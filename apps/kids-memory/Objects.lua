@@ -26,12 +26,13 @@ Tile = Class(function(obj, face_source, parent, ...)
     
     
     --clone each part of the face
-    obj.tbl     = {}
-    for i = 1, #tile_faces[face_source].tbl do
-        obj.tbl[i] = Clone{ source = tile_faces[face_source].tbl[i] }
-        obj.face:add(obj.tbl[i])
+    local function init_face()
+        obj.tbl     = {}
+        for i = 1, #tile_faces[face_source].tbl do
+            obj.tbl[i] = Clone{ source = tile_faces[face_source].tbl[i] }
+            obj.face:add(obj.tbl[i])
+        end
     end
-    
     
     --Umbrella group for the instance
     obj.group = Group{name="Tile"}
@@ -42,6 +43,7 @@ Tile = Class(function(obj, face_source, parent, ...)
     
     --Animation for flipping the tile over
     local flip_over = function(first_choice)
+        init_face()
         local tl = Timeline{duration=500}
         function tl:on_new_frame()
             obj.group.y_rotation={180*tl.progress,0,0}
@@ -72,6 +74,8 @@ Tile = Class(function(obj, face_source, parent, ...)
                         
                     end
                 end
+                tl=nil
+                
             end
             tl:start()
         end
@@ -93,6 +97,8 @@ Tile = Class(function(obj, face_source, parent, ...)
             tl = nil
             obj.backing.z = 1
             obj.face.z    = 0
+            tl = nil
+            obj.face:clear()
         end
         tl:start()
     end

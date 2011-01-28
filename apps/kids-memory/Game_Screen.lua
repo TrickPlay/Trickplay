@@ -107,42 +107,16 @@ function game_fade_out()
     game_screen:hide()
 end
 
-local focus_tl = nil
---[[
-local function anim_focus()
-    if focus_tl ~= nil then
-        focus_tl:stop()
-        focus_tl:on_completed()
-        focus_tl=nil
-    end
-    focus_tl = Timeline{duration=200}
-    local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
-    function focus_tl:on_new_frame(_,p)
-        local p = ani_mode.alpha
-        focus_next.opacity = 255*p
-        focus.opacity = 255*(1-p)
-    end
-    function focus_tl:on_completed()
-        
-        focus.x = focus_next.x
-        focus.y = focus_next.y
-        focus.opacity = 255
-        focus_next:hide()
-        focus_tl = nil
-    end
-    focus_next.opacity=0
-    focus_next:show()
-    focus_tl:start()
-end
---]]
+local focus_tl = Timeline{duration=200}
+local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
+
 local function anim_focus(targ_x,targ_y)
-    if focus_tl ~= nil then
+    if focus_tl.is_playing then
         focus_tl:stop()
         focus_tl:on_completed()
-        focus_tl=nil
     end
-    focus_tl = Timeline{duration=200}
-    local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
+    
+    
     local curr_x = focus.x
     local curr_y = focus.y
     function focus_tl:on_new_frame(_,p)
@@ -154,18 +128,17 @@ local function anim_focus(targ_x,targ_y)
         
         focus.x = targ_x
         focus.y = targ_y
-        focus_tl = nil
+        
     end
 
     focus_tl:start()
 end
 local function corner_get_focus()
-    if focus_tl ~= nil then
+    if focus_tl.is_playing then
         focus_tl:stop()
         focus_tl:on_completed()
-        focus_tl=nil
     end
-    focus_tl = Timeline{duration=200}
+    
     function focus_tl:on_new_frame(_,p)
         back_focus.opacity = 255*p
         focus.opacity = 255*(1-p)
@@ -174,17 +147,17 @@ local function corner_get_focus()
         
         focus.opacity = 0
         back_focus.opacity = 255
-        focus_tl = nil
+        
     end
     focus_tl:start()
 end
 local function corner_lose_focus()
-    if focus_tl ~= nil then
+    if focus_tl.is_playing then
         focus_tl:stop()
         focus_tl:on_completed()
-        focus_tl=nil
+        
     end
-    focus_tl = Timeline{duration=200}
+    
     function focus_tl:on_new_frame(_,p)
         back_focus.opacity = 255*(1-p)
         focus.opacity = 255*(p)
@@ -193,7 +166,7 @@ local function corner_lose_focus()
         
         focus.opacity = 255
         back_focus.opacity = 0
-        focus_tl = nil
+        --focus_tl = nil
     end
     focus_tl:start()
 end
