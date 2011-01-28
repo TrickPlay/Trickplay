@@ -408,8 +408,8 @@ function toboolean(s) if (s == "true") then return true else return false end en
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
              {"z", math.floor(v.z), "z"},
-             {"bw", math.floor(v.bw), "bw"},
-             {"bh", math.floor(v.bh), "bh"},
+             {"bw", math.floor(v.bwidth), "bw"},
+             {"bh", math.floor(v.bheight), "bh"},
              {"line",""}
       }
 
@@ -1428,6 +1428,7 @@ end
 local input_purpose     = ""
 
 --[[
+kk
 local function copy_widget_imgs ()
 	local source_files = readdir("assets/widgets")
 	for i, j in pairs(source_files) do 

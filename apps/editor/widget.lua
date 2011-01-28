@@ -1,6 +1,5 @@
 
 local widget = {}
-
 local skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
 				   ["button_focus"] = "assets/smallbuttonfocus.png", 
