@@ -1,6 +1,29 @@
 
 local widget = {}
 
+--Skin Test--
+--Skin Test--
+--Skin Test--
+
+local skin_list = { ["default"] = {["button"] = "assets/button-blue.png",}, ["skin_type1"] =  {["button"] = "assets/button-red.png",}, }
+
+function widget.change_all_skin(skin_name)
+    
+for i = 1, table.getn(g.children), 1 do
+	if g.children[i].Skin then 
+	     g.children[i].Skin = skin_name
+	     print("hereherhhh")
+	end 
+end 
+	
+end
+--Skin Test--
+--Skin Test--
+--Skin Test--
+
+
+
+
 -------------
 -- Util
 -------------
@@ -449,6 +472,141 @@ print("circle drawn")
 
 return c
 end
+
+
+--Skin Test--
+--Skin Test--
+--Skin Test--
+function widget.bb(t) 
+
+ --default parameters
+    local p = {
+    	Skin = "default", --------------*******************
+    	skin = "ring_image", 
+    	bwidth = 180,
+    	bheight = 60, 
+    	border_color = "FFFFFF", 
+    	focus_color = "1b911b", 
+    	border_width = 1,
+    	text = "Button", 
+    	font = "DejaVu Sans 30px",
+    	color = "FFFFFF",
+    	padding_x = 7,
+    	padding_y = 7,
+    	border_radius = 12,
+    	button_image = Image{},
+    	focus_image = assets("assets/smallbuttonfocus.png"),
+    }
+
+    
+
+ --overwrite defaults
+    if t ~= nil then 
+        for k, v in pairs (t) do
+	    p[k] = v 
+        end 
+    end 
+
+ --the umbrella Group
+    local ring, focus_ring, text, button, focus 
+
+    local b_group = Group
+    {
+        name = "button", 
+        size = { p.bwidth , p.bheight},
+        position = {100, 100, 0},  
+        reactive = true,
+        extra = {type = "Button"}
+    } 
+
+    local create_button = function() 
+    
+        p.button_image = assets(skin_list[p.Skin]["button"])  ---------------*************
+        b_group:clear()
+    
+        ring = make_ring(p.bwidth, p.bheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+        ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
+
+        focus_ring = make_ring(p.bwidth, p.bheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+        focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
+
+        button = p.button_image
+        button:set{name="button", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 255}
+
+        focus = p.focus_image
+        focus:set{name="focus", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 0}
+
+        text = Text{name = "text", text = p.text, font = p.font, color = p.color, reactive = true} 
+        text:set{name = "text", position = { (p.bwidth  -text.w)/2, (p.bheight - text.h)/2}}
+
+        b_group:add(ring, focus_ring, button, focus, text)
+
+        if (p.skin == "ring") then button.opacity = 0
+        elseif (p.skin == "image") then ring.opacity = 0 end 
+
+    end 
+
+    create_button()
+
+    function b_group.extra.on_focus_in()
+        if (p.skin == "ring") then 
+	     ring.opacity = 0
+	     focus_ring.opacity = 255
+        elseif (p.skin == "image") then 
+	     button.opacity = 0
+             focus.opacity = 255
+	else 
+	     ring.opacity = 0
+	     focus_ring.opacity = 255
+	     button.opacity = 0
+             focus.opacity = 255
+        end 
+	b_group:grab_key_focus(b_group)
+    end
+    
+    function b_group.extra.on_focus_out()
+        if (p.skin == "ring") then 
+	     ring.opacity = 255
+	     focus_ring.opacity = 0
+             focus.opacity = 0
+        elseif (p.skin == "image") then 
+	     button.opacity = 255
+             focus.opacity = 0
+	     focus_ring.opacity = 0
+	else 
+	     ring.opacity = 255
+	     focus_ring.opacity = 0
+	     button.opacity = 255
+             focus.opacity = 0
+        end 
+    end
+	
+    mt = {}
+    mt.__newindex = function (t, k, v)
+        if k == "bsize" then  
+	    p.bwidth = v[1] p.bheight = v[2]  
+        else 
+           p[k] = v
+        end
+        create_button()
+    end 
+
+    mt.__index = function (t,k)
+        if k == "bsize" then 
+	    return {p.bwidth, p.bheight}  
+        else 
+	    return p[k]
+        end 
+    end 
+
+    setmetatable (b_group.extra, mt) 
+
+    return b_group 
+end
+
+--Skin Test--
+--Skin Test--
+--Skin Test--
 
 --------------
 --  Button  
@@ -939,7 +1097,7 @@ function widget.buttonPicker(t)
  --default parameters 
     local p = {
 	skin = "default", 
-	items = {"item1", "item2", "itme3"},
+	items = {"item1", "item2", "item3"},
 	bwidth =  180,
 	bheight = 60,
 	border_width  = 3,
@@ -1160,11 +1318,12 @@ function widget.buttonPicker(t)
         
         mt = {}
         mt.__newindex = function (t, k, v)
-	     if k == "selected" then 
-	         print("JOGI--->")
-	         print(k)
+
+-- imsi 
+	     if k == "selected" or k == "org_x"  or k == "org_y" then 
 	         return 
              end
+-- imsi 
 
              if k == "bsize" then  
 	    	p.bwidth = v[1] p.bheight = v[2]  
@@ -1195,7 +1354,7 @@ function widget.radioButton(t)
  --default parameters
     local p = {
 	skin = "canvas", 
-	items = {"item1", "item2", "itme3"},
+	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = "FFFFFF", -- items 
 	bwidth = 600,
@@ -1309,7 +1468,7 @@ function widget.checkBox(t)
  --default parameters
     local p = {
 	skin = "canvas", 
-	items = {"item1", "item2", "itme3"},
+	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = "FFFFFF", -- items 
 	box_color = {255,255,255,255},
@@ -1588,13 +1747,13 @@ function widget.loadingbar(t)
 	
 local c_shell = Canvas{
             size = {p.bsize[1],p.bsize[2]},
-            x    = p.position[1],
-            y    = p.position[2]
+            x    = p.bsize[1],
+            y    = p.bsize[2]
         }
 	local c_fill  = Canvas{
             size = {1,p.bsize[2]},
-            x    = p.position[1]+2,
-            y    = p.position[2]
+            x    = p.bsize[1]+2,
+            y    = p.bsize[2]
         }
 local l_bar_group = Group{
 		name     = "loadingbar",

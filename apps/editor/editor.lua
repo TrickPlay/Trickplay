@@ -1,5 +1,4 @@
 dofile("apply.lua")
---1209 dofile("util.lua")
 
 editor = {}
 
@@ -570,7 +569,6 @@ function editor.the_image()
 	     return return_h 
         end 
 
-	
 	local file_list_size = get_file_list_sz()
         local scroll_box 
         local scroll_bar 
@@ -2409,6 +2407,17 @@ local function insert_widget(widget_name)
 	     b = widget.button()  
 	     g:add(b)
              create_on_button_down_f(b)
+--[[
+	     a = widget.bb()  
+	     g:add(a)
+             create_on_button_down_f(a)
+	     b = widget.bb()  
+	     g:add(b)
+             create_on_button_down_f(b)
+	     c = widget.bb()  
+	     g:add(c)
+             create_on_button_down_f(c)
+]]
 	elseif (widget_name == "TextField") then
 	     t = widget.textField()  
 	     g:add(t)
@@ -2435,9 +2444,13 @@ local function insert_widget(widget_name)
 	     g:add(bp)
              create_on_button_down_f(bp)
         elseif (widget_name == "LoadingDots") then 
-	     ld = widget.loadingdots{dot_radius    = 15}
+	     ld = widget.loadingdots{}
 	     g:add(ld)
              create_on_button_down_f(ld)
+        elseif (widget_name == "LoadingBar") then 
+	     lb = widget.loadingbar{}
+	     g:add(lb)
+             create_on_button_down_f(lb)
 	end 
 	screen:add(g)
 end 
@@ -2470,7 +2483,7 @@ function editor.widgets()
         widgets_list.position = {cur_w,cur_h}
         msgw:add(widgets_list)
 
-	local widgets = {"Button", "TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots"}
+	local widgets = {"Button", "TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots", "LoadingBar"}
         
         function print_widget_list() 
 	    cur_w = L_PADDING
