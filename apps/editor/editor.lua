@@ -2407,17 +2407,9 @@ local function insert_widget(widget_name)
 	     b = widget.button()  
 	     g:add(b)
              create_on_button_down_f(b)
---[[
-	     a = widget.bb()  
+	     a = widget.button()  
 	     g:add(a)
              create_on_button_down_f(a)
-	     b = widget.bb()  
-	     g:add(b)
-             create_on_button_down_f(b)
-	     c = widget.bb()  
-	     g:add(c)
-             create_on_button_down_f(c)
-]]
 	elseif (widget_name == "TextField") then
 	     t = widget.textField()  
 	     g:add(t)
