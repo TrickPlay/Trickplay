@@ -678,11 +678,7 @@
 							width = [[components objectAtIndex:4] floatValue],
 							height = [[components	objectAtIndex:5] floatValue];
 						
-						// create a new bitmap image context
-						//
-						CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
-
-						UIGraphicsBeginImageContext(CGSizeMake(mainframe.size.width, mainframe.size.height));		
+						UIGraphicsBeginImageContext(CGSizeMake(backgroundView.bounds.size.width, backgroundView.bounds.size.height));		
 						// get context
 						//
 						CGContextRef context = UIGraphicsGetCurrentContext();		
@@ -697,7 +693,7 @@
 						//
 						// this example draws the inputImage into the context
 						//
-						[backgroundView.image drawInRect:CGRectMake(0,0,mainframe.size.width, mainframe.size.height)];
+						[backgroundView.image drawInRect:CGRectMake(0,0,backgroundView.bounds.size.width, backgroundView.bounds.size.height)];
 						[tempImage drawInRect:CGRectMake(x, y, width, height)];
 
 						// pop context 
