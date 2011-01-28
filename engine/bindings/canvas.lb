@@ -19,6 +19,9 @@ module canvas;
 
 ]]
 
+/*
+    Class: Canvas
+*/
 
 class Canvas [[ cairo_t * ]]
 {
