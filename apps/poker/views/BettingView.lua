@@ -125,20 +125,6 @@ BettingView = Class(View, function(view, model, ...)
                       (j == controller:get_subselection_index()) then
                         -- set the positions of the focus-highlights correctly
                         item:on_focus_inst()
-                       --[[ 
-                        button_focus.position={
-                            MDPL[item.extra.text][1]-13,
-                            MDPL[item.extra.text][2]-11
-                        }
-                        -- show only required focus
-                        if(item.extra.text == "BET") then
-                            bet_focus.opacity = 255
-                            button_focus.opacity = 0
-                        else
-                            button_focus.opacity = 255
-                            bet_focus.opacity = 0
-                        end
-                        --]]
                     else
                         item:out_focus_inst()
                     end

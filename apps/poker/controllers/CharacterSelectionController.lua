@@ -381,6 +381,9 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
                 ctrlman:update_waiting_room()
             -- check x range for "Start" button press
             elseif pos > 6 and x/ctrl.x_ratio > 640/3 and x/ctrl.x_ratio < 2*640/3 then
+                selected = CharacterSelectionGroups.BOTTOM
+                subselection = SubGroups.MIDDLE
+                view:update()
                 if self.playerCounter >= 2 then
                     ctrlman:stop_accepting_ctrls()
                     start_a_game()

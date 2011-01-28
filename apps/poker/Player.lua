@@ -28,6 +28,9 @@ Player = Class(function(player, args, ...)
                 if player.isHuman then human_count = human_count + 1 end
             end
             player.isHuman = (human_count <= 1)
+            if player.controller.name ~= "Keyboard" then
+                player.controller = nil
+            end
         end
     end
 
