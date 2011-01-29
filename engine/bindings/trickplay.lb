@@ -150,6 +150,23 @@ global trickplay [[void*]]
             lua_rawset( L , -3 );
         ]];
 
+    /*
+        Function: check_version
+
+        This functions lets you easily check whether the TrickPlay version is
+        higher or equal to one you pass in.
+
+        Arguments:
+
+            version - A string to check for, like "1.15.0".
+
+        Returns:
+
+            true - The TrickPlay version is equal to or higher than the one passed in.
+
+            false - The TrickPlay version is lower than the one passed in.
+    */
+
     bool check_version( string version )
         [[
             int major = 0;
