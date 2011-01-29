@@ -21,10 +21,86 @@ module canvas;
 
 /*
     Class: Canvas
+
+    Canvas lets you create a bitmap and use various drawing operations on it. It is
+    based on the <Cairo graphics library at http://cairographics.org/manual/> and offers a similar API, with some slight
+    modifications for ease of use.
+
+    You typically use it by creating one, drawing into it and then creating an <Image> object from it.
+    Then, you can use the image object like any other <UIElement>.
+
+    Introduction:
+
+    You start by creating a Canvas with a given size.
+
+    (code)
+    local canvas = Canvas( 200 , 200 )
+    (end)
+
+    Now, you create a path. You can use <move_to>, <line_to>, <rectangle>, <round_rectangle>,
+    <curve_to>, <arc>, <arc_negative> or <text_path> for this. At this point, a path exists,
+    but it is not visible.
+
+    (code)
+    canvas:rectangle( 20 , 20 , 160 , 160 )
+    (end)
+
+    You can use the path in several ways. You can call <clip> to use it as a clipping region
+    for <paint>, you can <fill> it, or you can <stroke> it.
+
+    If you choose to fill it or stroke it, you first have to choose a brush; which is called a source.
+    You can use <set_source_color> to use a solid color, <set_source_linear_pattern> to use a linear color
+    gradient as your brush or <set_source_radial_pattern> to use a radial gradient. You can also use
+    <set_source_bitmap> to use another image as your brush. You can even use <push_group> and <pop_group>
+    to draw yourself a brush.
+
+    (code)
+    canvas:set_source_color( "FF0000" )
+    (end)
+
+    Finally, you can fill it. This will fill the rectangle with red.
+
+    (code)
+    canvas:fill( true )
+    (end)
+
+    Fill and stroke let you keep (preserve) your path, so you can still use it. Since we passed
+    true to <fill> above, the path is still there. Now, we change the source to solid green and
+    stroke the same path.
+
+    (code)
+    canvas:set_source_color( "00FF00" )
+    canvas:stroke()
+    (end)
+
+    In between these calls, you can use transformations like <translate>, <scale> and <rotate> to achieve
+    different results. You can also change the operator using the <op> property.
+
+    When you are happy with your Canvas, you can create an Image from it and add it to the screen.
+
+    (code)
+    screen:add( canvas:Image() )
+    (end)
 */
 
 class Canvas [[ cairo_t * ]]
 {
+    /*
+        Constructor: Canvas
+
+        The constructor of Canvas takes the desired width and height and returns a new Canvas.
+
+        Arguments:
+
+            width - The width of the Canvas surface in pixels.
+
+            height - The height of the Canvas surface.
+
+        Returns:
+
+            canvas - A newly created Canvas whose surface is all zeros.
+    */
+
     Canvas( ... )
         [[
             int width = 0;
@@ -78,25 +154,55 @@ class Canvas [[ cairo_t * ]]
             cairo_destroy( self );
         ]];
 
+    /*
+        Property: width
+
+        The width of the Canvas.
+    */
+
     readonly int width
         [[
             width = cairo_image_surface_get_width( cairo_get_target( self ) );
         ]];
+
+    /*
+        Property: w
+
+        The width of the Canvas.
+    */
 
     readonly int w
         [[
             w = cairo_image_surface_get_width( cairo_get_target( self ) );
         ]];
 
+    /*
+        Property: height
+
+        The height of the Canvas.
+    */
+
     readonly int height
         [[
             height = cairo_image_surface_get_height( cairo_get_target( self ) );
         ]];
 
+    /*
+        Property: h
+
+        The height of the Canvas.
+    */
+
     readonly int h
         [[
             h = cairo_image_surface_get_height( cairo_get_target( self ) );
         ]];
+
+    /*
+        Property: size
+
+        A table containing the width and height of the Canvas.
+    */
 
     readonly table size
         [[
@@ -106,6 +212,12 @@ class Canvas [[ cairo_t * ]]
             lua_pushinteger( L , cairo_image_surface_get_height( cairo_get_target( self ) ) );
             lua_rawseti( L , -2 , 2 );
         ]];
+
+    /*
+        Property: current_point
+
+        A table containing the coordinates of the current point.
+    */
 
     readonly table current_point
         [[
@@ -120,6 +232,19 @@ class Canvas [[ cairo_t * ]]
             lua_pushnumber( L , y );
             lua_rawseti( L , -2 , 2 );
         ]];
+
+    /*
+        Property: antialias
+
+        Lets you get or set the antialiasing mode used by the Canvas.
+
+        Values:
+
+            DEFAULT - The default mode.
+            NONE - No antialiasing.
+            GRAY - Single color.
+            SUBPIXEL - Subpixel antialiasing.
+    */
 
     string antialias
         [[
@@ -159,6 +284,17 @@ class Canvas [[ cairo_t * ]]
             cairo_set_antialias( self , a );
         ]];
 
+    /*
+        Property: fill_rule
+
+        Get or set the rule used for fills.
+
+        Values:
+
+            EVEN_ODD - Even/odd.
+            WINDING - Winding.
+    */
+
     string fill_rule
         [[
             switch( cairo_get_fill_rule( self ) )
@@ -181,6 +317,20 @@ class Canvas [[ cairo_t * ]]
                 luaL_error( L , "Invalid fill_rule '%s'" , fill_rule );
             }
         ]];
+
+    /*
+        Property: filter
+
+        Get or set the filter used for resizing the source pattern.
+
+        Values:
+
+            FAST - Fast.
+            GOOD - Good.
+            BEST - Best.
+            NEAREST - Nearest.
+            BILINEAR - Bilinear.
+    */
 
     string filter
         [[
@@ -226,6 +376,18 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
+    /*
+        Property: line_cap
+
+        Get or set the line cap.
+
+        Values:
+
+            ROUND - Round.
+            SQUARE - Square.
+            BUTT - Butt.
+    */
+
     string line_cap
         [[
             switch( cairo_get_line_cap( self ) )
@@ -253,6 +415,18 @@ class Canvas [[ cairo_t * ]]
                 luaL_error( L , "Invalid line_cap '%s'" , line_cap );
             }
         ]];
+
+    /*
+        Property: line_join
+
+        Get or set how lines are joined.
+
+        Values:
+
+            ROUND - Round.
+            BEVEL - Bevel.
+            MITER - Miter.
+    */
 
     string line_join
         [[
@@ -282,6 +456,12 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
+    /*
+        Property: line_width
+
+        Get or set the line width in pixels.
+    */
+
     double line_width
         [[
             line_width = cairo_get_line_width( self );
@@ -290,6 +470,12 @@ class Canvas [[ cairo_t * ]]
             cairo_set_line_width( self , line_width );
         ]];
 
+    /*
+        Property: miter_limit
+
+        The miter limit used when <line_join> is set to MITER.
+    */
+
     double miter_limit
         [[
             miter_limit = cairo_get_miter_limit( self );
@@ -297,6 +483,30 @@ class Canvas [[ cairo_t * ]]
         [[
             cairo_set_miter_limit( self , miter_limit );
         ]];
+
+    /*
+        Property: op
+
+        The operator used to combine the source pattern with the destination.
+        For details, see <this article at http://cairographics.org/operators/>.
+
+        Values:
+
+            CLEAR - Clear the destination.
+            SOURCE - Source.
+            OVER - Over.
+            IN - In.
+            OUT - Out.
+            ATOP - Atop.
+            DEST - Destination.
+            DEST_OVER - Destination over.
+            DEST_IN - Destination in.
+            DEST_OUT - Destination out.
+            DEST_ATOP - Destination atop.
+            XOR - XOR.
+            ADD - Add.
+            SATURATE - Saturate.
+    */
 
     string op
         [[
@@ -350,6 +560,12 @@ class Canvas [[ cairo_t * ]]
             cairo_set_operator( self , it->second );
         ]];
 
+    /*
+        Property: tolerance
+
+        Get or set the tolerance used when converting paths into trapezoids.
+    */
+
     double tolerance
         [[
             tolerance = cairo_get_tolerance( self );
@@ -357,6 +573,13 @@ class Canvas [[ cairo_t * ]]
         [[
             cairo_set_tolerance( self , tolerance );
         ]];
+
+    /*
+        Function: set_dash
+
+        Sets the dash pattern used for lines. The table dashes contains a list of
+        integers that define when dashes are ON and OFF.
+    */
 
     set_dash( double offset , table dashes )
         [[
@@ -377,40 +600,94 @@ class Canvas [[ cairo_t * ]]
             cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
         ]];
 
+    /*
+        Function: save
+
+        Saves the current state of the Canvas.
+    */
+
     save()
         [[
             cairo_save( self );
         ]];
+
+    /*
+        Function: restore
+
+        Restores the state of the Canvas from a previously saved state.
+    */
 
     restore()
         [[
             cairo_restore( self );
         ]];
 
+    /*
+        Function: translate
+
+        Modifies the transformation matrix of the Canvas by translating the origin by tx and ty.
+
+    */
+
     translate( double tx , double ty )
         [[
             cairo_translate( self , tx , ty );
         ]];
+
+    /*
+        Function: rotate
+
+        Rotates the transformation matrix by the given angle (in degrees).
+    */
 
     rotate( double angle )
         [[
             cairo_rotate( self , degrees_to_radians( angle ) );
         ]];
 
+    /*
+        Function: scale
+
+        Scales the transformation matrix by the given ratios in x and y.
+    */
+
+
     scale( double sx , double sy )
         [[
             cairo_scale( self , sx , sy );
         ]];
+
+    /*
+        Function: push_group
+
+        Temporarily redirects drawing operations to a new pattern until you call pop_group.
+    */
 
     push_group()
         [[
             cairo_push_group( self );
         ]];
 
+    /*
+        Function: pop_group
+
+        Pops the current group and sets it as the source pattern.
+    */
+
     pop_group()
         [[
             cairo_pop_group_to_source( self );
         ]];
+
+    /*
+        Function: clip
+
+        Clips the Canvas to the current path.
+
+        Arguments:
+
+            preserve - If true, the path is preserved.
+    */
 
     clip( bool preserve = false )
         [[
@@ -424,10 +701,26 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
+    /*
+        Function: reset_clip
+
+        Removes clipping.
+    */
+
     reset_clip()
         [[
             cairo_reset_clip( self );
         ]];
+
+    /*
+        Function: fill
+
+        Fills the current path with the current source.
+
+        Arguments:
+
+            preserve - If true, the path is preserved.
+    */
 
     fill( bool preserve = false )
         [[
@@ -441,6 +734,16 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
+    /*
+        Function: paint
+
+        Paints the current source inside the clipping region.
+
+        Arguments:
+
+            alpha - An alpha value (0-255) to apply to the source while painting.
+    */
+
     paint( int alpha = 255 )
         [[
             if ( alpha == 255 )
@@ -452,6 +755,16 @@ class Canvas [[ cairo_t * ]]
                 cairo_paint_with_alpha( self , alpha / 255.0 );
             }
         ]];
+
+    /*
+        Function: stroke
+
+        Strokes the current path with the current source.
+
+        Arguments:
+
+            preserve - If true, the path is preserved.
+    */
 
     stroke( bool preserve = false )
         [[
@@ -466,30 +779,107 @@ class Canvas [[ cairo_t * ]]
         ]];
 
 
+    /*
+        Function: new_path
+
+        Starts a new path.
+    */
+
     new_path()
         [[
             cairo_new_path( self );
         ]];
+
+    /*
+        Function: new_sub_path
+
+        Starts a new sub-path.
+    */
 
     new_sub_path()
         [[
             cairo_new_sub_path( self );
         ]];
 
+    /*
+        Function: close_path
+
+        Closes the current path.
+    */
+
     close_path()
         [[
             cairo_close_path( self );
         ]];
+
+    /*
+        Function: arc
+
+        Adds an arc to the current path.
+
+        Arguments:
+
+            xc - The x coordinate for the center of the arc.
+            yc - The y coordinate for the center of the arc.
+            radius - The radius of the arc.
+            angle1 - The starting angle in degrees.
+            angle2 - The ending andle in degrees.
+
+        Example:
+
+        This can be used to draw circles. The code below will create a Canvas that is
+        100x100 and draw a red-filled circle in the middle of it.
+
+        (code)
+
+            local canvas = Canvas( 100 , 100 )
+            canvas:arc( 50 , 50 , 50 , 0 , 360 )
+            canvas:set_source_color( "FF0000" )
+            canvas:fill()
+            screen:add( canvas:Image() )
+
+        (end)
+
+    */
 
     arc( double xc , double yc , double radius , double angle1 , double angle2 )
         [[
             cairo_arc( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
         ]];
 
+    /*
+        Function: arc_negative
+
+        Adds an arc to the path, just like <arc>, but the arc goes in decreasing angles from angle1 to angle2.
+
+        Arguments:
+
+            xc - The x coordinate for the center of the arc.
+            yc - The y coordinate for the center of the arc.
+            radius - The radius of the arc.
+            angle1 - The starting angle in degrees.
+            angle2 - The ending andle in degrees.
+
+    */
+
     arc_negative( double xc , double yc , double radius , double angle1 , double angle2 )
         [[
             cairo_arc_negative( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
         ]];
+
+    /*
+        Function: curve_to
+
+        Adds a cubic Bezier spline to the current path from the current point to x3,y3 using x1,y1 and x2,y2 as the control points.
+        If relative is true, the coordinates are interpreted as relative to the current point.
+
+        Arguments:
+
+            x1,y1 - The coordinates of the first control point.
+            x2,y2 - The coordinates of the second control point.
+            x3,y3 - The coordinates of the end point.
+            relative - If true, all coordinates are relative to the current point.
+    */
 
     curve_to( double x1 , double y1 , double x2 , double y2 , double x3, double y3 , bool relative = false )
         [[
@@ -503,6 +893,17 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
+    /*
+        Function: line_to
+
+        Adds a straight line to the current path, from the current point to x,y.
+
+        Arguments:
+
+            x,y - The coordinates for the end point of the line.
+            relative - If true, coordinates are relative to the current point.
+    */
+
     line_to( double x , double y , bool relative = false )
         [[
             if ( relative )
@@ -514,6 +915,17 @@ class Canvas [[ cairo_t * ]]
                 cairo_line_to( self , x , y );
             }
         ]];
+
+    /*
+        Function: move_to
+
+        Moves the current point to x,y.
+
+        Arguments:
+
+            x,y - The coordinates for the new current point.
+            relative - If true, coordinates are relative to the current point.
+    */
 
     move_to( double x , double y , bool relative = false )
         [[
@@ -527,10 +939,33 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
+    /*
+        Function: rectangle
+
+        Adds a rectangle to the current path.
+
+        Arguments:
+
+            x,y - Coordinates for the top left corner of the rectangle.
+            width,height - The width and height of the rectangle.
+    */
+
     rectangle( double x , double y , double width , double height )
         [[
             cairo_rectangle( self , x , y , width , height );
         ]];
+
+    /*
+        Function: round_rectangle
+
+        Adds a rectangle with rounded corners to the current path.
+
+        Arguments:
+
+            x,y - Coordinates for the top left corner of the rectangle.
+            w,h - The width and height of the rectangle.
+            r - The radius of the corners.
+    */
 
     round_rectangle( double x , double y , double w , double h , double r )
         [[
@@ -544,6 +979,18 @@ class Canvas [[ cairo_t * ]]
             cairo_line_to(self,x,y+r);
             cairo_curve_to(self,x,y,x,y,x+r,y);
         ]];
+
+    /*
+        Function: text_path
+
+        Adds a text path to the current path.
+
+        Arguments:
+
+            font - A font describing the font family, style and point size.
+            text - The text.
+            markup - If true, the text can contain Pango markup.
+    */
 
     text_path( string font , string text , bool markup = true )
         [[
@@ -569,12 +1016,34 @@ class Canvas [[ cairo_t * ]]
             g_object_unref( G_OBJECT( layout ) );
         ]];
 
+    /*
+        Function: set_source_color
+
+        Sets the source pattern to a solid color.
+
+        Arguments:
+
+            color - This can be a color specified as a string with hex RGBA values or a table
+                    with 3 or 4 integer components for RGB and A.
+    */
+
     set_source_color( ... )
         [[
             ClutterColor c;
             ClutterUtil::to_clutter_color( L , 2 , & c );
             cairo_set_source_rgba( self , c.red / 255.0 , c.green / 255.0 , c.blue / 255.0 , c.alpha / 255.0 );
         ]];
+
+    /*
+        Function: set_source_linear_pattern
+
+        Sets the source pattern to a linear gradient. The linear gradient moves along the line defined by x1,y1 and x2,y2.
+
+        Arguments:
+
+            x1,y1 - Starting coordinates for the gradient.
+            x2,y2 - Ending coordinates for the gradient.
+    */
 
     set_source_linear_pattern( double x1 , double y1 , double x2 , double y2 )
         [[
@@ -583,12 +1052,59 @@ class Canvas [[ cairo_t * ]]
             cairo_pattern_destroy( p );
         ]];
 
+    /*
+        Function: set_source_radial_pattern
+
+        Sets the source to a radial pattern between two circles.
+
+        Arguments:
+
+            cx0,cy0 - The coordinates for the center of the first circle.
+            radius0 - The radius of the first circle.
+            cx1,cy1 - The coordinates for the center of the second circle.
+            radius1 - The radius of the second circle.
+    */
+
     set_source_radial_pattern( double cx0 , double cy0 , double radius0 , double cx1 , double cy1 , double radius1 )
         [[
             cairo_pattern_t * p = cairo_pattern_create_radial( cx0 , cy0 , radius0 , cx1 , cy1 , radius1 );
             cairo_set_source( self , p );
             cairo_pattern_destroy( p );
         ]];
+
+    /*
+        Function: add_source_pattern_color_stop
+
+        When the source is a linear or radial gradient, this function lets you add color stops to it. Each color
+        stop has an offset that varies from 0 (the start) to 1 (the end) and the color for the gradient at that
+        offset.
+
+        Arguments:
+
+            offset - A number between 0 and 1.
+            color - A color, either as a hex RGBA string or a table with 3 or 4 components.
+    */
+
+    add_source_pattern_color_stop( double offset , ... )
+        [[
+            if ( cairo_pattern_t * p = cairo_get_source( self ) )
+            {
+                ClutterColor c;
+                ClutterUtil::to_clutter_color( L , 3 , & c );
+                cairo_pattern_add_color_stop_rgba( p , offset , c.red / 255.0 , c.green / 255.0 , c.blue / 255.0 , c.alpha / 255.0 );
+            }
+        ]];
+
+    /*
+        Function: set_source_bitmap
+
+        Sets the source to a bitmap. This lets you use other images as brushes.
+
+        Arguments:
+
+            bitmap - A <Bitmap>.
+            x,y - Coordinates for the top left corner of the bitmap.
+    */
 
     set_source_bitmap( Bitmap bitmap , double x = 0 , double y = 0 )
         [[
@@ -603,15 +1119,20 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
-    add_source_pattern_color_stop( double offset , ... )
-        [[
-            if ( cairo_pattern_t * p = cairo_get_source( self ) )
-            {
-                ClutterColor c;
-                ClutterUtil::to_clutter_color( L , 3 , & c );
-                cairo_pattern_add_color_stop_rgba( p , offset , c.red / 255.0 , c.green / 255.0 , c.blue / 255.0 , c.alpha / 255.0 );
-            }
-        ]];
+    /*
+        Function: Image
+
+        Creates a new <Image> using the current contents of the Canvas. After the
+        image is created, the Canvas is no longer needed.
+
+        Arguments:
+
+            props - A table of properties to pass to the Image constructor.
+
+        Returns:
+
+            image - A newly created Image.
+    */
 
     Image Image( table props = 0 )
         [[
