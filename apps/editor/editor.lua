@@ -1338,23 +1338,23 @@ function editor.rectangle_move(x,y)
 end
 
 local function ungroup(v)
-     v:clear()
+     v.extra.children = {}
      editor.n_selected(v)
      for i,c in pairs(v.children) do 
         table.insert(v.extra.children, c.name) 
-	v:remove(c)
 	c.extra.is_in_group = false
+	v:remove(c)
 	c.x = c.x + v.x 
 	c.y = c.y + v.y 
 	g:add(c)
 	if(c.type == "Text") then
-	function c:on_key_down(key)
+	   function c:on_key_down(key)
              if key == keys.Return then
 	          c:set{cursor_visible = false}
         	  screen.grab_key_focus(screen)
 		  return true
 	     end 
-	end 
+	   end 
 	end 
      end
      g:remove(v)
@@ -1656,6 +1656,16 @@ function editor.ugroup()
 			     v.extra.children = {}
 			     for i,c in pairs(v.children) do 
 				     table.insert(v.extra.children, c.name) 
+				---[[ 0128 : added for nested group 
+        				if(c.type == "Group") then 
+	       				   for j, cc in pairs (c.children) do
+                    				cc.reactive = true
+		    				cc.extra.is_in_group = true
+                    				create_on_button_down_f(cc)
+	       				   end 
+					end 
+				--]]
+
 				     v:remove(c)
 				     c.extra.is_in_group = false
 				     c.x = c.x + v.x 
