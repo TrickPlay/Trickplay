@@ -1338,7 +1338,7 @@ function editor.rectangle_move(x,y)
 end
 
 local function ungroup(v)
-     v.extra.children = {}
+     v:clear()
      editor.n_selected(v)
      for i,c in pairs(v.children) do 
         table.insert(v.extra.children, c.name) 
