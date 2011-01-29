@@ -1034,7 +1034,7 @@ function widget.toastBox(table)
     	  name = "toastb_group",  
     	  position = {200, 200, 0}, 
           reactive = true, 
-          extra = {type = "Toastb_group"} 
+          extra = {type = "ToastBox"} 
      }
 
     local tb_group_cur_y = 30
@@ -1623,7 +1623,7 @@ function widget.checkBox(table)
     	  name = "checkBox",  
     	  position = {200, 200, 0}, 
           reactive = true, 
-          extra = {type = "Toastb_group"}
+          extra = {type = "CheckBox"}
      }
 
 
