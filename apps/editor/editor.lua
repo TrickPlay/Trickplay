@@ -2404,7 +2404,7 @@ end
 
 local widget_map = {
 	["Button"] = function () return widget.button()  end, 
-	["TextField"] = function () return widget.textField() end, 
+	["TextInputField"] = function () return widget.textField() end, 
 	["DialogBox"] = function () return widget.dialogBox() end, 
 	["ToastBox"] = function () return widget.toastBox() end,   
 	["RadioButton"] = function () return widget.radioButton() end, 
@@ -2442,7 +2442,7 @@ function editor.widgets()
         widgets_list.position = {cur_w,cur_h}
         msgw:add(widgets_list)
 
-	local widgets = {"Button", "TextField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots", "LoadingBar", 
+	local widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots", "LoadingBar", 
 			 "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK"}
         
         function print_widget_list() 
@@ -2519,7 +2519,7 @@ function editor.widgets()
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget
-	      elseif (new_widget.extra.type == "TextField") then 
+	      elseif (new_widget.extra.type == "TextInputField") then 
 		t=new_widget
 	      elseif (new_widget.extra.type == "DialogBox") then 
 		db=new_widget
@@ -2556,7 +2556,7 @@ function editor.widgets()
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget
-	      elseif (new_widget.extra.type == "TextField") then 
+	      elseif (new_widget.extra.type == "TextInputField") then 
 		t=new_widget
 	      elseif (new_widget.extra.type == "DialogBox") then 
 		db=new_widget
