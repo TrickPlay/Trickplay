@@ -1233,6 +1233,7 @@ function inputMsgWindow_openfile(input_text)
                file_not_exists = false
           end
      end
+
      if (file_not_exists) then
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen) 
@@ -1427,17 +1428,17 @@ end
 
 local input_purpose     = ""
 
---[[
-kk
 local function copy_widget_imgs ()
-	local source_files = readdir("assets/widgets")
+	local source_files = editor_lb:readdir("assets/")
 	for i, j in pairs(source_files) do 
-	     source_file = "assets/widgets"..j 
-	     dest_file = CURRENT_DIR..j 
-	     file_copy(source_file, dest_file) 
+	     source_file = "assets/"..j 
+	     dest_file = CURRENT_DIR.."/assets/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
 	end 
 end 
-]]
+
 local function set_project_path ()
 	if(selected_prj == "" and input_t.text ~= "") then
 	     project = input_t.text 
@@ -1452,7 +1453,13 @@ local function set_project_path ()
              editor_lb:change_app_path( app_path )
 	     CURRENT_DIR = app_path
         end
-	--copy_widget_imgs()
+
+        asset_path = editor_lb:build_path( app_path, "assets" )
+        editor_lb:mkdir( asset_path ) 
+        --widget_path = editor_lb:build_path( asset_path, "widgets")
+        --editor_lb:mkdir( widget_path ) 
+
+	copy_widget_imgs()
 	cleanMsgWindow()
         screen:grab_key_focus(screen)
 end 
