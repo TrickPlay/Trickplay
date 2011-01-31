@@ -514,7 +514,7 @@ local color_map =
         [ "Group" ] = function()  size = {500, 670} color = {25,25,25,100}   return size, color end,
         [ "Video" ] = function()  size = {500, 575} color = {25,25,25,100}   return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
-        [ "widgets" ] = function() size = {500, 500} color = {25,25,25,100}  return size, color end,
+        [ "widgets" ] = function() size = {500, 535} color = {25,25,25,100}  return size, color end,
         --[ "widgets" ] = function() size = {500, 470} color = "472446" return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
@@ -702,6 +702,72 @@ function factory.make_msgw_button_item( assets , caption)
     return group, text
 
 end
+
+function factory.make_msgw_widget_item( assets , caption)
+
+    local STYLE         = { font = "DejaVu Sans 30px" , color = "FFFFFF" }
+    local PADDING_X     = 7 
+    local PADDING_Y     = 7
+    local WIDTH         = 230
+    local HEIGHT        = 60 
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+    
+    local function make_ring()
+        local ring = Canvas{ size = { WIDTH , HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+        ring:stroke()
+        ring:finish_painting()
+        return ring
+    end
+    
+    local text = Text{ text = caption }:set( STYLE )
+    
+    text.name = "caption"
+
+    text.reactive = true
+
+    local ring = make_ring ()
+    
+    local focus = assets( "assets/button-focus.png" )
+
+    local group = Group
+    {
+        size = { WIDTH , HEIGHT },
+        children =
+        {
+            ring:set{ position = { 0 , 0 } },
+            focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
+            text:set{ position = { (WIDTH  -text.w)/2, (HEIGHT - text.h)/2} }
+        }
+    }
+    
+    
+
+    function group.extra.on_focus_in()
+        focus.opacity = 255
+	group:grab_key_focus(group)
+	--print (caption, "button group grab key focus")
+    end
+    
+    function group.extra.on_focus_out()
+        focus.opacity = 0
+    end
+	
+--group.name = name -- (savefile, cancel, yes, no, openfile, reopenfile, open_imagefile, reopenImg, open_videofile)
+
+    return group, text
+
+end
+
 
 -------------------------------------------------------------------------------
 -- Makes a scroll bar item

@@ -1665,7 +1665,6 @@ function editor.ugroup()
 	       				   end 
 					end 
 				--]]
-
 				     v:remove(c)
 				     c.extra.is_in_group = false
 				     c.x = c.x + v.x 
@@ -2424,6 +2423,7 @@ local widget_map = {
 	["LoadingBar"] = function () return widget.loadingbar() end, 
 }
 
+--[[
 function editor.widgets()
 	local WIDTH = 500
 	local L_PADDING = 50
@@ -2608,8 +2608,147 @@ function editor.widgets()
     end 
 
     screen:add(msgw)
+end 
+]]
+
+
+function editor.widgets()
+    local WIDTH = 500
+    local L_PADDING = 20
+    local R_PADDING = 50
+    local TOP_PADDING = 60
+    local BOTTOM_PADDING = 12
+    local Y_PADDING = 10 
+    local X_PADDING = 10
+    local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+    local space = WIDTH
+    local msgw_bg = factory.make_popup_bg("widgets")
+    local xbox = factory.make_xbox()
+
+    local msgw = Group {
+         position ={500, 200},
+	 anchor_point = {0,0},
+         children =
+         {
+          msgw_bg,
+	  xbox:set{position = {465, 40}},
+         }
+    }
+    local widgets_list = Text {name = "w_list", text = "Widgets List"}:set(STYLE)
+    local text_g
+
+    cur_w= (WIDTH - widgets_list.w)/2
+    cur_h= TOP_PADDING/2 + Y_PADDING
+
+    widgets_list.position = {cur_w,cur_h}
+    msgw:add(widgets_list)
+
+    local widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", 
+		     "ButtonPicker", "LoadingDots", 
+                     "LoadingBar", "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK"}
+        
+    cur_w = L_PADDING
+    cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
+
+    for i, v in pairs(widgets) do
+         if (i == 8) then 
+              cur_w =  cur_w + 230
+              cur_h =  TOP_PADDING + widgets_list.h + Y_PADDING
+	 end 
+	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
+
+    	 widget_b.position =  {cur_w, cur_h}
+    	 widget_b.name = v
+    	 widget_b.reactive = true
+
+	 cur_h = cur_h + widget_b.h 
+         msgw:add(widget_b)
+         
+         function widget_b:on_button_down(x,y,button,num_clicks)
+	      new_widget = widget_map[v]() 
+
+--imsi  : for debugging, will be deleted 
+	      if (new_widget.extra.type == "Button") then 
+		b=new_widget
+	      elseif (new_widget.extra.type == "TextInputField") then 
+		t=new_widget
+	      elseif (new_widget.extra.type == "DialogBox") then 
+		db=new_widget
+	      elseif (new_widget.extra.type == "ToastBox") then 
+		tb=new_widget
+	      elseif (new_widget.extra.type == "RadioButton") then 
+		rb=new_widget
+	      elseif (new_widget.extra.type == "CheckBox") then 
+		cb=new_widget
+	      elseif (new_widget.extra.type == "ButtonPicker") then 
+		bp=new_widget
+	      elseif (new_widget.extra.type == "LoadingDots") then 
+		ld=new_widget
+	      elseif (new_widget.extra.type == "LoadingBar") then 
+		lb=new_widget
+	      end
+--imsi 
+	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	      end 
+	      new_widget.name = new_widget.name..tostring(item_num)
+	      g:add(new_widget)
+              create_on_button_down_f(new_widget)
+	      screen:add(g)
+	      screen:grab_key_focus()
+
+	      cleanMsgWin(msgw)
+        end 
+        function widget_t:on_button_down(x,y,button,num_clicks)
+
+	      new_widget = widget_map[v]() 
+--imsi  : for debugging, will be deleted 
+	      if (new_widget.extra.type == "Button") then 
+		b=new_widget
+	      elseif (new_widget.extra.type == "TextInputField") then 
+		t=new_widget
+	      elseif (new_widget.extra.type == "DialogBox") then 
+		db=new_widget
+	      elseif (new_widget.extra.type == "ToastBox") then 
+		tb=new_widget
+	      elseif (new_widget.extra.type == "RadioButton") then 
+		rb=new_widget
+	      elseif (new_widget.extra.type == "CheckBox") then 
+		cb=new_widget
+	      elseif (new_widget.extra.type == "ButtonPicker") then 
+		bp=new_widget
+	      elseif (new_widget.extra.type == "LoadingDots") then 
+		ld=new_widget
+	      elseif (new_widget.extra.type == "LoadingBar") then 
+		lb=new_widget
+	      end
+--imsi 
+ 	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	      end 
+	      new_widget.name = new_widget.name..tostring(item_num)
+	      g:add(new_widget)
+              create_on_button_down_f(new_widget)
+	      screen:add(g)
+	      screen:grab_key_focus()
+
+	      cleanMsgWin(msgw)
+          end 
+    end 
+
+    xbox.reactive = true
+    function xbox:on_button_down(x,y,button,num_clicks)
+         msgw:clear()
+	 screen:remove(msgw)
+         screen.grab_key_focus(screen) 
+	 input_mode = S_SELECT
+	 return true
+    end 
+
+    screen:add(msgw)
 --]]
 end 
+
 
 
 
