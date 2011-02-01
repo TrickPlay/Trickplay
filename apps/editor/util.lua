@@ -590,18 +590,23 @@ end
 
 function itemTostring(v, d_list, t_list)
     local itm_str = ""
+    local itm_str2 = ""
     local indent       = "\n\t\t"
     local b_indent       = "\n\t"
 
+     
     local function is_in_list(item, list)
-		for i, j in pairs (list) do
-			if item == j then 
-			    return true
-			end 
-		end 
-		return false
-    end 
+	if list == nil then 
+	    return false
+	end 
 
+	for i, j in pairs (list) do
+	     if item == j then 
+		return true
+	     end 
+	end 
+	return false
+    end 
     
     if(v.type == "Rectangle") then
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
@@ -646,13 +651,13 @@ function itemTostring(v, d_list, t_list)
          "wrap="..tostring(v.wrap)..","..indent..
          "wrap_mode=\""..v.wrap_mode.."\","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Clone") then
-	
-	 if not is_in_list(v.source, d_list) then 
-		if not v.extra.is_in_group == true then 
-		     table.insert(t_list, v) 
-		end 
-
-		return "", d_list, t_list
+	 src = v.source 
+	 if is_in_list(src.name, d_list) == false then 
+	     if(t_list == nil) then 
+		t_list = {src.name}
+	     else 
+		table.insert(t_list, src.name) 
+	     end
          end 
 
 	 itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
@@ -666,23 +671,43 @@ function itemTostring(v, d_list, t_list)
          "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
          "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
          "opacity = "..v.opacity..b_indent.."}\n\n"
+
+
+	if(d_list == nil) then  
+		d_list = {v.name}
+    	else 
+        	table.insert(d_list, v.name) 
+    	end 
+
+        return itm_str, d_list, t_list
+
     elseif (v.type == "Group") then
 	local i = 1
         local children = ""
-	local org_d_list = d_list
+	local org_d_list = {}
+	if(d_list ~= nil) then 
+	for i,j in pairs (d_list) do 
+		org_d_list[i] = j 
+	end 
+	end 
+
         for e in values(v.children) do
-		itm_str, d_list, t_list = itm_str..itemTostring(e, d_list, t_list)
-		if itm_str ~= "" then 
-		     if i == 1 then
-			children = children..e.name
-		     else 
-		 	children = children..","..e.name
-		     end
-		     i = i + 1
-		else 
-		     table.insert(t_list, v)
-		     return "", org_d_list, t_list
+		result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
+		if(result ~= nil) then 
+		    itm_str = itm_str..result
+		end
+		if(result2 ~= nil) then 
+		    itm_str2 = result2..itm_str2
 		end 
+		
+		d_list = done_list
+		t_list = todo_list
+		if i == 1 then
+		     children = children..e.name
+		else 
+		     children = children..","..e.name
+		end
+		i = i + 1
         end 
 
 	itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
@@ -718,9 +743,18 @@ function itemTostring(v, d_list, t_list)
 	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
 
     end
-    d_list = {1,}
-    table.insert(d_list, v.name) 
-    return itm_str, d_list, t_list
+
+    if(d_list == nil) then  
+	d_list = {v.name}
+    else 
+        table.insert(d_list, v.name) 
+    end 
+
+    if is_in_list(v.name, t_list) == true  then 
+	return "", d_list, t_list, itm_str
+    end 
+
+    return itm_str, d_list, t_list, itm_str2
 end
 
 local msgw_focus = ""
