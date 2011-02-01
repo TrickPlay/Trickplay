@@ -1235,21 +1235,34 @@ function editor.save(save_current_f)
      end 
 
      if (save_current_f == true) then 
-        contents = "local g = ... \n\n"
+	contents = ""
         local obj_names = getObjnames()
 
         local n = table.getn(g.children)
-   
-        for i, v in pairs(g.children) do
-               contents= contents..itemTostring(v)
+
+	for i, v in pairs(g.children) do
+	     local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
+	     if result2  ~= nil then 
+                  contents=result2..contents
+	     end  
+	     if result ~= nil then 
+                  contents=contents..result
+	     end 
+	     done_list = d_list
+	     todo_list = t_list
         end
+
 	if (g.extra.video ~= nil) then
 	     contents = contents..itemTostring(g.extra.video)
 	end 
 
 	contents = contents.."g:add("..obj_names..")"
+        contents = "local g = ... \n\n"..contents
+
         undo_list = {}
         redo_list = {}
+
+
 	if(current_fn ~= "") then 
 		editor_lb:writefile (current_fn, contents, true)	
 	else 
@@ -1262,59 +1275,27 @@ function editor.save(save_current_f)
         else 
              input_mode = S_POPUP
              printMsgWindow("File Name : ")
-             contents = "local g = ... \n\n"
+	     contents = ""
              local obj_names = getObjnames()
-   
---[[ 
-             for i, v in pairs(g.children) do
-		   if v.type == "Clone" then 
-		        is_in_v_list(v.source)
-			table.insert(v_list, v)  
-                        contents= contents..itemTostring(v)
-		   else 
-			table.insert(t_list, v) 
-		   end 
-             end
-]]
-
---[[ ORG : 
- 
-             for i, v in pairs(g.children) do
-                   contents= contents..itemTostring(v)
-             end
-]] 
-
- 
-             local done_list = {}
-             local todo_list = {}
 
              for i, v in pairs(g.children) do
-		   result, done_list, todo_list = itemTostring(v, done_list, todo_list)  
-	           if result ~= "" then 
-                       contents=contents..result
+		   local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
+		   if result2  ~= nil then 
+                   	contents=result2..contents
+		   end  
+		   if result ~= nil then 
+                        contents=contents..result
 		   end 
+		   done_list = d_list
+		   todo_list = t_list
              end
 
-	     while #todo_list ~= 0 do 
-		   v = table.remove(t_list)
-		   result, done_list, todo_list = itemTostring(v, done_list, todo_list)
-	           if result ~= "" then 
-                       contents=contents..result
-		   end 
-	     end 
-	     
---[[ YYUUUUGIIII
-             for i, v in pairs(t_list) do
-		   table.remove(t_list)
-		   result, v_list, t_list = itemTostring(v, v_list, t_list)  
-	     end 
-
-]]
 	     if (g.extra.video ~= nil) then
 	          contents = contents..itemTostring(g.extra.video)
 	     end 
 
 	     contents = contents.."g:add("..obj_names..")"
+             contents = "local g = ... \n\n"..contents
              undo_list = {}
              redo_list = {}
              inputMsgWindow("savefile")
