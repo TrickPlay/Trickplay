@@ -736,10 +736,11 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+*/
 
 #ifdef __cplusplus
 }
 #endif 
 
-#endif  // _TRICKPLAY_H
+#endif  /* _TRICKPLAY_H */
