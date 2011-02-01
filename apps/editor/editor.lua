@@ -1265,10 +1265,51 @@ function editor.save(save_current_f)
              contents = "local g = ... \n\n"
              local obj_names = getObjnames()
    
+--[[ 
+             for i, v in pairs(g.children) do
+		   if v.type == "Clone" then 
+		        is_in_v_list(v.source)
+			table.insert(v_list, v)  
+                        contents= contents..itemTostring(v)
+		   else 
+			table.insert(t_list, v) 
+		   end 
+             end
+]]
+
+--[[ ORG : 
+ 
              for i, v in pairs(g.children) do
                    contents= contents..itemTostring(v)
              end
+]] 
 
+ 
+             local done_list = {}
+             local todo_list = {}
+
+             for i, v in pairs(g.children) do
+		   result, done_list, todo_list = itemTostring(v, done_list, todo_list)  
+	           if result ~= "" then 
+                       contents=contents..result
+		   end 
+             end
+
+	     while #todo_list ~= 0 do 
+		   v = table.remove(t_list)
+		   result, done_list, todo_list = itemTostring(v, done_list, todo_list)
+	           if result ~= "" then 
+                       contents=contents..result
+		   end 
+	     end 
+	     
+--[[ YYUUUUGIIII
+             for i, v in pairs(t_list) do
+		   table.remove(t_list)
+		   result, v_list, t_list = itemTostring(v, v_list, t_list)  
+	     end 
+
+]]
 	     if (g.extra.video ~= nil) then
 	          contents = contents..itemTostring(g.extra.video)
 	     end 

@@ -219,6 +219,10 @@ local function make_xbox()
 
     c:finish_painting()
 
+    if c.Image then
+         c = c:Image()
+    end
+    
     return c
 end 
 
@@ -323,6 +327,9 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
   --  end
 
     c:finish_painting()
+    if c.Image then
+         c = c:Image()
+    end
     c.position = {0,0}
 
     return c
@@ -420,6 +427,9 @@ local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
     c:stroke( true )
 
     c:finish_painting()
+    if c.Image then
+         c = c:Image()
+    end
     c.position = {0,0}
 
     return c
@@ -439,6 +449,9 @@ local function make_ring(w,h,bc,bw,px,py,br)
             br )
         ring:stroke()
         ring:finish_painting()
+    	if ring.Image then
+            ring = ring:Image()
+    	end
         return ring
 end 
 
@@ -488,6 +501,9 @@ c:fill(true)
 c:stroke(stroke_bool)
 -- Finishes painting on Canvas
 c:finish_painting()
+if c.Image then
+  c = c:Image()
+end
 
 return c
 end
@@ -537,6 +553,9 @@ c:fill(false)
 c:stroke(false)
 -- Finishes painting on Canvas
 c:finish_painting()
+if c.Image then
+  c = c:Image()
+end
 
 return c
 end
@@ -589,11 +608,6 @@ function widget.button(table)
     	padding_y = 7,
     	border_radius = 12,
     }
-
---[[
-    result = editor_lb:file_copy("/Users/hjkim/g.lua", "/Users/hjkim/RRRR")
-    if(result == true) then print("TRUE COPY ? ") else print("FALSE COPY ?") end 
-    ]] 
 
  --overwrite defaults
     if table ~= nil then 
@@ -1737,6 +1751,8 @@ Return:
 
 	loading_dots_group - group containing the loading dots
 ]]
+ 
+--[[
 function widget.loadingdots(t) 
     --default parameters
     local p = {
@@ -1789,6 +1805,7 @@ function widget.loadingdots(t)
           dot:finish_painting()
           dot.anchor_point ={p.dot_radius,p.dot_radius}
           dot.name         = "Loading Dot"
+	  
           return dot
     end
     
@@ -1871,6 +1888,11 @@ function widget.loadingdots(t)
     setmetatable(l_dots.extra, mt)
     return l_dots
 end
+
+]]
+
+
+
 --[[
 Function: Loading Bar
 
@@ -1888,6 +1910,8 @@ Return:
 
 	loading_bar_group - group containing the loading bar
 ]]
+
+--[[
 function widget.loadingbar(t)
 
     --default parameters
@@ -2019,6 +2043,7 @@ function widget.loadingbar(t)
 	return l_bar_group
 end
 
+]]
 -----------------------------------------
 -- List Scroll Button (or Arrow Image)   
 -----------------------------------------
