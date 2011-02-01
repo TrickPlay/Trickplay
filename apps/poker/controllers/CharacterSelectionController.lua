@@ -312,6 +312,8 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
             model.positions[i] = false
         end
 
+        ctrlman:choose_dog()
+
         view:reset()
     end
 
