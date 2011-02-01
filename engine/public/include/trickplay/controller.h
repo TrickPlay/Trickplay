@@ -7,7 +7,7 @@
 extern "C" {
 #endif 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     File: Controller
     
@@ -32,15 +32,15 @@ extern "C" {
     it is not necessary to call <tp_context_remove_controller>, as TrickPlay will
     dispose of the controller when it exits.
 */
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPController TPController;
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Specification
 */
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Constants: Capabilities
     
@@ -85,7 +85,7 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_UI                        0x0040
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerKeyMap TPControllerKeyMap;
 
@@ -118,7 +118,7 @@ struct TPControllerKeyMap
     unsigned int trickplay_key_code;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerSpec TPControllerSpec;
 
@@ -220,7 +220,7 @@ struct TPControllerSpec
         void * data);
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Commands
     
@@ -230,7 +230,7 @@ struct TPControllerSpec
     a structure. These parameters should be copied if you wish to retain them
     beyond the call to execute_command.
 */
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Constant: TP_CONTROLLER_COMMAND_RESET
     
@@ -479,7 +479,7 @@ struct TPControllerSpec
 
 #define TP_CONTROLLER_COMMAND_STOP_SOUND            41
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerStartAccelerometer TPControllerStartAccelerometer;
 
@@ -523,7 +523,7 @@ struct TPControllerStartAccelerometer
 };
 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerMultipleChoice TPControllerMultipleChoice;
 
@@ -573,7 +573,7 @@ struct TPControllerMultipleChoice
     const char **   choices;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerEnterText TPControllerEnterText;
 
@@ -604,7 +604,7 @@ struct TPControllerEnterText
     const char *    text;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerDeclareResource TPControllerDeclareResource;
 
@@ -637,7 +637,7 @@ struct TPControllerDeclareResource
     const char *    uri;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerSetUIBackground TPControllerSetUIBackground;
 
@@ -687,7 +687,7 @@ struct TPControllerSetUIBackground
     unsigned int    mode;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerSetUIImage TPControllerSetUIImage;
 
@@ -742,7 +742,7 @@ struct TPControllerSetUIImage
     int             height;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerPlaySound TPControllerPlaySound;
 
@@ -776,7 +776,7 @@ struct TPControllerPlaySound
     unsigned int    loop;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Events
     
@@ -952,7 +952,7 @@ struct TPControllerPlaySound
         TPController * controller,
         const char * parameters);
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Insertion and Removal
 */
@@ -1031,12 +1031,12 @@ struct TPControllerPlaySound
         TPController * controller);
 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }
 #endif 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
-#endif // _TRICKPLAY_CONTROLLER_H
+#endif /* _TRICKPLAY_CONTROLLER_H */
