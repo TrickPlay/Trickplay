@@ -595,7 +595,7 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
     lua_insert( L , - ( nargs + 2 ) );
 
     {
-        PROFILER(name);
+        PROFILER(name,PROFILER_CALLS_TO_LUA);
 
         // callback : proxy : nargs
 

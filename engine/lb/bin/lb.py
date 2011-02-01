@@ -511,7 +511,7 @@ def emit( stuff , f ):
         
         	if options.profiling:
 #        		return "  PROFILER(\"%s\");\n" % name
-				return "  PROFILER(__FUNCTION__);\n"
+				return "  PROFILER(__FUNCTION__,PROFILER_CALLS_FROM_LUA);\n"
         	else:
         		return ""
         		
