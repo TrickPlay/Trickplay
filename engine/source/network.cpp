@@ -13,6 +13,7 @@
 // Internal structure to hold all the things we care about while we are
 // working on a request
 
+static Debug_ON log( "NETWORK" );
 
 class Network::RequestClosure
 {
@@ -30,16 +31,26 @@ public:
         notify( NULL ),
         got_body( false ),
         put_offset( 0 ),
-        cookie_jar( cookie_jar_ref( cj ) )
+        cookie_jar( cookie_jar_ref( cj ) ),
+        headers( 0 ),
+        synchronized( false )
 
     {
         if ( event_group )
         {
             event_group->ref();
         }
+
+        set_id();
     }
 
-    RequestClosure( const Settings & _settings, EventGroup * eg, const Request & req, CookieJar * cj, ResponseCallback cb, gpointer d, GDestroyNotify dn )
+    RequestClosure( const Settings & _settings,
+            EventGroup * eg,
+            const Request & req,
+            CookieJar * cj,
+            ResponseCallback cb,
+            gpointer d,
+            GDestroyNotify dn )
     :
         settings( _settings ),
         event_group( eg ),
@@ -50,15 +61,26 @@ public:
         notify( dn ),
         got_body( false ),
         put_offset( 0 ),
-        cookie_jar( cookie_jar_ref( cj ) )
+        cookie_jar( cookie_jar_ref( cj ) ),
+        headers( 0 ),
+        synchronized( false )
     {
         if ( event_group )
         {
             event_group->ref();
         }
+
+        set_id();
     }
 
-    RequestClosure( const Settings & _settings, EventGroup * eg, const Request & req, CookieJar * cj, IncrementalResponseCallback icb, gpointer d, GDestroyNotify dn )
+    RequestClosure( const Settings & _settings,
+            EventGroup * eg,
+            const Request & req,
+            CookieJar * cj,
+            IncrementalResponseCallback icb,
+            gpointer d,
+            GDestroyNotify dn ,
+            bool sync )
     :
         settings( _settings ),
         event_group( eg ),
@@ -69,12 +91,16 @@ public:
         notify( dn ),
         got_body( false ),
         put_offset( 0 ),
-        cookie_jar( cookie_jar_ref( cj ) )
+        cookie_jar( cookie_jar_ref( cj ) ),
+        headers( 0 ),
+        synchronized( sync )
     {
         if ( event_group )
         {
             event_group->ref();
         }
+
+        set_id();
     }
 
     ~RequestClosure()
@@ -90,8 +116,14 @@ public:
         {
             event_group->unref();
         }
+
+        if ( headers )
+        {
+            curl_slist_free_all( headers );
+        }
     }
 
+    guint                       id;
     Settings                    settings;
     EventGroup         *        event_group;
     Request                     request;
@@ -103,8 +135,27 @@ public:
     bool                        got_body;
     size_t                      put_offset;
     CookieJar         *         cookie_jar;
-};
+    curl_slist *                headers;
+    bool                        synchronized;
 
+private:
+
+    void set_id()
+    {
+        static guint next_id = 1;
+
+        id = next_id;
+
+        if ( next_id == G_MAXUINT )
+        {
+            next_id = 1;
+        }
+        else
+        {
+            ++next_id;
+        }
+    }
+};
 
 //****************************************************************************
 // Events that we push into the network thread's queue
@@ -113,7 +164,7 @@ class Network::Event
 {
 public:
 
-    enum Type {QUIT, REQUEST};
+    enum Type {QUIT, REQUEST,CANCEL};
 
     static Event * quit()
     {
@@ -123,6 +174,11 @@ public:
     static Event * request( RequestClosure * rc )
     {
         return new Event( rc );
+    }
+
+    static Event * cancel( guint id )
+    {
+        return new Event( CANCEL , id );
     }
 
     static void destroy( gpointer event )
@@ -145,19 +201,22 @@ public:
         return result;
     }
 
-    const Type type;
+    const Type  type;
+    const guint id;
 
 private:
 
-    Event( Type t )
+    Event( Type t , guint _id = 0 )
         :
         type( t ),
+        id( _id ),
         closure( NULL )
     {}
 
     Event( RequestClosure * rc )
         :
         type( REQUEST ),
+        id( 0 ),
         closure( rc )
     {}
 
@@ -179,7 +238,7 @@ public:
         file_name( fn ),
         mutex( g_mutex_new() )
     {
-        g_debug( "CREATED COOKIE JAR %p", this );
+        log( "CREATED COOKIE JAR %p", this );
 
         if ( g_file_test( fn, G_FILE_TEST_EXISTS ) )
         {
@@ -245,7 +304,7 @@ private:
 
     ~CookieJar()
     {
-        g_debug( "DESTROYING COOKIE JAR %p", this );
+        log( "DESTROYING COOKIE JAR %p", this );
 
         save();
         g_mutex_free( mutex );
@@ -323,13 +382,74 @@ const Network::Response & Network::Response::operator =( const Network::Response
     return * this;
 }
 
-const char * Network::Response::get_header( const String & name )
+const char * Network::Response::get_header( const String & name ) const
 {
     StringMultiMap::const_iterator it = headers.find( name );
 
     return it == headers.end() ? NULL : it->second.c_str();
 }
 
+void Network::Response::replace_body( gpointer data , gsize size )
+{
+    g_byte_array_unref( body );
+
+    body = g_byte_array_sized_new( size );
+
+    g_byte_array_append( body , ( const guint8 * ) data , size );
+}
+
+//*****************************************************************************
+
+class Network::IncrementalResponseClosure
+{
+public:
+
+    static void post( RequestClosure * closure , gpointer chunk , gsize size )
+    {
+        g_assert( closure );
+        g_assert( chunk );
+        g_assert( size );
+
+        g_assert( closure->event_group );
+
+        IncrementalResponseClosure * self = new IncrementalResponseClosure( closure , chunk , size );
+
+        closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback , self , destroy );
+    }
+
+private:
+
+    IncrementalResponseClosure( RequestClosure * closure , gpointer chunk , gsize size )
+    :
+        callback( closure->incremental_callback ),
+        response( closure->response ),
+        user_data( closure->data )
+    {
+        g_assert( callback );
+        g_assert( chunk );
+        g_assert( size );
+
+        response.replace_body( chunk , size );
+    }
+
+    static void destroy( gpointer self )
+    {
+        delete ( IncrementalResponseClosure * ) self;
+    }
+
+    static gboolean response_callback( gpointer _self )
+    {
+        IncrementalResponseClosure * self = ( IncrementalResponseClosure * ) _self;
+
+        self->callback( self->response , self->response.body->data , self->response.body->len , false , self->user_data );
+
+        return FALSE;
+    }
+
+    IncrementalResponseCallback callback;
+    Response                    response;
+    gpointer                    user_data;
+};
 
 //*****************************************************************************
 
@@ -387,7 +507,7 @@ public:
     static void request_finished( RequestClosure * closure )
     {
         g_assert( closure->event_group );
-        closure->event_group->add_idle( G_PRIORITY_DEFAULT_IDLE, response_callback, closure, request_closure_destroy );
+        closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback, closure, request_closure_destroy );
     }
 
     //.........................................................................
@@ -419,12 +539,21 @@ public:
 
         if ( closure->incremental_callback )
         {
-            // If the callback returns false, we return 0 so that
-            // curl will abort the request
+            // If the caller wants callbacks in the main thread
 
-            if ( !closure->incremental_callback( closure->response, ptr, result, false, closure->data ) )
+            if ( closure->synchronized )
             {
-                result = 0;
+                IncrementalResponseClosure::post( closure , ptr , result );
+            }
+            else
+            {
+                // If the callback returns false, we return 0 so that
+                // curl will abort the request
+
+                if ( !closure->incremental_callback( closure->response, ptr, result, false, closure->data ) )
+                {
+                    result = 0;
+                }
             }
         }
         else
@@ -596,7 +725,7 @@ public:
             }
             else
             {
-                g_debug( "SSL CLIENT CERTIFICATE SET" );
+                log( "SSL CLIENT CERTIFICATE SET" );
             }
 
             BIO_free( bio );
@@ -616,7 +745,7 @@ public:
             }
             else
             {
-                g_debug( "SSL CLIENT PRIVATE KEY SET" );
+                log( "SSL CLIENT PRIVATE KEY SET" );
             }
 
             BIO_free( bio );
@@ -718,14 +847,13 @@ public:
             cc( curl_easy_setopt( eh, CURLOPT_FOLLOWLOCATION, closure->request.redirect ? 1 : 0 ) );
             cc( curl_easy_setopt( eh, CURLOPT_USERAGENT, closure->request.user_agent.c_str() ) );
 
-            struct curl_slist * headers = NULL;
             for ( StringMap::const_iterator it = closure->request.headers.begin(); it != closure->request.headers.end(); ++it )
             {
-                curl_slist_append( headers, std::string( it->first + ":" + it->second ).c_str() );
+                closure->headers = curl_slist_append( closure->headers, std::string( it->first + ": " + it->second ).c_str() );
             }
 
-            cc( curl_easy_setopt( eh, CURLOPT_HTTPHEADER, headers ) );
-            // TODO: do we free the slist?
+            cc( curl_easy_setopt( eh, CURLOPT_HTTPHEADER, closure->headers ) );
+
 
             if ( closure->request.method == "PUT" )
             {
@@ -771,7 +899,7 @@ public:
 
     static gpointer process( gpointer q )
     {
-        g_debug( "STARTED NETWORK THREAD %p", g_thread_self() );
+        log( "STARTED NETWORK THREAD %p", g_thread_self() );
 
         // Get the queue
 
@@ -795,10 +923,12 @@ public:
         {
             if ( running_handles )
             {
-                // If there are running requests, we won't wait for new ones
-                // to arrive
+                // If there are running requests, we just wait a tiny bit - to
+                // throttle this thread.
 
-                pop_wait = 0;
+                // 20 ms
+
+                pop_wait = 20 * 1000;
             }
             else
             {
@@ -807,6 +937,8 @@ public:
 
                 timeout = 0;
                 curl_multi_timeout( multi, &timeout );
+
+                // Wait either a whole second, or whatever the timeout says
 
                 pop_wait = ( timeout < 0 || timeout > 1000 ) ? G_USEC_PER_SEC : timeout * 1000;
             }
@@ -818,13 +950,13 @@ public:
                 g_get_current_time( &tv );
                 g_time_val_add( &tv, pop_wait );
 
-                event = ( Event * )g_async_queue_timed_pop( queue, &tv );
+                event = ( Event * ) g_async_queue_timed_pop( queue, &tv );
             }
             else
             {
                 // See if there is a new request but don't wait
 
-                event = ( Event * )g_async_queue_try_pop( queue );
+                event = ( Event * ) g_async_queue_try_pop( queue );
             }
 
             if ( event )
@@ -877,6 +1009,49 @@ public:
 
                     delete event;
                 }
+                else if ( event->type == Event::CANCEL )
+                {
+                    // Find the easy handle for this request
+
+                    bool found = false;
+
+                    for ( std::set<CURL *>::iterator it = handles.begin(); it != handles.end(); ++it )
+                    {
+                        CURL * eh = * it;
+
+                        RequestClosure * closure = NULL;
+
+                        curl_easy_getinfo( eh, CURLINFO_PRIVATE, & closure );
+
+                        if ( closure )
+                        {
+                            if ( closure->id == event->id )
+                            {
+                                log( "FOUND HANDLE FOR REQUEST %u" , event->id );
+
+                                curl_multi_remove_handle( multi, eh );
+                                curl_easy_cleanup( eh );
+
+                                delete closure;
+
+                                handles.erase( it );
+
+                                log( "  REQUEST CANCELED" );
+
+                                found = true;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if ( ! found )
+                    {
+                        log( "REQUEST %u WAS NOT FOUND" , event->id );
+                    }
+
+                    delete event;
+                }
                 else
                 {
                     delete event;
@@ -889,11 +1064,6 @@ public:
             while ( true )
             {
                 CURLMcode result = curl_multi_perform( multi, &running_handles );
-
-                if ( result != CURLM_CALL_MULTI_PERFORM )
-                {
-                    break;
-                }
 
 #ifndef TP_PRODUCTION
 
@@ -917,6 +1087,10 @@ public:
                 }
 #endif
 
+                if ( result != CURLM_CALL_MULTI_PERFORM )
+                {
+                    break;
+                }
             }
 
             // Check for requests that are finished, whether completed or
@@ -960,7 +1134,7 @@ public:
 
         curl_multi_cleanup( multi );
 
-        g_debug( "NETWORK THREAD TERMINATING %p", g_thread_self() );
+        log( "NETWORK THREAD TERMINATING %p", g_thread_self() );
 
         return NULL;
     }
@@ -1083,21 +1257,42 @@ Network::Response Network::perform_request( const Request & request, CookieJar *
 
 //.............................................................................
 
-void Network::perform_request_async( const Network::Request & request, Network::CookieJar * cookie_jar, Network::ResponseCallback callback, gpointer user, GDestroyNotify notify )
+guint Network::perform_request_async( const Network::Request & request, Network::CookieJar * cookie_jar, Network::ResponseCallback callback, gpointer user, GDestroyNotify notify )
 {
     start();
 
-    g_async_queue_push( queue, Event::request( new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify ) ) );
+    RequestClosure * rc = new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify );
+
+    guint id = rc->id;
+
+    g_async_queue_push( queue, Event::request( rc ) );
+
+    return id;
 }
 
 //.............................................................................
 
-void Network::perform_request_async_incremental( const Network::Request & request, Network::CookieJar * cookie_jar, Network::IncrementalResponseCallback callback, gpointer user, GDestroyNotify notify )
+guint Network::perform_request_async_incremental( const Network::Request & request, Network::CookieJar * cookie_jar, Network::IncrementalResponseCallback callback, gpointer user, GDestroyNotify notify , bool synchronized )
 {
     start();
 
-    g_async_queue_push( queue, Event::request( new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify ) ) );
+    RequestClosure * rc = new RequestClosure( settings, event_group, request, cookie_jar, callback, user, notify , synchronized );
+
+    guint id = rc->id;
+
+    g_async_queue_push( queue, Event::request( rc ) );
+
+    return id;
 }
 
 //.............................................................................
 
+void Network::cancel_async_request( guint id )
+{
+    if ( thread )
+    {
+        log( "CANCELING REQUEST %u" , id );
+
+        g_async_queue_push( queue , Event::cancel( id ) );
+    }
+}
