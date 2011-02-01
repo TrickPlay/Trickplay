@@ -588,10 +588,20 @@ function toboolean(s) if (s == "true") then return true else return false end en
       return attr_t
 end
 
-function itemTostring(v)
+function itemTostring(v, d_list, t_list)
     local itm_str = ""
     local indent       = "\n\t\t"
     local b_indent       = "\n\t"
+
+    local function is_in_list(item, list)
+		for i, j in pairs (list) do
+			if item == j then 
+			    return true
+			end 
+		end 
+		return false
+    end 
+
     
     if(v.type == "Rectangle") then
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
@@ -636,7 +646,16 @@ function itemTostring(v)
          "wrap="..tostring(v.wrap)..","..indent..
          "wrap_mode=\""..v.wrap_mode.."\","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Clone") then
-	itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+	
+	 if not is_in_list(v.source, d_list) then 
+		if not v.extra.is_in_group == true then 
+		     table.insert(t_list, v) 
+		end 
+
+		return "", d_list, t_list
+         end 
+
+	 itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
          "size={"..table.concat(v.size,",").."},"..indent..
          "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
@@ -650,14 +669,20 @@ function itemTostring(v)
     elseif (v.type == "Group") then
 	local i = 1
         local children = ""
+	local org_d_list = d_list
         for e in values(v.children) do
-		itm_str = itm_str..itemTostring(e)
-		if i == 1 then
+		itm_str, d_list, t_list = itm_str..itemTostring(e, d_list, t_list)
+		if itm_str ~= "" then 
+		     if i == 1 then
 			children = children..e.name
+		     else 
+		 	children = children..","..e.name
+		     end
+		     i = i + 1
 		else 
-			children = children..","..e.name
-		end
-		i = i + 1
+		     table.insert(t_list, v)
+		     return "", org_d_list, t_list
+		end 
         end 
 
 	itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
@@ -693,7 +718,9 @@ function itemTostring(v)
 	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
 
     end
-    return itm_str
+    d_list = {1,}
+    table.insert(d_list, v.name) 
+    return itm_str, d_list, t_list
 end
 
 local msgw_focus = ""
@@ -734,6 +761,7 @@ local function create_small_input_box(txt)
      	local box_g = Group {}
      	local box = factory.draw_small_ring()
      	local box_focus = factory.draw_small_focus_ring()
+
 	box_g.name = "input_b"
         box.position  = {0,0}
         box.reactive = true
@@ -851,6 +879,10 @@ function printMsgWindow(txt, name)
         end 
      end 
      local msgw_bg = factory.make_popup_bg("msgw", txt_sz)
+     if msgw_bg.Image then
+  	 msgw_bg= msgw_bg:Image()
+     end
+
      msgw:add(msgw_bg)
      input_mode = S_POPUP
      msgw:add(Text{name= name, text = txt, font= "DejaVu Sans 32px",
