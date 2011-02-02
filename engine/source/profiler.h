@@ -1,14 +1,20 @@
 #ifndef _TRICKPLAY_PROFILER_H
 #define _TRICKPLAY_PROFILER_H
 
+#define PROFILER_CALLS_FROM_LUA     1
+#define PROFILER_CALLS_TO_LUA       2
+#define PROFILER_INTERNAL_CALLS     3
+
 #ifdef TP_PROFILING
 
-#define PROFILER(name)          Profiler _profiler(name)
-#define PROFILER_DUMP           Profiler::dump()
-#define PROFILER_OBJECTS        Profiler::dump_objects()
-#define PROFILER_RESET          Profiler::reset()
-#define PROFILER_CREATED(n,p)   Profiler::created(n,p)
-#define PROFILER_DESTROYED(n,p) Profiler::destroyed(n,p)
+#define PROFILER(name,type)         Profiler _profiler(name,type)
+#define PROFILER_DUMP               Profiler::dump()
+#define PROFILER_OBJECTS            Profiler::dump_objects()
+#define PROFILER_RESET              Profiler::reset()
+#define PROFILER_CREATED(n,p)       Profiler::created(n,p)
+#define PROFILER_DESTROYED(n,p)     Profiler::destroyed(n,p)
+#define PROFILE_START(name,type)    (new Profiler(name,type))
+#define PROFILE_STOP(p)             delete (Profiler*) (p)
 
 #include "common.h"
 
@@ -26,7 +32,7 @@ class Profiler
 
 public:
 
-    Profiler( const char * name );
+    Profiler( const char * name , int type );
 
     ~Profiler();
 
@@ -49,9 +55,18 @@ private:
     Profiler( const Profiler & );
 
     const char *    name;
+    int             type;
     GTimer *        timer;
 
-    typedef std::pair< unsigned int , double > Entry;
+    struct Entry
+    {
+        Entry() : count( 0 ) , time( 0 ) , type( 0 ) {}
+
+        unsigned int    count;
+        double          time;
+        int             type;
+    };
+
     typedef std::map< String , Entry > EntryMap;
 
     typedef std::vector< std::pair< String, Entry > > EntryVector;
@@ -77,12 +92,14 @@ private:
 
 #else
 
-#define PROFILER(name)          while(0){}
-#define PROFILER_DUMP           g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
-#define PROFILER_OBJECTS        g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
-#define PROFILER_RESET          while(0){}
-#define PROFILER_CREATED(n,p)   while(0){}
-#define PROFILER_DESTROYED(n,p) while(0){}
+#define PROFILER(name,type)         while(0){}
+#define PROFILER_DUMP               g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
+#define PROFILER_OBJECTS            g_info( "Profiling is disabled. Build with TP_PROFILING defined." )
+#define PROFILER_RESET              while(0){}
+#define PROFILER_CREATED(n,p)       while(0){}
+#define PROFILER_DESTROYED(n,p)     while(0){}
+#define PROFILE_START(name,type)    (0)
+#define PROFILE_STOP(p)             while(0){}
 
 #endif // TP_PROFILING
 

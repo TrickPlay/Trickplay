@@ -1,6 +1,5 @@
 
 local widget = {}
-
 local skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
 				   ["button_focus"] = "assets/smallbuttonfocus.png", 
@@ -61,6 +60,15 @@ local skin_list = { ["default"] = {
 
 		  }
 
+--[[
+Function: change_all_skin
+
+Change all widgets' skin to skin_name 
+
+Arguments:
+	skin_name 	   - name of skin  
+]]
+
 function widget.change_all_skin(skin_name)
     for i = 1, table.getn(g.children), 1 do
 	if g.children[i].skin then 
@@ -68,6 +76,15 @@ function widget.change_all_skin(skin_name)
 	end 
     end 
 end
+
+--[[
+Function: change_button_skin
+
+Change all buttons' skin to skin_name 
+
+Arguments:
+	skin_name 	   - name of skin  
+]]
 
 function widget.change_button_skin(skin_name)
     for i = 1, table.getn(g.children), 1 do
@@ -203,13 +220,17 @@ local function make_xbox()
 
     c:finish_painting()
 
+    if c.Image then
+         c = c:Image()
+    end
+    
     return c
 end 
 
 
 -- make_dialogBox_bg() : make message window background 
 
---make_dialogBox_bg(p.bwidth, p.bheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+--make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
 local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
 
     local size = {w, h} 
@@ -307,6 +328,9 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
   --  end
 
     c:finish_painting()
+    if c.Image then
+         c = c:Image()
+    end
     c.position = {0,0}
 
     return c
@@ -404,6 +428,9 @@ local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
     c:stroke( true )
 
     c:finish_painting()
+    if c.Image then
+         c = c:Image()
+    end
     c.position = {0,0}
 
     return c
@@ -423,6 +450,9 @@ local function make_ring(w,h,bc,bw,px,py,br)
             br )
         ring:stroke()
         ring:finish_painting()
+    	if ring.Image then
+            ring = ring:Image()
+    	end
         return ring
 end 
 
@@ -472,6 +502,9 @@ c:fill(true)
 c:stroke(stroke_bool)
 -- Finishes painting on Canvas
 c:finish_painting()
+if c.Image then
+  c = c:Image()
+end
 
 return c
 end
@@ -521,22 +554,51 @@ c:fill(false)
 c:stroke(false)
 -- Finishes painting on Canvas
 c:finish_painting()
+if c.Image then
+  c = c:Image()
+end
 
 return c
 end
 
 
---------------
---  Button  
---------------
+--[[
+Function: button
 
-function widget.button(t) 
+Creates a button widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of button 
+    	wwidth  - button image width 
+    	wheight - button image hight 
+    	border_color - the border color of button image 
+    	focus_color - the focus color of button image  
+    	border_width - the focus color of button image  
+    	text - the caption of button 
+    	font - the font of button caption 
+    	color - the color of button caption 
+    	padding_x - the x padding of button image 
+    	padding_y - the y padding of button image
+    	border_radius - the border radius of button image 
+
+Return:
+ 	b_group - group containing the button 
+
+Extra Function:
+	on_focus_out() - release button focus 
+	on_focus_in() - grab button focus 
+	
+]]
+
+function widget.button(table) 
 
  --default parameters
     local p = {
     	skin = "default", 
-    	bwidth = 180,
-    	bheight = 60, 
+    	wwidth = 180,
+    	wheight = 60, 
     	border_color = "FFFFFF", 
     	focus_color = "1b911b", 
     	border_width = 1,
@@ -546,13 +608,11 @@ function widget.button(t)
     	padding_x = 7,
     	padding_y = 7,
     	border_radius = 12,
-    	button_image = Image{}, 
-    	focus_image = Image{} 
     }
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -563,7 +623,7 @@ function widget.button(t)
     local b_group = Group
     {
         name = "button", 
-        size = { p.bwidth , p.bheight},
+        size = { p.wwidth , p.wheight},
         position = {100, 100, 0},  
         reactive = true,
         extra = {type = "Button"}
@@ -571,38 +631,41 @@ function widget.button(t)
 
     local create_button = function() 
     
+
 	if(p.skin ~= "canvas") then 
 		p.button_image = assets(skin_list[p.skin]["button"])
 		p.focus_image  = assets(skin_list[p.skin]["button_focus"])
 	end
-
         b_group:clear()
     
-        ring = make_ring(p.bwidth, p.bheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+        ring = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
-        focus_ring = make_ring(p.bwidth, p.bheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+        focus_ring = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
-        button = p.button_image
-        button:set{name="button", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 255}
-
-        focus = p.focus_image
-        focus:set{name="focus", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 0}
-
+	if(p.skin ~= "canvas") then 
+            button = assets(skin_list[p.skin]["button"])
+            button:set{name="button", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 255}
+            focus = assets(skin_list[p.skin]["button_focus"])
+            focus:set{name="focus", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 0}
+	else 
+	     button = Image{}
+	     focus = Image{}
+	end 
         text = Text{name = "text", text = p.text, font = p.font, color = p.color, reactive = true} 
-        text:set{name = "text", position = { (p.bwidth  -text.w)/2, (p.bheight - text.h)/2}}
+        text:set{name = "text", position = { (p.wwidth  -text.w)/2, (p.wheight - text.h)/2}}
 
         b_group:add(ring, focus_ring, button, focus, text)
 
-        if (p.skin == "canvas") then button.opacity = 0
+        if (p.skin == "canvas") then button.opacity = 0 print("heheheheh")
         else ring.opacity = 0 end 
 
     end 
 
     create_button()
 
-    function b_group.extra.on_focus_in()
+    function b_group.extra.on_focus_in() 
         if (p.skin == "canvas") then 
 	     ring.opacity = 0
 	     focus_ring.opacity = 255
@@ -613,7 +676,7 @@ function widget.button(t)
 	b_group:grab_key_focus(b_group)
     end
     
-    function b_group.extra.on_focus_out()
+    function b_group.extra.on_focus_out() 
         if (p.skin == "canvas") then 
 	     ring.opacity = 255
 	     focus_ring.opacity = 0
@@ -628,7 +691,7 @@ function widget.button(t)
     mt = {}
     mt.__newindex = function (t, k, v)
         if k == "bsize" then  
-	    p.bwidth = v[1] p.bheight = v[2]  
+	    p.wwidth = v[1] p.wheight = v[2]  
         else 
            p[k] = v
         end
@@ -637,7 +700,7 @@ function widget.button(t)
 
     mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.bwidth, p.bheight}  
+	    return {p.wwidth, p.wheight}  
         else 
 	    return p[k]
         end 
@@ -648,16 +711,46 @@ function widget.button(t)
     return b_group 
 end
 
------------------------
--- Text Input Field
------------------------
 
-function widget.textField(t)
+--[[
+Function: textField
+
+Creates a text input field widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of text input field 
+    	wwidth  - button image width 
+    	wheight - text input field image hight 
+    	border_color - the border color of text input field image 
+    	focus_color - the focus color of text input field image  
+    	border_width - the focus color of text input field image  
+    	text - the text  
+    	text_indent - the size of text indentation  
+    	font - the font of text input field caption 
+    	color - the color of text input field caption 
+    	padding_x - the x padding of text input field image 
+    	padding_y - the y padding of text input field image
+    	border_radius - the border radius of text input field image 
+
+Return:
+ 	t_group - group containing the text input field 
+
+Extra Function:
+	on_focus_out() - release text input field focus 
+	on_focus_in() - grab text input field focus 
+	
+]]
+
+
+
+function widget.textField(table) 
  --default parameters
     local p = {
     	skin = "canvas", 
-    	bwidth = 200 ,
-    	bheight = 80 ,
+    	wwidth = 200 ,
+    	wheight = 80 ,
     	text = "" ,
     	text_indent = 20 ,
     	border_width  = 3 ,
@@ -668,13 +761,11 @@ function widget.textField(t)
     	padding_x = 7 ,
     	padding_y = 7 ,
     	border_radius = 12 ,
-    	box_img = Image{}, 
-    	focus_img = Image{}, 
 
     }
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -685,7 +776,7 @@ function widget.textField(t)
     local t_group = Group
     {
        name = "t_group", 
-       size = { p.bwidth , p.bheight},
+       size = { p.wwidth , p.wheight},
        position = {200, 200, 0},  
        reactive = true, 
        extra = {type = "TextInputField"} 
@@ -694,6 +785,7 @@ function widget.textField(t)
 
     local create_textInputField= function()
  	
+
 	if(p.skin ~= "canvas") then 
              p.box_image   = assets(skin_list[p.skin]["textinput"])
 	     p.focus_image = assets(skin_list[p.skin]["textinput_focus"])
@@ -701,20 +793,24 @@ function widget.textField(t)
 
     	t_group:clear()
 
-    	box = make_ring(p.bwidth, p.bheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+    	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	box:set{name="box", position = { 0 , 0 } }
 
-    	focus_box = make_ring(p.bwidth, p.bheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+    	focus_box = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
-    	box_img = p.box_img
-    	box_img:set{name="box_img", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 0 }
-
-    	focus_img = p.focus_img
-    	focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.bwidth , p.bheight } , opacity = 0 }
+	if(p.skin ~= "canvas") then 
+    	     box_img = assets(skin_list[p.skin]["textinput"])
+    	     box_img:set{name="box_img", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 0 }
+    	     focus_img = assets(skin_list[p.skin]["textinput_focus"])
+    	     focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 0 }
+	else 
+	     box_img = Image{}
+	     focus_img = Image{}
+	end 
 
     	text = Text{text = p.text, editable = true, cursor_visible = true, reactive = true, font = p.font, color = p.color}
-    	text:set{name = "text", position = {p.text_indent, (p.bheight - text.h)/2} }
+    	text:set{name = "text", position = {p.text_indent, (p.wheight - text.h)/2} }
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
     	if (p.skin == "canvas") then box_img.opacity = 0
@@ -752,7 +848,7 @@ function widget.textField(t)
      mt = {}
      mt.__newindex = function (t, k, v)
 	if k == "bsize" then  
-	    p.bwidth = v[1] p.bheight = v[2]  
+	    p.wwidth = v[1] p.wheight = v[2]  
         else 
            p[k] = v
         end
@@ -761,7 +857,7 @@ function widget.textField(t)
 
      mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.bwidth, p.bheight}  
+	    return {p.wwidth, p.wheight}  
         else 
 	    return p[k]
         end 
@@ -772,11 +868,33 @@ function widget.textField(t)
      return t_group
 end 
 
--------------------
---  Dialog Box  
--------------------
+--[[
+Function: dialogBox
 
-function widget.dialogBox(t)
+Creates a dialog box widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of dialog box 
+    	wwidth  - button image width 
+    	wheight - dialog box image hight 
+    	fill_color - the color of dialog box image  
+    	border_color - the border color of dialog box image 
+    	focus_color - the focus color of dialog box image  
+    	border_width - the focus color of dialog box image  
+    	title - the title of dialog box
+    	font - the font of dialog box title 
+    	color - the color of dialog box caption 
+    	padding_x - the x padding of dialog box image 
+    	padding_y - the y padding of dialog box image
+    	border_radius - the border radius of dialog box image 
+
+Return:
+ 	db_group - group containing the dialog box
+]]
+
+function widget.dialogBox(table) 
  
 --default parameters
    local p = {
@@ -784,21 +902,19 @@ function widget.dialogBox(t)
 	title = "Dialog Box Title" ,
 	font = "DejaVu Sans 30px" , 
 	color = "FFFFFF" , 
-	bwidth = 900 ,
-	bheight = 500 ,
+	wwidth = 900 ,
+	wheight = 500 ,
 	border_width  = 3 ,
 	border_color  = "FFFFFFC0" , 
 	fill_color  = {25,25,25,100} ,
 	padding_x = 10 ,
 	padding_y = 10 ,
 	border_radius = 22 ,
-	box_image = Image{}, 
-        x_image = Image{}, 
     }
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -817,27 +933,26 @@ function widget.dialogBox(t)
 
     local create_dialogBox  = function ()
    
-	if(p.skin ~= "canvas") then 
-		p.box_image = assets(skin_list[p.skin]["dialogbox"])
-		p.x_image = assets(skin_list[p.skin]["dialogbox_x"])
-	end
- 
         db_group:clear()
     	
-        d_box = make_dialogBox_bg(p.bwidth, p.bheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+        d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
 	d_box:set{name="d_box"} 
 
         x_box = make_xbox()
-        x_box:set{name = "x_box", position  = {p.bwidth - 50, db_group_cur_y}}
+        x_box:set{name = "x_box", position  = {p.wwidth - 50, db_group_cur_y}}
 
         title= Text{text = p.title, font= "DejaVu Sans 32px", color = "FFFFFF"}     
-        title:set{name = "title", position = {(p.bwidth - title.w - 50)/2 , db_group_cur_y - 5}}
+        title:set{name = "title", position = {(p.wwidth - title.w - 50)/2 , db_group_cur_y - 5}}
 
-        d_box_img = p.box_image
-        d_box_img:set{name="d_box_img", size = { p.bwidth , p.bheight } , opacity = 0}
-
-        x_box_img= p.x_image
-        x_box_img:set{name="x_box_img", size = { p.bwidth , p.bheight } , opacity = 0}
+	if(p.skin ~= "canvas") then 
+        	d_box_img = assets(skin_list[p.skin]["dialogbox"])
+        	d_box_img:set{name="d_box_img", size = { p.wwidth , p.wheight } , opacity = 0}
+        	x_box_img = assets(skin_list[p.skin]["dialogbox_x"])
+        	x_box_img:set{name="x_box_img", size = { p.wwidth , p.wheight } , opacity = 0}
+	else 
+		d_box_img = Image{} 
+        	x_box_img = Image{} 
+	end
 
 	db_group:add(d_box, x_box, title, d_box_img, x_box_img)
 
@@ -846,17 +961,11 @@ function widget.dialogBox(t)
 
      end 
 
-     function db_group.extra.clean()
-          db_group.children = {}
-          db_group_cur_y = 40
-          screen:remove(db_group)
-     end 
-
      mt = {}
      mt.__newindex = function (t, k, v)
 	 if k == "bsize" then  
-	    p.bwidth = v[1] 
-	    p.bheight = v[2]  
+	    p.wwidth = v[1] 
+	    p.wheight = v[2]  
         else 
            p[k] = v
         end
@@ -865,7 +974,7 @@ function widget.dialogBox(t)
 
      mt.__index = function (t,k)
 	if k == "bsize" then 
-	    return {p.bwidth, p.bheight}  
+	    return {p.wwidth, p.wheight}  
         else 
 	    return p[k]
         end 
@@ -875,11 +984,41 @@ function widget.dialogBox(t)
      return db_group
 end 
 
--------------------
---  Toast  
--------------------
+--[[
+Function: toastBox
 
-function widget.toastBox(t)
+Creates a toast widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of toast 
+	title - title of toast
+	message - message of toast
+    	font - the font of toast title and message 
+    	color - the color of toast title and message 
+    	wwidth  - toast image width 
+    	wheight - toast image hight 
+    	border_color - the border color of toast image 
+    	fill_color - the color of toast image  
+    	focus_color - the focus color of toast image  
+    	border_width - the focus color of toast image  
+    	padding_x - the x padding of toast image 
+    	padding_y - the y padding of toast image
+    	border_radius - the border radius of toast image 
+	fade_duration - millisecs spent on fading away the toast 
+	duration - millisecs spent on showing the toast 
+
+Return:
+ 	tb_group - group containing the toast box
+
+Extra Function:
+	start_timer() - start the timer of toast box 	
+]]
+
+
+
+function widget.toastBox(table) 
 
  --default parameters
     local p = {
@@ -888,8 +1027,8 @@ function widget.toastBox(t)
 	message = "Toast box message ... ",
 	font = "DejaVu Sans 30px", 
 	color = "FFFFFF", 
-	bwidth = 600,
-	bheight = 200,
+	wwidth = 600,
+	wheight = 200,
 	border_width  = 3,
 	border_color  = "FFFFFFC0", 
 	fill_color  = {25,25,25,100},
@@ -898,14 +1037,13 @@ function widget.toastBox(t)
 	border_radius = 22,
 	fade_duration = 2000,
 	duration = 5000,
-	box_image = Image{},
 	icon_image = assets("assets/voice-1.png")
     }
 
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -916,7 +1054,7 @@ function widget.toastBox(t)
     	  name = "toastb_group",  
     	  position = {200, 200, 0}, 
           reactive = true, 
-          extra = {type = "Toastb_group"} 
+          extra = {type = "ToastBox"} 
      }
 
     local tb_group_cur_y = 30
@@ -926,26 +1064,27 @@ function widget.toastBox(t)
 
     local create_toastBox = function()
 
-	if(p.skin ~= "canvas") then 
-	     p.box_image = assets(skin_list[p.skin]["toast"])
-	end 
-
     	tb_group:clear()
 
-    	t_box = make_toastb_group_bg(p.bwidth, p.bheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+    	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
     
     	icon = p.icon_image
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
     	title= Text{text = p.title, font= "DejaVu Sans 32px", color = "FFFFFF"}     
-    	title:set{name = "title", position = {(p.bwidth - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
+    	title:set{name = "title", position = {(p.wwidth - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
 
     	message= Text{text = p.message, font= "DejaVu Sans 32px", color = "FFFFFF"}     
     	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*2 + title.h }} 
 
-    	t_box_img = p.box_image
-    	t_box_img:set{name="t_box_img", size = { p.bwidth , p.bheight } , opacity = 0}
+	if(p.skin ~= "canvas") then 
+    	     t_box_img = assets(skin_list[p.skin]["toast"])
+    	     t_box_img:set{name="t_box_img", size = { p.wwidth , p.wheight } , opacity = 0}
+	else 
+	     t_box_img = Image{}
+	end 
+
     	tb_group:add(t_box, icon, title, message, t_box_img)
 
     	if (p.skin == "canvas") then t_box_img.opacity = 0
@@ -973,11 +1112,6 @@ function widget.toastBox(t)
 
      create_toastBox()
 
-     function tb_group.extra.clean()
-          tb_group.children = {}
-          g:remove(tb_group)
-     end 
-
        
      function tb_group.extra.start_timer() 
 	tb_group_timer:start()
@@ -986,7 +1120,7 @@ function widget.toastBox(t)
      mt = {}
      mt.__newindex = function (t, k, v)
         if k == "bsize" then  
-	    p.bwidth = v[1] p.bheight = v[2]  
+	    p.wwidth = v[1] p.wheight = v[2]  
         else 
            p[k] = v
         end
@@ -995,7 +1129,7 @@ function widget.toastBox(t)
 
      mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.bwidth, p.bheight}  
+	    return {p.wwidth, p.wheight}  
         else 
 	    return p[k]
         end 
@@ -1007,31 +1141,55 @@ function widget.toastBox(t)
 end 
 
 
------------------------
---  Button Picker 
------------------------
+--[[
+Function: buttonPicker
+
+Creates a button picker widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of button picker  
+    	wwidth  - button picker image width 
+    	wheight - button picker image hight 
+	items   - a table of button picker items 
+    	font - the font of button picker items
+    	color - the color of button picker items
+	selected_item - selected item's number 
+	rotate_func - table of functions that is called by selected item numger   
+
+Return:
+ 	bp_group - group containing the button picker 
+
+Extra Function:
+	on_focus() - grab focus of button picker 
+	out_focus() - release focus of button picker
+	press_left() - left key press event, apply the selection of button picker
+	press_right() - right key press event, apply the selection of button picker
+	press_up() - up key press event, apply the selection of button picker
+	press_down() - down key press event, apply the selection of button picker
+	press_enter() - enter key press event, apply the selection of button picker
+	insert_item(item) - add an item to the items table 
+	remove_item(item) - remove an item from the items table 
+]]
+
  
-function widget.buttonPicker(t)
+function widget.buttonPicker(table) 
  --default parameters 
     local p = {
 	skin = "default", 
+	wwidth =  180,
+	wheight = 60,
 	items = {"item1", "item2", "item3"},
-	bwidth =  180,
-	bheight = 60,
-	border_width  = 3,
-	border_color  = "FFFFFFC0", 
 	font = "DejaVu Sans 30px" , 
 	color = "FFFFFF", 
-	padding_x = 10,
-	padding_y = 10,
-	border_radius = 22,
-	rotate_func = function(p,n) end, 
+	rotate_func = {}, 
         selected_item = 1 
     }
 
  --overwrite defaults
-     if t ~= nil then 
-        for k, v in pairs (t) do
+     if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
      end 
@@ -1050,30 +1208,53 @@ function widget.buttonPicker(t)
 
      local index = 1
      local padding = 10 
-     local pos = {p.bwidth/6, p.bheight/2}
+     local pos = {p.wwidth/6, p.wheight/2}
      local t = nil
 
      local create_buttonPicker = function() 
 
 	bp_group:clear()
 
-     	unfocus = assets(skin_list[p.skin]["buttonpicker"])
-     	unfocus:set{ position = {pos[1], pos[2]}, size = {p.bwidth, p.bheight}, opacity = 255}
+	if p.skin == "canvas" then 
+            ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
+            ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
 
-     	focus = assets(skin_list[p.skin]["buttonpicker_focus"])
-	focus:set{ position = {pos[1], pos[2]}, size = {p.bwidth, p.bheight}, opacity = 0}
+            focus_ring = make_ring(p.wwidth, p.wheight, {255, 0,0,255}, 1, 7, 7, 12)
+            focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
 
-	left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
-	left_un:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 255}
+	    left_un   = assets(skin_list["default"]["buttonpicker_left_un"])
+	    left_un:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 255}
 
-	left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
-	left_sel:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 0}
+	    left_sel  = assets(skin_list["default"]["buttonpciker_left_sel"])
+	    left_sel:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 0}
 
-	right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
-	right_un:set{position = {pos[1] + focus.w + padding, pos[2] + padding}, opacity = 255}
+	    right_un  = assets(skin_list["default"]["buttonpicker_right_un"])
+	    right_un:set{position = {pos[1] + focus.w + padding, pos[2] + padding}, opacity = 255}
 
-        right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
-	right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+            right_sel = assets(skin_list["default"]["buttonpicker_right_sel"])
+	    right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+	else 
+	    ring = Image{}
+	    focus = Image{}
+
+     	    unfocus = assets(skin_list[p.skin]["buttonpicker"])
+     	    unfocus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255}
+
+     	    focus = assets(skin_list[p.skin]["buttonpicker_focus"])
+	    focus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
+
+	    left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
+	    left_un:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 255}
+
+	    left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
+	    left_sel:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 0}
+
+	    right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
+	    right_un:set{position = {pos[1] + focus.w + padding, pos[2] + padding}, opacity = 255}
+
+            right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
+	    right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+ 	end 
    	
      	for i, j in pairs(p.items) do 
 	  if i == 1 then 
@@ -1090,7 +1271,9 @@ function widget.buttonPicker(t)
 		pos[2] + padding + unfocus.h
      	}
 
-   	bp_group:add(unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
+   	bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
+	if(p.skin == "canvas") then unfocus.opacity = 0 
+        else ring.opacity = 0 end 
 
         t = nil
      end 
@@ -1108,7 +1291,9 @@ function widget.buttonPicker(t)
 
      function bp_group.extra.press_left()
             local prev_i = index
-            local next_i = (index-1-1)%(table.getn(p.items))+1
+	    dumptable(p)
+
+            local next_i = (index-2)%(#p.items)+1
 
 	    index = next_i
 
@@ -1154,7 +1339,7 @@ function widget.buttonPicker(t)
 			t = nil
 	    end
 	    if p.rotate_func then
-	       p.rotate_func(next_i,prev_i)
+	      -- p.rotate_func(next_i,prev_i)
 	    end
 
 	    t:start()
@@ -1162,7 +1347,8 @@ function widget.buttonPicker(t)
 
 	function bp_group.extra.press_right()
 	    local prev_i = index
-	    local next_i = (index+1-1)%(table.getn(p.items)) + 1
+	    --local next_i = (index+1-1)%(table.getn(p.items)) + 1
+            local next_i = (index)%(#p.items)+1
 	    index = next_i
 
 	    local prev_old_x = pos[1] + unfocus.w/2 - 50 
@@ -1244,7 +1430,7 @@ function widget.buttonPicker(t)
 -- imsi 
 
              if k == "bsize" then  
-	    	p.bwidth = v[1] p.bheight = v[2]  
+	    	p.wwidth = v[1] p.wheight = v[2]  
              else 
                 p[k] = v
              end
@@ -1253,7 +1439,7 @@ function widget.buttonPicker(t)
 
         mt.__index = function (t,k)
              if k == "bsize" then 
-	        return {p.bwidth, p.bheight}  
+	        return {p.wwidth, p.wheight}  
              else 
 	        return p[k]
              end 
@@ -1264,10 +1450,40 @@ function widget.buttonPicker(t)
         return bp_group 
 end
 
-------------------------------------
---  List Picker : Radio Button   
-------------------------------------
-function widget.radioButton(t)
+--[[
+Function: radioButton
+
+Creates a radio button widget
+
+Arguments:
+	Table of 
+
+	skin 	- skin name of radio button  
+    	wwidth  - radio button image width 
+    	wheight - radio button image hight 
+	items   - a table of radio button items 
+    	font - the font of radio button items
+    	color - the color of radio button items
+	button_color - the color of radio button
+	select_color - the color of selected radio button 
+	button_radius - the radius of radio button
+	select_radius - the radius of selected radio button
+	ring_pos - the postion of the group of radio buttons 
+	item_pos - the position of the group of text items 
+	line_space - the space between the text itmes 
+	selected_item - selected item's number 
+	rotate_func - table of functions that is called by selected item numger   
+
+Return:
+ 	rb_group - group containing the radio button 
+
+Extra Function:
+	insert_item(item) - add an item to the items table 
+	remove_item(item) - remove an item from the items table 
+]]
+
+
+function widget.radioButton(table) 
 
  --default parameters
     local p = {
@@ -1275,23 +1491,24 @@ function widget.radioButton(t)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = "FFFFFF", -- items 
-	bwidth = 600,
-	bheight = 200,
+	wwidth = 600,
+	wheight = 200,
 	button_color = {255,255,255,200}, -- items 
 	select_color = {100, 100, 100, 255}, -- items 
 	button_radius = 10, -- items 
 	select_radius = 5,  -- items 
 	ring_pos = {0, 0},  -- items 
 	item_pos = {50,3},  -- items 
-	line_pad = 40,  -- items 
+	line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
+	rotate_func = {}, 
 	selected_item = 1 
     }
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end 
@@ -1328,7 +1545,7 @@ function widget.radioButton(t)
          select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
 
          for i, j in pairs(p.items) do 
-	      itm_h = p.line_pad
+	      itm_h = p.line_space
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = {0, i * itm_h - itm_h}})     
 	      if p.skin == "canvas" then 
     	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {0, i * itm_h - itm_h}} ) 
@@ -1362,7 +1579,7 @@ function widget.radioButton(t)
      mt = {}
      mt.__newindex = function (t, k, v)
 	if k == "bsize" then  
-	    p.bwidth = v[1] p.bheight = v[2]  
+	    p.wwidth = v[1] p.wheight = v[2]  
         else 
            p[k] = v
         end
@@ -1371,7 +1588,7 @@ function widget.radioButton(t)
 
      mt.__index = function (t,k)
 	if k == "bsize" then 
-	    return {p.bwidth, p.bheight}  
+	    return {p.wwidth, p.wheight}  
         else 
 	    return p[k]
         end 
@@ -1382,12 +1599,39 @@ function widget.radioButton(t)
      return rb_group
 end 
 
+--[[
+Function: checkBox
+
+Creates a check box widget
+
+Arguments:
+	skin 	- skin name of check box   
+    	wwidth  - check box image width 
+    	wheight - check box image hight 
+	items   - a table of check box items 
+    	font - the font of check box items
+    	color - the color of check box items
+	box_color - the color of check box border 
+	fill_color - the color of check box 
+	box_width - the line width of check box border
+	box_size - the size of check box 
+        check_size - the size of check image 
+	box_pos - the postion of the group of check box  
+	item_pos - the position of the group of text items 
+	line_space - the space between the text itmes 
+	selected_item - selected item's number 
+	rotate_func - table of functions that is called by selected item numger   
+
+Return:
+ 	rb_group - group containing the check box  
+
+Extra Function:
+	insert_item(item) - add an item to the items table 
+	remove_item(item) - remove an item from the items table 
+]]
 
 
-------------------------------------
---  List Picker : Check Box   
-------------------------------------
-function widget.checkBox(t)
+function widget.checkBox(table) 
 
  --default parameters
     local p = {
@@ -1400,19 +1644,20 @@ function widget.checkBox(t)
 	box_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
-	bwidth = 600,
-	bheight = 200,
-	line_pad = 40,   
+	wwidth = 600,
+	wheight = 200,
+	line_space = 40,   
 	box_pos = {0, 0},  -- items 
 	item_pos = {50,-5},  -- items 
 	selected_item = 1,  
 	box_image = Image{},
+	rotate_func = {}, 
 	check_image = assets("assets/checkmark.png") 
     } 
 
  --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
+    if table ~= nil then 
+        for k, v in pairs (table) do
 	    p[k] = v 
         end 
     end
@@ -1427,7 +1672,7 @@ function widget.checkBox(t)
     	  name = "checkBox",  
     	  position = {200, 200, 0}, 
           reactive = true, 
-          extra = {type = "Toastb_group"}
+          extra = {type = "CheckBox"}
      }
 
 
@@ -1448,7 +1693,7 @@ function widget.checkBox(t)
 
 
          for i, j in pairs(p.items) do 
-	      itm_h = p.line_pad
+	      itm_h = p.line_space
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color = p.color, position = {0, i * itm_h - itm_h}})     
 	      if p.skin == "canvas" then 
     	           boxes:add(Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
@@ -1479,7 +1724,7 @@ function widget.checkBox(t)
     mt = {}
     mt.__newindex = function (t, k, v)
     	if k == "bsize" then  
-	    p.bwidth = v[1] p.bheight = v[2]  
+	    p.wwidth = v[1] p.wheight = v[2]  
         else 
            p[k] = v
         end
@@ -1488,7 +1733,7 @@ function widget.checkBox(t)
 
     mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.bwidth, p.bheight}  
+	    return {p.wwidth, p.wheight}  
         else 
 	    return p[k]
         end 
@@ -1517,7 +1762,9 @@ Return:
 
 	loading_dots_group - group containing the loading dots
 ]]
-function widget.loadingdots(t)
+ 
+---[[
+function widget.loadingdots(t) 
     --default parameters
     local p = {
         skin          = "default",
@@ -1562,14 +1809,21 @@ function widget.loadingdots(t)
     
     --the Canvas used to create the dots
     local make_dot = function(x,y)
-          local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius},x=x,y=y}
+          local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius}}
           dot:begin_painting()
           dot:arc(p.dot_radius,p.dot_radius,p.dot_radius,0,360)
           dot:set_source_color(p.dot_color)
           dot:fill(true)
           dot:finish_painting()
+
+          if dot.Image then
+              dot = dot:Image()
+          end
           dot.anchor_point ={p.dot_radius,p.dot_radius}
           dot.name         = "Loading Dot"
+          dot.position     = {x,y}
+	  
+
           return dot
     end
     local img
@@ -1666,6 +1920,11 @@ function widget.loadingdots(t)
     setmetatable(l_dots.extra, mt)
     return l_dots
 end
+
+--]]
+
+
+
 --[[
 Function: Loading Bar
 
@@ -1683,6 +1942,8 @@ Return:
 
 	loading_bar_group - group containing the loading bar
 ]]
+
+---[[
 function widget.loadingbar(t)
 
     --default parameters
@@ -1789,7 +2050,12 @@ function widget.loadingbar(t)
 		c_fill:add_source_pattern_color_stop( 1 , p.fill_lower_color )
 		c_fill:fill(true)
 		c_fill:finish_painting()
-		
+		if c_shell.Image then
+			c_shell = c_shell:Image()
+		end
+		if c_fill.Image then
+			c_fill = c_fill:Image()
+		end
 		l_bar_group:add(c_shell,c_fill)
 	end
     
@@ -1814,6 +2080,7 @@ function widget.loadingbar(t)
 	return l_bar_group
 end
 
+--]]
 -----------------------------------------
 -- List Scroll Button (or Arrow Image)   
 -----------------------------------------

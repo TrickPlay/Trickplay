@@ -1,0 +1,1180 @@
+module canvas;
+
+[[
+#include <cstring>
+
+#include "pango/pangocairo.h"
+
+#include "common.h"
+#include "clutter_util.h"
+#include "bitmap.h"
+
+#define degrees_to_radians( degrees ) ( degrees * ( G_PI / 180.0 ) )
+
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+#define CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT COGL_PIXEL_FORMAT_BGRA_8888_PRE
+#else
+#define CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT COGL_PIXEL_FORMAT_ARGB_8888_PRE
+#endif
+
+]]
+
+/*
+    Class: Canvas
+
+    Canvas lets you create a bitmap and use various drawing operations on it. It is
+    based on the <Cairo graphics library at http://cairographics.org/manual/> and offers a similar API, with some slight
+    modifications for ease of use.
+
+    You typically use it by creating one, drawing into it and then creating an <Image> object from it.
+    Then, you can use the image object like any other <UIElement>.
+
+    Introduction:
+
+    You start by creating a Canvas with a given size.
+
+    (code)
+    local canvas = Canvas( 200 , 200 )
+    (end)
+
+    Now, you create a path. You can use <move_to>, <line_to>, <rectangle>, <round_rectangle>,
+    <curve_to>, <arc>, <arc_negative> or <text_path> for this. At this point, a path exists,
+    but it is not visible.
+
+    (code)
+    canvas:rectangle( 20 , 20 , 160 , 160 )
+    (end)
+
+    You can use the path in several ways. You can call <clip> to use it as a clipping region
+    for <paint>, you can <fill> it, or you can <stroke> it.
+
+    If you choose to fill it or stroke it, you first have to choose a brush; which is called a source.
+    You can use <set_source_color> to use a solid color, <set_source_linear_pattern> to use a linear color
+    gradient as your brush or <set_source_radial_pattern> to use a radial gradient. You can also use
+    <set_source_bitmap> to use another image as your brush. You can even use <push_group> and <pop_group>
+    to draw yourself a brush.
+
+    (code)
+    canvas:set_source_color( "FF0000" )
+    (end)
+
+    Finally, you can fill it. This will fill the rectangle with red.
+
+    (code)
+    canvas:fill( true )
+    (end)
+
+    Fill and stroke let you keep (preserve) your path, so you can still use it. Since we passed
+    true to <fill> above, the path is still there. Now, we change the source to solid green and
+    stroke the same path.
+
+    (code)
+    canvas:set_source_color( "00FF00" )
+    canvas:stroke()
+    (end)
+
+    In between these calls, you can use transformations like <translate>, <scale> and <rotate> to achieve
+    different results. You can also change the operator using the <op> property.
+
+    When you are happy with your Canvas, you can create an Image from it and add it to the screen.
+
+    (code)
+    screen:add( canvas:Image() )
+    (end)
+*/
+
+class Canvas [[ cairo_t * ]]
+{
+    /*
+        Constructor: Canvas
+
+        The constructor of Canvas takes the desired width and height and returns a new Canvas.
+
+        Arguments:
+
+            width - The width of the Canvas surface in pixels.
+
+            height - The height of the Canvas surface.
+
+        Returns:
+
+            canvas - A newly created Canvas whose surface is all zeros.
+    */
+
+    Canvas( ... )
+        [[
+            int width = 0;
+            int height = 0;
+
+            if ( lua_gettop( L ) >= 1 && lua_type( L , 1 ) == LUA_TTABLE )
+            {
+                lua_getfield( L , 1 , "size" );
+
+                if ( lua_type( L , -1 ) == LUA_TTABLE )
+                {
+                    lua_rawgeti( L , -1 , 1 );
+                    width = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                    lua_rawgeti( L , -1 , 2 );
+                    height = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                }
+                else
+                {
+                    lua_rawgeti( L , 1 , 1 );
+                    width = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                    lua_rawgeti( L , 1 , 2 );
+                    height = lua_tonumber( L , -1 );
+                    lua_pop( L , 1 );
+                }
+
+                lua_pop( L , 1 );
+            }
+            else if ( lua_gettop( L ) >= 2 && lua_type( L , 1 ) == LUA_TNUMBER && lua_type( L , 2 ) == LUA_TNUMBER )
+            {
+                width = lua_tonumber( L , 1 );
+                height = lua_tonumber( L , 2 );
+            }
+
+            if ( width == 0 || height == 0 )
+            {
+                luaL_error( L , "Invalid arguments to Canvas()" );
+            }
+
+            cairo_surface_t * surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32 , width , height );
+
+            self = lb_construct( cairo_t , cairo_create( surface ) );
+
+            cairo_surface_destroy( surface );
+        ]];
+
+    ~Canvas()
+        [[
+            cairo_destroy( self );
+        ]];
+
+    /*
+        Property: width
+
+        The width of the Canvas.
+    */
+
+    readonly int width
+        [[
+            width = cairo_image_surface_get_width( cairo_get_target( self ) );
+        ]];
+
+    /*
+        Property: w
+
+        The width of the Canvas.
+    */
+
+    readonly int w
+        [[
+            w = cairo_image_surface_get_width( cairo_get_target( self ) );
+        ]];
+
+    /*
+        Property: height
+
+        The height of the Canvas.
+    */
+
+    readonly int height
+        [[
+            height = cairo_image_surface_get_height( cairo_get_target( self ) );
+        ]];
+
+    /*
+        Property: h
+
+        The height of the Canvas.
+    */
+
+    readonly int h
+        [[
+            h = cairo_image_surface_get_height( cairo_get_target( self ) );
+        ]];
+
+    /*
+        Property: size
+
+        A table containing the width and height of the Canvas.
+    */
+
+    readonly table size
+        [[
+            lua_newtable( L );
+            lua_pushinteger( L , cairo_image_surface_get_width( cairo_get_target( self ) ) );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushinteger( L , cairo_image_surface_get_height( cairo_get_target( self ) ) );
+            lua_rawseti( L , -2 , 2 );
+        ]];
+
+    /*
+        Property: current_point
+
+        A table containing the coordinates of the current point.
+    */
+
+    readonly table current_point
+        [[
+            double x;
+            double y;
+
+            cairo_get_current_point( self , & x , & y );
+
+            lua_newtable( L );
+            lua_pushnumber( L , x );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushnumber( L , y );
+            lua_rawseti( L , -2 , 2 );
+        ]];
+
+    /*
+        Property: antialias
+
+        Lets you get or set the antialiasing mode used by the Canvas.
+
+        Values:
+
+            DEFAULT - The default mode.
+            NONE - No antialiasing.
+            GRAY - Single color.
+            SUBPIXEL - Subpixel antialiasing.
+    */
+
+    string antialias
+        [[
+            switch( cairo_get_antialias( self ) )
+            {
+                case CAIRO_ANTIALIAS_DEFAULT: antialias = "DEFAULT"; break;
+                case CAIRO_ANTIALIAS_NONE: antialias = "NONE"; break;
+                case CAIRO_ANTIALIAS_GRAY: antialias = "GRAY"; break;
+                case CAIRO_ANTIALIAS_SUBPIXEL: antialias = "SUBPIXEL"; break;
+                default: antialias = "DEFAULT"; break;
+            }
+        ]]
+        [[
+            cairo_antialias_t a = cairo_get_antialias( self );
+
+            if ( ! strcmp( antialias , "DEFAULT" ) )
+            {
+                a = CAIRO_ANTIALIAS_DEFAULT;
+            }
+            else if ( ! strcmp( antialias , "NONE" ) )
+            {
+                a = CAIRO_ANTIALIAS_NONE;
+            }
+            else if ( ! strcmp( antialias , "GRAY" ) )
+            {
+                a = CAIRO_ANTIALIAS_GRAY;
+            }
+            else if ( ! strcmp( antialias , "SUBPIXEL" ) )
+            {
+                a = CAIRO_ANTIALIAS_SUBPIXEL;
+            }
+            else
+            {
+                luaL_error( L , "Invalid canvas antialias '%s'" , antialias );
+            }
+
+            cairo_set_antialias( self , a );
+        ]];
+
+    /*
+        Property: fill_rule
+
+        Get or set the rule used for fills.
+
+        Values:
+
+            EVEN_ODD - Even/odd.
+            WINDING - Winding.
+    */
+
+    string fill_rule
+        [[
+            switch( cairo_get_fill_rule( self ) )
+            {
+                case CAIRO_FILL_RULE_EVEN_ODD: fill_rule = "EVEN_ODD"; break;
+                default: fill_rule = "WINDING"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( fill_rule , "WINDING" ) )
+            {
+                cairo_set_fill_rule( self , CAIRO_FILL_RULE_WINDING );
+            }
+            else if ( ! strcmp( fill_rule , "EVEN_ODD" ) )
+            {
+                cairo_set_fill_rule( self , CAIRO_FILL_RULE_EVEN_ODD );
+            }
+            else
+            {
+                luaL_error( L , "Invalid fill_rule '%s'" , fill_rule );
+            }
+        ]];
+
+    /*
+        Property: filter
+
+        Get or set the filter used for resizing the source pattern.
+
+        Values:
+
+            FAST - Fast.
+            GOOD - Good.
+            BEST - Best.
+            NEAREST - Nearest.
+            BILINEAR - Bilinear.
+    */
+
+    string filter
+        [[
+            switch( cairo_pattern_get_filter( cairo_get_source( self  ) ) )
+            {
+                case CAIRO_FILTER_FAST: filter = "FAST"; break;
+                case CAIRO_FILTER_GOOD: filter = "GOOD"; break;
+                case CAIRO_FILTER_BEST: filter = "BEST"; break;
+                case CAIRO_FILTER_NEAREST: filter = "NEAREST"; break;
+                case CAIRO_FILTER_BILINEAR: filter = "BILINEAR"; break;
+                case CAIRO_FILTER_GAUSSIAN: filter = "GAUSSIAN"; break;
+                default: filter = ""; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( filter , "FAST" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_FAST );
+            }
+            else if ( ! strcmp( filter , "GOOD" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_GOOD );
+            }
+            else if ( ! strcmp( filter , "BEST" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_BEST );
+            }
+            else if ( ! strcmp( filter , "NEAREST" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_NEAREST );
+            }
+            else if ( ! strcmp( filter , "BILINEAR" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_BILINEAR );
+            }
+            else if ( ! strcmp( filter , "GAUSSIAN" ) )
+            {
+                cairo_pattern_set_filter( cairo_get_source( self ) , CAIRO_FILTER_GAUSSIAN );
+            }
+            else
+            {
+                luaL_error( L , "Invalid filter '%s'" , filter );
+            }
+        ]];
+
+    /*
+        Property: line_cap
+
+        Get or set the line cap.
+
+        Values:
+
+            ROUND - Round.
+            SQUARE - Square.
+            BUTT - Butt.
+    */
+
+    string line_cap
+        [[
+            switch( cairo_get_line_cap( self ) )
+            {
+                case CAIRO_LINE_CAP_ROUND: line_cap = "ROUND"; break;
+                case CAIRO_LINE_CAP_SQUARE: line_cap = "SQUARE"; break;
+                default: line_cap = "BUTT"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( line_cap , "BUTT" ) )
+            {
+                cairo_set_line_cap( self , CAIRO_LINE_CAP_BUTT );
+            }
+            else if ( ! strcmp( line_cap , "ROUND" ) )
+            {
+                cairo_set_line_cap( self , CAIRO_LINE_CAP_ROUND );
+            }
+            else if ( ! strcmp( line_cap , "SQUARE" ) )
+            {
+                cairo_set_line_cap( self , CAIRO_LINE_CAP_SQUARE );
+            }
+            else
+            {
+                luaL_error( L , "Invalid line_cap '%s'" , line_cap );
+            }
+        ]];
+
+    /*
+        Property: line_join
+
+        Get or set how lines are joined.
+
+        Values:
+
+            ROUND - Round.
+            BEVEL - Bevel.
+            MITER - Miter.
+    */
+
+    string line_join
+        [[
+            switch( cairo_get_line_join( self ) )
+            {
+                case CAIRO_LINE_JOIN_ROUND: line_join = "ROUND"; break;
+                case CAIRO_LINE_JOIN_BEVEL: line_join = "BEVEL"; break;
+                default: line_join = "MITER"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( line_join , "MITER" ) )
+            {
+                cairo_set_line_join( self , CAIRO_LINE_JOIN_MITER );
+            }
+            else if ( ! strcmp( line_join , "ROUND" ) )
+            {
+                cairo_set_line_join( self , CAIRO_LINE_JOIN_ROUND );
+            }
+            else if ( ! strcmp( line_join , "BEVEL" ) )
+            {
+                cairo_set_line_join( self , CAIRO_LINE_JOIN_BEVEL );
+            }
+            else
+            {
+                luaL_error( L , "Invalid line_join '%s'" , line_join );
+            }
+        ]];
+
+    /*
+        Property: line_width
+
+        Get or set the line width in pixels.
+    */
+
+    double line_width
+        [[
+            line_width = cairo_get_line_width( self );
+        ]]
+        [[
+            cairo_set_line_width( self , line_width );
+        ]];
+
+    /*
+        Property: miter_limit
+
+        The miter limit used when <line_join> is set to MITER.
+    */
+
+    double miter_limit
+        [[
+            miter_limit = cairo_get_miter_limit( self );
+        ]]
+        [[
+            cairo_set_miter_limit( self , miter_limit );
+        ]];
+
+    /*
+        Property: op
+
+        The operator used to combine the source pattern with the destination.
+        For details, see <this article at http://cairographics.org/operators/>.
+
+        Values:
+
+            CLEAR - Clear the destination.
+            SOURCE - Source.
+            OVER - Over.
+            IN - In.
+            OUT - Out.
+            ATOP - Atop.
+            DEST - Destination.
+            DEST_OVER - Destination over.
+            DEST_IN - Destination in.
+            DEST_OUT - Destination out.
+            DEST_ATOP - Destination atop.
+            XOR - XOR.
+            ADD - Add.
+            SATURATE - Saturate.
+    */
+
+    string op
+        [[
+            switch ( cairo_get_operator( self ) )
+            {
+                case CAIRO_OPERATOR_CLEAR:      op = "CLEAR"; break;
+                case CAIRO_OPERATOR_SOURCE:     op = "SOURCE"; break;
+                case CAIRO_OPERATOR_OVER:       op = "OVER"; break;
+                case CAIRO_OPERATOR_IN:         op = "IN"; break;
+                case CAIRO_OPERATOR_OUT:        op = "OUT"; break;
+                case CAIRO_OPERATOR_ATOP:       op = "ATOP"; break;
+                case CAIRO_OPERATOR_DEST:       op = "DEST"; break;
+                case CAIRO_OPERATOR_DEST_OVER:  op = "DEST_OVER"; break;
+                case CAIRO_OPERATOR_DEST_IN:    op = "DEST_IN"; break;
+                case CAIRO_OPERATOR_DEST_OUT:   op = "DEST_OUT"; break;
+                case CAIRO_OPERATOR_DEST_ATOP:  op = "DEST_ATOP"; break;
+                case CAIRO_OPERATOR_XOR:        op = "XOR"; break;
+                case CAIRO_OPERATOR_ADD:        op = "ADD"; break;
+                case CAIRO_OPERATOR_SATURATE:   op = "SATURATE"; break;
+                default:                        op = "SOURCE";
+            }
+        ]]
+        [[
+            static std::map< String , cairo_operator_t > op_map;
+
+            if ( op_map.empty() )
+            {
+                op_map[ "CLEAR" ] = CAIRO_OPERATOR_CLEAR;
+                op_map[ "SOURCE" ] = CAIRO_OPERATOR_SOURCE;
+                op_map[ "OVER" ] = CAIRO_OPERATOR_OVER;
+                op_map[ "IN" ] = CAIRO_OPERATOR_IN;
+                op_map[ "OUT" ] = CAIRO_OPERATOR_OUT;
+                op_map[ "ATOP" ] = CAIRO_OPERATOR_ATOP;
+                op_map[ "DEST" ] = CAIRO_OPERATOR_DEST;
+                op_map[ "DEST_OVER" ] = CAIRO_OPERATOR_DEST_OVER;
+                op_map[ "DEST_IN" ] = CAIRO_OPERATOR_DEST_IN;
+                op_map[ "DEST_OUT" ] = CAIRO_OPERATOR_DEST_OUT;
+                op_map[ "DEST_ATOP" ] = CAIRO_OPERATOR_DEST_ATOP;
+                op_map[ "XOR" ] = CAIRO_OPERATOR_XOR;
+                op_map[ "ADD" ] = CAIRO_OPERATOR_ADD;
+                op_map[ "SATURATE" ] = CAIRO_OPERATOR_SATURATE;
+            }
+
+            std::map< String, cairo_operator_t >::const_iterator it = op_map.find( op );
+
+            if ( it == op_map.end() )
+            {
+                luaL_error(L,"Invalid canvas op '%s'", op );
+            }
+
+            cairo_set_operator( self , it->second );
+        ]];
+
+    /*
+        Property: tolerance
+
+        Get or set the tolerance used when converting paths into trapezoids.
+    */
+
+    double tolerance
+        [[
+            tolerance = cairo_get_tolerance( self );
+        ]]
+        [[
+            cairo_set_tolerance( self , tolerance );
+        ]];
+
+    /*
+        Function: set_dash
+
+        Sets the dash pattern used for lines. The table dashes contains a list of
+        integers that define when dashes are ON and OFF.
+    */
+
+    set_dash( double offset , table dashes )
+        [[
+            std::vector< double > d;
+
+            lua_pushnil( L );
+
+            while( lua_next( L , dashes ) )
+            {
+                if ( lua_isnumber( L , -1 ) )
+                {
+                    d.push_back( lua_tonumber( L , -1 ) );
+                }
+
+                lua_pop( L , 1 );
+            }
+
+            cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+        ]];
+
+    /*
+        Function: save
+
+        Saves the current state of the Canvas.
+    */
+
+    save()
+        [[
+            cairo_save( self );
+        ]];
+
+    /*
+        Function: restore
+
+        Restores the state of the Canvas from a previously saved state.
+    */
+
+    restore()
+        [[
+            cairo_restore( self );
+        ]];
+
+    /*
+        Function: translate
+
+        Modifies the transformation matrix of the Canvas by translating the origin by tx and ty.
+
+    */
+
+    translate( double tx , double ty )
+        [[
+            cairo_translate( self , tx , ty );
+        ]];
+
+    /*
+        Function: rotate
+
+        Rotates the transformation matrix by the given angle (in degrees).
+    */
+
+    rotate( double angle )
+        [[
+            cairo_rotate( self , degrees_to_radians( angle ) );
+        ]];
+
+    /*
+        Function: scale
+
+        Scales the transformation matrix by the given ratios in x and y.
+    */
+
+
+    scale( double sx , double sy )
+        [[
+            cairo_scale( self , sx , sy );
+        ]];
+
+    /*
+        Function: push_group
+
+        Temporarily redirects drawing operations to a new pattern until you call pop_group.
+    */
+
+    push_group()
+        [[
+            cairo_push_group( self );
+        ]];
+
+    /*
+        Function: pop_group
+
+        Pops the current group and sets it as the source pattern.
+    */
+
+    pop_group()
+        [[
+            cairo_pop_group_to_source( self );
+        ]];
+
+    /*
+        Function: clip
+
+        Clips the Canvas to the current path.
+
+        Arguments:
+
+            preserve - If true, the path is preserved.
+    */
+
+    clip( bool preserve = false )
+        [[
+            if ( ! preserve )
+            {
+                cairo_clip( self );
+            }
+            else
+            {
+                cairo_clip_preserve( self );
+            }
+        ]];
+
+    /*
+        Function: reset_clip
+
+        Removes clipping.
+    */
+
+    reset_clip()
+        [[
+            cairo_reset_clip( self );
+        ]];
+
+    /*
+        Function: fill
+
+        Fills the current path with the current source.
+
+        Arguments:
+
+            preserve - If true, the path is preserved.
+    */
+
+    fill( bool preserve = false )
+        [[
+            if(preserve)
+            {
+                cairo_fill_preserve( self );
+            }
+            else
+            {
+                cairo_fill( self );
+            }
+        ]];
+
+    /*
+        Function: paint
+
+        Paints the current source inside the clipping region.
+
+        Arguments:
+
+            alpha - An alpha value (0-255) to apply to the source while painting.
+    */
+
+    paint( int alpha = 255 )
+        [[
+            if ( alpha == 255 )
+            {
+                cairo_paint( self );
+            }
+            else
+            {
+                cairo_paint_with_alpha( self , alpha / 255.0 );
+            }
+        ]];
+
+    /*
+        Function: stroke
+
+        Strokes the current path with the current source.
+
+        Arguments:
+
+            preserve - If true, the path is preserved.
+    */
+
+    stroke( bool preserve = false )
+        [[
+            if(preserve)
+            {
+                cairo_stroke_preserve( self );
+            }
+            else
+            {
+                cairo_stroke( self );
+            }
+        ]];
+
+
+    /*
+        Function: new_path
+
+        Starts a new path.
+    */
+
+    new_path()
+        [[
+            cairo_new_path( self );
+        ]];
+
+    /*
+        Function: new_sub_path
+
+        Starts a new sub-path.
+    */
+
+    new_sub_path()
+        [[
+            cairo_new_sub_path( self );
+        ]];
+
+    /*
+        Function: close_path
+
+        Closes the current path.
+    */
+
+    close_path()
+        [[
+            cairo_close_path( self );
+        ]];
+
+    /*
+        Function: arc
+
+        Adds an arc to the current path.
+
+        Arguments:
+
+            xc - The x coordinate for the center of the arc.
+            yc - The y coordinate for the center of the arc.
+            radius - The radius of the arc.
+            angle1 - The starting angle in degrees.
+            angle2 - The ending andle in degrees.
+
+        Example:
+
+        This can be used to draw circles. The code below will create a Canvas that is
+        100x100 and draw a red-filled circle in the middle of it.
+
+        (code)
+
+            local canvas = Canvas( 100 , 100 )
+            canvas:arc( 50 , 50 , 50 , 0 , 360 )
+            canvas:set_source_color( "FF0000" )
+            canvas:fill()
+            screen:add( canvas:Image() )
+
+        (end)
+
+    */
+
+    arc( double xc , double yc , double radius , double angle1 , double angle2 )
+        [[
+            cairo_arc( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
+        ]];
+
+    /*
+        Function: arc_negative
+
+        Adds an arc to the path, just like <arc>, but the arc goes in decreasing angles from angle1 to angle2.
+
+        Arguments:
+
+            xc - The x coordinate for the center of the arc.
+            yc - The y coordinate for the center of the arc.
+            radius - The radius of the arc.
+            angle1 - The starting angle in degrees.
+            angle2 - The ending andle in degrees.
+
+    */
+
+    arc_negative( double xc , double yc , double radius , double angle1 , double angle2 )
+        [[
+            cairo_arc_negative( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
+        ]];
+
+    /*
+        Function: curve_to
+
+        Adds a cubic Bezier spline to the current path from the current point to x3,y3 using x1,y1 and x2,y2 as the control points.
+        If relative is true, the coordinates are interpreted as relative to the current point.
+
+        Arguments:
+
+            x1,y1 - The coordinates of the first control point.
+            x2,y2 - The coordinates of the second control point.
+            x3,y3 - The coordinates of the end point.
+            relative - If true, all coordinates are relative to the current point.
+    */
+
+    curve_to( double x1 , double y1 , double x2 , double y2 , double x3, double y3 , bool relative = false )
+        [[
+            if ( relative )
+            {
+                cairo_rel_curve_to( self , x1 , y1 , x2 , y2 , x3 , y3 );
+            }
+            else
+            {
+                cairo_curve_to( self , x1 , y1 , x2 , y2 , x3 , y3 );
+            }
+        ]];
+
+    /*
+        Function: line_to
+
+        Adds a straight line to the current path, from the current point to x,y.
+
+        Arguments:
+
+            x,y - The coordinates for the end point of the line.
+            relative - If true, coordinates are relative to the current point.
+    */
+
+    line_to( double x , double y , bool relative = false )
+        [[
+            if ( relative )
+            {
+                cairo_rel_line_to( self , x , y );
+            }
+            else
+            {
+                cairo_line_to( self , x , y );
+            }
+        ]];
+
+    /*
+        Function: move_to
+
+        Moves the current point to x,y.
+
+        Arguments:
+
+            x,y - The coordinates for the new current point.
+            relative - If true, coordinates are relative to the current point.
+    */
+
+    move_to( double x , double y , bool relative = false )
+        [[
+            if ( relative )
+            {
+                cairo_rel_move_to( self , x , y );
+            }
+            else
+            {
+                cairo_move_to( self , x , y );
+            }
+        ]];
+
+    /*
+        Function: rectangle
+
+        Adds a rectangle to the current path.
+
+        Arguments:
+
+            x,y - Coordinates for the top left corner of the rectangle.
+            width,height - The width and height of the rectangle.
+    */
+
+    rectangle( double x , double y , double width , double height )
+        [[
+            cairo_rectangle( self , x , y , width , height );
+        ]];
+
+    /*
+        Function: round_rectangle
+
+        Adds a rectangle with rounded corners to the current path.
+
+        Arguments:
+
+            x,y - Coordinates for the top left corner of the rectangle.
+            w,h - The width and height of the rectangle.
+            r - The radius of the corners.
+    */
+
+    round_rectangle( double x , double y , double w , double h , double r )
+        [[
+            cairo_move_to(self,x+r,y);
+            cairo_line_to(self,x+w-r,y);
+            cairo_curve_to(self,x+w,y,x+w,y,x+w,y+r);
+            cairo_line_to(self,x+w,y+h-r);
+            cairo_curve_to(self,x+w,y+h,x+w,y+h,x+w-r,y+h);
+            cairo_line_to(self,x+r,y+h);
+            cairo_curve_to(self,x,y+h,x,y+h,x,y+h-r);
+            cairo_line_to(self,x,y+r);
+            cairo_curve_to(self,x,y,x,y,x+r,y);
+        ]];
+
+    /*
+        Function: text_path
+
+        Adds a text path to the current path.
+
+        Arguments:
+
+            font - A font describing the font family, style and point size.
+            text - The text.
+            markup - If true, the text can contain Pango markup.
+    */
+
+    text_path( string font , string text , bool markup = true )
+        [[
+            PangoLayout * layout = pango_cairo_create_layout( self );
+
+            if ( markup )
+            {
+                pango_layout_set_markup( layout , text , -1 );
+            }
+            else
+            {
+                pango_layout_set_text( layout , text , -1 );
+            }
+
+            PangoFontDescription * fd = pango_font_description_from_string( font );
+
+            pango_layout_set_font_description( layout , fd );
+
+            pango_font_description_free( fd );
+
+            pango_cairo_layout_path( self , layout );
+
+            g_object_unref( G_OBJECT( layout ) );
+        ]];
+
+    /*
+        Function: set_source_color
+
+        Sets the source pattern to a solid color.
+
+        Arguments:
+
+            color - This can be a color specified as a string with hex RGBA values or a table
+                    with 3 or 4 integer components for RGB and A.
+    */
+
+    set_source_color( ... )
+        [[
+            ClutterColor c;
+            ClutterUtil::to_clutter_color( L , 2 , & c );
+            cairo_set_source_rgba( self , c.red / 255.0 , c.green / 255.0 , c.blue / 255.0 , c.alpha / 255.0 );
+        ]];
+
+    /*
+        Function: set_source_linear_pattern
+
+        Sets the source pattern to a linear gradient. The linear gradient moves along the line defined by x1,y1 and x2,y2.
+
+        Arguments:
+
+            x1,y1 - Starting coordinates for the gradient.
+            x2,y2 - Ending coordinates for the gradient.
+    */
+
+    set_source_linear_pattern( double x1 , double y1 , double x2 , double y2 )
+        [[
+            cairo_pattern_t * p = cairo_pattern_create_linear( x1 , y1 , x2 , y2 );
+            cairo_set_source( self , p );
+            cairo_pattern_destroy( p );
+        ]];
+
+    /*
+        Function: set_source_radial_pattern
+
+        Sets the source to a radial pattern between two circles.
+
+        Arguments:
+
+            cx0,cy0 - The coordinates for the center of the first circle.
+            radius0 - The radius of the first circle.
+            cx1,cy1 - The coordinates for the center of the second circle.
+            radius1 - The radius of the second circle.
+    */
+
+    set_source_radial_pattern( double cx0 , double cy0 , double radius0 , double cx1 , double cy1 , double radius1 )
+        [[
+            cairo_pattern_t * p = cairo_pattern_create_radial( cx0 , cy0 , radius0 , cx1 , cy1 , radius1 );
+            cairo_set_source( self , p );
+            cairo_pattern_destroy( p );
+        ]];
+
+    /*
+        Function: add_source_pattern_color_stop
+
+        When the source is a linear or radial gradient, this function lets you add color stops to it. Each color
+        stop has an offset that varies from 0 (the start) to 1 (the end) and the color for the gradient at that
+        offset.
+
+        Arguments:
+
+            offset - A number between 0 and 1.
+            color - A color, either as a hex RGBA string or a table with 3 or 4 components.
+    */
+
+    add_source_pattern_color_stop( double offset , ... )
+        [[
+            if ( cairo_pattern_t * p = cairo_get_source( self ) )
+            {
+                ClutterColor c;
+                ClutterUtil::to_clutter_color( L , 3 , & c );
+                cairo_pattern_add_color_stop_rgba( p , offset , c.red / 255.0 , c.green / 255.0 , c.blue / 255.0 , c.alpha / 255.0 );
+            }
+        ]];
+
+    /*
+        Function: set_source_bitmap
+
+        Sets the source to a bitmap. This lets you use other images as brushes.
+
+        Arguments:
+
+            bitmap - A <Bitmap>.
+            x,y - Coordinates for the top left corner of the bitmap.
+    */
+
+    set_source_bitmap( Bitmap bitmap , double x = 0 , double y = 0 )
+        [[
+            if ( Image * image = Bitmap::get_image( L , bitmap ) )
+            {
+                if ( cairo_surface_t * surface = image->cairo_surface() )
+                {
+                    cairo_set_source_surface( self , surface , x , y );
+
+                    cairo_surface_destroy( surface );
+                }
+            }
+        ]];
+
+    /*
+        Function: Image
+
+        Creates a new <Image> using the current contents of the Canvas. After the
+        image is created, the Canvas is no longer needed.
+
+        Arguments:
+
+            props - A table of properties to pass to the Image constructor.
+
+        Returns:
+
+            image - A newly created Image.
+    */
+
+    Image Image( table props = 0 )
+        [[
+            lua_getglobal( L , "Image" );
+
+            if ( props )
+            {
+                lua_pushvalue( L , props );
+            }
+
+            lua_call( L , props ? 1 : 0 , 1 );
+
+            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+            cairo_surface_t * surface = cairo_get_target( self );
+
+            CoglHandle cogl_texture = cogl_texture_new_from_data (
+                    cairo_image_surface_get_width( surface),
+                    cairo_image_surface_get_height( surface ),
+                    COGL_TEXTURE_NONE,
+                    CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
+                    COGL_PIXEL_FORMAT_ANY,
+                    cairo_image_surface_get_stride( surface ),
+                    cairo_image_surface_get_data( surface ) );
+
+            clutter_texture_set_cogl_texture ( t , cogl_texture );
+            cogl_handle_unref( cogl_texture );
+        ]];
+
+    set_line_width( double line_width )
+        [[
+            // For compatibility with old canvas
+            cairo_set_line_width( self , line_width );
+        ]];
+
+    begin_painting()
+        [[
+            // Does nothing - only for compatibility with the old canvas
+        ]];
+
+    finish_painting()
+        [[
+            // Does nothing - only for compatibility with the old canvas
+        ]];
+}

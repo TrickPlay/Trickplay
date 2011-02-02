@@ -32,6 +32,7 @@ function( section )
      	["IMAGE".."\t\t\t".."[I]"]   = function() input_mode = S_SELECT editor.image()  end,
      	["RECTANGLE".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
      	["VIDEO".."\t\t\t"..""]   = function() input_mode = S_SELECT editor.video() end,
+     	["WIDGETS ...".."\t\t".."[W]"]   = function() input_mode = S_SELECT editor.widgets() end,
      	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
      	["DELETE".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
      	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
@@ -53,7 +54,8 @@ function( section )
         local f_text  = factory.make_text_menu_item( assets , ui.strings[ "TEXT".."\t\t\t".."[T]" ] )
         local f_image = factory.make_text_menu_item( assets , ui.strings[ "IMAGE".."\t\t\t".."[I]" ] )
         local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE".."\t\t".."[R]" ] )
-        local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t\t".."" ] )
+        local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t".."" ] )
+        local f_video = factory.make_text_menu_item( assets , ui.strings[ "WIDGETS ...".."\t\t".."[W]" ] )
         local f_clone = factory.make_text_menu_item( assets , ui.strings[ "CLONE".."\t\t\t".."[C]" ] )
         local f_delete = factory.make_text_menu_item( assets , ui.strings[ "DELETE".."\t\t     ".."[Del]" ] )
         local f_group = factory.make_text_menu_item( assets , ui.strings[ "GROUP".."\t\t\t".."[G]" ] )

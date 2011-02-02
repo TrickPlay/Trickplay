@@ -1,4 +1,4 @@
-package com.kennyhamandroid.trickplay;
+package com.trickplay.androidremote;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
