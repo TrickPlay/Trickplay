@@ -1,0 +1,264 @@
+Index: uprof-0.3/uprof/Makefile.am
+===================================================================
+--- uprof-0.3.orig/uprof/Makefile.am	2011-02-02 10:24:04.000000000 -0800
++++ uprof-0.3/uprof/Makefile.am	2011-02-02 10:28:44.795066991 -0800
+@@ -9,9 +9,7 @@
+ 	uprof-counter-result.h \
+ 	uprof-timer.h \
+ 	uprof-timer-result.h \
+-	uprof-report.h \
+-	uprof-dbus.h \
+-	uprof-report-proxy.h
++	uprof-report.h 
+ 
+ libuprof_@UPROF_MAJOR_VERSION@_@UPROF_MINOR_VERSION@_la_SOURCES = \
+ 	uprof-private.h \
+@@ -26,13 +24,8 @@
+ 	uprof-timer.c \
+ 	uprof-timer-result-private.h \
+ 	uprof-timer-result.c \
+-	uprof-service-private.h \
+-	uprof-service.c \
+ 	uprof-report-private.h \
+ 	uprof-report.c \
+-	uprof-dbus-private.h \
+-	uprof-dbus.c \
+-	uprof-report-proxy.c \
+ 	uprof-marshal.c \
+ 	$(public_h_source)
+ 
+@@ -53,26 +46,17 @@
+     	-I$(top_srcdir)/uprof \
+     	@EXTRA_CPPFLAGS@
+ 
+-if HAVE_NCURSES
++#if HAVE_NCURSES
+ 
+-bin_PROGRAMS = uprof-tool
+-uprof_tool_SOURCES = uprof-tool.c uprof-marshal.c
+-uprof_tool_LDFLAGS = @UPROF_DEP_LIBS@ -luprof-@UPROF_MAJOR_VERSION@.@UPROF_MINOR_VERSION@ -lncursesw
+-uprof_tool_CFLAGS = @EXTRA_CFLAGS@ @UPROF_DEP_CFLAGS@
+-uprof_tool_CPPFLAGS = @EXTRA_CPPFLAGS@
++#bin_PROGRAMS = uprof-tool
++#uprof_tool_SOURCES = uprof-tool.c uprof-marshal.c
++#uprof_tool_LDFLAGS = @UPROF_DEP_LIBS@ -luprof-@UPROF_MAJOR_VERSION@.@UPROF_MINOR_VERSION@ -lncursesw
++#uprof_tool_CFLAGS = @EXTRA_CFLAGS@ @UPROF_DEP_CFLAGS@
++#uprof_tool_CPPFLAGS = @EXTRA_CPPFLAGS@
+ 
+-endif
++#endif
+ 
+-uprof-service-glue.h: org.freedesktop.UProf.Service.xml Makefile.am
+-	$(AM_V_GEN)dbus-binding-tool --prefix=_uprof_service --mode=glib-server --output=uprof-service-glue.h $(srcdir)/org.freedesktop.UProf.Service.xml
+-
+-uprof-reportable-glue.h: org.freedesktop.UProf.Reportable.xml Makefile.am
+-	$(AM_V_GEN)dbus-binding-tool --prefix=_uprof_report --mode=glib-server --output=uprof-reportable-glue.h $(srcdir)/org.freedesktop.UProf.Reportable.xml
+-
+-#example-service-glue.h: example-service.xml Makefile.am
+-#	libtool --mode=execute dbus-binding-tool --prefix=some_object --mode=glib-server --output=example-service-glue.h $(srcdir)/example-service.xml
+-
+-BUILT_SOURCES = uprof-service-glue.h uprof-reportable-glue.h
++BUILT_SOURCES = 
+ CLEANFILES =
+ DISTCLEANFILES =
+ EXTRA_DIST =
+Index: uprof-0.3/uprof/uprof.c
+===================================================================
+--- uprof-0.3.orig/uprof/uprof.c	2011-02-02 10:24:04.000000000 -0800
++++ uprof-0.3/uprof/uprof.c	2011-02-02 10:26:18.355066997 -0800
+@@ -29,11 +29,15 @@
+ #include <uprof.h>
+ #include <uprof-private.h>
+ #include <uprof-report-private.h>
++/*
+ #include <uprof-service-private.h>
++*/
+ #include <uprof-marshal.h>
+ 
+ #include <glib.h>
++/*
+ #include <dbus/dbus-glib.h>
++*/
+ 
+ #include <stdio.h>
+ #include <stdint.h>
+@@ -78,7 +82,9 @@
+ 
+ GList *_uprof_all_contexts;
+ UProfContext *mainloop_context = NULL;
++/*
+ UProfService *service = NULL;
++*/
+ 
+ void
+ uprof_init_real (void)
+@@ -115,6 +121,7 @@
+ 
+   mainloop_context = uprof_context_new ("Mainloop context");
+ 
++/*
+   dbus_g_object_register_marshaller (_uprof_marshal_VOID__STRING_STRING,
+                                      G_TYPE_NONE,
+                                      G_TYPE_STRING,
+@@ -126,6 +133,7 @@
+ 
+   service = _uprof_service_new ();
+ 
++*/
+   initialized = TRUE;
+ }
+ 
+@@ -135,11 +143,13 @@
+   uprof_init_real ();
+ }
+ 
++/*
+ UProfService *
+ _uprof_get_service (void)
+ {
+   return service;
+ }
++*/
+ 
+ static gboolean
+ pre_parse_hook (GOptionContext  *context,
+Index: uprof-0.3/uprof/uprof.h
+===================================================================
+--- uprof-0.3.orig/uprof/uprof.h	2011-02-02 10:24:04.000000000 -0800
++++ uprof-0.3/uprof/uprof.h	2011-02-02 10:26:18.355066997 -0800
+@@ -27,9 +27,10 @@
+ #include <uprof-timer.h>
+ #include <uprof-timer-result.h>
+ #include <uprof-report.h>
++/*
+ #include <uprof-dbus.h>
+ #include <uprof-report-proxy.h>
+-
++*/
+ #include <glib.h>
+ 
+ #include <stdint.h>
+Index: uprof-0.3/uprof/uprof-private.h
+===================================================================
+--- uprof-0.3.orig/uprof/uprof-private.h	2011-02-02 10:24:04.000000000 -0800
++++ uprof-0.3/uprof/uprof-private.h	2011-02-02 10:26:18.355066997 -0800
+@@ -21,15 +21,19 @@
+ #ifndef _UPROF_PRIVATE_H_
+ #define _UPROF_PRIVATE_H_
+ 
++/*
+ #include "uprof-service-private.h"
++*/
+ #include <glib.h>
+ 
+ G_BEGIN_DECLS
+ 
+ extern GList *_uprof_all_contexts;
+ 
++/*
+ UProfService *
+ _uprof_get_service (void);
++*/
+ 
+ G_END_DECLS
+ 
+Index: uprof-0.3/uprof/uprof-report.c
+===================================================================
+--- uprof-0.3.orig/uprof/uprof-report.c	2011-02-02 10:24:04.000000000 -0800
++++ uprof-0.3/uprof/uprof-report.c	2011-02-02 10:29:45.435066997 -0800
+@@ -27,13 +27,19 @@
+ #include "uprof-timer-result.h"
+ #include "uprof-timer-result-private.h"
+ #include "uprof-context-private.h"
++/*
+ #include "uprof-service-private.h"
++*/
+ #include "uprof-report.h"
+ #include "uprof-report-private.h"
++/*
+ #include "uprof-reportable-glue.h"
+ #include "uprof-dbus-private.h"
++*/
+ 
++/*
+ #include <dbus/dbus-glib.h>
++*/
+ #include <glib/gprintf.h>
+ #include <string.h>
+ 
+@@ -149,6 +155,7 @@
+   return g_quark_from_static_string ("uprof-report-error-quark");
+ }
+ 
++/*
+ static void
+ _uprof_report_setup_dbus_reporter_object (UProfReport *report)
+ {
+@@ -173,11 +180,13 @@
+   service = _uprof_get_service ();
+   _uprof_service_add_report (service, report);
+ }
+-
++*/
+ void
+ uprof_report_constructed (GObject *object)
+ {
++ /*
+   _uprof_report_setup_dbus_reporter_object (UPROF_REPORT (object));
++*/
+ }
+ 
+ static void
+@@ -261,13 +270,16 @@
+ {
+   UProfReport *report = UPROF_REPORT (object);
+   UProfReportPrivate *priv = report->priv;
++/*
+   UProfService *service;
++*/
+   GList *contexts;
+   GList *l;
+ 
++ /*
+   service = _uprof_get_service ();
+   _uprof_service_remove_report (service, report);
+-
++*/
+   g_free (priv->name);
+ 
+   g_list_foreach (priv->statistics_groups, (GFunc)free_statistics_group, NULL);
+@@ -275,7 +287,7 @@
+   g_list_foreach (priv->counter_attributes, (GFunc)free_attribute, NULL);
+ 
+   contexts = g_list_copy (priv->top_contexts);
+-  for (l = priv->top_contexts; l; l = l->next)
++  for (l = contexts; l; l = l->next)
+     uprof_report_remove_context (report, l->data);
+   g_list_free (contexts);
+ 
+@@ -335,8 +347,10 @@
+ void
+ _uprof_report_register_dbus_type_info (void)
+ {
++/*
+   dbus_g_object_type_install_info (UPROF_TYPE_REPORT,
+                                    &dbus_glib__uprof_report_object_info);
++*/
+ }
+ 
+ UProfReport *
+Index: uprof-0.3/uprof/uprof-report-private.h
+===================================================================
+--- uprof-0.3.orig/uprof/uprof-report-private.h	2011-02-02 10:24:04.000000000 -0800
++++ uprof-0.3/uprof/uprof-report-private.h	2011-02-02 10:26:18.355066997 -0800
+@@ -21,8 +21,10 @@
+ #ifndef _UPROF_REPORT_PRIVATE_H_
+ #define _UPROF_REPORT_PRIVATE_H_
+ 
++/*
+ void
+ _uprof_report_register_dbus_type_info (void);
++*/
+ 
+ gboolean
+ _uprof_report_get_text_report (UProfReport *report,

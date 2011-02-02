@@ -1,1 +1,1 @@
-atomic.path
+include_gthread_in_gatomic.patch

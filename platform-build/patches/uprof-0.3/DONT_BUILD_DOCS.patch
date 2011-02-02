@@ -1,0 +1,36 @@
+Index: uprof-0.3/Makefile.am
+===================================================================
+--- uprof-0.3.orig/Makefile.am	2011-01-31 13:50:17.135066996 -0800
++++ uprof-0.3/Makefile.am	2011-01-31 13:50:37.745067010 -0800
+@@ -1,4 +1,4 @@
+-SUBDIRS = uprof tests doc
++SUBDIRS = uprof
+ #SUBDIRS += po
+ 
+ ACLOCAL_AMFLAGS = -I autotools/m4
+Index: uprof-0.3/configure.in
+===================================================================
+--- uprof-0.3.orig/configure.in	2011-01-31 13:47:26.635066995 -0800
++++ uprof-0.3/configure.in	2011-01-31 13:49:53.885066986 -0800
+@@ -135,8 +135,8 @@
+ dnl ================================================================
+ dnl Documentation stuff.
+ dnl ================================================================
+-GTK_DOC_CHECK(1.4)
+-GNOME_DOC_INIT
++dnl GTK_DOC_CHECK(1.4)
++dnl GNOME_DOC_INIT
+ 
+ 
+ dnl ================================================================
+@@ -193,10 +193,6 @@
+ autotools/shave-libtool
+ uprof/Makefile
+ tests/Makefile
+-doc/Makefile
+-doc/reference/Makefile
+-doc/reference/uprof/Makefile
+-doc/reference/uprof/version.xml
+ uprof-$UPROF_MAJOR_VERSION.$UPROF_MINOR_VERSION.pc:uprof.pc.in
+ dnl po/Makefile.in
+ )

@@ -1,0 +1,12 @@
+Index: glib-2.27.4/glib/gatomic.c
+===================================================================
+--- glib-2.27.4.orig/glib/gatomic.c	2011-01-28 16:58:24.645066992 -0800
++++ glib-2.27.4/glib/gatomic.c	2011-01-28 16:59:16.095066994 -0800
+@@ -28,6 +28,7 @@
+ #endif
+ 
+ #include "gatomic.h"
++#include "gthread.h"
+ #include "gthreadprivate.h"
+ 
+ /**
