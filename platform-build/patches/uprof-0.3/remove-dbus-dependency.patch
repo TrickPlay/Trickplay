@@ -1,0 +1,13 @@
+Index: uprof-0.3/configure.in
+===================================================================
+--- uprof-0.3.orig/configure.in	2011-02-02 12:07:53.838659499 -0800
++++ uprof-0.3/configure.in	2011-02-02 12:08:09.669372126 -0800
+@@ -142,7 +142,7 @@
+ dnl ================================================================
+ dnl Check for dependency packages.
+ dnl ================================================================
+-UPROF_PKG_REQUIRES="glib-2.0 gobject-2.0 dbus-glib-1"
++UPROF_PKG_REQUIRES="glib-2.0 gobject-2.0"
+ AC_SUBST(UPROF_PKG_REQUIRES)
+ PKG_CHECK_MODULES(UPROF_DEP, [$UPROF_PKG_REQUIRES])
+ 
