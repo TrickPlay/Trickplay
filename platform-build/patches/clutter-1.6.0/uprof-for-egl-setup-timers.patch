@@ -1,0 +1,26 @@
+Index: clutter-1.6.0/clutter/egl/clutter-stage-egl.c
+===================================================================
+--- clutter-1.6.0.orig/clutter/egl/clutter-stage-egl.c	2011-02-02 10:56:42.865066999 -0800
++++ clutter-1.6.0/clutter/egl/clutter-stage-egl.c	2011-02-02 10:57:49.725066999 -0800
+@@ -346,6 +346,21 @@
+   EGLSurface          egl_surface;
+   gboolean            may_use_clipped_redraw;
+   gboolean            use_clipped_redraw;
++  CLUTTER_STATIC_TIMER (painting_timer,
++                        "Redrawing", /* parent */
++                        "Painting actors",
++                        "The time spent painting actors",
++                        0 /* no application private data */);
++  CLUTTER_STATIC_TIMER (swapbuffers_timer,
++                        "Redrawing", /* parent */
++                        "glXSwapBuffers",
++                        "The time spent blocked by glXSwapBuffers",
++                        0 /* no application private data */);
++  CLUTTER_STATIC_TIMER (blit_sub_buffer_timer,
++                        "Redrawing", /* parent */
++                        "glx_blit_sub_buffer",
++                        "The time spent in _glx_blit_sub_buffer",
++                        0 /* no application private data */);
+ #ifdef COGL_HAS_X11_SUPPORT
+   ClutterStageX11    *stage_x11 = CLUTTER_STAGE_X11 (stage_egl);
+ 
