@@ -45,6 +45,7 @@ INCLUDE_MODULE	+= avahi-common
 INCLUDE_MODULE	+= avahi-core
 INCLUDE_MODULE	+= avahi-glib
 INCLUDE_MODULE	+= cairo
+INCLUDE_MODULE	+= cairo-gobject
 INCLUDE_MODULE	+= cares
 INCLUDE_MODULE	+= clutter-eglnative-1.0
 INCLUDE_MODULE	+= crypto

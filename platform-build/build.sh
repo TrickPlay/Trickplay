@@ -61,12 +61,12 @@ fi
 #------------------------------------------------------------------------------
 # glib
 
-GLIB_MV="2.22"
-GLIB_V="${GLIB_MV}.4"
+GLIB_MV="2.26"
+GLIB_V="${GLIB_MV}.1"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.gz"
 GLIB_DIST="glib-${GLIB_V}.tar.gz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared ${GLIB_ICONV} --with-pic && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared ${GLIB_ICONV} --disable-fam --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # sqlite
@@ -160,7 +160,7 @@ FONTCONFIG_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD -
 #------------------------------------------------------------------------------
 # pixman
 
-PIXMAN_V="0.17.6"
+PIXMAN_V="0.21.2"
 PIXMAN_URL="http://cgit.freedesktop.org/pixman/snapshot/pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_DIST="pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_SOURCE="pixman-${PIXMAN_V}"
@@ -178,7 +178,7 @@ PNG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable
 #------------------------------------------------------------------------------
 # cairo
 
-CAIRO_V="1.8.10"
+CAIRO_V="1.10.2"
 CAIRO_URL="http://cairographics.org/releases/cairo-${CAIRO_V}.tar.gz"
 CAIRO_DIST="cairo-${CAIRO_V}.tar.gz"
 CAIRO_SOURCE="cairo-${CAIRO_V}"
@@ -225,8 +225,8 @@ GIF_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable
 #------------------------------------------------------------------------------
 # json
 
-JSON_MV="0.10"
-JSON_V="${JSON_MV}.4"
+JSON_MV="0.12"
+JSON_V="${JSON_MV}.2"
 JSON_URL="http://ftp.gnome.org/pub/GNOME/sources/json-glib/${JSON_MV}/json-glib-${JSON_V}.tar.gz"
 JSON_DIST="json-glib-${JSON_V}.tar.gz"
 JSON_SOURCE="json-glib-${JSON_V}"
@@ -246,12 +246,13 @@ ATK_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable
 #------------------------------------------------------------------------------
 # clutter
 
-CLUTTER_MV="1.4"
-CLUTTER_V="${CLUTTER_MV}.2"
+CLUTTER_MV="1.6"
+CLUTTER_V="${CLUTTER_MV}.0"
 CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
 CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no && make ${NUM_MAKE_JOBS} install" 
+#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/lib*.a ./clutter/.libs/lib*.la $PREFIX/lib/" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG"
 
 #------------------------------------------------------------------------------
@@ -290,7 +291,7 @@ UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./co
 
 #------------------------------------------------------------------------------
 
-ALL="GLIB SQLITE OPENSSL ZLIB CARES CURL BZIP EXPAT FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK CLUTTER AVAHI UPNP URI UUID"
+ALL="ZLIB GLIB SQLITE OPENSSL CARES CURL BZIP EXPAT FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK CLUTTER AVAHI UPNP URI UUID"
 
 #-----------------------------------------------------------------------------
 
@@ -461,7 +462,7 @@ then
     echo "================================================================="
 
 
-    ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o ${PREFIX}/lib/libGLES2.so
+    ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o ${PREFIX}/lib/libGLES2.so    
 fi
 
 #------------------------------------------------------------------------------
@@ -543,6 +544,7 @@ ${CXX} -o ${HERE}/test \
 	-lixml \
 	-lthreadutil \
 	-lGLES2 \
+	-lcairo-gobject \
 	${THERE}/test/main.cpp \
 	-Wl,--end-group 
 	
