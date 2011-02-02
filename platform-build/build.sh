@@ -61,8 +61,8 @@ fi
 #------------------------------------------------------------------------------
 # glib
 
-GLIB_MV="2.27"
-GLIB_V="${GLIB_MV}.4"
+GLIB_MV="2.26"
+GLIB_V="${GLIB_MV}.1"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.gz"
 GLIB_DIST="glib-${GLIB_V}.tar.gz"
 GLIB_SOURCE="glib-${GLIB_V}"
