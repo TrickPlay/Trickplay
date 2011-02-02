@@ -11,6 +11,7 @@ local skin_list = { ["default"] = {
 				   ["buttonpicker_right_un"] = "assets/right.png",
         			   ["buttonpicker_right_sel"] = "assets/rightfocus.png",
 				   ["checkbox_sel"] = "assets/checkmark.png", 
+				   ["loading_dot"]  = nil
 				  },
 
 		    ["skin_type1"] = { 
@@ -33,7 +34,7 @@ local skin_list = { ["default"] = {
 				   ["radiobutton_sel"] = "", 
 				   ["checkbox"] = "", 
 				   ["checkbox_sel"] = "assets/checkmark.png", 
-				   ["loadingdot"] = "", 
+				   ["loadingdot"] = "assets/checkmark.png", 
 				  },
  
 		    ["skin_type2"] = { 
@@ -56,7 +57,7 @@ local skin_list = { ["default"] = {
 				   ["radiobutton_sel"] = "", 
 				   ["checkbox"] = "", 
 				   ["checkbox_sel"] = "assets/checkmark.png", 
-				   ["loadingdot"] = "", 
+				   ["loadingdot"] = "assets/left.png", 
 				  },
 
 		  }
@@ -634,6 +635,11 @@ function widget.button(table)
 
     local create_button = function() 
     
+
+	if(p.skin ~= "canvas") then 
+		p.button_image = assets(skin_list[p.skin]["button"])
+		p.focus_image  = assets(skin_list[p.skin]["button_focus"])
+	end
         b_group:clear()
     
         ring = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
@@ -783,6 +789,11 @@ function widget.textField(table)
 
     local create_textInputField= function()
  	
+
+	if(p.skin ~= "canvas") then 
+             p.box_image   = assets(skin_list[p.skin]["textinput"])
+	     p.focus_image = assets(skin_list[p.skin]["textinput_focus"])
+	end 
 
     	t_group:clear()
 
@@ -1660,7 +1671,7 @@ function widget.checkBox(table)
         for k, v in pairs (table) do
 	    p[k] = v 
         end 
-    end 
+    end
 
  --the umbrella Group
     local check_img
@@ -1763,10 +1774,11 @@ Return:
 	loading_dots_group - group containing the loading dots
 ]]
  
---[[
+---[[
 function widget.loadingdots(t) 
     --default parameters
     local p = {
+        skin          = "default",
         dot_radius    = 5,
         dot_color     = "#FFFFFF",
         num_dots      = 12,
@@ -1808,39 +1820,59 @@ function widget.loadingdots(t)
     
     --the Canvas used to create the dots
     local make_dot = function(x,y)
-          local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius},x=x,y=y}
+          local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius}}
           dot:begin_painting()
           dot:arc(p.dot_radius,p.dot_radius,p.dot_radius,0,360)
           dot:set_source_color(p.dot_color)
           dot:fill(true)
           dot:finish_painting()
+
+          if dot.Image then
+              dot = dot:Image()
+          end
           dot.anchor_point ={p.dot_radius,p.dot_radius}
           dot.name         = "Loading Dot"
+          dot.position     = {x,y}
 	  
+
           return dot
     end
-    
+    local img
     --function used to remake the dots upon a parameter change
     create_dots = function()
         l_dots:clear()
         dots = {}
+	
         local rad
         
         for i = 1, p.num_dots do
             --they're radial position
             rad = (2*math.pi)/(p.num_dots) * i
             print(p.clone_src)
-            if p.clone_src == nil then
+            if p.clone_src == nil and skin_list[p.skin]["loadingdot"] == nil then
                 print(1)
                 dots[i] = make_dot(
                     math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
                     math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
                 )
+	    elseif skin_list[p.skin]["loadingdot"] ~= nil then
+		img = assets(skin_list[p.skin]["loadingdot"])
+		img.anchor_point = {
+                        img.w/2,
+                        img.h/2
+                    }
+		img.position = {
+
+                        math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
+                        math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                    }
+		dots[i] = img
             else
                 print(2)
                 dots[i] = Clone{
                     source = p.clone_src,
                     position = {
+
                         math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
                         math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
                     },
@@ -1900,7 +1932,7 @@ function widget.loadingdots(t)
     return l_dots
 end
 
-]]
+--]]
 
 
 
@@ -1922,7 +1954,7 @@ Return:
 	loading_bar_group - group containing the loading bar
 ]]
 
---[[
+---[[
 function widget.loadingbar(t)
 
     --default parameters
@@ -2029,7 +2061,12 @@ function widget.loadingbar(t)
 		c_fill:add_source_pattern_color_stop( 1 , p.fill_lower_color )
 		c_fill:fill(true)
 		c_fill:finish_painting()
-		
+		if c_shell.Image then
+			c_shell = c_shell:Image()
+		end
+		if c_fill.Image then
+			c_fill = c_fill:Image()
+		end
 		l_bar_group:add(c_shell,c_fill)
 	end
     
@@ -2054,7 +2091,7 @@ function widget.loadingbar(t)
 	return l_bar_group
 end
 
-]]
+--]]
 -----------------------------------------
 -- List Scroll Button (or Arrow Image)   
 -----------------------------------------
