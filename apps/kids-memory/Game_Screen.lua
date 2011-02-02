@@ -106,71 +106,8 @@ end
 function game_fade_out()
     game_screen:hide()
 end
---[[
-local focus_tl = Timeline{duration=200}
-local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
 
-local function anim_focus(targ_x,targ_y)
-    if focus_tl.is_playing then
-        focus_tl:stop()
-        focus_tl:on_completed()
-    end
-    
-    
-    local curr_x = focus.x
-    local curr_y = focus.y
-    function focus_tl:on_new_frame(_,p)
-        local p = ani_mode.alpha
-        focus.x = curr_x + (targ_x-curr_x)*p
-        focus.y = curr_y + (targ_y-curr_y)*p
-    end
-    function focus_tl:on_completed()
-        
-        focus.x = targ_x
-        focus.y = targ_y
-        
-    end
 
-    focus_tl:start()
-end
-local function corner_get_focus()
-    if focus_tl.is_playing then
-        focus_tl:stop()
-        focus_tl:on_completed()
-    end
-    
-    function focus_tl:on_new_frame(_,p)
-        back_focus.opacity = 255*p
-        focus.opacity = 255*(1-p)
-    end
-    function focus_tl:on_completed()
-        
-        focus.opacity = 0
-        back_focus.opacity = 255
-        
-    end
-    focus_tl:start()
-end
-local function corner_lose_focus()
-    if focus_tl.is_playing then
-        focus_tl:stop()
-        focus_tl:on_completed()
-        
-    end
-    
-    function focus_tl:on_new_frame(_,p)
-        back_focus.opacity = 255*(1-p)
-        focus.opacity = 255*(p)
-    end
-    function focus_tl:on_completed()
-        
-        focus.opacity = 255
-        back_focus.opacity = 0
-        --focus_tl = nil
-    end
-    focus_tl:start()
-end
---]]
 local anim_focus = {
     duration = {200},
     mode   = {"EASE_OUT_CIRC"},
