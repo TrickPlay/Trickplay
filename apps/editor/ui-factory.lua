@@ -97,6 +97,10 @@ function factory.make_dropdown( size , color )
 
     c:finish_painting()
     
+    if c.Image then
+       c= c:Image()
+    end
+
     return c
     
 end
@@ -167,6 +171,9 @@ function factory.make_text_menu_item( assets , caption )
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
+    	if ring.Image then
+       		ring= ring:Image()
+    	end
         return ring
     end
 
@@ -183,6 +190,9 @@ function factory.make_text_menu_item( assets , caption )
     	line:stroke (true)
     	line:fill (true)
         line:finish_painting()
+    	if line.Image then
+       		line= line:Image()
+    	end
         return line
     end 
     local icon 
@@ -346,6 +356,10 @@ function factory.make_text_side_selector( assets , caption )
         arrow:line_to( ARROW_WIDTH , ARROW_HEIGHT )
         arrow:fill()
         arrow:finish_painting()
+	if arrow.Image then
+  	 arrow= arrow:Image()
+        end
+
         return arrow
     end
     
@@ -514,7 +528,7 @@ local color_map =
         [ "Group" ] = function()  size = {500, 670} color = {25,25,25,100}   return size, color end,
         [ "Video" ] = function()  size = {500, 575} color = {25,25,25,100}   return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
-        [ "widgets" ] = function() size = {500, 570} color = {25,25,25,100}  return size, color end,
+        [ "widgets" ] = function() size = {500, 535} color = {25,25,25,100}  return size, color end,
         --[ "widgets" ] = function() size = {500, 470} color = "472446" return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
@@ -630,6 +644,9 @@ function factory.make_popup_bg(o_type, file_list_size)
          c:finish_painting()
          c.position = {0,0}
 
+    if c.Image then
+  	 c= c:Image()
+    end
     return c
 end 
 
@@ -661,6 +678,83 @@ function factory.make_msgw_button_item( assets , caption)
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
+        if ring.Image then
+  	    ring= ring:Image()
+    	end
+        return ring
+    end
+    
+    local text = Text{ text = caption }:set( STYLE )
+    
+    text.name = "caption"
+
+    text.reactive = true
+
+    local ring = make_ring ()
+    
+    local focus = assets( "assets/button-focus.png" )
+
+
+    if ring.Image then
+  	 ring= ring:Image()
+    end
+
+    local group = Group
+    {
+        size = { WIDTH , HEIGHT },
+        children =
+        {
+            ring:set{ position = { 0 , 0 } },
+            focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
+            text:set{ position = { (WIDTH  -text.w)/2, (HEIGHT - text.h)/2} }
+        }
+    }
+    
+    
+
+    function group.extra.on_focus_in()
+        focus.opacity = 255
+	group:grab_key_focus(group)
+	--print (caption, "button group grab key focus")
+    end
+    
+    function group.extra.on_focus_out()
+        focus.opacity = 0
+    end
+	
+--group.name = name -- (savefile, cancel, yes, no, openfile, reopenfile, open_imagefile, reopenImg, open_videofile)
+
+    return group, text
+
+end
+
+function factory.make_msgw_widget_item( assets , caption)
+
+    local STYLE         = { font = "DejaVu Sans 30px" , color = "FFFFFF" }
+    local PADDING_X     = 7 
+    local PADDING_Y     = 7
+    local WIDTH         = 230
+    local HEIGHT        = 60 
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = "FFFFFF"
+    local BORDER_RADIUS = 12
+    
+    local function make_ring()
+        local ring = Canvas{ size = { WIDTH , HEIGHT } }
+        ring:begin_painting()
+        ring:set_source_color( BORDER_COLOR )
+        ring:round_rectangle(
+            PADDING_X + BORDER_WIDTH / 2,
+            PADDING_Y + BORDER_WIDTH / 2,
+            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
+            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
+            BORDER_RADIUS )
+        ring:stroke()
+        ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
+
         return ring
     end
     
@@ -703,6 +797,7 @@ function factory.make_msgw_button_item( assets , caption)
 
 end
 
+
 -------------------------------------------------------------------------------
 -- Makes a scroll bar item
 -------------------------------------------------------------------------------
@@ -729,6 +824,10 @@ function factory.make_y_scroll_box()
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
+
         return ring
     end
     ring = make_ring ()
@@ -759,6 +858,9 @@ function factory.make_x_scroll_box()
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
     end
     ring = make_ring ()
@@ -789,6 +891,9 @@ function factory.make_msgw_scroll_box()
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
     end
     ring = make_ring ()
@@ -820,6 +925,9 @@ function factory.make_x_scroll_bar(canvas_sz)
             BORDER_RADIUS )
 	ring:fill()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
     end
 
@@ -857,6 +965,9 @@ function factory.make_y_scroll_bar(canvas_sz)
             BORDER_RADIUS )
 	ring:fill()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
     end
 
@@ -892,6 +1003,9 @@ function factory.make_msgw_scroll_bar(file_list_size)
             BORDER_RADIUS )
 	ring:fill()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
     end
 
@@ -962,6 +1076,9 @@ function factory.make_xbox()
 
     c:finish_painting()
 
+    if c.Image then
+  	 c= c:Image()
+    end
     return c
 end 
 
@@ -976,6 +1093,10 @@ function factory.draw_focus_ring()
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
+
         return ring
 end
 
@@ -987,6 +1108,9 @@ function factory.draw_small_focus_ring()
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
 end
 
@@ -1007,6 +1131,9 @@ function factory.draw_tiny_focus_ring()
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
 end
 
@@ -1021,6 +1148,9 @@ function factory.draw_ring()
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
 end
 
@@ -1032,6 +1162,9 @@ function factory.draw_small_ring()
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
 end
 
@@ -1044,6 +1177,9 @@ function factory.draw_tiny_ring()
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
 end
 
@@ -1067,6 +1203,9 @@ function factory.draw_line()
     	line:stroke (true)
     	line:fill (true)
         line:finish_painting()
+	if line.Image then
+  	 line= line:Image()
+        end
         return line
 end 
 
@@ -1111,6 +1250,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
+
         return ring
     end
 
@@ -1126,6 +1269,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
+	if ring.Image then
+  	 ring= ring:Image()
+        end
         return ring
     end
 
@@ -1140,6 +1286,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     	line:stroke (true)
     	line:fill (true)
         line:finish_painting()
+	if line.Image then
+  	 line= line:Image()
+        end
         return line
     end 
 

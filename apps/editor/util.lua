@@ -408,8 +408,8 @@ function toboolean(s) if (s == "true") then return true else return false end en
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
              {"z", math.floor(v.z), "z"},
-             {"bw", math.floor(v.bw), "bw"},
-             {"bh", math.floor(v.bh), "bh"},
+             {"bw", math.floor(v.bwidth), "bw"},
+             {"bh", math.floor(v.bheight), "bh"},
              {"line",""}
       }
 
@@ -588,10 +588,25 @@ function toboolean(s) if (s == "true") then return true else return false end en
       return attr_t
 end
 
-function itemTostring(v)
+function itemTostring(v, d_list, t_list)
     local itm_str = ""
+    local itm_str2 = ""
     local indent       = "\n\t\t"
     local b_indent       = "\n\t"
+
+     
+    local function is_in_list(item, list)
+	if list == nil then 
+	    return false
+	end 
+
+	for i, j in pairs (list) do
+	     if item == j then 
+		return true
+	     end 
+	end 
+	return false
+    end 
     
     if(v.type == "Rectangle") then
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
@@ -636,7 +651,16 @@ function itemTostring(v)
          "wrap="..tostring(v.wrap)..","..indent..
          "wrap_mode=\""..v.wrap_mode.."\","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Clone") then
-	itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+	 src = v.source 
+	 if is_in_list(src.name, d_list) == false then 
+	     if(t_list == nil) then 
+		t_list = {src.name}
+	     else 
+		table.insert(t_list, src.name) 
+	     end
+         end 
+
+	 itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
          "size={"..table.concat(v.size,",").."},"..indent..
          "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
@@ -647,15 +671,41 @@ function itemTostring(v)
          "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
          "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
          "opacity = "..v.opacity..b_indent.."}\n\n"
+
+
+	if(d_list == nil) then  
+		d_list = {v.name}
+    	else 
+        	table.insert(d_list, v.name) 
+    	end 
+
+        return itm_str, d_list, t_list
+
     elseif (v.type == "Group") then
 	local i = 1
         local children = ""
+	local org_d_list = {}
+	if(d_list ~= nil) then 
+	for i,j in pairs (d_list) do 
+		org_d_list[i] = j 
+	end 
+	end 
+
         for e in values(v.children) do
-		itm_str = itm_str..itemTostring(e)
+		result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
+		if(result ~= nil) then 
+		    itm_str = itm_str..result
+		end
+		if(result2 ~= nil) then 
+		    itm_str2 = result2..itm_str2
+		end 
+		
+		d_list = done_list
+		t_list = todo_list
 		if i == 1 then
-			children = children..e.name
+		     children = children..e.name
 		else 
-			children = children..","..e.name
+		     children = children..","..e.name
 		end
 		i = i + 1
         end 
@@ -693,7 +743,18 @@ function itemTostring(v)
 	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
 
     end
-    return itm_str
+
+    if(d_list == nil) then  
+	d_list = {v.name}
+    else 
+        table.insert(d_list, v.name) 
+    end 
+
+    if is_in_list(v.name, t_list) == true  then 
+	return "", d_list, t_list, itm_str
+    end 
+
+    return itm_str, d_list, t_list, itm_str2
 end
 
 local msgw_focus = ""
@@ -734,6 +795,7 @@ local function create_small_input_box(txt)
      	local box_g = Group {}
      	local box = factory.draw_small_ring()
      	local box_focus = factory.draw_small_focus_ring()
+
 	box_g.name = "input_b"
         box.position  = {0,0}
         box.reactive = true
@@ -851,6 +913,10 @@ function printMsgWindow(txt, name)
         end 
      end 
      local msgw_bg = factory.make_popup_bg("msgw", txt_sz)
+     if msgw_bg.Image then
+  	 msgw_bg= msgw_bg:Image()
+     end
+
      msgw:add(msgw_bg)
      input_mode = S_POPUP
      msgw:add(Text{name= name, text = txt, font= "DejaVu Sans 32px",
@@ -1233,6 +1299,7 @@ function inputMsgWindow_openfile(input_text)
                file_not_exists = false
           end
      end
+
      if (file_not_exists) then
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen) 
@@ -1427,16 +1494,17 @@ end
 
 local input_purpose     = ""
 
---[[
 local function copy_widget_imgs ()
-	local source_files = readdir("assets/widgets")
+	local source_files = editor_lb:readdir("assets/")
 	for i, j in pairs(source_files) do 
-	     source_file = "assets/widgets"..j 
-	     dest_file = CURRENT_DIR..j 
-	     file_copy(source_file, dest_file) 
+	     source_file = "assets/"..j 
+	     dest_file = CURRENT_DIR.."/assets/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
 	end 
 end 
-]]
+
 local function set_project_path ()
 	if(selected_prj == "" and input_t.text ~= "") then
 	     project = input_t.text 
@@ -1451,7 +1519,13 @@ local function set_project_path ()
              editor_lb:change_app_path( app_path )
 	     CURRENT_DIR = app_path
         end
-	--copy_widget_imgs()
+
+        asset_path = editor_lb:build_path( app_path, "assets" )
+        editor_lb:mkdir( asset_path ) 
+        --widget_path = editor_lb:build_path( asset_path, "widgets")
+        --editor_lb:mkdir( widget_path ) 
+
+	copy_widget_imgs()
 	cleanMsgWindow()
         screen:grab_key_focus(screen)
 end 
