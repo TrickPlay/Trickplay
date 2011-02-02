@@ -9,6 +9,8 @@
 #include "json.h"
 #include "common.h"
 
+static Debug_OFF ai( "APP-IMAGE" );
+
 //-----------------------------------------------------------------------------
 #define APP_TABLE_NAME          "app"
 #define APP_FIELD_ID            "id"
@@ -32,7 +34,6 @@ extern int luaopen_clutter_rectangle( lua_State * L );
 extern int luaopen_clutter_clone( lua_State * L );
 extern int luaopen_clutter_group( lua_State * L );
 extern int luaopen_clutter_image( lua_State * L );
-extern int luaopen_clutter_canvas( lua_State * L );
 
 extern int luaopen_clutter_timeline( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
@@ -60,6 +61,12 @@ extern int luaopen_uri( lua_State * L );
 extern int luaopen_physics_module( lua_State * L );
 extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
+extern int luaopen_bitmap( lua_State * L );
+extern int luaopen_canvas( lua_State * L );
+
+#ifndef TP_PRODUCTION
+extern int luaopen_devtools( lua_State * L );
+#endif
 
 #ifdef TP_UPNP_CLIENT
 extern int luaopen_upnp( lua_State * L );
@@ -748,7 +755,6 @@ int App::run( const StringSet & allowed_names )
     luaopen_clutter_clone( L );
     luaopen_clutter_group( L );
     luaopen_clutter_image( L );
-    luaopen_clutter_canvas( L );
     luaopen_clutter_timeline( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
@@ -772,6 +778,12 @@ int App::run( const StringSet & allowed_names )
     luaopen_physics_module( L );
     luaopen_editor( L );
     luaopen_trickplay( L );
+    luaopen_bitmap( L );
+    luaopen_canvas( L );
+
+#ifndef TP_PRODUCTION
+    luaopen_devtools( L );
+#endif
 
 #ifdef TP_UPNP_CLIENT
     luaopen_upnp( L );
@@ -834,7 +846,11 @@ int App::run( const StringSet & allowed_names )
 
 App::~App()
 {
+#ifndef TP_PRODUCTION
+
     debugger.uninstall();
+
+#endif
 
     context->remove_notification_handler( "*", forward_notification_handler, this );
     context->remove_notification_handler( TP_NOTIFICATION_PROFILE_CHANGE, profile_notification_handler, this );
@@ -1450,3 +1466,160 @@ gboolean App::animate_out_callback( gpointer s )
 }
 
 //-----------------------------------------------------------------------------
+
+
+Image * App::load_image( const gchar * source )
+{
+    ai( "LOADING SYNC '%s'" , source );
+
+    if ( ! source )
+    {
+        return 0;
+    }
+
+    bool is_uri;
+
+    char * path = normalize_path( source , & is_uri );
+
+    if ( ! path )
+    {
+        ai( "  INVALID PATH" );
+        return 0;
+    }
+
+    FreeLater free_later( path );
+
+    Image * image = 0;
+
+    if ( is_uri )
+    {
+        ai( "  STARTING REQUEST" );
+
+        Network::Request request( get_user_agent(), path );
+
+        Network::Response response = get_network()->perform_request( request, get_cookie_jar() );
+
+        if ( ! response.failed && response.body->len > 0 )
+        {
+            ai( "  DECODING" );
+
+            image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+        }
+        else
+        {
+            ai( "  REQUEST FAILED" );
+        }
+    }
+    else
+    {
+        ai( "  PATH IS '%s'" , path );
+        ai( "  DECODING" );
+
+        image = Image::decode( path );
+    }
+
+    ai( "  %s" , image ? "SUCCEEDED" : "FAILED" );
+
+    return image;
+}
+
+class ImageResponseClosure
+{
+public:
+
+    ImageResponseClosure( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        callback( _callback ),
+        user( _user ),
+        destroy_notify( _destroy_notify )
+    {
+    }
+
+    static void response_callback( const Network::Response & response , gpointer me )
+    {
+        ImageResponseClosure * self = ( ImageResponseClosure * ) me;
+
+        if ( response.failed || response.body->len == 0 )
+        {
+            ai( "  REQUEST FAILED" );
+
+            self->callback( 0 , self->user );
+        }
+        else
+        {
+            ai( "  STARTING DECODE FOM BUFFER" );
+
+            Image::decode_async( response.body ,
+                    response.get_header( "Content-Type" ),
+                    self->callback,
+                    self->user,
+                    self->destroy_notify );
+
+            self->destroy_notify = 0;
+        }
+    }
+
+    static void destroy( gpointer me )
+    {
+        ImageResponseClosure * self = ( ImageResponseClosure * ) me;
+
+        if ( self->destroy_notify )
+        {
+            self->destroy_notify( self->user );
+        }
+
+        delete self;
+    }
+
+private:
+
+
+    Image::DecodeAsyncCallback  callback;
+    gpointer                    user;
+    GDestroyNotify              destroy_notify;
+};
+
+bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+{
+    ai( "LOADING ASYNC '%s'" , source );
+
+    if ( ! source )
+    {
+        return false;
+    }
+
+    bool is_uri;
+
+    char * path = normalize_path( source , & is_uri );
+
+    if ( ! path )
+    {
+        ai( "  INVALID PATH" );
+        return false;
+    }
+
+    FreeLater free_later( path );
+
+    if ( is_uri )
+    {
+        ai( "  STARTING NETWORK REQUEST" );
+
+        Network::Request request( get_user_agent(), path );
+
+        get_network()->perform_request_async(
+            request,
+            get_cookie_jar(),
+            ImageResponseClosure::response_callback,
+            new ImageResponseClosure( callback , user , destroy_notify ),
+            ImageResponseClosure::destroy );
+    }
+    else
+    {
+        ai( "  PATH IS '%s'" , path );
+        ai( "  STARTING DECODE FROM FILE" );
+
+        Image::decode_async( path , callback , user , destroy_notify );
+    }
+
+    return true;
+}

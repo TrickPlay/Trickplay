@@ -33,8 +33,8 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    15
-#define TP_PATCH_VERSION    0
+#define TP_MINOR_VERSION    16
+#define TP_PATCH_VERSION    1
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -736,10 +736,11 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+*/
 
 #ifdef __cplusplus
 }
 #endif 
 
-#endif  // _TRICKPLAY_H
+#endif  /* _TRICKPLAY_H */

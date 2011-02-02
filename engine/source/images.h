@@ -3,6 +3,7 @@
 
 #include "clutter/clutter.h"
 #include "cairo/cairo.h"
+
 #include "trickplay/image.h"
 #include "common.h"
 
@@ -27,6 +28,11 @@ public:
 
     static Image * screenshot();
 
+    typedef void ( * DecodeAsyncCallback )( Image * image , gpointer user );
+
+    static void decode_async( const gchar * filename , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+
+    static void decode_async( GByteArray * bytes , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
     ~Image();
 
@@ -80,7 +86,7 @@ public:
     //.........................................................................
     // Loads the the decoded image into a Clutter texture.
 
-    static void load_texture( ClutterTexture * texture, const Image * image );
+    static void load_texture( ClutterTexture * texture, const Image * image , guint x = 0 , guint y = 0 , guint w = 0 , guint h = 0 );
 
     //.........................................................................
     // Destroys the Images singleton and frees all the decoders.
@@ -126,7 +132,7 @@ private:
     //.........................................................................
     // Loads the the decoded image into a Clutter texture.
 
-    static void load_texture( ClutterTexture * texture, TPImage * image );
+    static void load_texture( ClutterTexture * texture, TPImage * image , guint x = 0 , guint y = 0 , guint w = 0 , guint h = 0 );
 
     //.........................................................................
     // Decode an image and return the resulting TPImage, which must be freed
@@ -223,7 +229,7 @@ private:
         :
             width( image->width ),
             height( image->height ),
-            bytes( image->pitch * image->height )
+            bytes( image->width * image->height * image->depth )
         {}
 
         guint width;
