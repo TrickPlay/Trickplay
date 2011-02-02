@@ -57,6 +57,9 @@ c:fill(fill_bool)
 c:stroke(stroke_bool)
 -- Finishes painting on Canvas
 c:finish_painting()
+if c.Image then
+	c = c:Image()
+end
 print("circle drawn")
 
 end
@@ -75,6 +78,10 @@ s:fill(fill_bool)
 s:stroke(stroke_bool)
 -- Finishes painting on Canvas
 s:finish_painting()
+s:finish_painting()
+if s.Image then
+	s = s:Image()
+end
 print("square drawn")
 end
 
@@ -91,6 +98,10 @@ t:stroke(stroke_bool)
 -- Finishes painting on Canvas
 t:rotate(180)
 t:finish_painting()
+t:finish_painting()
+if t.Image then
+	t = t:Image()
+end
 print("triangle drawn")
 end
 
