@@ -4,7 +4,7 @@ local bg_color = "0C0C0C"
 local upper_outline = "B9B9B9"
 local lower_outline = "4D4D4D"
 
-local upper_corner = Canvas{size={r,r},opacity=0}
+local upper_corner = Canvas{size={r,r}}
     upper_corner:begin_painting()
     upper_corner:move_to(0,r+1)
     upper_corner:line_to(0,r)
@@ -22,7 +22,11 @@ local upper_corner = Canvas{size={r,r},opacity=0}
     upper_corner:set_line_width(   1 )
 	upper_corner:stroke( true )
     upper_corner:finish_painting()
-local upper_border = Canvas{size={1,r},opacity=0}
+    if upper_corner.Image then
+      upper_corner = upper_corner:Image()
+    end
+    upper_corner.opacity=0
+local upper_border = Canvas{size={1,r}}
     upper_border:begin_painting()
     upper_border:move_to(-1,0)
     upper_border:line_to(2,0)
@@ -35,7 +39,11 @@ local upper_border = Canvas{size={1,r},opacity=0}
     upper_border:set_line_width(   1 )
 	upper_border:stroke( true )
     upper_border:finish_painting()
-local lower_border = Canvas{size={1,r},opacity=0}
+    if upper_border.Image then
+      upper_border = upper_border:Image()
+    end
+    upper_border.opacity=0
+local lower_border = Canvas{size={1,r}}
     lower_border:begin_painting()
     lower_border:move_to(-1,r)
     lower_border:line_to(2,r)
@@ -48,7 +56,11 @@ local lower_border = Canvas{size={1,r},opacity=0}
     lower_border:set_line_width(   1 )
 	lower_border:stroke( true )
     lower_border:finish_painting()
-local left_border = Canvas{size={r,3*screen_h/4},opacity=0}
+    if lower_border.Image then
+      lower_border = lower_border:Image()
+    end
+    lower_border.opacity=0
+local left_border = Canvas{size={r,3*screen_h/4}}
     left_border:begin_painting()
     left_border:move_to( 0,   -1)
     left_border:line_to( 0,   left_border.h+1)
@@ -66,7 +78,11 @@ local left_border = Canvas{size={r,3*screen_h/4},opacity=0}
     left_border:set_line_width(   1 )
 	left_border:stroke( true )
     left_border:finish_painting()
-local lower_corner = Canvas{size={r,r},opacity=0}
+    if left_border.Image then
+        left_border = left_border:Image()
+    end
+    left_border.opacity=0
+local lower_corner = Canvas{size={r,r}}
     lower_corner:begin_painting()
     lower_corner:move_to(0,-1)
     lower_corner:line_to(0, 0)
@@ -84,7 +100,10 @@ local lower_corner = Canvas{size={r,r},opacity=0}
     lower_corner:set_line_width(   1 )
 	lower_corner:stroke( true )
     lower_corner:finish_painting()
-
+    if lower_corner.Image then
+      lower_corner = lower_corner:Image()
+    end
+    lower_corner.opacity=0
 local focus_corner = Image{src="assets/focus_corner.png",opacity=0}
 local focus_edge = Image{src="assets/focus_edge_tile.png",opacity=0}
 
@@ -185,7 +204,7 @@ make_bg = function(w,h,x,y,rules)
     --return Rectangle{color="#000000",w=w,h=h,x=x,y=y}
 end
 
-focus_strip = Canvas{size={1,69},opacity=0}
+focus_strip = Canvas{size={1,69}}
           focus_strip:begin_painting()
           focus_strip:move_to(0,0)
           focus_strip:line_to(focus_strip.w, 0)
@@ -200,7 +219,7 @@ focus_strip = Canvas{size={1,69},opacity=0}
           focus_strip:add_source_pattern_color_stop( 1 , "727272" )
 	      focus_strip:fill( true )
           focus_strip:finish_painting()
-base_grey_rect = Canvas{size={1,69},opacity=0}
+base_grey_rect = Canvas{size={1,69}}
           base_grey_rect:begin_painting()
           base_grey_rect:move_to(-1,0)--border_w,         border_w)
           base_grey_rect:line_to(2, 0)
@@ -213,9 +232,17 @@ base_grey_rect = Canvas{size={1,69},opacity=0}
           base_grey_rect:set_line_width(   1 )
 	      base_grey_rect:stroke( true )
           base_grey_rect:finish_painting()
+          if focus_strip.Image then
+            focus_strip = focus_strip:Image()
+          end
+          focus_strip.opacity=0
+          if base_grey_rect.Image then
+            base_grey_rect = base_grey_rect:Image()
+          end
+          base_grey_rect.opacity=0
 screen:add(focus_strip,base_grey_rect)
 make_bg_mini = function(w,h,x,y)
-    local bg = Canvas{size={w,h},x=x,y=y}
+    local bg = Canvas{size={w,h}}
     
     
     local top    = 0    
@@ -254,5 +281,10 @@ make_bg_mini = function(w,h,x,y)
     bg:fill(true)
     
     bg:finish_painting()
+    if bg.Image then
+        bg = bg:Image()
+    end
+    bg.x = x
+    bg.y = y
     return bg
 end
