@@ -2716,6 +2716,7 @@ function editor.widgets()
 	      new_widget.name = new_widget.name..tostring(item_num)
 	      g:add(new_widget)
               create_on_button_down_f(new_widget)
+--kk
 	      screen:add(g)
 	      screen:grab_key_focus()
 

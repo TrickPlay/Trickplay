@@ -21,6 +21,7 @@ local skin_list = { ["default"] = {
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
 				   ["toast"] = "", 
+				   ["icon"] = "", 
 				   ["toast_icon"] = "assets/voice-2.png", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
@@ -43,6 +44,7 @@ local skin_list = { ["default"] = {
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
 				   ["toast"] = "", 
+				   ["icon"] = "", 
 				   ["toast_icon"] = "assets/voice-2.png", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
@@ -595,15 +597,17 @@ function widget.button(table)
 
  --default parameters
     local p = {
+    	font = "DejaVu Sans 30px",
+    	color = "FFFFFF",
     	skin = "default", 
     	wwidth = 180,
     	wheight = 60, 
-    	border_color = "FFFFFF", 
-    	focus_color = "1b911b", 
-    	border_width = 1,
+
     	text = "Button", 
-    	font = "DejaVu Sans 30px",
-    	color = "FFFFFF",
+    	focus_color = "1b911b", 
+
+    	border_color = "FFFFFF", 
+    	border_width = 1,
     	padding_x = 7,
     	padding_y = 7,
     	border_radius = 12,
@@ -647,7 +651,7 @@ function widget.button(table)
 	     button = Image{}
 	     focus = Image{}
 	end 
-        text = Text{name = "text", text = p.text, font = p.font, color = p.color, reactive = true} 
+        text = Text{name = "text", text = p.text, font = p.font, color = p.color} --reactive = true 
         text:set{name = "text", position = { (p.wwidth  -text.w)/2, (p.wheight - text.h)/2}}
 
         b_group:add(ring, focus_ring, button, focus, text)
@@ -888,14 +892,14 @@ function widget.dialogBox(table)
 --default parameters
    local p = {
 	skin = "canvas", 
+	wwidth = 900 ,
+	wheight = 500 ,
 	title = "Dialog Box Title" ,
 	font = "DejaVu Sans 30px" , 
 	color = "FFFFFF" , 
-	wwidth = 900 ,
-	wheight = 500 ,
 	border_width  = 3 ,
 	border_color  = "FFFFFFC0" , 
-	fill_color  = {25,25,25,100} ,
+	fill_color  = {25,25,25,100},
 	padding_x = 10 ,
 	padding_y = 10 ,
 	border_radius = 22 ,
@@ -1012,12 +1016,12 @@ function widget.toastBox(table)
  --default parameters
     local p = {
  	skin = "canvas",  
+	wwidth = 600,
+	wheight = 200,
 	title = "Toast Box Title",
 	message = "Toast box message ... ",
 	font = "DejaVu Sans 30px", 
 	color = "FFFFFF", 
-	wwidth = 600,
-	wheight = 200,
 	border_width  = 3,
 	border_color  = "FFFFFFC0", 
 	fill_color  = {25,25,25,100},
@@ -1025,8 +1029,7 @@ function widget.toastBox(table)
 	padding_y = 10,
 	border_radius = 22,
 	fade_duration = 2000,
-	duration = 5000,
-	icon_image = assets("assets/voice-1.png")
+	duration = 5000
     }
 
 
@@ -1051,6 +1054,13 @@ function widget.toastBox(table)
     local tb_group_timer = Timer()
     local tb_group_timeline = Timeline ()
 
+    if(p.skin == "canvas") then 
+	icon = assets("assets/voice-1.png")
+    else 
+	icon = assets(skin_list[p.skin]["icon"])
+    end 
+    
+
     local create_toastBox = function()
 
     	tb_group:clear()
@@ -1058,7 +1068,6 @@ function widget.toastBox(table)
     	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
     
-    	icon = p.icon_image
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
     	title= Text{text = p.title, font= "DejaVu Sans 32px", color = "FFFFFF"}     
@@ -1145,7 +1154,7 @@ Arguments:
     	font - the font of button picker items
     	color - the color of button picker items
 	selected_item - selected item's number 
-	rotate_func - table of functions that is called by selected item numger   
+	item_func - table of functions that is called by selected item numger   
 
 Return:
  	bp_group - group containing the button picker 
@@ -1172,8 +1181,8 @@ function widget.buttonPicker(table)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px" , 
 	color = "FFFFFF", 
-	rotate_func = {}, 
-        selected_item = 1 
+	item_func = {}, 
+        selected_item = 1, 
     }
 
  --overwrite defaults
@@ -1197,7 +1206,7 @@ function widget.buttonPicker(table)
 
      local index = 1
      local padding = 10 
-     local pos = {p.wwidth/6, p.wheight/2}
+     local pos = {26, 0}
      local t = nil
 
      local create_buttonPicker = function() 
@@ -1224,7 +1233,7 @@ function widget.buttonPicker(table)
 	    right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
 	else 
 	    ring = Image{}
-	    focus = Image{}
+	    focus_ring = Image{}
 
      	    unfocus = assets(skin_list[p.skin]["buttonpicker"])
      	    unfocus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255}
@@ -1261,6 +1270,7 @@ function widget.buttonPicker(table)
      	}
 
    	bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
+
 	if(p.skin == "canvas") then unfocus.opacity = 0 
         else ring.opacity = 0 end 
 
@@ -1327,8 +1337,8 @@ function widget.buttonPicker(table)
 
 			t = nil
 	    end
-	    if p.rotate_func then
-	      -- p.rotate_func(next_i,prev_i)
+	    if p.item_func then
+	      -- p.item_func(next_i,prev_i)
 	    end
 
 	    t:start()
@@ -1381,8 +1391,8 @@ function widget.buttonPicker(table)
 		items:find_child("item"..tostring(next_i)).y = next_new_y
 		t = nil
 	    end
-	    --if p.rotate_func then
-	       -- p.rotate_func(next_i,prev_i)
+	    --if p.item_func then
+	       -- p.item_func(next_i,prev_i)
 	    --end
 	    t:start()
 	end
@@ -1404,26 +1414,27 @@ function widget.buttonPicker(table)
 		create_buttonPicker()
         end 
 
-	
-	function bp_group.extra.remove_item(itm)
-        end 
 	--bp_group.out_focus()
         
         mt = {}
         mt.__newindex = function (t, k, v)
-
--- imsi 
-	     if k == "selected" or k == "org_x"  or k == "org_y" then 
-	         return 
-             end
--- imsi 
 
              if k == "bsize" then  
 	    	p.wwidth = v[1] p.wheight = v[2]  
              else 
                 p[k] = v
              end
-             create_buttonPicker()
+	     if k ~= "selected" and k ~= "org_x"  and k ~= "org_y" and 
+		k ~= "is_in_group" and k ~= "group_position" then 
+		 print(k) 
+		 print(k) 
+		 print(k) 
+		 print(k) 
+		 print(k) 
+		 print(k) 
+		 print(k) 
+                 create_buttonPicker()
+	     end 
         end 
 
         mt.__index = function (t,k)
@@ -1457,11 +1468,11 @@ Arguments:
 	select_color - the color of selected radio button 
 	button_radius - the radius of radio button
 	select_radius - the radius of selected radio button
-	ring_pos - the postion of the group of radio buttons 
+	b_pos - the postion of the group of radio buttons 
 	item_pos - the position of the group of text items 
 	line_space - the space between the text itmes 
 	selected_item - selected item's number 
-	rotate_func - table of functions that is called by selected item numger   
+	item_func - table of functions that is called by selected item numger   
 
 Return:
  	rb_group - group containing the radio button 
@@ -1477,21 +1488,21 @@ function widget.radioButton(table)
  --default parameters
     local p = {
 	skin = "canvas", 
+	wwidth = 600,
+	wheight = 200,
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = "FFFFFF", -- items 
-	wwidth = 600,
-	wheight = 200,
 	button_color = {255,255,255,200}, -- items 
 	select_color = {100, 100, 100, 255}, -- items 
 	button_radius = 10, -- items 
 	select_radius = 5,  -- items 
-	ring_pos = {0, 0},  -- items 
-	item_pos = {50,3},  -- items 
+	b_pos = {0, 0},  -- items 
+	item_pos = {50,-5},  -- items 
 	line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
-	rotate_func = {}, 
+	item_func = {}, 
 	selected_item = 1 
     }
 
@@ -1537,15 +1548,15 @@ function widget.radioButton(table)
 	      itm_h = p.line_space
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = {0, i * itm_h - itm_h}})     
 	      if p.skin == "canvas" then 
-    	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {0, i * itm_h - itm_h}} ) 
+    	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {0, i * itm_h - itm_h - 8}} ) 
 	      else
-	           rings:add(Clone{name = "item"..tostring(i),  source=p.button_image, position = {0, i * itm_h - itm_h}}) 
+	           rings:add(Clone{name = "item"..tostring(i),  source=p.button_image, position = {0, i * itm_h - itm_h - 8}}) 
 	      end 
          end 
-	 rings:set{name = "rings", position = p.ring_pos} 
+	 rings:set{name = "rings", position = p.b_pos} 
 	 items:set{name = "items", position = p.item_pos} 
-     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 10 
-     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 10 
+     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 10
+     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 2 
 
 	 rb_group:add(rings, items, select_img)
 
@@ -1605,11 +1616,11 @@ Arguments:
 	box_width - the line width of check box border
 	box_size - the size of check box 
         check_size - the size of check image 
-	box_pos - the postion of the group of check box  
+	b_pos - the postion of the group of check box  
 	item_pos - the position of the group of text items 
 	line_space - the space between the text itmes 
 	selected_item - selected item's number 
-	rotate_func - table of functions that is called by selected item numger   
+	item_func - table of functions that is called by selected item numger   
 
 Return:
  	rb_group - group containing the check box  
@@ -1625,6 +1636,8 @@ function widget.checkBox(table)
  --default parameters
     local p = {
 	skin = "canvas", 
+	wwidth = 600,
+	wheight = 200,
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = "FFFFFF", -- items 
@@ -1633,14 +1646,12 @@ function widget.checkBox(table)
 	box_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
-	wwidth = 600,
-	wheight = 200,
 	line_space = 40,   
-	box_pos = {0, 0},  -- items 
+	b_pos = {0, 0},  -- items 
 	item_pos = {50,-5},  -- items 
 	selected_item = 1,  
 	box_image = Image{},
-	rotate_func = {}, 
+	item_func = {}, 
 	check_image = assets("assets/checkmark.png") 
     } 
 
@@ -1677,7 +1688,7 @@ function widget.checkBox(table)
     	 check_img = p.check_image
 	 check_img:set { name="check_img", position = {0,0,0}, size = p.check_size, opacity = 255 }
 
-	 boxes:set{name = "boxes", position = p.box_pos} 
+	 boxes:set{name = "boxes", position = p.b_pos} 
 	 items:set{name = "items", position = p.item_pos} 
 
 
