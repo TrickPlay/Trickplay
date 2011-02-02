@@ -74,6 +74,7 @@ INCLUDE_MODULE	+= threadutil
 INCLUDE_MODULE	+= tiff
 INCLUDE_MODULE	+= tiffxx
 INCLUDE_MODULE	+= upnp
+INCLUDE_MODULE  += uprof-0.3
 INCLUDE_MODULE	+= uriparser
 INCLUDE_MODULE	+= uuid
 INCLUDE_MODULE	+= z

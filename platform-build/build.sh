@@ -61,7 +61,7 @@ fi
 #------------------------------------------------------------------------------
 # glib
 
-GLIB_MV="2.22"
+GLIB_MV="2.27"
 GLIB_V="${GLIB_MV}.4"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.gz"
 GLIB_DIST="glib-${GLIB_V}.tar.gz"
@@ -244,6 +244,17 @@ ATK_SOURCE="atk-${ATK_V}"
 ATK_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
+# uprof
+
+UPROF_MV="0.3"
+UPROF_V="${UPROF_MV}"
+UPROF_URL="http://uprof.freedesktop.org/releases/uprof/uprof-${UPROF_V}.tar.gz"
+UPROF_DIST="uprof-${UPROF_V}.tar.gz"
+UPROF_SOURCE="uprof-${UPROF_V}"
+UPROF_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+UPROF_DEPENDS="GLIB"
+
+#------------------------------------------------------------------------------
 # clutter
 
 CLUTTER_MV="1.4"
@@ -251,8 +262,8 @@ CLUTTER_V="${CLUTTER_MV}.2"
 CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no && make ${NUM_MAKE_JOBS} install" 
-CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG"
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no --enable-profile=yes && make ${NUM_MAKE_JOBS} install" 
+CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
 #------------------------------------------------------------------------------
 # avahi
@@ -290,7 +301,7 @@ UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./co
 
 #------------------------------------------------------------------------------
 
-ALL="GLIB SQLITE OPENSSL ZLIB CARES CURL BZIP EXPAT FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK CLUTTER AVAHI UPNP URI UUID"
+ALL="ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID"
 
 #-----------------------------------------------------------------------------
 
@@ -383,6 +394,7 @@ for THIS in ${ALL}; do
         THIS_SOURCE=${THIS}_SOURCE
         THIS_COMMANDS=${THIS}_COMMANDS
         
+
         echo "================================================================="
         echo "== Building ${!THIS_SOURCE}..."
         echo "================================================================="
@@ -431,7 +443,7 @@ for THIS in ${ALL}; do
         fi
         
         # configure and build
-        
+        echo "executing command: ${!THIS_COMMANDS} > ${OUT}" > ${OUT}
         eval ${!THIS_COMMANDS} > ${OUT}
         
         # Save it to the built file
@@ -503,6 +515,7 @@ ${CXX} -o ${HERE}/test \
 	-ljson-glib-1.0 \
 	-latk-1.0 \
 	-lclutter-eglnative-1.0 \
+	-luprof-0.3 \
 	-lavahi-core \
 	-lavahi-common \
 	-lavahi-glib \

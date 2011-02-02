@@ -1,0 +1,2 @@
+DONT_BUILD_DOCS.patch
+no-dbus-no-ncurses.patch
