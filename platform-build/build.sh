@@ -59,6 +59,17 @@ else
 fi
 
 #------------------------------------------------------------------------------
+
+VERBOSE=${VERBOSE:-0}
+
+if [[ ${VERBOSE} == 1 ]]
+then
+    OUT=/dev/stdout
+else
+    OUT=/dev/null
+fi
+
+#------------------------------------------------------------------------------
 # glib
 
 GLIB_MV="2.26"
@@ -262,7 +273,8 @@ CLUTTER_V="${CLUTTER_MV}.0"
 CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no --enable-profile=yes && make ${NUM_MAKE_JOBS} install" 
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no --enable-profile=yes && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
+#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.a ./clutter/.libs/*.la $PREFIX/lib" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
 #------------------------------------------------------------------------------
@@ -365,15 +377,6 @@ then
             CLEAN=1
         fi    
     fi
-fi
-
-VERBOSE=${VERBOSE:-0}
-
-if [[ ${VERBOSE} == 1 ]]
-then
-    OUT=/dev/stdout
-else
-    OUT=/dev/null
 fi
 
 #-----------------------------------------------------------------------------
