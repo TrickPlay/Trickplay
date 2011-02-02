@@ -1,9 +1,9 @@
 app=
 {
-    id          = "com.trickplay.kids",
+    id          = "com.trickplay.crittertwins",
     release     = "1",
     version     = ".1",
-    name        = "Kids Memory",
+    name        = "Critter Twins",
     author      = "Alex Indaco",
     copyright   = "© Trickplay Inc."
 }

@@ -32,7 +32,7 @@ focus.anchor_point={focus.w/2,focus.h/2}
 splash_screen:add(focus)
 splash_screen:add(unpack(difficulty_items))
 
-local exit_focus  = Image{src="assets/focus-exit-btn.png",x=29,y=978}
+local exit_focus  = Image{src="assets/focus-exit-btn.png",x=8,y=957}
 local exit_button = Image{src="assets/button-exit.png",x=29,y=978}
 exit_focus.opacity=0
 splash_screen:add(exit_focus,exit_button)
@@ -44,72 +44,39 @@ function splash_fade_out()
     splash_screen:hide()
 end
 
-local focus_tl = Timeline{duration=200}
-local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
-local function anim_focus(targ_x,targ_y)
-    if focus_tl.is_playing then
-        focus_tl:stop()
-        focus_tl:on_completed()
-        --focus_tl=nil
-    end
-    --focus_tl = Timeline{duration=200}
-    --local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
-    local curr_x = focus.x
-    local curr_y = focus.y
-    function focus_tl:on_new_frame(_,p)
-        local p = ani_mode.alpha
-        focus.x = curr_x + (targ_x-curr_x)*p
-        focus.y = curr_y + (targ_y-curr_y)*p
-    end
-    function focus_tl:on_completed()
-        
-        focus.x = targ_x
-        focus.y = targ_y
-        --focus_tl = nil
-    end
+local anim_focus = {
+    duration = {200},
+    mode   = {"EASE_OUT_CIRC"},
+    setup  = function(self)
+        self.curr_x = focus.x
+        self.curr_y = focus.y
+    end,
+    stages = {
+        function(self,delta,p)
+            focus.x = self.curr_x + (self.targ_x-self.curr_x)*p
+            focus.y = self.curr_y + (self.targ_y-self.curr_y)*p
+        end
+    }
+}
+local corner_get_focus = {
+    duration = {200},
+    stages = {
+        function(self,delta,p)
+            exit_focus.opacity = 255*(p)
+            focus.opacity = 255*(1-p)
+        end
+    }
+}
 
-    focus_tl:start()
-end
-local function corner_get_focus()
-    if focus_tl.is_playing then
-        focus_tl:stop()
-        focus_tl:on_completed()
-        --focus_tl=nil
-    end
-    --focus_tl = Timeline{duration=200}
-    function focus_tl:on_new_frame(_,p)
-        exit_focus.opacity = 255*p
-        focus.opacity = 255*(1-p)
-    end
-    function focus_tl:on_completed()
-        
-        focus.opacity = 0
-        exit_focus.opacity = 255
-        --focus_tl = nil
-    end
-    focus_tl:start()
-end
-local function corner_lose_focus()
-    if focus_tl.is_playing then
-        focus_tl:stop()
-        focus_tl:on_completed()
-        --focus_tl=nil
-    end
-    --focus_tl = Timeline{duration=200}
-    function focus_tl:on_new_frame(_,p)
-        exit_focus.opacity = 255*(1-p)
-        focus.opacity = 255*(p)
-    end
-    function focus_tl:on_completed()
-        
-        focus.opacity = 255
-        exit_focus.opacity = 0
-        --focus_tl = nil
-    end
-    focus_tl:start()
-end
-
-
+local corner_lose_focus = {
+    duration = {200},
+    stages = {
+        function(self,delta,p)
+            exit_focus.opacity = 255*(1-p)
+            focus.opacity = 255*(p)
+        end
+    }
+}
 
 
 local exit_sel = false
@@ -119,7 +86,9 @@ local exit_button_key_handler = {
         exit()
     end,
     [keys.Right] = function()
-        corner_lose_focus()
+        --corner_lose_focus()
+        --table.insert(animate_list,corner_lose_focus)
+        animate_list[corner_lose_focus]=corner_lose_focus
         exit_sel = false
     end,
 }
@@ -134,17 +103,27 @@ local key_handler = {
     [keys.Down] = function()
         if diff_i < 3 then
             diff_i = diff_i + 1
-            anim_focus(focus.x, focus.y+button_backing.h+38)
+            --anim_focus(focus.x, focus.y+button_backing.h+38)
+            anim_focus.targ_x = focus.x
+            anim_focus.targ_y = focus.y+button_backing.h+38
+            --table.insert(animate_list,anim_focus)
+            animate_list[anim_focus]=anim_focus
         end
     end,
     [keys.Up] = function()
         if diff_i > 1 then
             diff_i = diff_i - 1
-            anim_focus(focus.x, focus.y-(button_backing.h+38))
+            --anim_focus(focus.x, focus.y-(button_backing.h+38))
+            anim_focus.targ_x = focus.x
+            anim_focus.targ_y = focus.y-(button_backing.h+38)
+            --table.insert(animate_list,anim_focus)
+            animate_list[anim_focus]=anim_focus
         end
     end,
     [keys.Left] = function()
-        corner_get_focus()
+        --corner_get_focus()
+        --table.insert(animate_list,corner_get_focus)
+        animate_list[corner_get_focus]=corner_get_focus
         exit_sel = true
     end,
 }
@@ -153,7 +132,7 @@ splash_on_key_down = function(key)
     
     if exit_sel and exit_button_key_handler[key] then
         exit_button_key_handler[key]()
-    elseif key_handler[key] then
+    elseif not exit_sel and key_handler[key] then
         key_handler[key]()
     else
         print("Splash Screen Key handler does not support the key "..key)

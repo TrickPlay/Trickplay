@@ -3,7 +3,9 @@
 -- main.lua - this file merely sets up a few globals, loads the files
 -- and handles delegation of key presses
 
+
 --display the screen
+screen.perspective = {1,1,screen.perspective[3],100}
 screen:show()
 
 ---------------------
@@ -23,8 +25,6 @@ end
 game_state={in_game=false,board={}}
 
 
-
-
 --index variable for key handlers
 local curr_handler = nil
 local key_handlers = {}
@@ -41,6 +41,13 @@ give_keys = function(new_handler)
     fade_in_f[curr_handler]()
 end
 
+
+---------------------------
+---- Other Files
+---------------------------
+
+--my framework for animations within an app
+dofile("App_Loop.lua")
 --that file that defines "Class" in lua
 dofile("Class.lua")
 --file containing the various objects used
@@ -52,6 +59,11 @@ dofile("Splash_Screen.lua")
 --file for managing the game screen
 dofile("Game_Screen.lua")
 
+---------------------------
+---- Game Loop
+---------------------------
+
+idle.on_idle = idle_loop
 
 
 ---------------------------
@@ -128,4 +140,7 @@ app.on_closing = function()
         --need to clear out the old game
         settings.board = nil
     end
+    
+    --reset the perspective
+    screen.perspective = {60,1,screen.perspective[3],100}
 end
