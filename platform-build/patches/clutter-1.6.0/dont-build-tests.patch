@@ -1,0 +1,13 @@
+Index: clutter-1.6.0/Makefile.in
+===================================================================
+--- clutter-1.6.0.orig/Makefile.in	2011-02-01 17:14:45.801462685 -0800
++++ clutter-1.6.0/Makefile.in	2011-02-01 17:15:18.587713020 -0800
+@@ -354,7 +354,7 @@
+ QUIET_COMP_ = $(QUIET_COMP_$(AM_DEFAULT_VERBOSITY))
+ QUIET_COMP_0 = @echo '  GICOMP '$@;
+ NULL = 
+-SUBDIRS = build clutter tests doc po
++SUBDIRS = build clutter doc po
+ 
+ # XXX - this is a massive hack to make autoreconf honour the ACLOCAL_FLAGS
+ # that jhbuild sets while still retaining build/autotools as the authoritative
