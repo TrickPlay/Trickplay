@@ -64,6 +64,9 @@ Tile = Class(function(obj, face_source, parent, ...)
     --save the source integer
     obj.index   = face_source
     
+    --Umbrella group for the instance
+    obj.group = Group{name="Tile"}
+    obj.group:add(obj.backing,obj.face_backing)
     
     --clone each part of the face
     local function init_face()
@@ -74,60 +77,20 @@ Tile = Class(function(obj, face_source, parent, ...)
             obj.tbl[i].scale = {tile_faces[face_source].tbl[i].scale[1],tile_faces[face_source].tbl[i].scale[2]}
             obj.face:add(obj.tbl[i])
         end
+        if tile_faces[face_source].clip then
+            obj.face.clip = {1,0,tile_size-2,tile_size}
+        end
     end
     init_face()
     
-    --Umbrella group for the instance
-    obj.group = Group{name="Tile"}
-    obj.group:add(obj.backing,obj.face_backing)
+    
     
     --flag for whether the tile is flipped or not
     local flipped = false
     local first_choice = nil
     
     --Animation for flipping the tile over
-    --[[
-    local flip_over = function(first_choice)
-        init_face()
-        local tl = Timeline{duration=500}
-        function tl:on_new_frame()
-            obj.group.y_rotation={180*tl.progress,0,0}
-            obj.backing.z = 1-tl.progress
-            obj.face.z    = tl.progress
-        end
-        function tl:on_completed()
-            obj.group.y_rotation={180,0,0}
-            tl = nil
-            obj.backing.z = 0
-            obj.face.z    = 1
-            
-            --animation for the face
-            tl = Timeline{duration=1000}
-            function tl:on_new_frame()
-                tile_faces[face_source].on_new_frame(obj.tbl,tl.progress)
-            end
-            function tl:on_completed()
-                tile_faces[face_source].on_completed(obj.tbl)
-                print(first_choice)
-                if first_choice ~= nil then
-                    if obj.index ~= first_choice.index then
-                        first_choice.flip()
-                        obj.flip()
-                    else
-                        first_choice.remove()
-                        obj.remove()
-                        
-                    end
-                end
-                tl=nil
-                
-            end
-            tl:start()
-        end
-        tile_faces[face_source].reset(obj.tbl)
-        tl:start()
-    end
-    --]]
+
     local face_animation = {
         tbl      = obj.tbl,
         g        = obj.face,
@@ -178,25 +141,6 @@ Tile = Class(function(obj, face_source, parent, ...)
     }
     
     --animation for flipping the tile back down
-    --[[
-    local flip_back = function()
-        local tl = Timeline{duration=500}
-        function tl:on_new_frame()
-            obj.group.y_rotation={180*(1-tl.progress),0,0}
-            obj.backing.z = tl.progress
-            obj.face.z    = 1-tl.progress
-        end
-        function tl:on_completed()
-            obj.group.y_rotation={0,0,0}
-            tl = nil
-            obj.backing.z = 1
-            obj.face.z    = 0
-            tl = nil
-            obj.face:clear()
-        end
-        tl:start()
-    end
-    --]]
     local flip_back = {
         duration = {500},
         stages = {
@@ -232,72 +176,19 @@ Tile = Class(function(obj, face_source, parent, ...)
                 animate_list[win_txt]=win_txt
             end
             flipped = false
+            obj.face.clip = {}
         end
     }
-    --[[
-    obj.remove = function()
-        game_state.board[ parent[1] ][ parent[2] ] = 0
-        
-        obj.group:animate{
-            duration = 300,
-            opacity  = 0,
-            on_completed = function()
-                obj = nil
-                game_state.tot = game_state.tot - 1
-                if game_state.tot == 0 then
-                    local tl = Timeline{duration=2000}
-                    local txt = Text{
-                        text="You've Won!",
-                        font="Sans 32px",
-                        opacity=0,
-                        position={screen_w/2,screen_h/2}
-                    }
-                    txt.anchor_point = {txt.w/2,txt.h/2}
-                    screen:add(txt)
-                    function tl:on_new_frame()
-                        local p = tl.progress*2
-                        if p < 1 then
-                            txt.opacity = p*255
-                        else
-                            txt.opacity = 255
-                        end
-                    end
-                    function tl:on_completed()
-                        txt:unparent()
-                        game_state.in_game=false
-                        give_keys("SPLASH")
-                    end
-                    tl:start()
-                end
-            end
-        }
-    end
-    --]]
+
     obj.flip_b = function()
-        --[[
-        if flipped then  flip_back()
-        else             flip_over(first_choice)  end
-        --]]
-        --print(flipped)
         if flipped then animate_list[flip_back]=flip_back
-        --else            animate_list[#animate_list+1]=flip_back
         end
-        --flipped = not flipped
-        
-        --return face_source
     end
     obj.flip = function(f)
         if flipping or flipped then return false end
         flipping = true
         first_choice = f
-        --[[
-        if flipped then  flip_back()
-        else             flip_over(first_choice)  end
-        --]]
         animate_list[flip_over]=flip_over
-        --else            animate_list[#animate_list+1]=flip_back
-        
-        --flipped = not flipped
         flipped = true
         return true
         

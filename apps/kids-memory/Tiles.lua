@@ -139,86 +139,100 @@ tile_faces[4].stages = {
     function(self,delta,p)
     end,
 }
-
-tile_faces[5]   = {}
-tile_faces[5].tbl = {
+do
+    local arm_start = -12
+    local arm_end   =  16
+    local tail_start = 5
+    local tail_end   = -15
+    local tail_mid   = (tail_end - tail_start)/2
+    tile_faces[5]   = {}
+    tile_faces[5].tbl = {
         Image{src="assets/critters/squirrel_tail.png", x= 120,y=20},
         Image{src="assets/critters/squirrel_arm.png", x=30,y=130},
         Image{src="assets/critters/squirrel_body.png",  x=30,y=30},
-        
         Image{src="assets/critters/squirrel_nut.png", x=0,y=100},
-}
-tile_faces[5].reset = function(tbl)
-    --tbl[3].y = 20
-    --tbl[3].x = 20
-    tbl[1]:move_anchor_point(0,tbl[1].h)
-    tbl[2]:move_anchor_point(65,35)
-    tbl[1].z_rotation = { 5,0,0}
-    tbl[2].z_rotation = { -12,0,0}
-    --tbl[3]:move_anchor_point(tbl[3].w/2,tbl[3].h-10)
-
-end
-
-tile_faces[5].duration = {200,200,200,200}
-tile_faces[5].stages = {
-    function(self,delta,p)
-       self.tbl[1].z_rotation = { 5+(-5-5)*p,0,0}
-       self.tbl[2].z_rotation = { -12+(16+12)*p,0,0}
-       self.tbl[4].y = 100 + (80-100)*p
-       self.tbl[4].x = 5*p
-    end,
-    function(self,delta,p)
-        self.tbl[1].z_rotation = { -5+(-15+5)*p,0,0}
-       self.tbl[4].y = 80 + (30-80)*p
-    end,
-    function(self,delta,p)
-        self.tbl[1].z_rotation = { -5+(-15+5)*(1-p),0,0}
-       self.tbl[4].y = 80 + (30-80)*(1-p)
-    end,
-    function(self,delta,p)
-        self.tbl[1].z_rotation = { 5+(-5-5)*(1-p),0,0}
-       self.tbl[2].z_rotation = { -12+(16+12)*(1-p),0,0}
-       self.tbl[4].y = 100 + (80-100)*(1-p)
-       self.tbl[4].x = 5*(1-p)
-    end,
-}
---[[
-tile_faces[4]   = {}
-tile_faces[4].tbl = {
-        Rectangle{w=150,h=150,color="0AFA0A"},
-        Rectangle{w=75,h=75,color="0000FF",x=75},
-        Rectangle{w=75,h=75,color="0000FF",y=75}
-}
-tile_faces[4].reset = function(tbl)
-    tbl[2].x = 75
-    tbl[2].y = 0
-    tbl[3].y = 75
-    tbl[3].x = 0
-end
-tile_faces[4].on_new_frame = function(tbl,prog)
-    prog = prog*4
-    if prog < 1 then
-        tbl[2].y = 75*(prog)
-        tbl[3].y = 75*(1-prog)
-    elseif prog < 2 then
-        tbl[2].y = 75*(2-prog)
-        tbl[3].y = 75*(prog-1)
-    elseif prog < 3 then
-        tbl[2].y = 75*(prog-2)
-        tbl[3].y = 75*(3-prog)
-    else
-        tbl[2].y = 75*(4-prog)
-        tbl[3].y = 75*(prog-3)
+    }
+    tile_faces[5].reset = function(tbl)
+        --tbl[3].y = 20
+        --tbl[3].x = 20
+        tbl[1]:move_anchor_point(0,tbl[1].h)
+        tbl[2]:move_anchor_point(65,35)
+        tbl[1].z_rotation = { 5,0,0}
+        tbl[2].z_rotation = { arm_start,0,0}
     end
+    
+    tile_faces[5].duration = {200,200,200,200}
+    tile_faces[5].stages = {
+        function(self,delta,p)
+            self.tbl[1].z_rotation = { tail_start+(-5-tail_start)*p,0,0}
+            self.tbl[2].z_rotation = { arm_start+(arm_end-arm_start)*p,0,0}
+            self.tbl[4].y = 100 + (80-100)*p
+            self.tbl[4].x = 5*p
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = { tail_mid+(tail_end-tail_mid)*p,0,0}
+            self.tbl[4].y = 80 + (30-80)*p
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = { tail_mid+(tail_end-tail_mid)*(1-p),0,0}
+            self.tbl[4].y = 80 + (30-80)*(1-p)
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = { tail_start+(-5-tail_start)*(1-p),0,0}
+            self.tbl[2].z_rotation = { arm_start+(arm_end-arm_start)*(1-p),0,0}
+            self.tbl[4].y = 100 + (80-100)*(1-p)
+            self.tbl[4].x = 5*(1-p)
+        end,
+    }
 end
-tile_faces[4].on_completed = function(tbl)
-    tbl[2].x = 75
-    tbl[2].y = 0
-    tbl[3].y = 75
-    tbl[3].x = 0
+do
+    local dip = 7
+    local angle_max = 3
+    tile_faces[6]   = {}
+    tile_faces[6].tbl = {
+        Image{src="assets/critters/duck_water2.png",y=tile_size-64-20, w=2*tile_size-75, tile={true,false}},
+        Image{src="assets/critters/duck.png",y=dip},
+        Image{src="assets/critters/duck_water1.png",y=tile_size-64-20, w=2*tile_size-75, tile={true,false} },
+        Image{src="assets/critters/duck_water3.png",y=tile_size-64,x=1},
+    }
+    tile_faces[6].clip = true
+    tile_faces[6].reset = function(tbl)
+        tbl[2]:move_anchor_point(tbl[2].w/2,tbl[2].h/2)
+        tbl[2].z_rotation = {-angle_max,0,0}
+    end
+    
+    tile_faces[6].duration = {2000,2000}
+    tile_faces[6].stages = {
+        function(self,delta,p)
+            self.tbl[1].x = -(self.tbl[1].w-tile_size)*p
+            self.tbl[3].x = -(self.tbl[3].w-tile_size)*p
+            p = 2*p
+            if p < 1 then
+                self.tbl[2].y = self.tbl[2].h/2+dip*(1-p)
+                self.tbl[2].z_rotation = {-angle_max*(1-p),0,0}
+            else
+                p = p-1
+                self.tbl[2].y = self.tbl[2].h/2+dip*(p)
+                self.tbl[2].z_rotation = {angle_max*p,0,0}
+            end
+            
+        end,
+        function(self,delta,p)
+            self.tbl[1].x = -(self.tbl[1].w-tile_size)*(p)
+            self.tbl[3].x = -(self.tbl[3].w-tile_size)*(p)
+            p = 2*p
+            if p < 1 then
+                self.tbl[2].y = self.tbl[2].h/2+dip*(1-p)
+                self.tbl[2].z_rotation = {angle_max*(1-p),0,0}
+            else
+                p = p - 1
+                self.tbl[2].y = self.tbl[2].h/2+dip*(p)
+                self.tbl[2].z_rotation = {-angle_max*p,0,0}
+            end
+            
+        end,
+    }
 end
---]]
-
 for i = 1,#tile_faces do
     for j = 1,#tile_faces[i].tbl do
         tile_container:add(tile_faces[i].tbl[j])
