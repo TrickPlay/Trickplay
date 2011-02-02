@@ -569,12 +569,69 @@ rm -rf ${HERE}/test
 # Build the LG addon
 
 echo "================================================================="
-echo "== Building addon..."
+echo "== Building LG addon..."
 echo "================================================================="
 
 make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean 
 make -C ${THERE}/lg-source/tp_addon/src TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
 mv ${THERE}/lg-source/tp_addon/src/trickplay ${THERE}/lg-source/tp_addon/src/trickplay.sym ${HERE}/
 make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean
+
+#------------------------------------------------------------------------------
+# Build the Broadcom executable
+
+echo "================================================================="
+echo "== Building broadcom executable..."
+echo "================================================================="
+
+NEXUS_TOP=${NEXUS_TOP:-0}
+
+if [[ -z "$NEXUS_TOP" ]]
+then
+    echo "NEXUS_TOP is not defined. Skipping."
+else
+
+TRICKPLAY_INCLUDE="$PREFIX/include"
+TRICKPLAY_LIB="$PREFIX/lib"
+
+# Unset all of these so we don't affect building the broadcom stuff
+
+unset PREFIX 
+unset HOST 
+unset BUILD
+unset CC 
+unset CXX 
+unset AR 
+unset STRIP 
+unset NM 
+unset LD 
+unset RANLIB 
+unset CFLAGS 
+unset CPPFLAGS 
+unset CXXFLAGS 
+unset LDFLAGS 
+unset LIBS 
+unset PKG_CONFIG_PATH
+
+export BCHP_VER=C0
+export PLATFORM=935230
+export HSM_SOURCE_AVAILABLE=y
+export KEYLADDER_SUPPORT=n
+#export LINUX=/opt/brcm/linux/
+export V3DIP_REV=v3d_b0/interface
+
+rm -rf "$THERE/broadcom-source/*.o" "$THERE/broadcom-source/trickplay"
+
+make -C $THERE/broadcom-source trickplay TRICKPLAY_INCLUDE="$TRICKPLAY_INCLUDE" TRICKPLAY_LIB="$TRICKPLAY_LIB"
+
+if [[ ! -d $HERE/broadcom ]]
+then
+    mkdir $HERE/broadcom
+fi
+
+mv $THERE/broadcom-source/trickplay $HERE/broadcom
+
+fi
+
 
 
