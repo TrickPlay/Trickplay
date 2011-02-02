@@ -44,7 +44,7 @@ local function x_y_from_index(i,j)
          (j- 1)*spacing)
 end
 local back_sel = false
-game_screen:add(back_button,back_focus,focus,focus_next,board)
+game_screen:add(back_focus,back_button,focus,focus_next,board)
 function game_fade_in(previous_board)
     board:clear()
     
@@ -66,7 +66,7 @@ function game_fade_in(previous_board)
         local t
         for i = 1, #placement_order do
             local index = math.ceil(i/2)
-            index = index%4 + 1
+            index = index%#tile_faces + 1
             t = Tile(index, {placement_order[i][1] , placement_order[i][2]})
             --t.group.position={200*placement_order[i][1],200*placement_order[i][2]}
             t.group.x, t.group.y = x_y_from_index(placement_order[i][1],placement_order[i][2])
@@ -106,7 +106,7 @@ end
 function game_fade_out()
     game_screen:hide()
 end
-
+--[[
 local focus_tl = Timeline{duration=200}
 local ani_mode = Alpha{timeline=focus_tl,mode="EASE_OUT_CIRC"}
 
@@ -170,6 +170,41 @@ local function corner_lose_focus()
     end
     focus_tl:start()
 end
+--]]
+local anim_focus = {
+    duration = {200},
+    mode   = {"EASE_OUT_CIRC"},
+    setup  = function(self)
+        self.curr_x = focus.x
+        self.curr_y = focus.y
+    end,
+    stages = {
+        function(self,delta,p)
+            focus.x = self.curr_x + (self.targ_x-self.curr_x)*p
+            focus.y = self.curr_y + (self.targ_y-self.curr_y)*p
+        end
+    }
+}
+local corner_get_focus = {
+    duration = {200},
+    stages = {
+        function(self,delta,p)
+            back_focus.opacity = 255*(p)
+            focus.opacity = 255*(1-p)
+        end
+    }
+}
+
+local corner_lose_focus = {
+    duration = {200},
+    stages = {
+        function(self,delta,p)
+            back_focus.opacity = 255*(1-p)
+            focus.opacity = 255*(p)
+        end
+    }
+}
+
 ------------------------
 ---- key handler
 ------------------------
@@ -180,20 +215,25 @@ local board_key_handler = {
            game_state.board[focus_i[1]][focus_i[2]] == nil then
             return
         elseif first_selected == nil then
-            
-            print(game_state.board[focus_i[1]][focus_i[2]])
-            first_selected   = game_state.board[focus_i[1]][focus_i[2]]
-            first_selected.flip(nil)
+            local next
+            next   = game_state.board[focus_i[1]][focus_i[2]]
+            if next.flip(nil) then
+                first_selected = next
+            end
             
         else -- second selected
-            game_state.board[focus_i[1]][focus_i[2]].flip(first_selected)
+            if game_state.board[focus_i[1]][focus_i[2]].flip(first_selected) then
             first_selected = nil
+            end
         end
     end,
     [keys.Up] = function()
         if focus_i[2] > 1 then
             focus_i[2] = focus_i[2] - 1
-            anim_focus( x_y_from_index(focus_i[1],focus_i[2]) )
+            --anim_focus( x_y_from_index(focus_i[1],focus_i[2]) )
+            anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
+            --table.insert(animate_list,anim_focus)
+            animate_list[anim_focus]=anim_focus
             --focus.y    = 200*focus_i[2]
             back_sel   = false
         end
@@ -202,26 +242,35 @@ local board_key_handler = {
         if focus_i[2] < board_spec[game_state.difficulty][4] then
             focus_i[2] = focus_i[2] + 1
             --focus.y    = 200*focus_i[2]
-            anim_focus( x_y_from_index(focus_i[1],focus_i[2])
-            )
+            --anim_focus( x_y_from_index(focus_i[1],focus_i[2])
+            anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
+            --table.insert(animate_list,anim_focus)
+            animate_list[anim_focus]=anim_focus
+            --)
         end
     end,
     [keys.Right] = function()
         if focus_i[1] < board_spec[game_state.difficulty][5] then
             focus_i[1] = focus_i[1] + 1
-            anim_focus( x_y_from_index(focus_i[1],focus_i[2])
-            )
+            --anim_focus( x_y_from_index(focus_i[1],focus_i[2]))
+            anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
+            --table.insert(animate_list,anim_focus)
+            animate_list[anim_focus]=anim_focus
             --focus.x = 200*focus_i[1]
         end
     end,
     [keys.Left] = function()
         if focus_i[1] >1 then
             focus_i[1] = focus_i[1] - 1
-            anim_focus( x_y_from_index(focus_i[1],focus_i[2])
-            )
+            --anim_focus( x_y_from_index(focus_i[1],focus_i[2]))
+            anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
+            --table.insert(animate_list,anim_focus)
+            animate_list[anim_focus]=anim_focus
             --focus.x = 200*focus_i[1]
         else
-            corner_get_focus()
+            --table.insert(animate_list,corner_get_focus)
+            animate_list[corner_get_focus]=corner_get_focus
+            --corner_get_focus()
             back_sel = true
         end
     end,
@@ -234,7 +283,9 @@ back_button_key_handler = {
     end,
     [keys.Right] = function()
         back_sel = false
-        corner_lose_focus()
+        --table.insert(animate_list,corner_lose_focus)
+        animate_list[corner_lose_focus]=corner_lose_focus
+        --corner_lose_focus()
     end,
 }
 
@@ -242,7 +293,7 @@ game_on_key_down = function(key)
     
     if back_sel and back_button_key_handler[key] then
         back_button_key_handler[key]()
-    elseif board_key_handler[key] then
+    elseif not back_sel and board_key_handler[key] then
         board_key_handler[key]()
     else
         print("Game Screen Key handler does not support the key "..key)
