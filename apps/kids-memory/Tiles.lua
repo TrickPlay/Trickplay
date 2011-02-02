@@ -190,9 +190,9 @@ do
     local angle_max = 3
     tile_faces[6]   = {}
     tile_faces[6].tbl = {
-        Image{src="assets/critters/duck_water2.png",y=tile_size-64-20, w=2*tile_size-75, tile={true,false}},
+        Image{src="assets/critters/duck_water2.png",y=tile_size-64-20},-- w=2*tile_size-75, tile={true,false}},
         Image{src="assets/critters/duck.png",y=dip},
-        Image{src="assets/critters/duck_water1.png",y=tile_size-64-20, w=2*tile_size-75, tile={true,false} },
+        Image{src="assets/critters/duck_water1.png",y=tile_size-64-20},-- w=2*tile_size-75, tile={true,false} },
         Image{src="assets/critters/duck_water3.png",y=tile_size-64,x=1},
     }
     tile_faces[6].clip = true
@@ -231,6 +231,41 @@ do
             end
             
         end,
+    }
+end
+do
+    local mouth_start = 160
+    local mouth_end   = 170
+    tile_faces[7]   = {}
+    tile_faces[7].tbl = {
+        Image{src="assets/critters/cow_body.png" ,x=30,y=50},
+        Image{src="assets/critters/cow_mouth.png",x=40,y=mouth_start},
+        Image{src="assets/critters/cow_head.png" ,x=10,y=40},
+    }
+    tile_faces[7].reset = function(tbl)
+        tbl[3]:move_anchor_point(tbl[3].w/2,tbl[3].h/3)
+        --tbl[2].z_rotation = {-angle_max,0,0}
+    end
+    
+    tile_faces[7].duration = {200,400,200,200,600,200,2000}
+    tile_faces[7].stages = {
+        function(self,delta,p)
+            self.tbl[3].z_rotation = {10*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[3].z_rotation = {-10*(2*p-1),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[3].z_rotation = {-10*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[2].y = mouth_start + (mouth_end-mouth_start)*p
+        end,
+        function() end,
+        function(self,delta,p)
+            self.tbl[2].y = mouth_start + (mouth_end-mouth_start)*(1-p)
+        end,
+        function() end,
     }
 end
 for i = 1,#tile_faces do
