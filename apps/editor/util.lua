@@ -72,6 +72,13 @@ function getObjnames()
 end
 
 function find_parent(child_obj) 
+--imsi
+   if (child_obj.name == nil) then 
+	print("KKKK ==>> ")
+	return nil
+   end 
+--imsi
+
    for i, v in pairs(g.children) do
    	if g:find_child(v.name) then
    	     if (v.type == "Group") then 
@@ -398,7 +405,13 @@ function toboolean(s) if (s == "true") then return true else return false end en
 
 
   if(v.type ~= "Video") then
-     if (v.extra.type == "Button") then 
+     if (v.extra.type == "Button" or v.extra.type == "TextInputField" or 
+         v.extra.type == "DialogBox" or v.extra.type == "ToastBox" or 
+         v.extra.type == "ButtonPicker" or v.extra.type == "radioButton" or 
+         v.extra.type == "checkBox" or v.extra.type == "LoadingDots" or 
+         v.extra.type == "LoadingBar" or v.extra.type == "MenuBar" or 
+         v.extra.type == "3D_List" or v.extra.type == "ScrollImage" or 
+         v.extra.type == "TabBar" or v.extra.type == "OSK") then 
 	attr_t =
       {
              {"title", "INSPECTOR : "..string.upper(v.extra.type)},
@@ -408,8 +421,8 @@ function toboolean(s) if (s == "true") then return true else return false end en
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
              {"z", math.floor(v.z), "z"},
-             {"bw", math.floor(v.bwidth), "bw"},
-             {"bh", math.floor(v.bheight), "bh"},
+             {"bw", math.floor(v.wwidth), "bw"},
+             {"bh", math.floor(v.wheight), "bh"},
              {"line",""}
       }
 
@@ -570,7 +583,7 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"line","", "hide"})
 
 	if (v.extra.type == "Button") then 
-             table.insert(attr_t, {"Caption","Button", "Caption"})
+             --table.insert(attr_t, {"Caption","Button", "Caption"})
 	end 
 
       end
@@ -608,6 +621,97 @@ function itemTostring(v, d_list, t_list)
 	return false
     end 
     
+
+    local w_prop_map = {
+	["wwidth"] = function() return 
+		"wwidth = "..v.wwidth..","..indent..
+		"wheight = "..v.wheight..","..indent..
+		"skin = \""..v.skin.."\","..indent..
+    		"font = \""..v.font.."\","..indent..
+    		"color = \""..v.color.."\""..b_indent.."}\n\n"
+		end,
+	["border_width"] = function() return 
+    		"border_width = "..v.border_width..","..indent..
+ 		"border_color= \""..v.border_color.."\","..indent..
+    		"padding_x = "..v.padding_x..","..indent.. 
+    		"padding_y = "..v.padding_y..","..indent.. 
+    		"border_radius = "..v.border_radius..","..indent
+		end,
+	["text"] = function() return 
+    		"focus_color = \""..v.focus_color.."\","..indent..
+    		"text = \""..v.text.."\","..indent
+		end,
+	["title"] = function() return 
+		"title = \""..v.title.."\","..indent
+		end,
+	["items"] = function ()
+		local items = ""
+		for i,j in pairs(v.items) do 
+			items = items.."\""..j.."\", "
+		end
+    		return "items = {"..items.."},"..indent..
+		"item_func = {"..table.concat(v.item_func,",").."},"..indent..
+    		"selected_item = "..v.selected_item..","..indent
+		end,
+	["item_pos"] = function() return 
+		"b_pos = {"..table.concat(v.b_pos,",").."},"..indent..
+		"item_pos = {"..table.concat(v.item_pos,",").."},"..indent..
+		"line_space = "..v.line_space..","..indent
+		end,
+	["group"] = function () return 
+		v.name..".name=\""..v.name.."\"".."\n"..
+        	v.name..".position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}".."\n"..
+        	v.name..".scale = {"..table.concat(v.scale,",").."}".."\n"..
+        	v.name..".anchor_point = {"..table.concat(v.anchor_point,",").."}".."\n"..
+        	v.name..".x_rotation={"..table.concat(v.x_rotation,",").."}".."\n"..
+        	v.name..".y_rotation={"..table.concat(v.y_rotation,",").."}".."\n"..
+        	v.name..".z_rotation={"..table.concat(v.z_rotation,",").."}".."\n"..
+		v.name..".opacity = "..v.opacity..b_indent.."\n\n"
+		end,
+	}
+
+
+    local widget_map = {
+	["Button"] = function() return v.name.." = ".."widget.button"..b_indent.."{"..indent.. 
+		w_prop_map["border_width"]()..w_prop_map["text"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["TextInputField"] = function () return v.name.." = ".."widget.textField"..b_indent.."{"..indent.. 
+    		"text_indent = "..v.text_indent..","..indent..
+		w_prop_map["border_width"]()..w_prop_map["text"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["DialogBox"] = function () return v.name.." = ".."widget.dialogBox"..b_indent.."{"..indent.. 
+		w_prop_map["border_width"]()..w_prop_map["title"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["ToastBox"] = function () return v.name.." = ".."widget.toastBox"..b_indent.."{"..indent.. 
+    		"message = \""..v.message.."\","..indent..
+    		"border_radius = "..v.border_radius..","..indent.. 
+    		"fade_duration = "..v.fade_duration..","..indent.. 
+    		"duration = "..v.duration..b_indent..","..indent.. 
+		w_prop_map["border_width"]()..w_prop_map["title"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["RadioButton"] = function () return v.name.." = ".."widget.radioButton"..b_indent.."{"..indent.. 
+		"button_color = {"..table.concat(v.button_color,",").."},"..indent..
+		"select_color = {"..table.concat(v.select_color,",").."},"..indent..
+    		"button_radius = "..v.button_radius..","..indent.. 
+    		"select_radius = "..v.select_radius..","..indent.. 
+		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["CheckBox"] = function () return v.name.." = ".."widget.checkBox"..b_indent.."{"..indent.. 
+		"box_color = {"..table.concat(v.box_color,",").."},"..indent..
+		"fill_color = {"..table.concat(v.fill_color,",").."},"..indent..
+    		"box_width = "..v.box_width..","..indent.. 
+		"box_size = {"..table.concat(v.box_size,",").."},"..indent..
+		"check_size = {"..table.concat(v.check_size,",").."},"..indent..
+		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["ButtonPicker"] = function () return v.name.." = ".."widget.buttonPicker"..b_indent.."{"..indent.. 
+		w_prop_map["items"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["LoadingDots"] = function () return widget.loadingdots() end, 
+	["LoadingBar"] = function () return widget.loadingbar() end, 
+   }
+
+
+    if(v.type == "Group") then 
+	if v.extra.type then 
+ 	     itm_str = widget_map[v.extra.type]() 
+	     return itm_str
+	end 
+    end 
+
     if(v.type == "Rectangle") then
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
          "name=\""..v.name.."\","..indent..
