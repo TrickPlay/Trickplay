@@ -586,7 +586,7 @@ echo "================================================================="
 
 NEXUS_TOP=${NEXUS_TOP:-0}
 
-if [[ -z "$NEXUS_TOP" ]]
+if [[ "$NEXUS_TOP" == "0" ]]
 then
     echo "NEXUS_TOP is not defined. Skipping."
 else
