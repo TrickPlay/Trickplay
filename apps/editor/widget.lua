@@ -2098,7 +2098,123 @@ function widget.loadingbar(t)
     
 	return l_bar_group
 end
+function widget.threeDlist(t)
+    --default parameters
+    local p = {
+        num_rows    = 4,
+        num_cols    = 3,
+        item_w      = 300,
+        item_h      = 200,
+        grid_gap    = 40,
+		duration_per_tile = 300,
+		cascade_delay     = 200, 
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+	
+	local tiles = {}
 
+    --the umbrella Group, containing the full slate of tiles
+    local slate = Group{ 
+        name     = "loadingdots",
+        position = {200,100},
+        extra    = {
+			type = "3D_List",
+			get_tile_group = function(r,c)
+				return tiles[r][c]
+			end,
+            animate_in = function()
+				local tl = Timeline{
+					duration =p.cascade_delay*(p.num_rows+p.num_cols-2)+ p.duration_per_tile
+				}
+				function tl:on_started()
+					for r = 1, p.num_rows  do
+						for c = 1, p.num_cols do
+							tiles[r][c].y_rotation={90,0,0}
+							tiles[r][c].opacity = 0
+						end
+					end
+				end
+				function tl:on_new_frame(msecs,prog)
+					msecs = tl.elapsed
+					local item
+					for r = 1, p.num_rows  do
+						for c = 1, p.num_cols do
+							item = tiles[r][c] 
+							if msecs > item.delay and msecs < (item.delay+p.duration_per_tile) then
+								prog = (msecs-item.delay) / p.duration_per_tile
+								item.y_rotation = {90*(1-prog),0,0}
+								item.opacity = 255*prog
+							elseif msecs > (item.delay+p.duration_per_tile) then
+								item.y_rotation = {0,0,0}
+								item.opacity = 255
+							end
+							
+						end
+					end
+				end
+				function tl:on_completed()
+					for r = 1, p.num_rows  do
+						for c = 1, p.num_cols do
+							tiles[r][c].y_rotation={0,0,0}
+							tiles[r][c].opacity = 255
+						end
+					end
+				end
+				tl:start()
+            end
+        }
+    }
+
+
+	local make_tile = function()
+		local group = Group{anchor_point = {p.item_w/2,p.item_h/2}}
+		local rect  = Rectangle{w=p.item_w,h=p.item_h,color="303030"}
+		group:add(rect)
+		return group
+	end
+	local x_y_from_index = function(r,c)
+		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
+		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
+	end
+	local make_grid = function()
+		
+		tiles = {}
+		slate:clear()
+		local g
+		for r = 1, p.num_rows  do
+			tiles[r] = {}
+			for c = 1, p.num_cols do
+				g = make_tile()
+				g.x, g.y = x_y_from_index(r,c)
+				g.delay = p.cascade_delay*(r+c-1)
+				slate:add(g)
+				tiles[r][c] = g
+			end
+		end
+	end
+	make_grid()
+
+    
+
+
+    mt = {}
+    mt.__newindex = function(t,k,v)
+		
+       p[k] = v
+       make_grid()
+		
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(slate.extra, mt)
+    return slate
+end
 --]]
 -----------------------------------------
 -- List Scroll Button (or Arrow Image)   
