@@ -2,6 +2,8 @@
 --the globally visible list, always empty
 animate_list = {}
 
+local iterating = false
+
 --the actual animation list
 local iterated_list = {}
 
@@ -25,6 +27,17 @@ function mt.__newindex(t,k,v)
         end
     --if an item is being added
     else
+        if iterated_list[k] ~= nil then
+            if iterating then
+                table.insert(to_be_deleted,k)
+            else
+                local item = iterated_list[k]
+                if item.on_remove ~= nil then item.on_remove(item) end
+                item.elapsed = 0
+                item.stage   = 1
+                iterated_list[item] = nil
+            end
+        end
         if k.setup then k:setup() end
         if k.elapsed == nil then k.elapsed = 0 end
         if k.stage   == nil then k.stage   = 1 end
@@ -38,7 +51,7 @@ setmetatable(animate_list, mt)
 
 
 idle_loop = function(_,seconds)
-    
+    iterating = true
     --don't rely on the table size while iterating, size is subject to change
     local num_items = #to_be_added
     
@@ -103,4 +116,5 @@ idle_loop = function(_,seconds)
         iterated_list[item] = nil
     end
     to_be_deleted = {}
+    iterating = false
 end

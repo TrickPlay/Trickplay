@@ -243,6 +243,7 @@ do
         Image{src="assets/critters/cow_head.png" ,x=10,y=40},
     }
     tile_faces[7].reset = function(tbl)
+        tbl[2].y = mouth_start
         tbl[3]:move_anchor_point(tbl[3].w/2,tbl[3].h/3)
         --tbl[2].z_rotation = {-angle_max,0,0}
     end
@@ -266,6 +267,295 @@ do
             self.tbl[2].y = mouth_start + (mouth_end-mouth_start)*(1-p)
         end,
         function() end,
+    }
+end
+do
+    local paw_up = 62
+    local paw_dn = 54
+    
+    local tail_rot = -20
+    tile_faces[8]   = {}
+    tile_faces[8].tbl = {
+        Image{src="assets/critters/cat_tail.png" ,x=130,y=50},
+        Image{src="assets/critters/cat_body.png",x=40,y=130},
+        Image{src="assets/critters/cat_head.png" ,x=20,y=30},
+        Image{src="assets/critters/cat_paw.png" ,x=40,y=140},
+
+    }
+    
+    tile_faces[8].reset = function(tbl)
+        tbl[1]:move_anchor_point(  4, 150 )
+        tbl[4]:move_anchor_point( 65,  25 )
+        --tbl[2].z_rotation = {-angle_max,0,0}
+    end
+    
+    tile_faces[8].duration = {300,300,300,300, 300,300,300,300, 1200}
+    tile_faces[8].stages = {
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up*p,0,0}
+            self.tbl[1].z_rotation = {tail_rot/3*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up+(paw_dn-paw_up)*p,0,0}
+            self.tbl[1].z_rotation = {tail_rot/3+(2*tail_rot/3-tail_rot/3)*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up+(paw_dn-paw_up)*(1-p),0,0}
+            self.tbl[1].z_rotation = {2*tail_rot/3+(tail_rot-2*tail_rot/3)*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up+(paw_dn-paw_up)*p,0,0}
+            self.tbl[1].z_rotation = {2*tail_rot/3+(tail_rot-2*tail_rot/3)*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up+(paw_dn-paw_up)*(1-p),0,0}
+            self.tbl[1].z_rotation = {tail_rot/3+(2*tail_rot/3-tail_rot/3)*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up+(paw_dn-paw_up)*p,0,0}
+            self.tbl[1].z_rotation = {tail_rot/3*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up+(paw_dn-paw_up)*(1-p),0,0}
+            self.tbl[1].z_rotation = {tail_rot/3*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[4].z_rotation = {paw_up*(1-p),0,0}
+            self.tbl[1].z_rotation = {tail_rot/3+(2*tail_rot/3-tail_rot/3)*p,0,0}
+        end,
+        function(self,delta,p)
+            if p*tile_faces[8].duration[9] < 300 then
+                p = tile_faces[8].duration[9]/300*p
+                self.tbl[1].z_rotation = {2*tail_rot/3+(tail_rot-2*tail_rot/3)*p,0,0}
+            else
+                p = tile_faces[8].duration[9]/900*(p-300/tile_faces[8].duration[9])
+                self.tbl[1].z_rotation = {tail_rot*(1-p),0,0}
+            end
+        end,
+    }
+end
+do
+    local head_high = 70
+    local head_low  = 75
+    
+    tile_faces[9]   = {}
+    tile_faces[9].tbl = {
+        Image{src="assets/critters/ladybug_body.png" ,x=40,y=90},
+        Image{src="assets/critters/ladybug_head.png",x=20,y=head_high},
+    }
+    
+    tile_faces[9].reset = function(tbl)
+        --tbl[2].z_rotation = {-angle_max,0,0}
+    end
+    
+    tile_faces[9].duration = {300,300}
+    tile_faces[9].stages = {
+        function(self,delta,p)
+            self.tbl[2].y = head_high+(head_low-head_high)*p
+        end,
+        function(self,delta,p)
+            self.tbl[2].y = head_high+(head_low-head_high)*(1-p)
+        end,
+    }
+end
+do
+    local scaled_nose = .9
+    local head_low  = 75
+    
+    local tail_rot = -15
+    tile_faces[10]   = {}
+    tile_faces[10].tbl = {
+        Image{src="assets/critters/pig_tail.png",x=200,y= 70},
+        Image{src="assets/critters/pig_body.png",x= 10,y= 40},
+        Image{src="assets/critters/pig_nose.png",x= 50,y=100},
+        
+    }
+    
+    tile_faces[10].reset = function(tbl)
+        tbl[1]:move_anchor_point(10,30)
+        tbl[3]:move_anchor_point(tbl[3].w/2,tbl[3].h/2)
+    end
+    
+    tile_faces[10].duration = {200,200}
+    tile_faces[10].stages = {
+        function(self,delta,p)
+            self.tbl[3].scale = {1+(scaled_nose-1)*p,1+(scaled_nose-1)*p}
+            self.tbl[1].z_rotation = {tail_rot*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[3].scale = {1+(scaled_nose-1)*(1-p),1+(scaled_nose-1)*(1-p)}
+            self.tbl[1].z_rotation = {tail_rot*(1-p),0,0}
+        end,
+    }
+end
+do
+
+    local l_eye_l_edge = 150
+    local l_eye_center = 145
+    local l_eye_r_edge = 140
+    
+    local r_eye_l_edge = 85
+    local r_eye_center = 80
+    local r_eye_r_edge = 75
+    tile_faces[11]   = {}
+    tile_faces[11].tbl = {
+        Image{src="assets/critters/frog_fly_perch.png" ,x= 160,y= 40},
+        Image{src="assets/critters/frog_no_fly.png"    ,x=  50,y= 30},
+        Image{src="assets/critters/frog-eye.png"    ,x=  r_eye_center,y= 60},
+        Image{src="assets/critters/frog-eye.png"    ,x=  l_eye_center,y= 52},
+        Image{src="assets/critters/frog_fly_buzz1.png" ,x=  20,y= 30},
+        Image{src="assets/critters/frog_fly_buzz2.png" ,x=  40,y=140},
+
+    }
+    
+    tile_faces[11].reset = function(tbl)
+        tbl[5].opacity = 0
+        tbl[6].opacity = 0
+    end
+    
+    tile_faces[11].duration = {400,400,700,1100,400,nil,500,nil,1500}
+    tile_faces[11].stages = {
+        function(self,delta,p)
+            self.tbl[1].opacity=255
+            self.tbl[1].y = 40+(10-40)*p
+        end,
+        function(self,delta,p)
+            if self.tbl[5].opacity == 0 then
+                self.tbl[5].opacity = 255
+                self.tbl[6].opacity = 0
+            else
+                self.tbl[5].opacity = 0
+                self.tbl[6].opacity = 255
+            end
+            self.tbl[1].opacity = 0
+            self.tbl[5].x = self.tbl[1].x
+            self.tbl[5].y = self.tbl[1].y-10*p
+            self.tbl[6].x = self.tbl[1].x
+            self.tbl[6].y = self.tbl[1].y-10*p
+        end,
+        function(self,delta,p)
+            if self.tbl[5].opacity == 0 then
+                self.tbl[5].opacity = 255
+                self.tbl[6].opacity = 0
+            else
+                self.tbl[5].opacity = 0
+                self.tbl[6].opacity = 255
+            end
+            self.tbl[3].x = r_eye_center+(r_eye_l_edge-r_eye_center)*p
+            self.tbl[4].x = l_eye_center+(l_eye_l_edge-l_eye_center)*p
+            self.tbl[5].x = self.tbl[1].x+50*p
+            self.tbl[5].y = self.tbl[1].y-10+50*p
+            self.tbl[6].x = self.tbl[1].x+50*p
+            self.tbl[6].y = self.tbl[1].y-10+50*p
+        end,
+        function(self,delta,p)
+            if self.tbl[5].opacity == 0 then
+                self.tbl[5].opacity = 255
+                self.tbl[6].opacity = 0
+            else
+                self.tbl[5].opacity = 0
+                self.tbl[6].opacity = 255
+            end
+            self.tbl[3].x = r_eye_center+(r_eye_l_edge-r_eye_center)*(1-p)
+            self.tbl[4].x = l_eye_center+(l_eye_l_edge-l_eye_center)*(1-p)
+            self.tbl[5].x = 80+(self.tbl[1].x-30)*(1-p)
+            self.tbl[5].y = self.tbl[1].y-10+50+20*p
+            self.tbl[6].x = 80+(self.tbl[1].x-30)*(1-p)
+            self.tbl[6].y = self.tbl[1].y-10+50+20*p
+        end,
+        function(self,delta,p)
+            if self.tbl[5].opacity == 0 then
+                self.tbl[5].opacity = 255
+                self.tbl[6].opacity = 0
+            else
+                self.tbl[5].opacity = 0
+                self.tbl[6].opacity = 255
+            end
+            self.tbl[3].x = r_eye_center+(r_eye_r_edge-r_eye_center)*p
+            self.tbl[4].x = l_eye_center+(l_eye_r_edge-l_eye_center)*p
+            self.tbl[5].x = 10+70*(1-p)
+            self.tbl[5].y = self.tbl[1].y-10+50+20*(1-p)
+            self.tbl[6].x = 10+70*(1-p)
+            self.tbl[6].y = self.tbl[1].y-10+50+20*(1-p)
+        end,
+        function(self)
+            self.tbl[2]:raise_to_top()
+            self.tbl[3]:raise_to_top()
+            self.tbl[4]:raise_to_top()
+            self.stage = self.stage + 1
+        end,
+        function(self,delta,p)
+            if self.tbl[5].opacity == 0 then
+                self.tbl[5].opacity = 255
+                self.tbl[6].opacity = 0
+            else
+                self.tbl[5].opacity = 0
+                self.tbl[6].opacity = 255
+            end
+            self.tbl[3].x = r_eye_center+(r_eye_r_edge-r_eye_center)*(1-p)
+            self.tbl[4].x = l_eye_center+(l_eye_r_edge-l_eye_center)*(1-p)
+            self.tbl[5].x = 10+70*(p)
+            self.tbl[5].y = self.tbl[1].y-10+50+20*(p)
+            self.tbl[6].x = 10+70*(p)
+            self.tbl[6].y = self.tbl[1].y-10+50+20*(p)
+        end,
+        function(self)
+            self.tbl[5]:raise_to_top()
+            self.tbl[6]:raise_to_top()
+            self.tbl[5].opacity = 0
+            self.tbl[6].opacity = 0
+            self.stage = self.stage + 1
+        end,
+        function()
+            
+        end
+    }
+end
+do
+    local scaled_nose = .9
+    local head_low  = 75
+    
+    local jaw_rot = 30
+    tile_faces[12]   = {}
+    tile_faces[12].tbl = {
+        Image{src="assets/critters/turtle-mouth.png",x= 65,y=122},
+        Image{src="assets/critters/turtle-no-jaw.png",x=0,y= 0},
+        Image{src="assets/critters/turtle-grass.png",x= 62,y=135},
+        
+    }
+    
+    tile_faces[12].reset = function(tbl)
+        tbl[2]:move_anchor_point(5,tbl[2].h/2)
+    end
+    
+    tile_faces[12].duration = {400,400,400,400,400,400,2000}
+    tile_faces[12].stages = {
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
+            self.tbl[3].y_rotation = {2*jaw_rot*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
+            self.tbl[3].y_rotation = {2*jaw_rot*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
+            self.tbl[3].y_rotation = {2*jaw_rot*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
+            self.tbl[3].y_rotation = {2*jaw_rot*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
+            self.tbl[3].y_rotation = {2*jaw_rot*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
+            self.tbl[3].y_rotation = {2*jaw_rot*(1-p),0,0}
+        end,
+        function()
+        end
     }
 end
 for i = 1,#tile_faces do
