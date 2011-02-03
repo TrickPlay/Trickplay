@@ -1803,7 +1803,6 @@ function widget.loadingdots(t)
         reactive = true,
         extra = {
             type = "LoadingDots", 
-            selected = 1, 
             speed_up = function()
                 p.anim_duration = p.anim_duration - 20
                 create_dots()
@@ -1992,7 +1991,6 @@ function widget.loadingbar(t)
         	reactive = true,
 	        extra = {
         	    type = "LoadingBar", 
-	            selected = 1, 
         	    set_prog = function(prog)
 	                c_fill.scale = {(p.bsize[1]-4)*(prog),1}
         	    end,

@@ -72,13 +72,6 @@ function getObjnames()
 end
 
 function find_parent(child_obj) 
---imsi
-   if (child_obj.name == nil) then 
-	print("KKKK ==>> ")
-	return nil
-   end 
---imsi
-
    for i, v in pairs(g.children) do
    	if g:find_child(v.name) then
    	     if (v.type == "Group") then 
@@ -601,27 +594,27 @@ function toboolean(s) if (s == "true") then return true else return false end en
       return attr_t
 end
 
+
+function is_in_list(item, list)
+    if list == nil then 
+        return false
+    end 
+
+    for i, j in pairs (list) do
+	if item == j then 
+		return true
+	end 
+    end 
+    return false
+end 
+    
+
 function itemTostring(v, d_list, t_list)
     local itm_str = ""
     local itm_str2 = ""
     local indent       = "\n\t\t"
     local b_indent       = "\n\t"
-
-     
-    local function is_in_list(item, list)
-	if list == nil then 
-	    return false
-	end 
-
-	for i, j in pairs (list) do
-	     if item == j then 
-		return true
-	     end 
-	end 
-	return false
-    end 
-    
-
+  
     local w_prop_map = {
 	["wwidth"] = function() return 
 		"wwidth = "..v.wwidth..","..indent..
@@ -700,17 +693,25 @@ function itemTostring(v, d_list, t_list)
 		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
 	["ButtonPicker"] = function () return v.name.." = ".."widget.buttonPicker"..b_indent.."{"..indent.. 
 		w_prop_map["items"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["LoadingDots"] = function () return widget.loadingdots() end, 
-	["LoadingBar"] = function () return widget.loadingbar() end, 
+	["LoadingDots"] = function () return v.name.." = ".."widget.loadingdots"..b_indent.."{"..indent.. 
+		"skin = \""..v.skin.."\","..indent..
+		"dot_radius = "..v.dot_radius..","..indent..
+    		"dot_color = \""..v.dot_color.."\","..indent..
+		"num_dots = "..v.num_dots..","..indent..
+		"anim_radius = "..v.anim_radius..","..indent..
+		"anim_duration = "..v.anim_duration..b_indent.."}\n\n"..w_prop_map["group"]() end,
+		--"anim_duration = "..v.anim_duration..","..indent..
+		--"clone_src = "..v.clone_src..b_indent.."}\n\n"..w_prop_map["group"]() end,
+	["LoadingBar"] = function () return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
+		"bsize = {"..table.concat(v.bsize,",").."},"..indent..
+        	"shell_upper_color = \""..v.shell_upper_color.."\","..indent.. 
+        	"shell_lower_color = \""..v.shell_lower_color.."\","..indent.. 
+        	"stroke_color = \""..v.stroke_color.."\","..indent.. 
+        	"fill_upper_color = \""..v.fill_upper_color.."\","..indent.. 
+        	"fill_lower_color = \""..v.fill_lower_color.."\""..b_indent.."}\n\n"..
+		w_prop_map["group"]() end, 
    }
 
-
-    if(v.type == "Group") then 
-	if v.extra.type then 
- 	     itm_str = widget_map[v.extra.type]() 
-	     return itm_str
-	end 
-    end 
 
     if(v.type == "Rectangle") then
          itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
@@ -786,16 +787,20 @@ function itemTostring(v, d_list, t_list)
         return itm_str, d_list, t_list
 
     elseif (v.type == "Group") then
-	local i = 1
-        local children = ""
-	local org_d_list = {}
-	if(d_list ~= nil) then 
-	for i,j in pairs (d_list) do 
-		org_d_list[i] = j 
-	end 
-	end 
+	if is_in_list(v.extra.type, widgets) == true then 
+ 	     itm_str = widget_map[v.extra.type]() 
+        else 
+	    local i = 1
+            local children = ""
+	    local org_d_list = {}
 
-        for e in values(v.children) do
+	    if(d_list ~= nil) then 
+	        for i,j in pairs (d_list) do 
+		     org_d_list[i] = j 
+	    	end      
+	    end 
+
+            for e in values(v.children) do
 		result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
 		if(result ~= nil) then 
 		    itm_str = itm_str..result
@@ -812,19 +817,20 @@ function itemTostring(v, d_list, t_list)
 		     children = children..","..e.name
 		end
 		i = i + 1
-        end 
+            end 
 
-	itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-        "name=\""..v.name.."\","..indent..
-        "size={"..table.concat(v.size,",").."},"..indent..
-        "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-	"children = {"..children.."},"..indent..
-        "scale = {"..table.concat(v.scale,",").."},"..indent..
-        "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-        "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-        "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-        "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-        "opacity = "..v.opacity..b_indent.."}\n\n"
+	    itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+            "name=\""..v.name.."\","..indent..
+            "size={"..table.concat(v.size,",").."},"..indent..
+            "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
+	    "children = {"..children.."},"..indent..
+            "scale = {"..table.concat(v.scale,",").."},"..indent..
+            "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
+            "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
+            "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
+            "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
+            "opacity = "..v.opacity..b_indent.."}\n\n"
+	end 
     elseif (v.type == "Video") then
 	itm_str = itm_str..v.name.." = ".."{"..indent..
         "name=\""..v.name.."\","..indent..
@@ -1446,9 +1452,13 @@ function inputMsgWindow_openfile(input_text)
           create_on_button_down_f(v)
 	  if(v.type == "Group") then 
 	       for j, c in pairs (v.children) do
-                    c.reactive = true
-		    c.extra.is_in_group = true
-                    create_on_button_down_f(c)
+		    --if (v.extra.type ~= "ButtonPicker") then 
+		    if is_in_list(v.extra.type, widgets) == false then 
+			print(c.name) 
+                        c.reactive = true
+		        c.extra.is_in_group = true
+                        create_on_button_down_f(c)
+		    end 
 	       end 
 	  end 
 

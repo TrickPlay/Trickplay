@@ -1407,6 +1407,7 @@ function editor.undo()
 			editor.n_selected(c_tmp)
 			g:remove(g:find_child(c))
 			c_tmp.extra.is_in_group = true
+			--print("KKKK 2222")
 			c_tmp.x = c_tmp.x - undo_item[3].x
 			c_tmp.y = c_tmp.y - undo_item[3].y
 			undo_item[3]:add(c_tmp)
@@ -1435,6 +1436,7 @@ function editor.redo()
 			local c_tmp = g:find_child(c)
 			g:remove(g:find_child(c))
 			c_tmp.extra.is_in_group = true
+			--print("KKKK 33333")
 			c_tmp.x = c_tmp.x - redo_item[3].x
 			c_tmp.y = c_tmp.y - redo_item[3].y
 			redo_item[3]:add(c_tmp)
@@ -1652,6 +1654,7 @@ function editor.group()
 	for i, v in pairs (ui.group.children) do 
 		if ui.group:find_child(v.name) then 
 			v.extra.is_in_group = true
+			--print("KKKKK 4444") 
 			v.extra.group_position = ui.group.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
@@ -1681,9 +1684,12 @@ function editor.ugroup()
 				---[[ 0128 : added for nested group 
         				if(c.type == "Group") then 
 	       				   for j, cc in pairs (c.children) do
+						if is_in_list(c.extra.type, widgets) == false then 
                     				cc.reactive = true
 		    				cc.extra.is_in_group = true
+						--print("KKKKKK 55555")
                     				create_on_button_down_f(cc)
+						end 
 	       				   end 
 					end 
 				--]]
@@ -2445,194 +2451,6 @@ local widget_map = {
 	["LoadingBar"] = function () return widget.loadingbar() end, 
 }
 
---[[
-function editor.widgets()
-	local WIDTH = 500
-	local L_PADDING = 50
-	local R_PADDING = 50
-        local TOP_PADDING = 60
-        local BOTTOM_PADDING = 12
-        local Y_PADDING = 10 
-	local X_PADDING = 10
-	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
-	local space = WIDTH
-	local msgw_bg = factory.make_popup_bg("widgets")
-	local msgw = Group {
-	     position ={500, 200},
-	     anchor_point = {0,0},
-             children =
-             {
-              msgw_bg,
-             }
-	}
-        local widgets_list = Text {name = "w_list", text = "Widgets List"}:set(STYLE)
-	local text_g
-
-	cur_w= (WIDTH - widgets_list.w)/2
-	cur_h= TOP_PADDING/2 + Y_PADDING
-
-        widgets_list.position = {cur_w,cur_h}
-        msgw:add(widgets_list)
-
-	local widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", "ButtonPicker", "LoadingDots", "LoadingBar", 
-			 "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK"}
-        
-        function print_widget_list() 
-	    cur_w = L_PADDING
-            cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
-
-	    text_g = Group{position = {cur_w, cur_h}}
-	    text_g.extra.org_y = cur_h
-	    text_g.reactive  = true 
-            cur_w = 0
-	    cur_h = 0 
-
-            local input_text
-            for i, v in pairs(widgets) do
-		if (i == 8) then 
-            	     cur_w = 200
-            	     cur_h = 0
-		end 
-	        text = Text {name = tostring(i), text = v}:set(STYLE)
-                text.position  = {cur_w, cur_h}
-		text.reactive = true
-    	        text_g:add(text)
-
-		if(cur_w == L_PADDING) then
-		     cur_w = cur_w + 7*L_PADDING
-		else 
-		     if(i < 8) then 
-	                  cur_w = 0 
-		     else 
-            	          cur_w = 200
-	             end 
-	             cur_h = cur_h + text.h + Y_PADDING
-		end
-		
-           end
-           cur_w = cur_w + L_PADDING
-           cur_h = cur_h + TOP_PADDING + widgets_list.h + Y_PADDING
-           msgw:add(text_g)
-	end
-
-	print_widget_list()
-
-	
-        for i,j in pairs (text_g.children) do 
-             function j:on_button_down(x,y,button, num_clicks)
-	      if input_text ~= nil then 
-		    input_text.color = {255, 255, 255, 255}
-	      end 
-              input_text = j
-	      j.color = {0,255,0,255}
-	      return true
-             end 
-        end 
-
-	
-	local file_list_size = 280
-        local insert_b, insert_t  = factory.make_msgw_button_item( assets , "insert")
-    	insert_b.position = {(WIDTH - 2*insert_b.w - X_PADDING)/2, file_list_size + 130}
-    	insert_b.name = "insert"
-    	insert_b.reactive = true
-
-    	local cancel_b, cancel_t = factory.make_msgw_button_item( assets , "cancel")
-    	cancel_b.position = {insert_b.x + insert_b.w + X_PADDING, file_list_size + 130}
-    	cancel_b.name = "cancel"
-    	cancel_b.reactive = true 
-	
-    	msgw:add(insert_b)
-    	msgw:add(cancel_b)
-
-    function insert_b:on_button_down(x,y,button,num_clicks)
-	 if (input_text ~= nil) then 
-	      new_widget = widget_map[input_text.text]() 
-
---imsi  : for debugging, will be deleted 
-	      if (new_widget.extra.type == "Button") then 
-		b=new_widget
-	      elseif (new_widget.extra.type == "TextInputField") then 
-		t=new_widget
-	      elseif (new_widget.extra.type == "DialogBox") then 
-		db=new_widget
-	      elseif (new_widget.extra.type == "ToastBox") then 
-		tb=new_widget
-	      elseif (new_widget.extra.type == "RadioButton") then 
-		rb=new_widget
-	      elseif (new_widget.extra.type == "CheckBox") then 
-		cb=new_widget
-	      elseif (new_widget.extra.type == "ButtonPicker") then 
-		bp=new_widget
-	      elseif (new_widget.extra.type == "LoadingDots") then 
-		ld=new_widget
-	      elseif (new_widget.extra.type == "LoadingBar") then 
-		lb=new_widget
-	      end
---imsi 
-	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
-		item_num = item_num + 1
-	      end 
-	      new_widget.name = new_widget.name..tostring(item_num)
-	      g:add(new_widget)
-              create_on_button_down_f(new_widget)
-	      screen:add(g)
-	      screen:grab_key_focus()
-
-	      cleanMsgWin(msgw)
-	 end 
-    end 
-    function insert_t:on_button_down(x,y,button,num_clicks)
-	 if (input_text ~= nil) then 
-	      new_widget = widget_map[input_text.text]() 
-
---imsi  : for debugging, will be deleted 
-	      if (new_widget.extra.type == "Button") then 
-		b=new_widget
-	      elseif (new_widget.extra.type == "TextInputField") then 
-		t=new_widget
-	      elseif (new_widget.extra.type == "DialogBox") then 
-		db=new_widget
-	      elseif (new_widget.extra.type == "ToastBox") then 
-		tb=new_widget
-	      elseif (new_widget.extra.type == "RadioButton") then 
-		rb=new_widget
-	      elseif (new_widget.extra.type == "CheckBox") then 
-		cb=new_widget
-	      elseif (new_widget.extra.type == "ButtonPicker") then 
-		bp=new_widget
-	      elseif (new_widget.extra.type == "LoadingDots") then 
-		ld=new_widget
-	      elseif (new_widget.extra.type == "LoadingBar") then 
-		lb=new_widget
-	      end
---imsi 
- 	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
-		item_num = item_num + 1
-	      end 
-	      new_widget.name = new_widget.name..tostring(item_num)
-	      g:add(new_widget)
-              create_on_button_down_f(new_widget)
-	      screen:add(g)
-	      screen:grab_key_focus()
-
-	      cleanMsgWin(msgw)
-	 end 
-    end 
-
-    function cancel_b:on_button_down(x,y,button,num_clicks)
-	 cleanMsgWin(msgw)
-	 screen:grab_key_focus(screen)
-    end 
-
-    function cancel_t:on_button_down(x,y,button,num_clicks)
-	 cleanMsgWin(msgw)
-	 screen:grab_key_focus(screen)
-    end 
-
-    screen:add(msgw)
-end 
-]]
-
 
 function editor.widgets()
     local WIDTH = 500
@@ -2665,10 +2483,7 @@ function editor.widgets()
     widgets_list.position = {cur_w,cur_h}
     msgw:add(widgets_list)
 
-    local widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", 
-		     "ButtonPicker", "LoadingDots", 
-                     "LoadingBar", "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK"}
-        
+            
     cur_w = L_PADDING
     cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
 
