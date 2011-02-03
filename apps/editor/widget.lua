@@ -2117,7 +2117,7 @@ function widget.threeDlist(t)
 			get_tile_group = function(r,c)
 				return tiles[r][c]
 			end,
-            anim = function()
+            animate_in = function()
 				local tl = Timeline{
 					duration =p.cascade_delay*(p.num_rows+p.num_cols-2)+ p.duration_per_tile
 				}
