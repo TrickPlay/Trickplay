@@ -469,113 +469,131 @@ done
 #------------------------------------------------------------------------------
 # OpenGL stub
 
-if [[ ! -f ${PREFIX}/lib/libGLES2.so ]]
+if [[ -d ${THERE}/gl-stub ]]
 then
-    echo "================================================================="
-    echo "== Building GLES2 stub..."
-    echo "================================================================="
+
+    if [[ ! -f ${PREFIX}/lib/libGLES2.so ]]
+    then
+        echo "================================================================="
+        echo "== Building GLES2 stub..."
+        echo "================================================================="
 
 
-    ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o ${PREFIX}/lib/libGLES2.so    
+        ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o ${PREFIX}/lib/libGLES2.so    
+    fi
 fi
 
 #------------------------------------------------------------------------------
 # Trickplay
 
-if [[ ! -d ${HERE}/tp-build ]]
+if [[ -f "${THERE}/../CMakeLists.txt" ]]    
 then
-    mkdir ${HERE}/tp-build
-    cd ${HERE}/tp-build 
-    
-    cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            ${BUILD_TP_CORE_DYNAMIC} \
-            -DTP_CLUTTER_BACKEND_EGL=1 \
-	    -DTP_PROFILING=1 \
-            "${THERE}/../"   
+
+    if [[ ! -d ${HERE}/tp-build ]]
+    then
+        mkdir ${HERE}/tp-build
+        cd ${HERE}/tp-build 
+        
+        cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
+                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                ${BUILD_TP_CORE_DYNAMIC} \
+                -DTP_CLUTTER_BACKEND_EGL=1 \
+	        -DTP_PROFILING=1 \
+                "${THERE}/../"   
+    fi
+
+    echo "================================================================="
+    echo "== Building libtpcore..."
+    echo "================================================================="
+
+    make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory 
+    make -C ${HERE}/tp-build --no-print-directory install
+
 fi
-
-echo "================================================================="
-echo "== Building libtpcore..."
-echo "================================================================="
-
-make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory 
-make -C ${HERE}/tp-build --no-print-directory install
    
 #------------------------------------------------------------------------------
 # Build a test exe
 
-echo "================================================================="
-echo "== Link test..."
-echo "================================================================="
+if [[ -d "${THERE}/test" ]]
+then
 
-${CXX} -o ${HERE}/test \
-    -g -Wall -fPIC \
-    -L ${PREFIX}/lib \
-    -I ${PREFIX}/include \
-    -Wl,--start-group \
-    -ltpcore \
-	-ljson-glib-1.0 \
-	-latk-1.0 \
-	-lclutter-eglnative-1.0 \
-	-luprof-0.3 \
-	-lavahi-core \
-	-lavahi-common \
-	-lavahi-glib \
-	-lpango-1.0 \
-	-lpangocairo-1.0 \
-	-lpangoft2-1.0 \
-	-lcairo \
-	-lpixman-1 \
-	-lpng12 \
-	-lpng \
-	-ltiff \
-	-ltiffxx \
-	-lgif \
-	-ljpeg \
-	-lfontconfig \
-	-lfreetype \
-	-lexpat \
-	-lbz2 \
-	-lcurl \
-	-lcares \
-	-lz \
-	-lssl \
-	-lcrypto \
-	-lsqlite3 \
-	-lgio-2.0 \
-	-lgmodule-2.0 \
-	-lgobject-2.0 \
-	-lglib-2.0 \
-	-lgthread-2.0 \
-	-liconv \
-	-lintl \
-	-lrt \
-	-lresolv \
-	-ldl \
-	-luuid \
-	-luriparser \
-	-lupnp \
-	-lixml \
-	-lthreadutil \
-	-lGLES2 \
-	-lcairo-gobject \
-	${THERE}/test/main.cpp \
-	-Wl,--end-group 
+    echo "================================================================="
+    echo "== Link test..."
+    echo "================================================================="
+
+    ${CXX} -o ${HERE}/test \
+        -g -Wall -fPIC \
+        -L ${PREFIX}/lib \
+        -I ${PREFIX}/include \
+        -Wl,--start-group \
+        -ltpcore \
+	    -ljson-glib-1.0 \
+	    -latk-1.0 \
+	    -lclutter-eglnative-1.0 \
+	    -luprof-0.3 \
+	    -lavahi-core \
+	    -lavahi-common \
+	    -lavahi-glib \
+	    -lpango-1.0 \
+	    -lpangocairo-1.0 \
+	    -lpangoft2-1.0 \
+	    -lcairo \
+	    -lpixman-1 \
+	    -lpng12 \
+	    -lpng \
+	    -ltiff \
+	    -ltiffxx \
+	    -lgif \
+	    -ljpeg \
+	    -lfontconfig \
+	    -lfreetype \
+	    -lexpat \
+	    -lbz2 \
+	    -lcurl \
+	    -lcares \
+	    -lz \
+	    -lssl \
+	    -lcrypto \
+	    -lsqlite3 \
+	    -lgio-2.0 \
+	    -lgmodule-2.0 \
+	    -lgobject-2.0 \
+	    -lglib-2.0 \
+	    -lgthread-2.0 \
+	    -liconv \
+	    -lintl \
+	    -lrt \
+	    -lresolv \
+	    -ldl \
+	    -luuid \
+	    -luriparser \
+	    -lupnp \
+	    -lixml \
+	    -lthreadutil \
+	    -lGLES2 \
+	    -lcairo-gobject \
+	    ${THERE}/test/main.cpp \
+	    -Wl,--end-group 
 	
-rm -rf ${HERE}/test	
+    rm -rf ${HERE}/test	
+fi
 
 #------------------------------------------------------------------------------
 # Build the LG addon
 
-echo "================================================================="
-echo "== Building LG addon..."
-echo "================================================================="
+if [[ -d "${THERE}/lg-source" ]]
+then
 
-make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean 
-make -C ${THERE}/lg-source/tp_addon/src TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
-mv ${THERE}/lg-source/tp_addon/src/trickplay ${THERE}/lg-source/tp_addon/src/trickplay.sym ${HERE}/
-make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean
+    echo "================================================================="
+    echo "== Building LG addon..."
+    echo "================================================================="
+
+    make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean 
+    make -C ${THERE}/lg-source/tp_addon/src TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
+    mv ${THERE}/lg-source/tp_addon/src/trickplay ${THERE}/lg-source/tp_addon/src/trickplay.sym ${HERE}/
+    make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean
+
+fi
 
 #------------------------------------------------------------------------------
 # Build the Broadcom executable
@@ -589,7 +607,9 @@ NEXUS_TOP=${NEXUS_TOP:-0}
 if [[ "$NEXUS_TOP" == "0" ]]
 then
     echo "NEXUS_TOP is not defined. Skipping."
-else
+    exit
+fi   
+
 
 TRICKPLAY_INCLUDE="$PREFIX/include"
 TRICKPLAY_LIB="$PREFIX/lib"
@@ -631,7 +651,7 @@ fi
 
 mv $THERE/broadcom-source/trickplay $HERE/broadcom
 
-fi
+
 
 
 
