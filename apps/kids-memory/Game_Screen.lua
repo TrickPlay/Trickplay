@@ -101,8 +101,11 @@ function game_fade_in(previous_board)
     focus.opacity=255
     focus.x, focus.y = x_y_from_index(1,1)
     focus_i = {1,1}
+    collectgarbage("collect")
 end
-
+function get_gs_focus()
+    return focus
+end
 function game_fade_out()
     game_screen:hide()
 end

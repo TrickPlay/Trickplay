@@ -13,29 +13,26 @@ backing:hide()
 local face_base = Image{src="assets/tile-back.png"}
 screen:add(face_base)
 face_base:hide()
-local win_txt = Text{
-    text     = "You've Won!",
-    font     = "Sans 32px",
-    opacity  =  0,
-    position = {screen_w/2,screen_h/2}
-}
-win_txt.anchor_point = {win_txt.w/2,win_txt.h/2}
+local win_img = Image{src="assets/win_txt.png",position={screen_w/2,screen_h/2}}
+win_img.anchor_point = {win_img.w/2,win_img.h/2}
 
 local win_animation = {
-    duration = {1000,1000},
+    duration = {1000,2000},
     setup = function()
-        screen:add(win_txt)
-        win_txt.opacity=0
+        screen:add(win_img)
+        win_img.opacity=0
     end,
     stages = {
         function(self,delta,p)
-            win_txt.opacity = p*255
+            get_gs_focus().opacity=255*(1-p)
+            win_img.opacity = p*255
+            win_img.scale = {p,p}
         end,
         function()
         end
     },
     on_remove = function(self)
-        win_txt:unparent()
+        win_img:unparent()
         game_state.in_game=false
         give_keys("SPLASH")
     end
@@ -155,6 +152,7 @@ Tile = Class(function(obj, face_source, parent, ...)
             animate_list[face_animation] = nil
             obj.face:unparent()
             flipped = false
+            collectgarbage("collect")
         end
     }
     
@@ -173,10 +171,12 @@ Tile = Class(function(obj, face_source, parent, ...)
             obj.group:unparent()
             game_state.tot = game_state.tot - 1
             if game_state.tot == 0 then
-                animate_list[win_txt]=win_txt
+                animate_list[win_animation]=win_animation
             end
             flipped = false
             obj.face.clip = {}
+            obj = nil
+            collectgarbage("collect")
         end
     }
 
