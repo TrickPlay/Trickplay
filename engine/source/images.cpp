@@ -3,16 +3,46 @@
 #include <fstream>
 #include <algorithm>
 
+#include "clutter/clutter.h"
+
 #include "common.h"
 #include "images.h"
 #include "profiler.h"
 #include "util.h"
 #include "image_decoders.h"
+#include "context.h"
+#include "thread_pool.h"
+#include "app.h"
 
 //=============================================================================
 // Set to OFF to stop image debug log
 
 Debug_OFF images_debug;
+
+//=============================================================================
+
+static ThreadPool * get_images_threadpool( bool destroy = false )
+{
+    static ThreadPool * tp = 0;
+
+    if ( destroy )
+    {
+        if ( tp )
+        {
+            delete tp;
+            tp = 0;
+        }
+    }
+    else
+    {
+        if ( ! tp )
+        {
+            tp = new ThreadPool( 2 );
+        }
+    }
+
+    return tp;
+}
 
 //=============================================================================
 // Wraps around an external decoder
@@ -21,12 +51,18 @@ class ExternalDecoder : public Images::Decoder
 {
 public:
 
-    ExternalDecoder( TPImageDecoder _decoder, gpointer _decoder_data )
+    ExternalDecoder( TPContext * _context , TPImageDecoder _decoder, gpointer _decoder_data )
     :
+        context( _context ),
         decoder( _decoder ),
         decoder_data( _decoder_data )
     {
         g_assert( decoder );
+    }
+
+    bool enabled( ) const
+    {
+        return context->get_bool( TP_IMAGE_DECODER_ENABLED , true );
     }
 
     virtual const char * name()
@@ -36,6 +72,13 @@ public:
 
     virtual int decode( gpointer data, gsize size, TPImage * image )
     {
+        if ( ! enabled() )
+        {
+            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+
+            return TP_IMAGE_UNSUPPORTED_FORMAT;
+        }
+
         images_debug( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
 
         int result = decoder( data, size, image, decoder_data );
@@ -67,6 +110,13 @@ public:
 
     virtual int decode( const char * filename, TPImage * image )
     {
+        if ( ! enabled() )
+        {
+            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+
+            return TP_IMAGE_UNSUPPORTED_FORMAT;
+        }
+
         std::ifstream stream;
 
         stream.open( filename, std::ios_base::in | std::ios_base::binary );
@@ -149,6 +199,7 @@ public:
 
 private:
 
+    TPContext *     context;
     TPImageDecoder  decoder;
     gpointer        decoder_data;
 };
@@ -177,6 +228,46 @@ Image * Image::decode( const gchar * filename )
     TPImage * image = Images::decode_image( filename );
 
     return image ? new Image( image ) : NULL;
+}
+
+//-----------------------------------------------------------------------------
+
+Image * Image::screenshot()
+{
+    TPImage image;
+
+    ClutterActor * stage = clutter_stage_get_default();
+
+    gfloat width;
+    gfloat height;
+
+    clutter_actor_get_size( stage , & width , & height );
+
+    image.pixels = clutter_stage_read_pixels( CLUTTER_STAGE( stage ) , 0 , 0 , width , height );
+
+    if ( ! image.pixels )
+    {
+        return 0;
+    }
+
+    // The alpha component of the stage is meaningless, so we set it
+    // to 255 for every pixel.
+
+    guchar * p = ( guchar * ) image.pixels + 3;
+
+    for ( int i = 0; i < width * height ; ++i , p += 4  )
+    {
+        *p = 255;
+    }
+
+    image.width = width;
+    image.height = height;
+    image.depth = 4;
+    image.pitch = width * 4;
+    image.bgr = 0;
+    image.free_pixels = g_free;
+
+    return Image::make( image );
 }
 
 //-----------------------------------------------------------------------------
@@ -211,7 +302,7 @@ Image::~Image()
 
 //-----------------------------------------------------------------------------
 
-void Image::convert_to_cairo_argb32()
+Image * Image::convert_to_cairo_argb32() const
 {
     TPImage * result = g_slice_new0( TPImage );
 
@@ -225,13 +316,13 @@ void Image::convert_to_cairo_argb32()
 
     guint8 * dest_pixel = ( guint8 * ) result->pixels;
 
-    guint8 * source_pixel;
+    const guint8 * source_pixel;
 
     double mult;
 
     for ( unsigned int r = 0; r < image->height; ++r )
     {
-        source_pixel = ( ( guint8 * ) image->pixels ) + ( image->pitch * r );
+        source_pixel = ( ( const guint8 * ) image->pixels ) + ( image->pitch * r );
 
         for ( unsigned int c = 0; c < image->width; ++c )
         {
@@ -272,11 +363,212 @@ void Image::convert_to_cairo_argb32()
         }
     }
 
-    Images::destroy_image( image );
-
-    image = result;
+    return new Image( result );
 }
 
+//-----------------------------------------------------------------------------
+
+String Image::checksum() const
+{
+    GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 );
+
+    guchar * source;
+
+    for ( unsigned int r = 0; r < image->height; ++r )
+    {
+        source = ( ( guchar * ) image->pixels ) + ( image->pitch * r );
+
+        g_checksum_update( ck , source , image->width * image->depth );
+    }
+
+    String result( g_checksum_get_string( ck ) );
+
+    g_checksum_free( ck );
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+static void surface_destroy_image( void * image )
+{
+    delete ( Image * ) image;
+}
+
+//-----------------------------------------------------------------------------
+
+cairo_surface_t * Image::cairo_surface() const
+{
+    Image * cairo_image = convert_to_cairo_argb32();
+
+    if ( ! cairo_image )
+    {
+        return 0;
+    }
+
+    cairo_surface_t * surface = cairo_image_surface_create_for_data(
+        ( unsigned char * ) cairo_image->pixels(),
+        CAIRO_FORMAT_ARGB32,
+        cairo_image->width(),
+        cairo_image->height(),
+        cairo_image->pitch() );
+
+    if ( ! surface )
+    {
+        delete cairo_image;
+
+        return 0;
+    }
+
+    // We attach the image to the cairo surface so that it will be
+    // destroyed when the surface is destroyed.
+
+    static cairo_user_data_key_t image_key;
+
+    cairo_surface_set_user_data( surface , & image_key , cairo_image , surface_destroy_image );
+
+    return surface;
+}
+
+//-----------------------------------------------------------------------------
+
+bool Image::write_to_png( const gchar * filename ) const
+{
+    bool result = false;
+
+    if ( cairo_surface_t * surface = this->cairo_surface() )
+    {
+        result = ( CAIRO_STATUS_SUCCESS == cairo_surface_write_to_png( surface , filename ) );
+
+        cairo_surface_destroy( surface );
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+class DecodeTask : public ThreadPool::Task
+{
+public:
+
+    DecodeTask( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        image( 0 ),
+        callback( _callback ),
+        user( _user ),
+        destroy_notify( _destroy_notify )
+    {
+    }
+
+    virtual ~DecodeTask()
+    {
+        if ( image )
+        {
+            delete image;
+        }
+
+        if ( destroy_notify )
+        {
+            destroy_notify( user );
+        }
+    }
+
+    virtual void process_main_thread()
+    {
+        if ( callback )
+        {
+            callback( image , user );
+
+            image = 0;
+        }
+    }
+
+protected:
+
+    Image *                     image;
+
+private:
+
+    Image::DecodeAsyncCallback  callback;
+    gpointer                    user;
+    GDestroyNotify              destroy_notify;
+};
+
+//-----------------------------------------------------------------------------
+
+class DecodeFileTask : public DecodeTask
+{
+public:
+
+    DecodeFileTask( const gchar * _filename , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        DecodeTask( _callback , _user , _destroy_notify ),
+        filename( _filename )
+    {
+
+    }
+
+    virtual void process()
+    {
+        image = Image::decode( filename.c_str() );
+    }
+
+private:
+
+    String                      filename;
+};
+
+//-----------------------------------------------------------------------------
+
+class DecodeBufferTask : public DecodeTask
+{
+public:
+
+    DecodeBufferTask( GByteArray * _bytes , const gchar * _content_type , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    :
+        DecodeTask( _callback , _user , _destroy_notify ),
+        bytes( _bytes ),
+        content_type( _content_type ? _content_type : "" )
+    {
+        g_byte_array_ref( bytes );
+    }
+
+    virtual ~DecodeBufferTask()
+    {
+        g_byte_array_unref( bytes );
+    }
+
+    virtual void process()
+    {
+        image = Image::decode( bytes->data , bytes->len , content_type.c_str() );
+    }
+
+private:
+
+    GByteArray *    bytes;
+    String          content_type;
+};
+
+//-----------------------------------------------------------------------------
+
+void Image::decode_async( const gchar * filename , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+{
+    g_assert( filename );
+
+    get_images_threadpool()->push( new DecodeFileTask( filename , callback , user , destroy_notify ) );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::decode_async( GByteArray * bytes , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+{
+    g_assert( bytes );
+    g_assert( bytes->data );
+    g_assert( bytes->len );
+
+    get_images_threadpool()->push( new DecodeBufferTask( bytes , content_type , callback , user , destroy_notify ) );
+}
 
 //=============================================================================
 
@@ -400,11 +692,12 @@ Images * Images::get( bool destroy )
 void Images::shutdown()
 {
     Images::get( true );
+    get_images_threadpool( true );
 }
 
 //-----------------------------------------------------------------------------
 
-void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data )
+void Images::set_external_decoder( TPContext * context , TPImageDecoder decoder, gpointer decoder_data )
 {
     Images * self( Images::get() );
 
@@ -416,7 +709,7 @@ void Images::set_external_decoder( TPImageDecoder decoder, gpointer decoder_data
         self->external_decoder = NULL;
     }
 
-    self->external_decoder = new ExternalDecoder( decoder, decoder_data );
+    self->external_decoder = new ExternalDecoder( context , decoder, decoder_data );
 }
 
 //-----------------------------------------------------------------------------
@@ -467,7 +760,7 @@ Images::DecoderList Images::get_decoders( const char * _hint )
 
 TPImage * Images::decode_image( gpointer data, gsize size, const char * content_type )
 {
-    PROFILER( "Images::decode_image/data" );
+    PROFILER( "Images::decode_image/data" , PROFILER_INTERNAL_CALLS );
 
     TPImage image;
     memset( &image, 0, sizeof( TPImage ) );
@@ -513,7 +806,7 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
 
 TPImage * Images::decode_image( const char * filename )
 {
-    PROFILER( "Images::decode_image/file" );
+    PROFILER( "Images::decode_image/file" , PROFILER_INTERNAL_CALLS );
 
     if ( ! g_file_test( filename, G_FILE_TEST_IS_REGULAR ) )
     {
@@ -585,19 +878,31 @@ void Images::destroy_image( TPImage * image )
 
 //-----------------------------------------------------------------------------
 
-void Images::load_texture( ClutterTexture * texture, TPImage * image )
+void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x , guint y , guint w , guint h )
 {
-    PROFILER( "Images::load_texture/clutter" );
+    PROFILER( "Images::load_texture/clutter" , PROFILER_INTERNAL_CALLS );
 
     g_assert( texture );
     g_assert( image );
 
+    const guchar * pixels = ( const guchar * ) image->pixels;
+
+    guint width = image->width;
+    guint height = image->height;
+
+    if ( w != 0 && h != 0 )
+    {
+        pixels += x * image->depth + y * image->pitch;
+        width = w;
+        height = h;
+    }
+
     clutter_texture_set_from_rgb_data(
         texture,
-        ( const guchar * ) image->pixels,
+        pixels,
         image->depth == 4,
-        image->width,
-        image->height,
+        width,
+        height,
         image->pitch,
         image->depth,
         image->bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
@@ -614,6 +919,13 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image )
     Util::GSRMutexLock lock( & self->mutex );
 
     ImageInfo info( image );
+
+    if ( w !=0 && h != 0 )
+    {
+        info.width = w;
+        info.height = h;
+        info.bytes = w * h * image->depth;
+    }
 
     ImageMap::iterator it( self->images.find( texture ) );
 
@@ -652,6 +964,17 @@ void Images::texture_destroyed_notify( gpointer data, GObject * instance )
 
 //-----------------------------------------------------------------------------
 
+#ifndef TP_PRODUCTION
+
+bool Images::compare( std::pair< gpointer , ImageInfo > a, std::pair< gpointer , ImageInfo > b )
+{
+    return a.second.bytes < b.second.bytes;
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
+
 void Images::dump()
 {
 #ifndef TP_PRODUCTION
@@ -660,16 +983,23 @@ void Images::dump()
 
     Util::GSRMutexLock lock( & self->mutex );
 
+    typedef std::vector< std::pair< gpointer , ImageInfo> > ImageVector;
+
+    ImageVector v( self->images.begin() , self->images.end() );
+
+    std::sort( v.begin() , v.end() , Images::compare );
+
+
     gsize total = 0;
     int i = 1;
 
     g_info( "Loaded images:" );
 
-    for( ImageMap::const_iterator it = self->images.begin(); it != self->images.end(); ++it, ++i )
+    for ( ImageVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
     {
         gchar * source = ( gchar * ) g_object_get_data( G_OBJECT( it->first ), "tp-src" );
 
-        g_info( "  %3d) %ux%u : %1.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
+        g_info( "  %3d) %4u x %-4u : %8.2f KB : %s", i, it->second.width, it->second.height, it->second.bytes / 1024.0, source ? source : "" );
 
         total += it->second.bytes;
     }
@@ -733,11 +1063,11 @@ void Images::set_cache_limit( guint bytes )
 
 //-----------------------------------------------------------------------------
 
-void Images::load_texture( ClutterTexture * texture, const Image * image )
+void Images::load_texture( ClutterTexture * texture, const Image * image , guint x , guint y , guint w , guint h )
 {
     g_assert( image );
 
-    load_texture( texture, image->image );
+    load_texture( texture, image->image , x , y , w , h );
 }
 
 //-----------------------------------------------------------------------------

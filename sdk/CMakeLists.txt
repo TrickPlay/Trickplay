@@ -51,7 +51,8 @@ if (UNIX AND NOT APPLE)
 			endif( FIRST )
 		
 		endforeach( D ) 
-		
+
+        string( TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE )		
 			
     
         # Get the architecture string from dpkg
@@ -68,7 +69,7 @@ if (UNIX AND NOT APPLE)
         
         set(CPACK_SYSTEM_NAME "Linux-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
         
-        set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+        set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}_${BUILD_TYPE}")
         
         set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Pablo Pissanetzky <pablo@trickplay.com>")
         

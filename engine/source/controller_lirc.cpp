@@ -131,7 +131,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
 
     timer = g_timer_new();
 
-    g_info( "LIRC CONTROLLER READY" );
+    log( "READY" );
 }
 
 //.............................................................................
