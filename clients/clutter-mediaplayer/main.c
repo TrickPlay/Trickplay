@@ -550,6 +550,25 @@ static void * mp_get_viewport_texture(TPMediaPlayer * mp)
 
 //-----------------------------------------------------------------------------
 
+static void stage_allocation_notify( GObject * actor , GParamSpec * p , gpointer vt )
+{
+    ClutterActor * video_texture = CLUTTER_ACTOR( vt );
+
+    if ( vt )
+    {
+        ClutterActor * stage = clutter_stage_get_default();
+
+        gfloat width;
+        gfloat height;
+
+        clutter_actor_get_size( stage , & width , & height );
+
+        clutter_actor_set_size( video_texture , width , height );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 static int mp_constructor(TPMediaPlayer * mp)
 {
     static int init=0;
@@ -588,6 +607,8 @@ static int mp_constructor(TPMediaPlayer * mp)
     
     clutter_actor_lower_bottom(video_texture);
     
+    g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , video_texture );
+
     // Connect signals
     
     g_signal_connect(video_texture,"eos",G_CALLBACK(mp_end_of_stream),mp);

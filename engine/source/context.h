@@ -34,6 +34,8 @@
 #define TP_LIRC_ENABLED_DEFAULT         true
 #define TP_LIRC_UDS_DEFAULT             "/var/run/lirc/lircd"
 #define TP_LIRC_REPEAT_DEFAULT          150
+#define TP_APP_PUSH_ENABLED_DEFAULT     true
+#define TP_APP_PUSH_PORT_DEFAULT        8888
 
 // TODO: Don't like hard-coding this app id here
 
@@ -49,6 +51,7 @@ class Downloads;
 class Installer;
 class Image;
 class ControllerLIRC;
+class AppPushServer;
 
 //-----------------------------------------------------------------------------
 
@@ -141,6 +144,10 @@ public:
     //.........................................................................
 
     Image * load_icon( const gchar * path );
+
+    //.........................................................................
+
+    StringMap get_config() const;
 
 private:
 
@@ -251,6 +258,8 @@ private:
     ControllerList              controller_list;
 
     ControllerLIRC *            controller_lirc;
+
+    AppPushServer *             app_push_server;
 
     Console *                   console;
 

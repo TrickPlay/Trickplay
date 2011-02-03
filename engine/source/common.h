@@ -10,6 +10,10 @@
 //-----------------------------------------------------------------------------
 #include "glib.h"
 //-----------------------------------------------------------------------------
+#include "json-glib/json-glib.h"
+#include "clutter/clutter.h"
+#define TRICKPLAY_PRIORITY CLUTTER_PRIORITY_REDRAW
+//-----------------------------------------------------------------------------
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"

@@ -4,109 +4,128 @@
 #include "app.h"
 #include "context.h"
 #include "actions.h"
+#include <cstdio>
 ]]
 
 restricted global editor [[ void * ]]
 {
 
-      editor()
-	[[
-	     lb_construct_empty();
-	]];
+    editor()
+        [[
+             lb_construct_empty();
+        ]];
+
+    table readdir(string dir_name)
+        [[
+             gchar *filename = NULL;
+             GDir *dir = NULL;
+
+             dir = g_dir_open(dir_name, 0, NULL);
+
+            if(dir)
+            {
+                filename = (gchar *)g_dir_read_name(dir);
+                lua_newtable( L );
+                int t = lua_gettop( L );
+                int i = 1;
+                while(filename != NULL)
+                {
+                    lua_pushstring( L , filename );
+                    lua_rawseti( L , t , i++ );
+                    filename = (gchar *)g_dir_read_name(dir);
+                }
+                g_dir_close(dir);
+            }
+            else
+            {
+                lua_pushnil( L );
+            }
+        ]];
 
 
-    /*
-        Function: readdir
+     bool writefile(string file_name, lstring contents, bool overwrite=true)
+        [[
+            bool is_uri=false;
+            char * path=App::get(L)->normalize_path(file_name,&is_uri);
 
-        List file names of the given directory name and returns them as a table. If
-        there are any problems, it returns nil.
+            result = false;              
 
-        Arguments:
+            if ( path && ! is_uri )
+            {
+                const char *mode;
 
-                dir_name - The name of the directory to look up.
+                if( overwrite )
+                {
+                    mode = "w";
+                }
+                else
+                {
+                    mode = "a";
+                }
 
-        Returns:
-                table - The file names or 
-                nil - If something went wrong.
+                FILE *fp;
 
-    */
+                if( ( fp = fopen( path , mode ) ) )
+                {
+                    if( contents_len == fwrite( contents , sizeof( char ) , contents_len , fp ) )
+                    {
+                        result = true;
+                    }
+                    fclose( fp );
+                }
+            }
 
-     table readdir(string dir_name)
-        [[	
-	    gchar *filename = NULL;
-	    GDir *dir = NULL;
+            g_free( path );
+        ]];
 
-            dir = g_dir_open(dir_name, 0, NULL);
+     bool change_app_path( string path )
+        [[
+            result = App::get(L)->change_app_path( path );
+        ]];
 
-	    if(dir) 
-	    {
-		filename = (gchar *)g_dir_read_name(dir);
-		lua_newtable( L );
-		int t = lua_gettop( L );
-		int i = 1; 
-		while(filename != NULL)
-		{
-			lua_pushstring( L , filename );
-   			lua_rawseti( L , t , i++ );  
-			filename = (gchar *)g_dir_read_name(dir);
-		}
-	    	g_dir_close(dir);
-	    }
-	    else 
-	    {
-   		lua_pushnil( L );
-	    }
+     bool mkdir( string path )
+        [[
+            result = 0 == g_mkdir_with_parents( path , 0700 );
+        ]];
+
+     string get_home_dir()
+         [[
+             result = g_getenv( "HOME" );
+
+             if ( ! result )
+             {
+                 result = g_get_home_dir();
+             }
          ]];
 
-    /*
-        Function: writefile
-
-        List file names of the given directory name and returns them as a table. 
-
-        Arguments:
-
-                file_name - The name of the file to write
-	        contents - The contents to write  
-	        overwrite - The boolean values which determine whether 
-			    the contents will be overwritten into the file 
-			    default is true 
-    */
-
-     writefile(string file_name, string contents, bool overwrite=true)
+     bool dir_exists( string path )
          [[
-	     bool is_uri=false;
-             char * path=App::get(L)->normalize_path(file_name,&is_uri);
-             gchar * old_contents = NULL;
-             gsize old_length = 0;
+             result = g_file_test( path , G_FILE_TEST_IS_DIR );
+         ]];
 
-             FreeLater free_later(path);
+     bool file_exists( string path )
+         [[
+             result = g_file_test( path , G_FILE_TEST_IS_REGULAR );
+         ]];
 
-             if ( path && ! is_uri )
+     string build_path( ... )
+         [[
+             std::vector< gchar * > paths;
+
+             for( int i = 2; i <= lua_gettop( L ); ++i )
              {
-             	 gsize length = strlen(contents);
-		 if( overwrite == false && g_file_get_contents( path, & old_contents, & old_length, NULL ) )
-                 {
-                      length += old_length;
-		      if (old_length != 0) 
-		      {
-                           gchar new_contents[length];
-                           g_strlcpy(new_contents, old_contents, old_length+1);
-                           g_strlcat(new_contents, contents, length+1);
-                           g_file_set_contents(path, new_contents, length, NULL);
-		      } 
-		      else 
-		      {
-                           g_file_set_contents(path, contents, length, NULL);
-		      }
-                 } 
-		 else 
-		 {
-                 	   g_file_set_contents(path, contents, length, NULL);
-                           length += old_length;
-                 }
+                 paths.push_back( ( gchar * ) lua_tostring( L , i ) );
              }
-          ]];
 
+             paths.push_back( 0 );
 
+             FreeLater free_later;
+
+             gchar * f = g_build_filenamev( & paths[0] );
+
+             free_later( f );
+
+             result = f;
+         ]];
 }
 

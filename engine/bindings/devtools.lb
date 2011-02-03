@@ -1,0 +1,117 @@
+[[
+#include "common.h"
+#include "util.h"
+#include "app.h"
+#include "context.h"
+#include "clutter_util.h"
+#include "images.h"
+
+//-----------------------------------------------------------------------------
+// __gc metamethod for markers
+
+static int marker_gc( lua_State * L )
+{
+    g_info( "MARKER COLLECTED '%s'" , lua_tostring( L , lua_upvalueindex( 1 ) ) );
+    return 0;
+}
+
+]]
+
+/*
+-------------------------------------------------------------------------------
+Undocumented developer tools that are only available in non-production builds
+*/
+
+global devtools [[ void * ]]
+{
+    devtools()
+        [[
+            lb_construct_empty();
+        ]];
+
+    debug()
+        [[
+            if ( Debugger * debugger = App::get( L )->get_debugger() )
+            {
+                debugger->break_next_line();
+            }
+        ]];
+
+    table registry()
+        [[
+            lua_pushvalue( L , LUA_REGISTRYINDEX );
+        ]];
+
+    /*
+        Marker is a thing that prints out its name when it is garbage collected. This
+        lets us attach it to stuff and see when it goes away.
+    */
+
+    udata marker( lstring name )
+        [[
+            lua_newuserdata( L , 1 );
+
+            lua_newtable( L );
+            lua_pushvalue( L , 1 );
+            lua_pushcclosure( L , marker_gc , 1 );
+            lua_setfield( L , -2 , "__gc" );
+            lua_setmetatable( L , -2 );
+        ]];
+
+    table udatatypes( udata u )
+        [[
+            LSG;
+            if ( ! lua_isuserdata( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else if ( ! lua_getmetatable( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_getfield( L , -1 , "__types__" );
+                lua_remove( L , -2 );
+            }
+            LSG_CHECK(1);
+        ]];
+
+    bool checkudatatype( udata u , string type )
+        [[
+            result = lb_check_udata_type( L , u , type , false );
+        ]];
+
+    string screensum()
+        [[
+            Image * image = Image::screenshot();
+
+            String checksum;
+
+            if ( image )
+            {
+                checksum = image->checksum();
+
+                delete image;
+            }
+
+            result = checksum.c_str();
+        ]];
+
+    keypress( int key , int unicode = 0 )
+        [[
+            ClutterUtil::inject_key_down( key , unicode );
+            ClutterUtil::inject_key_up( key , unicode );
+        ]];
+
+    udata gid( int gid )
+        [[
+            ClutterUtil::wrap_concrete_actor( L , clutter_get_actor_by_gid( gid ) );
+        ]];
+
+    sleep( int ms )
+        [[
+            usleep( ms * 1000 );
+        ]];
+}
+

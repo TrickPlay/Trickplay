@@ -7,6 +7,7 @@
 #include "util.h"
 #include "event_group.h"
 #include "debugger.h"
+#include "images.h"
 
 #define APP_METADATA_FILENAME   "app"
 
@@ -226,6 +227,11 @@ public:
     char * normalize_path( const gchar * path_or_uri, bool * is_uri = NULL, const StringSet & additional_uri_schemes = StringSet() );
 
     //.........................................................................
+    // ONLY FOR THE EDITOR - apps should not do this
+
+    bool change_app_path( const char * path );
+
+    //.........................................................................
     // This returns the clutter actor GID for this app's screen
 
     guint32 get_screen_gid() const;
@@ -244,6 +250,11 @@ public:
 
     Debugger * get_debugger();
 
+    //.........................................................................
+
+    Image * load_image( const gchar * source );
+
+    bool load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
 private:
 
@@ -281,6 +292,11 @@ private:
     static int lua_panic_handler( lua_State * L );
 
     //.........................................................................
+    // A handler for changes to the stage allocation (size)
+
+    static void stage_allocation_notify( gpointer , gpointer , gpointer screen_gid );
+
+    //.........................................................................
 
     TPContext       *       context;
     Metadata                metadata;
@@ -293,6 +309,7 @@ private:
     Network::CookieJar   *  cookie_jar;
     guint32                 screen_gid;
     LaunchInfo              launch;
+    gulong                  stage_allocation_handler;
 
 #ifndef TP_PRODUCTION
 

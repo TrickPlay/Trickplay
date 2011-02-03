@@ -202,4 +202,4 @@ extern "C" {
 }
 #endif
 
-#endif // _TRICKPLAY_IMAGE_H
+#endif /* _TRICKPLAY_IMAGE_H */
