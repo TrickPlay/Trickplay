@@ -2110,7 +2110,7 @@ function widget.threeDlist(t)
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
-        name     = "loadingdots",
+        name     = "3D List",
         position = {200,100},
         extra    = {
 			type = "3D_List",
