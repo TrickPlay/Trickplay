@@ -1071,6 +1071,7 @@ function editor.inspector(v)
         inspector_xbox.reactive = true
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		editor.n_selected(v, true)
+		inspector:clear() -- 0202
 		screen:remove(inspector)
 		current_inspector = nil
 			
@@ -1488,7 +1489,7 @@ function editor.text()
 
         ui.text = Text{
         name="text"..tostring(item_num),
-	text = strings[""], font= "DejaVu Sans 40px",
+	text = strings[""], font= "DejaVu Sans 30px",
 	-- 0111 text = "", font= "DejaVu Sans 40px",
      	color = DEFAULT_COLOR, 
 	position ={700, 500, 0}, 

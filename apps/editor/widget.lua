@@ -609,8 +609,8 @@ function widget.button(table)
 
     	border_color = "FFFFFF", 
     	border_width = 1,
-    	padding_x = 7,
-    	padding_y = 7,
+    	padding_x = 0,
+    	padding_y = 0,
     	border_radius = 12,
     }
 
@@ -641,7 +641,7 @@ function widget.button(table)
 		p.focus_image  = assets(skin_list[p.skin]["button_focus"])
 	end
         b_group:clear()
-    
+        b_group.size = { p.wwidth , p.wheight}
         ring = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
@@ -754,7 +754,7 @@ function widget.textField(table)
     local p = {
     	skin = "canvas", 
     	wwidth = 200 ,
-    	wheight = 80 ,
+    	wheight = 60 ,
     	text = "" ,
     	text_indent = 20 ,
     	border_width  = 3 ,
@@ -762,8 +762,8 @@ function widget.textField(table)
     	focus_color  = "1b911b" , 
     	font = "DejaVu Sans 30px"  , 
     	color = "FFFFFF" , 
-    	padding_x = 7 ,
-    	padding_y = 7 ,
+    	padding_x = 0 ,
+    	padding_y = 0 ,
     	border_radius = 12 ,
 
     }
@@ -796,6 +796,7 @@ function widget.textField(table)
 	end 
 
     	t_group:clear()
+        t_group.size = { p.wwidth , p.wheight}
 
     	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	box:set{name="box", position = { 0 , 0 } }
@@ -911,8 +912,8 @@ function widget.dialogBox(table)
 	border_width  = 3 ,
 	border_color  = "FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
-	padding_x = 10 ,
-	padding_y = 10 ,
+	padding_x = 0 ,
+	padding_y = 0 ,
 	border_radius = 22 ,
     }
 
@@ -924,7 +925,7 @@ function widget.dialogBox(table)
     end 
 
  --the umbrella Group
-    local db_group_cur_y = 40
+    local db_group_cur_y = 6
     local d_box, x_box, title, d_box_img, x_box_img
 
     local  db_group = Group {
@@ -938,14 +939,16 @@ function widget.dialogBox(table)
     local create_dialogBox  = function ()
    
         db_group:clear()
-    	
+        db_group.size = { p.wwidth , p.wheight - 34}
+
         d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+	d_box.y = d_box.y - 34
 	d_box:set{name="d_box"} 
 
         x_box = make_xbox()
         x_box:set{name = "x_box", position  = {p.wwidth - 50, db_group_cur_y}}
 
-        title= Text{text = p.title, font= "DejaVu Sans 32px", color = "FFFFFF"}     
+        title= Text{text = p.title, font= p.font, color = p.color}     
         title:set{name = "title", position = {(p.wwidth - title.w - 50)/2 , db_group_cur_y - 5}}
 
 	if(p.skin ~= "canvas") then 
@@ -1036,8 +1039,8 @@ function widget.toastBox(table)
 	border_width  = 3,
 	border_color  = "FFFFFFC0", 
 	fill_color  = {25,25,25,100},
-	padding_x = 10,
-	padding_y = 10,
+	padding_x = 0,
+	padding_y = 0,
 	border_radius = 22,
 	fade_duration = 2000,
 	duration = 5000
@@ -1075,6 +1078,7 @@ function widget.toastBox(table)
     local create_toastBox = function()
 
     	tb_group:clear()
+        tb_group.size = { p.wwidth , p.wheight}
 
     	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
@@ -1093,6 +1097,9 @@ function widget.toastBox(table)
 	else 
 	     t_box_img = Image{}
 	end 
+
+	t_box.y = t_box.y -30
+	tb_group.h = tb_group.h - 30
 
     	tb_group:add(t_box, icon, title, message, t_box_img)
 
@@ -1217,12 +1224,14 @@ function widget.buttonPicker(table)
 
      local index = 1
      local padding = 10 
-     local pos = {26, 0}
+     --local pos = {26, 0}
+     local pos = {0, 0}
      local t = nil
 
      local create_buttonPicker = function() 
 
 	bp_group:clear()
+        bp_group.size = { p.wwidth , p.wheight}
 
 	if p.skin == "canvas" then 
             ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
@@ -1546,6 +1555,7 @@ function widget.radioButton(table)
          rb_group:clear()
          rings:clear()
          items:clear()
+         --rb_group.size = { p.wwidth , p.wheight},
 	
          if(p.skin == "canvas") then 
 	     select_img = create_select_circle(p.select_radius, p.select_color)
