@@ -2448,7 +2448,8 @@ local widget_map = {
 	["CheckBox"] = function () return widget.checkBox()  end, 
 	["ButtonPicker"] = function () return widget.buttonPicker()  end, 
 	["LoadingDots"] = function () return widget.loadingdots() end, 
-	["LoadingBar"] = function () return widget.loadingbar() end, 
+	["LoadingBar"] = function () return widget.loadingbar() end,
+    ["3D_List"] = function () return widget.threeDlist() end, 
 }
 
 
@@ -2523,6 +2524,8 @@ function editor.widgets()
 		ld=new_widget
 	      elseif (new_widget.extra.type == "LoadingBar") then 
 		lb=new_widget
+         elseif (new_widget.extra.type == "3D_List") then 
+		d=new_widget
 	      end
 --imsi 
 	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
@@ -2559,6 +2562,8 @@ function editor.widgets()
 		ld=new_widget
 	      elseif (new_widget.extra.type == "LoadingBar") then 
 		lb=new_widget
+         elseif (new_widget.extra.type == "3D_List") then 
+		d=new_widget
 	      end
 --imsi 
  	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
