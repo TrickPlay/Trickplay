@@ -70,29 +70,35 @@ TutorialView = Class(View, function(self, model, ...)
             if not tutorial[1] then
                 -- begin by making an awesome red mask
                 local mask = Canvas{
-                    size = {1804, 964},
-                    position = {55, 60}
+                    size = {1804, 964}
                 }
                 mask:begin_painting()
                 mask:set_source_color("9A363A")
                 mask:round_rectangle(0, 0, 1804, 964, 15)
                 mask:set_source_radial_pattern(
-                    mask.x+mask.w/2, mask.y+mask.h/2, 50,
-                    mask.x+mask.w/2, mask.y+mask.h/2, 900
+                    55+mask.w/2, 60+mask.h/2, 50,
+                    55+mask.w/2, 60+mask.h/2, 900
                 )
                 mask:add_source_pattern_color_stop(0, "9A363A")
                 mask:add_source_pattern_color_stop(1, "421A12")
                 mask:fill()
                 mask:finish_painting()
+                if mask.Image then
+                    mask = mask:Image()
+                end
+                mask.position = {55, 60}
                 local border_mask = Canvas{
-                    size = {1816, 976},
-                    position = {49, 54}
+                    size = {1816, 976}
                 }
                 border_mask:begin_painting()
                 border_mask:set_source_color("FFFFFF")
                 border_mask:round_rectangle(0, 0, 1816, 976, 15)
                 border_mask:fill()
                 border_mask:finish_painting()
+                if border_mask.Image then
+                    border_mask = border_mask:Image()
+                end
+                border_mask.position = {49, 54}
                 border_mask.opacity = 128
                 -- Page 1
                 -- next add some awesome descriptions of how to play
