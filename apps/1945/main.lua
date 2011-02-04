@@ -6,7 +6,7 @@ play_sound_wrapper = function(sound)
 	--mediaplayer:play_sound(sound)
 end
 
-my_font = "kroeger 06_65 40px"
+my_font = "Arcade Normal, 32px"
 
 local recycled_tables = {}
 function make_table()
