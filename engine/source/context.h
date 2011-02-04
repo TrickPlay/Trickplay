@@ -150,6 +150,12 @@ public:
 
     StringMap get_config() const;
 
+    //.........................................................................
+
+    void add_internal( gpointer key , gpointer value , GDestroyNotify destroy );
+
+    gpointer get_internal( gpointer key );
+
 private:
 
     TPContext();
@@ -299,6 +305,11 @@ private:
     typedef std::map<String,StringSet>                          AppAllowedMap;
 
     AppAllowedMap                                               app_allowed;
+
+    typedef std::pair<gpointer,GDestroyNotify>                  InternalPair;
+    typedef std::map<gpointer,InternalPair>                     InternalMap;
+
+    InternalMap                                                 internals;
 };
 
 

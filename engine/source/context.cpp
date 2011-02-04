@@ -59,6 +59,15 @@ TPContext::TPContext()
 
 TPContext::~TPContext()
 {
+    // Free all the internals by calling their destroy notify
+
+    for( InternalMap::iterator it = internals.begin(); it != internals.end(); ++ it )
+    {
+        if ( it->second.second )
+        {
+            it->second.second( it->second.first );
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -2325,6 +2334,48 @@ StringMap TPContext::get_config() const
 {
     return config;
 }
+
+//-----------------------------------------------------------------------------
+
+void TPContext::add_internal( gpointer key , gpointer value , GDestroyNotify destroy )
+{
+    g_assert( key );
+
+    InternalMap::iterator it( internals.find( key ) );
+
+    // If it already exists, call its destroy notify
+
+    if ( it != internals.end() )
+    {
+        // If it has a destroy notify, call it with the value
+
+        if ( it->second.second != 0 )
+        {
+            it->second.second( it->second.first );
+        }
+
+        it->second = InternalPair( value , destroy );
+    }
+    else
+    {
+        internals[ key ] = InternalPair( value , destroy );
+    }
+}
+
+gpointer TPContext::get_internal( gpointer key )
+{
+    InternalMap::const_iterator it( internals.find( key ) );
+
+    // If it already exists, call its destroy notify
+
+    if ( it != internals.end() )
+    {
+        return it->second.first;
+    }
+
+    return 0;
+}
+
 
 //=============================================================================
 // External-facing functions
