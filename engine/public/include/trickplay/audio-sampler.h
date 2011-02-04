@@ -16,9 +16,13 @@ extern "C" {
     methodologies, TrickPlay may be able to provide apps information about what the
     user is watching.
 
-    To use this API, you simply populate a <TPAudioBuffer> structure and pass it
-    to <tp_context_submit_audio_buffer>. When the audio source changes, if the
-    user changes channels or inputs; you call <tp_context_audio_source_changed>.
+    To use this API, you start by getting a TPAudioSampler from your TrickPlay context
+    by calling <tp_context_get_audio_sampler>. This lets TrickPlay know that you intend
+    to use the audio sampling API and starts the internal machinery required for it.
+
+    Then, you simply populate a <TPAudioBuffer> structure and pass it
+    to <tp_audio_sampler_submit_buffer>. When the audio source changes, if the
+    user changes channels or inputs; you call <tp_audio_sampler_source_changed>.
 */
 /*-----------------------------------------------------------------------------*/
 /*
@@ -92,11 +96,11 @@ extern "C" {
     Struct: TPAudioBuffer
 
     This structure contains information about an audio buffer. You can populate one
-    and pass it to <tp_context_submit_audio_buffer>.
+    and pass it to <tp_audio_sampler_submit_buffer>.
 
     TrickPlay always copies the TPAudioBuffer structure itself, so you can re-use the
     same one in future calls. If you allocate the TPAudioBuffer structure on the heap,
-    you should always free it immediately after the call to <tp_context_submit_audio_buffer>.
+    you should always free it immediately after the call to <tp_audio_sampler_submit_buffer>.
 
     TrickPlay may or may not copy the samples themselves, unless you specifically set
     <copy_samples> to a non-zero value. If <free_samples> is set, TrickPlay will always
@@ -153,9 +157,9 @@ extern "C" {
             Possible Values:
 
             Non-zero - TrickPlay will make a copy of the samples and
-            call <free_samples> (if it is set) before <tp_context_submit_audio_buffer>
+            call <free_samples> (if it is set) before <tp_audio_sampler_submit_buffer>
             returns. If <free_samples> is NULL, you should free the samples after
-            calling <tp_context_submit_audio_buffer>.
+            calling <tp_audio_sampler_submit_buffer>.
 
             Zero - You must populate <free_samples> and TrickPlay will
             call it when it is finished with the buffer. This approach will result
@@ -188,8 +192,31 @@ extern "C" {
     Section: Global Interface
 */
 /*-----------------------------------------------------------------------------*/
+
+    typedef struct TPAudioSampler TPAudioSampler;
+
+/*-----------------------------------------------------------------------------*/
 /*
-    Function: tp_context_submit_audio_buffer
+    Function: tp_context_get_audio_sampler
+
+    This function returns the audio sampler for the TrickPlay context. It is valid
+    (and the same one) until you call tp_context_free, so you don't have to call it
+    repeatedly.
+
+    Arguments:
+
+        context - A valid TrickPlay context.
+*/
+
+    TP_API_EXPORT
+    TPAudioSampler *
+    tp_context_get_audio_sampler(
+
+        TPContext * context);
+
+/*-----------------------------------------------------------------------------*/
+/*
+    Function: tp_audio_sampler_submit_buffer
 
     This thread-safe function is used to submit an audio buffer to TrickPlay for
     processing.
@@ -198,7 +225,8 @@ extern "C" {
 
     Arguments:
 
-        context - A valid TrickPlay context.
+        sampler - A TPAudioSampler obtained by calling <tp_context_get_audio_sampler>.
+
         buffer - A pointer to a <TPAudioBuffer> structure. TrickPlay always copies
                  the structure itself (but not necessarily the samples), so you can
                  free it or re-use the same one after this call.
@@ -206,14 +234,14 @@ extern "C" {
 
     TP_API_EXPORT
     void
-    tp_context_submit_audio_buffer(
+    tp_audio_sampler_submit_buffer(
 
-            TPContext *     context,
-            TPAudioBuffer * buffer);
+            TPAudioSampler *    sampler,
+            TPAudioBuffer *     buffer);
 
 /*-----------------------------------------------------------------------------*/
 /*
-    Function: tp_context_audio_source_changed
+    Function: tp_audio_sampler_source_changed
 
     This thread-safe function notifies TrickPlay that the audio source has changed.
     TrickPlay will stop processing and free any audio buffers that were submitted
@@ -223,13 +251,17 @@ extern "C" {
     Not only will it improve the user experience, but will also improve the general
     performance of the audio sampler; because it can promtly free audio buffers that
     are no longer relevant.
+
+    Arguments:
+
+        sampler - A TPAudioSampler obtained by calling <tp_context_get_audio_sampler>.
 */
 
     TP_API_EXPORT
     void
-    tp_context_audio_source_changed(
+    tp_audio_sampler_source_changed(
 
-            TPContext * context);
+            TPAudioSampler *    sampler);
 
 /*-----------------------------------------------------------------------------*/
 

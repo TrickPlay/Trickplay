@@ -250,8 +250,7 @@ private:
     friend TPController * tp_context_add_controller( TPContext * context, const char * name, const TPControllerSpec * spec, void * data );
     friend void tp_context_remove_controller( TPContext * context, TPController * controller );
 
-    friend void tp_context_submit_audio_buffer( TPContext * context , TPAudioBuffer * buffer );
-    friend void tp_context_audio_source_changed( TPContext * context );
+    TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
 
 private:
 
