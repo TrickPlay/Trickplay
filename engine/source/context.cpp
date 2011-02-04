@@ -2514,3 +2514,17 @@ void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, 
 }
 
 //-----------------------------------------------------------------------------
+// Audio Sampling
+//-----------------------------------------------------------------------------
+
+void tp_context_submit_audio_buffer( TPContext * context , TPAudioBuffer * buffer )
+{
+    g_warning( "AUDIO SAMPLING IS NOT IMPLEMENTED" );
+}
+
+void tp_context_audio_source_changed( TPContext * context )
+{
+    g_warning( "AUDIO SAMPLING IS NOT IMPLEMENTED" );
+}
+
+//-----------------------------------------------------------------------------
