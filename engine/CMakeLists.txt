@@ -437,6 +437,7 @@ list( APPEND
     
     ${ENGINE_SRC}/source/app_push_server.cpp
     ${ENGINE_SRC}/source/bitmap.cpp
+    ${ENGINE_SRC}/source/audio_sampling.cpp
 )
 
 #------------------------------------------------------------------------------
