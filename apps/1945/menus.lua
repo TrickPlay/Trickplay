@@ -1,5 +1,5 @@
-modal_title = "kroeger 06_65 140px"
-modal_font  = "kroeger 06_65 70px"
+modal_title = "Arcade Normal, 70px"
+modal_font  = "Arcade Normal, 35px"
 
 local max_level = 4
 
