@@ -232,21 +232,28 @@ HandPresentation = Class(nil,function(pres, ctrl)
       back:begin_painting()
       back:set_source_color("024B23")
       back:round_rectangle(0, 0, 720, 146, 15)
-      back:set_source_linear_pattern(back.x, back.y, back.x, back.y + back.h)
+      back:set_source_linear_pattern(0, 0, 0, back.h)
       back:add_source_pattern_color_stop(0, "010803")
       back:add_source_pattern_color_stop(1, "024B23")
       back:fill()
       back:finish_painting()
+      if back.Image then
+          back = back:Image()
+      end
       local border = Canvas{
-          size = {906, 152},
-          position = {-3, -3}
+          size = {906, 152}
       }
       border:begin_painting()
       border:set_source_color("FFFFFF")
       border:round_rectangle(0, 0, 726, 152, 15)
       border:fill()
       border:finish_painting()
+      if border.Image then
+          border = border:Image()
+      end
+      border.position = {-3, -3}
       border.opacity = 128
+
       border_group:add(border, back)
       border_group.opacity = 0
       screen:add(border_group)
