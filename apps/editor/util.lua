@@ -393,8 +393,16 @@ end
 
 local input_t
 function make_attr_t(v)
-function toboolean(s) if (s == "true") then return true else return false end end
-  local attr_t 
+
+local function toboolean(s)  -- local 0202
+  if (s == "true") then 
+	return true 
+  else 
+	return false 
+  end 
+end
+
+local attr_t 
 
 
   if(v.type ~= "Video") then
@@ -457,7 +465,7 @@ function toboolean(s) if (s == "true") then return true else return false end en
       }
   end 
 
-      if (v.type == "Text") then
+  if (v.type == "Text") then
         table.insert(attr_t, {"caption", "COLOR "})
         local color_t = v.color 
         if color_t == nil then 
@@ -488,7 +496,7 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"line","", "hide"})
         table.insert(attr_t, {"line","", "hide"})
 
-      elseif (v.type  == "Rectangle") then
+  elseif (v.type  == "Rectangle") then
         color_t = v.color 
         if color_t == nil then 
              color_t = {0,0,0,0}
@@ -521,7 +529,7 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"line","", "hide"})
         table.insert(attr_t, {"line","", "hide"})
 
-      elseif (v.type  == "Image") then
+  elseif (v.type  == "Image") then
         table.insert(attr_t, {"caption", "SOURCE LOCATION"})
         table.insert(attr_t, {"src", v.src,"source"})
         table.insert(attr_t, {"line",""})
@@ -550,7 +558,7 @@ function toboolean(s) if (s == "true") then return true else return false end en
         table.insert(attr_t, {"line","", "hide"})
         table.insert(attr_t, {"line","", "hide"})
 
-      elseif (v.type  == "Group" or v.type == "Clone") then
+  elseif (v.type  == "Group" or v.type == "Clone") then
 
         table.insert(attr_t, {"caption", "SCALE"})
 	local scale_t = v.scale
@@ -579,19 +587,19 @@ function toboolean(s) if (s == "true") then return true else return false end en
              --table.insert(attr_t, {"Caption","Button", "Caption"})
 	end 
 
-      end
+   end
 
-      if(v.type ~= "Video") then
+   if(v.type ~= "Video") then
       	table.insert(attr_t, {"line",""})
       	table.insert(attr_t, {"opacity", v.opacity, "opacity"})
       	table.insert(attr_t, {"line",""})
-      end 
+   end 
 
-      table.insert(attr_t, {"button", "view code", "view code"})
-      table.insert(attr_t, {"button", "apply", "apply"})
-      table.insert(attr_t, {"button", "cancel", "cancel"})
+   table.insert(attr_t, {"button", "view code", "view code"})
+   table.insert(attr_t, {"button", "apply", "apply"})
+   table.insert(attr_t, {"button", "cancel", "cancel"})
 
-      return attr_t
+   return attr_t
 end
 
 

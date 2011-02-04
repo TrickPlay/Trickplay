@@ -65,10 +65,10 @@ local skin_list = { ["default"] = {
 --[[
 Function: change_all_skin
 
-Change all widgets' skin to skin_name 
+Changes all widgets' skins to 'skin_name' 
 
 Arguments:
-	skin_name 	   - name of skin  
+	skin_name - name of skin  
 ]]
 
 function widget.change_all_skin(skin_name)
@@ -82,11 +82,12 @@ end
 --[[
 Function: change_button_skin
 
-Change all buttons' skin to skin_name 
+Changes all buttons' skins to 'skin_name' 
 
 Arguments:
-	skin_name 	   - name of skin  
+	skin_name - Name of the skin  
 ]]
+
 
 function widget.change_button_skin(skin_name)
     for i = 1, table.getn(g.children), 1 do
@@ -570,27 +571,27 @@ Function: button
 Creates a button widget
 
 Arguments:
-	Table of 
-
-	skin 	- skin name of button 
-    	wwidth  - button image width 
-    	wheight - button image hight 
-    	border_color - the border color of button image 
-    	focus_color - the focus color of button image  
-    	border_width - the focus color of button image  
-    	text - the caption of button 
-    	font - the font of button caption 
-    	color - the color of button caption 
-    	padding_x - the x padding of button image 
-    	padding_y - the y padding of button image
-    	border_radius - the border radius of button image 
+	Table of button properties
+	
+		skin - Modify the skin for the button by changing this value
+    	bwidth  - Width of the button
+    	bheight - Height of the button
+    	border_color - Border color of the button
+    	focus_color - Focus color of the button
+    	border_width - Border width of the button
+    	text - Caption of the button
+    	font - Font of the button text
+    	color - Color of the button text
+    	padding_x - Padding of the button image on the X axis
+    	padding_y - Padding of the button image on the Y axis
+    	border_radius - Radius of the border for the button
 
 Return:
- 	b_group - group containing the button 
+ 	b_group - The group containing the button 
 
 Extra Function:
-	on_focus_out() - release button focus 
-	on_focus_in() - grab button focus 
+	on_focus_out() - Releases the button focus
+	on_focus_in() - Grabs the button focus
 	
 ]]
 
@@ -609,8 +610,8 @@ function widget.button(table)
 
     	border_color = "FFFFFF", 
     	border_width = 1,
-    	padding_x = 7,
-    	padding_y = 7,
+    	padding_x = 0,
+    	padding_y = 0,
     	border_radius = 12,
     }
 
@@ -641,7 +642,7 @@ function widget.button(table)
 		p.focus_image  = assets(skin_list[p.skin]["button_focus"])
 	end
         b_group:clear()
-    
+        b_group.size = { p.wwidth , p.wheight}
         ring = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
@@ -719,34 +720,33 @@ end
 --[[
 Function: textField
 
-Creates a text input field widget
+Creates a text field widget
 
 Arguments:
-	Table of 
+	Table of text field properties
 
-	skin 	- skin name of text input field 
-    	wwidth  - button image width 
-    	wheight - text input field image hight 
-    	border_color - the border color of text input field image 
-    	focus_color - the focus color of text input field image  
-    	border_width - the focus color of text input field image  
-    	text - the text  
-    	text_indent - the size of text indentation  
-    	font - the font of text input field caption 
-    	color - the color of text input field caption 
-    	padding_x - the x padding of text input field image 
-    	padding_y - the y padding of text input field image
-    	border_radius - the border radius of text input field image 
+		skin - Modify the skin used for the text field by changing this value
+    	bwidth  - Width of the text field
+    	bheight - Height of the text field 
+    	border_color - Border color of the text field
+    	focus_color - Focus color of the text field
+    	border_width - Border width of the text field 
+    	text - Caption of the text field  
+    	text_indent - Size of the text indentiation 
+    	font - Font of the text in the text field
+    	color - Color of the text in the text field
+    	padding_x - Padding of the button image on the X axis
+    	padding_y - Padding of the button image on the Y axis
+    	border_radius - Radius of the border for the button image 
 
 Return:
- 	t_group - group containing the text input field 
-
+ 	t_group - The group contaning the text field
+ 	
 Extra Function:
-	on_focus_out() - release text input field focus 
-	on_focus_in() - grab text input field focus 
+	on_focus_out() - Releases the text field focus
+	on_focus_in() - Grabs the text field focus
 	
 ]]
-
 
 
 function widget.textField(table) 
@@ -754,7 +754,7 @@ function widget.textField(table)
     local p = {
     	skin = "canvas", 
     	wwidth = 200 ,
-    	wheight = 80 ,
+    	wheight = 60 ,
     	text = "" ,
     	text_indent = 20 ,
     	border_width  = 3 ,
@@ -762,8 +762,8 @@ function widget.textField(table)
     	focus_color  = "1b911b" , 
     	font = "DejaVu Sans 30px"  , 
     	color = "FFFFFF" , 
-    	padding_x = 7 ,
-    	padding_y = 7 ,
+    	padding_x = 0 ,
+    	padding_y = 0 ,
     	border_radius = 12 ,
 
     }
@@ -796,6 +796,7 @@ function widget.textField(table)
 	end 
 
     	t_group:clear()
+        t_group.size = { p.wwidth , p.wheight}
 
     	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	box:set{name="box", position = { 0 , 0 } }
@@ -875,24 +876,24 @@ end
 --[[
 Function: dialogBox
 
-Creates a dialog box widget
+Creates a Dialog box widget
 
 Arguments:
-	Table of 
+	Table of Dialog box properties
 
-	skin 	- skin name of dialog box 
-    	wwidth  - button image width 
-    	wheight - dialog box image hight 
-    	fill_color - the color of dialog box image  
-    	border_color - the border color of dialog box image 
-    	focus_color - the focus color of dialog box image  
-    	border_width - the focus color of dialog box image  
-    	title - the title of dialog box
-    	font - the font of dialog box title 
-    	color - the color of dialog box caption 
-    	padding_x - the x padding of dialog box image 
-    	padding_y - the y padding of dialog box image
-    	border_radius - the border radius of dialog box image 
+		skin - Modify the skin used for the dialog box by changing this value
+    	bwidth  - Width of the dialog box 
+    	bheight - Height of the dialog box
+    	fill_color - Fill color of the dialog box
+    	border_color - Border color of the dialog box
+    	focus_color - Focus color of the dialog box
+    	border_width - Border width of the dialog box  
+    	title - Title in the dialog box
+    	font - Font of the text in the dialog box
+    	color - Color of the dialog box text 
+    	padding_x - Padding of the dialog box on the X axis
+    	padding_y - Padding of the dialog box on the Y axis
+    	border_radius - The radius of the border of the dialog box
 
 Return:
  	db_group - group containing the dialog box
@@ -911,8 +912,8 @@ function widget.dialogBox(table)
 	border_width  = 3 ,
 	border_color  = "FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
-	padding_x = 10 ,
-	padding_y = 10 ,
+	padding_x = 0 ,
+	padding_y = 0 ,
 	border_radius = 22 ,
     }
 
@@ -924,7 +925,7 @@ function widget.dialogBox(table)
     end 
 
  --the umbrella Group
-    local db_group_cur_y = 40
+    local db_group_cur_y = 6
     local d_box, x_box, title, d_box_img, x_box_img
 
     local  db_group = Group {
@@ -938,14 +939,16 @@ function widget.dialogBox(table)
     local create_dialogBox  = function ()
    
         db_group:clear()
-    	
+        db_group.size = { p.wwidth , p.wheight - 34}
+
         d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+	d_box.y = d_box.y - 34
 	d_box:set{name="d_box"} 
 
         x_box = make_xbox()
         x_box:set{name = "x_box", position  = {p.wwidth - 50, db_group_cur_y}}
 
-        title= Text{text = p.title, font= "DejaVu Sans 32px", color = "FFFFFF"}     
+        title= Text{text = p.title, font= p.font, color = p.color}     
         title:set{name = "title", position = {(p.wwidth - title.w - 50)/2 , db_group_cur_y - 5}}
 
 	if(p.skin ~= "canvas") then 
@@ -991,33 +994,33 @@ end
 --[[
 Function: toastBox
 
-Creates a toast widget
+Creates a Toast box widget
 
 Arguments:
-	Table of 
-
-	skin 	- skin name of toast 
-	title - title of toast
-	message - message of toast
-    	font - the font of toast title and message 
-    	color - the color of toast title and message 
-    	wwidth  - toast image width 
-    	wheight - toast image hight 
-    	border_color - the border color of toast image 
-    	fill_color - the color of toast image  
-    	focus_color - the focus color of toast image  
-    	border_width - the focus color of toast image  
-    	padding_x - the x padding of toast image 
-    	padding_y - the y padding of toast image
-    	border_radius - the border radius of toast image 
-	fade_duration - millisecs spent on fading away the toast 
-	duration - millisecs spent on showing the toast 
+	Table of Toast box properties
+	
+		skin - Modify the skin used for the toast widget by changing this value
+		title - Title of the Toast box
+		message - Message displayed in the Toast box
+    	font - Font used for text in the Toast box
+    	color - Color of the text in the Toast box
+    	bwidth  - Width of the Toast box 
+    	bheight - Height of the Toast box 
+    	border_color - Border color of the Toast box
+    	fill_color - Fill color of the Toast box
+    	focus_color - Focus color of the Toast box  
+    	border_width - Border width of the Toast box 
+    	padding_x - Padding of the toast box on the X axis 
+    	padding_y - Padding of the toast box on the Y axis
+    	border_radius - Radius of the border for the Toast box 
+	    fade_duration - Time in milleseconds that the Toast box spends fading away
+	    duration - Time in milleseconds that the Toast box spends in view before fading out
 
 Return:
- 	tb_group - group containing the toast box
+ 		tb_group - Group containing the Toast box
 
 Extra Function:
-	start_timer() - start the timer of toast box 	
+		start_timer() - Start the timer of the Toast box
 ]]
 
 
@@ -1036,8 +1039,8 @@ function widget.toastBox(table)
 	border_width  = 3,
 	border_color  = "FFFFFFC0", 
 	fill_color  = {25,25,25,100},
-	padding_x = 10,
-	padding_y = 10,
+	padding_x = 0,
+	padding_y = 0,
 	border_radius = 22,
 	fade_duration = 2000,
 	duration = 5000
@@ -1075,6 +1078,7 @@ function widget.toastBox(table)
     local create_toastBox = function()
 
     	tb_group:clear()
+        tb_group.size = { p.wwidth , p.wheight}
 
     	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
@@ -1093,6 +1097,9 @@ function widget.toastBox(table)
 	else 
 	     t_box_img = Image{}
 	end 
+
+	t_box.y = t_box.y -30
+	tb_group.h = tb_group.h - 30
 
     	tb_group:add(t_box, icon, title, message, t_box_img)
 
@@ -1151,38 +1158,36 @@ end
 
 
 --[[
-Function: buttonPicker
+Function: toastBox
 
-Creates a button picker widget
+Creates a Toast box widget
 
 Arguments:
-	Table of 
-
-	skin 	- skin name of button picker  
-    	wwidth  - button picker image width 
-    	wheight - button picker image hight 
-	items   - a table of button picker items 
-    	font - the font of button picker items
-    	color - the color of button picker items
-	selected_item - selected item's number 
-	item_func - table of functions that is called by selected item numger   
+	Table of Toast box properties
+	
+		skin - Modify the skin used for the toast widget by changing this value
+		title - Title of the Toast box
+		message - Message displayed in the Toast box
+    	font - Font used for text in the Toast box
+    	color - Color of the text in the Toast box
+    	bwidth  - Width of the Toast box 
+    	bheight - Height of the Toast box 
+    	border_color - Border color of the Toast box
+    	fill_color - Fill color of the Toast box
+    	focus_color - Focus color of the Toast box  
+    	border_width - Border width of the Toast box 
+    	padding_x - Padding of the toast box on the X axis 
+    	padding_y - Padding of the toast box on the Y axis
+    	border_radius - Radius of the border for the Toast box 
+	    fade_duration - Time in milleseconds that the Toast box spends fading away
+	    duration - Time in milleseconds that the Toast box spends in view before fading out
 
 Return:
- 	bp_group - group containing the button picker 
+ 		tb_group - Group containing the Toast box
 
 Extra Function:
-	on_focus() - grab focus of button picker 
-	out_focus() - release focus of button picker
-	press_left() - left key press event, apply the selection of button picker
-	press_right() - right key press event, apply the selection of button picker
-	press_up() - up key press event, apply the selection of button picker
-	press_down() - down key press event, apply the selection of button picker
-	press_enter() - enter key press event, apply the selection of button picker
-	insert_item(item) - add an item to the items table 
-	remove_item(item) - remove an item from the items table 
+		start_timer() - Start the timer of the Toast box
 ]]
-
- 
 function widget.buttonPicker(table) 
  --default parameters 
     local p = {
@@ -1217,12 +1222,14 @@ function widget.buttonPicker(table)
 
      local index = 1
      local padding = 10 
-     local pos = {26, 0}
+     --local pos = {26, 0}
+     local pos = {0, 0}
      local t = nil
 
      local create_buttonPicker = function() 
 
 	bp_group:clear()
+        bp_group.size = { p.wwidth , p.wheight}
 
 	if p.skin == "canvas" then 
             ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
@@ -1464,33 +1471,33 @@ end
 --[[
 Function: radioButton
 
-Creates a radio button widget
+Creates a Radio button widget
 
 Arguments:
-	Table of 
+	Table of Radio button properties
 
-	skin 	- skin name of radio button  
-    	wwidth  - radio button image width 
-    	wheight - radio button image hight 
-	items   - a table of radio button items 
-    	font - the font of radio button items
-    	color - the color of radio button items
-	button_color - the color of radio button
-	select_color - the color of selected radio button 
-	button_radius - the radius of radio button
-	select_radius - the radius of selected radio button
-	b_pos - the postion of the group of radio buttons 
-	item_pos - the position of the group of text items 
-	line_space - the space between the text itmes 
-	selected_item - selected item's number 
-	item_func - table of functions that is called by selected item numger   
+	skin - Modify the skin for the Radio button by changing this value  
+    bwidth - Width of the Radio button 
+    bheight - Height of the Radio button 
+	items - Table of Radio button items
+    font - Font of the Radio button items
+    color - Color of the Radio button items
+	button_color - Color of the Radio button
+	select_color - Color of the selected Radio button
+	button_radius - Radius of the Radio button
+	select_radius - Radius of the selected Radio button
+	ring_pos - The position of the group of Radio buttons 
+	item_pos - The position of the group of text items 
+	line_space - The space between the text items 
+	selected_item - Selected item's number 
+	rotate_func - Table of functions that is called by selceted item number
 
 Return:
- 	rb_group - group containing the radio button 
+ 	rb_group - Group containing the radio button 
 
 Extra Function:
-	insert_item(item) - add an item to the items table 
-	remove_item(item) - remove an item from the items table 
+	insert_item(item) - Add an item to the items table
+	remove_item(item) - Remove an item from the items table 
 ]]
 
 
@@ -1546,6 +1553,7 @@ function widget.radioButton(table)
          rb_group:clear()
          rings:clear()
          items:clear()
+         --rb_group.size = { p.wwidth , p.wheight},
 	
          if(p.skin == "canvas") then 
 	     select_img = create_select_circle(p.select_radius, p.select_color)
@@ -1613,32 +1621,33 @@ end
 --[[
 Function: checkBox
 
-Creates a check box widget
+Creates a Check box widget
 
 Arguments:
-	skin 	- skin name of check box   
-    	wwidth  - check box image width 
-    	wheight - check box image hight 
-	items   - a table of check box items 
-    	font - the font of check box items
-    	color - the color of check box items
-	box_color - the color of check box border 
-	fill_color - the color of check box 
-	box_width - the line width of check box border
-	box_size - the size of check box 
-        check_size - the size of check image 
-	b_pos - the postion of the group of check box  
-	item_pos - the position of the group of text items 
-	line_space - the space between the text itmes 
-	selected_item - selected item's number 
-	item_func - table of functions that is called by selected item numger   
+	Table of Check box properties
+		skin - Modify the skin for the button by changing this value   
+    	bwidth - Width of the Check box 
+    	bheight - Height of the Check box
+		items - Table of Check box items
+    	font - Font of the Check box items
+    	color - Color of the Check box items
+		box_color - Color of the Check box border 
+		fill_color - the color of the Check box 
+		box_width - Width of Check box border
+		box_size - The size of Check box 
+        check_size - The size of Check image 
+		box_pos - Postion of the group of check boxes
+		item_pos - Position of the group of text items 
+		line_space - Space between the text items 
+		selected_item - Selected item's number 
+		rotate_func - Table of functions that is called by selected item number   
 
 Return:
- 	rb_group - group containing the check box  
+		rb_group - Group containing the check box  
 
 Extra Function:
-	insert_item(item) - add an item to the items table 
-	remove_item(item) - remove an item from the items table 
+		insert_item(item) - Add an item to the items table 
+		remove_item(item) - Remove an item from the items table 
 ]]
 
 
@@ -1759,19 +1768,19 @@ end
 --[[
 Function: Loading Dots
 
-Creates a loading bar widget
+Creates a Loading dots widget
 
 Arguments:
-	dot_radius              - radius of the individual dots
-	dot_color  - color of the individual dots
-	num_dots  - number of dots in the loading circle
-	anim_radius       - the radius of the circle of dots
-	anim_duration   - millisecs spent on a dot, this number times the number of
-                      dots is the time for the animation to make a full circle
+	Table of Loading dots box properties
+		dot_radius - Radius of the individual dots
+		dot_color - Color of the individual dots
+		num_dots - Number of dots in the loading circle
+		anim_radius - Radius of the circle of dots
+		anim_duration - Millisecs spent on a dot, this number times the number of dots is the time for the animation to make a full circle
 
 Return:
 
-	loading_dots_group - group containing the loading dots
+	loading_dots_group - Group containing the loading dots
 ]]
  
 ---[[
@@ -1938,19 +1947,20 @@ end
 --[[
 Function: Loading Bar
 
-Creates a loading bar widget
+Creates a Loading bar widget
 
 Arguments:
-	bsize              - size of the loading bar
-	shell_upper_color  - the upper color for the inside of the loading bar
-	shell_lower_color  - the upper color for the inside of the loading bar
-	stroke_color       - the color for the outline
-	fill_upper_color   - the upper color for the loading bar fill
-	fill_lower_color   - the lower color for the loading bar fill
+	Table of Loading bar properties
+		bsize - Size of the loading bar
+		shell_upper_color - The upper color for the inside of the loading bar
+		shell_lower_color - The upper color for the inside of the loading bar
+		stroke_color - Color for the border
+		fill_upper_color - The upper color for the loading bar fill
+		fill_lower_color - The lower color for the loading bar fill
 
 Return:
 
-	loading_bar_group - group containing the loading bar
+		loading_bar_group - Group containing the loading bar
 ]]
 
 ---[[
