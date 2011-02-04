@@ -48,7 +48,6 @@ extern "C" {
     TP_AUDIO_FORMAT_DWVW_N       - N bit Delta Width Variable Word encoding.
     TP_AUDIO_FORMAT_DPCM_8       - 8 bit differential PCM (XI only)
     TP_AUDIO_FORMAT_DPCM_16      - 16 bit differential PCM (XI only)
-    TP_AUDIO_FORMAT_VORBIS       - Xiph Vorbis encoding.
 
     Constants: Endian-ness
 
@@ -82,7 +81,6 @@ extern "C" {
 #define TP_AUDIO_FORMAT_DWVW_N       = 0x0043
 #define TP_AUDIO_FORMAT_DPCM_8       = 0x0050
 #define TP_AUDIO_FORMAT_DPCM_16      = 0x0051
-#define TP_AUDIO_FORMAT_VORBIS       = 0x0060
 
 #define TP_AUDIO_ENDIAN_DEFAULT      = 0x00000000
 #define TP_AUDIO_ENDIAN_LITTLE       = 0x10000000
@@ -109,15 +107,6 @@ extern "C" {
 
     struct TPAudioBuffer
     {
-        /*
-            Field: frames
-
-            The number of frames contained in this buffer. Each frame should have
-            <channels> samples.
-        */
-
-        unsigned int        frames;
-
         /*
             Field: sample_rate
 
@@ -149,6 +138,14 @@ extern "C" {
         */
 
         void *              samples;
+
+        /*
+            Field: size
+
+            The size, in bytes of the buffer pointed to by samples.
+        */
+
+        unsigned long int   size;
 
         /*
             Field: copy_samples
@@ -197,6 +194,8 @@ extern "C" {
     This thread-safe function is used to submit an audio buffer to TrickPlay for
     processing.
 
+    You should try to call this function often and not accumulate samples yourself.
+
     Arguments:
 
         context - A valid TrickPlay context.
@@ -219,6 +218,11 @@ extern "C" {
     This thread-safe function notifies TrickPlay that the audio source has changed.
     TrickPlay will stop processing and free any audio buffers that were submitted
     before this call.
+
+    Although calling this function is optional, it is recommended that you do so.
+    Not only will it improve the user experience, but will also improve the general
+    performance of the audio sampler; because it can promtly free audio buffers that
+    are no longer relevant.
 */
 
     TP_API_EXPORT
