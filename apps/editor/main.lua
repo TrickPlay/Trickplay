@@ -732,10 +732,12 @@ local function build_ui( show_it )
 		    end 
 	       end 
 	      
-
-	       if(actor.type ~= "Canvas") then 
-	            actor.y =  y - dy  
+	       --print(actor.name)
+	       --print(actor.type)
+	       --if(actor.type ~= "Canvas") then 
+	       if(actor.name ~= "scroll_bar") then --imsi 0203 because of new Canvas is Image
 	            actor.x =  x - dx 
+	            actor.y =  y - dy  
 	       else
 		    if(actor.extra.h_y) then 
 	                local dif 

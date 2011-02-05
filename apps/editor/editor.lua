@@ -906,44 +906,44 @@ end
 
 function editor.inspector(v) 
 
-	local WIDTH = 450 
+	local WIDTH = 450 -- width for inspector's contents
+
 	local INSPECTOR_OFFSET = 30 
         local TOP_PADDING = 12
         local BOTTOM_PADDING = 12
 
-        local items_height = 0
-	local space = 0
-	local used = 0
 
 	if(current_inspector ~= nil) then 
 		return 
         end 
+ 	
+	for i, c in pairs(g.children) do
+	     editor.n_selected(c)
+	end
 	
-        editor.n_selected(v) --add 1108
-	
-        for i, c in pairs(g.children) do
-            if g:find_child(c.name) then
-	        if(c.extra.selected == true and c.name ~= v.name) then
-			editor.n_selected(c)
-		end
-		if(c.type == "Text") then 
-			c.reactive = false
-		end 
-            end
-        end
 
-        --editor.selected(v, true)
-	local attr_t = make_attr_t(v)
 
 	local inspector_items = {}
-	local inspector_bg = factory.make_popup_bg(v.type, 0)
+	local inspector_bg
+
+	-- make inspector background image 
+	if is_in_list(v.extra.type, widgets) == true  then
+	     if v.extra.type == "Button" and v.skin =="canvas" then 
+	     inspector_bg = factory.make_popup_bg(v.extra.type.."-c", 0)
+	     else 
+	     inspector_bg = factory.make_popup_bg(v.extra.type, 0)
+	     end 
+	else 
+	     inspector_bg = factory.make_popup_bg(v.type, 0)
+	end 
+
 	local inspector_xbox = factory.make_xbox()
 
+	-- inspector group 
 	local inspector = Group {
-	     --position ={ v.x + v.w + INSPECTOR_OFFSET , v.y },
 	     name = "inspector",
 	     position ={0, 0},
-	     anchor_point = {0,0},--{ inspector_bg.w / 2 , 0 },
+	     anchor_point = {0,0},
              children =
              {
                inspector_bg, 
@@ -999,6 +999,7 @@ function editor.inspector(v)
 	    end 
 	end 
 
+	-- set the inspector location 
 	if(v.type ~= "Video") then
 	     inspector_position() 
 	else 
@@ -1006,14 +1007,21 @@ function editor.inspector(v)
 	     inspector.y = screen.h/8
 	end 
 
-	local attr_n, attr_v
-	local i = 0
-	for i=1,40 do 
+	-- make the inspector 
+
+	local attr_t = make_attr_t(v)
+	local attr_n, attr_v, attr_s
+
+        local items_height = 0
+	local space = 0
+	local used = 0
+
+	for i=1, #attr_t do 
              if (attr_t[i] == nil) then break end 
+
 	     attr_n = attr_t[i][1] 
 	     attr_v = attr_t[i][2] 
 	     attr_s = attr_t[i][3] 
-
              attr_v = tostring(attr_v)
 
 	     if(attr_s == nil) then attr_s = "" end 
@@ -1031,22 +1039,12 @@ function editor.inspector(v)
 		 used = 0
              end 
 		
-	     if  attr_n == "name" or attr_n == "text" or attr_n == "src" 
-	       or attr_n == "r" or attr_n == "g" or attr_n == "b" 
-	       or attr_n == "rect_r" or attr_n == "rect_g" or attr_n == "rect_b" or attr_n == "rect_a" 
-	       or attr_n == "bord_r" or attr_n == "bord_g" or attr_n == "bord_b"
-	       or attr_n == "font "  
-	       then 
-                 --item.y = items_height - 15
-                 item.y = items_height 
-             --elseif (attr_n == "line") then  
-                 --item.y = items_height  + 40
-
-	     elseif (attr_n == "caption") then  
+	     
+	     if (attr_n == "caption") then  
                   item.y = items_height + 10
 	     else 
-                 item.y = items_height
-	     end
+                 item.y = items_height 
+	     end 
 
 	    if(space == 0) then 
 	         space = WIDTH - item.w 
@@ -1055,7 +1053,6 @@ function editor.inspector(v)
 	    end
 	    used = used + item.w 
 	
-	    
 	    inspector:add(item)
 		
         end 
@@ -1403,15 +1400,17 @@ function editor.undo()
 	  elseif undo_item[2] == DEL then 
 	       editor.n_selected(undo_item[3])
 	       if((undo_item[3]).type == "Group") then 
-		    for i, c in pairs(undo_item[3].extra.children) do
-			local c_tmp = g:find_child(c)
-			editor.n_selected(c_tmp)
-			g:remove(g:find_child(c))
-			c_tmp.extra.is_in_group = true
-			--print("KKKK 2222")
-			c_tmp.x = c_tmp.x - undo_item[3].x
-			c_tmp.y = c_tmp.y - undo_item[3].y
-			undo_item[3]:add(c_tmp)
+		    if is_in_list(undo_item[3].extra.type, widgets) == false then 
+		        for i, c in pairs(undo_item[3].extra.children) do
+				local c_tmp = g:find_child(c)
+				editor.n_selected(c_tmp)
+				g:remove(g:find_child(c))
+				c_tmp.extra.is_in_group = true
+				--print("KKKK 2222")
+				c_tmp.x = c_tmp.x - undo_item[3].x
+				c_tmp.y = c_tmp.y - undo_item[3].y
+				undo_item[3]:add(c_tmp)
+		    	end 
 		    end 
 		    g:add(undo_item[3])
   
@@ -2450,7 +2449,7 @@ local widget_map = {
 	["ButtonPicker"] = function () return widget.buttonPicker()  end, 
 	["LoadingDots"] = function () return widget.loadingdots() end, 
 	["LoadingBar"] = function () return widget.loadingbar() end,
-    ["3D_List"] = function () return widget.threeDlist() end, 
+        ["3D_List"] = function () return widget.threeDlist() end, 
 }
 
 
@@ -2525,7 +2524,7 @@ function editor.widgets()
 		ld=new_widget
 	      elseif (new_widget.extra.type == "LoadingBar") then 
 		lb=new_widget
-         elseif (new_widget.extra.type == "3D_List") then 
+              elseif (new_widget.extra.type == "3D_List") then 
 		d=new_widget
 	      end
 --imsi 
@@ -2533,6 +2532,7 @@ function editor.widgets()
 		item_num = item_num + 1
 	      end 
 	      new_widget.name = new_widget.name..tostring(item_num)
+              table.insert(undo_list, {new_widget.name, ADD, new_widget})
 	      g:add(new_widget)
               create_on_button_down_f(new_widget)
 --kk
@@ -2563,7 +2563,7 @@ function editor.widgets()
 		ld=new_widget
 	      elseif (new_widget.extra.type == "LoadingBar") then 
 		lb=new_widget
-         elseif (new_widget.extra.type == "3D_List") then 
+              elseif (new_widget.extra.type == "3D_List") then 
 		d=new_widget
 	      end
 --imsi 
@@ -2571,6 +2571,7 @@ function editor.widgets()
 		item_num = item_num + 1
 	      end 
 	      new_widget.name = new_widget.name..tostring(item_num)
+              table.insert(undo_list, {new_widget.name, ADD, new_widget})
 	      g:add(new_widget)
               create_on_button_down_f(new_widget)
 	      screen:add(g)
