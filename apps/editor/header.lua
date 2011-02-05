@@ -109,7 +109,7 @@ ui =
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "  EDIT  " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 665,
+                height  = 720,
                 init    = dofile( "section-edit" )
             },
 
@@ -126,7 +126,7 @@ ui =
                 button  = assets( "assets/button-blue.png" ),
                 text    = Text  { text = strings[ "  SETTING" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
-                height  = 400,
+                height  = 395,
                 init    = dofile( "section-setting" )
             }
         }
@@ -160,6 +160,7 @@ widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "
            "ButtonPicker", "LoadingDots", 
            "LoadingBar", "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK"}
 
+skins = {"default", "canvas", "skin_type1", "skin_type2"} 
 --[[
 dofile("Button.lua")
 dofile("TextField.lua")

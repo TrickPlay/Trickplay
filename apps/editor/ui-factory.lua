@@ -522,6 +522,21 @@ local color_map =
         [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
 ]]
         [ "Text" ] = function()  size = {500, 920} color = {25,25,25,100}  return size, color end,
+        [ "Button" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "Button-c" ] = function()  size = {500, 900} color = {25,25,25,100}  return size, color end,
+        [ "TextInputField" ] = function()  size = {500, 1000} color = {25,25,25,100}  return size, color end,
+        [ "DialogBox" ] = function()  size = {500, 1010} color = {25,25,25,100}  return size, color end,
+        [ "ToastBox" ] = function()  size = {500, 840} color = {25,25,25,100}  return size, color end,
+        [ "RadioButton" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "CheckBox" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "ButtonPicker" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "LoadingDots" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "LoadingBar" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "MenuBar" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "3D_List" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "ScrollImage" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "TabBar" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
+        [ "OSK" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
         [ "Image" ] = function()  size = {500, 850} color ={25,25,25,100}  return size, color end,
         [ "Rectangle" ] = function()  size = {500, 840} color = {25,25,25,100}   return size, color end,
         [ "Clone" ] = function()  size = {500, 670} color = {25,25,25,100}   return size, color end,
@@ -547,7 +562,7 @@ local color_map =
 function factory.make_popup_bg(o_type, file_list_size)
 
     local size, color = color_map[o_type](file_list_size)
-
+    
     local BORDER_WIDTH= 3 
     local POINT_HEIGHT=34
     local POINT_WIDTH=60
@@ -1292,9 +1307,11 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         return line
     end 
 
+    -- item group 
     local group = Group {}
+    	
+    -- item group's children 
     local text, input_text, ring, focus, line, button
-
 
     if(item_n == "title" or item_n == "caption") then
     	text = Text {text = item_v}:set(STYLE)
@@ -1359,6 +1376,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                   group.extra.on_focus_out()
 		  for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
+			     if(attr_t_idx[i+1] == nil) then return true end  -- 0203
 			     while(inspector:find_child(attr_t_idx[i+1]) == nil) do 
 				 i = i + 1
 			     end 
@@ -1442,12 +1460,57 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     button.opacity = 255 
         end
 
-    else 
+    elseif(item_n == "skin") then  -- Attribute with button picker 
+        local space = WIDTH - PADDING_X  
+ 	text = Text {name = "attr", wheight = 40, text = string.upper(item_s)}:set(STYLE)
+        text.position  = -- {WIDTH - space , 7}
+		{WIDTH - space , 0}
+
+    	group:add(text)
+
+        local space = WIDTH - PADDING_X  
+	skin_picker = widget.buttonPicker{skin = "canvas", items = skins, font = "DejaVu Sans 26px"}
+	skin_picker.wheight = 40
+        skin_picker.position = {text.x + text.w + 50 , 0 }-- -5}
+        group:add(skin_picker) 
+	
+	skin_picker.reactive  = true 
+	function skin_picker:on_button_down (x,y,b,n)
+		skin_picker:on_focus()
+	end 
+
+	function skin_picker:on_key_down()
+	       if key == keys.Left then 
+		     skin_picker.press_left()
+	       elseif key == keys.Right then  
+		     skin_picker.press_right()
+	       elseif (key == keys.Tab and shift == false) or key == keys.Down then
+		     skin_picker.out_focus()
+	       elseif key == keys.Up or (key == keys.Tab and shift == true )then 
+		     skin_picker.out_focus()
+	       end 
+	end 
+	
+	--[[
+	function (skin_picker:find_child("left_un")):on_button_down(x, y, button, num_clicks)
+		skin_picker.press_left()
+		return true 
+	end 
+	function (skin_picker:find_child("right_un")):on_button_down(x, y, button, num_clicks)
+		skin_picker.press_right()
+		return true 
+	end 
+	]]
+--kk
+--kk
+	
+	
+    else 	---- Attributes with focusable ring 
+
 	group.name = item_n
 	group.reactive = true
 
         local space = WIDTH - PADDING_X  
-
 
         if(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
@@ -1459,6 +1522,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     anchor_pnt.position = {300, 0}
 	     group:add(anchor_pnt)
              return group
+	elseif item_n == "message" then 
+	     input_box_width = WIDTH 
 	else 
     	     text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)
              text.position  = {WIDTH - space , PADDING_Y}
@@ -1466,9 +1531,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	     input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
 	     space = space - string.len(item_s) * 20
-             if (item_n =="font" ) then
+             if (item_n =="font" or item_n == "label") then
 	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
-             elseif(item_n == "wrap_mode" ) then 
+             elseif(item_n == "wrap_mode" or item_n =="duration" or item_n =="fade_duration") then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
              elseif(item_n == "rect_r" or item_n == "rect_g" or item_n == "rect_b" or item_n == "rect_a" ) 
              or (item_n == "cx" or item_n == "cy" or item_n == "cw" or item_n == "ch" ) then 
@@ -1476,7 +1541,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     end
         end 
 
-        ring = make_ring(input_box_width, HEIGHT + 5) 
+        ring = make_ring(input_box_width, HEIGHT + 5 ) 
 	ring.name = "ring"
 	ring.position = {WIDTH - space , 0}
         ring.opacity = 255
@@ -1534,6 +1599,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		    group.extra.on_focus_out()
  		    for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
+			     if(attr_t_idx[i-1] == nil) then return true end  -- 0203
 			     while(inspector:find_child(attr_t_idx[i-1]) == nil) do 
 				 i = i - 1
 			     end 
