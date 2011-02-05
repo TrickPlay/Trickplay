@@ -68,10 +68,32 @@ Tile = Class(function(obj, face_source, parent, ...)
     --clone each part of the face
     local function init_face()
         obj.tbl     = {}
+        local v, child
+        --for i, v in ipairs(tile_faces[face_source].tbl)
         for i = 1, #tile_faces[face_source].tbl do
-            obj.tbl[i] = Clone{ source = tile_faces[face_source].tbl[i] }
-            obj.tbl[i].position = {tile_faces[face_source].tbl[i].x,tile_faces[face_source].tbl[i].y}
-            obj.tbl[i].scale = {tile_faces[face_source].tbl[i].scale[1],tile_faces[face_source].tbl[i].scale[2]}
+            v = tile_faces[face_source].tbl[i]
+            if type(v.children) == "table" then
+                obj.tbl[i] = Group{x=v.x,y=v.y}
+                for j = 1, #v.children do
+                    child = v.children[j]
+                    obj.tbl[i]:add(
+                        Clone{
+                            source = child,
+                            name   = child.name,
+                            x      = child.x,
+                            y      = child.y,
+                            scale  = {child.scale[1],child.scale[2]}
+                        }
+                    )
+                end
+            else
+                obj.tbl[i] = Clone{
+                    source =  v,
+                    x      =  v.x,
+                    y      =  v.y,
+                    scale  = {v.scale[1],v.scale[2]}
+                }
+            end
             obj.face:add(obj.tbl[i])
         end
         if tile_faces[face_source].clip then
@@ -108,6 +130,7 @@ Tile = Class(function(obj, face_source, parent, ...)
             --init_face()
             obj.group:add(obj.face)
             tile_faces[face_source].reset(obj.tbl)
+            
         end,
         stages = {
             function(self,delta,p)
@@ -116,6 +139,7 @@ Tile = Class(function(obj, face_source, parent, ...)
                 obj.face.z    = p
             end,
             function(self,delta,p)
+                face_animation.played = false
                 animate_list[face_animation] = face_animation
                 self.stage = self.stage + 1
             end,

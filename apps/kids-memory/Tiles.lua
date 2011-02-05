@@ -4,11 +4,21 @@ screen:add(tile_container)
 tile_container:hide()
 
 
-
+do
+local mouth_start = 90
+local mouth_end   = 100
 tile_faces[1]     = {}
 tile_faces[1].tbl = {
         Image{src="assets/critters/monkey_tail.png",x=110,y=20},
-        Image{src="assets/critters/monkey_body.png",x=10,y=50},
+        Group{
+            position = {10,50},
+            children = {
+                Image{src="assets/critters/monkey_body.png",  },
+                Image{src="assets/critters/monkey-mouth.png",name="mouth",x=105,y=mouth_start},
+                Image{src="assets/critters/monkey-nose.png", x=87,y=90},
+                
+            }
+        },
         Image{src="assets/critters/monkey_feet.png",x=50,y=160},
 }
 tile_faces[1].reset = function(tbl)
@@ -18,21 +28,55 @@ tile_faces[1].reset = function(tbl)
     tbl[3]:move_anchor_point(tbl[3].w/2,0)
     tbl[2].z_rotation = {( 5),0,0}
     tbl[1].z_rotation = {(-15),0,0}
+    tbl[2]:find_child("mouth").y = mouth_start
 end
 
-tile_faces[1].duration = {500,500}
+tile_faces[1].duration = {nil,500,500}
 tile_faces[1].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/monkey.wav")
+            self.start_talking = 9
+        end
+        self.start_talking = self.start_talking - 1
+    end,
     function(self,delta,p)
         self.tbl[2].z_rotation = {(-5)*(2*p-1),0,0}
         self.tbl[1].z_rotation = {(-15)*(1-p),0,0}
+        
+        if self.start_talking > 0 then
+        p = 2*p
+        if p < 1 then
+            self.tbl[2]:find_child("mouth").y =
+                mouth_end + (mouth_start - mouth_end)*(1-p)
+        else
+            p = p-1
+            self.tbl[2]:find_child("mouth").y =
+                mouth_end + (mouth_start - mouth_end)*(p)
+        end
+        end
     end,
     function(self,delta,p)
         self.tbl[2].z_rotation = {( 5)*(2*p-1),0,0}
         self.tbl[1].z_rotation = {(-15)*(p),0,0}
+        
+        if self.start_talking > 0 then
+        p = 2*p
+        if p < 1 then
+            self.tbl[2]:find_child("mouth").y =
+                mouth_end + (mouth_start - mouth_end)*(1-p)
+        else
+            p = p-1
+            self.tbl[2]:find_child("mouth").y =
+                mouth_end + (mouth_start - mouth_end)*(p)
+        end
+        end
     end,
 }
 
-
+end
 
 tile_faces[2]   = {}
 tile_faces[2].tbl = {
@@ -54,8 +98,15 @@ tile_faces[2].reset = function(tbl)
     tbl[1].z_rotation = {20,0,0}
 end
 
-tile_faces[2].duration = {750,750}
+tile_faces[2].duration = {nil,750,750}
 tile_faces[2].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/butterfly.wav")
+        end
+    end,
     function(self,delta,p)
         self.tbl[3].y_rotation = {(-120)*p,0,0}
         self.tbl[1].y_rotation = {( 120)*p,0,0}
@@ -80,8 +131,14 @@ tile_faces[3].reset = function(tbl)
     tbl[2]:move_anchor_point(tbl[2].w/2,0)
 end
 
-tile_faces[3].duration = {250,250,250,250,1000}
+tile_faces[3].duration = {nil,250,250,nil,250,250,1000}
 tile_faces[3].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            mediaplayer:play_sound("audio/toucan.wav")
+        end
+    end,
     function(self,delta,p)
         self.tbl[2].z_rotation = {( 5)*p,0,0}
         self.tbl[3].z_rotation = {(-5)*p,0,0}
@@ -89,6 +146,13 @@ tile_faces[3].stages = {
     function(self,delta,p)
         self.tbl[2].z_rotation = { 5*(1-p),0,0}
         self.tbl[3].z_rotation = {-5*(1-p),0,0}
+    end,
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            --mediaplayer:play_sound("audio/toucan.wav")
+        end
     end,
     function(self,delta,p)
         self.tbl[2].z_rotation = {( 5)*p,0,0}
@@ -116,8 +180,15 @@ tile_faces[4].reset = function(tbl)
 
 end
 
-tile_faces[4].duration = {200,200,200,200,200,200,2000}
+tile_faces[4].duration = {nil,200,200,200,200,200,200,2000}
 tile_faces[4].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/mouse.wav")
+        end
+    end,
     function(self,delta,p)
         self.tbl[2].z_rotation = {( -26)*p,0,0}
     end,
@@ -161,8 +232,15 @@ do
         tbl[2].z_rotation = { arm_start,0,0}
     end
     
-    tile_faces[5].duration = {200,200,200,200}
+    tile_faces[5].duration = {nil,200,200,200,200}
     tile_faces[5].stages = {
+        function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/squirrel.wav")
+        end
+    end,
         function(self,delta,p)
             self.tbl[1].z_rotation = { tail_start+(-5-tail_start)*p,0,0}
             self.tbl[2].z_rotation = { arm_start+(arm_end-arm_start)*p,0,0}
@@ -201,8 +279,15 @@ do
         tbl[2].z_rotation = {-angle_max,0,0}
     end
     
-    tile_faces[6].duration = {2000,2000}
+    tile_faces[6].duration = {nil,2000,2000}
     tile_faces[6].stages = {
+        function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/duck.wav")
+        end
+    end,
         function(self,delta,p)
             self.tbl[1].x = -(self.tbl[1].w-tile_size)*p
             self.tbl[3].x = -(self.tbl[3].w-tile_size)*p
@@ -235,11 +320,11 @@ do
 end
 do
     local mouth_start = 160
-    local mouth_end   = 170
+    local mouth_end   = 171
     tile_faces[7]   = {}
     tile_faces[7].tbl = {
         Image{src="assets/critters/cow_body.png" ,x=30,y=50},
-        Image{src="assets/critters/cow_mouth.png",x=40,y=mouth_start},
+        Image{src="assets/critters/cow_mouth.png",x=43,y=mouth_start},
         Image{src="assets/critters/cow_head.png" ,x=10,y=40},
     }
     tile_faces[7].reset = function(tbl)
@@ -248,7 +333,7 @@ do
         --tbl[2].z_rotation = {-angle_max,0,0}
     end
     
-    tile_faces[7].duration = {200,400,200,200,600,200,2000}
+    tile_faces[7].duration = {200,400,200,nil,200,600,200,2000}
     tile_faces[7].stages = {
         function(self,delta,p)
             self.tbl[3].z_rotation = {10*p,0,0}
@@ -259,6 +344,13 @@ do
         function(self,delta,p)
             self.tbl[3].z_rotation = {-10*(1-p),0,0}
         end,
+        function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/cow.wav")
+        end
+    end,
         function(self,delta,p)
             self.tbl[2].y = mouth_start + (mouth_end-mouth_start)*p
         end,
@@ -289,8 +381,15 @@ do
         --tbl[2].z_rotation = {-angle_max,0,0}
     end
     
-    tile_faces[8].duration = {300,300,300,300, 300,300,300,300, 1200}
+    tile_faces[8].duration = {nil,300,300,300,300, 300,300,300,300, 1200}
     tile_faces[8].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/cat.wav")
+        end
+    end,
         function(self,delta,p)
             self.tbl[4].z_rotation = {paw_up*p,0,0}
             self.tbl[1].z_rotation = {tail_rot/3*p,0,0}
@@ -348,8 +447,15 @@ do
         --tbl[2].z_rotation = {-angle_max,0,0}
     end
     
-    tile_faces[9].duration = {300,300}
+    tile_faces[9].duration = {nil,300,300}
     tile_faces[9].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/ladybug.wav")
+        end
+    end,
         function(self,delta,p)
             self.tbl[2].y = head_high+(head_low-head_high)*p
         end,
@@ -376,8 +482,15 @@ do
         tbl[3]:move_anchor_point(tbl[3].w/2,tbl[3].h/2)
     end
     
-    tile_faces[10].duration = {200,200}
+    tile_faces[10].duration = {nil,200,200}
     tile_faces[10].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/pig.wav")
+        end
+    end,
         function(self,delta,p)
             self.tbl[3].scale = {1+(scaled_nose-1)*p,1+(scaled_nose-1)*p}
             self.tbl[1].z_rotation = {tail_rot*p,0,0}
@@ -413,8 +526,15 @@ do
         tbl[6].opacity = 0
     end
     
-    tile_faces[11].duration = {400,400,700,1100,400,nil,500,nil,1500}
+    tile_faces[11].duration = {nil,400,400,700,1100,400,nil,500,nil,1500}
     tile_faces[11].stages = {
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/frog.wav")
+        end
+    end,
         function(self,delta,p)
             self.tbl[1].opacity=255
             self.tbl[1].y = 40+(10-40)*p
@@ -519,43 +639,71 @@ do
     tile_faces[12]   = {}
     tile_faces[12].tbl = {
         Image{src="assets/critters/turtle-mouth.png",x= 65,y=122},
+        Image{src="assets/critters/turtle-tail.png",x= 202,y=140},
         Image{src="assets/critters/turtle-no-jaw.png",x=0,y= 0},
         Image{src="assets/critters/turtle-grass.png",x= 62,y=135},
-        
     }
     
     tile_faces[12].reset = function(tbl)
-        tbl[2]:move_anchor_point(5,tbl[2].h/2)
+        tbl[2]:move_anchor_point(5,5)
     end
-    
-    tile_faces[12].duration = {400,400,400,400,400,400,2000}
+    tile_faces[12].duration = {nil,400,400,400,400,400,400,400,400,400,400,400,400}
     tile_faces[12].stages = {
-        function(self,delta,p)
-            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
-            self.tbl[3].y_rotation = {2*jaw_rot*p,0,0}
-        end,
-        function(self,delta,p)
-            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
-            self.tbl[3].y_rotation = {2*jaw_rot*(1-p),0,0}
-        end,
-        function(self,delta,p)
-            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
-            self.tbl[3].y_rotation = {2*jaw_rot*p,0,0}
-        end,
-        function(self,delta,p)
-            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
-            self.tbl[3].y_rotation = {2*jaw_rot*(1-p),0,0}
-        end,
-        function(self,delta,p)
-            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
-            self.tbl[3].y_rotation = {2*jaw_rot*p,0,0}
-        end,
-        function(self,delta,p)
-            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
-            self.tbl[3].y_rotation = {2*jaw_rot*(1-p),0,0}
-        end,
-        function()
+    function(self,delta,p)
+        self.stage = self.stage+1
+        if not self.played then
+            self.played = true
+            mediaplayer:play_sound("audio/turtle.wav")
         end
+    end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
+            self.tbl[2].z_rotation = {-15*p,0,0}
+            self.tbl[4].y_rotation = {2*jaw_rot*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
+            self.tbl[2].z_rotation = {-15*(1-p),0,0}
+            self.tbl[4].y_rotation = {2*jaw_rot*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
+            self.tbl[2].z_rotation = {-15*p,0,0}
+            self.tbl[4].y_rotation = {2*jaw_rot*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
+            self.tbl[2].z_rotation = {-15*(1-p),0,0}
+            self.tbl[4].y_rotation = {2*jaw_rot*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*p,0,0}
+            self.tbl[2].z_rotation = {-15*p,0,0}
+            self.tbl[4].y_rotation = {2*jaw_rot*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[1].z_rotation = {jaw_rot*(1-p),0,0}
+            self.tbl[2].z_rotation = {-15*(1-p),0,0}
+            self.tbl[4].y_rotation = {2*jaw_rot*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[2].z_rotation = {-15*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[2].z_rotation = {-15*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[2].z_rotation = {-15*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[2].z_rotation = {-15*(1-p),0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[2].z_rotation = {-15*p,0,0}
+        end,
+        function(self,delta,p)
+            self.tbl[2].z_rotation = {-15*(1-p),0,0}
+        end,
     }
 end
 for i = 1,#tile_faces do
