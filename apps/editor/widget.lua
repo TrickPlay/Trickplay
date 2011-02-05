@@ -599,15 +599,15 @@ function widget.button(table)
  --default parameters
     local p = {
     	font = "DejaVu Sans 30px",
-    	color = "FFFFFF",
+    	color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	wwidth = 180,
     	wheight = 60, 
 
     	text = "Button", 
-    	focus_color = "1b911b", 
+    	focus_color = {27,145,27,255}, --"1b911b", 
 
-    	border_color = "FFFFFF", 
+    	border_color = {255,255,255,255}, --"FFFFFF"
     	border_width = 1,
     	padding_x = 0,
     	padding_y = 0,
@@ -758,10 +758,10 @@ function widget.textField(table)
     	text = "" ,
     	text_indent = 20 ,
     	border_width  = 3 ,
-    	border_color  = "FFFFFFC0" , 
-    	focus_color  = "1b911b" , 
+    	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
+    	focus_color  = {27,145,27,255}, --"1b911b" , 
     	font = "DejaVu Sans 30px"  , 
-    	color = "FFFFFF" , 
+    	color =  {255,255,255,255}, -- "FFFFFF" , 
     	padding_x = 0 ,
     	padding_y = 0 ,
     	border_radius = 12 ,
@@ -908,9 +908,9 @@ function widget.dialogBox(table)
 	wheight = 500 ,
 	title = "Dialog Box Title" ,
 	font = "DejaVu Sans 30px" , 
-	color = "FFFFFF" , 
+	color = {255,255,255,255} , --"FFFFFF" , 
 	border_width  = 3 ,
-	border_color  = "FFFFFFC0" , 
+	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
 	padding_x = 0 ,
 	padding_y = 0 ,
@@ -1035,9 +1035,9 @@ function widget.toastBox(table)
 	title = "Toast Box Title",
 	message = "Toast box message ... ",
 	font = "DejaVu Sans 30px", 
-	color = "FFFFFF", 
+	color = {255,255,255,255},  --"FFFFFF", 
 	border_width  = 3,
-	border_color  = "FFFFFFC0", 
+	border_color  = {255,255,255,255}, "FFFFFFC0", 
 	fill_color  = {25,25,25,100},
 	padding_x = 0,
 	padding_y = 0,
@@ -1191,6 +1191,9 @@ Extra Function:
 
  
 function widget.buttonPicker(table) 
+    local w_scale = 1
+    local h_scale = 1
+
  --default parameters 
     local p = {
 	skin = "default", 
@@ -1198,7 +1201,7 @@ function widget.buttonPicker(table)
 	wheight = 60,
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px" , 
-	color = "FFFFFF", 
+	color = {255,255,255,255}, --"FFFFFF", 
 	item_func = {}, 
         selected_item = 1, 
     }
@@ -1209,7 +1212,7 @@ function widget.buttonPicker(table)
 	    p[k] = v 
         end 
      end 
-
+     
  --the umbrella Group
      local unfocus, focus, left_un, left_sel, right_un, right_sel
      local items = Group{name = "items"}
@@ -1224,8 +1227,8 @@ function widget.buttonPicker(table)
 
      local index = 1
      local padding = 10 
-     --local pos = {26, 0}
-     local pos = {0, 0}
+     --local pos = {26, 0} -- left arrow 
+     local pos = {0, 0}    -- focus, unfocus 
      local t = nil
 
      local create_buttonPicker = function() 
@@ -1233,61 +1236,66 @@ function widget.buttonPicker(table)
 	bp_group:clear()
         bp_group.size = { p.wwidth , p.wheight}
 
+	ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
+        ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
+
+        focus_ring = make_ring(p.wwidth, p.wheight, {255, 0,0,255}, 1, 7, 7, 12)
+        focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
+
+
 	if p.skin == "canvas" then 
-            ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
-            ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
-
-            focus_ring = make_ring(p.wwidth, p.wheight, {255, 0,0,255}, 1, 7, 7, 12)
-            focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
-
-	    left_un   = assets(skin_list["default"]["buttonpicker_left_un"])
-	    left_un:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 255}
-
+     	    unfocus = assets(skin_list["default"]["buttonpicker"])
+     	    focus = assets(skin_list["default"]["buttonpicker_focus"])
+            left_un   = assets(skin_list["default"]["buttonpicker_left_un"])
 	    left_sel  = assets(skin_list["default"]["buttonpciker_left_sel"])
-	    left_sel:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 0}
-
 	    right_un  = assets(skin_list["default"]["buttonpicker_right_un"])
-	    right_un:set{position = {pos[1] + focus.w + padding, pos[2] + padding}, opacity = 255}
-
             right_sel = assets(skin_list["default"]["buttonpicker_right_sel"])
-	    right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
 	else 
-	    ring = Image{}
-	    focus_ring = Image{}
-
      	    unfocus = assets(skin_list[p.skin]["buttonpicker"])
-     	    unfocus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255}
-
      	    focus = assets(skin_list[p.skin]["buttonpicker_focus"])
-	    focus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
-
 	    left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
-	    left_un:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 255}
-
 	    left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
-	    left_sel:set{position = {pos[1] - left_un.w - padding, pos[2] + padding}, opacity = 0}
-
 	    right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
-	    right_un:set{position = {pos[1] + focus.w + padding, pos[2] + padding}, opacity = 255}
-
             right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
-	    right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
  	end 
-   	
+
+	left_un.scale = {w_scale, h_scale}
+	left_sel.scale = {w_scale, h_scale}
+	right_un.scale = {w_scale, h_scale}
+	right_sel.scale = {w_scale, h_scale}
+
+	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 255}
+	left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 0}
+	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.wheight/5}, opacity = 255}
+	right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+
+     	unfocus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255}
+	focus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
+
      	for i, j in pairs(p.items) do 
 	  if i == 1 then 
-               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = {pos[1] + unfocus.w/2 - string.len(j)*20/2, pos[2] + padding}, opacity = 255})     
+               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color,opacity = 255})      
+		-- position = {pos[1] + p.wwidth/2 - string.len(j)*26/4, pos[2] + p.wheight/4 }, 
 	  else 
-               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = {pos[1] + unfocus.w/2 - string.len(j)*20/2 + 200 , pos[2] + padding}, opacity = 255})     
+               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, opacity = 255})     
+		-- position = {pos[1] + p.wwidth/2 - string.len(j)*26/2 + 200 , pos[2] + padding}, 
 	  end 
      	end 
 
-	items.clip = {
-		pos[1] + unfocus.w/2 - 50 , 
-		pos[2] + padding, 
-		pos[1] + unfocus.w/2, 
-		pos[2] + padding + unfocus.h
-     	}
+	local j_padding
+
+	for i, j in pairs(items.children) do 
+	  if i == 1 then 
+               j.position = {p.wwidth/2 - j.width/2, p.wheight/2 - j.height/2}
+	       j_padding = 4 * j.x
+	       print (j_padding, "JPADDING")
+	  else 
+               j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
+	  end 
+     	end 
+
+	items.clip = { 0, 0, p.wwidth, p.wheight }
+
 
    	bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
 
@@ -1310,20 +1318,22 @@ function widget.buttonPicker(table)
 
      function bp_group.extra.press_left()
             local prev_i = index
-	    dumptable(p)
 
             local next_i = (index-2)%(#p.items)+1
 
 	    index = next_i
 
-	    local prev_old_x = pos[1] + unfocus.w/2 - 50 
-	    local prev_old_y = pos[2] + padding
-	    local next_old_x = pos[1] + unfocus.w/2 - 50 + focus.w
-	    local next_old_y = pos[2] + padding
-	    local prev_new_x = pos[1] + unfocus.w/2 - 50 - focus.w
-	    local prev_new_y = pos[2] + padding
-	    local next_new_x = pos[1] + unfocus.w/2 - 50
-	    local next_new_y = pos[2] + padding
+	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local prev_old_x = p.wwidth/2 - j.width/2
+	    local prev_old_y = p.wheight/2 - j.height/2
+	    local next_old_x = p.wwidth/2 - j.width/2 + focus.w
+	    local next_old_y = p.wheight/2 - j.height/2
+	    local prev_new_x = p.wwidth/2 - j.width/2 - focus.w
+	    local prev_new_y = p.wheight/2 - j.height/2
+	    local next_new_x = p.wwidth/2 - j.width/2
+	    local next_new_y = p.wheight/2 - j.height/2
+
+
 
 	    if t ~= nil then
 	       t:stop()
@@ -1354,7 +1364,7 @@ function widget.buttonPicker(table)
 			items:find_child("item"..tostring(prev_i)).y = prev_new_y
 			items:find_child("item"..tostring(next_i)).x = next_new_x
 			items:find_child("item"..tostring(next_i)).y = next_new_y
-
+			p.selected_item = next_i
 			t = nil
 	    end
 	    if p.item_func then
@@ -1370,14 +1380,15 @@ function widget.buttonPicker(table)
             local next_i = (index)%(#p.items)+1
 	    index = next_i
 
-	    local prev_old_x = pos[1] + unfocus.w/2 - 50 
-	    local prev_old_y = pos[2] + padding
-	    local next_old_x = pos[1] + unfocus.w/2 - 50 -focus.w
-	    local next_old_y = pos[2] + padding
-	    local prev_new_x = pos[1] + unfocus.w/2 - 50 +focus.w
-	    local prev_new_y = pos[2] + padding
-	    local next_new_x = pos[1] + unfocus.w/2 - 50
-	    local next_new_y = pos[2] + padding
+	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local prev_old_x = p.wwidth/2 - j.width/2
+	    local prev_old_y = p.wheight/2 - j.height/2
+	    local next_old_x = p.wwidth/2 - j.width/2 - focus.w
+	    local next_old_y = p.wheight/2 - j.height/2
+	    local prev_new_x = p.wwidth/2 - j.width/2 + focus.w
+	    local prev_new_y = p.wheight/2 - j.height/2
+	    local next_new_x = p.wwidth/2 - j.width/2
+	    local next_new_y = p.wheight/2 - j.height/2
 
 	    if t ~= nil then
 		t:stop()
@@ -1409,6 +1420,7 @@ function widget.buttonPicker(table)
 		items:find_child("item"..tostring(prev_i)).y = prev_new_y
 		items:find_child("item"..tostring(next_i)).x = next_new_x
 		items:find_child("item"..tostring(next_i)).y = next_new_y
+		p.selected_item = next_i
 		t = nil
 	    end
 	    --if p.item_func then
@@ -1440,19 +1452,21 @@ function widget.buttonPicker(table)
         mt.__newindex = function (t, k, v)
 
              if k == "bsize" then  
-	    	p.wwidth = v[1] p.wheight = v[2]  
-             else 
+	    	p.wwidth = v[1] 	
+		p.wheight = v[2]  
+		w_scale = v[1]/180
+		h_scale = v[2]/60
+             elseif k == "wwidth" then 
+		w_scale = v/180
+                p[k] = v
+	     elseif k == "wheight" then   
+		h_scale = v/60
+                p[k] = v
+	     else 
                 p[k] = v
              end
 	     if k ~= "selected" and k ~= "org_x"  and k ~= "org_y" and 
 		k ~= "is_in_group" and k ~= "group_position" then 
-		 print(k) 
-		 print(k) 
-		 print(k) 
-		 print(k) 
-		 print(k) 
-		 print(k) 
-		 print(k) 
                  create_buttonPicker()
 	     end 
         end 
@@ -1512,7 +1526,7 @@ function widget.radioButton(table)
 	wheight = 200,
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
-	color = "FFFFFF", -- items 
+	color = {255,255,255,255}, --"FFFFFF", -- items 
 	button_color = {255,255,255,200}, -- items 
 	select_color = {100, 100, 100, 255}, -- items 
 	button_radius = 10, -- items 
@@ -1661,7 +1675,7 @@ function widget.checkBox(table)
 	wheight = 200,
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
-	color = "FFFFFF", -- items 
+	color = {255,255,255,255}, -- "FFFFFF", -- items 
 	box_color = {255,255,255,255},
 	fill_color = {255,255,255,50},
 	box_width = 2,
@@ -2122,6 +2136,7 @@ function widget.threeDlist(t)
     local slate = Group{ 
         name     = "loadingdots",
         position = {200,100},
+	reactive = true,
         extra    = {
 			type = "3D_List",
 			get_tile_group = function(r,c)

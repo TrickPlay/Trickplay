@@ -406,16 +406,19 @@ local attr_t
 
 
   if(v.type ~= "Video") then
-     if (v.extra.type == "Button" or v.extra.type == "TextInputField" or 
+    --[[ if (v.extra.type == "Button" or v.extra.type == "TextInputField" or 
          v.extra.type == "DialogBox" or v.extra.type == "ToastBox" or 
          v.extra.type == "ButtonPicker" or v.extra.type == "radioButton" or 
          v.extra.type == "checkBox" or v.extra.type == "LoadingDots" or 
          v.extra.type == "LoadingBar" or v.extra.type == "MenuBar" or 
          v.extra.type == "3D_List" or v.extra.type == "ScrollImage" or 
          v.extra.type == "TabBar" or v.extra.type == "OSK") then 
+     ]]
+     if is_in_list(v.extra.type, widgets) == true  then
 	attr_t =
       {
-             {"title", "INSPECTOR : "..string.upper(v.extra.type)},
+             --{"title", "INSPECTOR : "..string.upper(v.extra.type)},
+             {"title", "INSPECTOR : "..(v.extra.type)},
              {"caption", "OBJECT NAME"},
              {"name", v.name,"name"},
              {"line",""},
@@ -427,10 +430,11 @@ local attr_t
              {"line",""}
       }
 
-     else 
+     else --Rectangle, Image, Text, Group, Clone
 	attr_t =
       {
-             {"title", "INSPECTOR : "..string.upper(v.type)},
+             --{"title", "INSPECTOR : "..string.upper(v.type)},
+             {"title", "INSPECTOR : "..(v.type)},
              {"caption", "OBJECT NAME"},
              {"name", v.name,"name"},
              {"line",""},
@@ -443,10 +447,11 @@ local attr_t
       }
 
      end 
-  else 
+  else -- Video 
       attr_t =
       {
-             {"title", "INSPECTOR : "..string.upper(v.type)},
+             --{"title", "INSPECTOR : "..string.upper(v.type)},
+             {"title", "INSPECTOR : "..(v.type)},
              {"caption", "OBJECT NAME"},
              {"name", v.name,"name"},
              {"line",""},
@@ -465,6 +470,159 @@ local attr_t
       }
   end 
 
+
+  local w_prop_map = {
+	["skin"] = function() 
+             	table.insert(attr_t, {"skin", v.skin, "skin"})
+		end, 
+	["font"] = function ()
+             	table.insert(attr_t, {"font", v.font, "font"})
+		end, 
+	["color"] = function ()
+        	table.insert(attr_t, {"caption", "COLOR"})
+        	local color_t = v.color 
+        	if color_t == nil then 
+             	     color_t = {0,0,0,0}
+		end 
+		table.insert(attr_t, {"r", color_t[1], "r"})
+        	table.insert(attr_t, {"g", color_t[2], "g"})
+        	table.insert(attr_t, {"b", color_t[3], "b"})
+        	table.insert(attr_t, {"a", color_t[4], "a"})
+                end, 
+	["border_width"] = function() 
+                table.insert(attr_t, {"border_width", v.border_width, "border_width"})
+		table.insert(attr_t, {"caption", "BORDER COLOR"})
+        	local color_t = v.border_color 
+        	if color_t == nil then 
+             	     color_t = {0,0,0,0}
+		end 
+		table.insert(attr_t, {"br", color_t[1], "r"})
+        	table.insert(attr_t, {"gb", color_t[2], "g"})
+        	table.insert(attr_t, {"bb", color_t[3], "b"})
+        	table.insert(attr_t, {"ab", color_t[4], "a"})
+
+		table.insert(attr_t, {"caption", "FOCUS COLOR"})
+        	local color_t = v.focus_color 
+        	if color_t == nil then 
+             	     color_t = {0,0,0,0}
+		end 
+		table.insert(attr_t, {"fr", color_t[1], "r"})
+        	table.insert(attr_t, {"fb", color_t[2], "g"})
+        	table.insert(attr_t, {"fb", color_t[3], "b"})
+        	table.insert(attr_t, {"fb", color_t[4], "a"})
+
+                table.insert(attr_t, {"border_radius", v.border_radius, "border_radius"})
+		end,
+	["label"] = function()
+		if(v.extra.type == "Button") then 
+			table.insert(attr_t, {"label", v.text, "label"})
+		elseif(v.extra.type == "DialogBox") then 
+			table.insert(attr_t, {"label", v.title, "title"})
+		end
+        	table.insert(attr_t, {"line","", "hide"})
+        	table.insert(attr_t, {"line","", "hide"})
+		end,
+	["text_indent"] = function()
+                table.insert(attr_t, {"text indent", v.text_indent, "text indent"})
+		end,
+	["title"] = function() 
+		table.insert(attr_t, {"title", v.title, "title"})
+		end,
+	["items"] = function ()
+		local items = ""
+		for i,j in pairs(v.items) do 
+			items = items.."\""..j.."\", "
+		end
+		table.insert(attr_t, {"items", v.items, "items"})
+		table.insert(attr_t, {"item_func", v.title, "item_func"})
+		table.insert(attr_t, {"selected_item", v.title, "selected_item"})
+		end,
+	["item_pos"] = function() 
+		table.insert(attr_t, {"b_pos", v.b_pos, "b_pos"})
+		table.insert(attr_t, {"item_pos", v.item_pos, "item_pos"})
+		table.insert(attr_t, {"line_space", v.line_space, "line_space"})
+		end,
+  } 
+
+--kk
+local widget_map = {
+	["Button"] = function()
+		w_prop_map["label"]()
+		w_prop_map["skin"]()
+		w_prop_map["font"]()
+		w_prop_map["color"]()
+		if v.skin == "canvas" then 
+		    w_prop_map["border_width"]()
+		end 
+		end,
+	["TextInputField"] = function () 
+		w_prop_map["skin"]()
+		w_prop_map["font"]()
+		w_prop_map["color"]()
+		w_prop_map["text_indent"]()
+		if v.skin == "canvas" then 
+		    w_prop_map["border_width"]()
+		end 
+		end,
+	["DialogBox"] = function () 
+		w_prop_map["label"]()
+		w_prop_map["skin"]()
+		w_prop_map["font"]()
+		w_prop_map["color"]()
+		if v.skin == "canvas" then 
+		    w_prop_map["border_width"]()
+		end 
+		end,
+
+	["ToastBox"] = function () 
+	        table.insert(attr_t, {"label", v.title, "title"})
+ 		table.insert(attr_t, {"caption", "MESSAGE  "})
+		table.insert(attr_t, {"message", v.message, "message"})
+        	table.insert(attr_t, {"line","", "hide"})
+        	table.insert(attr_t, {"line","", "hide"})
+		w_prop_map["skin"]()
+		w_prop_map["font"]()
+		w_prop_map["color"]()
+		table.insert(attr_t, {"duration", v.duration, "duration"})
+		table.insert(attr_t, {"fade_duration", v.fade_duration, "fade_duration"})
+		end,
+	["RadioButton"] = function () return v.name.." = ".."widget.radioButton"..b_indent.."{"..indent.. 
+		"button_color = {"..table.concat(v.button_color,",").."},"..indent..
+		"select_color = {"..table.concat(v.select_color,",").."},"..indent..
+    		"button_radius = "..v.button_radius..","..indent.. 
+    		"select_radius = "..v.select_radius..","..indent.. 
+		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["CheckBox"] = function () return v.name.." = ".."widget.checkBox"..b_indent.."{"..indent.. 
+		"box_color = {"..table.concat(v.box_color,",").."},"..indent..
+		"fill_color = {"..table.concat(v.fill_color,",").."},"..indent..
+    		"box_width = "..v.box_width..","..indent.. 
+		"box_size = {"..table.concat(v.box_size,",").."},"..indent..
+		"check_size = {"..table.concat(v.check_size,",").."},"..indent..
+		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["ButtonPicker"] = function () return v.name.." = ".."widget.buttonPicker"..b_indent.."{"..indent.. 
+		w_prop_map["items"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["LoadingDots"] = function () return v.name.." = ".."widget.loadingdots"..b_indent.."{"..indent.. 
+		"skin = \""..v.skin.."\","..indent..
+		"dot_radius = "..v.dot_radius..","..indent..
+    		"dot_color = \""..v.dot_color.."\","..indent..
+		"num_dots = "..v.num_dots..","..indent..
+		"anim_radius = "..v.anim_radius..","..indent..
+		"anim_duration = "..v.anim_duration..b_indent.."}\n\n"..w_prop_map["group"]() end,
+		--"anim_duration = "..v.anim_duration..","..indent..
+		--"clone_src = "..v.clone_src..b_indent.."}\n\n"..w_prop_map["group"]() end,
+	["LoadingBar"] = function () return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
+		"bsize = {"..table.concat(v.bsize,",").."},"..indent..
+        	"shell_upper_color = \""..v.shell_upper_color.."\","..indent.. 
+        	"shell_lower_color = \""..v.shell_lower_color.."\","..indent.. 
+        	"stroke_color = \""..v.stroke_color.."\","..indent.. 
+        	"fill_upper_color = \""..v.fill_upper_color.."\","..indent.. 
+        	"fill_lower_color = \""..v.fill_lower_color.."\""..b_indent.."}\n\n"..
+		w_prop_map["group"]() end, 
+   }
+
+  if is_in_list(v.extra.type, widgets) == true then 
+	widget_map[v.extra.type]()
+  else 
   if (v.type == "Text") then
         table.insert(attr_t, {"caption", "COLOR "})
         local color_t = v.color 
@@ -594,7 +752,7 @@ local attr_t
       	table.insert(attr_t, {"opacity", v.opacity, "opacity"})
       	table.insert(attr_t, {"line",""})
    end 
-
+   end 
    table.insert(attr_t, {"button", "view code", "view code"})
    table.insert(attr_t, {"button", "apply", "apply"})
    table.insert(attr_t, {"button", "cancel", "cancel"})
@@ -629,17 +787,20 @@ function itemTostring(v, d_list, t_list)
 		"wheight = "..v.wheight..","..indent..
 		"skin = \""..v.skin.."\","..indent..
     		"font = \""..v.font.."\","..indent..
-    		"color = \""..v.color.."\""..b_indent.."}\n\n"
+    		--"color = \""..v.color.."\""..b_indent.."}\n\n"
+		"color = {"..table.concat(v.color,",").."}".. b_indent.."}\n\n"
 		end,
 	["border_width"] = function() return 
     		"border_width = "..v.border_width..","..indent..
- 		"border_color= \""..v.border_color.."\","..indent..
+ 		--"border_color= \""..v.border_color.."\","..indent..
+		"border_color = {"..table.concat(v.border_color,",").."},"..indent..
     		"padding_x = "..v.padding_x..","..indent.. 
     		"padding_y = "..v.padding_y..","..indent.. 
     		"border_radius = "..v.border_radius..","..indent
 		end,
 	["text"] = function() return 
-    		"focus_color = \""..v.focus_color.."\","..indent..
+    		--"focus_color = \""..v.focus_color.."\","..indent..
+		"focus_color = {"..table.concat(v.focus_color,",").."},"..indent..
     		"text = \""..v.text.."\","..indent
 		end,
 	["title"] = function() return 
