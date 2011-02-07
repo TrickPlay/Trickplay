@@ -134,6 +134,13 @@ extern "C" {
     should be allocated in a contiguous memory block. The depth should be
     either 3 for no alpha, or 4 if it includes alpha. Each component should
     be 8 bits and the components should be organized as either RGB or RGBA.
+
+    This means that the red byte should be at the lowest address, followed
+    by the green byte, the blue byte and optionally, the alpha byte. So, if
+    a pixel is an array of 3 or 4 bytes, pixel[ 0 ] is the red byte, pixel
+    [ 1 ] is the green byte, pixel[ 2 ] is the blue byte and pixel[ 3 ], if
+    present, is the alpha byte.
+
     If the pixel data needs to be freed in a special manner, you can set
     the <free_pixels> field of the image parameter to a function; otherwise
     TrickPlay will use the system's 'free' function.
