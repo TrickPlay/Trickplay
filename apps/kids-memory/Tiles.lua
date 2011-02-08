@@ -37,7 +37,7 @@ tile_faces[1].stages = {
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/monkey.wav")
+            play_sound_wrapper(audio.monkey)
             self.start_talking = 9
         end
         self.start_talking = self.start_talking - 1
@@ -104,7 +104,7 @@ tile_faces[2].stages = {
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/butterfly.wav")
+            play_sound_wrapper(audio.butterfly)
         end
     end,
     function(self,delta,p)
@@ -136,7 +136,7 @@ tile_faces[3].stages = {
     function(self,delta,p)
         self.stage = self.stage+1
         if not self.played then
-            mediaplayer:play_sound("audio/toucan.wav")
+            play_sound_wrapper(audio.toucan)
         end
     end,
     function(self,delta,p)
@@ -151,7 +151,7 @@ tile_faces[3].stages = {
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            --mediaplayer:play_sound("audio/toucan.wav")
+            play_sound_wrapper(audio.toucan)
         end
     end,
     function(self,delta,p)
@@ -186,7 +186,7 @@ tile_faces[4].stages = {
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/mouse.wav")
+            play_sound_wrapper(audio.mouse)
         end
     end,
     function(self,delta,p)
@@ -238,7 +238,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/squirrel.wav")
+            play_sound_wrapper(audio.chipmunk)
         end
     end,
         function(self,delta,p)
@@ -285,7 +285,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/duck.wav")
+            play_sound_wrapper(audio.duck)
         end
     end,
         function(self,delta,p)
@@ -348,7 +348,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/cow.wav")
+            play_sound_wrapper(audio.cow)
         end
     end,
         function(self,delta,p)
@@ -387,7 +387,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/cat.wav")
+            play_sound_wrapper(audio.cat)
         end
     end,
         function(self,delta,p)
@@ -453,7 +453,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/ladybug.wav")
+            play_sound_wrapper(audio.ladybug)
         end
     end,
         function(self,delta,p)
@@ -488,7 +488,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/pig.wav")
+            play_sound_wrapper(audio.pig)
         end
     end,
         function(self,delta,p)
@@ -532,7 +532,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/frog.wav")
+            play_sound_wrapper(audio.frog)
         end
     end,
         function(self,delta,p)
@@ -653,7 +653,7 @@ do
         self.stage = self.stage+1
         if not self.played then
             self.played = true
-            mediaplayer:play_sound("audio/turtle.wav")
+            play_sound_wrapper(audio.turtle)
         end
     end,
         function(self,delta,p)

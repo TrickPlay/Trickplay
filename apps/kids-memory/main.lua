@@ -21,6 +21,39 @@ play_sound_wrapper = function(sound)
     mediaplayer:play_sound(sound)
 end
 
+audio = {
+    move_focus  = "audio/Effects/arrow press.wav",
+    blank_space = "audio/Effects/blank space.wav",
+    button      = "audio/Effects/button.wav",
+    card_flip   = "audio/Effects/card flip.wav",
+    match = {
+        "audio/Events/match_yes/Ahhh - great Job.wav",
+        "audio/Events/match_yes/Keys - its a match.wav",
+        "audio/Events/match_yes/Snare - Perfect Match!.wav",
+    },
+    no_match = {
+        "audio/Events/match_no/Boing-Uh Oh!.wav",
+        "audio/Events/match_no/Honk - try again!.wav",
+    },
+    win = {
+        "audio/Events/win_game/Wooh - You're a winner.wav",
+        "audio/Events/win_game/Yay - Yippe you won!.wav",
+    },
+    
+    butterfly = "audio/Animals/butterfly.wav",
+    cat       = "audio/Animals/cat.wav",
+    chipmunk  = "audio/Animals/chipmunk.wav",
+    cow       = "audio/Animals/cow.wav",
+    duck      = "audio/Animals/duck.wav",
+    frog      = "audio/Animals/frog.wav",
+    ladybug   = "audio/Animals/ladybug.wav",
+    monkey    = "audio/Animals/monkey.wav",
+    mouse     = "audio/Animals/mouse.wav",
+    pig       = "audio/Animals/pig.wav",
+    toucan    = "audio/Animals/toucan.wav",
+    turtle    = "audio/Animals/turtle.wav",
+}
+
 --holds important game information
 game_state={in_game=false,board={}}
 
@@ -36,6 +69,9 @@ give_keys = function(new_handler)
         key_handlers[new_handler] ~= nil,
         "Invalid handler assignment, "..new_handler.." is not a key handler"
     )
+    if mediaplayer.state == mediaplayer.PLAYING then
+        mediaplayer:pause()
+    end
     fade_out_f[curr_handler]()
     curr_handler = new_handler
     fade_in_f[curr_handler]()
@@ -144,3 +180,8 @@ app.on_closing = function()
     --reset the perspective
     screen.perspective = {60,1,screen.perspective[3],100}
 end
+function mediaplayer:on_loaded()
+    mediaplayer:play()
+end
+mediaplayer:load("audio/Opening song.mp3")
+

@@ -153,6 +153,7 @@ local board_key_handler = {
     [keys.OK] = function()
         if game_state.board[focus_i[1]][focus_i[2]] == 0 or
            game_state.board[focus_i[1]][focus_i[2]] == nil then
+            play_sound_wrapper(audio.blank_space)
             return
         elseif first_selected == nil then
             local next
@@ -176,6 +177,7 @@ local board_key_handler = {
             animate_list[anim_focus]=anim_focus
             --focus.y    = 200*focus_i[2]
             back_sel   = false
+            play_sound_wrapper(audio.move_focus)
         end
     end,
     [keys.Down] = function()
@@ -186,6 +188,7 @@ local board_key_handler = {
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
             animate_list[anim_focus]=anim_focus
+            play_sound_wrapper(audio.move_focus)
             --)
         end
     end,
@@ -200,6 +203,7 @@ local board_key_handler = {
         end
     end,
     [keys.Left] = function()
+        play_sound_wrapper(audio.move_focus)
         if focus_i[1] >1 then
             focus_i[1] = focus_i[1] - 1
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2]))
@@ -220,11 +224,13 @@ back_button_key_handler = {
     [keys.OK] = function()
         game_state.in_game = false
         give_keys("SPLASH")
+        play_sound_wrapper(audio.button)
     end,
     [keys.Right] = function()
         back_sel = false
         --table.insert(animate_list,corner_lose_focus)
         animate_list[corner_lose_focus]=corner_lose_focus
+        play_sound_wrapper(audio.move_focus)
         --corner_lose_focus()
     end,
 }
