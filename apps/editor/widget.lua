@@ -2218,7 +2218,7 @@ function widget.threeDlist(t)
 
 	local make_tile = function()
 		local group = Group{anchor_point = {p.item_w/2,p.item_h/2}}
-		local rect  = Rectangle{name="r",w=p.item_w,h=p.item_h,color="303030"}
+		local rect  = Rectangle{name="Base_Rect",w=p.item_w,h=p.item_h,color="303030"}
 		group:add(rect)
 		return group
 	end
@@ -2227,20 +2227,43 @@ function widget.threeDlist(t)
 		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
 	end
 	local make_grid = function()
-		
-		tiles = {}
-		slate:clear()
+        
 		local g
 		for r = 1, p.num_rows  do
-			tiles[r] = {}
+            if tiles[r] == nil then tiles[r] = {} end
 			for c = 1, p.num_cols do
-				g = make_tile()
-				g.x, g.y = x_y_from_index(r,c)
-				g.delay = p.cascade_delay*(r+c-1)
-				slate:add(g)
-				tiles[r][c] = g
+                if tiles[r][c] == nil then
+                    g = make_tile()
+                    slate:add(g)
+                    tiles[r][c] = g
+                else
+                    g = tiles[r][c]
+                    if g:find_child("Base_Rect") ~= nil then
+                        g:find_child("Base_Rect").size = {p.item_w,p.item_h}
+                    end
+                end
+                g.x, g.y = x_y_from_index(r,c)
+                g.delay = p.cascade_delay*(r+c-1)
 			end
 		end
+        
+        if p.num_rows < #tiles then
+            for r = p.num_rows + 1, #tiles do
+                for c = 1, #tiles[r] do
+                    tiles[r][c]:unparent()
+                    tiles[r][c] = nil
+                end
+                tiles[r] = nil
+            end
+        end
+        if p.num_cols < #tiles[1] then
+            for c = p.num_cols + 1, #tiles[r]r = 1, #tiles do
+                for r = 1, #tiles do
+                    tiles[r][c]:unparent()
+                    tiles[r][c] = nil
+                end
+            end
+        end
 	end
 	make_grid()
 
@@ -2274,6 +2297,10 @@ Arguments:
 	content_w - width of the group that holds the content being scrolled
 	arrow_clone_source - a Trickplay object that is to be cloned to replace the scroll arrows
 	arrow_sz  - size of the scroll arrows
+    arrows_in_box - a flag, setting to true positions the arrows inside the border
+    arrows_centered - a flag, setting to true positions the arrows along the center axises
+    grip_is_visible - a flag that either makes the grips of the scroll bars visible or invisible
+    border_is_visible - a flag that either makes the border visible or invisible
 Return:
 
 		Group - Group containing the grid
@@ -2295,7 +2322,11 @@ function widget.scrollWindow(t)
         content_h =  1000,
 		content_w =  1000,
 		arrow_clone_source = nil,
-		arrow_sz  = 10
+		arrow_sz  = 10,
+		arrows_in_box = false,
+		arrows_centered = false,
+		grip_is_visible = true,
+        border_is_visible = true
     }
     --overwrite defaults
     if t ~= nil then
@@ -2322,8 +2353,7 @@ function widget.scrollWindow(t)
         position = {200,100},
 		
         extra    = {
-			type = "ScrollImage",
-            reactive = true,
+			type = "Scroll Group",
 			get_content_group = function()
 				return content
 			end
@@ -2333,16 +2363,24 @@ function widget.scrollWindow(t)
 	--Key Handler
 	local keys={
 		[keys.Left] = function()
-			scroll_x(1)
+			if p.content_w > p.clip_w then
+				scroll_x(1)
+			end
 		end,
 		[keys.Right] = function()
-			scroll_x(-1)
+			if p.content_w > p.clip_w then
+				scroll_x(-1)
+			end
 		end,
 		[keys.Up] = function()
-			scroll_y(1)
+			if p.content_h > p.clip_h then
+				scroll_y(1)
+			end
 		end,
 		[keys.Down] = function()
-			scroll_y(-1)
+			if p.content_h > p.clip_h then
+				scroll_y(-1)
+			end
 		end,
 	}
 	scroll_group.on_key_down = function(self,key)
@@ -2362,8 +2400,8 @@ function widget.scrollWindow(t)
 	
 	
 	local grip_vert_base_y, grip_hor_base_x
-	local grip_vert = Rectangle{}
-	local grip_hor  = Rectangle{}
+	local grip_vert = Rectangle{name="scroll_window",reactive=true}
+	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
 	
 	scroll_y = function(dir)
 		local new_y = content.y+ dir*10
@@ -2451,6 +2489,7 @@ function widget.scrollWindow(t)
 	end
 	
 	
+	--this function creates the whole scroll bar box
 	local function create()
 		content.position  = { p.border_w, p.border_w }
 		window.clip = { p.border_w, p.border_w, p.clip_w, p.clip_h }
@@ -2458,7 +2497,9 @@ function widget.scrollWindow(t)
 		border.h = p.clip_h+2*p.border_w
 		border.border_width = p.border_w
 		border.border_color = p.color
-		
+		if p.border_is_visible then border.opacity=255
+        else border.opacity=0 end
+        
 		if p.arrow_clone_source == nil then
 			
 			if arrow_up ~= nil then arrow_up:unparent() end
@@ -2535,10 +2576,9 @@ function widget.scrollWindow(t)
 		arrow_l.anchor_point  = { arrow_l.w/2, arrow_l.h/2}
 		arrow_r.anchor_point  = { arrow_r.w/2, arrow_r.h/2}
 		
-		arrow_up.position = {border.w+arrow_up.w/2+5,arrow_up.h/2}
-		arrow_dn.position = {border.w+arrow_dn.w/2+5,border.h-arrow_dn.h/2}
-		arrow_l.position  = {         arrow_l.w/2,   border.h + 5 + arrow_up.h/2}
-		arrow_r.position  = {border.w-arrow_r.w/2,   border.h + 5 + arrow_up.h/2}
+		
+		
+		
 		
 		scroll_group:add(arrow_up,arrow_dn,arrow_l,arrow_r)
 		
@@ -2571,12 +2611,113 @@ function widget.scrollWindow(t)
 		grip_hor.w        = grip_h
 		grip_hor.color    = p.color
 		grip_hor.position = {grip_hor_base_x,border.h+5}
+		
+		if p.grip_is_visible and not p.arrows_centered then
+			grip_hor.opacity  = 255
+			grip_vert.opacity = 255
+		else
+			grip_hor.opacity  = 0
+			grip_vert.opacity = 0
+		end
+		
+		if p.arrows_centered then
+			if p.arrows_in_box then
+				arrow_up.position = {border.w/2+arrow_up.w/2+5,arrow_up.h/2+5 }
+				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h-arrow_dn.h/2-5}
+				arrow_l.position  = {arrow_l.w/2+5,border.h/2 + 5 + arrow_up.h/2}
+				arrow_r.position  = {border.w-arrow_r.w/2-5,border.h/2 + 5 + arrow_up.h/2}
+			else
+				arrow_up.position = {border.w/2+arrow_up.w/2+5,-arrow_up.h/2-5}
+				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h+arrow_dn.h/2+5}
+				arrow_l.position  = {-arrow_l.w/2-5,border.h/2 + 5 + arrow_up.h/2}
+				arrow_r.position  = {border.w+arrow_r.w/2+5,border.h/2 + 5 + arrow_up.h/2}
+			end
+		else
+			if p.arrows_in_box then
+			print("here")
+				arrow_up.position = {border.w-arrow_up.w/2-5,arrow_up.h/2+5}
+				arrow_dn.position = {border.w-arrow_dn.w/2-5,border.h-arrow_dn.h*3/2}
+				arrow_l.position  = {         arrow_l.w/2+5,   border.h - 5 - arrow_up.h/2}
+				arrow_r.position  = {border.w-arrow_r.w/2*3/2-5,   border.h - 5 - arrow_up.h/2}
+				grip_hor_base_x = arrow_l.x + arrow_l.w+5
+				grip_vert_base_y =  arrow_up.y+arrow_up.h+5
+				grip_vert.position = {border.w-arrow_up.w-5,grip_vert_base_y}
+				grip_hor.position = {grip_hor_base_x,border.h-5- arrow_up.h}
+			else
+				arrow_up.position = {border.w+arrow_up.w/2+5,arrow_up.h/2}
+				arrow_dn.position = {border.w+arrow_dn.w/2+5,border.h-arrow_dn.h/2}
+				arrow_l.position  = {         arrow_l.w/2,   border.h + 5 + arrow_up.h/2}
+				arrow_r.position  = {border.w-arrow_r.w/2,   border.h + 5 + arrow_up.h/2}
+				grip_vert.position = {border.w+5,grip_vert_base_y}
+				grip_hor.position = {grip_hor_base_x,border.h+5}
+			end
+		end
+		
+		if p.content_w <= p.clip_w then
+			arrow_r.opacity=0
+			arrow_l.opacity=0
+			grip_hor.opacity=0
+		end
+		
+		if p.content_h <= p.clip_h then
+			arrow_up.opacity=0
+			arrow_dn.opacity=0
+			grip_vert.opacity=0
+		end
 	end
 	
     create()
 	scroll_group:add(border,grip_hor,grip_vert,window)
 	window:add(content)
 	
+	
+	
+	--The mouse events for the grips
+	function grip_hor:on_button_down(x,y,button,num_clicks)
+		
+		local dx = x - grip_hor.x
+		
+        dragging = {grip_hor,
+			function(x,y)
+				
+				grip_hor.x = x - dx
+				
+				if  grip_hor.x < grip_hor_base_x then
+					grip_hor.x = grip_hor_base_x
+				elseif grip_hor.x > grip_hor_base_x+(track_w-grip_w) then
+					   grip_hor.x = grip_hor_base_x+(track_w-grip_w)
+				end
+				
+				content.x = -(grip_hor.x - grip_hor_base_x) * p.content_w/track_w
+				
+			end 
+		}
+		
+        return true
+    end
+	function grip_vert:on_button_down(x,y,button,num_clicks)
+		
+		local dy = y - grip_vert.y
+		
+        dragging = {grip_vert, function(x,y)
+				
+				grip_vert.y = y - dy
+				
+				if  grip_vert.y < grip_vert_base_y then
+					grip_vert.y = grip_vert_base_y
+				elseif grip_vert.y > grip_vert_base_y+(track_h-grip_h) then
+					   grip_vert.y = grip_vert_base_y+(track_h-grip_h)
+				end
+				
+				content.y = -(grip_vert.y - grip_vert_base_y) * p.content_h/track_h
+				
+			end
+		}
+		
+        return true
+    end 
+	
+	--set the meta table to overwrite the parameters
     mt = {}
     mt.__newindex = function(t,k,v)
 		
