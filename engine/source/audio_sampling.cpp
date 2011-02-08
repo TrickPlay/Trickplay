@@ -7,10 +7,10 @@
 static Debug_ON log( "AUDIO-SAMPLING" );
 //.............................................................................
 
-// We use the addresses of these as user_data in custom audio buffers.
-
-static char AS_SOURCE_CHANGED = 0;
-static char AS_QUIT = 0;
+#define AS_SOURCE_CHANGED   1
+#define AS_QUIT             2
+#define AS_PAUSE            3
+#define AS_RESUME           4
 
 //.............................................................................
 
@@ -140,17 +140,27 @@ struct TPAudioSampler
     {
         log( "SOURCE CHANGED" );
 
-        // If there is no thread, it means that no buffers have been submitted,
-        // so we don't care about the source change. We bail.
-
-        if ( ! thread )
-        {
-            return;
-        }
-
         // To signal a source change, we push a signal buffer
 
-        push_signal( & AS_SOURCE_CHANGED );
+        push_signal( AS_SOURCE_CHANGED );
+    }
+
+    //.............................................................................
+
+    void pause()
+    {
+        log( "PAUSED" );
+
+        push_signal( AS_PAUSE );
+    }
+
+    //.............................................................................
+
+    void resume()
+    {
+        log( "RESUME" );
+
+        push_signal( AS_RESUME );
     }
 
     //.............................................................................
@@ -166,7 +176,7 @@ private:
     {
         if ( thread )
         {
-            push_signal( & AS_QUIT );
+            push_signal( AS_QUIT );
 
             log( "WAITING FOR PROCESSING THREAD..." );
 
@@ -180,13 +190,18 @@ private:
     // Pushes a buffer that has samples == 0 and a special address in
     // user_data that we use as a signal.
 
-    void push_signal( gpointer signal )
+    void push_signal( int signal )
     {
-        TPAudioBuffer * buffer = g_slice_new0( TPAudioBuffer );
+        // Signals are meaningless unless the thread is already running
 
-        buffer->user_data = signal;
+        if ( thread )
+        {
+            TPAudioBuffer * buffer = g_slice_new0( TPAudioBuffer );
 
-        g_async_queue_push( queue , buffer );
+            buffer->user_data = GINT_TO_POINTER( signal );
+
+            g_async_queue_push( queue , buffer );
+        }
     }
 
     //.........................................................................
@@ -216,12 +231,16 @@ private:
     }
 
     //.........................................................................
+
+    typedef std::list< TPAudioBuffer * >    BufferList;
+
+    //.........................................................................
     // The thread that pulls samples from the queue and does the heavy
     // lifting.
 
     static gpointer process_samples( gpointer q )
     {
-        log( "STARTED PROCESSING THREAD %p" , g_thread_self() );
+        log( "STARTED PROCESSING THREAD" );
 
         GAsyncQueue * queue = ( GAsyncQueue * ) q;
 
@@ -230,6 +249,10 @@ private:
         bool done = false;
 
         GTimeVal t;
+
+        BufferList buffers;
+
+        int paused = 0;
 
         while( ! done )
         {
@@ -250,32 +273,83 @@ private:
 
             if ( ! buffer->samples )
             {
-                // If it is a quit signal, we will quit
+                switch( GPOINTER_TO_INT( buffer->user_data ) )
+                {
+                    case AS_QUIT:
 
-                if ( buffer->user_data == & AS_QUIT )
-                {
-                    done = true;
-                }
-                else if ( buffer->user_data == & AS_SOURCE_CHANGED )
-                {
-                    // TODO: What do we do now?
+                        done = true;
+                        break;
+
+                    case AS_SOURCE_CHANGED:
+
+                        // The source changed, we get rid of any pending
+                        // buffers we have
+
+                        for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
+                        {
+                            destroy_buffer( * it );
+                        }
+
+                        buffers.clear();
+                        break;
+
+                    case AS_PAUSE:
+
+                        ++paused;
+                        break;
+
+                    case AS_RESUME:
+
+                        if ( paused > 0 )
+                        {
+                            --paused;
+                        }
+                        break;
                 }
 
                 destroy_buffer( buffer );
             }
             else
             {
-                // TODO: We've got some audio samples, what now?
+                // We got a new buffer, we add it to the list
 
-                destroy_buffer( buffer );
+                buffers.push_back( buffer );
             }
+
+            //.................................................................
+            // Process pending buffers
+
+            // TODO: right now, we process each buffer as soon as it comes in.
+            // Instead, we should have a policy for accumulating buffers.
+
+            if ( ! paused && ! buffers.empty() )
+            {
+                process_buffers( buffers );
+            }
+        }
+
+        // The thread is exiting...
+
+        // Get rid of any buffers we still have
+
+        for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
+        {
+            destroy_buffer( * it );
         }
 
         g_async_queue_unref( queue );
 
-        log( "EXITING PROCESSING THREAD %p" , g_thread_self() );
+        log( "EXITING PROCESSING THREAD" );
 
         return 0;
+    }
+
+    //.........................................................................
+    // What do we do with the buffers?
+
+    static void process_buffers( BufferList & buffers )
+    {
+
     }
 
     TPContext *     context;
@@ -318,4 +392,22 @@ void tp_audio_sampler_source_changed( TPAudioSampler * sampler )
     g_assert( sampler );
 
     sampler->source_changed();
+}
+
+//.............................................................................
+
+void tp_audio_sampler_pause( TPAudioSampler * sampler )
+{
+    g_assert( sampler );
+
+    sampler->pause();
+}
+
+//.............................................................................
+
+void tp_audio_sampler_resume( TPAudioSampler * sampler )
+{
+    g_assert( sampler );
+
+    sampler->resume();
 }
