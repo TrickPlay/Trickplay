@@ -712,7 +712,16 @@ local function build_ui( show_it )
 	  end 
 
           if dragging then
-               local actor , dx , dy = unpack( dragging )
+
+	       local actor = unpack(dragging) 
+
+	       if (actor.name == "scroll_window") then  
+	             local actor,s_on_motion = unpack(dragging) 
+	             s_on_motion(x, y)
+	             return true
+	       end 
+		
+               local actor, dx , dy = unpack( dragging )
 
 	       if (guideline_type(actor.name) == "v_guideline") then 
 	            actor.x = x - dx
@@ -732,10 +741,7 @@ local function build_ui( show_it )
 		    end 
 	       end 
 	      
-	       --print(actor.type)
-	       --if(actor.type ~= "Canvas") then 
-
-	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar") then --imsi 0203 because of new Canvas is Image
+	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar") then
 	            actor.x =  x - dx 
 	            actor.y =  y - dy  
 	       else
