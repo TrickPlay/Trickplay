@@ -513,46 +513,34 @@ local code_map =
 
 local color_map =
 {
---[[
-        [ "Text" ] = function()  size = {500, 920} color = "472446" return size, color end,
-        [ "Image" ] = function()  size = {500, 850} color = "5a252b" return size, color end,
-        [ "Rectangle" ] = function()  size = {500, 840} color = "2c420c" return size, color end,
-        [ "Clone" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
-        [ "Group" ] = function()  size = {500, 670} color = "6d2b17" return size, color end,
-        [ "Video" ] = function()  size = {500, 575} color = {0, 25, 25, 255} return size, color end,
-]]
-        [ "Text" ] = function()  size = {500, 920} color = {25,25,25,100}  return size, color end,
-        [ "Button" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "Button-c" ] = function()  size = {500, 900} color = {25,25,25,100}  return size, color end,
-        [ "TextInputField" ] = function()  size = {500, 1000} color = {25,25,25,100}  return size, color end,
-        [ "DialogBox" ] = function()  size = {500, 1010} color = {25,25,25,100}  return size, color end,
-        [ "ToastBox" ] = function()  size = {500, 840} color = {25,25,25,100}  return size, color end,
-        [ "RadioButton" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "CheckBox" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "ButtonPicker" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "LoadingDots" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "LoadingBar" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "MenuBar" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "3D_List" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "ScrollImage" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "TabBar" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "OSK" ] = function()  size = {500, 665} color = {25,25,25,100}  return size, color end,
-        [ "Image" ] = function()  size = {500, 850} color ={25,25,25,100}  return size, color end,
-        [ "Rectangle" ] = function()  size = {500, 840} color = {25,25,25,100}   return size, color end,
+        [ "Text" ] = function()  size = {500, 820} color = {25,25,25,100}  return size, color end,
+        [ "Image" ] = function()  size = {500, 770} color ={25,25,25,100}  return size, color end,
+        [ "Rectangle" ] = function()  size = {500, 770} color = {25,25,25,100}   return size, color end,
         [ "Clone" ] = function()  size = {500, 670} color = {25,25,25,100}   return size, color end,
         [ "Group" ] = function()  size = {500, 670} color = {25,25,25,100}   return size, color end,
-        [ "Video" ] = function()  size = {500, 575} color = {25,25,25,100}   return size, color end,
-        [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
+        [ "Video" ] = function()  size = {500, 530} color = {25,25,25,100}   return size, color end,
+        [ "Button" ] = function()  size = {500, 900} color = {25,25,25,100}  return size, color end,
+
+        [ "Button-c" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "TextInputField" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "DialogBox" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "ToastBox" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "RadioButton" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "CheckBox" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "ButtonPicker" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "LoadingDots" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "LoadingBar" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "MenuBar" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "3D_List" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "ScrollImage" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "TabBar" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+        [ "OSK" ] = function()  size = {550, 700} color = {25,25,25,100}  return size, color end,
+
         [ "widgets" ] = function() size = {500, 535} color = {25,25,25,100}  return size, color end,
-        --[ "widgets" ] = function() size = {500, 470} color = "472446" return size, color end,
+        [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = {25,25,25,100}  return size, color end
---[[
-        [ "guidew" ] = function()  color =  "5a252b" size = {700, 230} return size, color end,
-        [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = "5a252b" return size, color end,
-        [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = "5a252b" return size, color end
-  ]]
 }
 
 -------------------------------------------------------------------------------
@@ -1313,11 +1301,16 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     -- item group's children 
     local text, input_text, ring, focus, line, button
 
-    if(item_n == "title" or item_n == "caption") then
+--kk
+    if(item_n == "title")then 
+    	text = Text {text = item_v}:set(STYLE)
+	text.position = {WIDTH/2 - text.w/2 - 10, 5} 
+    	group:add(text)
+    elseif(item_n == "caption") then
     	text = Text {text = item_v}:set(STYLE)
 	text.position = {PADDING_X, 0}
     	group:add(text)
-	if(item_v == "SCALE") then 
+	if(item_v == "Scale") then 
              group.size = {WIDTH/4, HEIGHT}
 	else
              group.size = {WIDTH, HEIGHT}
@@ -1469,7 +1462,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     	group:add(text)
 
         local space = WIDTH - PADDING_X  
-	skin_picker = widget.buttonPicker{skin = "canvas", items = skins, font = "DejaVu Sans 26px"}
+	skin_picker = widget.buttonPicker{skin = "custom", items = skins, font = "DejaVu Sans 26px"}
 	skin_picker.wheight = 40
         skin_picker.position = {text.x + text.w + 50 , 0 }-- -5}
         group:add(skin_picker) 

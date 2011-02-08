@@ -392,58 +392,38 @@ end
 --------------------------------
 
 local input_t
+
 function make_attr_t(v)
 
-local function toboolean(s)  -- local 0202
-  if (s == "true") then 
-	return true 
-  else 
-	return false 
-  end 
-end
-
-local attr_t 
-
+  local attr_t 
 
   if(v.type ~= "Video") then
-    --[[ if (v.extra.type == "Button" or v.extra.type == "TextInputField" or 
-         v.extra.type == "DialogBox" or v.extra.type == "ToastBox" or 
-         v.extra.type == "ButtonPicker" or v.extra.type == "radioButton" or 
-         v.extra.type == "checkBox" or v.extra.type == "LoadingDots" or 
-         v.extra.type == "LoadingBar" or v.extra.type == "MenuBar" or 
-         v.extra.type == "3D_List" or v.extra.type == "ScrollImage" or 
-         v.extra.type == "TabBar" or v.extra.type == "OSK") then 
-     ]]
      if is_in_list(v.extra.type, widgets) == true  then
 	attr_t =
       {
              --{"title", "INSPECTOR : "..string.upper(v.extra.type)},
-             {"title", "INSPECTOR : "..(v.extra.type)},
-             {"caption", "OBJECT NAME"},
+             {"title", "Inspector : "..(v.extra.type)},
+             {"caption", "Object Name"},
              {"name", v.name,"name"},
-             {"line",""},
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
              {"z", math.floor(v.z), "z"},
              {"bw", math.floor(v.wwidth), "bw"},
              {"bh", math.floor(v.wheight), "bh"},
-             {"line",""}
       }
 
      else --Rectangle, Image, Text, Group, Clone
 	attr_t =
       {
              --{"title", "INSPECTOR : "..string.upper(v.type)},
-             {"title", "INSPECTOR : "..(v.type)},
-             {"caption", "OBJECT NAME"},
+             {"title", "Inspector : "..(v.type)},
+             {"caption", "Object Name"},
              {"name", v.name,"name"},
-             {"line",""},
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
              {"z", math.floor(v.z), "z"},
              {"w", math.floor(v.w), "w"},
              {"h", math.floor(v.h), "h"},
-             {"line",""}
       }
 
      end 
@@ -451,22 +431,18 @@ local attr_t
       attr_t =
       {
              --{"title", "INSPECTOR : "..string.upper(v.type)},
-             {"title", "INSPECTOR : "..(v.type)},
-             {"caption", "OBJECT NAME"},
+             {"title", "Inspector : "..(v.type)},
+             {"caption", "Object Name"},
              {"name", v.name,"name"},
-             {"line",""},
-             {"caption", "SOURCE"},
+             {"caption", "Source"},
              {"source", v.source, "source"},
-             {"line",""},
-             {"caption", "VIEW PORT"},
+             {"caption", "View Port"},
              {"left", v.viewport[1], "x"},
              {"top", v.viewport[2], "y"},
              {"width", v.viewport[3], "w"},
              {"height", v.viewport[4], "h"},
-             {"line",""},
              {"volume", v.volume, "volume"},
              {"loop", v.loop, "loop"},
-             {"line",""}
       }
   end 
 
@@ -479,7 +455,7 @@ local attr_t
              	table.insert(attr_t, {"font", v.font, "font"})
 		end, 
 	["color"] = function ()
-        	table.insert(attr_t, {"caption", "COLOR"})
+        	table.insert(attr_t, {"caption", "Color"})
         	local color_t = v.color 
         	if color_t == nil then 
              	     color_t = {0,0,0,0}
@@ -491,7 +467,7 @@ local attr_t
                 end, 
 	["border_width"] = function() 
                 table.insert(attr_t, {"border_width", v.border_width, "border_width"})
-		table.insert(attr_t, {"caption", "BORDER COLOR"})
+		table.insert(attr_t, {"caption", "Border Color"})
         	local color_t = v.border_color 
         	if color_t == nil then 
              	     color_t = {0,0,0,0}
@@ -501,7 +477,7 @@ local attr_t
         	table.insert(attr_t, {"bb", color_t[3], "b"})
         	table.insert(attr_t, {"ab", color_t[4], "a"})
 
-		table.insert(attr_t, {"caption", "FOCUS COLOR"})
+		table.insert(attr_t, {"caption", "Focus Color"})
         	local color_t = v.focus_color 
         	if color_t == nil then 
              	     color_t = {0,0,0,0}
@@ -519,8 +495,6 @@ local attr_t
 		elseif(v.extra.type == "DialogBox") then 
 			table.insert(attr_t, {"label", v.title, "title"})
 		end
-        	table.insert(attr_t, {"line","", "hide"})
-        	table.insert(attr_t, {"line","", "hide"})
 		end,
 	["text_indent"] = function()
                 table.insert(attr_t, {"text indent", v.text_indent, "text indent"})
@@ -540,7 +514,28 @@ local attr_t
 	["item_pos"] = function() 
 		table.insert(attr_t, {"b_pos", v.b_pos, "b_pos"})
 		table.insert(attr_t, {"item_pos", v.item_pos, "item_pos"})
-		table.insert(attr_t, {"line_space", v.line_space, "line_space"})
+		end,
+
+	["group"] = function()
+
+		table.insert(attr_t, {"caption", "SCALE"})
+		local scale_t = v.scale
+        	if scale_t == nil then
+             		scale_t = {1,1} 
+        	end
+
+        	table.insert(attr_t, {"x_scale", scale_t[1], "x"})
+        	table.insert(attr_t, {"y_scale", scale_t[2], "y"})
+
+ 		table.insert(attr_t, {"caption", "Rotation  "})
+        	local x_rotation_t = v.x_rotation 
+        	local y_rotation_t = v.y_rotation 
+        	local z_rotation_t = v.z_rotation 
+        	table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
+        	table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
+        	table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
+	
+ 		table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 		end,
   } 
 
@@ -551,7 +546,7 @@ local widget_map = {
 		w_prop_map["skin"]()
 		w_prop_map["font"]()
 		w_prop_map["color"]()
-		if v.skin == "canvas" then 
+		if v.skin == "custom" then 
 		    w_prop_map["border_width"]()
 		end 
 		end,
@@ -560,7 +555,7 @@ local widget_map = {
 		w_prop_map["font"]()
 		w_prop_map["color"]()
 		w_prop_map["text_indent"]()
-		if v.skin == "canvas" then 
+		if v.skin == "custom" then 
 		    w_prop_map["border_width"]()
 		end 
 		end,
@@ -569,7 +564,7 @@ local widget_map = {
 		w_prop_map["skin"]()
 		w_prop_map["font"]()
 		w_prop_map["color"]()
-		if v.skin == "canvas" then 
+		if v.skin == "custom" then 
 		    w_prop_map["border_width"]()
 		end 
 		end,
@@ -578,14 +573,16 @@ local widget_map = {
 	        table.insert(attr_t, {"label", v.title, "title"})
  		table.insert(attr_t, {"caption", "MESSAGE  "})
 		table.insert(attr_t, {"message", v.message, "message"})
-        	table.insert(attr_t, {"line","", "hide"})
-        	table.insert(attr_t, {"line","", "hide"})
 		w_prop_map["skin"]()
 		w_prop_map["font"]()
 		w_prop_map["color"]()
 		table.insert(attr_t, {"duration", v.duration, "duration"})
 		table.insert(attr_t, {"fade_duration", v.fade_duration, "fade_duration"})
+		if v.skin == "custom" then 
+		    w_prop_map["border_width"]()
+		end 
 		end,
+-------------------------------------------------------------------------------
 	["RadioButton"] = function () return v.name.." = ".."widget.radioButton"..b_indent.."{"..indent.. 
 		"button_color = {"..table.concat(v.button_color,",").."},"..indent..
 		"select_color = {"..table.concat(v.select_color,",").."},"..indent..
@@ -619,29 +616,24 @@ local widget_map = {
         	"fill_lower_color = \""..v.fill_lower_color.."\""..b_indent.."}\n\n"..
 		w_prop_map["group"]() end, 
    }
-
+  if v.extra then 
   if is_in_list(v.extra.type, widgets) == true then 
 	widget_map[v.extra.type]()
-  else 
-  if (v.type == "Text") then
+  else
+	if (v.type == "Text") then
         table.insert(attr_t, {"caption", "COLOR "})
         local color_t = v.color 
         if color_t == nil then 
              color_t = {0,0,0}
         end
-        table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"r", color_t[1], "r"})
         table.insert(attr_t, {"g", color_t[2], "g"})
         table.insert(attr_t, {"b", color_t[3], "b"})
         table.insert(attr_t, {"font", v.font,"font "})
-        table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"editable", v.editable,"editable"})
-        table.insert(attr_t, {"line",""})
         table.insert(attr_t, {"wrap", v.wrap, "wrap"})
         table.insert(attr_t, {"wrap_mode", v.wrap_mode,"wrap mode"})
-	table.insert(attr_t, {"line",""})
- 	table.insert(attr_t, {"caption", "ROTATION  "})
+ 	table.insert(attr_t, {"caption", "Rotation  "})
         local x_rotation_t = v.x_rotation 
         local y_rotation_t = v.y_rotation 
         local z_rotation_t = v.z_rotation 
@@ -649,17 +641,14 @@ local widget_map = {
         table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
         table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
 
- 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
+ 	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 
   elseif (v.type  == "Rectangle") then
         color_t = v.color 
         if color_t == nil then 
              color_t = {0,0,0,0}
         end
-        table.insert(attr_t, {"caption", "FILL COLOR"})
+        table.insert(attr_t, {"caption", "Fill Color"})
         table.insert(attr_t, {"rect_r", color_t[1], "r"})
         table.insert(attr_t, {"rect_g", color_t[2], "g"})
         table.insert(attr_t, {"rect_b", color_t[3], "b"})
@@ -668,13 +657,12 @@ local widget_map = {
         if color_t == nil then 
              color_t = {0,0,0}
         end
-        table.insert(attr_t, {"caption", "BORDER COLOR"})
+        table.insert(attr_t, {"caption", "Border Color"})
         table.insert(attr_t, {"bord_r", color_t[1], "r"})
         table.insert(attr_t, {"bord_g", color_t[2], "g"})
         table.insert(attr_t, {"bord_b", color_t[3], "b"})
         table.insert(attr_t, {"bwidth", v.border_width, "border width"})
-        table.insert(attr_t, {"line",""})
-	table.insert(attr_t, {"caption", "ROTATION  "})
+	table.insert(attr_t, {"caption", "Rotation  "})
         local x_rotation_t = v.x_rotation 
         local y_rotation_t = v.y_rotation 
         local z_rotation_t = v.z_rotation 
@@ -682,28 +670,22 @@ local widget_map = {
         table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
         table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
 
- 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
+ 	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 
   elseif (v.type  == "Image") then
-        table.insert(attr_t, {"caption", "SOURCE LOCATION"})
+        table.insert(attr_t, {"caption", "Source Location"})
         table.insert(attr_t, {"src", v.src,"source"})
-        table.insert(attr_t, {"line",""})
-        table.insert(attr_t, {"caption", "CLIPPING REGION"})
+        table.insert(attr_t, {"caption", "Clipping Region"})
         local clip_t = v.clip
         if clip_t == nil then
              clip_t = {0,0 ,v.w, v.h}
         end
         table.insert(attr_t, {"clip_use", false, "use"})
-        table.insert(attr_t, {"line","", "hide"})
         table.insert(attr_t, {"cx", clip_t[1], "x"})
         table.insert(attr_t, {"cy", clip_t[2], "y"})
         table.insert(attr_t, {"cw", clip_t[3], "w"})
         table.insert(attr_t, {"ch", clip_t[4], "h"})
-        table.insert(attr_t, {"line",""})
- 	table.insert(attr_t, {"caption", "ROTATION  "})
+ 	table.insert(attr_t, {"caption", "Rotation  "})
         local x_rotation_t = v.x_rotation 
         local y_rotation_t = v.y_rotation 
         local z_rotation_t = v.z_rotation 
@@ -711,47 +693,16 @@ local widget_map = {
         table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
         table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
 
- 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
-
-  elseif (v.type  == "Group" or v.type == "Clone") then
-
-        table.insert(attr_t, {"caption", "SCALE"})
-	local scale_t = v.scale
-        if scale_t == nil then
-             scale_t = {1,1} 
-        end
-
-        table.insert(attr_t, {"x_scale", scale_t[1], "x"})
-        table.insert(attr_t, {"y_scale", scale_t[2], "y"})
-
-	table.insert(attr_t, {"line",""})
- 	table.insert(attr_t, {"caption", "ROTATION  "})
-        local x_rotation_t = v.x_rotation 
-        local y_rotation_t = v.y_rotation 
-        local z_rotation_t = v.z_rotation 
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
-
- 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
-        table.insert(attr_t, {"line","", "hide"})
-
-	if (v.extra.type == "Button") then 
-             --table.insert(attr_t, {"Caption","Button", "Caption"})
-	end 
-
-   end
-
-   if(v.type ~= "Video") then
-      	table.insert(attr_t, {"line",""})
-      	table.insert(attr_t, {"opacity", v.opacity, "opacity"})
-      	table.insert(attr_t, {"line",""})
+ 	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
    end 
+   end 
+   end 
+
+   if (v.type  == "Group" or v.type == "Clone") then
+	w_prop_map["group"]()
+   end
+   if(v.type ~= "Video") then
+      	table.insert(attr_t, {"opacity", v.opacity, "opacity"})
    end 
    table.insert(attr_t, {"button", "view code", "view code"})
    table.insert(attr_t, {"button", "apply", "apply"})
@@ -787,19 +738,16 @@ function itemTostring(v, d_list, t_list)
 		"wheight = "..v.wheight..","..indent..
 		"skin = \""..v.skin.."\","..indent..
     		"font = \""..v.font.."\","..indent..
-    		--"color = \""..v.color.."\""..b_indent.."}\n\n"
 		"color = {"..table.concat(v.color,",").."}".. b_indent.."}\n\n"
 		end,
 	["border_width"] = function() return 
     		"border_width = "..v.border_width..","..indent..
- 		--"border_color= \""..v.border_color.."\","..indent..
 		"border_color = {"..table.concat(v.border_color,",").."},"..indent..
     		"padding_x = "..v.padding_x..","..indent.. 
     		"padding_y = "..v.padding_y..","..indent.. 
     		"border_radius = "..v.border_radius..","..indent
 		end,
 	["text"] = function() return 
-    		--"focus_color = \""..v.focus_color.."\","..indent..
 		"focus_color = {"..table.concat(v.focus_color,",").."},"..indent..
     		"text = \""..v.text.."\","..indent
 		end,
@@ -845,7 +793,7 @@ function itemTostring(v, d_list, t_list)
     		"message = \""..v.message.."\","..indent..
     		"border_radius = "..v.border_radius..","..indent.. 
     		"fade_duration = "..v.fade_duration..","..indent.. 
-    		"duration = "..v.duration..b_indent..","..indent.. 
+    		"duration = "..v.duration..","..indent.. 
 		w_prop_map["border_width"]()..w_prop_map["title"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
 	["RadioButton"] = function () return v.name.." = ".."widget.radioButton"..b_indent.."{"..indent.. 
 		"button_color = {"..table.concat(v.button_color,",").."},"..indent..
