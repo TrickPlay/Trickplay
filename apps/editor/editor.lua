@@ -2465,8 +2465,8 @@ local widget_map = {
 	["ButtonPicker"] = function () return widget.buttonPicker()  end, 
 	["LoadingDots"] = function () return widget.loadingdots() end, 
 	["LoadingBar"] = function () return widget.loadingbar() end,
-        ["3D_List"] = function () return widget.threeDlist() end, 
-        ["OSK"] = function () return widget.dropDownButton() end, 
+	["3D_List"] = function () return widget.threeDlist() end,
+	["ScrollImage"] = function () return widget.scrollWindow() end, 
 }
 
 
@@ -2543,6 +2543,8 @@ function editor.widgets()
 		lb=new_widget
               elseif (new_widget.extra.type == "3D_List") then 
 		d=new_widget
+         elseif (new_widget.extra.type == "ScrollImage") then 
+		si=new_widget
 	      end
 --imsi 
 	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
@@ -2582,6 +2584,8 @@ function editor.widgets()
 		lb=new_widget
               elseif (new_widget.extra.type == "3D_List") then 
 		d=new_widget
+         elseif (new_widget.extra.type == "ScrollImage") then 
+		si=new_widget
 	      end
 --imsi 
  	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
