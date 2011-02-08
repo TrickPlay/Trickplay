@@ -732,10 +732,10 @@ local function build_ui( show_it )
 		    end 
 	       end 
 	      
-	       --print(actor.name)
 	       --print(actor.type)
 	       --if(actor.type ~= "Canvas") then 
-	       if(actor.name ~= "scroll_bar") then --imsi 0203 because of new Canvas is Image
+
+	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar") then --imsi 0203 because of new Canvas is Image
 	            actor.x =  x - dx 
 	            actor.y =  y - dy  
 	       else
@@ -786,6 +786,7 @@ local function build_ui( show_it )
 			     dif = actor.extra.l_x - actor.extra.org_x
 			     actor.x = actor.extra.l_x
 		        end 
+
 		        dif = dif * g.extra.scroll_dx
 		        for i,j in pairs (g.children) do 
 	           	     j.position = {j.extra.org_x- dif - g.extra.canvas_xf, j.y, j.z}

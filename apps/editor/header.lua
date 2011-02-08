@@ -157,8 +157,8 @@ attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loo
 widget = dofile("widget.lua")
 
 widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", 
-           "ButtonPicker", "LoadingDots", 
-           "LoadingBar", "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK"}
+           "ButtonPicker", "LoadingDots", "LoadingBar", "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK" }
+	   --"expander", "dropDownButton"}
 
 skins = {"default", "canvas", "skin_type1", "skin_type2"} 
 --[[

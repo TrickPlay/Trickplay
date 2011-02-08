@@ -62,10 +62,13 @@ function inspector_apply (v, inspector)
 	       end 
 
 	       for n,m in pairs (g.children) do 
-		    if is_in_list(m.extra.type, widgets) == false then
-	                m.y = m.extra.org_y
-	                m.x = m.extra.org_x
-		    end 
+		    if m.extra.type then 
+		        if is_in_list(m.extra.type, widgets) == false then
+	                    m.y = m.extra.org_y
+	                    m.x = m.extra.org_x
+				print("I GE MO GI ? ")
+		        end 
+		    end
 	       end 
 
 	       local x_scroll_from = 0 

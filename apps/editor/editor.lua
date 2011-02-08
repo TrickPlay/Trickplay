@@ -911,7 +911,7 @@ function editor.inspector(v)
 	local INSPECTOR_OFFSET = 30 
         local TOP_PADDING = 12
         local BOTTOM_PADDING = 12
-
+	local xbox_xpos = 465
 
 	if(current_inspector ~= nil) then 
 		return 
@@ -922,19 +922,27 @@ function editor.inspector(v)
 	end
 	
 
-
 	local inspector_items = {}
 	local inspector_bg
 
 	-- make inspector background image 
-	if is_in_list(v.extra.type, widgets) == true  then
-	     if v.extra.type == "Button" and v.skin =="canvas" then 
-	     inspector_bg = factory.make_popup_bg(v.extra.type.."-c", 0)
-	     else 
-	     inspector_bg = factory.make_popup_bg(v.extra.type, 0)
+	if v.extra then 
+	   if is_in_list(v.extra.type, widgets) == true  then
+	     if v.extra.type == "Button" and v.skin =="custom" then 
+	     	  xbox_xpos = 515
+	          inspector_bg = factory.make_popup_bg(v.extra.type.."-c", 0)
+	     elseif v.extra.type == "Button" then 
+		  xbox_xpos = 465
+	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
+	     else  
+	     	  xbox_xpos = 515
+	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
 	     end 
-	else 
+	   else -- rect, img, text 
 	     inspector_bg = factory.make_popup_bg(v.type, 0)
+	   end 
+	else  -- video
+	   inspector_bg = factory.make_popup_bg(v.type, 0)
 	end 
 
 	local inspector_xbox = factory.make_xbox()
@@ -947,7 +955,7 @@ function editor.inspector(v)
              children =
              {
                inspector_bg, 
-	       inspector_xbox:set{position = {465, 40}}
+	       inspector_xbox:set{position = {xbox_xpos, 40}}
              }
 	}
 
@@ -1016,6 +1024,8 @@ function editor.inspector(v)
 	local space = 0
 	local used = 0
 
+	local item_group = Group()
+
 	for i=1, #attr_t do 
              if (attr_t[i] == nil) then break end 
 
@@ -1034,7 +1044,7 @@ function editor.inspector(v)
                  items_height = items_height - item.h 
             	 item.x = used + 30
 	     else 
-                 item.x = ( inspector_bg.w - WIDTH ) / 2
+                 item.x = 25 --( inspector_bg.w - WIDTH ) / 2
 		 space = 0
 		 used = 0
              end 
@@ -1053,9 +1063,15 @@ function editor.inspector(v)
 	    end
 	    used = used + item.w 
 	
-	    inspector:add(item)
+	    if(attr_n == "button") then 
+	         inspector:add(item)
+	    else 
+	         item_group:add(item)
+	    end 
 		
         end 
+
+	inspector:add(item_group) 
 
 	screen:add(inspector)
 	input_mode = S_POPUP
@@ -2450,6 +2466,7 @@ local widget_map = {
 	["LoadingDots"] = function () return widget.loadingdots() end, 
 	["LoadingBar"] = function () return widget.loadingbar() end,
         ["3D_List"] = function () return widget.threeDlist() end, 
+        ["OSK"] = function () return widget.dropDownButton() end, 
 }
 
 
