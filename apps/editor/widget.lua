@@ -2277,6 +2277,7 @@ function widget.scrollWindow(t)
 		color     = "FFFFFF",
         clip_h    =  600,
 		border_w  =    2,
+        content   = Group{},
         content_h =  1000,
 		content_w =  1000,
 		arrow_clone_source = nil,
@@ -2296,7 +2297,7 @@ function widget.scrollWindow(t)
 	--Group that Clips the content
 	local window  = Group{}
 	--Group that contains all of the content
-	local content = Group{}
+	--local content = Group{}
 	--declarations for dependencies from scroll_group
 	local scroll
 	--flag to hold back key presses while animating content group
@@ -2312,9 +2313,12 @@ function widget.scrollWindow(t)
 		
         extra    = {
 			type = "ScrollImage",
+            reactive = true
+            --[[
 			get_content_group = function()
 				return content
 			end
+            --]]
         }
     }
 	
@@ -2362,22 +2366,22 @@ function widget.scrollWindow(t)
 	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
 	
 	scroll_y = function(dir)
-		local new_y = content.y+ dir*10
+		local new_y = p.content.y+ dir*10
 		animating = true
-		content:animate{
+		p.content:animate{
 			duration = 200,
 			y = new_y,
 			on_completed = function()
-				if content.y < -(p.content_h - p.clip_h) then
-					content:animate{
+				if p.content.y < -(p.content_h - p.clip_h) then
+					p.content:animate{
 						duration = 200,
 						y = -(p.content_h - p.clip_h),
 						on_completed = function()
 							animating = false
 						end
 					}
-				elseif content.y > 0 then
-					content:animate{
+				elseif p.content.y > 0 then
+					p.content:animate{
 						duration = 200,
 						y = 0,
 						on_completed = function()
@@ -2405,22 +2409,22 @@ function widget.scrollWindow(t)
 	
 	
 	scroll_x = function(dir)
-		local new_x = content.x+ dir*10
+		local new_x = p.content.x+ dir*10
 		animating = true
-		content:animate{
+		p.content:animate{
 			duration = 200,
 			x = new_x,
 			on_completed = function()
-				if content.x < -(p.content_w - p.clip_w) then
-					content:animate{
+				if p.content.x < -(p.content_w - p.clip_w) then
+					p.content:animate{
 						duration = 200,
 						y = -(p.content_w - p.clip_w),
 						on_completed = function()
 							animating = false
 						end
 					}
-				elseif content.x > 0 then
-					content:animate{
+				elseif p.content.x > 0 then
+					p.content:animate{
 						duration = 200,
 						x = 0,
 						on_completed = function()
@@ -2449,7 +2453,7 @@ function widget.scrollWindow(t)
 	
 	--this function creates the whole scroll bar box
 	local function create()
-		content.position  = { p.border_w, p.border_w }
+		p.content.position  = { p.border_w, p.border_w }
 		window.clip = { p.border_w, p.border_w, p.clip_w, p.clip_h }
 		border.w = p.clip_w+2*p.border_w
 		border.h = p.clip_h+2*p.border_w
@@ -2626,7 +2630,7 @@ function widget.scrollWindow(t)
 	
     create()
 	scroll_group:add(border,grip_hor,grip_vert,window)
-	window:add(content)
+	window:add(p.content)
 	
 	
 	
@@ -2646,7 +2650,7 @@ function widget.scrollWindow(t)
 					   grip_hor.x = grip_hor_base_x+(track_w-grip_w)
 				end
 				
-				content.x = -(grip_hor.x - grip_hor_base_x) * p.content_w/track_w
+				p.content.x = -(grip_hor.x - grip_hor_base_x) * p.content_w/track_w
 				
 			end 
 		}
@@ -2667,7 +2671,7 @@ function widget.scrollWindow(t)
 					   grip_vert.y = grip_vert_base_y+(track_h-grip_h)
 				end
 				
-				content.y = -(grip_vert.y - grip_vert_base_y) * p.content_h/track_h
+				p.content.y = -(grip_vert.y - grip_vert_base_y) * p.content_h/track_h
 				
 			end
 		}
@@ -2679,8 +2683,17 @@ function widget.scrollWindow(t)
     mt = {}
     mt.__newindex = function(t,k,v)
 		
-       p[k] = v
-       create()
+        if k == "content" then
+            p.content:unparent()
+            if v.parent ~= nil then
+                v:unparent()
+            end
+            v.position={0,0}
+            v.reactive = false
+            window:add(v)
+        end
+        p[k] = v
+        create()
 		
     end
     mt.__index = function(t,k)       
@@ -2688,7 +2701,6 @@ function widget.scrollWindow(t)
     end
     setmetatable(scroll_group.extra, mt)
 
-    scroll_group.reactive = true
     return scroll_group
 end
 --]]
