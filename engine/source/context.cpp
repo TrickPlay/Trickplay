@@ -7,6 +7,7 @@
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig.h"
+#include "sndfile.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
@@ -495,12 +496,62 @@ int TPContext::console_command_handler( const char * command, const char * param
 
                 delete image;
             }
-
-
         }
+    }
+    else if ( ! strcmp( command , "as" ) )
+    {
+        if ( parameters )
+        {
+            SF_INFO info;
 
+            memset( & info , sizeof( info ) , 0 );
 
+            SNDFILE * f = sf_open( parameters , SFM_READ , & info );
 
+            if ( ! f )
+            {
+                g_info( "FAILED TO OPEN '%s'" , parameters );
+            }
+            else
+            {
+                g_info( "  frames      = %u" , info.frames );
+                g_info( "  sample_rate = %d" , info.samplerate );
+                g_info( "  channels    = %d" , info.channels );
+                g_info( "  format      = 0x%x" , info.format );
+
+                // Allocate a buffer to hold 10 seconds of audio
+
+                sf_count_t frames = info.samplerate * 10;
+
+                float * samples = g_new( float , frames * info.channels );
+
+                while( true )
+                {
+                    sf_count_t read = sf_readf_float( f , samples , frames );
+
+                    if ( read == 0 )
+                    {
+                        break;
+                    }
+
+                    TPAudioBuffer buffer;
+
+                    buffer.format = TP_AUDIO_FORMAT_FLOAT;
+                    buffer.channels = info.channels;
+                    buffer.sample_rate = info.samplerate;
+                    buffer.copy_samples = 1;
+                    buffer.free_samples = 0;
+                    buffer.samples = samples;
+                    buffer.size = read * info.channels * sizeof( float );
+
+                    tp_audio_sampler_submit_buffer( tp_context_get_audio_sampler( context ) , & buffer );
+                }
+
+                g_free( samples );
+
+                sf_close( f );
+            }
+        }
     }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
