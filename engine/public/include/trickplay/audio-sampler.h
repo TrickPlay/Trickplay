@@ -63,33 +63,33 @@ extern "C" {
     TP_AUDIO_ENDIAN_CPU          - Force CPU endian-ness.
 */
 
-#define TP_AUDIO_FORMAT_PCM_S8       = 0x0001
-#define TP_AUDIO_FORMAT_PCM_16       = 0x0002
-#define TP_AUDIO_FORMAT_PCM_24       = 0x0003
-#define TP_AUDIO_FORMAT_PCM_32       = 0x0004
-#define TP_AUDIO_FORMAT_PCM_U8       = 0x0005
-#define TP_AUDIO_FORMAT_FLOAT        = 0x0006
-#define TP_AUDIO_FORMAT_DOUBLE       = 0x0007
-#define TP_AUDIO_FORMAT_ULAW         = 0x0010
-#define TP_AUDIO_FORMAT_ALAW         = 0x0011
-#define TP_AUDIO_FORMAT_IMA_ADPCM    = 0x0012
-#define TP_AUDIO_FORMAT_MS_ADPCM     = 0x0013
-#define TP_AUDIO_FORMAT_GSM610       = 0x0020
-#define TP_AUDIO_FORMAT_VOX_ADPCM    = 0x0021
-#define TP_AUDIO_FORMAT_G721_32      = 0x0030
-#define TP_AUDIO_FORMAT_G723_24      = 0x0031
-#define TP_AUDIO_FORMAT_G723_40      = 0x0032
-#define TP_AUDIO_FORMAT_DWVW_12      = 0x0040
-#define TP_AUDIO_FORMAT_DWVW_16      = 0x0041
-#define TP_AUDIO_FORMAT_DWVW_24      = 0x0042
-#define TP_AUDIO_FORMAT_DWVW_N       = 0x0043
-#define TP_AUDIO_FORMAT_DPCM_8       = 0x0050
-#define TP_AUDIO_FORMAT_DPCM_16      = 0x0051
+#define TP_AUDIO_FORMAT_PCM_S8       0x0001
+#define TP_AUDIO_FORMAT_PCM_16       0x0002
+#define TP_AUDIO_FORMAT_PCM_24       0x0003
+#define TP_AUDIO_FORMAT_PCM_32       0x0004
+#define TP_AUDIO_FORMAT_PCM_U8       0x0005
+#define TP_AUDIO_FORMAT_FLOAT        0x0006
+#define TP_AUDIO_FORMAT_DOUBLE       0x0007
+#define TP_AUDIO_FORMAT_ULAW         0x0010
+#define TP_AUDIO_FORMAT_ALAW         0x0011
+#define TP_AUDIO_FORMAT_IMA_ADPCM    0x0012
+#define TP_AUDIO_FORMAT_MS_ADPCM     0x0013
+#define TP_AUDIO_FORMAT_GSM610       0x0020
+#define TP_AUDIO_FORMAT_VOX_ADPCM    0x0021
+#define TP_AUDIO_FORMAT_G721_32      0x0030
+#define TP_AUDIO_FORMAT_G723_24      0x0031
+#define TP_AUDIO_FORMAT_G723_40      0x0032
+#define TP_AUDIO_FORMAT_DWVW_12      0x0040
+#define TP_AUDIO_FORMAT_DWVW_16      0x0041
+#define TP_AUDIO_FORMAT_DWVW_24      0x0042
+#define TP_AUDIO_FORMAT_DWVW_N       0x0043
+#define TP_AUDIO_FORMAT_DPCM_8       0x0050
+#define TP_AUDIO_FORMAT_DPCM_16      0x0051
 
-#define TP_AUDIO_ENDIAN_DEFAULT      = 0x00000000
-#define TP_AUDIO_ENDIAN_LITTLE       = 0x10000000
-#define TP_AUDIO_ENDIAN_BIG          = 0x20000000
-#define TP_AUDIO_ENDIAN_CPU          = 0x30000000
+#define TP_AUDIO_ENDIAN_DEFAULT      0x00000000
+#define TP_AUDIO_ENDIAN_LITTLE       0x10000000
+#define TP_AUDIO_ENDIAN_BIG          0x20000000
+#define TP_AUDIO_ENDIAN_CPU          0x30000000
 
 /*-----------------------------------------------------------------------------*/
 /*
@@ -260,6 +260,44 @@ extern "C" {
     TP_API_EXPORT
     void
     tp_audio_sampler_source_changed(
+
+            TPAudioSampler *    sampler);
+
+/*-----------------------------------------------------------------------------*/
+/*
+    Function: tp_audio_sampler_pause
+
+    Instructs the audio sampler to stop processing pending audio buffers. This
+    can be used to temporarily minimize the resources used by the audio sampler.
+
+    You can still submit audio buffers while the sampler is paused; it will simply
+    accumulate them and process them when you call <tp_audio_sampler_resume>.
+
+    Arguments:
+
+        sampler - A TPAudioSampler obtained by calling <tp_context_get_audio_sampler>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_audio_sampler_pause(
+
+            TPAudioSampler *    sampler);
+
+/*-----------------------------------------------------------------------------*/
+/*
+    Function: tp_audio_sampler_resume
+
+    Instructs the audio sampler to resume processing audio buffers.
+
+    Arguments:
+
+        sampler - A TPAudioSampler obtained by calling <tp_context_get_audio_sampler>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_audio_sampler_resume(
 
             TPAudioSampler *    sampler);
 
