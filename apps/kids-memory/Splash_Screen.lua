@@ -83,6 +83,7 @@ local exit_sel = false
 
 local exit_button_key_handler = {
     [keys.OK] = function()
+        play_sound_wrapper(audio.button)
         exit()
     end,
     [keys.Right] = function()
@@ -90,6 +91,7 @@ local exit_button_key_handler = {
         --table.insert(animate_list,corner_lose_focus)
         animate_list[corner_lose_focus]=corner_lose_focus
         exit_sel = false
+        play_sound_wrapper(audio.move_focus)
     end,
 }
 
@@ -99,6 +101,7 @@ local key_handler = {
         game_state.difficulty = diff_i
         game_state.in_game=true
         give_keys("GAME")
+        play_sound_wrapper(audio.button)
     end,
     [keys.Down] = function()
         if diff_i < 3 then
@@ -108,6 +111,7 @@ local key_handler = {
             anim_focus.targ_y = focus.y+button_backing.h+38
             --table.insert(animate_list,anim_focus)
             animate_list[anim_focus]=anim_focus
+            play_sound_wrapper(audio.move_focus)
         end
     end,
     [keys.Up] = function()
@@ -118,6 +122,7 @@ local key_handler = {
             anim_focus.targ_y = focus.y-(button_backing.h+38)
             --table.insert(animate_list,anim_focus)
             animate_list[anim_focus]=anim_focus
+            play_sound_wrapper(audio.move_focus)
         end
     end,
     [keys.Left] = function()
@@ -125,6 +130,7 @@ local key_handler = {
         --table.insert(animate_list,corner_get_focus)
         animate_list[corner_get_focus]=corner_get_focus
         exit_sel = true
+        play_sound_wrapper(audio.move_focus)
     end,
 }
 

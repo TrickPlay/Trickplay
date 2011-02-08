@@ -16,11 +16,18 @@ face_base:hide()
 local win_img = Image{src="assets/win_txt.png",position={screen_w/2,screen_h/2}}
 win_img.anchor_point = {win_img.w/2,win_img.h/2}
 
+local match     = 1
+local no_match  = 1
+local win_sound = 1
+
+
 local win_animation = {
     duration = {1000,2000},
     setup = function()
         screen:add(win_img)
         win_img.opacity=0
+        win_sound = win_sound%(#audio.win)+1
+        play_sound_wrapper(audio.win[win_sound])
     end,
     stages = {
         function(self,delta,p)
@@ -130,7 +137,7 @@ Tile = Class(function(obj, face_source, parent, ...)
             --init_face()
             obj.group:add(obj.face)
             tile_faces[face_source].reset(obj.tbl)
-            
+            play_sound_wrapper(audio.card_flip)
         end,
         stages = {
             function(self,delta,p)
@@ -150,11 +157,15 @@ Tile = Class(function(obj, face_source, parent, ...)
         on_remove = function(self)
             if first_choice ~= nil then
                 if obj.index ~= first_choice.index then
+                    no_match = no_match%(#audio.no_match)+1
+                    play_sound_wrapper(audio.no_match[no_match])
                     first_choice.flip_b()
                     obj.flip_b()
                 elseif first_choice ~= obj then
                     animate_list[first_choice.remove]=first_choice.remove
                     animate_list[obj.remove]=obj.remove
+                    match = match%(#audio.match)+1
+                    play_sound_wrapper(audio.match[match])
                 end
             end
             flipping = false
@@ -164,6 +175,9 @@ Tile = Class(function(obj, face_source, parent, ...)
     --animation for flipping the tile back down
     local flip_back = {
         duration = {500},
+        setup = function()
+            play_sound_wrapper(audio.card_flip)
+        end,
         stages = {
             function(self,delta,p)
                 obj.group.y_rotation={180*(1-p),0,0}
