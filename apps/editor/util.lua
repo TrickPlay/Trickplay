@@ -195,6 +195,12 @@ function create_on_button_down_f(v)
 		    return true 
 		elseif( input_mode ~= S_RECTANGLE) then  
 	      	    if(dragging ~= nil) then 
+
+	       	       local actor = unpack(dragging) 
+		       if (actor.name == "scroll_window") then  
+				dragging = nil 
+				return true 
+		       end 
 	               local actor , dx , dy = unpack( dragging )
 		       new_object = copy_obj(v)
 	               new_object.position = {x-dx, y-dy}
@@ -1250,7 +1256,7 @@ local function inputMsgWindow_savefile()
       end
 end
 
-function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
+local function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  -- local 0208
      
      local x_scroll_box, y_scroll_box 
      local x_scroll_bar, y_scroll_bar 

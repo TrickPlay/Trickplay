@@ -2310,10 +2310,9 @@ function widget.scrollWindow(t)
     local scroll_group = Group{ 
         name     = "Scroll clip",
         position = {200,100},
-		
+        reactive = true,
         extra    = {
 			type = "ScrollImage",
-            reactive = true
             --[[
 			get_content_group = function()
 				return content
@@ -2677,8 +2676,9 @@ function widget.scrollWindow(t)
 		}
 		
         return true
+
     end 
-	
+
 	--set the meta table to overwrite the parameters
     mt = {}
     mt.__newindex = function(t,k,v)
