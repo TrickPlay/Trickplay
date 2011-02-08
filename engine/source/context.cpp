@@ -504,7 +504,7 @@ int TPContext::console_command_handler( const char * command, const char * param
         {
             SF_INFO info;
 
-            memset( & info , sizeof( info ) , 0 );
+            memset( & info , 0 , sizeof( info ) );
 
             SNDFILE * f = sf_open( parameters , SFM_READ , & info );
 
