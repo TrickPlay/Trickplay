@@ -1866,6 +1866,7 @@ void TPContext::load_external_configuration()
         TP_MEDIAPLAYER_ENABLED,
         TP_IMAGE_DECODER_ENABLED,
         TP_RANDOM_SEED,
+        TP_PLUGINS_PATH,
 
         NULL
     };
@@ -2036,6 +2037,21 @@ void TPContext::validate_configuration()
     if ( g_mkdir_with_parents( downloads_path, 0700 ) != 0 )
     {
         g_error( "DOWNLOADS PATH '%s' DOES NOT EXIST AND COULD NOT BE CREATED", downloads_path );
+    }
+
+    // PLUGINS PATH
+
+    const char * plugins_path = get( TP_PLUGINS_PATH );
+
+    if ( ! plugins_path )
+    {
+        gchar * path = g_build_filename( g_get_current_dir() , "plugins" , NULL );
+
+        g_warning( "DEFAULT:%s=%s", TP_PLUGINS_PATH, path );
+
+        set( TP_PLUGINS_PATH, path );
+
+        g_free( path );
     }
 
     // SCREEN WIDTH AND HEIGHT

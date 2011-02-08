@@ -209,6 +209,10 @@ typedef struct TPContext TPContext;
                                 seed for all apps and the 'math.randomseed' function will
                                 become a no-op.
                                 Defaults to 0.
+
+    TP_PLUGINS_PATH -           Path to root directory of TrickPlay plugins.
+                                Defaults to "plugins" (in the current working directory).
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -246,6 +250,7 @@ typedef struct TPContext TPContext;
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
 #define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
 #define TP_RANDOM_SEED                  "random_seed"
+#define TP_PLUGINS_PATH                 "plugins_path"
 
 
 /*-----------------------------------------------------------------------------
