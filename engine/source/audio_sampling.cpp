@@ -1,5 +1,6 @@
 
 #include <cstdio>
+#include "gmodule.h"
 #include "sndfile.h"
 
 #include "trickplay/plugins/audio-detection.h"
