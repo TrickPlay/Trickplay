@@ -525,6 +525,12 @@ int TPContext::console_command_handler( const char * command, const char * param
 
                 float * samples = g_new( float , frames * info.channels );
 
+                // Get the audio sampler
+
+                TPAudioSampler * sampler = tp_context_get_audio_sampler( context );
+
+                tp_audio_sampler_pause( sampler );
+
                 while( true )
                 {
                     sf_count_t read = sf_readf_float( f , samples , frames );
@@ -544,10 +550,12 @@ int TPContext::console_command_handler( const char * command, const char * param
                     buffer.samples = samples;
                     buffer.size = read * info.channels * sizeof( float );
 
-                    tp_audio_sampler_submit_buffer( tp_context_get_audio_sampler( context ) , & buffer );
+                    tp_audio_sampler_submit_buffer( sampler , & buffer );
                 }
 
                 g_free( samples );
+
+                tp_audio_sampler_resume( sampler );
 
                 sf_close( f );
             }
