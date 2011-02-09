@@ -38,7 +38,8 @@ tile_faces[1].stages = {
         if not self.played then
             self.played = true
             play_sound_wrapper(audio.monkey)
-            self.start_talking = 9
+            self.start_talking = 2
+            
         end
         self.start_talking = self.start_talking - 1
     end,

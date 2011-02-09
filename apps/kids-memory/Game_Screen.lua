@@ -1,13 +1,13 @@
 --umbrella group for all members of the splash screen
-local game_screen = Group{}
+game_screen = Group{}
 --back icon
 local back_button = Image{src="assets/button-back.png",x=28,y=870}
 local back_focus  = Image{src="assets/focus-back-btn.png",x=28,y=870}
 
 --background
-game_screen:add(Image{src="assets/background-game.jpg",scale={2,2}})
+game_screen:add(Image{src="assets/background-game.jpg"})
 screen:add(game_screen)
-game_screen:hide()
+--game_screen:hide()
 
 --the Focus indicator, and its index-position
 local focus = Image{src="assets/focus-square-tiles.png"}
@@ -45,6 +45,53 @@ local function x_y_from_index(i,j)
 end
 local back_sel = false
 game_screen:add(back_focus,back_button,focus,focus_next,board)
+
+
+local cascade_delay = 200
+local duration_per_tile = 400
+local fade_out = {
+        duration = {500},
+        stages = {
+            function(self,delta,p)
+                game_screen.opacity=255*(1-p)
+            end
+        }
+    }
+local fade_in = {
+        duration = {500},
+        setup = function()
+            for i = 1, #game_state.board  do
+				for j = 1, #game_state.board[i] do
+                    game_state.board[i][j].opacity=0
+                end
+            end
+        end,
+        stages = {
+            function(self,delta,p)
+                game_screen.opacity=255*(p)
+            end,
+            function(self,delta,p)
+                local item
+                local msecs = p*self.duration[2]
+				for i = 1, #game_state.board  do
+					for j = 1, #game_state.board[i] do
+						item = game_state.board[i][j].group
+						if msecs > item.delay and msecs < (item.delay+duration_per_tile) then
+							prog = (msecs-item.delay) / duration_per_tile
+							item.y_rotation = {90*(1-prog),0,0}
+							item.opacity = 255*prog
+						elseif msecs > (item.delay+duration_per_tile) then
+							item.y_rotation = {0,0,0}
+							item.opacity = 255
+						end
+					end
+				end
+            end
+        }
+    }
+
+
+
 function game_fade_in(previous_board)
     board:clear()
     
@@ -70,6 +117,7 @@ function game_fade_in(previous_board)
             t = Tile(index, {placement_order[i][1] , placement_order[i][2]})
             --t.group.position={200*placement_order[i][1],200*placement_order[i][2]}
             t.group.x, t.group.y = x_y_from_index(placement_order[i][1],placement_order[i][2])
+            t.group.delay = cascade_delay*(placement_order[i][1] + placement_order[i][2] - 1)
             t.group.scale = {board_spec[game_state.difficulty][3],board_spec[game_state.difficulty][3]}
             board:add(t.group)
             game_state.board[ placement_order[i][1] ][ placement_order[i][2] ] = t
@@ -83,6 +131,7 @@ function game_fade_in(previous_board)
                     t = Tile(previous_board[i][j], {i,j})
                     --t.group.position={200*i,200*j}
                     t.group.x, t.group.y = x_y_from_index(i,j)
+                    t.group.delay = cascade_delay*(i + j - 1)
                     t.group.scale = {board_spec[game_state.difficulty][3],board_spec[game_state.difficulty][3]}
                     board:add(t.group)
                     game_state.board[ i ][ j ] = t
@@ -96,18 +145,20 @@ function game_fade_in(previous_board)
     focus.scale={board_spec[game_state.difficulty][3],board_spec[game_state.difficulty][3]}
     back_sel = false
     first_selected   = nil
-    game_screen:show()
+    --game_screen:show()
     back_focus.opacity=0
     focus.opacity=255
     focus.x, focus.y = x_y_from_index(1,1)
     focus_i = {1,1}
     collectgarbage("collect")
+    fade_in.duration[2] = cascade_delay*(#game_state.board+#game_state.board[1]-1)+ duration_per_tile
+    animate_list[fade_in]=fade_in
 end
 function get_gs_focus()
     return focus
 end
 function game_fade_out()
-    game_screen:hide()
+    animate_list[fade_out]=fade_out
 end
 
 

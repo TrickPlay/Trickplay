@@ -69,7 +69,7 @@ Tile = Class(function(obj, face_source, parent, ...)
     obj.index   = face_source
     
     --Umbrella group for the instance
-    obj.group = Group{name="Tile"}
+    obj.group = Group{name="Tile",opacity=0}
     obj.group:add(obj.backing,obj.face_backing)
     
     --clone each part of the face
