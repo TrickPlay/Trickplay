@@ -8,6 +8,7 @@
 #include "curl/curl.h"
 #include "fontconfig.h"
 #include "sndfile.h"
+#include "json-glib/json-glib.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
@@ -2437,6 +2438,8 @@ void TPContext::add_internal( gpointer key , gpointer value , GDestroyNotify des
     }
 }
 
+//-----------------------------------------------------------------------------
+
 gpointer TPContext::get_internal( gpointer key )
 {
     InternalMap::const_iterator it( internals.find( key ) );
@@ -2451,6 +2454,34 @@ gpointer TPContext::get_internal( gpointer key )
     return 0;
 }
 
+
+//-----------------------------------------------------------------------------
+// Called by other threads...
+
+void TPContext::audio_detection_match( const gchar * json )
+{
+    JsonParser * parser = json_parser_new();
+
+    GError * error = 0;
+
+    bool valid = json_parser_load_from_data( parser , json , -1 , & error );
+
+    g_object_unref( parser );
+
+    if ( ! valid )
+    {
+        g_warning( "INVALID JSON AUDIO DETECTION RESULT '%s' : %s" , json , error->message );
+
+        g_clear_error( & error );
+    }
+    else
+    {
+        g_info( "VALID JSON AUDIO DETECTION RESULT : '%s'" , json );
+
+        // TODO: Here, we would make a copy of the JSON string and use and idle to
+        // trigger some kind of event.
+    }
+}
 
 //=============================================================================
 // External-facing functions

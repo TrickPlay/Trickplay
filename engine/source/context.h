@@ -156,6 +156,14 @@ public:
 
     gpointer get_internal( gpointer key );
 
+    //.........................................................................
+    // This one is thread-safe, it receives a snippet of JSON that came from
+    // an audio detection plugin. In the future, we could make it more generic,
+    // and just let the outside world give us contextual information. It could
+    // come via TCP/IP from a set-top box, for example.
+
+    void audio_detection_match( const gchar * json );
+
 private:
 
     TPContext();
