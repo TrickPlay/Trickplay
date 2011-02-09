@@ -1,5 +1,5 @@
 --umbrella group for all members of the splash screen
-local splash_screen = Group{}
+splash_screen = Group{}
 local button_backing = Image{src="assets/button-start.png"}
 screen:add(button_backing)
 button_backing:hide()
@@ -8,9 +8,11 @@ local difficulty_items = {
     Group{},
     Group{},
 }
+local diff_x = 1255
 for i = 1,#difficulty_items do
     difficulty_items[i]:add(Clone{source = button_backing})
     difficulty_items[i].position={1255,96+(i-1)*(button_backing.h+38)}
+    difficulty_items[i]:move_anchor_point(screen_w-diff_x,0)
 end
 local t = Image{src="assets/level-start-easy.png",position={button_backing.w/2,button_backing.h/2}}
 t.anchor_point={t.w/2,t.h/2}
@@ -23,11 +25,28 @@ t = Image{src="assets/level-start-hard.png",position={button_backing.w/2,button_
 t.anchor_point={t.w/2,t.h/2}
 difficulty_items[3]:add(t)
 local diff_i = 1
-splash_screen:add(Image{src="assets/background-start.jpg",scale={2,2}})
-screen:add(splash_screen)
-splash_screen:hide()
+local bg = Image{src="assets/background-start.jpg"}
+local start_monkey = Image{src="assets/start-monkey.png",y=314,x=40}
+start_monkey:move_anchor_point(start_monkey.w/2,start_monkey.h/4)
+local monkey_business = {
+        duration = {900,900},
+        loop=true,
+        stages = {
+            function(self,delta,p)
+                start_monkey.z_rotation={30*p}
+            end,
+            function(self,delta,p)
+                start_monkey.z_rotation={30*(1-p)}
+            end
+        }
+    }
+        animate_list[monkey_business]=monkey_business
 
-local focus = Image{src="assets/focus-rectangle-start.png",x=difficulty_items[1].x+button_backing.w/2,y=difficulty_items[1].y+button_backing.h/2}
+splash_screen:add(bg,start_monkey)
+screen:add(splash_screen)
+--splash_screen:hide()
+
+local focus = Image{src="assets/focus-rectangle-start.png",x=diff_x+button_backing.w/2,y=difficulty_items[1].y+button_backing.h/2}
 focus.anchor_point={focus.w/2,focus.h/2}
 splash_screen:add(focus)
 splash_screen:add(unpack(difficulty_items))
@@ -37,11 +56,34 @@ local exit_button = Image{src="assets/button-exit.png",x=29,y=978}
 exit_focus.opacity=0
 splash_screen:add(exit_focus,exit_button)
 
+local fade_out = {
+        duration = {500},
+        stages = {
+            function(self,delta,p)
+                for i, item in ipairs(difficulty_items) do
+                    item.y_rotation={90*p,0,0}
+                end
+                splash_screen.opacity = 255*(1-p)
+            end
+        }
+    }
+local fade_in = {
+        duration = {500},
+        stages = {
+            function(self,delta,p)
+                for i, item in ipairs(difficulty_items) do
+                    item.y_rotation={90*(1-p),0,0}
+                end
+                splash_screen.opacity = 255*p
+            end
+        }
+    }
+
 function splash_fade_in()
-    splash_screen:show()
+    animate_list[fade_in]=fade_in
 end
 function splash_fade_out()
-    splash_screen:hide()
+    animate_list[fade_out]=fade_out
 end
 
 local anim_focus = {

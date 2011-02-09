@@ -22,6 +22,7 @@ play_sound_wrapper = function(sound)
 end
 
 audio = {
+    opening_song = "audio/Opening song.mp3",
     move_focus  = "audio/Effects/arrow press.wav",
     blank_space = "audio/Effects/blank space.wav",
     button      = "audio/Effects/button.wav",
@@ -95,6 +96,8 @@ dofile("Splash_Screen.lua")
 --file for managing the game screen
 dofile("Game_Screen.lua")
 
+
+splash_screen:raise_to_top()
 ---------------------------
 ---- Game Loop
 ---------------------------
@@ -137,13 +140,15 @@ if settings.board ~= nil and #settings.board ~= 0 then
     
     curr_handler = "GAME"
     game_fade_in(settings.board)
+    splash_screen.opacity=0
     
 -- otherwise just load splash screen
 else
     print("No save file to load from")
     
     curr_handler = "SPLASH"
-    splash_fade_in()
+    --splash_fade_in()
+    
 end
 
 ---------------------------
@@ -181,7 +186,9 @@ app.on_closing = function()
     screen.perspective = {60,1,screen.perspective[3],100}
 end
 function mediaplayer:on_loaded()
-    mediaplayer:play()
+    if not game_state.in_game then
+        mediaplayer:play()
+    end
 end
-mediaplayer:load("audio/Opening song.mp3")
+mediaplayer:load(audio.opening_song)
 
