@@ -8,6 +8,7 @@
 #include "network.h"
 #include "util.h"
 #include "app.h"
+#include "context.h"
 
 //****************************************************************************
 // Internal structure to hold all the things we care about while we are
@@ -397,6 +398,18 @@ void Network::Response::replace_body( gpointer data , gsize size )
 
     g_byte_array_append( body , ( const guint8 * ) data , size );
 }
+
+//*****************************************************************************
+// Settings
+
+Network::Settings::Settings( TPContext * context )
+:
+    debug( context->get_bool( TP_NETWORK_DEBUG, false ) ),
+    ssl_verify_peer( context->get_bool( TP_SSL_VERIFY_PEER, true ) ),
+    ssl_cert_bundle( context->get( TP_SSL_CA_CERT_FILE, "" ) )
+{
+}
+
 
 //*****************************************************************************
 
