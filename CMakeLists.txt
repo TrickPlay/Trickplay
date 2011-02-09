@@ -88,5 +88,5 @@ endif (CMAKE_TOOLCHAIN_FILE)
 
 add_subdirectory( engine/docs )
 
-
+add_subdirectory( plugins )
 
