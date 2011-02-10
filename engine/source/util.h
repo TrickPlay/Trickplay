@@ -40,6 +40,16 @@ inline StringVector split_string( const gchar * source , const gchar * delimiter
 {
     StringVector result;
 
+    if ( ! source || ! delimiter )
+    {
+        return result;
+    }
+
+    if ( strlen( source ) == 0 || strlen( delimiter ) == 0 )
+    {
+        return result;
+    }
+
     gchar * * parts = g_strsplit( source , delimiter , max_tokens );
 
     for ( gchar * * part = parts; * part; ++part )
