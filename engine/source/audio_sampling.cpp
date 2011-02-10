@@ -36,6 +36,43 @@ struct TPAudioSampler
 
     private:
 
+        struct Event
+        {
+        public:
+
+            typedef enum
+            {
+                SUBMIT_BUFFER,
+                SOURCE_CHANGED,
+                PAUSE,
+                RESUME,
+                QUIT,
+                URL_RESPONSE
+            }
+            Type;
+
+            static Event * make( Type type );
+
+            static Event * make( TPAudioBuffer * buffer );
+
+            static Event * make( TPAudioDetectionResult * result , GByteArray * response );
+
+            static void destroy( Event * event );
+
+            Type                        type;
+            TPAudioBuffer *             buffer;
+            TPAudioDetectionResult *    result;
+            GByteArray *                response;
+
+        private:
+
+            Event()
+            {}
+
+            ~Event()
+            {}
+        };
+
         //.....................................................................
 
         bool scan_for_plugins( TPContext * context );
@@ -44,6 +81,11 @@ struct TPAudioSampler
         // Frees a buffer and its associated samples
 
         static void destroy_buffer( TPAudioBuffer * buffer );
+
+        //.....................................................................
+        // Frees a detection result
+
+        static void destroy_result( TPAudioDetectionResult * result );
 
         //.........................................................................
         // When we copy a buffer's samples, we use this as the new free_samples
@@ -61,11 +103,9 @@ struct TPAudioSampler
         }
 
         //.....................................................................
-        // Signals that we can push
+        // Push an event
 
-        typedef enum { SOURCE_CHANGED , QUIT , PAUSE , RESUME } Signal;
-
-        void push_signal( Signal signal );
+        void push_event( Event * event );
 
         //.....................................................................
         // List of buffers
@@ -75,9 +115,29 @@ struct TPAudioSampler
         //.....................................................................
         // List of plugins
 
-        typedef std::pair< GModule * , TPAudioDetectionProcessSamples > PluginPair;
+        struct Plugin
+        {
+            static Plugin * make( const gchar * file_name );
 
-        typedef std::list< PluginPair > PluginList;
+            ~Plugin();
+
+            TPAudioDetectionPluginInfo      info;
+            TPAudioDetectionProcessSamples  process_samples;
+
+        private:
+
+            Plugin( GModule * _module ,
+                    TPAudioDetectionInitialize initialize,
+                    TPAudioDetectionProcessSamples _process_samples,
+                    TPAudioDetectionShutdown _shutdown );
+
+            static gpointer get_symbol( GModule * module , const gchar * name );
+
+            GModule *                       module;
+            TPAudioDetectionShutdown        shutdown;
+        };
+
+        typedef std::list< Plugin * > PluginList;
 
         //.....................................................................
 
@@ -92,6 +152,7 @@ struct TPAudioSampler
 
         //.....................................................................
 
+        TPContext *     context;
         GAsyncQueue *   queue;
         GThread *       thread;
         PluginList      plugins;
@@ -108,12 +169,14 @@ struct TPAudioSampler
             {
                 g_assert( queue );
                 g_assert( result );
-                g_assert( result->free_result );
             }
 
             ~RequestClosure()
             {
-                result->free_result( result );
+                if ( result )
+                {
+                    destroy_result( result );
+                }
 
                 g_async_queue_unref( queue );
             }
@@ -193,6 +256,9 @@ struct VirtualIO
         buffer( _buffer ),
         position( 0 )
     {
+        g_assert( buffer );
+        g_assert( buffer->samples );
+
         memset( & virtual_io , 0 , sizeof( virtual_io ) );
 
         virtual_io.get_filelen = get_filelen;
@@ -275,11 +341,163 @@ struct VirtualIO
 };
 
 //=============================================================================
+// TPAudioSampler::Thread::Event
+
+TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( Type type )
+{
+    Event * event = g_slice_new0( Event );
+
+    event->type = type;
+
+    return event;
+}
+
+TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioBuffer * buffer )
+{
+    g_assert( buffer );
+
+    Event * event = g_slice_new0( Event );
+
+    event->type = SUBMIT_BUFFER;
+    event->buffer = buffer;
+
+    return event;
+}
+
+TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioDetectionResult * result , GByteArray * response )
+{
+    g_assert( result );
+    g_assert( response );
+
+    Event * event = g_slice_new0( Event );
+
+    event->type = URL_RESPONSE;
+    event->result = result;
+    event->response = response;
+
+    g_byte_array_ref( response );
+
+    return event;
+}
+
+void TPAudioSampler::Thread::Event::destroy( Event * event )
+{
+    g_assert( event );
+
+    if ( event->buffer )
+    {
+        Thread::destroy_buffer( event->buffer );
+    }
+
+    if ( event->result )
+    {
+        Thread::destroy_result( event->result );
+    }
+
+    if ( event->response )
+    {
+        g_byte_array_unref( event->response );
+    }
+
+    g_slice_free( Event , event );
+}
+
+//=============================================================================
+// TPAudioSampler::Thread::Plugin
+
+TPAudioSampler::Thread::Plugin * TPAudioSampler::Thread::Plugin::make( const gchar * file_name )
+{
+    g_assert( file_name );
+
+    log( "FOUND PLUGIN %s" , file_name );
+
+    GModule * module = g_module_open( file_name , G_MODULE_BIND_LOCAL );
+
+    if ( ! module )
+    {
+        log( "  FAILED TO OPEN : %s" , g_module_error() );
+        return 0;
+    }
+
+    TPAudioDetectionInitialize initialize = ( TPAudioDetectionInitialize ) get_symbol( module , TP_AUDIO_DETECTION_INITIALIZE );
+    TPAudioDetectionProcessSamples process_samples = ( TPAudioDetectionProcessSamples ) get_symbol( module , TP_AUDIO_DETECTION_PROCESS_SAMPLES );
+    TPAudioDetectionShutdown shutdown = ( TPAudioDetectionShutdown ) get_symbol( module , TP_AUDIO_DETECTION_SHUTDOWN );
+
+    if ( ! initialize || ! process_samples || ! shutdown )
+    {
+        g_module_close( module );
+        return 0;
+    }
+
+    return new Plugin( module , initialize , process_samples , shutdown );
+}
+
+TPAudioSampler::Thread::Plugin::Plugin( GModule * _module ,
+        TPAudioDetectionInitialize initialize,
+        TPAudioDetectionProcessSamples _process_samples,
+        TPAudioDetectionShutdown _shutdown )
+:
+    process_samples( _process_samples ),
+    module( _module ),
+    shutdown( _shutdown )
+{
+    g_assert( module );
+    g_assert( initialize );
+    g_assert( process_samples );
+    g_assert( shutdown );
+
+    memset( & info , 0 , sizeof( info ) );
+
+    initialize( & info );
+
+    log( "  NAME        : %s" , info.name );
+    log( "  VERSION     : %u.%u.%u" , info.version[ 0 ] , info.version[ 1 ] , info.version[ 2 ] );
+    log( "  RESIDENT    : %s" , info.resident ? "YES" : "NO" );
+    log( "  MIN SECONDS : %u" , info.min_buffer_seconds );
+    log( "  USER DATA   : %p" , info.user_data );
+
+    if ( info.resident )
+    {
+        g_module_make_resident( module );
+    }
+}
+
+TPAudioSampler::Thread::Plugin::~Plugin()
+{
+    shutdown( info.user_data );
+
+    g_module_close( module );
+}
+
+gpointer TPAudioSampler::Thread::Plugin::get_symbol( GModule * module , const gchar * name )
+{
+    g_assert( module );
+    g_assert( name );
+
+    gpointer result = 0;
+
+    if ( ! g_module_symbol( module , name , & result ) )
+    {
+        log( "  MISSING SYMBOL '%s'" , name );
+        return 0;
+    }
+
+    if ( ! result )
+    {
+        log( "  SYMBOL '%s' IS NULL" , name );
+        return 0;
+    }
+
+    return result;
+}
+
+//=============================================================================
 // TPAudioSampler::Thread
 
-TPAudioSampler::Thread::Thread( TPContext * context )
+TPAudioSampler::Thread::Thread( TPContext * _context )
 :
-    queue( g_async_queue_new_full( ( GDestroyNotify ) destroy_buffer ) ),
+    context( _context ),
+    queue( g_async_queue_new_full( ( GDestroyNotify ) Event::destroy ) ),
     thread( 0 ),
     event_group( 0 )
 {
@@ -321,7 +539,7 @@ TPAudioSampler::Thread::~Thread()
 
     if ( thread )
     {
-        push_signal( QUIT );
+        push_event( Event::make( Event::QUIT ) );
 
         log( "WAITING FOR PROCESSING THREAD..." );
 
@@ -336,7 +554,7 @@ TPAudioSampler::Thread::~Thread()
 
         for ( PluginList::iterator it = plugins.begin(); it != plugins.end(); ++ it )
         {
-            g_module_close( it->first );
+            delete * it;
         }
     }
 
@@ -382,40 +600,9 @@ bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
         {
             gchar * sub = g_build_filename( plugins_path , name , NULL );
 
-            log( "FOUND PLUGIN %s" , sub );
-
-            // TODO: We may need to play with these flags
-
-            GModule * module = g_module_open( sub , G_MODULE_BIND_LOCAL );
-
-            if ( ! module )
+            if ( Plugin * plugin = Plugin::make( sub ) )
             {
-                log( "  FAILED TO OPEN" );
-            }
-            else
-            {
-                gpointer ad_process_samples = 0;
-
-                if ( ! g_module_symbol( module , TP_AUDIO_DETECTION_PROCESS_SAMPLES , & ad_process_samples ) )
-                {
-                    log( "  MISSING ENTRY POINT '%s'" , TP_AUDIO_DETECTION_PROCESS_SAMPLES );
-
-                    g_module_close( module );
-                }
-                else if ( ! ad_process_samples )
-                {
-                    log( "  ENTRY POINT '%s' IS NULL" , TP_AUDIO_DETECTION_PROCESS_SAMPLES );
-
-                    g_module_close( module );
-                }
-                else
-                {
-                    log( "  ADDED" );
-
-                    // This module is ready to go, add it to the list.
-
-                    plugins.push_back( PluginPair( module , ( TPAudioDetectionProcessSamples) ad_process_samples ) );
-                }
+                plugins.push_back( plugin );
             }
 
             g_free( sub );
@@ -431,12 +618,26 @@ bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
 
 void TPAudioSampler::Thread::destroy_buffer( TPAudioBuffer * buffer )
 {
+    g_assert( buffer );
+
     if ( buffer->samples && buffer->free_samples )
     {
         buffer->free_samples( buffer->samples , buffer->user_data );
     }
 
     g_slice_free( TPAudioBuffer , buffer );
+}
+
+//.........................................................................
+
+void TPAudioSampler::Thread::destroy_result( TPAudioDetectionResult * result )
+{
+    g_assert( result );
+
+    if ( result->free_result )
+    {
+        result->free_result( result );
+    }
 }
 
 //.........................................................................
@@ -537,7 +738,7 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
 
     // Now stick it in the queue
 
-    g_async_queue_push( queue , buffer );
+    push_event( Event::make( buffer ) );
 }
 
 //.........................................................................
@@ -546,7 +747,10 @@ void TPAudioSampler::Thread::source_changed()
 {
     log( "SOURCE CHANGED" );
 
-    push_signal( SOURCE_CHANGED );
+    if ( thread )
+    {
+        push_event( Event::make( Event::SOURCE_CHANGED ) );
+    }
 }
 
 //.........................................................................
@@ -555,7 +759,10 @@ void TPAudioSampler::Thread::pause()
 {
     log( "PAUSE" );
 
-    push_signal( PAUSE );
+    if ( thread )
+    {
+        push_event( Event::make( Event::PAUSE ) );
+    }
 }
 
 //.........................................................................
@@ -564,23 +771,25 @@ void TPAudioSampler::Thread::resume()
 {
     log( "RESUME" );
 
-    push_signal( RESUME );
+    if ( thread )
+    {
+        push_event( Event::make( Event::RESUME ) );
+    }
 }
 
 //.........................................................................
-// Pushes a buffer that has samples == 0 and a special address in
-// user_data that we use as a signal.
 
-void TPAudioSampler::Thread::push_signal( Signal signal )
+void TPAudioSampler::Thread::push_event( Event * event )
 {
-    if ( thread )
+    g_assert( event );
+
+    if ( ! thread )
     {
-        TPAudioBuffer * buffer = g_slice_new0( TPAudioBuffer );
-
-        buffer->user_data = GINT_TO_POINTER( signal );
-
-        g_async_queue_push( queue , buffer );
+        Event::destroy( event );
+        return;
     }
+
+    g_async_queue_push( queue , event );
 }
 
 //.........................................................................
@@ -606,71 +815,122 @@ void TPAudioSampler::Thread::process()
         g_get_current_time( & t );
         g_time_val_add( & t , 10 * G_USEC_PER_SEC );
 
-        // Pop a buffer from the queue, waiting if necessary
+        // Pop an event from the queue, waiting if necessary
 
-        TPAudioBuffer * buffer = ( TPAudioBuffer * ) g_async_queue_timed_pop( queue , & t );
+        Event * event = ( Event * ) g_async_queue_timed_pop( queue , & t );
 
         // Nothing in the queue, carry on
 
-        if ( ! buffer )
+        if ( ! event )
         {
             continue;
         }
 
         //.................................................................
-        // If the buffer does not have any samples, it is a signal - it wants
-        // us to do something
 
-        if ( ! buffer->samples )
+        switch( event->type )
         {
-            switch( Signal( GPOINTER_TO_INT( buffer->user_data ) ) )
-            {
-                case QUIT:
+            case Event::QUIT:
 
-                    done = true;
-                    break;
+                done = true;
+                break;
 
-                case SOURCE_CHANGED:
+            case Event::SOURCE_CHANGED:
 
-                    // The source changed, we get rid of any pending
-                    // buffers we have
+                // The source changed, we get rid of any pending
+                // buffers we have
 
-                    for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
+                for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
+                {
+                    destroy_buffer( * it );
+                }
+
+                buffers.clear();
+
+                // We also cancel any outstanding callbacks we have from
+                // network requests.
+
+                event_group->cancel_all();
+
+                break;
+
+            case Event::PAUSE:
+
+                ++paused;
+                break;
+
+            case Event::RESUME:
+
+                if ( paused > 0 )
+                {
+                    --paused;
+                }
+                break;
+
+            case Event::SUBMIT_BUFFER:
+
+                // We put the buffer in our list and steal it
+                // from the event - so that it won't free it.
+
+                buffers.push_back( event->buffer );
+
+                event->buffer = 0;
+
+                break;
+
+            case Event::URL_RESPONSE:
+
+                // We received the results of a URL request that
+                // a plugin wanted.
+
+                // If the plugin does not have a parse_response function,
+                // it means that the body of the response is the JSON we
+                // want.
+
+                if ( ! event->result->parse_response )
+                {
+                    log ( "GOT URL RESPONSE WITH JSON" );
+
+                    // We use strndup to make sure it is NULL terminated
+
+                    gchar * json = g_strndup( ( gchar * ) event->response->data , event->response->len );
+
+                    got_a_match( json );
+
+                    g_free( json );
+                }
+                else
+                {
+                    // The plugin does have a parse response function, we call it now
+
+                    log( "GOT URL RESPONSE TO PARSE. INVOKING PARSE_RESPONSE" );
+
+                    event->result->parse_response( event->result , ( const char * ) event->response->data , event->response->len );
+
+                    // The plugin should have stored the parsed response in 'json'.
+
+                    if ( ! event->result->json )
                     {
-                        destroy_buffer( * it );
+                        log( "PLUGIN FAILED TO PARSE RESPONSE" );
                     }
-
-                    buffers.clear();
-
-                    // We also cancel any outstanding callbacks we have from
-                    // network requests.
-
-                    event_group->cancel_all();
-
-                    break;
-
-                case PAUSE:
-
-                    ++paused;
-                    break;
-
-                case RESUME:
-
-                    if ( paused > 0 )
+                    else
                     {
-                        --paused;
+                        log( "RESPONSE PARSED" );
+
+                        got_a_match( event->result->json );
                     }
-                    break;
-            }
+                }
 
-            destroy_buffer( buffer );
-        }
-        else
-        {
-            // We got a new buffer, we add it to the list
+                // We are done with the response body and the result,
+                // destroying the event will free both of them.
 
-            buffers.push_back( buffer );
+                break;
         }
+
+        //.................................................................
+        // Destroy the event
+
+        Event::destroy( event );
 
         //.................................................................
         // Process pending buffers
@@ -715,7 +975,7 @@ void TPAudioSampler::Thread::process()
             }
             else
             {
-                log( "  sample rate=%d : channels=%d : frames=%ld" , info.samplerate , info.channels , info.frames );
+                log( "  sample rate=%d : channels=%d : frames=%d" , info.samplerate , info.channels , info.frames );
 
                 // Now, we read from the audio buffer a new buffer that uses float samples
 
@@ -752,8 +1012,10 @@ void TPAudioSampler::Thread::process()
             destroy_buffer( buffer );
         }
 
-        buffers.clear();
+        // We have destroyed all the buffers in the list, so
+        // we need to clear the list.
 
+        buffers.clear();
     }
 
     // The thread is exiting...
@@ -768,18 +1030,28 @@ void TPAudioSampler::Thread::process()
     g_async_queue_unref( queue );
 
     log( "EXITING PROCESSING THREAD" );
-
 }
 
 //.........................................................................
 
 void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samples )
 {
+    TPAudioDetectionSamples s;
+
+    s.sample_rate = info->samplerate;
+    s.channels = info->channels;
+    s.frames = info->frames;
+    s.samples = samples;
+
     for( PluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
     {
-        log( "  CALLING %s" , g_module_name( it->first ) );
+        Plugin * plugin = * it;
 
-        TPAudioDetectionResult * result = it->second( info->samplerate , info->channels , info->frames , samples );
+        g_assert( plugin );
+
+        log( "  CALLING %s" , plugin->info.name );
+
+        TPAudioDetectionResult * result = plugin->process_samples( & s , plugin->info.user_data );
 
         // The plugin returned NULL, we carry on
 
@@ -813,13 +1085,8 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
             {
                 log( "    RETURNED URL '%s'" , result->url );
 
-                // TODO: Now we should create a network request to
-                // the given url. Add to it the method, headers and body,
-                // if any. When the request comes back, we check to
-                // see if parse_response is NULL. If it is, we assume
-                // that the response body is the JSON we want. Otherwise,
-                // we call parse_response and check result->json again
-                // for the final JSON.
+                // The plugin returned a URL, which means it wants us to
+                // call that URL, so we create a request for it.
 
                 // TODO: user agent?
 
@@ -849,6 +1116,9 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
                         new RequestClosure( queue , result ) ,
                         ( GDestroyNotify ) RequestClosure::destroy );
 
+                // The result now belongs to the RequestClosure, so we
+                // don't free it here.
+
                 free_it = false;
             }
         }
@@ -857,7 +1127,7 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
         {
             // Free the result, we are done with it
 
-            result->free_result( result );
+            destroy_result( result );
         }
     }
 }
@@ -887,53 +1157,27 @@ void TPAudioSampler::Thread::response_callback( const Network::Response & respon
         return;
     }
 
-    // TODO: What we need to do here is to somehow put the response body
-    // into the queue, so that our thread can deal with it.
+    log( "GOT URL RESPONSE" );
 
-    log( "GOT A RESPONSE! %u" , response.body->len );
+    // Now, we ship the response to the processing thread. We create
+    // an event and steal the result from the request closure.
+    // The event will ref the response body.
 
-    // If the result does not have a parse_response function, we
-    // assume that the body of this response is the JSON we want
+    g_async_queue_push( rc->queue , Event::make( rc->result , response.body ) );
 
-    if ( ! rc->result->parse_response )
-    {
-        // We use strndup to make sure it is NULL terminated
-
-        gchar * json = g_strndup( ( gchar * ) response.body->data , response.body->len );
-
-        // got_a_match( json );
-
-        g_free( json );
-    }
-    else
-    {
-        // The result does have a parse_response method, so we pass it the response
-
-        rc->result->parse_response( rc->result , ( const char * ) response.body->data , response.body->len );
-
-        if ( ! rc->result->json )
-        {
-            log( "PLUGIN FAILED TO PARSE RESPONSE" );
-        }
-        else
-        {
-            log( "GOT JSON" );
-            log( "%s" , rc->result->json );
-//            got_a_match( json );
-        }
-    }
+    rc->result = 0;
 }
 
 //.........................................................................
-// TODO: This is what we have been after this whole time.
+// This is what we have been after this whole time.
 // We need to bubble up this JSON result to the engine and
 // give it a chance to act on it.
 
-// TODO: Make sure we copy the json
-
 void TPAudioSampler::Thread::got_a_match( const char * json )
 {
+    g_assert( json );
 
+    context->audio_detection_match( json );
 }
 
 //=============================================================================
