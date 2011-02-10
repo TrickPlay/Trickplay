@@ -985,7 +985,7 @@ void TPAudioSampler::Thread::process()
             }
             else
             {
-                log( "  sample rate=%d : channels=%d : frames=%d" , info.samplerate , info.channels , info.frames );
+                log( "  sample rate=%d : channels=%d : frames=%" G_GOFFSET_FORMAT , info.samplerate , info.channels , info.frames );
 
                 // Now, we read from the audio buffer a new buffer that uses float samples
 
@@ -993,7 +993,7 @@ void TPAudioSampler::Thread::process()
 
                 if ( ! float_samples )
                 {
-                    g_warning( "FAILED TO ALLOCATE MEMORY FOR FLOAT SAMPLES : NEED %ld BYTES" , info.frames * info.channels );
+                    g_warning( "FAILED TO ALLOCATE MEMORY FOR FLOAT SAMPLES : NEED %" G_GOFFSET_FORMAT " BYTES" , info.frames * info.channels );
                 }
                 else
                 {
