@@ -1876,6 +1876,7 @@ void TPContext::load_external_configuration()
         TP_IMAGE_DECODER_ENABLED,
         TP_RANDOM_SEED,
         TP_PLUGINS_PATH,
+        TP_AUDIO_SAMPLER_ENABLED,
 
         NULL
     };
