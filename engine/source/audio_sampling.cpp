@@ -501,27 +501,34 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
     thread( 0 ),
     event_group( 0 )
 {
-    if ( scan_for_plugins( context ) )
+    if ( ! context->get_bool( TP_AUDIO_SAMPLER_ENABLED , true ) )
     {
-        // Create the thread that will process the audio samples
-
-        GError * error = 0;
-
-        thread = g_thread_create( process , this , TRUE , & error );
-
-        if ( ! thread )
+        g_warning( "AUDIO SAMPLER IS DISABLED" );
+    }
+    else
+    {
+        if ( scan_for_plugins( context ) )
         {
-            g_warning( "FAILED TO CREATE AUDIO SAMPLER PROCESSING THREAD : %s" , error->message );
+            // Create the thread that will process the audio samples
 
-            g_clear_error( & error );
+            GError * error = 0;
 
-        }
+            thread = g_thread_create( process , this , TRUE , & error );
 
-        if ( thread )
-        {
-            event_group = new EventGroup();
+            if ( ! thread )
+            {
+                g_warning( "FAILED TO CREATE AUDIO SAMPLER PROCESSING THREAD : %s" , error->message );
 
-            network.reset( new Network( Network::Settings( context ) , event_group ) );
+                g_clear_error( & error );
+
+            }
+
+            if ( thread )
+            {
+                event_group = new EventGroup();
+
+                network.reset( new Network( Network::Settings( context ) , event_group ) );
+            }
         }
     }
 }
@@ -557,8 +564,6 @@ TPAudioSampler::Thread::~Thread()
             delete * it;
         }
     }
-
-    log( "FINISHED" );
 }
 
 //.........................................................................
@@ -651,12 +656,17 @@ void TPAudioSampler::Thread::free_samples( gpointer samples , gpointer )
 
 void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
 {
+    g_assert( _buffer );
+
     if ( ! thread )
     {
+        if ( _buffer->samples && _buffer->free_samples )
+        {
+            _buffer->free_samples( _buffer->samples , _buffer->user_data );
+        }
+
         return;
     }
-
-    g_assert( _buffer );
 
     log( "BUFFER : sample_rate=%u : channels=%u : format=0x%x : samples=%p : size=%lu : copy_samples=%d : free_samples=%p",
             _buffer->sample_rate , _buffer->channels , _buffer->format , _buffer->samples , _buffer->size , _buffer->copy_samples , _buffer->free_samples );
@@ -745,10 +755,10 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
 
 void TPAudioSampler::Thread::source_changed()
 {
-    log( "SOURCE CHANGED" );
-
     if ( thread )
     {
+        log( "SOURCE CHANGED" );
+
         push_event( Event::make( Event::SOURCE_CHANGED ) );
     }
 }
@@ -757,10 +767,10 @@ void TPAudioSampler::Thread::source_changed()
 
 void TPAudioSampler::Thread::pause()
 {
-    log( "PAUSE" );
-
     if ( thread )
     {
+        log( "PAUSE" );
+
         push_event( Event::make( Event::PAUSE ) );
     }
 }
@@ -769,10 +779,10 @@ void TPAudioSampler::Thread::pause()
 
 void TPAudioSampler::Thread::resume()
 {
-    log( "RESUME" );
-
     if ( thread )
     {
+        log( "RESUME" );
+
         push_event( Event::make( Event::RESUME ) );
     }
 }
