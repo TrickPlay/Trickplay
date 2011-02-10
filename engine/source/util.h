@@ -36,6 +36,29 @@ inline void failif( bool expression, const gchar * format, ... )
 
 //-----------------------------------------------------------------------------
 
+inline StringVector split_string( const gchar * source , const gchar * delimiter , gint max_tokens = 0 )
+{
+    StringVector result;
+
+    gchar * * parts = g_strsplit( source , delimiter , max_tokens );
+
+    for ( gchar * * part = parts; * part; ++part )
+    {
+        result.push_back( * part );
+    }
+
+    g_strfreev( parts );
+
+    return result;
+}
+
+inline StringVector split_string( const String & source , const gchar * delimiter , gint max_tokens = 0 )
+{
+    return split_string( source.c_str() , delimiter , max_tokens );
+}
+
+//-----------------------------------------------------------------------------
+
 class RefCounted
 {
 public:
