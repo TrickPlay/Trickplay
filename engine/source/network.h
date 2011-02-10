@@ -34,6 +34,8 @@ public:
         bool        redirect;
         String      user_agent;
 
+        void set_headers( const gchar * _headers );
+
     private:
 
         Request()

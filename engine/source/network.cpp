@@ -343,6 +343,26 @@ Network::Request::Request( const String & _user_agent, const String & _url )
 {
 }
 
+void Network::Request::set_headers( const gchar * _headers )
+{
+    g_assert( _headers );
+
+    StringVector lines( split_string( _headers , "\n" ) );
+
+    for( StringVector::const_iterator it = lines.begin(); it != lines.end(); ++it )
+    {
+        StringVector parts( split_string( *it , ": " , 2 ) );
+
+        if ( parts.size() == 2 )
+        {
+            if ( ! parts[ 0 ].empty() && ! parts[ 1 ].empty() )
+            {
+                headers[ parts[ 0 ] ] = parts[ 1 ];
+            }
+        }
+    }
+}
+
 //*****************************************************************************
 // Response
 
