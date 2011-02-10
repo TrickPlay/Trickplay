@@ -79,6 +79,9 @@
 	mClickEventsAllowed = YES;
 	mTouchEventsAllowed = NO;
 	mAccelerationFrequency = kAccelerometerFrequency;
+	
+	// grab the shared accelerometer object for the system, set the callback interval
+	// set the current instantiation of GestureView as the accelerometer's delegate
 	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:(1.0 / kAccelerometerFrequency)];  //update 20 times/second
 	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
 	
@@ -92,15 +95,17 @@
 	mTryingToConnect = NO;
 	multipleChoiceArray = [[NSMutableArray arrayWithObjects:nil] retain];
 	mStyleAlert = [[UIActionSheet alloc] initWithTitle:@"TrickPlay Multiple Choice"
-															delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil
-												   otherButtonTitles:nil];
+										 delegate:self cancelButtonTitle:nil
+										 destructiveButtonTitle:nil
+										 otherButtonTitles:nil];
 	mTextField.delegate = self;
 	mResourceNameCollection = [[NSMutableArray alloc] init];
 	mResourceDataCollection = [[NSMutableArray alloc] init];
 
 	UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc]
-									initWithTitle:NSLocalizedString(@"Exit", @"") style:UIBarButtonItemStyleBordered
-									target:self action:@selector(exitAppAction:)] autorelease]; 
+								  initWithTitle:NSLocalizedString(@"Exit", @"")
+								  style:UIBarButtonItemStyleBordered
+								  target:self action:@selector(exitAppAction:)] autorelease]; 
 	self.navigationItem.rightBarButtonItem = exitItem;
 
 	backgroundView.image = [UIImage imageNamed:@"background.png"];
@@ -128,7 +133,8 @@
 	{
 		[listenSocket connectToHost:hostname onPort:port error:&error ];
 		//[self logInfo:FORMAT(@"Echo server started on port %hu", [listenSocket localPort])];
-		[NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onTimeout) userInfo:nil repeats:NO];
+		[NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(onTimeout)
+				 userInfo:nil repeats:NO];
 		[waitingView startAnimating];
 	}
 	else {
