@@ -13,16 +13,115 @@ backing:hide()
 local face_base = Image{src="assets/tile-back.png"}
 screen:add(face_base)
 face_base:hide()
-local win_img = Image{src="assets/win_txt.png",position={screen_w/2,screen_h/2}}
+local win_img = Image{src="assets/win/victory-text-winner.png",position={screen_w/2,screen_h/2}}
 win_img.anchor_point = {win_img.w/2,win_img.h/2}
 
 local match     = 1
 local no_match  = 1
 local win_sound = 1
 
+local curly = Image{src="assets/win/victory-curly.png",opacity=0}
+local spiral = {
+    Image{src="assets/win/streamer1.png",opacity=0},
+    Image{src="assets/win/streamer2.png",opacity=0},
+    Image{src="assets/win/streamer3.png",opacity=0}
+}
+screen:add(curly)
+screen:add(unpack(spiral))
+
+local curly_streamer = function() return {
+    duration = {math.random(0,50)*10,500,nil,1000},
+    setup = function(self)
+        self.img = Clone{source=curly,opacity=255}
+        self.img:move_anchor_point(curly.w/2,curly.h/2)
+        self.img.position={screen_w/2,screen_h/2}
+        
+        local targ_x = math.random(0,screen_w)
+        
+        local peak_x = (screen_w/2 + targ_x)/2
+        local peak_y = math.random(screen_h/6-50,screen_h/6)
+        
+        self.to_peak_x = Interval(
+            screen_w/2,
+            peak_x
+        )
+        self.to_peak_y = Interval(
+            screen_h/2,
+            peak_y
+        )
+        
+        self.to_targ_x = Interval(
+            peak_x,
+            targ_x
+        )
+        self.to_targ_y = Interval(
+            peak_y,
+            screen_h+self.img.h
+        )
+        screen:add(self.img)
+        win_img:raise_to_top()
+    end,
+    stages = {
+        function()
+        end,
+        function(self,delta,p)
+            self.img.x = self.to_peak_x:get_value(p)
+            self.img.y = self.to_peak_y:get_value(math.sin(math.pi/2*p))
+            self.img.z_rotation={-360*p,0,0}
+        end,
+        function(self,delta,p)
+            self.img:raise_to_top()
+            self.stage = self.stage + 1
+        end,
+        function(self,delta,p)
+            self.img.x = self.to_targ_x:get_value(p)
+            self.img.y = self.to_targ_y:get_value(1-math.cos(math.pi/2*p))
+            self.img.z_rotation={-720*p,0,0}
+        end,
+    }
+} end
+
+local spiral_streamer = function(deg,i) return {
+    duration = {400,400,nil},
+    setup = function(self)
+        self.img = Clone{source=spiral[i],opacity=255}
+        self.img:move_anchor_point(spiral[i].w/2,0)
+        self.img.position={screen_w/2,screen_h/2}
+        self.img.z_rotation={deg,0,0}
+        self.img.clip={0,0,spiral[i].w,0}
+        local targ_x = math.random(0,screen_w)
+        
+        local peak_x = (screen_w/2 + targ_x)/2
+        local peak_y = math.random(screen_h/3-30,screen_h/3+30)
+        
+        self.unravel = Interval(
+            0,
+            spiral[i].h/2
+        )
+
+        screen:add(self.img)
+        win_img:raise_to_top()
+    end,
+    stages = {
+        function(self,delta,p)
+            self.img.clip={0,0,spiral[i].w,self.unravel:get_value(p)}
+        end,
+        function(self,delta,p)
+            self.img.clip={0,self.unravel:get_value(p),spiral[i].w,spiral[i].h/2}
+        end,
+        function(self,delta,p)
+            self.img.clip={0,0,spiral[i].w,spiral[i].h/2}
+            self.img.position={
+                self.img.x+spiral[i].h/2*math.cos((deg+90)*math.pi/180),
+                self.img.y+spiral[i].h/2*math.sin((deg+90)*math.pi/180)
+            }
+            self.stage = self.stage - 1
+        end,
+    }
+} end
 
 local win_animation = {
-    duration = {1000,2000},
+    duration = {1000,nil,3000},
     setup = function()
         screen:add(win_img)
         win_img.opacity=0
@@ -34,6 +133,18 @@ local win_animation = {
             get_gs_focus().opacity=255*(1-p)
             win_img.opacity = p*255
             win_img.scale = {p,p}
+        end,
+        function(self,delta,p)
+            self.stage = self.stage + 1
+            local a
+            for i = 1,8 do
+                a = spiral_streamer(45*(i-1),i%3+1)
+                animate_list[a] = a
+            end
+            for i = 1,20 do
+                a = curly_streamer()
+                animate_list[a] = a
+            end
         end,
         function()
         end
@@ -143,6 +254,7 @@ Tile = Class(function(obj, face_source, parent, ...)
             function(self,delta,p)
                 obj.group.y_rotation={180*p,0,0}
                 obj.backing.z = 1-p
+                obj.face_backing.z = .9*p
                 obj.face.z    = p
             end,
             function(self,delta,p)
@@ -182,6 +294,7 @@ Tile = Class(function(obj, face_source, parent, ...)
             function(self,delta,p)
                 obj.group.y_rotation={180*(1-p),0,0}
                 obj.backing.z = p
+                obj.face_backing.z = .9*(1-p)
                 obj.face.z    = 1-p
             end
         },

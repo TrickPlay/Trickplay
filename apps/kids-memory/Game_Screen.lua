@@ -2,8 +2,10 @@
 game_screen = Group{}
 --back icon
 local back_button = Image{src="assets/button-back.png",x=28,y=870}
-local back_focus  = Image{src="assets/focus-back-btn.png",x=28,y=870}
-
+local back_focus  = Image{src="assets/focus-back-btn.png"}
+back_button:move_anchor_point(back_button.w/2,back_button.h/2)
+back_focus:move_anchor_point(back_focus.w/2,back_focus.h/2)
+back_focus.position={back_button.x,back_button.y}
 --background
 game_screen:add(Image{src="assets/background-game.jpg"})
 screen:add(game_screen)
@@ -87,7 +89,17 @@ local fade_in = {
 					end
 				end
             end
-        }
+        },
+        on_remove = function()
+            local item
+			for i = 1, #game_state.board  do
+				for j = 1, #game_state.board[i] do
+                    item = game_state.board[i][j].group
+                    item.y_rotation = {0,0,0}
+					item.opacity = 255
+                end
+            end
+        end
     }
 
 
@@ -152,12 +164,14 @@ function game_fade_in(previous_board)
     focus_i = {1,1}
     collectgarbage("collect")
     fade_in.duration[2] = cascade_delay*(#game_state.board+#game_state.board[1]-1)+ duration_per_tile
+    animate_list[fade_out]=nil
     animate_list[fade_in]=fade_in
 end
 function get_gs_focus()
     return focus
 end
 function game_fade_out()
+    animate_list[fade_in]=nil
     animate_list[fade_out]=fade_out
 end
 
@@ -250,6 +264,7 @@ local board_key_handler = {
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
             animate_list[anim_focus]=anim_focus
+            play_sound_wrapper(audio.move_focus)
             --focus.x = 200*focus_i[1]
         end
     end,
@@ -269,6 +284,14 @@ local board_key_handler = {
             back_sel = true
         end
     end,
+    [keys.w] = function()
+        for i = 1, #game_state.board do
+            for j = 1, #game_state.board[i] do
+                
+                animate_list[game_state.board[i][j].remove]=game_state.board[i][j].remove
+            end
+        end
+    end
 }
 
 back_button_key_handler = {

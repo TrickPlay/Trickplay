@@ -16,6 +16,8 @@ screen:show()
 screen_w = screen.w
 screen_h = screen.h
 
+math.randomseed(os.time())
+
 --wrapper function for play_sound() to allow quick muting
 play_sound_wrapper = function(sound)
     mediaplayer:play_sound(sound)

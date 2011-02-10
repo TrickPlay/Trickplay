@@ -59,7 +59,7 @@ idle_loop = function(_,seconds)
     local i = 1
     
     --used to reduce table look ups
-    local item, p, curr_stage
+    local p, curr_stage
     
     for _,item in pairs( to_be_added ) do
         iterated_list[item] = item.stages
