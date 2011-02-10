@@ -1114,8 +1114,10 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
                     request.body = result->body;
                 }
 
-                // TODO: headers - we have to parse them and stick them into the
-                // request's map.
+                if ( result->headers )
+                {
+                    request.set_headers( result->headers );
+                }
 
                 // Fire off the request
 
