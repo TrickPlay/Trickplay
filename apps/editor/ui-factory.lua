@@ -1689,6 +1689,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			end 
     		    end
                end
+	       return true
    	end 
 
 	

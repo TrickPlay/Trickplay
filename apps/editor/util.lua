@@ -68,7 +68,6 @@ function is_this_widget(v)
     end 
 end 
 
-
 -- Clear background images 
 function clear_bg()
     BG_IMAGE_20.opacity = 0
@@ -348,11 +347,6 @@ function copy_obj (v)
       return new_object
 end	
 
---------------------------------
--- Inspector 
---------------------------------
-
-local input_t
 
 function make_attr_t(v)
 
@@ -676,6 +670,14 @@ local widget_map = {
    return attr_t
 end
 
+
+
+--------------------------------
+-- Inspector 
+--------------------------------
+
+local input_t
+
 function itemTostring(v, d_list, t_list)
     local itm_str  = ""
     local itm_str2 = ""
@@ -801,13 +803,13 @@ function itemTostring(v, d_list, t_list)
     elseif is_this_widget(v) == true then 
          itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
-         --delete_last_tab()
+	 itm_str = itm_str:sub(1,-2)
          itm_str = itm_str.."}\n\n"
 	 itm_str = itm_str..add_attr(group_list, v.name..".", "\n")
     else 
          itm_str = itm_str.."\n"..v.name.." = "..v.type..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(nw_attr_list, "", ","..indent)
-         --delete_last_tab()
+	 itm_str = itm_str:sub(1,-2)
          itm_str = itm_str.."}\n\n"
     end
 
@@ -818,276 +820,13 @@ function itemTostring(v, d_list, t_list)
         table.insert(d_list, v.name) 
     end 
 
---if not Clone then  
+    -- 만약 문제가 된다면 Clone일 경 아래 조건문은 빼세요    
     if is_in_list(v.name, t_list) == true  then 
 	return "", d_list, t_list, itm_str
     end 
 
     return itm_str, d_list, t_list, itm_str2
 end
-
---[[
-function itemTostring(v, d_list, t_list)
-    local itm_str  = ""
-    local itm_str2 = ""
-    local indent   = "\n\t\t"
-    local b_indent = "\n\t"
-
-    local w_prop_map = {
-	["wwidth"] = function() return 
-		"wwidth = "..v.wwidth..","..indent..
-		"wheight = "..v.wheight..","..indent..
-		"skin = \""..v.skin.."\","..indent..
-    		"font = \""..v.font.."\","..indent..
-		"color = {"..table.concat(v.color,",").."}".. b_indent.."}\n\n"
-		end,
-	["border_width"] = function() return 
-    		"border_width = "..v.border_width..","..indent..
-		"border_color = {"..table.concat(v.border_color,",").."},"..indent..
-    		"padding_x = "..v.padding_x..","..indent.. 
-    		"padding_y = "..v.padding_y..","..indent.. 
-    		"border_radius = "..v.border_radius..","..indent
-		end,
-	["text"] = function() return 
-		"f_color = {"..table.concat(v.f_color,",").."},"..indent..
-    		"label = \""..v.label.."\","..indent
-		end,
-	["title"] = function() return 
-		"title = \""..v.label.."\","..indent
-		end,
-	["items"] = function ()
-		local items = ""
-		for i,j in pairs(v.items) do 
-			items = items.."\""..j.."\", "
-		end
-    		return "items = {"..items.."},"..indent..
-		"item_func = {"..table.concat(v.item_func,",").."},"..indent..
-    		"selected_item = "..v.selected_item..","..indent
-		end,
-	["item_pos"] = function() return 
-		"b_pos = {"..table.concat(v.b_pos,",").."},"..indent..
-		"item_pos = {"..table.concat(v.item_pos,",").."},"..indent..
-		"line_space = "..v.line_space..","..indent
-		end,
-	["group"] = function () return 
-		v.name..".name=\""..v.name.."\"".."\n"..
-        	v.name..".position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}".."\n"..
-        	v.name..".scale = {"..table.concat(v.scale,",").."}".."\n"..
-        	v.name..".anchor_point = {"..table.concat(v.anchor_point,",").."}".."\n"..
-        	v.name..".x_rotation={"..table.concat(v.x_rotation,",").."}".."\n"..
-        	v.name..".y_rotation={"..table.concat(v.y_rotation,",").."}".."\n"..
-        	v.name..".z_rotation={"..table.concat(v.z_rotation,",").."}".."\n"..
-		v.name..".opacity = "..v.opacity..b_indent.."\n\n"
-		end,
-	}
-
-
-    local widget_map = {
-	["Button"] = function() return v.name.." = ".."widget.button"..b_indent.."{"..indent.. 
-		w_prop_map["border_width"]()..w_prop_map["text"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["TextInputField"] = function () return v.name.." = ".."widget.textField"..b_indent.."{"..indent.. 
-    		"text_indent = "..v.text_indent..","..indent..
-		w_prop_map["border_width"]()..w_prop_map["text"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["DialogBox"] = function () return v.name.." = ".."widget.dialogBox"..b_indent.."{"..indent.. 
-		w_prop_map["border_width"]()..w_prop_map["title"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["ToastBox"] = function () return v.name.." = ".."widget.toastBox"..b_indent.."{"..indent.. 
-    		"message = \""..v.message.."\","..indent..
-    		"border_radius = "..v.border_radius..","..indent.. 
-    		"fade_duration = "..v.fade_duration..","..indent.. 
-    		"duration = "..v.duration..","..indent.. 
-		w_prop_map["border_width"]()..w_prop_map["title"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["RadioButton"] = function () return v.name.." = ".."widget.radioButton"..b_indent.."{"..indent.. 
-		"button_color = {"..table.concat(v.button_color,",").."},"..indent..
-		"select_color = {"..table.concat(v.select_color,",").."},"..indent..
-    		"button_radius = "..v.button_radius..","..indent.. 
-    		"select_radius = "..v.select_radius..","..indent.. 
-		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["CheckBox"] = function () return v.name.." = ".."widget.checkBox"..b_indent.."{"..indent.. 
-		"box_color = {"..table.concat(v.box_color,",").."},"..indent..
-		"f_color = {"..table.concat(v.f_color,",").."},"..indent..
-    		"box_width = "..v.box_width..","..indent.. 
-		"box_size = {"..table.concat(v.box_size,",").."},"..indent..
-		"check_size = {"..table.concat(v.check_size,",").."},"..indent..
-		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["ButtonPicker"] = function () return v.name.." = ".."widget.buttonPicker"..b_indent.."{"..indent.. 
-		w_prop_map["items"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["LoadingDots"] = function () return v.name.." = ".."widget.loadingdots"..b_indent.."{"..indent.. 
-		"skin = \""..v.skin.."\","..indent..
-		"dot_radius = "..v.dot_radius..","..indent..
-    		"dot_color = \""..v.dot_color.."\","..indent..
-		"num_dots = "..v.num_dots..","..indent..
-		"anim_radius = "..v.anim_radius..","..indent..
-		"anim_duration = "..v.anim_duration..b_indent.."}\n\n"..w_prop_map["group"]() end,
-		--"anim_duration = "..v.anim_duration..","..indent..
-		--"clone_src = "..v.clone_src..b_indent.."}\n\n"..w_prop_map["group"]() end,
-	["LoadingBar"] = function () return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
-		"bsize = {"..table.concat(v.bsize,",").."},"..indent..
-        	"shell_upper_color = \""..v.shell_upper_color.."\","..indent.. 
-        	"shell_lower_color = \""..v.shell_lower_color.."\","..indent.. 
-        	"stroke_color = \""..v.stroke_color.."\","..indent.. 
-        	"fill_upper_color = \""..v.fill_upper_color.."\","..indent.. 
-        	"fill_lower_color = \""..v.fill_lower_color.."\""..b_indent.."}\n\n"..
-		w_prop_map["group"]() end, 
-   }
-
-
-    if(v.type == "Rectangle") then
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "border_color={"..table.concat(v.border_color,",").."},"..indent..
-         "border_width="..v.border_width..","..indent.."color={"..table.concat(v.color,",").."},"..indent..
-         "size = {"..table.concat(v.size,",").."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
-    elseif (v.type == "Image") then
-
-	if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "src=\""..v.src.."\","..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-         "size = {"..table.concat(v.size,",").."},"..indent..
-         "clip = {"..table.concat(v.clip,",").."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "opacity = "..v.opacity..b_indent.."}\n\n"
-    elseif (v.type == "Text") then
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "text=\""..v.text.."\","..indent..
-         "font=\""..v.font.."\","..indent..
-         "color={"..table.concat(v.color,",").."},"..indent..
-         "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "editable="..tostring(v.editable)..","..indent..
-         "reactive="..tostring(v.reactive)..","..indent..
-         "wants_enter="..tostring(v.wants_enter)..","..indent..
-         "wrap="..tostring(v.wrap)..","..indent..
-         "wrap_mode=\""..v.wrap_mode.."\","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
-    elseif (v.type == "Clone") then
-	 src = v.source 
-	 if is_in_list(src.name, d_list) == false then 
-	     if(t_list == nil) then 
-		t_list = {src.name}
-	     else 
-		table.insert(t_list, src.name) 
-	     end
-         end 
-
-	 itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-         "source="..v.source.name..","..indent..
-         "scale = {"..table.concat(v.scale,",").."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "opacity = "..v.opacity..b_indent.."}\n\n"
-
-
-	if(d_list == nil) then  
-		d_list = {v.name}
-    	else 
-        	table.insert(d_list, v.name) 
-    	end 
-
-        return itm_str, d_list, t_list
-
-    elseif (v.type == "Group") then
-	if is_in_list(v.extra.type, widgets) == true then 
- 	     itm_str = widget_map[v.extra.type]() 
-        else 
-	    local i = 1
-            local children = ""
-	    local org_d_list = {}
-
-	    if(d_list ~= nil) then 
-	        for i,j in pairs (d_list) do 
-		     org_d_list[i] = j 
-	    	end      
-	    end 
-
-            for e in values(v.children) do
-		result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
-		if(result ~= nil) then 
-		    itm_str = itm_str..result
-		end
-		if(result2 ~= nil) then 
-		    itm_str2 = result2..itm_str2
-		end 
-		
-		d_list = done_list
-		t_list = todo_list
-		if i == 1 then
-		     children = children..e.name
-		else 
-		     children = children..","..e.name
-		end
-		i = i + 1
-            end 
-
-	    itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-            "name=\""..v.name.."\","..indent..
-            "size={"..table.concat(v.size,",").."},"..indent..
-            "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-	    "children = {"..children.."},"..indent..
-            "scale = {"..table.concat(v.scale,",").."},"..indent..
-            "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-            "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-            "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-            "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-            "opacity = "..v.opacity..b_indent.."}\n\n"
-	end 
-    elseif (v.type == "Video") then
-	itm_str = itm_str..v.name.." = ".."{"..indent..
-        "name=\""..v.name.."\","..indent..
-        "type=\""..v.type.."\","..indent..
-        "source=\""..v.source.."\","..indent..
-        "viewport={"..table.concat(v.viewport,",").."},"..indent..
-        "loop = "..tostring(v.loop)..","..indent..
-        "volume = "..v.volume..b_indent.."}\n"..b_indent
-	
-	itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
-	"mediaplayer.on_loaded = function(self) self:play() end"..b_indent..
-	"if ("..v.name..".loop == true) then"..b_indent..
-     	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
-	"else"..b_indent..
-	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) end"..b_indent..
-	"end"..b_indent..
-	"mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
-	"mediaplayer.volume = "..v.name..".volume\n\n"
-
-	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
-
-    end
-
-    if(d_list == nil) then  
-	d_list = {v.name}
-    else 
-        table.insert(d_list, v.name) 
-    end 
-
-    if is_in_list(v.name, t_list) == true  then 
-	return "", d_list, t_list, itm_str
-    end 
-
-    return itm_str, d_list, t_list, itm_str2
-end
-]]
-
-
-
 
 
 local msgw_focus = ""
