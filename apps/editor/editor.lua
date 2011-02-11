@@ -928,20 +928,12 @@ function editor.inspector(v)
 	-- make inspector background image 
 	if v.extra then 
 	   if is_in_list(v.extra.type, widgets) == true  then
-	     if v.extra.type == "Button" and v.skin =="custom" then 
-	     	  xbox_xpos = 515
-	          inspector_bg = factory.make_popup_bg(v.extra.type.."-c", 0)
-	     elseif v.extra.type == "Button" then 
-		  xbox_xpos = 465
+	     	  xbox_xpos = 490
 	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
-	     else  
-	     	  xbox_xpos = 515
-	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
-	     end 
 	   else -- rect, img, text 
-	     inspector_bg = factory.make_popup_bg(v.type, 0)
+	     	  inspector_bg = factory.make_popup_bg(v.type, 0)
 	   end 
-	else  -- video
+	else -- video  
 	   inspector_bg = factory.make_popup_bg(v.type, 0)
 	end 
 
@@ -1015,7 +1007,7 @@ function editor.inspector(v)
 	     inspector.y = screen.h/8
 	end 
 
-	-- make the inspector 
+	-- make the inspector contents 
 
 	local attr_t = make_attr_t(v)
 	local attr_n, attr_v, attr_s
@@ -1024,8 +1016,8 @@ function editor.inspector(v)
 	local space = 0
 	local used = 0
 
-	local item_group = Group()
-
+	local item_group = Group{name = "item_group"}
+	
 	for i=1, #attr_t do 
              if (attr_t[i] == nil) then break end 
 
@@ -1055,6 +1047,7 @@ function editor.inspector(v)
 	     else 
                  item.y = items_height 
 	     end 
+	    
 
 	    if(space == 0) then 
 	         space = WIDTH - item.w 
@@ -1062,17 +1055,49 @@ function editor.inspector(v)
 		 space = space - item.w
 	    end
 	    used = used + item.w 
-	
-	    if(attr_n == "button") then 
-	         inspector:add(item)
+
+	    if (xbox_xpos == 465) then  
+		if (attr_n == "title" or attr_n == "button") then 
+	            inspector:add(item)
+	    	else 
+	            item_group:add(item)
+	    	end 
 	    else 
-	         item_group:add(item)
-	    end 
-		
+	        if (attr_n == "title") then 
+	            inspector:add(item)
+	    	elseif(attr_n == "button") then 
+		    if(attr_v == "view code") then 
+		        item.y = 570
+		    else 
+		        item.y = 620
+		        space = space + 100
+	            end 
+	            inspector:add(item)
+	        else 
+		    item.y = item.y - 82 
+	            item_group:add(item)
+	        end 
+	    end
+	    print (attr_n,":",item.x,",",item.y)
+	
         end 
 
-	inspector:add(item_group) 
-
+--[[ scroll function ]]--
+	if v.extra then 
+	   if is_in_list(v.extra.type, widgets) == true  then
+	       si = widget.scrollWindow{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} -- 10,18
+	       si.content = item_group
+	       si.position = {0,82,0}
+	       si.name ="si"
+	       si.size = {content_w, item_group.h, 0}
+	       inspector:add(si)
+	   else -- rect, img, text 
+	       inspector:add(item_group) 
+	   end 
+	else -- video  
+	   inspector:add(item_group) 
+	end 
+--[[ scroll function ]]--
 	screen:add(inspector)
 	input_mode = S_POPUP
 	inspector:find_child("name").extra.on_focus_in()
@@ -1108,9 +1133,18 @@ function editor.view_code(v)
         local BOTTOM_PADDING = 12
 	local CODE_OFFSET = 30 
         local codes = ""
-	local codeViewWin_bg = factory.make_popup_bg("Code", v.type)
+	local codeViewWin_bg 
 	local xbox = factory.make_xbox()
 	local codeViewWin 
+
+
+
+
+	if is_this_widget(v) == true then 
+	     codeViewWin_bg = factory.make_popup_bg("Code", "Widget")
+	else 
+	     codeViewWin_bg = factory.make_popup_bg("Code", v.type)
+	end 
 
 	if(v.type ~= "Video") then 
 	     codeViewWin = Group {
@@ -1136,7 +1170,7 @@ function editor.view_code(v)
     	end 
 	codeViewWin.reactive = true
 	
-	if(v.type ~= "Group") then 
+	if(v.type ~= "Group" or is_this_widget(v) == true) then 
 		codes = codes..itemTostring(v)
 	else 
 		local indent       = "\n\t\t"
@@ -1270,7 +1304,7 @@ function editor.save(save_current_f)
 	     contents = contents..itemTostring(g.extra.video)
 	end 
 
-	contents = contents.."g:add("..obj_names..")"
+	contents = contents.."\ng:add("..obj_names..")"
         contents = "local g = ... \n\n"..contents
 
         undo_list = {}
@@ -1308,7 +1342,7 @@ function editor.save(save_current_f)
 	          contents = contents..itemTostring(g.extra.video)
 	     end 
 
-	     contents = contents.."g:add("..obj_names..")"
+	     contents = contents.."\ng:add("..obj_names..")"
              contents = "local g = ... \n\n"..contents
              undo_list = {}
              redo_list = {}
@@ -1364,6 +1398,7 @@ function editor.rectangle_done(x,y)
 end 
 
 function editor.rectangle_move(x,y)
+	if ui.rect then 
         ui.rect.size = { abs(x-rect_init_x), abs(y-rect_init_y) }
         if(x- rect_init_x < 0) then
             ui.rect.x = x
@@ -1371,6 +1406,7 @@ function editor.rectangle_move(x,y)
         if(y- rect_init_y < 0) then
             ui.rect.y = y
         end
+	end
 end
 
 local function ungroup(v)
