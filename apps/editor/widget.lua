@@ -2153,6 +2153,22 @@ function widget.threeDlist(t)
 			get_tile_group = function(r,c)
 				return tiles[r][c]
 			end,
+            insert = function(r,c,obj)
+                if tiles[r][c] == nil then
+                    return false
+                else
+                    tiles[r][c]:add(obj)
+                    return true
+                end
+			end,
+            clear_group = function(r,c)
+                if tiles[r][c] == nil then
+                    return false
+                else
+                    tiles[r][c]:clear()
+                    return true
+                end
+            end,
             animate_in = function()
 				local tl = Timeline{
 					duration =p.cascade_delay*(p.num_rows+p.num_cols-2)+ p.duration_per_tile
@@ -2475,8 +2491,8 @@ function widget.scrollWindow(t)
 	
 	--this function creates the whole scroll bar box
 	local function create()
-		p.content.position  = { p.border_w, p.border_w }
-		window.clip = { p.border_w, p.border_w, p.clip_w, p.clip_h }
+        window.position={ p.border_w, p.border_w }
+		window.clip = { 0,0, p.clip_w, p.clip_h }
 		border.w = p.clip_w+2*p.border_w
 		border.h = p.clip_h+2*p.border_w
 		border.border_width = p.border_w
@@ -2494,7 +2510,8 @@ function widget.scrollWindow(t)
 			arrow_up:line_to(   arrow_up.w, arrow_up.h )
 			arrow_up:line_to(            0, arrow_up.h )
 			arrow_up:line_to( arrow_up.w/2,          0 )
-			arrow_up:set_source_color("FFFFFF") --kk
+			arrow_up:set_source_color(p.color)
+
 			arrow_up:fill(true)
 			arrow_up:finish_painting()
 			if arrow_up.Image then
@@ -2510,7 +2527,7 @@ function widget.scrollWindow(t)
 			arrow_dn:line_to(   arrow_dn.w,          0 )
 			arrow_dn:line_to( arrow_dn.w/2, arrow_dn.h )
 			arrow_dn:line_to(            0,          0 )
-			arrow_dn:set_source_color("FFFFFF")
+			arrow_dn:set_source_color(p.color)
 			arrow_dn:fill(true)
 			arrow_dn:finish_painting()
 			if arrow_dn.Image then
@@ -2526,7 +2543,7 @@ function widget.scrollWindow(t)
 			arrow_l:line_to(   arrow_l.w,   arrow_l.h )
 			arrow_l:line_to(           0, arrow_l.h/2 )
 			arrow_l:line_to(   arrow_l.w,           0 )
-			arrow_l:set_source_color("FFFFFF")
+			arrow_l:set_source_color(p.color)
 			arrow_l:fill(true)
 			arrow_l:finish_painting()
 			if arrow_l.Image then
@@ -2542,7 +2559,7 @@ function widget.scrollWindow(t)
 			arrow_r:line_to( arrow_r.w, arrow_l.h/2 )
 			arrow_r:line_to(         0,   arrow_l.h )
 			arrow_r:line_to(         0,           0 )
-			arrow_r:set_source_color("FFFFFF")
+			arrow_r:set_source_color(p.color)
 			arrow_r:fill(true)
 			arrow_r:finish_painting()
 			if arrow_r.Image then
@@ -2560,15 +2577,29 @@ function widget.scrollWindow(t)
 		arrow_l.anchor_point  = { arrow_l.w/2, arrow_l.h/2}
 		arrow_r.anchor_point  = { arrow_r.w/2, arrow_r.h/2}
 		
-		
-		
-		
+		arrow_up.reactive = true
+        arrow_dn.reactive = true
+        arrow_l.reactive=true
+        arrow_r.reactive=true
+
+		function arrow_up:on_button_down(x,y,button,num_clicks)
+            scroll_y(1)
+        end
+        function arrow_dn:on_button_down(x,y,button,num_clicks)
+            scroll_y(-1)
+        end
+		function arrow_l:on_button_down(x,y,button,num_clicks)
+            scroll_x(1)
+        end
+        function arrow_r:on_button_down(x,y,button,num_clicks)
+            scroll_x(-1)
+        end
 		
 		scroll_group:add(arrow_up,arrow_dn,arrow_l,arrow_r)
 		
 		-- re-used values
 		grip_vert_base_y =  arrow_up.h+5
-		track_h     = (p.clip_h-2*arrow_up.h-10)
+		track_h     = (p.clip_h-2*arrow_up.h-10+2*p.border_w)
 		grip_h      =  p.clip_h/p.content_h*track_h
 		if grip_h < p.arrow_sz then
 			grip_h = p.arrow_sz
@@ -2577,7 +2608,7 @@ function widget.scrollWindow(t)
 		end
 		
 		grip_hor_base_x = arrow_l.w+5
-		track_w     = (p.clip_w-2*arrow_l.w-10)
+		track_w     = (p.clip_w-2*arrow_l.w-10+2*p.border_w)
 		grip_w      =  p.clip_w/p.content_w*track_w
 		if grip_w < p.arrow_sz then
 			grip_w = p.arrow_sz
@@ -2618,7 +2649,6 @@ function widget.scrollWindow(t)
 			end
 		else
 			if p.arrows_in_box then
-			print("here")
 				arrow_up.position = {border.w-arrow_up.w/2-5,arrow_up.h/2+5}
 				arrow_dn.position = {border.w-arrow_dn.w/2-5,border.h-arrow_dn.h*3/2}
 				arrow_l.position  = {         arrow_l.w/2+5,   border.h - 5 - arrow_up.h/2}
