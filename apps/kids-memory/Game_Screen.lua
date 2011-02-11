@@ -64,7 +64,9 @@ local fade_in = {
         setup = function()
             for i = 1, #game_state.board  do
 				for j = 1, #game_state.board[i] do
-                    game_state.board[i][j].opacity=0
+                    if game_state.board[i][j] ~= 0 then
+                        game_state.board[i][j].opacity=0
+                    end
                 end
             end
         end,
@@ -77,6 +79,7 @@ local fade_in = {
                 local msecs = p*self.duration[2]
 				for i = 1, #game_state.board  do
 					for j = 1, #game_state.board[i] do
+                        if game_state.board[i][j] ~= 0 then
 						item = game_state.board[i][j].group
 						if msecs > item.delay and msecs < (item.delay+duration_per_tile) then
 							prog = (msecs-item.delay) / duration_per_tile
@@ -86,6 +89,7 @@ local fade_in = {
 							item.y_rotation = {0,0,0}
 							item.opacity = 255
 						end
+                        end
 					end
 				end
             end
@@ -94,9 +98,11 @@ local fade_in = {
             local item
 			for i = 1, #game_state.board  do
 				for j = 1, #game_state.board[i] do
-                    item = game_state.board[i][j].group
-                    item.y_rotation = {0,0,0}
-					item.opacity = 255
+                    if game_state.board[i][j] ~= 0 then
+                        item = game_state.board[i][j].group
+                        item.y_rotation = {0,0,0}
+                        item.opacity = 255
+                    end
                 end
             end
         end
