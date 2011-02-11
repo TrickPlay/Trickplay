@@ -446,12 +446,42 @@ TPAudioSampler::Thread::Plugin::Plugin( GModule * _module ,
     g_assert( process_samples );
     g_assert( shutdown );
 
+    gchar * config = 0;
+
+    // We look for a file that has the same name as the plugin but with
+    // the .config extension. If it is there, we load its contents and
+    // pass them to 'initialize'.
+
+    String file_name( g_module_name( module ) );
+
+    size_t dot = file_name.find_last_of( '.' );
+
+    if ( dot != String::npos )
+    {
+        file_name = file_name.substr( 0 , dot ) + ".config";
+
+        if ( g_file_get_contents( file_name.c_str() , & config , 0 , 0 ) )
+        {
+            log( "CONFIG LOADED" );
+        }
+    }
+
+    // Clear the plugin info structure and invoke the plugin's initialize
+    // function - passing the config.
+
     memset( & info , 0 , sizeof( info ) );
 
-    initialize( & info );
+    initialize( & info , config );
+
+    g_free( config );
+
+    // Make sure we NULL-terminate these two.
+
+    info.name[ sizeof( info.name ) - 1 ] = 0;
+    info.version[ sizeof( info.version ) - 1 ] = 0;
 
     log( "  NAME        : %s" , info.name );
-    log( "  VERSION     : %u.%u.%u" , info.version[ 0 ] , info.version[ 1 ] , info.version[ 2 ] );
+    log( "  VERSION     : %s" , info.version );
     log( "  RESIDENT    : %s" , info.resident ? "YES" : "NO" );
     log( "  MIN SECONDS : %u" , info.min_buffer_seconds );
     log( "  USER DATA   : %p" , info.user_data );
