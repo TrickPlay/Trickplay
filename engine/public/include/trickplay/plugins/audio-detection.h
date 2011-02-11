@@ -7,8 +7,8 @@
 
     struct TPAudioDetectionPluginInfo
     {
-        char            name[32];
-        unsigned int    version[3];
+        char            name[64];
+        char            version[64];
         int             resident;
         unsigned int    min_buffer_seconds;
         void *          user_data;
@@ -18,7 +18,8 @@
     void
     (*TPAudioDetectionInitialize)(
 
-            TPAudioDetectionPluginInfo * info);
+            TPAudioDetectionPluginInfo *    info,
+            const char *                    config);
 
 /*-----------------------------------------------------------------------------*/
 

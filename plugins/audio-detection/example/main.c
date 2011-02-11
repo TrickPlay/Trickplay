@@ -10,7 +10,7 @@
  */
 
 void
-tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info );
+tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info , const char * config );
 
 TPAudioDetectionResult *
 tp_audio_detection_process_samples( const TPAudioDetectionSamples * samples , void * user_data );
@@ -33,13 +33,10 @@ parse_response( TPAudioDetectionResult * result , const char * response_body , u
  */
 
 void
-tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info )
+tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info , const char * config )
 {
     strncpy( info->name , "Trickplay example" , sizeof( info->name ) - 1 );
-
-    info->version[ 0 ] = 1;
-    info->version[ 1 ] = 2;
-    info->version[ 2 ] = 3;
+    strncpy( info->version , "1.0" , sizeof( info->version ) - 1 );
 }
 
 /******************************************************************************
