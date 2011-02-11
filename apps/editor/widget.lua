@@ -2122,7 +2122,8 @@ function widget.threeDlist(t)
         item_h      = 200,
         grid_gap    = 40,
 		duration_per_tile = 300,
-		cascade_delay     = 200, 
+		cascade_delay     = 200,
+        tiles       = {}
     }
     --overwrite defaults
     if t ~= nil then
@@ -2131,20 +2132,19 @@ function widget.threeDlist(t)
         end
     end
 	
-	local tiles = {}
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
         name     = "3D List",
         position = {200,100},
-	reactive = true,
+        reactive = true,
         extra    = {
 			type = "3D_List",
             reactive = true,
-			get_tile_group = function(r,c)
+			get_tile = function(r,c)
 				return tiles[r][c]
 			end,
-            insert = function(r,c,obj)
+            replace = function(r,c,obj)
                 if tiles[r][c] == nil then
                     return false
                 else
@@ -2152,14 +2152,6 @@ function widget.threeDlist(t)
                     return true
                 end
 			end,
-            clear_group = function(r,c)
-                if tiles[r][c] == nil then
-                    return false
-                else
-                    tiles[r][c]:clear()
-                    return true
-                end
-            end,
             animate_in = function()
 				local tl = Timeline{
 					duration =p.cascade_delay*(p.num_rows+p.num_cols-2)+ p.duration_per_tile
@@ -2333,7 +2325,17 @@ function widget.scrollWindow(t)
 	--flag to hold back key presses while animating content group
 	local animating = false
 
+	local border = Rectangle{ color = "00000000" }
 	
+	local arrow_up, arrow_dn, arrow_l, arrow_r
+	
+	local track_h, track_w
+	local grip_h, grip_w
+	
+	
+	local grip_vert_base_y, grip_hor_base_x
+	local grip_vert = Rectangle{name="scroll_window",reactive=true}
+	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
 	
 
     --the umbrella Group, containing the full slate of tiles
@@ -2343,6 +2345,65 @@ function widget.scrollWindow(t)
         reactive = true,
         extra    = {
 			type = "ScrollImage",
+            seek_to = function(x,y)
+                local new_x, new_y
+                if p.content_w > p.clip_w then
+                    if x > p.content_w - p.clip_w/2 then
+                        new_x = -p.content_w + p.clip_w
+                    elseif x < p.clip_w/2 then
+                        new_x = 0
+                    else
+                        new_x = -x + p.clip_w/2
+                    end
+                else
+                    new_x =0
+                end
+                if p.content_h > p.clip_h then
+                    if y > p.content_w - p.clip_w/2 then
+                        new_y = -p.content_h + p.clip_h
+                    elseif y < p.clip_h/2 then
+                        new_y = 0
+                    else
+                        new_y = -y + p.clip_h/2
+                    end
+                else
+                    new_y =0
+                end
+                
+                if new_x ~= p.content.x or new_y ~= p.content.y then
+                    p.content:animate{
+                        duration = 200,
+                        x = new_x,
+                        y = new_y,
+                        on_completed = function()
+                            animating = false
+                        end
+                    }
+                
+                    if new_y < -(p.content_h - p.clip_h) then
+                        grip_vert.y = grip_vert_base_y+(track_h-grip_h)
+                    elseif new_y > 0 then
+                        grip_vert.y = grip_vert_base_y
+                    else
+                        grip_vert:complete_animation()
+                        grip_vert:animate{
+                            duration= 200,
+                            y = grip_vert_base_y-(track_h-grip_h)*new_y/(p.content_h - p.clip_h)
+                        }
+                    end
+                    if new_x < -(p.content_w - p.clip_w) then
+                        grip_hor.x = grip_hor_base_x+(track_w-grip_h)
+                    elseif new_x > 0 then
+                        grip_hor.x = grip_hor_base_x
+                    else
+                        grip_hor:complete_animation()
+                        grip_hor:animate{
+                            duration= 200,
+                            x = grip_hor_base_x-(track_w-grip_h)*new_x/(p.content_w - p.clip_w)
+                        }
+                    end
+                end
+            end
             --[[
 			get_content_group = function()
 				return content
@@ -2382,17 +2443,6 @@ function widget.scrollWindow(t)
 			print("Scroll Window does not support that key")
 		end
 	end
-	local border = Rectangle{ color = "00000000" }
-	
-	local arrow_up, arrow_dn, arrow_l, arrow_r
-	
-	local track_h, track_w
-	local grip_h, grip_w
-	
-	
-	local grip_vert_base_y, grip_hor_base_x
-	local grip_vert = Rectangle{name="scroll_window",reactive=true}
-	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
 	
 	scroll_y = function(dir)
 		local new_y = p.content.y+ dir*10
