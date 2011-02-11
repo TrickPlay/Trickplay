@@ -617,7 +617,7 @@ public:
 
         if ( left )
         {
-            memcpy( ptr, closure->request.body.c_str(), left );
+            memcpy( ptr, closure->request.body.c_str() + closure->put_offset , left );
 
             closure->put_offset += left;
         }
