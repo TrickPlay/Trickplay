@@ -42,6 +42,32 @@ function is_mp4_file(fn)
 	     end 
 end 
 
+
+function is_in_list(item, list)
+    if list == nil then 
+        return false
+    end 
+
+    for i, j in pairs (list) do
+	if item == j then 
+		return true
+	end 
+    end 
+    return false
+end 
+    
+function is_this_widget(v)
+    if v.extra then 
+        if is_in_list(v.extra.type, widgets) == true then 
+	    return true
+        else 
+	    return false
+        end 
+    else 
+        return false
+    end 
+end 
+
 -- Clear background images 
 function clear_bg()
     BG_IMAGE_20.opacity = 0
@@ -295,109 +321,32 @@ function get_group_position(child_obj)
           end
      end
 end 
-
-
-	
-
 	
 function set_obj (f, v)
-
-      if f == nil then 
-	    print("ERROR f is nill") 
-	    print("ERROR f is nill") 
-	    print("ERROR f is nill") 
-	    print("ERROR f is nill") 
-	    print("ERROR f is nill") 
-	    print("ERROR f is nill") 
-	    print("ERROR f is nill") 
+      for i,j in pairs(attr_name_list) do 
+           if f[j] then f[j] = v[j] end 
       end 
-
-      if(f.type == "Rectangle") then
-           f.color = v.color
-           f.border_color = v.border_color
-           f.border_width = v.border_width
-
-       elseif (v.type == "Text") then
-           f.color = v.color
-           f.font = v.font
-           f.text = v.text
-           f.editable = v.editable
-           f.wants_enter = v.wants_enter
-           f.wrap = v.wrap
-           f.wrap_mode = v.wrap_mode
-       elseif (v.type == "Image") then
-           f.src = v.src
-           f.clip = v.clip
-       elseif (v.type == "Clone") then
-	   f.scale = v.scale
-           f.source = v.source
-       elseif (v.type == "Group") then
-	   f.scale = v.scale
-       end
-       f.x_rotation = v.x_rotation
-       f.y_rotation = v.y_rotation
-       f.z_rotation = v.z_rotation
-       f.anchor_point = v.anchor_point
-       f.name = v.name
-       f.x = v.x
-       f.y = v.y
-       f.z = v.z
-       f.w = v.w
-       f.h = v.h
-       f.opacity = v.opacity
-       return new_object
-end	
+end 
 
 
 function copy_obj (v)
 
-      local new_object
-      if(v.type == "Rectangle") then
-           new_object = Rectangle{}
-           new_object.color = v.color
-           new_object.border_color = v.border_color
-           new_object.border_width = v.border_width
+      local new_map = {
+	["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
+	["Text"] = function() new_obj = Text{} return new_obj end, 
+	["Image"] = function() new_obj = Image{} return new_obj end, 
+	["Clone"] = function() new_obj = Clone{} return new_obj end, 
+	["Group"] = function() new_obj = Group{} return new_obj end, 
+	["Video"] = function() new_obj = {} return new_obj end, 
+      }
+	
+      local new_object = new_map[v.type]()
 
-       elseif (v.type == "Text") then
-           new_object = Text{}
-           new_object.color = v.color
-           new_object.font = v.font
-           new_object.text = v.text
-           new_object.editable = v.editable
-           new_object.wants_enter = v.wants_enter
-           new_object.wrap = v.wrap
-           new_object.wrap_mode = v.wrap_mode
-       elseif (v.type == "Image") then
-           new_object = Image{}
-           new_object.src = v.src
-           new_object.clip = v.clip
-       elseif (v.type == "Clone") then
-           new_object = Clone{}
-	   new_object.scale = v.scale
-           new_object.source = v.source
-       elseif (v.type == "Group") then
-           new_object = Group{}
-	   new_object.scale = v.scale
-       end
-       new_object.x_rotation = v.x_rotation
-       new_object.y_rotation = v.y_rotation
-       new_object.z_rotation = v.z_rotation
-       new_object.anchor_point = v.anchor_point
-       new_object.name = v.name
-       new_object.x = v.x
-       new_object.y = v.y
-       new_object.z = v.z
-       new_object.w = v.w
-       new_object.h = v.h
-       new_object.opacity = v.opacity
-       return new_object
+      set_obj(new_object, v)
+
+      return new_object
 end	
 
---------------------------------
--- Inspector 
---------------------------------
-
-local input_t
 
 function make_attr_t(v)
 
@@ -411,11 +360,11 @@ function make_attr_t(v)
              {"title", "Inspector : "..(v.extra.type)},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
-             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
-             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
-             {"z", math.floor(v.z), "z"},
-             {"bw", math.floor(v.wwidth), "bw"},
-             {"bh", math.floor(v.wheight), "bh"},
+             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
+             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
+             {"z", math.floor(v.z), "Z"},
+             {"wwidth", math.floor(v.wwidth), "W"},
+             {"wheight", math.floor(v.wheight), "H"},
       }
 
      else --Rectangle, Image, Text, Group, Clone
@@ -423,13 +372,14 @@ function make_attr_t(v)
       {
              --{"title", "INSPECTOR : "..string.upper(v.type)},
              {"title", "Inspector : "..(v.type)},
+             --{"line", "", "hide"},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
-             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
-             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
-             {"z", math.floor(v.z), "z"},
-             {"w", math.floor(v.w), "w"},
-             {"h", math.floor(v.h), "h"},
+             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
+             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
+             {"z", math.floor(v.z), "Z"},
+             {"w", math.floor(v.w), "W"},
+             {"h", math.floor(v.h), "H"},
       }
 
      end 
@@ -443,22 +393,22 @@ function make_attr_t(v)
              {"caption", "Source"},
              {"source", v.source, "source"},
              {"caption", "View Port"},
-             {"left", v.viewport[1], "x"},
-             {"top", v.viewport[2], "y"},
-             {"width", v.viewport[3], "w"},
-             {"height", v.viewport[4], "h"},
-             {"volume", v.volume, "volume"},
-             {"loop", v.loop, "loop"},
+             {"left", v.viewport[1], "X"},
+             {"top", v.viewport[2], "Y"},
+             {"width", v.viewport[3], "W"},
+             {"height", v.viewport[4], "H"},
+             {"volume", v.volume, "Volume"},
+             {"loop", v.loop, "Loop"},
       }
   end 
 
 
   local w_prop_map = {
 	["skin"] = function() 
-             	table.insert(attr_t, {"skin", v.skin, "skin"})
+             	table.insert(attr_t, {"skin", v.skin, "Skin"})
 		end, 
 	["font"] = function ()
-             	table.insert(attr_t, {"font", v.font, "font"})
+             	table.insert(attr_t, {"font", v.font, "Font"})
 		end, 
 	["color"] = function ()
         	table.insert(attr_t, {"caption", "Color"})
@@ -466,80 +416,83 @@ function make_attr_t(v)
         	if color_t == nil then 
              	     color_t = {0,0,0,0}
 		end 
-		table.insert(attr_t, {"r", color_t[1], "r"})
-        	table.insert(attr_t, {"g", color_t[2], "g"})
-        	table.insert(attr_t, {"b", color_t[3], "b"})
-        	table.insert(attr_t, {"a", color_t[4], "a"})
+		table.insert(attr_t, {"r", color_t[1], "R"})
+        	table.insert(attr_t, {"g", color_t[2], "G"})
+        	table.insert(attr_t, {"b", color_t[3], "B"})
+        	table.insert(attr_t, {"a", color_t[4], "A"})
                 end, 
 	["border_width"] = function() 
-                table.insert(attr_t, {"border_width", v.border_width, "border_width"})
+                table.insert(attr_t, {"border_width", v.border_width, "Border Width"})
 		table.insert(attr_t, {"caption", "Border Color"})
         	local color_t = v.border_color 
         	if color_t == nil then 
              	     color_t = {0,0,0,0}
 		end 
-		table.insert(attr_t, {"br", color_t[1], "r"})
-        	table.insert(attr_t, {"gb", color_t[2], "g"})
-        	table.insert(attr_t, {"bb", color_t[3], "b"})
-        	table.insert(attr_t, {"ab", color_t[4], "a"})
+		table.insert(attr_t, {"br", color_t[1], "R"})
+        	table.insert(attr_t, {"bg", color_t[2], "G"})
+        	table.insert(attr_t, {"bb", color_t[3], "B"})
+        	table.insert(attr_t, {"ba", color_t[4], "A"})
 
-		table.insert(attr_t, {"caption", "Focus Color"})
-        	local color_t = v.focus_color 
+		table.insert(attr_t, {"caption", "F Color"})
+        	local color_t = v.f_color 
         	if color_t == nil then 
              	     color_t = {0,0,0,0}
 		end 
-		table.insert(attr_t, {"fr", color_t[1], "r"})
-        	table.insert(attr_t, {"fb", color_t[2], "g"})
-        	table.insert(attr_t, {"fb", color_t[3], "b"})
-        	table.insert(attr_t, {"fb", color_t[4], "a"})
+		table.insert(attr_t, {"fr", color_t[1], "R"})
+        	table.insert(attr_t, {"fg", color_t[2], "G"})
+        	table.insert(attr_t, {"fb", color_t[3], "B"})
+        	table.insert(attr_t, {"fa", color_t[4], "A"})
 
-                table.insert(attr_t, {"border_radius", v.border_radius, "border_radius"})
+                table.insert(attr_t, {"border_radius", v.border_radius, "Border Radius"})
 		end,
 	["label"] = function()
 		if(v.extra.type == "Button") then 
-			table.insert(attr_t, {"label", v.text, "label"})
+			table.insert(attr_t, {"label", v.label, "Label"})
 		elseif(v.extra.type == "DialogBox") then 
-			table.insert(attr_t, {"label", v.title, "title"})
+			table.insert(attr_t, {"label", v.label, "Title"})
 		end
 		end,
 	["text_indent"] = function()
-                table.insert(attr_t, {"text indent", v.text_indent, "text indent"})
+                table.insert(attr_t, {"text_indent", v.text_indent, "Text Indent"})
 		end,
 	["title"] = function() 
-		table.insert(attr_t, {"title", v.title, "title"})
+		table.insert(attr_t, {"label", v.label, "Title"})
 		end,
 	["items"] = function ()
 		local items = ""
 		for i,j in pairs(v.items) do 
 			items = items.."\""..j.."\", "
 		end
-		table.insert(attr_t, {"items", v.items, "items"})
-		table.insert(attr_t, {"item_func", v.title, "item_func"})
-		table.insert(attr_t, {"selected_item", v.title, "selected_item"})
+		table.insert(attr_t, {"items", v.items, "Items"})
+		table.insert(attr_t, {"item_func", v.title, "Item Func"})
+		table.insert(attr_t, {"selected_item", v.title, "Selected Item"})
 		end,
 	["item_pos"] = function() 
-		table.insert(attr_t, {"b_pos", v.b_pos, "b_pos"})
-		table.insert(attr_t, {"item_pos", v.item_pos, "item_pos"})
+		table.insert(attr_t, {"b_pos", v.b_pos, "Button Pos."})
+		table.insert(attr_t, {"item_pos", v.item_pos, "Item Pos."})
 		end,
 
 	["group"] = function()
 
-		table.insert(attr_t, {"caption", "SCALE"})
+ 		table.insert(attr_t, {"line","", "hide"})
+		table.insert(attr_t, {"caption", "Scale"})
+
 		local scale_t = v.scale
         	if scale_t == nil then
              		scale_t = {1,1} 
         	end
 
-        	table.insert(attr_t, {"x_scale", scale_t[1], "x"})
-        	table.insert(attr_t, {"y_scale", scale_t[2], "y"})
+
+        	table.insert(attr_t, {"x_scale", scale_t[1], "X"})
+        	table.insert(attr_t, {"y_scale", scale_t[2], "Y"})
 
  		table.insert(attr_t, {"caption", "Rotation  "})
         	local x_rotation_t = v.x_rotation 
         	local y_rotation_t = v.y_rotation 
         	local z_rotation_t = v.z_rotation 
-        	table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
-        	table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
-        	table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
+        	table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
+        	table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
+        	table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
 	
  		table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 		end,
@@ -550,16 +503,16 @@ local widget_map = {
 	["Button"] = function()
 		w_prop_map["label"]()
 		w_prop_map["skin"]()
-		w_prop_map["font"]()
 		w_prop_map["color"]()
+		w_prop_map["font"]()
 		if v.skin == "custom" then 
 		    w_prop_map["border_width"]()
 		end 
 		end,
 	["TextInputField"] = function () 
 		w_prop_map["skin"]()
-		w_prop_map["font"]()
 		w_prop_map["color"]()
+		w_prop_map["font"]()
 		w_prop_map["text_indent"]()
 		if v.skin == "custom" then 
 		    w_prop_map["border_width"]()
@@ -568,22 +521,22 @@ local widget_map = {
 	["DialogBox"] = function () 
 		w_prop_map["label"]()
 		w_prop_map["skin"]()
-		w_prop_map["font"]()
 		w_prop_map["color"]()
+		w_prop_map["font"]()
 		if v.skin == "custom" then 
 		    w_prop_map["border_width"]()
 		end 
 		end,
 
 	["ToastBox"] = function () 
-	        table.insert(attr_t, {"label", v.title, "title"})
- 		table.insert(attr_t, {"caption", "MESSAGE  "})
-		table.insert(attr_t, {"message", v.message, "message"})
+	        table.insert(attr_t, {"label", v.label, "Title"})
+ 		table.insert(attr_t, {"caption", "Message  "})
+		table.insert(attr_t, {"message", v.message, "Message"})
 		w_prop_map["skin"]()
-		w_prop_map["font"]()
 		w_prop_map["color"]()
-		table.insert(attr_t, {"duration", v.duration, "duration"})
-		table.insert(attr_t, {"fade_duration", v.fade_duration, "fade_duration"})
+		w_prop_map["font"]()
+		table.insert(attr_t, {"duration", v.duration, "Duration"})
+		table.insert(attr_t, {"fade_duration", v.fade_duration, "Fade Duration"})
 		if v.skin == "custom" then 
 		    w_prop_map["border_width"]()
 		end 
@@ -597,7 +550,7 @@ local widget_map = {
 		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
 	["CheckBox"] = function () return v.name.." = ".."widget.checkBox"..b_indent.."{"..indent.. 
 		"box_color = {"..table.concat(v.box_color,",").."},"..indent..
-		"fill_color = {"..table.concat(v.fill_color,",").."},"..indent..
+		"f_color = {"..table.concat(v.f_color,",").."},"..indent..
     		"box_width = "..v.box_width..","..indent.. 
 		"box_size = {"..table.concat(v.box_size,",").."},"..indent..
 		"check_size = {"..table.concat(v.check_size,",").."},"..indent..
@@ -627,25 +580,25 @@ local widget_map = {
 	widget_map[v.extra.type]()
   else
 	if (v.type == "Text") then
-        table.insert(attr_t, {"caption", "COLOR "})
+        table.insert(attr_t, {"caption", "Color "})
         local color_t = v.color 
         if color_t == nil then 
              color_t = {0,0,0}
         end
-        table.insert(attr_t, {"r", color_t[1], "r"})
-        table.insert(attr_t, {"g", color_t[2], "g"})
-        table.insert(attr_t, {"b", color_t[3], "b"})
-        table.insert(attr_t, {"font", v.font,"font "})
-        table.insert(attr_t, {"editable", v.editable,"editable"})
-        table.insert(attr_t, {"wrap", v.wrap, "wrap"})
-        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"wrap mode"})
+        table.insert(attr_t, {"r", color_t[1], "R"})
+        table.insert(attr_t, {"g", color_t[2], "G"})
+        table.insert(attr_t, {"b", color_t[3], "B"})
+        table.insert(attr_t, {"font", v.font,"Font "})
+        table.insert(attr_t, {"editable", v.editable,"Editable"})
+        table.insert(attr_t, {"wrap", v.wrap, "Wrap"})
+        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"Wrap mode"})
  	table.insert(attr_t, {"caption", "Rotation  "})
         local x_rotation_t = v.x_rotation 
         local y_rotation_t = v.y_rotation 
         local z_rotation_t = v.z_rotation 
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
 
  	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 
@@ -655,49 +608,49 @@ local widget_map = {
              color_t = {0,0,0,0}
         end
         table.insert(attr_t, {"caption", "Fill Color"})
-        table.insert(attr_t, {"rect_r", color_t[1], "r"})
-        table.insert(attr_t, {"rect_g", color_t[2], "g"})
-        table.insert(attr_t, {"rect_b", color_t[3], "b"})
-        table.insert(attr_t, {"rect_a", color_t[4], "a"})
+        table.insert(attr_t, {"rect_r", color_t[1], "R"})
+        table.insert(attr_t, {"rect_g", color_t[2], "G"})
+        table.insert(attr_t, {"rect_b", color_t[3], "B"})
+        table.insert(attr_t, {"rect_a", color_t[4], "A"})
         color_t = v.border_color 
         if color_t == nil then 
              color_t = {0,0,0}
         end
         table.insert(attr_t, {"caption", "Border Color"})
-        table.insert(attr_t, {"bord_r", color_t[1], "r"})
-        table.insert(attr_t, {"bord_g", color_t[2], "g"})
-        table.insert(attr_t, {"bord_b", color_t[3], "b"})
-        table.insert(attr_t, {"bwidth", v.border_width, "border width"})
+        table.insert(attr_t, {"bord_r", color_t[1], "R"})
+        table.insert(attr_t, {"bord_g", color_t[2], "G"})
+        table.insert(attr_t, {"bord_b", color_t[3], "B"})
+        table.insert(attr_t, {"bwidth", v.border_width, "Border Width"})
 	table.insert(attr_t, {"caption", "Rotation  "})
         local x_rotation_t = v.x_rotation 
         local y_rotation_t = v.y_rotation 
         local z_rotation_t = v.z_rotation 
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
 
  	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 
   elseif (v.type  == "Image") then
         table.insert(attr_t, {"caption", "Source Location"})
-        table.insert(attr_t, {"src", v.src,"source"})
+        table.insert(attr_t, {"src", v.src,"Source"})
         table.insert(attr_t, {"caption", "Clipping Region"})
         local clip_t = v.clip
         if clip_t == nil then
              clip_t = {0,0 ,v.w, v.h}
         end
-        table.insert(attr_t, {"clip_use", false, "use"})
-        table.insert(attr_t, {"cx", clip_t[1], "x"})
-        table.insert(attr_t, {"cy", clip_t[2], "y"})
-        table.insert(attr_t, {"cw", clip_t[3], "w"})
-        table.insert(attr_t, {"ch", clip_t[4], "h"})
+        table.insert(attr_t, {"clip_use", false, "Use"})
+        table.insert(attr_t, {"cx", clip_t[1], "X"})
+        table.insert(attr_t, {"cy", clip_t[2], "Y"})
+        table.insert(attr_t, {"cw", clip_t[3], "W"})
+        table.insert(attr_t, {"ch", clip_t[4], "H"})
  	table.insert(attr_t, {"caption", "Rotation  "})
         local x_rotation_t = v.x_rotation 
         local y_rotation_t = v.y_rotation 
         local z_rotation_t = v.z_rotation 
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
 
  	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
    end 
@@ -708,176 +661,93 @@ local widget_map = {
 	w_prop_map["group"]()
    end
    if(v.type ~= "Video") then
-      	table.insert(attr_t, {"opacity", v.opacity, "opacity"})
+      	table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
    end 
-   table.insert(attr_t, {"button", "view code", "view code"})
-   table.insert(attr_t, {"button", "apply", "apply"})
-   table.insert(attr_t, {"button", "cancel", "cancel"})
+   table.insert(attr_t, {"button", "view code", "View code"})
+   table.insert(attr_t, {"button", "apply", "Apply"})
+   table.insert(attr_t, {"button", "cancel", "Cancel"})
 
    return attr_t
 end
 
 
-function is_in_list(item, list)
-    if list == nil then 
-        return false
-    end 
 
-    for i, j in pairs (list) do
-	if item == j then 
-		return true
-	end 
-    end 
-    return false
-end 
-    
+--------------------------------
+-- Inspector 
+--------------------------------
+
+local input_t
 
 function itemTostring(v, d_list, t_list)
-    local itm_str = ""
+    local itm_str  = ""
     local itm_str2 = ""
-    local indent       = "\n\t\t"
-    local b_indent       = "\n\t"
-  
-    local w_prop_map = {
-	["wwidth"] = function() return 
-		"wwidth = "..v.wwidth..","..indent..
-		"wheight = "..v.wheight..","..indent..
-		"skin = \""..v.skin.."\","..indent..
-    		"font = \""..v.font.."\","..indent..
-		"color = {"..table.concat(v.color,",").."}".. b_indent.."}\n\n"
-		end,
-	["border_width"] = function() return 
-    		"border_width = "..v.border_width..","..indent..
-		"border_color = {"..table.concat(v.border_color,",").."},"..indent..
-    		"padding_x = "..v.padding_x..","..indent.. 
-    		"padding_y = "..v.padding_y..","..indent.. 
-    		"border_radius = "..v.border_radius..","..indent
-		end,
-	["text"] = function() return 
-		"focus_color = {"..table.concat(v.focus_color,",").."},"..indent..
-    		"text = \""..v.text.."\","..indent
-		end,
-	["title"] = function() return 
-		"title = \""..v.title.."\","..indent
-		end,
-	["items"] = function ()
-		local items = ""
-		for i,j in pairs(v.items) do 
-			items = items.."\""..j.."\", "
-		end
-    		return "items = {"..items.."},"..indent..
-		"item_func = {"..table.concat(v.item_func,",").."},"..indent..
-    		"selected_item = "..v.selected_item..","..indent
-		end,
-	["item_pos"] = function() return 
-		"b_pos = {"..table.concat(v.b_pos,",").."},"..indent..
-		"item_pos = {"..table.concat(v.item_pos,",").."},"..indent..
-		"line_space = "..v.line_space..","..indent
-		end,
-	["group"] = function () return 
-		v.name..".name=\""..v.name.."\"".."\n"..
-        	v.name..".position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}".."\n"..
-        	v.name..".scale = {"..table.concat(v.scale,",").."}".."\n"..
-        	v.name..".anchor_point = {"..table.concat(v.anchor_point,",").."}".."\n"..
-        	v.name..".x_rotation={"..table.concat(v.x_rotation,",").."}".."\n"..
-        	v.name..".y_rotation={"..table.concat(v.y_rotation,",").."}".."\n"..
-        	v.name..".z_rotation={"..table.concat(v.z_rotation,",").."}".."\n"..
-		v.name..".opacity = "..v.opacity..b_indent.."\n\n"
-		end,
-	}
+    local indent   = "\n\t\t"
+    local b_indent = "\n\t"
 
+    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color",}
+
+    local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children"}
+
+    local group_list = {"name", "position", "scale", "anchor_point", "x_rotation", "y_rotation", "z_rotation", "opacity"}
 
     local widget_map = {
-	["Button"] = function() return v.name.." = ".."widget.button"..b_indent.."{"..indent.. 
-		w_prop_map["border_width"]()..w_prop_map["text"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["TextInputField"] = function () return v.name.." = ".."widget.textField"..b_indent.."{"..indent.. 
-    		"text_indent = "..v.text_indent..","..indent..
-		w_prop_map["border_width"]()..w_prop_map["text"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["DialogBox"] = function () return v.name.." = ".."widget.dialogBox"..b_indent.."{"..indent.. 
-		w_prop_map["border_width"]()..w_prop_map["title"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["ToastBox"] = function () return v.name.." = ".."widget.toastBox"..b_indent.."{"..indent.. 
-    		"message = \""..v.message.."\","..indent..
-    		"border_radius = "..v.border_radius..","..indent.. 
-    		"fade_duration = "..v.fade_duration..","..indent.. 
-    		"duration = "..v.duration..","..indent.. 
-		w_prop_map["border_width"]()..w_prop_map["title"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["RadioButton"] = function () return v.name.." = ".."widget.radioButton"..b_indent.."{"..indent.. 
-		"button_color = {"..table.concat(v.button_color,",").."},"..indent..
-		"select_color = {"..table.concat(v.select_color,",").."},"..indent..
-    		"button_radius = "..v.button_radius..","..indent.. 
-    		"select_radius = "..v.select_radius..","..indent.. 
-		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["CheckBox"] = function () return v.name.." = ".."widget.checkBox"..b_indent.."{"..indent.. 
-		"box_color = {"..table.concat(v.box_color,",").."},"..indent..
-		"fill_color = {"..table.concat(v.fill_color,",").."},"..indent..
-    		"box_width = "..v.box_width..","..indent.. 
-		"box_size = {"..table.concat(v.box_size,",").."},"..indent..
-		"check_size = {"..table.concat(v.check_size,",").."},"..indent..
-		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["ButtonPicker"] = function () return v.name.." = ".."widget.buttonPicker"..b_indent.."{"..indent.. 
-		w_prop_map["items"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["LoadingDots"] = function () return v.name.." = ".."widget.loadingdots"..b_indent.."{"..indent.. 
-		"skin = \""..v.skin.."\","..indent..
-		"dot_radius = "..v.dot_radius..","..indent..
-    		"dot_color = \""..v.dot_color.."\","..indent..
-		"num_dots = "..v.num_dots..","..indent..
-		"anim_radius = "..v.anim_radius..","..indent..
-		"anim_duration = "..v.anim_duration..b_indent.."}\n\n"..w_prop_map["group"]() end,
-		--"anim_duration = "..v.anim_duration..","..indent..
-		--"clone_src = "..v.clone_src..b_indent.."}\n\n"..w_prop_map["group"]() end,
-	["LoadingBar"] = function () return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
-		"bsize = {"..table.concat(v.bsize,",").."},"..indent..
-        	"shell_upper_color = \""..v.shell_upper_color.."\","..indent.. 
-        	"shell_lower_color = \""..v.shell_lower_color.."\","..indent.. 
-        	"stroke_color = \""..v.stroke_color.."\","..indent.. 
-        	"fill_upper_color = \""..v.fill_upper_color.."\","..indent.. 
-        	"fill_lower_color = \""..v.fill_lower_color.."\""..b_indent.."}\n\n"..
-		w_prop_map["group"]() end, 
+	["Button"] = function () return "widget.button"  end, 
+	["TextInputField"] = function () return "widget.textField" end, 
+	["DialogBox"] = function () return "widget.dialogBox" end, 
+	["ToastBox"] = function () return "widget.toastBox" end,   
+	["RadioButton"] = function () return "widget.radioButton" end, 
+	["CheckBox"] = function () return "widget.checkBox"  end, 
+	["ButtonPicker"] = function () return "widget.buttonPicker"  end, 
+	["LoadingDots"] = function () return "widget.loadingdots" end, 
+	["LoadingBar"] = function () return "widget.loadingbar" end,
+	["3D_List"] = function () return "widget.threeDlist" end,
+	["ScrollImage"] = function () return "widget.scrollWindow" end, 
    }
-
-
-    if(v.type == "Rectangle") then
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "border_color={"..table.concat(v.border_color,",").."},"..indent..
-         "border_width="..v.border_width..","..indent.."color={"..table.concat(v.color,",").."},"..indent..
-         "size = {"..table.concat(v.size,",").."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
-    elseif (v.type == "Image") then
-
+ 
+   local function add_attr (list, head, tail) 
+       local item_string =""
+       for i,j in pairs(list) do 
+          if v[j] then 
+	      if j == "position" then 
+		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
+	      elseif j == "children" then 
+                  local children = ""
+		  for k,l in pairs(v.children) do
+		      if (l ~= nil) then 
+		      if k == 1 then
+		         children = children..l.name
+		      else 
+		         children = children..","..l.name
+		      end
+		      end 
+                  end 
+		  item_string = item_string..head.."children = {"..children.."}"..tail
+	      elseif j == "items" then 
+		  local items = ""
+		  for i,j in pairs(v.items) do 
+			items = items.."\""..j.."\", "
+		  end
+    		  item_string = item_string..head.."items = {"..items.."}"..tail
+	      elseif type(v[j]) == "number" then 
+	          item_string = item_string..head..j.." = "..v[j]..tail 
+	      elseif type(v[j]) == "string" then 
+	          item_string = item_string..head..j.." = \""..v[j].."\""..tail 
+	      elseif type(v[j]) == "boolean" then 
+	          item_string = item_string..head..j.." = "..tostring(v[j])..tail 
+	      elseif type(v[j]) == "table" then 
+	          item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
+	      elseif type(v[j]) == "userdata" then 
+		  item_string = item_string..head..j.." = "..v[j].name..tail 
+	      else
+	          print("--", j, " 처리해 주세용 ~")
+	      end 
+	  end 
+       end 
+       return item_string
+    end 
+  
+    if (v.type == "Image") then
 	if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "src=\""..v.src.."\","..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-         "size = {"..table.concat(v.size,",").."},"..indent..
-         "clip = {"..table.concat(v.clip,",").."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "opacity = "..v.opacity..b_indent.."}\n\n"
-    elseif (v.type == "Text") then
-         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "text=\""..v.text.."\","..indent..
-         "font=\""..v.font.."\","..indent..
-         "color={"..table.concat(v.color,",").."},"..indent..
-         "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "editable="..tostring(v.editable)..","..indent..
-         "reactive="..tostring(v.reactive)..","..indent..
-         "wants_enter="..tostring(v.wants_enter)..","..indent..
-         "wrap="..tostring(v.wrap)..","..indent..
-         "wrap_mode=\""..v.wrap_mode.."\","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
     elseif (v.type == "Clone") then
 	 src = v.source 
 	 if is_in_list(src.name, d_list) == false then 
@@ -888,107 +758,76 @@ function itemTostring(v, d_list, t_list)
 	     end
          end 
 
-	 itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "size={"..table.concat(v.size,",").."},"..indent..
-         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-         "source="..v.source.name..","..indent..
-         "scale = {"..table.concat(v.scale,",").."},"..indent..
-         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-         "opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Group") and is_this_widget(v) == false then 
+	 local org_d_list = {}
 
+	 if(d_list ~= nil) then 
+	     for i,j in pairs (d_list) do 
+		 org_d_list[i] = j 
+	     end      
+	 end 
 
-	if(d_list == nil) then  
-		d_list = {v.name}
-    	else 
-        	table.insert(d_list, v.name) 
-    	end 
-
-        return itm_str, d_list, t_list
-
-    elseif (v.type == "Group") then
-	if is_in_list(v.extra.type, widgets) == true then 
- 	     itm_str = widget_map[v.extra.type]() 
-        else 
-	    local i = 1
-            local children = ""
-	    local org_d_list = {}
-
-	    if(d_list ~= nil) then 
-	        for i,j in pairs (d_list) do 
-		     org_d_list[i] = j 
-	    	end      
-	    end 
-
-            for e in values(v.children) do
-		result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
-		if(result ~= nil) then 
-		    itm_str = itm_str..result
-		end
-		if(result2 ~= nil) then 
-		    itm_str2 = result2..itm_str2
-		end 
+         for e in values(v.children) do
+	     result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
+	     if(result ~= nil) then 
+		 itm_str = itm_str..result
+	     end
+	     if(result2 ~= nil) then 
+		 itm_str2 = result2..itm_str2
+	     end 
 		
-		d_list = done_list
-		t_list = todo_list
-		if i == 1 then
-		     children = children..e.name
-		else 
-		     children = children..","..e.name
-		end
-		i = i + 1
-            end 
-
-	    itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
-            "name=\""..v.name.."\","..indent..
-            "size={"..table.concat(v.size,",").."},"..indent..
-            "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
-	    "children = {"..children.."},"..indent..
-            "scale = {"..table.concat(v.scale,",").."},"..indent..
-            "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-            "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-            "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-            "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-            "opacity = "..v.opacity..b_indent.."}\n\n"
-	end 
-    elseif (v.type == "Video") then
-	itm_str = itm_str..v.name.." = ".."{"..indent..
-        "name=\""..v.name.."\","..indent..
-        "type=\""..v.type.."\","..indent..
-        "source=\""..v.source.."\","..indent..
-        "viewport={"..table.concat(v.viewport,",").."},"..indent..
-        "loop = "..tostring(v.loop)..","..indent..
-        "volume = "..v.volume..b_indent.."}\n"..b_indent
-	
-	itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
-	"mediaplayer.on_loaded = function(self) self:play() end"..b_indent..
-	"if ("..v.name..".loop == true) then"..b_indent..
-     	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
-	"else"..b_indent..
-	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) end"..b_indent..
-	"end"..b_indent..
-	"mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
-	"mediaplayer.volume = "..v.name..".volume\n\n"
-
-	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
-
+	     d_list = done_list
+	     t_list = todo_list
+	 end
     end
 
+    if (v.type == "Video") then
+  	 itm_str = itm_str.."\n"..v.name.." = ".."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "type=\""..v.type.."\","..indent..
+         "source=\""..v.source.."\","..indent..
+         "viewport={"..table.concat(v.viewport,",").."},"..indent..
+         "loop = "..tostring(v.loop)..","..indent..
+         "volume = "..v.volume..b_indent.."}\n"..b_indent
+
+	 itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
+	 "mediaplayer.on_loaded = function(self) self:play() end"..b_indent..
+	 "if ("..v.name..".loop == true) then"..b_indent..
+     	 "     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
+	 "else"..b_indent..
+	 "     mediaplayer.on_end_of_stream = function(self) self:seek(0) end"..b_indent..
+	 "end"..b_indent..
+	 "mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
+	 "mediaplayer.volume = "..v.name..".volume\n\n"
+	 itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
+    elseif is_this_widget(v) == true then 
+         itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
+	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
+	 itm_str = itm_str:sub(1,-2)
+         itm_str = itm_str.."}\n\n"
+	 itm_str = itm_str..add_attr(group_list, v.name..".", "\n")
+    else 
+         itm_str = itm_str.."\n"..v.name.." = "..v.type..b_indent.."{"..indent
+	 itm_str = itm_str..add_attr(nw_attr_list, "", ","..indent)
+	 itm_str = itm_str:sub(1,-2)
+         itm_str = itm_str.."}\n\n"
+    end
+
+   
     if(d_list == nil) then  
 	d_list = {v.name}
     else 
         table.insert(d_list, v.name) 
     end 
 
+    -- 만약 문제가 된다면 Clone일 경 아래 조건문은 빼세요    
     if is_in_list(v.name, t_list) == true  then 
 	return "", d_list, t_list, itm_str
     end 
 
     return itm_str, d_list, t_list, itm_str2
 end
+
 
 local msgw_focus = ""
 
@@ -1256,7 +1095,7 @@ local function inputMsgWindow_savefile()
       end
 end
 
-local function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  -- local 0208
+function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
      
      local x_scroll_box, y_scroll_box 
      local x_scroll_bar, y_scroll_bar 
