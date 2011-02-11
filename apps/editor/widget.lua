@@ -1200,7 +1200,7 @@ function widget.buttonPicker(table)
 	ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
         ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
 
-        focus_ring = make_ring(p.wwidth, p.wheight, {255, 0,0,255}, 1, 7, 7, 12)
+        focus_ring = make_ring(p.wwidth, p.wheight, {0, 255, 0, 255}, 1, 7, 7, 12)
         focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
 
 
@@ -1225,13 +1225,13 @@ function widget.buttonPicker(table)
 	right_un.scale = {w_scale, h_scale}
 	right_sel.scale = {w_scale, h_scale}
 
-	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 255}
+	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 255, reactive = true}
 	left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 0}
-	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.wheight/5}, opacity = 255}
+	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.wheight/5}, opacity = 255, reactive = true}
 	right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
 
-     	unfocus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255}
-	focus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
+     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255, reactive = true}
+	focus:set{name = "focus",  position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
 
      	for i, j in pairs(p.items) do 
                items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, opacity = 255})     
@@ -1242,7 +1242,7 @@ function widget.buttonPicker(table)
 	for i, j in pairs(items.children) do 
 	  if i == p.selected_item then  -- i == 1
                j.position = {p.wwidth/2 - j.width/2, p.wheight/2 - j.height/2}
-	       j_padding = 4 * j.x
+	       j_padding = 5 * j.x -- 5 는 진정한 해답이 아니고.. 이걸 바꿔 줘야함.. 그리고 박스 크기가 문자열과 비례해서 적당히 커줘야하고.. ^^;;;
 	  else 
                --j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
 	  end 
@@ -1262,7 +1262,6 @@ function widget.buttonPicker(table)
 
 	items.clip = { 0, 0, p.wwidth, p.wheight }
 
-
    	bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
 
 	if(p.skin == "custom") then unfocus.opacity = 0 
@@ -1274,12 +1273,23 @@ function widget.buttonPicker(table)
      create_buttonPicker()
 
      function bp_group.extra.on_focus_in()
-        unfocus.opacity = 0
-	focus.opacity   = 255
+	if(p.skin == "custom") then 
+             ring.opacity = 0 
+	     focus_ring.opacity = 255
+        else 
+             unfocus.opacity = 0
+	     focus.opacity   = 255
+	end 
+
      end
      function bp_group.extra.on_focus_out()
-        unfocus.opacity = 255
-	focus.opacity   = 0
+	if(p.skin == "custom") then 
+             ring.opacity = 255 
+	     focus_ring.opacity = 0
+	else 
+            unfocus.opacity = 255
+	    focus.opacity   = 0
+	end 
      end
 
      function bp_group.extra.press_left()
@@ -1411,7 +1421,6 @@ function widget.buttonPicker(table)
 		table.remove(p.items)
 		create_buttonPicker()
         end 
-
 	--bp_group.out_focus()
         
         mt = {}
