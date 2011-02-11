@@ -193,7 +193,7 @@ struct TPAudioSampler
         static void response_callback( const Network::Response & response , gpointer closure );
 
         EventGroup *            event_group;
-        std::auto_ptr<Network>  network;
+        Network *               network;
     };
 
     //==========================================================================
@@ -499,7 +499,9 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
     context( _context ),
     queue( g_async_queue_new_full( ( GDestroyNotify ) Event::destroy ) ),
     thread( 0 ),
-    event_group( 0 )
+    event_group( 0 ),
+    network( 0 )
+
 {
     if ( ! context->get_bool( TP_AUDIO_SAMPLER_ENABLED , true ) )
     {
@@ -527,7 +529,7 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
             {
                 event_group = new EventGroup();
 
-                network.reset( new Network( Network::Settings( context ) , event_group ) );
+                network = new Network( Network::Settings( context ) , event_group );
             }
         }
     }
@@ -542,6 +544,11 @@ TPAudioSampler::Thread::~Thread()
         event_group->cancel_all();
 
         event_group->unref();
+    }
+
+    if ( network )
+    {
+        delete network;
     }
 
     if ( thread )
