@@ -195,7 +195,7 @@ end
 
 -- make_dialogBox_bg() : make message window background 
 
---make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+--make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
 local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
 
     local size = {w, h} 
@@ -539,7 +539,7 @@ Arguments:
     	bwidth  - Width of the button
     	bheight - Height of the button
     	border_color - Border color of the button
-    	focus_color - Focus color of the button
+    	f_color - Focus color of the button
     	border_width - Border width of the button
     	text - Caption of the button
     	font - Font of the button text
@@ -567,8 +567,8 @@ function widget.button(table)
     	wwidth = 180,
     	wheight = 60, 
 
-    	text = "Button", 
-    	focus_color = {27,145,27,255}, --"1b911b", 
+    	label = "Button", 
+    	f_color = {27,145,27,255}, --"1b911b", 
 
     	border_color = {255,255,255,255}, --"FFFFFF"
     	border_width = 1,
@@ -608,7 +608,7 @@ function widget.button(table)
         ring = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
-        focus_ring = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+        focus_ring = make_ring(p.wwidth, p.wheight, p.f_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
@@ -620,7 +620,7 @@ function widget.button(table)
 	     button = Image{}
 	     focus = Image{}
 	end 
-        text = Text{name = "text", text = p.text, font = p.font, color = p.color} --reactive = true 
+        text = Text{name = "text", text = p.label, font = p.font, color = p.color} --reactive = true 
         text:set{name = "text", position = { (p.wwidth  -text.w)/2, (p.wheight - text.h)/2}}
 
         b_group:add(ring, focus_ring, button, focus, text)
@@ -691,7 +691,7 @@ Arguments:
     	bwidth  - Width of the text field
     	bheight - Height of the text field 
     	border_color - Border color of the text field
-    	focus_color - Focus color of the text field
+    	f_color - Focus color of the text field
     	border_width - Border width of the text field 
     	text - Caption of the text field  
     	text_indent - Size of the text indentiation 
@@ -721,7 +721,7 @@ function widget.textField(table)
     	text_indent = 20 ,
     	border_width  = 3 ,
     	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-    	focus_color  = {27,145,27,255}, --"1b911b" , 
+    	f_color  = {27,145,27,255}, --"1b911b" , 
     	font = "DejaVu Sans 30px"  , 
     	color =  {255,255,255,255}, -- "FFFFFF" , 
     	padding_x = 0 ,
@@ -763,7 +763,7 @@ function widget.textField(table)
     	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	box:set{name="box", position = { 0 , 0 } }
 
-    	focus_box = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+    	focus_box = make_ring(p.wwidth, p.wheight, p.f_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
@@ -846,11 +846,11 @@ Arguments:
 		skin - Modify the skin used for the dialog box by changing this value
     	bwidth  - Width of the dialog box 
     	bheight - Height of the dialog box
-    	fill_color - Fill color of the dialog box
+    	f_color - Fill color of the dialog box
     	border_color - Border color of the dialog box
-    	focus_color - Focus color of the dialog box
+    	f_color - Focus color of the dialog box
     	border_width - Border width of the dialog box  
-    	title - Title in the dialog box
+    	label - Title in the dialog box
     	font - Font of the text in the dialog box
     	color - Color of the dialog box text 
     	padding_x - Padding of the dialog box on the X axis
@@ -868,12 +868,12 @@ function widget.dialogBox(table)
 	skin = "custom", 
 	wwidth = 900 ,
 	wheight = 500 ,
-	title = "Dialog Box Title" ,
+	label = "Dialog Box Title" ,
 	font = "DejaVu Sans 30px" , 
 	color = {255,255,255,255} , --"FFFFFF" , 
 	border_width  = 3 ,
 	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-	fill_color  = {25,25,25,100},
+	f_color  = {25,25,25,100},
 	padding_x = 0 ,
 	padding_y = 0 ,
 	border_radius = 22 ,
@@ -903,14 +903,14 @@ function widget.dialogBox(table)
         db_group:clear()
         db_group.size = { p.wwidth , p.wheight - 34}
 
-        d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+        d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
 	d_box.y = d_box.y - 34
 	d_box:set{name="d_box"} 
 
         x_box = make_xbox()
         x_box:set{name = "x_box", position  = {p.wwidth - 50, db_group_cur_y}}
 
-        title= Text{text = p.title, font= p.font, color = p.color}     
+        title= Text{text = p.label, font= p.font, color = p.color}     
         title:set{name = "title", position = {(p.wwidth - title.w - 50)/2 , db_group_cur_y - 5}}
 
 	if(p.skin ~= "custom") then 
@@ -969,8 +969,8 @@ Arguments:
     	bwidth  - Width of the Toast box 
     	bheight - Height of the Toast box 
     	border_color - Border color of the Toast box
-    	fill_color - Fill color of the Toast box
-    	focus_color - Focus color of the Toast box  
+    	f_color - Fill color of the Toast box
+    	f_color - Focus color of the Toast box  
     	border_width - Border width of the Toast box 
     	padding_x - Padding of the toast box on the X axis 
     	padding_y - Padding of the toast box on the Y axis
@@ -994,13 +994,13 @@ function widget.toastBox(table)
  	skin = "custom",  
 	wwidth = 600,
 	wheight = 200,
-	title = "Toast Box Title",
+	label = "Toast Box Title",
 	message = "Toast box message ... ",
 	font = "DejaVu Sans 30px", 
 	color = {255,255,255,255},  --"FFFFFF", 
 	border_width  = 3,
 	border_color  = {255,255,255,255}, "FFFFFFC0", 
-	fill_color  = {25,25,25,100},
+	f_color  = {25,25,25,100},
 	padding_x = 0,
 	padding_y = 0,
 	border_radius = 22,
@@ -1042,12 +1042,12 @@ function widget.toastBox(table)
     	tb_group:clear()
         tb_group.size = { p.wwidth , p.wheight}
 
-    	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_radius) 
+    	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
     
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
-    	title= Text{text = p.title, font= "DejaVu Sans 32px", color = "FFFFFF"}     
+    	title= Text{text = p.label, font= "DejaVu Sans 32px", color = "FFFFFF"}     
     	title:set{name = "title", position = {(p.wwidth - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
 
     	message= Text{text = p.message, font= "DejaVu Sans 32px", color = "FFFFFF"}     
@@ -1139,8 +1139,8 @@ Return:
  		bp_group - Group containing the button picker 
 
 Extra Function:
-		on_focus() - Grab focus of button picker 
-		out_focus() - Release focus of button picker
+		on_focus_in() - Grab focus of button picker 
+		on_focus_out() - Release focus of button picker
 		press_left() - Left key press event, apply the selection of button picker
 		press_right() - Right key press event, apply the selection of button picker
 		press_up() - Up key press event, apply the selection of button picker
@@ -1184,7 +1184,8 @@ function widget.buttonPicker(table)
 	extra = {type = "ButtonPicker"}
      }
 
-     local index = 1
+     local index 
+
      local padding = 10 
      --local pos = {26, 0} -- left arrow 
      local pos = {0, 0}    -- focus, unfocus 
@@ -1192,6 +1193,7 @@ function widget.buttonPicker(table)
 
      local create_buttonPicker = function() 
 
+	index = p.selected_item 
 	bp_group:clear()
         bp_group.size = { p.wwidth , p.wheight}
 
@@ -1238,10 +1240,22 @@ function widget.buttonPicker(table)
 	local j_padding
 
 	for i, j in pairs(items.children) do 
-	  if i == 1 then 
+	  if i == p.selected_item then  -- i == 1
                j.position = {p.wwidth/2 - j.width/2, p.wheight/2 - j.height/2}
 	       j_padding = 4 * j.x
 	  else 
+               --j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
+	  end 
+     	end 
+
+	for i, j in pairs(items.children) do 
+	  if i > p.selected_item then  -- i == 1
+               j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
+	  end 
+     	end 
+
+	for i, j in pairs(items.children) do 
+	  if i < p.selected_item then  -- i == 1
                j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
 	  end 
      	end 
@@ -1259,11 +1273,11 @@ function widget.buttonPicker(table)
  
      create_buttonPicker()
 
-     function bp_group.extra.on_focus()
+     function bp_group.extra.on_focus_in()
         unfocus.opacity = 0
 	focus.opacity   = 255
      end
-     function bp_group.extra.out_focus()
+     function bp_group.extra.on_focus_out()
         unfocus.opacity = 255
 	focus.opacity   = 0
      end
@@ -1604,7 +1618,7 @@ Arguments:
     	font - Font of the Check box items
     	color - Color of the Check box items
 		box_color - Color of the Check box border 
-		fill_color - the color of the Check box 
+		f_color - the color of the Check box 
 		box_width - Width of Check box border
 		box_size - The size of Check box 
         check_size - The size of Check image 
@@ -1634,7 +1648,7 @@ function widget.checkBox(table)
 	font = "DejaVu Sans 30px", -- items 
 	color = {255,255,255,255}, -- "FFFFFF", -- items 
 	box_color = {255,255,255,255},
-	fill_color = {255,255,255,50},
+	f_color = {255,255,255,50},
 	box_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
@@ -1688,7 +1702,7 @@ function widget.checkBox(table)
 	      itm_h = p.line_space
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color = p.color, position = {0, i * itm_h - itm_h}})     
 	      if p.skin == "custom" then 
-    	           boxes:add(Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
+    	           boxes:add(Rectangle{name="box"..tostring(i),  color= p.f_color, border_color= p.box_color, border_width= p.box_width, 
 				       size = p.box_size, position = {0, i * itm_h - itm_h,0}, opacity = 255}) 
 	      else
 	           boxes:add(Clone{name = "item"..tostring(i),  source=p.button_image, size = p.box_size, position = {0, i * itm_h - itm_h,0}, opacity = 255}) 
@@ -2488,6 +2502,7 @@ function widget.scrollWindow(t)
 			arrow_up:line_to(            0, arrow_up.h )
 			arrow_up:line_to( arrow_up.w/2,          0 )
 			arrow_up:set_source_color(p.color)
+
 			arrow_up:fill(true)
 			arrow_up:finish_painting()
 			if arrow_up.Image then
