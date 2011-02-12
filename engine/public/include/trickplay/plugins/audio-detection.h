@@ -66,6 +66,14 @@
 
     typedef
     void
+    (*TPAudioDetectionReset)(
+
+            void * user_data);
+
+/*-----------------------------------------------------------------------------*/
+
+    typedef
+    void
     (*TPAudioDetectionShutdown)(
 
             void * user_data);
@@ -74,6 +82,7 @@
 
 #define TP_AUDIO_DETECTION_INITIALIZE       "tp_audio_detection_initialize"
 #define TP_AUDIO_DETECTION_PROCESS_SAMPLES  "tp_audio_detection_process_samples"
+#define TP_AUDIO_DETECTION_RESET            "tp_audio_detection_reset"
 #define TP_AUDIO_DETECTION_SHUTDOWN         "tp_audio_detection_shutdown"
 
 /*-----------------------------------------------------------------------------*/

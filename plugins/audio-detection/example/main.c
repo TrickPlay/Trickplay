@@ -6,7 +6,7 @@
 #include "trickplay/plugins/audio-detection.h"
 
 /******************************************************************************
- * The three 'exported' functions.
+ * The 'exported' functions.
  */
 
 void
@@ -14,6 +14,9 @@ tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info , const char * 
 
 TPAudioDetectionResult *
 tp_audio_detection_process_samples( const TPAudioDetectionSamples * samples , void * user_data );
+
+void
+tp_audio_detection_reset( void * user_data );
 
 void
 tp_audio_detection_shutdown( void * user_data );
@@ -71,6 +74,16 @@ tp_audio_detection_process_samples( const TPAudioDetectionSamples * samples , vo
     result->free_result = free_result;
 
     return result;
+}
+
+/******************************************************************************
+ * Reset
+ */
+
+void
+tp_audio_detection_reset( void * user_data )
+{
+    // Nothing to do
 }
 
 /******************************************************************************
