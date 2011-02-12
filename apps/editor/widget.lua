@@ -2141,16 +2141,12 @@ function widget.threeDlist(t)
         extra    = {
 			type = "3D_List",
             reactive = true,
-			get_tile = function(r,c)
-				return tiles[r][c]
-			end,
             replace = function(r,c,obj)
-                if tiles[r][c] == nil then
-                    return false
-                else
-                    tiles[r][c]:add(obj)
-                    return true
+                if p.tiles[r][c] ~= nil then
+                    p.tiles[r][c]:unparent()
                 end
+                p.tiles[r][c] = obj
+                
 			end,
             animate_in = function()
 				local tl = Timeline{
@@ -2159,8 +2155,8 @@ function widget.threeDlist(t)
 				function tl:on_started()
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
-							tiles[r][c].y_rotation={90,0,0}
-							tiles[r][c].opacity = 0
+							p.tiles[r][c].y_rotation={90,0,0}
+							p.tiles[r][c].opacity = 0
 						end
 					end
 				end
@@ -2169,7 +2165,7 @@ function widget.threeDlist(t)
 					local item
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
-							item = tiles[r][c] 
+							item = p.tiles[r][c] 
 							if msecs > item.delay and msecs < (item.delay+p.duration_per_tile) then
 								prog = (msecs-item.delay) / p.duration_per_tile
 								item.y_rotation = {90*(1-prog),0,0}
@@ -2185,8 +2181,8 @@ function widget.threeDlist(t)
 				function tl:on_completed()
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
-							tiles[r][c].y_rotation={0,0,0}
-							tiles[r][c].opacity = 255
+							p.tiles[r][c].y_rotation={0,0,0}
+							p.tiles[r][c].opacity = 255
 						end
 					end
 				end
@@ -2197,10 +2193,13 @@ function widget.threeDlist(t)
 
 
 	local make_tile = function()
-		local group = Group{anchor_point = {p.item_w/2,p.item_h/2}}
-		local rect  = Rectangle{name="Base_Rect",w=p.item_w,h=p.item_h,color="303030"}
-		group:add(rect)
-		return group
+		local rect  = Rectangle{
+            name="Base_Rect",
+            size={ p.item_w, p.item_h},
+            color="303030",
+            anchor_point = { p.item_w/2, p.item_h/2}
+        }
+		return rect
 	end
 	local x_y_from_index = function(r,c)
 		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
@@ -2210,37 +2209,40 @@ function widget.threeDlist(t)
         
 		local g
 		for r = 1, p.num_rows  do
-            if tiles[r] == nil then tiles[r] = {} end
+            if p.tiles[r] == nil then p.tiles[r] = {} end
 			for c = 1, p.num_cols do
-                if tiles[r][c] == nil then
+                if p.tiles[r][c] == nil then
                     g = make_tile()
                     slate:add(g)
-                    tiles[r][c] = g
+                    p.tiles[r][c] = g
+                    g.x, g.y = x_y_from_index(r,c)
+                    g.delay = p.cascade_delay*(r+c-1)
                 else
-                    g = tiles[r][c]
-                    if g:find_child("Base_Rect") ~= nil then
-                        g:find_child("Base_Rect").size = {p.item_w,p.item_h}
+                    g = p.tiles[r][c]
+                    if g.parent ~= slate then
+                        slate:add(g)
+                        g.x, g.y = x_y_from_index(r,c)
+                        g.anchor_point = {p.item_w/2, p.item_h/2}
+                        g.delay = p.cascade_delay*(r+c-1)
                     end
                 end
-                g.x, g.y = x_y_from_index(r,c)
-                g.delay = p.cascade_delay*(r+c-1)
 			end
 		end
         
-        if p.num_rows < #tiles then
+        if p.num_rows < #p.tiles then
             for r = p.num_rows + 1, #tiles do
-                for c = 1, #tiles[r] do
-                    tiles[r][c]:unparent()
-                    tiles[r][c] = nil
+                for c = 1, #p.tiles[r] do
+                    p.tiles[r][c]:unparent()
+                    p.tiles[r][c] = nil
                 end
                 tiles[r] = nil
             end
         end
-        if p.num_cols < #tiles[1] then
+        if p.num_cols < #p.tiles[1] then
             for c = p.num_cols + 1, #tiles[r] do
-                for r = 1, #tiles do
-                    tiles[r][c]:unparent()
-                    tiles[r][c] = nil
+                for r = 1, #p.tiles do
+                    p.tiles[r][c]:unparent()
+                    p.tiles[r][c] = nil
                 end
             end
         end
