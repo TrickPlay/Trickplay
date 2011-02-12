@@ -640,14 +640,17 @@ bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
     {
         if ( g_str_has_prefix( name , "tp_audio_detection-" ) )
         {
-            gchar * sub = g_build_filename( plugins_path , name , NULL );
-
-            if ( Plugin * plugin = Plugin::make( sub ) )
+            if ( ! g_str_has_suffix( name , ".config" ) )
             {
-                plugins.push_back( plugin );
-            }
+                gchar * sub = g_build_filename( plugins_path , name , NULL );
 
-            g_free( sub );
+                if ( Plugin * plugin = Plugin::make( sub ) )
+                {
+                    plugins.push_back( plugin );
+                }
+
+                g_free( sub );
+            }
         }
     }
 
