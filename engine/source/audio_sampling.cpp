@@ -123,12 +123,14 @@ struct TPAudioSampler
 
             TPAudioDetectionPluginInfo      info;
             TPAudioDetectionProcessSamples  process_samples;
+            TPAudioDetectionReset           reset;
 
         private:
 
             Plugin( GModule * _module ,
                     TPAudioDetectionInitialize initialize,
                     TPAudioDetectionProcessSamples _process_samples,
+                    TPAudioDetectionReset _reset,
                     TPAudioDetectionShutdown _shutdown );
 
             static gpointer get_symbol( GModule * module , const gchar * name );
@@ -142,6 +144,8 @@ struct TPAudioSampler
         //.....................................................................
 
         void invoke_plugins( SF_INFO * info , const float * samples );
+
+        void invoke_plugins_reset( );
 
         void got_a_match( const char * json );
 
@@ -421,23 +425,26 @@ TPAudioSampler::Thread::Plugin * TPAudioSampler::Thread::Plugin::make( const gch
 
     TPAudioDetectionInitialize initialize = ( TPAudioDetectionInitialize ) get_symbol( module , TP_AUDIO_DETECTION_INITIALIZE );
     TPAudioDetectionProcessSamples process_samples = ( TPAudioDetectionProcessSamples ) get_symbol( module , TP_AUDIO_DETECTION_PROCESS_SAMPLES );
+    TPAudioDetectionReset reset = ( TPAudioDetectionReset ) get_symbol( module , TP_AUDIO_DETECTION_RESET );
     TPAudioDetectionShutdown shutdown = ( TPAudioDetectionShutdown ) get_symbol( module , TP_AUDIO_DETECTION_SHUTDOWN );
 
-    if ( ! initialize || ! process_samples || ! shutdown )
+    if ( ! initialize || ! process_samples || ! shutdown || ! reset )
     {
         g_module_close( module );
         return 0;
     }
 
-    return new Plugin( module , initialize , process_samples , shutdown );
+    return new Plugin( module , initialize , process_samples , reset , shutdown );
 }
 
 TPAudioSampler::Thread::Plugin::Plugin( GModule * _module ,
         TPAudioDetectionInitialize initialize,
         TPAudioDetectionProcessSamples _process_samples,
+        TPAudioDetectionReset _reset,
         TPAudioDetectionShutdown _shutdown )
 :
     process_samples( _process_samples ),
+    reset( _reset ),
     module( _module ),
     shutdown( _shutdown )
 {
@@ -902,6 +909,8 @@ void TPAudioSampler::Thread::process()
 
                 event_group->cancel_all();
 
+                invoke_plugins_reset();
+
                 break;
 
             case Event::PAUSE:
@@ -1181,6 +1190,19 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
             destroy_result( result );
         }
+    }
+}
+
+//.........................................................................
+// When the source changes, we call the plugin reset function
+
+void TPAudioSampler::Thread::invoke_plugins_reset( )
+{
+    for( PluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
+    {
+        Plugin * plugin = * it;
+
+        plugin->reset( plugin->info.user_data );
     }
 }
 

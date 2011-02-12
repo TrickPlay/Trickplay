@@ -166,6 +166,15 @@ public:
         return result;
     }
 
+    //.........................................................................
+    // This gets called when the source of audio changes, so we just dump
+    // the current file (if any) and start over.
+
+    void reset()
+    {
+        free_sound_file();
+    }
+
 private:
 
     //.........................................................................
@@ -393,6 +402,13 @@ TPAudioDetectionResult *
 tp_audio_detection_process_samples( const TPAudioDetectionSamples * samples , void * user_data )
 {
     return ( ( State * ) user_data )->process_samples( samples );
+}
+
+extern "C"
+void
+tp_audio_detection_reset( void * user_data )
+{
+    ( ( State * ) user_data )->reset();
 }
 
 extern "C"
