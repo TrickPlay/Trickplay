@@ -11,15 +11,40 @@
 
 @implementation GestureViewController
 
-@synthesize serviceName;
+@synthesize loadingIndicator;
 
 -(void) startService:(NSInteger)port
             hostname:(NSString *)hostName
             thetitle:(NSString *)name {
-    fprintf(stderr, "Service started name: %s host: %s port: %s\n", [name UTF8String], [hostName UTF8String], port);
-    serviceName.text = name;
     
-    socketManager = [[SocketManager alloc] initSocketStream:hostName port:port];
+    fprintf(stderr, "Service started name: %s host: %s port: %d\n", [name UTF8String], [hostName UTF8String], port);
+    
+    [loadingIndicator startAnimating];
+    
+    // Tell socket manager to create a socket and connect to the service selected
+    socketManager = [[SocketManager alloc] initSocketStream:hostName
+                                                       port:port
+                                                   delegate:self];
+    
+    // Made a connection, let the service know!
+    //[self logInfo:FORMAT(@"Accepted client %@:%hu", host, port)]; //320x410
+	//Get the actual width and height of the available area
+    //*
+	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
+	NSInteger height = mainframe.size.height;
+	height = height - 45;  //subtract the height of navbar
+	NSInteger width = mainframe.size.width;
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t2\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, width, height, width, height ] dataUsingEncoding:NSUTF8StringEncoding];
+	
+	
+    [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+	[loadingIndicator stopAnimating];
+    //*/
+    
+}
+
+- (void)socketErrorOccurred {
+    fprintf(stderr, "Socket Error Occurred\n");
 }
 
 
@@ -34,12 +59,19 @@
 }
 */
 
-/*
+//*
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    // If null then error connecting, back up to selecting services view
+    if (!socketManager) {
+        [self.navigationController popViewControllerAnimated:YES];
+        [loadingIndicator stopAnimating];
+    }
+    
 }
-*/
+//*/
 
 /*
 // Override to allow orientations other than the default portrait orientation.
@@ -64,6 +96,8 @@
 
 
 - (void)dealloc {
+    [socketManager release];
+    [loadingIndicator release];
     [super dealloc];
 }
 

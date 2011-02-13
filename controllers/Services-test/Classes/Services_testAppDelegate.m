@@ -21,7 +21,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
     
     // Override point for customization after application launch.
-    netServiceManager = [[NetServiceManager alloc] init:aTableView client:self];
+    netServiceManager = [[NetServiceManager alloc] init:aTableView delegate:self];
     
     aTableView.dataSource = self;
     
@@ -77,15 +77,14 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     fprintf(stderr, "Selected row %d\n", indexPath.row);
     
-    NSNetService *currentService = netServiceManager.currentService;
     NSMutableArray *services = netServiceManager.services;
     
     if ([services count] == 0) return;
     
-	currentService = [services objectAtIndex:indexPath.row];
-	[currentService setDelegate:netServiceManager];
+	netServiceManager.currentService = [services objectAtIndex:indexPath.row];
+	[netServiceManager.currentService setDelegate:netServiceManager];
     
-	[currentService resolveWithTimeout:0.0];
+	[netServiceManager.currentService resolveWithTimeout:0.0];
     
 	
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
@@ -187,6 +186,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 
 - (void)dealloc {
+    [netServiceManager release];
+    //[gestureViewController release];
     [navigationController release];
     [aTableView release];
     [window release];

@@ -10,12 +10,14 @@
 #import "SocketManager.h"
 
 
-@interface GestureViewController : UIViewController {
+@interface GestureViewController : UIViewController <SocketManagerDelegate, 
+CommandInterpreterDelegate> {
     SocketManager *socketManager;
-    UITextField *serviceName;
+
+    UIActivityIndicatorView *loadingIndicator;
 }
 
-@property (retain) IBOutlet UITextField *serviceName;
+@property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 
 -(void) startService:(NSInteger)port
             hostname:(NSString *)hostName

@@ -11,7 +11,8 @@
 #import "GestureViewController.h"
 
 @interface Services_testAppDelegate : NSObject <UIApplicationDelegate,
-UITableViewDelegate, UITableViewDataSource, UINavigationControllerDelegate> {
+UITableViewDelegate, UITableViewDataSource, UINavigationControllerDelegate,
+NetServiceManagerDelegate> {
     UIWindow *window;
     UINavigationController *navigationController;
     UITableView *aTableView;

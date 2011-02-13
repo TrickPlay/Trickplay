@@ -18,6 +18,15 @@
 		CD4D9B3913038DFC005F2C14 /* GestureViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9B3713038DFC005F2C14 /* GestureViewController.xib */; };
 		CD4D9B3D13038E8D005F2C14 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4D9B3C13038E8D005F2C14 /* SocketManager.m */; };
 		CD4D9B4013038EC7005F2C14 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4D9B3F13038EC7005F2C14 /* NSStreamAdditions.m */; };
+		CD4D9BFF13047C36005F2C14 /* iOS-logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9BF913047C36005F2C14 /* iOS-logo-57x57.png */; };
+		CD4D9C0013047C36005F2C14 /* iOS-logo-114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9BFA13047C36005F2C14 /* iOS-logo-114x114.png */; };
+		CD4D9C0113047C36005F2C14 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9BFB13047C36005F2C14 /* background@2x~iphone.png */; };
+		CD4D9C0213047C36005F2C14 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9BFC13047C36005F2C14 /* background~iphone.png */; };
+		CD4D9C0313047C36005F2C14 /* Default@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9BFD13047C36005F2C14 /* Default@2x~iphone.png */; };
+		CD4D9C0413047C36005F2C14 /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9BFE13047C36005F2C14 /* Default~iphone.png */; };
+		CD4D9C0713047C42005F2C14 /* iOS-logo-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9C0513047C42005F2C14 /* iOS-logo-72x72.png */; };
+		CD4D9C0813047C42005F2C14 /* Default~iPad.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4D9C0613047C42005F2C14 /* Default~iPad.png */; };
+		CD4D9CF21305F1A6005F2C14 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4D9CF11305F1A6005F2C14 /* CommandInterpreter.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +49,16 @@
 		CD4D9B3E13038EA2005F2C14 /* SocketManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketManager.h; sourceTree = "<group>"; };
 		CD4D9B3F13038EC7005F2C14 /* NSStreamAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStreamAdditions.m; path = "../ImageOverSocket-test/Classes/NSStreamAdditions.m"; sourceTree = SOURCE_ROOT; };
 		CD4D9B4113038ECC005F2C14 /* NSStreamAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStreamAdditions.h; path = "../ImageOverSocket-test/Classes/NSStreamAdditions.h"; sourceTree = SOURCE_ROOT; };
+		CD4D9BF913047C36005F2C14 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-57x57.png"; sourceTree = "<group>"; };
+		CD4D9BFA13047C36005F2C14 /* iOS-logo-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-114x114.png"; sourceTree = "<group>"; };
+		CD4D9BFB13047C36005F2C14 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
+		CD4D9BFC13047C36005F2C14 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
+		CD4D9BFD13047C36005F2C14 /* Default@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x~iphone.png"; sourceTree = "<group>"; };
+		CD4D9BFE13047C36005F2C14 /* Default~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iphone.png"; sourceTree = "<group>"; };
+		CD4D9C0513047C42005F2C14 /* iOS-logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-72x72.png"; sourceTree = "<group>"; };
+		CD4D9C0613047C42005F2C14 /* Default~iPad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iPad.png"; sourceTree = "<group>"; };
+		CD4D9CF01305F1A6005F2C14 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreter.h; sourceTree = "<group>"; };
+		CD4D9CF11305F1A6005F2C14 /* CommandInterpreter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreter.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +88,8 @@
 				CD4D9B3C13038E8D005F2C14 /* SocketManager.m */,
 				CD4D9B4113038ECC005F2C14 /* NSStreamAdditions.h */,
 				CD4D9B3F13038EC7005F2C14 /* NSStreamAdditions.m */,
+				CD4D9CF01305F1A6005F2C14 /* CommandInterpreter.h */,
+				CD4D9CF11305F1A6005F2C14 /* CommandInterpreter.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -84,6 +105,8 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				CD4D9BE913047B98005F2C14 /* iPhone */,
+				CD4D9BE813047B8C005F2C14 /* iPad */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -120,6 +143,28 @@
 				288765FC0DF74451002DB57D /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CD4D9BE813047B8C005F2C14 /* iPad */ = {
+			isa = PBXGroup;
+			children = (
+				CD4D9C0513047C42005F2C14 /* iOS-logo-72x72.png */,
+				CD4D9C0613047C42005F2C14 /* Default~iPad.png */,
+			);
+			name = iPad;
+			sourceTree = "<group>";
+		};
+		CD4D9BE913047B98005F2C14 /* iPhone */ = {
+			isa = PBXGroup;
+			children = (
+				CD4D9BF913047C36005F2C14 /* iOS-logo-57x57.png */,
+				CD4D9BFA13047C36005F2C14 /* iOS-logo-114x114.png */,
+				CD4D9BFB13047C36005F2C14 /* background@2x~iphone.png */,
+				CD4D9BFC13047C36005F2C14 /* background~iphone.png */,
+				CD4D9BFD13047C36005F2C14 /* Default@2x~iphone.png */,
+				CD4D9BFE13047C36005F2C14 /* Default~iphone.png */,
+			);
+			name = iPhone;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -173,6 +218,14 @@
 			files = (
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				CD4D9B3913038DFC005F2C14 /* GestureViewController.xib in Resources */,
+				CD4D9BFF13047C36005F2C14 /* iOS-logo-57x57.png in Resources */,
+				CD4D9C0013047C36005F2C14 /* iOS-logo-114x114.png in Resources */,
+				CD4D9C0113047C36005F2C14 /* background@2x~iphone.png in Resources */,
+				CD4D9C0213047C36005F2C14 /* background~iphone.png in Resources */,
+				CD4D9C0313047C36005F2C14 /* Default@2x~iphone.png in Resources */,
+				CD4D9C0413047C36005F2C14 /* Default~iphone.png in Resources */,
+				CD4D9C0713047C42005F2C14 /* iOS-logo-72x72.png in Resources */,
+				CD4D9C0813047C42005F2C14 /* Default~iPad.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,6 +242,7 @@
 				CD4D9B3813038DFC005F2C14 /* GestureViewController.m in Sources */,
 				CD4D9B3D13038E8D005F2C14 /* SocketManager.m in Sources */,
 				CD4D9B4013038EC7005F2C14 /* NSStreamAdditions.m in Sources */,
+				CD4D9CF21305F1A6005F2C14 /* CommandInterpreter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

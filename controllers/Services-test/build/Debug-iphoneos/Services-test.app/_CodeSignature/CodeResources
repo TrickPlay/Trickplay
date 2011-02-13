@@ -4,17 +4,53 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Default@2x~iphone.png</key>
+		<data>
+		TSV1sblGzwdaBq5wyl2GGf5/b2c=
+		</data>
+		<key>Default~iPad.png</key>
+		<data>
+		cpP5AKqVMW9xAQVh1t5b2pItc/M=
+		</data>
+		<key>Default~iphone.png</key>
+		<data>
+		Of2pxLt7s/Bd8YsKCK9bHWiSMXU=
+		</data>
+		<key>GestureViewController.nib</key>
+		<data>
+		wE/nAL2n1Miz+C3gUn0481LJP8s=
+		</data>
 		<key>MainWindow.nib</key>
 		<data>
-		662sKGikGNyTxCNeUqaSMQpLxno=
+		suP9i9meBOqco71JUDdKxv18REA=
 		</data>
 		<key>PkgInfo</key>
 		<data>
 		n57qDP4tZfLD1rCS43W0B4LQjzE=
 		</data>
+		<key>background@2x~iphone.png</key>
+		<data>
+		N4AVWdlmSbULbgxF/xDCNPEz/5E=
+		</data>
+		<key>background~iphone.png</key>
+		<data>
+		EsG1XeOSMVWYEKRH1sehq8vzwJQ=
+		</data>
 		<key>embedded.mobileprovision</key>
 		<data>
 		Y70QlV4OWApcSRYLfMWUUQ1wU3U=
+		</data>
+		<key>iOS-logo-114x114.png</key>
+		<data>
+		jtsxD5lWsSzIEWGkXN1oaXML74w=
+		</data>
+		<key>iOS-logo-57x57.png</key>
+		<data>
+		oXtu5GYBG7OQSiDQpR7kflUhCCM=
+		</data>
+		<key>iOS-logo-72x72.png</key>
+		<data>
+		p2s4PH2xV1HbGGavpzB6M7IJRuI=
 		</data>
 	</dict>
 	<key>rules</key>
