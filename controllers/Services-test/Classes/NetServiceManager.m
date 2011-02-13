@@ -14,6 +14,7 @@
 @synthesize currentService;
 @synthesize services;
 @synthesize tableView;
+@synthesize delegate;
 
 /**
  * Initializes the NetServiceManager. Provide a UITableView to list the services.
@@ -23,10 +24,10 @@
  * @property aClient : a client that will receive callbacks upon NSNetService
  *                     and NSNetServiceBrowser events.
  */
--(id)init:(UITableView *)aTableView client:(id)aClient{
+-(id)init:(UITableView *)aTableView delegate:(id)aClient{
     if (self = [super init])
     {
-        client = aClient;
+        delegate = aClient;
         tableView = aTableView;
         currentService = nil;
         services = [[NSMutableArray alloc] init];
@@ -43,7 +44,6 @@
     if (currentService){
         [currentService stop];
     }
-    [currentService release];
 	currentService = nil;
 }
 
@@ -61,6 +61,7 @@
 
 
 - (void)netServiceDidResolveAddress:(NSNetService *)service {
+    assert(service == currentService);
     // make sure the service is retained before stopped, else, deletion
 	[service retain];
 	[self stopCurrentService];
@@ -70,7 +71,7 @@
 	
 	NSLog(@"Did resolve address");
     
-    [client serviceResolved:service];
+    [[self delegate] serviceResolved:service];
 	
     [service stop];
 	[service release];
@@ -107,7 +108,8 @@
 	// If a service went away, stop resolving it if it's currently being resolved,
 	// remove it from the list and update the table view if no more events are queued.
 	if (self.currentService && [service isEqual:currentService]) {
-		[self stopCurrentService];
+		[currentService stop];
+        currentService = nil;
 	}
 	[self.services removeObject:service];
 	
@@ -142,7 +144,10 @@
 
 
 - (void)dealloc {
-    [self stopCurrentService];
+    if (currentService) {
+        [currentService stop];
+        [currentService release];
+    }
     [services release];
     [netServiceBrowser release];
     [super dealloc];

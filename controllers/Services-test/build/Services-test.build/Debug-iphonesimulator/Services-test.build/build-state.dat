@@ -1,11 +1,19 @@
 TServices-test
 v7
 r0
-t319005151.770260
+t319272886.781146
 cCheck dependencies
 cProcessInfoPlistFile /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Info.plist Services_test-Info.plist
 cCompileXIB /Users/rex/Documents/Services-test/MainWindow.xib
 cCompileXIB /Users/rex/Documents/Services-test/Classes/GestureViewController.xib
+cCpResource build/Debug-iphonesimulator/Services-test.app/iOS-logo-57x57.png iOS-logo-57x57.png
+cCpResource build/Debug-iphonesimulator/Services-test.app/iOS-logo-114x114.png iOS-logo-114x114.png
+cCpResource build/Debug-iphonesimulator/Services-test.app/background@2x~iphone.png background@2x~iphone.png
+cCpResource build/Debug-iphonesimulator/Services-test.app/background~iphone.png background~iphone.png
+cCpResource build/Debug-iphonesimulator/Services-test.app/Default@2x~iphone.png Default@2x~iphone.png
+cCpResource build/Debug-iphonesimulator/Services-test.app/Default~iphone.png Default~iphone.png
+cCpResource build/Debug-iphonesimulator/Services-test.app/iOS-logo-72x72.png iOS-logo-72x72.png
+cCpResource build/Debug-iphonesimulator/Services-test.app/Default~iPad.png Default~iPad.png
 cProcessPCH /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch.gch Services_test_Prefix.pch normal i386 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/main.o /Users/rex/Documents/Services-test/main.m normal i386 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services_testAppDelegate.o /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m normal i386 objective-c com.apple.compilers.gcc.4_2
@@ -13,6 +21,7 @@ cCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Ob
 cCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/GestureViewController.o /Users/rex/Documents/Services-test/Classes/GestureViewController.m normal i386 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/SocketManager.o /Users/rex/Documents/Services-test/Classes/SocketManager.m normal i386 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NSStreamAdditions.o /Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m normal i386 objective-c com.apple.compilers.gcc.4_2
+cCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/CommandInterpreter.o /Users/rex/Documents/Services-test/Classes/CommandInterpreter.m normal i386 objective-c com.apple.compilers.gcc.4_2
 cLd /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test normal i386
 cGenerateDSYMFile /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app.dSYM /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test
 cTouch /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app
@@ -65,62 +74,90 @@ t1297124267
 s1387
 i"NSStreamAdditions.h"
 
+N/Users/rex/Documents/Services-test/Classes/CommandInterpreter.h
+c000000004D5767530000000000000246
+t1297573715
+s582
+i<Foundation/Foundation.h>
+
+N/Users/rex/Documents/Services-test/Classes/CommandInterpreter.m
+c000000004D577A3F00000000000007BE
+t1297578559
+s1982
+i"CommandInterpreter.h"
+
 N/Users/rex/Documents/Services-test/Classes/GestureViewController.h
-c000000004D53666B00000000000001F8
-t1297311339
-s504
+c000000004D55BBDF0000000000000250
+t1297464287
+s592
 i<UIKit/UIKit.h>
 i"SocketManager.h"
 
 N/Users/rex/Documents/Services-test/Classes/GestureViewController.m
-c000000004D536A5F0000000000000735
-t1297312351
-s1845
+c000000004D577C6C0000000000000C42
+t1297579116
+s3138
 i"GestureViewController.h"
 
 N/Users/rex/Documents/Services-test/Classes/GestureViewController.xib
-c000000004D53567C000000000000187A
-t1297307260
-s6266
+c000000004D547BF60000000000004B48
+t1297382390
+s19272
 
 N/Users/rex/Documents/Services-test/Classes/NetServiceManager.h
-c000000004D535E7B00000000000002A6
-t1297309307
-s678
+c000000004D5478D10000000000000375
+t1297381585
+s885
 i<Foundation/Foundation.h>
 
 N/Users/rex/Documents/Services-test/Classes/NetServiceManager.m
-c000000004D5369CE0000000000001121
-t1297312206
-s4385
+c000000004D54783900000000000011A9
+t1297381433
+s4521
 i"NetServiceManager.h"
 
 N/Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.h
-c000000004D5365540000000000000355
-t1297311060
-s853
+c000000004D5479290000000000000370
+t1297381673
+s880
 i<UIKit/UIKit.h>
 i"NetServiceManager.h"
 i"GestureViewController.h"
 
 N/Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m
-c000000004D53698C000000000000178E
-t1297312140
-s6030
+c000000004D575E2000000000000017C7
+t1297571360
+s6087
 i"Services_testAppDelegate.h"
 
 N/Users/rex/Documents/Services-test/Classes/SocketManager.h
-c000000004D5365720000000000000310
-t1297311090
-s784
+c000000004D55BEDC00000000000004AE
+t1297465052
+s1198
 i<Foundation/Foundation.h>
 i"NSStreamAdditions.h"
+i"CommandInterpreter.h"
 
 N/Users/rex/Documents/Services-test/Classes/SocketManager.m
-c000000004D53657B000000000000111C
-t1297311099
-s4380
+c000000004D577042000000000000180D
+t1297576002
+s6157
 i"SocketManager.h"
+
+N/Users/rex/Documents/Services-test/Default@2x~iphone.png
+c000000004D3F676800000000000023AE
+t1296000872
+s9134
+
+N/Users/rex/Documents/Services-test/Default~iPad.png
+c000000004D3F6768000000000000151D
+t1296000872
+s5405
+
+N/Users/rex/Documents/Services-test/Default~iphone.png
+c000000004D3F676800000000000015FC
+t1296000872
+s5628
 
 N/Users/rex/Documents/Services-test/MainWindow.xib
 c000000004D5366020000000000006ACA
@@ -134,17 +171,39 @@ s195
 i<Foundation/Foundation.h>
 i<UIKit/UIKit.h>
 
+N/Users/rex/Documents/Services-test/background@2x~iphone.png
+c000000004D3F6768000000000004BBA0
+t1296000872
+s310176
+
+N/Users/rex/Documents/Services-test/background~iphone.png
+c000000004D3F6768000000000001649B
+t1296000872
+s91291
+
 N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app
-t1297312351
-s238
+t1297580059
+s510
 
 N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app.dSYM
-t1297312351
+t1297580059
 s102
 
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Default@2x~iphone.png
+t1297368296
+s9134
+
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Default~iPad.png
+t1297368296
+s5405
+
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Default~iphone.png
+t1297368296
+s5628
+
 N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/GestureViewController.nib
-t1297311399
-s764
+t1297383526
+s1272
 
 N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Info.plist
 t1297277134
@@ -159,37 +218,100 @@ t1297277134
 s8
 
 N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test
-t1297312351
-s44532
+t1297580058
+s55540
+
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/background@2x~iphone.png
+t1297368296
+s310176
+
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/background~iphone.png
+t1297368296
+s91291
+
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/iOS-logo-114x114.png
+t1297368296
+s22761
+
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/iOS-logo-57x57.png
+t1297368296
+s3325
+
+N/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/iOS-logo-72x72.png
+t1297368296
+s4221
+
+N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/CommandInterpreter.o
+t1297580058
+s14924
 
 N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/GestureViewController.o
-t1297312351
-s42736
+t1297580058
+s48328
 
 N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NSStreamAdditions.o
 t1297311400
 s8580
 
 N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NetServiceManager.o
-t1297312206
-s54792
+t1297381589
+s56260
 
 N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services-test.LinkFileList
-c000000004D5366A70000000000000354
-t1297311399
-s852
+c000000004D57638C00000000000003E4
+t1297572748
+s996
 
 N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services_testAppDelegate.o
-t1297312141
-s69724
+t1297574352
+s70904
 
 N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/SocketManager.o
-t1297311400
-s23252
+t1297576002
+s27876
 
 N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/main.o
 t1297277136
 s6296
+
+N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/GestureViewController.plist
+t2
+s0
+
+N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/NSStreamAdditions.plist
+t1297393771
+s276
+
+N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/NetServiceManager.plist
+t1297393770
+s276
+
+N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/Services_testAppDelegate.plist
+t2
+s0
+
+N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/SocketManager.plist
+t2
+s0
+
+N/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/main.plist
+t1297393770
+s276
+
+N/Users/rex/Documents/Services-test/iOS-logo-114x114.png
+c000000004D3F676800000000000058E9
+t1296000872
+s22761
+
+N/Users/rex/Documents/Services-test/iOS-logo-57x57.png
+c000000004D3F67680000000000000CFD
+t1296000872
+s3325
+
+N/Users/rex/Documents/Services-test/iOS-logo-72x72.png
+c000000004D3F6768000000000000107D
+t1296000872
+s4221
 
 N/Users/rex/Documents/Services-test/main.m
 c000000004D52E04F000000000000016C
@@ -201,18 +323,101 @@ N/var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/Shared
 t1297277136
 s15453392
 
+N/var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch.pth
+t1297393770
+s2783996
+
 NServices_test-Info.plist
 c000000004D52E04F000000000000038D
 t1297277007
 s909
 
+CAnalyze /Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m
+s319086571.037830
+e319086571.148720
+r1
+xAnalyze
+x/Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m
+lSLF07#2@94"Analyze /Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m319086571#319086571#0(0"0(0#0#86"/Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m8677515008#2057"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/clang -x objective-c -arch i386 -fmessage-length=0 -pipe -fdiagnostics-print-source-range-info -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility=hidden -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch --analyze /Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/NSStreamAdditions.plist0#
+
+CAnalyze /Users/rex/Documents/Services-test/Classes/GestureViewController.m
+s319086570.972068
+e319086571.037739
+r1
+xAnalyze
+x/Users/rex/Documents/Services-test/Classes/GestureViewController.m
+oIn file included from /Users/rex/Documents/Services-test/Classes/GestureViewController.m:9:
+oIn file included from /Users/rex/Documents/Services-test/Classes/GestureViewController.h:10:
+o/Users/rex/Documents/Services-test/Classes/SocketManager.h:20:1: error: property with 'retain' attribute must be of object type
+o @property (retain) NSUInteger position;
+o ^
+o1 error generated.
+lSLF07#2@74"Analyze /Users/rex/Documents/Services-test/Classes/GestureViewController.m319086570#319086571#0(376"In file included from /Users/rex/Documents/Services-test/Classes/GestureViewController.m:9:In file included from /Users/rex/Documents/Services-test/Classes/GestureViewController.h:10:/Users/rex/Documents/Services-test/Classes/SocketManager.h:20:1: error: property with 'retain' attribute must be of object type @property (retain) NSUInteger position; ^1 error generated.1(25@46"Analyzer skipped this file due to parse errors319086570#18446744073709551615#0#1(25@55"property with 'retain' attribute must be of object type319086570#18446744073709551615#0#0(6@58"/Users/rex/Documents/Services-test/Classes/SocketManager.h319086361#20#0#20#0#0"0(6@58"/Users/rex/Documents/Services-test/Classes/SocketManager.h319086361#0#0#0#0#0"0(0#0#66"/Users/rex/Documents/Services-test/Classes/GestureViewController.m8683805184#2041"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/clang -x objective-c -arch i386 -fmessage-length=0 -pipe -fdiagnostics-print-source-range-info -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility=hidden -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch --analyze /Users/rex/Documents/Services-test/Classes/GestureViewController.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/GestureViewController.plist0#
+
+CAnalyze /Users/rex/Documents/Services-test/Classes/NetServiceManager.m
+s319086570.870285
+e319086570.971761
+r1
+xAnalyze
+x/Users/rex/Documents/Services-test/Classes/NetServiceManager.m
+lSLF07#2@70"Analyze /Users/rex/Documents/Services-test/Classes/NetServiceManager.m319086570#319086570#0(0"0(0#0#62"/Users/rex/Documents/Services-test/Classes/NetServiceManager.m8694416320#2033"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/clang -x objective-c -arch i386 -fmessage-length=0 -pipe -fdiagnostics-print-source-range-info -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility=hidden -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch --analyze /Users/rex/Documents/Services-test/Classes/NetServiceManager.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/NetServiceManager.plist0#
+
+CAnalyze /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m
+s319086570.763830
+e319086570.971992
+r1
+xAnalyze
+x/Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m
+oIn file included from /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m:9:
+oIn file included from /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.h:11:
+oIn file included from /Users/rex/Documents/Services-test/Classes/GestureViewController.h:10:
+o/Users/rex/Documents/Services-test/Classes/SocketManager.h:20:1: error: property with 'retain' attribute must be of object type
+o @property (retain) NSUInteger position;
+o ^
+o1 error generated.
+lSLF07#2@77"Analyze /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m319086570#319086570#0(475"In file included from /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m:9:In file included from /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.h:11:In file included from /Users/rex/Documents/Services-test/Classes/GestureViewController.h:10:/Users/rex/Documents/Services-test/Classes/SocketManager.h:20:1: error: property with 'retain' attribute must be of object type @property (retain) NSUInteger position; ^1 error generated.1(25@46"Analyzer skipped this file due to parse errors319086570#18446744073709551615#0#1(25@55"property with 'retain' attribute must be of object type319086570#18446744073709551615#0#0(6@58"/Users/rex/Documents/Services-test/Classes/SocketManager.h319086361#20#0#20#0#0"0(6@58"/Users/rex/Documents/Services-test/Classes/SocketManager.h319086361#0#0#0#0#0"0(0#0#69"/Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m8676592960#2047"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/clang -x objective-c -arch i386 -fmessage-length=0 -pipe -fdiagnostics-print-source-range-info -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility=hidden -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch --analyze /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/Services_testAppDelegate.plist0#
+
+CAnalyze /Users/rex/Documents/Services-test/Classes/SocketManager.m
+s319086570.973250
+e319086571.039305
+r1
+xAnalyze
+x/Users/rex/Documents/Services-test/Classes/SocketManager.m
+oIn file included from /Users/rex/Documents/Services-test/Classes/SocketManager.m:9:
+o/Users/rex/Documents/Services-test/Classes/SocketManager.h:20:1: error: property with 'retain' attribute must be of object type
+o @property (retain) NSUInteger position;
+o ^
+o1 error generated.
+lSLF07#2@66"Analyze /Users/rex/Documents/Services-test/Classes/SocketManager.m319086570#319086571#0(275"In file included from /Users/rex/Documents/Services-test/Classes/SocketManager.m:9:/Users/rex/Documents/Services-test/Classes/SocketManager.h:20:1: error: property with 'retain' attribute must be of object type @property (retain) NSUInteger position; ^1 error generated.1(25@46"Analyzer skipped this file due to parse errors319086570#18446744073709551615#0#1(25@55"property with 'retain' attribute must be of object type319086570#18446744073709551615#0#0(6@58"/Users/rex/Documents/Services-test/Classes/SocketManager.h319086361#20#0#20#0#0"0(6@58"/Users/rex/Documents/Services-test/Classes/SocketManager.h319086361#0#0#0#0#0"0(0#0#58"/Users/rex/Documents/Services-test/Classes/SocketManager.m8683223104#2025"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/clang -x objective-c -arch i386 -fmessage-length=0 -pipe -fdiagnostics-print-source-range-info -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility=hidden -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch --analyze /Users/rex/Documents/Services-test/Classes/SocketManager.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/SocketManager.plist0#
+
+CAnalyze /Users/rex/Documents/Services-test/main.m
+s319086570.305345
+e319086570.870191
+r1
+xAnalyze
+x/Users/rex/Documents/Services-test/main.m
+lSLF07#2@49"Analyze /Users/rex/Documents/Services-test/main.m319086570#319086570#0(0"0(0#0#41"/Users/rex/Documents/Services-test/main.m8692111008#1999"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/clang -x objective-c -arch i386 -fmessage-length=0 -pipe -fdiagnostics-print-source-range-info -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility=hidden -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch --analyze /Users/rex/Documents/Services-test/main.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/StaticAnalyzer/normal/i386/main.plist0#
+
 CCheck dependencies
 r0
-lSLF07#2@18"Check dependencies319005151#319005151#0(0"0(0#1#0"8668413888#0"0#
+lSLF07#2@18"Check dependencies319272886#319272886#0(0"0(0#1#0"8674288224#0"0#
+
+CCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/CommandInterpreter.o /Users/rex/Documents/Services-test/Classes/CommandInterpreter.m normal i386 objective-c com.apple.compilers.gcc.4_2
+s319272857.795249
+e319272858.300617
+r1
+xCompileC
+xbuild/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/CommandInterpreter.o
+x/Users/rex/Documents/Services-test/Classes/CommandInterpreter.m
+xnormal
+xi386
+xobjective-c
+xcom.apple.compilers.gcc.4_2
+lSLF07#2@71"Compile /Users/rex/Documents/Services-test/Classes/CommandInterpreter.m319272857#319272858#0(0"0(0#0#63"/Users/rex/Documents/Services-test/Classes/CommandInterpreter.m8685003616#2026"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/CommandInterpreter.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/CommandInterpreter.o0#
 
 CCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/GestureViewController.o /Users/rex/Documents/Services-test/Classes/GestureViewController.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s319005151.267366
-e319005151.644794
+s319272857.793706
+e319272858.348474
 r1
 xCompileC
 xbuild/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/GestureViewController.o
@@ -221,9 +426,7 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-o/Users/rex/Documents/Services-test/Classes/GestureViewController.m: In function '-[GestureViewController startService:hostname:thetitle:]':
-o/Users/rex/Documents/Services-test/Classes/GestureViewController.m:19: warning: format '%s' expects type 'char *', but argument 5 has type 'NSInteger'
-lSLF07#2@74"Compile /Users/rex/Documents/Services-test/Classes/GestureViewController.m319005151#319005151#0(291"/Users/rex/Documents/Services-test/Classes/GestureViewController.m: In function '-[GestureViewController startService:hostname:thetitle:]':/Users/rex/Documents/Services-test/Classes/GestureViewController.m:19: warning: format '%s' expects type 'char *', but argument 5 has type 'NSInteger'1(22@70"Format '%s' expects type 'char *', but argument 5 has type 'NSInteger'319005151#140#151#0(6@66"/Users/rex/Documents/Services-test/Classes/GestureViewController.m319005151#19#0#19#0#56"format '*' expects type '*', but argument * has type '*'0(0#0#66"/Users/rex/Documents/Services-test/Classes/GestureViewController.m8684460864#2032"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/GestureViewController.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/GestureViewController.o0#
+lSLF07#2@74"Compile /Users/rex/Documents/Services-test/Classes/GestureViewController.m319272857#319272858#0(0"0(0#0#66"/Users/rex/Documents/Services-test/Classes/GestureViewController.m8653302944#2032"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/GestureViewController.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/GestureViewController.o0#
 
 CCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NSStreamAdditions.o /Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m normal i386 objective-c com.apple.compilers.gcc.4_2
 s319004200.111897
@@ -239,8 +442,8 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@94"Compile /Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m319004200#319004200#0(0"0(0#0#86"/Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m8678977792#2048"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/../ImageOverSocket-test/Classes/NSStreamAdditions.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NSStreamAdditions.o0#
 
 CCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NetServiceManager.o /Users/rex/Documents/Services-test/Classes/NetServiceManager.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s319005006.524703
-e319005006.941346
+s319074389.582105
+e319074389.721831
 r1
 xCompileC
 xbuild/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NetServiceManager.o
@@ -249,16 +452,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-o/Users/rex/Documents/Services-test/Classes/NetServiceManager.m: In function '-[NetServiceManager netServiceDidResolveAddress:]':
-o/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: no '-serviceResolved:' method found
-o/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: (Messages without a matching method signature
-o/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: will be assumed to return 'id' and accept
-o/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: '...' as arguments.)
-lSLF07#2@70"Compile /Users/rex/Documents/Services-test/Classes/NetServiceManager.m319005006#319005006#0(578"/Users/rex/Documents/Services-test/Classes/NetServiceManager.m: In function '-[NetServiceManager netServiceDidResolveAddress:]':/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: no '-serviceResolved:' method found/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: (Messages without a matching method signature/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: will be assumed to return 'id' and accept/Users/rex/Documents/Services-test/Classes/NetServiceManager.m:73: warning: '...' as arguments.)2(22@35"No '-serviceResolved:' method found319005006#129#112#0(6@62"/Users/rex/Documents/Services-test/Classes/NetServiceManager.m319005006#73#0#73#0#19"no '*' method found0(13@108"(Messages without a matching method signature will be assumed to return 'id' and accept '...' as arguments.)319005006#241#122#0(6@62"/Users/rex/Documents/Services-test/Classes/NetServiceManager.m319005006#73#0#73#0#0"0(0#0#62"/Users/rex/Documents/Services-test/Classes/NetServiceManager.m8673382272#2024"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/NetServiceManager.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NetServiceManager.o0#
+lSLF07#2@70"Compile /Users/rex/Documents/Services-test/Classes/NetServiceManager.m319074389#319074389#0(0"0(0#0#62"/Users/rex/Documents/Services-test/Classes/NetServiceManager.m8693087872#2024"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/NetServiceManager.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/NetServiceManager.o0#
 
 CCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services_testAppDelegate.o /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s319004941.729735
-e319004941.947541
+s319267152.411340
+e319267152.875337
 r1
 xCompileC
 xbuild/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services_testAppDelegate.o
@@ -267,11 +465,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@77"Compile /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m319004941#319004941#0(0"0(0#0#69"/Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m8657104128#2038"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services_testAppDelegate.o0#
+lSLF07#2@77"Compile /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m319267152#319267152#0(0"0(0#0#69"/Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m8691230848#2038"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/Services_testAppDelegate.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services_testAppDelegate.o0#
 
 CCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/SocketManager.o /Users/rex/Documents/Services-test/Classes/SocketManager.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s319004199.957655
-e319004200.248815
+s319268802.544597
+e319268802.811920
 r1
 xCompileC
 xbuild/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/SocketManager.o
@@ -280,7 +478,7 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@66"Compile /Users/rex/Documents/Services-test/Classes/SocketManager.m319004199#319004200#0(0"0(0#0#58"/Users/rex/Documents/Services-test/Classes/SocketManager.m8702636576#2016"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/SocketManager.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/SocketManager.o0#
+lSLF07#2@66"Compile /Users/rex/Documents/Services-test/Classes/SocketManager.m319268802#319268802#0(0"0(0#0#58"/Users/rex/Documents/Services-test/Classes/SocketManager.m8692991712#2016"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/Classes/SocketManager.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/SocketManager.o0#
 
 CCompileC build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/main.o /Users/rex/Documents/Services-test/main.m normal i386 objective-c com.apple.compilers.gcc.4_2
 s318969936.804612
@@ -296,12 +494,12 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@49"Compile /Users/rex/Documents/Services-test/main.m318969936#318969936#0(0"0(0#0#41"/Users/rex/Documents/Services-test/main.m8698499936#1990"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch -c /Users/rex/Documents/Services-test/main.m -o /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/main.o0#
 
 CCompileXIB /Users/rex/Documents/Services-test/Classes/GestureViewController.xib
-s319004199.103360
-e319004199.514521
+s319076324.776520
+e319076327.017180
 r1
 xCompileXIB
 x/Users/rex/Documents/Services-test/Classes/GestureViewController.xib
-lSLF07#2@44"CompileXIB Classes/GestureViewController.xib319004199#319004199#0(0"0(0#0#68"/Users/rex/Documents/Services-test/Classes/GestureViewController.xib8683349024#594"    cd /Users/rex/Documents/Services-test    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/GestureViewController.nib /Users/rex/Documents/Services-test/Classes/GestureViewController.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
+lSLF07#2@44"CompileXIB Classes/GestureViewController.xib319076324#319076327#0(0"0(0#0#68"/Users/rex/Documents/Services-test/Classes/GestureViewController.xib8683404352#594"    cd /Users/rex/Documents/Services-test    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/GestureViewController.nib /Users/rex/Documents/Services-test/Classes/GestureViewController.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
 
 CCompileXIB /Users/rex/Documents/Services-test/MainWindow.xib
 s319004199.059835
@@ -311,24 +509,96 @@ xCompileXIB
 x/Users/rex/Documents/Services-test/MainWindow.xib
 lSLF07#2@25"CompileXIB MainWindow.xib319004199#319004199#0(0"0(0#0#49"/Users/rex/Documents/Services-test/MainWindow.xib8684100352#564"    cd /Users/rex/Documents/Services-test    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/MainWindow.nib /Users/rex/Documents/Services-test/MainWindow.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
 
+CCpResource build/Debug-iphonesimulator/Services-test.app/Default@2x~iphone.png Default@2x~iphone.png
+s319061096.883843
+e319061096.930240
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/Default@2x~iphone.png
+xDefault@2x~iphone.png
+lSLF07#2@26"Copy Default@2x~iphone.png319061096#319061096#0(0"0(0#0#56"/Users/rex/Documents/Services-test/Default@2x~iphone.png8674320544#473"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/Default@2x~iphone.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
+CCpResource build/Debug-iphonesimulator/Services-test.app/Default~iPad.png Default~iPad.png
+s319061096.890534
+e319061096.930542
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/Default~iPad.png
+xDefault~iPad.png
+lSLF07#2@21"Copy Default~iPad.png319061096#319061096#0(0"0(0#0#51"/Users/rex/Documents/Services-test/Default~iPad.png8663519680#468"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/Default~iPad.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
+CCpResource build/Debug-iphonesimulator/Services-test.app/Default~iphone.png Default~iphone.png
+s319061096.885964
+e319061096.954877
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/Default~iphone.png
+xDefault~iphone.png
+lSLF07#2@23"Copy Default~iphone.png319061096#319061096#0(0"0(0#0#53"/Users/rex/Documents/Services-test/Default~iphone.png8674076480#470"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/Default~iphone.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
+CCpResource build/Debug-iphonesimulator/Services-test.app/background@2x~iphone.png background@2x~iphone.png
+s319061096.877361
+e319061096.969546
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/background@2x~iphone.png
+xbackground@2x~iphone.png
+lSLF07#2@29"Copy background@2x~iphone.png319061096#319061096#0(0"0(0#0#59"/Users/rex/Documents/Services-test/background@2x~iphone.png8678353408#476"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/background@2x~iphone.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
+CCpResource build/Debug-iphonesimulator/Services-test.app/background~iphone.png background~iphone.png
+s319061096.879393
+e319061096.955707
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/background~iphone.png
+xbackground~iphone.png
+lSLF07#2@26"Copy background~iphone.png319061096#319061096#0(0"0(0#0#56"/Users/rex/Documents/Services-test/background~iphone.png8677121696#473"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/background~iphone.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
+CCpResource build/Debug-iphonesimulator/Services-test.app/iOS-logo-114x114.png iOS-logo-114x114.png
+s319061096.867562
+e319061096.954649
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/iOS-logo-114x114.png
+xiOS-logo-114x114.png
+lSLF07#2@25"Copy iOS-logo-114x114.png319061096#319061096#0(0"0(0#0#55"/Users/rex/Documents/Services-test/iOS-logo-114x114.png8679815104#472"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/iOS-logo-114x114.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
+CCpResource build/Debug-iphonesimulator/Services-test.app/iOS-logo-57x57.png iOS-logo-57x57.png
+s319061096.865359
+e319061096.955084
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/iOS-logo-57x57.png
+xiOS-logo-57x57.png
+lSLF07#2@23"Copy iOS-logo-57x57.png319061096#319061096#0(0"0(0#0#53"/Users/rex/Documents/Services-test/iOS-logo-57x57.png8681061248#470"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/iOS-logo-57x57.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
+CCpResource build/Debug-iphonesimulator/Services-test.app/iOS-logo-72x72.png iOS-logo-72x72.png
+s319061096.888580
+e319061096.930416
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/Services-test.app/iOS-logo-72x72.png
+xiOS-logo-72x72.png
+lSLF07#2@23"Copy iOS-logo-72x72.png319061096#319061096#0(0"0(0#0#53"/Users/rex/Documents/Services-test/iOS-logo-72x72.png8668893600#470"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/Services-test/iOS-logo-72x72.png /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+
 CGenerateDSYMFile /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app.dSYM /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test
-s319005151.704555
-e319005151.767088
+s319272858.845935
+e319272859.025938
 r1
 xGenerateDSYMFile
 x/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app.dSYM
 x/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test
-lSLF07#2@127"GenerateDSYMFile build/Debug-iphonesimulator/Services-test.app.dSYM build/Debug-iphonesimulator/Services-test.app/Services-test319005151#319005151#0(0"0(0#0#94"/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test8683789184#389"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/dsymutil /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test -o /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app.dSYM0#
+lSLF07#2@127"GenerateDSYMFile build/Debug-iphonesimulator/Services-test.app.dSYM build/Debug-iphonesimulator/Services-test.app/Services-test319272858#319272859#0(0"0(0#0#94"/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test8656576704#389"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/dsymutil /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test -o /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app.dSYM0#
 
 CLd /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test normal i386
-s319005151.644882
-e319005151.704449
+s319272858.348616
+e319272858.845828
 r1
 xLd
 x/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test
 xnormal
 xi386
-lSLF07#2@99"Link /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test319005151#319005151#0(0"0(0#0#0"8698870304#910"    cd /Users/rex/Documents/Services-test    setenv MACOSX_DEPLOYMENT_TARGET 10.6    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -arch i386 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -L/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -filelist /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services-test.LinkFileList -mmacosx-version-min=10.6 -Xlinker -objc_abi_version -Xlinker 2 -framework Foundation -framework UIKit -framework CoreGraphics -o /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test0#
+lSLF07#2@99"Link /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test319272858#319272858#0(0"0(0#0#0"8656973856#910"    cd /Users/rex/Documents/Services-test    setenv MACOSX_DEPLOYMENT_TARGET 10.6    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -arch i386 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -L/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -filelist /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Objects-normal/i386/Services-test.LinkFileList -mmacosx-version-min=10.6 -Xlinker -objc_abi_version -Xlinker 2 -framework Foundation -framework UIKit -framework CoreGraphics -o /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Services-test0#
 
 CProcessInfoPlistFile /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app/Info.plist Services_test-Info.plist
 s318969934.343242
@@ -352,11 +622,24 @@ xobjective-c
 xcom.apple.compilers.gcc.4_2
 lSLF07#2@35"Precompile Services_test_Prefix.pch318969935#318969936#0(0"0(0#0#59"/Users/rex/Documents/Services-test/Services_test_Prefix.pch8697054304#1880"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c-header -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -c /Users/rex/Documents/Services-test/Services_test_Prefix.pch -o /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-agxyjqjqxncruzelbhwswagofzix/Services_test_Prefix.pch.gch0#
 
+CProcessPCH /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch.pth Services_test_Prefix.pch normal i386 objective-c com.apple.compilers.llvm.clang.1_0.analyzer
+s319086568.318050
+e319086570.145203
+r1
+xProcessPCH
+x/var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch.pth
+xServices_test_Prefix.pch
+xnormal
+xi386
+xobjective-c
+xcom.apple.compilers.llvm.clang.1_0.analyzer
+lSLF07#2@35"Precompile Services_test_Prefix.pch319086568#319086570#0(0"0(0#0#59"/Users/rex/Documents/Services-test/Services_test_Prefix.pch8672388416#1871"    cd /Users/rex/Documents/Services-test    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/clang -x objective-c-header -arch i386 -fmessage-length=0 -pipe -fdiagnostics-print-source-range-info -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility=hidden -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-generated-files.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-own-target-headers.hmap -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-all-target-headers.hmap -iquote /Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/Services-test-project-headers.hmap -F/Users/rex/Documents/Services-test/build/Debug-iphonesimulator -I/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/include -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources/i386 -I/Users/rex/Documents/Services-test/build/Services-test.build/Debug-iphonesimulator/Services-test.build/DerivedSources -c /Users/rex/Documents/Services-test/Services_test_Prefix.pch -o /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Services_test_Prefix-fiepipfrfmtbxybgfdxpsttubrco/Services_test_Prefix.pch.pth0#
+
 CTouch /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app
-s319005151.767176
-e319005151.770218
+s319272859.026027
+e319272859.029048
 r1
 xTouch
 x/Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app
-lSLF07#2@86"Touch /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app319005151#319005151#0(0"0(0#0#0"8674180512#276"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/touch -c /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
+lSLF07#2@86"Touch /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app319272859#319272859#0(0"0(0#0#0"8647649664#276"    cd /Users/rex/Documents/Services-test    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/touch -c /Users/rex/Documents/Services-test/build/Debug-iphonesimulator/Services-test.app0#
 

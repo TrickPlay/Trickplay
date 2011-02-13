@@ -8,10 +8,18 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol NetServiceManagerDelegate
+
+@optional
+- (void)serviceResolved:(NSNetService *)service;
+
+@end
+
+
 
 @interface NetServiceManager : NSObject <NSNetServiceBrowserDelegate,
 NSNetServiceDelegate> {
-    id client;
+    id <NetServiceManagerDelegate> delegate;
     UITableView *tableView;
     
     NSNetServiceBrowser *netServiceBrowser;
@@ -19,7 +27,7 @@ NSNetServiceDelegate> {
     NSMutableArray *services;
 }
 
-- (id)init:(UITableView *)aTableView client:(id)client;
+- (id)init:(UITableView *)aTableView delegate:(id)client;
 
 - (void)handleError:(NSNumber *)error;
 
@@ -27,5 +35,6 @@ NSNetServiceDelegate> {
 
 @property (retain) NSNetService *currentService;
 @property (retain) NSMutableArray *services;
+@property (nonatomic, assign) id <NetServiceManagerDelegate> delegate;
 
 @end
