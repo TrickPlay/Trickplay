@@ -137,6 +137,8 @@ typedef enum
 	GPU_PIXEL_FORMAT_RGB16, 	/**< 16 bit RGB (2 byte, red 5\@11, green 6\@5, blue 5\@0) */
 	GPU_PIXEL_FORMAT_ARGB4444, 	/**< 16 bit ARGB (2 byte, alpha 4\@12, red 4\@8, green 4\@4, blue 4\@0) */
 	GPU_PIXEL_FORMAT_A8, 		/**< 8 bit A (1 byte, alpha 8\@0) */
+	GPU_PIXEL_FORMAT_RGBA,		// temp
+	GPU_PIXEL_FORMAT_ABGR,		// temp
 	GPU_PIXEL_FORMAT_MAX		/**< Maximum number of GPU_PIXEL_FORMAT_T */
 } GPU_PIXEL_FORMAT_T;
 

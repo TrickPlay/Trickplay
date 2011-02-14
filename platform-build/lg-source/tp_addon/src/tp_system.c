@@ -11,7 +11,9 @@ BOOLEAN TP_System_Initialize(void)
 {
 	DBG_PRINT_TP();
 
+#if 0
 	HOA_STATUS_T	hoaStatus;
+#endif
 	GOA_STATUS_T	goaStatus;
 	APP_CALLBACKS_T	callbacks;
 	GOA_CALLBACK_T	goa_callback;
@@ -53,19 +55,23 @@ BOOLEAN TP_System_Initialize(void)
 	}
 	++ulInitializedStep;	// Done initialize step 2
 
-	if (HOA_APP_SetReady() != HOA_OK) {
+#if 0
+	hoaStatus = HOA_APP_SetReady();
+	if (hoaStatus != HOA_OK) {
 		DBG_PRINT_TP("HOA_APP_SetReady() failed. (%d)", hoaStatus);
 		TP_System_Finalize();
 		return FALSE;
 	}
 	++ulInitializedStep;	// Done initialize step 3
 
-	if (HOA_APP_RequestFocus() != HOA_OK) {
+	hoaStatus = HOA_APP_RequestFocus();
+	if (hoaStatus != HOA_OK) {
 		DBG_PRINT_TP("HOA_APP_RequestFocus() failed. (%d)", hoaStatus);
 		TP_System_Finalize();
 		return FALSE;
 	}
 	++ulInitializedStep;	// Done initialize step 4
+#endif
 
 	return TRUE;
 }
@@ -78,11 +84,12 @@ void TP_System_Finalize(void)
 		GOA_OPENGLES_DestroyNativeEGLWindow(eglWindow);
 		eglWindow = NULL;
 	}
-
+#if 0
 	if (ulInitializedStep > 3)
 		HOA_APP_ReleaseFocus(EXITCODE_NORMAL);
 	if (ulInitializedStep > 2)
 		HOA_APP_SetTerminate();
+#endif
 	if (ulInitializedStep > 1)
 		GOA_OPENGLES_Finalize(EXITCODE_NORMAL);
 	if (ulInitializedStep > 0)

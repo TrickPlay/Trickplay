@@ -16,17 +16,16 @@
 #include <trickplay/image.h>
 
 #include "tp_common.h"
+#include "tp_util.h"
 #include "tp_imagedecoder.h"
 
-#define MAKE_RGBA(a, b, g, r)   (UINT32)(((a) << 24) | ((b) << 16) | ((g) << 8) | (r))
-
-#define GET_A_FROM_ARGB(pixel)  (((pixel))              >> 24)
-#define GET_R_FROM_ARGB(pixel)  (((pixel) & 0x00ff0000) >> 16)
-#define GET_G_FROM_ARGB(pixel)  (((pixel) & 0x0000ff00) >>  8)
-#define GET_B_FROM_ARGB(pixel)  (((pixel) & 0x000000ff)      )
+#ifndef LIBJPEG_MEMSRC_SUPPORT
+#define JPEG_GET_UINT16(ptr)	(((ptr)[0] << 8) | (ptr)[1])
+#endif
 
 
 static UINT32 _gVideoVirtAddrBase = 0;
+static GPU_SURFACE_INFO_T _gSurface;
 
 static BOOLEAN _ImageDecoder_GetVideoVirtualAddrBase(UINT32 *pVideoVirtAddrBase)
 {
@@ -72,26 +71,6 @@ static BOOLEAN _ImageDecoder_GetVideoVirtualAddrBase(UINT32 *pVideoVirtAddrBase)
 
 	*pVideoVirtAddrBase = (UINT32)pAddr;
 	return TRUE;
-}
-
-// Input pixel format is always ARGB8888, so we don't consider other cases.
-static void _ImageDecoder_ARGB2RGBA(void *pRGBA, const void *pARGB, int width, int height)
-{
-	const UINT32 *pSrc = (UINT32 *)pARGB;
-	UINT32 *pDst = (UINT32 *)pRGBA;
-	int x, y;
-
-	for (y = 0; y < height; ++y) {
-		for (x = 0; x < width; ++x) {
-			*pDst = MAKE_RGBA(GET_A_FROM_ARGB(*pSrc),
-							  GET_B_FROM_ARGB(*pSrc),
-							  GET_G_FROM_ARGB(*pSrc),
-							  GET_R_FROM_ARGB(*pSrc));
-
-			++pSrc;
-		  	++pDst;
-		}
-	}
 }
 
 static void _ImageDecoder_PNG_Read(png_structp pstruct, png_bytep pointer, png_size_t size)
@@ -171,8 +150,6 @@ static JPEG_MARKER_T _ImageDecoder_JPEG_ReadMarker(UINT8 **ppData)
 }
 
 #ifndef LIBJPEG_MEMSRC_SUPPORT
-#define JPEG_GET_UINT16(ptr)	(((ptr)[0] << 8) | (ptr)[1])
-
 static BOOLEAN _ImageDecoder_JPEG_JumpToNextMarker(JPEG_MARKER_T marker, UINT8 **ppData)
 {
 	if ((ppData == NULL) || (*ppData == NULL))
@@ -216,10 +193,10 @@ static int _ImageDecoder_GIF_Read(GifFileType *pGif, GifByteType *pBuf, int size
 
 static BOOLEAN _ImageDecoder_IsPNG(void *pData, unsigned long int size)
 {
-	if ((pData == NULL) || (size < 8))
+	if (pData == NULL)
 		return FALSE;
 
-	if (png_sig_cmp(pData, 0, 8) == 0)
+	if (png_sig_cmp(pData, 0, size) == 0)
 		return TRUE;
 
 	return FALSE;
@@ -249,7 +226,7 @@ static BOOLEAN _ImageDecoder_IsGIF(void *pData, unsigned long int size)
 		return FALSE;
 
 	// No need to support GIF87 format
-	static const UINT8 signatureGIF89[6]    = { 'G', 'I', 'F', '8', '9', 'a' };
+	static const UINT8 signatureGIF89[6] = { 'G', 'I', 'F', '8', '9', 'a' };
 
 	if (memcmp(pData, signatureGIF89, sizeof(signatureGIF89)) == 0)
 		return TRUE;
@@ -296,7 +273,6 @@ static BOOLEAN _ImageDecoder_GetPNGInfo(void *pData, unsigned long int size, GPU
 	pImageInfo->rect.w		= png_get_image_width(png_ptr, info_ptr);
 	pImageInfo->rect.h		= png_get_image_height(png_ptr, info_ptr);
 	pImageInfo->imageLength	= size;
-	pImageInfo->pixelFormat	= GPU_PIXEL_FORMAT_ARGB;
 	pImageInfo->bImageFromBuffer = TRUE;
 	pImageInfo->imagePtr	= pData;
 
@@ -325,15 +301,14 @@ static BOOLEAN _ImageDecoder_GetJPEGInfo(void *pData, unsigned long int size, GP
 	pImageInfo->rect.w		= cinfo.image_width;
 	pImageInfo->rect.h		= cinfo.image_height;
 	pImageInfo->imageLength	= size;
-	pImageInfo->pixelFormat	= GPU_PIXEL_FORMAT_ARGB;
 	pImageInfo->bImageFromBuffer = TRUE;
 	pImageInfo->imagePtr	= pData;
-	pImageInfo->imagePath	= NULL;
 
 	jpeg_destroy_decompress(&cinfo);
+
 	return TRUE;
 #else
-	if ((pData == NULL) || (size == 0) || (pImageInfo == NULL))
+	if ((pData == NULL) || (size < 2) || (pImageInfo == NULL))
 		return FALSE;
 
 	// Find SOF0 or SOF2 marker
@@ -350,6 +325,8 @@ static BOOLEAN _ImageDecoder_GetJPEGInfo(void *pData, unsigned long int size, GP
 
 		if (!_ImageDecoder_JPEG_JumpToNextMarker(marker, &p))
 			return FALSE;
+		if (p - (UINT8 *)pData > size)
+			return FALSE;
 	}
 
 	pImageInfo->imageFormat	= GPU_IMAGE_FORMAT_JPEG;
@@ -358,10 +335,8 @@ static BOOLEAN _ImageDecoder_GetJPEGInfo(void *pData, unsigned long int size, GP
 	pImageInfo->rect.w		= JPEG_GET_UINT16(p + 3);
 	pImageInfo->rect.h		= JPEG_GET_UINT16(p + 5);
 	pImageInfo->imageLength	= size;
-	pImageInfo->pixelFormat	= GPU_PIXEL_FORMAT_ARGB;
 	pImageInfo->bImageFromBuffer = TRUE;
 	pImageInfo->imagePtr	= pData;
-	pImageInfo->imagePath	= NULL;
 
 	return TRUE;
 #endif
@@ -383,14 +358,18 @@ static BOOLEAN _ImageDecoder_GetGIFInfo(void *pData, unsigned long int size, GPU
 	pImageInfo->rect.w		= pGif->SWidth;
 	pImageInfo->rect.h		= pGif->SHeight;
 	pImageInfo->imageLength	= size;
-	pImageInfo->pixelFormat	= GPU_PIXEL_FORMAT_ARGB;
 	pImageInfo->bImageFromBuffer = TRUE;
 	pImageInfo->imagePtr	= pData;
-	pImageInfo->imagePath	= NULL;
 
 	DGifCloseFile(pGif);
 
 	return TRUE;
+}
+
+static void _ImageDecoder_DestroySurface(void* pData)
+{
+	// This is OK because TrickPlay decodes image one by one.
+	DDI_GPU_DeallocSurface(_gSurface);
 }
 
 static int _ImageDecoder_DecodeImage(void *pData, unsigned long int size, TPImage *pImage, void *pUser)
@@ -401,13 +380,15 @@ static int _ImageDecoder_DecodeImage(void *pData, unsigned long int size, TPImag
 	}
 
 	BOOLEAN res;
-	GPU_SURFACE_INFO_T	surface;
 	GPU_IMAGE_FORMAT_T	imageFormat = _ImageDecoder_GetImageFormat(pData, size);
 	GPU_IMAGE_INFO_T	imageInfo;
 
 	// When pImage is NULL, just returns whether Nexus can decode this image.
 	if (pImage == NULL)
 		return (imageFormat == GPU_IMAGE_FORMAT_MAX) ? TP_IMAGE_UNSUPPORTED_FORMAT : TP_IMAGE_SUPPORTED_FORMAT;
+
+	if (size > 512 * 1024)	// RPC_SMEM_SIZE is 512 KByte.
+		return TP_IMAGE_UNSUPPORTED_FORMAT;
 
 	switch (imageFormat) {
 		case GPU_IMAGE_FORMAT_PNG:
@@ -428,30 +409,38 @@ static int _ImageDecoder_DecodeImage(void *pData, unsigned long int size, TPImag
 		return TP_IMAGE_DECODE_FAILED;
 	}
 
-	if (DDI_GPU_AllocSurface(imageInfo.rect.w, imageInfo.rect.h, GPU_PIXEL_FORMAT_ARGB, &surface) != OK) {
+	if (imageInfo.rect.w * imageInfo.rect.h > 1280 * 720)
+		return TP_IMAGE_UNSUPPORTED_FORMAT;
+
+#ifdef _TP_DEBUG
+	TP_Util_StartTimer();
+#endif
+
+	// [TODO] NEXUS_PixelFormat_eA8_eB8_G8_R8 actually generates RGBA format pixels. (reverse byte-order)
+	// I should figure this out with Broadcom.
+	if (DDI_GPU_AllocSurface(imageInfo.rect.w, imageInfo.rect.h, GPU_PIXEL_FORMAT_ABGR, &_gSurface) != OK) {
 		DBG_PRINT_TP("DDI_GPU_AllocSurface() failed.");
 		return TP_IMAGE_DECODE_FAILED;
 	}
 
-	if (DDI_GPU_DecodeImage(imageInfo, surface, GPU_DECODEIMAGE_NOFX) != OK) {
+	if (DDI_GPU_DecodeImage(imageInfo, _gSurface, GPU_DECODEIMAGE_NOFX) != OK) {
 		DBG_PRINT_TP("DDI_GPU_DecodeImage() failed.");
-		DDI_GPU_DeallocSurface(surface);
-		return TP_IMAGE_DECODE_FAILED;
+		DDI_GPU_DeallocSurface(_gSurface);
+		return TP_IMAGE_UNSUPPORTED_FORMAT;
 	}
 
-	void *pRGBA = malloc(surface.pitch * surface.height);
-	_ImageDecoder_ARGB2RGBA(pRGBA, (void *)(_gVideoVirtAddrBase + surface.offset),
-			surface.width, surface.height);
-
-	pImage->pixels		= pRGBA;
-	pImage->width		= surface.width,
-	pImage->height		= surface.height;
-	pImage->pitch		= surface.pitch;
-	pImage->depth		= surface.bpp;
+	pImage->pixels		= (void *)(_gVideoVirtAddrBase + _gSurface.offset);
+	pImage->width		= _gSurface.width;
+	pImage->height		= _gSurface.height;
+	pImage->pitch		= _gSurface.pitch;
+	pImage->depth		= _gSurface.bpp;
 	pImage->bgr			= FALSE;
-	pImage->free_pixels	= free;
+	pImage->free_pixels	= _ImageDecoder_DestroySurface;
 
-	DDI_GPU_DeallocSurface(surface);
+#ifdef _TP_DEBUG
+	TP_Util_EndTimer();
+	DBG_PRINT_TP("%.3f sec to decode image %dx%d", TP_Util_GetElapsedTime(), imageInfo.rect.w, imageInfo.rect.h);
+#endif
 
 	return TP_IMAGE_DECODE_OK;
 }
@@ -483,7 +472,7 @@ BOOLEAN TP_ImageDecoder_Initialize(TPContext *pContext)
 	return TRUE;
 }
 
-void TP_ImageDecoder_Finalize(void)
+void TP_ImageDecoder_Finalize(TPContext *pContext)
 {
 	RPC_CloseDDI_GPU();
 }

@@ -7,7 +7,7 @@
 
 
 BOOLEAN TP_ImageDecoder_Initialize(TPContext *pContext);
-void	TP_ImageDecoder_Finalize(void);
+void	TP_ImageDecoder_Finalize(TPContext *pContext);
 
 #endif
 

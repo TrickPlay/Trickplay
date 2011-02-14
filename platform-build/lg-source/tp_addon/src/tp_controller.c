@@ -94,6 +94,17 @@ static BOOLEAN _TP_AddRemoteController(TPContext *pContext)
 	return (_gpRemoteController != NULL);
 }
 
+static void _TP_RemoveRemoteController(TPContext *pContext)
+{
+	if (pContext == NULL)
+		return;
+
+	if (_gpRemoteController != NULL) {
+		tp_context_remove_controller(pContext, _gpRemoteController);
+		_gpRemoteController = NULL;
+	}
+}
+
 #ifdef INCLUDE_MOUSE
 static TPController	*_gpMouseController	 = NULL;
 
@@ -112,6 +123,17 @@ static BOOLEAN _TP_AddMouseController(TPContext *pContext)
 	_gpMouseController = tp_context_add_controller(pContext, "MouseController", &mouseSpec, NULL);
 
 	return (_gpMouseController != NULL);
+}
+
+static void _TP_RemoveMouseController(TPContext *pContext)
+{
+	if (pContext == NULL)
+		return;
+
+	if (_gpMouseController != NULL) {
+		tp_context_remove_controller(pContext, _gpMouseController);
+		_gpMouseController = NULL;
+	}
 }
 #endif
 
@@ -141,11 +163,28 @@ BOOLEAN TP_Controller_Initialize(TPContext *pContext)
 	return TRUE;
 }
 
+void TP_Controller_Finalize(TPContext *pContext)
+{
+	DBG_PRINT_TP();
+
+	if (pContext == NULL) {
+		DBG_PRINT_TP("pContext is NULL.");
+		return;
+	}
+
+	// remove remote controller
+	_TP_RemoveRemoteController(pContext);
+
+#ifdef INCLUDE_MOUDE
+	// remove mouse controller
+	_TP_RemoveMouseController(pContext);
+#endif
+}
+
 BOOLEAN TP_KeyEventCallback(UINT32 key, ADDON_KEY_COND_T keyCond)
 {
-	if (keyCond >= ADDON_KEY_COND_LAST) {
+	if ((_gpRemoteController == NULL) || (keyCond >= ADDON_KEY_COND_LAST))
 		return FALSE;
-	}
 
 	DBG_PRINT_TP("KeyEvent: Key(%#x) KeyCond(%u)", key, keyCond);
 
@@ -173,3 +212,4 @@ BOOLEAN TP_MouseEventCallback(SINT32 posX, SINT32 posY, UINT32 keyCode, ADDON_KE
 	return FALSE;
 }
 #endif
+

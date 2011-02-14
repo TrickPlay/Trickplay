@@ -23,7 +23,7 @@ static TPContext *pContext = NULL;
 static char szAppPath[PATH_MAX];
 
 #ifdef INCLUDE_NEW_WMDRMPD
-static BOOLEAN _TP_ExtractAppID(int argc, const char *argv[], UINT32 *pAppID)
+static BOOLEAN _TP_GetAppID(int argc, const char *argv[], UINT32 *pAppID)
 {
 	if (pAppID == NULL) {
 		return FALSE;
@@ -46,13 +46,13 @@ static BOOLEAN _TP_ExtractAppID(int argc, const char *argv[], UINT32 *pAppID)
 	return FALSE;
 }
 
-static void _TP_RemovePathRecursively(const char *szPath)
+static void _TP_RemovePathRecursive(const char *szPath)
 {
 	execlp("rm", "rm", "-rf", szPath, NULL);
 }
 #endif
 
-static BOOLEAN _TP_ExtractAppDirectory(char *szAppDirectory, const char *szAppPath)
+static BOOLEAN _TP_GetAppDirectory(char *szAppDirectory, const char *szAppPath)
 {
 	if ((szAppDirectory == NULL) || (szAppPath == NULL)) {
 		return FALSE;
@@ -83,16 +83,17 @@ static BOOLEAN _TP_InitContext(int argc, char *argv[])
 #ifdef INCLUDE_NEW_WMDRMPD
 	UINT32 appID = 0;
 
-	if (!_TP_ExtractAppID(argc, argv, &appID)) {
+	if (!_TP_GetAppID(argc, argv, &appID)) {
 		return FALSE;
 	}
 
-	// szAppPath를 만들어 준다. temp 경로에 hidden 속성으로 appID를 이름으로 하는 경로로 생성
-	sprintf(szAppPath, "%s/.%u", TRICKPLAY_DRM_DECRYPTED_PATH, appID);
+	// Create the string which stores the path to decrypt app.
+	// : make this path to hidden directory (with starting with dot(.)) following appID.
+	sprintf(szAppPath, "%s/.%u", TRICKPLAY_DRM_DECRYPTED_BASE_PATH, appID);
 
-	// 기존에 동일 디렉토리가 존재한다면 삭제한다.
+	// Remove existing directory.
 	if (access(szAppPath, F_OK) == 0) {
-		_TP_RemovePathRecursively(szAppPath);
+		_TP_RemovePathRecursive(szAppPath);
 	}
 
 	if (!TP_DRM_DecryptAppToPath(appID, argv[argc - 1], szAppPath)) {
@@ -117,7 +118,7 @@ static BOOLEAN _TP_InitContext(int argc, char *argv[])
 
 	char szAppDirectory[PATH_MAX] = { '\0', };
 
-	if (_TP_ExtractAppDirectory(szAppDirectory, argv[1])) {
+	if (_TP_GetAppDirectory(szAppDirectory, argv[1])) {
 		tp_context_set(pContext, TP_APP_SOURCES, szAppDirectory);
 		tp_context_set(pContext, TP_SCAN_APP_SOURCES, TRICKPLAY_SCAN_APP_SOURCES);
 	}
@@ -154,8 +155,8 @@ static BOOLEAN _TP_RunContext(void)
 		return FALSE;
 	}
 
-    // Run Trickplay - will not return until you exit
-	return (tp_context_run(pContext) == 0) ? TRUE : FALSE;
+    // Run Trickplay - will not return until exit
+	return (tp_context_run(pContext) == TP_RUN_OK) ? TRUE : FALSE;
 }
 
 void TP_QuitContext(void)
@@ -177,7 +178,7 @@ static void _TP_FiniContext(void)
 
 #ifdef INCLUDE_NEW_WMDRMPD
 	// remove DRM decrypted app
-	_TP_RemovePathRecursively(szAppPath);
+	_TP_RemovePathRecursive(szAppPath);
 #endif
 }
 
@@ -195,10 +196,9 @@ int main(int argc, char *argv[])
 		goto done;
 	}
 
-	if (!TP_Controller_Initialize(pContext)		||
-		!TP_ImageDecoder_Initialize(pContext)	||
-		!TP_MediaPlayer_Initialize(pContext))
-	{
+	if (!TP_Controller_Initialize(pContext)
+			|| !TP_MediaPlayer_Initialize(pContext)
+			|| !TP_ImageDecoder_Initialize(pContext)) {
 		goto done;
 	}
 
@@ -207,9 +207,11 @@ int main(int argc, char *argv[])
 	TP_System_DisableFullDisplay();
 
 done:
-	_TP_FiniContext();
+	TP_ImageDecoder_Finalize(pContext);
+	TP_MediaPlayer_Finalize(pContext);
+	TP_Controller_Finalize(pContext);
 
-	TP_ImageDecoder_Finalize();
+	_TP_FiniContext();
 
 	TP_System_Finalize();
 

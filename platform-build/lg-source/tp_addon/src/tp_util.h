@@ -2,8 +2,8 @@
 #define __TP_UTIL_H__
 
 
-void	RS_Debug_StartTimer(void);
-void	RS_Debug_EndTimer(void);
-float	RS_Debug_GetElapsedTime(void);
+void	TP_Util_StartTimer(void);
+void	TP_Util_EndTimer(void);
+float	TP_Util_GetElapsedTime(void);
 
 #endif

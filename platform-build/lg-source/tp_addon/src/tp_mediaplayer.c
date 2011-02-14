@@ -1,27 +1,3 @@
-/******************************************************************************
- *   DTV LABORATORY, LG ELECTRONICS INC., SEOUL, KOREA
- *   Copyright(c) 2010 by LG Electronics Inc.
- *
- *   All rights reserved. No part of this work may be reproduced, stored in a
- *   retrieval system, or transmitted by any means without prior written
- *   permission of LG Electronics Inc.
- *****************************************************************************/
-
-/** @file tp_mediaplayer.cpp
- *
- *  TPMediaPlayer implementations
- *  Implements Trickplay MediaPlayer callbacks using HOA_MEDIA functions
- *
- *  @author     Hong, Won-gi (wongi.hong@lge.com)
- *  @version    1.0
- *  @date       2010.08.24
- *  @note		None
- *  @see		None
- */
-
-/******************************************************************************
-	File Inclusions
- ******************************************************************************/
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,17 +6,7 @@
 #include "tp_common.h"
 #include "tp_mediaplayer.h"
 
-/******************************************************************************
-	Macro Definitions
- ******************************************************************************/
 
-/******************************************************************************
-	Local Constant Definitions
- ******************************************************************************/
-
-/******************************************************************************
-	Local Type Definitions
- ******************************************************************************/
 typedef enum tagMediaStatus {
 	MEDIA_STOP,
 	MEDIA_PLAY,
@@ -59,30 +25,9 @@ typedef struct tagMediaPlayerData {
 	MEDIA_FORMAT_T		mediaFormat;
 } TP_MEDIAPLAYERDATA_T;
 
-/******************************************************************************
-	Extern Variables & Function Prototype Declarations
- ******************************************************************************/
-
-/******************************************************************************
-	Static Variables & Function Prototypes Declarations
- ******************************************************************************/
 static MEDIA_STATUS_T	_gMediaStatus;
 static TPMediaPlayer	*_gpCurrentPlaying;
 
-/******************************************************************************
-	Global Variables & Function Prototypes Declarations
- ******************************************************************************/
-
-/******************************************************************************
-	Local Variables & Function Prototypes Declarations
- ******************************************************************************/
-
-/**
- * URI를 분석하여 media transport type을 반환한다.
- *
- * @param	pszUri [IN] URI
- * @return	MEDIA_TRANSPORT_T
- */
 static MEDIA_TRANSPORT_T _TP_GetMediaTransportType(const char *pszUri)
 {
 	if (pszUri == NULL) {
@@ -98,12 +43,6 @@ static MEDIA_TRANSPORT_T _TP_GetMediaTransportType(const char *pszUri)
 	return MEDIA_TRANS_FILE;
 }
 
-/**
- * URI를 분석하여 media format type을 반환하다.
- *
- * @param	pszUri [IN] URI
- * @return	MEDIA_FORMAT_T
- */
 static MEDIA_FORMAT_T _TP_GetMediaFormat(const char *pszUri)
 {
 	if (pszUri == NULL) {
@@ -184,12 +123,6 @@ static void _TP_MediaPlayer_PlayCallback(MEDIA_CHANNEL_T ch, MEDIA_CB_MSG_T msg)
 	}
 }
 
-/**
- * TPMediaPlayer.destroy callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @return	void
- */
 static void _TP_MediaPlayer_Destroy(TPMediaPlayer *pMp)
 {
 	DBG_PRINT_TP();
@@ -206,14 +139,6 @@ static void _TP_MediaPlayer_Destroy(TPMediaPlayer *pMp)
 	}
 }
 
-/**
- * TPMediaPlayer.load callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pszUri [IN] the URI to load
- * @param	pExtra [IN] not used
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_Load(TPMediaPlayer *pMp, const char *pszUri, const char *pExtra)
 {
 	DBG_PRINT_TP();
@@ -258,12 +183,6 @@ static int _TP_MediaPlayer_Load(TPMediaPlayer *pMp, const char *pszUri, const ch
 	return 0;
 }
 
-/**
- * TPMediaPlayer.reset callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @return	void
- */
 static void _TP_MediaPlayer_Reset(TPMediaPlayer *pMp)
 {
 	DBG_PRINT_TP();
@@ -281,12 +200,6 @@ static void _TP_MediaPlayer_Reset(TPMediaPlayer *pMp)
 	HOA_MEDIA_EndChannel(MEDIA_CH_A);
 }
 
-/**
- * TPMediaPlayer.play callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_Play(TPMediaPlayer *pMp)
 {
 	DBG_PRINT_TP();
@@ -373,13 +286,6 @@ static int _TP_MediaPlayer_Play(TPMediaPlayer *pMp)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.seek callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	seconds [IN] position within the stream in seconds
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_Seek(TPMediaPlayer *pMp, double seconds)
 {
 	DBG_PRINT_TP();
@@ -398,12 +304,6 @@ static int _TP_MediaPlayer_Seek(TPMediaPlayer *pMp, double seconds)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.pause callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_Pause(TPMediaPlayer *pMp)
 {
 	DBG_PRINT_TP();
@@ -421,13 +321,6 @@ static int _TP_MediaPlayer_Pause(TPMediaPlayer *pMp)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.set_playback_rate callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	rate [IN] integer multiplier, which will never be 0. 1 is normal speed.
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_SetPlaybackRate(TPMediaPlayer *pMp, int rate)
 {
 	DBG_PRINT_TP();
@@ -447,13 +340,6 @@ static int _TP_MediaPlayer_SetPlaybackRate(TPMediaPlayer *pMp, int rate)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_position callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pSeconds [OUT] playback position
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetPosition(TPMediaPlayer *pMp, double *pSeconds)
 {
 	DBG_PRINT_TP();
@@ -474,13 +360,6 @@ static int _TP_MediaPlayer_GetPosition(TPMediaPlayer *pMp, double *pSeconds)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_duration callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pSeconds [OUT] stream duration in seconds
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetDuration(TPMediaPlayer *pMp, double *pSeconds)
 {
 	DBG_PRINT_TP();
@@ -501,14 +380,6 @@ static int _TP_MediaPlayer_GetDuration(TPMediaPlayer *pMp, double *pSeconds)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.load callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pStartSeconds [OUT] starting point of the buffer in seconds
- * @param	pEndSeconds [OUT] ending point of the buffer in seconds
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetBufferedDuration(TPMediaPlayer *pMp, double *pStartSeconds, double *pEndSeconds)
 {
 	DBG_PRINT_TP();
@@ -530,14 +401,6 @@ static int _TP_MediaPlayer_GetBufferedDuration(TPMediaPlayer *pMp, double *pStar
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_video_size callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pWidth [OUT] width of the video
- * @param	pHeight [OUT] height of the video
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetVideoSize(TPMediaPlayer *pMp, int *pWidth, int *pHeight)
 {
 	DBG_PRINT_TP();
@@ -559,16 +422,6 @@ static int _TP_MediaPlayer_GetVideoSize(TPMediaPlayer *pMp, int *pWidth, int *pH
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_viewport_geometry callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pLeft [OUT] the left (x) coordinate of the viewport
- * @param	pTop [OUT] the top (y) coordinate of the viewport
- * @param	pWidth [OUT] the width of the viewport
- * @param	pHeight [OUT] the height of the viewport
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetViewportGeometry(TPMediaPlayer *pMp, int *pLeft, int *pTop, int *pWidth, int *pHeight)
 {
 	DBG_PRINT_TP();
@@ -587,16 +440,6 @@ static int _TP_MediaPlayer_GetViewportGeometry(TPMediaPlayer *pMp, int *pLeft, i
 	return 0;
 }
 
-/**
- * TPMediaPlayer.set_viewport_geometry callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pLeft [IN] desired left (x) coordinate of the viewport
- * @param	pTop [IN] desired top (y) coordinate of the viewport
- * @param	pWidth [IN] desired width of the viewport
- * @param	pHeight [IN] desired height of the viewport
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_SetViewportGeometry(TPMediaPlayer *pMp, int left, int top, int width, int height)
 {
 	DBG_PRINT_TP();
@@ -615,13 +458,6 @@ static int _TP_MediaPlayer_SetViewportGeometry(TPMediaPlayer *pMp, int left, int
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_media_type callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pType [OUT] type
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetMediaType(TPMediaPlayer *pMp, int *pType)
 {
 	DBG_PRINT_TP();
@@ -646,13 +482,6 @@ static int _TP_MediaPlayer_GetMediaType(TPMediaPlayer *pMp, int *pType)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_audio_volume callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pVolume [OUT] volume
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetAudioVolume(TPMediaPlayer *pMp, double *pVolume)
 {
 	DBG_PRINT_TP();
@@ -672,13 +501,6 @@ static int _TP_MediaPlayer_GetAudioVolume(TPMediaPlayer *pMp, double *pVolume)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.set_audio_volume callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	volume [IN] new volume (0 ~ 1)
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_SetAudioVolume(TPMediaPlayer *pMp, double volume)
 {
 	DBG_PRINT_TP();
@@ -695,13 +517,6 @@ static int _TP_MediaPlayer_SetAudioVolume(TPMediaPlayer *pMp, double volume)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_audio_mute callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pMute [OUT] whether audio is muted. (0: not muted / other: muted)
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_GetAudioMute(TPMediaPlayer *pMp, int *pMute)
 {
 	DBG_PRINT_TP();
@@ -721,13 +536,6 @@ static int _TP_MediaPlayer_GetAudioMute(TPMediaPlayer *pMp, int *pMute)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.set_audio_mute callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	mute [IN] whether audio should be muted. (0: not muted / other: muted)
- * @return	int 0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_SetAudioMute(TPMediaPlayer *pMp, int mute)
 {
 	DBG_PRINT_TP();
@@ -746,14 +554,6 @@ static int _TP_MediaPlayer_SetAudioMute(TPMediaPlayer *pMp, int mute)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.play_sound callback 구현
- * main media 플레이를 위해 사용중인 채널 A가 아닌 채널 B에서 사운드를 플레이한다.
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @param	pszUri [IN] the URI of the sound to play.
- * @return	void
- */
 static int _TP_MediaPlayer_PlaySound(TPMediaPlayer *pMp, const char *pszUri)
 {
 	DBG_PRINT_TP();
@@ -815,12 +615,6 @@ static int _TP_MediaPlayer_PlaySound(TPMediaPlayer *pMp, const char *pszUri)
 	return 0;
 }
 
-/**
- * TPMediaPlayer.get_viewport_texture callback 구현
- *
- * @param	pMp [IN] TPMediaPlayer interface
- * @return	void* should return NULL.
- */
 static void *_TP_MediaPlayer_GetViewportTexture(TPMediaPlayer *pMp)
 {
 	DBG_PRINT_TP();
@@ -828,13 +622,6 @@ static void *_TP_MediaPlayer_GetViewportTexture(TPMediaPlayer *pMp)
 	return NULL;
 }
 
-/**
- * initializes a new media player.
- * typedef int (*TPMediaPlayerContructor)(TPMediaPlayer *mp);
- *
- * @param	pMp [IN] a pointer to an uninitialized TPMediaPlayer structure
- * @return	int	0 : 성공 / other : 실패
- */
 static int _TP_MediaPlayer_Constructor(TPMediaPlayer *pMp)
 {
 	DBG_PRINT_TP();
@@ -888,13 +675,6 @@ static int _TP_MediaPlayer_Constructor(TPMediaPlayer *pMp)
 	return 0;
 }
 
-/**
- * initializes Media Player features of TPContext
- * registers TPMediaPlayerConstructor callback
- *
- * @param	pContext [IN] a pointer to the relevant TPContext structure
- * @return	BOOLEAN 성공 여부
- */
 BOOLEAN TP_MediaPlayer_Initialize(TPContext *pContext)
 {
 	DBG_PRINT_TP();
@@ -905,5 +685,9 @@ BOOLEAN TP_MediaPlayer_Initialize(TPContext *pContext)
 
 	tp_context_set_media_player_constructor(pContext, _TP_MediaPlayer_Constructor);
 	return TRUE;
+}
+
+void TP_MediaPlayer_Finalize(TPContext *pContext)
+{
 }
 

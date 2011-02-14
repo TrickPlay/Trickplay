@@ -7,6 +7,7 @@
 
 
 BOOLEAN	TP_Controller_Initialize(TPContext *pContext);
+void	TP_Controller_Finalize(TPContext *pContext);
 
 BOOLEAN TP_KeyEventCallback(UINT32 key, ADDON_KEY_COND_T keyCond);
 #ifdef INCLUDE_MOUSE

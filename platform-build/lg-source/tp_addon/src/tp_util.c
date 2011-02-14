@@ -4,35 +4,26 @@
 #include "tp_util.h"
 
 
-static struct timeval _gStart[64], _gEnd[64];
-static int _gDepth = 0;
+static struct timeval _gStart, _gEnd;
 
-void RS_Debug_StartTimer(void)
+void TP_Util_StartTimer(void)
 {
-	gettimeofday(&_gStart[_gDepth], NULL);
-
-	++_gDepth;
-	if (_gDepth > 63)
-		_gDepth = 63;
+	gettimeofday(&_gStart, NULL);
 }
 
-void RS_Debug_EndTimer(void)
+void TP_Util_EndTimer(void)
 {
-	--_gDepth;
-	if (_gDepth < 0)
-		_gDepth = 0;
-
-	gettimeofday(&_gEnd[_gDepth], NULL);
+	gettimeofday(&_gEnd, NULL);
 }
 
-float RS_Debug_GetElapsedTime(void)
+float TP_Util_GetElapsedTime(void)
 {
-	int sec = _gEnd[_gDepth].tv_sec - _gStart[_gDepth].tv_sec;
-	int usec = _gEnd[_gDepth].tv_usec - _gStart[_gDepth].tv_usec;
+	int sec = _gEnd.tv_sec - _gStart.tv_sec;
+	int usec = _gEnd.tv_usec - _gStart.tv_usec;
 	float result;
 
 	result = usec;
-	result /= 1000000;
+	result /= (1000 * 1000);
 	result += sec;
 
 	return result;

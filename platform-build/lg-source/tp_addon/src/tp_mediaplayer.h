@@ -8,5 +8,6 @@
 
 
 BOOLEAN	TP_MediaPlayer_Initialize(TPContext *pContext);
+void	TP_MediaPlayer_Finalize(TPContext *pContext);
 
 #endif

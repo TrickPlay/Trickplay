@@ -43,21 +43,23 @@ static BOOLEAN _TP_DecryptFileDRM(const UINT32 appID, const char *srcFilePath, c
 	int dstFileDesc = -1;
 	unsigned char bszKey[32] = { 0, };
 
-	// 읽을 DRM-encrypted 파일을 연다
+	// 1. Open DRM-encrypted file to read
 	nResult = NCG_OpenAndVerifyFile(srcFilePath, TRUE, TRUE, O_RDONLY, 0, &hNCGFile);
 	if (Failed(nResult) || (hNCGFile == NULL)) {
 		DBG_PRINT_TP("NCG_OpenAndVerifyFile() failed. Could not open encrypted file.");
 		goto clear_and_return;
 	}
 
-	// App ID와 파일 경로를 통해 Key를 얻고 파일에 Key를 설정한다.
+	// 2. Get CEK from App ID and source file path.
 	if (HOA_SECCHK_GetCEK(appID, (char *)srcFilePath, bszKey) != HOA_UC_OK) {
 		DBG_PRINT_TP("HOA_SECCHK_GetCEK() failed.");
 		goto clear_and_return;
 	}
+
+	// 3. Set CEK to the file handle.
 	NCG_SetCEKForce(hNCGFile, bszKey);
 
-	// 기록할 대상이 되는 DRM-decrypted 파일을 연다.
+	// 4. Open a file to write decrypted contents.
 	dstFileDesc = open(dstFilePath, O_WRONLY | O_CREAT | O_EXCL, S_IREAD);
 	if (dstFileDesc == -1) {
 		DBG_PRINT_TP("open() failed. Could not create decrypted file.");
@@ -67,7 +69,7 @@ static BOOLEAN _TP_DecryptFileDRM(const UINT32 appID, const char *srcFilePath, c
 	unsigned char buffer[BUFFER_SIZE];
 	unsigned long read;
 
-	// 원본 파일을 복호화 하며 읽고, 내용을 대상 파일에 기록한다.
+	// 5. Do decryption
 	do {
 		nResult = NCG_Read(hNCGFile, sizeof(buffer), buffer, &read);
 		if (Succeed(nResult)) {
@@ -95,7 +97,7 @@ BOOLEAN TP_DRM_DecryptAppToPath(const UINT32 appID, const char *appDir, const ch
 		return FALSE;
 	}
 
-	if (mkdir(targetDir, 0755) != 0) {
+	if (mkdir(targetDir, 755) != 0) {
 		DBG_PRINT_TP("mkdir() failed. Could not create target directory.");
 		return FALSE;
 	}
@@ -128,15 +130,15 @@ BOOLEAN TP_DRM_DecryptAppToPath(const UINT32 appID, const char *appDir, const ch
 		sprintf(dstPath, "%s/%s", targetDir, basename(tmp));
 		free(tmp);
 
-		// 1. 디렉토리 : 대상 경로에도 동일하게 서브 디렉토리 생성 후 재귀 호출
+		// case of directory : make subdirectory and the call this function recursively.
 		if (_TP_IsDirectory(srcPath)) {
 			res = TP_DRM_DecryptAppToPath(appID, srcPath, dstPath);
 		}
-		// 2. DRM 적용 파일 : DRM 복호화 시도
+		// case of DRM encrypted file :  do decryption.
 		else if (NCG_IsNCGFile(srcPath)) {
 			res = _TP_DecryptFileDRM(appID, srcPath, dstPath);
 		}
-		// 3. DRM 미적용 파일 : 원본에 대한 symbolic link 생성
+		// case of non-encrypted file : make a symbolic link to the source file.
 		else {
 			res = (symlink(srcPath, dstPath) == 0);
 		}
