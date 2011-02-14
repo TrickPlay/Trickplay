@@ -16,11 +16,7 @@ Downloads::Downloads( TPContext * context )
 
     EventGroup * event_group = new EventGroup();
 
-    network.reset( new Network(
-            Network::Settings( context->get_bool( TP_NETWORK_DEBUG, false ),
-                    context->get_bool( TP_SSL_VERIFY_PEER, true ),
-                    context->get( TP_SSL_CA_CERT_FILE, "" ) ),
-            event_group ) );
+    network.reset( new Network( context , event_group ) );
 
     event_group->unref();
 

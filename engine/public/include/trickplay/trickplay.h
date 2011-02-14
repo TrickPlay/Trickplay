@@ -209,6 +209,15 @@ typedef struct TPContext TPContext;
                                 seed for all apps and the 'math.randomseed' function will
                                 become a no-op.
                                 Defaults to 0.
+
+    TP_PLUGINS_PATH -           Path to root directory of TrickPlay plugins.
+                                Defaults to "plugins" (in the current working directory).
+
+    TP_AUDIO_SAMPLER_ENABLED -  Whether TrickPlay's audio sampling machinery is enabled.
+                                When set to false, the audio sampler API can still be used,
+                                but it won't do anything.
+                                Defaults to "true".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -246,7 +255,8 @@ typedef struct TPContext TPContext;
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
 #define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
 #define TP_RANDOM_SEED                  "random_seed"
-
+#define TP_PLUGINS_PATH                 "plugins_path"
+#define TP_AUDIO_SAMPLER_ENABLED        "audio_sampler_enabled"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

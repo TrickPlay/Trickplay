@@ -7,6 +7,8 @@
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig.h"
+#include "sndfile.h"
+#include "json-glib/json-glib.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
@@ -59,6 +61,15 @@ TPContext::TPContext()
 
 TPContext::~TPContext()
 {
+    // Free all the internals by calling their destroy notify
+
+    for( InternalMap::iterator it = internals.begin(); it != internals.end(); ++ it )
+    {
+        if ( it->second.second )
+        {
+            it->second.second( it->second.first );
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -486,12 +497,70 @@ int TPContext::console_command_handler( const char * command, const char * param
 
                 delete image;
             }
-
-
         }
+    }
+    else if ( ! strcmp( command , "as" ) )
+    {
+        if ( parameters )
+        {
+            SF_INFO info;
 
+            memset( & info , 0 , sizeof( info ) );
 
+            SNDFILE * f = sf_open( parameters , SFM_READ , & info );
 
+            if ( ! f )
+            {
+                g_info( "FAILED TO OPEN '%s'" , parameters );
+            }
+            else
+            {
+                g_info( "  frames      = %u" , info.frames );
+                g_info( "  sample_rate = %d" , info.samplerate );
+                g_info( "  channels    = %d" , info.channels );
+                g_info( "  format      = 0x%x" , info.format );
+
+                // Allocate a buffer to hold 10 seconds of audio
+
+                sf_count_t frames = info.samplerate * 10;
+
+                float * samples = g_new( float , frames * info.channels );
+
+                // Get the audio sampler
+
+                TPAudioSampler * sampler = tp_context_get_audio_sampler( context );
+
+                tp_audio_sampler_pause( sampler );
+
+                while( true )
+                {
+                    sf_count_t read = sf_readf_float( f , samples , frames );
+
+                    if ( read == 0 )
+                    {
+                        break;
+                    }
+
+                    TPAudioBuffer buffer;
+
+                    buffer.format = TP_AUDIO_FORMAT_FLOAT;
+                    buffer.channels = info.channels;
+                    buffer.sample_rate = info.samplerate;
+                    buffer.copy_samples = 1;
+                    buffer.free_samples = 0;
+                    buffer.samples = samples;
+                    buffer.size = read * info.channels * sizeof( float );
+
+                    tp_audio_sampler_submit_buffer( sampler , & buffer );
+                }
+
+                g_free( samples );
+
+                tp_audio_sampler_resume( sampler );
+
+                sf_close( f );
+            }
+        }
     }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
@@ -1806,6 +1875,8 @@ void TPContext::load_external_configuration()
         TP_MEDIAPLAYER_ENABLED,
         TP_IMAGE_DECODER_ENABLED,
         TP_RANDOM_SEED,
+        TP_PLUGINS_PATH,
+        TP_AUDIO_SAMPLER_ENABLED,
 
         NULL
     };
@@ -1976,6 +2047,21 @@ void TPContext::validate_configuration()
     if ( g_mkdir_with_parents( downloads_path, 0700 ) != 0 )
     {
         g_error( "DOWNLOADS PATH '%s' DOES NOT EXIST AND COULD NOT BE CREATED", downloads_path );
+    }
+
+    // PLUGINS PATH
+
+    const char * plugins_path = get( TP_PLUGINS_PATH );
+
+    if ( ! plugins_path )
+    {
+        gchar * path = g_build_filename( g_get_current_dir() , "plugins" , NULL );
+
+        g_warning( "DEFAULT:%s=%s", TP_PLUGINS_PATH, path );
+
+        set( TP_PLUGINS_PATH, path );
+
+        g_free( path );
     }
 
     // SCREEN WIDTH AND HEIGHT
@@ -2324,6 +2410,78 @@ Image * TPContext::load_icon( const gchar * path )
 StringMap TPContext::get_config() const
 {
     return config;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::add_internal( gpointer key , gpointer value , GDestroyNotify destroy )
+{
+    g_assert( key );
+
+    InternalMap::iterator it( internals.find( key ) );
+
+    // If it already exists, call its destroy notify
+
+    if ( it != internals.end() )
+    {
+        // If it has a destroy notify, call it with the value
+
+        if ( it->second.second != 0 )
+        {
+            it->second.second( it->second.first );
+        }
+
+        it->second = InternalPair( value , destroy );
+    }
+    else
+    {
+        internals[ key ] = InternalPair( value , destroy );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+gpointer TPContext::get_internal( gpointer key )
+{
+    InternalMap::const_iterator it( internals.find( key ) );
+
+    // If it already exists, call its destroy notify
+
+    if ( it != internals.end() )
+    {
+        return it->second.first;
+    }
+
+    return 0;
+}
+
+
+//-----------------------------------------------------------------------------
+// Called by other threads...
+
+void TPContext::audio_detection_match( const gchar * json )
+{
+    JsonParser * parser = json_parser_new();
+
+    GError * error = 0;
+
+    bool valid = json_parser_load_from_data( parser , json , -1 , & error );
+
+    g_object_unref( parser );
+
+    if ( ! valid )
+    {
+        g_warning( "INVALID JSON AUDIO DETECTION RESULT '%s' : %s" , json , error->message );
+
+        g_clear_error( & error );
+    }
+    else
+    {
+        g_info( "VALID JSON AUDIO DETECTION RESULT : '%s'" , json );
+
+        // TODO: Here, we would make a copy of the JSON string and use and idle to
+        // trigger some kind of event.
+    }
 }
 
 //=============================================================================
