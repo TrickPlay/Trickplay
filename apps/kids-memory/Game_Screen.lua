@@ -59,9 +59,13 @@ local fade_out = {
             end
         }
     }
+    
+local fading_in = false
+    
 local fade_in = {
         duration = {500},
         setup = function()
+            fading_in = true
             for i = 1, #game_state.board  do
 				for j = 1, #game_state.board[i] do
                     if game_state.board[i][j] ~= 0 then
@@ -105,6 +109,7 @@ local fade_in = {
                     end
                 end
             end
+            fading_in = false
         end
     }
 
@@ -222,6 +227,8 @@ local corner_lose_focus = {
 
 local board_key_handler = {
     [keys.OK] = function()
+        if fading_in then return end
+        
         if game_state.board[focus_i[1]][focus_i[2]] == 0 or
            game_state.board[focus_i[1]][focus_i[2]] == nil then
             play_sound_wrapper(audio.blank_space)
