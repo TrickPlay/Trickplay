@@ -1961,7 +1961,8 @@ function widget.loadingbar(t)
 
     --default parameters
     local p={
-        bsize     = {300, 50},
+        wwidth             = 300,
+        wheight            = 50,
         shell_upper_color  = "000000",
         shell_lower_color  = "7F7F7F",
         stroke_color       = "A0A0A0",
@@ -1978,14 +1979,14 @@ function widget.loadingbar(t)
 	
 
 	local c_shell = Canvas{
-            size = {p.bsize[1],p.bsize[2]},
-            x    = p.bsize[1],
-            y    = p.bsize[2]
+            size = {p.wwidth,p.wheight},
+            x    = p.wwidth,
+            y    = p.wheight
         }
 	local c_fill  = Canvas{
-            size = {1,p.bsize[2]},
-            x    = p.bsize[1]+2,
-            y    = p.bsize[2]
+            size = {1,p.wheight},
+            x    = p.wwidth+2,
+            y    = p.wheight
         }
 	local l_bar_group = Group{
 		name     = "loadingbar",
@@ -1995,7 +1996,7 @@ function widget.loadingbar(t)
 	        extra = {
         	    type = "LoadingBar", 
         	    set_prog = function(prog)
-	                c_fill.scale = {(p.bsize[1]-4)*(prog),1}
+	                c_fill.scale = {(p.wwidth-4)*(prog),1}
         	    end,
 	        },
 	}
@@ -2003,10 +2004,10 @@ function widget.loadingbar(t)
 	local function create_loading_bar()
 		l_bar_group:clear()
 		c_shell = Canvas{
-				size = {p.bsize[1],p.bsize[2]},
+				size = {p.wwidth,p.wheight},
 		}
 		c_fill  = Canvas{
-				size = {1,p.bsize[2]},
+				size = {1,p.wheight},
 		}  
         
 		local stroke_width = 2
@@ -2104,7 +2105,7 @@ Arguments:
     grid_gap    - the number of pixels in between the grid items
 	duration_per_tile - how long a particular tile flips for
 	cascade_delay     - how long a tile waits to start flipping after its neighbor began flipping
-
+    tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'num_cols' elements in a 2 dimensional table 
 Return:
 
 		Group - Group containing the grid
@@ -2123,8 +2124,11 @@ function widget.threeDlist(t)
         grid_gap    = 40,
 		duration_per_tile = 300,
 		cascade_delay     = 200,
-        tiles       = {}
+        tiles       = {},
+        focus       = nil,
     }
+    
+    local focus_i = {1,1}
     --overwrite defaults
     if t ~= nil then
         for k, v in pairs (t) do
@@ -2132,6 +2136,11 @@ function widget.threeDlist(t)
         end
     end
 	
+    local x_y_from_index = function(r,c)
+		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
+		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
+	end
+     
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
@@ -2141,13 +2150,32 @@ function widget.threeDlist(t)
         extra    = {
 			type = "3D_List",
             reactive = true,
-            replace = function(r,c,obj)
+            replace = function(self,r,c,obj)
                 if p.tiles[r][c] ~= nil then
                     p.tiles[r][c]:unparent()
                 end
                 p.tiles[r][c] = obj
                 
+                if obj.parent ~= nil then obj:unparent() end
+                
+                self:add(obj)
+                obj.x, obj.y = x_y_from_index(r,c)
+                obj.anchor_point = {obj.w/2,obj.h/2}
+                obj.delay = p.cascade_delay*(r+c-1)
 			end,
+            focus_to = function(r,c)
+                if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                    return
+                end
+                local x,y = x_y_from_index(r,c)
+                focus:complete_animation()
+                focus:animate{
+                    duration=300,
+                    mode="EASE_OUT_CIRC",
+                    x=x,
+                    y=y
+                }
+            end,
             animate_in = function()
 				local tl = Timeline{
 					duration =p.cascade_delay*(p.num_rows+p.num_cols-2)+ p.duration_per_tile
@@ -2174,7 +2202,6 @@ function widget.threeDlist(t)
 								item.y_rotation = {0,0,0}
 								item.opacity = 255
 							end
-							
 						end
 					end
 				end
@@ -2201,13 +2228,31 @@ function widget.threeDlist(t)
         }
 		return rect
 	end
-	local x_y_from_index = function(r,c)
-		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
-		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
-	end
+    local make_focus = function()
+        return Rectangle{
+            name="Focus",
+            size={ p.item_w+5, p.item_h+5},
+            color="00000000",
+            anchor_point = { (p.item_w+5)/2, (p.item_h+5)/2},
+            border_width=5,
+            border_color="FFFFFFFF",
+        }
+    end
+	
 	local make_grid = function()
         
 		local g
+        slate:clear()
+        
+        if p.focus == nil then
+            focus = make_focus()
+        else
+            focus = p.focus
+            focus.anchor_point={focus.w/2,focus.h/2}
+        end
+        focus.x, focus.y = x_y_from_index(focus_i[1],focus_i[2])
+        slate:add(focus)
+        
 		for r = 1, p.num_rows  do
             if p.tiles[r] == nil then p.tiles[r] = {} end
 			for c = 1, p.num_cols do
@@ -2219,12 +2264,13 @@ function widget.threeDlist(t)
                     g.delay = p.cascade_delay*(r+c-1)
                 else
                     g = p.tiles[r][c]
-                    if g.parent ~= slate then
-                        slate:add(g)
-                        g.x, g.y = x_y_from_index(r,c)
-                        g.anchor_point = {p.item_w/2, p.item_h/2}
-                        g.delay = p.cascade_delay*(r+c-1)
+                    if g.parent ~= nil then
+                        g:unparent()
                     end
+                    slate:add(g)
+                    g.x, g.y = x_y_from_index(r,c)
+                    g.anchor_point = {g.w/2,g.h/2}
+                    g.delay = p.cascade_delay*(r+c-1)
                 end
 			end
 		end
@@ -2246,6 +2292,7 @@ function widget.threeDlist(t)
                 end
             end
         end
+        
 	end
 	make_grid()
 
