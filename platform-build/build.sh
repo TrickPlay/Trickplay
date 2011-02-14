@@ -60,6 +60,10 @@ fi
 
 #------------------------------------------------------------------------------
 
+PROFILING="0"
+
+#------------------------------------------------------------------------------
+
 VERBOSE=${VERBOSE:-0}
 
 if [[ ${VERBOSE} == 1 ]]
@@ -273,7 +277,12 @@ CLUTTER_V="${CLUTTER_MV}.0"
 CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no --enable-profile=yes && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
+CLUTTER_PROFILING=""
+if [[ $PROFILING != "0" ]] 
+then
+    CLUTTER_PROFILING="--enable-profile=yes"
+fi
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
 #CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.a ./clutter/.libs/*.la $PREFIX/lib" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
@@ -321,6 +330,7 @@ HERE=${PWD}
 
 SOURCE=${HERE}/source
 
+LIB_BUILD=${HERE}/build-libs
 
 #-----------------------------------------------------------------------------
 # If the output directory does not exist, create it and copy the baseline
@@ -343,6 +353,11 @@ fi
 if [[ ! -d "${SOURCE}" ]]
 then
     mkdir "${SOURCE}"
+fi   
+
+if [[ ! -d "${LIB_BUILD}" ]]
+then
+    mkdir "${LIB_BUILD}"
 fi   
 
 #-----------------------------------------------------------------------------
@@ -405,7 +420,7 @@ for THIS in ${ALL}; do
         # If the source directory does not exist, unpack the dist
         
 
-        if [[ ! -d "${SOURCE}/${!THIS_SOURCE}" ]]
+        if [[ ! -d "${LIB_BUILD}/${!THIS_SOURCE}" ]]
         then
         
             cd ${SOURCE}
@@ -417,26 +432,28 @@ for THIS in ${ALL}; do
                 wget "http://developer.trickplay.com/sources/${!THIS_DIST}"
             fi
             
+            cd ${LIB_BUILD}
+            
             if [[ "${!THIS_DIST:0-3}" == "bz2" ]]
             then
-                tar jxf "${!THIS_DIST}" 
+                tar jxf "${SOURCE}/${!THIS_DIST}" 
             else
-                tar zxf "${!THIS_DIST}" 
+                tar zxf "${SOURCE}/${!THIS_DIST}" 
             fi
 
 	        # Patches
 
             if [[ -d "${THERE}/patches/${!THIS_SOURCE}" ]]
 	        then
-			cd "${SOURCE}/${!THIS_SOURCE}"
-			QUILT_PATCHES="${THERE}/patches/${!THIS_SOURCE}" quilt push -a
+			    cd "${LIB_BUILD}/${!THIS_SOURCE}"
+			    QUILT_PATCHES="${THERE}/patches/${!THIS_SOURCE}" quilt push -a
 	        fi
         fi
         
         
         # cd into the source directory for this one
         
-        cd ${SOURCE}/${!THIS_SOURCE}
+        cd ${LIB_BUILD}/${!THIS_SOURCE}
         
         # clean
         
@@ -491,6 +508,13 @@ then
 
     if [[ ! -d ${HERE}/tp-build ]]
     then
+    
+        TP_PROFILING=""
+        if [[ $PROFILING != "0" ]]
+        then
+            TP_PROFILING="-DTP_PROFILING=1"
+        fi
+        
         mkdir ${HERE}/tp-build
         cd ${HERE}/tp-build 
         
@@ -498,7 +522,7 @@ then
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
                 ${BUILD_TP_CORE_DYNAMIC} \
                 -DTP_CLUTTER_BACKEND_EGL=1 \
-	        -DTP_PROFILING=1 \
+	            $TP_PROFILING \
                 "${THERE}/../"   
     fi
 
