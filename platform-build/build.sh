@@ -321,8 +321,17 @@ UUID_SOURCE="uuid-${UUID_V}"
 UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --includedir=$PREFIX/include/ossp --disable-shared --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
+# libsndfile
 
-ALL="ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID"
+SNDFILE_V="1.0.23"
+SNDFILE_DIST="libsndfile-${SNDFILE_V}.tar.gz"
+SNDFILE_SOURCE="libsndfile-${SNDFILE_V}"
+SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --disable-shared --disable-cpu-clip  --disable-sqlite --disable-alsa --disable-external-libs --with-pic && make && make ${NUM_MAKE_JOBS} install"
+SNDFILE_URL="http://www.mega-nerd.com/libsndfile/files/${SNDFILE_DIST}"
+
+#------------------------------------------------------------------------------
+
+ALL="ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE"
 
 #-----------------------------------------------------------------------------
 
