@@ -363,9 +363,11 @@ function make_attr_t(v)
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
-             {"wwidth", math.floor(v.wwidth), "W"},
-             {"wheight", math.floor(v.wheight), "H"},
       }
+      	if (v.extra.type ~= "LoadingDots" or v.extra.type ~= "LoadingBar" ) then 
+             table.insert(attr_t,{"wwidth", math.floor(v.wwidth), "W"})
+             table.insert(attr_t,{"wheight", math.floor(v.wheight), "H"})
+	end 
 
      else --Rectangle, Image, Text, Group, Clone
 	attr_t =
@@ -542,12 +544,21 @@ local widget_map = {
 		end 
 		end,
 -------------------------------------------------------------------------------
-	["RadioButton"] = function () return v.name.." = ".."widget.radioButton"..b_indent.."{"..indent.. 
-		"button_color = {"..table.concat(v.button_color,",").."},"..indent..
-		"select_color = {"..table.concat(v.select_color,",").."},"..indent..
-    		"button_radius = "..v.button_radius..","..indent.. 
-    		"select_radius = "..v.select_radius..","..indent.. 
-		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["RadioButton"] = function () 
+		w_prop_map["skin"]()
+		w_prop_map["color"]()
+		w_prop_map["font"]()
+		--w_prop_map["items"]()
+		w_prop_map["button_color"]() 
+		w_prop_map["select_color"]() 
+		table.insert(attr_t, {"button_color", v.button_color, "Button Color"})
+		table.insert(attr_t, {"select_color", v.select_color, "Select Color"})
+		table.insert(attr_t, {"button_radius", v.button_radius, "Button Radius"})
+		table.insert(attr_t, {"select_radius", v.select_radius, "Select Radius"})
+		table.insert(attr_t, {"selected_item", v.selected_item, "Selected Item"})
+		w_prop_map["item_pos"]()
+	        w_prop_map["b_pos"]()
+	        end, 
 	["CheckBox"] = function () return v.name.." = ".."widget.checkBox"..b_indent.."{"..indent.. 
 		"box_color = {"..table.concat(v.box_color,",").."},"..indent..
 		"f_color = {"..table.concat(v.f_color,",").."},"..indent..
@@ -557,16 +568,28 @@ local widget_map = {
 		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
 	["ButtonPicker"] = function () return v.name.." = ".."widget.buttonPicker"..b_indent.."{"..indent.. 
 		w_prop_map["items"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["LoadingDots"] = function () return v.name.." = ".."widget.loadingdots"..b_indent.."{"..indent.. 
-		"skin = \""..v.skin.."\","..indent..
-		"dot_radius = "..v.dot_radius..","..indent..
-    		"dot_color = \""..v.dot_color.."\","..indent..
-		"num_dots = "..v.num_dots..","..indent..
-		"anim_radius = "..v.anim_radius..","..indent..
-		"anim_duration = "..v.anim_duration..b_indent.."}\n\n"..w_prop_map["group"]() end,
-		--"anim_duration = "..v.anim_duration..","..indent..
-		--"clone_src = "..v.clone_src..b_indent.."}\n\n"..w_prop_map["group"]() end,
-	["LoadingBar"] = function () return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
+	["LoadingDots"] = function () 
+		w_prop_map["skin"]()
+		table.insert(attr_t, {"dot_color", v.dot_color, "Dot Color"})
+		table.insert(attr_t, {"dot_radius", v.dot_radius, "Dot Radius"})
+		table.insert(attr_t, {"num_dots", v.num_dots, "Num Dots"})
+		table.insert(attr_t, {"anim_radius", v.anim_radius, "Anim Radius"})
+		table.insert(attr_t, {"anim_duration", v.anim_duration, "Anim Duration"})
+		table.insert(attr_t, {"clone_src", v.clone_src, "Clone Src"})
+		end,
+	["LoadingBar"] = function () 
+		w_prop_map["skin"]()
+		table.insert(attr_t, {"dot_color", v.dot_color, "Dot Color"})
+		table.insert(attr_t, {"dot_radius", v.dot_radius, "Dot Radius"})
+		table.insert(attr_t, {"num_dots", v.num_dots, "Num Dots"})
+		table.insert(attr_t, {"anim_radius", v.anim_radius, "Anim Radius"})
+		table.insert(attr_t, {"anim_duration", v.anim_duration, "Anim Duration"})
+		table.insert(attr_t, {"clone_src", v.clone_src, "Clone Src"})
+		end,
+
+	        	
+--[[
+		return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
 		"bsize = {"..table.concat(v.bsize,",").."},"..indent..
         	"shell_upper_color = \""..v.shell_upper_color.."\","..indent.. 
         	"shell_lower_color = \""..v.shell_lower_color.."\","..indent.. 
@@ -574,6 +597,7 @@ local widget_map = {
         	"fill_upper_color = \""..v.fill_upper_color.."\","..indent.. 
         	"fill_lower_color = \""..v.fill_lower_color.."\""..b_indent.."}\n\n"..
 		w_prop_map["group"]() end, 
+]]
    }
   if v.extra then 
   if is_in_list(v.extra.type, widgets) == true then 
