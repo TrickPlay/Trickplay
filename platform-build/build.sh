@@ -605,6 +605,8 @@ then
 	    -lthreadutil \
 	    -lGLES2 \
 	    -lcairo-gobject \
+	    -luprof-0.3 \
+	    -lsndfile \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group 
 	

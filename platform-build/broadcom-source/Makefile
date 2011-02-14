@@ -116,6 +116,7 @@ LDFLAGS += -L$(TRICKPLAY_LIB) \
 	-liconv \
 	-lcairo-gobject \
 	-luprof-0.3 \
+	-lsndfile \
 	-Wl,--end-group 
 
 
