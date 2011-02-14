@@ -1,3 +1,4 @@
 dont-build-tests.patch
 custom-egl-initialization.patch
 uprof-for-egl-setup-timers.patch
+dispose-crash.patch
