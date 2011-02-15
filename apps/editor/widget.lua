@@ -1854,7 +1854,7 @@ function widget.loadingdots(t)
     local p = {
         skin          = "default",
         dot_radius    = 5,
-        dot_color     = "#FFFFFF",
+        dot_color     = {255,255,255},
         num_dots      = 12,
         anim_radius   = 50,
         anim_duration = 150,
@@ -2036,12 +2036,13 @@ function widget.loadingbar(t)
 
     --default parameters
     local p={
-        bsize     = {300, 50},
-        shell_upper_color  = "000000",
-        shell_lower_color  = "7F7F7F",
-        stroke_color       = "A0A0A0",
-        fill_upper_color  = "FF0000",
-        fill_lower_color  = "603030",
+        wwidth             = 300,
+        wheight            = 50,
+        shell_upper_color  = {0,0,0},
+        shell_lower_color  = {127,127,127},
+        stroke_color       = {160,160,160},
+        fill_upper_color  = {255,0,0},
+        fill_lower_color  = {96,48,48},
     }
     --overwrite defaults
     if t ~= nil then
@@ -2053,14 +2054,14 @@ function widget.loadingbar(t)
 	
 
 	local c_shell = Canvas{
-            size = {p.bsize[1],p.bsize[2]},
-            x    = p.bsize[1],
-            y    = p.bsize[2]
+            size = {p.wwidth,p.wheight},
+            x    = p.wwidth,
+            y    = p.wheight
         }
 	local c_fill  = Canvas{
-            size = {1,p.bsize[2]},
-            x    = p.bsize[1]+2,
-            y    = p.bsize[2]
+            size = {1,p.wheight},
+            x    = p.wwidth+2,
+            y    = p.wheight
         }
 	local l_bar_group = Group{
 		name     = "loadingbar",
@@ -2070,7 +2071,7 @@ function widget.loadingbar(t)
 	        extra = {
         	    type = "LoadingBar", 
         	    set_prog = function(prog)
-	                c_fill.scale = {(p.bsize[1]-4)*(prog),1}
+	                c_fill.scale = {(p.wwidth-4)*(prog),1}
         	    end,
 	        },
 	}
@@ -2078,10 +2079,10 @@ function widget.loadingbar(t)
 	local function create_loading_bar()
 		l_bar_group:clear()
 		c_shell = Canvas{
-				size = {p.bsize[1],p.bsize[2]},
+				size = {p.wwidth,p.wheight},
 		}
 		c_fill  = Canvas{
-				size = {1,p.bsize[2]},
+				size = {1,p.wheight},
 		}  
         
 		local stroke_width = 2
@@ -2179,7 +2180,7 @@ Arguments:
     grid_gap    - the number of pixels in between the grid items
 	duration_per_tile - how long a particular tile flips for
 	cascade_delay     - how long a tile waits to start flipping after its neighbor began flipping
-
+    tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'num_cols' elements in a 2 dimensional table 
 Return:
 
 		Group - Group containing the grid
@@ -2197,8 +2198,12 @@ function widget.threeDlist(t)
         item_h      = 200,
         grid_gap    = 40,
 		duration_per_tile = 300,
-		cascade_delay     = 200, 
+		cascade_delay     = 200,
+        tiles       = {},
+        focus       = nil,
     }
+    
+    local focus_i = {1,1}
     --overwrite defaults
     if t ~= nil then
         for k, v in pairs (t) do
@@ -2206,34 +2211,45 @@ function widget.threeDlist(t)
         end
     end
 	
-	local tiles = {}
+    local x_y_from_index = function(r,c)
+		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
+		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
+	end
+     
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
         name     = "3D List",
         position = {200,100},
-	reactive = true,
+        reactive = true,
         extra    = {
 			type = "3D_List",
             reactive = true,
-			get_tile_group = function(r,c)
-				return tiles[r][c]
-			end,
-            insert = function(r,c,obj)
-                if tiles[r][c] == nil then
-                    return false
-                else
-                    tiles[r][c]:add(obj)
-                    return true
+            replace = function(self,r,c,obj)
+                if p.tiles[r][c] ~= nil then
+                    p.tiles[r][c]:unparent()
                 end
+                p.tiles[r][c] = obj
+                
+                if obj.parent ~= nil then obj:unparent() end
+                
+                self:add(obj)
+                obj.x, obj.y = x_y_from_index(r,c)
+                obj.anchor_point = {obj.w/2,obj.h/2}
+                obj.delay = p.cascade_delay*(r+c-1)
 			end,
-            clear_group = function(r,c)
-                if tiles[r][c] == nil then
-                    return false
-                else
-                    tiles[r][c]:clear()
-                    return true
+            focus_to = function(r,c)
+                if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                    return
                 end
+                local x,y = x_y_from_index(r,c)
+                focus:complete_animation()
+                focus:animate{
+                    duration=300,
+                    mode="EASE_OUT_CIRC",
+                    x=x,
+                    y=y
+                }
             end,
             animate_in = function()
 				local tl = Timeline{
@@ -2242,8 +2258,8 @@ function widget.threeDlist(t)
 				function tl:on_started()
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
-							tiles[r][c].y_rotation={90,0,0}
-							tiles[r][c].opacity = 0
+							p.tiles[r][c].y_rotation={90,0,0}
+							p.tiles[r][c].opacity = 0
 						end
 					end
 				end
@@ -2252,7 +2268,7 @@ function widget.threeDlist(t)
 					local item
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
-							item = tiles[r][c] 
+							item = p.tiles[r][c] 
 							if msecs > item.delay and msecs < (item.delay+p.duration_per_tile) then
 								prog = (msecs-item.delay) / p.duration_per_tile
 								item.y_rotation = {90*(1-prog),0,0}
@@ -2261,15 +2277,14 @@ function widget.threeDlist(t)
 								item.y_rotation = {0,0,0}
 								item.opacity = 255
 							end
-							
 						end
 					end
 				end
 				function tl:on_completed()
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
-							tiles[r][c].y_rotation={0,0,0}
-							tiles[r][c].opacity = 255
+							p.tiles[r][c].y_rotation={0,0,0}
+							p.tiles[r][c].opacity = 255
 						end
 					end
 				end
@@ -2280,53 +2295,79 @@ function widget.threeDlist(t)
 
 
 	local make_tile = function()
-		local group = Group{anchor_point = {p.item_w/2,p.item_h/2}}
-		local rect  = Rectangle{name="Base_Rect",w=p.item_w,h=p.item_h,color="303030"}
-		group:add(rect)
-		return group
+		local rect  = Rectangle{
+            name="Base_Rect",
+            size={ p.item_w, p.item_h},
+            color="303030",
+            anchor_point = { p.item_w/2, p.item_h/2}
+        }
+		return rect
 	end
-	local x_y_from_index = function(r,c)
-		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
-		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
-	end
+    local make_focus = function()
+        return Rectangle{
+            name="Focus",
+            size={ p.item_w+5, p.item_h+5},
+            color="00000000",
+            anchor_point = { (p.item_w+5)/2, (p.item_h+5)/2},
+            border_width=5,
+            border_color="FFFFFFFF",
+        }
+    end
+	
 	local make_grid = function()
         
 		local g
+        slate:clear()
+        
+        if p.focus == nil then
+            focus = make_focus()
+        else
+            focus = p.focus
+            focus.anchor_point={focus.w/2,focus.h/2}
+        end
+        focus.x, focus.y = x_y_from_index(focus_i[1],focus_i[2])
+        slate:add(focus)
+        
 		for r = 1, p.num_rows  do
-            if tiles[r] == nil then tiles[r] = {} end
+            if p.tiles[r] == nil then p.tiles[r] = {} end
 			for c = 1, p.num_cols do
-                if tiles[r][c] == nil then
+                if p.tiles[r][c] == nil then
                     g = make_tile()
                     slate:add(g)
-                    tiles[r][c] = g
+                    p.tiles[r][c] = g
+                    g.x, g.y = x_y_from_index(r,c)
+                    g.delay = p.cascade_delay*(r+c-1)
                 else
-                    g = tiles[r][c]
-                    if g:find_child("Base_Rect") ~= nil then
-                        g:find_child("Base_Rect").size = {p.item_w,p.item_h}
+                    g = p.tiles[r][c]
+                    if g.parent ~= nil then
+                        g:unparent()
                     end
+                    slate:add(g)
+                    g.x, g.y = x_y_from_index(r,c)
+                    g.anchor_point = {g.w/2,g.h/2}
+                    g.delay = p.cascade_delay*(r+c-1)
                 end
-                g.x, g.y = x_y_from_index(r,c)
-                g.delay = p.cascade_delay*(r+c-1)
 			end
 		end
         
-        if p.num_rows < #tiles then
+        if p.num_rows < #p.tiles then
             for r = p.num_rows + 1, #tiles do
-                for c = 1, #tiles[r] do
-                    tiles[r][c]:unparent()
-                    tiles[r][c] = nil
+                for c = 1, #p.tiles[r] do
+                    p.tiles[r][c]:unparent()
+                    p.tiles[r][c] = nil
                 end
                 tiles[r] = nil
             end
         end
-        if p.num_cols < #tiles[1] then
+        if p.num_cols < #p.tiles[1] then
             for c = p.num_cols + 1, #tiles[r] do
-                for r = 1, #tiles do
-                    tiles[r][c]:unparent()
-                    tiles[r][c] = nil
+                for r = 1, #p.tiles do
+                    p.tiles[r][c]:unparent()
+                    p.tiles[r][c] = nil
                 end
             end
         end
+        
 	end
 	make_grid()
 
@@ -2408,7 +2449,17 @@ function widget.scrollWindow(t)
 	--flag to hold back key presses while animating content group
 	local animating = false
 
+	local border = Rectangle{ color = "00000000" }
 	
+	local arrow_up, arrow_dn, arrow_l, arrow_r
+	
+	local track_h, track_w
+	local grip_h, grip_w
+	
+	
+	local grip_vert_base_y, grip_hor_base_x
+	local grip_vert = Rectangle{name="scroll_window",reactive=true}
+	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
 	
 
     --the umbrella Group, containing the full slate of tiles
@@ -2418,6 +2469,65 @@ function widget.scrollWindow(t)
         reactive = true,
         extra    = {
 			type = "ScrollImage",
+            seek_to = function(x,y)
+                local new_x, new_y
+                if p.content_w > p.clip_w then
+                    if x > p.content_w - p.clip_w/2 then
+                        new_x = -p.content_w + p.clip_w
+                    elseif x < p.clip_w/2 then
+                        new_x = 0
+                    else
+                        new_x = -x + p.clip_w/2
+                    end
+                else
+                    new_x =0
+                end
+                if p.content_h > p.clip_h then
+                    if y > p.content_w - p.clip_w/2 then
+                        new_y = -p.content_h + p.clip_h
+                    elseif y < p.clip_h/2 then
+                        new_y = 0
+                    else
+                        new_y = -y + p.clip_h/2
+                    end
+                else
+                    new_y =0
+                end
+                
+                if new_x ~= p.content.x or new_y ~= p.content.y then
+                    p.content:animate{
+                        duration = 200,
+                        x = new_x,
+                        y = new_y,
+                        on_completed = function()
+                            animating = false
+                        end
+                    }
+                
+                    if new_y < -(p.content_h - p.clip_h) then
+                        grip_vert.y = grip_vert_base_y+(track_h-grip_h)
+                    elseif new_y > 0 then
+                        grip_vert.y = grip_vert_base_y
+                    else
+                        grip_vert:complete_animation()
+                        grip_vert:animate{
+                            duration= 200,
+                            y = grip_vert_base_y-(track_h-grip_h)*new_y/(p.content_h - p.clip_h)
+                        }
+                    end
+                    if new_x < -(p.content_w - p.clip_w) then
+                        grip_hor.x = grip_hor_base_x+(track_w-grip_h)
+                    elseif new_x > 0 then
+                        grip_hor.x = grip_hor_base_x
+                    else
+                        grip_hor:complete_animation()
+                        grip_hor:animate{
+                            duration= 200,
+                            x = grip_hor_base_x-(track_w-grip_h)*new_x/(p.content_w - p.clip_w)
+                        }
+                    end
+                end
+            end
             --[[
 			get_content_group = function()
 				return content
@@ -2457,17 +2567,6 @@ function widget.scrollWindow(t)
 			print("Scroll Window does not support that key")
 		end
 	end
-	local border = Rectangle{ color = "00000000" }
-	
-	local arrow_up, arrow_dn, arrow_l, arrow_r
-	
-	local track_h, track_w
-	local grip_h, grip_w
-	
-	
-	local grip_vert_base_y, grip_hor_base_x
-	local grip_vert = Rectangle{name="scroll_window",reactive=true}
-	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
 	
 	scroll_y = function(dir)
 		local new_y = p.content.y+ dir*10
