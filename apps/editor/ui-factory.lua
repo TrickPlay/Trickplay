@@ -1225,15 +1225,15 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     local WIDTH         = 450
     local HEIGHT        = TEXT_SIZE  + ( PADDING_Y * 2 )
     local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local LINE_COLOR    = "FFFFFF"
+    local BORDER_COLOR  = {255,255,255,255}
+    local FOCUS_COLOR  = {0,255,0,255}
+    local LINE_COLOR    = {255,255,255,255}  --"FFFFFF"
     local BORDER_RADIUS = 12
     local LINE_WIDTH    = 1
 
     local input_box_width     
 
-   
-
+    local item_group 
  
     local function text_reactive()
 	for i, c in pairs(g.children) do
@@ -1246,14 +1246,14 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     local function make_focus_ring(w, h)
         local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
-        ring:set_source_color("1b911b")
+        ring:set_source_color( FOCUS_COLOR )
         ring:round_rectangle(
             PADDING_X + BORDER_WIDTH /2,
             PADDING_Y + BORDER_WIDTH /2,
             w - BORDER_WIDTH - PADDING_X * 2 ,
             h - BORDER_WIDTH - PADDING_Y * 2 ,
             BORDER_RADIUS )
-    	ring:set_line_width (4)
+    	--ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
 	if ring.Image then
@@ -1304,7 +1304,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     -- item group's children 
     local text, input_text, ring, focus, line, button
 
---kk
     if(item_n == "title")then 
     	text = Text {text = item_v}:set(STYLE)
 	text.position = {WIDTH/2 - text.w/2 - 10, 5} 
@@ -1345,17 +1344,11 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         button.reactive = true
 
 	function button:on_key_down(key)
-    local item_group 
- if v.extra then 
-         if is_in_list(v.extra.type, widgets) == true  then
-              item_group = (inspector:find_child("si")).content
-	 else 
-              item_group = inspector:find_child("item_group")
-	 end 
-    else 
-         item_group = inspector:find_child("item_group")
-    end 
-
+    	     if is_this_widget(v) == true  then
+                item_group = (inspector:find_child("si")).content
+             else 
+         	item_group = inspector:find_child("item_group")
+    	     end 
              if key == keys.Return then
                   if (item_v == "view code") then 
 		      screen:remove(inspector)
@@ -1437,7 +1430,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      editor.view_code(v)
 		      text_reactive()
 	     elseif (item_v == "apply") then 
-		      --org_obj, new_obj = inspector_apply (v, inspector) 
 		      inspector_apply (v, inspector) 
 		      screen:remove(inspector)
 		      input_mode = S_SELECT
@@ -1504,51 +1496,109 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
         local skin_picker = widget.buttonPicker{skin = "custom", items = skins, font = "DejaVu Sans 26px", selected_item = selected}
 	skin_picker.wheight = 45
+	skin_picker.wwidth = 210
         skin_picker.position = {text.x + text.w + 50 , 5}
-	--skin_picker.name = "skin"
+	skin_picker.name = "skin_picker"
+
+
+	print("Skin Picker Children : ")
+	dumptable(skin_picker.children)
+	print("Skin Picker Items : ")
+	dumptable(skin_picker.items)
+	print("Skin Picker Selected Items : ")
+	print(skins[tonumber(skin_picker.selected_item)])
+
         group:add(skin_picker) 
 	
-	skin_picker.reactive  = true 
-	function skin_picker:on_button_down (x,y,b,n)
+	unfocus = skin_picker:find_child("unfocus")
+	function unfocus:on_button_down (x,y,b,n)
+	        print("oipiop")
+   		current_focus.extra.on_focus_out()
+	        current_focus = group
 		skin_picker.on_focus_in()
+	        skin_picker:grab_key_focus()
+		return true
 	end 
 
-	function skin_picker:on_key_down()
+        left_arrow = skin_picker:find_child("left_un")
+	left_arrow.reactive = true 
+	function left_arrow:on_button_down(x, y, b, n)
+		current_focus.extra.on_focus_out()
+	        current_focus = group
+		skin_picker.on_focus_in()
+	        skin_picker:grab_key_focus()
+		skin_picker.press_left()
+		return true 
+	end 
+
+	right_arrow = skin_picker:find_child("right_un")
+	right_arrow.reactive = true 
+	function right_arrow:on_button_down(x, y, b, n)
+		current_focus.extra.on_focus_out()
+	        current_focus = group
+		skin_picker.on_focus_in()
+	        skin_picker:grab_key_focus()
+		skin_picker.press_right()
+		return true 
+	end 
+
+	function skin_picker:on_key_down(key)
+    	     if is_this_widget(v) == true  then
+                item_group = (inspector:find_child("si")).content
+             else 
+         	item_group = inspector:find_child("item_group")
+    	     end 
 	       if key == keys.Left then 
 		     skin_picker.press_left()
 	       elseif key == keys.Right then  
 		     skin_picker.press_right()
 	       elseif (key == keys.Tab and shift == false) or key == keys.Down then
-		     skin_picker.out_focus()
+		     skin_picker.on_focus_out()
+		     for i, v in pairs(attr_t_idx) do
+		     if(item_n == v or item_v == v) then 
+		          while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
+		               i = i + 1
+			       if(attr_t_idx[i+1] == nil) then return true end  
+		          end 
+		          if(item_group:find_child(attr_t_idx[i+1])) then
+		               local n_item = attr_t_idx[i+1]
+			       item_group:find_child(n_item).extra.on_focus_in()	
+			       break
+		          end
+		     end 
+    		     end
 	       elseif key == keys.Up or (key == keys.Tab and shift == true )then 
-		     skin_picker.out_focus()
+		     skin_picker.on_focus_out()
+		      for i, v in pairs(attr_t_idx) do
+			if(item_n == v or item_v == v) then 
+			     if(attr_t_idx[i-1] == nil) then return true end 
+			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
+				 i = i - 1
+			     end 
+			     if(item_group:find_child(attr_t_idx[i-1])) then
+			     	local p_item = attr_t_idx[i-1]
+				item_group:find_child(p_item).extra.on_focus_in()	
+				break
+			     end
+			end 
+    		    end
 	       end 
 	end 
 
 
---[[
+	group:add(skin_picker)
+
         function group.extra.on_focus_in()
-		 skin_picker.extra.on_focus_in()
+		 group:find_child("skin_picker").extra.on_focus_in()
+	         group:find_child("skin_picker"):grab_key_focus()
         end
 
         function group.extra.on_focus_out()
-		  skin_picker.extra.on_focus_out()
+		 group:find_child("skin_picker").extra.on_focus_out()
         end 
-]]
 
-	group:add(skin_picker)
+
         return group
-
-	--[[
-	function (skin_picker:find_child("left_un")):on_button_down(x, y, button, num_clicks)
-		skin_picker.press_left()
-		return true 
-	end 
-	function (skin_picker:find_child("right_un")):on_button_down(x, y, button, num_clicks)
-		skin_picker.press_right()
-		return true 
-	end 
-	]]
     else 	---- Attributes with focusable ring 
 
 	group.name = item_n
@@ -1631,49 +1681,39 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	
   	function input_text:on_key_down(key)
-    	local item_group 
-	if v.extra then 
-            if is_in_list(v.extra.type, widgets) == true  then
+    	     if is_this_widget(v) == true  then
                 item_group = (inspector:find_child("si")).content
-	    else 
-                item_group = inspector:find_child("item_group")
-	    end 
-        else 
-            item_group = inspector:find_child("item_group")
-        end 
+             else 
+         	item_group = inspector:find_child("item_group")
+    	     end 
+	    if key == keys.Return or
+                 (key == keys.Tab and shift == false) or 
+                 key == keys.Down then
+	       	 group.extra.on_focus_out()
+		 --print("item_n : ", item_n)
+		 --print("item_v : ", item_v)
 
-	       if key == keys.Return or
-                  (key == keys.Tab and shift == false) or 
-                  key == keys.Down then
-	       	     group.extra.on_focus_out()
-		     print("item_n : ", item_n)
-		     print("item_v : ", item_v)
-
-		     for i, v in pairs(attr_t_idx) do
-			if(item_n == v or item_v == v) then 
-			     print("i : ", i) 
-			     print("v : ", v) 
-	                     print("next attr", attr_t_idx[i+1])
-			     while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-				 i = i + 1
-			         if(attr_t_idx[i+1] == nil) then 
-                		 --(inspector:find_child("si")).reactive = true
-			             return true
-			         end  -- 0208
-			     end 
-	                     print("there is .. ", attr_t_idx[i+1])
-			     if item_group:find_child("skin") then 
-				print("there is skin !!")
-			     end 	
-			     if(item_group:find_child(attr_t_idx[i+1])) then
-			     	local n_item = attr_t_idx[i+1]
-				item_group:find_child(n_item).extra.on_focus_in()	
-				break
-			     end
-			end 
-    		     end
-	       elseif key == keys.Up or 
-		      (key == keys.Tab and shift == true )then 
+		 for i, v in pairs(attr_t_idx) do
+		     if(item_n == v or item_v == v) then 
+		--	     print("i : ", i) 
+		--	     print("v : ", v) 
+	         --            print("next attr", attr_t_idx[i+1])
+		          while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
+		               i = i + 1
+			       if(attr_t_idx[i+1] == nil) then return true end  -- 0208
+		          end 
+	                 -- print("there is .. ", attr_t_idx[i+1])
+		          if item_group:find_child("skin") then 
+		         -- print("there is skin !!")
+	                  end 	
+		          if(item_group:find_child(attr_t_idx[i+1])) then
+		               local n_item = attr_t_idx[i+1]
+			       item_group:find_child(n_item).extra.on_focus_in()	
+			       break
+		          end
+		     end 
+    		end
+	     elseif key == keys.Up or (key == keys.Tab and shift == true )then 
 		    group.extra.on_focus_out()
  		    for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
@@ -1688,33 +1728,25 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     end
 			end 
     		    end
-               end
-	       return true
+             end
+	     --return true
    	end 
 
 	
     	group:add(input_text)
 
         function group.extra.on_focus_in()
-	     if(group.name ~= "skin") then 
 	         current_focus = group
              	 ring.opacity = 0
                  input_text.cursor_visible = true
                  focus.opacity = 255
-	     else 
-		 skin_picker.extra.on_focus_in()
-	     end 
-	     input_text:grab_key_focus(input_text)
+	         input_text:grab_key_focus(input_text)
         end
 
         function group.extra.on_focus_out()
-	     if(group.name ~= "skin") then 
                   focus.opacity = 0
                   input_text.cursor_visible = false
                   ring.opacity = 255
-	     else 
-		  skin_picker.extra.on_focus_out()
-	     end
         end 
     end
 
