@@ -1,6 +1,6 @@
 
-local widget = {}
-local skin_list = { ["default"] = {
+     local widget = {}
+     skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
 				   ["button_focus"] = "assets/smallbuttonfocus.png", 
 				   ["toast_icon"] = "assets/voice-1.png", 
@@ -14,16 +14,18 @@ local skin_list = { ["default"] = {
 				   ["loading_dot"]  = nil
 				  },
 
+	            ["custom"] = {},
 		    ["skin_type1"] = { 
 				   ["button"] = "assets/button-red.png", 
 				   ["button_focus"] = "assets/button-focus.png", 
+				   --["toast_icon"] = "assets/button-yellow-circle.png", 
+				   ["toast_icon"] = "assets/voice-2.png", 
+				   ["toast"] = "assets/background-blue-6.jpg", 
 				   ["textinput"] = "", 
 				   ["textinput_focus"] = "", 
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
-				   ["toast"] = "", 
 				   ["icon"] = "", 
-				   ["toast_icon"] = "assets/voice-2.png", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -44,9 +46,9 @@ local skin_list = { ["default"] = {
 				   ["textinput_focus"] = "", 
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
-				   ["toast"] = "", 
+				   ["toast"] = "assets/background-red-6.jpg", 
+				   ["toast_icon"] = "assets/voice-3.png", 
 				   ["icon"] = "", 
-				   ["toast_icon"] = "assets/voice-2.png", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -58,6 +60,22 @@ local skin_list = { ["default"] = {
 				   ["checkbox"] = "", 
 				   ["checkbox_sel"] = "assets/checkmark.png", 
 				   ["loadingdot"] = "assets/left.png", 
+				  },
+		    ["skin_type3"] = { 
+				   ["button"] = "assets/button-blue.png", 
+				   ["button_focus"] = "assets/smallbuttonfocus.png", 
+				  },
+		    ["skin_type4"] = { 
+				   ["button"] = "assets/button-blue.png", 
+				   ["button_focus"] = "assets/smallbuttonfocus.png", 
+				  },
+		    ["skin_type5"] = { 
+				   ["button"] = "assets/button-blue.png", 
+				   ["button_focus"] = "assets/smallbuttonfocus.png", 
+				  },
+		    ["skin_type6"] = { 
+				   ["button"] = "assets/button-blue.png", 
+				   ["button_focus"] = "assets/smallbuttonfocus.png", 
 				  },
 
 		  }
@@ -999,7 +1017,7 @@ function widget.toastBox(table)
 	font = "DejaVu Sans 30px", 
 	color = {255,255,255,255},  --"FFFFFF", 
 	border_width  = 3,
-	border_color  = {255,255,255,255}, "FFFFFFC0", 
+	border_color  = {255,255,255,255}, -- "FFFFFFC0", 
 	f_color  = {25,25,25,100},
 	padding_x = 0,
 	padding_y = 0,
@@ -1025,16 +1043,10 @@ function widget.toastBox(table)
           extra = {type = "ToastBox"} 
      }
 
-    local tb_group_cur_y = 30
-    local tb_group_cur_x = 30
+    local tb_group_cur_y = 10
+    local tb_group_cur_x = 20
     local tb_group_timer = Timer()
     local tb_group_timeline = Timeline ()
-
-    if(p.skin == "custom") then 
-	icon = assets("assets/voice-1.png")
-    else 
-	icon = assets(skin_list[p.skin]["icon"])
-    end 
     
 
     local create_toastBox = function()
@@ -1044,18 +1056,25 @@ function widget.toastBox(table)
 
     	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
+
+        
+    	if(p.skin == "custom") then 
+		icon = assets("assets/voice-1.png")
+    	else 
+		icon = assets(skin_list[p.skin]["toast_icon"])
+    	end 
     
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
     	title= Text{text = p.label, font= "DejaVu Sans 32px", color = "FFFFFF"}     
     	title:set{name = "title", position = {(p.wwidth - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
 
-    	message= Text{text = p.message, font= "DejaVu Sans 32px", color = "FFFFFF"}     
-    	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*2 + title.h }} 
+    	message= Text{text = p.message, font= "DejaVu Sans 28px", color = "FFFFFF"}     
+    	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 + title.h }} 
 
 	if(p.skin ~= "custom") then 
     	     t_box_img = assets(skin_list[p.skin]["toast"])
-    	     t_box_img:set{name="t_box_img", size = { p.wwidth , p.wheight } , opacity = 0}
+    	     t_box_img:set{name="t_box_img", size = { p.wwidth , p.wheight } , opacity = 255}
 	else 
 	     t_box_img = Image{}
 	end 
@@ -1063,7 +1082,7 @@ function widget.toastBox(table)
 	t_box.y = t_box.y -30
 	tb_group.h = tb_group.h - 30
 
-    	tb_group:add(t_box, icon, title, message, t_box_img)
+    	tb_group:add(t_box, t_box_img, icon, title, message)
 
     	if (p.skin == "custom") then t_box_img.opacity = 0
     	else t_box.opacity = 0 end 
@@ -1200,7 +1219,7 @@ function widget.buttonPicker(table)
 	ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
         ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
 
-        focus_ring = make_ring(p.wwidth, p.wheight, {255, 0,0,255}, 1, 7, 7, 12)
+        focus_ring = make_ring(p.wwidth, p.wheight, {0, 255, 0, 255}, 1, 7, 7, 12)
         focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
 
 
@@ -1225,13 +1244,13 @@ function widget.buttonPicker(table)
 	right_un.scale = {w_scale, h_scale}
 	right_sel.scale = {w_scale, h_scale}
 
-	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 255}
+	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 255, reactive = true}
 	left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 0}
-	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.wheight/5}, opacity = 255}
+	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.wheight/5}, opacity = 255, reactive = true}
 	right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
 
-     	unfocus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255}
-	focus:set{ position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
+     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255, reactive = true}
+	focus:set{name = "focus",  position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
 
      	for i, j in pairs(p.items) do 
                items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, opacity = 255})     
@@ -1242,7 +1261,7 @@ function widget.buttonPicker(table)
 	for i, j in pairs(items.children) do 
 	  if i == p.selected_item then  -- i == 1
                j.position = {p.wwidth/2 - j.width/2, p.wheight/2 - j.height/2}
-	       j_padding = 4 * j.x
+	       j_padding = 5 * j.x -- 5 는 진정한 해답이 아니고.. 이걸 바꿔 줘야함.. 그리고 박스 크기가 문자열과 비례해서 적당히 커줘야하고.. ^^;;;
 	  else 
                --j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
 	  end 
@@ -1262,7 +1281,6 @@ function widget.buttonPicker(table)
 
 	items.clip = { 0, 0, p.wwidth, p.wheight }
 
-
    	bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
 
 	if(p.skin == "custom") then unfocus.opacity = 0 
@@ -1274,12 +1292,23 @@ function widget.buttonPicker(table)
      create_buttonPicker()
 
      function bp_group.extra.on_focus_in()
-        unfocus.opacity = 0
-	focus.opacity   = 255
+	if(p.skin == "custom") then 
+             ring.opacity = 0 
+	     focus_ring.opacity = 255
+        else 
+             unfocus.opacity = 0
+	     focus.opacity   = 255
+	end 
+
      end
      function bp_group.extra.on_focus_out()
-        unfocus.opacity = 255
-	focus.opacity   = 0
+	if(p.skin == "custom") then 
+             ring.opacity = 255 
+	     focus_ring.opacity = 0
+	else 
+            unfocus.opacity = 255
+	    focus.opacity   = 0
+	end 
      end
 
      function bp_group.extra.press_left()
@@ -1411,7 +1440,6 @@ function widget.buttonPicker(table)
 		table.remove(p.items)
 		create_buttonPicker()
         end 
-
 	--bp_group.out_focus()
         
         mt = {}

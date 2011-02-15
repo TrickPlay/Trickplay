@@ -28,6 +28,10 @@ function inspector_apply (v, inspector)
       for i, j in pairs(item_group.children) do 
 	   if j.name then
 
+	   if j.name == "skin" then 
+		v[j.name] = skins[tonumber(item_group:find_child(j.name):find_child("skin_picker").selected_item)]
+	   end 
+
 	   if j.name == "anchor_point" then 
 	        v:move_anchor_point(item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[1], 
 	  	item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
