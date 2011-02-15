@@ -2201,6 +2201,7 @@ function widget.threeDlist(t)
 		cascade_delay     = 200,
         tiles       = {},
         focus       = nil,
+        focus_visible = true,
     }
     
     local focus_i = {1,1}
@@ -2327,6 +2328,12 @@ function widget.threeDlist(t)
         end
         focus.x, focus.y = x_y_from_index(focus_i[1],focus_i[2])
         slate:add(focus)
+        
+        if p.focus_visible then
+            focus.opacity=255
+        else
+            focus.opacity=0
+        end
         
 		for r = 1, p.num_rows  do
             if p.tiles[r] == nil then p.tiles[r] = {} end
