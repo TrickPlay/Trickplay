@@ -1807,7 +1807,7 @@ function widget.loadingdots(t)
     local p = {
         skin          = "default",
         dot_radius    = 5,
-        dot_color     = "#FFFFFF",
+        dot_color     = {255,255,255},
         num_dots      = 12,
         anim_radius   = 50,
         anim_duration = 150,
@@ -1991,11 +1991,11 @@ function widget.loadingbar(t)
     local p={
         wwidth             = 300,
         wheight            = 50,
-        shell_upper_color  = "000000",
-        shell_lower_color  = "7F7F7F",
-        stroke_color       = "A0A0A0",
-        fill_upper_color  = "FF0000",
-        fill_lower_color  = "603030",
+        shell_upper_color  = {0,0,0},
+        shell_lower_color  = {127,127,127},
+        stroke_color       = {160,160,160},
+        fill_upper_color  = {255,0,0},
+        fill_lower_color  = {96,48,48},
     }
     --overwrite defaults
     if t ~= nil then
