@@ -565,6 +565,9 @@ Arguments:
     	padding_x - Padding of the button image on the X axis
     	padding_y - Padding of the button image on the Y axis
     	border_radius - Radius of the border for the button
+	on_pressed - Function that is called by on_focus_in() or on_key_down() event
+	on_release - Function that is called by on_focus_out()
+
 
 Return:
  	b_group - The group containing the button 
@@ -593,6 +596,8 @@ function widget.button(table)
     	padding_x = 0,
     	padding_y = 0,
     	border_radius = 12,
+	on_pressed = nil, 
+	on_released = nil, 
     }
 
  --overwrite defaults
@@ -658,6 +663,10 @@ function widget.button(table)
 	     button.opacity = 0
              focus.opacity = 255
         end 
+	if p.on_pressed then 
+		p.on_pressed()
+	end 
+
 	b_group:grab_key_focus(b_group)
     end
     
@@ -670,7 +679,11 @@ function widget.button(table)
 	     button.opacity = 255
              focus.opacity = 0
 	     focus_ring.opacity = 0
-        end 
+        end
+	if p.on_released then 
+		p.on_released()
+	end 
+ 
     end
 	
     mt = {}
@@ -1180,7 +1193,7 @@ function widget.buttonPicker(table)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px" , 
 	color = {255,255,255,255}, --"FFFFFF", 
-	item_func = {}, 
+	rotate_func = {}, 
         selected_item = 1, 
     }
 
@@ -1360,12 +1373,13 @@ function widget.buttonPicker(table)
 			items:find_child("item"..tostring(next_i)).x = next_new_x
 			items:find_child("item"..tostring(next_i)).y = next_new_y
 			p.selected_item = next_i
+			if p.rotate_func then
+	       		     p.rotate_func(next_i)
+	    		end
+
 			t = nil
 	    end
-	    if p.item_func then
-	      -- p.item_func(next_i,prev_i)
-	    end
-
+	   
 	    t:start()
 	end
 
@@ -1416,11 +1430,11 @@ function widget.buttonPicker(table)
 		items:find_child("item"..tostring(next_i)).x = next_new_x
 		items:find_child("item"..tostring(next_i)).y = next_new_y
 		p.selected_item = next_i
+		if p.rotate_func then
+	       	     p.rotate_func(next_i)
+	    	end
 		t = nil
 	    end
-	    --if p.item_func then
-	       -- p.item_func(next_i,prev_i)
-	    --end
 	    t:start()
 	end
 
@@ -1501,7 +1515,7 @@ Arguments:
 	item_pos - The position of the group of text items 
 	line_space - The space between the text items 
 	selected_item - Selected item's number 
-	rotate_func - Table of functions that is called by selceted item number
+	rotate_func - function that is called by selceted item number
 
 Return:
  	rb_group - Group containing the radio button 
@@ -1531,7 +1545,8 @@ function widget.radioButton(table)
 	line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
-	item_func = {}, 
+	rotate_func = nil, 
+	direction = 1, 
 	selected_item = 1 
     }
 
@@ -1574,14 +1589,22 @@ function widget.radioButton(table)
     
          select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
 
+	 local pos = {0,0}
          for i, j in pairs(p.items) do 
-	      itm_h = p.line_space
-              items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = {0, i * itm_h - itm_h}})     
+	      if(p.direction == 1) then --vertical 
+                  pos= {0, i * p.line_space - p.line_space}
+	      end   	
+              items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = pos})     
 	      if p.skin == "custom" then 
-    	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {0, i * itm_h - itm_h - 8}} ) 
+    	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}} ) 
 	      else
-	           rings:add(Clone{name = "item"..tostring(i),  source=p.button_image, position = {0, i * itm_h - itm_h - 8}}) 
+	           rings:add(Clone{name = "item"..tostring(i),  source=p.button_image, position = {pos[1], pos[2] - 8}}) 
 	      end 
+
+	      if(p.direction == 2) then --horizontal
+		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
+	      end 
+
          end 
 	 rings:set{name = "rings", position = p.b_pos} 
 	 items:set{name = "items", position = p.item_pos} 
@@ -1594,6 +1617,12 @@ function widget.radioButton(table)
 
      create_radioButton()
 
+     function rb_group.extra.select_button(item_n) 
+	    p.selected_item = item_n
+            if p.rotate_func then
+	       p.rotate_func(p.selected_item)
+	    end
+     end 
 
      function rb_group.extra.insert_item(itm) 
 	table.insert(p.items, itm) 
@@ -1654,7 +1683,9 @@ Arguments:
 		item_pos - Position of the group of text items 
 		line_space - Space between the text items 
 		selected_item - Selected item's number 
-		rotate_func - Table of functions that is called by selected item number   
+		rotate_func - function that is called by selected item number   
+		direction - Option of list direction (1=Vertical, 2=Horizontal)
+
 
 Return:
 		rb_group - Group containing the check box  
@@ -1683,10 +1714,9 @@ function widget.checkBox(table)
 	line_space = 40,   
 	b_pos = {0, 0},  -- items 
 	item_pos = {50,-5},  -- items 
-	selected_item = 1,  
-	box_image = Image{},
-	item_func = {}, 
-	check_image = assets("assets/checkmark.png") 
+	selected_item = {1, 3},  
+	direction = 2, 
+	rotate_func = {},  
     } 
 
  --overwrite defaults
@@ -1697,7 +1727,8 @@ function widget.checkBox(table)
     end
 
  --the umbrella Group
-    local check_img
+    local check_image
+    local checks = Group()
     local items = Group()
     local boxes = Group() 
     local cb_group = Group()
@@ -1711,35 +1742,51 @@ function widget.checkBox(table)
 
 
     local function create_checkBox()
-	if(p.skin ~= "custom") then 
-         p.box_image = assets(skin_list[p.skin]["checkbox"])
-	end
-	
+
 	 items:clear() 
+	 checks:clear() 
 	 boxes:clear() 
 	 cb_group:clear()
 
-    	 check_img = p.check_image
-	 check_img:set { name="check_img", position = {0,0,0}, size = p.check_size, opacity = 255 }
-
+	 if(p.skin ~= "custom") then 
+             p.box_image = assets(skin_list[p.skin]["checkbox"])
+             p.check_image = skin_list[p.skin]["check"]
+	 else 
+	     p.box_image = Image{}
+             p.check_image = "assets/checkmark.png"
+	 end
+	
 	 boxes:set{name = "boxes", position = p.b_pos} 
+	 checks:set{name = "checks", position = p.b_pos} 
 	 items:set{name = "items", position = p.item_pos} 
 
-
+         local pos = {0, 0}
          for i, j in pairs(p.items) do 
-	      itm_h = p.line_space
-              items:add(Text{name="item"..tostring(i), text = j, font=p.font, color = p.color, position = {0, i * itm_h - itm_h}})     
+	       
+	      if(p.direction == 1) then --vertical 
+                  pos= {0, i * p.line_space - p.line_space}
+	      end   			
+
+	      items:add(Text{name="item"..tostring(i), text = j, font=p.font, color = p.color, position = pos})     
 	      if p.skin == "custom" then 
     	           boxes:add(Rectangle{name="box"..tostring(i),  color= p.f_color, border_color= p.box_color, border_width= p.box_width, 
-				       size = p.box_size, position = {0, i * itm_h - itm_h,0}, opacity = 255}) 
+				       size = p.box_size, position = pos, opacity = 255}) 
+	           checks:add(Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, opacity = 0}) 
 	      else
-	           boxes:add(Clone{name = "item"..tostring(i),  source=p.button_image, size = p.box_size, position = {0, i * itm_h - itm_h,0}, opacity = 255}) 
+	           boxes:add(Clone{name = "item"..tostring(i),  source=p.button_image, size = p.box_size, position = pos, opacity = 255}) 
+	           checks:add(Image{name = "check"..tostring(i),  src=p.check_image, size = p.check_size, position = pos, opacity = 0}) 
+	      end 
+
+	      if(p.direction == 2) then --horizontal
+		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
 	      end 
          end 
-         check_img.x  = items:find_child("item"..tostring(p.selected_item)).x 
-         check_img.y  = items:find_child("item"..tostring(p.selected_item)).y 
 
-	 cb_group:add(boxes, items, check_img) 
+	 for i,j in pairs(p.selected_item) do 
+             checks:find_child("check"..tostring(j)).opacity = 255 
+	 end 
+
+	 cb_group:add(boxes, items, checks)
     end
     
     create_checkBox()
