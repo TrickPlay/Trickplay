@@ -682,6 +682,20 @@ void TPContext::setup_fonts()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
+static int controller_execute_command( TPController * , unsigned int command , void * , void * )
+{
+    switch( command )
+    {
+        case TP_CONTROLLER_COMMAND_START_POINTER:
+            return 0;
+
+        case TP_CONTROLLER_COMMAND_STOP_POINTER:
+            return 0;
+    }
+
+    return 1;
+}
+
 static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode )
 {
     * keyval = event->key.keyval;
@@ -719,6 +733,8 @@ static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode 
 // In desktop builds, we catch all key events that are not synthetic and pass
 // them through a keyboard controller. That will generate an event for the
 // controller and re-inject the event into clutter as a synthetic event.
+//
+// We also use this for mouse events.
 
 gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer controller )
 {
@@ -755,6 +771,43 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                     return TRUE;
                 }
                 break;
+            }
+
+            case CLUTTER_MOTION:
+            {
+                if ( !(event->motion.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y );
+                    }
+                    return TRUE;
+                }
+                break;
+            }
+
+            case CLUTTER_BUTTON_PRESS:
+            {
+                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    }
+                    return TRUE;
+                }
+            }
+
+            case CLUTTER_BUTTON_RELEASE:
+            {
+                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    }
+                    return TRUE;
+                }
             }
 
             default:
@@ -1020,7 +1073,9 @@ int TPContext::run()
 
     memset( &spec, 0, sizeof( spec ) );
 
-    spec.capabilities = TP_CONTROLLER_HAS_KEYS;
+    spec.capabilities = TP_CONTROLLER_HAS_KEYS | TP_CONTROLLER_HAS_POINTER;
+
+    spec.execute_command = controller_execute_command;
 
     // This controller won't leak because the controller list will free it
 
@@ -1029,6 +1084,8 @@ int TPContext::run()
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
 
 #endif
+
+    clutter_stage_set_throttle_motion_events( CLUTTER_STAGE( stage ) , FALSE );
 
     //.........................................................................
     // Create the default media player. This may come back NULL.

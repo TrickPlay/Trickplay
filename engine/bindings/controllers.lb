@@ -37,10 +37,12 @@ public:
     virtual bool key_down(unsigned int key_code,unsigned long int unicode);
     virtual bool key_up(unsigned int key_code,unsigned long int unicode);
     virtual void accelerometer(double x,double y,double z);
-    virtual void click(int x,int y);
-    virtual void touch_down(int x,int y);
-    virtual void touch_move(int x,int y);  
-    virtual void touch_up(int x,int y);    
+    virtual bool pointer_move( int x, int y );
+    virtual bool pointer_button_down( int button , int x, int y );
+    virtual bool pointer_button_up( int button , int x, int y );
+    virtual void touch_down(int finger,int x,int y);
+    virtual void touch_move(int finger,int x,int y);
+    virtual void touch_up(int finger,int x,int y);
     virtual void ui_event(const String & parameters);
     
 private:
@@ -72,6 +74,8 @@ public:
     
     void proxy_disconnected(ControllerDelegate * proxy);
     
+    void start_pointer();
+
 private:
 
     lua_State *         L;
@@ -123,6 +127,18 @@ global controllers [[ControllerListDelegate*]]
             self->push_connected();
         ]];
     
+    /*
+       Function: start_pointer
+
+       A convenience function that tells all connected controllers to start
+       sending pointer events.
+    */
+
+    start_pointer()
+        [[
+            self->start_pointer();
+        ]];
+
     /*
     	Event: on_controller_connected
     	
@@ -206,15 +222,20 @@ interface controller [[ControllerDelegate*]]
             has_accelerometer=self->has_cap(TP_CONTROLLER_HAS_ACCELEROMETER);
         ]];
         
-    /*
-    	Property: has_clicks
-    	
-    	Whether the controller can send click events.
-    */
-    
     readonly bool has_clicks
         [[
-            has_clicks=self->has_cap(TP_CONTROLLER_HAS_CLICKS);
+            has_clicks=false;
+        ]];
+
+    /*
+        Property: has_pointer
+
+        Whether the controller can send pointer events.
+    */
+    
+    readonly bool has_pointer
+        [[
+            has_pointer=self->has_cap(TP_CONTROLLER_HAS_POINTER);
         ]];
     
     /*
@@ -389,39 +410,38 @@ interface controller [[ControllerDelegate*]]
         ]];
         
 
-	/*
-		Function: start_clicks
-		
-		Instructs the controller to start sending click events.
-		
-	    Returns:
-    	
-    		true - If it was successful.
-    		
-    		false - Otherwise.		
-	*/
-	
-    bool start_clicks()
+    /*
+        Function: start_pointer
+
+        Tells the controller to start sending pointer events.
+
+        Returns:
+
+            true - If it was successful.
+
+            false - Otherwise.
+    */
+
+    bool start_pointer()
         [[
-            result=self->get_controller()->start_clicks();
+            result=self->get_controller()->start_pointer();
         ]];
         
-	/*
-		Function: stop_clicks
-		
-		Tells the controller to stop sending click events.
-		
-    	
-    	Returns:
-    	
-    		true - If it was successful.
-    		
-    		false - Otherwise.
-	*/
-			        
-    bool stop_clicks()
+    /*
+        Function: stop_pointer
+
+        Tells the controller to stop sending pointer events.
+
+        Returns:
+
+            true - If it was successful.
+
+            false - Otherwise.
+    */
+
+    bool stop_pointer()
         [[
-            result=self->get_controller()->stop_clicks();
+            result=self->get_controller()->stop_pointer();
         ]];
     
     /*
@@ -784,20 +804,64 @@ interface controller [[ControllerDelegate*]]
     callback on_accelerometer;
 
 	/*
-		Event: on_click
+		Event: on_pointer_move
 		
-		A click event.
+		A pointer move event.
 		
     	Arguments:
     	
     		controller - The controller that generated the event.
     		
     		x,y - The coordinates of the event.
+
+        Returns:
+
+            false - If you don't want the event to be propagated.
 	*/
 	    
-    callback on_click;
+    callback on_pointer_move;
 
-	/*
+    /*
+        Event: on_pointer_button_down
+
+        A pointer button was pressed.
+
+        Arguments:
+
+            controller - The controller that generated the event.
+
+            button - The button, starting at 0.
+
+            x,y - The coordinates of the event.
+
+        Returns:
+
+            false - If you don't want the event to be propagated.
+    */
+
+    callback on_pointer_button_down;
+
+    /*
+        Event: on_pointer_button_up
+
+        A pointer button was released.
+
+        Arguments:
+
+            controller - The controller that generated the event.
+
+            button - The button, starting at 0.
+
+            x,y - The coordinates of the event.
+
+        Returns:
+
+            false - If you don't want the event to be propagated.
+    */
+
+    callback on_pointer_button_up;
+
+    /*
 		Event: on_touch_down
 		
 		A touch down event.
@@ -806,6 +870,8 @@ interface controller [[ControllerDelegate*]]
     	
     		controller - The controller that generated the event.
     		
+    		finger - The finger, starting at 0.
+
     		x,y - The coordinates of the event.
 	*/
 	    
@@ -820,6 +886,8 @@ interface controller [[ControllerDelegate*]]
     	
     		controller - The controller that generated the event.
     		
+            finger - The finger, starting at 0.
+
     		x,y - The coordinates of the event.
 	*/
 
@@ -834,6 +902,8 @@ interface controller [[ControllerDelegate*]]
     	
     		controller - The controller that generated the event.
     		
+            finger - The finger, starting at 0.
+
     		x,y - The coordinates of the event.
 	*/
 
@@ -939,32 +1009,87 @@ void ControllerDelegate::accelerometer(double x,double y,double z)
     invoke_controller_on_accelerometer(L,this,3,0);    
 }
 
-void ControllerDelegate::click(int x,int y)
+bool ControllerDelegate::pointer_move(int x,int y)
 {
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_click(L,this,2,0);        
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_move(L,this,2,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
 }
 
-void ControllerDelegate::touch_down(int x,int y)
+bool ControllerDelegate::pointer_button_down(int button,int x,int y)
+{
+    lua_pushnumber(L,button);
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_button_down(L,this,3,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
+}
+
+bool ControllerDelegate::pointer_button_up(int button,int x,int y)
+{
+    lua_pushnumber(L,button);
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_button_up(L,this,3,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
+}
+
+void ControllerDelegate::touch_down(int finger,int x,int y)
 {   
+    lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_down(L,this,2,0);        
+    invoke_controller_on_touch_down(L,this,3,0);
 }
 
-void ControllerDelegate::touch_move(int x,int y)
+void ControllerDelegate::touch_move(int finger, int x,int y)
 {
+    lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_move(L,this,2,0);            
+    invoke_controller_on_touch_move(L,this,3,0);
 }
 
-void ControllerDelegate::touch_up(int x,int y)
+void ControllerDelegate::touch_up(int finger, int x,int y)
 {
+    lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_up(L,this,2,0);            
+    invoke_controller_on_touch_up(L,this,3,0);
 }
 
 void ControllerDelegate::ui_event(const String & parameters)
@@ -1089,6 +1214,17 @@ void ControllerListDelegate::push_connected()
         proxies[ d ] = UserData::Handle::make( L , -1 );
         
         lua_rawseti(L,-2,i++);
+    }
+}
+
+void ControllerListDelegate::start_pointer()
+{
+    ControllerList::ControllerSet controllers(list->get_controllers());
+
+    for(ControllerList::ControllerSet::iterator it=controllers.begin();
+        it!=controllers.end();++it)
+    {
+        (*it)->start_pointer();
     }
 }
 
