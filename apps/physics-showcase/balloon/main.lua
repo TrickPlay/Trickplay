@@ -16,6 +16,10 @@ sky:rectangle( 0 , 0 , screen.w , screen.h )
 sky:fill()
 sky:finish_painting()
 
+if sky.Image then 
+    sky = sky:Image()
+end
+
 screen:add( sky )
 
 ------------------------------------------------------------------------------
