@@ -1,0 +1,361 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
+		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
+		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
+		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
+		2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */; };
+		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
+		28F335F11007B36200424DE2 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* RootViewController.xib */; };
+		CDFEBB66130A498600A14307 /* iOS-logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */; };
+		CDFEBB67130A498600A14307 /* iOS-logo-114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB60130A498600A14307 /* iOS-logo-114x114.png */; };
+		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
+		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
+		CDFEBB6A130A498600A14307 /* Default@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB63130A498600A14307 /* Default@2x~iphone.png */; };
+		CDFEBB6B130A498600A14307 /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB64130A498600A14307 /* Default~iphone.png */; };
+		CDFEBB6C130A498600A14307 /* MainWindow-iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */; };
+		CDFEBB71130A498C00A14307 /* iOS-logo-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */; };
+		CDFEBB72130A498C00A14307 /* Default~iPad.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB6F130A498C00A14307 /* Default~iPad.png */; };
+		CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */; };
+		CDFEBBA8130A4BA900A14307 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */; };
+		CDFEBBA9130A4BA900A14307 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */; };
+		CDFEBBAA130A4BA900A14307 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */; };
+		CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */; };
+		CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */; };
+		CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBC51130A57FA00A14307 /* GestureViewController.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		1D3623250D0F684500981E51 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		1D6058910D05DD3D006BFB54 /* TrickplayController_v2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrickplayController_v2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		28A0AAE50D9B0CCF005BE974 /* TrickplayController_v2_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayController_v2_Prefix.pch; sourceTree = "<group>"; };
+		28C286DF0D94DF7D0034E888 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
+		28C286E00D94DF7D0034E888 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
+		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
+		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayController_v2-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-57x57.png"; sourceTree = "<group>"; };
+		CDFEBB60130A498600A14307 /* iOS-logo-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-114x114.png"; sourceTree = "<group>"; };
+		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
+		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
+		CDFEBB63130A498600A14307 /* Default@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x~iphone.png"; sourceTree = "<group>"; };
+		CDFEBB64130A498600A14307 /* Default~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iphone.png"; sourceTree = "<group>"; };
+		CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPhone.xib"; sourceTree = "<group>"; };
+		CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-72x72.png"; sourceTree = "<group>"; };
+		CDFEBB6F130A498C00A14307 /* Default~iPad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iPad.png"; sourceTree = "<group>"; };
+		CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPad.xib"; sourceTree = "<group>"; };
+		CDFEBBA2130A4BA000A14307 /* SocketManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketManager.h; sourceTree = "<group>"; };
+		CDFEBBA3130A4BA900A14307 /* SocketManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocketManager.m; sourceTree = "<group>"; };
+		CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStreamAdditions.h; sourceTree = "<group>"; };
+		CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStreamAdditions.m; sourceTree = "<group>"; };
+		CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreter.h; sourceTree = "<group>"; };
+		CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreter.m; sourceTree = "<group>"; };
+		CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetServiceManager.h; sourceTree = "<group>"; };
+		CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetServiceManager.m; sourceTree = "<group>"; };
+		CDFEBC4F130A57FA00A14307 /* GestureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureViewController.h; sourceTree = "<group>"; };
+		CDFEBC50130A57FA00A14307 /* GestureViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureViewController.m; sourceTree = "<group>"; };
+		CDFEBC51130A57FA00A14307 /* GestureViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = GestureViewController.xib; path = Classes/GestureViewController.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1D60588F0D05DD3D006BFB54 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
+				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
+				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		080E96DDFE201D6D7F000001 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEBBB8130A4CD100A14307 /* ViewControllers */,
+				CDFEBBA1130A4B8700A14307 /* Modules */,
+				1D3623240D0F684500981E51 /* AppDelegate.h */,
+				1D3623250D0F684500981E51 /* AppDelegate.m */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1D6058910D05DD3D006BFB54 /* TrickplayController_v2.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEBB6D130A498C00A14307 /* iPad */,
+				CDFEBB5E130A498600A14307 /* iPhone */,
+				080E96DDFE201D6D7F000001 /* Classes */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = CustomTemplate;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				28A0AAE50D9B0CCF005BE974 /* TrickplayController_v2_Prefix.pch */,
+				29B97316FDCFA39411CA2CEA /* main.m */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				28F335F01007B36200424DE2 /* RootViewController.xib */,
+				CDFEBC51130A57FA00A14307 /* GestureViewController.xib */,
+				8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
+				1D30AB110D05D00D00671497 /* Foundation.framework */,
+				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CDFEBB5E130A498600A14307 /* iPhone */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */,
+				CDFEBB60130A498600A14307 /* iOS-logo-114x114.png */,
+				CDFEBB61130A498600A14307 /* background@2x~iphone.png */,
+				CDFEBB62130A498600A14307 /* background~iphone.png */,
+				CDFEBB63130A498600A14307 /* Default@2x~iphone.png */,
+				CDFEBB64130A498600A14307 /* Default~iphone.png */,
+				CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */,
+			);
+			path = iPhone;
+			sourceTree = "<group>";
+		};
+		CDFEBB6D130A498C00A14307 /* iPad */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */,
+				CDFEBB6F130A498C00A14307 /* Default~iPad.png */,
+				CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */,
+			);
+			path = iPad;
+			sourceTree = "<group>";
+		};
+		CDFEBBA1130A4B8700A14307 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */,
+				CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */,
+				CDFEBBA2130A4BA000A14307 /* SocketManager.h */,
+				CDFEBBA3130A4BA900A14307 /* SocketManager.m */,
+				CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */,
+				CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */,
+				CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */,
+				CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */,
+			);
+			name = Modules;
+			sourceTree = "<group>";
+		};
+		CDFEBBB8130A4CD100A14307 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				28C286DF0D94DF7D0034E888 /* RootViewController.h */,
+				28C286E00D94DF7D0034E888 /* RootViewController.m */,
+				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
+				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
+			);
+			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D6058900D05DD3D006BFB54 /* TrickplayController_v2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "TrickplayController_v2" */;
+			buildPhases = (
+				1D60588D0D05DD3D006BFB54 /* Resources */,
+				1D60588E0D05DD3D006BFB54 /* Sources */,
+				1D60588F0D05DD3D006BFB54 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TrickplayController_v2;
+			productName = TrickplayController_v2;
+			productReference = 1D6058910D05DD3D006BFB54 /* TrickplayController_v2.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TrickplayController_v2" */;
+			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+				en,
+			);
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1D6058900D05DD3D006BFB54 /* TrickplayController_v2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1D60588D0D05DD3D006BFB54 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				28F335F11007B36200424DE2 /* RootViewController.xib in Resources */,
+				CDFEBB66130A498600A14307 /* iOS-logo-57x57.png in Resources */,
+				CDFEBB67130A498600A14307 /* iOS-logo-114x114.png in Resources */,
+				CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */,
+				CDFEBB69130A498600A14307 /* background~iphone.png in Resources */,
+				CDFEBB6A130A498600A14307 /* Default@2x~iphone.png in Resources */,
+				CDFEBB6B130A498600A14307 /* Default~iphone.png in Resources */,
+				CDFEBB6C130A498600A14307 /* MainWindow-iPhone.xib in Resources */,
+				CDFEBB71130A498C00A14307 /* iOS-logo-72x72.png in Resources */,
+				CDFEBB72130A498C00A14307 /* Default~iPad.png in Resources */,
+				CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */,
+				CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1D60588E0D05DD3D006BFB54 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
+				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
+				28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */,
+				CDFEBBA8130A4BA900A14307 /* SocketManager.m in Sources */,
+				CDFEBBA9130A4BA900A14307 /* NSStreamAdditions.m in Sources */,
+				CDFEBBAA130A4BA900A14307 /* CommandInterpreter.m in Sources */,
+				CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */,
+				CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D6058940D05DD3E006BFB54 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = TrickplayController_v2_Prefix.pch;
+				INFOPLIST_FILE = "TrickplayController_v2-Info.plist";
+				PRODUCT_NAME = TrickplayController_v2;
+			};
+			name = Debug;
+		};
+		1D6058950D05DD3E006BFB54 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = TrickplayController_v2_Prefix.pch;
+				INFOPLIST_FILE = "TrickplayController_v2-Info.plist";
+				PRODUCT_NAME = TrickplayController_v2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PREBINDING = NO;
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "TrickplayController_v2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D6058940D05DD3E006BFB54 /* Debug */,
+				1D6058950D05DD3E006BFB54 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TrickplayController_v2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}
