@@ -564,6 +564,8 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
             if ( thread )
             {
+                g_thread_set_priority( thread , G_THREAD_PRIORITY_LOW );
+
                 event_group = new EventGroup();
 
                 network = new Network( Network::Settings( context ) , event_group );
