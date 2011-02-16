@@ -643,7 +643,7 @@
 							tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [listenSocket connectedHost],[listenSocket connectedPort],[itemAtIndex objectForKey:@"link"]]]]] autorelease];
 						}
 						backgroundView.image = tempImage;
-					}
+                    }
 				}				
 			}
 			
