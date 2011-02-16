@@ -2050,13 +2050,14 @@ function widget.loadingbar(t)
 
     --default parameters
     local p={
-        wwidth             = 300,
-        wheight            = 50,
-        shell_upper_color  = {0,0,0},
-        shell_lower_color  = {127,127,127},
-        stroke_color       = {160,160,160},
-        fill_upper_color  = {255,0,0},
-        fill_lower_color  = {96,48,48},
+        wwidth            =  300,
+        wheight           =   50,
+        shell_upper_color = {  0,  0,  0},
+        shell_lower_color = {127,127,127},
+        stroke_color      = {160,160,160},
+        fill_upper_color  = {255,  0,  0},
+        fill_lower_color  = { 96, 48, 48},
+        skin="default",
     }
     --overwrite defaults
     if t ~= nil then
@@ -2092,14 +2093,15 @@ function widget.loadingbar(t)
 
 	local function create_loading_bar()
 		l_bar_group:clear()
+        local stroke_width = 2
 		c_shell = Canvas{
 				size = {p.wwidth,p.wheight},
 		}
 		c_fill  = Canvas{
-				size = {1,p.wheight},
+				size = {1,p.wheight-stroke_width},
 		}  
         
-		local stroke_width = 2
+		
 		local RAD = 6
         
 		local top    = math.ceil(stroke_width/2)
@@ -2158,6 +2160,8 @@ function widget.loadingbar(t)
 		if c_fill.Image then
 			c_fill = c_fill:Image()
 		end
+        c_fill.x=stroke_width
+        c_fill.y=stroke_width/2
 		l_bar_group:add(c_shell,c_fill)
 	end
     
@@ -2216,6 +2220,7 @@ function widget.threeDlist(t)
         tiles       = {},
         focus       = nil,
         focus_visible = true,
+        skin="default",
     }
     
     local focus_i = {1,1}
@@ -2452,7 +2457,8 @@ function widget.scrollWindow(t)
 		arrows_in_box = false,
 		arrows_centered = false,
 		grip_is_visible = true,
-        border_is_visible = true
+        border_is_visible = true,
+        skin="default",
     }
     --overwrite defaults
     if t ~= nil then
@@ -2686,7 +2692,6 @@ function widget.scrollWindow(t)
 		if p.border_is_visible then border.opacity=255
         else border.opacity=0 end
         
-        local arrow_clone_src =  
         
 		if p.arrow_clone_source == nil and skin_list[p.skin]["scroll_arrow"] == nil then
 			
