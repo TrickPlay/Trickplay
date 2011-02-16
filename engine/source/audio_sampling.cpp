@@ -36,43 +36,6 @@ struct TPAudioSampler
 
     private:
 
-        struct Event
-        {
-        public:
-
-            typedef enum
-            {
-                SUBMIT_BUFFER,
-                SOURCE_CHANGED,
-                PAUSE,
-                RESUME,
-                QUIT,
-                URL_RESPONSE
-            }
-            Type;
-
-            static Event * make( Type type );
-
-            static Event * make( TPAudioBuffer * buffer );
-
-            static Event * make( TPAudioDetectionResult * result , GByteArray * response );
-
-            static void destroy( Event * event );
-
-            Type                        type;
-            TPAudioBuffer *             buffer;
-            TPAudioDetectionResult *    result;
-            GByteArray *                response;
-
-        private:
-
-            Event()
-            {}
-
-            ~Event()
-            {}
-        };
-
         //.....................................................................
 
         bool scan_for_plugins( TPContext * context );
@@ -103,11 +66,6 @@ struct TPAudioSampler
         }
 
         //.....................................................................
-        // Push an event
-
-        void push_event( Event * event );
-
-        //.....................................................................
         // List of buffers
 
         typedef std::list< TPAudioBuffer * > BufferList;
@@ -124,6 +82,8 @@ struct TPAudioSampler
             TPAudioDetectionPluginInfo      info;
             TPAudioDetectionProcessSamples  process_samples;
             TPAudioDetectionReset           reset;
+            guint32                         next_request;
+            guint32                         last_response;
 
         private:
 
@@ -150,6 +110,55 @@ struct TPAudioSampler
         void got_a_match( const char * json );
 
         //.....................................................................
+
+        struct Event
+        {
+        public:
+
+            typedef enum
+            {
+                SUBMIT_BUFFER,
+                SOURCE_CHANGED,
+                PAUSE,
+                RESUME,
+                QUIT,
+                URL_RESPONSE
+            }
+            Type;
+
+            static Event * make( Type type );
+
+            static Event * make( TPAudioBuffer * buffer );
+
+            static Event * make( TPAudioDetectionResult * result ,
+                    GByteArray * response ,
+                    Plugin * plugin,
+                    guint32 request);
+
+            static void destroy( Event * event );
+
+            Type                        type;
+            TPAudioBuffer *             buffer;
+            TPAudioDetectionResult *    result;
+            GByteArray *                response;
+            Plugin *                    plugin;
+            guint32                     request;
+
+        private:
+
+            Event()
+            {}
+
+            ~Event()
+            {}
+        };
+
+        //.....................................................................
+        // Push an event
+
+        void push_event( Event * event );
+
+        //.....................................................................
         // Process samples
 
         void process();
@@ -166,10 +175,12 @@ struct TPAudioSampler
 
         struct RequestClosure
         {
-            RequestClosure( GAsyncQueue * _queue , TPAudioDetectionResult * _result )
+            RequestClosure( GAsyncQueue * _queue , TPAudioDetectionResult * _result , Plugin * _plugin )
             :
                 queue( g_async_queue_ref( _queue ) ),
-                result( _result )
+                result( _result ),
+                plugin( _plugin ),
+                request( ++( plugin->next_request ) )
             {
                 g_assert( queue );
                 g_assert( result );
@@ -192,6 +203,8 @@ struct TPAudioSampler
 
             GAsyncQueue *               queue;
             TPAudioDetectionResult *    result;
+            Plugin *                    plugin;
+            guint32                     request;
         };
 
         static void response_callback( const Network::Response & response , gpointer closure );
@@ -368,16 +381,19 @@ TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioBuff
     return event;
 }
 
-TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioDetectionResult * result , GByteArray * response )
+TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioDetectionResult * result , GByteArray * response , Plugin * plugin , guint32 request )
 {
     g_assert( result );
     g_assert( response );
+    g_assert( plugin );
 
     Event * event = g_slice_new0( Event );
 
     event->type = URL_RESPONSE;
     event->result = result;
     event->response = response;
+    event->plugin = plugin;
+    event->request = request;
 
     g_byte_array_ref( response );
 
@@ -445,6 +461,8 @@ TPAudioSampler::Thread::Plugin::Plugin( GModule * _module ,
 :
     process_samples( _process_samples ),
     reset( _reset ),
+    next_request( 0 ),
+    last_response( 0 ),
     module( _module ),
     shutdown( _shutdown )
 {
@@ -944,41 +962,54 @@ void TPAudioSampler::Thread::process()
                 // We received the results of a URL request that
                 // a plugin wanted.
 
-                // If the plugin does not have a parse_response function,
-                // it means that the body of the response is the JSON we
-                // want.
-
-                if ( ! event->result->parse_response )
+                if ( event->request < event->plugin->last_response )
                 {
-                    log ( "GOT URL RESPONSE WITH JSON" );
+                    // This one is out of order, we ignore it
 
-                    // We use strndup to make sure it is NULL terminated
+                    log( "REQ %u : NEXT REQ %u : LAST RESP %u" , event->request , event->plugin->next_request , event->plugin->last_response );
 
-                    gchar * json = g_strndup( ( gchar * ) event->response->data , event->response->len );
-
-                    got_a_match( json );
-
-                    g_free( json );
+                    log( "RESPONSE IS OUT OF ORDER, WILL BE IGNORED." );
                 }
                 else
                 {
-                    // The plugin does have a parse response function, we call it now
+                    event->plugin->last_response = event->request;
 
-                    log( "GOT URL RESPONSE TO PARSE. INVOKING PARSE_RESPONSE" );
+                    // If the plugin does not have a parse_response function,
+                    // it means that the body of the response is the JSON we
+                    // want.
 
-                    event->result->parse_response( event->result , ( const char * ) event->response->data , event->response->len );
-
-                    // The plugin should have stored the parsed response in 'json'.
-
-                    if ( ! event->result->json )
+                    if ( ! event->result->parse_response )
                     {
-                        log( "PLUGIN FAILED TO PARSE RESPONSE" );
+                        log ( "GOT URL RESPONSE WITH JSON" );
+
+                        // We use strndup to make sure it is NULL terminated
+
+                        gchar * json = g_strndup( ( gchar * ) event->response->data , event->response->len );
+
+                        got_a_match( json );
+
+                        g_free( json );
                     }
                     else
                     {
-                        log( "RESPONSE PARSED" );
+                        // The plugin does have a parse response function, we call it now
 
-                        got_a_match( event->result->json );
+                        log( "GOT URL RESPONSE TO PARSE. INVOKING PARSE_RESPONSE" );
+
+                        event->result->parse_response( event->result , ( const char * ) event->response->data , event->response->len );
+
+                        // The plugin should have stored the parsed response in 'json'.
+
+                        if ( ! event->result->json )
+                        {
+                            log( "PLUGIN FAILED TO PARSE RESPONSE" );
+                        }
+                        else
+                        {
+                            log( "RESPONSE PARSED" );
+
+                            got_a_match( event->result->json );
+                        }
                     }
                 }
 
@@ -1135,6 +1166,8 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
             log( "    RETURNED JSON '%s'" , result->json );
 
             got_a_match( result->json );
+
+            plugin->last_response = ++plugin->next_request;
         }
         else
         {
@@ -1176,7 +1209,7 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
                         request ,
                         0 ,
                         response_callback ,
-                        new RequestClosure( queue , result ) ,
+                        new RequestClosure( queue , result , plugin ) ,
                         ( GDestroyNotify ) RequestClosure::destroy );
 
                 // The result now belongs to the RequestClosure, so we
@@ -1205,6 +1238,11 @@ void TPAudioSampler::Thread::invoke_plugins_reset( )
         Plugin * plugin = * it;
 
         plugin->reset( plugin->info.user_data );
+
+        // To ignore any requests that are processing now and may
+        // callback after this happens.
+
+        plugin->last_response = ++plugin->next_request;
     }
 }
 
@@ -1239,7 +1277,7 @@ void TPAudioSampler::Thread::response_callback( const Network::Response & respon
     // an event and steal the result from the request closure.
     // The event will ref the response body.
 
-    g_async_queue_push( rc->queue , Event::make( rc->result , response.body ) );
+    g_async_queue_push( rc->queue , Event::make( rc->result , response.body , rc->plugin , rc->request ) );
 
     rc->result = 0;
 }
