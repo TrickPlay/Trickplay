@@ -61,22 +61,6 @@
 				   ["checkbox_sel"] = "assets/checkmark.png", 
 				   ["loadingdot"] = "assets/left.png", 
 				  },
-		    ["skin_type3"] = { 
-				   ["button"] = "assets/button-blue.png", 
-				   ["button_focus"] = "assets/smallbuttonfocus.png", 
-				  },
-		    ["skin_type4"] = { 
-				   ["button"] = "assets/button-blue.png", 
-				   ["button_focus"] = "assets/smallbuttonfocus.png", 
-				  },
-		    ["skin_type5"] = { 
-				   ["button"] = "assets/button-blue.png", 
-				   ["button_focus"] = "assets/smallbuttonfocus.png", 
-				  },
-		    ["skin_type6"] = { 
-				   ["button"] = "assets/button-blue.png", 
-				   ["button_focus"] = "assets/smallbuttonfocus.png", 
-				  },
 
 		  }
 
@@ -298,6 +282,7 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
     c:set_line_width( BORDER_WIDTH )
     c:set_source_color( BORDER_COLOR )
     c.op = "SOURCE"
+    -- test c:set_dash(0,{10,10})
     c:stroke( true )
 
   -- Draw title line
@@ -750,9 +735,9 @@ function widget.textField(table)
     	wheight = 60 ,
     	text = "" ,
     	text_indent = 20 ,
-    	border_width  = 3 ,
+    	border_width  = 4 ,
     	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-    	f_color  = {27,145,27,255}, --"1b911b" , 
+    	f_color  = {0,255,0,255}, --"1b911b" , 
     	font = "DejaVu Sans 30px"  , 
     	color =  {255,255,255,255}, -- "FFFFFF" , 
     	padding_x = 0 ,
@@ -781,8 +766,6 @@ function widget.textField(table)
  
 
     local create_textInputField= function()
- 	
-
 	if(p.skin ~= "custom") then 
              p.box_image   = assets(skin_list[p.skin]["textinput"])
 	     p.focus_image = assets(skin_list[p.skin]["textinput_focus"])
@@ -792,7 +775,7 @@ function widget.textField(table)
         t_group.size = { p.wwidth , p.wheight}
 
     	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
-    	box:set{name="box", position = { 0 , 0 } }
+    	box:set{name="box", position = {0 ,0}}
 
     	focus_box = make_ring(p.wwidth, p.wheight, p.f_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
@@ -807,8 +790,8 @@ function widget.textField(table)
 	     focus_img = Image{}
 	end 
 
-    	text = Text{text = p.text, editable = true, cursor_visible = true, reactive = true, font = p.font, color = p.color}
-    	text:set{name = "text", position = {p.text_indent, (p.wheight - text.h)/2} }
+    	text = Text{text = p.text, editable = false, cursor_visible = false, wants_enter = false, reactive = true, font = p.font, color = p.color}
+    	text:set{name = "textInput", position = {p.text_indent, (p.wheight - text.h)/2} }
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
     	if (p.skin == "custom") then box_img.opacity = 0
@@ -819,6 +802,7 @@ function widget.textField(table)
      create_textInputField()
 
      function t_group.extra.on_focus_in()
+	  print("KKK")
           if (p.skin == "custom") then 
 	     box.opacity = 0
 	     focus_box.opacity = 255
@@ -826,22 +810,33 @@ function widget.textField(table)
 	     box_img.opacity = 0
              focus_img.opacity = 255
           end 
-          text:grab_key_focus()
+	  text.editable = true
 	  text.cursor_visible = true
+	  text.reactive = true 
+          text:grab_key_focus(text)
      end
 
      function t_group.extra.on_focus_out()
+		print("QQQQQQQQQ")
           if (p.skin == "custom") then 
 	     box.opacity = 255
 	     focus_box.opacity = 0
-             focus_img.opacity = 0
+		print("right!!!")
           else
 	     box_img.opacity = 255
-	     focus_box.opacity = 0
              focus_img.opacity = 0
           end 
 	  text.cursor_visible = false
+	  text.reactive = false 
      end
+
+--[[
+     function t_group:on_button_down()
+	  t_group.on_focus_in()
+	  return true
+     end 
+]]
+
 
      mt = {}
      mt.__newindex = function (t, k, v)
@@ -1069,6 +1064,7 @@ function widget.toastBox(table)
 
     	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
+	tb_group.anchor_point = {p.wwidth/2, p.wheight/2}
 
         
     	if(p.skin == "custom") then 
@@ -1107,11 +1103,15 @@ function widget.toastBox(table)
 
      	function tb_group_timeline.on_new_frame(t, m, p)
 		tb_group.opacity = 255 * (1-p) 
+		if(tb_group.scale[1] > 0.8) then 
+		     tb_group.scale = {(1-p/10), (1-p/10)} 
+	        end 
      	end  
 
      	function tb_group_timeline.on_completed()
 		tb_group.opacity = 0
-		tb_group.extra.clean()
+		tb_group.scale = {0.8, 0.8}
+		--tb_group.extra:clean()
      	end 
 
      	function tb_group_timer.on_timer(tb_group_timer)
@@ -1165,7 +1165,7 @@ Arguments:
     	font - Font of the Button picker items
     	color - Color of the Button picker items
 		selected_item - The number of the selected item 
-		rotate_func - Table of functions that is called by selected item number   
+		rotate_func - function that is called by selected item number   
 
 Return:
  		bp_group - Group containing the button picker 
@@ -1193,7 +1193,7 @@ function widget.buttonPicker(table)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px" , 
 	color = {255,255,255,255}, --"FFFFFF", 
-	rotate_func = {}, 
+	rotate_func = nil, 
         selected_item = 1, 
     }
 
@@ -1208,7 +1208,7 @@ function widget.buttonPicker(table)
      local unfocus, focus, left_un, left_sel, right_un, right_sel
      local items = Group{name = "items"}
 
-     bp_group = Group
+     local bp_group = Group
      {
 	name = "buttonPicker", 
 	position = {300, 300, 0}, 
@@ -1227,6 +1227,7 @@ function widget.buttonPicker(table)
 
 	index = p.selected_item 
 	bp_group:clear()
+	items:clear()
         bp_group.size = { p.wwidth , p.wheight}
 
 	ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
@@ -1716,7 +1717,7 @@ function widget.checkBox(table)
 	item_pos = {50,-5},  -- items 
 	selected_item = {1, 3},  
 	direction = 2, 
-	rotate_func = {},  
+	rotate_func = nil,  
     } 
 
  --overwrite defaults
@@ -1854,7 +1855,7 @@ function widget.loadingdots(t)
     local p = {
         skin          = "default",
         dot_radius    = 5,
-        dot_color     = {255,255,255},
+        dot_color     = {255,255,255,255},
         num_dots      = 12,
         anim_radius   = 50,
         anim_duration = 150,
@@ -2038,11 +2039,11 @@ function widget.loadingbar(t)
     local p={
         wwidth             = 300,
         wheight            = 50,
-        shell_upper_color  = {0,0,0},
-        shell_lower_color  = {127,127,127},
-        stroke_color       = {160,160,160},
-        fill_upper_color  = {255,0,0},
-        fill_lower_color  = {96,48,48},
+        shell_upper_color  = {0,0,0,255},
+        shell_lower_color  = {127,127,127,255},
+        stroke_color       = {160,160,160,255},
+        fill_upper_color  = {255,0,0,255},
+        fill_lower_color  = {96,48,48,255},
     }
     --overwrite defaults
     if t ~= nil then
@@ -2197,8 +2198,8 @@ function widget.threeDlist(t)
         item_w      = 300,
         item_h      = 200,
         grid_gap    = 40,
-		duration_per_tile = 300,
-		cascade_delay     = 200,
+	duration_per_tile = 300,
+	cascade_delay     = 200,
         tiles       = {},
         focus       = nil,
     }
