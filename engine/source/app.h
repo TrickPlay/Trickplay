@@ -256,6 +256,8 @@ public:
 
     bool load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
+    void audio_match( const String & json );
+
 private:
 
     App( TPContext * context, const Metadata & metadata, const String & data_path, const LaunchInfo & launch );

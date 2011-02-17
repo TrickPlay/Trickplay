@@ -1619,3 +1619,32 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
 
     return true;
 }
+
+void App::audio_match( const String & json )
+{
+    // TODO: Not terribly excited about doing it this way
+
+    lua_getglobal( L , "app" );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        lua_pop( L , 1 );
+        return;
+    }
+
+    if ( UserData * ud = UserData::get( L , lua_gettop( L ) ) )
+    {
+        JSON::parse( L , json.c_str() );
+
+        if ( lua_isnil( L , -1 ) )
+        {
+            lua_pop( L , 1 );
+        }
+        else
+        {
+            ud->invoke_callback( "on_audio_match" , 1 , 0 );
+        }
+    }
+
+    lua_pop( L , 1 );
+}
