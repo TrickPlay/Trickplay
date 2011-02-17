@@ -91,13 +91,6 @@
     [commandLine appendString:newCommandLine];
 }
 
-- (void)doDispatchDRToDelegate:(NSArray *)args {
-    [delegate do_DR:args];
-}
-
-- (void)doDispatchUBToDelegate:(NSArray *)args {
-    [delegate do_UB:args];
-}
 
 - (void)interpret:(NSString *)command {
     //fprintf(stderr, "Command recieved: %s\n", [command UTF8String]);
@@ -129,6 +122,16 @@
         [delegate do_UG:args];
     } else if ([key compare:@"RT"] == NSOrderedSame) {
         [delegate do_RT:args];
+    } else if ([key compare:@"SC"] == NSOrderedSame) {
+        [delegate do_SC];
+	} else if ([key compare:@"PC"] == NSOrderedSame) {
+        [delegate do_PC];
+	} else if ([key compare:@"ST"] == NSOrderedSame) {
+		[delegate do_ST];
+	} else if ([key compare:@"PT"] == NSOrderedSame) {
+		[delegate do_PT];
+    } else if ([key compare:@"CU"] == NSOrderedSame) {
+        [delegate do_CU];
     } else {
         NSLog(@"Command not recognized %@", key);
     }

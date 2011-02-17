@@ -30,6 +30,8 @@
 		CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */; };
 		CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */; };
 		CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBC51130A57FA00A14307 /* GestureViewController.xib */; };
+		CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */; };
+		CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEBC130C734B00A14307 /* TouchController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +68,10 @@
 		CDFEBC4F130A57FA00A14307 /* GestureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureViewController.h; sourceTree = "<group>"; };
 		CDFEBC50130A57FA00A14307 /* GestureViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureViewController.m; sourceTree = "<group>"; };
 		CDFEBC51130A57FA00A14307 /* GestureViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = GestureViewController.xib; path = Classes/GestureViewController.xib; sourceTree = "<group>"; };
+		CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccelerometerController.h; sourceTree = "<group>"; };
+		CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccelerometerController.m; sourceTree = "<group>"; };
+		CDFEBEBB130C734B00A14307 /* TouchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchController.h; sourceTree = "<group>"; };
+		CDFEBEBC130C734B00A14307 /* TouchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TouchController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,14 +177,8 @@
 		CDFEBBA1130A4B8700A14307 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
-				CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */,
-				CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */,
-				CDFEBBA2130A4BA000A14307 /* SocketManager.h */,
-				CDFEBBA3130A4BA900A14307 /* SocketManager.m */,
-				CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */,
-				CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */,
-				CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */,
-				CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */,
+				CDFEBEBA130C704800A14307 /* UserInput */,
+				CDFEBEB9130C6F9A00A14307 /* Networking */,
 			);
 			name = Modules;
 			sourceTree = "<group>";
@@ -192,6 +192,32 @@
 				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
 			);
 			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+		CDFEBEB9130C6F9A00A14307 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */,
+				CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */,
+				CDFEBBA2130A4BA000A14307 /* SocketManager.h */,
+				CDFEBBA3130A4BA900A14307 /* SocketManager.m */,
+				CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */,
+				CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */,
+				CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */,
+				CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */,
+			);
+			name = Networking;
+			sourceTree = "<group>";
+		};
+		CDFEBEBA130C704800A14307 /* UserInput */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */,
+				CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */,
+				CDFEBEBB130C734B00A14307 /* TouchController.h */,
+				CDFEBEBC130C734B00A14307 /* TouchController.m */,
+			);
+			name = UserInput;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -274,6 +300,8 @@
 				CDFEBBAA130A4BA900A14307 /* CommandInterpreter.m in Sources */,
 				CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */,
 				CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */,
+				CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */,
+				CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

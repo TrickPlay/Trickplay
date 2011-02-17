@@ -15,7 +15,6 @@ UITableViewDataSource, UINavigationControllerDelegate,
 NetServiceManagerDelegate> {
     UIWindow *window;
     //UINavigationController *navigationController;
-    UIView *aTableView;
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
 }
@@ -25,7 +24,6 @@ NetServiceManagerDelegate> {
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 //@property (nonatomic, retain) IBOutlet UINavigationController *navigationController;
-@property (nonatomic, retain) IBOutlet UIView *aTableView;
 
 
 @end

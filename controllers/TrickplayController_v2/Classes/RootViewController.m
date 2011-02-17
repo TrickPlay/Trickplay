@@ -13,7 +13,6 @@
 
 @synthesize window;
 //@synthesize navigationController;
-@synthesize aTableView;
 
 
 #pragma mark -
@@ -23,20 +22,24 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    netServiceManager = [[NetServiceManager alloc] init:(UITableView *)aTableView delegate:self];
-    aTableView = self.view;
+    // Customize the View
+    self.title = @"Remote Services";
+    self.view.tag = 1;
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     
-    //aTableView.dataSource = self;
+    // Initialize the NSNetServiceBrowser stuff
+    netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
+    
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
 
 - (void)reloadData {
-    [(UITableView *)aTableView reloadData];
+    [(UITableView *)self.view reloadData];
 }
 
 - (void)serviceResolved:(NSNetService *)service {
-    //*
+    /*
     if (gestureViewController == nil)
 	{
 		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
@@ -48,6 +51,16 @@
 	//[[self navigationController] presentModalViewController:gestureViewController animated:YES];
 	//self.title = @"Disconnect"; 
      //*/
+    
+    [gestureViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+    [gestureViewController startService];
+}
+
+- (void)didNotResolveService {
+    if (gestureViewController) {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+    [self reloadData];
 }
 
 
@@ -195,6 +208,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if ([services count] == 0) return;
     
+    if (gestureViewController == nil)
+	{
+		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
+	}
+    
+	[self.navigationController pushViewController:gestureViewController animated:YES];    
+    
 	netServiceManager.currentService = [services objectAtIndex:indexPath.row];
 	[netServiceManager.currentService setDelegate:netServiceManager];
     
@@ -228,9 +248,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)dealloc {
     [netServiceManager release];
-    //[gestureViewController release];
+    if (gestureViewController) {
+        [gestureViewController release];
+    }
     //[navigationController release];
-    [aTableView release];
+
     [super dealloc];
 }
 
