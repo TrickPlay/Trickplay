@@ -17,7 +17,7 @@ NM=${HOST}-nm
 LD=${HOST}-ld
 RANLIB=${HOST}-ranlib
 
-CFLAGS="-I${PREFIX}/include -fPIC"
+CFLAGS="-I${PREFIX}/include -fPIC -O2"
 CPPFLAGS=${CFLAGS}
 CXXFLAGS=${CFLAGS}
 LDFLAGS="-L${PREFIX}/lib -Wl,-rpath-link,${PREFIX}/lib"

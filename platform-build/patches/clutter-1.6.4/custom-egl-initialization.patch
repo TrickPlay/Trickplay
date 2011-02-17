@@ -1,0 +1,22 @@
+Index: clutter-1.6.4/clutter/egl/clutter-backend-egl.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/egl/clutter-backend-egl.c	2011-02-01 17:27:18.797713178 -0800
++++ clutter-1.6.4/clutter/egl/clutter-backend-egl.c	2011-02-01 17:28:07.098962834 -0800
+@@ -56,6 +56,8 @@
+ 
+ static gchar *clutter_vblank_name = NULL;
+ 
++extern NativeWindowType tp_egl_get_native_window();
++
+ #ifdef COGL_HAS_X11_SUPPORT
+ G_DEFINE_TYPE (ClutterBackendEGL, _clutter_backend_egl, CLUTTER_TYPE_BACKEND_X11);
+ #else
+@@ -367,7 +369,7 @@
+       backend_egl->egl_surface =
+         eglCreateWindowSurface (edpy,
+                                 config,
+-                                (NativeWindowType) NULL,
++                                tp_egl_get_native_window(),
+                                 NULL);
+     }
+ 
