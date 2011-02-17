@@ -49,16 +49,16 @@ function( section )
         local items_height = 0
     
     
-        local f_undo  = factory.make_text_menu_item( assets , ui.strings[ "UNDO".."\t\t\t".."[U]" ] )
-        local f_redo  = factory.make_text_menu_item( assets , ui.strings[ "REDO".."\t\t\t".."[E]" ] )
-        local f_text  = factory.make_text_menu_item( assets , ui.strings[ "TEXT".."\t\t\t".."[T]" ] )
-        local f_image = factory.make_text_menu_item( assets , ui.strings[ "IMAGE".."\t\t\t".."[I]" ] )
-        local f_rect  = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE".."\t\t".."[R]" ] )
-        local f_video = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t".."" ] )
+        local f_undo   = factory.make_text_menu_item( assets , ui.strings[ "UNDO".."\t\t\t".."[U]" ] )
+        local f_redo   = factory.make_text_menu_item( assets , ui.strings[ "REDO".."\t\t\t".."[E]" ] )
+        local f_text   = factory.make_text_menu_item( assets , ui.strings[ "TEXT".."\t\t\t".."[T]" ] )
+        local f_image  = factory.make_text_menu_item( assets , ui.strings[ "IMAGE".."\t\t\t".."[I]" ] )
+        local f_rect   = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE".."\t\t".."[R]" ] )
+        local f_video  = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t".."" ] )
         local f_widget = factory.make_text_menu_item( assets , ui.strings[ "WIDGETS ...".."\t\t".."[W]" ] )
-        local f_clone = factory.make_text_menu_item( assets , ui.strings[ "CLONE".."\t\t\t".."[C]" ] )
+        local f_clone  = factory.make_text_menu_item( assets , ui.strings[ "CLONE".."\t\t\t".."[C]" ] )
         local f_delete = factory.make_text_menu_item( assets , ui.strings[ "DELETE".."\t\t     ".."[Del]" ] )
-        local f_group = factory.make_text_menu_item( assets , ui.strings[ "GROUP".."\t\t\t".."[G]" ] )
+        local f_group  = factory.make_text_menu_item( assets , ui.strings[ "GROUP".."\t\t\t".."[G]" ] )
         local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UNGROUP".."\t\t\t".."" ] )
         
     
