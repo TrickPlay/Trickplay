@@ -2568,6 +2568,34 @@ gpointer TPContext::get_internal( gpointer key )
 //-----------------------------------------------------------------------------
 // Called by other threads...
 
+class AudioMatchAction : public Action
+{
+public:
+
+    AudioMatchAction( TPContext * _context , const gchar * _json )
+    :
+        context( _context ),
+        json( _json )
+    {}
+
+    virtual bool run()
+    {
+        g_debug( "RUNNING AUDIO MATCH ACTION" );
+
+        if ( App * app = context->get_current_app() )
+        {
+            app->audio_match( json );
+        }
+
+        return false;
+    }
+
+private:
+
+    TPContext * context;
+    String      json;
+};
+
 void TPContext::audio_detection_match( const gchar * json )
 {
     JsonParser * parser = json_parser_new();
@@ -2588,8 +2616,7 @@ void TPContext::audio_detection_match( const gchar * json )
     {
         g_info( "VALID JSON AUDIO DETECTION RESULT : '%s'" , json );
 
-        // TODO: Here, we would make a copy of the JSON string and use and idle to
-        // trigger some kind of event.
+        Action::post( new AudioMatchAction( this , json ) );
     }
 }
 
