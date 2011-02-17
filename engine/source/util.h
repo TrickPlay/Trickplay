@@ -291,6 +291,33 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// Lets you run something as an idle or a timeout in the main thread. Derive
+// from this, implement run and call post with an instance.
+
+class Action
+{
+public:
+
+    Action( int interval = -1 );
+
+    virtual ~Action();
+
+    static void post( Action * action );
+
+protected:
+
+    virtual bool run() = 0;
+
+private:
+
+    static void destroy( Action * action );
+
+    static gboolean run_internal( Action * action );
+
+    int interval;
+};
+
+//-----------------------------------------------------------------------------
 
 namespace Util
 {
