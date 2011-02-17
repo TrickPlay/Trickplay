@@ -432,7 +432,12 @@ private:
 
         json << "]";
 
-        result->json = strdup( json.str().c_str() );
+        // We have more than []
+
+        if ( json.str().size() > 2 )
+        {
+            result->json = strdup( json.str().c_str() );
+        }
     }
 
     //.........................................................................
