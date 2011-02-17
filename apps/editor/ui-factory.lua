@@ -1300,23 +1300,27 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
     -- item group 
     local group = Group {}
+    group:clear()
     	
     -- item group's children 
     local text, input_text, ring, focus, line, button
 
     if(item_n == "title")then 
     	text = Text {text = item_v}:set(STYLE)
-	text.position = {WIDTH/2 - text.w/2 - 10, 5} 
+	text.position = {WIDTH/2 - text.w/2, 8} 
     	group:add(text)
     elseif(item_n == "caption") then
     	text = Text {text = item_v}:set(STYLE)
 	text.position = {PADDING_X, 0}
     	group:add(text)
+        group.size = {WIDTH, HEIGHT - PADDING_Y}
+--[[
 	if(item_v == "Scale") then 
              group.size = {WIDTH/4, HEIGHT}
 	else
-             group.size = {WIDTH, HEIGHT}
+             group.size = {WIDTH, HEIGHT - PADDING_Y}
 	end 
+]]
     elseif (item_n =="line") then 
         line = make_line()
 	if(item_s =="hide") then 
@@ -1381,10 +1385,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		  end 
  	     elseif (key == keys.Tab and shift == false) or key == keys.Down then 
                   group.extra.on_focus_out()
-		        print(item_n)
+		        --print(item_n)
 		  for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
-			print(v)
+			--print(v)
 			     if(attr_t_idx[i+1] == nil) then return true end  -- 0203
 			     while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
 				 i = i + 1
@@ -1400,9 +1404,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     elseif key == keys.Up or 
 		    (key == keys.Tab and shift == true )then 
 		  group.extra.on_focus_out()
-		        print(item_n)
+		        --print(item_n)
 		  for i, v in pairs(attr_t_idx) do
-		        print(v)
+		        --print(v)
 			if(item_n == v or item_v == v) then 
 			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
 				 i = i - 1
@@ -1473,7 +1477,175 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     button.opacity = 255 
         end
 
+    elseif(item_n == "items") then 
+	group:clear()
+	group.name = "itemsList"
+	group.reactive = true
+
+	local space = WIDTH - PADDING_X  
+
+	local text = Text {name = "attr", text = item_s}:set(STYLE)
+        text.position  = {WIDTH - space , 5}
+    	group:add(text)
+
+	local plus_minus = factory.draw_plus_minus()
+	local plus = plus_minus:find_child("plus")
+	local minus = plus_minus:find_child("minus")
+	plus_minus.position = {text.x + text.w + PADDING_X, 5}
+	plus.reactive = true 
+	minus.reactive = true 
+
+	function plus:on_button_down()
+		table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
+		screen:remove(inspector)
+		input_mode = S_SELECT
+		current_inspector = nil
+                screen:grab_key_focus(screen) 
+		text_reactive()
+		editor.n_selected(v, true)
+		editor.inspector(v, inspector.x, inspector.y) --scroll position !!
+		return true
+	end 
+
+	function minus:on_button_down()
+		table.remove(v.items)
+		screen:remove(inspector)
+		input_mode = S_SELECT
+		current_inspector = nil
+                screen:grab_key_focus(screen) 
+		text_reactive()
+		editor.n_selected(v, true)
+		editor.inspector(v, inspector.x, inspector.y)
+		return true 
+	end 
+
+	group:add(plus_minus)
+
+	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
+	local items_list = widget.threeDlist{num_rows = table.getn(v.items), num_cols = 1, item_w = 300, item_h = 40, grid_gap=5, focus=list_focus}
+	--items.focus = nil
+        items_list.position = {text.w, text.y + text.h + PADDING_Y}
+        items_list.name = "items_list"
+	items_list:find_child("Focus").opacity = 0 
+
+	for i,j in pairs(v.items) do 
+--hjk
+             local item = widget.textField{wwidth = 350, wheight = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
+	     item.name = "item_text"..tostring(i)
+	     --local item = Group {}
+	     --item:add(Rectangle{size = {300,40}, color = {0,0,0,0}, border_color = {255, 255, 255, 255}, border_width = 2})
+	     --item:add(Text{name = "item_text"..tonumber(i), text = j, reative = true, cursor_visible = false, editable =true, wrap = "CHAR"}:set(STYLE))
+
+	     function item:on_button_down()
+   		current_focus.extra.on_focus_out()
+	        current_focus = group
+--[[
+		for i,j in pairs(items.children) do 
+		     if(j.name ~= item.name and j.on_focus_out)then 
+			 j.on_focus_out()
+		     end 
+		end 
+]]
+		item.on_focus_in()
+		return true
+	     end 
+ 
+	    function item:on_key_down(key)
+		print(key)
+
+    	       if is_this_widget(v) == true  then
+                item_group = (inspector:find_child("si")).content
+               else 
+         	item_group = inspector:find_child("item_group")
+    	       end 
+
+	       if (key == keys.Tab and shift == false) or key == keys.Down then
+		  item.on_focus_out()
+		  print("--------", item:find_child("textInput").text , "------------")
+		  local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
+		  if (item_group:find_child("item_text"..tostring(next_i))) then
+			item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
+		  else 	
+		     for i, v in pairs(attr_t_idx) do
+ 		        if("itemsList" == v) then 
+			  local function there()
+		          	while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
+		               		i = i + 1
+			       		if(attr_t_idx[i+1] == nil) then return true end  
+		          	end 
+			
+		          	if(item_group:find_child(attr_t_idx[i+1])) then
+		               		local n_item = attr_t_idx[i+1]
+			       		if item_group:find_child(n_item).extra.on_focus_in then 
+			           		item_group:find_child(n_item).extra.on_focus_in()	
+			       		else
+				   		there()
+			       		end 
+		          	end
+			  end 
+			  there()
+		        end 
+    		     end
+		  end
+	       elseif key == keys.Up or (key == keys.Tab and shift == true )then 
+		     item.on_focus_out()
+		     local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
+		     if (item_group:find_child("item_text"..tostring(prev_i))) then
+			item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
+		     else 	
+		      for i, v in pairs(attr_t_idx) do
+			if("itemsList" == v) then 
+			     if(attr_t_idx[i-1] == nil) then return true end 
+			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
+				 i = i - 1
+			     end 
+			     if(item_group:find_child(attr_t_idx[i-1])) then
+			     	local p_item = attr_t_idx[i-1]
+				item_group:find_child(p_item).extra.on_focus_in()	
+				break
+			     end
+			end 
+    		    end
+		    end 
+	       end 
+	     end 
+
+
+
+	     items_list:replace(i,1,item)
+	end
+
+	function group.extra.on_focus_in()
+	         current_focus = group
+		 a = items_list.tiles[1][1]
+		 a.on_focus_in()
+		 a:grab_key_focus()
+        end
+
+        function group.extra.on_focus_out()
+		for i,j in pairs(items_list.children) do 
+		     if j.on_focus_out then 
+			 j.on_focus_out()
+		     end 
+		end 
+		return true
+        end 
+--[[
+
+	function items:on_button_down (x,y,b,n)
+	        print("oipiop")
+   		current_focus.extra.on_focus_out()
+	        current_focus = group
+		group.on_focus_in()
+		return true
+	end 
+]]
+
+	group:add(items_list) 
+	return group
+
     elseif(item_n == "skin") then  -- Attribute with button picker 
+	group:clear()
 	group.name = item_n
 	group.reactive = true
 
@@ -1491,8 +1663,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	    end
 	end
 
-	print("attr_v  :  ", item_v) 
-	print("selected : ", selected)
+	--print("attr_v  :  ", item_v) 
+	--print("selected : ", selected)
 
         local skin_picker = widget.buttonPicker{skin = "custom", items = skins, font = "DejaVu Sans 26px", selected_item = selected}
 	skin_picker.wheight = 45
@@ -1501,13 +1673,14 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	skin_picker.name = "skin_picker"
 
 
+--[[
 	print("Skin Picker Children : ")
 	dumptable(skin_picker.children)
 	print("Skin Picker Items : ")
 	dumptable(skin_picker.items)
 	print("Skin Picker Selected Items : ")
 	print(skins[tonumber(skin_picker.selected_item)])
-
+]]
         group:add(skin_picker) 
 	
 	unfocus = skin_picker:find_child("unfocus")
@@ -1600,7 +1773,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
         return group
     else 	---- Attributes with focusable ring 
-
+        group:clear()
 	group.name = item_n
 	group.reactive = true
 
@@ -1639,11 +1812,12 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         end 
 
 	local y_space = 0
+--[[
 	if item_n == "x_scale" or item_n == "y_scale" then 
 		y_space = 8
 	text.y = text.y + y_space
 	end 
-
+]]
         ring = make_ring(input_box_width, HEIGHT + 5 ) 
 	ring.name = "ring"
 	ring.position = {WIDTH - space , y_space}
@@ -1690,21 +1864,13 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                  (key == keys.Tab and shift == false) or 
                  key == keys.Down then
 	       	 group.extra.on_focus_out()
-		 --print("item_n : ", item_n)
-		 --print("item_v : ", item_v)
-
 		 for i, v in pairs(attr_t_idx) do
 		     if(item_n == v or item_v == v) then 
-		--	     print("i : ", i) 
-		--	     print("v : ", v) 
-	         --            print("next attr", attr_t_idx[i+1])
 		          while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
 		               i = i + 1
-			       if(attr_t_idx[i+1] == nil) then return true end  -- 0208
+			       if(attr_t_idx[i+1] == nil) then return true end 
 		          end 
-	                 -- print("there is .. ", attr_t_idx[i+1])
 		          if item_group:find_child("skin") then 
-		         -- print("there is skin !!")
 	                  end 	
 		          if(item_group:find_child(attr_t_idx[i+1])) then
 		               local n_item = attr_t_idx[i+1]
@@ -1717,15 +1883,22 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		    group.extra.on_focus_out()
  		    for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
-			     if(attr_t_idx[i-1] == nil) then return true end  -- 0203
+			     if(attr_t_idx[i-1] == nil) then return true end  
+			     local function here ()
 			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
 				 i = i - 1
 			     end 
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
-				item_group:find_child(p_item).extra.on_focus_in()	
-				break
+				if item_group:find_child(p_item).extra.on_focus_in then 	
+				     item_group:find_child(p_item).extra.on_focus_in()	
+				else 
+				     i = i -1
+				     here()
+				end 
 			     end
+			     end 
+			     here()
 			end 
     		    end
              end
@@ -2079,4 +2252,143 @@ mouse_pointer = Group
 	mouse_pointer.anchor_point = {mouse_pointer.w/2, mouse_pointer.h/2}
 	return mouse_pointer
 end 
+
+function factory.draw_plus_minus()
+
+local l_col = {150,150,150,200}
+local l_wid = 4
+local l_scale = 0.9
+
+rect1 = Rectangle
+	{
+		color = l_col,
+		border_color = {255,255,255,255},
+		border_width = 0,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect1",
+		position = {13,4,0},
+		size = {l_wid,25},
+		opacity = 255,
+	}
+
+
+rect2 = Rectangle
+	{
+		color = l_col,
+		border_color = {255,255,255,255},
+		border_width = 0,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect2",
+		position = {2,12,0},
+		size = {25,l_wid},
+		opacity = 255,
+	}
+
+
+rect0 = Rectangle
+	{
+		color = {25,25,25,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect0",
+		position = {0,0,0},
+		size = {29,29},
+		opacity = 255,
+	}
+
+
+plus = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "plus",
+		position = {0,0,0},
+		size = {29,29},
+		opacity = 255,
+		children = {rect1,rect2,rect0},
+	}
+
+
+rect5 = Rectangle
+	{
+		color = l_col,
+		border_color = {255,255,255,255},
+		border_width = 0,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect5",
+		position = {2,12,0},
+		size = {25, l_wid},
+		opacity = 255,
+	}
+
+
+rect4 = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect4",
+		position = {0,0,0},
+		size = {29,29},
+		opacity = 255,
+	}
+
+
+minus = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "minus",
+		position = {36,0,0},
+		size = {29,29},
+		opacity = 255,
+		children = {rect5,rect4},
+	}
+
+
+plus_minus = Group
+	{
+		scale = {l_scale,l_scale,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "plus_minus",
+		position = {0,0,0},
+		size = {65,29},
+		opacity = 255,
+		children = {plus, minus},
+	}
+
+return plus_minus
+end 
+
 return factory

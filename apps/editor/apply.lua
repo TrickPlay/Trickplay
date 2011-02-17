@@ -25,8 +25,27 @@ function inspector_apply (v, inspector)
 
       org_object, new_object = obj_map[v.type]()
       set_obj(org_object, v) 
+
+      dumptable(item_group.children)
+
       for i, j in pairs(item_group.children) do 
 	   if j.name then
+ 	   if j.name == "itemsList" then 
+		 local items, item
+		 if item_group:find_child(j.name) then 
+		    if item_group:find_child(j.name):find_child("items_list") then 
+		        items = item_group:find_child(j.name):find_child("items_list")
+		    end 
+                 end 
+		 if items then 
+		 local next = 1
+		 for next, _ in pairs(items.tiles) do 
+		       item = items.tiles[next][1]
+		       v.items[next] = item:find_child("textInput").text
+		 end 
+		 end 
+	   end 
+
 
 	   if j.name == "skin" then 
 		v[j.name] = skins[tonumber(item_group:find_child(j.name):find_child("skin_picker").selected_item)]
@@ -42,8 +61,14 @@ function inspector_apply (v, inspector)
 	             if j.name == "wrap_mode" then 
            	          v.wrap_mode = string.upper(item_group:find_child("wrap_mode"):find_child("input_text").text)
 		     else
-		          v[j.name] = item_group:find_child(j.name):find_child("input_text").text
+                          v[j.name] = item_group:find_child(j.name):find_child("input_text").text
 		     end 
+		elseif(j.name == "dr" or j.name == "dg" or j.name == "db" or j.name == "da") then 
+ 		     local color_t = {}
+		     color_t = v.dot_color
+		     color_t[rgba_map[string.sub(j.name,-1, -1)]] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+	             v.dot_color = color_t
+
 	        elseif(j.name == "r" or j.name == "g" or j.name == "b" or j.name == "a" or 
 		       j.name == "rect_r" or j.name == "rect_g" or j.name == "rect_b" or j.name == "rect_a") then 
  		     local color_t = {}
@@ -323,6 +348,7 @@ function inspector_apply (v, inspector)
            color_t[4] = tonumber(item_group:find_child("rect_a"):find_child("input_text").text)
 	   v.color = color_t
            new_object.color = v.color
+ item_group:find_child(j.name):find_child("input_text").text
 
 	   color_t = v.border_color
            org_object.border_color = v.border_color
@@ -389,7 +415,8 @@ function inspector_apply (v, inspector)
            new_object.scale = v.scale
 
 	 --kk
-      	   if v.extra then 
+      	   if v.extra th item_group:find_child(j.name):find_child("input_text").text
+en 
                if is_in_list(v.extra.type, widgets) == true  then
 		    
                end

@@ -904,7 +904,7 @@ function editor.the_open()
 --]]
 end 
 
-function editor.inspector(v) 
+function editor.inspector(v, x_pos, y_pos) 
 
 	local WIDTH = 450 -- width for inspector's contents
 
@@ -1001,7 +1001,12 @@ function editor.inspector(v)
 
 	-- set the inspector location 
 	if(v.type ~= "Video") then
+	   if(x_pos ~= nil and y_pos ~= nil) then 
+	     inspector.x = x_pos	
+	     inspector.y = y_pos	
+	   else
 	     inspector_position() 
+	   end 
 	else 
 	     inspector.x = screen.w/8
 	     inspector.y = screen.h/8
@@ -1013,57 +1018,60 @@ function editor.inspector(v)
 	local attr_n, attr_v, attr_s
 
         local items_height = 0
-	local space = 0
+        local prev_item_h = 0
+	local prev_y = 0 
+	local space = WIDTH
 	local used = 0
 
 	local item_group = Group{name = "item_group"}
+	local H_SPACE = 5 --30
+	local X_INDENT = 25
+	local TOP_PADDING = 30
 	
 	for i=1, #attr_t do 
-             if (attr_t[i] == nil) then break end 
+            if (attr_t[i] == nil) then break end 
+	    attr_n = attr_t[i][1] 
+	    attr_v = attr_t[i][2] 
+	    attr_s = attr_t[i][3] 
+            attr_v = tostring(attr_v)
 
-	     attr_n = attr_t[i][1] 
-	     attr_v = attr_t[i][2] 
-	     attr_s = attr_t[i][3] 
-             attr_v = tostring(attr_v)
-
-	     if(attr_s == nil) then attr_s = "" end 
+	    if(attr_s == nil) then attr_s = "" end 
 	     
-	     local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s) 
-
-             items_height = items_height + item.h 
-
-	     if(item.w <= space) then 
-                 items_height = items_height - item.h 
-            	 item.x = used + 30
-	     else 
-                 item.x = 25 --( inspector_bg.w - WIDTH ) / 2
-		 space = 0
-		 used = 0
-             end 
-		
-	     
-	     if (attr_n == "caption") then  
-                  item.y = items_height + 10
-	     else 
-                 item.y = items_height 
-	     end 
-	    
-
-	    if(space == 0) then 
-	         space = WIDTH - item.w 
-            else 
+	    local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s) 
+	    if(item.w <= space) then 
+		 if (item.h > prev_item_h) then 
+                     items_height = items_height + (item.h - prev_item_h) 
+		     prev_item_h = item.h
+	         end 
+            	 item.x = used + H_SPACE 
+		 item.y = prev_y
 		 space = space - item.w
-	    end
-	    used = used + item.w 
+	    else 
+		 if (attr_n == "wwidth" or attr_n == "w") then 
+			items_height = items_height - 12 -- imsi !! 
+ 		 end 
+		 item.y = items_height 
+                 item.x = X_INDENT 
+		 prev_y = item.y 
+		 items_height = items_height + item.h 
+		 space = WIDTH - item.w
+            end 
+	    used = item.x + item.w 
 
 	    if (xbox_xpos == 465) then  
-		if (attr_n == "title" or attr_n == "button") then 
+		if (attr_n == "title") then 
+		    item.y = item.y + TOP_PADDING 
+		    prev_y = item.y 
+		    items_height = items_height + TOP_PADDING *3/2
+	            inspector:add(item)
+		elseif(attr_n == "button") then 
 	            inspector:add(item)
 	    	else 
 	            item_group:add(item)
 	    	end 
 	    else 
 	        if (attr_n == "title") then 
+		    item.y = item.y + TOP_PADDING 
 	            inspector:add(item)
 	    	elseif(attr_n == "button") then 
 		    if(attr_v == "view code") then 
@@ -1074,18 +1082,17 @@ function editor.inspector(v)
 	            end 
 	            inspector:add(item)
 	        else 
-		    item.y = item.y - 82 
+		    item.y = item.y - TOP_PADDING
 	            item_group:add(item)
 	        end 
 	    end
-	    print (attr_n,":",item.x,",",item.y)
-	
+	    --print (attr_n,":",item.x,",",item.y)
         end 
 
---[[ scroll function ]]--
+	-- inspector scroll function 
 	if v.extra then 
 	   if is_in_list(v.extra.type, widgets) == true  then
-	       si = widget.scrollWindow{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} -- 10,18
+	       si = widget.scrollWindow{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} 
 	       si.content = item_group
 	       si.position = {0,82,0}
 	       si.name ="si"
@@ -1097,7 +1104,7 @@ function editor.inspector(v)
 	else -- video  
 	   inspector:add(item_group) 
 	end 
---[[ scroll function ]]--
+
 	screen:add(inspector)
 	input_mode = S_POPUP
 	inspector:find_child("name").extra.on_focus_in()
@@ -1109,7 +1116,7 @@ function editor.inspector(v)
         inspector_xbox.reactive = true
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		editor.n_selected(v, true)
-		inspector:clear() -- 0202
+		inspector:clear() 
 		screen:remove(inspector)
 		current_inspector = nil
 			

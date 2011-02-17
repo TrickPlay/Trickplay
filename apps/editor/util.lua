@@ -154,6 +154,11 @@ function create_on_button_down_f(v)
 	local org_object, new_object 
 	
         function v:on_button_down(x,y,button,num_clicks)
+
+	   if is_this_widget(v) == true then
+	        --v.on_focus_in()
+	   end 
+
 	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
 	     if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
@@ -364,7 +369,7 @@ function make_attr_t(v)
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
       }
-      	if (v.extra.type ~= "LoadingDots" or v.extra.type ~= "LoadingBar" ) then 
+      	if (v.extra.type ~= "LoadingDots") then 
              table.insert(attr_t,{"wwidth", math.floor(v.wwidth), "W"})
              table.insert(attr_t,{"wheight", math.floor(v.wheight), "H"})
 	end 
@@ -461,13 +466,7 @@ function make_attr_t(v)
 		table.insert(attr_t, {"label", v.label, "Title"})
 		end,
 	["items"] = function ()
-		local items = ""
-		for i,j in pairs(v.items) do 
-			items = items.."\""..j.."\", "
-		end
 		table.insert(attr_t, {"items", v.items, "Items"})
-		table.insert(attr_t, {"item_func", v.title, "Item Func"})
-		table.insert(attr_t, {"selected_item", v.title, "Selected Item"})
 		end,
 	["item_pos"] = function() 
 		table.insert(attr_t, {"b_pos", v.b_pos, "Button Pos."})
@@ -543,7 +542,6 @@ local widget_map = {
 		    w_prop_map["border_width"]()
 		end 
 		end,
--------------------------------------------------------------------------------
 	["RadioButton"] = function () 
 		w_prop_map["skin"]()
 		w_prop_map["color"]()
@@ -566,11 +564,24 @@ local widget_map = {
 		"box_size = {"..table.concat(v.box_size,",").."},"..indent..
 		"check_size = {"..table.concat(v.check_size,",").."},"..indent..
 		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["ButtonPicker"] = function () return v.name.." = ".."widget.buttonPicker"..b_indent.."{"..indent.. 
-		w_prop_map["items"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
+	["ButtonPicker"] = function () 
+		w_prop_map["skin"]()
+		w_prop_map["color"]()
+		w_prop_map["font"]()
+		w_prop_map["items"]()
+		--table.insert(attr_t, {"selected_item", v.selected_item, "Selected Item"})
+		end,
 	["LoadingDots"] = function () 
 		w_prop_map["skin"]()
-		table.insert(attr_t, {"dot_color", v.dot_color, "Dot Color"})
+		table.insert(attr_t, {"caption", "Dot Color"})
+        	local color_t = v.dot_color 
+        	if color_t == nil then 
+             	     color_t = {0,0,0,0}
+		end 
+		table.insert(attr_t, {"dr", color_t[1], "R"})
+        	table.insert(attr_t, {"dg", color_t[2], "G"})
+        	table.insert(attr_t, {"db", color_t[3], "B"})
+        	table.insert(attr_t, {"da", color_t[4], "A"})
 		table.insert(attr_t, {"dot_radius", v.dot_radius, "Dot Radius"})
 		table.insert(attr_t, {"num_dots", v.num_dots, "Num Dots"})
 		table.insert(attr_t, {"anim_radius", v.anim_radius, "Anim Radius"})
@@ -586,8 +597,6 @@ local widget_map = {
 		table.insert(attr_t, {"anim_duration", v.anim_duration, "Anim Duration"})
 		table.insert(attr_t, {"clone_src", v.clone_src, "Clone Src"})
 		end,
-
-	        	
 --[[
 		return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
 		"bsize = {"..table.concat(v.bsize,",").."},"..indent..
