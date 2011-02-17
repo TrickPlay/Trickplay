@@ -505,21 +505,21 @@ local code_map =
 {
         [ "Text" ] = function()  size = {800, 800} color =  {0, 25, 25, 255} return size, color end,
         [ "Image" ] = function()  size = {800, 550} color =  {0, 25, 25, 255}  return size, color end,
-        [ "Rectangle" ] = function()  size = {800, 600} color =  {0, 25, 25, 255} return size, color end,
-        [ "Clone" ] = function()  size = {800, 550} color =  {0, 25, 25, 255} return size, color end,
-        [ "Group" ] = function()  size = {800, 550} color =  {0, 25, 25, 255} return size, color end,
-	[ "Video" ] =  function()  size = {1500, 850} color =  {0, 25, 25, 255} return size, color end,
-	[ "Widget" ] =  function()  size = {800, 1100} color =  {0, 25, 25, 255} return size, color end,
+        [ "Rectangle" ] = function()  size = {800, 650} color =  {0, 25, 25, 255} return size, color end,
+        [ "Clone" ] = function()  size = {800, 600} color =  {0, 25, 25, 255} return size, color end,
+        [ "Group" ] = function()  size = {800, 510} color =  {0, 25, 25, 255} return size, color end,
+	[ "Video" ] =  function()  size = {1500, 860} color =  {0, 25, 25, 255} return size, color end,
+	[ "Widget" ] =  function()  size = {800, 800} color =  {0, 25, 25, 255} return size, color end,
 }
 
 local color_map =
 {
-        [ "Text" ] = function()  size = {500, 820} color = {25,25,25,100}  return size, color end,
-        [ "Image" ] = function()  size = {500, 770} color ={25,25,25,100}  return size, color end,
-        [ "Rectangle" ] = function()  size = {500, 770} color = {25,25,25,100}   return size, color end,
-        [ "Clone" ] = function()  size = {500, 600} color = {25,25,25,100}   return size, color end,
-        [ "Group" ] = function()  size = {500, 600} color = {25,25,25,100}   return size, color end,
-        [ "Video" ] = function()  size = {500, 530} color = {25,25,25,100}   return size, color end,
+        [ "Text" ] = function()  size = {500, 800} color = {25,25,25,100}  return size, color end,
+        [ "Image" ] = function()  size = {500, 740} color ={25,25,25,100}  return size, color end,
+        [ "Rectangle" ] = function()  size = {500, 740} color = {25,25,25,100}   return size, color end,
+        [ "Clone" ] = function()  size = {500, 625} color = {25,25,25,100}   return size, color end,
+        [ "Group" ] = function()  size = {500, 625} color = {25,25,25,100}   return size, color end,
+        [ "Video" ] = function()  size = {500, 525} color = {25,25,25,100}   return size, color end,
 
         [ "Button" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "TextInputField" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
@@ -536,7 +536,7 @@ local color_map =
         [ "TabBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "OSK" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
 
-        [ "widgets" ] = function() size = {500, 535} color = {25,25,25,100}  return size, color end,
+        [ "widgets" ] = function() size = {500, 600} color = {25,25,25,100}  return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
@@ -1230,9 +1230,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     local LINE_COLOR    = {255,255,255,255}  --"FFFFFF"
     local BORDER_RADIUS = 12
     local LINE_WIDTH    = 1
-
     local input_box_width     
-
     local item_group 
  
     local function text_reactive()
@@ -1348,6 +1346,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         button.reactive = true
 
 	function button:on_key_down(key)
+             local si = inspector:find_child("si")
+
     	     if is_this_widget(v) == true  then
                 item_group = (inspector:find_child("si")).content
              else 
@@ -1369,7 +1369,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      --org_obj, new_obj = inspector_apply (v, inspector) 
 		      screen:remove(inspector)
 		      input_mode = S_SELECT
-		     
 		      current_inspector = nil
                       screen:grab_key_focus(screen) 
 		      text_reactive()
@@ -1385,10 +1384,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		  end 
  	     elseif (key == keys.Tab and shift == false) or key == keys.Down then 
                   group.extra.on_focus_out()
-		        --print(item_n)
 		  for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
-			--print(v)
 			     if(attr_t_idx[i+1] == nil) then return true end  -- 0203
 			     while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
 				 i = i + 1
@@ -1404,9 +1401,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     elseif key == keys.Up or 
 		    (key == keys.Tab and shift == true )then 
 		  group.extra.on_focus_out()
-		        --print(item_n)
 		  for i, v in pairs(attr_t_idx) do
-		        --print(v)
 			if(item_n == v or item_v == v) then 
 			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
 				 i = i - 1
@@ -1503,7 +1498,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                 screen:grab_key_focus(screen) 
 		text_reactive()
 		editor.n_selected(v, true)
-		editor.inspector(v, inspector.x, inspector.y) --scroll position !!
+		editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 		return true
 	end 
 
@@ -1515,7 +1510,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                 screen:grab_key_focus(screen) 
 		text_reactive()
 		editor.n_selected(v, true)
-		editor.inspector(v, inspector.x, inspector.y)
+		editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
 		return true 
 	end 
 
@@ -1551,20 +1546,20 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     end 
  
 	    function item:on_key_down(key)
-		print(key)
-
+	       local si = inspector:find_child("si")
     	       if is_this_widget(v) == true  then
-                item_group = (inspector:find_child("si")).content
+                    item_group = si.content
                else 
-         	item_group = inspector:find_child("item_group")
+         	    item_group = inspector:find_child("item_group")
     	       end 
 
 	       if (key == keys.Tab and shift == false) or key == keys.Down then
 		  item.on_focus_out()
-		  print("--------", item:find_child("textInput").text , "------------")
 		  local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
 		  if (item_group:find_child("item_text"..tostring(next_i))) then
 			item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
+		  	si.seek_to(0,item_group:find_child("item_text"..tostring(next_i)).y) 
+			print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child("item_text"..tostring(next_i)).y)
 		  else 	
 		     for i, v in pairs(attr_t_idx) do
  		        if("itemsList" == v) then 
@@ -1578,6 +1573,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		               		local n_item = attr_t_idx[i+1]
 			       		if item_group:find_child(n_item).extra.on_focus_in then 
 			           		item_group:find_child(n_item).extra.on_focus_in()	
+		  			        si.seek_to(0,item_group:find_child(n_item).y) 
+					        print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child(n_item).y)
 			       		else
 				   		there()
 			       		end 
@@ -1592,6 +1589,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		     local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     if (item_group:find_child("item_text"..tostring(prev_i))) then
 			item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
+		  	si.seek_to(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
+			print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child("item_text"..tostring(prev_i)).y)
 		     else 	
 		      for i, v in pairs(attr_t_idx) do
 			if("itemsList" == v) then 
@@ -1602,6 +1601,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
+		  	        si.seek_to(0,item_group:find_child(p_item).y) 
+			        print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child(p_item).y)
 				break
 			     end
 			end 
@@ -1609,8 +1610,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		    end 
 	       end 
 	     end 
-
-
 
 	     items_list:replace(i,1,item)
 	end
@@ -1716,6 +1715,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end 
 
 	function skin_picker:on_key_down(key)
+	     local si = inspector:find_child("si")
     	     if is_this_widget(v) == true  then
                 item_group = (inspector:find_child("si")).content
              else 
@@ -1736,6 +1736,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		          if(item_group:find_child(attr_t_idx[i+1])) then
 		               local n_item = attr_t_idx[i+1]
 			       item_group:find_child(n_item).extra.on_focus_in()	
+			       si.seek_to(0, item_group:find_child(n_item).y)
+			       print("SEEK_TO: FROM-",skin_picker.parent.y,"TO-",item_group:find_child(n_item).y)
 			       break
 		          end
 		     end 
@@ -1751,6 +1753,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
+				si.seek_to(0, item_group:find_child(p_item))
+			        print("SEEK_TO: FROM-",skin_picker.parent.y,"TO-",item_group:find_child(p_item).y)
 				break
 			     end
 			end 
@@ -1855,11 +1859,12 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	
   	function input_text:on_key_down(key)
-    	     if is_this_widget(v) == true  then
+	    local si = inspector:find_child("si")
+    	    if is_this_widget(v) == true  then
                 item_group = (inspector:find_child("si")).content
-             else 
+            else 
          	item_group = inspector:find_child("item_group")
-    	     end 
+    	    end 
 	    if key == keys.Return or
                  (key == keys.Tab and shift == false) or 
                  key == keys.Down then
@@ -1875,6 +1880,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		          if(item_group:find_child(attr_t_idx[i+1])) then
 		               local n_item = attr_t_idx[i+1]
 			       item_group:find_child(n_item).extra.on_focus_in()	
+			       if (si) then 
+				    si.seek_to(0, item_group:find_child(n_item).y)
+			            print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(n_item).y)
+			       end
 			       break
 		          end
 		     end 
@@ -1892,6 +1901,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     	local p_item = attr_t_idx[i-1]
 				if item_group:find_child(p_item).extra.on_focus_in then 	
 				     item_group:find_child(p_item).extra.on_focus_in()	
+			             if (si) then 
+				          si.seek_to(0, item_group:find_child(p_item).y)
+			                  print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(p_item).y)
+			             end
 				else 
 				     i = i -1
 				     here()

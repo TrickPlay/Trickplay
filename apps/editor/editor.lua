@@ -904,7 +904,7 @@ function editor.the_open()
 --]]
 end 
 
-function editor.inspector(v, x_pos, y_pos) 
+function editor.inspector(v, x_pos, y_pos, scroll_y_pos) 
 
 	local WIDTH = 450 -- width for inspector's contents
 
@@ -1086,7 +1086,7 @@ function editor.inspector(v, x_pos, y_pos)
 	            item_group:add(item)
 	        end 
 	    end
-	    --print (attr_n,":",item.x,",",item.y)
+	    print (attr_n,":",item.x,",",item.y)
         end 
 
 	-- inspector scroll function 
@@ -1097,6 +1097,9 @@ function editor.inspector(v, x_pos, y_pos)
 	       si.position = {0,82,0}
 	       si.name ="si"
 	       si.size = {content_w, item_group.h, 0}
+	       if scroll_y_pos then 
+	           si.seek_to(0, scroll_y_pos) 
+	       end 
 	       inspector:add(si)
 	   else -- rect, img, text 
 	       inspector:add(item_group) 
@@ -1136,16 +1139,13 @@ end
 function editor.view_code(v)
 
 	local WIDTH = 750 
-        local TOP_PADDING = 12
+        local TOP_PADDING = 0--12
         local BOTTOM_PADDING = 12
 	local CODE_OFFSET = 30 
         local codes = ""
 	local codeViewWin_bg 
 	local xbox = factory.make_xbox()
 	local codeViewWin 
-
-
-
 
 	if is_this_widget(v) == true then 
 	     codeViewWin_bg = factory.make_popup_bg("Code", "Widget")
@@ -1263,7 +1263,7 @@ function editor.view_code(v)
         end 
 
         text_codes = Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
-        color = "FFFFFF" , position = { 50 , 60 } , size = {1400, 910}, editable = false ,
+        color = "FFFFFF" , position = { 25 , 35 } , size = {1400, 910}, editable = false ,
         reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
 	codeViewWin:add(text_codes)
 	screen:add(codeViewWin)
@@ -2508,7 +2508,8 @@ local widget_map = {
 	["ButtonPicker"] = function () return widget.buttonPicker()  end, 
 	["LoadingDots"] = function () return widget.loadingdots() end, 
 	["LoadingBar"] = function () return widget.loadingbar() end,
-    ["MenuBar"] = function () return widget.dropDownBar() end,
+        ["DropDown"] = function () return widget.dropDownBar() end,
+        ["MenuBar"] = function () return widget.dropDownBar() end,
 	["3D_List"] = function () return widget.threeDlist() end,
 	["ScrollImage"] = function () return widget.scrollWindow() end, 
 }
@@ -2589,6 +2590,8 @@ function editor.widgets()
 		d=new_widget
          elseif (new_widget.extra.type == "ScrollImage") then 
 		si=new_widget
+         elseif (new_widget.extra.type == "DropDown") then 
+		dd=new_widget
          elseif (new_widget.extra.type == "MenuBar") then 
 		mb=new_widget
 	      end
@@ -2632,6 +2635,8 @@ function editor.widgets()
 		d=new_widget
          elseif (new_widget.extra.type == "ScrollImage") then 
 		si=new_widget
+         elseif (new_widget.extra.type == "DropDown") then 
+		dd=new_widget
          elseif (new_widget.extra.type == "MenuBar") then 
 		mb=new_widget
 	      end
