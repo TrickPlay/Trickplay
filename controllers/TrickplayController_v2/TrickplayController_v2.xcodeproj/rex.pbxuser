@@ -2,16 +2,16 @@
 {
 	1D3623240D0F684500981E51 /* AppDelegate.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {598, 549}}";
-			sepNavSelRange = "{338, 0}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
+			sepNavSelRange = "{337, 0}";
 			sepNavVisRange = "{0, 488}";
 		};
 	};
 	1D3623250D0F684500981E51 /* AppDelegate.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {598, 1248}}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 1222}}";
 			sepNavSelRange = "{183, 0}";
-			sepNavVisRange = "{0, 1255}";
+			sepNavVisRange = "{0, 1097}";
 		};
 	};
 	1D6058900D05DD3D006BFB54 /* TrickplayController_v2 */ = {
@@ -29,16 +29,16 @@
 	};
 	28C286DF0D94DF7D0034E888 /* RootViewController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {877, 569}}";
-			sepNavSelRange = "{731, 0}";
-			sepNavVisRange = "{0, 882}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
+			sepNavSelRange = "{791, 0}";
+			sepNavVisRange = "{0, 799}";
 		};
 	};
 	28C286E00D94DF7D0034E888 /* RootViewController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {877, 3250}}";
-			sepNavSelRange = "{1078, 0}";
-			sepNavVisRange = "{0, 1042}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 3718}}";
+			sepNavSelRange = "{1787, 0}";
+			sepNavVisRange = "{5683, 1000}";
 		};
 	};
 	29B97313FDCFA39411CA2CEA /* Project object */ = {
@@ -50,12 +50,12 @@
 			1D6058900D05DD3D006BFB54 /* TrickplayController_v2 */,
 		);
 		breakpoints = (
-			CDFEBD86130B221E00A14307 /* CommandInterpreter.m:99 */,
-			CDFEBD92130B223500A14307 /* CommandInterpreter.m:131 */,
-			CDFEBDB0130B244500A14307 /* CommandInterpreter.m:95 */,
-			CDFEBDBF130B258D00A14307 /* GestureViewController.m:103 */,
+			CDFEBD86130B221E00A14307 /* CommandInterpreter.m:93 */,
+			CDFEBD92130B223500A14307 /* CommandInterpreter.m:135 */,
+			CDFEBDB0130B244500A14307 /* CommandInterpreter.m:93 */,
+			CDFEBDBF130B258D00A14307 /* GestureViewController.m:127 */,
 			CDFEBDCE130B26E700A14307 /* objc_exception_throw */,
-			CDFEBE1F130B37AE00A14307 /* SocketManager.m:95 */,
+			CDFEBE1F130B37AE00A14307 /* SocketManager.m:96 */,
 		);
 		codeSenseManager = CDFEBB5D130A495E00A14307 /* Code sense */;
 		executables = (
@@ -67,7 +67,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					371,
+					422,
 					20,
 					48.16259765625,
 					43,
@@ -410,6 +410,76 @@
 			CDFEBE97130B7BEF00A14307 /* PBXTextBookmark */ = CDFEBE97130B7BEF00A14307 /* PBXTextBookmark */;
 			CDFEBE98130B7BEF00A14307 /* XCBuildMessageTextBookmark */ = CDFEBE98130B7BEF00A14307 /* XCBuildMessageTextBookmark */;
 			CDFEBE99130B7BEF00A14307 /* PBXTextBookmark */ = CDFEBE99130B7BEF00A14307 /* PBXTextBookmark */;
+			CDFEBEA4130C62CB00A14307 /* PBXTextBookmark */ = CDFEBEA4130C62CB00A14307 /* PBXTextBookmark */;
+			CDFEBEA5130C62CB00A14307 /* PBXTextBookmark */ = CDFEBEA5130C62CB00A14307 /* PBXTextBookmark */;
+			CDFEBEA6130C62CB00A14307 /* PBXTextBookmark */ = CDFEBEA6130C62CB00A14307 /* PBXTextBookmark */;
+			CDFEBEA7130C62CB00A14307 /* PBXTextBookmark */ = CDFEBEA7130C62CB00A14307 /* PBXTextBookmark */;
+			CDFEBEA8130C62CB00A14307 /* PBXTextBookmark */ = CDFEBEA8130C62CB00A14307 /* PBXTextBookmark */;
+			CDFEBEAD130C62EA00A14307 /* PBXTextBookmark */ = CDFEBEAD130C62EA00A14307 /* PBXTextBookmark */;
+			CDFEBEC4130CAE8E00A14307 /* XCBuildMessageTextBookmark */ = CDFEBEC4130CAE8E00A14307 /* XCBuildMessageTextBookmark */;
+			CDFEBEC5130CAE8E00A14307 /* PBXTextBookmark */ = CDFEBEC5130CAE8E00A14307 /* PBXTextBookmark */;
+			CDFEBEF6130CB1FF00A14307 /* PBXTextBookmark */ = CDFEBEF6130CB1FF00A14307 /* PBXTextBookmark */;
+			CDFEBEF7130CB1FF00A14307 /* PBXTextBookmark */ = CDFEBEF7130CB1FF00A14307 /* PBXTextBookmark */;
+			CDFEBEF8130CB1FF00A14307 /* XCBuildMessageTextBookmark */ = CDFEBEF8130CB1FF00A14307 /* XCBuildMessageTextBookmark */;
+			CDFEBEF9130CB1FF00A14307 /* PBXTextBookmark */ = CDFEBEF9130CB1FF00A14307 /* PBXTextBookmark */;
+			CDFEBEFE130CB20700A14307 /* PBXTextBookmark */ = CDFEBEFE130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBEFF130CB20700A14307 /* PBXTextBookmark */ = CDFEBEFF130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF00130CB20700A14307 /* PBXTextBookmark */ = CDFEBF00130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF01130CB20700A14307 /* PlistBookmark */ = CDFEBF01130CB20700A14307 /* PlistBookmark */;
+			CDFEBF02130CB20700A14307 /* PBXTextBookmark */ = CDFEBF02130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF03130CB20700A14307 /* PBXTextBookmark */ = CDFEBF03130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF04130CB20700A14307 /* PBXTextBookmark */ = CDFEBF04130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF05130CB20700A14307 /* PBXTextBookmark */ = CDFEBF05130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF06130CB20700A14307 /* PBXTextBookmark */ = CDFEBF06130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF07130CB20700A14307 /* PBXTextBookmark */ = CDFEBF07130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF08130CB20700A14307 /* PBXTextBookmark */ = CDFEBF08130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF09130CB20700A14307 /* PBXTextBookmark */ = CDFEBF09130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF0A130CB20700A14307 /* PBXTextBookmark */ = CDFEBF0A130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF0B130CB20700A14307 /* PBXTextBookmark */ = CDFEBF0B130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF0C130CB20700A14307 /* PBXTextBookmark */ = CDFEBF0C130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF0D130CB20700A14307 /* PBXTextBookmark */ = CDFEBF0D130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF0E130CB20700A14307 /* PBXTextBookmark */ = CDFEBF0E130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF0F130CB20700A14307 /* PBXTextBookmark */ = CDFEBF0F130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF10130CB20700A14307 /* PBXTextBookmark */ = CDFEBF10130CB20700A14307 /* PBXTextBookmark */;
+			CDFEBF1B130CBCCD00A14307 /* PBXTextBookmark */ = CDFEBF1B130CBCCD00A14307 /* PBXTextBookmark */;
+			CDFEBF1C130CBCCD00A14307 /* PBXTextBookmark */ = CDFEBF1C130CBCCD00A14307 /* PBXTextBookmark */;
+			CDFEBF1D130CBCCD00A14307 /* PBXTextBookmark */ = CDFEBF1D130CBCCD00A14307 /* PBXTextBookmark */;
+			CDFEBF1E130CBCCD00A14307 /* PBXTextBookmark */ = CDFEBF1E130CBCCD00A14307 /* PBXTextBookmark */;
+			CDFEBF1F130CBCCD00A14307 /* PBXTextBookmark */ = CDFEBF1F130CBCCD00A14307 /* PBXTextBookmark */;
+			CDFEBF20130CBCCD00A14307 /* PBXTextBookmark */ = CDFEBF20130CBCCD00A14307 /* PBXTextBookmark */;
+			CDFEBF21130CBCCD00A14307 /* PBXTextBookmark */ = CDFEBF21130CBCCD00A14307 /* PBXTextBookmark */;
+			CDFEBF24130CBD8300A14307 /* PBXTextBookmark */ = CDFEBF24130CBD8300A14307 /* PBXTextBookmark */;
+			CDFEBF25130CBD8300A14307 /* PBXTextBookmark */ = CDFEBF25130CBD8300A14307 /* PBXTextBookmark */;
+			CDFEBF26130CBD8300A14307 /* PBXTextBookmark */ = CDFEBF26130CBD8300A14307 /* PBXTextBookmark */;
+			CDFEBF27130CBD8300A14307 /* PBXTextBookmark */ = CDFEBF27130CBD8300A14307 /* PBXTextBookmark */;
+			CDFEBF28130CBD8300A14307 /* PBXTextBookmark */ = CDFEBF28130CBD8300A14307 /* PBXTextBookmark */;
+			CDFEBF29130CBE1F00A14307 /* PBXTextBookmark */ = CDFEBF29130CBE1F00A14307 /* PBXTextBookmark */;
+			CDFEBF2A130CBE1F00A14307 /* PBXTextBookmark */ = CDFEBF2A130CBE1F00A14307 /* PBXTextBookmark */;
+			CDFEBF2B130CBE1F00A14307 /* PBXTextBookmark */ = CDFEBF2B130CBE1F00A14307 /* PBXTextBookmark */;
+			CDFEBF2C130CBE1F00A14307 /* PBXTextBookmark */ = CDFEBF2C130CBE1F00A14307 /* PBXTextBookmark */;
+			CDFEBF2D130CBE1F00A14307 /* PBXTextBookmark */ = CDFEBF2D130CBE1F00A14307 /* PBXTextBookmark */;
+			CDFEBF30130CBEB100A14307 /* PBXTextBookmark */ = CDFEBF30130CBEB100A14307 /* PBXTextBookmark */;
+			CDFEBF39130CC84300A14307 /* PBXTextBookmark */ = CDFEBF39130CC84300A14307 /* PBXTextBookmark */;
+			CDFEBF3A130CC84300A14307 /* PBXTextBookmark */ = CDFEBF3A130CC84300A14307 /* PBXTextBookmark */;
+			CDFEBF3B130CC84300A14307 /* PBXTextBookmark */ = CDFEBF3B130CC84300A14307 /* PBXTextBookmark */;
+			CDFEBF3C130CC84300A14307 /* PBXTextBookmark */ = CDFEBF3C130CC84300A14307 /* PBXTextBookmark */;
+			CDFEBF3F130CC86B00A14307 /* PBXTextBookmark */ = CDFEBF3F130CC86B00A14307 /* PBXTextBookmark */;
+			CDFEBF40130CC86B00A14307 /* PBXTextBookmark */ = CDFEBF40130CC86B00A14307 /* PBXTextBookmark */;
+			CDFEBF41130CC86B00A14307 /* PBXTextBookmark */ = CDFEBF41130CC86B00A14307 /* PBXTextBookmark */;
+			CDFEBF48130CCAA500A14307 /* PBXTextBookmark */ = CDFEBF48130CCAA500A14307 /* PBXTextBookmark */;
+			CDFEBF49130CCAA500A14307 /* PBXTextBookmark */ = CDFEBF49130CCAA500A14307 /* PBXTextBookmark */;
+			CDFEBF4A130CCAA500A14307 /* PBXTextBookmark */ = CDFEBF4A130CCAA500A14307 /* PBXTextBookmark */;
+			CDFEBF4B130CCAA500A14307 /* PBXTextBookmark */ = CDFEBF4B130CCAA500A14307 /* PBXTextBookmark */;
+			CDFEBF56130CCD4A00A14307 /* PBXTextBookmark */ = CDFEBF56130CCD4A00A14307 /* PBXTextBookmark */;
+			CDFEBF57130CCD4A00A14307 /* XCBuildMessageTextBookmark */ = CDFEBF57130CCD4A00A14307 /* XCBuildMessageTextBookmark */;
+			CDFEBF58130CCD4A00A14307 /* PBXTextBookmark */ = CDFEBF58130CCD4A00A14307 /* PBXTextBookmark */;
+			CDFEBF59130CCD5500A14307 /* XCBuildMessageTextBookmark */ = CDFEBF59130CCD5500A14307 /* XCBuildMessageTextBookmark */;
+			CDFEBF5A130CCD5500A14307 /* PBXTextBookmark */ = CDFEBF5A130CCD5500A14307 /* PBXTextBookmark */;
+			CDFEBF5F130CCD9D00A14307 /* XCBuildMessageTextBookmark */ = CDFEBF5F130CCD9D00A14307 /* XCBuildMessageTextBookmark */;
+			CDFEBF60130CCD9D00A14307 /* PBXTextBookmark */ = CDFEBF60130CCD9D00A14307 /* PBXTextBookmark */;
+			CDFEBF63130CCDAA00A14307 /* XCBuildMessageTextBookmark */ = CDFEBF63130CCDAA00A14307 /* XCBuildMessageTextBookmark */;
+			CDFEBF64130CCDAA00A14307 /* PBXTextBookmark */ = CDFEBF64130CCDAA00A14307 /* PBXTextBookmark */;
+			CDFEBF67130CCE9F00A14307 /* PBXTextBookmark */ = CDFEBF67130CCE9F00A14307 /* PBXTextBookmark */;
 		};
 		sourceControlManager = CDFEBB5C130A495E00A14307 /* Source Control */;
 		userBuildSettings = {
@@ -639,44 +709,44 @@
 	};
 	CDFEBBA2130A4BA000A14307 /* SocketManager.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {598, 1027}}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 897}}";
 			sepNavSelRange = "{301, 0}";
-			sepNavVisRange = "{0, 673}";
+			sepNavVisRange = "{415, 914}";
 		};
 	};
 	CDFEBBA3130A4BA900A14307 /* SocketManager.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {941, 2834}}";
-			sepNavSelRange = "{2637, 0}";
-			sepNavVisRange = "{3088, 767}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 3159}}";
+			sepNavSelRange = "{4899, 0}";
+			sepNavVisRange = "{2338, 1638}";
 		};
 	};
 	CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {598, 526}}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRange = "{0, 464}";
 		};
 	};
 	CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {877, 598}}";
-			sepNavSelRange = "{492, 0}";
-			sepNavVisRange = "{3, 1384}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 624}}";
+			sepNavSelRange = "{1058, 0}";
+			sepNavVisRange = "{155, 1232}";
 		};
 	};
 	CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {549, 539}}";
-			sepNavSelRange = "{381, 0}";
-			sepNavVisRange = "{0, 945}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 559}}";
+			sepNavSelRange = "{456, 0}";
+			sepNavVisRange = "{0, 918}";
 		};
 	};
 	CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {549, 1963}}";
-			sepNavSelRange = "{4078, 0}";
-			sepNavVisRange = "{3083, 1193}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 1937}}";
+			sepNavSelRange = "{4305, 0}";
+			sepNavVisRange = "{3343, 1159}";
 		};
 	};
 	CDFEBBAD130A4BD800A14307 /* PBXTextBookmark */ = {
@@ -761,16 +831,16 @@
 	};
 	CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {598, 549}}";
-			sepNavSelRange = "{298, 0}";
-			sepNavVisRange = "{0, 905}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 520}}";
+			sepNavSelRange = "{308, 0}";
+			sepNavVisRange = "{0, 840}";
 		};
 	};
 	CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {941, 2080}}";
-			sepNavSelRange = "{2434, 0}";
-			sepNavVisRange = "{2188, 510}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 2041}}";
+			sepNavSelRange = "{1236, 0}";
+			sepNavVisRange = "{1888, 1346}";
 		};
 	};
 	CDFEBBBA130A4CF600A14307 /* PBXTextBookmark */ = {
@@ -788,7 +858,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 17";
 		rLen = 0;
-		rLoc = 381;
+		rLoc = 456;
 		rType = 0;
 		vrLen = 787;
 		vrLoc = 0;
@@ -828,7 +898,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 26";
 		rLen = 0;
-		rLoc = 532;
+		rLoc = 668;
 		rType = 0;
 		vrLen = 795;
 		vrLoc = 0;
@@ -838,7 +908,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 26";
 		rLen = 0;
-		rLoc = 532;
+		rLoc = 668;
 		rType = 0;
 		vrLen = 819;
 		vrLoc = 192;
@@ -881,7 +951,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 258";
 		rLen = 0;
-		rLoc = 6331;
+		rLoc = 7001;
 		rType = 0;
 		vrLen = 1047;
 		vrLoc = 6957;
@@ -891,7 +961,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 206";
 		rLen = 0;
-		rLoc = 6010;
+		rLoc = 6680;
 		rType = 0;
 		vrLen = 904;
 		vrLoc = 5630;
@@ -921,7 +991,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 28";
 		rLen = 0;
-		rLoc = 573;
+		rLoc = 673;
 		rType = 0;
 		vrLen = 1476;
 		vrLoc = 2355;
@@ -931,7 +1001,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 116";
 		rLen = 0;
-		rLoc = 3115;
+		rLoc = 3532;
 		rType = 0;
 		vrLen = 1337;
 		vrLoc = 2294;
@@ -941,7 +1011,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 116";
 		rLen = 0;
-		rLoc = 3115;
+		rLoc = 3532;
 		rType = 0;
 		vrLen = 1459;
 		vrLoc = 2090;
@@ -951,7 +1021,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 59";
 		rLen = 0;
-		rLoc = 1641;
+		rLoc = 1417;
 		rType = 0;
 		vrLen = 965;
 		vrLoc = 1126;
@@ -961,7 +1031,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 131";
 		rLen = 0;
-		rLoc = 3813;
+		rLoc = 3589;
 		rType = 0;
 		vrLen = 1599;
 		vrLoc = 2815;
@@ -971,7 +1041,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1544;
 		vrLoc = 2815;
@@ -981,7 +1051,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1544;
 		vrLoc = 2815;
@@ -1011,7 +1081,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 116";
 		rLen = 0;
-		rLoc = 3115;
+		rLoc = 3532;
 		rType = 0;
 		vrLen = 1408;
 		vrLoc = 2141;
@@ -1021,7 +1091,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 28";
 		rLen = 0;
-		rLoc = 544;
+		rLoc = 673;
 		rType = 0;
 		vrLen = 929;
 		vrLoc = 0;
@@ -1031,7 +1101,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 25";
 		rLen = 1;
-		rLoc = 406;
+		rLoc = 593;
 		rType = 0;
 		vrLen = 1043;
 		vrLoc = 710;
@@ -1041,7 +1111,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1403;
 		vrLoc = 3146;
@@ -1051,7 +1121,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 138";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1350;
 		vrLoc = 3146;
@@ -1061,7 +1131,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 4129;
+		rLoc = 3905;
 		rType = 0;
 		vrLen = 1350;
 		vrLoc = 3146;
@@ -1081,7 +1151,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 28";
 		rLen = 0;
-		rLoc = 544;
+		rLoc = 673;
 		rType = 0;
 		vrLen = 1049;
 		vrLoc = 55;
@@ -1091,7 +1161,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 28";
 		rLen = 0;
-		rLoc = 544;
+		rLoc = 673;
 		rType = 0;
 		vrLen = 1076;
 		vrLoc = 353;
@@ -1101,7 +1171,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 4129;
+		rLoc = 3905;
 		rType = 0;
 		vrLen = 1350;
 		vrLoc = 3146;
@@ -1111,7 +1181,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1124;
 		vrLoc = 3520;
@@ -1131,7 +1201,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 28";
 		rLen = 0;
-		rLoc = 544;
+		rLoc = 673;
 		rType = 0;
 		vrLen = 1067;
 		vrLoc = 192;
@@ -1141,7 +1211,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1171;
 		vrLoc = 3489;
@@ -1151,7 +1221,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1171;
 		vrLoc = 3489;
@@ -1161,7 +1231,7 @@
 		fRef = CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */;
 		name = "NetServiceManager.h: 15";
 		rLen = 0;
-		rLoc = 298;
+		rLoc = 328;
 		rType = 0;
 		vrLen = 905;
 		vrLoc = 0;
@@ -1181,7 +1251,7 @@
 		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
 		name = "RootViewController.h: 24";
 		rLen = 0;
-		rLoc = 670;
+		rLoc = 646;
 		rType = 0;
 		vrLen = 888;
 		vrLoc = 0;
@@ -1191,7 +1261,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 35";
 		rLen = 0;
-		rLoc = 822;
+		rLoc = 921;
 		rType = 0;
 		vrLen = 1114;
 		vrLoc = 192;
@@ -1211,7 +1281,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3962;
+		rLoc = 3738;
 		rType = 0;
 		vrLen = 1160;
 		vrLoc = 3489;
@@ -1221,7 +1291,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3962;
+		rLoc = 3738;
 		rType = 0;
 		vrLen = 1154;
 		vrLoc = 3489;
@@ -1231,7 +1301,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3962;
+		rLoc = 3738;
 		rType = 0;
 		vrLen = 1154;
 		vrLoc = 3489;
@@ -1241,7 +1311,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3962;
+		rLoc = 3738;
 		rType = 0;
 		vrLen = 1154;
 		vrLoc = 3489;
@@ -1251,7 +1321,7 @@
 		fRef = CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */;
 		name = "NetServiceManager.h: 15";
 		rLen = 0;
-		rLoc = 298;
+		rLoc = 328;
 		rType = 0;
 		vrLen = 905;
 		vrLoc = 0;
@@ -1261,7 +1331,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3962;
+		rLoc = 3738;
 		rType = 0;
 		vrLen = 1422;
 		vrLoc = 3024;
@@ -1271,7 +1341,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 108";
 		rLen = 0;
-		rLoc = 2605;
+		rLoc = 3022;
 		rType = 0;
 		vrLen = 1256;
 		vrLoc = 2120;
@@ -1281,7 +1351,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 34";
 		rLen = 0;
-		rLoc = 797;
+		rLoc = 897;
 		rType = 0;
 		vrLen = 1115;
 		vrLoc = 192;
@@ -1291,7 +1361,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 34";
 		rLen = 0;
-		rLoc = 797;
+		rLoc = 897;
 		rType = 0;
 		vrLen = 1103;
 		vrLoc = 192;
@@ -1301,7 +1371,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 34";
 		rLen = 0;
-		rLoc = 781;
+		rLoc = 881;
 		rType = 0;
 		vrLen = 1105;
 		vrLoc = 192;
@@ -1311,7 +1381,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 27";
 		rLen = 0;
-		rLoc = 532;
+		rLoc = 668;
 		rType = 0;
 		vrLen = 1106;
 		vrLoc = 192;
@@ -1321,7 +1391,7 @@
 		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
 		name = "RootViewController.h: 24";
 		rLen = 0;
-		rLoc = 670;
+		rLoc = 646;
 		rType = 0;
 		vrLen = 888;
 		vrLoc = 0;
@@ -1331,7 +1401,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 27";
 		rLen = 0;
-		rLoc = 532;
+		rLoc = 668;
 		rType = 0;
 		vrLen = 1106;
 		vrLoc = 192;
@@ -1341,7 +1411,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 27";
 		rLen = 0;
-		rLoc = 509;
+		rLoc = 668;
 		rType = 0;
 		vrLen = 1116;
 		vrLoc = 192;
@@ -1351,7 +1421,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 31";
 		rLen = 0;
-		rLoc = 856;
+		rLoc = 632;
 		rType = 0;
 		vrLen = 1075;
 		vrLoc = 144;
@@ -1361,7 +1431,7 @@
 		fRef = CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */;
 		name = "NetServiceManager.h: 15";
 		rLen = 0;
-		rLoc = 298;
+		rLoc = 328;
 		rType = 0;
 		vrLen = 905;
 		vrLoc = 0;
@@ -1371,7 +1441,7 @@
 		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
 		name = "RootViewController.h: 28";
 		rLen = 0;
-		rLoc = 857;
+		rLoc = 791;
 		rType = 0;
 		vrLen = 878;
 		vrLoc = 0;
@@ -1381,7 +1451,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 23";
 		rLen = 0;
-		rLoc = 372;
+		rLoc = 348;
 		rType = 0;
 		vrLen = 965;
 		vrLoc = 0;
@@ -1391,7 +1461,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 32";
 		rLen = 0;
-		rLoc = 754;
+		rLoc = 854;
 		rType = 0;
 		vrLen = 1046;
 		vrLoc = 487;
@@ -1401,23 +1471,23 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 39";
 		rLen = 0;
-		rLoc = 879;
+		rLoc = 977;
 		rType = 0;
 		vrLen = 1047;
 		vrLoc = 487;
 	};
 	CDFEBC4F130A57FA00A14307 /* GestureViewController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {549, 546}}";
-			sepNavSelRange = "{966, 0}";
-			sepNavVisRange = "{3, 970}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 858}}";
+			sepNavSelRange = "{1030, 0}";
+			sepNavVisRange = "{692, 1013}";
 		};
 	};
 	CDFEBC50130A57FA00A14307 /* GestureViewController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {549, 3380}}";
-			sepNavSelRange = "{6831, 0}";
-			sepNavVisRange = "{6221, 1024}";
+			sepNavIntBoundsRect = "{{0, 0}, {600, 4498}}";
+			sepNavSelRange = "{9828, 0}";
+			sepNavVisRange = "{61, 1111}";
 		};
 	};
 	CDFEBC55130A583E00A14307 /* PBXTextBookmark */ = {
@@ -1425,7 +1495,7 @@
 		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
 		name = "RootViewController.h: 28";
 		rLen = 0;
-		rLoc = 857;
+		rLoc = 791;
 		rType = 0;
 		vrLen = 878;
 		vrLoc = 0;
@@ -1435,7 +1505,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 42";
 		rLen = 0;
-		rLoc = 1017;
+		rLoc = 1115;
 		rType = 0;
 		vrLen = 1105;
 		vrLoc = 307;
@@ -1445,7 +1515,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 16";
 		rLen = 0;
-		rLoc = 403;
+		rLoc = 884;
 		rType = 0;
 		vrLen = 825;
 		vrLoc = 0;
@@ -1465,7 +1535,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 382;
+		rLoc = 437;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -1475,7 +1545,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 382;
+		rLoc = 437;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -1497,7 +1567,7 @@
 		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
 		name = "RootViewController.h: 27";
 		rLen = 0;
-		rLoc = 731;
+		rLoc = 707;
 		rType = 0;
 		vrLen = 882;
 		vrLoc = 0;
@@ -1517,7 +1587,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 232";
 		rLen = 0;
-		rLoc = 6529;
+		rLoc = 7240;
 		rType = 0;
 		vrLen = 906;
 		vrLoc = 5726;
@@ -1527,7 +1597,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 232";
 		rLen = 0;
-		rLoc = 6529;
+		rLoc = 7240;
 		rType = 0;
 		vrLen = 906;
 		vrLoc = 5726;
@@ -1537,7 +1607,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 382;
+		rLoc = 437;
 		rType = 0;
 		vrLen = 1476;
 		vrLoc = 668;
@@ -1557,7 +1627,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 136";
 		rLen = 0;
-		rLoc = 4132;
+		rLoc = 3908;
 		rType = 0;
 		vrLen = 1548;
 		vrLoc = 2765;
@@ -1567,7 +1637,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 31";
 		rLen = 0;
-		rLoc = 832;
+		rLoc = 632;
 		rType = 0;
 		vrLen = 1124;
 		vrLoc = 214;
@@ -1577,7 +1647,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 26";
 		rLen = 0;
-		rLoc = 670;
+		rLoc = 527;
 		rType = 0;
 		vrLen = 1217;
 		vrLoc = 214;
@@ -1627,7 +1697,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 382;
+		rLoc = 437;
 		rType = 0;
 		vrLen = 1476;
 		vrLoc = 668;
@@ -1637,7 +1707,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 128";
 		rLen = 0;
-		rLoc = 7824;
+		rLoc = 9849;
 		rType = 0;
 		vrLen = 1200;
 		vrLoc = 4004;
@@ -1667,7 +1737,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 105";
 		rLen = 0;
-		rLoc = 2527;
+		rLoc = 2944;
 		rType = 0;
 		vrLen = 293;
 		vrLoc = 5969;
@@ -1677,7 +1747,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 4133;
+		rLoc = 3909;
 		rType = 0;
 		vrLen = 348;
 		vrLoc = 3992;
@@ -1688,7 +1758,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 0;
-		rLoc = 220;
+		rLoc = 288;
 		rType = 1;
 	};
 	CDFEBC90130A5E2500A14307 /* PBXTextBookmark */ = {
@@ -1696,7 +1766,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 7824;
+		rLoc = 9849;
 		rType = 0;
 		vrLen = 402;
 		vrLoc = 4436;
@@ -1718,7 +1788,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 16";
 		rLen = 0;
-		rLoc = 403;
+		rLoc = 884;
 		rType = 0;
 		vrLen = 825;
 		vrLoc = 0;
@@ -1728,7 +1798,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 7824;
+		rLoc = 9849;
 		rType = 0;
 		vrLen = 1248;
 		vrLoc = 4083;
@@ -1738,7 +1808,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 132";
 		rLen = 0;
-		rLoc = 7831;
+		rLoc = 9856;
 		rType = 0;
 		vrLen = 1248;
 		vrLoc = 4083;
@@ -1749,7 +1819,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 0;
-		rLoc = 220;
+		rLoc = 288;
 		rType = 1;
 	};
 	CDFEBCA4130A5EA300A14307 /* PBXTextBookmark */ = {
@@ -1757,7 +1827,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 7824;
+		rLoc = 9849;
 		rType = 0;
 		vrLen = 363;
 		vrLoc = 4539;
@@ -1767,7 +1837,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 16";
 		rLen = 0;
-		rLoc = 403;
+		rLoc = 884;
 		rType = 0;
 		vrLen = 825;
 		vrLoc = 0;
@@ -1777,7 +1847,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 7824;
+		rLoc = 9849;
 		rType = 0;
 		vrLen = 1169;
 		vrLoc = 4083;
@@ -1787,7 +1857,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 126";
 		rLen = 0;
-		rLoc = 7824;
+		rLoc = 9849;
 		rType = 0;
 		vrLen = 1159;
 		vrLoc = 4083;
@@ -1797,7 +1867,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 2020;
 		rType = 0;
 		vrLen = 1425;
 		vrLoc = 983;
@@ -1807,7 +1877,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 52";
 		rLen = 0;
-		rLoc = 1812;
+		rLoc = 2019;
 		rType = 0;
 		vrLen = 1409;
 		vrLoc = 1114;
@@ -1847,7 +1917,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 26";
 		rLen = 0;
-		rLoc = 670;
+		rLoc = 527;
 		rType = 0;
 		vrLen = 1188;
 		vrLoc = 243;
@@ -1857,7 +1927,7 @@
 		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
 		name = "RootViewController.h: 27";
 		rLen = 0;
-		rLoc = 731;
+		rLoc = 707;
 		rType = 0;
 		vrLen = 882;
 		vrLoc = 0;
@@ -1867,7 +1937,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 223";
 		rLen = 0;
-		rLoc = 6288;
+		rLoc = 6958;
 		rType = 0;
 		vrLen = 982;
 		vrLoc = 5650;
@@ -1877,7 +1947,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 32";
 		rLen = 0;
-		rLoc = 966;
+		rLoc = 1698;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -1887,7 +1957,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 1814;
+		rLoc = 2021;
 		rType = 0;
 		vrLen = 1718;
 		vrLoc = 2206;
@@ -1897,7 +1967,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 1814;
+		rLoc = 2021;
 		rType = 0;
 		vrLen = 1509;
 		vrLoc = 2490;
@@ -1907,7 +1977,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 25";
 		rLen = 0;
-		rLoc = 641;
+		rLoc = 1179;
 		rType = 0;
 		vrLen = 858;
 		vrLoc = 0;
@@ -1917,7 +1987,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 15";
 		rLen = 0;
-		rLoc = 294;
+		rLoc = 322;
 		rType = 0;
 		vrLen = 1354;
 		vrLoc = 0;
@@ -1927,7 +1997,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 52";
 		rLen = 0;
-		rLoc = 1812;
+		rLoc = 2019;
 		rType = 0;
 		vrLen = 1472;
 		vrLoc = 670;
@@ -1937,7 +2007,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 15";
 		rLen = 0;
-		rLoc = 267;
+		rLoc = 295;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -1947,7 +2017,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 25";
 		rLen = 0;
-		rLoc = 641;
+		rLoc = 1179;
 		rType = 0;
 		vrLen = 858;
 		vrLoc = 0;
@@ -1957,7 +2027,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 25";
 		rLen = 0;
-		rLoc = 641;
+		rLoc = 1179;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -1967,7 +2037,7 @@
 		fRef = CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */;
 		name = "NetServiceManager.h: 15";
 		rLen = 0;
-		rLoc = 298;
+		rLoc = 328;
 		rType = 0;
 		vrLen = 905;
 		vrLoc = 0;
@@ -1977,7 +2047,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 26";
 		rLen = 0;
-		rLoc = 670;
+		rLoc = 527;
 		rType = 0;
 		vrLen = 1227;
 		vrLoc = 215;
@@ -2007,7 +2077,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 17";
 		rLen = 0;
-		rLoc = 381;
+		rLoc = 456;
 		rType = 0;
 		vrLen = 787;
 		vrLoc = 0;
@@ -2047,7 +2117,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 223";
 		rLen = 0;
-		rLoc = 6288;
+		rLoc = 6958;
 		rType = 0;
 		vrLen = 987;
 		vrLoc = 5645;
@@ -2057,7 +2127,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 18";
 		rLen = 0;
-		rLoc = 483;
+		rLoc = 964;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -2087,7 +2157,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 15";
 		rLen = 0;
-		rLoc = 267;
+		rLoc = 295;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -2097,7 +2167,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3672;
+		rLoc = 4373;
 		rType = 0;
 		vrLen = 1413;
 		vrLoc = 3090;
@@ -2107,7 +2177,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3630;
+		rLoc = 4331;
 		rType = 0;
 		vrLen = 1412;
 		vrLoc = 3090;
@@ -2117,7 +2187,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 101";
 		rLen = 0;
-		rLoc = 3630;
+		rLoc = 4331;
 		rType = 0;
 		vrLen = 1798;
 		vrLoc = 2674;
@@ -2127,7 +2197,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 101";
 		rLen = 0;
-		rLoc = 3630;
+		rLoc = 4331;
 		rType = 0;
 		vrLen = 1792;
 		vrLoc = 2674;
@@ -2137,7 +2207,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 99";
 		rLen = 0;
-		rLoc = 3630;
+		rLoc = 4331;
 		rType = 0;
 		vrLen = 1580;
 		vrLoc = 2985;
@@ -2147,7 +2217,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 99";
 		rLen = 0;
-		rLoc = 3630;
+		rLoc = 4331;
 		rType = 0;
 		vrLen = 1623;
 		vrLoc = 2985;
@@ -2157,7 +2227,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 103";
 		rLen = 0;
-		rLoc = 3672;
+		rLoc = 4373;
 		rType = 0;
 		vrLen = 1608;
 		vrLoc = 2985;
@@ -2167,7 +2237,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 3630;
+		rLoc = 4331;
 		rType = 0;
 		vrLen = 1574;
 		vrLoc = 2985;
@@ -2177,7 +2247,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1597;
 		vrLoc = 2985;
@@ -2207,7 +2277,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 2020;
 		rType = 0;
 		vrLen = 1466;
 		vrLoc = 977;
@@ -2217,7 +2287,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 2020;
 		rType = 0;
 		vrLen = 1180;
 		vrLoc = 1681;
@@ -2237,7 +2307,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 18";
 		rLen = 0;
-		rLoc = 483;
+		rLoc = 964;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -2247,7 +2317,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 2020;
 		rType = 0;
 		vrLen = 1875;
 		vrLoc = 2861;
@@ -2267,7 +2337,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 117";
 		rLen = 0;
-		rLoc = 3789;
+		rLoc = 3632;
 		rType = 0;
 		vrLen = 1408;
 		vrLoc = 2529;
@@ -2277,7 +2347,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 119";
 		rLen = 0;
-		rLoc = 3875;
+		rLoc = 3718;
 		rType = 0;
 		vrLen = 1463;
 		vrLoc = 2529;
@@ -2287,7 +2357,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 144";
 		rLen = 0;
-		rLoc = 7824;
+		rLoc = 9849;
 		rType = 0;
 		vrLen = 258;
 		vrLoc = 6034;
@@ -2298,7 +2368,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 124;
+		rLoc = 117;
 		rType = 1;
 	};
 	CDFEBD28130B1A9500A14307 /* PBXTextBookmark */ = {
@@ -2306,7 +2376,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 117";
 		rLen = 0;
-		rLoc = 3789;
+		rLoc = 3632;
 		rType = 0;
 		vrLen = 524;
 		vrLoc = 3566;
@@ -2316,7 +2386,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 2020;
 		rType = 0;
 		vrLen = 1875;
 		vrLoc = 2861;
@@ -2326,7 +2396,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 117";
 		rLen = 0;
-		rLoc = 3789;
+		rLoc = 3632;
 		rType = 0;
 		vrLen = 1463;
 		vrLoc = 2529;
@@ -2336,7 +2406,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 99";
 		rLen = 0;
-		rLoc = 2912;
+		rLoc = 2763;
 		rType = 0;
 		vrLen = 1390;
 		vrLoc = 2764;
@@ -2346,7 +2416,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 99";
 		rLen = 0;
-		rLoc = 2912;
+		rLoc = 2763;
 		rType = 0;
 		vrLen = 1390;
 		vrLoc = 2764;
@@ -2356,7 +2426,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 1813;
+		rLoc = 2020;
 		rType = 0;
 		vrLen = 1875;
 		vrLoc = 2861;
@@ -2366,7 +2436,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1639;
 		vrLoc = 3192;
@@ -2376,7 +2446,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 95";
 		rLen = 0;
-		rLoc = 3226;
+		rLoc = 3995;
 		rType = 0;
 		vrLen = 1742;
 		vrLoc = 2905;
@@ -2386,7 +2456,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 95";
 		rLen = 0;
-		rLoc = 3226;
+		rLoc = 3995;
 		rType = 0;
 		vrLen = 1742;
 		vrLoc = 2905;
@@ -2395,7 +2465,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		rLen = 0;
-		rLoc = 136;
+		rLoc = 133;
 		rType = 1;
 	};
 	CDFEBD3A130B1ECC00A14307 /* PBXTextBookmark */ = {
@@ -2403,7 +2473,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 4133;
+		rLoc = 3909;
 		rType = 0;
 		vrLen = 1106;
 		vrLoc = 3431;
@@ -2413,7 +2483,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 125";
 		rLen = 0;
-		rLoc = 3789;
+		rLoc = 3632;
 		rType = 0;
 		vrLen = 677;
 		vrLoc = 3477;
@@ -2423,7 +2493,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 4133;
+		rLoc = 3909;
 		rType = 0;
 		vrLen = 1106;
 		vrLoc = 3431;
@@ -2433,7 +2503,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 95";
 		rLen = 0;
-		rLoc = 3226;
+		rLoc = 3995;
 		rType = 0;
 		vrLen = 1786;
 		vrLoc = 2861;
@@ -2443,7 +2513,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1786;
 		vrLoc = 2861;
@@ -2453,7 +2523,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1785;
 		vrLoc = 2861;
@@ -2463,7 +2533,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1785;
 		vrLoc = 2861;
@@ -2472,7 +2542,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		rLen = 0;
-		rLoc = 136;
+		rLoc = 133;
 		rType = 1;
 	};
 	CDFEBD4E130B1F3A00A14307 /* PBXTextBookmark */ = {
@@ -2480,7 +2550,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 4133;
+		rLoc = 3909;
 		rType = 0;
 		vrLen = 1185;
 		vrLoc = 3352;
@@ -2490,7 +2560,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 4133;
+		rLoc = 3909;
 		rType = 0;
 		vrLen = 1422;
 		vrLoc = 2295;
@@ -2500,7 +2570,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1809;
 		vrLoc = 2837;
@@ -2510,7 +2580,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1807;
 		vrLoc = 2837;
@@ -2520,7 +2590,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1757;
 		vrLoc = 2837;
@@ -2530,7 +2600,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 101";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1818;
 		vrLoc = 2837;
@@ -2540,7 +2610,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 61";
 		rLen = 0;
-		rLoc = 1857;
+		rLoc = 2064;
 		rType = 0;
 		vrLen = 1707;
 		vrLoc = 2645;
@@ -2550,12 +2620,12 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 61";
 		rLen = 0;
-		rLoc = 1857;
+		rLoc = 2064;
 		rType = 0;
 		vrLen = 1621;
 		vrLoc = 2645;
 	};
-	CDFEBD86130B221E00A14307 /* CommandInterpreter.m:99 */ = {
+	CDFEBD86130B221E00A14307 /* CommandInterpreter.m:93 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -2567,7 +2637,7 @@
 		functionName = "-doDispatchUBToDelegate:";
 		hitCount = 0;
 		ignoreCount = 0;
-		lineNumber = 99;
+		lineNumber = 93;
 		location = TrickplayController_v2;
 		modificationTime = 319503296.875812;
 		originalNumberOfMultipleMatches = 1;
@@ -2578,7 +2648,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 89";
 		rLen = 0;
-		rLoc = 2860;
+		rLoc = 3629;
 		rType = 0;
 		vrLen = 1392;
 		vrLoc = 2258;
@@ -2588,7 +2658,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2882;
+		rLoc = 2763;
 		rType = 0;
 		vrLen = 1677;
 		vrLoc = 2463;
@@ -2598,12 +2668,12 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2882;
+		rLoc = 2763;
 		rType = 0;
 		vrLen = 1588;
 		vrLoc = 2463;
 	};
-	CDFEBD92130B223500A14307 /* CommandInterpreter.m:131 */ = {
+	CDFEBD92130B223500A14307 /* CommandInterpreter.m:135 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -2615,7 +2685,7 @@
 		functionName = "-interpret:";
 		hitCount = 0;
 		ignoreCount = 0;
-		lineNumber = 131;
+		lineNumber = 135;
 		location = TrickplayController_v2;
 		modificationTime = 319503296.876049;
 		originalNumberOfMultipleMatches = 1;
@@ -2626,7 +2696,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 2528;
+		rLoc = 3297;
 		rType = 0;
 		vrLen = 1803;
 		vrLoc = 2128;
@@ -2636,7 +2706,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2882;
+		rLoc = 2763;
 		rType = 0;
 		vrLen = 1358;
 		vrLoc = 2921;
@@ -2646,7 +2716,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2882;
+		rLoc = 2763;
 		rType = 0;
 		vrLen = 1358;
 		vrLoc = 2921;
@@ -2656,7 +2726,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 127";
 		rLen = 0;
-		rLoc = 3875;
+		rLoc = 3718;
 		rType = 0;
 		vrLen = 1623;
 		vrLoc = 2529;
@@ -2666,7 +2736,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 2528;
+		rLoc = 3297;
 		rType = 0;
 		vrLen = 1980;
 		vrLoc = 2328;
@@ -2676,7 +2746,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 2528;
+		rLoc = 3297;
 		rType = 0;
 		vrLen = 1938;
 		vrLoc = 2328;
@@ -2686,7 +2756,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 2528;
+		rLoc = 3297;
 		rType = 0;
 		vrLen = 1938;
 		vrLoc = 2328;
@@ -2695,8 +2765,8 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
-		rLen = 49;
-		rLoc = 2843;
+		rLen = 0;
+		rLoc = 2763;
 		rType = 0;
 		vrLen = 1513;
 		vrLoc = 2426;
@@ -2706,7 +2776,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 17";
 		rLen = 0;
-		rLoc = 381;
+		rLoc = 456;
 		rType = 0;
 		vrLen = 787;
 		vrLoc = 0;
@@ -2716,12 +2786,12 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 34";
 		rLen = 0;
-		rLoc = 872;
+		rLoc = 878;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
 	};
-	CDFEBDB0130B244500A14307 /* CommandInterpreter.m:95 */ = {
+	CDFEBDB0130B244500A14307 /* CommandInterpreter.m:93 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -2733,7 +2803,7 @@
 		functionName = "-doDispatchDRToDelegate:";
 		hitCount = 0;
 		ignoreCount = 0;
-		lineNumber = 95;
+		lineNumber = 93;
 		location = TrickplayController_v2;
 		modificationTime = 319503296.876149;
 		originalNumberOfMultipleMatches = 1;
@@ -2744,7 +2814,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 34";
 		rLen = 0;
-		rLoc = 872;
+		rLoc = 878;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
@@ -2754,7 +2824,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 2528;
+		rLoc = 3297;
 		rType = 0;
 		vrLen = 1879;
 		vrLoc = 2328;
@@ -2764,7 +2834,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4311;
 		rType = 0;
 		vrLen = 1443;
 		vrLoc = 2813;
@@ -2774,7 +2844,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4311;
 		rType = 0;
 		vrLen = 1424;
 		vrLoc = 2813;
@@ -2784,7 +2854,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 2528;
+		rLoc = 3297;
 		rType = 0;
 		vrLen = 1879;
 		vrLoc = 2328;
@@ -2793,7 +2863,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		rLen = 0;
-		rLoc = 130;
+		rLoc = 134;
 		rType = 1;
 	};
 	CDFEBDBD130B246E00A14307 /* PBXTextBookmark */ = {
@@ -2801,12 +2871,12 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 126";
 		rLen = 0;
-		rLoc = 3820;
+		rLoc = 3663;
 		rType = 0;
 		vrLen = 1499;
 		vrLoc = 2714;
 	};
-	CDFEBDBF130B258D00A14307 /* GestureViewController.m:103 */ = {
+	CDFEBDBF130B258D00A14307 /* GestureViewController.m:127 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -2818,7 +2888,7 @@
 		functionName = "-do_UB:";
 		hitCount = 0;
 		ignoreCount = 0;
-		lineNumber = 103;
+		lineNumber = 127;
 		location = TrickplayController_v2;
 		modificationTime = 319503296.876215;
 		originalNumberOfMultipleMatches = 1;
@@ -2829,7 +2899,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 125";
 		rLen = 1;
-		rLoc = 3789;
+		rLoc = 3632;
 		rType = 0;
 		vrLen = 1504;
 		vrLoc = 2714;
@@ -2839,7 +2909,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1709;
 		vrLoc = 2673;
@@ -2849,7 +2919,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 3587;
+		rLoc = 4288;
 		rType = 0;
 		vrLen = 1712;
 		vrLoc = 2668;
@@ -2875,7 +2945,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 3672;
+		rLoc = 4373;
 		rType = 0;
 		vrLen = 1718;
 		vrLoc = 2660;
@@ -2884,7 +2954,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		rLen = 0;
-		rLoc = 130;
+		rLoc = 134;
 		rType = 1;
 	};
 	CDFEBDD3130B26F000A14307 /* PBXTextBookmark */ = {
@@ -2892,7 +2962,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 3876;
+		rLoc = 3719;
 		rType = 0;
 		vrLen = 1423;
 		vrLoc = 2922;
@@ -2902,7 +2972,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 3876;
+		rLoc = 3719;
 		rType = 0;
 		vrLen = 1383;
 		vrLoc = 2962;
@@ -2912,7 +2982,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 45";
 		rLen = 18;
-		rLoc = 1177;
+		rLoc = 1275;
 		rType = 0;
 		vrLen = 966;
 		vrLoc = 753;
@@ -2922,7 +2992,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 17";
 		rLen = 12;
-		rLoc = 304;
+		rLoc = 359;
 		rType = 0;
 		vrLen = 1592;
 		vrLoc = 198;
@@ -2932,7 +3002,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 131";
 		rLen = 0;
-		rLoc = 7687;
+		rLoc = 9415;
 		rType = 0;
 		vrLen = 1185;
 		vrLoc = 4053;
@@ -2942,7 +3012,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 133";
 		rLen = 0;
-		rLoc = 7823;
+		rLoc = 9848;
 		rType = 0;
 		vrLen = 1116;
 		vrLoc = 4526;
@@ -2952,7 +3022,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 49";
 		rLen = 0;
-		rLoc = 1361;
+		rLoc = 1459;
 		rType = 0;
 		vrLen = 1145;
 		vrLoc = 574;
@@ -2962,7 +3032,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 131";
 		rLen = 0;
-		rLoc = 7732;
+		rLoc = 9460;
 		rType = 0;
 		vrLen = 1222;
 		vrLoc = 4019;
@@ -2972,7 +3042,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 137";
 		rLen = 0;
-		rLoc = 7823;
+		rLoc = 9848;
 		rType = 0;
 		vrLen = 1070;
 		vrLoc = 4640;
@@ -2982,7 +3052,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 124";
 		rLen = 0;
-		rLoc = 3789;
+		rLoc = 3632;
 		rType = 0;
 		vrLen = 734;
 		vrLoc = 3455;
@@ -2992,7 +3062,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 142";
 		rLen = 75;
-		rLoc = 4196;
+		rLoc = 3972;
 		rType = 0;
 		vrLen = 365;
 		vrLoc = 4104;
@@ -3003,7 +3073,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 22;
+		rLoc = 27;
 		rType = 1;
 	};
 	CDFEBDF2130B304F00A14307 /* PBXTextBookmark */ = {
@@ -3011,7 +3081,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 23";
 		rLen = 0;
-		rLoc = 472;
+		rLoc = 527;
 		rType = 0;
 		vrLen = 659;
 		vrLoc = 237;
@@ -3031,7 +3101,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 192";
 		rLen = 0;
-		rLoc = 5500;
+		rLoc = 5599;
 		rType = 0;
 		vrLen = 741;
 		vrLoc = 0;
@@ -3041,7 +3111,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 130";
 		rLen = 0;
-		rLoc = 4139;
+		rLoc = 4366;
 		rType = 0;
 		vrLen = 1373;
 		vrLoc = 2919;
@@ -3051,7 +3121,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 45";
 		rLen = 0;
-		rLoc = 1078;
+		rLoc = 1176;
 		rType = 0;
 		vrLen = 1042;
 		vrLoc = 0;
@@ -3061,7 +3131,7 @@
 		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
 		name = "RootViewController.h: 27";
 		rLen = 0;
-		rLoc = 731;
+		rLoc = 707;
 		rType = 0;
 		vrLen = 882;
 		vrLoc = 0;
@@ -3071,7 +3141,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 142";
 		rLen = 0;
-		rLoc = 4196;
+		rLoc = 3972;
 		rType = 0;
 		vrLen = 1289;
 		vrLoc = 3186;
@@ -3081,7 +3151,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 393;
+		rLoc = 874;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3092,7 +3162,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 28;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBDFE130B30E800A14307 /* PBXTextBookmark */ = {
@@ -3100,7 +3170,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 621;
+		rLoc = 730;
 		rType = 0;
 		vrLen = 1345;
 		vrLoc = 99;
@@ -3111,7 +3181,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 28;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBE00130B30EE00A14307 /* PBXTextBookmark */ = {
@@ -3119,7 +3189,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 621;
+		rLoc = 730;
 		rType = 0;
 		vrLen = 617;
 		vrLoc = 237;
@@ -3130,7 +3200,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 28;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBE04130B311F00A14307 /* PBXTextBookmark */ = {
@@ -3138,7 +3208,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 621;
+		rLoc = 730;
 		rType = 0;
 		vrLen = 723;
 		vrLoc = 407;
@@ -3148,7 +3218,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 393;
+		rLoc = 874;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3159,7 +3229,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 28;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBE09130B313000A14307 /* PBXTextBookmark */ = {
@@ -3167,7 +3237,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 30";
 		rLen = 0;
-		rLoc = 750;
+		rLoc = 859;
 		rType = 0;
 		vrLen = 1142;
 		vrLoc = 0;
@@ -3177,7 +3247,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3876;
+		rLoc = 3719;
 		rType = 0;
 		vrLen = 1370;
 		vrLoc = 2922;
@@ -3187,7 +3257,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 393;
+		rLoc = 874;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3197,7 +3267,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 113";
 		rLen = 0;
-		rLoc = 3672;
+		rLoc = 4373;
 		rType = 0;
 		vrLen = 1623;
 		vrLoc = 365;
@@ -3207,7 +3277,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 35";
 		rLen = 0;
-		rLoc = 930;
+		rLoc = 1039;
 		rType = 0;
 		vrLen = 1257;
 		vrLoc = 0;
@@ -3217,7 +3287,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 106";
 		rLen = 0;
-		rLoc = 3630;
+		rLoc = 4331;
 		rType = 0;
 		vrLen = 1938;
 		vrLoc = 2656;
@@ -3227,7 +3297,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3876;
+		rLoc = 3719;
 		rType = 0;
 		vrLen = 1370;
 		vrLoc = 2922;
@@ -3237,7 +3307,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 122";
 		rLen = 1;
-		rLoc = 3741;
+		rLoc = 3584;
 		rType = 0;
 		vrLen = 1371;
 		vrLoc = 2921;
@@ -3247,7 +3317,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 21";
 		rLen = 8;
-		rLoc = 421;
+		rLoc = 496;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
@@ -3257,7 +3327,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 127";
 		rLen = 0;
-		rLoc = 3875;
+		rLoc = 3718;
 		rType = 0;
 		vrLen = 1373;
 		vrLoc = 2919;
@@ -3267,12 +3337,12 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 127";
 		rLen = 0;
-		rLoc = 3875;
+		rLoc = 3718;
 		rType = 0;
 		vrLen = 1351;
 		vrLoc = 2919;
 	};
-	CDFEBE1F130B37AE00A14307 /* SocketManager.m:95 */ = {
+	CDFEBE1F130B37AE00A14307 /* SocketManager.m:96 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -3284,7 +3354,7 @@
 		functionName = "-stream:handleEvent:";
 		hitCount = 0;
 		ignoreCount = 0;
-		lineNumber = 95;
+		lineNumber = 96;
 		location = TrickplayController_v2;
 		modificationTime = 319503296.876235;
 		originalNumberOfMultipleMatches = 1;
@@ -3295,7 +3365,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 109";
 		rLen = 0;
-		rLoc = 2742;
+		rLoc = 2817;
 		rType = 0;
 		vrLen = 1638;
 		vrLoc = 2165;
@@ -3315,7 +3385,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 104";
 		rLen = 0;
-		rLoc = 3077;
+		rLoc = 2920;
 		rType = 0;
 		vrLen = 1478;
 		vrLoc = 2426;
@@ -3325,7 +3395,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 95";
 		rLen = 0;
-		rLoc = 2238;
+		rLoc = 2313;
 		rType = 0;
 		vrLen = 1638;
 		vrLoc = 2165;
@@ -3335,7 +3405,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 105";
 		rLen = 0;
-		rLoc = 3596;
+		rLoc = 4297;
 		rType = 0;
 		vrLen = 1854;
 		vrLoc = 2520;
@@ -3345,7 +3415,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 131";
 		rLen = 0;
-		rLoc = 4092;
+		rLoc = 4319;
 		rType = 0;
 		vrLen = 1621;
 		vrLoc = 2107;
@@ -3354,7 +3424,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 93";
-		rLen = 1;
+		rLen = 0;
 		rLoc = 2763;
 		rType = 0;
 		vrLen = 1602;
@@ -3365,7 +3435,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 621;
+		rLoc = 730;
 		rType = 0;
 		vrLen = 715;
 		vrLoc = 407;
@@ -3376,7 +3446,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 107;
+		rLoc = 108;
 		rType = 1;
 	};
 	CDFEBE35130B3B3000A14307 /* PBXTextBookmark */ = {
@@ -3384,7 +3454,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2637;
+		rLoc = 2712;
 		rType = 0;
 		vrLen = 832;
 		vrLoc = 2380;
@@ -3394,7 +3464,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3875;
+		rLoc = 3718;
 		rType = 0;
 		vrLen = 1417;
 		vrLoc = 1819;
@@ -3405,7 +3475,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 107;
+		rLoc = 108;
 		rType = 1;
 	};
 	CDFEBE3A130B3B4500A14307 /* PBXTextBookmark */ = {
@@ -3413,7 +3483,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2699;
+		rLoc = 2774;
 		rType = 0;
 		vrLen = 1673;
 		vrLoc = 2165;
@@ -3423,7 +3493,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2674;
+		rLoc = 2749;
 		rType = 0;
 		vrLen = 794;
 		vrLoc = 5622;
@@ -3433,7 +3503,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3875;
+		rLoc = 3718;
 		rType = 0;
 		vrLen = 1416;
 		vrLoc = 1820;
@@ -3443,7 +3513,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 3884;
+		rLoc = 3727;
 		rType = 0;
 		vrLen = 1398;
 		vrLoc = 2922;
@@ -3453,7 +3523,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 109";
 		rLen = 0;
-		rLoc = 3288;
+		rLoc = 3131;
 		rType = 0;
 		vrLen = 1398;
 		vrLoc = 2922;
@@ -3473,7 +3543,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 220";
 		rLen = 0;
-		rLoc = 5969;
+		rLoc = 6068;
 		rType = 0;
 		vrLen = 956;
 		vrLoc = 4944;
@@ -3483,7 +3553,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 105";
 		rLen = 0;
-		rLoc = 3596;
+		rLoc = 4297;
 		rType = 0;
 		vrLen = 1813;
 		vrLoc = 2520;
@@ -3493,7 +3563,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 109";
 		rLen = 0;
-		rLoc = 3719;
+		rLoc = 4420;
 		rType = 0;
 		vrLen = 1589;
 		vrLoc = 2518;
@@ -3503,7 +3573,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 6536;
+		rLoc = 7194;
 		rType = 0;
 		vrLen = 1608;
 		vrLoc = 2518;
@@ -3513,7 +3583,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 393;
+		rLoc = 874;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3523,7 +3593,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 37";
 		rLen = 0;
-		rLoc = 966;
+		rLoc = 1698;
 		rType = 0;
 		vrLen = 955;
 		vrLoc = 0;
@@ -3533,7 +3603,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 26";
 		rLen = 0;
-		rLoc = 587;
+		rLoc = 1125;
 		rType = 0;
 		vrLen = 955;
 		vrLoc = 0;
@@ -3543,7 +3613,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 6536;
+		rLoc = 7194;
 		rType = 0;
 		vrLen = 1332;
 		vrLoc = 2794;
@@ -3553,7 +3623,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 120";
 		rLen = 0;
-		rLoc = 4235;
+		rLoc = 4936;
 		rType = 0;
 		vrLen = 1446;
 		vrLoc = 3656;
@@ -3563,7 +3633,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 120";
 		rLen = 0;
-		rLoc = 4235;
+		rLoc = 4936;
 		rType = 0;
 		vrLen = 1529;
 		vrLoc = 3656;
@@ -3573,7 +3643,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4311;
 		rType = 0;
 		vrLen = 1265;
 		vrLoc = 2922;
@@ -3583,7 +3653,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 21";
 		rLen = 8;
-		rLoc = 421;
+		rLoc = 496;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
@@ -3593,7 +3663,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 18";
 		rLen = 0;
-		rLoc = 381;
+		rLoc = 456;
 		rType = 0;
 		vrLen = 914;
 		vrLoc = 0;
@@ -3603,7 +3673,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 131";
 		rLen = 0;
-		rLoc = 4078;
+		rLoc = 4311;
 		rType = 0;
 		vrLen = 1193;
 		vrLoc = 3083;
@@ -3613,7 +3683,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 19";
 		rLen = 0;
-		rLoc = 381;
+		rLoc = 456;
 		rType = 0;
 		vrLen = 945;
 		vrLoc = 0;
@@ -3623,7 +3693,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 22";
 		rLen = 0;
-		rLoc = 516;
+		rLoc = 997;
 		rType = 0;
 		vrLen = 955;
 		vrLoc = 0;
@@ -3633,7 +3703,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 98";
 		rLen = 0;
-		rLoc = 3522;
+		rLoc = 4223;
 		rType = 0;
 		vrLen = 1271;
 		vrLoc = 2468;
@@ -3643,7 +3713,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 199";
 		rLen = 0;
-		rLoc = 7686;
+		rLoc = 9414;
 		rType = 0;
 		vrLen = 1008;
 		vrLoc = 6555;
@@ -3653,7 +3723,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 171";
 		rLen = 20;
-		rLoc = 6570;
+		rLoc = 7276;
 		rType = 0;
 		vrLen = 1029;
 		vrLoc = 5813;
@@ -3663,7 +3733,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 22";
 		rLen = 0;
-		rLoc = 516;
+		rLoc = 997;
 		rType = 0;
 		vrLen = 950;
 		vrLoc = 0;
@@ -3673,7 +3743,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 966;
+		rLoc = 1698;
 		rType = 0;
 		vrLen = 937;
 		vrLoc = 31;
@@ -3683,7 +3753,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2637;
+		rLoc = 2712;
 		rType = 0;
 		vrLen = 767;
 		vrLoc = 3088;
@@ -3693,7 +3763,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 171";
 		rLen = 0;
-		rLoc = 6570;
+		rLoc = 7276;
 		rType = 0;
 		vrLen = 360;
 		vrLoc = 6124;
@@ -3704,7 +3774,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 93;
+		rLoc = 90;
 		rType = 1;
 	};
 	CDFEBE72130B4D7A00A14307 /* PBXTextBookmark */ = {
@@ -3712,7 +3782,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 94";
 		rLen = 0;
-		rLoc = 2434;
+		rLoc = 2210;
 		rType = 0;
 		vrLen = 510;
 		vrLoc = 2188;
@@ -3722,7 +3792,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 966;
+		rLoc = 1698;
 		rType = 0;
 		vrLen = 912;
 		vrLoc = 61;
@@ -3732,7 +3802,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 82";
 		rLen = 0;
-		rLoc = 2153;
+		rLoc = 1929;
 		rType = 0;
 		vrLen = 1049;
 		vrLoc = 1645;
@@ -3742,7 +3812,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 171";
 		rLen = 20;
-		rLoc = 6570;
+		rLoc = 7276;
 		rType = 0;
 		vrLen = 1088;
 		vrLoc = 5757;
@@ -3752,7 +3822,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 111";
 		rLen = 0;
-		rLoc = 3739;
+		rLoc = 4440;
 		rType = 0;
 		vrLen = 1310;
 		vrLoc = 3043;
@@ -3762,7 +3832,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 136";
 		rLen = 0;
-		rLoc = 5094;
+		rLoc = 5727;
 		rType = 0;
 		vrLen = 1452;
 		vrLoc = 4412;
@@ -3772,7 +3842,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 94";
 		rLen = 0;
-		rLoc = 2434;
+		rLoc = 2210;
 		rType = 0;
 		vrLen = 510;
 		vrLoc = 2188;
@@ -3783,7 +3853,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 188;
+		rLoc = 247;
 		rType = 1;
 	};
 	CDFEBE94130B7BE400A14307 /* PBXTextBookmark */ = {
@@ -3791,7 +3861,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 189";
 		rLen = 0;
-		rLoc = 6758;
+		rLoc = 8401;
 		rType = 0;
 		vrLen = 657;
 		vrLoc = 6592;
@@ -3801,7 +3871,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 966;
+		rLoc = 1698;
 		rType = 0;
 		vrLen = 970;
 		vrLoc = 3;
@@ -3812,7 +3882,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 188;
+		rLoc = 247;
 		rType = 1;
 	};
 	CDFEBE99130B7BEF00A14307 /* PBXTextBookmark */ = {
@@ -3820,9 +3890,732 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 190";
 		rLen = 0;
-		rLoc = 6831;
+		rLoc = 8474;
 		rType = 0;
 		vrLen = 1024;
 		vrLoc = 6221;
+	};
+	CDFEBEA4130C62CB00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 39";
+		rLen = 0;
+		rLoc = 1698;
+		rType = 0;
+		vrLen = 942;
+		vrLoc = 31;
+	};
+	CDFEBEA5130C62CB00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 63";
+		rLen = 0;
+		rLoc = 2186;
+		rType = 0;
+		vrLen = 1154;
+		vrLoc = 1101;
+	};
+	CDFEBEA6130C62CB00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
+		name = "RootViewController.h: 26";
+		rLen = 0;
+		rLoc = 791;
+		rType = 0;
+		vrLen = 799;
+		vrLoc = 0;
+	};
+	CDFEBEA7130C62CB00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 19";
+		rLen = 0;
+		rLoc = 328;
+		rType = 0;
+		vrLen = 1004;
+		vrLoc = 284;
+	};
+	CDFEBEA8130C62CB00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 30";
+		rLen = 0;
+		rLoc = 855;
+		rType = 0;
+		vrLen = 1004;
+		vrLoc = 284;
+	};
+	CDFEBEAD130C62EA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 30";
+		rLen = 0;
+		rLoc = 855;
+		rType = 0;
+		vrLen = 1000;
+		vrLoc = 284;
+	};
+	CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 257}";
+		};
+	};
+	CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
+			sepNavSelRange = "{242, 0}";
+			sepNavVisRange = "{0, 248}";
+		};
+	};
+	CDFEBEBB130C734B00A14307 /* TouchController.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {600, 585}}";
+			sepNavSelRange = "{332, 0}";
+			sepNavVisRange = "{55, 1113}";
+		};
+	};
+	CDFEBEBC130C734B00A14307 /* TouchController.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {941, 2730}}";
+			sepNavSelRange = "{6363, 0}";
+			sepNavVisRange = "{6176, 669}";
+		};
+	};
+	CDFEBEC4130CAE8E00A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "'TouchController' undeclared (first use in this function)";
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 55;
+		rType = 1;
+	};
+	CDFEBEC5130CAE8E00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 54";
+		rLen = 98;
+		rLoc = 1792;
+		rType = 0;
+		vrLen = 800;
+		vrLoc = 1435;
+	};
+	CDFEBEF6130CB1FF00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 12";
+		rLen = 0;
+		rLoc = 334;
+		rType = 0;
+		vrLen = 479;
+		vrLoc = 25;
+	};
+	CDFEBEF7130CB1FF00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 283";
+		rLen = 0;
+		rLoc = 10802;
+		rType = 0;
+		vrLen = 315;
+		vrLoc = 8974;
+	};
+	CDFEBEF8130CB1FF00A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Unused variable 'sentClickData'";
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 171;
+		rType = 1;
+	};
+	CDFEBEF9130CB1FF00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 172";
+		rLen = 0;
+		rLoc = 6363;
+		rType = 0;
+		vrLen = 796;
+		vrLoc = 6017;
+	};
+	CDFEBEFE130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */;
+		name = "NetServiceManager.h: 30";
+		rLen = 0;
+		rLoc = 608;
+		rType = 0;
+		vrLen = 810;
+		vrLoc = 0;
+	};
+	CDFEBEFF130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 34";
+		rLen = 0;
+		rLoc = 878;
+		rType = 0;
+		vrLen = 849;
+		vrLoc = 0;
+	};
+	CDFEBF00130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AppDelegate.m */;
+		name = "AppDelegate.m: 9";
+		rLen = 0;
+		rLoc = 183;
+		rType = 0;
+		vrLen = 1097;
+		vrLoc = 0;
+	};
+	CDFEBF01130CB20700A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEBF02130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */;
+		name = "AccelerometerController.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 257;
+		vrLoc = 0;
+	};
+	CDFEBF03130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 37";
+		rLen = 0;
+		rLoc = 876;
+		rType = 0;
+		vrLen = 922;
+		vrLoc = 0;
+	};
+	CDFEBF04130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623240D0F684500981E51 /* AppDelegate.h */;
+		name = "AppDelegate.h: 15";
+		rLen = 0;
+		rLoc = 337;
+		rType = 0;
+		vrLen = 488;
+		vrLoc = 0;
+	};
+	CDFEBF05130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */;
+		name = "NSStreamAdditions.m: 34";
+		rLen = 0;
+		rLoc = 1058;
+		rType = 0;
+		vrLen = 1232;
+		vrLoc = 155;
+	};
+	CDFEBF06130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA2130A4BA000A14307 /* SocketManager.h */;
+		name = "SocketManager.h: 16";
+		rLen = 0;
+		rLoc = 301;
+		rType = 0;
+		vrLen = 914;
+		vrLoc = 415;
+	};
+	CDFEBF07130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */;
+		name = "AccelerometerController.m: 13";
+		rLen = 0;
+		rLoc = 242;
+		rType = 0;
+		vrLen = 248;
+		vrLoc = 0;
+	};
+	CDFEBF08130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
+		name = "NetServiceManager.m: 25";
+		rLen = 0;
+		rLoc = 549;
+		rType = 0;
+		vrLen = 1018;
+		vrLoc = 3224;
+	};
+	CDFEBF09130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 214";
+		rLen = 0;
+		rLoc = 5997;
+		rType = 0;
+		vrLen = 730;
+		vrLoc = 5761;
+	};
+	CDFEBF0A130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */;
+		name = "NSStreamAdditions.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 464;
+		vrLoc = 0;
+	};
+	CDFEBF0B130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 39";
+		rLen = 0;
+		rLoc = 985;
+		rType = 0;
+		vrLen = 986;
+		vrLoc = 0;
+	};
+	CDFEBF0C130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 42";
+		rLen = 0;
+		rLoc = 1317;
+		rType = 0;
+		vrLen = 1091;
+		vrLoc = 0;
+	};
+	CDFEBF0D130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 68";
+		rLen = 0;
+		rLoc = 2225;
+		rType = 0;
+		vrLen = 1381;
+		vrLoc = 1156;
+	};
+	CDFEBF0E130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 15";
+		rLen = 0;
+		rLoc = 332;
+		rType = 0;
+		vrLen = 1085;
+		vrLoc = 0;
+	};
+	CDFEBF0F130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 17";
+		rLen = 0;
+		rLoc = 268;
+		rType = 0;
+		vrLen = 1410;
+		vrLoc = 2044;
+	};
+	CDFEBF10130CB20700A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 169";
+		rLen = 0;
+		rLoc = 6278;
+		rType = 0;
+		vrLen = 1064;
+		vrLoc = 6096;
+	};
+	CDFEBF1B130CBCCD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 132";
+		rLen = 0;
+		rLoc = 4305;
+		rType = 0;
+		vrLen = 1091;
+		vrLoc = 3336;
+	};
+	CDFEBF1C130CBCCD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 23";
+		rLen = 0;
+		rLoc = 456;
+		rType = 0;
+		vrLen = 904;
+		vrLoc = 0;
+	};
+	CDFEBF1D130CBCCD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 195";
+		rLen = 0;
+		rLoc = 7129;
+		rType = 0;
+		vrLen = 1112;
+		vrLoc = 6096;
+	};
+	CDFEBF1E130CBCCD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 15";
+		rLen = 0;
+		rLoc = 332;
+		rType = 0;
+		vrLen = 1113;
+		vrLoc = 55;
+	};
+	CDFEBF1F130CBCCD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 16";
+		rLen = 267;
+		rLoc = 334;
+		rType = 0;
+		vrLen = 1053;
+		vrLoc = 0;
+	};
+	CDFEBF20130CBCCD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 222";
+		rLen = 0;
+		rLoc = 7688;
+		rType = 0;
+		vrLen = 788;
+		vrLoc = 7104;
+	};
+	CDFEBF21130CBCCD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 221";
+		rLen = 0;
+		rLoc = 7686;
+		rType = 0;
+		vrLen = 1010;
+		vrLoc = 7192;
+	};
+	CDFEBF24130CBD8300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 221";
+		rLen = 0;
+		rLoc = 7686;
+		rType = 0;
+		vrLen = 1056;
+		vrLoc = 7192;
+	};
+	CDFEBF25130CBD8300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */;
+		name = "NSStreamAdditions.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 464;
+		vrLoc = 0;
+	};
+	CDFEBF26130CBD8300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 132";
+		rLen = 0;
+		rLoc = 4305;
+		rType = 0;
+		vrLen = 1091;
+		vrLoc = 3336;
+	};
+	CDFEBF27130CBD8300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 195";
+		rLen = 0;
+		rLoc = 7129;
+		rType = 0;
+		vrLen = 1263;
+		vrLoc = 4836;
+	};
+	CDFEBF28130CBD8300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 164";
+		rLen = 0;
+		rLoc = 4833;
+		rType = 0;
+		vrLen = 1007;
+		vrLoc = 4229;
+	};
+	CDFEBF29130CBE1F00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 84";
+		rLen = 37;
+		rLoc = 2634;
+		rType = 0;
+		vrLen = 1169;
+		vrLoc = 8769;
+	};
+	CDFEBF2A130CBE1F00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 37";
+		rLen = 0;
+		rLoc = 876;
+		rType = 0;
+		vrLen = 922;
+		vrLoc = 0;
+	};
+	CDFEBF2B130CBE1F00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 63";
+		rLen = 0;
+		rLoc = 1698;
+		rType = 0;
+		vrLen = 1053;
+		vrLoc = 0;
+	};
+	CDFEBF2C130CBE1F00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 164";
+		rLen = 0;
+		rLoc = 4833;
+		rType = 0;
+		vrLen = 1052;
+		vrLoc = 4186;
+	};
+	CDFEBF2D130CBE1F00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 164";
+		rLen = 0;
+		rLoc = 4833;
+		rType = 0;
+		vrLen = 1051;
+		vrLoc = 4186;
+	};
+	CDFEBF30130CBEB100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 169";
+		rLen = 0;
+		rLoc = 5038;
+		rType = 0;
+		vrLen = 963;
+		vrLoc = 4394;
+	};
+	CDFEBF39130CC84300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 169";
+		rLen = 0;
+		rLoc = 5038;
+		rType = 0;
+		vrLen = 896;
+		vrLoc = 4486;
+	};
+	CDFEBF3A130CC84300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 209";
+		rLen = 0;
+		rLoc = 7334;
+		rType = 0;
+		vrLen = 868;
+		vrLoc = 6769;
+	};
+	CDFEBF3B130CC84300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 132";
+		rLen = 0;
+		rLoc = 4305;
+		rType = 0;
+		vrLen = 1091;
+		vrLoc = 3336;
+	};
+	CDFEBF3C130CC84300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 134";
+		rLen = 0;
+		rLoc = 4305;
+		rType = 0;
+		vrLen = 1159;
+		vrLoc = 3343;
+	};
+	CDFEBF3F130CC86B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 134";
+		rLen = 0;
+		rLoc = 4305;
+		rType = 0;
+		vrLen = 1159;
+		vrLoc = 3343;
+	};
+	CDFEBF40130CC86B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 23";
+		rLen = 0;
+		rLoc = 456;
+		rType = 0;
+		vrLen = 864;
+		vrLoc = 0;
+	};
+	CDFEBF41130CC86B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 24";
+		rLen = 0;
+		rLoc = 456;
+		rType = 0;
+		vrLen = 915;
+		vrLoc = 3;
+	};
+	CDFEBF48130CCAA500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 24";
+		rLen = 0;
+		rLoc = 456;
+		rType = 0;
+		vrLen = 919;
+		vrLoc = 0;
+	};
+	CDFEBF49130CCAA500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 39";
+		rLen = 0;
+		rLoc = 1030;
+		rType = 0;
+		vrLen = 1012;
+		vrLoc = 693;
+	};
+	CDFEBF4A130CCAA500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 281";
+		rLen = 0;
+		rLoc = 9604;
+		rType = 0;
+		vrLen = 1173;
+		vrLoc = 8891;
+	};
+	CDFEBF4B130CCAA500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 251";
+		rLen = 0;
+		rLoc = 8487;
+		rType = 0;
+		vrLen = 1193;
+		vrLoc = 8401;
+	};
+	CDFEBF56130CCD4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 172";
+		rLen = 0;
+		rLoc = 6363;
+		rType = 0;
+		vrLen = 669;
+		vrLoc = 6176;
+	};
+	CDFEBF57130CCD4A00A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Expected ':' before ']' token";
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 249;
+		rType = 1;
+	};
+	CDFEBF58130CCD4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 258";
+		rLen = 0;
+		rLoc = 8487;
+		rType = 0;
+		vrLen = 959;
+		vrLoc = 8401;
+	};
+	CDFEBF59130CCD5500A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Expected ':' before ']' token";
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 249;
+		rType = 1;
+	};
+	CDFEBF5A130CCD5500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 258";
+		rLen = 0;
+		rLoc = 8487;
+		rType = 0;
+		vrLen = 959;
+		vrLoc = 8401;
+	};
+	CDFEBF5F130CCD9D00A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "'tempImage' undeclared (first use in this function)";
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 249;
+		rType = 1;
+	};
+	CDFEBF60130CCD9D00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 259";
+		rLen = 0;
+		rLoc = 8487;
+		rType = 0;
+		vrLen = 941;
+		vrLoc = 8401;
+	};
+	CDFEBF63130CCDAA00A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "'tempImage' undeclared (first use in this function)";
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 249;
+		rType = 1;
+	};
+	CDFEBF64130CCDAA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 254";
+		rLen = 0;
+		rLoc = 8487;
+		rType = 0;
+		vrLen = 1363;
+		vrLoc = 8010;
+	};
+	CDFEBF67130CCE9F00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 262";
+		rLen = 0;
+		rLoc = 8693;
+		rType = 0;
+		vrLen = 1393;
+		vrLoc = 8271;
 	};
 }

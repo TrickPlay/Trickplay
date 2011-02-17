@@ -60,11 +60,12 @@
             return nil;
         }
         
-        host = theHost;
+        // Dot syntax properly releases and retains objects
+        self.host = theHost;
         port = thePort;
     
-        input_stream = inputStream;
-        output_stream = outputStream;
+        self.input_stream = inputStream;
+        self.output_stream = outputStream;
     
         [input_stream setDelegate:self];
         [output_stream setDelegate:self];
@@ -164,6 +165,7 @@
     packet.data = [NSData dataWithBytes:data length:bytes];
     packet.position = 0;
     [writeQueue addObject:packet];
+    [self sendPackets];
 }
 
 

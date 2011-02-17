@@ -13,22 +13,19 @@
 
 @synthesize currentService;
 @synthesize services;
-@synthesize tableView;
 @synthesize delegate;
 
 /**
- * Initializes the NetServiceManager. Provide a UITableView to list the services.
- * and a client to callback to with event triggers.
+ * Initializes the NetServiceManager. Provide a delegate to callback to
+ * with event triggers.
  *
- * @property aTableView : a UITableView to list the services provided by Bonjour.
  * @property aClient : a client that will receive callbacks upon NSNetService
  *                     and NSNetServiceBrowser events.
  */
--(id)init:(UITableView *)aTableView delegate:(id)aClient{
+-(id)initWithDelegate:(id)client{
     if (self = [super init])
     {
-        delegate = aClient;
-        tableView = aTableView; //TODO: get rid of this property
+        delegate = client;
         currentService = nil;
         services = [[NSMutableArray alloc] init];
         netServiceBrowser = [[NSNetServiceBrowser alloc] init];
@@ -56,7 +53,7 @@
     NSLog(@"Current NetService did not resolve address");
     
 	[self stopCurrentService];
-	[tableView reloadData];
+	[delegate didNotResolveService];
 }
 
 

@@ -17,6 +17,11 @@
 - (void)do_UB:(NSArray *)args;
 - (void)do_UG:(NSArray *)args;
 - (void)do_RT:(NSArray *)args;
+- (void)do_SC;
+- (void)do_PC;
+- (void)do_ST;
+- (void)do_PT;
+- (void)do_CU;
 
 @end
 
@@ -32,8 +37,6 @@
 - (void)createCommandDictionary;
 - (void)addBytes:(const uint8_t *)bytes length:(NSUInteger)length;
 - (void)parse;
-- (void)doDispatchUBToDelegate:(NSArray *)args;
-- (void)doDispatchDRToDelegate:(NSArray *)args;
 - (void)interpret:(NSString *)command;
 
 @end

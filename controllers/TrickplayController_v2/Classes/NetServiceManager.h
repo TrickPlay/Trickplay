@@ -12,6 +12,7 @@
 
 @optional
 - (void)serviceResolved:(NSNetService *)service;
+- (void)didNotResolveService;
 - (void)reloadData;
 
 @end
@@ -21,18 +22,15 @@
 @interface NetServiceManager : NSObject <NSNetServiceBrowserDelegate,
 NSNetServiceDelegate> {
     id <NetServiceManagerDelegate> delegate;
-    UITableView *tableView;
     
     NSNetServiceBrowser *netServiceBrowser;
     NSNetService *currentService;
     NSMutableArray *services;
 }
 
-- (id)init:(UITableView *)aTableView delegate:(id)client;
+- (id)initWithDelegate:(id)client;
 
 - (void)handleError:(NSNumber *)error;
-
-@property (retain) UITableView *tableView;
 
 @property (retain) NSNetService *currentService;
 @property (retain) NSMutableArray *services;

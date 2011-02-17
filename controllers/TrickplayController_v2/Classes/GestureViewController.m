@@ -7,12 +7,14 @@
 //
 
 #import "GestureViewController.h"
+#import "TouchController.h"
 
 
 @implementation GestureViewController
 
 @synthesize loadingIndicator;
 @synthesize backgroundView;
+@synthesize touchDelegate;
 
 -(void) setupService:(NSInteger)p
             hostname:(NSString *)h
@@ -21,6 +23,9 @@
     NSLog(@"Service Setup: %@ host: %@ port: %d", n, h, p);
     
     port = p;
+    if (hostName) {
+        [hostName release];
+    }
     hostName = [h retain];
 }
 
@@ -48,6 +53,7 @@
     
     resourceNames = [[NSMutableDictionary alloc] initWithCapacity:40];
 	
+    touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     //[loadingIndicator stopAnimating];
@@ -55,11 +61,30 @@
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred");
-    [self.navigationController popViewControllerAnimated:YES];
     [socketManager release];
+    [(TouchController *)touchDelegate release];
+    [self clearUI];
     [loadingIndicator stopAnimating];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount
+{
+	if (socketManager)
+	{
+	    int index;	
+		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", thekey];
+        
+		for (index = 1; index <= thecount; index++) {
+			[socketManager sendData:[sentData UTF8String]  numberOfBytes:[sentData length]];
+		}
+    }
+}
+
+- (void)exitTrickplayApp:(id)sender {
+    //Send Escape key to exit whatever app is currently running
+	[self sendKeyToTrickplay:@"FF1B" thecount:1];
+}
 
 
 //------------------- Handling Commands From Server ------------------
@@ -93,8 +118,7 @@
         } else {
             //Use the hostname and port to construct the url
             NSURL *imageurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], imageURLString]];
-            [[imageurl retain] autorelease];
-            NSData *imageData = [[[NSData dataWithContentsOfURL:imageurl] retain] autorelease];
+            NSData *imageData = [NSData dataWithContentsOfURL:imageurl];
             tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
         }
 
@@ -122,8 +146,7 @@
         } else {
             //Use the hostname and port to construct the url
             NSURL *imageurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], imageURLString]];
-            [[imageurl retain] autorelease];
-            NSData *imageData = [[[NSData dataWithContentsOfURL:imageurl] retain] autorelease];
+            NSData *imageData = [NSData dataWithContentsOfURL:imageurl];
             tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
         }
         
@@ -173,16 +196,52 @@
         backgroundView.image = outputImage;
         //*/
     }
+    
+    [args release];
 }
 
+// TODO: Reset all modules to the initial state
 - (void)do_RT:(NSArray *)args {
     [self clearUI];
 }
 
+- (void)do_CU {
+    [self clearUI];
+}
+
+
+//------------------ Stuff passed to TouchController --------------------
+// TODO: Change this design pattern to use Categories/Class-Extensions
+
+- (void)do_SC {
+    [touchDelegate startClicks];
+}
+- (void)do_PC {
+    [touchDelegate stopClicks];
+}
+- (void)do_ST {
+    [touchDelegate startTouches];
+}
+- (void)do_PT {
+    [touchDelegate stopTouches];
+}
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [touchDelegate touchesBegan:touches withEvent:event];
+}
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    [touchDelegate touchesMoved:touches withEvent:event];
+}
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    [touchDelegate touchesEnded:touches withEvent:event];
+}
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    [touchDelegate touchesCancelled:touches withEvent:event];
+}
 
 //-------------------- Other View stuff ------------------------
 
 - (void)clearUI {
+    NSLog(@"Clearing the UI");
     CGFloat
     x = self.view.frame.origin.x,
     y = self.view.frame.origin.y,
@@ -191,7 +250,9 @@
     
     UIImageView *newImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background.png"]];
     newImageView.frame = CGRectMake(x, y, width, height);
+    [backgroundView removeFromSuperview];
     self.backgroundView = newImageView;
+    [self.view addSubview:backgroundView];
     [newImageView release];
 }
 
@@ -217,7 +278,14 @@
     [loadingIndicator startAnimating];
     
     backgroundView.image = [UIImage imageNamed:@"background.png"];
-    [self startService];
+    
+    UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc]
+								  initWithTitle:NSLocalizedString(@"Exit", @"")
+								  style:UIBarButtonItemStyleBordered
+								  target:self action:@selector(exitTrickplayApp:)] autorelease]; 
+	self.navigationItem.rightBarButtonItem = exitItem;
+    
+    //[self startService];
 }
 //*/
 
@@ -244,8 +312,15 @@
 
 
 - (void)dealloc {
-    [hostName release];
-    [socketManager release];
+    if (hostName) {
+        [hostName release];
+    }
+    if (socketManager) {
+        [socketManager release];
+    }
+    if (touchDelegate) {
+        [(TouchController *)touchDelegate release];
+    }
     [loadingIndicator release];
     [backgroundView release];
     [super dealloc];
