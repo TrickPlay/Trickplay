@@ -319,11 +319,11 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
 
 //-----------------------------------------------------------------------------
 
-class AudioFeeder
+class AudioFeeder : private Action
 {
 public:
 
-    static bool post( TPContext * context , const char * file_name , guint interval )
+    static bool post( TPContext * context , const char * file_name , guint interval_s )
     {
         SF_INFO info;
 
@@ -336,7 +336,7 @@ public:
             return false;
         }
 
-        g_info( "FEEDING AUDIO FROM %s EVERY %u s" , file_name , interval );
+        g_info( "FEEDING AUDIO FROM %s EVERY %u s" , file_name , interval_s );
         g_info( "  frames      = %u"   , info.frames );
         g_info( "  sample_rate = %d"   , info.samplerate );
         g_info( "  channels    = %d"   , info.channels );
@@ -347,20 +347,16 @@ public:
 
         tp_audio_sampler_source_changed( sampler );
 
-        g_timeout_add_seconds_full(
-                TRICKPLAY_PRIORITY ,
-                interval ,
-                ( GSourceFunc ) feed ,
-                new AudioFeeder( sampler , f , info ),
-                ( GDestroyNotify ) destroy );
+        Action::post( new AudioFeeder( sampler , f , info , interval_s ) );
 
         return true;
     }
 
 private:
 
-    AudioFeeder( TPAudioSampler * _sampler , SNDFILE * _f , const SF_INFO & _info )
+    AudioFeeder( TPAudioSampler * _sampler , SNDFILE * _f , const SF_INFO & _info , int interval )
     :
+        Action( interval * 1000 ),
         sampler( _sampler ),
         f( _f ),
         info( _info ),
@@ -368,32 +364,27 @@ private:
     {
     }
 
-    ~AudioFeeder()
+    virtual ~AudioFeeder()
     {
         sf_close( f );
         g_timer_destroy( timer );
         g_debug( "DESTROYED AUDIO FEEDER" );
     }
 
-    static void destroy( AudioFeeder * me )
+    virtual bool run()
     {
-        delete me;
-    }
+        sf_count_t frames = g_timer_elapsed( timer , 0 ) * info.samplerate;
 
-    static gboolean feed( AudioFeeder * me )
-    {
-        sf_count_t frames = g_timer_elapsed( me->timer , 0 ) * me->info.samplerate;
+        g_timer_start( timer );
 
-        g_timer_start( me->timer );
+        float * samples = g_new( float , frames * info.channels );
 
-        float * samples = g_new( float , frames * me->info.channels );
-
-        sf_count_t read = sf_readf_float( me->f , samples , frames );
+        sf_count_t read = sf_readf_float( f , samples , frames );
 
         if ( read == 0 )
         {
             g_free( samples );
-            return FALSE;
+            return false;
         }
 
         TPAudioBuffer buffer;
@@ -401,18 +392,18 @@ private:
         memset( & buffer , 0 , sizeof( buffer ) );
 
         buffer.format = TP_AUDIO_FORMAT_FLOAT;
-        buffer.channels = me->info.channels;
-        buffer.sample_rate = me->info.samplerate;
+        buffer.channels = info.channels;
+        buffer.sample_rate = info.samplerate;
         buffer.copy_samples = 1;
         buffer.free_samples = 0;
         buffer.samples = samples;
-        buffer.size = read * me->info.channels * sizeof( float );
+        buffer.size = read * info.channels * sizeof( float );
 
-        tp_audio_sampler_submit_buffer( me->sampler , & buffer );
+        tp_audio_sampler_submit_buffer( sampler , & buffer );
 
         g_free( samples );
 
-        return TRUE;
+        return true;
     }
 
     TPAudioSampler *    sampler;
