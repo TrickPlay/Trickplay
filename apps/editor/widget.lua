@@ -97,7 +97,7 @@
 --[[
 Function: change_all_skin
 
-Changes all widgets' skins to 'skin_name' 
+Changes all widgets' skins to 'skin_name' item:find_child("textInput").text
 
 Arguments:
 	skin_name - name of skin  
@@ -199,7 +199,6 @@ local function make_xbox()
     c:line_to ( x + XBOX_SIZE, y + XBOX_SIZE)
     c:move_to ( x + XBOX_SIZE, y)
     c:line_to ( x, y + XBOX_SIZE)
-
   -- Draw x button box
     c:move_to ( x, y)
     c:line_to ( x + XBOX_SIZE, y)
@@ -580,8 +579,8 @@ Arguments:
     	padding_x - Padding of the button image on the X axis
     	padding_y - Padding of the button image on the Y axis
     	border_radius - Radius of the border for the button
-	on_pressed - Function that is called by on_focus_in() or on_key_down() event
-	on_release - Function that is called by on_focus_out()
+	pressed - Function that is called by on_focus_in() or on_key_down() event
+	release - Function that is called by on_focus_out()
 
 
 Return:
@@ -611,8 +610,8 @@ function widget.button(table)
     	padding_x = 0,
     	padding_y = 0,
     	border_radius = 12,
-	on_pressed = nil, 
-	on_released = nil, 
+	pressed = nil, 
+	released = nil, 
     }
 
  --overwrite defaults
@@ -678,8 +677,8 @@ function widget.button(table)
 	     button.opacity = 0
              focus.opacity = 255
         end 
-	if p.on_pressed then 
-		p.on_pressed()
+	if p.pressed then 
+		p.pressed()
 	end 
 
 	b_group:grab_key_focus(b_group)
@@ -695,8 +694,8 @@ function widget.button(table)
              focus.opacity = 0
 	     focus_ring.opacity = 0
         end
-	if p.on_released then 
-		p.on_released()
+	if p.released then 
+		p.released()
 	end 
  
     end
@@ -832,7 +831,6 @@ function widget.textField(table)
      create_textInputField()
 
      function t_group.extra.on_focus_in()
-	  print("KKK")
           if (p.skin == "custom") then 
 	     box.opacity = 0
 	     focus_box.opacity = 255
@@ -847,11 +845,9 @@ function widget.textField(table)
      end
 
      function t_group.extra.on_focus_out()
-		print("QQQQQQQQQ")
           if (p.skin == "custom") then 
 	     box.opacity = 255
 	     focus_box.opacity = 0
-		print("right!!!")
           else
 	     box_img.opacity = 255
              focus_img.opacity = 0

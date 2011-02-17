@@ -569,7 +569,8 @@ local widget_map = {
 		w_prop_map["color"]()
 		w_prop_map["font"]()
 		w_prop_map["items"]()
-		--table.insert(attr_t, {"selected_item", v.selected_item, "Selected Item"})
+                table.insert(attr_t, {"line", "", "hide"})
+		table.insert(attr_t, {"selected_item", v.selected_item, "Selected Item"})
 		end,
 	["LoadingDots"] = function () 
 		w_prop_map["skin"]()

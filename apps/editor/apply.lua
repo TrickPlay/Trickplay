@@ -61,7 +61,13 @@ function inspector_apply (v, inspector)
 	             if j.name == "wrap_mode" then 
            	          v.wrap_mode = string.upper(item_group:find_child("wrap_mode"):find_child("input_text").text)
 		     else
-                          v[j.name] = item_group:find_child(j.name):find_child("input_text").text
+			  if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
+			  print("number : ", j.name)
+                               v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+			  else 
+			  print("string : ", j.name)
+                               v[j.name] = item_group:find_child(j.name):find_child("input_text").text
+			  end
 		     end 
 		elseif(j.name == "dr" or j.name == "dg" or j.name == "db" or j.name == "da") then 
  		     local color_t = {}
