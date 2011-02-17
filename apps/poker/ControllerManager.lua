@@ -40,10 +40,15 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     function controllers:on_controller_connected(controller)
         if number_of_ctrls > max_controllers
         or not accepting_controllers
-        or active_ctrls[controller]
         or not model:get_active_controller().add_controller then
             return
         end
+        if active_ctrls[controller.name] then
+            print("Controller trying to connect has the same NAME as"
+            .." controller already connected")
+            return
+        end
+        
 
         controller.state = ControllerStates.SPLASH
 
@@ -87,7 +92,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                     "assets/phone/waiting_screen/player"..i..".png")
             end
 
-            controller:set_ui_background("splash")
+            controller:clear_and_set_background("splash")
         end
 
         local x_ratio = controller.ui_size[1]/640
@@ -95,22 +100,15 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:add_image(image_name, x, y, width, height)
             if not image_name then error("no image name", 2) end
             
-            --[[
-            print("controller.ui_size")
-            dumptable(controller.ui_size)
-
-            print("x_ratio", tostring(x_ratio))
-            print("y_ratio", tostring(y_ratio))
-            print("x*x_ratio", tostring(x*x_ratio))
-            print("y*y_ratio", tostring(y*y_ratio))
-            print("width*x_ratio", tostring(width*x_ratio))
-            print("height*y_ratio", tostring(height*y_ratio))
-            --]]
-
             return
                 controller:set_ui_image(image_name, math.floor(x*x_ratio),
                     math.floor(y*y_ratio), math.floor(width*x_ratio),
                     math.floor(height*y_ratio))
+        end
+
+        function controller:clear_and_set_background(image_name)
+            controller:clear_ui()
+            controller:set_ui_background(image_name)
         end
 
         controller.x_ratio = x_ratio
@@ -131,6 +129,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             print("DISCONNECTED", controller.name)
 
             active_ctrls[controller.name] = nil
+            number_of_ctrls = number_of_ctrls - 1
         end
 
         if start_click then
@@ -152,7 +151,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:choose_dog()
             print("choosing dog")
 
-            controller:set_ui_background("bkg")
+            controller:clear_and_set_background("bkg")
             controller:add_image("hdr_choose_dog", 95, 30, 450, 50)
             for i = 1,6 do
                 if not controller:add_image("dog_"..i, ((i-1)%2)*(256+8)+60,
@@ -174,7 +173,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         --]]
         function controller:name_dog(pos)
             print("naming dog")
-            controller:set_ui_background("bkg")
+            controller:clear_and_set_background("bkg")
             controller:add_image("hdr_name_dog", 109, 30, 422, 50)
             controller:add_image("dog_"..pos, 192, 100, 256, 256)
             if controller:enter_text("Name Your Dog", "Name Your Dog") then
@@ -191,7 +190,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
 
         function controller:waiting_room()
-            controller:set_ui_background("bkg")
+            controller:clear_and_set_background("bkg")
             controller:add_image("waiting_text", 0, 0, 640, 86)
             for i = 1,6 do
                 controller:add_image("player_"..i, 0, (i-1)*115+86, 640, 115)
@@ -224,7 +223,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:set_hole_cards(hole)
             assert(hole[1])
             assert(hole[2])
-            controller:set_ui_background("bkg")
+            controller:clear_and_set_background("bkg")
             controller:add_image("buttons", 0, 535, 640, 313)
 
             controller:declare_resource("card1",
