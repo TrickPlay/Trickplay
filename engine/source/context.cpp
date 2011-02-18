@@ -319,6 +319,102 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
 
 //-----------------------------------------------------------------------------
 
+class AudioFeeder : private Action
+{
+public:
+
+    static bool post( TPContext * context , const char * file_name , guint interval_s )
+    {
+        SF_INFO info;
+
+        memset( & info , 0 , sizeof( info ) );
+
+        SNDFILE * f = sf_open( file_name , SFM_READ , & info );
+
+        if ( ! f )
+        {
+            return false;
+        }
+
+        g_info( "FEEDING AUDIO FROM %s EVERY %u s" , file_name , interval_s );
+        g_info( "  frames      = %u"   , info.frames );
+        g_info( "  sample_rate = %d"   , info.samplerate );
+        g_info( "  channels    = %d"   , info.channels );
+        g_info( "  format      = 0x%x" , info.format );
+        g_info( "  duration    = %d s" , info.frames / info.samplerate );
+
+        TPAudioSampler * sampler = tp_context_get_audio_sampler( context );
+
+        tp_audio_sampler_source_changed( sampler );
+
+        Action::post( new AudioFeeder( sampler , f , info , interval_s ) );
+
+        return true;
+    }
+
+private:
+
+    AudioFeeder( TPAudioSampler * _sampler , SNDFILE * _f , const SF_INFO & _info , int interval )
+    :
+        Action( interval * 1000 ),
+        sampler( _sampler ),
+        f( _f ),
+        info( _info ),
+        timer( g_timer_new() )
+    {
+    }
+
+    virtual ~AudioFeeder()
+    {
+        sf_close( f );
+        g_timer_destroy( timer );
+        g_debug( "DESTROYED AUDIO FEEDER" );
+    }
+
+    virtual bool run()
+    {
+        sf_count_t frames = g_timer_elapsed( timer , 0 ) * info.samplerate;
+
+        g_timer_start( timer );
+
+        float * samples = g_new( float , frames * info.channels );
+
+        sf_count_t read = sf_readf_float( f , samples , frames );
+
+        if ( read == 0 )
+        {
+            g_free( samples );
+            return false;
+        }
+
+        TPAudioBuffer buffer;
+
+        memset( & buffer , 0 , sizeof( buffer ) );
+
+        buffer.format = TP_AUDIO_FORMAT_FLOAT;
+        buffer.channels = info.channels;
+        buffer.sample_rate = info.samplerate;
+        buffer.copy_samples = 1;
+        buffer.free_samples = 0;
+        buffer.samples = samples;
+        buffer.size = read * info.channels * sizeof( float );
+
+        tp_audio_sampler_submit_buffer( sampler , & buffer );
+
+        g_free( samples );
+
+        return true;
+    }
+
+    TPAudioSampler *    sampler;
+    SNDFILE *           f;
+    SF_INFO             info;
+    GTimer *            timer;
+};
+
+//-----------------------------------------------------------------------------
+
+
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
 {
     TPContext * context = ( TPContext * )self;
@@ -503,62 +599,9 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         if ( parameters )
         {
-            SF_INFO info;
-
-            memset( & info , 0 , sizeof( info ) );
-
-            SNDFILE * f = sf_open( parameters , SFM_READ , & info );
-
-            if ( ! f )
+            if ( ! AudioFeeder::post( context , parameters , 15 ) )
             {
                 g_info( "FAILED TO OPEN '%s'" , parameters );
-            }
-            else
-            {
-                g_info( "  frames      = %u" , info.frames );
-                g_info( "  sample_rate = %d" , info.samplerate );
-                g_info( "  channels    = %d" , info.channels );
-                g_info( "  format      = 0x%x" , info.format );
-
-                // Allocate a buffer to hold 10 seconds of audio
-
-                sf_count_t frames = info.samplerate * 10;
-
-                float * samples = g_new( float , frames * info.channels );
-
-                // Get the audio sampler
-
-                TPAudioSampler * sampler = tp_context_get_audio_sampler( context );
-
-                tp_audio_sampler_pause( sampler );
-
-                while( true )
-                {
-                    sf_count_t read = sf_readf_float( f , samples , frames );
-
-                    if ( read == 0 )
-                    {
-                        break;
-                    }
-
-                    TPAudioBuffer buffer;
-
-                    buffer.format = TP_AUDIO_FORMAT_FLOAT;
-                    buffer.channels = info.channels;
-                    buffer.sample_rate = info.samplerate;
-                    buffer.copy_samples = 1;
-                    buffer.free_samples = 0;
-                    buffer.samples = samples;
-                    buffer.size = read * info.channels * sizeof( float );
-
-                    tp_audio_sampler_submit_buffer( sampler , & buffer );
-                }
-
-                g_free( samples );
-
-                tp_audio_sampler_resume( sampler );
-
-                sf_close( f );
             }
         }
     }
@@ -682,6 +725,20 @@ void TPContext::setup_fonts()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
+static int controller_execute_command( TPController * , unsigned int command , void * , void * )
+{
+    switch( command )
+    {
+        case TP_CONTROLLER_COMMAND_START_POINTER:
+            return 0;
+
+        case TP_CONTROLLER_COMMAND_STOP_POINTER:
+            return 0;
+    }
+
+    return 1;
+}
+
 static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode )
 {
     * keyval = event->key.keyval;
@@ -719,6 +776,8 @@ static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode 
 // In desktop builds, we catch all key events that are not synthetic and pass
 // them through a keyboard controller. That will generate an event for the
 // controller and re-inject the event into clutter as a synthetic event.
+//
+// We also use this for mouse events.
 
 gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer controller )
 {
@@ -755,6 +814,43 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                     return TRUE;
                 }
                 break;
+            }
+
+            case CLUTTER_MOTION:
+            {
+                if ( !(event->motion.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y );
+                    }
+                    return TRUE;
+                }
+                break;
+            }
+
+            case CLUTTER_BUTTON_PRESS:
+            {
+                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    }
+                    return TRUE;
+                }
+            }
+
+            case CLUTTER_BUTTON_RELEASE:
+            {
+                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    }
+                    return TRUE;
+                }
             }
 
             default:
@@ -1020,7 +1116,9 @@ int TPContext::run()
 
     memset( &spec, 0, sizeof( spec ) );
 
-    spec.capabilities = TP_CONTROLLER_HAS_KEYS;
+    spec.capabilities = TP_CONTROLLER_HAS_KEYS | TP_CONTROLLER_HAS_POINTER;
+
+    spec.execute_command = controller_execute_command;
 
     // This controller won't leak because the controller list will free it
 
@@ -1029,6 +1127,8 @@ int TPContext::run()
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
 
 #endif
+
+    clutter_stage_set_throttle_motion_events( CLUTTER_STAGE( stage ) , FALSE );
 
     //.........................................................................
     // Create the default media player. This may come back NULL.
@@ -2459,6 +2559,34 @@ gpointer TPContext::get_internal( gpointer key )
 //-----------------------------------------------------------------------------
 // Called by other threads...
 
+class AudioMatchAction : public Action
+{
+public:
+
+    AudioMatchAction( TPContext * _context , const gchar * _json )
+    :
+        context( _context ),
+        json( _json )
+    {}
+
+    virtual bool run()
+    {
+        g_debug( "RUNNING AUDIO MATCH ACTION" );
+
+        if ( App * app = context->get_current_app() )
+        {
+            app->audio_match( json );
+        }
+
+        return false;
+    }
+
+private:
+
+    TPContext * context;
+    String      json;
+};
+
 void TPContext::audio_detection_match( const gchar * json )
 {
     JsonParser * parser = json_parser_new();
@@ -2479,8 +2607,7 @@ void TPContext::audio_detection_match( const gchar * json )
     {
         g_info( "VALID JSON AUDIO DETECTION RESULT : '%s'" , json );
 
-        // TODO: Here, we would make a copy of the JSON string and use and idle to
-        // trigger some kind of event.
+        Action::post( new AudioMatchAction( this , json ) );
     }
 }
 

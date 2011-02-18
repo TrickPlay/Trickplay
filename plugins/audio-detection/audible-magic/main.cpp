@@ -14,6 +14,11 @@
 
 #include "sndfile.h"
 
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+
 //******************************************************************************
 
 class State
@@ -344,7 +349,95 @@ private:
 
     void parse_response( TPAudioDetectionResult * result , const char * response_body , unsigned long int response_size )
     {
+#if 0
         std::cout << std::endl << response_body << std::endl;
+#endif
+
+        // All we are doing here is using XPath to find all the title nodes.
+
+        static bool initialized = false;
+
+        if ( ! initialized )
+        {
+            initialized = true;
+            xmlInitParser();
+        }
+
+        std::ostringstream json;
+
+        json << "[";
+
+        int count = 0;
+
+        xmlDocPtr doc = xmlParseMemory( response_body , response_size );
+
+        if ( doc )
+        {
+            xmlXPathContextPtr xpc = xmlXPathNewContext( doc );
+
+            if ( xpc )
+            {
+                xmlXPathObjectPtr xpo;
+
+                const xmlChar * exp = BAD_CAST "/AMIdServerResponse/Details/IdResponseInfo/IdResponse/IdDetails/Title";
+
+                xpo = xmlXPathEvalExpression( exp , xpc );
+
+                if ( xpo )
+                {
+                    if ( xpo->nodesetval )
+                    {
+                        for ( int i = 0; i < xpo->nodesetval->nodeNr; ++i )
+                        {
+                            xmlNodePtr node = xpo->nodesetval->nodeTab[ i ];
+
+                            if ( node && node->children )
+                            {
+                                xmlChar * title = xmlNodeGetContent( node );
+
+                                if ( title )
+                                {
+                                    if ( count > 0 )
+                                    {
+                                        json << ",";
+                                    }
+
+                                    // TODO : This is completely wrong - there is no way for us to know that
+                                    // the title is valid JSON. We need to encode it properly.
+
+                                    json << "{\"title\":\"" << BAD_CAST title << "\"}";
+
+                                    xmlFree( title );
+
+                                    ++count;
+
+                                    // Only return the first 4 matches
+
+                                    if ( count > 4 )
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    xmlXPathFreeObject( xpo );
+                }
+
+                xmlXPathFreeContext( xpc );
+            }
+            xmlFreeDoc( doc );
+        }
+
+        json << "]";
+
+        // We have more than []
+
+        if ( json.str().size() > 2 )
+        {
+            result->json = strdup( json.str().c_str() );
+        }
     }
 
     //.........................................................................

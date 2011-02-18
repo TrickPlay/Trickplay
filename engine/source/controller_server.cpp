@@ -21,7 +21,7 @@
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
-#define DISCONNECT_TIMEOUT_SEC  120
+#define DISCONNECT_TIMEOUT_SEC  30
 
 //-----------------------------------------------------------------------------
 
@@ -154,15 +154,16 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_START_CLICKS          :
+
+        case TP_CONTROLLER_COMMAND_START_POINTER         :
         {
-            server->write( connection, "SC\n" );
+            server->write( connection, "SP\n" );
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_STOP_CLICKS           :
+        case TP_CONTROLLER_COMMAND_STOP_POINTER          :
         {
-            server->write( connection, "PC\n" );
+            server->write( connection, "PP\n" );
             break;
         }
 
@@ -456,6 +457,14 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         if ( info.version < 2 )
         {
             g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 2" );
+            info.version = 0;
+            return;
+        }
+
+        if ( info.version < 3 )
+        {
+            g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 3" );
+            info.version = 0;
             return;
         }
 
@@ -483,9 +492,14 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ACCELEROMETER;
                 }
+                else if ( cmp2( cap, "PT" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_POINTER;
+                }
                 else if ( cmp2( cap, "CK" ) )
                 {
-                    spec.capabilities |= TP_CONTROLLER_HAS_CLICKS;
+                    // Deprecated
+                    // spec.capabilities |= TP_CONTROLLER_HAS_CLICKS;
                 }
                 else if ( cmp2( cap, "TC" ) )
                 {
@@ -605,12 +619,9 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         // Click
         // CK <x> <y>
 
-        if ( count < 3 || !info.controller )
-        {
-            return;
-        }
+        // deprecated
 
-        tp_controller_click( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        return;
     }
     else if ( cmp2( cmd, "AX" ) )
     {
@@ -636,41 +647,77 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         tp_controller_ui_event( info.controller, parts[1] );
     }
-    else if ( cmp2( cmd, "TD" ) )
+    else if ( cmp2( cmd, "PD" ) )
     {
-        // Touch down
-        // TD <x> <y>
+        // Pointer button down
+        // PD <button> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_pointer_button_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+    }
+    else if ( cmp2( cmd, "PM" ) )
+    {
+        // Pointer move
+        // PM <x> <y>
 
         if ( count < 3 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_pointer_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+    }
+    else if ( cmp2( cmd, "PU" ) )
+    {
+        // Pointer button up
+        // PU <button> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_pointer_button_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+    }
+    else if ( cmp2( cmd, "TD" ) )
+    {
+        // Touch down
+        // TD <finger> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
     }
     else if ( cmp2( cmd, "TM" ) )
     {
         // Touch move
-        // TM <x> <y>
+        // TM <finger> <x> <y>
 
-        if ( count < 3 || !info.controller )
+        if ( count < 4 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
     }
     else if ( cmp2( cmd, "TU" ) )
     {
         // Touch up
-        // TU <x> <y>
+        // TU <finger> <x> <y>
 
-        if ( count < 3 || !info.controller )
+        if ( count < 4 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
     }
     else if ( cmp2( cmd, "GE" ) )
     {

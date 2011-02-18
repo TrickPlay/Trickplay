@@ -206,6 +206,10 @@ extern "C" {
     Arguments:
 
         context - A valid TrickPlay context.
+
+    Returns:
+
+        sampler - A pointer to a TPAudioSampler structure, which is opaque.
 */
 
     TP_API_EXPORT
@@ -249,7 +253,7 @@ extern "C" {
 
     Although calling this function is optional, it is recommended that you do so.
     Not only will it improve the user experience, but will also improve the general
-    performance of the audio sampler; because it can promtly free audio buffers that
+    performance of the audio sampler; because it can promptly free audio buffers that
     are no longer relevant.
 
     Arguments:
