@@ -1,6 +1,4 @@
 
-#define G_LOG_DOMAIN "tp-cmp"
-
 #include "clutter-gst/clutter-gst.h"
 #include "gst/video/video.h"
 
@@ -9,6 +7,10 @@
 
 #include "trickplay/trickplay.h"
 #include "trickplay/mediaplayer.h"
+
+//-----------------------------------------------------------------------------
+
+TPContext * context = 0;
 
 //-----------------------------------------------------------------------------
 
@@ -66,6 +68,10 @@ void collect_tags(const GstTagList * list,const gchar * tag,gpointer user_data)
     }
     g_value_unset(&original_value);
 }
+
+//-----------------------------------------------------------------------------
+
+extern void connect_audio_sampler( TPContext * context , GstElement * bin );
 
 //-----------------------------------------------------------------------------
 // Looks for the stream types and video size
@@ -186,18 +192,22 @@ static void get_stream_information(TPMediaPlayer * mp)
 	g_debug("About to do AUDIO stuff!");
 
 #if 1
-    if (ud->media_type&TP_MEDIA_TYPE_AUDIO)
+
+    if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
     {
         GstElement * audio_sink= gst_element_factory_make( "autoaudiosink", "TPAudioSink" );
         
         if(!audio_sink)
         {
         	g_debug("Failed to create autoaudiosink");
-        } else {
+        }
+        else
+        {
 			g_object_set(G_OBJECT(pipeline),"audio-sink",audio_sink,NULL);
         	g_debug("autoaudiosink set");
 		}
-    }    
+    }
+
 #endif
 
 }
@@ -652,7 +662,7 @@ int main(int argc,char * argv[])
 {
     tp_init(&argc,&argv);
     
-    TPContext * context = tp_context_new();
+    context = tp_context_new();
     
     if ( argc > 1 && * ( argv[ argc - 1 ] ) != '-' )
     {
@@ -665,6 +675,8 @@ int main(int argc,char * argv[])
     
     tp_context_free(context);
     
+    context = 0;
+
     return result;
 }
 
