@@ -1782,11 +1782,11 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group.reactive = true
 
         local space = WIDTH - PADDING_X  
+	local text
 
         if(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	elseif item_n == "anchor_point" then 
-	     --text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)
 	     text = Text {name = "attr", text = item_s}:set(STYLE)
              text.position  = {WIDTH - space , 0}
     	     group:add(text)
@@ -1798,7 +1798,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     input_box_width = WIDTH 
 	     
         else  
-    	     --text = Text {name = "attr", text = string.upper(item_s)}:set(STYLE)
     	     text = Text {name = "attr", text = item_s}:set(STYLE)
              text.position  = {WIDTH - space , PADDING_Y}
     	     group:add(text)
@@ -1809,28 +1808,31 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
              elseif(item_n == "wrap_mode" or item_n =="duration" or item_n =="fade_duration") then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
-             elseif(item_n == "rect_r" or item_n == "rect_g" or item_n == "rect_b" or item_n == "rect_a" ) 
-             or (item_n == "cx" or item_n == "cy" or item_n == "cw" or item_n == "ch" ) then 
+             elseif(string.find(item_n,"color")) then 
 	          input_box_width = WIDTH - 350 - ( PADDING_X * 2) 
 	     end
         end 
 
 	local y_space = 0
---[[
-	if item_n == "x_scale" or item_n == "y_scale" then 
-		y_space = 8
-	text.y = text.y + y_space
-	end 
-]]
+
         ring = make_ring(input_box_width, HEIGHT + 5 ) 
 	ring.name = "ring"
-	ring.position = {WIDTH - space , y_space}
+	if (text) then 
+	     ring.position = {text.x+text.w+5, y_space}
+	else 
+	     ring.position = {WIDTH = space, y_space}
+	end
         ring.opacity = 255
         group:add(ring)
 
         focus = make_focus_ring(input_box_width, HEIGHT + 5)
         focus.name = "focus"
-        focus.position = {WIDTH - space , y_space}
+	if (text) then 
+	     focus.position = {text.x+text.w+5, y_space}
+	else 
+             focus.position = {WIDTH - space , y_space}
+	end
+
         focus.opacity = 0
 	group:add(focus)
 
@@ -1841,7 +1843,12 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     	input_text = Text {name = "input_text", text =item_v, editable=true,
         reactive = true, wants_enter = false, cursor_visible = false}:set(STYLE)
 
-        input_text.position  = {WIDTH - space , PADDING_Y + y_space}
+	if (text) then 
+             input_text.position  = {text.x+text.w+20, PADDING_Y + y_space}
+	else 
+             input_text.position  = {WIDTH - space , PADDING_Y + y_space}
+	end
+
 
 	function input_text:on_button_down(x,y,button,num_clicks)
  	       current_focus.extra.on_focus_out()

@@ -1563,17 +1563,17 @@ function widget.radioButton(table)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = {255,255,255,255}, --"FFFFFF", -- items 
-	button_color = {255,255,255,200}, -- items 
-	select_color = {100, 100, 100, 255}, -- items 
-	button_radius = 10, -- items 
-	select_radius = 5,  -- items 
-	b_pos = {0, 0},  -- items 
-	item_pos = {50,-5},  -- items 
-	line_space = 40,  -- items 
+		button_color = {255,255,255,200}, -- items 
+		select_color = {100, 100, 100, 255}, -- items 
+		button_radius = 10, -- items 
+		select_radius = 5,  -- items 
+		b_pos = {0, 0},  -- items 
+		item_pos = {50,-5},  -- items 
+		line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
 	rotate_func = nil, 
-	direction = 1, 
+		direction = 1, 
 	selected_item = 1 
     }
 
@@ -1731,19 +1731,19 @@ function widget.checkBox(table)
 	wwidth = 600,
 	wheight = 200,
 	items = {"item1", "item2", "item3"},
-	font = "DejaVu Sans 30px", -- items 
-	color = {255,255,255,255}, -- "FFFFFF", -- items 
-	box_color = {255,255,255,255},
-	f_color = {255,255,255,50},
-	box_width = 2,
-	box_size = {25,25},
-	check_size = {25,25},
-	line_space = 40,   
-	b_pos = {0, 0},  -- items 
-	item_pos = {50,-5},  -- items 
-	selected_item = {1, 3},  
-	direction = 2, 
-	rotate_func = nil,  
+	font = "DejaVu Sans 30px", 
+	color = {255,255,255,255}, 
+		box_color = {255,255,255,255},
+		f_color = {255,255,255,50},
+		box_width = 2,
+		box_size = {25,25},
+		check_size = {25,25},
+		line_space = 40,   
+		b_pos = {0, 0},  
+		item_pos = {50,-5},  
+	selected_items = {1},  
+	direction = 1,  -- 1:vertical 2:horizontal
+		rotate_func = nil,  
     } 
 
  --overwrite defaults
@@ -1809,7 +1809,7 @@ function widget.checkBox(table)
 	      end 
          end 
 
-	 for i,j in pairs(p.selected_item) do 
+	 for i,j in pairs(p.selected_items) do 
              checks:find_child("check"..tostring(j)).opacity = 255 
 	 end 
 
@@ -1881,7 +1881,7 @@ function widget.loadingdots(t)
     local p = {
         skin          = "default",
         dot_radius    = 5,
-        dot_color     = {255,255,255},
+        dot_color     = {255,255,255,255},
         num_dots      = 12,
         anim_radius   = 50,
         anim_duration = 150,

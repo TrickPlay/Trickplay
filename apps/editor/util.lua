@@ -353,15 +353,146 @@ function copy_obj (v)
 end	
 
 
-function make_attr_t(v)
+function n_make_attr_t(v)
 
-  local attr_t 
+  local attr_t
+  local obj_type = v.type
 
-  if(v.type ~= "Video") then
-     if is_in_list(v.extra.type, widgets) == true  then
+  local function stringTotitle(str)
+	print("\ninput string :", str)
+      local i,j = string.find(str,"_")
+      if i then str = string.upper(str:sub(1,1))..str:sub(2,i-1).." "..string.upper(str:sub(i+1, i+1))..str:sub(i+2,-1)
+      else str = string.upper(str:sub(1,1))..str:sub(2,-1)
+      end
+      return str
+  end
+
+  local function stringToitem(str)
+       local first = ""
+       local second = ""
+       local last
+
+       local i, j = str:find("_")
+       if i then 
+       	first = str:sub(1,1)
+       	last = str:sub(i+1,-1)
+	i, j = last:find("_")
+	if i then 
+	    second = last:sub(1,1)
+        end 
+       end 
+      
+       return first..second
+  end 
+
+  local attr_map = {
+	["items"] = function ()
+		local items = ""
+		for i,j in pairs(v.items) do 
+			items = items.."\""..j.."\", "
+		end
+		table.insert(attr_t, {"items", v.items, "Items"})
+                table.insert(attr_t, {"line", "", "hide"})
+                table.insert(attr_t, {"line", "", "hide"})
+		end,
+	["scale"] = function()
+ 		table.insert(attr_t, {"line","", "hide"})
+		table.insert(attr_t, {"caption", "Scale"})
+		local scale_t = v.scale
+        	if scale_t == nil then
+             		scale_t = {1,1} 
+        	end
+        	table.insert(attr_t, {"x_scale", scale_t[1], "X"})
+        	table.insert(attr_t, {"y_scale", scale_t[2], "Y"})
+		end,
+	["x_rotation"] = function()
+ 		table.insert(attr_t, {"caption", "Rotation  "})
+        	local x_rotation_t = v.x_rotation 
+        	local y_rotation_t = v.y_rotation 
+        	local z_rotation_t = v.z_rotation 
+        	table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
+        	table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
+        	table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
+		end,  
+       ["clip"] = function()
+                table.insert(attr_t, {"caption", "Clipping Region"})
+                local clip_t = v.clip
+                if clip_t == nil then
+                     clip_t = {0,0 ,v.w, v.h}
+                end
+                table.insert(attr_t, {"clip_use", false, "Use"})
+                table.insert(attr_t, {"cx", clip_t[1], "X"})
+                table.insert(attr_t, {"cy", clip_t[2], "Y"})
+                table.insert(attr_t, {"cw", clip_t[3], "W"})
+                table.insert(attr_t, {"ch", clip_t[4], "H"})
+		end,
+        ["anchor_point"] = function()	
+ 		table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
+		end,
+	["src"] = function()
+        	table.insert(attr_t, {"caption", "Source Location"})
+        	table.insert(attr_t, {"src", v.src,"Source"})
+		end,
+	["color"] = function(j)
+		table.insert(attr_t, {"caption", stringTotitle(j)})
+             	local color_t = v[j] 
+             	if color_t == nil then 
+                 	color_t = {0,0,0,0}
+	     	end
+	     	table.insert(attr_t, {j.."r", color_t[1], "R"})
+             	table.insert(attr_t, {j.."g", color_t[2], "G"})
+             	table.insert(attr_t, {j.."b", color_t[3], "B"})
+       	     	table.insert(attr_t, {j.."a", color_t[4], "A"})    
+		end,
+	["size"] = function(j)
+		table.insert(attr_t, {"caption", stringTotitle(j)})
+             	local size_t = v[j] 
+             	if size_t == nil then 
+                 	size_t = {0,0}
+	     	end
+             	local size_k = ""
+             	if j:sub(1,1) ~= "s" then
+                 	size_k = j:sub(1,1) 
+             	end 
+	     	table.insert(attr_t, {size_k.."w", size_t[1], "W"})
+             	table.insert(attr_t, {size_k.."h", size_t[2], "H"})
+		end,
+	["pos"] = function(j)
+		table.insert(attr_t, {"caption", stringTotitle(j)})
+             	local pos_t = v[j] 
+             	if pos_t == nil then 
+                 	pos_t = {0,0,0,0}
+	     	end
+             	local pos_k = ""
+             	if j:sub(1,1) ~= "p" then 
+                 	pos_k = j:sub(1,1) 
+             	end 
+	     	table.insert(attr_t, {pos_k.."x", pos_t[1], "X"})
+             	table.insert(attr_t, {pos_k.."y", pos_t[2], "Y"})
+		end,
+  }
+  
+  local obj_map = {
+       ["Rectangle"] = function() return {"color", "border_color", "border_width", "x_rotation", "anchor_point"} end,
+       ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point"} end,
+       ["Text"] = function() return {"color", "font", "editable", "wrap", "wrap_mode", "x_rotation", "anchor_point"} end,
+       ["Group"] = function() return {"scale","x_rotation","anchor_point"} end,
+       ["Clone"] = function() return {"scale","x_rotation","anchor_point"} end,
+       ["Button"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
+       ["TextInputField"] = function() return {"skin","color","f_color","font","text_indent","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
+       ["DialogBox"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
+       ["ToastBox"] = function() return {"label","message","skin","duration","fade_duration","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
+       ["ButtonPicker"] = function() return {"skin","color","font","items","selected_item","scale","x_rotation","anchor_point"} end,
+       ["CheckBox"] = function() return {"skin","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","scale","x_rotation","anchor_point"} end,
+       ["RadioButton"] = function() return {"skin","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space","scale","x_rotation","anchor_point"} end,
+       ["LoadingDots"] = function() return {"skin","dot_color","dot_radius","num_dots","anim_radius","anim_duration","clone_src","scale","x_rotation","anchor_point"} end,
+       ["LoadingBar"] = function() return {"shell_upper_color","shell_lower_color","stroke_color","fill_upper_color","fill_lower_color", "scale","x_rotation","anchor_point"} end,
+   }
+  
+  if is_this_widget(v) == true  then
+       obj_type = v.extra.type
 	attr_t =
       {
-             --{"title", "INSPECTOR : "..string.upper(v.extra.type)},
              {"title", "Inspector : "..(v.extra.type)},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
@@ -369,17 +500,15 @@ function make_attr_t(v)
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
       }
-      	if (v.extra.type ~= "LoadingDots") then 
-             table.insert(attr_t,{"wwidth", math.floor(v.wwidth), "W"})
-             table.insert(attr_t,{"wheight", math.floor(v.wheight), "H"})
-	end 
+       if (v.extra.type ~= "LoadingDots") then 
+             table.insert(attr_t, {"wwidth", math.floor(v.wwidth), "W"})
+             table.insert(attr_t, {"wheight", math.floor(v.wheight), "H"})
+       end
 
-     else --Rectangle, Image, Text, Group, Clone
+  elseif v.type ~= "Video" then  --Rectangle, Image, Text, Group, Clone
 	attr_t =
       {
-             --{"title", "INSPECTOR : "..string.upper(v.type)},
              {"title", "Inspector : "..(v.type)},
-             --{"line", "", "hide"},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
@@ -389,11 +518,9 @@ function make_attr_t(v)
              {"h", math.floor(v.h), "H"},
       }
 
-     end 
   else -- Video 
       attr_t =
       {
-             --{"title", "INSPECTOR : "..string.upper(v.type)},
              {"title", "Inspector : "..(v.type)},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
@@ -406,304 +533,40 @@ function make_attr_t(v)
              {"height", v.viewport[4], "H"},
              {"volume", v.volume, "Volume"},
              {"loop", v.loop, "Loop"},
+             {"button", "view code", "View code"},
+             {"button", "apply", "Apply"},
+             {"button", "cancel", "Cancel"},
       }
+      return attr_t 
   end 
-
-
-  local w_prop_map = {
-	["skin"] = function() 
-             	table.insert(attr_t, {"skin", v.skin, "Skin"})
-		end, 
-	["font"] = function ()
-             	table.insert(attr_t, {"font", v.font, "Font"})
-		end, 
-	["color"] = function ()
-        	table.insert(attr_t, {"caption", "Color"})
-        	local color_t = v.color 
-        	if color_t == nil then 
-             	     color_t = {0,0,0,0}
-		end 
-		table.insert(attr_t, {"r", color_t[1], "R"})
-        	table.insert(attr_t, {"g", color_t[2], "G"})
-        	table.insert(attr_t, {"b", color_t[3], "B"})
-        	table.insert(attr_t, {"a", color_t[4], "A"})
-                end, 
-	["border_width"] = function() 
-                table.insert(attr_t, {"border_width", v.border_width, "Border Width"})
-		table.insert(attr_t, {"caption", "Border Color"})
-        	local color_t = v.border_color 
-        	if color_t == nil then 
-             	     color_t = {0,0,0,0}
-		end 
-		table.insert(attr_t, {"br", color_t[1], "R"})
-        	table.insert(attr_t, {"bg", color_t[2], "G"})
-        	table.insert(attr_t, {"bb", color_t[3], "B"})
-        	table.insert(attr_t, {"ba", color_t[4], "A"})
-
-		table.insert(attr_t, {"caption", "F Color"})
-        	local color_t = v.f_color 
-        	if color_t == nil then 
-             	     color_t = {0,0,0,0}
-		end 
-		table.insert(attr_t, {"fr", color_t[1], "R"})
-        	table.insert(attr_t, {"fg", color_t[2], "G"})
-        	table.insert(attr_t, {"fb", color_t[3], "B"})
-        	table.insert(attr_t, {"fa", color_t[4], "A"})
-
-                table.insert(attr_t, {"border_radius", v.border_radius, "Border Radius"})
-		end,
-	["label"] = function()
-		if(v.extra.type == "Button") then 
-			table.insert(attr_t, {"label", v.label, "Label"})
-		elseif(v.extra.type == "DialogBox") then 
-			table.insert(attr_t, {"label", v.label, "Title"})
-		end
-		end,
-	["text_indent"] = function()
-                table.insert(attr_t, {"text_indent", v.text_indent, "Text Indent"})
-		end,
-	["title"] = function() 
-		table.insert(attr_t, {"label", v.label, "Title"})
-		end,
-	["items"] = function ()
-		table.insert(attr_t, {"items", v.items, "Items"})
-		end,
-	["item_pos"] = function() 
-		table.insert(attr_t, {"b_pos", v.b_pos, "Button Pos."})
-		table.insert(attr_t, {"item_pos", v.item_pos, "Item Pos."})
-		end,
-
-	["group"] = function()
-
- 		table.insert(attr_t, {"line","", "hide"})
-		table.insert(attr_t, {"caption", "Scale"})
-
-		local scale_t = v.scale
-        	if scale_t == nil then
-             		scale_t = {1,1} 
-        	end
-
-
-        	table.insert(attr_t, {"x_scale", scale_t[1], "X"})
-        	table.insert(attr_t, {"y_scale", scale_t[2], "Y"})
-
- 		table.insert(attr_t, {"caption", "Rotation  "})
-        	local x_rotation_t = v.x_rotation 
-        	local y_rotation_t = v.y_rotation 
-        	local z_rotation_t = v.z_rotation 
-        	table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
-        	table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
-        	table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
-	
- 		table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
-		end,
-  } 
-
---kk
-local widget_map = {
-	["Button"] = function()
-		w_prop_map["label"]()
-		w_prop_map["skin"]()
-		w_prop_map["color"]()
-		w_prop_map["font"]()
-		if v.skin == "custom" then 
-		    w_prop_map["border_width"]()
-		end 
-		end,
-	["TextInputField"] = function () 
-		w_prop_map["skin"]()
-		w_prop_map["color"]()
-		w_prop_map["font"]()
-		w_prop_map["text_indent"]()
-		if v.skin == "custom" then 
-		    w_prop_map["border_width"]()
-		end 
-		end,
-	["DialogBox"] = function () 
-		w_prop_map["label"]()
-		w_prop_map["skin"]()
-		w_prop_map["color"]()
-		w_prop_map["font"]()
-		if v.skin == "custom" then 
-		    w_prop_map["border_width"]()
-		end 
-		end,
-
-	["ToastBox"] = function () 
-	        table.insert(attr_t, {"label", v.label, "Title"})
- 		table.insert(attr_t, {"caption", "Message  "})
-		table.insert(attr_t, {"message", v.message, "Message"})
-		w_prop_map["skin"]()
-		w_prop_map["color"]()
-		w_prop_map["font"]()
-		table.insert(attr_t, {"duration", v.duration, "Duration"})
-		table.insert(attr_t, {"fade_duration", v.fade_duration, "Fade Duration"})
-		if v.skin == "custom" then 
-		    w_prop_map["border_width"]()
-		end 
-		end,
-	["RadioButton"] = function () 
-		w_prop_map["skin"]()
-		w_prop_map["color"]()
-		w_prop_map["font"]()
-		--w_prop_map["items"]()
-		w_prop_map["button_color"]() 
-		w_prop_map["select_color"]() 
-		table.insert(attr_t, {"button_color", v.button_color, "Button Color"})
-		table.insert(attr_t, {"select_color", v.select_color, "Select Color"})
-		table.insert(attr_t, {"button_radius", v.button_radius, "Button Radius"})
-		table.insert(attr_t, {"select_radius", v.select_radius, "Select Radius"})
-		table.insert(attr_t, {"selected_item", v.selected_item, "Selected Item"})
-		w_prop_map["item_pos"]()
-	        w_prop_map["b_pos"]()
-	        end, 
-	["CheckBox"] = function () return v.name.." = ".."widget.checkBox"..b_indent.."{"..indent.. 
-		"box_color = {"..table.concat(v.box_color,",").."},"..indent..
-		"f_color = {"..table.concat(v.f_color,",").."},"..indent..
-    		"box_width = "..v.box_width..","..indent.. 
-		"box_size = {"..table.concat(v.box_size,",").."},"..indent..
-		"check_size = {"..table.concat(v.check_size,",").."},"..indent..
-		w_prop_map["items"]()..w_prop_map["item_pos"]()..w_prop_map["wwidth"]()..w_prop_map["group"]() end, 
-	["ButtonPicker"] = function () 
-		w_prop_map["skin"]()
-		w_prop_map["color"]()
-		w_prop_map["font"]()
-		w_prop_map["items"]()
-                table.insert(attr_t, {"line", "", "hide"})
-		table.insert(attr_t, {"selected_item", v.selected_item, "Selected Item"})
-		end,
-	["LoadingDots"] = function () 
-		w_prop_map["skin"]()
-		table.insert(attr_t, {"caption", "Dot Color"})
-        	local color_t = v.dot_color 
-        	if color_t == nil then 
-             	     color_t = {0,0,0,0}
-		end 
-		table.insert(attr_t, {"dr", color_t[1], "R"})
-        	table.insert(attr_t, {"dg", color_t[2], "G"})
-        	table.insert(attr_t, {"db", color_t[3], "B"})
-        	table.insert(attr_t, {"da", color_t[4], "A"})
-		table.insert(attr_t, {"dot_radius", v.dot_radius, "Dot Radius"})
-		table.insert(attr_t, {"num_dots", v.num_dots, "Num Dots"})
-		table.insert(attr_t, {"anim_radius", v.anim_radius, "Anim Radius"})
-		table.insert(attr_t, {"anim_duration", v.anim_duration, "Anim Duration"})
-		table.insert(attr_t, {"clone_src", v.clone_src, "Clone Src"})
-		end,
-	["LoadingBar"] = function () 
-		w_prop_map["skin"]()
-		table.insert(attr_t, {"dot_color", v.dot_color, "Dot Color"})
-		table.insert(attr_t, {"dot_radius", v.dot_radius, "Dot Radius"})
-		table.insert(attr_t, {"num_dots", v.num_dots, "Num Dots"})
-		table.insert(attr_t, {"anim_radius", v.anim_radius, "Anim Radius"})
-		table.insert(attr_t, {"anim_duration", v.anim_duration, "Anim Duration"})
-		table.insert(attr_t, {"clone_src", v.clone_src, "Clone Src"})
-		end,
---[[
-		return v.name.." = ".."widget.loadingbar"..b_indent.."{"..indent.. 
-		"bsize = {"..table.concat(v.bsize,",").."},"..indent..
-        	"shell_upper_color = \""..v.shell_upper_color.."\","..indent.. 
-        	"shell_lower_color = \""..v.shell_lower_color.."\","..indent.. 
-        	"stroke_color = \""..v.stroke_color.."\","..indent.. 
-        	"fill_upper_color = \""..v.fill_upper_color.."\","..indent.. 
-        	"fill_lower_color = \""..v.fill_lower_color.."\""..b_indent.."}\n\n"..
-		w_prop_map["group"]() end, 
-]]
-   }
-  if v.extra then 
-  if is_in_list(v.extra.type, widgets) == true then 
-	widget_map[v.extra.type]()
-  else
-	if (v.type == "Text") then
-        table.insert(attr_t, {"caption", "Color "})
-        local color_t = v.color 
-        if color_t == nil then 
-             color_t = {0,0,0}
-        end
-        table.insert(attr_t, {"r", color_t[1], "R"})
-        table.insert(attr_t, {"g", color_t[2], "G"})
-        table.insert(attr_t, {"b", color_t[3], "B"})
-        table.insert(attr_t, {"font", v.font,"Font "})
-        table.insert(attr_t, {"editable", v.editable,"Editable"})
-        table.insert(attr_t, {"wrap", v.wrap, "Wrap"})
-        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"Wrap mode"})
- 	table.insert(attr_t, {"caption", "Rotation  "})
-        local x_rotation_t = v.x_rotation 
-        local y_rotation_t = v.y_rotation 
-        local z_rotation_t = v.z_rotation 
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
-
- 	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
-
-  elseif (v.type  == "Rectangle") then
-        color_t = v.color 
-        if color_t == nil then 
-             color_t = {0,0,0,0}
-        end
-        table.insert(attr_t, {"caption", "Fill Color"})
-        table.insert(attr_t, {"rect_r", color_t[1], "R"})
-        table.insert(attr_t, {"rect_g", color_t[2], "G"})
-        table.insert(attr_t, {"rect_b", color_t[3], "B"})
-        table.insert(attr_t, {"rect_a", color_t[4], "A"})
-        color_t = v.border_color 
-        if color_t == nil then 
-             color_t = {0,0,0}
-        end
-        table.insert(attr_t, {"caption", "Border Color"})
-        table.insert(attr_t, {"bord_r", color_t[1], "R"})
-        table.insert(attr_t, {"bord_g", color_t[2], "G"})
-        table.insert(attr_t, {"bord_b", color_t[3], "B"})
-        table.insert(attr_t, {"bwidth", v.border_width, "Border Width"})
-	table.insert(attr_t, {"caption", "Rotation  "})
-        local x_rotation_t = v.x_rotation 
-        local y_rotation_t = v.y_rotation 
-        local z_rotation_t = v.z_rotation 
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
-
- 	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
-
-  elseif (v.type  == "Image") then
-        table.insert(attr_t, {"caption", "Source Location"})
-        table.insert(attr_t, {"src", v.src,"Source"})
-        table.insert(attr_t, {"caption", "Clipping Region"})
-        local clip_t = v.clip
-        if clip_t == nil then
-             clip_t = {0,0 ,v.w, v.h}
-        end
-        table.insert(attr_t, {"clip_use", false, "Use"})
-        table.insert(attr_t, {"cx", clip_t[1], "X"})
-        table.insert(attr_t, {"cy", clip_t[2], "Y"})
-        table.insert(attr_t, {"cw", clip_t[3], "W"})
-        table.insert(attr_t, {"ch", clip_t[4], "H"})
- 	table.insert(attr_t, {"caption", "Rotation  "})
-        local x_rotation_t = v.x_rotation 
-        local y_rotation_t = v.y_rotation 
-        local z_rotation_t = v.z_rotation 
-        table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
-        table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
-        table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
-
- 	table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
+  
+  for i,j in pairs(obj_map[obj_type]()) do 
+       	if attr_map[j] then
+             attr_map[j](j)
+        elseif type(v[j]) == "number" then 
+             table.insert(attr_t, {j, math.floor(v[j]), stringTotitle(j)})
+	elseif type(v[j]) == "string" then 
+             table.insert(attr_t, {j, v[j], stringTotitle(j)})
+	elseif type(v[j]) == "boolean" then 
+             table.insert(attr_t, {j, v[j], stringTotitle(j)})
+	elseif string.find(j,"color") then
+             attr_map["color"](j)
+	elseif string.find(j,"size") then
+             attr_map["size"](j)
+	elseif string.find(j,"pos") then
+             attr_map["pos"](j)
+	else
+	     print("make_attr_t() : ", j, " 처리해 주세용 ~")
+	end 
    end 
-   end 
-   end 
-
-   if (v.type  == "Group" or v.type == "Clone") then
-	w_prop_map["group"]()
-   end
-   if(v.type ~= "Video") then
-      	table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
-   end 
+ 
+   table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
    table.insert(attr_t, {"button", "view code", "View code"})
    table.insert(attr_t, {"button", "apply", "Apply"})
    table.insert(attr_t, {"button", "cancel", "Cancel"})
-
+   
    return attr_t
 end
-
 
 
 --------------------------------
