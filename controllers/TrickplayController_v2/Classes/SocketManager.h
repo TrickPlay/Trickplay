@@ -27,8 +27,9 @@
 
 @protocol SocketManagerDelegate
 
-@optional
+@required
 - (void) socketErrorOccurred;
+- (void) streamEndEncountered;
 
 @end
 
