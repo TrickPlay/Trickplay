@@ -4,18 +4,25 @@
 
 #include "trickplay/audio-sampler.h"
 
+void connect_audio_sampler( TPContext * context , GstElement * pipeline );
+
+void disconnect_audio_sampler( GstElement * pipeline );
+
 //=============================================================================
 
 typedef struct BufferInfo
 {
     TPAudioSampler *    sampler;
     TPAudioBuffer       buffer;
+    gulong              probe_handler;
 }
 BufferInfo;
 
 //=============================================================================
 
 static gboolean audio_buffer_received( GstPad * pad , GstBuffer * buffer , gpointer u_data );
+
+static void disconnect_probe( gpointer pad );
 
 //=============================================================================
 
@@ -136,6 +143,21 @@ static GstPad * find_source_pad( GstElement * element )
 
 void connect_audio_sampler( TPContext * context , GstElement * pipeline )
 {
+    g_assert( context );
+    g_assert( pipeline );
+
+    const char * enabled = g_getenv( "TP_CMP_SAMPLE" );
+
+    if ( ! enabled )
+    {
+        return;
+    }
+
+    if ( strcmp( enabled , "1" ) )
+    {
+        return;
+    }
+
     //-------------------------------------------------------------------------
     // Find the audio converter element
 
@@ -149,8 +171,6 @@ void connect_audio_sampler( TPContext * context , GstElement * pipeline )
 
     //-------------------------------------------------------------------------
     // We got the audio convert element, get its source pad
-
-    g_debug( "GOT AUDIO CONVERT" );
 
     GstPad * source_pad = find_source_pad( audio_convert );
 
@@ -167,8 +187,6 @@ void connect_audio_sampler( TPContext * context , GstElement * pipeline )
     //-------------------------------------------------------------------------
     // Get the caps for the source pad
 
-    g_debug( "GOT SOURCE PAD" );
-
     GstCaps * caps = gst_pad_get_negotiated_caps( GST_PAD( source_pad ) );
 
     if ( ! caps )
@@ -180,7 +198,7 @@ void connect_audio_sampler( TPContext * context , GstElement * pipeline )
 
     gchar * s = gst_caps_to_string( caps );
 
-    g_debug( "CAPS : %s" , s );
+    g_debug( "AUDIO CAPS : %s" , s );
 
     g_free( s );
 
@@ -225,14 +243,25 @@ void connect_audio_sampler( TPContext * context , GstElement * pipeline )
         {
             BufferInfo * info = g_new0( BufferInfo , 1 );
 
-            g_object_set_data_full( G_OBJECT( source_pad ) , "tp-buffer-info" , info , g_free );
-
             info->sampler = tp_context_get_audio_sampler( context );
             info->buffer.sample_rate = rate;
             info->buffer.channels = channels;
             info->buffer.format = TP_AUDIO_FORMAT_PCM_16 | TP_AUDIO_ENDIAN_LITTLE;
 
-            gst_pad_add_buffer_probe( GST_PAD( source_pad ) , G_CALLBACK( audio_buffer_received ) , info );
+            info->probe_handler = gst_pad_add_buffer_probe( GST_PAD( source_pad ) , G_CALLBACK( audio_buffer_received ) , info );
+
+            // We attach the buffer info to the pad - so that it will be destroyed when
+            // the pad goes away.
+
+            g_object_set_data_full( G_OBJECT( source_pad ) , "tp-buffer-info" , info , g_free );
+
+            // We attach the pad to the pipeline, so that our probe will be disconnected
+            // when the pipeline goes away. It also lets us easily find the pad later
+            // if we want to disconnect manually.
+
+            g_object_set_data_full( G_OBJECT( pipeline ) , "tp-probe-pad" , gst_object_ref( source_pad ) , disconnect_probe );
+
+            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_INFO , "AUDIO SAMPLING STARTED" );
         }
         else
         {
@@ -245,12 +274,41 @@ void connect_audio_sampler( TPContext * context , GstElement * pipeline )
     gst_object_unref( source_pad );
 }
 
+//=============================================================================
+
+void disconnect_audio_sampler( GstElement * pipeline )
+{
+    g_object_set_data( G_OBJECT( pipeline ) , "tp-probe-pad" , NULL );
+}
+
+//=============================================================================
+
+static void disconnect_probe( gpointer _pad )
+{
+    GstPad * pad = GST_PAD( _pad );
+
+    BufferInfo * info = ( BufferInfo * ) g_object_get_data( G_OBJECT( pad ) , "tp-buffer-info" );
+
+    if ( info && info->probe_handler )
+    {
+        gst_pad_remove_buffer_probe( pad , info->probe_handler );
+
+        info->probe_handler = 0;
+    }
+
+    gst_object_unref( pad );
+}
+
+//=============================================================================
+
 static void free_samples( void * samples , void * gst_buffer )
 {
     // g_assert( GST_BUFFER_DATA( GST_BUFFER( gst_buffer ) ) == samples );
 
     gst_buffer_unref( GST_BUFFER( gst_buffer ) );
 }
+
+//=============================================================================
 
 static gboolean audio_buffer_received( GstPad * pad , GstBuffer * buffer , gpointer u_data )
 {
