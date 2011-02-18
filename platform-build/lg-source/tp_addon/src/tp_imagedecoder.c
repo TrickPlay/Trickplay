@@ -409,6 +409,11 @@ static int _ImageDecoder_DecodeImage(void *pData, unsigned long int size, TPImag
 		return TP_IMAGE_DECODE_FAILED;
 	}
 
+    // Small images are faster in software. Threshold is 26667 now.
+    
+	if (imageInfo.rect.w * imageInfo.rect.h < 26667)
+		return TP_IMAGE_UNSUPPORTED_FORMAT;
+
 	if (imageInfo.rect.w * imageInfo.rect.h > 1280 * 720)
 		return TP_IMAGE_UNSUPPORTED_FORMAT;
 
