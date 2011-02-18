@@ -22,6 +22,7 @@
 - (void)do_ST;
 - (void)do_PT;
 - (void)do_CU;
+- (void)do_ET:(NSArray *)args;
 
 @end
 

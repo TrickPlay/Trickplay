@@ -26,6 +26,7 @@
     self.title = @"Remote Services";
     self.view.tag = 1;
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    self.navigationController.delegate = self;
     
     // Initialize the NSNetServiceBrowser stuff
     netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
@@ -92,6 +93,25 @@
 	return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
  */
+
+
+#pragma mark -
+#pragma mark Navigation Controller Delegate methods
+
+- (void)navigationController:(UINavigationController *)navigationController 
+      willShowViewController:(UIViewController *)viewController 
+                    animated:(BOOL)animated {
+    //NSLog(@"navigation controller tag = %d", viewController.view.tag);
+    //NSLog(@"navigation controller tag = %d", self.view.tag);
+
+    if (viewController.view.tag == self.view.tag) {
+        if (gestureViewController) {
+            [gestureViewController release];
+            gestureViewController = nil;
+        }
+    }
+    [self reloadData];
+}
 
 
 #pragma mark -
@@ -205,9 +225,12 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"Selected row %@\n", indexPath);
     
     NSMutableArray *services = netServiceManager.services;
+    NSLog(@"services %@\n", services);
+    NSLog(@"count %d\n", [services count]);
     
     if ([services count] == 0) return;
     
+    NSLog(@"gestureViewController %@\n", gestureViewController);
     if (gestureViewController == nil)
 	{
 		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
@@ -251,7 +274,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (gestureViewController) {
         [gestureViewController release];
     }
-    //[navigationController release];
 
     [super dealloc];
 }

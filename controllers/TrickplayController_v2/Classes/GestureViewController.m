@@ -13,6 +13,7 @@
 @implementation GestureViewController
 
 @synthesize loadingIndicator;
+@synthesize theTextField;
 @synthesize backgroundView;
 @synthesize touchDelegate;
 
@@ -52,6 +53,7 @@
 	
     
     resourceNames = [[NSMutableDictionary alloc] initWithCapacity:40];
+    resources = [[NSMutableDictionary alloc] initWithCapacity:40];
 	
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
@@ -59,12 +61,16 @@
     //[loadingIndicator stopAnimating];
 }
 
+
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred");
-    [socketManager release];
-    [(TouchController *)touchDelegate release];
-    [self clearUI];
-    [loadingIndicator stopAnimating];
+    // everything will get released from the navigation controller's delegate call
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)streamEndEncountered {
+    // everything will get released from the navigation controller's delegate call
+    NSLog(@"first");
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -90,6 +96,44 @@
 //------------------- Handling Commands From Server ------------------
 
 
+//--Text input stuff
+
+/**
+ * Brings up the text field, sets the text field as the focus, and the
+ * user may enter text.
+ */
+- (void)do_ET:(NSArray *)args {
+    theTextField.hidden = NO;
+    [theTextField becomeFirstResponder];
+    // see if trickplay passed any text
+    if ([args count] > 1) {
+        theTextField.text = [args objectAtIndex:1];
+    } else {
+        theTextField.text = @"";
+    }
+    [self.view bringSubviewToFront:theTextField];
+}
+
+/**
+ * Send the data the user entered into the text field to Trickplay.
+ * Then hide text field.
+ */
+- (IBAction)hideTextBox:(id)sender {
+    NSLog(@"textbox hidden");
+    NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", theTextField.text];
+    [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
+}
+
+// UITextFieldDelegate method
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [theTextField resignFirstResponder];
+    theTextField.hidden = YES;
+    return YES;
+}
+
+
+//--Image related
+
 - (void)do_DR:(NSArray *)args {
     NSLog(@"Declaring Resource");
     [args retain];
@@ -103,16 +147,16 @@
     [args release];
 }
 
-- (void)do_UB:(NSArray *)args {
-    NSLog(@"Updating Background");
-    [args retain];
+- (UIImage *)fetchResource:(NSString *)name {
+    NSLog(@"Fetching resource %@", name);
+    UIImage *tempImage;
     
-    NSString *key = [args objectAtIndex:0];
-    // If resource has been declared
-    if ([resourceNames objectForKey:key]) {
-        // If resource has not been pulled, then pull it
-        NSString *imageURLString = [[resourceNames objectForKey:key] objectForKey:@"link"];
-        UIImage *tempImage;
+    if (tempImage = [resources objectForKey:name]) {
+        NSLog(@" from dictionary");
+        return tempImage;
+    } else {    // pull resource
+        NSLog(@" from network");
+        NSString *imageURLString = [[resourceNames objectForKey:name] objectForKey:@"link"];
         if ([imageURLString hasPrefix:@"http:"] || [imageURLString hasPrefix:@"https:"]) {
             tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURLString]]] autorelease];
         } else {
@@ -121,10 +165,30 @@
             NSData *imageData = [NSData dataWithContentsOfURL:imageurl];
             tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
         }
+        if (tempImage) {
+            [resources setObject:tempImage forKey:name];
+        } else {
+            NSLog(@"Trouble pulling image %@ from network! Will set as nil\n", [resourceNames objectForKey:name]);
+        }
 
-        [loadingIndicator stopAnimating];
+    }
+    return tempImage;
+}
 
-        backgroundView.image = tempImage;
+- (void)do_UB:(NSArray *)args {
+    NSLog(@"Updating Background");
+    [args retain];
+    
+    NSString *key = [args objectAtIndex:0];
+    // If resource has been declared
+    if ([resourceNames objectForKey:key]) {
+        UIImage *tempImage = [self fetchResource:key];
+        
+        if (tempImage) {
+            [loadingIndicator stopAnimating];
+            NSLog(@"Creating background view");
+            backgroundView.image = tempImage;
+        }
     }
     
     [args release];
@@ -138,19 +202,11 @@
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
     if ([resourceNames objectForKey:key]) {
-        // TODO: if resource has not been pulled, then pull it
-        NSString *imageURLString = [[resourceNames objectForKey:key] objectForKey:@"link"];
-        UIImage *tempImage;
-        if ([imageURLString hasPrefix:@"http:"] || [imageURLString hasPrefix:@"https:"]) {
-            tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURLString]]] autorelease];
-        } else {
-            //Use the hostname and port to construct the url
-            NSURL *imageurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], imageURLString]];
-            NSData *imageData = [NSData dataWithContentsOfURL:imageurl];
-            tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
-        }
-        
+        // Grab the image, make sure its there.
+        UIImage *tempImage = [self fetchResource:key];
+        if (!tempImage) return;
         // Now we have the image, we need to draw it
+        NSLog(@"Drawing resource");
         CGFloat
         x = [[args objectAtIndex:1] floatValue],
         y = [[args objectAtIndex:2] floatValue],
@@ -242,6 +298,9 @@
 
 - (void)clearUI {
     NSLog(@"Clearing the UI");
+    [theTextField resignFirstResponder];
+	theTextField.hidden = YES;
+    
     CGFloat
     x = self.view.frame.origin.x,
     y = self.view.frame.origin.y,
@@ -312,6 +371,7 @@
 
 
 - (void)dealloc {
+    NSLog(@"Gesture View Controller dealloc");
     if (hostName) {
         [hostName release];
     }
@@ -321,7 +381,14 @@
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];
     }
+    if (resourceNames) {
+        [resourceNames release];
+    }
+    if (resources) {
+        [resources release];
+    }
     [loadingIndicator release];
+    [theTextField release];
     [backgroundView release];
     [super dealloc];
 }

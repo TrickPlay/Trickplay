@@ -97,14 +97,16 @@
     NSLog(@"Received command: %@", command);
     
     NSArray *components = [[command componentsSeparatedByString:@"\t"] retain];
-    NSMutableArray *args = [[NSMutableArray alloc] initWithCapacity:20];
+    NSMutableArray *args = [[[NSMutableArray alloc] initWithCapacity:20] autorelease];
+    
     int i;
     for (i = 1; i < [components count]; i++) {
         //fprintf(stderr, "arg: %s\n", [[components objectAtIndex:i] UTF8String]);
         [args addObject:[components objectAtIndex:i]];
     }
     
-    NSString *key = [components objectAtIndex:0];
+    NSString *key = [[[components objectAtIndex:0] retain] autorelease];
+    [components release];
     /*
     SEL method = (SEL)[commandDictionary objectForKey:key];
     if (method) {
@@ -132,16 +134,16 @@
 		[delegate do_PT];
     } else if ([key compare:@"CU"] == NSOrderedSame) {
         [delegate do_CU];
+    } else if ([key compare:@"ET"] == NSOrderedSame) {
+        [delegate do_ET:args];
     } else {
         NSLog(@"Command not recognized %@", key);
     }
 
-    
-    [args autorelease];
-    [components release];
 }
 
 - (void)dealloc {
+    NSLog(@"Command Interpreter dealloc");
     [commandLine release];
     [super dealloc];
 }

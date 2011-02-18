@@ -27,21 +27,23 @@
 
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterDelegate> {
+CommandInterpreterDelegate, UITextFieldDelegate> {
     SocketManager *socketManager;
     NSString *hostName;
     NSInteger port;
     
     UIActivityIndicatorView *loadingIndicator;
+    UITextField *theTextField;
     UIImageView *backgroundView;
     
     NSMutableDictionary *resourceNames;
-    //NSMutableDictionary *resources;
+    NSMutableDictionary *resources;
     
     id <ViewControllerTouchDelegate> touchDelegate;
 }
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
+@property (nonatomic, retain) IBOutlet UITextField *theTextField;
 @property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
 
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
@@ -54,9 +56,9 @@ CommandInterpreterDelegate> {
 - (void) startService;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
 
-- (void)do_DR:(NSArray *)args;
-- (void)do_UB:(NSArray *)args;
-- (void)do_UG:(NSArray *)args;
+- (UIImage *)fetchResource:(NSString *)name;
+
+- (IBAction)hideTextBox:(id)sender;
 
 - (void)clearUI;
 

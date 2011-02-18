@@ -141,6 +141,7 @@
 
 
 - (void)dealloc {
+    NSLog(@"Net Service Manager dealloc");
     if (currentService) {
         [currentService stop];
         [currentService release];
