@@ -353,7 +353,7 @@ function copy_obj (v)
 end	
 
 
-function n_make_attr_t(v)
+function make_attr_t(v)
 
   local attr_t
   local obj_type = v.type
