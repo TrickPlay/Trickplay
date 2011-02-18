@@ -20,7 +20,6 @@
 		    ["skin_type1"] = { 
 				   ["button"] = "assets/button-red.png", 
 				   ["button_focus"] = "assets/button-focus.png", 
-				   --["toast_icon"] = "assets/button-yellow-circle.png", 
 				   ["toast_icon"] = "assets/voice-2.png", 
 				   ["toast"] = "assets/background-blue-6.jpg", 
 				   ["textinput"] = "", 
