@@ -14,6 +14,12 @@ TPContext * context = 0;
 
 //-----------------------------------------------------------------------------
 
+extern void connect_audio_sampler( TPContext * context , GstElement * bin );
+
+extern void disconnect_audio_sampler( GstElement * bin );
+
+//-----------------------------------------------------------------------------
+
 typedef struct 
 {
     ClutterActor *  vt;
@@ -68,10 +74,6 @@ void collect_tags(const GstTagList * list,const gchar * tag,gpointer user_data)
     }
     g_value_unset(&original_value);
 }
-
-//-----------------------------------------------------------------------------
-
-extern void connect_audio_sampler( TPContext * context , GstElement * bin );
 
 //-----------------------------------------------------------------------------
 // Looks for the stream types and video size
@@ -151,8 +153,6 @@ static void get_stream_information(TPMediaPlayer * mp)
     g_object_get(G_OBJECT(pipeline), "n-video", &n_video, NULL);
     g_object_get(G_OBJECT(pipeline), "n-audio", &n_audio, NULL);
 
-	g_debug("Identified %d audio and %d video streams",n_audio,n_video);
-
     if(n_video) ud->media_type|=TP_MEDIA_TYPE_VIDEO;
     if(n_audio) ud->media_type|=TP_MEDIA_TYPE_AUDIO;
 #endif
@@ -189,8 +189,6 @@ static void get_stream_information(TPMediaPlayer * mp)
         }
     }    
 
-	g_debug("About to do AUDIO stuff!");
-
 #if 1
 
     if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
@@ -204,12 +202,15 @@ static void get_stream_information(TPMediaPlayer * mp)
         else
         {
 			g_object_set(G_OBJECT(pipeline),"audio-sink",audio_sink,NULL);
-        	g_debug("autoaudiosink set");
 		}
     }
 
 #endif
 
+    if ( context )
+    {
+        connect_audio_sampler( context , pipeline );
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -381,6 +382,17 @@ static void mp_reset(TPMediaPlayer * mp)
     clutter_media_set_progress(cm,0);
     
     clutter_actor_hide(CLUTTER_ACTOR(cm));
+
+#if (CLUTTER_GST_MAJOR_VERSION<1)
+    GstElement * pipeline=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#else
+    GstElement * pipeline=clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#endif
+
+    if ( pipeline )
+    {
+        disconnect_audio_sampler( pipeline );
+    }
 }
 
 static int mp_play(TPMediaPlayer * mp)
