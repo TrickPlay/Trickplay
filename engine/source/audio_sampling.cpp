@@ -11,7 +11,7 @@
 #include "network.h"
 
 //.............................................................................
-static Debug_ON log( "AUDIO-SAMPLING" );
+static Debug_OFF log( "AUDIO-SAMPLING" );
 //.............................................................................
 
 struct TPAudioSampler
@@ -883,6 +883,8 @@ void TPAudioSampler::Thread::process()
 
     BufferList buffers;
 
+    gdouble buffered_seconds = 0;
+
     int paused = 0;
 
     while( ! done )
@@ -924,6 +926,8 @@ void TPAudioSampler::Thread::process()
 
                 buffers.clear();
 
+                buffered_seconds = 0;
+
                 // We also cancel any outstanding callbacks we have from
                 // network requests.
 
@@ -947,14 +951,48 @@ void TPAudioSampler::Thread::process()
                 break;
 
             case Event::SUBMIT_BUFFER:
+                {
+                    // We are going to try to 'open' this buffer with sndfile to make
+                    // sure that we can deal with it - and also get its duration in
+                    // seconds. If we can't deal with it, we dump it. Otherwise
+                    // we add it to the buffer list.
 
-                // We put the buffer in our list and steal it
-                // from the event - so that it won't free it.
+                    // Create the virtual IO structure for this buffer
 
-                buffers.push_back( event->buffer );
+                    VirtualIO vio( event->buffer );
 
-                event->buffer = 0;
+                    // The sndfile info
 
+                    SF_INFO info;
+
+                    memset( & info , 0 , sizeof( info ) );
+
+                    info.channels = event->buffer->channels;
+                    info.format = SF_FORMAT_RAW | ( event->buffer->format & SF_FORMAT_ENDMASK ) | ( event->buffer->format & SF_FORMAT_SUBMASK );
+                    info.samplerate = event->buffer->sample_rate;
+
+                    // Now try to open it
+
+                    SNDFILE * sf = sf_open_virtual( & vio.virtual_io , SFM_READ , & info , & vio );
+
+                    if ( ! sf )
+                    {
+                        log( "FAILED TO OPEN AUDIO BUFFER" );
+                    }
+                    else
+                    {
+                        sf_close( sf );
+
+                        buffered_seconds += gdouble( info.frames ) / gdouble( info.samplerate );
+
+                        // We put the buffer in our list and steal it
+                        // from the event - so that it won't free it.
+
+                        buffers.push_back( event->buffer );
+
+                        event->buffer = 0;
+                    }
+                }
                 break;
 
             case Event::URL_RESPONSE:
@@ -1032,8 +1070,13 @@ void TPAudioSampler::Thread::process()
             continue;
         }
 
-        // TODO: right now, we process each buffer as soon as it comes in.
-        // Instead, we should have a policy for accumulating buffers.
+        //.................................................................
+        // How much time do we have?
+
+        if ( buffered_seconds < 5 )
+        {
+            continue;
+        }
 
         // Iterate over all the buffers in the list
 
@@ -1108,6 +1151,8 @@ void TPAudioSampler::Thread::process()
         // we need to clear the list.
 
         buffers.clear();
+
+        buffered_seconds = 0;
     }
 
     // The thread is exiting...
