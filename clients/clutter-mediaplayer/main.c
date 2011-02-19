@@ -10,13 +10,9 @@
 
 //-----------------------------------------------------------------------------
 
-TPContext * context = 0;
+extern void * connect_audio_sampler( TPContext * context );
 
-//-----------------------------------------------------------------------------
-
-extern void connect_audio_sampler( TPContext * context , GstElement * bin );
-
-extern void disconnect_audio_sampler( GstElement * bin );
+extern void disconnect_audio_sampler( void * sampler );
 
 //-----------------------------------------------------------------------------
 
@@ -206,11 +202,6 @@ static void get_stream_information(TPMediaPlayer * mp)
     }
 
 #endif
-
-    if ( context )
-    {
-        connect_audio_sampler( context , pipeline );
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -382,17 +373,6 @@ static void mp_reset(TPMediaPlayer * mp)
     clutter_media_set_progress(cm,0);
     
     clutter_actor_hide(CLUTTER_ACTOR(cm));
-
-#if (CLUTTER_GST_MAJOR_VERSION<1)
-    GstElement * pipeline=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
-#else
-    GstElement * pipeline=clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(cm));
-#endif
-
-    if ( pipeline )
-    {
-        disconnect_audio_sampler( pipeline );
-    }
 }
 
 static int mp_play(TPMediaPlayer * mp)
@@ -668,13 +648,20 @@ static int mp_constructor(TPMediaPlayer * mp)
     return 0;
 }
 
+static void * sampler = 0;
+
+static void trickplay_running( const char * subject , void * data )
+{
+    sampler = connect_audio_sampler( ( TPContext * ) data );
+}
+
 //-----------------------------------------------------------------------------
 
 int main(int argc,char * argv[])
 {
     tp_init(&argc,&argv);
     
-    context = tp_context_new();
+    TPContext * context = tp_context_new();
     
     if ( argc > 1 && * ( argv[ argc - 1 ] ) != '-' )
     {
@@ -683,8 +670,12 @@ int main(int argc,char * argv[])
     
     tp_context_set_media_player_constructor(context,mp_constructor);
     
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_RUNNING,trickplay_running,context);
+
     int result = tp_context_run(context);
     
+    disconnect_audio_sampler(sampler);
+
     tp_context_free(context);
     
     context = 0;
