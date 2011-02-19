@@ -917,6 +917,30 @@ static void after_paint( ClutterActor * actor , gpointer )
 
 #endif
 
+
+//-----------------------------------------------------------------------------
+
+class RunningAction : public Action
+{
+public:
+
+    RunningAction( TPContext * _context )
+    :
+        context( _context )
+    {}
+
+private:
+
+    virtual bool run()
+    {
+        context->notify( TP_NOTIFICATION_RUNNING );
+
+        return false;
+    }
+
+    TPContext * context;
+};
+
 //-----------------------------------------------------------------------------
 
 int TPContext::run()
@@ -1181,6 +1205,10 @@ int TPContext::run()
             {
                 console->attach_to_lua( current_app->get_lua_state() );
             }
+
+            //.................................................................
+
+            Action::post( new RunningAction( this ) );
 
             //.................................................................
             // Dip into the loop
@@ -2571,8 +2599,6 @@ public:
 
     virtual bool run()
     {
-        g_debug( "RUNNING AUDIO MATCH ACTION" );
-
         if ( App * app = context->get_current_app() )
         {
             app->audio_match( json );
