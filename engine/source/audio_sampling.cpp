@@ -11,7 +11,8 @@
 #include "network.h"
 
 //.............................................................................
-static Debug_OFF log( "AUDIO-SAMPLING" );
+static Debug_ON log( "AUDIO-SAMPLING" );
+static Debug_OFF log2( "AUDIO-SAMPLING" );
 //.............................................................................
 
 struct TPAudioSampler
@@ -735,7 +736,7 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
         return;
     }
 
-    log( "BUFFER : sample_rate=%u : channels=%u : format=0x%x : samples=%p : size=%lu : copy_samples=%d : free_samples=%p",
+    log2( "BUFFER : sample_rate=%u : channels=%u : format=0x%x : samples=%p : size=%lu : copy_samples=%d : free_samples=%p",
             _buffer->sample_rate , _buffer->channels , _buffer->format , _buffer->samples , _buffer->size , _buffer->copy_samples , _buffer->free_samples );
 
     // First pass validation
@@ -1018,7 +1019,7 @@ void TPAudioSampler::Thread::process()
 
                     if ( ! event->result->parse_response )
                     {
-                        log ( "GOT URL RESPONSE WITH JSON" );
+                        log( "GOT URL RESPONSE WITH JSON" );
 
                         // We use strndup to make sure it is NULL terminated
 
@@ -1084,7 +1085,7 @@ void TPAudioSampler::Thread::process()
         {
             TPAudioBuffer * buffer = * it;
 
-            log( "PROCESSING BUFFER" );
+            log2( "PROCESSING BUFFER" );
 
             // Create the virtual IO structure for this buffer
 
@@ -1110,7 +1111,7 @@ void TPAudioSampler::Thread::process()
             }
             else
             {
-                log( "  sample rate=%d : channels=%d : frames=%" G_GOFFSET_FORMAT , info.samplerate , info.channels , info.frames );
+                log2( "  sample rate=%d : channels=%d : frames=%" G_GOFFSET_FORMAT , info.samplerate , info.channels , info.frames );
 
                 // Now, we read from the audio buffer a new buffer that uses float samples
 
@@ -1133,7 +1134,7 @@ void TPAudioSampler::Thread::process()
                         // OK, now we have floating point samples that we can hand off to
                         // a library for processing.
 
-                        log( "  READY TO PROCESS SAMPLES" );
+                        log2( "  READY TO PROCESS SAMPLES" );
 
                         invoke_plugins( & info , float_samples );
                     }
@@ -1186,7 +1187,7 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
         g_assert( plugin );
 
-        log( "  CALLING %s" , plugin->info.name );
+        log2( "  CALLING %s" , plugin->info.name );
 
         TPAudioDetectionResult * result = plugin->process_samples( & s , plugin->info.user_data );
 
@@ -1194,7 +1195,7 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
         if ( ! result )
         {
-            log( "    RETURNED NULL" );
+            log2( "    RETURNED NULL" );
             continue;
         }
 
