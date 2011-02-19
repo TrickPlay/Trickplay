@@ -285,7 +285,7 @@ void disconnect_audio_sampler_old( GstElement * pipeline )
 
 static void disconnect_probe( gpointer _pad )
 {
-    g_debug( "DISCONNECT PROBE" );
+    g_debug( "DISCONNECTING AUDIO SAMPLER" );
 
     GstPad * pad = GST_PAD( _pad );
 
