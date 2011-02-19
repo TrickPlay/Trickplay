@@ -299,6 +299,7 @@ typedef struct TPContext TPContext;
     TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD -            The app no longer needs to use the numeric keypad.
     TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS -    The app no longer needs the transport control keys.
     TP_NOTIFICATION_RELEASE_KEYBOARD -                  The app no longer needs the keyboard.
+    TP_NOTIFICATION_RUNNING -                           Trickplay is running and has entered its main loop.
 */
 
 #define TP_NOTIFICATION_APP_LOADING                     "app-loading"
@@ -313,6 +314,8 @@ typedef struct TPContext TPContext;
 #define TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD          "release-numeric-keypad"
 #define TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS  "release-transport-control-keys"
 #define TP_NOTIFICATION_RELEASE_KEYBOARD                "release-keyboard"
+
+#define TP_NOTIFICATION_RUNNING                         "running"
 
 
 /*-----------------------------------------------------------------------------
