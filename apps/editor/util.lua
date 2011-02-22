@@ -581,7 +581,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color",}
+    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible",}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children"}
 
@@ -599,6 +599,7 @@ function itemTostring(v, d_list, t_list)
 	["LoadingBar"] = function () return "widget.loadingbar" end,
 	["3D_List"] = function () return "widget.threeDlist" end,
 	["ScrollImage"] = function () return "widget.scrollWindow" end, 
+	["DropDown"] = function () return "widget.dropDownBar" end, 
    }
  
    local function add_attr (list, head, tail) 
@@ -632,7 +633,25 @@ function itemTostring(v, d_list, t_list)
 	      elseif type(v[j]) == "boolean" then 
 	          item_string = item_string..head..j.." = "..tostring(v[j])..tail 
 	      elseif type(v[j]) == "table" then 
-	          item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
+		  if(type(v[j][1]) == "table") then  
+			local tiles_name_table = {} 
+			
+			for m,n in pairs(v[j]) do 
+				local tile_name_table = {}
+				for q,r in pairs(n) do 
+				     table.insert(tile_name_table, r.name)
+				end 
+				table.insert(tiles_name_table, tile_name_table)
+			end 
+			
+	          	item_string = item_string..head..j.." = {"
+			for m,n in pairs(tiles_name_table) do 
+	          	     item_string = item_string.." {"..table.concat(n,",").."},"
+			end 
+			item_string = item_string.."}"..tail
+		  else 
+	          	item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
+		  end 
 	      elseif type(v[j]) == "userdata" then 
 		  item_string = item_string..head..j.." = "..v[j].name..tail 
 	      else
@@ -1469,6 +1488,7 @@ local input_purpose     = ""
 
 local function copy_widget_imgs ()
 	local source_files = editor_lb:readdir("assets/")
+	local source_file, dest_file
 	for i, j in pairs(source_files) do 
 	     source_file = "assets/"..j 
 	     dest_file = CURRENT_DIR.."/assets/"..j 
@@ -1476,6 +1496,17 @@ local function copy_widget_imgs ()
 		--print("couldn't copy widget image"..dest_file) 
 	     end 
 	end 
+	source_file = "widget.lua" 
+	dest_file = CURRENT_DIR.."/widget.lua" 
+	if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	end 
+	source_file = "localized/strings.lua" 
+	dest_file = CURRENT_DIR.."/strings.lua" 
+	if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	end 
+
 end 
 
 local function set_project_path ()

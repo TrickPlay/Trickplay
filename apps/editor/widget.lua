@@ -3,7 +3,6 @@
      skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
 				   ["button_focus"] = "assets/smallbuttonfocus.png", 
-				   ["toast_icon"] = "assets/voice-1.png", 
 			           ["buttonpicker"] = "assets/smallbutton.png",
      				   ["buttonpicker_focus"] = "assets/smallbuttonfocus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -20,13 +19,11 @@
 		    ["skin_type1"] = { 
 				   ["button"] = "assets/button-red.png", 
 				   ["button_focus"] = "assets/button-focus.png", 
-				   ["toast_icon"] = "assets/voice-2.png", 
 				   ["toast"] = "assets/background-blue-6.jpg", 
 				   ["textinput"] = "", 
 				   ["textinput_focus"] = "", 
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
-				   ["icon"] = "", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -50,8 +47,6 @@
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
 				   ["toast"] = "assets/background-red-6.jpg", 
-				   ["toast_icon"] = "assets/voice-3.png", 
-				   ["icon"] = "", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -633,7 +628,6 @@ function widget.button(table)
     } 
 
     local create_button = function() 
-    
 
 	if(p.skin ~= "custom") then 
 		p.button_image = assets(skin_list[p.skin]["button"])
@@ -778,7 +772,7 @@ function widget.textField(table)
         for k, v in pairs (table) do
 	    p[k] = v 
         end 
-    end 
+    end
 
  --the umbrella Group
     local box, focus_box, box_img, focus_img, text
@@ -794,11 +788,6 @@ function widget.textField(table)
  
 
     local create_textInputField= function()
-	if(p.skin ~= "custom") then 
-             p.box_image   = assets(skin_list[p.skin]["textinput"])
-	     p.focus_image = assets(skin_list[p.skin]["textinput_focus"])
-	end 
-
     	t_group:clear()
         t_group.size = { p.wwidth , p.wheight}
 
@@ -854,14 +843,6 @@ function widget.textField(table)
 	  text.cursor_visible = false
 	  text.reactive = false 
      end
-
---[[
-     function t_group:on_button_down()
-	  t_group.on_focus_in()
-	  return true
-     end 
-]]
-
 
      mt = {}
      mt.__newindex = function (t, k, v)
@@ -981,6 +962,8 @@ function widget.dialogBox(table)
 
      end 
 
+     create_dialogBox ()
+
      mt = {}
      mt.__newindex = function (t, k, v)
 	 if k == "bsize" then  
@@ -1056,7 +1039,8 @@ function widget.toastBox(table)
 	padding_y = 0,
 	border_radius = 22,
 	fade_duration = 2000,
-	duration = 5000
+	duration = 5000,
+	icon = "assets/voice-1.png"
     }
 
 
@@ -1091,13 +1075,7 @@ function widget.toastBox(table)
     	t_box:set{name="t_box"}
 	tb_group.anchor_point = {p.wwidth/2, p.wheight/2}
 
-        
-    	if(p.skin == "custom") then 
-		icon = assets("assets/voice-1.png")
-    	else 
-		icon = assets(skin_list[p.skin]["toast_icon"])
-    	end 
-    
+	icon = assets(p.icon)
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
     	title= Text{text = p.label, font= "DejaVu Sans 32px", color = "FFFFFF"}     
@@ -1136,7 +1114,6 @@ function widget.toastBox(table)
      	function tb_group_timeline.on_completed()
 		tb_group.opacity = 0
 		tb_group.scale = {0.8, 0.8}
-		--tb_group.extra:clean()
      	end 
 
      	function tb_group_timer.on_timer(tb_group_timer)
