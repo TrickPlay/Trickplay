@@ -8,7 +8,7 @@ local OEM = "trickplay"
 
 dofile( "globals" )
 
-pcall( dofile , "audio-detection/main" )
+dofile( "audio-detection/main" )
 
 -------------------------------------------------------------------------------
 -- Build the UI
