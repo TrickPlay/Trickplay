@@ -3,7 +3,6 @@
      skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
 				   ["button_focus"] = "assets/smallbuttonfocus.png", 
-				   ["toast_icon"] = "assets/voice-1.png", 
 			           ["buttonpicker"] = "assets/smallbutton.png",
      				   ["buttonpicker_focus"] = "assets/smallbuttonfocus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -20,14 +19,11 @@
 		    ["skin_type1"] = { 
 				   ["button"] = "assets/button-red.png", 
 				   ["button_focus"] = "assets/button-focus.png", 
-				   --["toast_icon"] = "assets/button-yellow-circle.png", 
-				   ["toast_icon"] = "assets/voice-2.png", 
 				   ["toast"] = "assets/background-blue-6.jpg", 
 				   ["textinput"] = "", 
 				   ["textinput_focus"] = "", 
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
-				   ["icon"] = "", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -51,8 +47,6 @@
 				   ["dialogbox"] = "", 
 			           ["dialogbox_x"] ="", 
 				   ["toast"] = "assets/background-red-6.jpg", 
-				   ["toast_icon"] = "assets/voice-3.png", 
-				   ["icon"] = "", 
 			           ["buttonpicker"] = "assets/button-red.png",
      				   ["buttonpicker_focus"] = "assets/button-focus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
@@ -97,7 +91,7 @@
 --[[
 Function: change_all_skin
 
-Changes all widgets' skins to 'skin_name' 
+Changes all widgets' skins to 'skin_name' item:find_child("textInput").text
 
 Arguments:
 	skin_name - name of skin  
@@ -199,7 +193,6 @@ local function make_xbox()
     c:line_to ( x + XBOX_SIZE, y + XBOX_SIZE)
     c:move_to ( x + XBOX_SIZE, y)
     c:line_to ( x, y + XBOX_SIZE)
-
   -- Draw x button box
     c:move_to ( x, y)
     c:line_to ( x + XBOX_SIZE, y)
@@ -312,6 +305,7 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
     c:set_line_width( BORDER_WIDTH )
     c:set_source_color( BORDER_COLOR )
     c.op = "SOURCE"
+    -- test c:set_dash(0,{10,10})
     c:stroke( true )
 
   -- Draw title line
@@ -579,8 +573,8 @@ Arguments:
     	padding_x - Padding of the button image on the X axis
     	padding_y - Padding of the button image on the Y axis
     	border_radius - Radius of the border for the button
-	on_pressed - Function that is called by on_focus_in() or on_key_down() event
-	on_release - Function that is called by on_focus_out()
+	pressed - Function that is called by on_focus_in() or on_key_down() event
+	release - Function that is called by on_focus_out()
 
 
 Return:
@@ -610,8 +604,8 @@ function widget.button(table)
     	padding_x = 0,
     	padding_y = 0,
     	border_radius = 12,
-	on_pressed = nil, 
-	on_released = nil, 
+	pressed = nil, 
+	released = nil, 
     }
 
  --overwrite defaults
@@ -634,7 +628,6 @@ function widget.button(table)
     } 
 
     local create_button = function() 
-    
 
 	if(p.skin ~= "custom") then 
 		p.button_image = assets(skin_list[p.skin]["button"])
@@ -677,8 +670,8 @@ function widget.button(table)
 	     button.opacity = 0
              focus.opacity = 255
         end 
-	if p.on_pressed then 
-		p.on_pressed()
+	if p.pressed then 
+		p.pressed()
 	end 
 
 	b_group:grab_key_focus(b_group)
@@ -694,8 +687,8 @@ function widget.button(table)
              focus.opacity = 0
 	     focus_ring.opacity = 0
         end
-	if p.on_released then 
-		p.on_released()
+	if p.released then 
+		p.released()
 	end 
  
     end
@@ -764,9 +757,9 @@ function widget.textField(table)
     	wheight = 60 ,
     	text = "" ,
     	text_indent = 20 ,
-    	border_width  = 3 ,
+    	border_width  = 4 ,
     	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-    	f_color  = {27,145,27,255}, --"1b911b" , 
+    	f_color  = {0,255,0,255}, --"1b911b" , 
     	font = "DejaVu Sans 30px"  , 
     	color =  {255,255,255,255}, -- "FFFFFF" , 
     	padding_x = 0 ,
@@ -779,7 +772,7 @@ function widget.textField(table)
         for k, v in pairs (table) do
 	    p[k] = v 
         end 
-    end 
+    end
 
  --the umbrella Group
     local box, focus_box, box_img, focus_img, text
@@ -795,18 +788,11 @@ function widget.textField(table)
  
 
     local create_textInputField= function()
- 	
-
-	if(p.skin ~= "custom") then 
-             p.box_image   = assets(skin_list[p.skin]["textinput"])
-	     p.focus_image = assets(skin_list[p.skin]["textinput_focus"])
-	end 
-
     	t_group:clear()
         t_group.size = { p.wwidth , p.wheight}
 
     	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
-    	box:set{name="box", position = { 0 , 0 } }
+    	box:set{name="box", position = {0 ,0}}
 
     	focus_box = make_ring(p.wwidth, p.wheight, p.f_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
@@ -821,8 +807,8 @@ function widget.textField(table)
 	     focus_img = Image{}
 	end 
 
-    	text = Text{text = p.text, editable = true, cursor_visible = true, reactive = true, font = p.font, color = p.color}
-    	text:set{name = "text", position = {p.text_indent, (p.wheight - text.h)/2} }
+    	text = Text{text = p.text, editable = false, cursor_visible = false, wants_enter = false, reactive = true, font = p.font, color = p.color}
+    	text:set{name = "textInput", position = {p.text_indent, (p.wheight - text.h)/2} }
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
     	if (p.skin == "custom") then box_img.opacity = 0
@@ -840,21 +826,22 @@ function widget.textField(table)
 	     box_img.opacity = 0
              focus_img.opacity = 255
           end 
-          text:grab_key_focus()
+	  text.editable = true
 	  text.cursor_visible = true
+	  text.reactive = true 
+          text:grab_key_focus(text)
      end
 
      function t_group.extra.on_focus_out()
           if (p.skin == "custom") then 
 	     box.opacity = 255
 	     focus_box.opacity = 0
-             focus_img.opacity = 0
           else
 	     box_img.opacity = 255
-	     focus_box.opacity = 0
              focus_img.opacity = 0
           end 
 	  text.cursor_visible = false
+	  text.reactive = false 
      end
 
      mt = {}
@@ -975,6 +962,8 @@ function widget.dialogBox(table)
 
      end 
 
+     create_dialogBox ()
+
      mt = {}
      mt.__newindex = function (t, k, v)
 	 if k == "bsize" then  
@@ -1050,7 +1039,8 @@ function widget.toastBox(table)
 	padding_y = 0,
 	border_radius = 22,
 	fade_duration = 2000,
-	duration = 5000
+	duration = 5000,
+	icon = "assets/voice-1.png"
     }
 
 
@@ -1083,14 +1073,9 @@ function widget.toastBox(table)
 
     	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
     	t_box:set{name="t_box"}
+	tb_group.anchor_point = {p.wwidth/2, p.wheight/2}
 
-        
-    	if(p.skin == "custom") then 
-		icon = assets("assets/voice-1.png")
-    	else 
-		icon = assets(skin_list[p.skin]["toast_icon"])
-    	end 
-    
+	icon = assets(p.icon)
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
     	title= Text{text = p.label, font= "DejaVu Sans 32px", color = "FFFFFF"}     
@@ -1121,11 +1106,14 @@ function widget.toastBox(table)
 
      	function tb_group_timeline.on_new_frame(t, m, p)
 		tb_group.opacity = 255 * (1-p) 
+		if(tb_group.scale[1] > 0.8) then 
+		     tb_group.scale = {(1-p/10), (1-p/10)} 
+	        end 
      	end  
 
      	function tb_group_timeline.on_completed()
 		tb_group.opacity = 0
-		tb_group.extra.clean()
+		tb_group.scale = {0.8, 0.8}
      	end 
 
      	function tb_group_timer.on_timer(tb_group_timer)
@@ -1179,7 +1167,7 @@ Arguments:
     	font - Font of the Button picker items
     	color - Color of the Button picker items
 		selected_item - The number of the selected item 
-		rotate_func - Table of functions that is called by selected item number   
+		rotate_func - function that is called by selected item number   
 
 Return:
  		bp_group - Group containing the button picker 
@@ -1207,7 +1195,7 @@ function widget.buttonPicker(table)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px" , 
 	color = {255,255,255,255}, --"FFFFFF", 
-	rotate_func = {}, 
+	rotate_func = nil, 
         selected_item = 1, 
     }
 
@@ -1222,7 +1210,7 @@ function widget.buttonPicker(table)
      local unfocus, focus, left_un, left_sel, right_un, right_sel
      local items = Group{name = "items"}
 
-     bp_group = Group
+     local bp_group = Group
      {
 	name = "buttonPicker", 
 	position = {300, 300, 0}, 
@@ -1241,6 +1229,7 @@ function widget.buttonPicker(table)
 
 	index = p.selected_item 
 	bp_group:clear()
+	items:clear()
         bp_group.size = { p.wwidth , p.wheight}
 
 	ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
@@ -1550,17 +1539,17 @@ function widget.radioButton(table)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = {255,255,255,255}, --"FFFFFF", -- items 
-	button_color = {255,255,255,200}, -- items 
-	select_color = {100, 100, 100, 255}, -- items 
-	button_radius = 10, -- items 
-	select_radius = 5,  -- items 
-	b_pos = {0, 0},  -- items 
-	item_pos = {50,-5},  -- items 
-	line_space = 40,  -- items 
+		button_color = {255,255,255,200}, -- items 
+		select_color = {100, 100, 100, 255}, -- items 
+		button_radius = 10, -- items 
+		select_radius = 5,  -- items 
+		b_pos = {0, 0},  -- items 
+		item_pos = {50,-5},  -- items 
+		line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
 	rotate_func = nil, 
-	direction = 1, 
+		direction = 1, 
 	selected_item = 1 
     }
 
@@ -1718,19 +1707,19 @@ function widget.checkBox(table)
 	wwidth = 600,
 	wheight = 200,
 	items = {"item1", "item2", "item3"},
-	font = "DejaVu Sans 30px", -- items 
-	color = {255,255,255,255}, -- "FFFFFF", -- items 
-	box_color = {255,255,255,255},
-	f_color = {255,255,255,50},
-	box_width = 2,
-	box_size = {25,25},
-	check_size = {25,25},
-	line_space = 40,   
-	b_pos = {0, 0},  -- items 
-	item_pos = {50,-5},  -- items 
-	selected_item = {1, 3},  
-	direction = 2, 
-	rotate_func = {},  
+	font = "DejaVu Sans 30px", 
+	color = {255,255,255,255}, 
+		box_color = {255,255,255,255},
+		f_color = {255,255,255,50},
+		box_width = 2,
+		box_size = {25,25},
+		check_size = {25,25},
+		line_space = 40,   
+		b_pos = {0, 0},  
+		item_pos = {50,-5},  
+	selected_items = {1},  
+	direction = 1,  -- 1:vertical 2:horizontal
+		rotate_func = nil,  
     } 
 
  --overwrite defaults
@@ -1796,7 +1785,7 @@ function widget.checkBox(table)
 	      end 
          end 
 
-	 for i,j in pairs(p.selected_item) do 
+	 for i,j in pairs(p.selected_items) do 
              checks:find_child("check"..tostring(j)).opacity = 255 
 	 end 
 
@@ -1868,7 +1857,7 @@ function widget.loadingdots(t)
     local p = {
         skin          = "default",
         dot_radius    = 5,
-        dot_color     = {255,255,255},
+        dot_color     = {255,255,255,255},
         num_dots      = 12,
         anim_radius   = 50,
         anim_duration = 150,
@@ -2050,14 +2039,13 @@ function widget.loadingbar(t)
 
     --default parameters
     local p={
-        wwidth            =  300,
-        wheight           =   50,
-        shell_upper_color = {  0,  0,  0},
-        shell_lower_color = {127,127,127},
-        stroke_color      = {160,160,160},
-        fill_upper_color  = {255,  0,  0},
-        fill_lower_color  = { 96, 48, 48},
-        skin="default",
+        wwidth             = 300,
+        wheight            = 50,
+        shell_upper_color  = {0,0,0,255},
+        shell_lower_color  = {127,127,127,255},
+        stroke_color       = {160,160,160,255},
+        fill_upper_color  = {255,0,0,255},
+        fill_lower_color  = {96,48,48,255},
     }
     --overwrite defaults
     if t ~= nil then
@@ -2215,8 +2203,8 @@ function widget.threeDlist(t)
         item_w      = 300,
         item_h      = 200,
         grid_gap    = 40,
-		duration_per_tile = 300,
-		cascade_delay     = 200,
+	duration_per_tile = 300,
+	cascade_delay     = 200,
         tiles       = {},
         focus       = nil,
         focus_visible = true,
