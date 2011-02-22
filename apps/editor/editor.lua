@@ -710,6 +710,32 @@ function editor.the_image()
 --]]
 end 
 
+function editor.export ()
+
+	animate_out_dropdown()
+	ui:hide()
+	if(screen:find_child("xscroll_bar") ~= nil) then 
+		screen:find_child("xscroll_bar"):hide() 
+		screen:find_child("xscroll_box"):hide() 
+		screen:find_child("x_0_mark"):hide()
+		screen:find_child("x_1920_mark"):hide()
+	end 
+	if(screen:find_child("scroll_bar") ~= nil) then 
+		screen:find_child("scroll_bar"):hide() 
+		screen:find_child("scroll_box"):hide() 
+		screen:find_child("y_0_mark"):hide()
+		screen:find_child("y_1080_mark"):hide()
+	end 
+	menu_hide = true 
+	screen:grab_key_focus()
+	screen:remove(g)
+	g:clear()
+	local f = loadfile(current_fn)
+	f(g)
+	screen:add(g)
+	
+end 
+
 
 function editor.the_open()
 ---[[
