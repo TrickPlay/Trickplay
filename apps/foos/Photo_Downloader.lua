@@ -103,6 +103,7 @@ end
 local req = URLRequest{
 	url = license_info_url.."&api_key="..api_key,
 	on_complete = function(request,response)
+		if response.body == nil then return end
 		local data = json:parse( response.body )
 		for i, license in ipairs( data.licenses.license ) do
 			licenses[license.id] =	
