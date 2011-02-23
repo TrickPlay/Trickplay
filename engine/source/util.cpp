@@ -59,22 +59,26 @@ Action::~Action()
     al( "DESTROYING ACTION %p" , this );
 }
 
-void Action::post( Action * action )
+guint Action::post( Action * action )
 {
     g_assert( action );
+
+    guint result = 0;
 
     if ( action->interval < 0 )
     {
         al( "POSTING IDLE ACTION %p" , action );
 
-        g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
+        result = g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
     }
     else
     {
         al( "POSTING TIMEOUT ACTION %p EVERY %d s" , action , action->interval );
 
-        g_timeout_add_full( TRICKPLAY_PRIORITY , guint( action->interval ) , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
+        result = g_timeout_add_full( TRICKPLAY_PRIORITY , guint( action->interval ) , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
     }
+
+    return result;
 }
 
 void Action::destroy( Action * action )
