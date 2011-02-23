@@ -218,6 +218,10 @@ typedef struct TPContext TPContext;
                                 but it won't do anything.
                                 Defaults to "true".
 
+    TP_TOAST_JSON_PATH -        Path to a file containing the JSON definition
+                                for the toast UI.
+                                Default is not set.
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -257,6 +261,7 @@ typedef struct TPContext TPContext;
 #define TP_RANDOM_SEED                  "random_seed"
 #define TP_PLUGINS_PATH                 "plugins_path"
 #define TP_AUDIO_SAMPLER_ENABLED        "audio_sampler_enabled"
+#define TP_TOAST_JSON_PATH              "toast_json_path"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
