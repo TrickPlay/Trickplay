@@ -3017,6 +3017,7 @@ function widget.dropDownBar(t)
         bg_w         = 300,
         padding      = 5,
         divider_h    = 2,
+        bg_goes_up   = false,
         
         top_img       = nil,
         top_focus_img = nil,
@@ -3344,7 +3345,13 @@ function widget.dropDownBar(t)
         ui_ele:lower_to_bottom()
         
         dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
+        if p.bg_goes_up then
+            ui_ele.x_rotation={180,0,0}
+            ui_ele.y = ui_ele.h+p.item_start_y
+            dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.item_start_y}
+        else
+            dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
+        end
         
         button:clear()
         if p.top_img ~= nil then
@@ -3379,7 +3386,11 @@ function widget.dropDownBar(t)
         
         button.position = {button.w/2,button.h/2}
         dropDownMenu.x = button.w/2
-        dropDownMenu.y = dropDownMenu.y + button.h+10
+        if p.bg_goes_up then
+            dropDownMenu.y = dropDownMenu.y -10
+        else
+            dropDownMenu.y = dropDownMenu.y + button.h+10
+        end
     end
     
     
