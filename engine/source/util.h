@@ -302,7 +302,7 @@ public:
 
     virtual ~Action();
 
-    static void post( Action * action );
+    static guint post( Action * action );
 
 protected:
 
