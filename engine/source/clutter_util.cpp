@@ -34,28 +34,14 @@ void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
 
 //.............................................................................
 
-void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
+ClutterColor ClutterUtil::string_to_color( const char * s )
 {
-    LSG;
+    ClutterColor result = { 0 , 0 , 0 , 0 };
 
-    if ( lua_istable( L, index ) )
-    {
-        lua_rawgeti( L, index, 1 );
-        lua_rawgeti( L, index, 2 );
-        lua_rawgeti( L, index, 3 );
-        lua_rawgeti( L, index, 4 );
-        color->red = luaL_optint( L, -4, 0 );
-        color->green = luaL_optint( L, -3, 0 );
-        color->blue = luaL_optint( L, -2, 0 );
-        color->alpha = luaL_optint( L, -1, 255 );
-        lua_pop( L, 4 );
-    }
-    else if ( lua_isstring( L, index ) )
+    if ( s )
     {
         int colors[4] = {0, 0, 0, 255};
         char buffer[3] = {0, 0, 0};
-
-        const char * s = lua_tostring( L, index );
 
         if ( *s == '#' )
         {
@@ -85,10 +71,36 @@ void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * col
             i++;
         }
 
-        color->red   = colors[0];
-        color->green = colors[1];
-        color->blue  = colors[2];
-        color->alpha = colors[3];
+        result.red   = colors[0];
+        result.green = colors[1];
+        result.blue  = colors[2];
+        result.alpha = colors[3];
+    }
+
+    return result;
+}
+
+//.............................................................................
+
+void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
+{
+    LSG;
+
+    if ( lua_istable( L, index ) )
+    {
+        lua_rawgeti( L, index, 1 );
+        lua_rawgeti( L, index, 2 );
+        lua_rawgeti( L, index, 3 );
+        lua_rawgeti( L, index, 4 );
+        color->red = luaL_optint( L, -4, 0 );
+        color->green = luaL_optint( L, -3, 0 );
+        color->blue = luaL_optint( L, -2, 0 );
+        color->alpha = luaL_optint( L, -1, 255 );
+        lua_pop( L, 4 );
+    }
+    else if ( lua_isstring( L, index ) )
+    {
+        * color = string_to_color( lua_tostring( L, index ) );
     }
     else
     {
