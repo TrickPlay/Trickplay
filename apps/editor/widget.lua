@@ -2531,12 +2531,15 @@ function widget.scrollWindow(t)
                     new_x =0
                 end
                 if p.content_h > p.clip_h then
-                    if y > p.content_w - p.clip_w/2 then
+                    if y > p.content_h - p.clip_h/2 then
                         new_y = -p.content_h + p.clip_h
+                        print(1)
                     elseif y < p.clip_h/2 then
                         new_y = 0
+                        print(2)
                     else
                         new_y = -y + p.clip_h/2
+                        print(3)
                     end
                 else
                     new_y =0
@@ -2865,8 +2868,8 @@ function widget.scrollWindow(t)
 			else
 				arrow_up.position = {border.w/2+arrow_up.w/2+5,-arrow_up.h/2-5}
 				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h+arrow_dn.h/2+5}
-				arrow_l.position  = {-arrow_l.w/2-5,border.h/2 + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w+arrow_r.w/2+5,border.h/2 + 5 + arrow_up.h/2}
+				arrow_l.position  = {-arrow_l.w/2-5,border.h/2}-- + 5 + arrow_up.h/2}
+				arrow_r.position  = {border.w+arrow_r.w/2+5,border.h/2}-- + 5 + arrow_up.h/2}
 			end
 		else
 			if p.arrows_in_box then
