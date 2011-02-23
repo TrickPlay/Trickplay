@@ -1172,6 +1172,9 @@ function editor.view_code(v)
 	local xbox = factory.make_xbox()
 	local codeViewWin 
 
+
+
+
 	if is_this_widget(v) == true then 
 	     codeViewWin_bg = factory.make_popup_bg("Code", "Widget")
 	else 
@@ -2619,6 +2622,8 @@ function editor.widgets()
 		dd=new_widget
          elseif (new_widget.extra.type == "MenuBar") then 
 		mb=new_widget
+         elseif (new_widget.extra.type == "TabBar") then 
+		tb=new_widget
 	      end
 --imsi 
 	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
@@ -2664,6 +2669,8 @@ function editor.widgets()
 		dd=new_widget
          elseif (new_widget.extra.type == "MenuBar") then 
 		mb=new_widget
+         elseif (new_widget.extra.type == "TabBar") then 
+		tb=new_widget
 	      end
 --imsi 
  	      while (is_available(new_widget.name..tostring(item_num)) == false) do  

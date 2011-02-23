@@ -2211,6 +2211,7 @@ function widget.threeDlist(t)
         skin="default",
     }
     
+    local functions={}
     local focus_i = {1,1}
     --overwrite defaults
     if t ~= nil then
@@ -2223,7 +2224,7 @@ function widget.threeDlist(t)
 		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
 		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
 	end
-     
+    
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
@@ -2246,10 +2247,24 @@ function widget.threeDlist(t)
                 obj.anchor_point = {obj.w/2,obj.h/2}
                 obj.delay = p.cascade_delay*(r+c-1)
 			end,
-            focus_to = function(r,c)
+            set_function = function(r,c,f)
                 if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                    print("invalid row/col")
                     return
                 end
+                if functions[r][c] == nil then
+                    print("no function")
+                    return
+                else
+                    functions[r][c]()
+                end
+            end,
+            focus_to = function(r,c)
+                if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                    print("invalid row/col")
+                    return
+                end
+                focus_i = {r,c}
                 local x,y = x_y_from_index(r,c)
                 focus:complete_animation()
                 focus:animate{
@@ -2258,6 +2273,9 @@ function widget.threeDlist(t)
                     x=x,
                     y=y
                 }
+            end,
+            press_enter = function(p)
+                functions[focus_i[1]][focus_i[2]](p)
             end,
             animate_in = function()
 				local tl = Timeline{
@@ -2303,13 +2321,23 @@ function widget.threeDlist(t)
 
 
 	local make_tile = function()
-		local rect  = Rectangle{
-            name="Base_Rect",
-            size={ p.item_w, p.item_h},
-            color="303030",
-            anchor_point = { p.item_w/2, p.item_h/2}
-        }
-		return rect
+        local c = Canvas{size={p.item_w, p.item_h}}
+        c:begin_painting()
+        c:move_to(            0,          0 )
+        c:line_to(   c.w,          0 )
+        c:line_to( c.w, c.h )
+        c:line_to( 0, c.h )
+        c:line_to(            0,          0 )
+        c:set_source_color("ffffff")
+        c:set_line_width( 4 )
+        c:set_dash(0,{10,10})
+        c:stroke(true)
+        c:finish_painting()
+        if c.Image then
+            c = c:Image()
+        end
+        c.name="nil"
+		return c
 	end
     local make_focus = function()
         return Rectangle{
@@ -2343,7 +2371,10 @@ function widget.threeDlist(t)
         end
         
 		for r = 1, p.num_rows  do
-            if p.tiles[r] == nil then p.tiles[r] = {} end
+            if p.tiles[r] == nil then
+                p.tiles[r]   = {}
+                functions[r] = {}
+            end
 			for c = 1, p.num_cols do
                 if p.tiles[r][c] == nil then
                     g = make_tile()
@@ -2370,14 +2401,16 @@ function widget.threeDlist(t)
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c] = nil
                 end
-                tiles[r] = nil
+                tiles[r]     = nil
+                functions[r] = nil
             end
         end
         if p.num_cols < #p.tiles[1] then
             for c = p.num_cols + 1, #tiles[r] do
                 for r = 1, #p.tiles do
                     p.tiles[r][c]:unparent()
-                    p.tiles[r][c] = nil
+                    p.tiles[r][c]   = nil
+                    functions[r][c] = nil
                 end
             end
         end
@@ -2498,12 +2531,15 @@ function widget.scrollWindow(t)
                     new_x =0
                 end
                 if p.content_h > p.clip_h then
-                    if y > p.content_w - p.clip_w/2 then
+                    if y > p.content_h - p.clip_h/2 then
                         new_y = -p.content_h + p.clip_h
+                        print(1)
                     elseif y < p.clip_h/2 then
                         new_y = 0
+                        print(2)
                     else
                         new_y = -y + p.clip_h/2
+                        print(3)
                     end
                 else
                     new_y =0
@@ -2578,8 +2614,6 @@ function widget.scrollWindow(t)
 		if animating then return end
 		if keys[key] then
 			keys[key]()
-		else
-			print("Scroll Window does not support that key")
 		end
 	end
 	
@@ -2834,8 +2868,8 @@ function widget.scrollWindow(t)
 			else
 				arrow_up.position = {border.w/2+arrow_up.w/2+5,-arrow_up.h/2-5}
 				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h+arrow_dn.h/2+5}
-				arrow_l.position  = {-arrow_l.w/2-5,border.h/2 + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w+arrow_r.w/2+5,border.h/2 + 5 + arrow_up.h/2}
+				arrow_l.position  = {-arrow_l.w/2-5,border.h/2}-- + 5 + arrow_up.h/2}
+				arrow_r.position  = {border.w+arrow_r.w/2+5,border.h/2}-- + 5 + arrow_up.h/2}
 			end
 		else
 			if p.arrows_in_box then
@@ -2953,31 +2987,464 @@ function widget.dropDownBar(t)
         name  = "Drop Down Bar",
         font  = "DejaVu Sans 26px",
         items = {
-        --   item text, selectable, icon source
-            {"Item 1",      true,  nil },
-            {"Item 2",      true,  nil },
-            {"Item 5",      true,  nil },
-            {"Subgroup A:", false, nil },
-            {"Item 3",      true,  nil },
-            {"Item 4",      true,  nil },
-            {"Item 5",      true,  nil },
-            {"Item 5",      true,  nil },
+            {
+                name="Subgroup A:",
+                items={
+                    {txt="Item A1",f=nil},
+                    {txt="Item A2",f=nil}
+                }
+            },
+            {
+                name="Subgroup B:",
+                items={
+                    {txt="Item B1",f=nil},
+                    {txt="Item B2",f=nil}
+                }
+            },
+            {
+                items={
+                    {txt="Item 1",f=nil},
+                    {txt="Item 2",f=nil}
+                }
+            },
         },
         item_bg_clone_src    = nil,
         item_focus_clone_src = nil,
         item_spacing = 7,
         item_start_y = 45,
-        right_margin =  100,
         
-        txt_color = {255,255,255},
-        bg_color     = nil,
+        
+        txt_color    = {255,255,255},
+        bg_color     = {255,0,0},
         bg_clone_src = nil,
+        bg_w         = 300,
         padding      = 5,
-        
+        divider_h    = 2,
+        bg_goes_up   = false,
         
         top_img       = nil,
         top_focus_img = nil,
         skin          = "default",
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+    
+    local create, curr_index, curr_cat
+    local curr_index = 0
+    local focus_sel_items  = {}
+    
+    local dropDownMenu = Group{}
+    local button       = Group{}
+    local button_focus = nil
+    local umbrella     = Group{
+        name="Drop down bar",
+        reactive = true,
+        children={button,dropDownMenu},
+        extra={
+            type="DropDown",
+            focus_index = function(cat,i)
+                if curr_cat == cat and curr_index == i then
+                    print("Item on Drop Down Bar is already focused")
+                    return
+                end
+                if focus_sel_items[curr_cat] ~= nil and
+                   focus_sel_items[curr_cat][curr_index] ~= nil then
+                    
+                    focus_sel_items[curr_cat][curr_index]:complete_animation()
+                    focus_sel_items[curr_cat][curr_index].opacity=255
+                    focus_sel_items[curr_cat][curr_index]:animate{
+                        duration=300,
+                        opacity=0
+                    }
+                end
+                if focus_sel_items[cat] ~= nil and
+                   focus_sel_items[cat][i] ~= nil then
+                   
+                    focus_sel_items[cat][i]:complete_animation()
+                    focus_sel_items[cat][i].opacity=0
+                    focus_sel_items[cat][i]:animate{
+                        duration=300,
+                        opacity=255
+                    }
+                    curr_cat = cat
+                    curr_index=i
+                end
+            end,
+            replace_item = function (cat,index,item)
+                assert(type(item)=="table","invalid item")
+                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
+                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+                
+                if type(item)=="table" then
+                    p.items[cat].items[index]=item
+                elseif type(item)=="string" then
+                    p.items[cat].items[index].txt=item
+                end
+                create()
+            end,
+            insert_item = function (cat,index,item)
+                assert(type(item)=="table","invalid item")
+                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
+                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+                
+                table.insert(p.items[cat].items,index,item)
+                create()
+            end,
+            remove_item = function (cat,index)
+                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
+                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+                
+                table.remove(p.items[cat].items,index)
+                create()
+            end,
+            rename_category = function (index,name)
+                assert(index > 0 and index <= #p.items, "invalid category index")
+                
+                p.items[index].name=name
+                create()
+            end,
+            insert_category = function (index,cat)
+                assert(index > 0 and index <= #p.items, "invalid category index")
+                
+                if type(cat) == "table" then
+                    table.insert(p.items,index,cat)
+                elseif type(cat) == "string" then
+                    table.insert(p.items,index,{name=cat,items={}})
+                end
+                
+                create()
+            end,
+            remove_category = function (index)
+                assert(index > 0 and index <= #p.items, "invalid category index")
+                
+                table.remove(p.items,index)
+                create()
+            end,
+            spin_in = function()
+                dropDownMenu:complete_animation()
+                button_focus:complete_animation()
+                button_focus.opacity=0
+                dropDownMenu.y_rotation={90,0,0}
+                dropDownMenu.opacity=0
+                dropDownMenu:animate{
+                    duration=300,
+                    opacity=255,
+                    y_rotation=0
+                }
+                button_focus:animate{
+                    duration=300,
+                    opacity=255,
+                }
+                curr_cat   = 0
+                curr_index = 0
+            end,
+            spin_out = function()
+                dropDownMenu:complete_animation()
+                button_focus:complete_animation()
+                button_focus.opacity=255
+                dropDownMenu.y_rotation={0,0,0}
+                dropDownMenu.opacity=255
+                dropDownMenu:animate{
+                    duration=300,
+                    opacity=0,
+                    y_rotation=-90
+                }
+                button_focus:animate{
+                    duration=300,
+                    opacity=0,
+                }
+            end,
+            fade_in = function()
+                dropDownMenu:complete_animation()
+                button_focus:complete_animation()
+                button_focus.opacity=0
+                dropDownMenu.y_rotation={0,0,0}
+                dropDownMenu.opacity=0
+                dropDownMenu:animate{
+                    duration=300,
+                    opacity=255,
+                }
+                button_focus:animate{
+                    duration=300,
+                    opacity=255,
+                }
+                curr_cat   = 0
+                curr_index = 0
+            end,
+            fade_out = function()
+                dropDownMenu:complete_animation()
+                button_focus:complete_animation()
+                button_focus.opacity=255
+                dropDownMenu.y_rotation={0,0,0}
+                dropDownMenu.opacity=255
+                dropDownMenu:animate{
+                    duration=300,
+                    opacity=0,
+                }
+                button_focus:animate{
+                    duration=300,
+                    opacity=0,
+                }
+            end,
+            set_item_function = function(cat,index,f)
+                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
+                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+                
+                p.items[cat].items[index].f=f
+                
+            end,
+            press_enter = function(p)
+                if p.items[curr_cat] ~= nil and
+                   p.items[curr_cat].items[curr_index].f ~= nil then
+                   
+                    p.items[curr_cat].items[curr_index].f(p)
+                else
+                    print("no function")
+                end
+            end
+        }
+    }
+    local function make_ring(w,h,padding)
+        local ring = Canvas{ size = { w , h } }
+        ring:begin_painting()
+        ring:set_source_color( p.txt_color )
+        ring:round_rectangle(
+            padding + 2 / 2,
+            padding + 2 / 2,
+            w - 2 - padding * 2 ,
+            h - 2 - padding * 2 ,
+            12 )
+        ring:stroke()
+        ring:finish_painting()
+    	if ring.Image then
+       		ring= ring:Image()
+    	end
+        return ring
+    end
+    
+    function create()
+        
+        --local vars used to create the menu
+        local ui_ele = nil
+        local curr_y = 0
+        
+        local max_item_w = 0
+        local max_item_h = 0
+        
+        local txt_spacing = 10
+        local txt_h       = Text{font=p.font}.h
+        local inset       = 20
+        
+        --reset globals
+        curr_cat   = 0
+        curr_index = 0
+        focus_sel_items  = {}
+        dropDownMenu:clear()
+        dropDownMenu.opacity=0
+        
+        if p.bg_clone_src == nil then
+            curr_y = 45
+        else
+            curr_y = p.item_start_y
+        end
+        
+        --For each category
+        for cat = 1, #p.items do
+            
+            focus_sel_items[cat] = {}
+            
+            --Don't place a divider at the top
+            if cat ~= 1 and p.divider_h ~= 0 then
+                dropDownMenu:add(
+                    Rectangle{
+                        x     = p.padding,
+                        y     = curr_y,
+                        name  = "divider "..(cat-1),
+                        w     = p.bg_w-2*p.padding,
+                        h     = p.divider_h,
+                        color = txt_color
+                    }
+                )
+                curr_y = curr_y + p.divider_h + txt_spacing
+            end
+            
+            --Category title
+            if p.items[cat].name ~= nil then
+                dropDownMenu:add(
+                    Text{
+                        text  = p.items[cat].name,
+                        font  = p.font,
+                        color = p.txt_color,
+                        x     = p.padding,
+                        y     = curr_y,
+                    }
+                )
+                curr_y = curr_y + txt_h + txt_spacing
+            end
+            
+            --For each item in that categoryitem
+            for item = 1, #p.items[cat].items do
+                
+                --Make the base_img for each item
+                if p.item_bg_clone_src ~= nil then
+                    ui_ele = Clone{source=p.item_bg_clone_src}
+                else
+                    ui_ele = make_ring(p.bg_w,txt_h+15,7)
+                end
+                
+                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
+                ui_ele.position     = {   p.bg_w/2, curr_y+txt_h/2 }
+                dropDownMenu:add(ui_ele)
+                
+                
+                --Make the focus for each item
+                if p.item_focus_clone_src ~= nil then
+                    ui_ele = Clone{source=p.item_focus_clone_src}
+                else
+                    ui_ele = assets(skin_list[p.skin]["button_focus"])
+                    ui_ele.size = {p.bg_w,txt_h+15}
+                end
+                
+                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
+                ui_ele.position     = {   p.bg_w/2, curr_y+txt_h/2 }
+                ui_ele.opacity      = 0
+                dropDownMenu:add(ui_ele)
+                table.insert(focus_sel_items[cat],ui_ele)
+                
+                
+                --Make the text label for each item
+                dropDownMenu:add(
+                    Text{
+                        text  = p.items[cat].items[item].txt,
+                        font  = p.font,
+                        color = p.txt_color,
+                        x     = p.padding+inset,
+                        y     = curr_y,
+                    }
+                )
+                curr_y = curr_y + txt_h + txt_spacing
+            end
+        end
+        
+        
+        if p.bg_clone_src == nil then
+            if skin_list[p.skin]["drop_down_bg"] then
+                ui_ele = assets(skin_list[p.skin]["drop_down_bg"])
+                ui_ele.size = { p.bg_w , curr_y }
+            else
+                ui_ele = ui.factory.make_dropdown(
+                    { p.bg_w , curr_y } ,
+                    p.bg_color
+                )
+            end
+        else
+            ui_ele = Clone{source=p.bg_clone_src}
+        end
+        dropDownMenu:add(ui_ele)
+        ui_ele:lower_to_bottom()
+        
+        dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
+        if p.bg_goes_up then
+            ui_ele.x_rotation={180,0,0}
+            ui_ele.y = ui_ele.h+p.item_start_y
+            dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.item_start_y}
+        else
+            dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
+        end
+        
+        button:clear()
+        if p.top_img ~= nil then
+            if p.top_img.parent ~= nil then
+                p.top_img.unparent()
+            end
+            p.top_img.anchor_point = {p.top_img.w/2,p.top_img.h/2}
+            button:add(p.top_img)
+        else
+            ui_ele = assets(skin_list[p.skin]["button"])
+            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
+            button:add(ui_ele)
+        end
+        
+        if p.top_focus_img ~= nil then
+            if p.top_focus_img.parent ~= nil then
+                p.top_focus_img.unparent()
+            end
+            p.top_focus_img.anchor_point = {p.top_focus_img.w/2,p.top_focus_img.h/2}
+            button:add(p.top_focus_img)
+            button_focus = p.top_focus_img
+        else
+            button_focus = assets(skin_list[p.skin]["button_focus"])
+            button_focus.anchor_point = {button_focus.w/2,button_focus.h/2}
+            button:add(button_focus)
+        end
+        
+        button_focus.opacity = 0
+        ui_ele = Text{text=p.name,font=p.font,color = p.txt_color}
+        ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
+        button:add(ui_ele)
+        
+        button.position = {button.w/2,button.h/2}
+        dropDownMenu.x = button.w/2
+        if p.bg_goes_up then
+            dropDownMenu.y = dropDownMenu.y -10
+        else
+            dropDownMenu.y = dropDownMenu.y + button.h+10
+        end
+    end
+    
+    
+    
+    --set the meta table to overwrite the parameters
+    mt = {}
+    mt.__newindex = function(t,k,v)
+		
+        p[k] = v
+        create()
+		
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(umbrella.extra, mt)
+
+    return umbrella
+end
+function widget.menuBar(t)
+    local p = {
+        
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+end
+function widget.tabBar(t)
+    
+    --default parameters
+    local p = {
+        name  = "Drop Down Bar",
+        font  = "DejaVu Sans 26px",
+        tabs = {
+        --  item text, selectable, icon source
+            {"Item 1",      true,  nil },
+            {"Item 2",      true,  nil },
+            {"Item 3",      true,  nil },
+        },
+        tab_w_equal = false,
+        tab_w_padding = 30,
+        min_w = 500,
+        border_width=2,
+        border_color={255,255,255},
+        
+        bg_color = {0,0,0},
+        border_rad=12,
+        
     }
     --overwrite defaults
     if t ~= nil then
