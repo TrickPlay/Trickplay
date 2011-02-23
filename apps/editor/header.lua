@@ -14,6 +14,7 @@ S_SELECT          = 0
 S_RECTANGLE       = 1
 S_POPUP        	  = 2
 S_MENU        	  = 3
+S_FOCUS        	  = 4
 
 DEFAULT_COLOR     = {255,255,255,255}
 
@@ -56,7 +57,7 @@ contents    	  = ""
 item_num 	  = 0
 h_guideline = 0
 v_guideline = 0
-
+focus_type = ""
 
 
 shift 		  = false
