@@ -514,11 +514,11 @@ local code_map =
 
 local color_map =
 {
-        [ "Text" ] = function()  size = {500, 800} color = {25,25,25,100}  return size, color end,
-        [ "Image" ] = function()  size = {500, 740} color ={25,25,25,100}  return size, color end,
-        [ "Rectangle" ] = function()  size = {500, 740} color = {25,25,25,100}   return size, color end,
-        [ "Clone" ] = function()  size = {500, 625} color = {25,25,25,100}   return size, color end,
-        [ "Group" ] = function()  size = {500, 625} color = {25,25,25,100}   return size, color end,
+        [ "Text" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "Image" ] = function()  size = {530, 680} color ={25,25,25,100}  return size, color end,
+        [ "Rectangle" ] = function()  size = {530, 680} color = {25,25,25,100}   return size, color end,
+        [ "Clone" ] = function()  size = {530, 680} color = {25,25,25,100}   return size, color end,
+        [ "Group" ] = function()  size = {530, 680} color = {25,25,25,100}   return size, color end,
         [ "Video" ] = function()  size = {500, 525} color = {25,25,25,100}   return size, color end,
 
         [ "Button" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
@@ -1359,6 +1359,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      input_mode = S_SELECT
 		      current_inspector = nil
 		      --editor.n_selected(v, true)
+		      for i, c in pairs(g.children) do
+	     		  editor.n_selected(c)
+		      end
                       screen:grab_key_focus(screen) 
 		      editor.view_code(v)
 		      text_reactive()
@@ -1372,6 +1375,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      current_inspector = nil
                       screen:grab_key_focus(screen) 
 		      text_reactive()
+		      for i, c in pairs(g.children) do
+	     		  editor.n_selected(c)
+		      end
 	              return true
 		  elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
@@ -1380,6 +1386,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      editor.n_selected(v, true)
                       screen:grab_key_focus(screen) 
 		      text_reactive()
+		      for i, c in pairs(g.children) do
+	     		  editor.n_selected(c)
+		      end
 	              return true
 		  end 
  	     elseif (key == keys.Tab and shift == false) or key == keys.Down then 
@@ -1444,6 +1453,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      text_reactive()
 		      editor.n_selected(v, true)
 	     end 
+	     for i, c in pairs(g.children) do
+	     	editor.n_selected(c)
+	     end
 
              return true
 	end 
@@ -1472,6 +1484,27 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     button.opacity = 255 
         end
 
+    elseif(item_n == "focus") then  -- Attribute with button picker 
+	group:clear()
+	group.name = "focusChanger"
+	group.reactive = true
+	local focus_changer = factory.draw_focus_changer()
+
+	local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
+	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
+
+	if v.extra.focus then 
+		for m, n in pairs (v.extra.focus) do
+		     focus_changer:find_child("text"..focus_map[m]).text = n
+		end 	
+	
+	end 	
+
+	local space = WIDTH - PADDING_X  
+        focus_changer.position  = {WIDTH - space , 5}
+
+        group:add(focus_changer)
+	return group
     elseif(item_n == "items") then 
 	group:clear()
 	group.name = "itemsList"
@@ -1662,8 +1695,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	    end
 	end
 
-	--print("attr_v  :  ", item_v) 
-	--print("selected : ", selected)
 
         local skin_picker = widget.buttonPicker{skin = "custom", items = skins, font = "DejaVu Sans 26px", selected_item = selected}
 	skin_picker.wheight = 45
@@ -1671,15 +1702,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         skin_picker.position = {text.x + text.w + 50 , 5}
 	skin_picker.name = "skin_picker"
 
-
---[[
-	print("Skin Picker Children : ")
-	dumptable(skin_picker.children)
-	print("Skin Picker Items : ")
-	dumptable(skin_picker.items)
-	print("Skin Picker Selected Items : ")
-	print(skins[tonumber(skin_picker.selected_item)])
-]]
         group:add(skin_picker) 
 	
 	unfocus = skin_picker:find_child("unfocus")
@@ -2409,6 +2431,760 @@ plus_minus = Group
 	}
 
 return plus_minus
+end 
+
+function factory.draw_focus_changer()
+
+
+
+bnd = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "bnd",
+		position = {0,0,0},
+		size = {434,580},
+		opacity = 10,
+	}
+
+
+text11 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "Change Focus",
+		editable = true,
+		wants_enter = true,
+		wrap = true,
+		cursor_visible=false,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text11",
+		position = {0,2,0},
+		size = {300,30},
+		opacity = 255,
+	}
+
+
+text8 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "U",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text8",
+		position = {15,12,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectU = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectU",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gU = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gU",
+		position = {188,45,0},
+		size = {50,50},
+		opacity = 255,
+		reactive = true,
+		children = {text8,rectU},
+	}
+
+
+textU = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textU",
+		position = {188,95,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+
+text13 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "L",
+		editable = true,
+		wants_enter = true,
+		wrap = true,
+		cursor_visible=false,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text13",
+		position = {14,5,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectL = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectL",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gL = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gL",
+		position = {30,177,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text13,rectL},
+	}
+
+
+textL = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textL",
+		position = {30,227,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+text10 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "E",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text10",
+		position = {14,7,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectE = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectE",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gE = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gE",
+		position = {188,177,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text10,rectE},
+	}
+
+
+textE = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textE",
+		position = {188,227,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+
+text14 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "R",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text14",
+		position = {14,9,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectR = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectR",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gR = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gR",
+		position = {346,175,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text14,rectR},
+	}
+
+
+
+textR = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textR",
+		position = {346,225,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+
+text12 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "D",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text12",
+		position = {12,6,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectD = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectD",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gD = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gD",
+		position = {188,309,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text12,rectD},
+	}
+
+textD = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textD",
+		position = {188,359,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+
+text16 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "R",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text16",
+		position = {12,10,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectRed = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectRed",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gRed = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gRed",
+		position = {30,443,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text16,rectRed},
+	}
+
+textRed = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textRed",
+		position = {30,493,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+text17 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "G",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text17",
+		position = {12,7,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectG = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectG",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gG = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gG",
+		position = {135,441,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text17,rectG},
+	}
+
+
+textG = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textG",
+		position = {135,491,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+
+text18 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "Y",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text18",
+		position = {14,10,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectY = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectY",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gY = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gY",
+		position = {240,443,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text18,rectY},
+	}
+
+
+textY = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textY",
+		position = {240,493,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+
+
+text19 = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "B",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text19",
+		position = {14,8,0},
+		size = {30,30},
+		opacity = 255,
+	}
+
+
+rectB = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = {255,255,255,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rectB",
+		position = {0,0,0},
+		size = {50,50},
+		opacity = 255,
+	}
+
+
+gB = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "gB",
+		position = {346,443,0},
+		size = {50,50},
+		opacity = 255,
+		children = {text19,rectB},
+	}
+
+
+textB = Text
+	{
+		color = {255,255,255,255},
+		font = "Highway Gothic Narrow 22px",
+		text = "",
+		wants_enter = true,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "textB",
+		position = {346,493,0},
+		size = {100,30},
+		opacity = 255,
+	}
+
+
+focus = Group
+	{
+		name = "focusChanger",
+		position = {0,0,0},
+		reactive = true,
+	}
+
+focus:add(bnd,text11,gU,textU,gL,textL,gE,textE,gR,textR, gD, textD, gRed, textRed, gG, textG, gY, textY, gB, textB)
+	
+local focus_map  = {["gU"] = function() end,}
+
+function focus.extra.on_focus_in()
+	 current_focus.extra.on_focus_out()
+	 current_focus = focus
+	 for i,j in pairs(focus.children) do
+		if j.type == "Group" then 
+		     local focus_t= j.name:sub(2,-1)
+		     j:find_child("rect"..focus_t).border_color = {255,255,255,255}
+		end 
+	 end 
+end 
+
+function focus.extra.on_focus_out(call_by_inspector)
+	focus_type = ""
+	input_mode = S_POPUP
+        for i,j in pairs(focus.children) do
+		if j.type == "Group" then 
+		     local focus_t= j.name:sub(2,-1)
+		     j:find_child("rect"..focus_t).border_color = {255,255,255,255}
+		end 
+	end 
+
+end 
+
+function make_on_button_down_f(v)
+     function v:on_button_down(x,y,b,n)
+           focus.on_focus_in()
+	   focus_type = v.name:sub(2,-1)
+	   v:find_child("rect"..focus_type).border_color = {0,255,0,255} -- 
+	   if (focus:find_child("text"..focus_type).text ~= "") then
+		focus:find_child("text"..focus_type).text = ""
+	   end 
+	   --dolater : add F to mouse pointer 
+	   input_mode = S_FOCUS
+	   return true 
+	end 
+end 
+
+
+
+for i,j in pairs (focus.children) do 
+     j.reactive = true 
+     if (j.type == "Group") then 
+          make_on_button_down_f(j)
+     end
+end
+
+
+return focus
+
 end 
 
 return factory
