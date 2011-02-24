@@ -173,18 +173,18 @@ function create_on_button_down_f(v)
 		     	editor.selected(p_obj)
 	            elseif (p_obj.extra.selected == true) then 
 		     	editor.n_select(p_obj)
-	       	    end
+		    end
 	            org_object = copy_obj(p_obj)
            	    dragging = {p_obj, x - p_obj.x, y - p_obj.y }
            	    return true
 	      else 
-                    if(button == 3 or num_clicks >= 2) then
+		    if(button == 3 or num_clicks >= 2) then
                          editor.inspector(v)
                          return true
                     end 
 	            if(input_mode == S_SELECT and v.extra.selected == false) then 
 		     	editor.selected(v) 
-	            elseif (v.extra.selected == true) then 
+		    elseif (v.extra.selected == true) then 
 			if(v.type == "Text") then 
 			      v:set{cursor_visible = true}
 			      v:set{editable= true}
@@ -195,11 +195,31 @@ function create_on_button_down_f(v)
 	            org_object = copy_obj(v)
            	    dragging = {v, x - v.x, y - v.y }
            	    return true
-	   	 end
-              end
+	     end
+	    elseif (input_mode == S_FOCUS) then 
+			if (v.name ~= "inspector") then 
+		     		editor.selected(v)
+		     		screen:find_child("text"..focus_type).text = v.name 
+			end 
+			input_mode = S_FOCUS
+           		return true
+
+            end
+	
+--[[
+ 	   elseif (input_mode == S_FOCUS) then 
+		print("YUGI cccccccccccc")
+		if (v.name ~= "inspector") then 
+		print("YUGI dddddd")
+		     editor.selected(v)
+		     screen:find_child("text"..focus_type).text = v.name 
+		end 
+		input_mode = S_FOCUS
+           	return true
+]]
 	   elseif( input_mode ~= S_RECTANGLE) then  
-                 dragging = {v, x - v.x, y - v.y }
-           	 return true
+                dragging = {v, x - v.x, y - v.y }
+           	return true
            end
 	  end
            --return true .. 렉탱글 안에서 또 렉탱글 글릴때 안되아서.. 뺌
@@ -359,7 +379,6 @@ function make_attr_t(v)
   local obj_type = v.type
 
   local function stringTotitle(str)
-	print("\ninput string :", str)
       local i,j = string.find(str,"_")
       if i then str = string.upper(str:sub(1,1))..str:sub(2,i-1).." "..string.upper(str:sub(i+1, i+1))..str:sub(i+2,-1)
       else str = string.upper(str:sub(1,1))..str:sub(2,-1)
@@ -387,10 +406,6 @@ function make_attr_t(v)
 
   local attr_map = {
 	["items"] = function ()
-		local items = ""
-		for i,j in pairs(v.items) do 
-			items = items.."\""..j.."\", "
-		end
 		table.insert(attr_t, {"items", v.items, "Items"})
                 table.insert(attr_t, {"line", "", "hide"})
                 table.insert(attr_t, {"line", "", "hide"})
@@ -470,21 +485,29 @@ function make_attr_t(v)
 	     	table.insert(attr_t, {pos_k.."x", pos_t[1], "X"})
              	table.insert(attr_t, {pos_k.."y", pos_t[2], "Y"})
 		end,
+	["focus"]= function()
+ 		if v.extra.focus then 
+ 		     table.insert(attr_t, {"focus", v.extra.focus, "Focus"})
+ 		else 
+ 		     table.insert(attr_t, {"focus", {"1","2","3","4","5"}, "Focus"})
+ 		end 
+ 		end, 
+	
   }
   
   local obj_map = {
-       ["Rectangle"] = function() return {"color", "border_color", "border_width", "x_rotation", "anchor_point"} end,
-       ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point"} end,
-       ["Text"] = function() return {"color", "font", "editable", "wrap", "wrap_mode", "x_rotation", "anchor_point"} end,
-       ["Group"] = function() return {"scale","x_rotation","anchor_point"} end,
-       ["Clone"] = function() return {"scale","x_rotation","anchor_point"} end,
-       ["Button"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
-       ["TextInputField"] = function() return {"skin","color","f_color","font","text_indent","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
-       ["DialogBox"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
+       ["Rectangle"] = function() return {"color", "border_color", "border_width", "x_rotation", "anchor_point","reactive", "focus"} end,
+       ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point","reactive", "focus"} end,
+       ["Text"] = function() return {"color", "font", "editable", "wrap", "wrap_mode", "x_rotation", "anchor_point","reactive", "focus"} end,
+       ["Group"] = function() return {"scale","x_rotation","anchor_point","reactive", "focus"} end,
+       ["Clone"] = function() return {"scale","x_rotation","anchor_point","reactive", "focus"} end,
+       ["Button"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive",  "focus"} end,
+       ["TextInputField"] = function() return {"skin","color","f_color","font","text_indent","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive", "focus"} end,
+       ["DialogBox"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive", "focus"} end,
        ["ToastBox"] = function() return {"label","message","skin","duration","fade_duration","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
-       ["ButtonPicker"] = function() return {"skin","color","font","items","selected_item","scale","x_rotation","anchor_point"} end,
-       ["CheckBox"] = function() return {"skin","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","scale","x_rotation","anchor_point"} end,
-       ["RadioButton"] = function() return {"skin","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space","scale","x_rotation","anchor_point"} end,
+       ["ButtonPicker"] = function() return {"skin","color","font","items","selected_item","scale","x_rotation","anchor_point","reactive","focus"} end,
+       ["CheckBox"] = function() return {"skin","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","scale","x_rotation","anchor_point","reactive", "focus"} end,
+       ["RadioButton"] = function() return {"skin","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space","scale","x_rotation","anchor_point","reactive", "focus"} end,
        ["LoadingDots"] = function() return {"skin","dot_color","dot_radius","num_dots","anim_radius","anim_duration","clone_src","scale","x_rotation","anchor_point"} end,
        ["LoadingBar"] = function() return {"shell_upper_color","shell_lower_color","stroke_color","fill_upper_color","fill_lower_color", "scale","x_rotation","anchor_point"} end,
    }
@@ -729,7 +752,14 @@ function itemTostring(v, d_list, t_list)
          itm_str = itm_str.."}\n\n"
     end
 
-   
+    if v.extra.focus then 
+	itm_str = itm_str..v.name.."\.extra\.focus = {" 
+	for m,n in pairs (v.extra.focus) do 
+		itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+	end 
+	itm_str = itm_str.."}\n\n"
+    end 
+
     if(d_list == nil) then  
 	d_list = {v.name}
     else 
