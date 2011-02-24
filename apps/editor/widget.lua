@@ -13,6 +13,7 @@
 				   ["loading_dot"]  = nil,
                    ["scroll_arrow"] = nil,
                    ["drop_down_color"]={0,0,0},
+                   ["menu_bar"] = "assets/menu-background.png",
 				  },
 
 	            ["custom"] = {},
@@ -37,6 +38,7 @@
 				   ["loadingdot"] = "assets/checkmark.png",
                    ["drop_down_color"]={255,0,0},
                    ["scroll_arrow"] = nil,
+                   ["menu_bar"] = "assets/menu-background.png",
 				  },
  
 		    ["skin_type2"] = { 
@@ -60,6 +62,7 @@
 				   ["loadingdot"] = "assets/left.png",
                    ["drop_down_color"]={0,0,255},
                    ["scroll_arrow"] = nil,
+                   ["menu_bar"] = "assets/menu-background.png",
 				  },
 		    ["skin_type3"] = { 
 				   ["button"] = "assets/button-blue.png", 
@@ -2559,7 +2562,7 @@ function widget.scrollWindow(t)
                         grip_vert.y = grip_vert_base_y+(track_h-grip_h)
                     elseif new_y > 0 then
                         grip_vert.y = grip_vert_base_y
-                    else
+                    elseif new_y ~= p.content.y then
                         grip_vert:complete_animation()
                         grip_vert:animate{
                             duration= 200,
@@ -2570,7 +2573,7 @@ function widget.scrollWindow(t)
                         grip_hor.x = grip_hor_base_x+(track_w-grip_h)
                     elseif new_x > 0 then
                         grip_hor.x = grip_hor_base_x
-                    else
+                    elseif new_x ~= p.content.x then
                         grip_hor:complete_animation()
                         grip_hor:animate{
                             duration= 200,
@@ -3397,7 +3400,7 @@ function widget.dropDownBar(t)
     end
     
     
-    
+    create()
     --set the meta table to overwrite the parameters
     mt = {}
     mt.__newindex = function(t,k,v)
@@ -3415,7 +3418,21 @@ function widget.dropDownBar(t)
 end
 function widget.menuBar(t)
     local p = {
-        
+        bar_widgets = {
+            {widget.dropDownBar(),300},
+            {widget.dropDownBar(),300},
+            {widget.dropDownBar(),300},
+            {widget.dropDownBar(),300},
+            {widget.button(),200},
+            {widget.button(),200},
+            {widget.button(),200},
+            {widget.button(),200},
+            {widget.button(),200},
+        },
+        clip_w      = 2/3*screen.w,
+        bg_pic      = nil,
+        arrow_img   = nil,
+        skin        = "default"
     }
     --overwrite defaults
     if t ~= nil then
@@ -3423,6 +3440,110 @@ function widget.menuBar(t)
             p[k] = v
         end
     end
+    
+    local index = 0
+    
+    local si = widget.scrollWindow{
+        clip_h              = screen.h,
+        content_h           = screen.h,
+        arrow_sz            = 30,
+        arrows_centered     = true,
+        border_is_visible   = false,
+    }
+    si.position={40,0}
+    local func = {
+        ["Button"] = {
+            fade_in = "on_focus_in",
+            fade_out = "on_focus_out"
+        },
+        ["DropDown"] ={
+            fade_in = "spin_in",
+            fade_out = "spin_out"
+        }
+    }
+    local umbrella = Group{
+        name     = "Menu_Bar",
+        reactive = true,
+        position = {200,100},
+        extra    = {
+            type = "MenuBar",
+            move_left = function()
+                if index > 1 then
+                    if p.bar_widgets[index] ~= nil then
+                        p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_out]()
+                        si.seek_to(p.bar_widgets[index][1].x,0)
+                    end
+                    index = index - 1
+                    p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_in]()
+                end
+                --if p.bar_widgets[index][1].x + p.bar_widgets[index][2] > p.clip_w then
+                        
+                --end
+            end,
+            move_right = function()
+                if index < #p.bar_widgets then
+                    if p.bar_widgets[index] ~= nil then
+                        p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_out]()
+                    end
+                    index = index + 1
+                    p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_in]()
+                    --if p.bar_widgets[index][1].x + p.bar_widgets[index][2] > p.clip_w then
+                        si.seek_to(p.bar_widgets[index][1].x,0)
+                    --end
+                end
+            end
+        }
+    }
+    
+    local function create()
+        
+        --clear the groups
+        umbrella:clear()
+        si.content:clear()
+        
+        --load the background
+        if p.bg_pic == nil then
+            umbrella:add(assets(skin_list[p.skin]["menu_bar"]))
+        else
+            umbrella:add(p.bg_pic)
+        end
+        
+        umbrella:add(si)
+        si.clip_w = p.clip_w
+        
+        local curr_w = 0
+        for i = 1, #p.bar_widgets do
+            
+            assert(
+                p.bar_widgets[i][1].extra.type == "Button" or
+                p.bar_widgets[i][1].extra.type == "DropDown",
+                "invalid widget added to the dropdown bar"
+            )
+            si.content:add(p.bar_widgets[i][1])
+            p.bar_widgets[i][1].position = {curr_w,0}
+            
+            --print(p.bar_widgets[i],p.bar_widgets[i].w,p.bar_widgets[i].h,curr_w)
+            curr_w = curr_w + p.bar_widgets[i][2] + 15
+            
+        end
+        si.content_w = curr_w
+    end
+    
+    create()
+    --set the meta table to overwrite the parameters
+    mt = {}
+    mt.__newindex = function(t,k,v)
+		
+        p[k] = v
+        create()
+		
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(umbrella.extra, mt)
+
+    return umbrella
 end
 function widget.tabBar(t)
     

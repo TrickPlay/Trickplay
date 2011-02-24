@@ -2527,19 +2527,19 @@ function editor.bring_forward()
 end
 
 local widget_map = {
-	["Button"] = function () return widget.button()  end, 
-	["TextInputField"] = function () return widget.textField() end, 
-	["DialogBox"] = function () return widget.dialogBox() end, 
-	["ToastBox"] = function () return widget.toastBox() end,   
-	["RadioButton"] = function () return widget.radioButton() end, 
-	["CheckBox"] = function () return widget.checkBox()  end, 
-	["ButtonPicker"] = function () return widget.buttonPicker()  end, 
-	["LoadingDots"] = function () return widget.loadingdots() end, 
-	["LoadingBar"] = function () return widget.loadingbar() end,
-        ["DropDown"] = function () return widget.dropDownBar() end,
-        ["MenuBar"] = function () return widget.dropDownBar() end,
-	["3D_List"] = function () return widget.threeDlist() end,
-	["ScrollImage"] = function () return widget.scrollWindow() end, 
+     ["Button"]         = function () return widget.button()       end, 
+     ["TextInputField"] = function () return widget.textField()    end, 
+     ["DialogBox"]      = function () return widget.dialogBox()    end, 
+     ["ToastBox"]       = function () return widget.toastBox()     end,   
+     ["RadioButton"]    = function () return widget.radioButton()  end, 
+     ["CheckBox"]       = function () return widget.checkBox()     end, 
+     ["ButtonPicker"]   = function () return widget.buttonPicker() end, 
+     ["LoadingDots"]    = function () return widget.loadingdots()  end, 
+     ["LoadingBar"]     = function () return widget.loadingbar()   end,
+     ["DropDown"]       = function () return widget.dropDownBar()  end,
+     ["MenuBar"]        = function () return widget.menuBar()      end,
+     ["3D_List"]        = function () return widget.threeDlist()   end,
+     ["ScrollImage"]    = function () return widget.scrollWindow() end, 
 }
 
 
