@@ -2517,7 +2517,7 @@ function widget.scrollWindow(t)
 
     --the umbrella Group, containing the full slate of tiles
     local scroll_group = Group{ 
-        name     = "Scroll clip",
+        name     = "scrollclip",
         position = {200,100},
         reactive = true,
         extra    = {
