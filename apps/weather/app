@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.sudoku",
+    release     = "2",
+    version     = ".6",
+    name        = "Sudoku",
+    author      = "Trickplay, Jr.",
+    copyright   = "© Trickplay Inc."
+}
