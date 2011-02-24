@@ -604,7 +604,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible",}
+    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible",}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children"}
 
@@ -675,6 +675,12 @@ function itemTostring(v, d_list, t_list)
 		  else 
 	          	item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
 		  end 
+	      elseif v[j].type == "Group" then 
+		        item_string = item_string..head..j.."= Group { children = {"
+			for m,n in pairs (v[j].children) do
+				item_string = item_string .. n.name..","
+			end 
+			item_string = item_string.."} }"..tail
 	      elseif type(v[j]) == "userdata" then 
 		  item_string = item_string..head..j.." = "..v[j].name..tail 
 	      else
@@ -689,7 +695,8 @@ function itemTostring(v, d_list, t_list)
 	if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
 	 src = v.source 
-	 if is_in_list(src.name, d_list) == false then 
+	 if is_in_list(src.name, d_list) == false then  --> need debugging this line :(
+							--  LUA PANIC : /Users/hjkim/code/trickplay/apps/editor/./util.lua:698: attempt to index global 'src' (a nil value)
 	     if(t_list == nil) then 
 		t_list = {src.name}
 	     else 
@@ -739,7 +746,20 @@ function itemTostring(v, d_list, t_list)
 	 "mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
 	 "mediaplayer.volume = "..v.name..".volume\n\n"
 	 itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
-    elseif is_this_widget(v) == true then 
+
+    elseif is_this_widget(v) == true then 	 
+	 if v.content then 
+	    for m,n in pairs (v.content.children) do
+		itm_str= itemTostring(n) .. itm_str
+	    end 
+	 end 
+	 if v.tiles then 
+	     for m,n in pairs(v.tiles) do 
+	          for q,r in pairs(n) do 
+		       itm_str= itemTostring(r)..itm_str
+	          end 
+	     end 
+	 end 
          itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
 	 itm_str = itm_str:sub(1,-2)
@@ -758,6 +778,21 @@ function itemTostring(v, d_list, t_list)
 		itm_str = itm_str.."["..m.."] = \""..n.."\", " 
 	end 
 	itm_str = itm_str.."}\n\n"
+
+	itm_str = itm_str.."function "..v.name..":on_key_down(key)\n\t"
+	.."if "..v.name..".focus[key] then\n\t\t" 
+	.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
+	..v.name..".focus[key]()\n\t\t"
+	.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
+	.."if "..v.name..".on_focus_out then\n\t\t\t\t"
+	..v.name..".on_focus_out()\n\t\t\t".."end\n\t\t\t"
+	.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
+	.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
+        .."screen:find_child("..v.name..".focus[key]).on_focus_in()\n\t\t\t".."end\n\t\t\t"
+	.."end\n\t"
+	.."end\n\t"
+	.."return true\n"
+        .."end\n\n"
     end 
 
     if(d_list == nil) then  
