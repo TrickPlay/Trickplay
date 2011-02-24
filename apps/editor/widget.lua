@@ -2480,6 +2480,8 @@ function widget.scrollWindow(t)
 		arrow_sz  = 10,
 		arrows_in_box = false,
 		arrows_centered = false,
+        hor_arrow_y     = nil,
+        vert_arrow_x    = nil,
 		grip_is_visible = true,
         border_is_visible = true,
         skin="default",
@@ -2807,7 +2809,7 @@ function widget.scrollWindow(t)
         arrow_dn.reactive = true
         arrow_l.reactive=true
         arrow_r.reactive=true
-
+        
 		function arrow_up:on_button_down(x,y,button,num_clicks)
             scroll_y(1)
         end
@@ -2862,7 +2864,16 @@ function widget.scrollWindow(t)
 			grip_vert.opacity = 0
 		end
 		
-		if p.arrows_centered then
+        if p.hor_arrows_y ~= nil or p.vert_arrows_x ~= nil then
+            if p.vert_arrows_x ~= nil then
+                arrow_up.position = {p.vert_arrows_x,-arrow_up.h/2-5 }
+                arrow_dn.position = {p.vert_arrows_x,border.h+arrow_dn.h/2+5}
+            end
+            if p.hor_arrows_y ~= nil then
+                arrow_l.position  = {-arrow_l.w/2-5,        p.hor_arrows_y}
+                arrow_r.position  = {border.w+arrow_r.w/2+5,p.hor_arrows_y}
+            end
+		elseif p.arrows_centered then
 			if p.arrows_in_box then
 				arrow_up.position = {border.w/2+arrow_up.w/2+5,arrow_up.h/2+5 }
 				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h-arrow_dn.h/2-5}
@@ -3036,14 +3047,16 @@ function widget.dropDownBar(t)
         end
     end
     
-    local create, curr_index, curr_cat
+    local create
+    local curr_cat = 1
     local curr_index = 0
     local focus_sel_items  = {}
     
     local dropDownMenu = Group{}
     local button       = Group{}
     local button_focus = nil
-    local umbrella     = Group{
+    local umbrella
+    umbrella     = Group{
         name="Drop down bar",
         reactive = true,
         children={button,dropDownMenu},
@@ -3075,6 +3088,28 @@ function widget.dropDownBar(t)
                     }
                     curr_cat = cat
                     curr_index=i
+                end
+            end,
+            press_up = function()
+                if curr_index == 1 then
+                    if curr_cat == 1 then
+                        return
+                    else
+                        umbrella.focus_index(curr_cat-1,#focus_sel_items[curr_cat])
+                    end
+                else
+                    umbrella.focus_index(curr_cat,curr_index-1)
+                end
+            end,
+            press_down = function()
+                if curr_index == #focus_sel_items[curr_cat] then
+                    if curr_cat == #focus_sel_items then
+                        return
+                    else
+                        umbrella.focus_index(curr_cat+1,1)
+                    end
+                else
+                    umbrella.focus_index(curr_cat,curr_index+1)
                 end
             end,
             replace_item = function (cat,index,item)
@@ -3142,7 +3177,10 @@ function widget.dropDownBar(t)
                     duration=300,
                     opacity=255,
                 }
-                curr_cat   = 0
+                if focus_sel_items[curr_cat][curr_index] then
+                    focus_sel_items[curr_cat][curr_index].opacity=0
+                end
+                curr_cat   = 1
                 curr_index = 0
             end,
             spin_out = function()
@@ -3175,7 +3213,10 @@ function widget.dropDownBar(t)
                     duration=300,
                     opacity=255,
                 }
-                curr_cat   = 0
+                if focus_sel_items[curr_cat][curr_index] then
+                    focus_sel_items[curr_cat][curr_index].opacity=0
+                end
+                curr_cat   = 1
                 curr_index = 0
             end,
             fade_out = function()
@@ -3243,7 +3284,7 @@ function widget.dropDownBar(t)
         local inset       = 20
         
         --reset globals
-        curr_cat   = 0
+        curr_cat   = 1
         curr_index = 0
         focus_sel_items  = {}
         dropDownMenu:clear()
@@ -3369,8 +3410,11 @@ function widget.dropDownBar(t)
         else
             ui_ele = assets(skin_list[p.skin]["button"])
             ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
+            ui_ele.reactive=true
             button:add(ui_ele)
         end
+        
+        
         
         if p.top_focus_img ~= nil then
             if p.top_focus_img.parent ~= nil then
@@ -3386,6 +3430,16 @@ function widget.dropDownBar(t)
         end
         
         button_focus.opacity = 0
+        
+        button.reactive=true
+        function button:on_button_down(x,y,b,n)
+            if button_focus.opacity == 0 then
+                umbrella.spin_in()
+            else
+                umbrella.spin_out()
+            end
+        end
+        
         ui_ele = Text{text=p.name,font=p.font,color = p.txt_color}
         ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
         button:add(ui_ele)
@@ -3419,19 +3473,21 @@ end
 function widget.menuBar(t)
     local p = {
         bar_widgets = {
-            {widget.dropDownBar(),300},
-            {widget.dropDownBar(),300},
-            {widget.dropDownBar(),300},
-            {widget.dropDownBar(),300},
-            {widget.button(),200},
-            {widget.button(),200},
-            {widget.button(),200},
-            {widget.button(),200},
-            {widget.button(),200},
+            widget.dropDownBar(),
+            widget.dropDownBar(),
+            widget.dropDownBar(),
+            widget.dropDownBar(),
+            widget.button(),
+            widget.button(),
+            widget.button(),
+            widget.button(),
+            widget.button(),
         },
+        y_offset  = 20,
         clip_w      = 2/3*screen.w,
         bg_pic      = nil,
         arrow_img   = nil,
+        arrow_y     = 60,
         skin        = "default"
     }
     --overwrite defaults
@@ -3440,15 +3496,15 @@ function widget.menuBar(t)
             p[k] = v
         end
     end
-    
+    local create
     local index = 0
     
     local si = widget.scrollWindow{
-        clip_h              = screen.h,
-        content_h           = screen.h,
-        arrow_sz            = 30,
-        arrows_centered     = true,
-        border_is_visible   = false,
+        clip_h    = screen.h,
+        content_h = screen.h,
+        arrow_sz  = 30,
+        arrows_centered   = true,
+        border_is_visible = false,
     }
     si.position={40,0}
     local func = {
@@ -3461,41 +3517,70 @@ function widget.menuBar(t)
             fade_out = "spin_out"
         }
     }
+    local width = {
+        ["Button"]   = 200,
+        ["DropDown"] = 300
+    }
     local umbrella = Group{
         name     = "Menu_Bar",
         reactive = true,
-        position = {200,100},
+        position = {0,200},
         extra    = {
             type = "MenuBar",
-            move_left = function()
+            press_left = function()
                 if index > 1 then
                     if p.bar_widgets[index] ~= nil then
-                        p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_out]()
-                        si.seek_to(p.bar_widgets[index][1].x,0)
+                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
+                        si.seek_to(p.bar_widgets[index].x,0)
                     end
                     index = index - 1
-                    p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_in]()
+                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
                 end
-                --if p.bar_widgets[index][1].x + p.bar_widgets[index][2] > p.clip_w then
-                        
-                --end
             end,
-            move_right = function()
+            press_right = function()
                 if index < #p.bar_widgets then
                     if p.bar_widgets[index] ~= nil then
-                        p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_out]()
+                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
                     end
                     index = index + 1
-                    p.bar_widgets[index][1].extra[func[p.bar_widgets[index][1].extra.type].fade_in]()
-                    --if p.bar_widgets[index][1].x + p.bar_widgets[index][2] > p.clip_w then
-                        si.seek_to(p.bar_widgets[index][1].x,0)
-                    --end
+                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
+                    
+                    si.seek_to(p.bar_widgets[index].x,0)
                 end
-            end
+            end,
+            press_up = function()
+                if p.bar_widgets[index].press_up then
+                    p.bar_widgets[index].press_up()
+                end
+            end,
+            press_down = function()
+                if p.bar_widgets[index].press_down then
+                    p.bar_widgets[index].press_down()
+                end
+            end,
+            press_enter= function()
+                if p.bar_widgets[index].press_enter then
+                    p.bar_widgets[index].press_enter()
+                elseif p.bar_widgets[index].pressed then
+                    p.bar_widgets[index].pressed()
+                end
+            end,
+            insert_widget = function(i,w)
+                table.insert(p.bar_widgets,i,w)
+                create()
+            end,
+            replace_widget = function(i,w)
+                p.bar_widgets[i] = w
+                create()
+            end,
+            remove_widget = function(i)
+                table.remove(p.bar_widgets,i)
+                create()
+            end,
         }
     }
     
-    local function create()
+    create = function()
         
         --clear the groups
         umbrella:clear()
@@ -3509,21 +3594,25 @@ function widget.menuBar(t)
         end
         
         umbrella:add(si)
-        si.clip_w = p.clip_w
+        si.seek_to(0,0)
+        si.clip_w       = p.clip_w
+        si.skin         = p.skin
+        si.hor_arrows_y = p.arrow_y
+        index = 0
         
         local curr_w = 0
         for i = 1, #p.bar_widgets do
             
             assert(
-                p.bar_widgets[i][1].extra.type == "Button" or
-                p.bar_widgets[i][1].extra.type == "DropDown",
+                p.bar_widgets[i].extra.type == "Button" or
+                p.bar_widgets[i].extra.type == "DropDown",
                 "invalid widget added to the dropdown bar"
             )
-            si.content:add(p.bar_widgets[i][1])
-            p.bar_widgets[i][1].position = {curr_w,0}
+            si.content:add(p.bar_widgets[i])
+            p.bar_widgets[i].position = {curr_w,p.y_offset}
+            p.bar_widgets[i].skin     = p.skin
             
-            --print(p.bar_widgets[i],p.bar_widgets[i].w,p.bar_widgets[i].h,curr_w)
-            curr_w = curr_w + p.bar_widgets[i][2] + 15
+            curr_w = curr_w + width[p.bar_widgets[i].extra.type] + 15
             
         end
         si.content_w = curr_w
