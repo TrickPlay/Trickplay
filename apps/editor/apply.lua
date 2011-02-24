@@ -141,6 +141,27 @@ function inspector_apply (v, inspector)
                      ipos_t[1] = item_group:find_child("ix"):find_child("input_text").text
                      ipos_t[2] = item_group:find_child("iy"):find_child("input_text").text
  		     v.item_pos = ipos_t
+		elseif j.name == "focusChanger" then 
+		     v.extra.focus = {}
+		     local focus_t_list = {"U","D","E","L","R","Red","G","Y","B"}
+		     local focus_map = {["U"] = keys.Up, ["D"] = keys.Down, ["E"] = keys.Return, ["L"] = keys.Left, ["R"] = keys.Right,["Red"] = keys.RED,["G"] = keys.GREEN,["Y"] = keys.YELLOW,["B"] = keys.BLUE}
+
+		     local focus_match= {["U"] = keys.Down, ["D"] = keys.Up, ["L"] = keys.Right,["R"] = keys.Left,}
+
+		     for m,n in pairs (focus_t_list) do 
+		          if item_group:find_child("text"..n).text ~= "" then 
+				v.extra.focus[focus_map[n]] = item_group:find_child("text"..n).text
+				if focus_match[n] then 
+					if g:find_child(item_group:find_child("text"..n).text).extra.focus then 
+					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+					else
+					     g:find_child(item_group:find_child("text"..n).text).extra.focus = {} 
+					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+					end
+						
+				end 
+			  end 
+		     end 
 		else
 		     print(j.name, " 처리해 주세요")
 		end 

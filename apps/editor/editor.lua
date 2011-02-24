@@ -937,7 +937,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local INSPECTOR_OFFSET = 30 
         local TOP_PADDING = 12
         local BOTTOM_PADDING = 12
-	local xbox_xpos = 465
+	local xbox_xpos = 490
 
 	if(current_inspector ~= nil) then 
 		return 
@@ -953,13 +953,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- make inspector background image 
 	if v.extra then 
-	   if is_in_list(v.extra.type, widgets) == true  then
-	     	  xbox_xpos = 490
+	   if is_this_widget(v) == true  then
 	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
 	   else -- rect, img, text 
 	     	  inspector_bg = factory.make_popup_bg(v.type, 0)
 	   end 
 	else -- video  
+	   xbox_xpos = 465
 	   inspector_bg = factory.make_popup_bg(v.type, 0)
 	end 
 
@@ -1112,13 +1112,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	            item_group:add(item)
 	        end 
 	    end
-	    print (attr_n,":",item.x,",",item.y)
-	
+	    --print (attr_n,":",item.x,",",item.y)
         end 
 
 	-- inspector scroll function 
 	if v.extra then 
-	   if is_in_list(v.extra.type, widgets) == true  then
 	       si = widget.scrollWindow{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} 
 	       si.content = item_group
 	       si.position = {0,82,0}
@@ -1128,13 +1126,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	           si.seek_to(0, scroll_y_pos) 
 	       end 
 	       inspector:add(si)
-	   else -- rect, img, text 
-	       inspector:add(item_group) 
-	   end 
 	else -- video  
 	   inspector:add(item_group) 
 	end 
-
 	screen:add(inspector)
 	input_mode = S_POPUP
 	inspector:find_child("name").extra.on_focus_in()
@@ -1155,6 +1149,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			c.reactive = true
 		    end 
                 end
+
+		for i, c in pairs(g.children) do
+	     		editor.n_selected(c)
+		end
 
                 screen.grab_key_focus(screen) 
 	        input_mode = S_SELECT
