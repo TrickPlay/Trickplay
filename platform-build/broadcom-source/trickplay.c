@@ -87,10 +87,13 @@
 #include "nexus_platform.h"
 #include "nexus_display.h"
 #include "bkni.h"
+#include "nexus_ir_input.h"
 
 #include "esutil.h"
 
 #include "trickplay/trickplay.h"
+#include "trickplay/controller.h"
+#include "trickplay/keys.h"
 
 typedef struct
 {
@@ -107,6 +110,9 @@ const unsigned int WIDTH             = 1280;
 const unsigned int HEIGHT            = 720;
 const unsigned int FRAMES            = 0;
 const unsigned int BPP               = 16;
+
+NEXUS_IrInputHandle           mIRHandle = 0;
+TPController *               controller = 0;
 
 NEXUS_DisplayHandle nexus_display = 0;
 EGLNativeDisplayType native_display = 0;
@@ -543,12 +549,39 @@ bool InitEGL(NativeWindowType egl_win, const AppConfig *config)
    return true;
 }
 
+static void irCallback(void *pParam, int iParam)
+{
+   size_t numEvents = 1;
+   NEXUS_Error rc = 0;
+   bool overflow;
+   NEXUS_IrInputHandle irHandle = *(NEXUS_IrInputHandle *)pParam;
+   BSTD_UNUSED(iParam);
+
+   while (numEvents && !rc) 
+   {
+      NEXUS_IrInputEvent irEvent;
+      rc = NEXUS_IrInput_GetEvents(irHandle, &irEvent, 1, &numEvents, &overflow);
+
+      if (numEvents && (irEvent.code == 0x5da2a55a || irEvent.repeat)) /* Ignore non-repeat events. We always seem to get at least 2 (except for exit). */
+      {
+         BKNI_Printf("irCallback: rc: %d, code: %08x, repeat: %s\n", rc, irEvent.code, irEvent.repeat ? "true" : "false");
+         
+         if ( controller )
+         {
+            tp_controller_key_down( controller , irEvent.code , 0 );
+            tp_controller_key_up( controller , irEvent.code , 0 );
+         }
+      }
+   }
+}
+
 bool InitDisplay(float *aspect, const AppConfig *config)
 {
    NEXUS_PlatformSettings        platform_settings;
    NEXUS_DisplaySettings         display_settings;
    NEXUS_GraphicsSettings        graphics_settings;
    NEXUS_PlatformConfiguration   platform_config;
+   NEXUS_IrInputSettings         irSettings;
 #ifdef SIXTY_HZ
    NEXUS_PanelOutputSettings     panelOutputSettings;
 #endif
@@ -621,15 +654,24 @@ bool InitDisplay(float *aspect, const AppConfig *config)
    BRCM_GetDefaultNativeWindowSettings(&egl_window);
    egl_window.rect.x = 0;
    egl_window.rect.y = 0;
-   egl_window.rect.width = config->vpW;
-   egl_window.rect.height = config->vpH;
+   egl_window.rect.width = 960;
+   egl_window.rect.height = 540;
+   egl_window.stretchToDisplay = 1;
+/*
    egl_window.stretchToDisplay = config->stretchToFit;
+*/
 
    /* Initialise EGL now we have a 'window' */
 /*
    if (!InitEGL(&egl_window, config))
       return false;
 */
+
+   NEXUS_IrInput_GetDefaultSettings(&irSettings);
+   irSettings.dataReady.callback = irCallback;
+   irSettings.dataReady.context = &mIRHandle;
+   mIRHandle = NEXUS_IrInput_Open(0, &irSettings);
+
    return true;
 }
 
@@ -901,6 +943,49 @@ int tp_egl_create_context_and_surface( EGLContext * context , EGLSurface * surfa
 #endif
 }
 
+static void install_controller( TPContext * ctx )
+{
+	TPControllerSpec remoteSpec;
+
+	memset(&remoteSpec, 0, sizeof(remoteSpec));
+	remoteSpec.capabilities	= TP_CONTROLLER_HAS_KEYS;
+	
+	TPControllerKeyMap map[] =
+	{
+	    { 0x40bf04fb , TP_KEY_UP },
+	    { 0x41be04fb , TP_KEY_DOWN },
+	    { 0x06f904fb , TP_KEY_RIGHT },
+	    { 0x07f804fb , TP_KEY_LEFT },
+	    { 0x44bb04fb , TP_KEY_RETURN },
+	    { 0x28d704fb , TP_KEY_BACK },
+	    { 0x5ba404fb , TP_KEY_EXIT },
+	    { 0x728d04fb , TP_KEY_RED },
+        { 0x718e04fb , TP_KEY_GREEN },
+        { 0x639c04fb , TP_KEY_YELLOW },
+        { 0x619e04fb , TP_KEY_BLUE },
+        
+        { 0x10ef04fb , TP_KEY_0 },
+        { 0x11ee04fb , TP_KEY_1 },
+        { 0x12ed04fb , TP_KEY_2 },
+        { 0x13ec04fb , TP_KEY_3 },
+        { 0x14eb04fb , TP_KEY_4 },
+        { 0x15ea04fb , TP_KEY_5 },
+        { 0x16e904fb , TP_KEY_6 },
+        { 0x17e804fb , TP_KEY_7 },
+        { 0x18e704fb , TP_KEY_8 },
+        { 0x19e604fb , TP_KEY_9 },
+	    
+	    {0,0}
+	};
+	
+
+    remoteSpec.key_map = map;
+    
+    controller = tp_context_add_controller( ctx, "Remote", &remoteSpec, NULL);    
+}
+
+
+
 int main(int argc, char** argv)
 {
    float        panelAspect = 1.0f;
@@ -927,6 +1012,8 @@ int main(int argc, char** argv)
       
       ctx = tp_context_new();
       
+      install_controller( ctx );
+      
       result = tp_context_run( ctx );
       
       tp_context_free( ctx );      
@@ -944,6 +1031,11 @@ int main(int argc, char** argv)
 
       /* Close the Nexus display */
       NEXUS_Display_Close(nexus_display);
+   }
+
+   if (mIRHandle)
+   {
+      NEXUS_IrInput_Close(mIRHandle);
    }
    
    /* Close the platform */
