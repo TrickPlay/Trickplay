@@ -1,9 +1,9 @@
 app=
 {
-    id          = "com.trickplay.sudoku",
+    id          = "com.trickplay.weather",
     release     = "2",
-    version     = ".6",
-    name        = "Sudoku",
-    author      = "Trickplay, Jr.",
+    version     = "0.1",
+    name        = "Weather",
+    author      = "Alex Indaco",
     copyright   = "© Trickplay Inc."
 }
