@@ -1,29 +1,74 @@
+
+screen_w = screen.w
+screen_h = screen.h
 screen:show()
 
-sun1 = Image{src="test-sun.png",x=300,y=100}
-sun2 = Image{src="test-sun.png",x=300,y=100,opacity=127}
+dofile("App_Loop.lua")
+dofile("Utils.lua")
 
-sun1:move_anchor_point(sun1.w/2,sun1.h/2)
-sun2:move_anchor_point(sun2.w/2,sun2.h/2)
-
-cloud1 = Image{src="test-cloud-3.png",x=100,y=300}
-cloud2 = Image{src="test-cloud-2.png",x=100,y=400}
-cloud3 = Image{src="test-cloud-1.png",x=sun1.w+20,y=300}
-
-screen:add(sun1,sun2,cloud1,cloud2,cloud3)
-tl=Timeline{
-	duration=10000,
-	loop=true,
+imgs = {
+	rain_clouds = {
+		Image{src="assets/clouds/clouds-stormy1.png"},
+		Image{src="assets/clouds/clouds-stormy2.png"},
+	},
+	reg_clouds = {
+		Image{src="assets/clouds/clouds-fluffy1.png"},
+		Image{src="assets/clouds/clouds-fluffy2.png"},
+	},
+	moon  = Image{src="assets/night/moon.png"},
+	stars = Image{src="assets/night/stars.png"},
+	rain  = {
+		streak = Image{src="assets/rain/rain-streak.png"},
+		clump  = Image{src="assets/rain/rain-clump.png"},
+		drops  = {
+			Image{src="assets/rain/raindrop1.png"},
+			Image{src="assets/rain/raindrop2.png"},
+			Image{src="assets/rain/raindrop3.png"},
+			Image{src="assets/rain/raindrop4.png"},
+			Image{src="assets/rain/raindrop5.png"},
+		},
+	},
+	frost_corner = Image{src="assets/snow/frost.png"},
+	snow_corner  = Image{src="assets/snow/snow.png"},
+	sun = {
+		base  = Image{src="assets/sun/sun_base.png"},
+		flare = {
+			Image{src="assets/sun/sun_flare1.png"},
+			Image{src="assets/sun/sun_flare2.png"},
+			Image{src="assets/sun/sun_flare3.png"},
+		}
+	},
+	arrows = {
+		left  = Image{src="assets/ui/arrow_left.png"},
+		right = Image{src="assets/ui/arrow_right.png"},
+	},
+	bar = {
+		full = Image{src="assets/ui/bar-full.png"},
+	},
+	color_button = {
+		green       = Image{src="assets/ui/button-less.png"},
+		green_glow  = Image{src="assets/ui/button-less-glow.png"},
+		blue        = Image{src="assets/ui/button-5day.png"},
+		blue_glow   = Image{src="assets/ui/button-5day-glow.png"},
+		yellow      = Image{src="assets/ui/button-options.png"},
+		yellow_glow = Image{src="assets/ui/button-options-glow.png"},
+	},
+	logo      = Image{src="assets/ui/logo.png"},
+	lightning = Image{src="assets/lightning-bolt.png"},
 }
-tl.on_new_frame = function(self,msecs,p)
-	sun1.z_rotation={ 30*p,0,0}
-	sun2.z_rotation={-30*p,0,0}
 
-	cloud1.x=100 + (sun1.w-100)*p
-	cloud2.x=100 + (sun1.w+100)*p
-	cloud3.x=sun1.w+20-(sun1.w+50)*p
+
+do
+	local clone_source_container = Group{name="Clone Source Container"}
+	
+	apply_func_to_leaves(imgs,clone_source_container.add,clone_source_container)
+	
+	screen:add(clone_source_container)
+	
+	clone_source_container:hide()
 end
 
+dofile("Internet.lua")
+local zip = 94306
 
-tl:start()
-
+lookup(zip)
