@@ -8,17 +8,32 @@ dofile("Utils.lua")
 
 imgs = {
 	rain_clouds = {
-		Image{src="assets/clouds/clouds-stormy1.png"},
-		Image{src="assets/clouds/clouds-stormy2.png"},
+		lg = {
+			Image{src="assets/clouds/clouds-stormy1.png"},
+			Image{src="assets/clouds/clouds-stormy2.png"},
+		},
+		sm = {
+			Image{src="assets/clouds/clouds-stormy-small1.png"},
+			Image{src="assets/clouds/clouds-stormy-small2.png"},
+		}
 	},
 	reg_clouds = {
-		Image{src="assets/clouds/clouds-fluffy1.png"},
-		Image{src="assets/clouds/clouds-fluffy2.png"},
+		lg = {
+			Image{src="assets/clouds/clouds-fluffy1.png"},
+			Image{src="assets/clouds/clouds-fluffy2.png"},
+		},
+		sm = {
+			Image{src="assets/clouds/clouds-fluffy-small1.png"},
+			Image{src="assets/clouds/clouds-fluffy-small2.png"},
+		},
 	},
 	moon  = Image{src="assets/night/moon.png"},
 	stars = Image{src="assets/night/stars.png"},
 	rain  = {
-		streak = Image{src="assets/rain/rain-streak.png"},
+		streak = {
+			Image{src="assets/rain/rain-streak.png"},
+			Image{src="assets/rain/rain-streak2.png"},
+		},
 		clump  = Image{src="assets/rain/rain-clump.png"},
 		drops  = {
 			Image{src="assets/rain/raindrop1.png"},
@@ -30,6 +45,27 @@ imgs = {
 	},
 	frost_corner = Image{src="assets/snow/frost.png"},
 	snow_corner  = Image{src="assets/snow/snow.png"},
+	snow_flake = {
+		lg = {
+			Image{src="assets/snow/snowflake-lg1.png"},
+			Image{src="assets/snow/snowflake-lg2.png"},
+			Image{src="assets/snow/snowflake-lg3.png"},
+			Image{src="assets/snow/snowflake-lg4.png"},
+			Image{src="assets/snow/snowflake-lg5.png"},
+		},
+		lg_blur = {
+			Image{src="assets/snow/snowflake-lg-blur1.png"},
+			Image{src="assets/snow/snowflake-lg-blur2.png"},
+			Image{src="assets/snow/snowflake-lg-blur3.png"},
+			Image{src="assets/snow/snowflake-lg-blur4.png"},
+			Image{src="assets/snow/snowflake-lg-blur5.png"},
+		},
+		sm = {
+			Image{src="assets/snow/snowflake-small1.png"},
+			Image{src="assets/snow/snowflake-small2.png"},
+			Image{src="assets/snow/snowflake-small3.png"},
+		}
+	},
 	sun = {
 		base  = Image{src="assets/sun/sun_base.png"},
 		flare = {
@@ -44,9 +80,15 @@ imgs = {
 	},
 	bar = {
 		full = Image{src="assets/ui/bar-full.png"},
+		mini = Image{src="assets/ui/bar-mini.png"},
+	},
+	gradient = {
+		full = Image{src="assets/ui/gradient-full.png"},
+		mini = Image{src="assets/ui/gradient-mini.png"}
 	},
 	color_button = {
-		green       = Image{src="assets/ui/button-less.png"},
+		green_less  = Image{src="assets/ui/button-less.png"},
+		green_more  = Image{src="assets/ui/button-more.png"},
 		green_glow  = Image{src="assets/ui/button-less-glow.png"},
 		blue        = Image{src="assets/ui/button-5day.png"},
 		blue_glow   = Image{src="assets/ui/button-5day-glow.png"},
@@ -55,6 +97,7 @@ imgs = {
 	},
 	logo      = Image{src="assets/ui/logo.png"},
 	lightning = Image{src="assets/lightning-bolt.png"},
+	bg        = Image{src="assets/bg.jpg"}
 }
 
 
@@ -69,6 +112,8 @@ do
 end
 
 dofile("Internet.lua")
+dofile("Weather_Bar.lua")
 local zip = 94306
-
-lookup(zip)
+screen:add(Clone{source=imgs.bg})
+screen:add(Make_Mini_Bar())
+--lookup(zip)
