@@ -206,7 +206,7 @@ function()
       return event_listener_en
    end
 
-   ctrlman = ControllerManager(false, true, false, nil, 7)
+   ctrlman = ControllerManager(false, false, true, nil, 7)
    game = GameControl(model)
    model:start_app(Components.SPLASH)
 --   model:start_app(Components.PLAYER_BETTING)
