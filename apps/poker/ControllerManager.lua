@@ -134,8 +134,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         if start_click then
             function controller:on_click(x, y)
-                print("answered", controller.name,x,y)
+                print("answered", controller.name, x, y)
 
+                print("component "..tostring(model:get_active_component())
+                .."handling click")
                 model:get_active_controller():handle_click(controller, x, y)
             end
             controller:start_clicks()
@@ -146,6 +148,22 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 print("accelerometer: x", x, "y", y, "z", z)
             end
             controller:start_accelerometer("L", 1)
+        end
+
+        if start_touch then
+            print("can accept touches!")
+            function controller:on_touch_down(finger, x, y)
+                print("answered", controller.name, x, y)
+
+                print("component "..tostring(model:get_active_component())
+                .."handling click")
+                -- hackish way to do this for now
+                model:get_active_controller():handle_click(controller, x, y)
+            end
+            function controller:on_touch_up(finger, x, y)
+            end
+            function controller:on_touch_move(finger, x, y)
+            end
         end
 
         function controller:choose_dog()
