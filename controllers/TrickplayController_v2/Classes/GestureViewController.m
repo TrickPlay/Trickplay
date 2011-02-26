@@ -7,8 +7,6 @@
 //
 
 #import "GestureViewController.h"
-#import "TouchController.h"
-
 
 @implementation GestureViewController
 
@@ -16,6 +14,7 @@
 @synthesize theTextField;
 @synthesize backgroundView;
 @synthesize touchDelegate;
+@synthesize accelDelegate;
 
 -(void) setupService:(NSInteger)p
             hostname:(NSString *)h
@@ -44,18 +43,18 @@
     }
     
     // Made a connection, let the service know!
-	// Get the actual width and height of the available are
+	// Get the actual width and height of the available area
 	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
 	NSInteger height = mainframe.size.height;
 	height = height - 45;  //subtract the height of navbar
 	NSInteger width = mainframe.size.width;
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t2\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, width, height, width, height ] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, width, height, width, height ] dataUsingEncoding:NSUTF8StringEncoding];
 	
-    
-    resourceNames = [[NSMutableDictionary alloc] initWithCapacity:40];
-    resources = [[NSMutableDictionary alloc] initWithCapacity:40];
+    resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
 	
+    audioController = [[AudioController alloc] initWithResourceManager:resourceManager socketManager:socketManager];
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
+    accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     //[loadingIndicator stopAnimating];
@@ -93,8 +92,66 @@
 }
 
 
+#pragma mark -
+#pragma mark Handling Commands From Server
+
 //------------------- Handling Commands From Server ------------------
 
+//--Audio junk
+
+- (void)do_SS:(NSArray *)args {
+    NSMutableDictionary *audioInfo = [resourceManager getResourceInfo:[args objectAtIndex:0]];
+    // Add the amount of times to loop this sound file to the info
+    NSString *loopValue = [args objectAtIndex:1];
+    [audioInfo setObject:loopValue forKey:@"loop"];
+    
+    [audioController playSoundFile:[audioInfo objectForKey:@"name"] filename:[audioInfo objectForKey:@"link"]];
+}
+
+//--Multiple Choice junk
+
+- (void)do_MC:(NSArray *)args {
+    NSString *windowtitle = [args objectAtIndex:0];
+    //multiple choice alertview
+    //<id>,<text> pairs
+    unsigned theindex = 1;
+    if (styleAlert != nil)
+    {
+        [styleAlert release];
+        styleAlert = nil;
+        styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle
+                                                  delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+    }
+    styleAlert.title = windowtitle;
+    [multipleChoiceArray removeAllObjects];
+    while (theindex < [args count]) {
+        //First one is <id>
+        //Second is the text
+        //Theindex is the id
+        [multipleChoiceArray addObject:[args objectAtIndex:theindex]];
+        [styleAlert addButtonWithTitle:[args objectAtIndex:theindex+1]];
+        theindex = theindex + 2;
+    }
+    styleAlert.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+    //[styleAlert addButtonWithTitle:@"Cancel"]; 
+    //[styleAlert showInView:self.view.superview];
+    [styleAlert showInView:self.view];
+    //[styleAlert release];    
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+	//AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    NSLog(@"Dismiss the alertview");
+	if (buttonIndex < 5)
+	{
+		NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
+		[socketManager sendData:[sentData UTF8String]
+                  numberOfBytes:[sentData length]];
+	}
+    
+	
+}
 
 //--Text input stuff
 
@@ -138,7 +195,7 @@
     NSLog(@"Declaring Resource");
     [args retain];
     
-    [resourceNames setObject:[
+    [resourceManager declareResourceWithObject:[
                               NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", @"", @"scale", nil
                               ]
                       forKey:[args objectAtIndex:0]
@@ -147,48 +204,31 @@
     [args release];
 }
 
-- (UIImage *)fetchResource:(NSString *)name {
-    NSLog(@"Fetching resource %@", name);
-    UIImage *tempImage;
-    
-    if (tempImage = [resources objectForKey:name]) {
-        NSLog(@" from dictionary");
-        return tempImage;
-    } else {    // pull resource
-        NSLog(@" from network");
-        NSString *imageURLString = [[resourceNames objectForKey:name] objectForKey:@"link"];
-        if ([imageURLString hasPrefix:@"http:"] || [imageURLString hasPrefix:@"https:"]) {
-            tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURLString]]] autorelease];
-        } else {
-            //Use the hostname and port to construct the url
-            NSURL *imageurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], imageURLString]];
-            NSData *imageData = [NSData dataWithContentsOfURL:imageurl];
-            tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
-        }
-        if (tempImage) {
-            [resources setObject:tempImage forKey:name];
-        } else {
-            NSLog(@"Trouble pulling image %@ from network! Will set as nil\n", [resourceNames objectForKey:name]);
-        }
-
-    }
-    return tempImage;
-}
-
 - (void)do_UB:(NSArray *)args {
     NSLog(@"Updating Background");
     [args retain];
     
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
-    if ([resourceNames objectForKey:key]) {
-        UIImage *tempImage = [self fetchResource:key];
-        
-        if (tempImage) {
+    if ([resourceManager getResourceInfo:key]) {
+        //**
+        NSData *imageData = [resourceManager fetchResource:key];
+        if (imageData) {
+            UIImage *tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
             [loadingIndicator stopAnimating];
             NSLog(@"Creating background view");
             backgroundView.image = tempImage;
+            //**for testing
+            //backgroundView.image = [UIImage imageNamed:@"background.png"];
         }
+        //*/
+        /**
+        UIImageView *newBackgroundView = [resourceManager fetchImageViewUsingResource:key frame:backgroundView.frame];
+        [backgroundView removeFromSuperview];
+        self.backgroundView = newBackgroundView;
+        [self.view addSubview:backgroundView];
+        [loadingIndicator stopAnimating];
+        //*/
     }
     
     [args release];
@@ -201,10 +241,19 @@
     
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
-    if ([resourceNames objectForKey:key]) {
+    if ([resourceManager getResourceInfo:key]) {
+        CGFloat
+        x = [[args objectAtIndex:1] floatValue],
+        y = [[args objectAtIndex:2] floatValue],
+        width = [[args objectAtIndex:3] floatValue],
+        height = [[args	objectAtIndex:4] floatValue];
+        CGRect frame = CGRectMake(x, y, width, height);
+        UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
+        /**
         // Grab the image, make sure its there.
-        UIImage *tempImage = [self fetchResource:key];
-        if (!tempImage) return;
+        NSData *imageData = [resourceManager fetchResource:key];
+        if (!imageData) return;
+        UIImage *tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
         // Now we have the image, we need to draw it
         NSLog(@"Drawing resource");
         CGFloat
@@ -215,8 +264,12 @@
         
         UIImageView *newImageView = [[UIImageView alloc] initWithImage:tempImage];
         newImageView.frame = CGRectMake(x, y, width, height);
-        [self.view addSubview:newImageView];
-        [newImageView release];
+        //*/
+        
+        //[self.view addSubview:newImageView];
+        // NOTE: Assumes backgroundView is only replaced in clearUI(),
+        // hence, replace backgroundView.image, do not replace the entire View
+        [backgroundView addSubview:newImageView];
         
         /*
         UIGraphicsBeginImageContext(CGSizeMake(backgroundView.bounds.size.width, backgroundView.bounds.size.height));		
@@ -256,8 +309,12 @@
     [args release];
 }
 
+
+//--Resetting stuff
+
 // TODO: Reset all modules to the initial state
 - (void)do_RT:(NSArray *)args {
+    [accelDelegate pauseAccelerometer];
     [self clearUI];
 }
 
@@ -266,15 +323,27 @@
 }
 
 
+//------------------ Stuff passed to AccelerometerController ------------
+
+- (void)do_SA:(NSArray *)args {
+    [accelDelegate startAccelerometerWithFilter:[args objectAtIndex:0] interval:[[args objectAtIndex:1] floatValue]];
+}
+
+- (void)do_PA:(NSArray *)args {
+    [accelDelegate pauseAccelerometer];
+}
+
+
 //------------------ Stuff passed to TouchController --------------------
 // TODO: Change this design pattern to use Categories/Class-Extensions
-
+/** depricated
 - (void)do_SC {
     [touchDelegate startClicks];
 }
 - (void)do_PC {
     [touchDelegate stopClicks];
 }
+//*/
 - (void)do_ST {
     [touchDelegate startTouches];
 }
@@ -334,9 +403,18 @@
     NSLog(@"View loaded!");
     
     loadingIndicator.hidesWhenStopped = YES;
+    //loadingIndicator.bounds = self.view.frame;
+    loadingIndicator.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/3);
     [loadingIndicator startAnimating];
     
     backgroundView.image = [UIImage imageNamed:@"background.png"];
+    
+    styleAlert = [[UIActionSheet alloc] initWithTitle:@"TrickPlay Multiple Choice"
+                                              delegate:self cancelButtonTitle:nil
+                                destructiveButtonTitle:nil
+                                     otherButtonTitles:nil];
+    
+    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
     
     UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc]
 								  initWithTitle:NSLocalizedString(@"Exit", @"")
@@ -375,18 +453,25 @@
     if (hostName) {
         [hostName release];
     }
+    if (audioController) {
+        [audioController release];
+    }
+    if (resourceManager) {
+        [resourceManager release];
+    }
     if (socketManager) {
         [socketManager release];
     }
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];
     }
-    if (resourceNames) {
-        [resourceNames release];
+    if (accelDelegate) {
+        [(AccelerometerController *)accelDelegate release];
     }
-    if (resources) {
-        [resources release];
+    if (styleAlert) {
+        [styleAlert release];
     }
+    [multipleChoiceArray release];
     [loadingIndicator release];
     [theTextField release];
     [backgroundView release];

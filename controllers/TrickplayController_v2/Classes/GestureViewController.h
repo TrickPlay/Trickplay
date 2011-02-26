@@ -7,7 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ResourceManager.h"
 #import "SocketManager.h"
+
+
+@protocol ViewControllerAccelerometerDelegate
+
+@required
+- (void)startAccelerometerWithFilter:(NSString *)filter interval:(float)interval;
+- (void)pauseAccelerometer;
+
+@end
+
 
 // TODO: change this to a Category/Class Extension rather than Delegate
 @protocol ViewControllerTouchDelegate
@@ -18,16 +29,24 @@
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
 
+/** depricated
 - (void)startClicks;
 - (void)stopClicks;
+//*/
 - (void)startTouches;
 - (void)stopTouches;
+
 @end
 
 
 
+#import "TouchController.h"
+#import "AccelerometerController.h"
+#import "AudioController.h"
+
+
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterDelegate, UITextFieldDelegate> {
+CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     SocketManager *socketManager;
     NSString *hostName;
     NSInteger port;
@@ -35,11 +54,17 @@ CommandInterpreterDelegate, UITextFieldDelegate> {
     UIActivityIndicatorView *loadingIndicator;
     UITextField *theTextField;
     UIImageView *backgroundView;
+    //NSMutableArray *displayedImageViews;
     
-    NSMutableDictionary *resourceNames;
-    NSMutableDictionary *resources;
+    NSMutableArray *multipleChoiceArray;
+    UIActionSheet *styleAlert;
+    
+    ResourceManager *resourceManager;
+    
+    AudioController *audioController;
     
     id <ViewControllerTouchDelegate> touchDelegate;
+    id <ViewControllerAccelerometerDelegate> accelDelegate;
 }
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
@@ -47,6 +72,7 @@ CommandInterpreterDelegate, UITextFieldDelegate> {
 @property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
 
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
+@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
 
 
 - (void) setupService:(NSInteger)port
@@ -55,8 +81,6 @@ CommandInterpreterDelegate, UITextFieldDelegate> {
 
 - (void) startService;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
-
-- (UIImage *)fetchResource:(NSString *)name;
 
 - (IBAction)hideTextBox:(id)sender;
 

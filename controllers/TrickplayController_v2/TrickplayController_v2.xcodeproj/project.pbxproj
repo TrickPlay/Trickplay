@@ -32,6 +32,12 @@
 		CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBC51130A57FA00A14307 /* GestureViewController.xib */; };
 		CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */; };
 		CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEBC130C734B00A14307 /* TouchController.m */; };
+		CDFEC0FC13147A6A00A14307 /* AudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */; };
+		CDFEC10013147E9A00A14307 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */; };
+		CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC1271314B98100A14307 /* ResourceManager.m */; };
+		CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */; };
+		CDFEC2E61317514B00A14307 /* background~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEC2E51317514B00A14307 /* background~ipad.png */; };
+		CDFEC3101318752500A14307 /* GestureViewController-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEC30F1318752500A14307 /* GestureViewController-iPad.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -72,6 +78,16 @@
 		CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccelerometerController.m; sourceTree = "<group>"; };
 		CDFEBEBB130C734B00A14307 /* TouchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchController.h; sourceTree = "<group>"; };
 		CDFEBEBC130C734B00A14307 /* TouchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TouchController.m; sourceTree = "<group>"; };
+		CDFEC0FA13147A6A00A14307 /* AudioController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioController.h; sourceTree = "<group>"; };
+		CDFEC0FB13147A6A00A14307 /* AudioController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioController.m; sourceTree = "<group>"; };
+		CDFEC0FE13147E9A00A14307 /* AudioStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioStreamer.h; sourceTree = "<group>"; };
+		CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioStreamer.m; sourceTree = "<group>"; };
+		CDFEC1261314B98100A14307 /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResourceManager.h; sourceTree = "<group>"; };
+		CDFEC1271314B98100A14307 /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ResourceManager.m; sourceTree = "<group>"; };
+		CDFEC15A1315929800A14307 /* AsyncImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncImageView.h; sourceTree = "<group>"; };
+		CDFEC15B1315929800A14307 /* AsyncImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsyncImageView.m; sourceTree = "<group>"; };
+		CDFEC2E51317514B00A14307 /* background~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~ipad.png"; sourceTree = "<group>"; };
+		CDFEC30F1318752500A14307 /* GestureViewController-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "GestureViewController-iPad.xib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +111,8 @@
 				CDFEBBA1130A4B8700A14307 /* Modules */,
 				1D3623240D0F684500981E51 /* AppDelegate.h */,
 				1D3623250D0F684500981E51 /* AppDelegate.m */,
+				CDFEC15A1315929800A14307 /* AsyncImageView.h */,
+				CDFEC15B1315929800A14307 /* AsyncImageView.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -135,6 +153,7 @@
 			children = (
 				28F335F01007B36200424DE2 /* RootViewController.xib */,
 				CDFEBC51130A57FA00A14307 /* GestureViewController.xib */,
+				CDFEC30F1318752500A14307 /* GestureViewController-iPad.xib */,
 				8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */,
 			);
 			name = Resources;
@@ -167,6 +186,7 @@
 		CDFEBB6D130A498C00A14307 /* iPad */ = {
 			isa = PBXGroup;
 			children = (
+				CDFEC2E51317514B00A14307 /* background~ipad.png */,
 				CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */,
 				CDFEBB6F130A498C00A14307 /* Default~iPad.png */,
 				CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */,
@@ -179,6 +199,9 @@
 			children = (
 				CDFEBEBA130C704800A14307 /* UserInput */,
 				CDFEBEB9130C6F9A00A14307 /* Networking */,
+				CDFEC0FD13147E6400A14307 /* Audio */,
+				CDFEC1261314B98100A14307 /* ResourceManager.h */,
+				CDFEC1271314B98100A14307 /* ResourceManager.m */,
 			);
 			name = Modules;
 			sourceTree = "<group>";
@@ -218,6 +241,17 @@
 				CDFEBEBC130C734B00A14307 /* TouchController.m */,
 			);
 			name = UserInput;
+			sourceTree = "<group>";
+		};
+		CDFEC0FD13147E6400A14307 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEC0FE13147E9A00A14307 /* AudioStreamer.h */,
+				CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */,
+				CDFEC0FA13147A6A00A14307 /* AudioController.h */,
+				CDFEC0FB13147A6A00A14307 /* AudioController.m */,
+			);
+			name = Audio;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -282,6 +316,8 @@
 				CDFEBB72130A498C00A14307 /* Default~iPad.png in Resources */,
 				CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */,
 				CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */,
+				CDFEC2E61317514B00A14307 /* background~ipad.png in Resources */,
+				CDFEC3101318752500A14307 /* GestureViewController-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,6 +338,10 @@
 				CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */,
 				CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */,
 				CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */,
+				CDFEC0FC13147A6A00A14307 /* AudioController.m in Sources */,
+				CDFEC10013147E9A00A14307 /* AudioStreamer.m in Sources */,
+				CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */,
+				CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +385,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};

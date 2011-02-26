@@ -1,0 +1,100 @@
+//
+//  AsyncImageView.m
+//  TrickplayController_v2
+//
+//  Created by Rex Fenley on 2/23/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "AsyncImageView.h"
+
+
+@implementation AsyncImageView
+
+@synthesize dataCacheDelegate;
+@synthesize resourceKey;
+
+- (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key{
+    if (connection) {
+        [connection cancel];
+        [connection release];
+        connection = nil;
+    }
+    if (data) {
+        [data release];
+        data = nil;
+    }
+    self.resourceKey = key;
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60.0];
+    connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    if (!connection) {
+        NSLog(@"Connection to URL %@ could not be established", url);
+        // make a broken link symbol in image
+        return;
+    }
+    //spinny thing
+    loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    loadingIndicator.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
+    [self addSubview:loadingIndicator];
+    [loadingIndicator release];
+    loadingIndicator.hidesWhenStopped = YES;
+    [loadingIndicator startAnimating];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
+    if (!data) {
+        data = [[NSMutableData alloc] initWithCapacity:10000];
+    }
+    
+    [data appendData:incrementalData];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)theConnection {
+    [connection cancel];
+    [connection release];
+    connection = nil;
+    //**
+    if ([[self subviews] count] > 0) {
+        [[[self subviews] objectAtIndex:0] removeFromSuperview];
+    }
+    UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageWithData:data]] autorelease];
+    // might need to change this to scale to fill
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
+    imageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth || UIViewAutoresizingFlexibleHeight);
+    
+    [self addSubview:imageView];
+    imageView.frame = self.bounds;
+    [imageView setNeedsLayout];
+    [self setNeedsLayout];
+    
+    // send data to the delegate if it exists for cacheing
+    if (dataCacheDelegate) {
+        [dataCacheDelegate dataReceived:data resourcekey:resourceKey];
+    }
+    //*/
+    [data release];
+    data = nil;
+    [loadingIndicator stopAnimating];
+    [loadingIndicator removeFromSuperview];
+}
+
+- (UIImageView *)imageView {
+    return [[self subviews] objectAtIndex:0];
+}
+
+- (void)dealloc {
+    if (connection) {
+        [connection cancel];
+        [connection release];
+    }
+    if (data) {
+        [data release];
+    }
+    if (resourceKey) {
+        [resourceKey release];
+    }
+    [super dealloc];
+}
+
+@end

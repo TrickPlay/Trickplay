@@ -10,12 +10,12 @@
 #import "GestureViewController.h"
 
 #define HORIZ_SWIPE_DRAG_MIN  25  //Was 20
-#define VERT_SWIPE_DRAG_MAX    10
+#define VERT_SWIPE_DRAG_MIN    10
 #define TAP_DISTANCE_MAX    4
 
 
 @interface TouchController : NSObject <ViewControllerTouchDelegate> {
-    BOOL clickEventsAllowed;
+    BOOL clickEventsAllowed; //depricated
     BOOL touchEventsAllowed;
     
     CGPoint startTouchPosition;
@@ -27,6 +27,8 @@
     
     SocketManager *socketManager;
     UIView *view;
+    
+    NSMutableArray *activeTouches;
 }
 
 @property (retain) SocketManager *socketManager;

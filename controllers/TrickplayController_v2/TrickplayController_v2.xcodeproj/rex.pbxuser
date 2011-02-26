@@ -2,16 +2,16 @@
 {
 	1D3623240D0F684500981E51 /* AppDelegate.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
+			sepNavIntBoundsRect = "{{0, 0}, {620, 510}}";
 			sepNavSelRange = "{337, 0}";
 			sepNavVisRange = "{0, 488}";
 		};
 	};
 	1D3623250D0F684500981E51 /* AppDelegate.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {600, 1222}}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 1209}}";
 			sepNavSelRange = "{183, 0}";
-			sepNavVisRange = "{0, 1097}";
+			sepNavVisRange = "{0, 1050}";
 		};
 	};
 	1D6058900D05DD3D006BFB54 /* TrickplayController_v2 */ = {
@@ -29,16 +29,16 @@
 	};
 	28C286DF0D94DF7D0034E888 /* RootViewController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 512}}";
+			sepNavIntBoundsRect = "{{0, 0}, {620, 510}}";
 			sepNavSelRange = "{456, 0}";
 			sepNavVisRange = "{0, 711}";
 		};
 	};
 	28C286E00D94DF7D0034E888 /* RootViewController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {941, 3796}}";
-			sepNavSelRange = "{2869, 0}";
-			sepNavVisRange = "{2732, 530}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 4108}}";
+			sepNavSelRange = "{7484, 0}";
+			sepNavVisRange = "{1378, 807}";
 		};
 	};
 	29B97313FDCFA39411CA2CEA /* Project object */ = {
@@ -51,11 +51,37 @@
 		);
 		breakpoints = (
 			CDFEBD86130B221E00A14307 /* CommandInterpreter.m:93 */,
-			CDFEBD92130B223500A14307 /* CommandInterpreter.m:139 */,
+			CDFEBD92130B223500A14307 /* CommandInterpreter.m:148 */,
 			CDFEBDB0130B244500A14307 /* CommandInterpreter.m:93 */,
-			CDFEBDBF130B258D00A14307 /* GestureViewController.m:191 */,
 			CDFEBDCE130B26E700A14307 /* objc_exception_throw */,
 			CDFEBE1F130B37AE00A14307 /* SocketManager.m:96 */,
+			CDFEC18A1315C16200A14307 /* SocketManager.m:136 */,
+			CDFEC18C1315C16400A14307 /* SocketManager.m:137 */,
+			CDFEC18E1315C16400A14307 /* SocketManager.m:138 */,
+			CDFEC1AF1315C58B00A14307 /* ResourceManager.m:61 */,
+			CDFEC1B11315C58D00A14307 /* ResourceManager.m:63 */,
+			CDFEC1B31315C59100A14307 /* ResourceManager.m:66 */,
+			CDFEC1B51315C59200A14307 /* ResourceManager.m:69 */,
+			CDFEC1B71315C59300A14307 /* ResourceManager.m:74 */,
+			CDFEC1B91315C59500A14307 /* ResourceManager.m:84 */,
+			CDFEC1BB1315C59600A14307 /* ResourceManager.m:85 */,
+			CDFEC1C41315C5F400A14307 /* ResourceManager.m:91 */,
+			CDFEC1C61315C5F800A14307 /* ResourceManager.m:92 */,
+			CDFEC1CA1315C63500A14307 /* AsyncImageView.m:45 */,
+			CDFEC1CC1315C63600A14307 /* AsyncImageView.m:46 */,
+			CDFEC1CE1315C63700A14307 /* AsyncImageView.m:50 */,
+			CDFEC1D01315C63A00A14307 /* AsyncImageView.m:54 */,
+			CDFEC1D21315C63C00A14307 /* AsyncImageView.m:56 */,
+			CDFEC1D41315C63D00A14307 /* AsyncImageView.m:58 */,
+			CDFEC1D61315C63E00A14307 /* AsyncImageView.m:61 */,
+			CDFEC1D81315C64000A14307 /* AsyncImageView.m:66 */,
+			CDFEC1DA1315C64100A14307 /* AsyncImageView.m:67 */,
+			CDFEC1DC1315C64300A14307 /* AsyncImageView.m:68 */,
+			CDFEC1DE1315C64300A14307 /* AsyncImageView.m:69 */,
+			CDFEC1E01315C64800A14307 /* AsyncImageView.m:72 */,
+			CDFEC1E21315C64A00A14307 /* AsyncImageView.m:73 */,
+			CDFEC1E41315C64B00A14307 /* AsyncImageView.m:76 */,
+			CDFEC2091315C9E400A14307 /* AsyncImageView.m:88 */,
 		);
 		codeSenseManager = CDFEBB5D130A495E00A14307 /* Code sense */;
 		executables = (
@@ -67,7 +93,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					436,
+					425,
 					20,
 					48.16259765625,
 					43,
@@ -589,6 +615,198 @@
 			CDFEC08A130E2B8D00A14307 /* PBXTextBookmark */ = CDFEC08A130E2B8D00A14307 /* PBXTextBookmark */;
 			CDFEC095130E2D7700A14307 /* PBXTextBookmark */ = CDFEC095130E2D7700A14307 /* PBXTextBookmark */;
 			CDFEC099130E30CF00A14307 /* PBXTextBookmark */ = CDFEC099130E30CF00A14307 /* PBXTextBookmark */;
+			CDFEC0D3130F461A00A14307 /* PBXTextBookmark */ = CDFEC0D3130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0D4130F461A00A14307 /* PBXTextBookmark */ = CDFEC0D4130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0D5130F461A00A14307 /* PBXTextBookmark */ = CDFEC0D5130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0D6130F461A00A14307 /* PBXTextBookmark */ = CDFEC0D6130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0D7130F461A00A14307 /* PBXTextBookmark */ = CDFEC0D7130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0D8130F461A00A14307 /* PBXTextBookmark */ = CDFEC0D8130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0D9130F461A00A14307 /* PBXTextBookmark */ = CDFEC0D9130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0DA130F461A00A14307 /* PBXTextBookmark */ = CDFEC0DA130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0DB130F461A00A14307 /* PBXTextBookmark */ = CDFEC0DB130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0DC130F461A00A14307 /* PBXTextBookmark */ = CDFEC0DC130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0DD130F461A00A14307 /* PBXTextBookmark */ = CDFEC0DD130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0DE130F461A00A14307 /* PBXTextBookmark */ = CDFEC0DE130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0DF130F461A00A14307 /* PBXTextBookmark */ = CDFEC0DF130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0E0130F461A00A14307 /* PBXTextBookmark */ = CDFEC0E0130F461A00A14307 /* PBXTextBookmark */;
+			CDFEC0E1130F461A00A14307 /* PBXBookmark */ = CDFEC0E1130F461A00A14307 /* PBXBookmark */;
+			CDFEC0E2130F461A00A14307 /* PBXBookmark */ = CDFEC0E2130F461A00A14307 /* PBXBookmark */;
+			CDFEC0E3130F461A00A14307 /* PBXBookmark */ = CDFEC0E3130F461A00A14307 /* PBXBookmark */;
+			CDFEC0E4130F461A00A14307 /* PBXBookmark */ = CDFEC0E4130F461A00A14307 /* PBXBookmark */;
+			CDFEC0E5130F461A00A14307 /* PBXBookmark */ = CDFEC0E5130F461A00A14307 /* PBXBookmark */;
+			CDFEC0E6130F461A00A14307 /* PBXBookmark */ = CDFEC0E6130F461A00A14307 /* PBXBookmark */;
+			CDFEC0E7130F461A00A14307 /* PlistBookmark */ = CDFEC0E7130F461A00A14307 /* PlistBookmark */;
+			CDFEC0E8130F461A00A14307 /* PlistBookmark */ = CDFEC0E8130F461A00A14307 /* PlistBookmark */;
+			CDFEC0F413146D3100A14307 /* XCBuildMessageTextBookmark */ = CDFEC0F413146D3100A14307 /* XCBuildMessageTextBookmark */;
+			CDFEC0F513146D3100A14307 /* PBXTextBookmark */ = CDFEC0F513146D3100A14307 /* PBXTextBookmark */;
+			CDFEC101131492D900A14307 /* PBXTextBookmark */ = CDFEC101131492D900A14307 /* PBXTextBookmark */;
+			CDFEC1651315C02C00A14307 /* PBXTextBookmark */ = CDFEC1651315C02C00A14307 /* PBXTextBookmark */;
+			CDFEC1661315C02C00A14307 /* PBXTextBookmark */ = CDFEC1661315C02C00A14307 /* PBXTextBookmark */;
+			CDFEC1671315C02C00A14307 /* XCBuildMessageTextBookmark */ = CDFEC1671315C02C00A14307 /* XCBuildMessageTextBookmark */;
+			CDFEC1681315C02C00A14307 /* PBXTextBookmark */ = CDFEC1681315C02C00A14307 /* PBXTextBookmark */;
+			CDFEC16F1315C05000A14307 /* PlistBookmark */ = CDFEC16F1315C05000A14307 /* PlistBookmark */;
+			CDFEC1701315C05000A14307 /* PBXTextBookmark */ = CDFEC1701315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1711315C05000A14307 /* PBXTextBookmark */ = CDFEC1711315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1721315C05000A14307 /* PBXTextBookmark */ = CDFEC1721315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1731315C05000A14307 /* PBXTextBookmark */ = CDFEC1731315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1741315C05000A14307 /* PBXTextBookmark */ = CDFEC1741315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1751315C05000A14307 /* PBXTextBookmark */ = CDFEC1751315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1761315C05000A14307 /* PBXTextBookmark */ = CDFEC1761315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1771315C05000A14307 /* PBXTextBookmark */ = CDFEC1771315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1781315C05000A14307 /* PBXTextBookmark */ = CDFEC1781315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1791315C05000A14307 /* PBXTextBookmark */ = CDFEC1791315C05000A14307 /* PBXTextBookmark */;
+			CDFEC17A1315C05000A14307 /* PBXTextBookmark */ = CDFEC17A1315C05000A14307 /* PBXTextBookmark */;
+			CDFEC17B1315C05000A14307 /* PBXTextBookmark */ = CDFEC17B1315C05000A14307 /* PBXTextBookmark */;
+			CDFEC17C1315C05000A14307 /* PBXTextBookmark */ = CDFEC17C1315C05000A14307 /* PBXTextBookmark */;
+			CDFEC17D1315C05000A14307 /* PBXTextBookmark */ = CDFEC17D1315C05000A14307 /* PBXTextBookmark */;
+			CDFEC17E1315C05000A14307 /* PBXTextBookmark */ = CDFEC17E1315C05000A14307 /* PBXTextBookmark */;
+			CDFEC17F1315C05000A14307 /* PBXTextBookmark */ = CDFEC17F1315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1801315C05000A14307 /* PBXTextBookmark */ = CDFEC1801315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1811315C05000A14307 /* PBXTextBookmark */ = CDFEC1811315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1821315C05000A14307 /* PBXTextBookmark */ = CDFEC1821315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1831315C05000A14307 /* PBXTextBookmark */ = CDFEC1831315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1841315C05000A14307 /* PBXTextBookmark */ = CDFEC1841315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1851315C05000A14307 /* PBXTextBookmark */ = CDFEC1851315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1861315C05000A14307 /* PBXTextBookmark */ = CDFEC1861315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1871315C05000A14307 /* PBXTextBookmark */ = CDFEC1871315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1881315C05000A14307 /* PBXTextBookmark */ = CDFEC1881315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1891315C05000A14307 /* PBXTextBookmark */ = CDFEC1891315C05000A14307 /* PBXTextBookmark */;
+			CDFEC1961315C40400A14307 /* PBXTextBookmark */ = CDFEC1961315C40400A14307 /* PBXTextBookmark */;
+			CDFEC1971315C40400A14307 /* PBXTextBookmark */ = CDFEC1971315C40400A14307 /* PBXTextBookmark */;
+			CDFEC1981315C40400A14307 /* PlistBookmark */ = CDFEC1981315C40400A14307 /* PlistBookmark */;
+			CDFEC1991315C40400A14307 /* PBXTextBookmark */ = CDFEC1991315C40400A14307 /* PBXTextBookmark */;
+			CDFEC19A1315C40400A14307 /* PBXTextBookmark */ = CDFEC19A1315C40400A14307 /* PBXTextBookmark */;
+			CDFEC19B1315C40400A14307 /* PBXTextBookmark */ = CDFEC19B1315C40400A14307 /* PBXTextBookmark */;
+			CDFEC19C1315C40400A14307 /* PBXTextBookmark */ = CDFEC19C1315C40400A14307 /* PBXTextBookmark */;
+			CDFEC1AA1315C51B00A14307 /* PBXTextBookmark */ = CDFEC1AA1315C51B00A14307 /* PBXTextBookmark */;
+			CDFEC1AB1315C51B00A14307 /* PBXTextBookmark */ = CDFEC1AB1315C51B00A14307 /* PBXTextBookmark */;
+			CDFEC1AC1315C51B00A14307 /* PBXTextBookmark */ = CDFEC1AC1315C51B00A14307 /* PBXTextBookmark */;
+			CDFEC1BF1315C59B00A14307 /* PBXTextBookmark */ = CDFEC1BF1315C59B00A14307 /* PBXTextBookmark */;
+			CDFEC1C01315C59B00A14307 /* PBXTextBookmark */ = CDFEC1C01315C59B00A14307 /* PBXTextBookmark */;
+			CDFEC1C11315C59B00A14307 /* PBXTextBookmark */ = CDFEC1C11315C59B00A14307 /* PBXTextBookmark */;
+			CDFEC1C21315C59B00A14307 /* PBXTextBookmark */ = CDFEC1C21315C59B00A14307 /* PBXTextBookmark */;
+			CDFEC1FE1315C9B100A14307 /* PBXTextBookmark */ = CDFEC1FE1315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC1FF1315C9B100A14307 /* PBXTextBookmark */ = CDFEC1FF1315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC2001315C9B100A14307 /* PBXTextBookmark */ = CDFEC2001315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC2011315C9B100A14307 /* PBXTextBookmark */ = CDFEC2011315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC2021315C9B100A14307 /* PBXTextBookmark */ = CDFEC2021315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC2031315C9B100A14307 /* PBXTextBookmark */ = CDFEC2031315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC2041315C9B100A14307 /* PBXTextBookmark */ = CDFEC2041315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC2051315C9B100A14307 /* PBXTextBookmark */ = CDFEC2051315C9B100A14307 /* PBXTextBookmark */;
+			CDFEC2081315C9D300A14307 /* PBXTextBookmark */ = CDFEC2081315C9D300A14307 /* PBXTextBookmark */;
+			CDFEC20D1315C9EA00A14307 /* PBXTextBookmark */ = CDFEC20D1315C9EA00A14307 /* PBXTextBookmark */;
+			CDFEC20E1315C9EA00A14307 /* PBXTextBookmark */ = CDFEC20E1315C9EA00A14307 /* PBXTextBookmark */;
+			CDFEC2181315CB4C00A14307 /* PBXTextBookmark */ = CDFEC2181315CB4C00A14307 /* PBXTextBookmark */;
+			CDFEC2191315CB4C00A14307 /* PBXTextBookmark */ = CDFEC2191315CB4C00A14307 /* PBXTextBookmark */;
+			CDFEC21A1315CB4C00A14307 /* PBXTextBookmark */ = CDFEC21A1315CB4C00A14307 /* PBXTextBookmark */;
+			CDFEC21B1315CB4C00A14307 /* PBXTextBookmark */ = CDFEC21B1315CB4C00A14307 /* PBXTextBookmark */;
+			CDFEC2261315CE5500A14307 /* PBXTextBookmark */ = CDFEC2261315CE5500A14307 /* PBXTextBookmark */;
+			CDFEC2271315CE5500A14307 /* PBXTextBookmark */ = CDFEC2271315CE5500A14307 /* PBXTextBookmark */;
+			CDFEC2281315CE5500A14307 /* PBXTextBookmark */ = CDFEC2281315CE5500A14307 /* PBXTextBookmark */;
+			CDFEC22F1315D32800A14307 /* PBXTextBookmark */ = CDFEC22F1315D32800A14307 /* PBXTextBookmark */;
+			CDFEC2301315D32800A14307 /* PBXTextBookmark */ = CDFEC2301315D32800A14307 /* PBXTextBookmark */;
+			CDFEC2311315D32800A14307 /* PBXTextBookmark */ = CDFEC2311315D32800A14307 /* PBXTextBookmark */;
+			CDFEC2321315D32800A14307 /* PlistBookmark */ = CDFEC2321315D32800A14307 /* PlistBookmark */;
+			CDFEC2331315D32800A14307 /* PBXTextBookmark */ = CDFEC2331315D32800A14307 /* PBXTextBookmark */;
+			CDFEC2341315D32800A14307 /* PBXTextBookmark */ = CDFEC2341315D32800A14307 /* PBXTextBookmark */;
+			CDFEC23A1315D3AD00A14307 /* PBXTextBookmark */ = CDFEC23A1315D3AD00A14307 /* PBXTextBookmark */;
+			CDFEC23B1315D3AD00A14307 /* PBXTextBookmark */ = CDFEC23B1315D3AD00A14307 /* PBXTextBookmark */;
+			CDFEC23C1315D3AD00A14307 /* PBXTextBookmark */ = CDFEC23C1315D3AD00A14307 /* PBXTextBookmark */;
+			CDFEC23D1315D3DB00A14307 /* PBXTextBookmark */ = CDFEC23D1315D3DB00A14307 /* PBXTextBookmark */;
+			CDFEC2421315D4C500A14307 /* PBXTextBookmark */ = CDFEC2421315D4C500A14307 /* PBXTextBookmark */;
+			CDFEC2431315D58600A14307 /* PBXTextBookmark */ = CDFEC2431315D58600A14307 /* PBXTextBookmark */;
+			CDFEC2461315F2FA00A14307 /* PBXTextBookmark */ = CDFEC2461315F2FA00A14307 /* PBXTextBookmark */;
+			CDFEC2471315F2FA00A14307 /* PBXTextBookmark */ = CDFEC2471315F2FA00A14307 /* PBXTextBookmark */;
+			CDFEC2481315F2FA00A14307 /* PBXTextBookmark */ = CDFEC2481315F2FA00A14307 /* PBXTextBookmark */;
+			CDFEC2491315F2FA00A14307 /* PBXTextBookmark */ = CDFEC2491315F2FA00A14307 /* PBXTextBookmark */;
+			CDFEC24A1315F2FA00A14307 /* PBXTextBookmark */ = CDFEC24A1315F2FA00A14307 /* PBXTextBookmark */;
+			CDFEC24B1315F2FA00A14307 /* PBXTextBookmark */ = CDFEC24B1315F2FA00A14307 /* PBXTextBookmark */;
+			CDFEC2641316DBF000A14307 /* PBXTextBookmark */ = CDFEC2641316DBF000A14307 /* PBXTextBookmark */;
+			CDFEC2651316DBF000A14307 /* PBXTextBookmark */ = CDFEC2651316DBF000A14307 /* PBXTextBookmark */;
+			CDFEC2661316DBF000A14307 /* PBXTextBookmark */ = CDFEC2661316DBF000A14307 /* PBXTextBookmark */;
+			CDFEC2671316DBF000A14307 /* PBXTextBookmark */ = CDFEC2671316DBF000A14307 /* PBXTextBookmark */;
+			CDFEC2681316DBF000A14307 /* PBXTextBookmark */ = CDFEC2681316DBF000A14307 /* PBXTextBookmark */;
+			CDFEC2691316DBF000A14307 /* PBXTextBookmark */ = CDFEC2691316DBF000A14307 /* PBXTextBookmark */;
+			CDFEC29213170EA100A14307 /* PBXTextBookmark */ = CDFEC29213170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29313170EA100A14307 /* PBXTextBookmark */ = CDFEC29313170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29413170EA100A14307 /* PBXTextBookmark */ = CDFEC29413170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29513170EA100A14307 /* PBXTextBookmark */ = CDFEC29513170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29613170EA100A14307 /* PBXTextBookmark */ = CDFEC29613170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29713170EA100A14307 /* PBXTextBookmark */ = CDFEC29713170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29813170EA100A14307 /* PBXTextBookmark */ = CDFEC29813170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29913170EA100A14307 /* PBXTextBookmark */ = CDFEC29913170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29A13170EA100A14307 /* PBXTextBookmark */ = CDFEC29A13170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29B13170EA100A14307 /* PBXTextBookmark */ = CDFEC29B13170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29C13170EA100A14307 /* PBXTextBookmark */ = CDFEC29C13170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29D13170EA100A14307 /* PBXTextBookmark */ = CDFEC29D13170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29E13170EA100A14307 /* PBXTextBookmark */ = CDFEC29E13170EA100A14307 /* PBXTextBookmark */;
+			CDFEC29F13170EA100A14307 /* PBXTextBookmark */ = CDFEC29F13170EA100A14307 /* PBXTextBookmark */;
+			CDFEC2A013170EA100A14307 /* PBXTextBookmark */ = CDFEC2A013170EA100A14307 /* PBXTextBookmark */;
+			CDFEC2A113170EA100A14307 /* PBXTextBookmark */ = CDFEC2A113170EA100A14307 /* PBXTextBookmark */;
+			CDFEC2A213170EA100A14307 /* PBXTextBookmark */ = CDFEC2A213170EA100A14307 /* PBXTextBookmark */;
+			CDFEC2A313170EA100A14307 /* PBXTextBookmark */ = CDFEC2A313170EA100A14307 /* PBXTextBookmark */;
+			CDFEC2C11317468500A14307 /* PBXTextBookmark */ = CDFEC2C11317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C21317468500A14307 /* PBXTextBookmark */ = CDFEC2C21317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C31317468500A14307 /* PBXTextBookmark */ = CDFEC2C31317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C41317468500A14307 /* PBXTextBookmark */ = CDFEC2C41317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C51317468500A14307 /* PBXTextBookmark */ = CDFEC2C51317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C61317468500A14307 /* PBXTextBookmark */ = CDFEC2C61317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C71317468500A14307 /* PBXTextBookmark */ = CDFEC2C71317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C81317468500A14307 /* PBXTextBookmark */ = CDFEC2C81317468500A14307 /* PBXTextBookmark */;
+			CDFEC2C91317468500A14307 /* PBXBookmark */ = CDFEC2C91317468500A14307 /* PBXBookmark */;
+			CDFEC2CA1317468500A14307 /* PBXBookmark */ = CDFEC2CA1317468500A14307 /* PBXBookmark */;
+			CDFEC2CB1317468500A14307 /* PBXBookmark */ = CDFEC2CB1317468500A14307 /* PBXBookmark */;
+			CDFEC2CC1317468500A14307 /* PBXBookmark */ = CDFEC2CC1317468500A14307 /* PBXBookmark */;
+			CDFEC2CD1317468500A14307 /* PBXBookmark */ = CDFEC2CD1317468500A14307 /* PBXBookmark */;
+			CDFEC2CE1317468500A14307 /* PBXBookmark */ = CDFEC2CE1317468500A14307 /* PBXBookmark */;
+			CDFEC2CF1317468500A14307 /* PBXTextBookmark */ = CDFEC2CF1317468500A14307 /* PBXTextBookmark */;
+			CDFEC2D01317468500A14307 /* PlistBookmark */ = CDFEC2D01317468500A14307 /* PlistBookmark */;
+			CDFEC2D11317468500A14307 /* PBXTextBookmark */ = CDFEC2D11317468500A14307 /* PBXTextBookmark */;
+			CDFEC2D21317468500A14307 /* PBXTextBookmark */ = CDFEC2D21317468500A14307 /* PBXTextBookmark */;
+			CDFEC2D31317468500A14307 /* PBXTextBookmark */ = CDFEC2D31317468500A14307 /* PBXTextBookmark */;
+			CDFEC2D41317468500A14307 /* PBXTextBookmark */ = CDFEC2D41317468500A14307 /* PBXTextBookmark */;
+			CDFEC2D51317468500A14307 /* PBXTextBookmark */ = CDFEC2D51317468500A14307 /* PBXTextBookmark */;
+			CDFEC2D61317468500A14307 /* PBXTextBookmark */ = CDFEC2D61317468500A14307 /* PBXTextBookmark */;
+			CDFEC2FB1318416D00A14307 /* PBXTextBookmark */ = CDFEC2FB1318416D00A14307 /* PBXTextBookmark */;
+			CDFEC2FC13186F4A00A14307 /* PBXBookmark */ = CDFEC2FC13186F4A00A14307 /* PBXBookmark */;
+			CDFEC2FD13186F4A00A14307 /* PBXBookmark */ = CDFEC2FD13186F4A00A14307 /* PBXBookmark */;
+			CDFEC2FE13186F4A00A14307 /* PBXBookmark */ = CDFEC2FE13186F4A00A14307 /* PBXBookmark */;
+			CDFEC2FF13186F4A00A14307 /* PBXBookmark */ = CDFEC2FF13186F4A00A14307 /* PBXBookmark */;
+			CDFEC30013186F4A00A14307 /* PBXBookmark */ = CDFEC30013186F4A00A14307 /* PBXBookmark */;
+			CDFEC30113186F4A00A14307 /* PBXTextBookmark */ = CDFEC30113186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30213186F4A00A14307 /* PBXTextBookmark */ = CDFEC30213186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30313186F4A00A14307 /* PBXBookmark */ = CDFEC30313186F4A00A14307 /* PBXBookmark */;
+			CDFEC30413186F4A00A14307 /* PBXBookmark */ = CDFEC30413186F4A00A14307 /* PBXBookmark */;
+			CDFEC30513186F4A00A14307 /* PlistBookmark */ = CDFEC30513186F4A00A14307 /* PlistBookmark */;
+			CDFEC30613186F4A00A14307 /* PBXTextBookmark */ = CDFEC30613186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30713186F4A00A14307 /* PBXTextBookmark */ = CDFEC30713186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30813186F4A00A14307 /* PBXTextBookmark */ = CDFEC30813186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30913186F4A00A14307 /* PBXTextBookmark */ = CDFEC30913186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30A13186F4A00A14307 /* PBXTextBookmark */ = CDFEC30A13186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30B13186F4A00A14307 /* PBXTextBookmark */ = CDFEC30B13186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC30C13186F4A00A14307 /* PBXTextBookmark */ = CDFEC30C13186F4A00A14307 /* PBXTextBookmark */;
+			CDFEC3121318752C00A14307 /* PBXTextBookmark */ = CDFEC3121318752C00A14307 /* PBXTextBookmark */;
+			CDFEC3131318752C00A14307 /* PBXTextBookmark */ = CDFEC3131318752C00A14307 /* PBXTextBookmark */;
+			CDFEC3141318752C00A14307 /* PBXTextBookmark */ = CDFEC3141318752C00A14307 /* PBXTextBookmark */;
+			CDFEC3151318752C00A14307 /* PBXTextBookmark */ = CDFEC3151318752C00A14307 /* PBXTextBookmark */;
+			CDFEC3161318752C00A14307 /* PBXTextBookmark */ = CDFEC3161318752C00A14307 /* PBXTextBookmark */;
+			CDFEC31E1318786B00A14307 /* PBXTextBookmark */ = CDFEC31E1318786B00A14307 /* PBXTextBookmark */;
+			CDFEC31F1318786B00A14307 /* XCBuildMessageTextBookmark */ = CDFEC31F1318786B00A14307 /* XCBuildMessageTextBookmark */;
+			CDFEC3201318786B00A14307 /* PBXTextBookmark */ = CDFEC3201318786B00A14307 /* PBXTextBookmark */;
+			CDFEC3211318787300A14307 /* PBXTextBookmark */ = CDFEC3211318787300A14307 /* PBXTextBookmark */;
+			CDFEC3221318789400A14307 /* PBXTextBookmark */ = CDFEC3221318789400A14307 /* PBXTextBookmark */;
+			CDFEC327131878EC00A14307 /* PBXTextBookmark */ = CDFEC327131878EC00A14307 /* PBXTextBookmark */;
+			CDFEC328131878EC00A14307 /* PBXTextBookmark */ = CDFEC328131878EC00A14307 /* PBXTextBookmark */;
+			CDFEC329131878EC00A14307 /* PBXTextBookmark */ = CDFEC329131878EC00A14307 /* PBXTextBookmark */;
+			CDFEC32A131878EC00A14307 /* PBXTextBookmark */ = CDFEC32A131878EC00A14307 /* PBXTextBookmark */;
+			CDFEC32D131878F400A14307 /* PBXTextBookmark */ = CDFEC32D131878F400A14307 /* PBXTextBookmark */;
+			CDFEC33A13187CB400A14307 /* PBXTextBookmark */ = CDFEC33A13187CB400A14307 /* PBXTextBookmark */;
+			CDFEC33B13187CB400A14307 /* PBXTextBookmark */ = CDFEC33B13187CB400A14307 /* PBXTextBookmark */;
+			CDFEC33C13187CB400A14307 /* PBXTextBookmark */ = CDFEC33C13187CB400A14307 /* PBXTextBookmark */;
+			CDFEC33D13187CB400A14307 /* PBXTextBookmark */ = CDFEC33D13187CB400A14307 /* PBXTextBookmark */;
+			CDFEC3411318821000A14307 /* PBXTextBookmark */ = CDFEC3411318821000A14307 /* PBXTextBookmark */;
+			CDFEC3421318821000A14307 /* PBXTextBookmark */ = CDFEC3421318821000A14307 /* PBXTextBookmark */;
+			CDFEC3431318821000A14307 /* PBXTextBookmark */ = CDFEC3431318821000A14307 /* PBXTextBookmark */;
 		};
 		sourceControlManager = CDFEBB5C130A495E00A14307 /* Source Control */;
 		userBuildSettings = {
@@ -599,6 +817,11 @@
 			sepNavIntBoundsRect = "{{0, 0}, {543, 519}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRange = "{0, 374}";
+		};
+	};
+	8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */ = {
+		uiCtxt = {
+			sepNavWindowFrame = "{{868, 347}, {785, 565}}";
 		};
 	};
 	CDFEBB58130A493F00A14307 /* TrickplayController_v2 */ = {
@@ -620,6 +843,11 @@
 		dylibVariantSuffix = "";
 		enableDebugStr = 1;
 		environmentEntries = (
+			{
+				active = YES;
+				name = NSZombieEnabled;
+				value = YES;
+			},
 		);
 		executableSystemSymbolLevel = 0;
 		executableUserSymbolLevel = 0;
@@ -646,6 +874,11 @@
 	CDFEBB5D130A495E00A14307 /* Code sense */ = {
 		isa = PBXCodeSenseManager;
 		indexTemplatePath = "";
+	};
+	CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {
+		uiCtxt = {
+			sepNavWindowFrame = "{{61, 446}, {785, 565}}";
+		};
 	};
 	CDFEBB7B130A49F300A14307 /* XCBuildMessageTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -818,44 +1051,44 @@
 	};
 	CDFEBBA2130A4BA000A14307 /* SocketManager.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 1001}}";
-			sepNavSelRange = "{458, 0}";
-			sepNavVisRange = "{150, 632}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 897}}";
+			sepNavSelRange = "{527, 0}";
+			sepNavVisRange = "{414, 892}";
 		};
 	};
 	CDFEBBA3130A4BA900A14307 /* SocketManager.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 3276}}";
-			sepNavSelRange = "{5847, 0}";
-			sepNavVisRange = "{5692, 859}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 2938}}";
+			sepNavSelRange = "{3634, 0}";
+			sepNavVisRange = "{4381, 1102}";
 		};
 	};
 	CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 507}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRange = "{0, 464}";
 		};
 	};
 	CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 624}}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 624}}";
 			sepNavSelRange = "{1058, 0}";
-			sepNavVisRange = "{154, 1233}";
+			sepNavVisRange = "{151, 1230}";
 		};
 	};
 	CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 572}}";
-			sepNavSelRange = "{486, 0}";
-			sepNavVisRange = "{46, 909}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 650}}";
+			sepNavSelRange = "{462, 0}";
+			sepNavVisRange = "{186, 913}";
 		};
 	};
 	CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 1950}}";
-			sepNavSelRange = "{4593, 0}";
-			sepNavVisRange = "{3404, 1240}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 2119}}";
+			sepNavSelRange = "{4252, 0}";
+			sepNavVisRange = "{3643, 1361}";
 		};
 	};
 	CDFEBBAD130A4BD800A14307 /* PBXTextBookmark */ = {
@@ -940,16 +1173,16 @@
 	};
 	CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 520}}";
-			sepNavSelRange = "{308, 0}";
-			sepNavVisRange = "{0, 840}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 532}}";
+			sepNavSelRange = "{693, 0}";
+			sepNavVisRange = "{0, 866}";
 		};
 	};
 	CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 2002}}";
-			sepNavSelRange = "{4111, 0}";
-			sepNavVisRange = "{3174, 1115}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 2054}}";
+			sepNavSelRange = "{2990, 0}";
+			sepNavVisRange = "{1962, 1364}";
 		};
 	};
 	CDFEBBBA130A4CF600A14307 /* PBXTextBookmark */ = {
@@ -967,7 +1200,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 17";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 787;
 		vrLoc = 0;
@@ -1060,7 +1293,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 258";
 		rLen = 0;
-		rLoc = 7807;
+		rLoc = 7803;
 		rType = 0;
 		vrLen = 1047;
 		vrLoc = 6957;
@@ -1070,7 +1303,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 206";
 		rLen = 0;
-		rLoc = 7486;
+		rLoc = 7482;
 		rType = 0;
 		vrLen = 904;
 		vrLoc = 5630;
@@ -1110,7 +1343,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 116";
 		rLen = 0;
-		rLoc = 4190;
+		rLoc = 4186;
 		rType = 0;
 		vrLen = 1337;
 		vrLoc = 2294;
@@ -1120,7 +1353,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 116";
 		rLen = 0;
-		rLoc = 4190;
+		rLoc = 4186;
 		rType = 0;
 		vrLen = 1459;
 		vrLoc = 2090;
@@ -1140,7 +1373,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 131";
 		rLen = 0;
-		rLoc = 3589;
+		rLoc = 3661;
 		rType = 0;
 		vrLen = 1599;
 		vrLoc = 2815;
@@ -1150,7 +1383,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1544;
 		vrLoc = 2815;
@@ -1160,7 +1393,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1544;
 		vrLoc = 2815;
@@ -1190,7 +1423,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 116";
 		rLen = 0;
-		rLoc = 4190;
+		rLoc = 4186;
 		rType = 0;
 		vrLen = 1408;
 		vrLoc = 2141;
@@ -1220,7 +1453,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1403;
 		vrLoc = 3146;
@@ -1230,7 +1463,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 138";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1350;
 		vrLoc = 3146;
@@ -1240,7 +1473,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 3905;
+		rLoc = 3977;
 		rType = 0;
 		vrLen = 1350;
 		vrLoc = 3146;
@@ -1280,7 +1513,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 3905;
+		rLoc = 3977;
 		rType = 0;
 		vrLen = 1350;
 		vrLoc = 3146;
@@ -1290,7 +1523,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1124;
 		vrLoc = 3520;
@@ -1320,7 +1553,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1171;
 		vrLoc = 3489;
@@ -1330,7 +1563,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 139";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1171;
 		vrLoc = 3489;
@@ -1390,7 +1623,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3738;
+		rLoc = 3810;
 		rType = 0;
 		vrLen = 1160;
 		vrLoc = 3489;
@@ -1400,7 +1633,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3738;
+		rLoc = 3810;
 		rType = 0;
 		vrLen = 1154;
 		vrLoc = 3489;
@@ -1410,7 +1643,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3738;
+		rLoc = 3810;
 		rType = 0;
 		vrLen = 1154;
 		vrLoc = 3489;
@@ -1420,7 +1653,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3738;
+		rLoc = 3810;
 		rType = 0;
 		vrLen = 1154;
 		vrLoc = 3489;
@@ -1440,7 +1673,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 134";
 		rLen = 0;
-		rLoc = 3738;
+		rLoc = 3810;
 		rType = 0;
 		vrLen = 1422;
 		vrLoc = 3024;
@@ -1450,7 +1683,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 108";
 		rLen = 0;
-		rLoc = 3680;
+		rLoc = 3676;
 		rType = 0;
 		vrLen = 1256;
 		vrLoc = 2120;
@@ -1587,16 +1820,16 @@
 	};
 	CDFEBC4F130A57FA00A14307 /* GestureViewController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 884}}";
-			sepNavSelRange = "{1248, 0}";
-			sepNavVisRange = "{692, 1112}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 1261}}";
+			sepNavSelRange = "{867, 0}";
+			sepNavVisRange = "{162, 929}";
 		};
 	};
 	CDFEBC50130A57FA00A14307 /* GestureViewController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 5031}}";
-			sepNavSelRange = "{11677, 0}";
-			sepNavVisRange = "{6528, 1532}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 6305}}";
+			sepNavSelRange = "{1514, 0}";
+			sepNavVisRange = "{235, 1359}";
 		};
 	};
 	CDFEBC55130A583E00A14307 /* PBXTextBookmark */ = {
@@ -1624,7 +1857,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 16";
 		rLen = 0;
-		rLoc = 905;
+		rLoc = 1247;
 		rType = 0;
 		vrLen = 825;
 		vrLoc = 0;
@@ -1644,7 +1877,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 463;
+		rLoc = 461;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -1654,7 +1887,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 463;
+		rLoc = 461;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -1696,7 +1929,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 232";
 		rLen = 0;
-		rLoc = 8040;
+		rLoc = 8036;
 		rType = 0;
 		vrLen = 906;
 		vrLoc = 5726;
@@ -1706,7 +1939,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 232";
 		rLen = 0;
-		rLoc = 8040;
+		rLoc = 8036;
 		rType = 0;
 		vrLen = 906;
 		vrLoc = 5726;
@@ -1716,7 +1949,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 463;
+		rLoc = 461;
 		rType = 0;
 		vrLen = 1476;
 		vrLoc = 668;
@@ -1736,7 +1969,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 136";
 		rLen = 0;
-		rLoc = 3908;
+		rLoc = 3980;
 		rType = 0;
 		vrLen = 1548;
 		vrLoc = 2765;
@@ -1786,7 +2019,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 69";
 		rLen = 0;
-		rLoc = 1927;
+		rLoc = 1922;
 		rType = 0;
 		vrLen = 1169;
 		vrLoc = 0;
@@ -1806,7 +2039,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 19";
 		rLen = 0;
-		rLoc = 463;
+		rLoc = 461;
 		rType = 0;
 		vrLen = 1476;
 		vrLoc = 668;
@@ -1816,7 +2049,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 128";
 		rLen = 0;
-		rLoc = 11129;
+		rLoc = 14248;
 		rType = 0;
 		vrLen = 1200;
 		vrLoc = 4004;
@@ -1846,7 +2079,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 105";
 		rLen = 0;
-		rLoc = 3602;
+		rLoc = 3598;
 		rType = 0;
 		vrLen = 293;
 		vrLoc = 5969;
@@ -1856,7 +2089,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 3909;
+		rLoc = 3981;
 		rType = 0;
 		vrLen = 348;
 		vrLoc = 3992;
@@ -1867,7 +2100,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 0;
-		rLoc = 347;
+		rLoc = 425;
 		rType = 1;
 	};
 	CDFEBC90130A5E2500A14307 /* PBXTextBookmark */ = {
@@ -1875,7 +2108,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 11129;
+		rLoc = 14248;
 		rType = 0;
 		vrLen = 402;
 		vrLoc = 4436;
@@ -1897,7 +2130,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 16";
 		rLen = 0;
-		rLoc = 905;
+		rLoc = 1247;
 		rType = 0;
 		vrLen = 825;
 		vrLoc = 0;
@@ -1907,7 +2140,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 11129;
+		rLoc = 14248;
 		rType = 0;
 		vrLen = 1248;
 		vrLoc = 4083;
@@ -1917,7 +2150,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 132";
 		rLen = 0;
-		rLoc = 11136;
+		rLoc = 14255;
 		rType = 0;
 		vrLen = 1248;
 		vrLoc = 4083;
@@ -1928,7 +2161,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 0;
-		rLoc = 347;
+		rLoc = 425;
 		rType = 1;
 	};
 	CDFEBCA4130A5EA300A14307 /* PBXTextBookmark */ = {
@@ -1936,7 +2169,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 11129;
+		rLoc = 14248;
 		rType = 0;
 		vrLen = 363;
 		vrLoc = 4539;
@@ -1946,7 +2179,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 16";
 		rLen = 0;
-		rLoc = 905;
+		rLoc = 1247;
 		rType = 0;
 		vrLen = 825;
 		vrLoc = 0;
@@ -1956,7 +2189,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 129";
 		rLen = 0;
-		rLoc = 11129;
+		rLoc = 14248;
 		rType = 0;
 		vrLen = 1169;
 		vrLoc = 4083;
@@ -1966,7 +2199,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 126";
 		rLen = 0;
-		rLoc = 11129;
+		rLoc = 14248;
 		rType = 0;
 		vrLen = 1159;
 		vrLoc = 4083;
@@ -1976,7 +2209,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 2113;
+		rLoc = 2262;
 		rType = 0;
 		vrLen = 1425;
 		vrLoc = 983;
@@ -1986,7 +2219,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 52";
 		rLen = 0;
-		rLoc = 2112;
+		rLoc = 2261;
 		rType = 0;
 		vrLen = 1409;
 		vrLoc = 1114;
@@ -2006,7 +2239,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 69";
 		rLen = 0;
-		rLoc = 1927;
+		rLoc = 1922;
 		rType = 0;
 		vrLen = 1141;
 		vrLoc = 28;
@@ -2046,7 +2279,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 223";
 		rLen = 0;
-		rLoc = 7764;
+		rLoc = 7760;
 		rType = 0;
 		vrLen = 982;
 		vrLoc = 5650;
@@ -2056,7 +2289,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 32";
 		rLen = 0;
-		rLoc = 1803;
+		rLoc = 2370;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -2066,7 +2299,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 2114;
+		rLoc = 2263;
 		rType = 0;
 		vrLen = 1718;
 		vrLoc = 2206;
@@ -2076,7 +2309,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 2114;
+		rLoc = 2263;
 		rType = 0;
 		vrLen = 1509;
 		vrLoc = 2490;
@@ -2086,7 +2319,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 25";
 		rLen = 0;
-		rLoc = 1295;
+		rLoc = 1822;
 		rType = 0;
 		vrLen = 858;
 		vrLoc = 0;
@@ -2096,7 +2329,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 15";
 		rLen = 0;
-		rLoc = 348;
+		rLoc = 319;
 		rType = 0;
 		vrLen = 1354;
 		vrLoc = 0;
@@ -2106,7 +2339,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 52";
 		rLen = 0;
-		rLoc = 2112;
+		rLoc = 2261;
 		rType = 0;
 		vrLen = 1472;
 		vrLoc = 670;
@@ -2116,7 +2349,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 15";
 		rLen = 0;
-		rLoc = 321;
+		rLoc = 292;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -2126,7 +2359,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 25";
 		rLen = 0;
-		rLoc = 1295;
+		rLoc = 1822;
 		rType = 0;
 		vrLen = 858;
 		vrLoc = 0;
@@ -2136,7 +2369,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 25";
 		rLen = 0;
-		rLoc = 1295;
+		rLoc = 1822;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -2186,7 +2419,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 17";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 787;
 		vrLoc = 0;
@@ -2226,7 +2459,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 223";
 		rLen = 0;
-		rLoc = 7764;
+		rLoc = 7760;
 		rType = 0;
 		vrLen = 987;
 		vrLoc = 5645;
@@ -2236,7 +2469,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 18";
 		rLen = 0;
-		rLoc = 1016;
+		rLoc = 1401;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -2256,7 +2489,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 24";
 		rLen = 0;
-		rLoc = 539;
+		rLoc = 534;
 		rType = 0;
 		vrLen = 1195;
 		vrLoc = 3;
@@ -2266,7 +2499,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 15";
 		rLen = 0;
-		rLoc = 321;
+		rLoc = 292;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 0;
@@ -2276,7 +2509,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6230;
+		rLoc = 7765;
 		rType = 0;
 		vrLen = 1413;
 		vrLoc = 3090;
@@ -2286,7 +2519,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6174;
+		rLoc = 7263;
 		rType = 0;
 		vrLen = 1412;
 		vrLoc = 3090;
@@ -2296,7 +2529,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 101";
 		rLen = 0;
-		rLoc = 6174;
+		rLoc = 7263;
 		rType = 0;
 		vrLen = 1798;
 		vrLoc = 2674;
@@ -2306,7 +2539,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 101";
 		rLen = 0;
-		rLoc = 6174;
+		rLoc = 7263;
 		rType = 0;
 		vrLen = 1792;
 		vrLoc = 2674;
@@ -2316,7 +2549,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 99";
 		rLen = 0;
-		rLoc = 6174;
+		rLoc = 7263;
 		rType = 0;
 		vrLen = 1580;
 		vrLoc = 2985;
@@ -2326,7 +2559,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 99";
 		rLen = 0;
-		rLoc = 6174;
+		rLoc = 7263;
 		rType = 0;
 		vrLen = 1623;
 		vrLoc = 2985;
@@ -2336,7 +2569,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 103";
 		rLen = 0;
-		rLoc = 6230;
+		rLoc = 7765;
 		rType = 0;
 		vrLen = 1608;
 		vrLoc = 2985;
@@ -2346,7 +2579,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 6174;
+		rLoc = 7263;
 		rType = 0;
 		vrLen = 1574;
 		vrLoc = 2985;
@@ -2356,7 +2589,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1597;
 		vrLoc = 2985;
@@ -2376,7 +2609,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 24";
 		rLen = 0;
-		rLoc = 539;
+		rLoc = 534;
 		rType = 0;
 		vrLen = 1492;
 		vrLoc = 2069;
@@ -2386,7 +2619,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
 		rLen = 0;
-		rLoc = 2113;
+		rLoc = 2262;
 		rType = 0;
 		vrLen = 1466;
 		vrLoc = 977;
@@ -2396,7 +2629,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 2113;
+		rLoc = 2262;
 		rType = 0;
 		vrLen = 1180;
 		vrLoc = 1681;
@@ -2416,7 +2649,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 18";
 		rLen = 0;
-		rLoc = 1016;
+		rLoc = 1401;
 		rType = 0;
 		vrLen = 856;
 		vrLoc = 0;
@@ -2426,7 +2659,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 2113;
+		rLoc = 2262;
 		rType = 0;
 		vrLen = 1875;
 		vrLoc = 2861;
@@ -2446,7 +2679,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 117";
 		rLen = 0;
-		rLoc = 3700;
+		rLoc = 3776;
 		rType = 0;
 		vrLen = 1408;
 		vrLoc = 2529;
@@ -2456,7 +2689,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 119";
 		rLen = 0;
-		rLoc = 3786;
+		rLoc = 3862;
 		rType = 0;
 		vrLen = 1463;
 		vrLoc = 2529;
@@ -2466,7 +2699,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 144";
 		rLen = 0;
-		rLoc = 11129;
+		rLoc = 14248;
 		rType = 0;
 		vrLen = 258;
 		vrLoc = 6034;
@@ -2477,7 +2710,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 119;
+		rLoc = 120;
 		rType = 1;
 	};
 	CDFEBD28130B1A9500A14307 /* PBXTextBookmark */ = {
@@ -2485,7 +2718,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 117";
 		rLen = 0;
-		rLoc = 3700;
+		rLoc = 3776;
 		rType = 0;
 		vrLen = 524;
 		vrLoc = 3566;
@@ -2495,7 +2728,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 2113;
+		rLoc = 2262;
 		rType = 0;
 		vrLen = 1875;
 		vrLoc = 2861;
@@ -2505,7 +2738,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 117";
 		rLen = 0;
-		rLoc = 3700;
+		rLoc = 3776;
 		rType = 0;
 		vrLen = 1463;
 		vrLoc = 2529;
@@ -2515,7 +2748,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 99";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1390;
 		vrLoc = 2764;
@@ -2525,7 +2758,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 99";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1390;
 		vrLoc = 2764;
@@ -2535,7 +2768,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 57";
 		rLen = 0;
-		rLoc = 2113;
+		rLoc = 2262;
 		rType = 0;
 		vrLen = 1875;
 		vrLoc = 2861;
@@ -2545,7 +2778,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1639;
 		vrLoc = 3192;
@@ -2555,7 +2788,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 95";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1742;
 		vrLoc = 2905;
@@ -2565,7 +2798,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 95";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1742;
 		vrLoc = 2905;
@@ -2574,7 +2807,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		rLen = 0;
-		rLoc = 133;
+		rLoc = 134;
 		rType = 1;
 	};
 	CDFEBD3A130B1ECC00A14307 /* PBXTextBookmark */ = {
@@ -2582,7 +2815,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 3909;
+		rLoc = 3981;
 		rType = 0;
 		vrLen = 1106;
 		vrLoc = 3431;
@@ -2592,7 +2825,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 125";
 		rLen = 0;
-		rLoc = 3700;
+		rLoc = 3776;
 		rType = 0;
 		vrLen = 677;
 		vrLoc = 3477;
@@ -2602,7 +2835,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 3909;
+		rLoc = 3981;
 		rType = 0;
 		vrLen = 1106;
 		vrLoc = 3431;
@@ -2612,7 +2845,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 95";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1786;
 		vrLoc = 2861;
@@ -2622,7 +2855,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1786;
 		vrLoc = 2861;
@@ -2632,7 +2865,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1785;
 		vrLoc = 2861;
@@ -2642,7 +2875,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1785;
 		vrLoc = 2861;
@@ -2651,7 +2884,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		rLen = 0;
-		rLoc = 133;
+		rLoc = 134;
 		rType = 1;
 	};
 	CDFEBD4E130B1F3A00A14307 /* PBXTextBookmark */ = {
@@ -2659,7 +2892,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 3909;
+		rLoc = 3981;
 		rType = 0;
 		vrLen = 1185;
 		vrLoc = 3352;
@@ -2669,7 +2902,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 137";
 		rLen = 0;
-		rLoc = 3909;
+		rLoc = 3981;
 		rType = 0;
 		vrLen = 1422;
 		vrLoc = 2295;
@@ -2679,7 +2912,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1809;
 		vrLoc = 2837;
@@ -2689,7 +2922,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1807;
 		vrLoc = 2837;
@@ -2699,7 +2932,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 100";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1757;
 		vrLoc = 2837;
@@ -2709,7 +2942,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 101";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1818;
 		vrLoc = 2837;
@@ -2719,7 +2952,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 61";
 		rLen = 0;
-		rLoc = 2158;
+		rLoc = 2307;
 		rType = 0;
 		vrLen = 1707;
 		vrLoc = 2645;
@@ -2729,7 +2962,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 61";
 		rLen = 0;
-		rLoc = 2158;
+		rLoc = 2307;
 		rType = 0;
 		vrLen = 1621;
 		vrLoc = 2645;
@@ -2748,7 +2981,7 @@
 		ignoreCount = 0;
 		lineNumber = 93;
 		location = TrickplayController_v2;
-		modificationTime = 319503296.875812;
+		modificationTime = 320197422.76693;
 		originalNumberOfMultipleMatches = 1;
 		state = 2;
 	};
@@ -2757,7 +2990,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 89";
 		rLen = 0;
-		rLoc = 6046;
+		rLoc = 7055;
 		rType = 0;
 		vrLen = 1392;
 		vrLoc = 2258;
@@ -2767,7 +3000,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1677;
 		vrLoc = 2463;
@@ -2777,12 +3010,12 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1588;
 		vrLoc = 2463;
 	};
-	CDFEBD92130B223500A14307 /* CommandInterpreter.m:139 */ = {
+	CDFEBD92130B223500A14307 /* CommandInterpreter.m:148 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
 		);
@@ -2794,9 +3027,9 @@
 		functionName = "-interpret:";
 		hitCount = 0;
 		ignoreCount = 0;
-		lineNumber = 139;
+		lineNumber = 148;
 		location = TrickplayController_v2;
-		modificationTime = 319503296.876049;
+		modificationTime = 320197422.767093;
 		originalNumberOfMultipleMatches = 1;
 		state = 2;
 	};
@@ -2805,7 +3038,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 5808;
+		rLoc = 6789;
 		rType = 0;
 		vrLen = 1803;
 		vrLoc = 2128;
@@ -2815,7 +3048,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1358;
 		vrLoc = 2921;
@@ -2825,7 +3058,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1358;
 		vrLoc = 2921;
@@ -2835,7 +3068,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 127";
 		rLen = 0;
-		rLoc = 3786;
+		rLoc = 3862;
 		rType = 0;
 		vrLen = 1623;
 		vrLoc = 2529;
@@ -2845,7 +3078,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 5808;
+		rLoc = 6789;
 		rType = 0;
 		vrLen = 1980;
 		vrLoc = 2328;
@@ -2855,7 +3088,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 5808;
+		rLoc = 6789;
 		rType = 0;
 		vrLen = 1938;
 		vrLoc = 2328;
@@ -2865,7 +3098,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 5808;
+		rLoc = 6789;
 		rType = 0;
 		vrLen = 1938;
 		vrLoc = 2328;
@@ -2875,7 +3108,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 98";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1513;
 		vrLoc = 2426;
@@ -2885,7 +3118,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 17";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 787;
 		vrLoc = 0;
@@ -2895,7 +3128,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 34";
 		rLen = 0;
-		rLoc = 909;
+		rLoc = 1053;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
@@ -2914,7 +3147,7 @@
 		ignoreCount = 0;
 		lineNumber = 93;
 		location = TrickplayController_v2;
-		modificationTime = 319503296.876149;
+		modificationTime = 320197422.767151;
 		originalNumberOfMultipleMatches = 1;
 		state = 2;
 	};
@@ -2923,7 +3156,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 34";
 		rLen = 0;
-		rLoc = 909;
+		rLoc = 1053;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
@@ -2933,7 +3166,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 5808;
+		rLoc = 6789;
 		rType = 0;
 		vrLen = 1879;
 		vrLoc = 2328;
@@ -2943,7 +3176,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 4465;
+		rLoc = 4827;
 		rType = 0;
 		vrLen = 1443;
 		vrLoc = 2813;
@@ -2953,7 +3186,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 4465;
+		rLoc = 4827;
 		rType = 0;
 		vrLen = 1424;
 		vrLoc = 2813;
@@ -2963,7 +3196,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 81";
 		rLen = 0;
-		rLoc = 5808;
+		rLoc = 6789;
 		rType = 0;
 		vrLen = 1879;
 		vrLoc = 2328;
@@ -2972,7 +3205,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		rLen = 0;
-		rLoc = 138;
+		rLoc = 147;
 		rType = 1;
 	};
 	CDFEBDBD130B246E00A14307 /* PBXTextBookmark */ = {
@@ -2980,35 +3213,17 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 126";
 		rLen = 0;
-		rLoc = 3731;
+		rLoc = 3807;
 		rType = 0;
 		vrLen = 1499;
 		vrLoc = 2714;
-	};
-	CDFEBDBF130B258D00A14307 /* GestureViewController.m:191 */ = {
-		isa = PBXFileBreakpoint;
-		actions = (
-		);
-		breakpointStyle = 0;
-		continueAfterActions = 0;
-		countType = 0;
-		delayBeforeContinue = 0;
-		fileReference = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
-		functionName = "-do_UB:";
-		hitCount = 0;
-		ignoreCount = 0;
-		lineNumber = 191;
-		location = TrickplayController_v2;
-		modificationTime = 319503296.876215;
-		originalNumberOfMultipleMatches = 1;
-		state = 2;
 	};
 	CDFEBDC3130B259100A14307 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 125";
 		rLen = 1;
-		rLoc = 3700;
+		rLoc = 3776;
 		rType = 0;
 		vrLen = 1504;
 		vrLoc = 2714;
@@ -3018,7 +3233,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1709;
 		vrLoc = 2673;
@@ -3028,7 +3243,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 102";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1712;
 		vrLoc = 2668;
@@ -3044,7 +3259,7 @@
 		hitCount = 0;
 		ignoreCount = 0;
 		location = libobjc.A.dylib;
-		modificationTime = 319503296.876344;
+		modificationTime = 320197422.771187;
 		originalNumberOfMultipleMatches = 1;
 		state = 1;
 		symbolName = objc_exception_throw;
@@ -3054,7 +3269,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 6230;
+		rLoc = 7765;
 		rType = 0;
 		vrLen = 1718;
 		vrLoc = 2660;
@@ -3063,7 +3278,7 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		rLen = 0;
-		rLoc = 138;
+		rLoc = 147;
 		rType = 1;
 	};
 	CDFEBDD3130B26F000A14307 /* PBXTextBookmark */ = {
@@ -3071,7 +3286,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 3787;
+		rLoc = 3863;
 		rType = 0;
 		vrLen = 1423;
 		vrLoc = 2922;
@@ -3081,7 +3296,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 3787;
+		rLoc = 3863;
 		rType = 0;
 		vrLen = 1383;
 		vrLoc = 2962;
@@ -3101,7 +3316,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 17";
 		rLen = 12;
-		rLoc = 385;
+		rLoc = 383;
 		rType = 0;
 		vrLen = 1592;
 		vrLoc = 198;
@@ -3111,7 +3326,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 131";
 		rLen = 0;
-		rLoc = 10695;
+		rLoc = 13448;
 		rType = 0;
 		vrLen = 1185;
 		vrLoc = 4053;
@@ -3121,7 +3336,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 133";
 		rLen = 0;
-		rLoc = 11128;
+		rLoc = 14247;
 		rType = 0;
 		vrLen = 1116;
 		vrLoc = 4526;
@@ -3141,7 +3356,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 131";
 		rLen = 0;
-		rLoc = 10740;
+		rLoc = 13493;
 		rType = 0;
 		vrLen = 1222;
 		vrLoc = 4019;
@@ -3151,7 +3366,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 137";
 		rLen = 0;
-		rLoc = 11128;
+		rLoc = 14247;
 		rType = 0;
 		vrLen = 1070;
 		vrLoc = 4640;
@@ -3161,7 +3376,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 124";
 		rLen = 0;
-		rLoc = 3700;
+		rLoc = 3776;
 		rType = 0;
 		vrLen = 734;
 		vrLoc = 3455;
@@ -3170,8 +3385,8 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 142";
-		rLen = 75;
-		rLoc = 3972;
+		rLen = 97;
+		rLoc = 4070;
 		rType = 0;
 		vrLen = 365;
 		vrLoc = 4104;
@@ -3182,7 +3397,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 28;
+		rLoc = 27;
 		rType = 1;
 	};
 	CDFEBDF2130B304F00A14307 /* PBXTextBookmark */ = {
@@ -3190,7 +3405,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 23";
 		rLen = 0;
-		rLoc = 553;
+		rLoc = 551;
 		rType = 0;
 		vrLen = 659;
 		vrLoc = 237;
@@ -3210,7 +3425,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 192";
 		rLen = 0;
-		rLoc = 5391;
+		rLoc = 5386;
 		rType = 0;
 		vrLen = 741;
 		vrLoc = 0;
@@ -3220,7 +3435,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 130";
 		rLen = 0;
-		rLoc = 4520;
+		rLoc = 4882;
 		rType = 0;
 		vrLen = 1373;
 		vrLoc = 2919;
@@ -3250,7 +3465,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 142";
 		rLen = 0;
-		rLoc = 3972;
+		rLoc = 4070;
 		rType = 0;
 		vrLen = 1289;
 		vrLoc = 3186;
@@ -3260,7 +3475,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 895;
+		rLoc = 1237;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3271,7 +3486,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 34;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBDFE130B30E800A14307 /* PBXTextBookmark */ = {
@@ -3279,7 +3494,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 756;
+		rLoc = 754;
 		rType = 0;
 		vrLen = 1345;
 		vrLoc = 99;
@@ -3290,7 +3505,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 34;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBE00130B30EE00A14307 /* PBXTextBookmark */ = {
@@ -3298,7 +3513,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 756;
+		rLoc = 754;
 		rType = 0;
 		vrLen = 617;
 		vrLoc = 237;
@@ -3309,7 +3524,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 34;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBE04130B311F00A14307 /* PBXTextBookmark */ = {
@@ -3317,7 +3532,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 756;
+		rLoc = 754;
 		rType = 0;
 		vrLen = 723;
 		vrLoc = 407;
@@ -3327,7 +3542,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 895;
+		rLoc = 1237;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3338,7 +3553,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 34;
+		rLoc = 33;
 		rType = 1;
 	};
 	CDFEBE09130B313000A14307 /* PBXTextBookmark */ = {
@@ -3346,7 +3561,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 30";
 		rLen = 0;
-		rLoc = 885;
+		rLoc = 883;
 		rType = 0;
 		vrLen = 1142;
 		vrLoc = 0;
@@ -3356,7 +3571,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3787;
+		rLoc = 3863;
 		rType = 0;
 		vrLen = 1370;
 		vrLoc = 2922;
@@ -3366,7 +3581,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 895;
+		rLoc = 1237;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3376,7 +3591,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 113";
 		rLen = 0;
-		rLoc = 6230;
+		rLoc = 7765;
 		rType = 0;
 		vrLen = 1623;
 		vrLoc = 365;
@@ -3386,7 +3601,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 35";
 		rLen = 0;
-		rLoc = 1065;
+		rLoc = 1063;
 		rType = 0;
 		vrLen = 1257;
 		vrLoc = 0;
@@ -3396,7 +3611,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 106";
 		rLen = 0;
-		rLoc = 6174;
+		rLoc = 7263;
 		rType = 0;
 		vrLen = 1938;
 		vrLoc = 2656;
@@ -3406,7 +3621,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3787;
+		rLoc = 3863;
 		rType = 0;
 		vrLen = 1370;
 		vrLoc = 2922;
@@ -3416,7 +3631,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 122";
 		rLen = 1;
-		rLoc = 3652;
+		rLoc = 3642;
 		rType = 0;
 		vrLen = 1371;
 		vrLoc = 2921;
@@ -3426,7 +3641,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 21";
 		rLen = 8;
-		rLoc = 527;
+		rLoc = 671;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
@@ -3436,7 +3651,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 127";
 		rLen = 0;
-		rLoc = 3786;
+		rLoc = 3862;
 		rType = 0;
 		vrLen = 1373;
 		vrLoc = 2919;
@@ -3446,7 +3661,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 127";
 		rLen = 0;
-		rLoc = 3786;
+		rLoc = 3862;
 		rType = 0;
 		vrLen = 1351;
 		vrLoc = 2919;
@@ -3465,7 +3680,7 @@
 		ignoreCount = 0;
 		lineNumber = 96;
 		location = TrickplayController_v2;
-		modificationTime = 319503296.876235;
+		modificationTime = 320197422.76719;
 		originalNumberOfMultipleMatches = 1;
 		state = 2;
 	};
@@ -3474,7 +3689,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 109";
 		rLen = 0;
-		rLoc = 2817;
+		rLoc = 2812;
 		rType = 0;
 		vrLen = 1638;
 		vrLoc = 2165;
@@ -3484,7 +3699,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 79";
 		rLen = 0;
-		rLoc = 2196;
+		rLoc = 2191;
 		rType = 0;
 		vrLen = 1323;
 		vrLoc = 1639;
@@ -3494,7 +3709,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 104";
 		rLen = 0;
-		rLoc = 2920;
+		rLoc = 2915;
 		rType = 0;
 		vrLen = 1478;
 		vrLoc = 2426;
@@ -3504,7 +3719,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 95";
 		rLen = 0;
-		rLoc = 2313;
+		rLoc = 2308;
 		rType = 0;
 		vrLen = 1638;
 		vrLoc = 2165;
@@ -3514,7 +3729,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 105";
 		rLen = 0;
-		rLoc = 6093;
+		rLoc = 7182;
 		rType = 0;
 		vrLen = 1854;
 		vrLoc = 2520;
@@ -3524,7 +3739,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 131";
 		rLen = 0;
-		rLoc = 4473;
+		rLoc = 4835;
 		rType = 0;
 		vrLen = 1621;
 		vrLoc = 2107;
@@ -3534,7 +3749,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 93";
 		rLen = 0;
-		rLoc = 2763;
+		rLoc = 2758;
 		rType = 0;
 		vrLen = 1602;
 		vrLoc = 2529;
@@ -3544,7 +3759,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 29";
 		rLen = 0;
-		rLoc = 756;
+		rLoc = 754;
 		rType = 0;
 		vrLen = 715;
 		vrLoc = 407;
@@ -3563,7 +3778,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2712;
+		rLoc = 2707;
 		rType = 0;
 		vrLen = 832;
 		vrLoc = 2380;
@@ -3573,7 +3788,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3786;
+		rLoc = 3862;
 		rType = 0;
 		vrLen = 1417;
 		vrLoc = 1819;
@@ -3592,7 +3807,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2774;
+		rLoc = 2769;
 		rType = 0;
 		vrLen = 1673;
 		vrLoc = 2165;
@@ -3602,7 +3817,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2749;
+		rLoc = 2744;
 		rType = 0;
 		vrLen = 794;
 		vrLoc = 5622;
@@ -3612,7 +3827,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 128";
 		rLen = 0;
-		rLoc = 3786;
+		rLoc = 3862;
 		rType = 0;
 		vrLen = 1416;
 		vrLoc = 1820;
@@ -3622,7 +3837,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 3795;
+		rLoc = 3871;
 		rType = 0;
 		vrLen = 1398;
 		vrLoc = 2922;
@@ -3632,7 +3847,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 109";
 		rLen = 0;
-		rLoc = 3150;
+		rLoc = 3145;
 		rType = 0;
 		vrLen = 1398;
 		vrLoc = 2922;
@@ -3652,7 +3867,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 220";
 		rLen = 0;
-		rLoc = 5963;
+		rLoc = 5894;
 		rType = 0;
 		vrLen = 956;
 		vrLoc = 4944;
@@ -3662,7 +3877,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 105";
 		rLen = 0;
-		rLoc = 6093;
+		rLoc = 7182;
 		rType = 0;
 		vrLen = 1813;
 		vrLoc = 2520;
@@ -3672,7 +3887,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 109";
 		rLen = 0;
-		rLoc = 6277;
+		rLoc = 7812;
 		rType = 0;
 		vrLen = 1589;
 		vrLoc = 2518;
@@ -3682,7 +3897,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 8400;
+		rLoc = 10615;
 		rType = 0;
 		vrLen = 1608;
 		vrLoc = 2518;
@@ -3692,7 +3907,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 17";
 		rLen = 0;
-		rLoc = 895;
+		rLoc = 1237;
 		rType = 0;
 		vrLen = 924;
 		vrLoc = 0;
@@ -3702,7 +3917,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 37";
 		rLen = 0;
-		rLoc = 1803;
+		rLoc = 2370;
 		rType = 0;
 		vrLen = 955;
 		vrLoc = 0;
@@ -3712,7 +3927,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 26";
 		rLen = 0;
-		rLoc = 1175;
+		rLoc = 1702;
 		rType = 0;
 		vrLen = 955;
 		vrLoc = 0;
@@ -3722,7 +3937,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 8400;
+		rLoc = 10615;
 		rType = 0;
 		vrLen = 1332;
 		vrLoc = 2794;
@@ -3732,7 +3947,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 120";
 		rLen = 0;
-		rLoc = 6536;
+		rLoc = 8561;
 		rType = 0;
 		vrLen = 1446;
 		vrLoc = 3656;
@@ -3742,7 +3957,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 120";
 		rLen = 0;
-		rLoc = 6536;
+		rLoc = 8561;
 		rType = 0;
 		vrLen = 1529;
 		vrLoc = 3656;
@@ -3752,7 +3967,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 129";
 		rLen = 0;
-		rLoc = 4465;
+		rLoc = 4827;
 		rType = 0;
 		vrLen = 1265;
 		vrLoc = 2922;
@@ -3762,7 +3977,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 21";
 		rLen = 8;
-		rLoc = 527;
+		rLoc = 671;
 		rType = 0;
 		vrLen = 883;
 		vrLoc = 0;
@@ -3772,7 +3987,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 18";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 914;
 		vrLoc = 0;
@@ -3782,7 +3997,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 131";
 		rLen = 0;
-		rLoc = 4465;
+		rLoc = 4827;
 		rType = 0;
 		vrLen = 1193;
 		vrLoc = 3083;
@@ -3792,7 +4007,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 19";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 945;
 		vrLoc = 0;
@@ -3802,7 +4017,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 22";
 		rLen = 0;
-		rLoc = 1049;
+		rLoc = 1406;
 		rType = 0;
 		vrLen = 955;
 		vrLoc = 0;
@@ -3812,7 +4027,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 98";
 		rLen = 0;
-		rLoc = 6080;
+		rLoc = 7169;
 		rType = 0;
 		vrLen = 1271;
 		vrLoc = 2468;
@@ -3822,7 +4037,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 199";
 		rLen = 0;
-		rLoc = 10694;
+		rLoc = 13294;
 		rType = 0;
 		vrLen = 1008;
 		vrLoc = 6555;
@@ -3832,7 +4047,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 171";
 		rLen = 20;
-		rLoc = 8482;
+		rLoc = 10759;
 		rType = 0;
 		vrLen = 1029;
 		vrLoc = 5813;
@@ -3842,7 +4057,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 22";
 		rLen = 0;
-		rLoc = 1049;
+		rLoc = 1406;
 		rType = 0;
 		vrLen = 950;
 		vrLoc = 0;
@@ -3852,7 +4067,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 1803;
+		rLoc = 2370;
 		rType = 0;
 		vrLen = 937;
 		vrLoc = 31;
@@ -3862,7 +4077,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 108";
 		rLen = 0;
-		rLoc = 2712;
+		rLoc = 2707;
 		rType = 0;
 		vrLen = 767;
 		vrLoc = 3088;
@@ -3872,7 +4087,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 171";
 		rLen = 0;
-		rLoc = 8482;
+		rLoc = 10759;
 		rType = 0;
 		vrLen = 360;
 		vrLoc = 6124;
@@ -3901,7 +4116,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 1803;
+		rLoc = 2370;
 		rType = 0;
 		vrLen = 912;
 		vrLoc = 61;
@@ -3921,7 +4136,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 171";
 		rLen = 20;
-		rLoc = 8482;
+		rLoc = 10759;
 		rType = 0;
 		vrLen = 1088;
 		vrLoc = 5757;
@@ -3931,7 +4146,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 111";
 		rLen = 0;
-		rLoc = 6297;
+		rLoc = 7832;
 		rType = 0;
 		vrLen = 1310;
 		vrLoc = 3043;
@@ -3941,7 +4156,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 136";
 		rLen = 0;
-		rLoc = 6933;
+		rLoc = 8956;
 		rType = 0;
 		vrLen = 1452;
 		vrLoc = 4412;
@@ -3962,7 +4177,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 306;
+		rLoc = 375;
 		rType = 1;
 	};
 	CDFEBE94130B7BE400A14307 /* PBXTextBookmark */ = {
@@ -3970,7 +4185,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 189";
 		rLen = 0;
-		rLoc = 9681;
+		rLoc = 12281;
 		rType = 0;
 		vrLen = 657;
 		vrLoc = 6592;
@@ -3980,7 +4195,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 1803;
+		rLoc = 2370;
 		rType = 0;
 		vrLen = 970;
 		vrLoc = 3;
@@ -3991,7 +4206,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 306;
+		rLoc = 375;
 		rType = 1;
 	};
 	CDFEBE99130B7BEF00A14307 /* PBXTextBookmark */ = {
@@ -3999,7 +4214,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 190";
 		rLen = 0;
-		rLoc = 9754;
+		rLoc = 12354;
 		rType = 0;
 		vrLen = 1024;
 		vrLoc = 6221;
@@ -4009,7 +4224,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 1803;
+		rLoc = 2370;
 		rType = 0;
 		vrLen = 942;
 		vrLoc = 31;
@@ -4019,7 +4234,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 63";
 		rLen = 0;
-		rLoc = 2271;
+		rLoc = 2420;
 		rType = 0;
 		vrLen = 1154;
 		vrLoc = 1101;
@@ -4066,30 +4281,30 @@
 	};
 	CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 257}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 509}}";
+			sepNavSelRange = "{842, 0}";
+			sepNavVisRange = "{0, 1007}";
 		};
 	};
 	CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {600, 510}}";
-			sepNavSelRange = "{242, 0}";
-			sepNavVisRange = "{0, 248}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 1677}}";
+			sepNavSelRange = "{608, 0}";
+			sepNavVisRange = "{3019, 1396}";
 		};
 	};
 	CDFEBEBB130C734B00A14307 /* TouchController.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {600, 585}}";
-			sepNavSelRange = "{332, 0}";
-			sepNavVisRange = "{55, 1113}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 611}}";
+			sepNavSelRange = "{295, 0}";
+			sepNavVisRange = "{155, 1066}";
 		};
 	};
 	CDFEBEBC130C734B00A14307 /* TouchController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {614, 3276}}";
-			sepNavSelRange = "{7129, 0}";
-			sepNavVisRange = "{4836, 1263}";
+			sepNavIntBoundsRect = "{{0, 0}, {603, 3302}}";
+			sepNavSelRange = "{6910, 0}";
+			sepNavVisRange = "{3600, 1509}";
 		};
 	};
 	CDFEBEC4130CAE8E00A14307 /* XCBuildMessageTextBookmark */ = {
@@ -4098,15 +4313,15 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 57;
+		rLoc = 56;
 		rType = 1;
 	};
 	CDFEBEC5130CAE8E00A14307 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 54";
-		rLen = 98;
-		rLoc = 1885;
+		rLen = 189;
+		rLoc = 1943;
 		rType = 0;
 		vrLen = 800;
 		vrLoc = 1435;
@@ -4126,7 +4341,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 283";
 		rLen = 0;
-		rLoc = 12277;
+		rLoc = 15596;
 		rType = 0;
 		vrLen = 315;
 		vrLoc = 8974;
@@ -4137,7 +4352,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 171;
+		rLoc = 177;
 		rType = 1;
 	};
 	CDFEBEF9130CB1FF00A14307 /* PBXTextBookmark */ = {
@@ -4145,7 +4360,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		name = "TouchController.m: 172";
 		rLen = 0;
-		rLoc = 6363;
+		rLoc = 6554;
 		rType = 0;
 		vrLen = 796;
 		vrLoc = 6017;
@@ -4165,7 +4380,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 34";
 		rLen = 0;
-		rLoc = 909;
+		rLoc = 1053;
 		rType = 0;
 		vrLen = 849;
 		vrLoc = 0;
@@ -4246,7 +4461,7 @@
 		fRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */;
 		name = "AccelerometerController.m: 13";
 		rLen = 0;
-		rLoc = 242;
+		rLoc = 4409;
 		rType = 0;
 		vrLen = 248;
 		vrLoc = 0;
@@ -4266,7 +4481,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 214";
 		rLen = 0;
-		rLoc = 5789;
+		rLoc = 5784;
 		rType = 0;
 		vrLen = 730;
 		vrLoc = 5761;
@@ -4286,7 +4501,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 39";
 		rLen = 0;
-		rLoc = 985;
+		rLoc = 980;
 		rType = 0;
 		vrLen = 986;
 		vrLoc = 0;
@@ -4296,7 +4511,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 42";
 		rLen = 0;
-		rLoc = 1433;
+		rLoc = 1960;
 		rType = 0;
 		vrLen = 1091;
 		vrLoc = 0;
@@ -4306,7 +4521,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 68";
 		rLen = 0;
-		rLoc = 2271;
+		rLoc = 2420;
 		rType = 0;
 		vrLen = 1381;
 		vrLoc = 1156;
@@ -4336,7 +4551,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		name = "TouchController.m: 169";
 		rLen = 0;
-		rLoc = 6278;
+		rLoc = 6440;
 		rType = 0;
 		vrLen = 1064;
 		vrLoc = 6096;
@@ -4346,7 +4561,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 132";
 		rLen = 0;
-		rLoc = 4459;
+		rLoc = 4821;
 		rType = 0;
 		vrLen = 1091;
 		vrLoc = 3336;
@@ -4356,7 +4571,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 23";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 904;
 		vrLoc = 0;
@@ -4366,7 +4581,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		name = "TouchController.m: 195";
 		rLen = 0;
-		rLoc = 7129;
+		rLoc = 7341;
 		rType = 0;
 		vrLen = 1112;
 		vrLoc = 6096;
@@ -4386,7 +4601,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 16";
 		rLen = 267;
-		rLoc = 334;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 1053;
 		vrLoc = 0;
@@ -4396,7 +4611,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 222";
 		rLen = 0;
-		rLoc = 8894;
+		rLoc = 11494;
 		rType = 0;
 		vrLen = 788;
 		vrLoc = 7104;
@@ -4406,7 +4621,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 221";
 		rLen = 0;
-		rLoc = 8892;
+		rLoc = 11492;
 		rType = 0;
 		vrLen = 1010;
 		vrLoc = 7192;
@@ -4416,7 +4631,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 221";
 		rLen = 0;
-		rLoc = 8892;
+		rLoc = 11492;
 		rType = 0;
 		vrLen = 1056;
 		vrLoc = 7192;
@@ -4436,7 +4651,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 132";
 		rLen = 0;
-		rLoc = 4459;
+		rLoc = 4821;
 		rType = 0;
 		vrLen = 1091;
 		vrLoc = 3336;
@@ -4446,7 +4661,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		name = "TouchController.m: 195";
 		rLen = 0;
-		rLoc = 7129;
+		rLoc = 7341;
 		rType = 0;
 		vrLen = 1263;
 		vrLoc = 4836;
@@ -4456,7 +4671,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 164";
 		rLen = 0;
-		rLoc = 4625;
+		rLoc = 4620;
 		rType = 0;
 		vrLen = 1007;
 		vrLoc = 4229;
@@ -4466,7 +4681,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 84";
 		rLen = 37;
-		rLoc = 2877;
+		rLoc = 3026;
 		rType = 0;
 		vrLen = 1169;
 		vrLoc = 8769;
@@ -4486,7 +4701,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 63";
 		rLen = 0;
-		rLoc = 1803;
+		rLoc = 2370;
 		rType = 0;
 		vrLen = 1053;
 		vrLoc = 0;
@@ -4496,7 +4711,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 164";
 		rLen = 0;
-		rLoc = 4625;
+		rLoc = 4620;
 		rType = 0;
 		vrLen = 1052;
 		vrLoc = 4186;
@@ -4506,7 +4721,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 164";
 		rLen = 0;
-		rLoc = 4625;
+		rLoc = 4620;
 		rType = 0;
 		vrLen = 1051;
 		vrLoc = 4186;
@@ -4516,7 +4731,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 169";
 		rLen = 0;
-		rLoc = 4830;
+		rLoc = 4825;
 		rType = 0;
 		vrLen = 963;
 		vrLoc = 4394;
@@ -4526,7 +4741,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 169";
 		rLen = 0;
-		rLoc = 4830;
+		rLoc = 4825;
 		rType = 0;
 		vrLen = 896;
 		vrLoc = 4486;
@@ -4536,7 +4751,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 209";
 		rLen = 0;
-		rLoc = 8540;
+		rLoc = 10817;
 		rType = 0;
 		vrLen = 868;
 		vrLoc = 6769;
@@ -4546,7 +4761,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 132";
 		rLen = 0;
-		rLoc = 4459;
+		rLoc = 4821;
 		rType = 0;
 		vrLen = 1091;
 		vrLoc = 3336;
@@ -4556,7 +4771,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 134";
 		rLen = 0;
-		rLoc = 4459;
+		rLoc = 4821;
 		rType = 0;
 		vrLen = 1159;
 		vrLoc = 3343;
@@ -4566,7 +4781,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 134";
 		rLen = 0;
-		rLoc = 4459;
+		rLoc = 4821;
 		rType = 0;
 		vrLen = 1159;
 		vrLoc = 3343;
@@ -4576,7 +4791,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 23";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 864;
 		vrLoc = 0;
@@ -4586,7 +4801,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 24";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 915;
 		vrLoc = 3;
@@ -4596,7 +4811,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 24";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 919;
 		vrLoc = 0;
@@ -4606,7 +4821,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 39";
 		rLen = 0;
-		rLoc = 1080;
+		rLoc = 1406;
 		rType = 0;
 		vrLen = 1012;
 		vrLoc = 693;
@@ -4616,7 +4831,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 281";
 		rLen = 0;
-		rLoc = 10884;
+		rLoc = 14003;
 		rType = 0;
 		vrLen = 1173;
 		vrLoc = 8891;
@@ -4626,7 +4841,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 251";
 		rLen = 0;
-		rLoc = 9767;
+		rLoc = 12367;
 		rType = 0;
 		vrLen = 1193;
 		vrLoc = 8401;
@@ -4636,7 +4851,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		name = "TouchController.m: 172";
 		rLen = 0;
-		rLoc = 6363;
+		rLoc = 6554;
 		rType = 0;
 		vrLen = 669;
 		vrLoc = 6176;
@@ -4647,7 +4862,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 308;
+		rLoc = 377;
 		rType = 1;
 	};
 	CDFEBF58130CCD4A00A14307 /* PBXTextBookmark */ = {
@@ -4655,7 +4870,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 258";
 		rLen = 0;
-		rLoc = 9767;
+		rLoc = 12367;
 		rType = 0;
 		vrLen = 959;
 		vrLoc = 8401;
@@ -4666,7 +4881,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 308;
+		rLoc = 377;
 		rType = 1;
 	};
 	CDFEBF5A130CCD5500A14307 /* PBXTextBookmark */ = {
@@ -4674,7 +4889,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 258";
 		rLen = 0;
-		rLoc = 9767;
+		rLoc = 12367;
 		rType = 0;
 		vrLen = 959;
 		vrLoc = 8401;
@@ -4685,7 +4900,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 308;
+		rLoc = 377;
 		rType = 1;
 	};
 	CDFEBF60130CCD9D00A14307 /* PBXTextBookmark */ = {
@@ -4693,7 +4908,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 259";
 		rLen = 0;
-		rLoc = 9767;
+		rLoc = 12367;
 		rType = 0;
 		vrLen = 941;
 		vrLoc = 8401;
@@ -4704,7 +4919,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 308;
+		rLoc = 377;
 		rType = 1;
 	};
 	CDFEBF64130CCDAA00A14307 /* PBXTextBookmark */ = {
@@ -4712,7 +4927,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 254";
 		rLen = 0;
-		rLoc = 9767;
+		rLoc = 12367;
 		rType = 0;
 		vrLen = 1363;
 		vrLoc = 8010;
@@ -4722,7 +4937,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 262";
 		rLen = 0;
-		rLoc = 9973;
+		rLoc = 12575;
 		rType = 0;
 		vrLen = 1393;
 		vrLoc = 8271;
@@ -4732,16 +4947,16 @@
 		comments = "'key' undeclared (first use in this function)";
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
-		rLen = 1;
-		rLoc = 158;
+		rLen = 0;
+		rLoc = 205;
 		rType = 1;
 	};
 	CDFEBF89130DCADD00A14307 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 113";
-		rLen = 93;
-		rLoc = 4797;
+		rLen = 0;
+		rLoc = 6756;
 		rType = 0;
 		vrLen = 822;
 		vrLoc = 3212;
@@ -4751,16 +4966,16 @@
 		comments = "Void value not ignored as it ought to be";
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
-		rLen = 1;
-		rLoc = 184;
+		rLen = 0;
+		rLoc = 214;
 		rType = 1;
 	};
 	CDFEBF93130DCB0A00A14307 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 134";
-		rLen = 55;
-		rLoc = 5992;
+		rLen = 0;
+		rLoc = 7055;
 		rType = 0;
 		vrLen = 715;
 		vrLoc = 3827;
@@ -4770,7 +4985,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 24";
 		rLen = 0;
-		rLoc = 487;
+		rLoc = 538;
 		rType = 0;
 		vrLen = 918;
 		vrLoc = 0;
@@ -4780,7 +4995,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 165";
 		rLen = 0;
-		rLoc = 4691;
+		rLoc = 4686;
 		rType = 0;
 		vrLen = 1638;
 		vrLoc = 2338;
@@ -4830,7 +5045,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 57";
 		rLen = 0;
-		rLoc = 1711;
+		rLoc = 2278;
 		rType = 0;
 		vrLen = 1051;
 		vrLoc = 693;
@@ -4839,8 +5054,8 @@
 		isa = PBXTextBookmark;
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 107";
-		rLen = 45;
-		rLoc = 4499;
+		rLen = 0;
+		rLoc = 6756;
 		rType = 0;
 		vrLen = 1399;
 		vrLoc = 2926;
@@ -4850,7 +5065,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 115";
 		rLen = 0;
-		rLoc = 4999;
+		rLoc = 6756;
 		rType = 0;
 		vrLen = 1367;
 		vrLoc = 2959;
@@ -4870,7 +5085,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 111";
 		rLen = 0;
-		rLoc = 4730;
+		rLoc = 6756;
 		rType = 0;
 		vrLen = 1106;
 		vrLoc = 0;
@@ -4880,7 +5095,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 46";
 		rLen = 0;
-		rLoc = 1294;
+		rLoc = 1821;
 		rType = 0;
 		vrLen = 1104;
 		vrLoc = 692;
@@ -4890,7 +5105,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		name = "TouchController.m: 195";
 		rLen = 0;
-		rLoc = 7129;
+		rLoc = 7341;
 		rType = 0;
 		vrLen = 1263;
 		vrLoc = 4836;
@@ -4900,7 +5115,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 136";
 		rLen = 0;
-		rLoc = 4457;
+		rLoc = 4561;
 		rType = 0;
 		vrLen = 1229;
 		vrLoc = 3336;
@@ -4910,7 +5125,7 @@
 		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
 		name = "CommandInterpreter.h: 25";
 		rLen = 0;
-		rLoc = 486;
+		rLoc = 537;
 		rType = 0;
 		vrLen = 909;
 		vrLoc = 46;
@@ -4920,7 +5135,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 111";
 		rLen = 37;
-		rLoc = 3657;
+		rLoc = 5897;
 		rType = 0;
 		vrLen = 980;
 		vrLoc = 2678;
@@ -4930,7 +5145,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 63";
 		rLen = 0;
-		rLoc = 1748;
+		rLoc = 2315;
 		rType = 0;
 		vrLen = 1068;
 		vrLoc = 772;
@@ -4940,7 +5155,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 62";
 		rLen = 0;
-		rLoc = 1748;
+		rLoc = 2315;
 		rType = 0;
 		vrLen = 1088;
 		vrLoc = 695;
@@ -4950,7 +5165,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 62";
 		rLen = 0;
-		rLoc = 1748;
+		rLoc = 2315;
 		rType = 0;
 		vrLen = 1088;
 		vrLoc = 695;
@@ -4960,7 +5175,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 122";
 		rLen = 0;
-		rLoc = 4072;
+		rLoc = 6312;
 		rType = 0;
 		vrLen = 1116;
 		vrLoc = 3315;
@@ -4970,7 +5185,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 16";
 		rLen = 0;
-		rLoc = 320;
+		rLoc = 291;
 		rType = 0;
 		vrLen = 959;
 		vrLoc = 0;
@@ -4980,7 +5195,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 62";
 		rLen = 0;
-		rLoc = 1748;
+		rLoc = 2315;
 		rType = 0;
 		vrLen = 1011;
 		vrLoc = 772;
@@ -4990,7 +5205,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 45";
 		rLen = 0;
-		rLoc = 1228;
+		rLoc = 1755;
 		rType = 0;
 		vrLen = 1011;
 		vrLoc = 772;
@@ -5000,7 +5215,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 52";
 		rLen = 0;
-		rLoc = 1481;
+		rLoc = 2094;
 		rType = 0;
 		vrLen = 1088;
 		vrLoc = 695;
@@ -5010,7 +5225,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 16";
 		rLen = 0;
-		rLoc = 320;
+		rLoc = 291;
 		rType = 0;
 		vrLen = 1062;
 		vrLoc = 0;
@@ -5020,7 +5235,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 3552;
+		rLoc = 5792;
 		rType = 0;
 		vrLen = 892;
 		vrLoc = 2948;
@@ -5030,7 +5245,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 3513;
+		rLoc = 5753;
 		rType = 0;
 		vrLen = 1051;
 		vrLoc = 2971;
@@ -5041,7 +5256,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 113;
+		rLoc = 170;
 		rType = 1;
 	};
 	CDFEBFC6130DD76A00A14307 /* PBXTextBookmark */ = {
@@ -5049,7 +5264,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 110";
 		rLen = 0;
-		rLoc = 3513;
+		rLoc = 5753;
 		rType = 0;
 		vrLen = 567;
 		vrLoc = 3071;
@@ -5059,7 +5274,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 123";
 		rLen = 0;
-		rLoc = 3892;
+		rLoc = 6132;
 		rType = 0;
 		vrLen = 1127;
 		vrLoc = 2976;
@@ -5069,7 +5284,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 122";
 		rLen = 0;
-		rLoc = 3892;
+		rLoc = 6132;
 		rType = 0;
 		vrLen = 928;
 		vrLoc = 2873;
@@ -5079,7 +5294,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 123";
 		rLen = 0;
-		rLoc = 3892;
+		rLoc = 6132;
 		rType = 0;
 		vrLen = 940;
 		vrLoc = 2876;
@@ -5089,7 +5304,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 114";
 		rLen = 0;
-		rLoc = 3594;
+		rLoc = 5834;
 		rType = 0;
 		vrLen = 1127;
 		vrLoc = 3071;
@@ -5099,7 +5314,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 139";
 		rLen = 0;
-		rLoc = 4495;
+		rLoc = 6753;
 		rType = 0;
 		vrLen = 1310;
 		vrLoc = 4677;
@@ -5109,7 +5324,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 52";
 		rLen = 0;
-		rLoc = 1481;
+		rLoc = 2094;
 		rType = 0;
 		vrLen = 1090;
 		vrLoc = 693;
@@ -5119,7 +5334,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 30";
 		rLen = 0;
-		rLoc = 819;
+		rLoc = 1161;
 		rType = 0;
 		vrLen = 1107;
 		vrLoc = 692;
@@ -5129,7 +5344,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 30";
 		rLen = 0;
-		rLoc = 819;
+		rLoc = 1161;
 		rType = 0;
 		vrLen = 1112;
 		vrLoc = 692;
@@ -5139,7 +5354,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 139";
 		rLen = 0;
-		rLoc = 4495;
+		rLoc = 6753;
 		rType = 0;
 		vrLen = 1310;
 		vrLoc = 4677;
@@ -5149,7 +5364,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 120";
 		rLen = 0;
-		rLoc = 3892;
+		rLoc = 6132;
 		rType = 0;
 		vrLen = 1147;
 		vrLoc = 2976;
@@ -5159,7 +5374,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 61";
 		rLen = 0;
-		rLoc = 1712;
+		rLoc = 2279;
 		rType = 0;
 		vrLen = 1114;
 		vrLoc = 692;
@@ -5170,7 +5385,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 121;
+		rLoc = 178;
 		rType = 1;
 	};
 	CDFEBFEB130DE25B00A14307 /* PBXTextBookmark */ = {
@@ -5178,7 +5393,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 117";
 		rLen = 0;
-		rLoc = 3693;
+		rLoc = 5933;
 		rType = 0;
 		vrLen = 1047;
 		vrLoc = 2976;
@@ -5189,7 +5404,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 121;
+		rLoc = 178;
 		rType = 1;
 	};
 	CDFEBFED130DE25E00A14307 /* PBXTextBookmark */ = {
@@ -5197,7 +5412,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 118";
 		rLen = 30;
-		rLoc = 3694;
+		rLoc = 5934;
 		rType = 0;
 		vrLen = 609;
 		vrLoc = 3134;
@@ -5207,7 +5422,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 117";
 		rLen = 0;
-		rLoc = 3660;
+		rLoc = 5900;
 		rType = 0;
 		vrLen = 1050;
 		vrLoc = 2976;
@@ -5217,7 +5432,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 117";
 		rLen = 36;
-		rLoc = 3657;
+		rLoc = 5897;
 		rType = 0;
 		vrLen = 1062;
 		vrLoc = 2976;
@@ -5227,7 +5442,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 61";
 		rLen = 0;
-		rLoc = 1712;
+		rLoc = 2279;
 		rType = 0;
 		vrLen = 1112;
 		vrLoc = 692;
@@ -5237,7 +5452,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 53";
 		rLen = 0;
-		rLoc = 1520;
+		rLoc = 2133;
 		rType = 0;
 		vrLen = 1112;
 		vrLoc = 692;
@@ -5247,7 +5462,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 53";
 		rLen = 0;
-		rLoc = 1520;
+		rLoc = 2133;
 		rType = 0;
 		vrLen = 1107;
 		vrLoc = 692;
@@ -5258,7 +5473,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 128;
+		rLoc = 185;
 		rType = 1;
 	};
 	CDFEBFF8130DE2CF00A14307 /* PBXTextBookmark */ = {
@@ -5266,7 +5481,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 126";
 		rLen = 0;
-		rLoc = 4028;
+		rLoc = 6268;
 		rType = 0;
 		vrLen = 1072;
 		vrLoc = 2976;
@@ -5276,7 +5491,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 124";
 		rLen = 0;
-		rLoc = 3972;
+		rLoc = 6212;
 		rType = 0;
 		vrLen = 1066;
 		vrLoc = 2976;
@@ -5287,7 +5502,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 128;
+		rLoc = 185;
 		rType = 1;
 	};
 	CDFEBFFD130DE30D00A14307 /* PBXTextBookmark */ = {
@@ -5295,7 +5510,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 125";
 		rLen = 0;
-		rLoc = 3992;
+		rLoc = 6232;
 		rType = 0;
 		vrLen = 523;
 		vrLoc = 3485;
@@ -5305,7 +5520,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 123";
 		rLen = 9;
-		rLoc = 3901;
+		rLoc = 6141;
 		rType = 0;
 		vrLen = 1183;
 		vrLoc = 3078;
@@ -5315,7 +5530,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 46";
 		rLen = 0;
-		rLoc = 1285;
+		rLoc = 1812;
 		rType = 0;
 		vrLen = 987;
 		vrLoc = 823;
@@ -5345,7 +5560,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 165";
 		rLen = 0;
-		rLoc = 4691;
+		rLoc = 4686;
 		rType = 0;
 		vrLen = 693;
 		vrLoc = 5822;
@@ -5355,7 +5570,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 46";
 		rLen = 0;
-		rLoc = 1248;
+		rLoc = 1775;
 		rType = 0;
 		vrLen = 1116;
 		vrLoc = 694;
@@ -5365,7 +5580,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 16";
 		rLen = 0;
-		rLoc = 320;
+		rLoc = 291;
 		rType = 0;
 		vrLen = 1143;
 		vrLoc = 61;
@@ -5375,7 +5590,7 @@
 		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
 		name = "TouchController.m: 195";
 		rLen = 0;
-		rLoc = 7129;
+		rLoc = 7341;
 		rType = 0;
 		vrLen = 1263;
 		vrLoc = 4836;
@@ -5395,7 +5610,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 136";
 		rLen = 0;
-		rLoc = 4457;
+		rLoc = 4561;
 		rType = 0;
 		vrLen = 1473;
 		vrLoc = 2107;
@@ -5414,7 +5629,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 105";
 		rLen = 0;
-		rLoc = 2889;
+		rLoc = 2885;
 		rType = 0;
 		vrLen = 1109;
 		vrLoc = 2181;
@@ -5424,7 +5639,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 125";
 		rLen = 0;
-		rLoc = 3992;
+		rLoc = 6232;
 		rType = 0;
 		vrLen = 570;
 		vrLoc = 3659;
@@ -5443,7 +5658,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 105";
 		rLen = 0;
-		rLoc = 2869;
+		rLoc = 2865;
 		rType = 0;
 		vrLen = 535;
 		vrLoc = 2474;
@@ -5453,7 +5668,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 105";
 		rLen = 0;
-		rLoc = 2889;
+		rLoc = 2885;
 		rType = 0;
 		vrLen = 1119;
 		vrLoc = 2181;
@@ -5463,7 +5678,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 105";
 		rLen = 0;
-		rLoc = 2856;
+		rLoc = 2852;
 		rType = 0;
 		vrLen = 1026;
 		vrLoc = 2336;
@@ -5493,7 +5708,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 229";
 		rLen = 0;
-		rLoc = 6858;
+		rLoc = 6854;
 		rType = 0;
 		vrLen = 1343;
 		vrLoc = 3216;
@@ -5503,7 +5718,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 112";
 		rLen = 0;
-		rLoc = 3082;
+		rLoc = 3078;
 		rType = 0;
 		vrLen = 1010;
 		vrLoc = 2491;
@@ -5513,7 +5728,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 228";
 		rLen = 0;
-		rLoc = 6744;
+		rLoc = 6740;
 		rType = 0;
 		vrLen = 1109;
 		vrLoc = 6354;
@@ -5533,7 +5748,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 228";
 		rLen = 0;
-		rLoc = 6744;
+		rLoc = 6740;
 		rType = 0;
 		vrLen = 1148;
 		vrLoc = 6296;
@@ -5543,7 +5758,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 110";
 		rLen = 0;
-		rLoc = 3043;
+		rLoc = 3039;
 		rType = 0;
 		vrLen = 1099;
 		vrLoc = 2185;
@@ -5563,7 +5778,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 148";
 		rLen = 0;
-		rLoc = 4217;
+		rLoc = 4212;
 		rType = 0;
 		vrLen = 1364;
 		vrLoc = 3679;
@@ -5573,7 +5788,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 71";
 		rLen = 0;
-		rLoc = 2364;
+		rLoc = 2513;
 		rType = 0;
 		vrLen = 1087;
 		vrLoc = 2115;
@@ -5603,7 +5818,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 107";
 		rLen = 0;
-		rLoc = 2869;
+		rLoc = 2865;
 		rType = 0;
 		vrLen = 530;
 		vrLoc = 2732;
@@ -5614,7 +5829,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 72;
+		rLoc = 71;
 		rType = 1;
 	};
 	CDFEC06A130E1D6D00A14307 /* PBXTextBookmark */ = {
@@ -5622,7 +5837,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 73";
 		rLen = 0;
-		rLoc = 2447;
+		rLoc = 2596;
 		rType = 0;
 		vrLen = 680;
 		vrLoc = 2184;
@@ -5633,7 +5848,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 72;
+		rLoc = 71;
 		rType = 1;
 	};
 	CDFEC06C130E1D7600A14307 /* PBXTextBookmark */ = {
@@ -5641,7 +5856,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 73";
 		rLen = 0;
-		rLoc = 2447;
+		rLoc = 2596;
 		rType = 0;
 		vrLen = 684;
 		vrLoc = 2184;
@@ -5651,7 +5866,7 @@
 		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
 		name = "RootViewController.m: 108";
 		rLen = 0;
-		rLoc = 2957;
+		rLoc = 2953;
 		rType = 0;
 		vrLen = 1094;
 		vrLoc = 2336;
@@ -5661,7 +5876,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 138";
 		rLen = 0;
-		rLoc = 4039;
+		rLoc = 4034;
 		rType = 0;
 		vrLen = 1507;
 		vrLoc = 3052;
@@ -5671,7 +5886,7 @@
 		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
 		name = "GestureViewController.h: 46";
 		rLen = 0;
-		rLoc = 1248;
+		rLoc = 1775;
 		rType = 0;
 		vrLen = 1112;
 		vrLoc = 692;
@@ -5681,7 +5896,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 162";
 		rLen = 0;
-		rLoc = 5135;
+		rLoc = 6756;
 		rType = 0;
 		vrLen = 1364;
 		vrLoc = 4411;
@@ -5691,7 +5906,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 387";
 		rLen = 0;
-		rLoc = 12155;
+		rLoc = 15387;
 		rType = 0;
 		vrLen = 985;
 		vrLoc = 11220;
@@ -5701,7 +5916,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 387";
 		rLen = 0;
-		rLoc = 12155;
+		rLoc = 15387;
 		rType = 0;
 		vrLen = 985;
 		vrLoc = 11220;
@@ -5711,7 +5926,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 136";
 		rLen = 0;
-		rLoc = 4457;
+		rLoc = 4561;
 		rType = 0;
 		vrLen = 1445;
 		vrLoc = 2135;
@@ -5721,7 +5936,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 123";
 		rLen = 0;
-		rLoc = 3872;
+		rLoc = 3948;
 		rType = 0;
 		vrLen = 1487;
 		vrLoc = 2714;
@@ -5731,7 +5946,7 @@
 		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
 		name = "CommandInterpreter.m: 146";
 		rLen = 0;
-		rLoc = 4593;
+		rLoc = 4955;
 		rType = 0;
 		vrLen = 1240;
 		vrLoc = 3404;
@@ -5741,7 +5956,7 @@
 		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
 		name = "SocketManager.m: 215";
 		rLen = 0;
-		rLoc = 5847;
+		rLoc = 5842;
 		rType = 0;
 		vrLen = 859;
 		vrLoc = 5692;
@@ -5751,7 +5966,7 @@
 		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
 		name = "NetServiceManager.m: 144";
 		rLen = 0;
-		rLoc = 4111;
+		rLoc = 4231;
 		rType = 0;
 		vrLen = 1115;
 		vrLoc = 3174;
@@ -5761,7 +5976,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 387";
 		rLen = 0;
-		rLoc = 12155;
+		rLoc = 15387;
 		rType = 0;
 		vrLen = 985;
 		vrLoc = 11220;
@@ -5771,7 +5986,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 374";
 		rLen = 0;
-		rLoc = 11840;
+		rLoc = 14959;
 		rType = 0;
 		vrLen = 1054;
 		vrLoc = 11140;
@@ -5781,7 +5996,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 374";
 		rLen = 0;
-		rLoc = 11840;
+		rLoc = 14959;
 		rType = 0;
 		vrLen = 1054;
 		vrLoc = 11140;
@@ -5791,7 +6006,7 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 363";
 		rLen = 0;
-		rLoc = 11600;
+		rLoc = 14719;
 		rType = 0;
 		vrLen = 960;
 		vrLoc = 11292;
@@ -5801,9 +6016,2353 @@
 		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
 		name = "GestureViewController.m: 367";
 		rLen = 0;
-		rLoc = 11677;
+		rLoc = 14796;
 		rType = 0;
 		vrLen = 1532;
 		vrLoc = 6528;
+	};
+	CDFEC0D3130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 141";
+		rLen = 0;
+		rLoc = 4821;
+		rType = 0;
+		vrLen = 1340;
+		vrLoc = 3378;
+	};
+	CDFEC0D4130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 17";
+		rLen = 0;
+		rLoc = 358;
+		rType = 0;
+		vrLen = 1113;
+		vrLoc = 55;
+	};
+	CDFEC0D5130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA2130A4BA000A14307 /* SocketManager.h */;
+		name = "SocketManager.h: 30";
+		rLen = 0;
+		rLoc = 458;
+		rType = 0;
+		vrLen = 632;
+		vrLoc = 150;
+	};
+	CDFEC0D6130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 195";
+		rLen = 0;
+		rLoc = 7341;
+		rType = 0;
+		vrLen = 929;
+		vrLoc = 0;
+	};
+	CDFEC0D7130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */;
+		name = "AccelerometerController.h: 30";
+		rLen = 0;
+		rLoc = 842;
+		rType = 0;
+		vrLen = 1007;
+		vrLoc = 0;
+	};
+	CDFEC0D8130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */;
+		name = "AccelerometerController.m: 15";
+		rLen = 0;
+		rLoc = 328;
+		rType = 0;
+		vrLen = 1129;
+		vrLoc = 101;
+	};
+	CDFEC0D9130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 23";
+		rLen = 0;
+		rLoc = 492;
+		rType = 0;
+		vrLen = 911;
+		vrLoc = 46;
+	};
+	CDFEC0DA130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 125";
+		rLen = 0;
+		rLoc = 3506;
+		rType = 0;
+		vrLen = 1386;
+		vrLoc = 3240;
+	};
+	CDFEC0DB130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286DF0D94DF7D0034E888 /* RootViewController.h */;
+		name = "RootViewController.h: 17";
+		rLen = 0;
+		rLoc = 456;
+		rType = 0;
+		vrLen = 711;
+		vrLoc = 0;
+	};
+	CDFEC0DC130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 105";
+		rLen = 0;
+		rLoc = 2807;
+		rType = 0;
+		vrLen = 965;
+		vrLoc = 55;
+	};
+	CDFEC0DD130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 17";
+		rLen = 0;
+		rLoc = 373;
+		rType = 0;
+		vrLen = 1130;
+		vrLoc = 0;
+	};
+	CDFEC0DE130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 41";
+		rLen = 0;
+		rLoc = 1011;
+		rType = 0;
+		vrLen = 1136;
+		vrLoc = 842;
+	};
+	CDFEC0DF130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
+		name = "NetServiceManager.m: 144";
+		rLen = 0;
+		rLoc = 4231;
+		rType = 0;
+		vrLen = 957;
+		vrLoc = 0;
+	};
+	CDFEC0E0130F461A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AppDelegate.m */;
+		name = "AppDelegate.m: 9";
+		rLen = 0;
+		rLoc = 183;
+		rType = 0;
+		vrLen = 1097;
+		vrLoc = 0;
+	};
+	CDFEC0E1130F461A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB63130A498600A14307 /* Default@2x~iphone.png */;
+	};
+	CDFEC0E2130F461A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB60130A498600A14307 /* iOS-logo-114x114.png */;
+	};
+	CDFEC0E3130F461A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */;
+	};
+	CDFEC0E4130F461A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */;
+	};
+	CDFEC0E5130F461A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */;
+	};
+	CDFEC0E6130F461A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB6F130A498C00A14307 /* Default~iPad.png */;
+	};
+	CDFEC0E7130F461A00A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEC0E8130F461A00A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEC0F413146D3100A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Class 'GestureViewController' does not implement the 'UIActionSheetDelegate' protocol";
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 123;
+		rType = 1;
+	};
+	CDFEC0F513146D3100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 114";
+		rLen = 0;
+		rLoc = 4231;
+		rType = 0;
+		vrLen = 740;
+		vrLoc = 3393;
+	};
+	CDFEC0FA13147A6A00A14307 /* AudioController.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {620, 510}}";
+			sepNavSelRange = "{395, 0}";
+			sepNavVisRange = "{0, 876}";
+		};
+	};
+	CDFEC0FB13147A6A00A14307 /* AudioController.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {603, 2028}}";
+			sepNavSelRange = "{1817, 0}";
+			sepNavVisRange = "{1430, 1249}";
+		};
+	};
+	CDFEC0FE13147E9A00A14307 /* AudioStreamer.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {620, 2301}}";
+			sepNavSelRange = "{4662, 0}";
+			sepNavVisRange = "{4070, 596}";
+		};
+	};
+	CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {620, 23283}}";
+			sepNavSelRange = "{45945, 0}";
+			sepNavVisRange = "{45272, 674}";
+		};
+	};
+	CDFEC101131492D900A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 114";
+		rLen = 0;
+		rLoc = 4231;
+		rType = 0;
+		vrLen = 620;
+		vrLoc = 3224;
+	};
+	CDFEC1261314B98100A14307 /* ResourceManager.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {603, 509}}";
+			sepNavSelRange = "{307, 0}";
+			sepNavVisRange = "{0, 736}";
+		};
+	};
+	CDFEC1271314B98100A14307 /* ResourceManager.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {603, 1638}}";
+			sepNavSelRange = "{2410, 0}";
+			sepNavVisRange = "{0, 1080}";
+		};
+	};
+	CDFEC15A1315929800A14307 /* AsyncImageView.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {603, 507}}";
+			sepNavSelRange = "{479, 0}";
+			sepNavVisRange = "{0, 756}";
+		};
+	};
+	CDFEC15B1315929800A14307 /* AsyncImageView.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {941, 1313}}";
+			sepNavSelRange = "{2869, 0}";
+			sepNavVisRange = "{912, 721}";
+		};
+	};
+	CDFEC1651315C02C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 124";
+		rLen = 0;
+		rLoc = 4231;
+		rType = 0;
+		vrLen = 785;
+		vrLoc = 3769;
+	};
+	CDFEC1661315C02C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 42";
+		rLen = 0;
+		rLoc = 1294;
+		rType = 0;
+		vrLen = 620;
+		vrLoc = 219;
+	};
+	CDFEC1671315C02C00A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Property 'resourceKey' requires method '-resourceKey' to be defined - use @synthesize, @dynamic or provide a method implementation";
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 99;
+		rType = 1;
+	};
+	CDFEC1681315C02C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 81";
+		rLen = 0;
+		rLoc = 2869;
+		rType = 0;
+		vrLen = 429;
+		vrLoc = 1748;
+	};
+	CDFEC16F1315C05000A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEC1701315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623240D0F684500981E51 /* AppDelegate.h */;
+		name = "AppDelegate.h: 15";
+		rLen = 0;
+		rLoc = 337;
+		rType = 0;
+		vrLen = 488;
+		vrLoc = 0;
+	};
+	CDFEC1711315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 105";
+		rLen = 0;
+		rLoc = 2807;
+		rType = 0;
+		vrLen = 1146;
+		vrLoc = 6337;
+	};
+	CDFEC1721315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */;
+		name = "NSStreamAdditions.m: 34";
+		rLen = 0;
+		rLoc = 1058;
+		rType = 0;
+		vrLen = 1233;
+		vrLoc = 154;
+	};
+	CDFEC1731315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */;
+		name = "NSStreamAdditions.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 464;
+		vrLoc = 0;
+	};
+	CDFEC1741315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 145";
+		rLen = 0;
+		rLoc = 4821;
+		rType = 0;
+		vrLen = 1399;
+		vrLoc = 3561;
+	};
+	CDFEC1751315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
+		name = "NetServiceManager.m: 144";
+		rLen = 0;
+		rLoc = 4231;
+		rType = 0;
+		vrLen = 957;
+		vrLoc = 0;
+	};
+	CDFEC1761315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */;
+		name = "NetServiceManager.h: 15";
+		rLen = 0;
+		rLoc = 308;
+		rType = 0;
+		vrLen = 840;
+		vrLoc = 0;
+	};
+	CDFEC1771315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */;
+		name = "AccelerometerController.m: 17";
+		rLen = 0;
+		rLoc = 375;
+		rType = 0;
+		vrLen = 1221;
+		vrLoc = 0;
+	};
+	CDFEC1781315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 195";
+		rLen = 0;
+		rLoc = 7341;
+		rType = 0;
+		vrLen = 1131;
+		vrLoc = 518;
+	};
+	CDFEC1791315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 17";
+		rLen = 0;
+		rLoc = 358;
+		rType = 0;
+		vrLen = 1075;
+		vrLoc = 93;
+	};
+	CDFEC17A1315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */;
+		name = "AccelerometerController.h: 30";
+		rLen = 0;
+		rLoc = 842;
+		rType = 0;
+		vrLen = 1007;
+		vrLoc = 0;
+	};
+	CDFEC17B1315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FE13147E9A00A14307 /* AudioStreamer.h */;
+		name = "AudioStreamer.h: 163";
+		rLen = 0;
+		rLoc = 4662;
+		rType = 0;
+		vrLen = 596;
+		vrLoc = 4070;
+	};
+	CDFEC17C1315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */;
+		name = "AudioStreamer.m: 1791";
+		rLen = 0;
+		rLoc = 45945;
+		rType = 0;
+		vrLen = 674;
+		vrLoc = 45272;
+	};
+	CDFEC17D1315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FA13147A6A00A14307 /* AudioController.h */;
+		name = "AudioController.h: 19";
+		rLen = 0;
+		rLoc = 395;
+		rType = 0;
+		vrLen = 876;
+		vrLoc = 0;
+	};
+	CDFEC17E1315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */;
+		name = "AudioController.m: 52";
+		rLen = 0;
+		rLoc = 1817;
+		rType = 0;
+		vrLen = 1113;
+		vrLoc = 955;
+	};
+	CDFEC17F1315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 219";
+		rLen = 0;
+		rLoc = 7292;
+		rType = 0;
+		vrLen = 1191;
+		vrLoc = 6754;
+	};
+	CDFEC1801315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 43";
+		rLen = 0;
+		rLoc = 1011;
+		rType = 0;
+		vrLen = 979;
+		vrLoc = 848;
+	};
+	CDFEC1811315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA2130A4BA000A14307 /* SocketManager.h */;
+		name = "SocketManager.h: 11";
+		rLen = 0;
+		rLoc = 245;
+		rType = 0;
+		vrLen = 606;
+		vrLoc = 0;
+	};
+	CDFEC1821315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 29";
+		rLen = 0;
+		rLoc = 631;
+		rType = 0;
+		vrLen = 895;
+		vrLoc = 184;
+	};
+	CDFEC1831315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15A1315929800A14307 /* AsyncImageView.h */;
+		name = "AsyncImageView.h: 15";
+		rLen = 0;
+		rLoc = 252;
+		rType = 0;
+		vrLen = 704;
+		vrLoc = 0;
+	};
+	CDFEC1841315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 85";
+		rLen = 0;
+		rLoc = 3321;
+		rType = 0;
+		vrLen = 1289;
+		vrLoc = 2161;
+	};
+	CDFEC1851315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1261314B98100A14307 /* ResourceManager.h */;
+		name = "ResourceManager.h: 14";
+		rLen = 0;
+		rLoc = 307;
+		rType = 0;
+		vrLen = 736;
+		vrLoc = 0;
+	};
+	CDFEC1861315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AppDelegate.m */;
+		name = "AppDelegate.m: 9";
+		rLen = 0;
+		rLoc = 183;
+		rType = 0;
+		vrLen = 932;
+		vrLoc = 0;
+	};
+	CDFEC1871315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 125";
+		rLen = 0;
+		rLoc = 3506;
+		rType = 0;
+		vrLen = 864;
+		vrLoc = 179;
+	};
+	CDFEC1881315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 14";
+		rLen = 0;
+		rLoc = 228;
+		rType = 0;
+		vrLen = 880;
+		vrLoc = 0;
+	};
+	CDFEC1891315C05000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 54";
+		rLen = 0;
+		rLoc = 2059;
+		rType = 0;
+		vrLen = 1076;
+		vrLoc = 1080;
+	};
+	CDFEC18A1315C16200A14307 /* SocketManager.m:136 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		functionName = "-stream:handleEvent:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 136;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767316;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC18C1315C16400A14307 /* SocketManager.m:137 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		functionName = "-stream:handleEvent:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 137;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767372;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC18E1315C16400A14307 /* SocketManager.m:138 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		functionName = "-stream:handleEvent:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 138;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767447;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1961315C40400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 52";
+		rLen = 0;
+		rLoc = 1952;
+		rType = 0;
+		vrLen = 1099;
+		vrLoc = 1080;
+	};
+	CDFEC1971315C40400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 85";
+		rLen = 0;
+		rLoc = 3321;
+		rType = 0;
+		vrLen = 1409;
+		vrLoc = 1838;
+	};
+	CDFEC1981315C40400A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEC1991315C40400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */;
+		name = "AudioController.m: 52";
+		rLen = 0;
+		rLoc = 1817;
+		rType = 0;
+		vrLen = 1107;
+		vrLoc = 955;
+	};
+	CDFEC19A1315C40400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 220";
+		rLen = 0;
+		rLoc = 7288;
+		rType = 0;
+		vrLen = 1150;
+		vrLoc = 6734;
+	};
+	CDFEC19B1315C40400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 137";
+		rLen = 0;
+		rLoc = 3999;
+		rType = 0;
+		vrLen = 1475;
+		vrLoc = 3052;
+	};
+	CDFEC19C1315C40400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 137";
+		rLen = 0;
+		rLoc = 3999;
+		rType = 0;
+		vrLen = 1440;
+		vrLoc = 2239;
+	};
+	CDFEC1AA1315C51B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 137";
+		rLen = 0;
+		rLoc = 3999;
+		rType = 0;
+		vrLen = 1592;
+		vrLoc = 1878;
+	};
+	CDFEC1AB1315C51B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 220";
+		rLen = 0;
+		rLoc = 7288;
+		rType = 0;
+		vrLen = 1203;
+		vrLoc = 6729;
+	};
+	CDFEC1AC1315C51B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 226";
+		rLen = 0;
+		rLoc = 7765;
+		rType = 0;
+		vrLen = 1166;
+		vrLoc = 6729;
+	};
+	CDFEC1AF1315C58B00A14307 /* ResourceManager.m:61 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-fetchImageViewUsingResource:frame:";
+		hitCount = 1;
+		ignoreCount = 0;
+		lineNumber = 61;
+		location = TrickplayController_v2;
+		modificationTime = 320197429.622525;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1B11315C58D00A14307 /* ResourceManager.m:63 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-fetchImageViewUsingResource:frame:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 63;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767531;
+		originalNumberOfMultipleMatches = 1;
+		state = 2;
+	};
+	CDFEC1B31315C59100A14307 /* ResourceManager.m:66 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-fetchImageViewUsingResource:frame:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 66;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.7676;
+		originalNumberOfMultipleMatches = 1;
+		state = 2;
+	};
+	CDFEC1B51315C59200A14307 /* ResourceManager.m:69 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-fetchImageViewUsingResource:frame:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 69;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767637;
+		originalNumberOfMultipleMatches = 1;
+		state = 2;
+	};
+	CDFEC1B71315C59300A14307 /* ResourceManager.m:74 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-fetchImageViewUsingResource:frame:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 74;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767683;
+		originalNumberOfMultipleMatches = 1;
+		state = 2;
+	};
+	CDFEC1B91315C59500A14307 /* ResourceManager.m:84 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-fetchImageViewUsingResource:frame:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 84;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767718;
+		originalNumberOfMultipleMatches = 1;
+		state = 2;
+	};
+	CDFEC1BB1315C59600A14307 /* ResourceManager.m:85 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-fetchImageViewUsingResource:frame:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 85;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767749;
+		originalNumberOfMultipleMatches = 1;
+		state = 2;
+	};
+	CDFEC1BF1315C59B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 226";
+		rLen = 0;
+		rLoc = 7765;
+		rType = 0;
+		vrLen = 1166;
+		vrLoc = 6729;
+	};
+	CDFEC1C01315C59B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 96";
+		rLen = 0;
+		rLoc = 2308;
+		rType = 0;
+		vrLen = 1441;
+		vrLoc = 3017;
+	};
+	CDFEC1C11315C59B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 85";
+		rLen = 0;
+		rLoc = 3321;
+		rType = 0;
+		vrLen = 1501;
+		vrLoc = 1829;
+	};
+	CDFEC1C21315C59B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 85";
+		rLen = 0;
+		rLoc = 3321;
+		rType = 0;
+		vrLen = 1418;
+		vrLoc = 1829;
+	};
+	CDFEC1C41315C5F400A14307 /* ResourceManager.m:91 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-dataReceived:resourcekey:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 91;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767801;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1C61315C5F800A14307 /* ResourceManager.m:92 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		functionName = "-dataReceived:resourcekey:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 92;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767853;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1CA1315C63500A14307 /* AsyncImageView.m:45 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connection:didReceiveData:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 45;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.767921;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1CC1315C63600A14307 /* AsyncImageView.m:46 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connection:didReceiveData:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 46;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768118;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1CE1315C63700A14307 /* AsyncImageView.m:50 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connection:didReceiveData:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 50;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768173;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1D01315C63A00A14307 /* AsyncImageView.m:54 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 54;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768249;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1D21315C63C00A14307 /* AsyncImageView.m:56 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 56;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768309;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1D41315C63D00A14307 /* AsyncImageView.m:58 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 58;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768385;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1D61315C63E00A14307 /* AsyncImageView.m:61 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 61;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768447;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1D81315C64000A14307 /* AsyncImageView.m:66 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 66;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768501;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1DA1315C64100A14307 /* AsyncImageView.m:67 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 67;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.76861;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1DC1315C64300A14307 /* AsyncImageView.m:68 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 68;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768763;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1DE1315C64300A14307 /* AsyncImageView.m:69 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 69;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768873;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1E01315C64800A14307 /* AsyncImageView.m:72 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 72;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.768962;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1E21315C64A00A14307 /* AsyncImageView.m:73 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 73;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.769066;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1E41315C64B00A14307 /* AsyncImageView.m:76 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-connectionDidFinishLoading:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 76;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.76917;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC1FE1315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15A1315929800A14307 /* AsyncImageView.h */;
+		name = "AsyncImageView.h: 15";
+		rLen = 0;
+		rLoc = 252;
+		rType = 0;
+		vrLen = 704;
+		vrLoc = 0;
+	};
+	CDFEC1FF1315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */;
+		name = "NSStreamAdditions.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 464;
+		vrLoc = 0;
+	};
+	CDFEC2001315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */;
+		name = "NSStreamAdditions.m: 34";
+		rLen = 0;
+		rLoc = 1058;
+		rType = 0;
+		vrLen = 1236;
+		vrLoc = 151;
+	};
+	CDFEC2011315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 224";
+		rLen = 0;
+		rLoc = 7569;
+		rType = 0;
+		vrLen = 1126;
+		vrLoc = 6721;
+	};
+	CDFEC2021315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 150";
+		rLen = 0;
+		rLoc = 4892;
+		rType = 0;
+		vrLen = 1290;
+		vrLoc = 1819;
+	};
+	CDFEC2031315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 86";
+		rLen = 0;
+		rLoc = 3370;
+		rType = 0;
+		vrLen = 1257;
+		vrLoc = 2278;
+	};
+	CDFEC2041315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		rLen = 0;
+		rLoc = 75;
+		rType = 1;
+	};
+	CDFEC2051315C9B100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 65";
+		rLen = 0;
+		rLoc = 2434;
+		rType = 0;
+		vrLen = 1169;
+		vrLoc = 856;
+	};
+	CDFEC2081315C9D300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 75";
+		rLen = 0;
+		rLoc = 2674;
+		rType = 0;
+		vrLen = 1137;
+		vrLoc = 1082;
+	};
+	CDFEC2091315C9E400A14307 /* AsyncImageView.m:88 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		functionName = "-dealloc";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 88;
+		location = TrickplayController_v2;
+		modificationTime = 320197422.769288;
+		originalNumberOfMultipleMatches = 1;
+		state = 1;
+	};
+	CDFEC20D1315C9EA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 75";
+		rLen = 0;
+		rLoc = 2674;
+		rType = 0;
+		vrLen = 1109;
+		vrLoc = 1082;
+	};
+	CDFEC20E1315C9EA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 75";
+		rLen = 0;
+		rLoc = 2674;
+		rType = 0;
+		vrLen = 1105;
+		vrLoc = 1082;
+	};
+	CDFEC2181315CB4C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 34";
+		rLen = 0;
+		rLoc = 455;
+		rType = 0;
+		vrLen = 919;
+		vrLoc = 208;
+	};
+	CDFEC2191315CB4C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 60";
+		rLen = 0;
+		rLoc = 2080;
+		rType = 0;
+		vrLen = 1438;
+		vrLoc = 1930;
+	};
+	CDFEC21A1315CB4C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		rLen = 0;
+		rLoc = 45;
+		rType = 1;
+	};
+	CDFEC21B1315CB4C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 83";
+		rLen = 0;
+		rLoc = 2838;
+		rType = 0;
+		vrLen = 1081;
+		vrLoc = 1204;
+	};
+	CDFEC2261315CE5500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 60";
+		rLen = 0;
+		rLoc = 2080;
+		rType = 0;
+		vrLen = 1500;
+		vrLoc = 1868;
+	};
+	CDFEC2271315CE5500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		rLen = 0;
+		rLoc = 45;
+		rType = 1;
+	};
+	CDFEC2281315CE5500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 76";
+		rLen = 0;
+		rLoc = 2682;
+		rType = 0;
+		vrLen = 995;
+		vrLoc = 1316;
+	};
+	CDFEC22F1315D32800A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 60";
+		rLen = 0;
+		rLoc = 2080;
+		rType = 0;
+		vrLen = 1499;
+		vrLoc = 1868;
+	};
+	CDFEC2301315D32800A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 30";
+		rLen = 15;
+		rLoc = 694;
+		rType = 0;
+		vrLen = 1086;
+		vrLoc = 92;
+	};
+	CDFEC2311315D32800A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15A1315929800A14307 /* AsyncImageView.h */;
+		name = "AsyncImageView.h: 15";
+		rLen = 0;
+		rLoc = 252;
+		rType = 0;
+		vrLen = 704;
+		vrLoc = 0;
+	};
+	CDFEC2321315D32800A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+			UIStatusBarHidden,
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEC2331315D32800A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */;
+		name = "AudioController.m: 52";
+		rLen = 0;
+		rLoc = 1817;
+		rType = 0;
+		vrLen = 1113;
+		vrLoc = 952;
+	};
+	CDFEC2341315D32800A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */;
+		name = "AudioController.m: 52";
+		rLen = 0;
+		rLoc = 1817;
+		rType = 0;
+		vrLen = 1110;
+		vrLoc = 952;
+	};
+	CDFEC23A1315D3AD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */;
+		name = "AudioController.m: 52";
+		rLen = 0;
+		rLoc = 1817;
+		rType = 0;
+		vrLen = 1110;
+		vrLoc = 952;
+	};
+	CDFEC23B1315D3AD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 67";
+		rLen = 0;
+		rLoc = 2421;
+		rType = 0;
+		vrLen = 1080;
+		vrLoc = 2519;
+	};
+	CDFEC23C1315D3AD00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 76";
+		rLen = 0;
+		rLoc = 2682;
+		rType = 0;
+		vrLen = 995;
+		vrLoc = 1316;
+	};
+	CDFEC23D1315D3DB00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 47";
+		rLen = 0;
+		rLoc = 1680;
+		rType = 0;
+		vrLen = 1236;
+		vrLoc = 859;
+	};
+	CDFEC2421315D4C500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 48";
+		rLen = 0;
+		rLoc = 1687;
+		rType = 0;
+		vrLen = 1235;
+		vrLoc = 859;
+	};
+	CDFEC2431315D58600A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 68";
+		rLen = 0;
+		rLoc = 2552;
+		rType = 0;
+		vrLen = 1130;
+		vrLoc = 1036;
+	};
+	CDFEC2461315F2FA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 22";
+		rLen = 0;
+		rLoc = 444;
+		rType = 0;
+		vrLen = 1036;
+		vrLoc = 0;
+	};
+	CDFEC2471315F2FA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 150";
+		rLen = 0;
+		rLoc = 4892;
+		rType = 0;
+		vrLen = 1312;
+		vrLoc = 612;
+	};
+	CDFEC2481315F2FA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */;
+		name = "AudioController.m: 52";
+		rLen = 0;
+		rLoc = 1817;
+		rType = 0;
+		vrLen = 1249;
+		vrLoc = 1430;
+	};
+	CDFEC2491315F2FA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 67";
+		rLen = 0;
+		rLoc = 2421;
+		rType = 0;
+		vrLen = 1483;
+		vrLoc = 1684;
+	};
+	CDFEC24A1315F2FA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 240";
+		rLen = 0;
+		rLoc = 8305;
+		rType = 0;
+		vrLen = 1475;
+		vrLoc = 7604;
+	};
+	CDFEC24B1315F2FA00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 263";
+		rLen = 0;
+		rLoc = 9370;
+		rType = 0;
+		vrLen = 1598;
+		vrLoc = 7627;
+	};
+	CDFEC2641316DBF000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 217";
+		rLen = 0;
+		rLoc = 5867;
+		rType = 0;
+		vrLen = 726;
+		vrLoc = 5614;
+	};
+	CDFEC2651316DBF000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 263";
+		rLen = 0;
+		rLoc = 9370;
+		rType = 0;
+		vrLen = 914;
+		vrLoc = 13995;
+	};
+	CDFEC2661316DBF000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */;
+		name = "AccelerometerController.h: 30";
+		rLen = 0;
+		rLoc = 842;
+		rType = 0;
+		vrLen = 1007;
+		vrLoc = 0;
+	};
+	CDFEC2671316DBF000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */;
+		name = "AccelerometerController.m: 24";
+		rLen = 0;
+		rLoc = 608;
+		rType = 0;
+		vrLen = 1227;
+		vrLoc = 0;
+	};
+	CDFEC2681316DBF000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 195";
+		rLen = 0;
+		rLoc = 7341;
+		rType = 0;
+		vrLen = 1097;
+		vrLoc = 186;
+	};
+	CDFEC2691316DBF000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 71";
+		rLen = 0;
+		rLoc = 2588;
+		rType = 0;
+		vrLen = 1386;
+		vrLoc = 1684;
+	};
+	CDFEC29213170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */;
+		name = "NetServiceManager.h: 33";
+		rLen = 0;
+		rLoc = 693;
+		rType = 0;
+		vrLen = 866;
+		vrLoc = 0;
+	};
+	CDFEC29313170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1261314B98100A14307 /* ResourceManager.h */;
+		name = "ResourceManager.h: 14";
+		rLen = 0;
+		rLoc = 307;
+		rType = 0;
+		vrLen = 736;
+		vrLoc = 0;
+	};
+	CDFEC29413170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */;
+		name = "NSStreamAdditions.m: 34";
+		rLen = 0;
+		rLoc = 1058;
+		rType = 0;
+		vrLen = 1231;
+		vrLoc = 151;
+	};
+	CDFEC29513170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */;
+		name = "NetServiceManager.m: 110";
+		rLen = 0;
+		rLoc = 2990;
+		rType = 0;
+		vrLen = 1364;
+		vrLoc = 1962;
+	};
+	CDFEC29613170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 261";
+		rLen = 23;
+		rLoc = 7634;
+		rType = 0;
+		vrLen = 1021;
+		vrLoc = 7015;
+	};
+	CDFEC29713170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15A1315929800A14307 /* AsyncImageView.h */;
+		name = "AsyncImageView.h: 15";
+		rLen = 0;
+		rLoc = 252;
+		rType = 0;
+		vrLen = 704;
+		vrLoc = 0;
+	};
+	CDFEC29813170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 29";
+		rLen = 0;
+		rLoc = 631;
+		rType = 0;
+		vrLen = 929;
+		vrLoc = 150;
+	};
+	CDFEC29913170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 23";
+		rLen = 0;
+		rLoc = 502;
+		rType = 0;
+		vrLen = 1021;
+		vrLoc = 0;
+	};
+	CDFEC29A13170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA2130A4BA000A14307 /* SocketManager.h */;
+		name = "SocketManager.h: 11";
+		rLen = 0;
+		rLoc = 245;
+		rType = 0;
+		vrLen = 946;
+		vrLoc = 414;
+	};
+	CDFEC29B13170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 72";
+		rLen = 0;
+		rLoc = 1588;
+		rType = 0;
+		vrLen = 1511;
+		vrLoc = 3047;
+	};
+	CDFEC29C13170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */;
+		name = "AccelerometerController.m: 24";
+		rLen = 0;
+		rLoc = 608;
+		rType = 0;
+		vrLen = 1396;
+		vrLoc = 3019;
+	};
+	CDFEC29D13170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 17";
+		rLen = 0;
+		rLoc = 358;
+		rType = 0;
+		vrLen = 1075;
+		vrLoc = 93;
+	};
+	CDFEC29E13170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 28";
+		rLen = 0;
+		rLoc = 639;
+		rType = 0;
+		vrLen = 926;
+		vrLoc = 0;
+	};
+	CDFEC29F13170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 26";
+		rLen = 0;
+		rLoc = 713;
+		rType = 0;
+		vrLen = 1244;
+		vrLoc = 714;
+	};
+	CDFEC2A013170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 42";
+		rLen = 0;
+		rLoc = 1536;
+		rType = 0;
+		vrLen = 917;
+		vrLoc = 1420;
+	};
+	CDFEC2A113170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 414";
+		rLen = 0;
+		rLoc = 14220;
+		rType = 0;
+		vrLen = 1252;
+		vrLoc = 12660;
+	};
+	CDFEC2A213170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 43";
+		rLen = 0;
+		rLoc = 1011;
+		rType = 0;
+		vrLen = 1099;
+		vrLoc = 807;
+	};
+	CDFEC2A313170EA100A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 55";
+		rLen = 0;
+		rLoc = 1401;
+		rType = 0;
+		vrLen = 1062;
+		vrLoc = 807;
+	};
+	CDFEC2C11317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 18";
+		rLen = 0;
+		rLoc = 445;
+		rType = 0;
+		vrLen = 1029;
+		vrLoc = 152;
+	};
+	CDFEC2C21317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 262";
+		rLen = 0;
+		rLoc = 7664;
+		rType = 0;
+		vrLen = 745;
+		vrLoc = 7323;
+	};
+	CDFEC2C31317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */;
+		name = "CommandInterpreter.h: 24";
+		rLen = 0;
+		rLoc = 462;
+		rType = 0;
+		vrLen = 913;
+		vrLoc = 186;
+	};
+	CDFEC2C41317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */;
+		name = "NSStreamAdditions.m: 34";
+		rLen = 0;
+		rLoc = 1058;
+		rType = 0;
+		vrLen = 1230;
+		vrLoc = 151;
+	};
+	CDFEC2C51317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */;
+		name = "NSStreamAdditions.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 464;
+		vrLoc = 0;
+	};
+	CDFEC2C61317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */;
+		name = "CommandInterpreter.m: 133";
+		rLen = 0;
+		rLoc = 4252;
+		rType = 0;
+		vrLen = 1361;
+		vrLoc = 3643;
+	};
+	CDFEC2C71317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 82";
+		rLen = 0;
+		rLoc = 3092;
+		rType = 0;
+		vrLen = 1486;
+		vrLoc = 2393;
+	};
+	CDFEC2C81317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 70";
+		rLen = 0;
+		rLoc = 2410;
+		rType = 0;
+		vrLen = 1513;
+		vrLoc = 1955;
+	};
+	CDFEC2C91317468500A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB64130A498600A14307 /* Default~iphone.png */;
+	};
+	CDFEC2CA1317468500A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB63130A498600A14307 /* Default@2x~iphone.png */;
+	};
+	CDFEC2CB1317468500A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB6F130A498C00A14307 /* Default~iPad.png */;
+	};
+	CDFEC2CC1317468500A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */;
+	};
+	CDFEC2CD1317468500A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */;
+	};
+	CDFEC2CE1317468500A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB62130A498600A14307 /* background~iphone.png */;
+	};
+	CDFEC2CF1317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 72";
+		rLen = 0;
+		rLoc = 1588;
+		rType = 0;
+		vrLen = 1471;
+		vrLoc = 3083;
+	};
+	CDFEC2D01317468500A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEC2D11317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* AppDelegate.m */;
+		name = "AppDelegate.m: 9";
+		rLen = 0;
+		rLoc = 183;
+		rType = 0;
+		vrLen = 1050;
+		vrLoc = 0;
+	};
+	CDFEC2D21317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 399";
+		rLen = 0;
+		rLoc = 13217;
+		rType = 0;
+		vrLen = 1380;
+		vrLoc = 13104;
+	};
+	CDFEC2D31317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 55";
+		rLen = 0;
+		rLoc = 1365;
+		rType = 0;
+		vrLen = 1063;
+		vrLoc = 807;
+	};
+	CDFEC2D41317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15A1315929800A14307 /* AsyncImageView.h */;
+		name = "AsyncImageView.h: 25";
+		rLen = 0;
+		rLoc = 479;
+		rType = 0;
+		vrLen = 756;
+		vrLoc = 0;
+	};
+	CDFEC2D51317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 37";
+		rLen = 0;
+		rLoc = 1309;
+		rType = 0;
+		vrLen = 1056;
+		vrLoc = 184;
+	};
+	CDFEC2D61317468500A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 38";
+		rLen = 0;
+		rLoc = 1090;
+		rType = 0;
+		vrLen = 1195;
+		vrLoc = 413;
+	};
+	CDFEC2FB1318416D00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 100";
+		rLen = 0;
+		rLoc = 2869;
+		rType = 0;
+		vrLen = 721;
+		vrLoc = 912;
+	};
+	CDFEC2FC13186F4A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */;
+	};
+	CDFEC2FD13186F4A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB64130A498600A14307 /* Default~iphone.png */;
+	};
+	CDFEC2FE13186F4A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB62130A498600A14307 /* background~iphone.png */;
+	};
+	CDFEC2FF13186F4A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB63130A498600A14307 /* Default@2x~iphone.png */;
+	};
+	CDFEC30013186F4A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */;
+	};
+	CDFEC30113186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 255";
+		rLen = 0;
+		rLoc = 7484;
+		rType = 0;
+		vrLen = 967;
+		vrLoc = 0;
+	};
+	CDFEC30213186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */;
+		name = "SocketManager.m: 128";
+		rLen = 0;
+		rLoc = 3634;
+		rType = 0;
+		vrLen = 1102;
+		vrLoc = 4381;
+	};
+	CDFEC30313186F4A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEBB6F130A498C00A14307 /* Default~iPad.png */;
+	};
+	CDFEC30413186F4A00A14307 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = CDFEC2E51317514B00A14307 /* background~ipad.png */;
+	};
+	CDFEC30513186F4A00A14307 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	CDFEC30613186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBBA2130A4BA000A14307 /* SocketManager.h */;
+		name = "SocketManager.h: 36";
+		rLen = 0;
+		rLoc = 527;
+		rType = 0;
+		vrLen = 892;
+		vrLoc = 414;
+	};
+	CDFEC30713186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 38";
+		rLen = 89;
+		rLoc = 1064;
+		rType = 0;
+		vrLen = 1251;
+		vrLoc = 439;
+	};
+	CDFEC30813186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 61";
+		rLen = 0;
+		rLoc = 2263;
+		rType = 0;
+		vrLen = 1206;
+		vrLoc = 2416;
+	};
+	CDFEC30913186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 19";
+		rLen = 0;
+		rLoc = 474;
+		rType = 0;
+		vrLen = 1129;
+		vrLoc = 52;
+	};
+	CDFEC30A13186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 55";
+		rLen = 0;
+		rLoc = 1365;
+		rType = 0;
+		vrLen = 1134;
+		vrLoc = 1223;
+	};
+	CDFEC30B13186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 70";
+		rLen = 0;
+		rLoc = 2388;
+		rType = 0;
+		vrLen = 1471;
+		vrLoc = 929;
+	};
+	CDFEC30C13186F4A00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 48";
+		rLen = 0;
+		rLoc = 1265;
+		rType = 0;
+		vrLen = 1457;
+		vrLoc = 946;
+	};
+	CDFEC3121318752C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC1271314B98100A14307 /* ResourceManager.m */;
+		name = "ResourceManager.m: 70";
+		rLen = 0;
+		rLoc = 2410;
+		rType = 0;
+		vrLen = 1080;
+		vrLoc = 0;
+	};
+	CDFEC3131318752C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 33";
+		rLen = 0;
+		rLoc = 895;
+		rType = 0;
+		vrLen = 1316;
+		vrLoc = 413;
+	};
+	CDFEC3141318752C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 407";
+		rLen = 0;
+		rLoc = 13349;
+		rType = 0;
+		vrLen = 1400;
+		vrLoc = 12856;
+	};
+	CDFEC3151318752C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 31";
+		rLen = 0;
+		rLoc = 717;
+		rType = 0;
+		vrLen = 1163;
+		vrLoc = 52;
+	};
+	CDFEC3161318752C00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 60";
+		rLen = 0;
+		rLoc = 1609;
+		rType = 0;
+		vrLen = 1371;
+		vrLoc = 992;
+	};
+	CDFEC31E1318786B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */;
+		name = "AsyncImageView.m: 100";
+		rLen = 0;
+		rLoc = 2869;
+		rType = 0;
+		vrLen = 721;
+		vrLoc = 912;
+	};
+	CDFEC31F1318786B00A14307 /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Unused variable 'newActiveTouches'";
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 49;
+		rType = 1;
+	};
+	CDFEC3201318786B00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 50";
+		rLen = 0;
+		rLoc = 1145;
+		rType = 0;
+		vrLen = 543;
+		vrLoc = 996;
+	};
+	CDFEC3211318787300A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 50";
+		rLen = 0;
+		rLoc = 1145;
+		rType = 0;
+		vrLen = 543;
+		vrLoc = 996;
+	};
+	CDFEC3221318789400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 50";
+		rLen = 0;
+		rLoc = 1145;
+		rType = 0;
+		vrLen = 543;
+		vrLoc = 996;
+	};
+	CDFEC327131878EC00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 31";
+		rLen = 0;
+		rLoc = 717;
+		rType = 0;
+		vrLen = 1066;
+		vrLoc = 155;
+	};
+	CDFEC328131878EC00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC4F130A57FA00A14307 /* GestureViewController.h */;
+		name = "GestureViewController.h: 35";
+		rLen = 0;
+		rLoc = 867;
+		rType = 0;
+		vrLen = 929;
+		vrLoc = 162;
+	};
+	CDFEC329131878EC00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 210";
+		rLen = 11;
+		rLoc = 7461;
+		rType = 0;
+		vrLen = 632;
+		vrLoc = 7325;
+	};
+	CDFEC32A131878EC00A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 215";
+		rLen = 0;
+		rLoc = 7557;
+		rType = 0;
+		vrLen = 627;
+		vrLoc = 7325;
+	};
+	CDFEC32D131878F400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 50";
+		rLen = 0;
+		rLoc = 1145;
+		rType = 0;
+		vrLen = 543;
+		vrLoc = 996;
+	};
+	CDFEC33A13187CB400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */;
+		name = "RootViewController.m: 255";
+		rLen = 0;
+		rLoc = 7484;
+		rType = 0;
+		vrLen = 807;
+		vrLoc = 1378;
+	};
+	CDFEC33B13187CB400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */;
+		name = "GestureViewController.m: 50";
+		rLen = 0;
+		rLoc = 1514;
+		rType = 0;
+		vrLen = 1359;
+		vrLoc = 235;
+	};
+	CDFEC33C13187CB400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 139";
+		rLen = 0;
+		rLoc = 5039;
+		rType = 0;
+		vrLen = 1233;
+		vrLoc = 5246;
+	};
+	CDFEC33D13187CB400A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 60";
+		rLen = 0;
+		rLoc = 1681;
+		rType = 0;
+		vrLen = 1106;
+		vrLoc = 264;
+	};
+	CDFEC3411318821000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBB130C734B00A14307 /* TouchController.h */;
+		name = "TouchController.h: 13";
+		rLen = 0;
+		rLoc = 295;
+		rType = 0;
+		vrLen = 1066;
+		vrLoc = 155;
+	};
+	CDFEC3421318821000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 117";
+		rLen = 0;
+		rLoc = 4209;
+		rType = 0;
+		vrLen = 1404;
+		vrLoc = 3939;
+	};
+	CDFEC3431318821000A14307 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = CDFEBEBC130C734B00A14307 /* TouchController.m */;
+		name = "TouchController.m: 185";
+		rLen = 0;
+		rLoc = 6910;
+		rType = 0;
+		vrLen = 1509;
+		vrLoc = 3600;
 	};
 }
