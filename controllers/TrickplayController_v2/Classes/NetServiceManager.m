@@ -95,7 +95,8 @@
 - (void)netServiceBrowser:(NSNetServiceBrowser *)browser
              didNotSearch:(NSDictionary *)errorDict
 {
-    [self handleError:[errorDict objectForKey:NSNetServicesErrorCode]];
+    [self handleError:[errorDict objectForKey:NSNetServicesErrorCode]
+               domain:[errorDict objectForKey:NSNetServicesErrorDomain]];
 }
 
 
@@ -135,8 +136,8 @@
 
 
 // Error Handling
-- (void)handleError:(NSNumber *)error {
-    NSLog(@"An error occurred in NetworkManager. Error code = %@", error);
+- (void)handleError:(NSNumber *)error domain:(NSString *)domain {
+    NSLog(@"An error occurred in NetworkManager. Error code = %@, in Domain %@", error, domain);
 }
 
 

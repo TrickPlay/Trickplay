@@ -13,16 +13,22 @@
 
 // Commands issued here
 @required
+- (void)do_MC:(NSArray *)args;
 - (void)do_DR:(NSArray *)args;
 - (void)do_UB:(NSArray *)args;
 - (void)do_UG:(NSArray *)args;
 - (void)do_RT:(NSArray *)args;
+/** depricated
 - (void)do_SC;
 - (void)do_PC;
+//*/
 - (void)do_ST;
 - (void)do_PT;
 - (void)do_CU;
 - (void)do_ET:(NSArray *)args;
+- (void)do_SA:(NSArray *)args;
+- (void)do_PA:(NSArray *)args;
+- (void)do_SS:(NSArray *)args;
 
 @end
 

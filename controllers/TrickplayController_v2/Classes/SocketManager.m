@@ -76,7 +76,7 @@
         commandInterpreter = [[CommandInterpreter alloc] 
                               init:(id <CommandInterpreterDelegate>)theDelegate];
         
-        self.delegate = theDelegate;
+        delegate = theDelegate;
         
         
         [input_stream scheduleInRunLoop:[NSRunLoop currentRunLoop]
@@ -213,27 +213,22 @@
 
 - (void)dealloc{
     NSLog(@"Socket Manager dealloc");
-    NSLog(@"second\n");
     [host release];
-    NSLog(@"third\n");
+    
     [input_stream close];
-    NSLog(@"forth\n");
     [output_stream close];
-    NSLog(@"fifth\n");
+    
     [input_stream removeFromRunLoop:[NSRunLoop currentRunLoop]
                             forMode:NSDefaultRunLoopMode];
-    NSLog(@"sixth\n");
     [output_stream removeFromRunLoop:[NSRunLoop currentRunLoop] 
                              forMode:NSDefaultRunLoopMode];
-    NSLog(@"seventh\n");
+    
     [input_stream release];
-    NSLog(@"eight\n");
     [output_stream release];
-    NSLog(@"ninth\n");
+    
     [writeQueue release];
-    NSLog(@"tenth\n");
     [commandInterpreter release];
-    NSLog(@"eleventh\n");
+    
     [super dealloc];
 }
 

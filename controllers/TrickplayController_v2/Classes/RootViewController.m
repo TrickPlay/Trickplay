@@ -101,8 +101,8 @@
 - (void)navigationController:(UINavigationController *)navigationController 
       willShowViewController:(UIViewController *)viewController 
                     animated:(BOOL)animated {
-    //NSLog(@"navigation controller tag = %d", viewController.view.tag);
-    //NSLog(@"navigation controller tag = %d", self.view.tag);
+    NSLog(@"navigation controller tag = %d", viewController.view.tag);
+    NSLog(@"navigation controller tag = %d", self.view.tag);
 
     if (viewController.view.tag == self.view.tag) {
         if (gestureViewController) {

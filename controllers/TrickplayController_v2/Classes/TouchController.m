@@ -22,6 +22,7 @@
         clickEventsAllowed = YES;
         swipeSent = NO;
         keySent = NO;
+        activeTouches = [[NSMutableArray alloc] initWithCapacity:10];
     }
     
     return self;
@@ -45,15 +46,20 @@
 
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    UITouch *touch = [touches anyObject];
-    startTouchPosition = [touch locationInView:view];
-    currentTouchPosition = startTouchPosition;
-    keySent = NO;
-    NSLog(@"touches began");
-    touchedTime = [NSDate timeIntervalSinceReferenceDate];
-    if (socketManager && touchEventsAllowed) {
-        NSString *sentTouchData = [NSString stringWithFormat:@"TD\t%f\t%f\t%f\n", currentTouchPosition.x, currentTouchPosition.y, touchedTime];
-        [socketManager sendData:[sentTouchData UTF8String] numberOfBytes:[sentTouchData length]];
+    if ([view isMultipleTouchEnabled]) {
+        //NSMutableArray *newActiveTouches = [NSMutableArray arrayWithArray:[touches allObjects]];
+        
+    } else {
+        UITouch *touch = [touches anyObject];
+        startTouchPosition = [touch locationInView:view];
+        currentTouchPosition = startTouchPosition;
+        keySent = NO;
+        NSLog(@"touches began");
+        touchedTime = [NSDate timeIntervalSinceReferenceDate];
+        if (socketManager && touchEventsAllowed) {
+            NSString *sentTouchData = [NSString stringWithFormat:@"TD\t%f\t%f\t%f\t%f\n", 1, currentTouchPosition.x, currentTouchPosition.y, touchedTime];
+            [socketManager sendData:[sentTouchData UTF8String] numberOfBytes:[sentTouchData length]];
+        }
     }
 }
 
@@ -63,7 +69,7 @@
     currentTouchPosition = [touch locationInView:view];
     
     if (socketManager && touchEventsAllowed) {
-        NSString *sentTouchData = [NSString stringWithFormat:@"TM\t%f\t%f\t%f\n", currentTouchPosition.x, currentTouchPosition.y, [NSDate timeIntervalSinceReferenceDate]];
+        NSString *sentTouchData = [NSString stringWithFormat:@"TM\t%f\t%f\t%f\t%f\n", 1, currentTouchPosition.x, currentTouchPosition.y, [NSDate timeIntervalSinceReferenceDate]];
         [socketManager sendData:[sentTouchData UTF8String] numberOfBytes:[sentTouchData length]];
     }
     
@@ -108,8 +114,7 @@
         //Vertical swipe
         //else if (fabsf(startTouchPosition.y - currentTouchPosition.y) >= HORIZ_SWIPE_DRAG_MIN &&
         //		 fabsf(startTouchPosition.x - currentTouchPosition.x) <= VERT_SWIPE_DRAG_MAX)
-        else if ((fabsf(startTouchPosition.y - currentTouchPosition.y) / fabsf(startTouchPosition.x - currentTouchPosition.x) > 2.0) &&
-                 (fabsf(startTouchPosition.y - currentTouchPosition.y) >= HORIZ_SWIPE_DRAG_MIN))
+        else if ((fabsf(startTouchPosition.y - currentTouchPosition.y) >= VERT_SWIPE_DRAG_MIN))
         {
             if (touchedTime > 0)
             {
@@ -152,7 +157,7 @@
 	//Send the TOUCHUP event if enabled
 	if (socketManager && touchEventsAllowed)
 	{
-		NSString *sentTouchData = [NSString stringWithFormat:@"TU\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]];
+		NSString *sentTouchData = [NSString stringWithFormat:@"TU\t%f\t%f\t%f\t%f\n", 1, currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]];
 		[socketManager sendData:[sentTouchData UTF8String] numberOfBytes:[sentTouchData length]];
 	}
 	
@@ -167,15 +172,17 @@
 			//Tap occured, send <ENTER> key
 			[self sendKeyToTrickplay:@"FF0D" thecount:1];
 			//Send click event if click events are enabled
+            /**  depricated!
 			if (socketManager && clickEventsAllowed)
 			{
 				NSString *sentClickData = [NSString stringWithFormat:@"CK\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]];
 				[socketManager sendData:[sentClickData UTF8String] numberOfBytes:[sentClickData length]];
 			}
+            //*/
 		}
 		else
 		{
-			NSLog(@"no swipe sent, start.x,.y:%f , %f  current.x,.y:%f , %f",startTouchPosition.x, startTouchPosition.y, currentTouchPosition.x,currentTouchPosition.y);
+			NSLog(@"no swipe sent, start.x,.y: (%f, %f)  current.x,.y: (%f, %f)",startTouchPosition.x, startTouchPosition.y, currentTouchPosition.x,currentTouchPosition.y);
 		}
 		
 		
@@ -198,6 +205,7 @@
 	keySent = NO;
 }
 
+/** depricated
 - (void)startClicks {
     clickEventsAllowed = YES;
 }
@@ -205,6 +213,7 @@
 - (void)stopClicks {
     clickEventsAllowed = NO;
 }
+//*/
 
 - (void)startTouches {
     touchEventsAllowed = YES;
@@ -214,5 +223,14 @@
     touchEventsAllowed = NO;
 }
 
+- (void)dealloc {
+    if (view) {
+        [view release];
+    }
+    if (socketManager) {
+        [socketManager release];
+    }
+    [super dealloc];
+}
 
 @end

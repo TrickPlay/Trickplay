@@ -20,7 +20,7 @@
     if (self = [super init]) {
         commandLine = [[NSMutableString alloc] initWithCapacity:40];
         
-        self.delegate = theDelegate;
+        delegate = theDelegate;
         
         //[self createCommandDictionary];
     }
@@ -115,8 +115,9 @@
         fprintf(stderr, "Unrecognized command %s\n", [key UTF8String]);
     }
     //*/
-    
-    if ([key compare:@"DR"] == NSOrderedSame) {
+    if ([key compare:@"MC"] == NSOrderedSame) {
+        [delegate do_MC:args];
+    } else if ([key compare:@"DR"] == NSOrderedSame) {
         [delegate do_DR:args];
     } else if ([key compare:@"UB"] == NSOrderedSame) {
         [delegate do_UB:args];
@@ -124,10 +125,12 @@
         [delegate do_UG:args];
     } else if ([key compare:@"RT"] == NSOrderedSame) {
         [delegate do_RT:args];
+    /** depricated
     } else if ([key compare:@"SC"] == NSOrderedSame) {
         [delegate do_SC];
 	} else if ([key compare:@"PC"] == NSOrderedSame) {
         [delegate do_PC];
+    //*/
 	} else if ([key compare:@"ST"] == NSOrderedSame) {
 		[delegate do_ST];
 	} else if ([key compare:@"PT"] == NSOrderedSame) {
@@ -136,6 +139,12 @@
         [delegate do_CU];
     } else if ([key compare:@"ET"] == NSOrderedSame) {
         [delegate do_ET:args];
+    } else if ([key compare:@"SA"] == NSOrderedSame) {
+        [delegate do_SA:args];
+    } else if ([key compare:@"PA"] == NSOrderedSame) {
+        [delegate do_PA:args];
+    } else if ([key compare:@"SS"] == NSOrderedSame) {
+        [delegate do_SS:args];
     } else {
         NSLog(@"Command not recognized %@", key);
     }

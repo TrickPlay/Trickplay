@@ -30,7 +30,7 @@ NSNetServiceDelegate> {
 
 - (id)initWithDelegate:(id)client;
 
-- (void)handleError:(NSNumber *)error;
+- (void)handleError:(NSNumber *)error domain:(NSString *)domain;
 
 @property (retain) NSNetService *currentService;
 @property (retain) NSMutableArray *services;

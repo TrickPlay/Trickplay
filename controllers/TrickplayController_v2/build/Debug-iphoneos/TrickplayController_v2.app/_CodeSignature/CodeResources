@@ -16,9 +16,13 @@
 		<data>
 		Of2pxLt7s/Bd8YsKCK9bHWiSMXU=
 		</data>
+		<key>GestureViewController-iPad.nib</key>
+		<data>
+		ihO16xyu1Lq9+h8aYv2yIxOsVuY=
+		</data>
 		<key>GestureViewController.nib</key>
 		<data>
-		xlBECT2GEeWgLhzVnTQLs4yMdGU=
+		xGTRvo7PmiuVCYO9+C2w2nJlIzc=
 		</data>
 		<key>MainWindow-iPad.nib</key>
 		<data>
@@ -40,7 +44,15 @@
 		<data>
 		zYEOszlDGNxaRCdLoXnkHWIFMWc=
 		</data>
+		<key>background.png</key>
+		<data>
+		N4AVWdlmSbULbgxF/xDCNPEz/5E=
+		</data>
 		<key>background@2x~iphone.png</key>
+		<data>
+		N4AVWdlmSbULbgxF/xDCNPEz/5E=
+		</data>
+		<key>background~iPad.png</key>
 		<data>
 		N4AVWdlmSbULbgxF/xDCNPEz/5E=
 		</data>
@@ -50,7 +62,7 @@
 		</data>
 		<key>embedded.mobileprovision</key>
 		<data>
-		Y70QlV4OWApcSRYLfMWUUQ1wU3U=
+		L7aZF2KmQO/gCDfUY7Q3s2a1TLY=
 		</data>
 		<key>iOS-logo-114x114.png</key>
 		<data>
