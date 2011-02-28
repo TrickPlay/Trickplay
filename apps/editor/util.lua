@@ -1,4 +1,4 @@
------------
+----------
 -- Utils 
 -----------
 
@@ -164,7 +164,8 @@ function create_on_button_down_f(v)
 	     if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
 	       if (v.extra.is_in_group == true and control == false) then 
 		    local p_obj = find_parent(v)
-                    if(button == 3 or num_clicks >= 2) then
+                    if(button == 3) then -- imsi : num_clicks is not correct ! 
+                    --if(button == 3 or num_clicks >= 2) then
                          editor.inspector(p_obj)
                          return true
                     end 
@@ -178,7 +179,8 @@ function create_on_button_down_f(v)
            	    dragging = {p_obj, x - p_obj.x, y - p_obj.y }
            	    return true
 	      else 
-		    if(button == 3 or num_clicks >= 2) then
+                    if(button == 3) then-- imsi : num_clicks is not correct ! 
+		    --if(button == 3 or num_clicks >= 2) then
                          editor.inspector(v)
                          return true
                     end 
@@ -564,6 +566,7 @@ function make_attr_t(v)
   end 
   
   for i,j in pairs(obj_map[obj_type]()) do 
+		
        	if attr_map[j] then
              attr_map[j](j)
         elseif type(v[j]) == "number" then 
@@ -658,15 +661,17 @@ function itemTostring(v, d_list, t_list)
 	      elseif type(v[j]) == "table" then 
 		  if(type(v[j][1]) == "table") then  
 			local tiles_name_table = {} 
-			
 			for m,n in pairs(v[j]) do 
 				local tile_name_table = {}
 				for q,r in pairs(n) do 
+				   if r.name ~= "nil" then 
 				     table.insert(tile_name_table, r.name)
+				   end 
 				end 
-				table.insert(tiles_name_table, tile_name_table)
+				if table.getn(tile_name_table) ~= 0 then 
+					table.insert(tiles_name_table, tile_name_table)
+				end
 			end 
-			
 	          	item_string = item_string..head..j.." = {"
 			for m,n in pairs(tiles_name_table) do 
 	          	     item_string = item_string.." {"..table.concat(n,",").."},"
@@ -756,7 +761,9 @@ function itemTostring(v, d_list, t_list)
 	 if v.tiles then 
 	     for m,n in pairs(v.tiles) do 
 	          for q,r in pairs(n) do 
-		       itm_str= itemTostring(r)..itm_str
+			if r.name ~= "nil" then
+		            itm_str= itemTostring(r)..itm_str
+			end 
 	          end 
 	     end 
 	 end 
@@ -794,6 +801,17 @@ function itemTostring(v, d_list, t_list)
 	.."return true\n"
         .."end\n\n"
     end 
+
+
+--[[
+    if v.extra.timeline then 
+	itm_str = itm_str..v.name.."\.extra\.timeline = {" 
+	for m,n in pairs (v.extra.timeline) do 
+		itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+	end 
+	itm_str = itm_str.."}\n\n"
+    end 
+]]
 
     if(d_list == nil) then  
 	d_list = {v.name}

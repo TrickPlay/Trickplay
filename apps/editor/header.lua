@@ -162,7 +162,7 @@ attr_name_list = {"color", "border_color", "border_width", "color", "border_colo
 widget = dofile("widget.lua")
 
 widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", 
-           "ButtonPicker", "LoadingDots", "LoadingBar", "DropDown", "MenuBar", "3D_List", "ScrollImage", "TabBar", "OSK" }
+           "ButtonPicker", "LoadingDots", "LoadingBar", "DropDown", "MenuBar", "3D_List", "ScrollImage", "TabBar", "TimeLine", "OSK" }
 	   --"expander", "dropDownButton"}
 skins = {}
 for i, j in pairs(skin_list) do

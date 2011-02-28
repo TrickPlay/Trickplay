@@ -70,7 +70,9 @@ function inspector_apply (v, inspector)
 
       for i, j in pairs(item_group.children) do 
 	   if j.name then
-              if (attr_map[j.name]) then
+	      if j.name == "editable" then 
+                     v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
+              elseif (attr_map[j.name]) then
                      attr_map[j.name]()
               elseif(v[j.name])then 
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
