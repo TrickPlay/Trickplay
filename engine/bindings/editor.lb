@@ -1,4 +1,6 @@
 [[
+#include "gio/gio.h"
+
 #include "common.h"
 #include "util.h"
 #include "app.h"
