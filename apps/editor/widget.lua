@@ -91,6 +91,16 @@
 
 		  }
 
+
+	
+        local attr_map = {
+          	["Rectangle"] = function() return {"x", "y", "z", "w","h","opacity","color","border_color", "border_width", "x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
+        	["Image"] = function() return {"x", "y", "z", "w","h","opacity","color","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
+        	["Text"] = function() return {"x", "y", "z", "w","h","opacity","color","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
+        }
+
+	local current_time_focus = nil 
+
 --[[
 Function: change_all_skin
 
@@ -174,6 +184,170 @@ local assets = setmetatable( {} , _mt )
 -- UI Factory
 -------------------
 
+
+local function draw_timeline(p, duration, num_pointer)
+
+
+	bg = Rectangle
+	{
+		color = {25,25,25,50},
+		border_color = {25,25,25,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "bg",
+		position = {0,0,0},
+		size = {1800,76},
+		opacity = 255,
+	}
+
+
+
+
+	line = Rectangle
+	{
+		color = {25,25,25,255},
+		border_color = {255,255,255,255},
+		border_width = 0,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "line",
+		position = {106,36,0},
+		size = {1600,6},
+		opacity = 255,
+	}
+
+	timeline = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "timeline",
+		reactive = true,
+		position = {20,984,0},
+		size = {1700,76},
+		opacity = 255,
+		children = {bg,line},
+		extra = {numPointer = num_pointer}
+	}
+
+	timeline:add(Text{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 22px",
+		text = "Timeline 0", 
+		editable = true,
+		wants_enter = true,
+		cursor_visible = false,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text"..tostring(num_pointer + 1), -- beginning point 
+		position = {100,6,0},
+		size = {200,30},
+		opacity = 255,
+	})
+
+	timeline:add(Image{
+		src = "left.png",
+		clip = {0,0,16,33},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {90,0,0},
+		anchor_point = {0,0},
+		reactive = true,
+		name = "pointer"..tostring(num_pointer + 1), -- beginning point 
+		position = {142,42,0},
+		size = {16,33},
+		opacity = 255,
+	})
+
+
+	local function make_pointer_focus(pointerName)
+	    local pointer = timeline:find_child(pointerName)
+	    function pointer.extra.on_focus_in()
+		 timeline:find_child(pointerName).src = "leftfocus.png"
+	    end 
+      
+	    function pointer.extra.on_focus_out()
+		 timeline:find_child(pointerName).src = "left.png"
+
+		 for n,m in pairs (g.children) do 
+	           if not m.name:find("timeline") then 
+
+		     if m.extra.timeline[pointerName] then
+			for l,k in pairs (attr_map[m.type]()) do 
+	     			m.extra.timeline[pointerName][k] = m[k]
+			end
+                     end 
+		   end
+	         end 
+	    end 
+	end 
+
+	make_pointer_focus("pointer"..tostring(num_pointer + 1))
+
+	local prev_text_x = 70
+	local prev_img_x = 100
+
+	for i = 1, num_pointer, 1 do 
+	timeline:add(Text{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 22px",
+		text = "Timeline "..tostring(i),
+		editable = true,
+		wants_enter = true,
+		cursor_visible = false,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text"..tostring(i),
+  		position = {math.floor(p[i][2] * line.w / duration) + prev_text_x,6,0},
+		size = {200,30},
+		opacity = 255,
+	})
+	prev_text_x = math.floor(p[i][2] * line.w / duration) + prev_text_x
+
+	timeline:add(Image{
+		src = "left.png",
+		clip = {0,0,16,33},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {90,0,0},
+		anchor_point = {0,0},
+		reactive = true,
+		name = "pointer"..tostring(i),
+  		position = {math.floor(p[i][2] * line.w / duration) + prev_img_x,42,0},
+		size = {16,33},
+		opacity = 255,
+	})
+	prev_img_x = math.floor(p[i][2] * line.w / duration) + prev_img_x 
+	make_pointer_focus("pointer"..tostring(i))
+    end 
+
+    
+
+return timeline
+
+end 
+
 -- make_xbox() : make closing box 
 
 local function make_xbox()
@@ -205,7 +379,6 @@ local function make_xbox()
     c:line_to ( x, y + XBOX_SIZE)
     c:move_to ( x, y + XBOX_SIZE)
     c:line_to ( x, y)
-
     c:set_line_width (3)
     c:set_source_color( BORDER_COLOR )
     c:stroke (true)
@@ -557,6 +730,204 @@ end
 
 
 --[[
+Function: timeline
+
+Creates a timeline widget
+
+Arguments:
+	Table of timeline properties
+	
+	duration 
+	num_point  
+	points - time point information - {name of point, duration, chainging time}
+
+Return:
+ 	timeline - The timeline tool 
+
+Extra Function:
+	hide()
+	show()
+	
+]]
+
+function widget.timeline(t)
+
+ --default parameters
+    local p = {
+	duration = 6000,
+    	num_point = 3, 
+	points = {},
+    }
+
+ --overwrite defaults
+    if table ~= nil then 
+        for k, v in pairs (table) do
+	    p[k] = v 
+        end 
+    end 
+
+ --set default points table
+    if table.getn(p.points) > 0 then 
+         for i = 1, p.num_point, 1 do 
+	     if type(p.points[i]) == "table" then 
+	          for j = 1, 3, 1 do 
+	             if not p.points[i][j] then 
+			if j == 1 then 
+	          	     p.points[i][j] = "timepoint"..tostring(i) -- name of time point
+			else 
+	          	     p.points[i][j] = p.duration / p.num_point -- duration, changing time 
+			end 
+		     end 
+		  end 
+	     end 
+	 end 
+    else 
+	for i = 1, p.num_point, 1 do 
+	    p.points[i] = {}
+	    p.points[i][1] = "timepoint"..tostring(i) -- name of time point
+	    p.points[i][2] = p.duration / p.num_point -- duration
+	    p.points[i][3] = p.duration / p.num_point -- changing time 
+	end 
+    end 
+
+
+dumptable (p.points)
+
+    --local timeline = draw_timeline(p.duration/p.num_point, p.num_point)
+    local timeline = draw_timeline(p.points, p.duration, p.num_point)
+
+    local timeline_timers = {}
+    local timeline_timelines = {}
+
+    for i =1, p.num_point + 1, 1 do 
+	  timeline_timers[i] = Timer()
+	  timeline_timers[i].interval = p.duration/p.num_point * (i + 1) 
+	  timeline_timelines[i] = Timeline()
+    	  timeline_timelines[i].duration = p.duration/p.num_point
+    	  timeline_timelines[i].direction = "FORWARD"
+    	  timeline_timelines[i].loop = false
+    
+	  local tl = timeline_timelines[i]
+
+  	  local next_point, current_point  
+	  if i == p.num_point + 1 then 
+		next_point = "pointer"..tostring(p.num_point + 1) 
+	  else 
+		next_point = "pointer"..tostring(i)
+	  end 
+	  if i == 1 then 
+		current_point = "pointer"..tostring(p.num_point+1)
+	  else 
+		current_point = "pointer"..tostring(i - 1) 
+	  end 
+
+          function tl.on_new_frame(t, m, p)
+		for n,m in pairs (g.children) do 
+		     if m.extra.timeline[current_point] then 
+			for l,k in pairs (attr_map[m.type]()) do 
+				 if type(m[k]) == "table" then 
+					local temptable = {}
+					for o = 1, table.getn(m[k]),1 do 
+				      		local interval = Interval(m.extra.timeline[current_point][k][o], m.extra.timeline[next_point][k][o])
+						temptable[o] = interval:get_value(p)
+				        end 
+					m[k] = temptable
+				else 
+					local interval = Interval(m.extra.timeline[current_point][k], m.extra.timeline[next_point][k])
+					m[k] = interval:get_value(p)
+				end
+			end 
+		     end 
+	         end
+         end  
+
+         function tl.on_completed()
+		for n,m in pairs (g.children) do 
+		     if m.extra.timeline[current_point] then 
+			for l,k in pairs (attr_map[m.type]()) do 
+				if type(m[k]) == "table" then 
+				    local temptable = {}
+				    for o = 1, table.getn(m[k]),1 do 
+					temptable[o] = m.extra.timeline[next_point][k][o]
+				    end
+				    m[k] = temptable
+				else
+				    m[k] = m.extra.timeline[next_point][k] 
+				end 
+			end 
+		     end
+		end
+        end 
+
+        local tl_timer = timeline_timers[i]
+        function tl_timer:on_timer()
+		timeline_timelines[i]:start()
+        	timeline_timers[i]:stop()
+        end 
+     
+     end 
+
+     -- start_timer() function 
+     function g.extra.start_timer()
+        for i=1, p.num_point, 1 do	
+	     timeline_timers[i]:start()
+	end 
+     end 
+
+    -- set object.extra.timeline table
+    for n,m in pairs (g.children) do 
+	if not m.name:find("timeline") then 
+            m.extra.timeline = {}
+            for i = 1, p.num_point + 1, 1 do
+                 m.extra.timeline["pointer"..tostring(i)] = {}
+            end 
+	    for l,k in pairs (attr_map[m.type]()) do 
+	         m.extra.timeline["pointer"..tostring(p.num_point + 1)][k] = m[k]
+	    end
+	end
+    end 
+
+    -- make_on_button_down() function for time pointer image
+    local function make_on_button_down(name) 
+	 local pointer = timeline:find_child(name)
+	 function pointer:on_button_down(x,y,n,b)
+	    if current_time_focus then 
+	         current_time_focus.on_focus_out()
+	    end 
+	    current_time_focus = pointer
+	    pointer.on_focus_in()
+	    
+            for n,m in pairs (g.children) do 
+	      if not m.name:find("timeline") then 
+		if m.extra.timeline[pointer.name] then
+		     for l,k in pairs (m.extra.timeline[pointer.name]) do 
+			m[l] = k
+		     end
+		else 
+		     for l,k in pairs (m.extra.timeline["pointer"..tostring(p.num_point + 1)]) do
+			m[l] = k
+		     end 
+                end 
+	      end 
+	   end 
+
+	 end 
+    end 
+
+    --make_on_button_down("pointerOrg")
+    for i = 1, p.num_point + 1, 1 do 
+	make_on_button_down("pointer"..tostring(i))
+    end 
+	
+
+    return timeline
+	
+end 
+
+
+
+
+--[[
 Function: button
 
 Creates a button widget
@@ -609,6 +980,7 @@ function widget.button(table)
     	border_radius = 12,
 	pressed = nil, 
 	released = nil, 
+
     }
 
  --overwrite defaults
@@ -1036,7 +1408,7 @@ function widget.toastBox(table)
 	font = "DejaVu Sans 30px", 
 	color = {255,255,255,255},  --"FFFFFF", 
 	border_width  = 3,
-	border_color  = {255,255,255,255}, -- "FFFFFFC0", 
+	border_color  = {255,255,255,255}, --"FFFFFFC0", 
 	f_color  = {25,25,25,100},
 	padding_x = 0,
 	padding_y = 0,
@@ -3927,8 +4299,7 @@ function widget.tabBar(t)
 
     return umbrella
 end
+
 --]]
-
-
 
 return widget

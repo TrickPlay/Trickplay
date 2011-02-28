@@ -670,7 +670,10 @@ local function build_ui( show_it )
 		     input_mode = S_SELECT
           elseif(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	       if(current_inspector == nil) then 
-		    if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then
+		    --if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then
+		    if(button == 3) and (g.extra.video ~= nil) then -- imsi : num_clicks is not correct in engine 17
+			 print("Button Number -- ", button)
+			 print("Number of click-- ", num_clicks)
                          editor.inspector(g.extra.video)
                     end 
 		    		    if(shift == true) then 
@@ -956,6 +959,11 @@ end
 -------------------------------------------------------------------------------
 
 function main()
+
+    if controllers.start_pointer then 
+  	controllers:start_pointer()
+    end
+    
     screen:add(BG_IMAGE_20)
     screen:add(BG_IMAGE_40)
     screen:add(BG_IMAGE_80)

@@ -2540,6 +2540,7 @@ local widget_map = {
      ["MenuBar"]        = function () return widget.menuBar()      end,
      ["3D_List"]        = function () return widget.threeDlist()   end,
      ["ScrollImage"]    = function () return widget.scrollWindow() end, 
+     ["TimeLine"]	= function () return widget.timeline()     end,
 }
 
 
@@ -2579,7 +2580,7 @@ function editor.widgets()
     cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
 
     for i, v in pairs(widgets) do
-         if (i == 8) then 
+         if (i == 9) then 
               cur_w =  cur_w + 230
               cur_h =  TOP_PADDING + widgets_list.h + Y_PADDING
 	 end 
@@ -2594,6 +2595,7 @@ function editor.widgets()
          
          function widget_b:on_button_down(x,y,button,num_clicks)
 	      new_widget = widget_map[v]() 
+	      
 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
@@ -2624,18 +2626,22 @@ function editor.widgets()
 		mb=new_widget
          elseif (new_widget.extra.type == "TabBar") then 
 		tb=new_widget
-	      end
+	end
 --imsi 
-	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
-		item_num = item_num + 1
-	      end 
-	      new_widget.name = new_widget.name..tostring(item_num)
-              table.insert(undo_list, {new_widget.name, ADD, new_widget})
-	      g:add(new_widget)
-              create_on_button_down_f(new_widget)
+	if new_widget.name:find("timeline") then 
+		    screen:add(new_widget)
+	else 
+	           while (is_available(new_widget.name..tostring(item_num)) == false) do  
+		     item_num = item_num + 1
+	           end 
+	           new_widget.name = new_widget.name..tostring(item_num)
+                   table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	           g:add(new_widget)
+                   create_on_button_down_f(new_widget)
+	           screen:add(g)
+	           screen:grab_key_focus()
+	end 
 --kk
-	      screen:add(g)
-	      screen:grab_key_focus()
 
 	      cleanMsgWin(msgw)
         end 
@@ -2673,6 +2679,9 @@ function editor.widgets()
 		tb=new_widget
 	      end
 --imsi 
+	if new_widget.name:find("timeline") then 
+		    screen:add(new_widget)
+	else
  	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	      end 
@@ -2683,6 +2692,7 @@ function editor.widgets()
 	      screen:add(g)
 	      screen:grab_key_focus()
 
+	end 
 	      cleanMsgWin(msgw)
           end 
     end 
