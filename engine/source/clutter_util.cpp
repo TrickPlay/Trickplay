@@ -290,7 +290,7 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_PRESS );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
@@ -317,7 +317,7 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_RELEASE );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
@@ -344,7 +344,7 @@ void ClutterUtil::inject_motion( gfloat x , gfloat y )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_MOTION );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->motion.x = x;
     event->motion.y = y;
@@ -371,7 +371,7 @@ void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_PRESS );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->button.button = button;
     event->button.x = x;
@@ -399,7 +399,7 @@ void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_RELEASE );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->button.button = button;
     event->button.x = x;
