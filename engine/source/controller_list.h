@@ -194,11 +194,6 @@ public:
 
     void reset_all();
 
-    inline gdouble time()
-    {
-        return g_timer_elapsed( timer , 0 );
-    }
-
 private:
 
     void post_event( gpointer event );
@@ -237,10 +232,6 @@ private:
     typedef std::set<Delegate *> DelegateSet;
 
     DelegateSet     delegates;
-
-    //.........................................................................
-
-    GTimer *        timer;
 };
 
 #endif // _TRICKPLAY_CONTROLLER_LIST_H
