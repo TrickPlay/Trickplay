@@ -896,6 +896,11 @@ main = function()
         title:stroke()
         title:finish_painting()
         
+        if title.Image then
+            title = title:Image()
+        end
+            
+        
         return title
         
     end
