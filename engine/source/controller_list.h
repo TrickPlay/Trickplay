@@ -121,17 +121,17 @@ public:
 
     inline bool wants_accelerometer_events() const
     {
-        return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && accelerometer_started;
+        return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && g_atomic_int_get( & ts_accelerometer_started );
     }
 
     inline bool wants_pointer_events() const
     {
-        return ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) && pointer_started;
+        return ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) && g_atomic_int_get( & ts_pointer_started );
     }
 
     inline bool wants_touch_events() const
     {
-        return ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) && touch_started;
+        return ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) && g_atomic_int_get( & ts_touch_started );
     }
 
 protected:
@@ -157,9 +157,9 @@ private:
 
     KeyMap              key_map;
 
-    bool                accelerometer_started;
-    bool                pointer_started;
-    bool                touch_started;
+    gint                ts_accelerometer_started;
+    gint                ts_pointer_started;
+    gint                ts_touch_started;
 };
 
 //-----------------------------------------------------------------------------
