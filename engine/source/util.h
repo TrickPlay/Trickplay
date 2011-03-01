@@ -7,6 +7,20 @@
 #include "common.h"
 //-----------------------------------------------------------------------------
 
+inline gulong timestamp()
+{
+    static GTimer * timer = 0;
+
+    if ( ! timer )
+    {
+        timer = g_timer_new();
+    }
+
+    return gulong( g_timer_elapsed( timer , 0 ) / 1.0e-6 );
+}
+
+//-----------------------------------------------------------------------------
+
 inline void g_info( const gchar * format, ... )
 {
     va_list args;
