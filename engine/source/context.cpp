@@ -1389,17 +1389,25 @@ String TPContext::make_fake_app()
 
             free_later( app );
 
-            g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1}", -1, NULL );
+            if ( ! g_file_test( app , G_FILE_TEST_EXISTS ) )
+            {
+                g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1}", -1, NULL );
+            }
 
             gchar * main = g_build_filename( app_path, "main.lua", NULL );
 
             free_later( main );
 
-            g_file_set_contents( main, "--Automatically Created", -1, NULL );
+            if ( ! g_file_test( main , G_FILE_TEST_EXISTS ) )
+            {
+                g_file_set_contents( main, "--Automatically Created", -1, NULL );
+            }
 
             result = app_path;
         }
     }
+
+    g_info( "CREATED EMPTY APP" );
 
 #endif
 
