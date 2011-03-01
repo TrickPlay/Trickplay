@@ -238,9 +238,9 @@ Controller::Controller( ControllerList * _list, const char * _name, const TPCont
     name( _name ),
     spec( *_spec ),
     data( _data ),
-    accelerometer_started( false ),
-    pointer_started( false ),
-    touch_started( false )
+    ts_accelerometer_started( 0 ),
+    ts_pointer_started( 0 ),
+    ts_touch_started( 0 )
 {
     // If the outside world did not provide a function to execute commands,
     // we set our own which always fails.
@@ -595,9 +595,9 @@ void Controller::remove_delegate( Delegate * delegate )
 
 bool Controller::reset()
 {
-    accelerometer_started = false;
-    pointer_started = false;
-    touch_started = false;
+    g_atomic_int_set( & ts_accelerometer_started , 0 );
+    g_atomic_int_set( & ts_pointer_started , 0 );
+    g_atomic_int_set( & ts_touch_started , 0 );
 
     return
         ( connected ) &&
@@ -635,18 +635,20 @@ bool Controller::start_accelerometer( AccelerometerFilter filter, double interva
 
     parameters.interval = interval;
 
-    accelerometer_started = spec.execute_command(
+    bool accelerometer_started = spec.execute_command(
                tp_controller,
                TP_CONTROLLER_COMMAND_START_ACCELEROMETER,
                &parameters,
                data ) == 0;
+
+    g_atomic_int_set( & ts_accelerometer_started , accelerometer_started ? 1 : 0 );
 
     return accelerometer_started;
 }
 
 bool Controller::stop_accelerometer()
 {
-    accelerometer_started = false;
+    g_atomic_int_set( & ts_accelerometer_started , 0 );
 
     return
         ( connected ) &&
@@ -660,7 +662,7 @@ bool Controller::stop_accelerometer()
 
 bool Controller::start_pointer()
 {
-    pointer_started =
+    bool pointer_started =
         ( connected ) &&
         ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) &&
         ( spec.execute_command(
@@ -669,12 +671,14 @@ bool Controller::start_pointer()
               NULL,
               data ) == 0 );
 
+    g_atomic_int_set( & ts_pointer_started , pointer_started ? 1 : 0 );
+
     return pointer_started;
 }
 
 bool Controller::stop_pointer()
 {
-    pointer_started = false;
+    g_atomic_int_set( & ts_pointer_started , 0 );
 
     return
         ( connected ) &&
@@ -688,7 +692,7 @@ bool Controller::stop_pointer()
 
 bool Controller::start_touches()
 {
-    touch_started =
+    bool touch_started =
         ( connected ) &&
         ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) &&
         ( spec.execute_command(
@@ -697,12 +701,14 @@ bool Controller::start_touches()
               NULL,
               data ) == 0 );
 
+    g_atomic_int_set( & ts_touch_started , touch_started ? 1 : 0 );
+
     return touch_started;
 }
 
 bool Controller::stop_touches()
 {
-    touch_started = false;
+    g_atomic_int_set( & ts_touch_started , 0 );
 
     return
         ( connected ) &&
