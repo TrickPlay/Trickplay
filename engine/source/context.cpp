@@ -2250,7 +2250,7 @@ void TPContext::validate_configuration()
 
 gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message )
 {
-    gulong ms = clutter_get_timestamp() / 1000;
+    gulong ms = timestamp() / 1000;
 
     int sec = 0;
     int min = 0;
