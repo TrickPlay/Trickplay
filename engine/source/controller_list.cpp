@@ -2,6 +2,11 @@
 #include "controller_list.h"
 #include "clutter_util.h"
 
+//=============================================================================
+// If defined, will time and report times for controller events.
+
+//#define TP_TIME_CONTROLLER_EVENTS   1
+
 //==============================================================================
 // This is the structure we give the outside world. To them, it is opaque.
 // It has a pointer to a Controller instance, the associated ControllerList
@@ -67,7 +72,12 @@ public:
 
         event->type = type;
         event->controller = controller;
-        event->time = controller->get_tp_controller()->list->time();
+
+#ifdef TP_TIME_CONTROLLER_EVENTS
+
+        event->create_time = timestamp();
+
+#endif
 
         if ( type == UI )
         {
@@ -135,6 +145,12 @@ public:
 
     inline void process()
     {
+
+#ifdef TP_TIME_CONTROLLER_EVENTS
+
+        g_debug( "EVENT PROCESS TIME TYPE %d : %d ms" , type , int( ( timestamp() - create_time ) / 1000.0 ) );
+#endif
+
         switch ( type )
         {
             case ADDED:
@@ -188,16 +204,16 @@ public:
         }
     }
 
-    inline gdouble get_time()
-    {
-        return time;
-    }
-
 private:
 
     Type            type;
     Controller   *  controller;
-    gdouble         time;
+
+#ifdef TP_TIME_CONTROLLER_EVENTS
+
+    gulong          create_time;
+
+#endif
 
     union
     {
@@ -902,8 +918,7 @@ bool Controller::enter_text( const String & label, const String & text )
 
 ControllerList::ControllerList()
     :
-    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
-    timer( g_timer_new() )
+    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) )
 {
     g_static_rec_mutex_init( &mutex );
 }
@@ -919,8 +934,6 @@ ControllerList::~ControllerList()
 
     g_static_rec_mutex_free( &mutex );
     g_async_queue_unref( queue );
-
-    g_timer_destroy( timer );
 }
 
 //.............................................................................
@@ -946,9 +959,6 @@ gboolean ControllerList::process_events( gpointer self )
 
     while ( Event * event = ( Event * )g_async_queue_try_pop( list->queue ) )
     {
-#if 0
-        g_debug( "EVENT PROCESS TIME %f ms" , ( list->time() - event->get_time() ) * 1000 );
-#endif
         event->process();
         Event::destroy( event );
     }
