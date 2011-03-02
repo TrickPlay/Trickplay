@@ -187,23 +187,25 @@ public:
 
     _Debug_ON( const char * _prefix = 0 )
     {
-        prefix = _prefix ? g_strdup_printf( "[%s]" , _prefix ) : 0;
+        if ( _prefix )
+        {
+            prefix = _prefix;
+        }
     }
 
     ~_Debug_ON()
     {
-        g_free( prefix );
     }
 
     inline void operator()( const gchar * format, ...)
     {
-        if ( prefix )
+        if ( ! prefix.empty() )
         {
             va_list args;
             va_start( args, format );
             gchar * message = g_strdup_vprintf( format , args );
             va_end( args );
-            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "%s %s" , prefix , message );
+            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "[%s] %s" , prefix.c_str() , message );
             g_free( message );
         }
         else
@@ -222,7 +224,7 @@ public:
 
 private:
 
-    gchar * prefix;
+    String prefix;
 };
 
 class _Debug_OFF
