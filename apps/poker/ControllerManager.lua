@@ -156,7 +156,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 print("answered", controller.name, x, y)
 
                 print("component "..tostring(model:get_active_component())
-                .."handling click")
+                .." handling click")
                 -- hackish way to do this for now
                 model:get_active_controller():handle_click(controller, x, y)
             end
@@ -164,6 +164,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             end
             function controller:on_touch_move(finger, x, y)
             end
+            controller:start_touches()
         end
 
         function controller:choose_dog()
