@@ -93,14 +93,15 @@
 
 
 	
-        local attr_map = {
+        attr_map = {
           	["Rectangle"] = function() return {"x", "y", "z", "w","h","opacity","color","border_color", "border_width", "x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
-        	["Image"] = function() return {"x", "y", "z", "w","h","opacity","color","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
+        	["Image"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
         	["Text"] = function() return {"x", "y", "z", "w","h","opacity","color","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
+        	["Group"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point", "scale"} end,
+        	["Clone"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point", "scale"} end,
         }
 
-	local current_time_focus = nil 
-
+	
 --[[
 Function: change_all_skin
 
@@ -185,11 +186,9 @@ local assets = setmetatable( {} , _mt )
 -------------------
 
 
-local function draw_timeline(p, duration, num_pointer)
+local function draw_timeline(timeline, p, duration, num_pointer)
 
-
-	bg = Rectangle
-	{
+	bg = Rectangle {
 		color = {25,25,25,50},
 		border_color = {25,25,25,255},
 		border_width = 2,
@@ -200,15 +199,14 @@ local function draw_timeline(p, duration, num_pointer)
 		anchor_point = {0,0},
 		name = "bg",
 		position = {0,0,0},
-		size = {1800,76},
+		size = {screen.w,76},
 		opacity = 255,
 	}
 
 
 
 
-	line = Rectangle
-	{
+	line = Rectangle {
 		color = {25,25,25,255},
 		border_color = {255,255,255,255},
 		border_width = 0,
@@ -218,31 +216,18 @@ local function draw_timeline(p, duration, num_pointer)
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "line",
-		position = {106,36,0},
+		--position = {106,36,0},
+		position = {0,36,0},
 		size = {1600,6},
 		opacity = 255,
 	}
 
-	timeline = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "timeline",
-		reactive = true,
-		position = {20,984,0},
-		size = {1700,76},
-		opacity = 255,
-		children = {bg,line},
-		extra = {numPointer = num_pointer}
-	}
+	timeline:add(bg,line)
 
 	timeline:add(Text{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 22px",
-		text = "Timeline 0", 
+		text = "origin", 
 		editable = true,
 		wants_enter = true,
 		cursor_visible = false,
@@ -254,13 +239,14 @@ local function draw_timeline(p, duration, num_pointer)
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "text"..tostring(num_pointer + 1), -- beginning point 
-		position = {100,6,0},
+		--position = {100,6,0},
+		position = {0,6,0},
 		size = {200,30},
 		opacity = 255,
 	})
 
 	timeline:add(Image{
-		src = "left.png",
+		src = "assets/left.png",
 		clip = {0,0,16,33},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -269,21 +255,23 @@ local function draw_timeline(p, duration, num_pointer)
 		anchor_point = {0,0},
 		reactive = true,
 		name = "pointer"..tostring(num_pointer + 1), -- beginning point 
-		position = {142,42,0},
+		--position = {142,42,0},
+		position = {36,42,0},
 		size = {16,33},
 		opacity = 255,
+		extra = {set = true},
 	})
 
 
 	local function make_pointer_focus(pointerName)
 	    local pointer = timeline:find_child(pointerName)
-	    function pointer.extra.on_focus_in()
-		 timeline:find_child(pointerName).src = "leftfocus.png"
-	    end 
+	    if pointer then 
+	       function pointer.extra.on_focus_in()
+		 timeline:find_child(pointerName).src = "assets/leftfocus.png"
+	       end
       
-	    function pointer.extra.on_focus_out()
-		 timeline:find_child(pointerName).src = "left.png"
-
+	       function pointer.extra.on_focus_out()
+		 pointer.src = "assets/left.png"
 		 for n,m in pairs (g.children) do 
 	           if not m.name:find("timeline") then 
 
@@ -294,19 +282,21 @@ local function draw_timeline(p, duration, num_pointer)
                      end 
 		   end
 	         end 
-	    end 
+		 pointer.extra.set = true
+	       end 
+	    end
 	end 
 
 	make_pointer_focus("pointer"..tostring(num_pointer + 1))
 
-	local prev_text_x = 70
-	local prev_img_x = 100
+	local prev_text_x = -120 -- 70
+	local prev_img_x = 0-- 100
 
 	for i = 1, num_pointer, 1 do 
 	timeline:add(Text{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 22px",
-		text = "Timeline "..tostring(i),
+		text = p[i][1],
 		editable = true,
 		wants_enter = true,
 		cursor_visible = false,
@@ -325,7 +315,7 @@ local function draw_timeline(p, duration, num_pointer)
 	prev_text_x = math.floor(p[i][2] * line.w / duration) + prev_text_x
 
 	timeline:add(Image{
-		src = "left.png",
+		src = "assets/left.png",
 		clip = {0,0,16,33},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -337,12 +327,11 @@ local function draw_timeline(p, duration, num_pointer)
   		position = {math.floor(p[i][2] * line.w / duration) + prev_img_x,42,0},
 		size = {16,33},
 		opacity = 255,
+		extra = {set = false},
 	})
 	prev_img_x = math.floor(p[i][2] * line.w / duration) + prev_img_x 
 	make_pointer_focus("pointer"..tostring(i))
     end 
-
-    
 
 return timeline
 
@@ -760,68 +749,128 @@ function widget.timeline(t)
     }
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
 
  --set default points table
-    if table.getn(p.points) > 0 then 
-         for i = 1, p.num_point, 1 do 
-	     if type(p.points[i]) == "table" then 
-	          for j = 1, 3, 1 do 
-	             if not p.points[i][j] then 
-			if j == 1 then 
-	          	     p.points[i][j] = "timepoint"..tostring(i) -- name of time point
-			else 
-	          	     p.points[i][j] = p.duration / p.num_point -- duration, changing time 
-			end 
-		     end 
-		  end 
-	     end 
-	 end 
-    else 
-	for i = 1, p.num_point, 1 do 
+
+    local function set_default_point(i, j)
+	if not j then
 	    p.points[i] = {}
 	    p.points[i][1] = "timepoint"..tostring(i) -- name of time point
 	    p.points[i][2] = p.duration / p.num_point -- duration
 	    p.points[i][3] = p.duration / p.num_point -- changing time 
+	elseif j == 1 then   
+       	     p.points[i][j] = "timepoint"..tostring(i) -- name of time point
+	else 
+   	     p.points[i][j] = p.duration / p.num_point -- duration, changing time 
+	end 
+    end
+
+   
+ --the umbrella Group
+    local timeline_timers, timeline_timelines 
+    local timeline = Group {
+		name = "timeline",
+		reactive = true,
+		position = {0,screen.h - 76,0},
+		size = {1700,76},
+		opacity = 255,
+		extra = {type = "TimeLine"}
+    }
+
+  local function find_prev_point(name)
+	local cur_num = tonumber(name:sub(8, -1))
+        if cur_num == 1 then 
+		return p.num_point + 1
+	else 
+		return cur_num - 1 
+	end 
+  end 
+
+
+-- make_on_button_down() function for time pointer image
+    local function make_on_button_down(name) 
+	 local pointer = timeline:find_child(name)
+
+	 function pointer:on_button_down(x,y,n,b)
+	    if current_time_focus then 
+	         current_time_focus.on_focus_out()
+	    end 
+	    current_time_focus = pointer
+	    pointer.on_focus_in()
+	    
+            for n,m in pairs (g.children) do 
+	      if not m.name:find("timeline") then 
+		if pointer.extra.set == false then 
+		   if m.extra.timeline["pointer"..tostring(find_prev_point(pointer.name))] then   
+		     for l,k in pairs (m.extra.timeline["pointer"..tostring(find_prev_point(pointer.name))]) do
+			m[l] = k
+		     end 
+	           end 
+		else 
+		   if m.extra.timeline[pointer.name] then
+		     for l,k in pairs (m.extra.timeline[pointer.name]) do 
+			m[l] = k
+		     end
+                   end 
+		end 
+	      end 
+	   end 
 	end 
     end 
 
 
-dumptable (p.points)
+    local create_timeline = function ()
 
-    --local timeline = draw_timeline(p.duration/p.num_point, p.num_point)
-    local timeline = draw_timeline(p.points, p.duration, p.num_point)
+    	timeline:clear()
 
-    local timeline_timers = {}
-    local timeline_timelines = {}
+	if table.getn(p.points) > 0 then 
+             for i = 1, p.num_point, 1 do 
+	         if p.points[i] then 
+	              for j = 1, 3, 1 do 
+	                 if not p.points[i][j] then 
+		    	    set_default_point(i,j)
+		         end 
+		      end 
+	         else 
+		     set_default_point(i)
+	         end 
+	     end 
+	else 
+ 	     for i = 1, p.num_point, 1 do 
+	          set_default_point(i)
+	     end 
+   	end 
+ 
+    	timeline = draw_timeline(timeline, p.points, p.duration, p.num_point)
+	
+	
+    	timeline_timers = {}
+    	timeline_timelines = {}
 
-    for i =1, p.num_point + 1, 1 do 
+    	for i =1, p.num_point, 1 do 
 	  timeline_timers[i] = Timer()
-	  timeline_timers[i].interval = p.duration/p.num_point * (i + 1) 
 	  timeline_timelines[i] = Timeline()
-    	  timeline_timelines[i].duration = p.duration/p.num_point
+	  timeline_timers[i].interval = p.points[i][2] * (i + 1) --p.duration/p.num_point * (i + 1) 
+    	  timeline_timelines[i].duration = p.points[i][3] 	     -- p.duration/p.num_point
     	  timeline_timelines[i].direction = "FORWARD"
     	  timeline_timelines[i].loop = false
     
 	  local tl = timeline_timelines[i]
 
   	  local next_point, current_point  
-	  if i == p.num_point + 1 then 
-		next_point = "pointer"..tostring(p.num_point + 1) 
-	  else 
-		next_point = "pointer"..tostring(i)
-	  end 
+	  next_point = "pointer"..tostring(i)
 	  if i == 1 then 
 		current_point = "pointer"..tostring(p.num_point+1)
 	  else 
 		current_point = "pointer"..tostring(i - 1) 
 	  end 
 
-          function tl.on_new_frame(t, m, p)
+          function tl.on_new_frame(t, m, p) -- local 
 		for n,m in pairs (g.children) do 
 		     if m.extra.timeline[current_point] then 
 			for l,k in pairs (attr_map[m.type]()) do 
@@ -833,6 +882,8 @@ dumptable (p.points)
 				        end 
 					m[k] = temptable
 				else 
+					print("current point", current_point)
+					print("next point", next_point)
 					local interval = Interval(m.extra.timeline[current_point][k], m.extra.timeline[next_point][k])
 					m[k] = interval:get_value(p)
 				end
@@ -841,7 +892,7 @@ dumptable (p.points)
 	         end
          end  
 
-         function tl.on_completed()
+         function tl.on_completed() --local
 		for n,m in pairs (g.children) do 
 		     if m.extra.timeline[current_point] then 
 			for l,k in pairs (attr_map[m.type]()) do 
@@ -875,50 +926,102 @@ dumptable (p.points)
      end 
 
     -- set object.extra.timeline table
-    for n,m in pairs (g.children) do 
-	if not m.name:find("timeline") then 
-            m.extra.timeline = {}
-            for i = 1, p.num_point + 1, 1 do
-                 m.extra.timeline["pointer"..tostring(i)] = {}
-            end 
-	    for l,k in pairs (attr_map[m.type]()) do 
-	         m.extra.timeline["pointer"..tostring(p.num_point + 1)][k] = m[k]
-	    end
-	end
-    end 
+      for n,m in pairs (g.children) do 
+	 if m.name then 
+	    if not m.extra.timeline then 
+                m.extra.timeline = {}
+                for i = 1, p.num_point + 1, 1 do
+                     m.extra.timeline["pointer"..tostring(i)] = {}
+	             for l,k in pairs (attr_map[m.type]()) do 
+	                  m.extra.timeline["pointer"..tostring(i)][k] = m[k]
+	             end
+                end 
+	    else
+		local prev_org = false
+	
+	        for i = 1, p.num_point, 1 do
+	             if not m.extra.timeline["pointer"..tostring(i)]then 
+			if prev_org == false then 
+			     m.extra.timeline["pointer"..tostring(p.num_point + 1)] = {} 
+	             	     for l,k in pairs (attr_map[m.type]()) do 
+			          m.extra.timeline["pointer"..tostring(p.num_point + 1)][k] = m.extra.timeline["pointer"..tostring(i-1)][k] 
+			          m.extra.timeline["pointer"..tostring(i-1)][k] = m.extra.timeline["pointer"..tostring(i-2)][k] 
+			     end 
+			     prev_org = true 
+			end 
+			m.extra.timeline["pointer"..tostring(i)] = {} 
+	             	for l,k in pairs (attr_map[m.type]()) do 
+	                     m.extra.timeline["pointer"..tostring(i)][k] = m.extra.timeline["pointer"..tostring(i-1)][k]
+	             	end
+		     end 
+		end 
 
-    -- make_on_button_down() function for time pointer image
-    local function make_on_button_down(name) 
-	 local pointer = timeline:find_child(name)
-	 function pointer:on_button_down(x,y,n,b)
-	    if current_time_focus then 
-	         current_time_focus.on_focus_out()
-	    end 
-	    current_time_focus = pointer
-	    pointer.on_focus_in()
-	    
-            for n,m in pairs (g.children) do 
-	      if not m.name:find("timeline") then 
-		if m.extra.timeline[pointer.name] then
-		     for l,k in pairs (m.extra.timeline[pointer.name]) do 
-			m[l] = k
+		local function table_removekey(table, key)
+    			local element = table[key]
+			table[key] = nil
+			return element
+		end
+
+		local end_point = 0
+		for i,j in pairs (m.extra.timeline) do 
+		     if tonumber(i:sub(8, -1)) > end_point then 
+		          end_point = tonumber(i:sub(8, -1)) 
+		     end 
+		end 
+
+		if end_point > p.num_point + 1 then 
+	             for l,k in pairs (attr_map[m.type]()) do 
+	                  m.extra.timeline["pointer"..tostring(p.num_point + 1)][k] = m.extra.timeline["pointer"..tostring(end_point)][k]
 		     end
-		else 
-		     for l,k in pairs (m.extra.timeline["pointer"..tostring(p.num_point + 1)]) do
-			m[l] = k
+		end 
+
+		for i,j in pairs (m.extra.timeline) do 
+		     if tonumber(i:sub(8, -1)) > p.num_point + 1 then
+			 table_removekey(m.extra.timeline, i)
 		     end 
                 end 
-	      end 
-	   end 
+	    end
+    	  end 
+    	end 
 
-	 end 
+    
+        for i = 1, p.num_point + 1, 1 do 
+	     make_on_button_down("pointer"..tostring(i))
+        end 
+
+
+	g.extra.points = p.points
+	g.extra.duration = p.duration
+	g.extra.num_point = p.num_point
     end 
 
-    --make_on_button_down("pointerOrg")
-    for i = 1, p.num_point + 1, 1 do 
-	make_on_button_down("pointer"..tostring(i))
+    create_timeline()
+
+    mt = {}
+    mt.__newindex = function (t, k, v)
+	local pre_num
+	if k == "num_point" then
+	      pre_num = p.num_point + 1
+	      p.points = {}
+	end 
+        p[k] = v
+        create_timeline()
+	for i,j in pairs (screen:find_child("timeline").children) do
+	       if j.name:find("pointer") then 
+		    if pre_num >= tonumber(j.name:sub(8,-1)) then 
+			 print ("pointer", j.name:sub(8,-1), "is set to true")
+		         j.extra.set = true
+	            end      
+	       end 
+	end 
+
     end 
-	
+
+    mt.__index = function (t,k)
+	return p[k]
+    end 
+
+    setmetatable (timeline.extra, mt) 
 
     return timeline
 	

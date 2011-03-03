@@ -131,7 +131,7 @@ function( section )
         f_widget.extra.on_activate =
             function()
 		input_mode = S_SELECT
-		editor.widget()
+		editor.widgets()
             end
         f_undo.extra.on_activate =
             function()

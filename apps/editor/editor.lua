@@ -498,10 +498,22 @@ function editor.close()
 	g.extra.canvas_h = screen.h
 	g.extra.scroll_dy = 0
 	g.extra.scroll_dx = 0
+
+	local timeline = screen:find_child("timeline")
+	if timeline then 
+		timeline:clear()
+		screen:remove(timeline)
+	end 
+	
 end 
 
 function editor.open()
 
+     local timeline = screen:find_child("timeline")
+     if timeline then 
+	timeline:clear()
+	screen:remove(timeline)
+     end 
     -- editor.close()
      if(CURRENT_DIR == "") then 
 	set_app_path()
@@ -739,7 +751,7 @@ end
 
 function editor.the_open()
 ---[[
-	local WIDTH = 700
+       	local WIDTH = 700
 	local L_PADDING = 50
 	local R_PADDING = 50
         local TOP_PADDING = 60
@@ -905,12 +917,22 @@ function editor.the_open()
 
     function open_b:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
-              inputMsgWindow_openfile(input_text.text) 
-	      cleanMsgWin(msgw)
+	       local timeline = screen:find_child("timeline")
+	       if timeline then 
+		     timeline:clear()
+	     	     screen:remove(timeline)
+	       end 
+               inputMsgWindow_openfile(input_text.text) 
+	       cleanMsgWin(msgw)
 	 end 
     end 
     function open_t:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
+	      local timeline = screen:find_child("timeline")
+	      if timeline then 
+		     timeline:clear()
+	     	     screen:remove(timeline)
+	      end 
               inputMsgWindow_openfile(input_text.text) 
 	      cleanMsgWin(msgw)
 	 end 
@@ -1339,6 +1361,25 @@ function editor.save(save_current_f)
 	     contents = contents..itemTostring(g.extra.video)
 	end 
 
+        local timeline = screen:find_child("timeline")
+	if timeline then
+	      contents = contents .."local timeline = widget.timeline { \n\tpoints = {" 
+	      for m,n in pairs (timeline.points) do 
+		    contents = contents.."{"
+		    for q,r in pairs (n) do
+		         if q == 1 then 
+			      contents = contents.."\""..tostring(r).."\","
+		         else 
+			      contents = contents..tostring(r)..","
+		         end
+		    end 
+		    contents = contents.."},"
+	      end 
+	      contents = contents.."},\n\t" 
+              contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
+              contents = contents.."screen:add(timeline)\n\n"
+	end 
+
 	contents = contents.."\ng:add("..obj_names..")"
         contents = "local g = ... \n\n"..contents
 
@@ -1375,6 +1416,25 @@ function editor.save(save_current_f)
 
 	     if (g.extra.video ~= nil) then
 	          contents = contents..itemTostring(g.extra.video)
+	     end 
+
+	     local timeline = screen:find_child("timeline")
+	     if timeline then
+	          contents = contents .."local timeline = widget.timeline { \n\tpoints = {" 
+	          for m,n in pairs (timeline.points) do 
+		         contents = contents.."{"
+			    for q,r in pairs (n) do
+				    if q == 1 then 
+				         contents = contents.."\""..tostring(r).."\","
+				    else 
+				         contents = contents..tostring(r)..","
+				    end
+			    end 
+		         contents = contents.."},"
+	         end 
+	         contents = contents.."},\n\t" 
+                 contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
+                 contents = contents.."screen:add(timeline)\n\n"
 	     end 
 
 	     contents = contents.."\ng:add("..obj_names..")"
@@ -1415,6 +1475,24 @@ function editor.rectangle(x, y)
 	if(screen:find_child("screen_objects") == nil) then 
              screen:add(g)
 	end
+
+	if screen:find_child("timeline") then 
+		ui.rect.extra.timeline = {}
+		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
+		     ui.rect.extra.timeline ["pointer"..tostring(i)] = {}
+		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+		     for l,k in pairs (attr_map["Rectangle"]()) do
+		           ui.rect.extra.timeline["pointer"..tostring(i)][k] = ui.rect[k]
+		     end   
+		     --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
+		     if (cur_focus_n > i) or 
+                        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
+			   ui.rect.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+		     end 
+		end 
+
+	end 
+
 
         create_on_button_down_f(ui.rect) 
 
@@ -1587,6 +1665,23 @@ function editor.text()
 
         table.insert(undo_list, {ui.text.name, ADD, ui.text})
         g:add(ui.text)
+
+	if screen:find_child("timeline") then 
+		ui.text.extra.timeline = {}
+		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
+		     ui.text.extra.timeline ["pointer"..tostring(i)] = {}
+		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+		     for l,k in pairs (attr_map["Text"]()) do
+		           ui.text.extra.timeline["pointer"..tostring(i)][k] = ui.text[k]
+		     end   
+		     --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
+		     if (cur_focus_n > i ) or 
+		        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
+			   ui.text.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+		     end 
+		end 
+
+	end 
 	if(screen:find_child("screen_objects") == nil) then 
              screen:add(g)
 	end
@@ -1655,6 +1750,23 @@ function editor.clone()
         	     }
         	     table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
         	     g:add(ui.clone)
+		     
+		     if screen:find_child("timeline") then 
+			 ui.clone.extra.timeline = {}
+			for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
+			     ui.clone.extra.timeline ["pointer"..tostring(i)] = {}
+			     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+		     	     for l,k in pairs (attr_map["Clone"]()) do
+		           	  ui.clone.extra.timeline["pointer"..tostring(i)][k] = ui.clone[k]
+		     	     end   
+		             --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
+		             if (cur_focus_n > i) or 
+		     	        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
+			   	  ui.clone.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+		     	     end 
+			end 
+		     end 
+
 	             if(screen:find_child("screen_objects") == nil) then 
         	          screen:add(g)        
 		     end 
@@ -1741,7 +1853,6 @@ function editor.group()
 	for i, v in pairs (ui.group.children) do 
 		if ui.group:find_child(v.name) then 
 			v.extra.is_in_group = true
-			--print("KKKKK 4444") 
 			v.extra.group_position = ui.group.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
@@ -1751,6 +1862,23 @@ function editor.group()
         g:add(ui.group)
 	if(screen:find_child("screen_objects") == nil) then 
              screen:add(g)
+	end 
+	
+	if screen:find_child("timeline") then 
+		ui.group.extra.timeline = {}
+		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
+		     ui.group.extra.timeline ["pointer"..tostring(i)] = {}
+		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+		     for l,k in pairs (attr_map["Group"]()) do
+		           ui.group.extra.timeline["pointer"..tostring(i)][k] = ui.group[k]
+		     end   
+		     --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
+		     if (cur_focus_n > i ) or 
+			(screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n) then
+			   ui.group.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+		     end 
+		end 
+
 	end 
 
         item_num = item_num + 1
@@ -2594,7 +2722,7 @@ function editor.widgets()
          msgw:add(widget_b)
          
          function widget_b:on_button_down(x,y,button,num_clicks)
-	      new_widget = widget_map[v]() 
+	      local new_widget = widget_map[v]() 
 	      
 
 --imsi  : for debugging, will be deleted 
@@ -2647,7 +2775,7 @@ function editor.widgets()
         end 
         function widget_t:on_button_down(x,y,button,num_clicks)
 
-	      new_widget = widget_map[v]() 
+	      local new_widget = widget_map[v]() 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget

@@ -166,6 +166,8 @@ function create_on_button_down_f(v)
 		    local p_obj = find_parent(v)
                     if(button == 3) then -- imsi : num_clicks is not correct ! 
                     --if(button == 3 or num_clicks >= 2) then
+		    print ("button", button)
+		    print ("num_clicks", num_clicks)
                          editor.inspector(p_obj)
                          return true
                     end 
@@ -181,6 +183,8 @@ function create_on_button_down_f(v)
 	      else 
                     if(button == 3) then-- imsi : num_clicks is not correct ! 
 		    --if(button == 3 or num_clicks >= 2) then
+		    print ("button", button)
+		    print ("num_clicks", num_clicks)
                          editor.inspector(v)
                          return true
                     end 
@@ -595,10 +599,6 @@ function make_attr_t(v)
 end
 
 
---------------------------------
--- Inspector 
---------------------------------
-
 local input_t
 
 function itemTostring(v, d_list, t_list)
@@ -803,15 +803,26 @@ function itemTostring(v, d_list, t_list)
     end 
 
 
---[[
     if v.extra.timeline then 
-	itm_str = itm_str..v.name.."\.extra\.timeline = {" 
-	for m,n in pairs (v.extra.timeline) do 
-		itm_str = itm_str.."["..m.."] = \""..n.."\", " 
-	end 
-	itm_str = itm_str.."}\n\n"
+	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 
+	    for m,n in pairs (v.extra.timeline) do 
+	         itm_str = itm_str.."[\""..m.."\"] = { \n"
+	         for q,r in pairs (n) do
+	             itm_str = itm_str.."[\""..q.."\"] = "
+		     if type(r) == "table" then 
+		          itm_str = itm_str.."{"
+		          for s,t in pairs (r) do
+			      itm_str = itm_str..t..","
+		          end 
+		          itm_str = itm_str.."},"
+		     else 
+		          itm_str = itm_str..r.."," 
+		     end
+	         end
+	         itm_str = itm_str.."},\n"
+	    end 
+	    itm_str = itm_str.."}\n\n"
     end 
-]]
 
     if(d_list == nil) then  
 	d_list = {v.name}
@@ -1383,6 +1394,13 @@ function inputMsgWindow_openfile(input_text)
            current_fn = input_t.text
            local f = loadfile(current_fn)
            f(g) 
+	   if screen:find_child("timeline") then 
+	      for i,j in pairs (screen:find_child("timeline").children) do
+	         if j.name:find("pointer") then 
+		    j.extra.set = true
+	         end      
+	      end      
+	   end 
      else 
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen)
@@ -1551,6 +1569,22 @@ function inputMsgWindow_openimage(input_purpose, input_text)
           create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, ADD, ui.image})
           g:add(ui.image)
+
+	  
+	  if screen:find_child("timeline") then 
+		ui.image.extra.timeline = {}
+		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
+		     ui.image.extra.timeline ["pointer"..tostring(i)] = {}
+		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+		     for l,k in pairs (attr_map["Rectangle"]()) do
+		           ui.image.extra.timeline["pointer"..tostring(i)][k] = ui.image[k]
+		     end   
+		     if cur_focus_n > i or ( screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
+			   ui.image.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+		     end 
+		end 
+	  end 
+	
           if(screen:find_child("screen_objects") == nil) then
                screen:add(g)
           end 
@@ -1879,6 +1913,7 @@ function inputMsgWindow(input_purpose)
 	 msgw:find_child(msgw_focus).extra.on_focus_out()
 	 input_box.extra.on_focus_in()
     end 
+
     function input_box:on_button_down(x,y,button,num)
 	 msgw:find_child(msgw_focus).extra.on_focus_out()
 	 input_box.extra.on_focus_in()
