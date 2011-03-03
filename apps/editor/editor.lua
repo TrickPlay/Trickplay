@@ -1476,24 +1476,6 @@ function editor.rectangle(x, y)
              screen:add(g)
 	end
 
-	if screen:find_child("timeline") then 
-		ui.rect.extra.timeline = {}
-		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
-		     ui.rect.extra.timeline ["pointer"..tostring(i)] = {}
-		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-		     for l,k in pairs (attr_map["Rectangle"]()) do
-		           ui.rect.extra.timeline["pointer"..tostring(i)][k] = ui.rect[k]
-		     end   
-		     --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
-		     if (cur_focus_n > i) or 
-                        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
-			   ui.rect.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
-		     end 
-		end 
-
-	end 
-
-
         create_on_button_down_f(ui.rect) 
 
 end 
@@ -1508,6 +1490,34 @@ function editor.rectangle_done(x,y)
         end
         item_num = item_num + 1
         screen.grab_key_focus(screen)
+
+
+	
+	if screen:find_child("timeline") then 
+		ui.rect.extra.timeline = {}
+		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
+		     ui.rect.extra.timeline ["pointer"..tostring(i)] = {}
+		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+		     for l,k in pairs (attr_map["Rectangle"]()) do
+		           ui.rect.extra.timeline["pointer"..tostring(i)][k] = ui.rect[k]
+			   if k == "w" then 
+			    print("i",i,"w", ui.rect[k])
+			   elseif k == "h" then 
+			    print("i",i,"h", ui.rect[k])
+			   end 
+				
+		     end   
+		     if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
+		     --if (cur_focus_n > i) or 
+                        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
+			   ui.rect.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+		     end 
+		end 
+
+	end 
+
+
+
 end 
 
 function editor.rectangle_move(x,y)

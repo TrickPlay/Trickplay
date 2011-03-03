@@ -218,7 +218,8 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 		name = "line",
 		--position = {106,36,0},
 		position = {0,36,0},
-		size = {1600,6},
+		--size = {1600,6},
+		size = {screen.w,6},
 		opacity = 255,
 	}
 
