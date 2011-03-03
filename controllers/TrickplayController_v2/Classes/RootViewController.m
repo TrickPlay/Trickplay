@@ -230,6 +230,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if ([services count] == 0) return;
     
+    
     NSLog(@"gestureViewController %@\n", gestureViewController);
     if (gestureViewController == nil)
 	{

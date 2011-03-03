@@ -1,7 +1,7 @@
 TTrickplayController_v2
 v7
 r0
-t320265199.873690
+t320802040.487667
 cCheck dependencies
 cProcessInfoPlistFile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/Info.plist TrickplayController_v2-Info.plist
 cCompileXIB /Users/rex/Documents/TrickplayController_v2/RootViewController.xib
@@ -16,6 +16,7 @@ cCpResource build/Debug-iphonesimulator/TrickplayController_v2.app/iOS-logo-72x7
 cCpResource build/Debug-iphonesimulator/TrickplayController_v2.app/Default~iPad.png iPad/Default~iPad.png
 cCompileXIB /Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib
 cCompileXIB /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib
+cCpResource build/Debug-iphonesimulator/TrickplayController_v2.app/background~ipad.png iPad/background~ipad.png
 cProcessPCH /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch.gch TrickplayController_v2_Prefix.pch normal i386 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/main.o /Users/rex/Documents/TrickplayController_v2/main.m normal i386 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AppDelegate.o /Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m normal i386 objective-c com.apple.compilers.gcc.4_2
@@ -112,15 +113,15 @@ i"AppDelegate.h"
 i"RootViewController.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.h
-c000000004D65884300000000000002C0
-t1298499651
-s704
+c000000004D6707C900000000000002F4
+t1298597833
+s756
 i<Foundation/Foundation.h>
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m
-c000000004D659DEE0000000000000920
-t1298505198
-s2336
+c000000004D6710230000000000000B39
+t1298599971
+s2873
 i"AsyncImageView.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/AudioController.h
@@ -155,21 +156,21 @@ i"AudioStreamer.h"
 i<CFNetwork/CFNetwork.h>
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.h
-c000000004D64771A0000000000000437
-t1298429722
-s1079
+c000000004D66E612000000000000044B
+t1298589202
+s1099
 i<Foundation/Foundation.h>
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m
-c000000004D647707000000000000137D
-t1298429703
-s4989
+c000000004D66E6820000000000001394
+t1298589314
+s5012
 i"CommandInterpreter.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.h
-c000000004D648958000000000000090A
-t1298434392
-s2314
+c000000004D68412D0000000000000949
+t1298678061
+s2377
 i<UIKit/UIKit.h>
 i"ResourceManager.h"
 i"SocketManager.h"
@@ -178,15 +179,15 @@ i"AccelerometerController.h"
 i"AudioController.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m
-c000000004D65BB790000000000003A3D
-t1298512761
-s14909
+c000000004D68448E0000000000003CF1
+t1298678926
+s15601
 i"GestureViewController.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib
-c000000004D5DAC200000000000006232
-t1297984544
-s25138
+c000000004D6EC7E600000000000065E6
+t1299105766
+s26086
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/NSStreamAdditions.h
 c000000004D506FCD00000000000001D0
@@ -201,15 +202,15 @@ s1387
 i"NSStreamAdditions.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.h
-c000000004D5C9D680000000000000348
-t1297915240
-s840
+c000000004D66AE2D0000000000000362
+t1298574893
+s866
 i<Foundation/Foundation.h>
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m
-c000000004D5DF3E800000000000010C7
-t1298002920
-s4295
+c000000004D66AE16000000000000113F
+t1298574870
+s4415
 i"NetServiceManager.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.h
@@ -221,9 +222,9 @@ i"SocketManager.h"
 i"AsyncImageView.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m
-c000000004D6588610000000000000E0F
-t1298499681
-s3599
+c000000004D66D45F0000000000000EF9
+t1298584671
+s3833
 i"ResourceManager.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.h
@@ -249,22 +250,22 @@ i"NSStreamAdditions.h"
 i"CommandInterpreter.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m
-c000000004D5EF14D00000000000018C4
-t1298067789
-s6340
+c000000004D66CD5700000000000018BF
+t1298582871
+s6335
 i"SocketManager.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.h
-c000000004D5C7A050000000000000490
-t1297906181
-s1168
+c000000004D6EA2200000000000000567
+t1299096096
+s1383
 i<Foundation/Foundation.h>
 i"GestureViewController.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m
-c000000004D5C84950000000000001D1A
-t1297908885
-s7450
+c000000004D6EC6CE0000000000002565
+t1299105486
+s9573
 i"TouchController.h"
 
 N/Users/rex/Documents/TrickplayController_v2/GestureViewController.xib
@@ -278,9 +279,9 @@ t1297748415
 s24624
 
 N/Users/rex/Documents/TrickplayController_v2/RootViewController.xib
-c000000004D5A1F030000000000004D22
-t1297751811
-s19746
+c000000004D6ECB0A00000000000047CD
+t1299106570
+s18381
 
 N/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2_Prefix.pch
 c000000004D5A11BF000000000000015E
@@ -291,11 +292,11 @@ i<Foundation/Foundation.h>
 i<UIKit/UIKit.h>
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app
-t1298572399
-s612
+t1299109240
+s646
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app.dSYM
-t1298572399
+t1299109240
 s102
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/Default@2x~iphone.png
@@ -311,39 +312,43 @@ t1297748583
 s5628
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/GestureViewController.nib
-t1297984547
-s1790
+t1299109228
+s1977
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/Info.plist
-t1298504615
-s1056
+t1299109224
+s1074
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow-iPad.nib
-t1297748584
-s1502
+t1299109228
+s1504
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow-iPhone.nib
-t1297752882
-s1478
+t1299109227
+s1480
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow.nib
 t1297748583
 s1524
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/PkgInfo
-t1298504615
+t1299109224
 s8
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/RootViewController.nib
-t1297751822
+t1299109227
 s979
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2
-t1298572399
-s108540
+t1299109240
+s113884
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/background@2x~iphone.png
 t1297748583
+s310176
+
+N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/background~ipad.png
+t1299109228
 s310176
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/background~iphone.png
@@ -363,19 +368,19 @@ t1297748583
 s4221
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AccelerometerController.o
-t1298572399
+t1299109238
 s19608
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AppDelegate.o
-t1298499790
+t1299109236
 s52244
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AsyncImageView.o
-t1298512762
-s47664
+t1299109239
+s49940
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioController.o
-t1298499791
+t1299109239
 s12540
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioStreamer.o
@@ -383,36 +388,36 @@ t1298499791
 s3948
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/CommandInterpreter.o
-t1298499790
-s20612
+t1299109237
+s20144
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/GestureViewController.o
-t1298512762
-s91784
+t1299109238
+s91856
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NSStreamAdditions.o
 t1297749080
 s8540
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NetServiceManager.o
-t1298003053
-s24372
+t1299109237
+s24612
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/ResourceManager.o
-t1298499791
-s48300
+t1299109239
+s48948
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/RootViewController.o
-t1298499790
+t1299109236
 s68556
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/SocketManager.o
-t1298499790
-s29228
+t1299109237
+s29216
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TouchController.o
-t1298499791
-s58832
+t1299109239
+s63704
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TrickplayController_v2.LinkFileList
 c000000004D6588CB0000000000000934
@@ -429,9 +434,14 @@ t1296000872
 s5405
 
 N/Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib
-c000000004D3F67680000000000005F73
+c000000004D6ECAE9000000000000646B
+t1299106537
+s25707
+
+N/Users/rex/Documents/TrickplayController_v2/iPad/background~ipad.png
+c000000004D3F6768000000000004BBA0
 t1296000872
-s24435
+s310176
 
 N/Users/rex/Documents/TrickplayController_v2/iPad/iOS-logo-72x72.png
 c000000004D3F6768000000000000107D
@@ -449,9 +459,9 @@ t1296000872
 s5628
 
 N/Users/rex/Documents/TrickplayController_v2/iPhone/MainWindow-iPhone.xib
-c000000004D5A22D000000000000064AD
-t1297752784
-s25773
+c000000004D6ECAF700000000000061D0
+t1299106551
+s25040
 
 N/Users/rex/Documents/TrickplayController_v2/iPhone/background@2x~iphone.png
 c000000004D3F6768000000000004BBA0
@@ -484,17 +494,17 @@ t1297748585
 s15453392
 
 NTrickplayController_v2-Info.plist
-c000000004D659BA400000000000005CE
-t1298504612
-s1486
+c000000004D67F0B1000000000000060C
+t1298657457
+s1548
 
 CCheck dependencies
 r0
-lSLF07#2@18"Check dependencies320265194#320265194#0(0"0(0#1#0"8688847264#0"0#
+lSLF07#2@18"Check dependencies320802023#320802024#0(0"0(0#1#0"8781165472#0"0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AccelerometerController.o /Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320265194.916247
-e320265199.181863
+s320802037.910037
+e320802038.269462
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AccelerometerController.o
@@ -503,11 +513,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@85"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m320265194#320265199#0(0"0(0#0#77"/Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m8699715232#2315"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AccelerometerController.o0#
+lSLF07#2@85"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m320802037#320802038#0(0"0(0#0#77"/Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m8780738848#2315"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AccelerometerController.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AppDelegate.o /Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320192587.698709
-e320192590.719134
+s320802028.846043
+e320802036.803559
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AppDelegate.o
@@ -516,11 +526,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@73"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m320192587#320192590#0(0"0(0#0#65"/Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m8700322336#2291"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AppDelegate.o0#
+lSLF07#2@73"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m320802028#320802037#0(0"0(0#0#65"/Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m8773580960#2291"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AppDelegate.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AppDelegate.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AsyncImageView.o /Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320205561.866190
-e320205562.182358
+s320802039.165421
+e320802039.494280
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AsyncImageView.o
@@ -529,11 +539,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@76"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m320205561#320205562#0(0"0(0#0#68"/Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m8701131488#2297"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AsyncImageView.o0#
+lSLF07#2@76"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m320802039#320802039#0(0"0(0#0#68"/Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m8778310944#2297"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AsyncImageView.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AsyncImageView.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioController.o /Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320192591.137533
-e320192591.267453
+s320802038.815823
+e320802039.153365
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioController.o
@@ -542,7 +552,7 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m320192591#320192591#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m8708671296#2299"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioController.o0#
+lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m320802038#320802039#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m8777958144#2299"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioController.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioStreamer.o /Users/rex/Documents/TrickplayController_v2/Classes/AudioStreamer.m normal i386 objective-c com.apple.compilers.gcc.4_2
 s320192591.155902
@@ -558,8 +568,8 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@75"Compile /Users/rex/Documents/TrickplayController_v2/Classes/AudioStreamer.m320192591#320192591#0(0"0(0#0#67"/Users/rex/Documents/TrickplayController_v2/Classes/AudioStreamer.m8706779744#2295"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/AudioStreamer.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/AudioStreamer.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/CommandInterpreter.o /Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320192590.730171
-e320192590.847119
+s320802036.803768
+e320802037.654935
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/CommandInterpreter.o
@@ -568,11 +578,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@80"Compile /Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m320192590#320192590#0(0"0(0#0#72"/Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m8707806176#2305"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/CommandInterpreter.o0#
+lSLF07#2@80"Compile /Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m320802036#320802037#0(0"0(0#0#72"/Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m8779190464#2305"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/CommandInterpreter.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/GestureViewController.o /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320205561.644323
-e320205562.102478
+s320802037.774374
+e320802038.815697
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/GestureViewController.o
@@ -581,7 +591,7 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@83"Compile /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m320205561#320205562#0(0"0(0#0#75"/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m8607900928#2311"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/GestureViewController.o0#
+lSLF07#2@83"Compile /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m320802037#320802038#0(0"0(0#0#75"/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m8780420160#2311"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/GestureViewController.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NSStreamAdditions.o /Users/rex/Documents/TrickplayController_v2/Classes/NSStreamAdditions.m normal i386 objective-c com.apple.compilers.gcc.4_2
 s319441880.155160
@@ -597,8 +607,8 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@79"Compile /Users/rex/Documents/TrickplayController_v2/Classes/NSStreamAdditions.m319441880#319441880#0(0"0(0#0#71"/Users/rex/Documents/TrickplayController_v2/Classes/NSStreamAdditions.m8656605056#2303"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/NSStreamAdditions.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NSStreamAdditions.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NetServiceManager.o /Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s319695853.610809
-e319695853.817974
+s320802037.655038
+e320802037.909939
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NetServiceManager.o
@@ -607,11 +617,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@79"Compile /Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m319695853#319695853#0(0"0(0#0#71"/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m8709340320#2303"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NetServiceManager.o0#
+lSLF07#2@79"Compile /Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m320802037#320802037#0(0"0(0#0#71"/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m8781241632#2303"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/NetServiceManager.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/ResourceManager.o /Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320192591.229168
-e320192591.377136
+s320802039.163770
+e320802039.494012
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/ResourceManager.o
@@ -620,11 +630,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m320192591#320192591#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m8700620064#2299"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/ResourceManager.o0#
+lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m320802039#320802039#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m8780547680#2299"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/ResourceManager.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/RootViewController.o /Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320192587.701028
-e320192590.729605
+s320802028.847529
+e320802036.699799
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/RootViewController.o
@@ -633,11 +643,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@80"Compile /Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.m320192587#320192590#0(0"0(0#0#72"/Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.m8695008192#2305"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/RootViewController.o0#
+lSLF07#2@80"Compile /Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.m320802028#320802037#0(0"0(0#0#72"/Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.m8770911104#2305"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/RootViewController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/RootViewController.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/SocketManager.o /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320192590.719492
-e320192590.834261
+s320802036.700069
+e320802037.774270
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/SocketManager.o
@@ -646,11 +656,11 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@75"Compile /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m320192590#320192590#0(0"0(0#0#67"/Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m8709553888#2295"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/SocketManager.o0#
+lSLF07#2@75"Compile /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m320802036#320802037#0(0"0(0#0#67"/Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m8745834656#2295"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/SocketManager.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TouchController.o /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m normal i386 objective-c com.apple.compilers.gcc.4_2
-s320192590.968968
-e320192591.137420
+s320802038.269770
+e320802039.165330
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TouchController.o
@@ -659,7 +669,7 @@ xnormal
 xi386
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m320192590#320192591#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m8699442368#2299"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TouchController.o0#
+lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m320802038#320802039#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m8695038080#2299"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TouchController.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/main.o /Users/rex/Documents/TrickplayController_v2/main.m normal i386 objective-c com.apple.compilers.gcc.4_2
 s319441385.287346
@@ -675,12 +685,12 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@58"Compile /Users/rex/Documents/TrickplayController_v2/main.m319441385#319441385#0(0"0(0#0#50"/Users/rex/Documents/TrickplayController_v2/main.m8648328352#2269"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/main.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/main.o0#
 
 CCompileXIB /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib
-s319677346.680733
-e319677347.348345
+s320802028.161427
+e320802028.845708
 r1
 xCompileXIB
 x/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib
-lSLF07#2@44"CompileXIB Classes/GestureViewController.xib319677346#319677347#0(0"0(0#0#77"/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib8670837184#630"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/GestureViewController.nib /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
+lSLF07#2@44"CompileXIB Classes/GestureViewController.xib320802028#320802028#0(0"0(0#0#77"/Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib8777834976#630"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/GestureViewController.nib /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
 
 CCompileXIB /Users/rex/Documents/TrickplayController_v2/GestureViewController.xib
 s319442685.846897
@@ -699,28 +709,28 @@ x/Users/rex/Documents/TrickplayController_v2/MainWindow.xib
 lSLF07#2@25"CompileXIB MainWindow.xib319441383#319441383#0(0"0(0#0#58"/Users/rex/Documents/TrickplayController_v2/MainWindow.xib8605168512#600"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow.nib /Users/rex/Documents/TrickplayController_v2/MainWindow.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
 
 CCompileXIB /Users/rex/Documents/TrickplayController_v2/RootViewController.xib
-s319444622.454398
-e319444622.846230
+s320802024.098160
+e320802028.161336
 r1
 xCompileXIB
 x/Users/rex/Documents/TrickplayController_v2/RootViewController.xib
-lSLF07#2@33"CompileXIB RootViewController.xib319444622#319444622#0(0"0(0#0#66"/Users/rex/Documents/TrickplayController_v2/RootViewController.xib8673205184#616"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/RootViewController.nib /Users/rex/Documents/TrickplayController_v2/RootViewController.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
+lSLF07#2@33"CompileXIB RootViewController.xib320802024#320802028#0(0"0(0#0#66"/Users/rex/Documents/TrickplayController_v2/RootViewController.xib8779834048#616"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/RootViewController.nib /Users/rex/Documents/TrickplayController_v2/RootViewController.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
 
 CCompileXIB /Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib
-s319441383.832761
-e319441384.334053
+s320802027.970303
+e320802028.504259
 r1
 xCompileXIB
 x/Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib
-lSLF07#2@35"CompileXIB iPad/MainWindow-iPad.xib319441383#319441384#0(0"0(0#0#68"/Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib8615686624#615"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow-iPad.nib /Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
+lSLF07#2@35"CompileXIB iPad/MainWindow-iPad.xib320802027#320802028#0(0"0(0#0#68"/Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib8779057856#615"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow-iPad.nib /Users/rex/Documents/TrickplayController_v2/iPad/MainWindow-iPad.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
 
 CCompileXIB /Users/rex/Documents/TrickplayController_v2/iPhone/MainWindow-iPhone.xib
-s319445681.054722
-e319445682.459177
+s320802024.130470
+e320802027.969833
 r1
 xCompileXIB
 x/Users/rex/Documents/TrickplayController_v2/iPhone/MainWindow-iPhone.xib
-lSLF07#2@39"CompileXIB iPhone/MainWindow-iPhone.xib319445681#319445682#0(0"0(0#0#72"/Users/rex/Documents/TrickplayController_v2/iPhone/MainWindow-iPhone.xib8672433216#621"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow-iPhone.nib /Users/rex/Documents/TrickplayController_v2/iPhone/MainWindow-iPhone.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
+lSLF07#2@39"CompileXIB iPhone/MainWindow-iPhone.xib320802024#320802027#0(0"0(0#0#72"/Users/rex/Documents/TrickplayController_v2/iPhone/MainWindow-iPhone.xib8747991680#621"    cd /Users/rex/Documents/TrickplayController_v2    setenv IBC_MINIMUM_COMPATIBILITY_VERSION 4.2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/ibtool --errors --warnings --notices --output-format human-readable-text --compile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/MainWindow-iPhone.nib /Users/rex/Documents/TrickplayController_v2/iPhone/MainWindow-iPhone.xib --sdk /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk0#
 
 CCpResource build/Debug-iphonesimulator/TrickplayController_v2.app/Default@2x~iphone.png iPhone/Default@2x~iphone.png
 s319441383.791014
@@ -757,6 +767,15 @@ xCpResource
 xbuild/Debug-iphonesimulator/TrickplayController_v2.app/background@2x~iphone.png
 xiPhone/background@2x~iphone.png
 lSLF07#2@36"Copy iPhone/background@2x~iphone.png319441383#319441383#0(0"0(0#0#75"/Users/rex/Documents/TrickplayController_v2/iPhone/background@2x~iphone.png8616868160#519"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/TrickplayController_v2/iPhone/background@2x~iphone.png /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app0#
+
+CCpResource build/Debug-iphonesimulator/TrickplayController_v2.app/background~ipad.png iPad/background~ipad.png
+s320802028.504355
+e320802028.703897
+r1
+xCpResource
+xbuild/Debug-iphonesimulator/TrickplayController_v2.app/background~ipad.png
+xiPad/background~ipad.png
+lSLF07#2@29"Copy iPad/background~ipad.png320802028#320802028#0(0"0(0#0#68"/Users/rex/Documents/TrickplayController_v2/iPad/background~ipad.png8771441472#512"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/TrickplayController_v2/iPad/background~ipad.png /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app0#
 
 CCpResource build/Debug-iphonesimulator/TrickplayController_v2.app/background~iphone.png iPhone/background~iphone.png
 s319441383.785750
@@ -795,32 +814,32 @@ xiPad/iOS-logo-72x72.png
 lSLF07#2@28"Copy iPad/iOS-logo-72x72.png319441383#319441383#0(0"0(0#0#67"/Users/rex/Documents/TrickplayController_v2/iPad/iOS-logo-72x72.png8646051936#511"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks /Users/rex/Documents/TrickplayController_v2/iPad/iOS-logo-72x72.png /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app0#
 
 CGenerateDSYMFile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app.dSYM /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2
-s320265199.767041
-e320265199.870110
+s320802040.378522
+e320802040.469345
 r1
 xGenerateDSYMFile
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app.dSYM
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2
-lSLF07#2@154"GenerateDSYMFile build/Debug-iphonesimulator/TrickplayController_v2.app.dSYM build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2320265199#320265199#0(0"0(0#0#121"/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v28693069728#443"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/dsymutil /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2 -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app.dSYM0#
+lSLF07#2@154"GenerateDSYMFile build/Debug-iphonesimulator/TrickplayController_v2.app.dSYM build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2320802040#320802040#0(0"0(0#0#121"/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v28780983840#443"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/dsymutil /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2 -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app.dSYM0#
 
 CLd /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2 normal i386
-s320265199.182160
-e320265199.766932
+s320802039.494345
+e320802040.378217
 r1
 xLd
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2
 xnormal
 xi386
-lSLF07#2@126"Link /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2320265199#320265199#0(0"0(0#0#0"8710076672#1000"    cd /Users/rex/Documents/TrickplayController_v2    setenv MACOSX_DEPLOYMENT_TARGET 10.6    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -arch i386 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -L/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -filelist /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TrickplayController_v2.LinkFileList -mmacosx-version-min=10.6 -Xlinker -objc_abi_version -Xlinker 2 -framework Foundation -framework UIKit -framework CoreGraphics -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v20#
+lSLF07#2@126"Link /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v2320802039#320802040#0(0"0(0#0#0"8773878144#1000"    cd /Users/rex/Documents/TrickplayController_v2    setenv MACOSX_DEPLOYMENT_TARGET 10.6    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -arch i386 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -L/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -filelist /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/Objects-normal/i386/TrickplayController_v2.LinkFileList -mmacosx-version-min=10.6 -Xlinker -objc_abi_version -Xlinker 2 -framework Foundation -framework UIKit -framework CoreGraphics -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/TrickplayController_v20#
 
 CProcessInfoPlistFile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/Info.plist TrickplayController_v2-Info.plist
-s320197415.682761
-e320197415.690569
+s320802024.001249
+e320802024.098070
 r1
 xProcessInfoPlistFile
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/Info.plist
 xTrickplayController_v2-Info.plist
-lSLF07#2@41"Process TrickplayController_v2-Info.plist320197415#320197415#0(0"0(0#0#77"/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist8694833472#539"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    builtin-infoPlistUtility TrickplayController_v2-Info.plist -genpkginfo /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/Info.plist0#
+lSLF07#2@41"Process TrickplayController_v2-Info.plist320802024#320802024#0(0"0(0#0#77"/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2-Info.plist8781316064#539"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    builtin-infoPlistUtility TrickplayController_v2-Info.plist -genpkginfo /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app/Info.plist0#
 
 CProcessPCH /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch.gch TrickplayController_v2_Prefix.pch normal i386 objective-c com.apple.compilers.gcc.4_2
 s319441384.418581
@@ -836,10 +855,10 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@44"Precompile TrickplayController_v2_Prefix.pch319441384#319441385#0(0"0(0#0#77"/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2_Prefix.pch8623147968#2141"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/gcc-4.2 -x objective-c-header -arch i386 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk -fexceptions -fvisibility=hidden -mmacosx-version-min=10.6 -gdwarf-2 -fobjc-abi-version=2 -fobjc-legacy-dispatch -D__IPHONE_OS_VERSION_MIN_REQUIRED=40200 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources/i386 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphonesimulator/TrickplayController_v2.build/DerivedSources -c /Users/rex/Documents/TrickplayController_v2/TrickplayController_v2_Prefix.pch -o /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-abgbeqgmepwkdxdmqoohymvkwlow/TrickplayController_v2_Prefix.pch.gch0#
 
 CTouch /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app
-s320265199.870205
-e320265199.873637
+s320802040.469442
+e320802040.487610
 r1
 xTouch
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app
-lSLF07#2@104"Touch /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app320265199#320265199#0(0"0(0#0#0"8670962624#303"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/touch -c /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app0#
+lSLF07#2@104"Touch /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app320802040#320802040#0(0"0(0#0#0"8780708288#303"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/touch -c /Users/rex/Documents/TrickplayController_v2/build/Debug-iphonesimulator/TrickplayController_v2.app0#
 

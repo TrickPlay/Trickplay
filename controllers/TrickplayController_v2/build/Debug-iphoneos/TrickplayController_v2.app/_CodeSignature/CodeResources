@@ -4,6 +4,10 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>AppBrowserViewController.nib</key>
+		<data>
+		pIgqx9vPdC9gR1isrSBLOsvQd7s=
+		</data>
 		<key>Default@2x~iphone.png</key>
 		<data>
 		TSV1sblGzwdaBq5wyl2GGf5/b2c=
@@ -22,15 +26,15 @@
 		</data>
 		<key>GestureViewController.nib</key>
 		<data>
-		xGTRvo7PmiuVCYO9+C2w2nJlIzc=
+		kCRCzxzgak9jOTYJaNHAH63s4kE=
 		</data>
 		<key>MainWindow-iPad.nib</key>
 		<data>
-		Rl4CuyJ2tn4N2zx8h2rfDcGch04=
+		xoxx/Ma2Ty3DJOXyZd1LccIVIfA=
 		</data>
 		<key>MainWindow-iPhone.nib</key>
 		<data>
-		OiOwCxhXMZB/1XwIym1seK/qoxg=
+		8LcNuscNYmqdGR2YQNpwhwDwUdQ=
 		</data>
 		<key>MainWindow.nib</key>
 		<data>
@@ -42,7 +46,7 @@
 		</data>
 		<key>RootViewController.nib</key>
 		<data>
-		zYEOszlDGNxaRCdLoXnkHWIFMWc=
+		nU0eHnvBrKQPQaFNeOIk9JV/zbc=
 		</data>
 		<key>background.png</key>
 		<data>

@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "GestureViewController.h"
 
-#define HORIZ_SWIPE_DRAG_MIN  25  //Was 20
-#define VERT_SWIPE_DRAG_MIN    10
+#define HORIZ_SWIPE_DRAG_MIN  30
+#define VERT_SWIPE_DRAG_MIN    30
 #define TAP_DISTANCE_MAX    4
 
 
@@ -18,8 +18,6 @@
     BOOL clickEventsAllowed; //depricated
     BOOL touchEventsAllowed;
     
-    CGPoint startTouchPosition;
-    CGPoint currentTouchPosition;
     NSTimeInterval touchedTime;
     
     BOOL swipeSent;
@@ -28,13 +26,20 @@
     SocketManager *socketManager;
     UIView *view;
     
-    NSMutableArray *activeTouches;
+    CFMutableDictionaryRef activeTouches;
+    //NSMutableDictionary *activeTouches;
+    NSUInteger openFinger;
 }
 
 @property (retain) SocketManager *socketManager;
 @property (retain) UIView *view;
 
 - (id)initWithView:aView socketManager:(SocketManager *)sockman;
+
+- (void)resetTouches;
+- (void)setMultipleTouch:(BOOL)val;
+- (void)addTouch:(UITouch *)touch;
+- (BOOL)sendTouch:(UITouch *)touch withCommand:(NSString *)command;
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;

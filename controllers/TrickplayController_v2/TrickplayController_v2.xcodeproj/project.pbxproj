@@ -37,7 +37,8 @@
 		CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC1271314B98100A14307 /* ResourceManager.m */; };
 		CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */; };
 		CDFEC2E61317514B00A14307 /* background~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEC2E51317514B00A14307 /* background~ipad.png */; };
-		CDFEC3101318752500A14307 /* GestureViewController-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEC30F1318752500A14307 /* GestureViewController-iPad.xib */; };
+		CDFEC3F7131F1BB200A14307 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */; };
+		CDFEC3F8131F1BB200A14307 /* AppBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -87,7 +88,9 @@
 		CDFEC15A1315929800A14307 /* AsyncImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncImageView.h; sourceTree = "<group>"; };
 		CDFEC15B1315929800A14307 /* AsyncImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsyncImageView.m; sourceTree = "<group>"; };
 		CDFEC2E51317514B00A14307 /* background~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~ipad.png"; sourceTree = "<group>"; };
-		CDFEC30F1318752500A14307 /* GestureViewController-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "GestureViewController-iPad.xib"; sourceTree = "<group>"; };
+		CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppBrowserViewController.h; sourceTree = "<group>"; };
+		CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppBrowserViewController.m; sourceTree = "<group>"; };
+		CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = AppBrowserViewController.xib; path = Classes/AppBrowserViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,8 +155,8 @@
 			isa = PBXGroup;
 			children = (
 				28F335F01007B36200424DE2 /* RootViewController.xib */,
+				CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */,
 				CDFEBC51130A57FA00A14307 /* GestureViewController.xib */,
-				CDFEC30F1318752500A14307 /* GestureViewController-iPad.xib */,
 				8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */,
 			);
 			name = Resources;
@@ -213,6 +216,8 @@
 				28C286E00D94DF7D0034E888 /* RootViewController.m */,
 				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
 				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
+				CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */,
+				CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -317,7 +322,7 @@
 				CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */,
 				CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */,
 				CDFEC2E61317514B00A14307 /* background~ipad.png in Resources */,
-				CDFEC3101318752500A14307 /* GestureViewController-iPad.xib in Resources */,
+				CDFEC3F8131F1BB200A14307 /* AppBrowserViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,6 +347,7 @@
 				CDFEC10013147E9A00A14307 /* AudioStreamer.m in Sources */,
 				CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */,
 				CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */,
+				CDFEC3F7131F1BB200A14307 /* AppBrowserViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
