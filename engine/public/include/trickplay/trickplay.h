@@ -224,6 +224,14 @@ typedef struct TPContext TPContext;
                                 but it won't do anything.
                                 Defaults to "true".
 
+    TP_AUDIO_SAMPLER_MAX_INTERVAL - How many seconds' worth of audio should the sampler accumulate
+                                    before it passes the samples to audio detection plugins.
+                                    Default is 10.
+
+    TP_AUDIO_SAMPLER_MAX_BUFFER_KB - The maximum buffer (in KB) of audio samples that the
+                                     audio sampler keeps.
+                                     Defaults to 5000.
+
     TP_TOAST_JSON_PATH -        Path to a file containing the JSON definition
                                 for the toast UI.
                                 Default is not set.
@@ -269,6 +277,8 @@ typedef struct TPContext TPContext;
 #define TP_RANDOM_SEED                  "random_seed"
 #define TP_PLUGINS_PATH                 "plugins_path"
 #define TP_AUDIO_SAMPLER_ENABLED        "audio_sampler_enabled"
+#define TP_AUDIO_SAMPLER_MAX_BUFFER_KB  "audio_sampler_max_buffer_kb"
+#define TP_AUDIO_SAMPLER_MAX_INTERVAL   "audio_sampler_max_interval"
 #define TP_TOAST_JSON_PATH              "toast_json_path"
 
 /*-----------------------------------------------------------------------------
