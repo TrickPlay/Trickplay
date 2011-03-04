@@ -52,14 +52,27 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
 #ifdef TP_CONTROLLER_DISCOVERY_MDNS
 
-        discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+        if ( context->get_bool( TP_CONTROLLERS_MDNS_ENABLED , true ) )
+        {
+            discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+        }
+        else
+        {
+            g_info( "CONTROLLER MDNS DISCOVERY IS DISABLED" );
+        }
 
 #endif
 
 #ifdef TP_CONTROLLER_DISCOVERY_UPNP
 
-        discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
-
+        if ( context->get_bool( TP_CONTROLLERS_UPNP_ENABLED , false ) )
+        {
+            discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
+        }
+        else
+        {
+            g_info( "CONTROLLER UPNP DISCOVERY IS DISABLED" );
+        }
 #endif
 
     }

@@ -160,6 +160,12 @@ typedef struct TPContext TPContext;
                             service.
                             Defaults to "TrickPlay".
                             
+    TP_CONTROLLERS_MDNS_ENABLED -   Whether controller discovery via mDNS is enabled.
+                                    Defaults to "TRUE".
+
+    TP_CONTROLLERS_UPNP_ENABLED -   Whether controller discovery via UPnP is enabled.
+                                    Defaults to "FALSE".
+
     TP_LOG_DEBUG -          Whether to log DEBUG messages. Set to "0" to prevent
                             DEBUG messages from being logged.
                             Defaults to "1".
@@ -244,6 +250,8 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_ENABLED          "controllers_enabled"
 #define TP_CONTROLLERS_PORT             "controllers_port"
 #define TP_CONTROLLERS_NAME             "controllers_name"
+#define TP_CONTROLLERS_UPNP_ENABLED     "controllers_upnp_enabled"
+#define TP_CONTROLLERS_MDNS_ENABLED     "controllers_mdns_enabled"
 #define TP_LOG_DEBUG                    "log_debug"
 #define TP_LOG_APP_ONLY                 "log_app_only"
 #define TP_FONTS_PATH                   "fonts_path"
