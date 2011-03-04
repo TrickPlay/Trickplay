@@ -1,0 +1,62 @@
+Index: glib-2.26.1/glib/gatomic.c
+===================================================================
+--- glib-2.26.1.orig/glib/gatomic.c	2011-03-03 17:37:56.462510468 -0800
++++ glib-2.26.1/glib/gatomic.c	2011-03-03 17:38:07.012509062 -0800
+@@ -811,6 +811,9 @@
+ #  define g_atomic_int_compare_and_exchange __g_atomic_int_compare_and_exchange
+ #  define g_atomic_pointer_compare_and_exchange __g_atomic_pointer_compare_and_exchange
+ 
++# elif defined (MIPSEL)
++#  define DEFINE_WITH_MUTEXES
++#  define G_ATOMIC_MEMORY_BARRIER __asm__ ("sync\n" )
+ # else /* !G_ATOMIC_* */
+ #  define DEFINE_WITH_MUTEXES
+ # endif /* G_ATOMIC_* */
+@@ -999,7 +1002,38 @@
+   return result;
+ }
+ 
+-#ifdef G_ATOMIC_OP_MEMORY_BARRIER_NEEDED
++#if defined (G_ATOMIC_OP_MEMORY_BARRIER_NEEDED) && defined(G_ATOMIC_MEMORY_BARRIER)
++gint
++(g_atomic_int_get) (volatile gint G_GNUC_MAY_ALIAS *atomic)
++{
++  G_ATOMIC_MEMORY_BARRIER;
++  return *atomic;
++}
++
++void
++(g_atomic_int_set) (volatile gint G_GNUC_MAY_ALIAS *atomic,
++                  gint           newval)
++{
++  *atomic = newval;
++  G_ATOMIC_MEMORY_BARRIER;
++}
++
++gpointer
++(g_atomic_pointer_get) (volatile gpointer G_GNUC_MAY_ALIAS *atomic)
++{
++  G_ATOMIC_MEMORY_BARRIER;
++  return *atomic;
++}
++
++void
++(g_atomic_pointer_set) (volatile gpointer G_GNUC_MAY_ALIAS *atomic,
++                      gpointer           newval)
++{
++  *atomic = newval;
++  G_ATOMIC_MEMORY_BARRIER;
++}
++
++#elif defined( G_ATOMIC_OP_MEMORY_BARRIER_NEEDED )
+ 
+ /**
+  * g_atomic_int_get:
+@@ -1084,6 +1118,7 @@
+   *atomic = newval;
+   g_mutex_unlock (g_atomic_mutex);
+ }
++
+ #endif /* G_ATOMIC_OP_MEMORY_BARRIER_NEEDED */   
+ #elif defined (G_ATOMIC_OP_MEMORY_BARRIER_NEEDED)
+ gint
