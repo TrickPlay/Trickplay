@@ -599,7 +599,19 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         if ( parameters )
         {
-            if ( ! AudioFeeder::post( context , parameters , 15 ) )
+            if ( ! strcmp( parameters , "pause" ) )
+            {
+                tp_audio_sampler_pause( tp_context_get_audio_sampler( context ) );
+            }
+            else if ( ! strcmp( parameters , "resume" ) )
+            {
+                tp_audio_sampler_resume( tp_context_get_audio_sampler( context ) );
+            }
+            else if ( ! strcmp( parameters , "changed" ) )
+            {
+                tp_audio_sampler_source_changed( tp_context_get_audio_sampler( context ) );
+            }
+            else if ( ! AudioFeeder::post( context , parameters , 15 ) )
             {
                 g_info( "FAILED TO OPEN '%s'" , parameters );
             }
