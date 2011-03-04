@@ -69,7 +69,9 @@ struct TPAudioSampler
         //.....................................................................
         // List of buffers
 
-        typedef std::list< TPAudioBuffer * > BufferList;
+        typedef std::pair< TPAudioBuffer * , SF_INFO > BufferPair;
+
+        typedef std::list< BufferPair > BufferList;
 
         //.....................................................................
         // List of plugins
@@ -167,9 +169,12 @@ struct TPAudioSampler
         //.....................................................................
 
         TPContext *     context;
+        GMutex *        mutex;
         GAsyncQueue *   queue;
         GThread *       thread;
         PluginList      plugins;
+        guint32         max_buffer_kb;
+        guint           max_interval;
 
         //.....................................................................
         // Network stuff
@@ -553,11 +558,13 @@ gpointer TPAudioSampler::Thread::Plugin::get_symbol( GModule * module , const gc
 TPAudioSampler::Thread::Thread( TPContext * _context )
 :
     context( _context ),
+    mutex( g_mutex_new() ),
     queue( g_async_queue_new_full( ( GDestroyNotify ) Event::destroy ) ),
     thread( 0 ),
+    max_buffer_kb( 0 ),
+    max_interval( 0 ),
     event_group( 0 ),
     network( 0 )
-
 {
     if ( ! context->get_bool( TP_AUDIO_SAMPLER_ENABLED , true ) )
     {
@@ -565,8 +572,26 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
     }
     else
     {
+        max_buffer_kb = context->get_int( TP_AUDIO_SAMPLER_MAX_BUFFER_KB , 5000 );
+
+        if ( max_buffer_kb == 0 )
+        {
+            max_buffer_kb = 5000;
+        }
+
+        max_interval = context->get_int( TP_AUDIO_SAMPLER_MAX_INTERVAL , 10 );
+
+        if ( max_interval == 0 )
+        {
+            max_interval = 1;
+        }
+
         if ( scan_for_plugins( context ) )
         {
+            // Lock this mutex so the thread won't start until we are done
+
+            g_mutex_lock( mutex );
+
             // Create the thread that will process the audio samples
 
             GError * error = 0;
@@ -589,6 +614,8 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
                 network = new Network( Network::Settings( context ) , event_group );
             }
+
+            g_mutex_unlock( mutex );
         }
     }
 }
@@ -619,6 +646,8 @@ TPAudioSampler::Thread::~Thread()
     }
 
     g_async_queue_unref( queue );
+
+    g_mutex_free( mutex );
 
     if ( ! plugins.empty() )
     {
@@ -874,6 +903,11 @@ void TPAudioSampler::Thread::push_event( Event * event )
 
 void TPAudioSampler::Thread::process()
 {
+    // Wait until this mutex is available to continue
+
+    g_mutex_lock( mutex );
+    g_mutex_unlock( mutex );
+
     log( "STARTED PROCESSING THREAD" );
 
     g_async_queue_ref( queue );
@@ -885,6 +919,8 @@ void TPAudioSampler::Thread::process()
     BufferList buffers;
 
     gdouble buffered_seconds = 0;
+
+    gdouble buffered_kb = 0;
 
     int paused = 0;
 
@@ -922,12 +958,14 @@ void TPAudioSampler::Thread::process()
 
                 for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
                 {
-                    destroy_buffer( * it );
+                    destroy_buffer( it->first );
                 }
 
                 buffers.clear();
 
                 buffered_seconds = 0;
+
+                buffered_kb = 0;
 
                 // We also cancel any outstanding callbacks we have from
                 // network requests.
@@ -986,10 +1024,12 @@ void TPAudioSampler::Thread::process()
 
                         buffered_seconds += gdouble( info.frames ) / gdouble( info.samplerate );
 
+                        buffered_kb += event->buffer->size / 1024.0;
+
                         // We put the buffer in our list and steal it
                         // from the event - so that it won't free it.
 
-                        buffers.push_back( event->buffer );
+                        buffers.push_back( BufferPair( event->buffer , info ) );
 
                         event->buffer = 0;
                     }
@@ -1064,26 +1104,67 @@ void TPAudioSampler::Thread::process()
         Event::destroy( event );
 
         //.................................................................
-        // Process pending buffers
+        // No buffers, so carry on waiting.
 
-        if ( paused || buffers.empty() )
+        if ( buffers.empty() )
         {
             continue;
         }
 
         //.................................................................
-        // How much time do we have?
+        // See if our buffer list is getting too big
 
-        if ( buffered_seconds < 5 )
+        bool overflow = max_buffer_kb == 0 ? false : buffered_kb >= max_buffer_kb;
+
+        //.................................................................
+        // If we are paused, and there is an overflow, we need to dump
+        // some buffers.
+
+        if ( paused )
+        {
+            // TODO: If max_buffer_kb is 0, this will not get rid of anything.
+
+            if ( overflow )
+            {
+                log( "BUFFER TOO BIG : HAVE %1.0f KB , %1.1f s , %u BUFFERS : MAX IS %" G_GUINT32_FORMAT " KB" , buffered_kb , buffered_seconds , buffers.size() , max_buffer_kb );
+
+                gdouble target = max_buffer_kb / 2;
+
+                while ( buffered_kb > target && ! buffers.empty() )
+                {
+                    BufferPair & item( buffers.front() );
+
+                    buffered_kb -= item.first->size / 1024.0;
+
+                    buffered_seconds -= gdouble( item.second.frames ) / gdouble( item.second.samplerate );
+
+                    destroy_buffer( item.first );
+
+                    buffers.pop_front();
+                }
+            }
+
+            continue;
+        }
+
+        //.................................................................
+        // If we have not reached our max buffer size and we have less
+        // than interval seconds, we keep accumulating.
+
+        if ( ! overflow && buffered_seconds < max_interval )
         {
             continue;
         }
+
+        // Otherwise, we pass all of the current buffers to the plugins.
+
+        log2( "PROCESSING %1.0f KB , %1.1f s , %u BUFFERS : %s" , buffered_kb , buffered_seconds , buffers.size() , overflow ? "MAX BUFFER REACHED" : "INTERVAL REACHED" );
 
         // Iterate over all the buffers in the list
 
         for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
         {
-            TPAudioBuffer * buffer = * it;
+            TPAudioBuffer * buffer = it->first;
 
             log2( "PROCESSING BUFFER" );
 
@@ -1154,6 +1235,8 @@ void TPAudioSampler::Thread::process()
         buffers.clear();
 
         buffered_seconds = 0;
+
+        buffered_kb = 0;
     }
 
     // The thread is exiting...
@@ -1162,7 +1245,7 @@ void TPAudioSampler::Thread::process()
 
     for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
     {
-        destroy_buffer( * it );
+        destroy_buffer( it->first );
     }
 
     g_async_queue_unref( queue );
