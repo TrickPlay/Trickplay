@@ -2000,6 +2000,8 @@ void TPContext::load_external_configuration()
         TP_CONTROLLERS_ENABLED,
         TP_CONTROLLERS_PORT,
         TP_CONTROLLERS_NAME,
+        TP_CONTROLLERS_MDNS_ENABLED,
+        TP_CONTROLLERS_UPNP_ENABLED,
         TP_LOG_DEBUG,
         TP_LOG_APP_ONLY,
         TP_FONTS_PATH,
