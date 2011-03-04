@@ -2019,6 +2019,8 @@ void TPContext::load_external_configuration()
         TP_RANDOM_SEED,
         TP_PLUGINS_PATH,
         TP_AUDIO_SAMPLER_ENABLED,
+        TP_AUDIO_SAMPLER_MAX_INTERVAL,
+        TP_AUDIO_SAMPLER_MAX_BUFFER_KB,
         TP_TOAST_JSON_PATH,
 
         NULL
