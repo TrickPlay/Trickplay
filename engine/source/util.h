@@ -314,23 +314,46 @@ class Action
 {
 public:
 
-    Action( int interval = -1 );
-
     virtual ~Action();
 
-    static guint post( Action * action );
+    static void destroy( gpointer action );
+
+    // Posts this action to run as an idle, or a timeout if interval_ms > -1
+    // Returns the source tag.
+
+    static guint post( Action * action , int interval_ms = -1 );
+
+    // Pushes the action into the queue
+
+    static void push( GAsyncQueue * queue , Action * action );
+
+    // Tries to pop and run one from the queue, waiting if wait_ms > 0.
+    // Returns true if one ran.
+
+    static bool run_one( GAsyncQueue * queue , gulong wait_ms );
+
+    // Tries to run as many as it can pop from the queue, without
+    // waiting. Returns how many ran.
+
+    static int run_all( GAsyncQueue * queue );
+
+    // Posts an idle action that will call run_all from the given
+    // queue when it executes. Refs the queue and then unrefs it.
+
+    static void post_run_all( GAsyncQueue * queue );
 
 protected:
+
+    // You implement this. In the case of idle or timeout actions,
+    // returning true will let them run again. Returning false
+    // will take them out and destroy them. For queue actions,
+    // the return value is ignored.
 
     virtual bool run() = 0;
 
 private:
 
-    static void destroy( Action * action );
-
     static gboolean run_internal( Action * action );
-
-    int interval;
 };
 
 //-----------------------------------------------------------------------------
