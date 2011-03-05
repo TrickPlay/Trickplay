@@ -38,7 +38,6 @@ public:
 
     ToastUpAction( lua_State * L , Toast * _toast )
     :
-        Action( TOAST_ANIMATE_UP_TIME + TOAST_UP_TIME ),
         lsp( App::get( L )->ref_lua_state_proxy() ),
         toast( _toast ),
         dismissed( false ),
@@ -423,7 +422,7 @@ bool Toast::show_internal( lua_State * L , const char * _title , const char * _p
 
     // Create the action that will deal with it while the toast is up
 
-    hide_source = Action::post( new ToastUpAction( L , this ) );
+    hide_source = Action::post( new ToastUpAction( L , this ) , TOAST_ANIMATE_UP_TIME + TOAST_UP_TIME );
 
     return true;
 }

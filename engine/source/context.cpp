@@ -347,16 +347,15 @@ public:
 
         tp_audio_sampler_source_changed( sampler );
 
-        Action::post( new AudioFeeder( sampler , f , info , interval_s ) );
+        Action::post( new AudioFeeder( sampler , f , info ) , interval_s * 1000 );
 
         return true;
     }
 
 private:
 
-    AudioFeeder( TPAudioSampler * _sampler , SNDFILE * _f , const SF_INFO & _info , int interval )
+    AudioFeeder( TPAudioSampler * _sampler , SNDFILE * _f , const SF_INFO & _info )
     :
-        Action( interval * 1000 ),
         sampler( _sampler ),
         f( _f ),
         info( _info ),

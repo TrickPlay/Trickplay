@@ -48,45 +48,125 @@ String Util::make_v4_uuid()
 
 static Debug_OFF al( "ACTION" );
 
-Action::Action( int _interval )
-:
-    interval( _interval )
-{
-}
-
 Action::~Action()
 {
     al( "DESTROYING ACTION %p" , this );
 }
 
-guint Action::post( Action * action )
+void Action::destroy( gpointer action )
 {
     g_assert( action );
 
-    guint result = 0;
+    delete ( Action * ) action;
+}
 
-    if ( action->interval < 0 )
+guint Action::post( Action * action , int interval_ms )
+{
+    g_assert( action );
+
+    if ( interval_ms < 0 )
     {
         al( "POSTING IDLE ACTION %p" , action );
 
-        result = g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
+        return g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , destroy );
+    }
+
+    al( "POSTING TIMEOUT ACTION %p EVERY %d ms" , action , interval_ms );
+
+    return g_timeout_add_full( TRICKPLAY_PRIORITY , guint( interval_ms ) , ( GSourceFunc ) run_internal , action , destroy );
+}
+
+void Action::push( GAsyncQueue * queue , Action * action )
+{
+    g_assert( queue );
+    g_assert( action );
+
+    al( "QUEUEING ACTION %p IN QUEUE %p" , action , queue );
+
+    g_async_queue_push( queue , action );
+}
+
+bool Action::run_one( GAsyncQueue * queue , gulong wait_ms )
+{
+    g_assert( queue );
+
+    g_async_queue_ref( queue );
+
+    Action * action = 0;
+
+    if ( wait_ms == 0 )
+    {
+        action = ( Action * ) g_async_queue_try_pop( queue );
     }
     else
     {
-        al( "POSTING TIMEOUT ACTION %p EVERY %d s" , action , action->interval );
+        GTimeVal t;
 
-        result = g_timeout_add_full( TRICKPLAY_PRIORITY , guint( action->interval ) , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
+        g_get_current_time( & t );
+        g_time_val_add( & t , wait_ms * 1000 );
+
+        action = ( Action * ) g_async_queue_timed_pop( queue , & t );
     }
+
+    g_async_queue_unref( queue );
+
+    if ( action )
+    {
+        run_internal( action );
+
+        delete action;
+
+        return true;
+    }
+
+    return false;
+}
+
+int Action::run_all( GAsyncQueue * queue )
+{
+    g_assert( queue );
+
+    int result = 0;
+
+    g_async_queue_ref( queue );
+
+    while ( Action * action = ( Action * ) g_async_queue_try_pop( queue ) )
+    {
+        run_internal( action );
+
+        delete action;
+
+        ++result;
+    }
+
+    g_async_queue_unref( queue );
 
     return result;
 }
 
-void Action::destroy( Action * action )
+class QueueRunAllAction : public Action
 {
-    g_assert( action );
+public:
 
-    delete action;
+    QueueRunAllAction( GAsyncQueue * _queue ) : queue( g_async_queue_ref( _queue ) ) {}
+    ~QueueRunAllAction() { g_async_queue_unref( queue ); }
+
+protected:
+
+    virtual bool run() { Action::run_all( queue ); return false; }
+
+private:
+
+    GAsyncQueue * queue;
+};
+
+void Action::post_run_all( GAsyncQueue * queue )
+{
+    g_assert( queue );
+
+    Action::post( new QueueRunAllAction( queue ) );
 }
+
 
 gboolean Action::run_internal( Action * action )
 {
