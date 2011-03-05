@@ -158,8 +158,7 @@ public:
                 break;
 
             case REMOVED:
-                controller->disconnected();
-                controller->unref();
+                controller->get_tp_controller()->list->controller_removed( controller );
                 break;
 
             case KEY_DOWN:
@@ -979,10 +978,6 @@ TPController * ControllerList::add_controller( const char * name, const TPContro
 
     TPController * result = controller->get_tp_controller();
 
-    LOCK;
-
-    controllers.insert( result );
-
     post_event( Event::make( Event::ADDED, controller ) );
 
     return result;
@@ -996,12 +991,7 @@ void ControllerList::remove_controller( TPController * controller )
 {
     TPController::check( controller );
 
-    LOCK;
-
-    if ( controllers.erase( controller ) == 1 )
-    {
-        post_event( Event::make( Event::REMOVED, controller->controller ) );
-    }
+    post_event( Event::make( Event::REMOVED, controller->controller ) );
 }
 
 //.............................................................................
@@ -1009,10 +999,22 @@ void ControllerList::remove_controller( TPController * controller )
 
 void ControllerList::controller_added( Controller * controller )
 {
+    controllers.insert( controller->get_tp_controller() );
+
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->connected( controller );
     }
+}
+
+//.............................................................................
+
+void ControllerList::controller_removed( Controller * controller )
+{
+    controllers.erase( controller->get_tp_controller() );
+
+    controller->disconnected();
+    controller->unref();
 }
 
 //.............................................................................
