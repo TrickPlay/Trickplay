@@ -178,6 +178,8 @@ public:
 
     void controller_added( Controller * controller );
 
+    void controller_removed( Controller * controller );
+
     class Delegate
     {
     public:
