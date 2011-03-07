@@ -2,6 +2,7 @@
 #define _TICKPLAY_CONTEXT_H
 
 //-----------------------------------------------------------------------------
+#include "trickplay/audio-sampler.h"
 #include "common.h"
 #include "notify.h"
 #include "mediaplayers.h"
@@ -31,10 +32,15 @@
 #define TP_SCREEN_WIDTH_DEFAULT         960
 #define TP_SCREEN_HEIGHT_DEFAULT        540
 #define TP_CONTROLLERS_NAME_DEFAULT     "TrickPlay"
+#define TP_LIRC_ENABLED_DEFAULT         true
+#define TP_LIRC_UDS_DEFAULT             "/var/run/lirc/lircd"
+#define TP_LIRC_REPEAT_DEFAULT          150
+#define TP_APP_PUSH_ENABLED_DEFAULT     true
+#define TP_APP_PUSH_PORT_DEFAULT        8888
 
 // TODO: Don't like hard-coding this app id here
 
-#define TP_APP_ALLOWED_DEFAULT          "com.trickplay.launcher=apps:com.trickplay.store=apps"
+#define TP_APP_ALLOWED_DEFAULT          "com.trickplay.launcher=apps:com.trickplay.store=apps:com.trickplay.editor=editor"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -45,6 +51,8 @@ class Console;
 class Downloads;
 class Installer;
 class Image;
+class ControllerLIRC;
+class AppPushServer;
 
 //-----------------------------------------------------------------------------
 
@@ -124,6 +132,13 @@ public:
 
     //.........................................................................
 
+    inline App * get_current_app()
+    {
+        return current_app;
+    }
+
+    //.........................................................................
+
     ControllerList * get_controller_list();
 
     //.........................................................................
@@ -137,6 +152,24 @@ public:
     //.........................................................................
 
     Image * load_icon( const gchar * path );
+
+    //.........................................................................
+
+    StringMap get_config() const;
+
+    //.........................................................................
+
+    void add_internal( gpointer key , gpointer value , GDestroyNotify destroy );
+
+    gpointer get_internal( gpointer key );
+
+    //.........................................................................
+    // This one is thread-safe, it receives a snippet of JSON that came from
+    // an audio detection plugin. In the future, we could make it more generic,
+    // and just let the outside world give us contextual information. It could
+    // come via TCP/IP from a set-top box, for example.
+
+    void audio_detection_match( const gchar * json );
 
 private:
 
@@ -232,6 +265,8 @@ private:
     friend TPController * tp_context_add_controller( TPContext * context, const char * name, const TPControllerSpec * spec, void * data );
     friend void tp_context_remove_controller( TPContext * context, TPController * controller );
 
+    friend TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
+
 private:
 
     TPContext( const TPContext & );
@@ -245,6 +280,10 @@ private:
     ControllerServer *          controller_server;
 
     ControllerList              controller_list;
+
+    ControllerLIRC *            controller_lirc;
+
+    AppPushServer *             app_push_server;
 
     Console *                   console;
 
@@ -280,6 +319,11 @@ private:
     typedef std::map<String,StringSet>                          AppAllowedMap;
 
     AppAllowedMap                                               app_allowed;
+
+    typedef std::pair<gpointer,GDestroyNotify>                  InternalPair;
+    typedef std::map<gpointer,InternalPair>                     InternalMap;
+
+    InternalMap                                                 internals;
 };
 
 

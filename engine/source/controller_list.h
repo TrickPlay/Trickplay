@@ -23,6 +23,11 @@ public:
 
     unsigned int get_capabilities() const;
 
+    inline bool has_cap( int cap ) const
+    {
+        return spec.capabilities & cap;
+    }
+
     void get_input_size( unsigned int & width, unsigned int & height );
 
     void get_ui_size( unsigned int & width, unsigned int & height );
@@ -42,13 +47,17 @@ public:
 
     void accelerometer( double x, double y, double z );
 
-    void click( int x, int y );
+    void pointer_move( int x, int y );
 
-    void touch_down( int x, int y );
+    void pointer_button_down( int button , int x, int y );
 
-    void touch_move( int x, int y );
+    void pointer_button_up( int button , int x, int y );
 
-    void touch_up( int x, int y );
+    void touch_down( int finger , int x, int y );
+
+    void touch_move( int finger , int x, int y );
+
+    void touch_up( int finger , int x, int y );
 
     void ui_event( const String & parameters );
 
@@ -61,10 +70,12 @@ public:
         virtual bool key_down( unsigned int key_code, unsigned long int unicode ) = 0;
         virtual bool key_up( unsigned int key_code, unsigned long int unicode ) = 0;
         virtual void accelerometer( double x, double y, double z ) = 0;
-        virtual void click( int x, int y ) = 0;
-        virtual void touch_down( int x, int y ) = 0;
-        virtual void touch_move( int x, int y ) = 0;
-        virtual void touch_up( int x, int y ) = 0;
+        virtual bool pointer_move( int x, int y ) = 0;
+        virtual bool pointer_button_down( int button , int x, int y ) = 0;
+        virtual bool pointer_button_up( int button , int x, int y ) = 0;
+        virtual void touch_down( int finger , int x, int y ) = 0;
+        virtual void touch_move( int finger , int x, int y ) = 0;
+        virtual void touch_up( int finger , int x, int y ) = 0;
         virtual void ui_event( const String & parameters ) = 0;
     };
 
@@ -84,9 +95,9 @@ public:
 
     bool stop_accelerometer();
 
-    bool start_clicks();
+    bool start_pointer();
 
-    bool stop_clicks();
+    bool stop_pointer();
 
     bool start_touches();
 
@@ -107,6 +118,21 @@ public:
     bool declare_resource( const String & resource, const String & uri );
 
     bool enter_text( const String & label, const String & text );
+
+    inline bool wants_accelerometer_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && accelerometer_started;
+    }
+
+    inline bool wants_pointer_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) && pointer_started;
+    }
+
+    inline bool wants_touch_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) && touch_started;
+    }
 
 protected:
 
@@ -130,6 +156,10 @@ private:
     typedef std::map<unsigned int, unsigned int> KeyMap;
 
     KeyMap              key_map;
+
+    bool                accelerometer_started;
+    bool                pointer_started;
+    bool                touch_started;
 };
 
 //-----------------------------------------------------------------------------
@@ -164,6 +194,11 @@ public:
 
     void reset_all();
 
+    inline gdouble time()
+    {
+        return g_timer_elapsed( timer , 0 );
+    }
+
 private:
 
     void post_event( gpointer event );
@@ -171,10 +206,12 @@ private:
     friend void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode );
     friend void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode );
     friend void tp_controller_accelerometer( TPController * controller, double x, double y, double z );
-    friend void tp_controller_click( TPController * controller, int x, int y );
-    friend void tp_controller_touch_down( TPController * controller, int x, int y );
-    friend void tp_controller_touch_move( TPController * controller, int x, int y );
-    friend void tp_controller_touch_up( TPController * controller, int x, int y );
+    friend void tp_controller_pointer_move( TPController * controller, int x, int y );
+    friend void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y );
+    friend void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y );
+    friend void tp_controller_touch_down( TPController * controller, int finger, int x, int y );
+    friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y );
+    friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y );
     friend void tp_controller_ui_event( TPController * controller, const char * parameters );
 
     //.........................................................................
@@ -200,6 +237,10 @@ private:
     typedef std::set<Delegate *> DelegateSet;
 
     DelegateSet     delegates;
+
+    //.........................................................................
+
+    GTimer *        timer;
 };
 
 #endif // _TRICKPLAY_CONTROLLER_LIST_H

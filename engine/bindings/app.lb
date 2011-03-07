@@ -229,6 +229,8 @@ global app [[App*]]
     # This callback is invoked just before the app is about to close.
     
     callback on_closing;
+
+    callback on_audio_match;
 }
 
 [[

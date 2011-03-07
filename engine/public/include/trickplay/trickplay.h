@@ -32,9 +32,9 @@ extern "C" {
     TrickPlay version
 */
 
-#define TP_MAJOR_VERSION    0
-#define TP_MINOR_VERSION    0
-#define TP_PATCH_VERSION    11
+#define TP_MAJOR_VERSION    1
+#define TP_MINOR_VERSION    16
+#define TP_PATCH_VERSION    2
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -59,17 +59,16 @@ typedef struct TPContext TPContext;
     Context configuration keys to be used with <tp_context_set> and <tp_context_get>.
     
     TP_APP_SOURCES -        List of paths to applications. This is a semicolon (";")
-                            delimited list of paths where applications can be sourced
-                            from.
+                            delimited list of paths where applications can be sourced.
                             Defaults to "apps" (in the current working directory).
                         
-    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "1" TrickPlay will scan the
+    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "TRUE" TrickPlay will scan the
                             paths listed in app sources for apps. If you attempt to
                             launch an app using an id (instead of a path) and the
                             TrickPlay database does not have any apps, TrickPlay will
                             scan all of the app sources regardless of the value of
                             this variable.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_APP_ID -             Initial app id. The id of the first application to launch.
                             Instead of specifying the id, you can set <TP_APP_PATH> to
@@ -147,10 +146,10 @@ typedef struct TPContext TPContext;
                             production builds, the telnet console is always disabled.
                             Defaults to "7777".
                             
-    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "1" if you wish to enable
+    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "TRUE" if you wish to enable
                             support for remote controllers. This will create a
                             listener and establish an mDNS service for discovery.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_CONTROLLERS_PORT -   Controllers port. Set to non-zero to run the controllers
                             listener on a fixed port.
@@ -165,8 +164,12 @@ typedef struct TPContext TPContext;
                             DEBUG messages from being logged.
                             Defaults to "1".
                             
-    TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
-                            TrickPlay will use the systems fonts.
+    TP_LOG_APP_ONLY -       Whether to log only MESSAGE messages (printed by apps).
+                            Defaults to "0".
+
+    TP_FONTS_PATH -         List of paths to directories containing fonts. If not set,
+                            TrickPlay will use the systems fonts.  This is a semicolon (";")
+                            delimited list of paths where fonts can be sourced.
                             Defaults to NULL.
 
     TP_DOWNLOADS_PATH -     Path to a directory that TrickPlay will use to download
@@ -183,6 +186,37 @@ typedef struct TPContext TPContext;
     TP_SSL_CA_CERT_FILE -   Path to a file that contains top level certificates for
                             certificate authorities in PEM format.
                             Defaults to empty, which implies use of system certificates.
+
+    TP_LIRC_ENABLED -       Whether TrickPlay attempts to connect to a LIRC daemon.
+                            Defaults to "true".
+
+    TP_LIRC_UDS -           Path to the LIRC daemon Unix Doman Socket.
+                            Defaults to "/var/run/lirc/lircd".
+
+    TP_LIRC_REPEAT -            Minimum number of milliseconds between button presses. Any
+                                presses that arrive within this time are ignored.
+                                Defaults to 150.
+
+    TP_MEDIAPLAYER_ENABLED -    Whether the media player is enabled. If set to false, apps
+                                will behave as if there is no media player.
+                                Defaults to "true".
+
+    TP_IMAGE_DECODER_ENABLED -  Whether the external image decoder is enabled. If set to false,
+                                only internal decoders will be used.
+                                Defaults to "true".
+
+    TP_RANDOM_SEED -            If set to a non-zero value, this will be the default random
+                                seed for all apps and the 'math.randomseed' function will
+                                become a no-op.
+                                Defaults to 0.
+
+    TP_PLUGINS_PATH -           Path to root directory of TrickPlay plugins.
+                                Defaults to "plugins" (in the current working directory).
+
+    TP_AUDIO_SAMPLER_ENABLED -  Whether TrickPlay's audio sampling machinery is enabled.
+                                When set to false, the audio sampler API can still be used,
+                                but it won't do anything.
+                                Defaults to "true".
 
 */
 
@@ -207,11 +241,22 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_PORT             "controllers_port"
 #define TP_CONTROLLERS_NAME             "controllers_name"
 #define TP_LOG_DEBUG                    "log_debug"
+#define TP_LOG_APP_ONLY                 "log_app_only"
 #define TP_FONTS_PATH                   "fonts_path"
 #define TP_DOWNLOADS_PATH               "downloads_path"
 #define TP_NETWORK_DEBUG                "network_debug"
 #define TP_SSL_VERIFY_PEER              "ssl_verifypeer"
 #define TP_SSL_CA_CERT_FILE             "ssl_cacertfile"
+#define TP_LIRC_ENABLED                 "lirc_enabled"
+#define TP_LIRC_UDS                     "lirc_uds"
+#define TP_LIRC_REPEAT                  "lirc_repeat"
+#define TP_APP_PUSH_ENABLED             "app_push_enabled"
+#define TP_APP_PUSH_PORT                "app_push_port"
+#define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
+#define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
+#define TP_RANDOM_SEED                  "random_seed"
+#define TP_PLUGINS_PATH                 "plugins_path"
+#define TP_AUDIO_SAMPLER_ENABLED        "audio_sampler_enabled"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -701,10 +746,11 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+*/
 
 #ifdef __cplusplus
 }
 #endif 
 
-#endif  // _TRICKPLAY_H
+#endif  /* _TRICKPLAY_H */

@@ -36,6 +36,39 @@ inline void failif( bool expression, const gchar * format, ... )
 
 //-----------------------------------------------------------------------------
 
+inline StringVector split_string( const gchar * source , const gchar * delimiter , gint max_tokens = 0 )
+{
+    StringVector result;
+
+    if ( ! source || ! delimiter )
+    {
+        return result;
+    }
+
+    if ( strlen( source ) == 0 || strlen( delimiter ) == 0 )
+    {
+        return result;
+    }
+
+    gchar * * parts = g_strsplit( source , delimiter , max_tokens );
+
+    for ( gchar * * part = parts; * part; ++part )
+    {
+        result.push_back( * part );
+    }
+
+    g_strfreev( parts );
+
+    return result;
+}
+
+inline StringVector split_string( const String & source , const gchar * delimiter , gint max_tokens = 0 )
+{
+    return split_string( source.c_str() , delimiter , max_tokens );
+}
+
+//-----------------------------------------------------------------------------
+
 class RefCounted
 {
 public:
@@ -138,23 +171,53 @@ class _Debug_ON
 {
 public:
 
+    _Debug_ON( const char * _prefix = 0 )
+    {
+        prefix = _prefix ? g_strdup_printf( "[%s]" , _prefix ) : 0;
+    }
+
+    ~_Debug_ON()
+    {
+        g_free( prefix );
+    }
+
     inline void operator()( const gchar * format, ...)
     {
-        va_list args;
-        va_start( args, format );
-        g_logv( G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, format, args );
-        va_end( args );
+        if ( prefix )
+        {
+            va_list args;
+            va_start( args, format );
+            gchar * message = g_strdup_vprintf( format , args );
+            va_end( args );
+            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "%s %s" , prefix , message );
+            g_free( message );
+        }
+        else
+        {
+            va_list args;
+            va_start( args, format );
+            g_logv( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , format , args );
+            va_end( args );
+        }
     }
 
     inline operator bool()
     {
         return true;
     }
+
+private:
+
+    gchar * prefix;
 };
 
 class _Debug_OFF
 {
 public:
+
+    _Debug_OFF( const char * prefix = 0 )
+    {
+    }
 
     inline void operator()( const gchar * format, ...)
     {
@@ -225,6 +288,33 @@ private:
     typedef std::list< FreePair > FreeList;
 
     FreeList list;
+};
+
+//-----------------------------------------------------------------------------
+// Lets you run something as an idle or a timeout in the main thread. Derive
+// from this, implement run and call post with an instance.
+
+class Action
+{
+public:
+
+    Action( int interval = -1 );
+
+    virtual ~Action();
+
+    static void post( Action * action );
+
+protected:
+
+    virtual bool run() = 0;
+
+private:
+
+    static void destroy( Action * action );
+
+    static gboolean run_internal( Action * action );
+
+    int interval;
 };
 
 //-----------------------------------------------------------------------------

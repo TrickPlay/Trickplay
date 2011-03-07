@@ -8,6 +8,13 @@
 
 namespace ClutterUtil
 {
+    // Notification handler for actors on opacity changes to show/hide as necessary
+    void actor_opacity_notify( GObject * , GParamSpec * , ClutterActor * self );
+
+    void actor_on_show(ClutterActor*actor,void*);
+    void actor_on_hide(ClutterActor*actor,void*);
+
+
     // Returns an actor created from the constructor function. It sinks
     // the original ref and then adds another, so you have to unref the
     // result.
@@ -52,6 +59,12 @@ namespace ClutterUtil
     void inject_key_down( guint key_code, gunichar unicode );
 
     void inject_key_up( guint key_code, gunichar unicode );
+
+    void inject_motion( gfloat x , gfloat y );
+
+    void inject_button_press( guint32 button , gfloat x , gfloat y );
+
+    void inject_button_release( guint32 button , gfloat x , gfloat y );
 
     // Convert stage coordinates into screen coordinates -- adjusts x,y in place
     void stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y );

@@ -1,0 +1,131 @@
+[[
+#include "common.h"
+#include "util.h"
+#include "app.h"
+#include "context.h"
+#include "actions.h"
+#include <cstdio>
+]]
+
+restricted global editor [[ void * ]]
+{
+
+    editor()
+        [[
+             lb_construct_empty();
+        ]];
+
+    table readdir(string dir_name)
+        [[
+             gchar *filename = NULL;
+             GDir *dir = NULL;
+
+             dir = g_dir_open(dir_name, 0, NULL);
+
+            if(dir)
+            {
+                filename = (gchar *)g_dir_read_name(dir);
+                lua_newtable( L );
+                int t = lua_gettop( L );
+                int i = 1;
+                while(filename != NULL)
+                {
+                    lua_pushstring( L , filename );
+                    lua_rawseti( L , t , i++ );
+                    filename = (gchar *)g_dir_read_name(dir);
+                }
+                g_dir_close(dir);
+            }
+            else
+            {
+                lua_pushnil( L );
+            }
+        ]];
+
+
+     bool writefile(string file_name, lstring contents, bool overwrite=true)
+        [[
+            bool is_uri=false;
+            char * path=App::get(L)->normalize_path(file_name,&is_uri);
+
+            result = false;              
+
+            if ( path && ! is_uri )
+            {
+                const char *mode;
+
+                if( overwrite )
+                {
+                    mode = "w";
+                }
+                else
+                {
+                    mode = "a";
+                }
+
+                FILE *fp;
+
+                if( ( fp = fopen( path , mode ) ) )
+                {
+                    if( contents_len == fwrite( contents , sizeof( char ) , contents_len , fp ) )
+                    {
+                        result = true;
+                    }
+                    fclose( fp );
+                }
+            }
+
+            g_free( path );
+        ]];
+
+     bool change_app_path( string path )
+        [[
+            result = App::get(L)->change_app_path( path );
+        ]];
+
+     bool mkdir( string path )
+        [[
+            result = 0 == g_mkdir_with_parents( path , 0700 );
+        ]];
+
+     string get_home_dir()
+         [[
+             result = g_getenv( "HOME" );
+
+             if ( ! result )
+             {
+                 result = g_get_home_dir();
+             }
+         ]];
+
+     bool dir_exists( string path )
+         [[
+             result = g_file_test( path , G_FILE_TEST_IS_DIR );
+         ]];
+
+     bool file_exists( string path )
+         [[
+             result = g_file_test( path , G_FILE_TEST_IS_REGULAR );
+         ]];
+
+     string build_path( ... )
+         [[
+             std::vector< gchar * > paths;
+
+             for( int i = 2; i <= lua_gettop( L ); ++i )
+             {
+                 paths.push_back( ( gchar * ) lua_tostring( L , i ) );
+             }
+
+             paths.push_back( 0 );
+
+             FreeLater free_later;
+
+             gchar * f = g_build_filenamev( & paths[0] );
+
+             free_later( f );
+
+             result = f;
+         ]];
+}
+

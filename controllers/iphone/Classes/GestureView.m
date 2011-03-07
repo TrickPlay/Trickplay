@@ -67,7 +67,7 @@
     [super viewDidLoad];
 	self.view.tag = 2;
 	
-	mSocketMode = SOCKET_MODE_IPHONE4;
+	mSocketMode = SOCKET_MODE_LEGACY;
 	
 	accelerationY = 0;
 	accelerationX = 0;
@@ -625,36 +625,96 @@
 						//NSData *data = [NSData dataWithContentsOfURL:url];
 						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
 						NSString *imageurl = [itemAtIndex objectForKey:@"link"];
+						UIImage *tempImage;
 						if ([imageurl hasPrefix:@"http:"] || [imageurl hasPrefix:@"https:"])
 						{
-							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageurl]]] autorelease];
-							backgroundView.image = tempImage;//[UIImage imageNamed:@"icon.png"];
+							tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageurl]]] autorelease];
 						}
 						else {
 							//Use the hostname and port to construct the url
 							
 							//NSString *urlstr = [itemAtIndex objectForKey:@"link"]
-							UIImage *tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [listenSocket connectedHost],[listenSocket connectedPort],[itemAtIndex objectForKey:@"link"]]]]] autorelease];
-							backgroundView.image = tempImage;
+							tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [listenSocket connectedHost],[listenSocket connectedPort],[itemAtIndex objectForKey:@"link"]]]]] autorelease];
 						}
+						backgroundView.image = tempImage;
+					}
+				}				
+			}
+			
+			
+		}
+		else if ([msg hasPrefix:@"UG"])
+		{
+			NSArray *components = [msg componentsSeparatedByString:@"\t"];
+			if ([mResourceNameCollection count] > 0)
+			{
+				//Show the image
+				unsigned index;
+				NSDictionary *itemAtIndex;
+				for (index = 0;index < [mResourceNameCollection count];index++)
+				{
+					itemAtIndex = (NSDictionary *)[mResourceNameCollection objectAtIndex:index];
+					if ([[itemAtIndex objectForKey:@"name"] compare:[components objectAtIndex:1]] == 0)
+					{
+						//[NSURL URLWithString:aURL]
+						//NSData *data = [NSData dataWithContentsOfURL:url];
+						//@"http://images.apple.com/home/images/ipad_headline_20100127.png"
+						NSString *imageurl = [itemAtIndex objectForKey:@"link"];
+						UIImage *tempImage;
+						if ([imageurl hasPrefix:@"http:"] || [imageurl hasPrefix:@"https:"])
+						{
+							tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageurl]]] autorelease];
+						}
+						else {
+							//Use the hostname and port to construct the url
+							
+							//NSString *urlstr = [itemAtIndex objectForKey:@"link"]
+							tempImage = [[[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [listenSocket connectedHost],[listenSocket connectedPort],[itemAtIndex objectForKey:@"link"]]]]] autorelease];
+						}
+						// Now we have the image, we need to draw it
+						CGFloat
+							x = [[components objectAtIndex:2] floatValue],
+							y = [[components objectAtIndex:3] floatValue],
+							width = [[components objectAtIndex:4] floatValue],
+							height = [[components	objectAtIndex:5] floatValue];
+						
+						// create a new bitmap image context
+						//
+						CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
 
+						UIGraphicsBeginImageContext(CGSizeMake(mainframe.size.width, mainframe.size.height));		
+						// get context
+						//
+						CGContextRef context = UIGraphicsGetCurrentContext();		
+						
+						// push context to make it current 
+						// (need to do this manually because we are not drawing in a UIView)
+						//
+						UIGraphicsPushContext(context);								
+						
+						// drawing code comes here- look at CGContext reference
+						// for available operations
+						//
+						// this example draws the inputImage into the context
+						//
+						[backgroundView.image drawInRect:CGRectMake(0,0,mainframe.size.width, mainframe.size.height)];
+						[tempImage drawInRect:CGRectMake(x, y, width, height)];
+
+						// pop context 
+						//
+						UIGraphicsPopContext();								
+						
+						// get a UIImage from the image context- enjoy!!!
+						//
+						UIImage *outputImage = UIGraphicsGetImageFromCurrentImageContext();
+						
+						// clean up drawing environment
+						//
+						UIGraphicsEndImageContext();
+						
+						backgroundView.image = outputImage;
 					}
 				}
-				
-				//Scale or tile it if necessary
-				if ([(NSString *)[components objectAtIndex:2] compare:@"C"] == 0)  //Center
-				{
-					
-				}
-				else if ([(NSString *)[components objectAtIndex:2] compare:@"S"] == 0)  //Stretch
-				{
-					
-				}
-				else if ([(NSString *)[components objectAtIndex:2] compare:@"T"] == 0)  //Tile
-				{
-					
-				}
-				
 			}
 			
 			
