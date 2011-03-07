@@ -81,7 +81,16 @@ GLIB_V="${GLIB_MV}.1"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.gz"
 GLIB_DIST="glib-${GLIB_V}.tar.gz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS\" && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
+# We build glib for the host system first, so the cross compiled one can get
+# glib-genmarhsal and glib-compile-schemas without having to install a new glib
+# on the host system.
+
+GLIB_HOST_DIST="glib-${GLIB_V}.tar.gz"
+GLIB_HOST_SOURCE="glib-${GLIB_V}"
+GLIB_HOST_COMMANDS="env -i PATH=$PATH ./configure --prefix=$PREFIX/host && make ${NUM_MAKE_JOBS} install && cd .. && rm -rf ./$GLIB_HOST_SOURCE"
 
 #------------------------------------------------------------------------------
 # sqlite
@@ -285,7 +294,7 @@ fi
 
 #Override Clutter CFLAGS so that it is not built optimized
 
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O2 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
 #CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.a ./clutter/.libs/*.la $PREFIX/lib" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
@@ -334,7 +343,7 @@ SNDFILE_URL="http://www.mega-nerd.com/libsndfile/files/${SNDFILE_DIST}"
 
 #------------------------------------------------------------------------------
 
-ALL="ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE"
+ALL="GLIB_HOST ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE"
 
 #-----------------------------------------------------------------------------
 
@@ -428,13 +437,23 @@ fi
 #-----------------------------------------------------------------------------
 
 for THIS in ${ALL}; do
-
+    
     if [[ ${THIS} == "clean" ]]
     then
         continue
     fi
-
-    if [[ ! ${BUILT} == *${THIS}* ]]
+    
+    if [[ $BUILT == "" ]]
+    then
+      DOIT=1
+    else
+      set +e
+      grep -q "^$THIS$" $HERE/built
+      DOIT=$?
+      set -e
+    fi
+        
+    if [[ $DOIT != 0 ]]
     then
     
         THIS_V=${THIS}_V
@@ -445,7 +464,7 @@ for THIS in ${ALL}; do
         
 
         echo "================================================================="
-        echo "== Building ${!THIS_SOURCE}..."
+        echo "== Building ${!THIS_SOURCE}...($THIS)"
         echo "================================================================="
 
         # If the source directory does not exist, unpack the dist
