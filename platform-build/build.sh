@@ -42,11 +42,11 @@ DYNAMIC_BUILD=${DYNAMIC_BUILD:-0}
 if [[ ${DYNAMIC_BUILD} == 1 ]]
 then
     BUILD_TP_CORE_DYNAMIC="-DBUILD_SHARED_LIBS=1"
-    BUILD_CLUTTER_DYNAMIC="--enable-shared"
+    SHARED="--enable-shared --disable-static"
     echo "DYMAMIC build selected"
 else
     BUILD_TP_CORE_DYNAMIC=""
-    BUILD_CLUTTER_DYNAMIC="--disable-shared"
+    SHARED="--disable-shared"
     echo "STATIC build selected"
 fi
 
@@ -81,7 +81,7 @@ GLIB_V="${GLIB_MV}.1"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.gz"
 GLIB_DIST="glib-${GLIB_V}.tar.gz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared ${GLIB_ICONV} --disable-fam --with-pic && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS\" && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # sqlite
@@ -89,7 +89,7 @@ GLIB_COMMANDS="glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwui
 SQLITE_V="3.6.22"
 SQLITE_DIST="sqlite-amalgamation-${SQLITE_V}.tar.gz"
 SQLITE_SOURCE="sqlite-${SQLITE_V}"
-SQLITE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST  --build=$BUILD --with-pic --disable-shared && make ${NUM_MAKE_JOBS} install"
+SQLITE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST  --build=$BUILD --with-pic $SHARED && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # openssl
@@ -116,7 +116,7 @@ CARES_V="1.7.0"
 CARES_URL="http://c-ares.haxx.se/c-ares-${CARES_V}.tar.gz"
 CARES_DIST="c-ares-${CARES_V}.tar.gz"
 CARES_SOURCE="c-ares-${CARES_V}"
-CARES_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+CARES_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # curl
@@ -125,7 +125,7 @@ CURL_V="7.20.0"
 CURL_URL="http://curl.haxx.se/download/curl-${CURL_V}.tar.gz"
 CURL_DIST="curl-${CURL_V}.tar.gz"
 CURL_SOURCE="curl-${CURL_V}"
-CURL_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic --enable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict && make ${NUM_MAKE_JOBS} install"
+CURL_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict && make ${NUM_MAKE_JOBS} install"
 CURL_DEPENDS="CARES ZLIB OPENSSL"
 #------------------------------------------------------------------------------
 # bzip
@@ -152,7 +152,7 @@ EXPAT_V="2.0.1"
 EXPAT_URL="http://sourceforge.net/projects/expat/files/expat/${EXPAT_V}/expat-${EXPAT_V}.tar.gz/download"
 EXPAT_DIST="expat-${EXPAT_V}.tar.gz"
 EXPAT_SOURCE="expat-${EXPAT_V}"
-EXPAT_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+EXPAT_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # freetype
@@ -161,7 +161,7 @@ FREETYPE_V="2.3.12"
 FREETYPE_URL="http://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_V}.tar.gz"
 FREETYPE_DIST="freetype-${FREETYPE_V}.tar.gz"
 FREETYPE_SOURCE="freetype-${FREETYPE_V}"
-FREETYPE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+FREETYPE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # fontconfig
@@ -170,7 +170,7 @@ FONTCONFIG_V="2.8.0"
 FONTCONFIG_URL="http://fontconfig.org/release/fontconfig-${FONTCONFIG_V}.tar.gz"
 FONTCONFIG_DIST="fontconfig-${FONTCONFIG_V}.tar.gz"
 FONTCONFIG_SOURCE="fontconfig-${FONTCONFIG_V}"
-FONTCONFIG_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD --with-arch=$ARCH --disable-shared --with-pic --with-freetype-config=\"$PREFIX/bin/freetype-config\" && make ${NUM_MAKE_JOBS} install"
+FONTCONFIG_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD --with-arch=$ARCH $SHARED --with-pic --with-freetype-config=\"$PREFIX/bin/freetype-config\" && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # pixman
@@ -179,7 +179,7 @@ PIXMAN_V="0.21.2"
 PIXMAN_URL="http://cgit.freedesktop.org/pixman/snapshot/pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_DIST="pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_SOURCE="pixman-${PIXMAN_V}"
-PIXMAN_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic --disable-gtk && make ${NUM_MAKE_JOBS} install"
+PIXMAN_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-gtk && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # png
@@ -188,7 +188,7 @@ PNG_V="1.2.42"
 PNG_URL="http://sourceforge.net/projects/libpng/files/00-libpng-stable/${PNG_V}/libpng-${PNG_V}.tar.gz/download"
 PNG_DIST="libpng-${PNG_V}.tar.gz"
 PNG_SOURCE="libpng-${PNG_V}"
-PNG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+PNG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # cairo
@@ -197,7 +197,7 @@ CAIRO_V="1.10.2"
 CAIRO_URL="http://cairographics.org/releases/cairo-${CAIRO_V}.tar.gz"
 CAIRO_DIST="cairo-${CAIRO_V}.tar.gz"
 CAIRO_SOURCE="cairo-${CAIRO_V}"
-CAIRO_COMMANDS="CFLAGS=\"${CFLAGS} -DPNG_SKIP_SETJMP_CHECK=1\" ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic --disable-xlib --disable-ps --disable-pdf --disable-svg && make ${NUM_MAKE_JOBS} install"
+CAIRO_COMMANDS="CFLAGS=\"${CFLAGS} -DPNG_SKIP_SETJMP_CHECK=1\" ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-xlib --disable-ps --disable-pdf --disable-svg && make ${NUM_MAKE_JOBS} install"
 CAIRO_DEPENDS="PIXMAN PNG"
 
 #------------------------------------------------------------------------------
@@ -208,7 +208,7 @@ PANGO_V="${PANGO_MV}.2"
 PANGO_URL="http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_MV}/pango-${PANGO_V}.tar.gz"
 PANGO_DIST="pango-${PANGO_V}.tar.gz"
 PANGO_SOURCE="pango-${PANGO_V}"
-PANGO_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --without-x --disable-shared --with-pic --with-included-modules=yes && make ${NUM_MAKE_JOBS} install"
+PANGO_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --without-x $SHARED --with-pic --with-included-modules=yes && make ${NUM_MAKE_JOBS} install"
 PANGO_DEPENDS="CAIRO FREETYPE FONTCONFIG"
 #------------------------------------------------------------------------------
 # jpeg
@@ -217,7 +217,7 @@ JPEG_V="8b"
 JPEG_URL="http://www.ijg.org/files/jpegsrc.v${JPEG_V}.tar.gz"
 JPEG_DIST="jpegsrc.v${JPEG_V}.tar.gz"
 JPEG_SOURCE="jpeg-${JPEG_V}"
-JPEG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+JPEG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # tiff
@@ -226,7 +226,7 @@ TIFF_V="3.9.4"
 TIFF_URL="ftp://ftp.remotesensing.org/pub/libtiff/tiff-${TIFF_V}.tar.gz"
 TIFF_DIST="tiff-${TIFF_V}.tar.gz"
 TIFF_SOURCE="tiff-${TIFF_V}"
-TIFF_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+TIFF_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # gif
@@ -235,7 +235,7 @@ GIF_V="4.1.6"
 GIF_URL="http://sourceforge.net/projects/giflib/files/giflib%204.x/giflib-${GIF_V}/giflib-${GIF_V}.tar.gz/download"
 GIF_DIST="giflib-${GIF_V}.tar.gz"
 GIF_SOURCE="giflib-${GIF_V}"
-GIF_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+GIF_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # json
@@ -245,7 +245,7 @@ JSON_V="${JSON_MV}.2"
 JSON_URL="http://ftp.gnome.org/pub/GNOME/sources/json-glib/${JSON_MV}/json-glib-${JSON_V}.tar.gz"
 JSON_DIST="json-glib-${JSON_V}.tar.gz"
 JSON_SOURCE="json-glib-${JSON_V}"
-JSON_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic --disable-glibtest && make ${NUM_MAKE_JOBS} install"
+JSON_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-glibtest && make ${NUM_MAKE_JOBS} install"
 JSON_DEPENDS="GLIB"
 
 #------------------------------------------------------------------------------
@@ -256,7 +256,7 @@ ATK_V="${ATK_MV}.0"
 ATK_URL="http://ftp.gnome.org/pub/gnome/sources/atk/${ATK_MV}/atk-${ATK_V}.tar.gz"
 ATK_DIST="atk-${ATK_V}.tar.gz"
 ATK_SOURCE="atk-${ATK_V}"
-ATK_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+ATK_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # uprof
@@ -266,7 +266,7 @@ UPROF_V="${UPROF_MV}"
 UPROF_URL="http://uprof.freedesktop.org/releases/uprof/uprof-${UPROF_V}.tar.gz"
 UPROF_DIST="uprof-${UPROF_V}.tar.gz"
 UPROF_SOURCE="uprof-${UPROF_V}"
-UPROF_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD --disable-shared --with-pic && make ${NUM_MAKE_JOBS} install"
+UPROF_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 UPROF_DEPENDS="GLIB"
 
 #------------------------------------------------------------------------------
@@ -285,7 +285,7 @@ fi
 
 #Override Clutter CFLAGS so that it is not built optimized
 
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD ${BUILD_CLUTTER_DYNAMIC} --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
 #CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.a ./clutter/.libs/*.la $PREFIX/lib" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
@@ -296,7 +296,7 @@ AVAHI_V="0.6.25"
 AVAHI_URL="http://avahi.org/download/avahi-${AVAHI_V}.tar.gz"
 AVAHI_DIST="avahi-${AVAHI_V}.tar.gz"
 AVAHI_SOURCE="avahi-${AVAHI_V}"
-AVAHI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --disable-shared --with-pic --disable-qt3 --disable-qt4 --disable-gtk --disable-dbus --disable-gdbm --disable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-xml --with-distro=none --disable-nls --disable-shared && make ${NUM_MAKE_JOBS} install"
+AVAHI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-qt3 --disable-qt4 --disable-gtk --disable-dbus --disable-gdbm --disable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-xml --with-distro=none --disable-nls $SHARED && make ${NUM_MAKE_JOBS} install"
 AVAHI_DEPENDS="GLIB"
 
 #------------------------------------------------------------------------------
@@ -305,7 +305,7 @@ AVAHI_DEPENDS="GLIB"
 UPNP_V="1.6.6"
 UPNP_DIST="libupnp-${UPNP_V}.tar.bz2"
 UPNP_SOURCE="libupnp-${UPNP_V}"
-UPNP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --disable-shared --with-pic && make && make ${NUM_MAKE_JOBS} install"
+UPNP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # uriparser
@@ -313,7 +313,7 @@ UPNP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --disabl
 URI_V="0.7.5"
 URI_DIST="uriparser-${URI_V}.tar.gz"
 URI_SOURCE="uriparser-${URI_V}"
-URI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --disable-shared --with-pic --disable-test --disable-doc && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
+URI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-test --disable-doc && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # uuid
@@ -321,7 +321,7 @@ URI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --disable
 UUID_V="1.6.2"
 UUID_DIST="uuid-${UUID_V}.tar.gz"
 UUID_SOURCE="uuid-${UUID_V}"
-UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --includedir=$PREFIX/include/ossp --disable-shared --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
+UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --includedir=$PREFIX/include/ossp $SHARED --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # libsndfile
@@ -329,7 +329,7 @@ UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./co
 SNDFILE_V="1.0.23"
 SNDFILE_DIST="libsndfile-${SNDFILE_V}.tar.gz"
 SNDFILE_SOURCE="libsndfile-${SNDFILE_V}"
-SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD --disable-shared --disable-cpu-clip  --disable-sqlite --disable-alsa --disable-external-libs --with-pic && make && make ${NUM_MAKE_JOBS} install"
+SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --disable-cpu-clip  --disable-sqlite --disable-alsa --disable-external-libs --with-pic && make && make ${NUM_MAKE_JOBS} install"
 SNDFILE_URL="http://www.mega-nerd.com/libsndfile/files/${SNDFILE_DIST}"
 
 #------------------------------------------------------------------------------
@@ -358,6 +358,25 @@ then
         cp -r ${THERE}/base/* ${PREFIX}/
     fi
 
+fi
+
+#------------------------------------------------------------------------------
+# OpenGL stub
+
+if [[ -d ${THERE}/gl-stub ]]
+then
+
+    if [[ ! -f ${PREFIX}/lib/libGLESv2.so ]]
+    then
+        echo "================================================================="
+        echo "== Building GLES2 stub..."
+        echo "================================================================="
+
+
+        ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o ${PREFIX}/lib/libGLESv2.so    
+        ln -s ${PREFIX}/lib/libGLESv2.so ${PREFIX}/lib/libGLES2.so   
+        ln -s ${PREFIX}/lib/libGLESv2.so ${PREFIX}/lib/libEGL.so   
+    fi
 fi
 
 #-----------------------------------------------------------------------------
@@ -495,22 +514,6 @@ for THIS in ${ALL}; do
     
 done
 
-#------------------------------------------------------------------------------
-# OpenGL stub
-
-if [[ -d ${THERE}/gl-stub ]]
-then
-
-    if [[ ! -f ${PREFIX}/lib/libGLES2.so ]]
-    then
-        echo "================================================================="
-        echo "== Building GLES2 stub..."
-        echo "================================================================="
-
-
-        ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o ${PREFIX}/lib/libGLES2.so    
-    fi
-fi
 
 #------------------------------------------------------------------------------
 # Trickplay
@@ -606,7 +609,7 @@ then
 	    -lupnp \
 	    -lixml \
 	    -lthreadutil \
-	    -lGLES2 \
+	    -lGLESv2 \
 	    -lcairo-gobject \
 	    -luprof-0.3 \
 	    -lsndfile \
@@ -628,7 +631,12 @@ then
 
     make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean 
     make -C ${THERE}/lg-source/tp_addon/src TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
-    mv ${THERE}/lg-source/tp_addon/src/trickplay ${THERE}/lg-source/tp_addon/src/trickplay.sym ${HERE}/
+    if [[ ! -d "${HERE}/lg" ]]
+    then
+        mkdir "${HERE}/lg"
+    fi
+    
+    mv ${THERE}/lg-source/tp_addon/src/trickplay ${THERE}/lg-source/tp_addon/src/trickplay.sym ${HERE}/lg/
     make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean
 
 fi
@@ -680,7 +688,7 @@ export V3DIP_REV=v3d_b0/interface
 
 rm -rf "$THERE/broadcom-source/*.o" "$THERE/broadcom-source/trickplay"
 
-make -C $THERE/broadcom-source trickplay TRICKPLAY_INCLUDE="$TRICKPLAY_INCLUDE" TRICKPLAY_LIB="$TRICKPLAY_LIB"
+make -C $THERE/broadcom-source trickplay TRICKPLAY_INCLUDE="$TRICKPLAY_INCLUDE" TRICKPLAY_LIB="$TRICKPLAY_LIB"  DEBUG=n
 
 if [[ ! -d $HERE/broadcom ]]
 then
