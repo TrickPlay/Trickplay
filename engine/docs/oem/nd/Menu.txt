@@ -1,9 +1,8 @@
 Format: 1.5
 
 
-# You can add a title and sub-title to your menu like this:
-# Title: [project name]
-# SubTitle: [subtitle]
+Title: TrickPlay
+SubTitle: OEM Integration Reference
 
 # You can add a footer to your documentation like this:
 # Footer: [text]
@@ -46,10 +45,12 @@ Format: 1.5
 # --------------------------------------------------------------------------
 
 
-File: Controller  (controller.h)
-File: Image Decoding  (image.h)
-File: Media Player  (mediaplayer.h)
-File: TrickPlay Context  (trickplay.h)
+File: Introduction  (docs/oem/text/introduction.txt)
+File: TrickPlay Context  (public/include/trickplay/trickplay.h)
+File: Controller  (public/include/trickplay/controller.h)
+File: Media Player  (public/include/trickplay/mediaplayer.h)
+File: Image Decoding  (public/include/trickplay/image.h)
+File: Audio Sampling  (public/include/trickplay/audio-sampler.h)
 
 Group: Index  {
 

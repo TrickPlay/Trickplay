@@ -103,6 +103,11 @@ public:
         else
         {
             g_assert( image->pixels == NULL );
+
+            // We change to unsupported format so that no matter what
+            // the external decoder does, we try the internal decoders.
+
+            result = TP_IMAGE_UNSUPPORTED_FORMAT;
         }
 
         return result;

@@ -627,11 +627,7 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
 
     // Create the network
 
-    network = new Network(
-            Network::Settings( context->get_bool( TP_NETWORK_DEBUG, false ),
-                    context->get_bool( TP_SSL_VERIFY_PEER, true ),
-                    context->get( TP_SSL_CA_CERT_FILE, "" ) ),
-            event_group );
+    network = new Network( context , event_group );
 
     // Register to get all notifications
 
@@ -1622,4 +1618,33 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
     }
 
     return true;
+}
+
+void App::audio_match( const String & json )
+{
+    // TODO: Not terribly excited about doing it this way
+
+    lua_getglobal( L , "app" );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        lua_pop( L , 1 );
+        return;
+    }
+
+    if ( UserData * ud = UserData::get( L , lua_gettop( L ) ) )
+    {
+        JSON::parse( L , json.c_str() );
+
+        if ( lua_isnil( L , -1 ) )
+        {
+            lua_pop( L , 1 );
+        }
+        else
+        {
+            ud->invoke_callback( "on_audio_match" , 1 , 0 );
+        }
+    }
+
+    lua_pop( L , 1 );
 }
