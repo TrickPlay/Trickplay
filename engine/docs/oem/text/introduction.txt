@@ -1,0 +1,35 @@
+
+Title: Introduction
+
+This document provides information regarding the integration points 
+between TrickPlay and an OEM. 
+
+Topic: Launch TrickPlay
+
+The first step is to configure and launch TrickPlay. For this, you use
+the <TrickPlay Context> API.
+
+Topic: Send remote control events to TrickPlay
+
+Next, you can use the <Controller> API to pass remote control events
+to TrickPlay.
+
+Topic: Audio, video and sound playback
+
+To allow TrickPlay to play back audio, video and sounds, you should 
+use the <Media Player> API.
+
+Topic: Accelerated image decoding
+
+If your platform supports hardware accelerated image decoding, you
+can use the <Image Decoding> API to let TrickPlay take advantage 
+of it.
+
+Topic: Audio sampling
+
+Finally, to enable a richer experience, you can use the <Audio Sampling>
+API to provide TrickPlay with sound buffers it can analyze.
+
+
+
+

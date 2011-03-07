@@ -36,6 +36,7 @@ TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( atk-1.0 atk/atk.h 			            ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( sndfile.h								ENGINE_INCLUDE_DIRS )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -139,6 +140,8 @@ list(
     json-glib-1.0
     
     uriparser           
+    
+    sndfile
 )
 
 #--------------
@@ -437,6 +440,7 @@ list( APPEND
     
     ${ENGINE_SRC}/source/app_push_server.cpp
     ${ENGINE_SRC}/source/bitmap.cpp
+    ${ENGINE_SRC}/source/audio_sampling.cpp
 )
 
 #------------------------------------------------------------------------------

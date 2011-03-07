@@ -1,6 +1,4 @@
 
-#define G_LOG_DOMAIN "tp-cmp"
-
 #include "clutter-gst/clutter-gst.h"
 #include "gst/video/video.h"
 
@@ -9,6 +7,16 @@
 
 #include "trickplay/trickplay.h"
 #include "trickplay/mediaplayer.h"
+
+//-----------------------------------------------------------------------------
+
+TPContext * context = 0;
+
+//-----------------------------------------------------------------------------
+
+extern void connect_audio_sampler( TPContext * context , GstElement * bin );
+
+extern void disconnect_audio_sampler( GstElement * bin );
 
 //-----------------------------------------------------------------------------
 
@@ -145,8 +153,6 @@ static void get_stream_information(TPMediaPlayer * mp)
     g_object_get(G_OBJECT(pipeline), "n-video", &n_video, NULL);
     g_object_get(G_OBJECT(pipeline), "n-audio", &n_audio, NULL);
 
-	g_debug("Identified %d audio and %d video streams",n_audio,n_video);
-
     if(n_video) ud->media_type|=TP_MEDIA_TYPE_VIDEO;
     if(n_audio) ud->media_type|=TP_MEDIA_TYPE_AUDIO;
 #endif
@@ -183,23 +189,28 @@ static void get_stream_information(TPMediaPlayer * mp)
         }
     }    
 
-	g_debug("About to do AUDIO stuff!");
-
 #if 1
-    if (ud->media_type&TP_MEDIA_TYPE_AUDIO)
+
+    if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
     {
         GstElement * audio_sink= gst_element_factory_make( "autoaudiosink", "TPAudioSink" );
         
         if(!audio_sink)
         {
         	g_debug("Failed to create autoaudiosink");
-        } else {
+        }
+        else
+        {
 			g_object_set(G_OBJECT(pipeline),"audio-sink",audio_sink,NULL);
-        	g_debug("autoaudiosink set");
 		}
-    }    
+    }
+
 #endif
 
+    if ( context )
+    {
+        connect_audio_sampler( context , pipeline );
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -371,6 +382,17 @@ static void mp_reset(TPMediaPlayer * mp)
     clutter_media_set_progress(cm,0);
     
     clutter_actor_hide(CLUTTER_ACTOR(cm));
+
+#if (CLUTTER_GST_MAJOR_VERSION<1)
+    GstElement * pipeline=clutter_gst_video_texture_get_playbin(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#else
+    GstElement * pipeline=clutter_gst_video_texture_get_pipeline(CLUTTER_GST_VIDEO_TEXTURE(cm));
+#endif
+
+    if ( pipeline )
+    {
+        disconnect_audio_sampler( pipeline );
+    }
 }
 
 static int mp_play(TPMediaPlayer * mp)
@@ -652,7 +674,7 @@ int main(int argc,char * argv[])
 {
     tp_init(&argc,&argv);
     
-    TPContext * context = tp_context_new();
+    context = tp_context_new();
     
     if ( argc > 1 && * ( argv[ argc - 1 ] ) != '-' )
     {
@@ -665,6 +687,8 @@ int main(int argc,char * argv[])
     
     tp_context_free(context);
     
+    context = 0;
+
     return result;
 }
 

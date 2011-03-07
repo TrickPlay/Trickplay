@@ -36,6 +36,39 @@ inline void failif( bool expression, const gchar * format, ... )
 
 //-----------------------------------------------------------------------------
 
+inline StringVector split_string( const gchar * source , const gchar * delimiter , gint max_tokens = 0 )
+{
+    StringVector result;
+
+    if ( ! source || ! delimiter )
+    {
+        return result;
+    }
+
+    if ( strlen( source ) == 0 || strlen( delimiter ) == 0 )
+    {
+        return result;
+    }
+
+    gchar * * parts = g_strsplit( source , delimiter , max_tokens );
+
+    for ( gchar * * part = parts; * part; ++part )
+    {
+        result.push_back( * part );
+    }
+
+    g_strfreev( parts );
+
+    return result;
+}
+
+inline StringVector split_string( const String & source , const gchar * delimiter , gint max_tokens = 0 )
+{
+    return split_string( source.c_str() , delimiter , max_tokens );
+}
+
+//-----------------------------------------------------------------------------
+
 class RefCounted
 {
 public:
@@ -255,6 +288,33 @@ private:
     typedef std::list< FreePair > FreeList;
 
     FreeList list;
+};
+
+//-----------------------------------------------------------------------------
+// Lets you run something as an idle or a timeout in the main thread. Derive
+// from this, implement run and call post with an instance.
+
+class Action
+{
+public:
+
+    Action( int interval = -1 );
+
+    virtual ~Action();
+
+    static void post( Action * action );
+
+protected:
+
+    virtual bool run() = 0;
+
+private:
+
+    static void destroy( Action * action );
+
+    static gboolean run_internal( Action * action );
+
+    int interval;
 };
 
 //-----------------------------------------------------------------------------
