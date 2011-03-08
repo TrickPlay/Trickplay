@@ -94,10 +94,16 @@
     } else {
         NSLog(@"Could not cache data, either no key is specified or the data never arrived over the network");
     }
+}
 
+- (void)clean {
+    [resourceNames removeAllObjects];
+    [resources removeAllObjects];
 }
 
 - (void)dealloc {
+    NSLog(@"ResourceManager dealloc");
+    [self clean];
     if (socketManager) {
         [socketManager release];
     }

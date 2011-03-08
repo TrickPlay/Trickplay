@@ -23,9 +23,9 @@
     [super viewDidLoad];
     
     // Customize the View
-    self.title = @"Remote Services";
+    self.title = @"TV";
     self.view.tag = 1;
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    
     self.navigationController.delegate = self;
     
     // Initialize the NSNetServiceBrowser stuff
@@ -53,12 +53,21 @@
 	//self.title = @"Disconnect"; 
      //*/
     
+    /*
     [gestureViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
     [gestureViewController startService];
+    */
+    [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+    if ([appBrowserViewController fetchApps]) {
+        [appBrowserViewController.theTableView reloadData];
+    }
 }
 
 - (void)didNotResolveService {
     if (gestureViewController) {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+    if (appBrowserViewController) {
         [self.navigationController popViewControllerAnimated:YES];
     }
     [self reloadData];
@@ -104,12 +113,24 @@
     NSLog(@"navigation controller tag = %d", viewController.view.tag);
     NSLog(@"navigation controller tag = %d", self.view.tag);
 
+    // if popping back to self, release everything else
     if (viewController.view.tag == self.view.tag) {
         if (gestureViewController) {
             [gestureViewController release];
             gestureViewController = nil;
         }
+        if (appBrowserViewController) {
+            [appBrowserViewController release];
+            appBrowserViewController = nil;
+        }
     }
+    // if popping back to app browser
+    else if (viewController.view.tag == appBrowserViewController.view.tag) {
+        [appBrowserViewController fetchApps];
+        [appBrowserViewController.theTableView reloadData];
+    }
+
+    
     [self reloadData];
 }
 
@@ -149,8 +170,7 @@
     
     NSMutableArray *services = netServiceManager.services;
 	NSUInteger count = [services count];
-    
-    fprintf(stderr, "The count: %d\n", count);
+    NSLog(@"number of services = %d", count);
 	if (count == 0) {
         // If there are no services and searchingForServicesString is set, show one row explaining that to the user.
         cell.textLabel.text = @"Searching for services...";
@@ -230,14 +250,20 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if ([services count] == 0) return;
     
-    
-    NSLog(@"gestureViewController %@\n", gestureViewController);
-    if (gestureViewController == nil)
-	{
+    /*
+    //NSLog(@"pushing gestureViewController = %@\n", gestureViewController);
+    if (gestureViewController == nil) {
 		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
 	}
     
 	[self.navigationController pushViewController:gestureViewController animated:YES];    
+    */
+    //NSLog(@"pushing appBrowserViewController = %@", appBrowserViewController);
+    if (appBrowserViewController == nil) {
+        appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
+    }
+    
+    [self.navigationController pushViewController:appBrowserViewController animated:YES];
     
 	netServiceManager.currentService = [services objectAtIndex:indexPath.row];
 	[netServiceManager.currentService setDelegate:netServiceManager];
@@ -271,9 +297,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 
 - (void)dealloc {
+    NSLog(@"RootViewController dealloc");
     [netServiceManager release];
     if (gestureViewController) {
         [gestureViewController release];
+    }
+    if (appBrowserViewController) {
+        [appBrowserViewController release];
     }
 
     [super dealloc];

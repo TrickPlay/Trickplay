@@ -16,6 +16,8 @@
 
 @end
 
+#import "ResourceManager.h"
+
 
 @interface AsyncImageView : UIImageView {
     NSURLConnection *connection;
@@ -28,7 +30,8 @@
 }
 
 @property (nonatomic, retain) id resourceKey;
-@property (nonatomic, assign) id <AsyncImageViewDelegate> dataCacheDelegate;
+//@property (nonatomic, assign) id <AsyncImageViewDelegate> dataCacheDelegate;
+@property (nonatomic, retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key;
 - (UIImageView *)imageView;

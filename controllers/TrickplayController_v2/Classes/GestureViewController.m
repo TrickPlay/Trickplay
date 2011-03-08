@@ -16,7 +16,7 @@
 @synthesize touchDelegate;
 @synthesize accelDelegate;
 
--(void) setupService:(NSInteger)p
+- (void)setupService:(NSInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n {
     
@@ -29,7 +29,7 @@
     hostName = [h retain];
 }
 
--(void) startService {
+- (BOOL)startService {
     // Tell socket manager to create a socket and connect to the service selected
     socketManager = [[SocketManager alloc] initSocketStream:hostName
                                                        port:port
@@ -39,7 +39,7 @@
         // If null then error connecting, back up to selecting services view
         [self.navigationController popViewControllerAnimated:YES];
         NSLog(@"Could Not Establish Connection");
-        return;
+        return NO;
     }
     
     // Made a connection, let the service know!
@@ -58,19 +58,20 @@
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     //[loadingIndicator stopAnimating];
+    
+    return YES;
 }
 
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred");
     // everything will get released from the navigation controller's delegate call
-    [self.navigationController popViewControllerAnimated:YES];
+    [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
 - (void)streamEndEncountered {
     // everything will get released from the navigation controller's delegate call
-    NSLog(@"first");
-    [self.navigationController popViewControllerAnimated:YES];
+    [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount
@@ -119,8 +120,7 @@
     {
         [styleAlert release];
         styleAlert = nil;
-        styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle
-                                                  delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+        styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
     }
     styleAlert.title = windowtitle;
     [multipleChoiceArray removeAllObjects];
@@ -139,8 +139,7 @@
     //[styleAlert release];    
 }
 
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
-{
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	//AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     NSLog(@"Dismiss the alertview");
 	if (buttonIndex < 5)
@@ -365,6 +364,11 @@
 
 //-------------------- Other View stuff ------------------------
 
+- (void)clean {
+    [self clearUI];
+    [resourceManager clean];
+}
+
 - (void)clearUI {
     NSLog(@"Clearing the UI");
     [theTextField resignFirstResponder];
@@ -400,14 +404,14 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSLog(@"View loaded!");
+    NSLog(@"GestureView loaded!");
     
     loadingIndicator.hidesWhenStopped = YES;
     //loadingIndicator.bounds = self.view.frame;
     loadingIndicator.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/3);
     [loadingIndicator startAnimating];
     
-    backgroundView.image = [UIImage imageNamed:@"background.png"];
+    //backgroundView.image = [UIImage imageNamed:@"background.png"];
     
     styleAlert = [[UIActionSheet alloc] initWithTitle:@"TrickPlay Multiple Choice"
                                               delegate:self cancelButtonTitle:nil

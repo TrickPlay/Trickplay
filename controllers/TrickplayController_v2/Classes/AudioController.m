@@ -124,6 +124,7 @@
 }
 
 - (void)dealloc {
+    NSLog(@"AudioController dealloc");
     //[self destroyAudioStreamer];
     if (resourceManager) {
         [resourceManager release];

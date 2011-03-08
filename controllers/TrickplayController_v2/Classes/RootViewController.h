@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "NetServiceManager.h"
 #import "GestureViewController.h"
+#import "AppBrowserViewController.h"
 
 @interface RootViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate,
@@ -17,6 +18,7 @@ NetServiceManagerDelegate> {
     //UINavigationController *navigationController;
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
+    AppBrowserViewController *appBrowserViewController;
 }
 
 - (void)serviceResolved:(NSNetService *)service;
