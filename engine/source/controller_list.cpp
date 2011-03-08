@@ -148,7 +148,7 @@ public:
 
 #ifdef TP_TIME_CONTROLLER_EVENTS
 
-        g_debug( "EVENT PROCESS TIME TYPE %d : %d ms" , type , int( ( timestamp() - create_time ) / 1000.0 ) );
+        g_debug( "EVENT PROCESS TIME TYPE %d : %d ms" , type , int( timestamp() - create_time ) );
 #endif
 
         switch ( type )
