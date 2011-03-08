@@ -34,6 +34,8 @@ public:
         bool        redirect;
         String      user_agent;
 
+        void set_headers( const gchar * _headers );
+
     private:
 
         Request()
@@ -51,7 +53,7 @@ public:
         Response( const Response & other );
         const Response & operator =( const Response & other );
 
-        const char * get_header( const String & name );
+        const char * get_header( const String & name ) const;
 
         void replace_body( gpointer data , gsize size );
 
@@ -67,6 +69,8 @@ public:
 
     struct Settings
     {
+        Settings( TPContext * context );
+
         Settings( bool _debug = false, bool _ssl_verify_peer = true, const String & _ssl_cert_bundle = String() )
         :
             debug( _debug ),

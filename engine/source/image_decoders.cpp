@@ -36,7 +36,7 @@ namespace ImageDecoders
 
         virtual int decode( gpointer data, gsize size, TPImage * image )
         {
-            PROFILER( "Images::TIFF_decode/memory" );
+            PROFILER( "Images::TIFF_decode/memory" , PROFILER_INTERNAL_CALLS );
 
             imstream stream( ( char * )data, size );
 
@@ -56,7 +56,7 @@ namespace ImageDecoders
 
         virtual int decode( const char * filename, TPImage * image )
         {
-            PROFILER( "Images::TIFF_decode/file" );
+            PROFILER( "Images::TIFF_decode/file" , PROFILER_INTERNAL_CALLS );
 
             TIFF * tiff = TIFFOpen( filename, "r" );
 
@@ -124,7 +124,7 @@ namespace ImageDecoders
 
         virtual int decode( gpointer data, gsize size, TPImage * image )
         {
-            PROFILER( "Images::PNG_decode/memory" );
+            PROFILER( "Images::PNG_decode/memory" , PROFILER_INTERNAL_CALLS );
 
             imstream stream( ( char * )data, size );
 
@@ -133,7 +133,7 @@ namespace ImageDecoders
 
         virtual int decode( const char * filename, TPImage * image )
         {
-            PROFILER( "Images::PNG_decode/file" );
+            PROFILER( "Images::PNG_decode/file" , PROFILER_INTERNAL_CALLS );
 
             std::ifstream stream;
 
@@ -317,7 +317,7 @@ namespace ImageDecoders
 
         virtual int decode( gpointer data, gsize size, TPImage * image )
         {
-            PROFILER( "Images::JPEG_decode/memory" );
+            PROFILER( "Images::JPEG_decode/memory" , PROFILER_INTERNAL_CALLS );
 
             if ( size < 2 )
             {
@@ -372,7 +372,7 @@ namespace ImageDecoders
 
         virtual int decode( const char * filename, TPImage * image )
         {
-            PROFILER( "Images::JPEG_decode/file" );
+            PROFILER( "Images::JPEG_decode/file" , PROFILER_INTERNAL_CALLS );
 
             FILE * file = fopen( filename, "rb" );
 
@@ -590,7 +590,7 @@ namespace ImageDecoders
 
         virtual int decode( gpointer data, gsize size, TPImage * image )
         {
-            PROFILER( "Images::GIF_decode/memory" );
+            PROFILER( "Images::GIF_decode/memory" , PROFILER_INTERNAL_CALLS );
 
             UserData user_data = { ( guchar * ) data, size };
 
@@ -610,7 +610,7 @@ namespace ImageDecoders
 
         virtual int decode( const char * filename, TPImage * image )
         {
-            PROFILER( "Images::GIF_decode/file" );
+            PROFILER( "Images::GIF_decode/file" , PROFILER_INTERNAL_CALLS );
 
             GifFileType * g = DGifOpenFileName( filename );
 

@@ -6,6 +6,7 @@ module globals;
 #include "app.h"
 #include "context.h"
 #include "actions.h"
+#include "images.h"
 
 struct DoLater
 {
@@ -16,7 +17,7 @@ struct DoLater
         return & nil;
     }
 
-	static void add(lua_State * L,int function_ref,int args_table_ref)
+	static void add(lua_State * L,int delay,int function_ref,int args_table_ref)
 	{
 		DoLater * dl = g_new0( DoLater , 1 );
 		
@@ -24,7 +25,14 @@ struct DoLater
 		dl->function_ref = function_ref;
 		dl->args_table_ref = args_table_ref;
 		
-		g_idle_add_full( G_PRIORITY_DEFAULT_IDLE, (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy ); 
+		if ( delay <= 0 )
+		{
+		    g_idle_add_full( TRICKPLAY_PRIORITY , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
+		}
+		else
+		{
+		    g_timeout_add_full( TRICKPLAY_PRIORITY , delay , (GSourceFunc) do_it, dl, (GDestroyNotify)  destroy );
+		}
 	}  
 	
 	static gboolean do_it( DoLater * self )
@@ -96,28 +104,6 @@ private:
 	int 			function_ref;
 	int				args_table_ref;
 };
-
-static int marker_gc( lua_State * L )
-{
-    g_info( "MARKER COLLECTED '%s'" , lua_tostring( L , lua_upvalueindex( 1 ) ) );
-    return 0;
-}
-
-#if 0
-void pb( void * s , int l )
-{
-	String o;
-	
-	for( int i = 0; i < l; ++i )
-	{
-		gchar * t = g_strdup_printf( "%s%d" , i == 0 ? "" : "," , ((guint8*)s)[i] );
-		o += t;
-		g_free(t);
-	}
-	g_debug( "%s" , o.c_str() );
-}
-#endif
-
 
 String hash( GChecksumType type , const void * data , gsize length , bool binary )
 {
@@ -854,18 +840,9 @@ globals
 			} 
 		]];		
 
-	debug()
-		[[
-		    if ( Debugger * debugger = App::get( L )->get_debugger() )
-		    {
-		        debugger->break_next_line();
-		    }		
-		]];
-		
 	detach( udata o )
 		[[
-			// UserData::clear_callbacks( L , o );
-		    g_warning( "'detach' function is deprecated" );
+			UserData::clear_callbacks( L , o );
 		]];		       
 		
 	/*
@@ -874,51 +851,76 @@ globals
 		Posts a function and arguments for execution during the next pass of the event loop. Note
 		that there is no way to receive any values returned by the function. 
 		
+		If the first argument is a number, it is interpreted as a number of milliseconds to wait
+		before executing the function, which must be the second argument. This can act as a simple
+		alternative to a timer.
+
 		Arguments:
 		
+            delay - Otional. A number of milliseconds to wait.
 			f - The function to execute.
-			others - Any number of arguments to pass to the function. 
+			others - Any number of arguments to pass to the function.
+
+        Example:
+
+	    (code)
+
+	      dolater( print , 1 ) -- Will call print as soon as it can and pass 1 as a parameter
+
+	      dolater( 1000 , print , 1 ) -- Will call print in a second, with 1 as a parameter
+
+	    (end)
+
 	*/
 	
-	dolater( function f , ... )
+	dolater( ... )
 		[[
-			int nargs = lua_gettop(L)-f;
-			int args = LUA_NOREF;
-			
-			// If there are args, we put them into a table and
-			// get a ref to the table
-			
-			if ( nargs > 0 )
-			{
-				lua_newtable(L);
-				for (int i=1; i<=nargs; ++i)
-				{
-				    if ( lua_isnil( L , i+f ) )
-				    {
-				        lua_pushlightuserdata( L , DoLater::nil() );
-				    }
-				    else
-				    {
-				        lua_pushvalue(L,i+f);
-				    }
-					lua_rawseti(L,-2,i);
-				}
-				args = luaL_ref(L,LUA_REGISTRYINDEX);
-			}
-			
-			lua_pushvalue(L,f);
-			int func = luaL_ref(L,LUA_REGISTRYINDEX);
-			
-			DoLater::add(L,func,args);
-		]];
-		
-	table registry()
-		[[
-#ifdef TP_PRODUCTION		
-			lua_pushnil( L );
-#else
-			lua_pushvalue( L , LUA_REGISTRYINDEX );
-#endif			
+			int nargs = lua_gettop(L);
+
+            if ( nargs > 0 )
+            {
+                int f = 1;
+                int delay = 0;
+
+                if ( lua_type( L , 1 ) == LUA_TNUMBER )
+                {
+                    delay = lua_tonumber( L , 1 );
+                    ++f;
+                    --nargs;
+                }
+
+                lb_checkfunction( L , f );
+
+                --nargs;
+
+                int args = LUA_NOREF;
+
+                // If there are args, we put them into a table and
+                // get a ref to the table
+
+                if ( nargs > 0 )
+                {
+                    lua_newtable(L);
+                    for (int i=1; i<=nargs; ++i)
+                    {
+                        if ( lua_isnil( L , i+f ) )
+                        {
+                            lua_pushlightuserdata( L , DoLater::nil() );
+                        }
+                        else
+                        {
+                            lua_pushvalue(L,i+f);
+                        }
+                        lua_rawseti(L,-2,i);
+                    }
+                    args = luaL_ref(L,LUA_REGISTRYINDEX);
+                }
+
+                lua_pushvalue(L,f);
+                int func = luaL_ref(L,LUA_REGISTRYINDEX);
+
+                DoLater::add(L,delay,func,args);
+            }
 		]];
 		
 	/*
@@ -959,42 +961,40 @@ globals
 		]];
 
 	/*
-        Marker is a thing that prints out its name when it is garbage collected. This
-        lets us attach it to stuff and see when it goes away.
+        Function: time
+
+        Returns the current time, but includes microseconds, so it has more resolution than
+        os.time.
+
+        Returns:
+
+        time - Fractional number of seconds since the Epoch.
 	*/
 
-	udata marker( lstring name )
+	double time()
         [[
-            lua_newuserdata( L , 1 );
+            GTimeVal tv;
 
+	        g_get_current_time( & tv );
+
+	        result = tv.tv_sec + double( tv.tv_usec ) / G_USEC_PER_SEC;
+        ]];
+
+	table split( string source , string delimiter , int max_tokens = 0 )
+        [[
             lua_newtable( L );
-            lua_pushvalue( L , 1 );
-            lua_pushcclosure( L , marker_gc , 1 );
-            lua_setfield( L , -2 , "__gc" );
-            lua_setmetatable( L , -2 );
-        ]];
 
-	table udatatypes( udata u )
-        [[
-            LSG;
-            if ( ! lua_isuserdata( L , u ) )
+            if ( strlen( delimiter ) )
             {
-                lua_pushnil( L );
-            }
-            else if ( ! lua_getmetatable( L , u ) )
-            {
-                lua_pushnil( L );
-            }
-            else
-            {
-                lua_getfield( L , -1 , "__types__" );
-                lua_remove( L , -2 );
-            }
-            LSG_CHECK(1);
-        ]];
+                StringVector v = split_string( source , delimiter , max_tokens );
 
-	bool checkudatatype( udata u , string type )
-        [[
-            result = lb_check_udata_type( L , u , type , false );
+                int i = 1;
+
+                for( StringVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
+                {
+                    lua_pushstring( L , it->c_str() );
+                    lua_rawseti( L , -2 , i );
+                }
+            }
         ]];
 }
