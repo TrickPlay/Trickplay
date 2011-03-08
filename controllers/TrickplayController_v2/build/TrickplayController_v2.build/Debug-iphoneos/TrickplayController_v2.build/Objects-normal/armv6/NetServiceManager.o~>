@@ -1,8 +1,0 @@
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m: In function '-[NetServiceManager netServiceBrowser:didNotSearch:]':
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:99: warning: 'NetServiceManager' may not respond to '-handleError:domain:'
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:99: warning: (Messages without a matching method signature
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:99: warning: will be assumed to return 'id' and accept
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:99: warning: '...' as arguments.)
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m: At top level:
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:155: warning: incomplete implementation of class 'NetServiceManager'
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:155: warning: method definition for '-handleError:' not found

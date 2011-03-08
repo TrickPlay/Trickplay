@@ -51,6 +51,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)theConnection {
+    NSLog(@"Connection did finish loading");
     [connection cancel];
     [connection release];
     connection = nil;
@@ -84,6 +85,7 @@
 }
 
 - (void)dealloc {
+    NSLog(@"AsyncImageView dealloc");
     if (connection) {
         [connection cancel];
         [connection release];
@@ -94,6 +96,12 @@
     if (resourceKey) {
         [resourceKey release];
     }
+    //*
+    if (dataCacheDelegate) {
+        [(NSObject *)dataCacheDelegate release];
+        dataCacheDelegate = nil;
+    }
+    //*/
     [super dealloc];
 }
 

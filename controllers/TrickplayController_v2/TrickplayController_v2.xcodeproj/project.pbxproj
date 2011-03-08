@@ -14,15 +14,16 @@
 		2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */; };
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
 		28F335F11007B36200424DE2 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* RootViewController.xib */; };
+		CD6229271326B91D003AB721 /* Default~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CD6229261326B91D003AB721 /* Default~ipad.png */; };
+		CD62293D1326BCBC003AB721 /* background~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background~ipad.png */; };
+		CD62295A1326C331003AB721 /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD6229591326C331003AB721 /* Default~iphone.png */; };
+		CD62297A1326CCFC003AB721 /* Default@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD6229791326CCFC003AB721 /* Default@2x~iphone.png */; };
 		CDFEBB66130A498600A14307 /* iOS-logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */; };
 		CDFEBB67130A498600A14307 /* iOS-logo-114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB60130A498600A14307 /* iOS-logo-114x114.png */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
 		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
-		CDFEBB6A130A498600A14307 /* Default@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB63130A498600A14307 /* Default@2x~iphone.png */; };
-		CDFEBB6B130A498600A14307 /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB64130A498600A14307 /* Default~iphone.png */; };
 		CDFEBB6C130A498600A14307 /* MainWindow-iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */; };
 		CDFEBB71130A498C00A14307 /* iOS-logo-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */; };
-		CDFEBB72130A498C00A14307 /* Default~iPad.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB6F130A498C00A14307 /* Default~iPad.png */; };
 		CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */; };
 		CDFEBBA8130A4BA900A14307 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */; };
 		CDFEBBA9130A4BA900A14307 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */; };
@@ -36,9 +37,9 @@
 		CDFEC10013147E9A00A14307 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */; };
 		CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC1271314B98100A14307 /* ResourceManager.m */; };
 		CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */; };
-		CDFEC2E61317514B00A14307 /* background~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEC2E51317514B00A14307 /* background~ipad.png */; };
 		CDFEC3F7131F1BB200A14307 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */; };
 		CDFEC3F8131F1BB200A14307 /* AppBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */; };
+		CDFEC5701320608400A14307 /* YAJLiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDFEC56F1320608400A14307 /* YAJLiOS.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,15 +55,16 @@
 		28F335F01007B36200424DE2 /* RootViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayController_v2-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		CD6229261326B91D003AB721 /* Default~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~ipad.png"; sourceTree = "<group>"; };
+		CD62293C1326BCBC003AB721 /* background~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~ipad.png"; sourceTree = "<group>"; };
+		CD6229591326C331003AB721 /* Default~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default~iphone.png"; path = "../Default~iphone.png"; sourceTree = "<group>"; };
+		CD6229791326CCFC003AB721 /* Default@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x~iphone.png"; path = "../Default@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-57x57.png"; sourceTree = "<group>"; };
 		CDFEBB60130A498600A14307 /* iOS-logo-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-114x114.png"; sourceTree = "<group>"; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
-		CDFEBB63130A498600A14307 /* Default@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x~iphone.png"; sourceTree = "<group>"; };
-		CDFEBB64130A498600A14307 /* Default~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPhone.xib"; sourceTree = "<group>"; };
 		CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-72x72.png"; sourceTree = "<group>"; };
-		CDFEBB6F130A498C00A14307 /* Default~iPad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~iPad.png"; sourceTree = "<group>"; };
 		CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPad.xib"; sourceTree = "<group>"; };
 		CDFEBBA2130A4BA000A14307 /* SocketManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketManager.h; sourceTree = "<group>"; };
 		CDFEBBA3130A4BA900A14307 /* SocketManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocketManager.m; sourceTree = "<group>"; };
@@ -87,10 +89,10 @@
 		CDFEC1271314B98100A14307 /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ResourceManager.m; sourceTree = "<group>"; };
 		CDFEC15A1315929800A14307 /* AsyncImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncImageView.h; sourceTree = "<group>"; };
 		CDFEC15B1315929800A14307 /* AsyncImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsyncImageView.m; sourceTree = "<group>"; };
-		CDFEC2E51317514B00A14307 /* background~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~ipad.png"; sourceTree = "<group>"; };
 		CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppBrowserViewController.h; sourceTree = "<group>"; };
 		CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppBrowserViewController.m; sourceTree = "<group>"; };
 		CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = AppBrowserViewController.xib; path = Classes/AppBrowserViewController.xib; sourceTree = "<group>"; };
+		CDFEC56F1320608400A14307 /* YAJLiOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = YAJLiOS.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +103,7 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
+				CDFEC5701320608400A14307 /* YAJLiOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +168,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CDFEC57E1320608F00A14307 /* Other */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
@@ -179,8 +183,8 @@
 				CDFEBB60130A498600A14307 /* iOS-logo-114x114.png */,
 				CDFEBB61130A498600A14307 /* background@2x~iphone.png */,
 				CDFEBB62130A498600A14307 /* background~iphone.png */,
-				CDFEBB63130A498600A14307 /* Default@2x~iphone.png */,
-				CDFEBB64130A498600A14307 /* Default~iphone.png */,
+				CD6229791326CCFC003AB721 /* Default@2x~iphone.png */,
+				CD6229591326C331003AB721 /* Default~iphone.png */,
 				CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */,
 			);
 			path = iPhone;
@@ -189,9 +193,9 @@
 		CDFEBB6D130A498C00A14307 /* iPad */ = {
 			isa = PBXGroup;
 			children = (
-				CDFEC2E51317514B00A14307 /* background~ipad.png */,
+				CD6229261326B91D003AB721 /* Default~ipad.png */,
+				CD62293C1326BCBC003AB721 /* background~ipad.png */,
 				CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */,
-				CDFEBB6F130A498C00A14307 /* Default~iPad.png */,
 				CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */,
 			);
 			path = iPad;
@@ -214,10 +218,10 @@
 			children = (
 				28C286DF0D94DF7D0034E888 /* RootViewController.h */,
 				28C286E00D94DF7D0034E888 /* RootViewController.m */,
-				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
-				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
 				CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */,
 				CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */,
+				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
+				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -257,6 +261,14 @@
 				CDFEC0FB13147A6A00A14307 /* AudioController.m */,
 			);
 			name = Audio;
+			sourceTree = "<group>";
+		};
+		CDFEC57E1320608F00A14307 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEC56F1320608400A14307 /* YAJLiOS.framework */,
+			);
+			name = Other;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -314,15 +326,15 @@
 				CDFEBB67130A498600A14307 /* iOS-logo-114x114.png in Resources */,
 				CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */,
 				CDFEBB69130A498600A14307 /* background~iphone.png in Resources */,
-				CDFEBB6A130A498600A14307 /* Default@2x~iphone.png in Resources */,
-				CDFEBB6B130A498600A14307 /* Default~iphone.png in Resources */,
 				CDFEBB6C130A498600A14307 /* MainWindow-iPhone.xib in Resources */,
 				CDFEBB71130A498C00A14307 /* iOS-logo-72x72.png in Resources */,
-				CDFEBB72130A498C00A14307 /* Default~iPad.png in Resources */,
 				CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */,
 				CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */,
-				CDFEC2E61317514B00A14307 /* background~ipad.png in Resources */,
 				CDFEC3F8131F1BB200A14307 /* AppBrowserViewController.xib in Resources */,
+				CD6229271326B91D003AB721 /* Default~ipad.png in Resources */,
+				CD62293D1326BCBC003AB721 /* background~ipad.png in Resources */,
+				CD62295A1326C331003AB721 /* Default~iphone.png in Resources */,
+				CD62297A1326CCFC003AB721 /* Default@2x~iphone.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,11 +371,16 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayController_v2_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayController_v2-Info.plist";
+				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = TrickplayController_v2;
 			};
 			name = Debug;
@@ -373,9 +390,14 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TrickplayController_v2_Prefix.pch;
 				INFOPLIST_FILE = "TrickplayController_v2-Info.plist";
+				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = TrickplayController_v2;
 				VALIDATE_PRODUCT = YES;
 			};

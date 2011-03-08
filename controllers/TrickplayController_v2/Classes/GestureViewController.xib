@@ -12,7 +12,7 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="1"/>
+			<integer value="4"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -57,7 +57,7 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">background~iPad.png</string>
+							<string key="NSResourceName">background~ipad.png</string>
 						</object>
 					</object>
 					<object class="IBUIActivityIndicatorView" id="628114805">
@@ -73,7 +73,7 @@
 					<object class="IBUITextField" id="639084555">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">-2147483347</int>
-						<string key="NSFrame">{{33, 215}, {254, 31}}</string>
+						<string key="NSFrame">{{33, 189}, {254, 31}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
@@ -183,8 +183,8 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="628114805"/>
-							<reference ref="564022326"/>
 							<reference ref="639084555"/>
+							<reference ref="564022326"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -243,7 +243,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSAffineTransform">
-						<bytes key="NSTransformStruct">P4AAAL+AAABCBAAAw1MAAA</bytes>
+						<bytes key="NSTransformStruct">P4AAAL+AAABCBAAAw10AAA</bytes>
 					</object>
 				</object>
 			</object>
@@ -456,6 +456,13 @@
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
+					<string key="className">NSObject</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBFrameworkSource</string>
+						<string key="minorKey">YAJLiOS.framework/Headers/NSObject+YAJL.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
 					<string key="className">UIActivityIndicatorView</string>
 					<string key="superclassName">UIView</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
@@ -579,8 +586,8 @@
 		<string key="IBDocument.LastKnownRelativeProjectPath">../TrickplayController_v2.xcodeproj</string>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
-			<string key="NS.key.0">background~iPad.png</string>
-			<string key="NS.object.0">{640, 870}</string>
+			<string key="NS.key.0">background~ipad.png</string>
+			<string key="NS.object.0">{768, 979}</string>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">132</string>
 	</data>

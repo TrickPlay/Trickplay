@@ -69,22 +69,24 @@ CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 @property (nonatomic, retain) IBOutlet UITextField *theTextField;
-@property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
+@property (retain) IBOutlet UIImageView *backgroundView;
 
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
 @property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
 
 
-- (void) setupService:(NSInteger)port
-             hostname:(NSString *)hostName
-             thetitle:(NSString *)name;
+- (void)setupService:(NSInteger)port
+            hostname:(NSString *)hostName
+            thetitle:(NSString *)name;
 
-- (void) startService;
+- (BOOL)startService;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
 
 - (IBAction)hideTextBox:(id)sender;
 
 - (void)clearUI;
+
+- (void)clean;
 
 - (void)exitTrickplayApp:(id)sender;
 

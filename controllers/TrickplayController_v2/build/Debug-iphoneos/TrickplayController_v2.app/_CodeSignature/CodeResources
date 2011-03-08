@@ -6,39 +6,31 @@
 	<dict>
 		<key>AppBrowserViewController.nib</key>
 		<data>
-		pIgqx9vPdC9gR1isrSBLOsvQd7s=
+		kJp4J2bKmVa3neGtmDJ2Zigj0JE=
 		</data>
 		<key>Default@2x~iphone.png</key>
 		<data>
-		TSV1sblGzwdaBq5wyl2GGf5/b2c=
+		EEzk5MDJGXwYVBbY2HUNuqv2LdY=
 		</data>
-		<key>Default~iPad.png</key>
+		<key>Default~ipad.png</key>
 		<data>
-		cpP5AKqVMW9xAQVh1t5b2pItc/M=
+		wjbHbyk2hzc3Q4GzvB9c44R+cig=
 		</data>
 		<key>Default~iphone.png</key>
 		<data>
-		Of2pxLt7s/Bd8YsKCK9bHWiSMXU=
-		</data>
-		<key>GestureViewController-iPad.nib</key>
-		<data>
-		ihO16xyu1Lq9+h8aYv2yIxOsVuY=
+		GyvsHbdNwtEkckYYqknYEtJa2xM=
 		</data>
 		<key>GestureViewController.nib</key>
 		<data>
-		kCRCzxzgak9jOTYJaNHAH63s4kE=
+		PQKR4HAvPjvAdPofAFd88mWSyB8=
 		</data>
 		<key>MainWindow-iPad.nib</key>
 		<data>
-		xoxx/Ma2Ty3DJOXyZd1LccIVIfA=
+		I/h99jLsU2q6jQ8jCaOMpF1Eh/o=
 		</data>
 		<key>MainWindow-iPhone.nib</key>
 		<data>
-		8LcNuscNYmqdGR2YQNpwhwDwUdQ=
-		</data>
-		<key>MainWindow.nib</key>
-		<data>
-		thiGZ4vdy++E71pR4msargs7rJ8=
+		jlmZaWHil5D3+fpV8pJVhpCFOE8=
 		</data>
 		<key>PkgInfo</key>
 		<data>
@@ -46,7 +38,7 @@
 		</data>
 		<key>RootViewController.nib</key>
 		<data>
-		nU0eHnvBrKQPQaFNeOIk9JV/zbc=
+		EytijiM2oPHnruJ/o51nFWEtV+M=
 		</data>
 		<key>background.png</key>
 		<data>
@@ -56,7 +48,7 @@
 		<data>
 		N4AVWdlmSbULbgxF/xDCNPEz/5E=
 		</data>
-		<key>background~iPad.png</key>
+		<key>background~ipad.png</key>
 		<data>
 		N4AVWdlmSbULbgxF/xDCNPEz/5E=
 		</data>
