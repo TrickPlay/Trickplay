@@ -17,7 +17,7 @@ ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext * context, const Str
 {
     avahi_set_allocator( avahi_glib_allocator() );
 
-    poll = avahi_glib_poll_new( NULL, G_PRIORITY_DEFAULT );
+    poll = avahi_glib_poll_new( NULL, TRICKPLAY_PRIORITY );
     g_assert( poll );
 
     AvahiServerConfig config;

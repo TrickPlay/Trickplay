@@ -43,3 +43,50 @@ String Util::make_v4_uuid()
 {
     return make_uuid( UUID_MAKE_V4 );
 }
+
+//-----------------------------------------------------------------------------
+
+static Debug_OFF al( "ACTION" );
+
+Action::Action( int _interval )
+:
+    interval( _interval )
+{
+}
+
+Action::~Action()
+{
+    al( "DESTROYING ACTION %p" , this );
+}
+
+void Action::post( Action * action )
+{
+    g_assert( action );
+
+    if ( action->interval < 0 )
+    {
+        al( "POSTING IDLE ACTION %p" , action );
+
+        g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
+    }
+    else
+    {
+        al( "POSTING TIMEOUT ACTION %p EVERY %d s" , action , action->interval );
+
+        g_timeout_add_full( TRICKPLAY_PRIORITY , guint( action->interval ) , ( GSourceFunc ) run_internal , action , ( GDestroyNotify ) destroy );
+    }
+}
+
+void Action::destroy( Action * action )
+{
+    g_assert( action );
+
+    delete action;
+}
+
+gboolean Action::run_internal( Action * action )
+{
+    al( "RUNNING ACTION %p" , action );
+
+    return action->run() ? TRUE : FALSE;
+}

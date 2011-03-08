@@ -8,6 +8,7 @@
 #include "network.h"
 #include "util.h"
 #include "app.h"
+#include "context.h"
 
 //****************************************************************************
 // Internal structure to hold all the things we care about while we are
@@ -342,6 +343,26 @@ Network::Request::Request( const String & _user_agent, const String & _url )
 {
 }
 
+void Network::Request::set_headers( const gchar * _headers )
+{
+    g_assert( _headers );
+
+    StringVector lines( split_string( _headers , "\n" ) );
+
+    for( StringVector::const_iterator it = lines.begin(); it != lines.end(); ++it )
+    {
+        StringVector parts( split_string( *it , ": " , 2 ) );
+
+        if ( parts.size() == 2 )
+        {
+            if ( ! parts[ 0 ].empty() && ! parts[ 1 ].empty() )
+            {
+                headers[ parts[ 0 ] ] = parts[ 1 ];
+            }
+        }
+    }
+}
+
 //*****************************************************************************
 // Response
 
@@ -382,7 +403,7 @@ const Network::Response & Network::Response::operator =( const Network::Response
     return * this;
 }
 
-const char * Network::Response::get_header( const String & name )
+const char * Network::Response::get_header( const String & name ) const
 {
     StringMultiMap::const_iterator it = headers.find( name );
 
@@ -397,6 +418,18 @@ void Network::Response::replace_body( gpointer data , gsize size )
 
     g_byte_array_append( body , ( const guint8 * ) data , size );
 }
+
+//*****************************************************************************
+// Settings
+
+Network::Settings::Settings( TPContext * context )
+:
+    debug( context->get_bool( TP_NETWORK_DEBUG, false ) ),
+    ssl_verify_peer( context->get_bool( TP_SSL_VERIFY_PEER, true ) ),
+    ssl_cert_bundle( context->get( TP_SSL_CA_CERT_FILE, "" ) )
+{
+}
+
 
 //*****************************************************************************
 
@@ -414,7 +447,7 @@ public:
 
         IncrementalResponseClosure * self = new IncrementalResponseClosure( closure , chunk , size );
 
-        closure->event_group->add_idle( G_PRIORITY_DEFAULT_IDLE , response_callback , self , destroy );
+        closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback , self , destroy );
     }
 
 private:
@@ -507,7 +540,7 @@ public:
     static void request_finished( RequestClosure * closure )
     {
         g_assert( closure->event_group );
-        closure->event_group->add_idle( G_PRIORITY_DEFAULT_IDLE, response_callback, closure, request_closure_destroy );
+        closure->event_group->add_idle( TRICKPLAY_PRIORITY , response_callback, closure, request_closure_destroy );
     }
 
     //.........................................................................
@@ -584,7 +617,7 @@ public:
 
         if ( left )
         {
-            memcpy( ptr, closure->request.body.c_str(), left );
+            memcpy( ptr, closure->request.body.c_str() + closure->put_offset , left );
 
             closure->put_offset += left;
         }
