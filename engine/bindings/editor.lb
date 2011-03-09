@@ -1,10 +1,12 @@
 [[
+#include <gio/gio.h>
+
 #include "common.h"
 #include "util.h"
 #include "app.h"
 #include "context.h"
 #include "actions.h"
-#include <gio/gio.h>
+#include <cstdio>
 ]]
 
 restricted global editor [[ void * ]]
@@ -43,39 +45,39 @@ restricted global editor [[ void * ]]
         ]];
 
 
-     writefile(string file_name, string contents, bool overwrite=true)
+     bool writefile(string file_name, lstring contents, bool overwrite=true)
         [[
             bool is_uri=false;
             char * path=App::get(L)->normalize_path(file_name,&is_uri);
-            gchar * old_contents = NULL;
-            gsize old_length = 0;
 
-            FreeLater free_later(path);
+            result = false;              
 
             if ( path && ! is_uri )
             {
-                gsize length = strlen(contents);
-                if( overwrite == false && g_file_get_contents( path, & old_contents, & old_length, NULL ) )
+                const char *mode;
+
+                if( overwrite )
                 {
-                    length += old_length;
-                    if (old_length != 0)
-                    {
-                        gchar new_contents[length];
-                        g_strlcpy(new_contents, old_contents, old_length+1);
-                        g_strlcat(new_contents, contents, length+1);
-                        g_file_set_contents(path, new_contents, length, NULL);
-                    }
-                    else
-                    {
-                        g_file_set_contents(path, contents, length, NULL);
-                    }
+                    mode = "w";
                 }
                 else
                 {
-                    g_file_set_contents(path, contents, length, NULL);
-                    length += old_length;
+                    mode = "a";
+                }
+
+                FILE *fp;
+
+                if( ( fp = fopen( path , mode ) ) )
+                {
+                    if( contents_len == fwrite( contents , sizeof( char ) , contents_len , fp ) )
+                    {
+                        result = true;
+                    }
+                    fclose( fp );
                 }
             }
+
+            g_free( path );
         ]];
 
      bool change_app_path( string path )
@@ -128,12 +130,14 @@ restricted global editor [[ void * ]]
              result = f;
          ]];
 
-/* g_file_copy() test */
+     bool file_copy(string src_file_name, string dest_file_name)
+         [[
+             GFile * source = g_file_new_for_path( src_file_name );
+             GFile * dest = g_file_new_for_path(dest_file_name);
+             result = g_file_copy ( source , dest , G_FILE_COPY_NONE, NULL, NULL, NULL, NULL);
+             g_object_unref( source );
+             g_object_unref( dest );
+         ]];
 
-    bool file_copy(string src_file_name, string dest_file_name)
-	[[
-		result = g_file_copy ( g_file_new_for_path(src_file_name), 
-		g_file_new_for_path(dest_file_name), G_FILE_COPY_NONE, NULL, NULL, NULL, NULL);
-	]];
 }
 

@@ -156,6 +156,8 @@ private:
     void handle_http_get( gpointer connection, const gchar * line );
     void handle_http_line( gpointer connection, ConnectionInfo & info, const gchar * line );
 
+    String handle_http_api( gpointer connection , const String & url );
+
     // The key is a hash we generate, the first string is the real path
     // and the second string is the group.
 

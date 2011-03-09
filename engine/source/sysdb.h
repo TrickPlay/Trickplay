@@ -113,6 +113,8 @@ public:
 
     std::list<int> get_profiles_for_app( const String & app_id );
 
+    bool is_app_in_current_profile( const String & app_id );
+
     //.....................................................................
     // App actions
 

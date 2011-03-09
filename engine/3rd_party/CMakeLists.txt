@@ -57,3 +57,8 @@ list( APPEND 3RD_PARTY_SOURCE_FILES
 	${BOX2D_SOURCE}/Dynamics/Joints/b2RevoluteJoint.cpp
 	${BOX2D_SOURCE}/Dynamics/Joints/b2WeldJoint.cpp
 )
+
+# Inhibit warnings from 3rd party code. We may want to turn this off
+# when we update code from a 3rd party.
+
+set_source_files_properties( ${3RD_PARTY_SOURCE_FILES} COMPILE_FLAGS "-w" )
