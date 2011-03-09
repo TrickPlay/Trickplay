@@ -613,7 +613,7 @@ function make_attr_t(v)
              {"volume", v.volume, "Volume"},
              {"loop", v.loop, "Loop"},
              {"button", "view code", "View code"},
-             {"button", "apply", "Apply"},
+             {"button", "apply", "OK"},
              {"button", "cancel", "Cancel"},
       }
       return attr_t 
@@ -644,7 +644,7 @@ function make_attr_t(v)
  
    table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
    table.insert(attr_t, {"button", "view code", "View code"})
-   table.insert(attr_t, {"button", "apply", "Apply"})
+   table.insert(attr_t, {"button", "apply", "OK"})
    table.insert(attr_t, {"button", "cancel", "Cancel"})
    
    return attr_t

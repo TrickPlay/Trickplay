@@ -84,7 +84,6 @@ function inspector_apply (v, inspector)
               elseif(v[j.name] ~= nil)then 
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
                             v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-			    print(j.name, " is number")
                      else 
                             v[j.name] = item_group:find_child(j.name):find_child("input_text").text
 			    if v[j.name] == "true" or v[j.name] == "false" then
