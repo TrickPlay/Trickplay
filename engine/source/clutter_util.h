@@ -30,6 +30,10 @@ namespace ClutterUtil
 
     void to_clutter_color( lua_State * L, int index, ClutterColor * color );
 
+    // Converts a string to a color
+
+    ClutterColor string_to_color( const char * s );
+
     // Converts animation modes
 
     gulong to_clutter_animation_mode( const char * mode );
@@ -59,6 +63,12 @@ namespace ClutterUtil
     void inject_key_down( guint key_code, gunichar unicode );
 
     void inject_key_up( guint key_code, gunichar unicode );
+
+    void inject_motion( gfloat x , gfloat y );
+
+    void inject_button_press( guint32 button , gfloat x , gfloat y );
+
+    void inject_button_release( guint32 button , gfloat x , gfloat y );
 
     // Convert stage coordinates into screen coordinates -- adjusts x,y in place
     void stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y );

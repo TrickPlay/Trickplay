@@ -53,8 +53,8 @@ typedef struct TPController TPController;
     TP_CONTROLLER_HAS_ACCELEROMETER   - The controller is capable of sending
                                         accelerometer events.
                                         
-    TP_CONTROLLER_HAS_CLICKS          - The controler can send clicks with x and
-                                        y coordinates.
+    TP_CONTROLLER_HAS_POINTER         - The controller has a pointer (mouse-like input).
+
                                         
     TP_CONTROLLER_HAS_TOUCHES         - The controller supports touches, or swipes
                                         and can send their x and y coordinates.
@@ -78,7 +78,7 @@ typedef struct TPController TPController;
 
 #define TP_CONTROLLER_HAS_KEYS                      0x0001
 #define TP_CONTROLLER_HAS_ACCELEROMETER             0x0002
-#define TP_CONTROLLER_HAS_CLICKS                    0x0004
+#define TP_CONTROLLER_HAS_POINTER                   0x0004
 #define TP_CONTROLLER_HAS_TOUCHES                   0x0008
 #define TP_CONTROLLER_HAS_MULTIPLE_CHOICE           0x0010
 #define TP_CONTROLLER_HAS_SOUND                     0x0020
@@ -235,7 +235,7 @@ struct TPControllerSpec
     Constant: TP_CONTROLLER_COMMAND_RESET
     
     When this command is sent to a controller, it should stop the accelerometer, stop sending
-    clicks and touches, stop playing any sounds and clear the user interface, if any, removing
+    pointer events and touches, stop playing any sounds and clear the user interface, if any, removing
     backgrounds and images. The controller can continue to send key events.
     
     Parameters:
@@ -275,32 +275,32 @@ struct TPControllerSpec
 #define TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER    6
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_START_CLICKS
-    
-    The controller should start sending click events using <tp_controller_click>.
-    This command is only sent when the controller includes
-    TP_CONTROLLER_HAS_CLICKS in its capabilities.
-    
+    Constant: TP_CONTROLLER_COMMAND_START_POINTER
+
+    The controller should start sending pointer events. This command is only
+    sent when the controller includes TP_CONTROLLER_HAS_POINTER in its
+    capabilities.
+
     Parameters:
-    
+
         None
 */
 
-#define TP_CONTROLLER_COMMAND_START_CLICKS          7
+#define TP_CONTROLLER_COMMAND_START_POINTER         7
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_STOP_CLICKS
-    
-    The controller should stop sending click events.
-    This command is only sent when the controller includes
-    TP_CONTROLLER_HAS_CLICKS in its capabilities.
-    
+    Constant: TP_CONTROLLER_COMMAND_STOP_POINTER
+
+    The controller should stop sending pointer events. This command is only
+    sent when the controller includes TP_CONTROLLER_HAS_POINTER in its
+    capabilities.
+
     Parameters:
-    
+
         None
 */
 
-#define TP_CONTROLLER_COMMAND_STOP_CLICKS           8
+#define TP_CONTROLLER_COMMAND_STOP_POINTER          8
 
 /*
     Constant: TP_CONTROLLER_COMMAND_START_TOUCHES
@@ -851,22 +851,68 @@ struct TPControllerPlaySound
         double z);
 
 /*
-    Callback: tp_controller_click
+    Callback: tp_controller_pointer_move
+
+    Report a pointer motion event.
+
+    Arguments:
+
+        controller -    The controller returned by <tp_context_add_controller>.
+
+        x,y -           The coordinates of the event, in pixels, relative to the display size.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_pointer_move(
+
+        TPController * controller,
+        int x,
+        int y);
+
+/*
+    Callback: tp_controller_pointer_button_down
+
+    Report a pointer button down event.
+
+    Arguments:
+
+        controller -    The controller returned by <tp_context_add_controller>.
+
+        button -        The button number, where 1 is the first button.
+
+        x,y -           The coordinates of the event, in pixels, relative to the display size.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_pointer_button_down(
+
+        TPController * controller,
+        int button,
+        int x,
+        int y);
+
+/*
+    Callback: tp_controller_pointer_button_up
     
-    Report a click event.
+    Report a pointer button up event.
     
     Arguments:
     
         controller -    The controller returned by <tp_context_add_controller>.
         
-        x,y -           The coordinates of the click, in pixels.    
+        button -        The button number, where 1 is the first button.
+
+        x,y -           The coordinates of the event, in pixels, relative to the display size.
 */
 
     TP_API_EXPORT
     void
-    tp_controller_click(
+    tp_controller_pointer_button_up(
                              
         TPController * controller,
+        int button,
         int x,
         int y);
     
@@ -879,6 +925,8 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
+        finger -        The finger number, starting with 1.
+
         x,y -           The coordinates of the event, in pixels.    
 */
 
@@ -887,6 +935,7 @@ struct TPControllerPlaySound
     tp_controller_touch_down(
                                   
         TPController * controller,
+        int finger,
         int x,
         int y);
 
@@ -899,6 +948,8 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
+        finger -        The finger number, starting with 1.
+
         x,y -           The coordinates of the event, in pixels.
 */
 
@@ -907,6 +958,7 @@ struct TPControllerPlaySound
     tp_controller_touch_move(
                                   
         TPController * controller,
+        int finger,
         int x,
         int y);
     
@@ -919,6 +971,8 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
+        finger -        The finger number, starting with 1.
+
         x,y -           The coordinates of the event, in pixels.
 */
 
@@ -927,6 +981,7 @@ struct TPControllerPlaySound
     tp_controller_touch_up(
                                 
         TPController * controller,
+        int finger,
         int x,
         int y);
     
@@ -951,6 +1006,84 @@ struct TPControllerPlaySound
             
         TPController * controller,
         const char * parameters);
+
+/*-----------------------------------------------------------------------------*/
+/*
+    Section: Controller Event Queries
+
+    These functions let you know whether a controller wants certain types of events.
+    They are a convenience; so you don't have to keep track of the related start
+    and stop commands.
+
+    For example, a controller will want accelerometer events only if a) it has
+    TP_CONTROLLER_HAS_ACCELEROMETER in its capabilities and b) the result of
+    execute_command with TP_CONTROLLER_COMMAND_START_ACCELEROMETER was zero (success).
+
+    You don't have to check these functions when you invoke the related event
+    callbacks; they are checked automatically for you. For example, if you call
+    tp_controller_accelerometer, and the controller does not want accelerometer
+    events, the call is ignored.
+*/
+
+/*
+    Function: tp_controller_wants_accelerometer_events
+
+    Arguments:
+
+        controller - The controller returned by <tp_context_add_controller>.
+
+    Returns:
+
+        0 - The controller does not want these events.
+
+        other - The controller wants these events.
+*/
+
+    TP_API_EXPORT
+    int
+    tp_controller_wants_accelerometer_events(
+
+        TPController * controller);
+
+/*
+    Function: tp_controller_wants_pointer_events
+
+    Arguments:
+
+        controller - The controller returned by <tp_context_add_controller>.
+
+    Returns:
+
+        0 - The controller does not want these events.
+
+        other - The controller wants these events.
+*/
+
+    TP_API_EXPORT
+    int
+    tp_controller_wants_pointer_events(
+
+        TPController * controller);
+
+/*
+    Function: tp_controller_wants_touch_events
+
+    Arguments:
+
+        controller - The controller returned by <tp_context_add_controller>.
+
+    Returns:
+
+        0 - The controller does not want these events.
+
+        other - The controller wants these events.
+*/
+
+    TP_API_EXPORT
+    int
+    tp_controller_wants_touch_events(
+
+        TPController * controller);
 
 /*-----------------------------------------------------------------------------*/
 /*

@@ -33,8 +33,8 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    16
-#define TP_PATCH_VERSION    1
+#define TP_MINOR_VERSION    17
+#define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -160,6 +160,12 @@ typedef struct TPContext TPContext;
                             service.
                             Defaults to "TrickPlay".
                             
+    TP_CONTROLLERS_MDNS_ENABLED -   Whether controller discovery via mDNS is enabled.
+                                    Defaults to "TRUE".
+
+    TP_CONTROLLERS_UPNP_ENABLED -   Whether controller discovery via UPnP is enabled.
+                                    Defaults to "FALSE".
+
     TP_LOG_DEBUG -          Whether to log DEBUG messages. Set to "0" to prevent
                             DEBUG messages from being logged.
                             Defaults to "1".
@@ -209,6 +215,27 @@ typedef struct TPContext TPContext;
                                 seed for all apps and the 'math.randomseed' function will
                                 become a no-op.
                                 Defaults to 0.
+
+    TP_PLUGINS_PATH -           Path to root directory of TrickPlay plugins.
+                                Defaults to "plugins" (in the current working directory).
+
+    TP_AUDIO_SAMPLER_ENABLED -  Whether TrickPlay's audio sampling machinery is enabled.
+                                When set to false, the audio sampler API can still be used,
+                                but it won't do anything.
+                                Defaults to "true".
+
+    TP_AUDIO_SAMPLER_MAX_INTERVAL - How many seconds' worth of audio should the sampler accumulate
+                                    before it passes the samples to audio detection plugins.
+                                    Default is 10.
+
+    TP_AUDIO_SAMPLER_MAX_BUFFER_KB - The maximum buffer (in KB) of audio samples that the
+                                     audio sampler keeps.
+                                     Defaults to 5000.
+
+    TP_TOAST_JSON_PATH -        Path to a file containing the JSON definition
+                                for the toast UI.
+                                Default is not set.
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -231,6 +258,8 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_ENABLED          "controllers_enabled"
 #define TP_CONTROLLERS_PORT             "controllers_port"
 #define TP_CONTROLLERS_NAME             "controllers_name"
+#define TP_CONTROLLERS_UPNP_ENABLED     "controllers_upnp_enabled"
+#define TP_CONTROLLERS_MDNS_ENABLED     "controllers_mdns_enabled"
 #define TP_LOG_DEBUG                    "log_debug"
 #define TP_LOG_APP_ONLY                 "log_app_only"
 #define TP_FONTS_PATH                   "fonts_path"
@@ -246,7 +275,11 @@ typedef struct TPContext TPContext;
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
 #define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
 #define TP_RANDOM_SEED                  "random_seed"
-
+#define TP_PLUGINS_PATH                 "plugins_path"
+#define TP_AUDIO_SAMPLER_ENABLED        "audio_sampler_enabled"
+#define TP_AUDIO_SAMPLER_MAX_BUFFER_KB  "audio_sampler_max_buffer_kb"
+#define TP_AUDIO_SAMPLER_MAX_INTERVAL   "audio_sampler_max_interval"
+#define TP_TOAST_JSON_PATH              "toast_json_path"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -289,6 +322,8 @@ typedef struct TPContext TPContext;
     TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD -            The app no longer needs to use the numeric keypad.
     TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS -    The app no longer needs the transport control keys.
     TP_NOTIFICATION_RELEASE_KEYBOARD -                  The app no longer needs the keyboard.
+    TP_NOTIFICATION_RUNNING -                           Trickplay is running and has entered its main loop.
+    TP_NOTIFICATION_EXITING -                           Trickplay has exited its main loop and <tp_context_run> will return soon.
 */
 
 #define TP_NOTIFICATION_APP_LOADING                     "app-loading"
@@ -303,6 +338,9 @@ typedef struct TPContext TPContext;
 #define TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD          "release-numeric-keypad"
 #define TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS  "release-transport-control-keys"
 #define TP_NOTIFICATION_RELEASE_KEYBOARD                "release-keyboard"
+
+#define TP_NOTIFICATION_RUNNING                         "running"
+#define TP_NOTIFICATION_EXITING                         "exiting"
 
 
 /*-----------------------------------------------------------------------------
