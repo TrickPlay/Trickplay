@@ -120,7 +120,7 @@ local function guideline_inspector(v)
         input_box_v.position = {430, 90}
         gw:add(input_box_v)
 
-	save_b, save_t  = factory.make_msgw_button_item( assets , "Apply")
+	save_b, save_t  = factory.make_msgw_button_item( assets , "OK")
         save_b.position = {250, 150}
 	save_b.reactive = true 
 	save_b.name = "apply"
