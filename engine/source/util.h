@@ -7,7 +7,9 @@
 #include "common.h"
 //-----------------------------------------------------------------------------
 
-inline gulong timestamp()
+// Returns ms
+
+inline double timestamp()
 {
     static GTimer * timer = 0;
 
@@ -16,7 +18,7 @@ inline gulong timestamp()
         timer = g_timer_new();
     }
 
-    return gulong( g_timer_elapsed( timer , 0 ) / 1.0e-6 );
+    return g_timer_elapsed( timer , 0 ) * 1000;
 }
 
 //-----------------------------------------------------------------------------
