@@ -16,8 +16,6 @@ S_POPUP        	  = 2
 S_MENU        	  = 3
 S_FOCUS        	  = 4
 
-DEFAULT_COLOR     = {255,255,255,255}
-
 ADD               = 1
 CHG               = 2
 DEL               = 3
@@ -37,6 +35,7 @@ SECTION_SETTING   = 4
 
 -- Style constants
 
+DEFAULT_COLOR     = {255,255,255,255}
 BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
 
 ---------------------
@@ -99,7 +98,7 @@ ui =
             [SECTION_FILE] =
             {
                 button  = assets( "assets/button-red.png" ),
-                text    = Text  { text = strings[ "  FILE " ] }:set( BUTTON_TEXT_STYLE ),
+                text    = Text  { text = strings[ "  File " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 120 ,  21 ,  21 , 230 }, -- RED
                 height  = 340,
                 init    = dofile( "section-file" )
@@ -108,26 +107,26 @@ ui =
             [SECTION_EDIT] =
             {
                 button  = assets( "assets/button-green.png" ),
-                text    = Text  { text = strings[ "  EDIT  " ] }:set( BUTTON_TEXT_STYLE ),
+                text    = Text  { text = strings[ "  Edit  " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 720,
+                height  = 770,
                 init    = dofile( "section-edit" )
             },
 
             [SECTION_ARRANGE] =
             {
                 button  = assets( "assets/button-yellow.png" ),
-                text    = Text  { text = strings[ "  ARRANGE" ] }:set( BUTTON_TEXT_STYLE ),
+                text    = Text  { text = strings[ "  Arrange" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = { 173 , 178 ,  30 , 230 }, -- YELLOW
-                height  = 840,
+                height  = 800,
                 init    = dofile( "section-arrange" )
             },
            [SECTION_SETTING] =
             {
                 button  = assets( "assets/button-blue.png" ),
-                text    = Text  { text = strings[ "  SETTING" ] }:set( BUTTON_TEXT_STYLE ),
+                text    = Text  { text = strings[ "  Settings" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
-                height  = 395,
+                height  = 430,
                 init    = dofile( "section-setting" )
             }
         }
@@ -162,8 +161,9 @@ attr_name_list = {"color", "border_color", "border_width", "color", "border_colo
 widget = dofile("widget.lua")
 
 widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", 
-           "ButtonPicker", "LoadingDots", "LoadingBar", "DropDown", "MenuBar", "3D_List", "ScrollImage", "TabBar", "TimeLine", "OSK" }
-	   --"expander", "dropDownButton"}
+           "ButtonPicker", "LoadingDots", "LoadingBar", "DropDown", "MenuBar", "3D_List", "ScrollImage",} 
+	   -- "TabBar", "TimeLine", "OSK", 
+	   -- "expander", "dropDownButton"}
 skins = {}
 for i, j in pairs(skin_list) do
 	table.insert(skins, i) 

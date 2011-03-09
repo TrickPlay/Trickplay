@@ -190,15 +190,21 @@ local function build_ui( show_it )
 		item:find_child("caption").color = {100,100,100,255} 
 	end 
 
-	local function turn_on(item)
+	local function turn_on(item, option)
 		item.reactive = true	
 		for i, j in pairs(item.children) do 
 		     if (j.reactive) then 
 			j.reactive = true
 		     end 
 		end 
+		if option then 
+			if option == "Hide" then 
+			item:find_child("caption").text = "Timeline "..option.."\t\t".."[J]"
+			else 
+			item:find_child("caption").text = "Timeline "..option.."\t".."[J]"
+			end
+		end 
 		item:find_child("caption").color = {255,255,255,255} 
-		
 	end 
 
 	if (ui.focus == SECTION_EDIT) then 
@@ -225,6 +231,26 @@ local function build_ui( show_it )
 		turn_on(section.dropdown:find_child("group")) 
 		turn_on(section.dropdown:find_child("ungroup")) 
 	     end 	
+
+	     if table.getn(g.children) > 0 then 
+		if screen:find_child("timeline") then 
+		      if screen:find_child("timeline").extra.show ~= true  then 
+		           turn_on(section.dropdown:find_child("tline"), "Show") 
+		      else 
+		     	   turn_on(section.dropdown:find_child("tline"), "Hide") 
+		      end 
+		else 
+		     turn_on(section.dropdown:find_child("tline")) 
+		end 
+	     else 
+		if screen:find_child("timeline") then 
+		     screen:remove(screen:find_child("timeline"))
+		end 
+		if screen:find_child("tline") then 
+		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		end 
+		turn_off(section.dropdown:find_child("tline")) 
+	     end 
 	elseif (ui.focus == SECTION_ARRANGE) then 
 	     if table.getn(selected_objs) == 0 then 
 		turn_off(section.dropdown:find_child("left"))
@@ -420,6 +446,24 @@ local function build_ui( show_it )
         [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
         [ keys.v	] = function() animate_out_dropdown() editor.v_guideline() input_mode = S_SELECT end,
         [ keys.h	] = function() animate_out_dropdown() editor.h_guideline() input_mode = S_SELECT end,
+        [ keys.j	] = function() animate_out_dropdown() if not screen:find_child("timeline") then 
+							         if table.getn(g.children) > 0 then
+								     input_mode = S_SELECT local tl = widget.timeline() screen:add(tl)
+							             screen:find_child("timeline").extra.show = true 
+							         end
+						 	      elseif table.getn(g.children) == 0 then 
+		      						    screen:remove(screen:find_child("timeline"))
+		                                                    if screen:find_child("tline") then 
+		                                                         screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		                                                    end 
+							      elseif screen:find_child("timeline").extra.show ~= true  then 
+								   screen:find_child("timeline"):show()
+								   screen:find_child("timeline").extra.show = true
+						 	      else 
+								   screen:find_child("timeline"):hide()
+								   screen:find_child("timeline").extra.show = false
+							      end
+							      end,
         --[ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.export() input_mode = S_SELECT end,
         [ keys.w	] = function() animate_out_dropdown() editor.widgets() input_mode = S_SELECT end,
@@ -566,10 +610,10 @@ local function build_ui( show_it )
     local button_map =
     {
 
-        ["  FILE "]   = function() move_focus(SECTION_FILE) end,
-        ["  EDIT  "]  = function() move_focus(SECTION_EDIT) end,
-        ["  ARRANGE"] = function() move_focus(SECTION_ARRANGE) end, 
-        ["  SETTING"]    = function() move_focus(SECTION_SETTING ) end
+        ["  File "]   = function() move_focus(SECTION_FILE) end,
+        ["  Edit  "]  = function() move_focus(SECTION_EDIT) end,
+        ["  Arrange"] = function() move_focus(SECTION_ARRANGE) end, 
+        ["  Settings"]    = function() move_focus(SECTION_SETTING ) end
     }
 
     local menu_button_second_down = false
@@ -684,6 +728,16 @@ local function build_ui( show_it )
      end
 
      function screen:on_button_up(x,y,button,clicks_count)
+	   if dragging then
+	       local actor = unpack(dragging)
+	       if actor.parent then 	
+		   if actor.parent.name == "timeline" then 
+			local actor, dx , dy, pointer_up_f = unpack( dragging )
+			pointer_up_f(x,y,button,clicks_count) 
+			return true
+		   end 
+	       end 
+          end 	
 	  dragging = nil
           if (mouse_state == BUTTON_DOWN) then
               if (input_mode == S_RECTANGLE) then 
@@ -726,6 +780,27 @@ local function build_ui( show_it )
 	       end 
 		
                local actor, dx , dy = unpack( dragging )
+
+	       local tl = actor.parent          
+	       if tl then 
+	         if tl.name == "timeline" then 
+			local timepoint, last_point, new_x	
+			
+			timepoint = tonumber(actor.name:sub(8, -1))
+			for j,k in orderedPairs (screen:find_child("timeline").points) do
+	     		   last_point = j
+			end 
+			new_x = x - dx 
+			if timepoint == last_point then 
+			     if new_x > 1860 then 
+				 new_x = 1860
+			     end 
+			end
+			screen:find_child("text"..tostring(timepoint)).x = new_x - 120 
+			actor.x = new_x 
+		        return true 
+		 end 
+	       end
 
 	       if (guideline_type(actor.name) == "v_guideline") then 
 	            actor.x = x - dx

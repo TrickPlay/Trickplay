@@ -56,6 +56,12 @@ function inspector_apply (v, inspector)
 	      color_t[rgba_map[string.sub(name,-1, -1)]] = tonumber(item_group:find_child(name):find_child("input_text").text)
 	      v[attr_name] = color_t
 	      end,
+       ["hor_arrow_y"] = function()
+	       v.hor_arrow_y = tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text)
+		end, 
+       ["vert_arrow_x"] = function()
+	       v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
+		end,
       }       
 
       if is_this_widget(v) == true  then
@@ -69,16 +75,21 @@ function inspector_apply (v, inspector)
 
 
       for i, j in pairs(item_group.children) do 
+	  
 	   if j.name then
 	      if j.name == "editable" then 
                      v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
               elseif (attr_map[j.name]) then
                      attr_map[j.name]()
-              elseif(v[j.name])then 
+              elseif(v[j.name] ~= nil)then 
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
                             v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+			    print(j.name, " is number")
                      else 
                             v[j.name] = item_group:find_child(j.name):find_child("input_text").text
+			    if v[j.name] == "true" or v[j.name] == "false" then
+				v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
+			    end 
                      end
 	      elseif string.find(j.name,"color") then
 		     attr_map["color"](j.name)

@@ -4,6 +4,61 @@
 
 local factory = ui.factory
 
+
+
+function table_removekey(table, key)
+	local element = table[key]
+	table[key] = nil
+	return element
+end
+
+
+function __genOrderedIndex( t )
+    local orderedIndex = {}
+    for key in pairs(t) do
+        table.insert( orderedIndex, key )
+    end
+    table.sort( orderedIndex )
+    return orderedIndex
+end
+
+local function orderedNext(t, state)
+    -- Equivalent of the next function, but returns the keys in the alphabetic
+    -- order. We use a temporary ordered key table that is stored in the
+    -- table being iterated.
+
+    --print("orderedNext: state = "..tostring(state) )
+    if state == nil then
+        -- the first time, generate the index
+        t.__orderedIndex = __genOrderedIndex( t )
+        key = t.__orderedIndex[1]
+        return key, t[key]
+    end
+    -- fetch the next value
+    key = nil
+    for i = 1,table.getn(t.__orderedIndex) do
+        if t.__orderedIndex[i] == state then
+            key = t.__orderedIndex[i+1]
+        end
+    end
+
+    if key then
+        return key, t[key]
+    end
+
+    -- no more value to return, cleanup
+    t.__orderedIndex = nil
+    return
+end
+
+function orderedPairs(t)
+    -- Equivalent of the pairs() function on tables. Allows to iterate
+    -- in order
+    return orderedNext, t, nil
+end
+
+
+
 function is_available(new_name)
     if(g:find_child(new_name) ~= nil) then 
 	return false 
@@ -212,17 +267,6 @@ function create_on_button_down_f(v)
 
             end
 	
---[[
- 	   elseif (input_mode == S_FOCUS) then 
-		print("YUGI cccccccccccc")
-		if (v.name ~= "inspector") then 
-		print("YUGI dddddd")
-		     editor.selected(v)
-		     screen:find_child("text"..focus_type).text = v.name 
-		end 
-		input_mode = S_FOCUS
-           	return true
-]]
 	   elseif( input_mode ~= S_RECTANGLE) then  
                 dragging = {v, x - v.x, y - v.y }
            	return true
@@ -516,6 +560,12 @@ function make_attr_t(v)
        ["RadioButton"] = function() return {"skin","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space","scale","x_rotation","anchor_point","reactive", "focus"} end,
        ["LoadingDots"] = function() return {"skin","dot_color","dot_radius","num_dots","anim_radius","anim_duration","clone_src","scale","x_rotation","anchor_point"} end,
        ["LoadingBar"] = function() return {"shell_upper_color","shell_lower_color","stroke_color","fill_upper_color","fill_lower_color", "scale","x_rotation","anchor_point"} end,
+       ["3D_List"] = function() return {"skin","num_rows", "num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible","scale","x_rotation","anchor_point"} end,
+       --["ScrollImage"] = function() return {"skin","color","clip_w","clip_h","border_w","content_h","content_w","arrow_clone_source","arrow_sz","arrows_in_box","arrows_centered","hor_arrow_y","vert_arrow_x"
+       ["ScrollImage"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point"} end,
+       ["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point"} end,
+       --["DropDown"] = function() return {"skin", "font","items"
+       ["DropDown"] = function() return {"skin", "font", "item_spacing", "item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up",} end,
    }
   
   if is_this_widget(v) == true  then
@@ -529,7 +579,7 @@ function make_attr_t(v)
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
       }
-       if (v.extra.type ~= "LoadingDots") then 
+       if (v.extra.type ~= "LoadingDots" and v.extra.type ~= "3D_List" and v.extra.type ~= "ScrollImage" and v.extra.type ~= "MenuBar" and v.extra.type ~= "DropDown") then 
              table.insert(attr_t, {"wwidth", math.floor(v.wwidth), "W"})
              table.insert(attr_t, {"wheight", math.floor(v.wheight), "H"})
        end
@@ -585,6 +635,8 @@ function make_attr_t(v)
              attr_map["size"](j)
 	elseif string.find(j,"pos") then
              attr_map["pos"](j)
+	elseif j == "hor_arrow_y"or j == "vert_arrow_x" then 
+             table.insert(attr_t, {j, "nil", stringTotitle(j)})
 	else
 	     print("make_attr_t() : ", j, " 처리해 주세용 ~")
 	end 
@@ -607,9 +659,9 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible",}
+    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive"}
 
-    local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children"}
+    local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
     local group_list = {"name", "position", "scale", "anchor_point", "x_rotation", "y_rotation", "z_rotation", "opacity"}
 
@@ -806,7 +858,7 @@ function itemTostring(v, d_list, t_list)
     if v.extra.timeline then 
 	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 
 	    for m,n in pairs (v.extra.timeline) do 
-	         itm_str = itm_str.."[\""..m.."\"] = { \n"
+	         itm_str = itm_str.."["..m.."] = { \n"
 	         for q,r in pairs (n) do
 	             itm_str = itm_str.."[\""..q.."\"] = "
 		     if type(r) == "table" then 
@@ -816,7 +868,7 @@ function itemTostring(v, d_list, t_list)
 		          end 
 		          itm_str = itm_str.."},"
 		     else 
-		          itm_str = itm_str..r.."," 
+		          itm_str = itm_str..tostring(r).."," 
 		     end
 	         end
 	         itm_str = itm_str.."},\n"
@@ -1010,7 +1062,8 @@ function printMsgWindow(txt, name)
          msgw_cur_x = msgw_cur_x + string.len(txt) * 20
 	 
      	 for i, j in pairs (projects) do  
-	     local prj_text = Text {text = j, color = {255,255,255,255}, font= "DejaVu Sans 32px", color = "FFFFFF"}
+	     --local prj_text = Text {text = j, color = {255,255,255,255}, font= "DejaVu Sans 32px", color = "FFFFFF"}
+	     local prj_text = Text {text = j, color = DEFAULT_COLOR, font= "DejaVu Sans 32px", color = "FFFFFF"}
 	     prj_text.reactive = true
 	     prj_text.position = {msgw_cur_x, msgw_cur_y+10}
 	     prj_text.extra.index = i 
@@ -1569,21 +1622,34 @@ function inputMsgWindow_openimage(input_purpose, input_text)
           create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, ADD, ui.image})
           g:add(ui.image)
-
 	  
-	  if screen:find_child("timeline") then 
-		ui.image.extra.timeline = {}
-		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
-		     ui.image.extra.timeline ["pointer"..tostring(i)] = {}
-		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-		     for l,k in pairs (attr_map["Rectangle"]()) do
-		           ui.image.extra.timeline["pointer"..tostring(i)][k] = ui.image[k]
-		     end   
-		     if cur_focus_n > i or ( screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
-			   ui.image.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+	  local timeline = screen:find_child("timeline")
+  	  if timeline then 
+	     ui.image.extra.timeline = {}
+             ui.image.extra.timeline[0] = {}
+	     local prev_point = 0
+	     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+	     for l,k in pairs (attr_map["Image"]()) do 
+	          ui.image.extra.timeline[0][k] = ui.image[k]
+	     end
+ 	     if cur_focus_n ~= 0 then 
+                 ui.image.extra.timeline[0]["hide"] = true  
+	     end 
+	     for i, j in orderedPairs(timeline.points) do 
+	        if not ui.image.extra.timeline[i] then 
+	             ui.image.extra.timeline[i] = {} 
+	             for l,k in pairs (attr_map["Image"]()) do 
+		         ui.image.extra.timeline[i][k] = ui.image.extra.timeline[prev_point][k] 
 		     end 
+		     prev_point = i 
 		end 
+	        if i < cur_focus_n  then 
+                     ui.image.extra.timeline[i]["hide"] = true  
+		end 
+	     end 
 	  end 
+
+
 	
           if(screen:find_child("screen_objects") == nil) then
                screen:add(g)

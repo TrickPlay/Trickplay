@@ -185,159 +185,6 @@ local assets = setmetatable( {} , _mt )
 -- UI Factory
 -------------------
 
-
-local function draw_timeline(timeline, p, duration, num_pointer)
-
-	bg = Rectangle {
-		color = {25,25,25,50},
-		border_color = {25,25,25,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "bg",
-		position = {0,0,0},
-		size = {screen.w,76},
-		opacity = 255,
-	}
-
-
-
-
-	line = Rectangle {
-		color = {25,25,25,255},
-		border_color = {255,255,255,255},
-		border_width = 0,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "line",
-		--position = {106,36,0},
-		position = {0,36,0},
-		--size = {1600,6},
-		size = {screen.w,6},
-		opacity = 255,
-	}
-
-	timeline:add(bg,line)
-
-	timeline:add(Text{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 22px",
-		text = "origin", 
-		editable = true,
-		wants_enter = true,
-		cursor_visible = false,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text"..tostring(num_pointer + 1), -- beginning point 
-		--position = {100,6,0},
-		position = {0,6,0},
-		size = {200,30},
-		opacity = 255,
-	})
-
-	timeline:add(Image{
-		src = "assets/left.png",
-		clip = {0,0,16,33},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {90,0,0},
-		anchor_point = {0,0},
-		reactive = true,
-		name = "pointer"..tostring(num_pointer + 1), -- beginning point 
-		--position = {142,42,0},
-		position = {36,42,0},
-		size = {16,33},
-		opacity = 255,
-		extra = {set = true},
-	})
-
-
-	local function make_pointer_focus(pointerName)
-	    local pointer = timeline:find_child(pointerName)
-	    if pointer then 
-	       function pointer.extra.on_focus_in()
-		 timeline:find_child(pointerName).src = "assets/leftfocus.png"
-	       end
-      
-	       function pointer.extra.on_focus_out()
-		 pointer.src = "assets/left.png"
-		 for n,m in pairs (g.children) do 
-	           if not m.name:find("timeline") then 
-
-		     if m.extra.timeline[pointerName] then
-			for l,k in pairs (attr_map[m.type]()) do 
-	     			m.extra.timeline[pointerName][k] = m[k]
-			end
-                     end 
-		   end
-	         end 
-		 pointer.extra.set = true
-	       end 
-	    end
-	end 
-
-	make_pointer_focus("pointer"..tostring(num_pointer + 1))
-
-	local prev_text_x = -120 -- 70
-	local prev_img_x = 0-- 100
-
-	for i = 1, num_pointer, 1 do 
-	timeline:add(Text{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 22px",
-		text = p[i][1],
-		editable = true,
-		wants_enter = true,
-		cursor_visible = false,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text"..tostring(i),
-  		position = {math.floor(p[i][2] * line.w / duration) + prev_text_x,6,0},
-		size = {200,30},
-		opacity = 255,
-	})
-	prev_text_x = math.floor(p[i][2] * line.w / duration) + prev_text_x
-
-	timeline:add(Image{
-		src = "assets/left.png",
-		clip = {0,0,16,33},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {90,0,0},
-		anchor_point = {0,0},
-		reactive = true,
-		name = "pointer"..tostring(i),
-  		position = {math.floor(p[i][2] * line.w / duration) + prev_img_x,42,0},
-		size = {16,33},
-		opacity = 255,
-		extra = {set = false},
-	})
-	prev_img_x = math.floor(p[i][2] * line.w / duration) + prev_img_x 
-	make_pointer_focus("pointer"..tostring(i))
-    end 
-
-return timeline
-
-end 
-
 -- make_xbox() : make closing box 
 
 local function make_xbox()
@@ -718,6 +565,153 @@ end
 return c
 end
 
+local function name2num(name)
+	if name then 
+	    return tonumber(name:sub(8, -1))	
+	end 
+end 
+
+local function draw_timeline(timeline, p, duration, num_pointer)
+
+	bg = Rectangle {
+		color = {25,25,25,50},
+		border_color = {25,25,25,255},
+		border_width = 2,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "bg",
+		position = {0,0,0},
+		size = {screen.w,76},
+		opacity = 255,
+	}
+
+	line = Rectangle {
+		color = {25,25,25,255},
+		border_color = {255,255,255,255},
+		border_width = 0,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "line",
+		position = {60,36,0},
+		size = {screen.w - 120,6},
+		opacity = 255,
+	}
+
+	timeline:add(bg,line)
+
+	timeline:add(Text{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 22px",
+		text = "Beginnig", 
+		editable = true,
+		wants_enter = true,
+		cursor_visible = false,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text0",
+		position = {60,6,0},
+		size = {200,30},
+		opacity = 255,
+	})
+
+	timeline:add(Image{
+		src = "assets/left.png",
+		clip = {0,0,16,33},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {90,0,0},
+		anchor_point = {0,0},
+		reactive = true,
+		name = "pointer0",
+		position = {90,42,0},
+		size = {16,33},
+		opacity = 255,
+		extra = {set = true},
+	})
+
+
+	local function make_pointer_focus(pointerName)
+	    local pointer = timeline:find_child(pointerName)
+	    if pointer then 
+	       function pointer.extra.on_focus_in()
+		    timeline:find_child(pointer.name).src = "assets/leftfocus.png"
+	       end
+      
+	       function pointer.extra.on_focus_out()
+		 pointer.src = "assets/left.png"
+		 for n,m in pairs (g.children) do 
+		     if m.extra.timeline[name2num(pointerName)] then
+			for l,k in pairs (attr_map[m.type]()) do 
+	     			m.extra.timeline[name2num(pointerName)][k] = m[k]
+			end
+                     end 
+	         end 
+		 pointer.extra.set = true
+	       end 
+	    end
+	end 
+
+	make_pointer_focus("pointer0")
+
+	local prev_text_x = -60 
+	local prev_img_x = 60
+
+	for i, j in orderedPairs(p) do 
+	    timeline:add(Text{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 22px",
+		text = p[i][1],
+		editable = true,
+		wants_enter = true,
+		cursor_visible = false,
+		wrap = true,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text"..tostring(i),
+  		position = {math.floor(p[i][2] * line.w / duration) + prev_text_x,6,0},
+		size = {200,30},
+		opacity = 255,
+	    })
+	    prev_text_x = math.floor(p[i][2] * line.w / duration) + prev_text_x
+
+	    timeline:add(Image{
+		src = "assets/left.png",
+		clip = {0,0,16,33},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {90,0,0},
+		anchor_point = {0,0},
+		reactive = true,
+		name = "pointer"..tostring(i),
+  		position = {math.floor(p[i][2] * line.w / duration) + prev_img_x,42,0},
+		size = {16,33},
+		opacity = 255,
+		extra = {set = false},
+	   })
+	   prev_img_x = math.floor(p[i][2] * line.w / duration) + prev_img_x 
+	   make_pointer_focus("pointer"..tostring(i))
+        end 
+
+        return timeline
+end 
+
 
 --[[
 Function: timeline
@@ -745,7 +739,7 @@ function widget.timeline(t)
  --default parameters
     local p = {
 	duration = 6000,
-    	num_point = 3, 
+    	num_point = 3,  	--[read only] 
 	points = {},
     }
 
@@ -761,7 +755,7 @@ function widget.timeline(t)
     local function set_default_point(i, j)
 	if not j then
 	    p.points[i] = {}
-	    p.points[i][1] = "timepoint"..tostring(i) -- name of time point
+	    p.points[i][1] = ""--timepoint"..tostring(i) -- name of time point
 	    p.points[i][2] = p.duration / p.num_point -- duration
 	    p.points[i][3] = p.duration / p.num_point -- changing time 
 	elseif j == 1 then   
@@ -783,21 +777,133 @@ function widget.timeline(t)
 		extra = {type = "TimeLine"}
     }
 
-  local function find_prev_point(name)
-	local cur_num = tonumber(name:sub(8, -1))
-        if cur_num == 1 then 
-		return p.num_point + 1
-	else 
-		return cur_num - 1 
-	end 
-  end 
 
+    local function find_prev_i(name)
+	local prev_i = 0 
+        local num_name = name2num(name)
+	local rr 
+
+        for j,k in orderedPairs (p.points) do 
+	     if j == num_name then 
+		rr = prev_i 
+	     end 
+	     prev_i = j 
+	end 
+	return rr 
+    end 
 
 -- make_on_button_down() function for time pointer image
     local function make_on_button_down(name) 
 	 local pointer = timeline:find_child(name)
 
-	 function pointer:on_button_down(x,y,n,b)
+	 local function pointer_on_button_up(x,y,b,n)
+	     if(dragging ~= nil) then 
+	          local actor , dx , dy = unpack( dragging )
+		  local timepoint, new_timepoint, prev_point, next_point, last_point, new_x
+		  local timeline_length = 1800
+		  local duration = screen:find_child("timeline").duration
+		  for j,k in orderedPairs (screen:find_child("timeline").points) do
+	     	       last_point = j
+		  end 
+		  timepoint = tonumber(actor.name:sub(8, -1))
+		  new_x = x - dx 
+		  if timepoint == last_point then 
+		      if new_x > timeline_length + 60 then 
+		          new_x = timeline_length + 60
+	              end 
+	          end
+		  screen:find_child("text"..tostring(timepoint)).x = new_x - 120 
+		  pointer.x = new_x
+	          dragging = nil
+
+		  new_timepoint = math.floor((new_x - 60)/timeline_length * duration)
+
+		  if new_timepoint ~= timepoint then 
+		      screen:find_child("timeline").points[new_timepoint] = {}
+		      screen:find_child("timeline").points[new_timepoint][1] = 
+		      screen:find_child("timeline").points[timepoint][1]	
+
+		      table_removekey(screen:find_child("timeline").points, timepoint)
+
+		      local prev_i = 0
+		      for j,k in orderedPairs (screen:find_child("timeline").points) do
+	    	          if j == new_timepoint then 
+		 	       prev_point = prev_i 
+	     	          end 
+	     	          prev_i = j
+		      end 
+		      screen:find_child("timeline").points[new_timepoint][2] = new_timepoint - prev_point 
+		      screen:find_child("timeline").points[new_timepoint][3] = new_timepoint - prev_point 
+            	      
+		      local temp_point = nil 
+		      for j,k in orderedPairs (screen:find_child("timeline").points) do
+			  if temp_point then 
+				next_point = j
+				temp_point = nil
+			  end 
+	    	          if j == new_timepoint then 
+		 	       temp_point = j 
+	     	          end 
+		      end 
+			
+		      --print("new_point::",new_timepoint)
+		      --print("next_point::",next_point)
+                      if next_point then 
+		          screen:find_child("timeline").points[next_point][2] = next_point - new_timepoint 
+		          screen:find_child("timeline").points[next_point][3] = next_point - new_timepoint 
+                      end
+			
+		      --dumptable(screen:find_child("timeline").points)
+		      for n,m in pairs (g.children) do
+			     if m.extra.timeline then
+				  for i,j in pairs (m.extra.timeline) do 
+					if i == timepoint then 
+					    m.extra.timeline[new_timepoint] = {}
+				            for l,k in pairs (j) do 
+					         m.extra.timeline[new_timepoint][l] = k
+					    end 
+					    table_removekey(m.extra.timeline, timepoint) 
+				        end 
+				  end 
+			     end
+		      end 
+			
+		      pointer.name = "pointer"..tostring(new_timepoint) 
+		      screen:find_child("text"..tostring(timepoint)).name = "text"..tostring(new_timepoint) 
+		      screen:find_child("timeline").points = screen:find_child("timeline").points
+		      for i,j in pairs (screen:find_child("timeline").children) do 
+		           if j.name:find("pointer") then 
+		                j.extra.set = true
+			   end
+		      end
+			
+		      if current_time_focus then 
+			     current_time_focus.extra.on_focus_out()
+		      end 
+		      current_time_focus = timeline:find_child("pointer"..tostring(new_timepoint)) 
+		      timeline:find_child("pointer"..tostring(new_timepoint)).on_focus_in()
+
+        	      for n,m in pairs (g.children) do 
+	                  if m.extra.timeline then 
+	                       if m.extra.timeline[new_timepoint] then 
+	         	            m:show()
+	                            for l,k in pairs (m.extra.timeline[new_timepoint]) do 
+		                        if l ~= "hide" then
+		                          m[l] = k
+		                        elseif k == true then 
+		                          m:hide() 
+		                        end 
+	                            end
+                               end 
+	                  end
+	              end 
+
+		  end 
+             end
+         end
+
+
+	 function pointer:on_button_down(x,y,b,n)
 	    if current_time_focus then 
 	         current_time_focus.on_focus_out()
 	    end 
@@ -805,75 +911,108 @@ function widget.timeline(t)
 	    pointer.on_focus_in()
 	    
             for n,m in pairs (g.children) do 
-	      if not m.name:find("timeline") then 
 		if pointer.extra.set == false then 
-		   if m.extra.timeline["pointer"..tostring(find_prev_point(pointer.name))] then   
-		     for l,k in pairs (m.extra.timeline["pointer"..tostring(find_prev_point(pointer.name))]) do
+		   local prev_i = find_prev_i(pointer.name)
+		   if m.extra.timeline[prev_i] then    
+		     for l,k in pairs (m.extra.timeline[prev_i]) do 
 			m[l] = k
 		     end 
 	           end 
 		else 
-		   if m.extra.timeline[pointer.name] then
-		     for l,k in pairs (m.extra.timeline[pointer.name]) do 
-			m[l] = k
+		   if m.extra.timeline[name2num(pointer.name)] then 
+		     m:show()
+		     for l,k in pairs (m.extra.timeline[name2num(pointer.name)]) do 
+			if l ~= "hide" then
+			     m[l] = k
+			elseif k == true then 
+			     m:hide() 
+			end 
 		     end
                    end 
 		end 
-	      end 
+	   end 
+           if name2num(pointer.name) ~= 0 then 
+	   	if(b == 3) then-- imsi : num_clicks is not correct ! 
+	 	--if(b == 3 or n >= 2) then
+			-- point_inspector()
+	   	else
+                 	dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
+           	 	return true
+	   	end 
 	   end 
 	end 
     end 
 
+    local function points_getn(points)
+	local num = 0
+	for i, j in pairs (points) do
+	     num = num+1
+	end
+	return num
+    end
 
     local create_timeline = function ()
 
     	timeline:clear()
 
-	if table.getn(p.points) > 0 then 
-             for i = 1, p.num_point, 1 do 
-	         if p.points[i] then 
-	              for j = 1, 3, 1 do 
-	                 if not p.points[i][j] then 
-		    	    set_default_point(i,j)
-		         end 
-		      end 
-	         else 
-		     set_default_point(i)
-	         end 
-	     end 
+	if points_getn(p.points) > 0 then 
+	     p.num_point = points_getn(p.points) 
 	else 
- 	     for i = 1, p.num_point, 1 do 
+ 	     for i = p.duration/p.num_point , p.duration,  p.duration/p.num_point do 
 	          set_default_point(i)
 	     end 
    	end 
  
     	timeline = draw_timeline(timeline, p.points, p.duration, p.num_point)
-	
-	
+
+        current_time_focus = timeline:find_child("pointer0") 
+	timeline:find_child("pointer0").on_focus_in()
+
+        for n,m in pairs (g.children) do 
+	   if m.extra.timeline then 
+	     if m.extra.timeline[0] then 
+	         m:show()
+	         for l,k in pairs (m.extra.timeline[0]) do 
+		     if l ~= "hide" then
+		         m[l] = k
+		     elseif k == true then 
+		         m:hide() 
+		     end 
+	         end
+             end 
+	   end
+	end 
+        	
     	timeline_timers = {}
     	timeline_timelines = {}
 
-    	for i =1, p.num_point, 1 do 
+	local first_point = 0 
+	for i, j in orderedPairs(p.points) do 
 	  timeline_timers[i] = Timer()
 	  timeline_timelines[i] = Timeline()
-	  timeline_timers[i].interval = p.points[i][2] * (i + 1) --p.duration/p.num_point * (i + 1) 
-    	  timeline_timelines[i].duration = p.points[i][3] 	     -- p.duration/p.num_point
+	  if first_point == 0 then 
+	       timeline_timers[i].interval = 1
+          else 
+	       timeline_timers[i].interval = first_point
+	  end 
+    	  timeline_timelines[i].duration = p.points[i][2] 	 
     	  timeline_timelines[i].direction = "FORWARD"
     	  timeline_timelines[i].loop = false
     
 	  local tl = timeline_timelines[i]
+  	  local next_point, current_point 
 
-  	  local next_point, current_point  
-	  next_point = "pointer"..tostring(i)
-	  if i == 1 then 
-		current_point = "pointer"..tostring(p.num_point+1)
-	  else 
-		current_point = "pointer"..tostring(i - 1) 
-	  end 
+	  current_point = first_point
+          next_point = i 
 
-          function tl.on_new_frame(t, m, p) -- local 
+          function tl.on_new_frame(t, m, p) 
 		for n,m in pairs (g.children) do 
-		     if m.extra.timeline[current_point] then 
+		     if m.extra.timeline[current_point] then  
+			if m.extra.timeline[current_point]["hide"] then 
+			   if  m.extra.timeline[current_point]["hide"] == true then 
+				m:hide()
+			   end 
+			end 	
 			for l,k in pairs (attr_map[m.type]()) do 
 				 if type(m[k]) == "table" then 
 					local temptable = {}
@@ -882,9 +1021,7 @@ function widget.timeline(t)
 						temptable[o] = interval:get_value(p)
 				        end 
 					m[k] = temptable
-				else 
-					print("current point", current_point)
-					print("next point", next_point)
+				elseif k ~= "hide" then  
 					local interval = Interval(m.extra.timeline[current_point][k], m.extra.timeline[next_point][k])
 					m[k] = interval:get_value(p)
 				end
@@ -893,7 +1030,7 @@ function widget.timeline(t)
 	         end
          end  
 
-         function tl.on_completed() --local
+         function tl.on_completed()
 		for n,m in pairs (g.children) do 
 		     if m.extra.timeline[current_point] then 
 			for l,k in pairs (attr_map[m.type]()) do 
@@ -903,25 +1040,39 @@ function widget.timeline(t)
 					temptable[o] = m.extra.timeline[next_point][k][o]
 				    end
 				    m[k] = temptable
-				else
+				elseif k ~= "hide" then
 				    m[k] = m.extra.timeline[next_point][k] 
 				end 
 			end 
 		     end
+		     if m.extra.timeline[next_point] then 
+			if not m.extra.timeline[next_point]["hide"] then 
+			     m:show()
+			end 	
+		     end 
 		end
         end 
 
+
         local tl_timer = timeline_timers[i]
+	
         function tl_timer:on_timer()
 		timeline_timelines[i]:start()
         	timeline_timers[i]:stop()
         end 
      
+	  first_point = next_point
      end 
+    dumptable(timeline_timers)
+    dumptable(timeline_timelines)
 
      -- start_timer() function 
      function g.extra.start_timer()
-        for i=1, p.num_point, 1 do	
+	if current_time_focus then 
+		current_time_focus.on_focus_out()
+		current_time_focus = nil
+	end 
+	for i, j in orderedPairs(p.points) do 
 	     timeline_timers[i]:start()
 	end 
      end 
@@ -929,93 +1080,44 @@ function widget.timeline(t)
     -- set object.extra.timeline table
       for n,m in pairs (g.children) do 
 	 if m.name then 
+	    local prev_point = 0	  
 	    if not m.extra.timeline then 
                 m.extra.timeline = {}
-                for i = 1, p.num_point + 1, 1 do
-                     m.extra.timeline["pointer"..tostring(i)] = {}
-	             for l,k in pairs (attr_map[m.type]()) do 
-	                  m.extra.timeline["pointer"..tostring(i)][k] = m[k]
-	             end
-                end 
-	    else
-		local prev_org = false
-	
-	        for i = 1, p.num_point, 1 do
-	             if not m.extra.timeline["pointer"..tostring(i)]then 
-			if prev_org == false then 
-			     m.extra.timeline["pointer"..tostring(p.num_point + 1)] = {} 
-	             	     for l,k in pairs (attr_map[m.type]()) do 
-			          m.extra.timeline["pointer"..tostring(p.num_point + 1)][k] = m.extra.timeline["pointer"..tostring(i-1)][k] 
-			          m.extra.timeline["pointer"..tostring(i-1)][k] = m.extra.timeline["pointer"..tostring(i-2)][k] 
-			     end 
-			     prev_org = true 
-			end 
-			m.extra.timeline["pointer"..tostring(i)] = {} 
-	             	for l,k in pairs (attr_map[m.type]()) do 
-	                     m.extra.timeline["pointer"..tostring(i)][k] = m.extra.timeline["pointer"..tostring(i-1)][k]
-	             	end
-		     end 
+                m.extra.timeline[0] = {}
+	        for l,k in pairs (attr_map[m.type]()) do 
+	        	m.extra.timeline[0][k] = m[k]
+	        end
+	    end 
+	    for i, j in orderedPairs(p.points) do 
+	        if not m.extra.timeline[i] then 
+		    m.extra.timeline[i] = {} 
+	            for l,k in pairs (attr_map[m.type]()) do 
+		         m.extra.timeline[i][k] = m.extra.timeline[prev_point][k] 
+		    end 
+		    prev_point = i 
 		end 
-
-		local function table_removekey(table, key)
-    			local element = table[key]
-			table[key] = nil
-			return element
-		end
-
-		local end_point = 0
-		for i,j in pairs (m.extra.timeline) do 
-		     if tonumber(i:sub(8, -1)) > end_point then 
-		          end_point = tonumber(i:sub(8, -1)) 
-		     end 
-		end 
-
-		if end_point > p.num_point + 1 then 
-	             for l,k in pairs (attr_map[m.type]()) do 
-	                  m.extra.timeline["pointer"..tostring(p.num_point + 1)][k] = m.extra.timeline["pointer"..tostring(end_point)][k]
-		     end
-		end 
-
-		for i,j in pairs (m.extra.timeline) do 
-		     if tonumber(i:sub(8, -1)) > p.num_point + 1 then
-			 table_removekey(m.extra.timeline, i)
-		     end 
-                end 
-	    end
-    	  end 
+	    end 
+    	   end 
     	end 
 
-    
-        for i = 1, p.num_point + 1, 1 do 
+	make_on_button_down("pointer0")
+	for i, j in orderedPairs(p.points) do 
 	     make_on_button_down("pointer"..tostring(i))
         end 
-
-
-	g.extra.points = p.points
-	g.extra.duration = p.duration
-	g.extra.num_point = p.num_point
     end 
 
     create_timeline()
 
     mt = {}
     mt.__newindex = function (t, k, v)
-	local pre_num
-	if k == "num_point" then
-	      pre_num = p.num_point + 1
-	      p.points = {}
+	print("NEW NEW NEW")
+	if k ~= "num_point" then
+        	p[k] = v
+        	create_timeline()
+	else 
+	     print(k,"is read only. \n")
 	end 
-        p[k] = v
-        create_timeline()
-	for i,j in pairs (screen:find_child("timeline").children) do
-	       if j.name:find("pointer") then 
-		    if pre_num >= tonumber(j.name:sub(8,-1)) then 
-			 print ("pointer", j.name:sub(8,-1), "is set to true")
-		         j.extra.set = true
-	            end      
-	       end 
-	end 
-
+	
     end 
 
     mt.__index = function (t,k)
@@ -1867,7 +1969,6 @@ function widget.buttonPicker(table)
 
 	function bp_group.extra.press_right()
 	    local prev_i = index
-	    --local next_i = (index+1-1)%(table.getn(p.items)) + 1
             local next_i = (index)%(#p.items)+1
 	    index = next_i
 
@@ -2946,19 +3047,19 @@ function widget.scrollWindow(t)
     --default parameters
     local p = {
         clip_w    =  600,
-		color     = "FFFFFF",
+	color     =  {255,255,255,255},
         clip_h    =  600,
-		border_w  =    2,
+	border_w  =    2,
         content   = Group{},
         content_h =  1000,
-		content_w =  1000,
-		arrow_clone_source = nil,
-		arrow_sz  = 10,
-		arrows_in_box = false,
-		arrows_centered = false,
+	content_w =  1000,
+	arrow_clone_source = nil,
+	arrow_sz  = 10,
+	arrows_in_box = false,
+	arrows_centered = false,
         hor_arrow_y     = nil,
         vert_arrow_x    = nil,
-		grip_is_visible = true,
+	grip_is_visible = true,
         border_is_visible = true,
         skin="default",
     }
@@ -3458,6 +3559,7 @@ function widget.scrollWindow(t)
             v.position={0,0}
             v.reactive = false
             window:add(v)
+print("here")
         end
         p[k] = v
         create()
@@ -3474,7 +3576,7 @@ function widget.dropDownBar(t)
     
     --default parameters
     local p = {
-        name  = "Drop Down Bar",
+        name  = "dropdownbar",
         font  = "DejaVu Sans 26px",
         items = {
             {
@@ -3504,8 +3606,8 @@ function widget.dropDownBar(t)
         item_start_y = 45,
         
         
-        txt_color    = {255,255,255},
-        bg_color     = {255,0,0},
+        txt_color    = {255,255,255,255},
+        bg_color     = {255,0,0,255},
         bg_clone_src = nil,
         bg_w         = 300,
         padding      = 5,
@@ -3533,7 +3635,7 @@ function widget.dropDownBar(t)
     local button_focus = nil
     local umbrella
     umbrella     = Group{
-        name="Drop down bar",
+        name="dropdownbar",
         reactive = true,
         children={button,dropDownMenu},
         extra={
@@ -3953,6 +4055,7 @@ function widget.menuBar(t)
             widget.dropDownBar(),
             widget.dropDownBar(),
             widget.dropDownBar(),
+            widget.dropDownBar(),
             widget.button(),
             widget.button(),
             widget.button(),
@@ -3998,7 +4101,7 @@ function widget.menuBar(t)
         ["DropDown"] = 300
     }
     local umbrella = Group{
-        name     = "Menu_Bar",
+        name     = "menubar",
         reactive = true,
         position = {0,200},
         extra    = {
