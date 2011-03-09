@@ -33,7 +33,7 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["Background Image        "]   = function() 
+	["Reference Image        "]   = function() 
 			if(CURRENT_DIR == "") then 
 				set_app_path() 
 			else 
@@ -61,7 +61,7 @@ function( section )
 	  
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
-        local f_import = factory.make_text_menu_item( assets , ui.strings[ "Background Image        " ] )
+        local f_import = factory.make_text_menu_item( assets , ui.strings[ "Reference Image        " ] )
         local f_tp_20  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 20" ] )
         local f_tp_40  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 40" ] )
         local f_tp_80  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 80" ] )

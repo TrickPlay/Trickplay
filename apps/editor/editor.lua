@@ -237,7 +237,8 @@ local function create_on_line_down_f(v)
         function v:on_button_down(x,y,button,num_clicks)
              dragging = {v, x - v.x, y - v.y }
 	     v.color = {50, 50,50,255}
-	     if(button == 3 or num_clicks >= 2) then
+	     --if(button == 3 or num_clicks >= 2) then
+	     if(button == 3) then
 		  guideline_inspector(v)
                   return true
              end 
@@ -267,8 +268,8 @@ function editor.v_guideline()
 
      local v_gl = Rectangle {
 		name="v_guideline"..tostring(v_guideline),
-		border_color={255,255,255,255},
-		border_color={255,255,255,255},
+		border_color= DEFAULT_COLOR, --{255,255,255,255},
+		border_color= DEFAULT_COLOR, -- {255,255,255,255},
 		color={100,255,25,255},
 		size = {4, screen.h},
 		anchor_point = {0,0},
@@ -290,8 +291,8 @@ function editor.h_guideline()
 
      local h_gl = Rectangle {
 		name="h_guideline"..tostring(h_guideline),
-		border_color={255,255,255,255},
-		border_color={255,255,255,255},
+		border_color= DEFAULT_COLOR, --{255,255,255,255},
+		border_color= DEFAULT_COLOR, --{255,255,255,255},
 		color={100,255,25,255},
 		size = {screen.w, 4},
 		anchor_point = {0,0},
@@ -503,6 +504,9 @@ function editor.close()
 	if timeline then 
 		timeline:clear()
 		screen:remove(timeline)
+		if screen:find_child("tline") then
+		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		end
 	end 
 	
 end 
@@ -513,6 +517,9 @@ function editor.open()
      if timeline then 
 	timeline:clear()
 	screen:remove(timeline)
+	if screen:find_child("tline") then
+	     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+	end 
      end 
     -- editor.close()
      if(CURRENT_DIR == "") then 
@@ -674,7 +681,7 @@ function editor.the_image()
         for i,j in pairs (text_g.children) do 
          function j:on_button_down(x,y,button, num_clicks)
 	      if input_text ~= nil then 
-		    input_text.color = {255, 255, 255, 255}
+		    input_text.color = DEFAULT_COLOR -- {255, 255, 255, 255}
 	      end 
               input_text = j
 	      j.color = {0,255,0,255}
@@ -894,7 +901,7 @@ function editor.the_open()
     for i,j in pairs (text_g.children) do 
          function j:on_button_down(x,y,button, num_clicks)
 	      if input_text ~= nil then 
-		    input_text.color = {255, 255, 255, 255}
+		    input_text.color = DEFAULT_COLOR-- {255, 255, 255, 255}
 	      end 
               input_text = j
 	      j.color = {0,255,0,255}
@@ -921,9 +928,28 @@ function editor.the_open()
 	       if timeline then 
 		     timeline:clear()
 	     	     screen:remove(timeline)
+		     if screen:find_child("tline") then
+		          screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		     end
 	       end 
                inputMsgWindow_openfile(input_text.text) 
 	       cleanMsgWin(msgw)
+	       local timeline = screen:find_child("timeline") 
+	       if timeline then  
+                 for n,m in pairs (g.children) do 
+	         if m.extra.timeline[0] then 
+	            m:show()
+	            for l,k in pairs (m.extra.timeline[0]) do 
+		        if l ~= "hide" then
+		            m[l] = k
+		        elseif k == true then 
+		            m:hide() 
+		        end 
+	            end
+                end 
+             	end 
+             end 
+
 	 end 
     end 
     function open_t:on_button_down(x,y,button,num_clicks)
@@ -932,9 +958,27 @@ function editor.the_open()
 	      if timeline then 
 		     timeline:clear()
 	     	     screen:remove(timeline)
+		     if screen:find_child("tline") then
+		          screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		     end
 	      end 
               inputMsgWindow_openfile(input_text.text) 
 	      cleanMsgWin(msgw)
+	      local timeline = screen:find_child("timeline") 
+	      if timeline then  
+                 for n,m in pairs (g.children) do 
+	         if m.extra.timeline[0] then 
+	            m:show()
+	            for l,k in pairs (m.extra.timeline[0]) do 
+		        if l ~= "hide" then
+		            m[l] = k
+		        elseif k == true then 
+		            m:hide() 
+		        end 
+	            end
+                end 
+             	end 
+              end 
 	 end 
     end 
 
@@ -976,6 +1020,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	-- make inspector background image 
 	if v.extra then 
 	   if is_this_widget(v) == true  then
+		  print("editor.lua : => ", v.extra.type)
 	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
 	   else -- rect, img, text 
 	     	  inspector_bg = factory.make_popup_bg(v.type, 0)
@@ -1143,7 +1188,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	       si.content = item_group
 	       si.position = {0,82,0}
 	       si.name ="si"
-	       si.size = {content_w, item_group.h, 0}
+	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
 	       if scroll_y_pos then 
 	           si.seek_to(0, scroll_y_pos) 
 	       end 
@@ -1333,6 +1378,11 @@ end
 
 function editor.save(save_current_f)
 
+     if current_time_focus then 
+	current_time_focus.on_focus_out()
+	current_time_focus = nil
+     end 
+
      local screen_rect = g:find_child("screen_rect")
   
      if(g:find_child("screen_rect") ~= nil) then 
@@ -1364,8 +1414,8 @@ function editor.save(save_current_f)
         local timeline = screen:find_child("timeline")
 	if timeline then
 	      contents = contents .."local timeline = widget.timeline { \n\tpoints = {" 
-	      for m,n in pairs (timeline.points) do 
-		    contents = contents.."{"
+	      for m,n in orderedPairs (timeline.points) do 
+		    contents = contents.."["..tostring(m).."] = {"
 		    for q,r in pairs (n) do
 		         if q == 1 then 
 			      contents = contents.."\""..tostring(r).."\","
@@ -1421,8 +1471,8 @@ function editor.save(save_current_f)
 	     local timeline = screen:find_child("timeline")
 	     if timeline then
 	          contents = contents .."local timeline = widget.timeline { \n\tpoints = {" 
-	          for m,n in pairs (timeline.points) do 
-		         contents = contents.."{"
+	          for m,n in orderedPairs(timeline.points) do 
+		         contents = contents.."["..tostring(m).."] = {"
 			    for q,r in pairs (n) do
 				    if q == 1 then 
 				         contents = contents.."\""..tostring(r).."\","
@@ -1464,7 +1514,7 @@ function editor.rectangle(x, y)
                 name="rect"..tostring(item_num),
                 border_color= DEFAULT_COLOR,
                 border_width=0,
-                color= {255,255,255,255},
+                color= DEFAULT_COLOR,
                 size = {1,1},
                 position = {x,y,0}, 
 		extra = {org_x = x, org_y = y}
@@ -1492,32 +1542,33 @@ function editor.rectangle_done(x,y)
         screen.grab_key_focus(screen)
 
 
-	
-	if screen:find_child("timeline") then 
-		ui.rect.extra.timeline = {}
-		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
-		     ui.rect.extra.timeline ["pointer"..tostring(i)] = {}
-		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-		     for l,k in pairs (attr_map["Rectangle"]()) do
-		           ui.rect.extra.timeline["pointer"..tostring(i)][k] = ui.rect[k]
-			   if k == "w" then 
-			    print("i",i,"w", ui.rect[k])
-			   elseif k == "h" then 
-			    print("i",i,"h", ui.rect[k])
-			   end 
-				
-		     end   
-		     if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
-		     --if (cur_focus_n > i) or 
-                        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
-			   ui.rect.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
-		     end 
+	local timeline = screen:find_child("timeline")
+	if timeline then 
+	    ui.rect.extra.timeline = {}
+            ui.rect.extra.timeline[0] = {}
+	    local prev_point = 0
+	    local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+	    for l,k in pairs (attr_map["Rectangle"]()) do 
+	        ui.rect.extra.timeline[0][k] = ui.rect[k]
+	    end
+	    if cur_focus_n ~= 0 then 
+                ui.rect.extra.timeline[0]["hide"] = true  
+	    end 
+
+	    for i, j in orderedPairs(timeline.points) do 
+	        if not ui.rect.extra.timeline[i] then 
+		    ui.rect.extra.timeline[i] = {} 
+	            for l,k in pairs (attr_map["Rectangle"]()) do 
+		         ui.rect.extra.timeline[i][k] = ui.rect.extra.timeline[prev_point][k] 
+		    end 
+		    prev_point = i 
 		end 
-
+	        if i < cur_focus_n  then 
+                    ui.rect.extra.timeline[i]["hide"] = true  
+		end 
+	    end 
+	    
 	end 
-
-
-
 end 
 
 function editor.rectangle_move(x,y)
@@ -1676,22 +1727,33 @@ function editor.text()
         table.insert(undo_list, {ui.text.name, ADD, ui.text})
         g:add(ui.text)
 
-	if screen:find_child("timeline") then 
-		ui.text.extra.timeline = {}
-		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
-		     ui.text.extra.timeline ["pointer"..tostring(i)] = {}
-		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-		     for l,k in pairs (attr_map["Text"]()) do
-		           ui.text.extra.timeline["pointer"..tostring(i)][k] = ui.text[k]
-		     end   
-		     --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
-		     if (cur_focus_n > i ) or 
-		        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
-			   ui.text.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
-		     end 
-		end 
+	local timeline = screen:find_child("timeline")
+	if timeline then 
+	    ui.text.extra.timeline = {}
+            ui.text.extra.timeline[0] = {}
+	    local prev_point = 0
+	    local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+	    for l,k in pairs (attr_map["Text"]()) do 
+	        	ui.text.extra.timeline[0][k] = ui.text[k]
+	    end
+	    if cur_focus_n ~= 0 then 
+                ui.text.extra.timeline[0]["hide"] = true  
+	    end 
 
+	    for i, j in orderedPairs(timeline.points) do 
+	        if not ui.text.extra.timeline[i] then 
+		    ui.text.extra.timeline[i] = {} 
+	            for l,k in pairs (attr_map["Text"]()) do 
+		         ui.text.extra.timeline[i][k] = ui.text.extra.timeline[prev_point][k] 
+		    end 
+		    prev_point = i 
+		end 
+	        if i < cur_focus_n  then 
+                    ui.text.extra.timeline[i]["hide"] = true  
+		end 
+	    end 
 	end 
+
 	if(screen:find_child("screen_objects") == nil) then 
              screen:add(g)
 	end
@@ -1760,23 +1822,34 @@ function editor.clone()
         	     }
         	     table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
         	     g:add(ui.clone)
-		     
-		     if screen:find_child("timeline") then 
-			 ui.clone.extra.timeline = {}
-			for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
-			     ui.clone.extra.timeline ["pointer"..tostring(i)] = {}
-			     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-		     	     for l,k in pairs (attr_map["Clone"]()) do
-		           	  ui.clone.extra.timeline["pointer"..tostring(i)][k] = ui.clone[k]
-		     	     end   
-		             --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
-		             if (cur_focus_n > i) or 
-		     	        (screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n ) then
-			   	  ui.clone.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
-		     	     end 
-			end 
-		     end 
 
+		     local timeline = screen:find_child("timeline")
+		     if timeline then 
+	    		ui.clone.extra.timeline = {}
+            		ui.clone.extra.timeline[0] = {}
+	    		local prev_point = 0
+	        	local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+	    		for l,k in pairs (attr_map["Clone"]()) do 
+	        	     ui.clone.extra.timeline[0][k] = ui.clone[k]
+	    		end
+	    		if cur_focus_n ~= 0 then 
+                		ui.clone.extra.timeline[0]["hide"] = true  
+	    		end 
+	    		for i, j in orderedPairs(timeline.points) do 
+	        	     if not ui.clone.extra.timeline[i] then 
+		    	          ui.clone.extra.timeline[i] = {} 
+	            		  for l,k in pairs (attr_map["Clone"]()) do 
+		         	  	ui.clone.extra.timeline[i][k] = ui.clone.extra.timeline[prev_point][k] 
+		    		  end 
+		                  prev_point = i 
+			     end 
+	        	     if i < cur_focus_n  then 
+                    		  ui.clone.extra.timeline[i]["hide"] = true  
+			     end 
+	    	        end 
+		     end 
+ 
+		     
 	             if(screen:find_child("screen_objects") == nil) then 
         	          screen:add(g)        
 		     end 
@@ -1810,6 +1883,11 @@ function editor.delete()
             end
         end
 
+	if table.getn(g.children) == 0 then 
+	    if screen:find_child("timeline") then 
+		screen:remove(screen:find_child("timeline"))
+	    end 
+	end 
 	input_mode = S_SELECT
 end
 	
@@ -1874,21 +1952,30 @@ function editor.group()
              screen:add(g)
 	end 
 	
-	if screen:find_child("timeline") then 
-		ui.group.extra.timeline = {}
-		for i = 1, screen:find_child("timeline").num_point + 1, 1 do 
-		     ui.group.extra.timeline ["pointer"..tostring(i)] = {}
-		     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-		     for l,k in pairs (attr_map["Group"]()) do
-		           ui.group.extra.timeline["pointer"..tostring(i)][k] = ui.group[k]
-		     end   
-		     --if (cur_focus_n > i and i ~= screen:find_child("timeline").num_point + 1) or 
-		     if (cur_focus_n > i ) or 
-			(screen:find_child("timeline").num_point + 1 == i and i ~= cur_focus_n) then
-			   ui.group.extra.timeline["pointer"..tostring(i)]["opacity"] = 0 
+	local timeline = screen:find_child("timeline")
+	if timeline then 
+	     ui.group.extra.timeline = {}
+             ui.group.extra.timeline[0] = {}
+	     local prev_point = 0
+	     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+	     for l,k in pairs (attr_map["Group"]()) do 
+	          ui.group.extra.timeline[0][k] = ui.group[k]
+	     end
+	     if cur_focus_n ~= 0 then 
+                 ui.group.extra.timeline[0]["hide"] = true  
+	     end 
+	     for i, j in orderedPairs(timeline.points) do 
+	        if not ui.group.extra.timeline[i] then 
+	             ui.group.extra.timeline[i] = {} 
+	             for l,k in pairs (attr_map["Group"]()) do 
+		         ui.group.extra.timeline[i][k] = ui.group.extra.timeline[prev_point][k] 
 		     end 
+		     prev_point = i 
 		end 
-
+	        if i < cur_focus_n  then 
+                     ui.group.extra.timeline[i]["hide"] = true  
+		end 
+	     end 
 	end 
 
         item_num = item_num + 1

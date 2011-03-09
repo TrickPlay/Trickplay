@@ -26,17 +26,23 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-     	["UNDO".."\t\t\t".."[U]"]   = function() editor.undo() input_mode = S_SELECT end,
-     	["REDO".."\t\t\t".."[E]"]   = function() editor.redo() input_mode = S_SELECT end,
-     	["TEXT".."\t\t\t".."[T]"]   = function() editor.text() input_mode = S_SELECT end,
-     	["IMAGE".."\t\t\t".."[I]"]   = function() input_mode = S_SELECT editor.image()  end,
-     	["RECTANGLE".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
-     	["VIDEO".."\t\t"..""]   = function() input_mode = S_SELECT editor.video() end,
-     	["WIDGETS ...".."\t\t".."[W]"]   = function() input_mode = S_SELECT editor.widgets() end,
-     	["CLONE".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
-     	["DELETE".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
-     	["GROUP".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
-     	["UNGROUP".."\t\t\t"..""]   = function() editor.ugroup() input_mode = S_SELECT end
+     	["Undo".."\t\t\t".."[U]"]   = function() editor.undo() input_mode = S_SELECT end,
+     	["Redo".."\t\t\t".."[E]"]   = function() editor.redo() input_mode = S_SELECT end,
+     	["Text".."\t\t\t\t".."[T]"]   = function() editor.text() input_mode = S_SELECT end,
+     	["Image".."\t\t\t".."[I]"]   = function() input_mode = S_SELECT editor.image()  end,
+     	["Rectangle".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
+     	["Video".."\t\t"..""]   = function() input_mode = S_SELECT editor.video() end,
+     	["Timeline".."\t\t\t".."[J]"]   = function() input_mode = S_SELECT local tl = widget.timeline() screen:add(tl)
+						     screen:find_child("timeline").extra.show = true end,
+     	["Timeline Hide".."\t\t".."[J]"]   = function() screen:find_child("timeline"):hide() 
+							screen:find_child("timeline").extra.show = false end,
+     	["Timeline Show".."\t".."[J]"]   = function() screen:find_child("timeline"):show() 
+						      screen:find_child("timeline").extra.show = true end,
+     	["Widgets ...".."\t\t".."[W]"]   = function() input_mode = S_SELECT editor.widgets()  end,
+     	["Clone".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
+     	["Delete".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
+     	["Group".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
+     	["UnGroup".."\t\t\t"..""]   = function() editor.ugroup() input_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -49,17 +55,18 @@ function( section )
         local items_height = 0
     
     
-        local f_undo   = factory.make_text_menu_item( assets , ui.strings[ "UNDO".."\t\t\t".."[U]" ] )
-        local f_redo   = factory.make_text_menu_item( assets , ui.strings[ "REDO".."\t\t\t".."[E]" ] )
-        local f_text   = factory.make_text_menu_item( assets , ui.strings[ "TEXT".."\t\t\t".."[T]" ] )
-        local f_image  = factory.make_text_menu_item( assets , ui.strings[ "IMAGE".."\t\t\t".."[I]" ] )
-        local f_rect   = factory.make_text_menu_item( assets , ui.strings[ "RECTANGLE".."\t\t".."[R]" ] )
-        local f_video  = factory.make_text_menu_item( assets , ui.strings[ "VIDEO".."\t\t".."" ] )
-        local f_widget = factory.make_text_menu_item( assets , ui.strings[ "WIDGETS ...".."\t\t".."[W]" ] )
-        local f_clone  = factory.make_text_menu_item( assets , ui.strings[ "CLONE".."\t\t\t".."[C]" ] )
-        local f_delete = factory.make_text_menu_item( assets , ui.strings[ "DELETE".."\t\t     ".."[Del]" ] )
-        local f_group  = factory.make_text_menu_item( assets , ui.strings[ "GROUP".."\t\t\t".."[G]" ] )
-        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UNGROUP".."\t\t\t".."" ] )
+        local f_undo   = factory.make_text_menu_item( assets , ui.strings[ "Undo".."\t\t\t".."[U]" ] )
+        local f_redo   = factory.make_text_menu_item( assets , ui.strings[ "Redo".."\t\t\t".."[E]" ] )
+        local f_text   = factory.make_text_menu_item( assets , ui.strings[ "Text".."\t\t\t\t".."[T]" ] )
+        local f_image  = factory.make_text_menu_item( assets , ui.strings[ "Image".."\t\t\t".."[I]" ] )
+        local f_rect   = factory.make_text_menu_item( assets , ui.strings[ "Rectangle".."\t\t".."[R]" ] )
+        local f_video  = factory.make_text_menu_item( assets , ui.strings[ "Video".."\t\t".."" ] )
+        local f_widget = factory.make_text_menu_item( assets , ui.strings[ "Widgets ...".."\t\t".."[W]" ] )
+        local f_timeline = factory.make_text_menu_item( assets , ui.strings[ "Timeline".."\t\t\t".."[J]" ] )
+        local f_clone  = factory.make_text_menu_item( assets , ui.strings[ "Clone".."\t\t\t".."[C]" ] )
+        local f_delete = factory.make_text_menu_item( assets , ui.strings[ "Delete".."\t\t     ".."[Del]" ] )
+        local f_group  = factory.make_text_menu_item( assets , ui.strings[ "Group".."\t\t\t".."[G]" ] )
+        local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UnGroup".."\t\t\t".."" ] )
         
     
         table.insert( section_items , f_undo )
@@ -69,6 +76,7 @@ function( section )
         table.insert( section_items , f_rect )
         table.insert( section_items , f_video )
         table.insert( section_items , f_widget )
+        table.insert( section_items , f_timeline )
         table.insert( section_items , f_delete)
         table.insert( section_items , f_clone )
         table.insert( section_items , f_group )
@@ -77,7 +85,6 @@ function( section )
 	for _,item in ipairs( section_items ) do
 	     item.reactive = true
 	     if (item.text ~= "INSERT :                   ") then 
----[[
              function item:on_button_down(x,y,button,num_clicks)
         	if item.on_activate then
 	    		item:on_focus_out()
@@ -88,7 +95,6 @@ function( section )
         	end
 		return true 
 	     end
---]]
              if item:find_child("caption") then
                 local dropmenu_item = item:find_child("caption")
                 --dropmenu_item.reactive = true
@@ -105,7 +111,7 @@ function( section )
              end
        end
 
-        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_widget.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
+        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_timeline.h + f_widget.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
         
 
         f_rect.extra.on_activate =
@@ -127,6 +133,12 @@ function( section )
             function()
 		input_mode = S_SELECT
 		editor.video()
+            end
+        f_timeline.extra.on_activate =
+            function()
+		input_mode = S_SELECT
+                local caption = f_timeline:find_child("caption").text
+		if(dropdown_map[caption]) then dropdown_map[caption]() end
             end
         f_widget.extra.on_activate =
             function()

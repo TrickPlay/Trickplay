@@ -111,37 +111,40 @@ end
 
 local icon_map = 
 {
-	["LEFT SIDE      "] = function() icon = icon_l return icon end, 
-        ["RIGHT SIDE    "] = function() icon = icon_r return icon end, 
-        ["TOP             "] = function() icon = icon_t return icon end, 
-        ["BOTTOM        "] = function() icon = icon_b return icon end, 
-        ["HORIZ. CENTER   "] = function() icon = icon_hc return icon end, 
-        ["VERT. CENTER    "] = function() icon = icon_vc return icon end, 
-        ["HORIZONTALLY	  "] = function() icon = icon_dhc return icon end,  
-        ["VERTICALLY 	  "] = function() icon = icon_dvc return icon end 
+	["Left Side      "] = function() icon = icon_l return icon end, 
+        ["Right Side    "] = function() icon = icon_r return icon end, 
+        ["Top             "] = function() icon = icon_t return icon end, 
+        ["Bottom        "] = function() icon = icon_b return icon end, 
+        ["HORIZ. Center   "] = function() icon = icon_hc return icon end, 
+        ["VERT. Center    "] = function() icon = icon_vc return icon end, 
+        ["Horizontally	  "] = function() icon = icon_dhc return icon end,  
+        ["Vertically 	  "] = function() icon = icon_dvc return icon end 
 }
 
 local item_map = 
 {
-        ["UNDO".."\t\t\t".."[U]"]   = function()  return "undo" end,
-     	["REDO".."\t\t\t".."[E]"]   = function()  return "redo" end,
-     	["CLONE".."\t\t\t".."[C]"]   = function() return "clone" end,
-     	["DELETE".."\t\t     ".."[Del]"]   = function() return "delete" end,
-     	["GROUP".."\t\t\t".."[G]"]   = function() return "group" end,
-     	["UNGROUP".."\t\t\t"..""]   = function() return "ungroup" end,
-	["LEFT SIDE      "] = function() return "left" end, 
-        ["RIGHT SIDE    "] = function() return "right" end, 
-        ["TOP             "] = function() return "top" end, 
-        ["BOTTOM        "] = function() return "bottom" end, 
-        ["HORIZ. CENTER   "] = function() return "hcenter" end, 
-        ["VERT. CENTER    "] = function() return "vcenter" end, 
-        ["HORIZONTALLY	  "] = function() return "hspace" end,  
-        ["VERTICALLY 	  "] = function() return "vspace" end,
-	["BRING TO FRONT"] = function() return "bring_front" end,
-        ["BRING FORWARD "] = function() return "bring_forward" end,
-        ["SEND TO BACK "] = function() return "send_back" end,
-        ["SEND BACKWARD "] = function() return "send_backward"end,
-	["Background Image        "] = function() return "bgimage" end
+        ["Undo".."\t\t\t".."[U]"]   = function()  return "undo" end,
+     	["Redo".."\t\t\t".."[E]"]   = function()  return "redo" end,
+     	["Clone".."\t\t\t".."[C]"]   = function() return "clone" end,
+     	["Delete".."\t\t     ".."[Del]"]   = function() return "delete" end,
+     	["Group".."\t\t\t".."[G]"]   = function() return "group" end,
+     	["UnGroup".."\t\t\t"..""]   = function() return "ungroup" end,
+     	["Timeline".."\t\t\t".."[J]"]   = function() return "tline" end,
+     	["Timeline Show".."\t".."[J]"]   = function() return "tline" end,
+     	["Timeline Hide".."\t\t".."[J]"]   = function() return "tline" end,
+	["Left Side      "] = function() return "left" end, 
+        ["Right Side    "] = function() return "right" end, 
+        ["Top             "] = function() return "top" end, 
+        ["Bottom        "] = function() return "bottom" end, 
+        ["HORIZ. Center   "] = function() return "hcenter" end, 
+        ["VERT. Center    "] = function() return "vcenter" end, 
+        ["Horizontally	  "] = function() return "hspace" end,  
+        ["Vertically 	  "] = function() return "vspace" end,
+	["Bring To Front"] = function() return "bring_front" end,
+        ["Bring Forward "] = function() return "bring_forward" end,
+        ["Send To Back "] = function() return "send_back" end,
+        ["Send Backward "] = function() return "send_backward"end,
+	["Reference Image        "] = function() return "bgimage" end
 }
 
    
@@ -206,16 +209,18 @@ function factory.make_text_menu_item( assets , caption )
     local focus = assets( "assets/button-focus.png" )
     local text_category, line_category
     
-    if (caption == "TEXT"..ITEM_SPACE.."[T]") then 
-	text_category = Text{ text = "INSERT : "}:set(STYLE)
+    if (caption == "Text".."\t\t\t\t".."[T]") then 
+	text_category = Text{ text = "Insert : "}:set(STYLE)
     elseif (caption == "LEFT SIDE      ") then
-	text_category = Text{ text = "ALIGN : "}:set(STYLE)
-    elseif (caption == "HORIZONTALLY	  ") then
-	text_category = Text{ text = "DISTRIBUTE : "}:set(STYLE)
-    elseif (caption ==  "BRING TO FRONT" ) then 
-	text_category = Text{ text = "ARRANGE : "}:set(STYLE)
-    elseif ( caption == "DELETE".."\t\t     ".."[Del]") then
+	text_category = Text{ text = "Align : "}:set(STYLE)
+    elseif (caption == "Horizontally	  ") then
+	text_category = Text{ text = "Distribute : "}:set(STYLE)
+    elseif (caption ==  "Bring To Front" ) then 
+	text_category = Text{ text = "Arrange : "}:set(STYLE)
+    elseif ( caption == "Delete".."\t\t     ".."[Del]") then
 	line_category = make_line()
+    elseif (caption == "Reference Image        ") then
+	text_category = Text{ text = "Transparency Grid : "}:set(STYLE)
     end 
         
     if text_category ~= nil then 
@@ -531,6 +536,7 @@ local color_map =
         [ "LoadingDots" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "LoadingBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "MenuBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "DropDown" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "3D_List" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ScrollImage" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "TabBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,

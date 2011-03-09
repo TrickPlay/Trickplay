@@ -24,18 +24,18 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["LEFT SIDE      "]   = function() editor.left() input_mode = S_SELECT end,
-        ["RIGHT SIDE    "]   = function() editor.right() input_mode = S_SELECT end,
-        ["TOP             "]= function() editor.top() input_mode = S_SELECT end,
-        ["BOTTOM        "] = function() editor.bottom() input_mode = S_SELECT end,
-        ["HORIZ. CENTER   "] = function() editor.hcenter() input_mode = S_SELECT end,
-        ["VERT. CENTER    "] = function() editor.vcenter() input_mode = S_SELECT end,
-        ["HORIZONTALLY	  "] = function() editor.hspace() input_mode = S_SELECT end,
-        ["VERTICALLY 	  "] = function() editor.vspace() input_mode = S_SELECT end,
-        ["BRING TO FRONT"] = function() editor.bring_to_front() input_mode = S_SELECT end,
-        ["BRING FORWARD "] = function() editor.bring_forward() input_mode = S_SELECT end,
-        ["SEND TO BACK "] = function() editor.send_to_back() input_mode = S_SELECT end,
-        ["SEND BACKWARD "] = function() editor.send_backward() input_mode = S_SELECT end
+	["Left Side      "]   = function() editor.left() input_mode = S_SELECT end,
+        ["Right Side    "]   = function() editor.right() input_mode = S_SELECT end,
+        ["Top             "]= function() editor.top() input_mode = S_SELECT end,
+        ["Bottom        "] = function() editor.bottom() input_mode = S_SELECT end,
+        ["HORIZ. Center   "] = function() editor.hcenter() input_mode = S_SELECT end,
+        ["VERT. Center    "] = function() editor.vcenter() input_mode = S_SELECT end,
+        ["Horizontally	  "] = function() editor.hspace() input_mode = S_SELECT end,
+        ["Vertically 	  "] = function() editor.vspace() input_mode = S_SELECT end,
+        ["Bring To Front"] = function() editor.bring_to_front() input_mode = S_SELECT end,
+        ["Bring Forward "] = function() editor.bring_forward() input_mode = S_SELECT end,
+        ["Send To Back "] = function() editor.send_to_back() input_mode = S_SELECT end,
+        ["Send Backward "] = function() editor.send_backward() input_mode = S_SELECT end
      }
     local function build_dropdown_ui()
     
@@ -49,18 +49,18 @@ function( section )
     
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
-        local f_left  = factory.make_text_menu_item( assets , ui.strings[ "LEFT SIDE      " ] )
-        local f_right  = factory.make_text_menu_item( assets , ui.strings[ "RIGHT SIDE    " ] )
-        local f_top  = factory.make_text_menu_item( assets , ui.strings[ "TOP             " ] )
-        local f_bottom = factory.make_text_menu_item( assets , ui.strings[ "BOTTOM        " ] )
-        local f_hcenter  = factory.make_text_menu_item( assets , ui.strings[ "HORIZ. CENTER   " ] )
-        local f_vcenter = factory.make_text_menu_item( assets , ui.strings[ "VERT. CENTER    " ] )
-        local f_hspace = factory.make_text_menu_item( assets , ui.strings[ "HORIZONTALLY	  " ] )
-        local f_vspace = factory.make_text_menu_item( assets , ui.strings[ "VERTICALLY 	  " ] )
-        local f_bring_to_front  = factory.make_text_menu_item( assets , ui.strings[ "BRING TO FRONT" ] )
-        local f_bring_forward = factory.make_text_menu_item( assets , ui.strings[ "BRING FORWARD "] )
-        local f_send_to_back = factory.make_text_menu_item( assets , ui.strings[ "SEND TO BACK " ] )
-        local f_send_backward = factory.make_text_menu_item( assets , ui.strings[ "SEND BACKWARD " ] )
+        local f_left  = factory.make_text_menu_item( assets , ui.strings[ "Left Side      " ] )
+        local f_right  = factory.make_text_menu_item( assets , ui.strings[ "Right Side    " ] )
+        local f_top  = factory.make_text_menu_item( assets , ui.strings[ "Top             " ] )
+        local f_bottom = factory.make_text_menu_item( assets , ui.strings[ "Bottom        " ] )
+        local f_hcenter  = factory.make_text_menu_item( assets , ui.strings[ "HORIZ. Center   " ] )
+        local f_vcenter = factory.make_text_menu_item( assets , ui.strings[ "VERT. Center    " ] )
+        local f_hspace = factory.make_text_menu_item( assets , ui.strings[ "Horizontally	  " ] )
+        local f_vspace = factory.make_text_menu_item( assets , ui.strings[ "Vertically 	  " ] )
+        local f_bring_to_front  = factory.make_text_menu_item( assets , ui.strings[ "Bring To Front" ] )
+        local f_bring_forward = factory.make_text_menu_item( assets , ui.strings[ "Bring Forward "] )
+        local f_send_to_back = factory.make_text_menu_item( assets , ui.strings[ "Send To Back " ] )
+        local f_send_backward = factory.make_text_menu_item( assets , ui.strings[ "Send Backward " ] )
         
         --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
