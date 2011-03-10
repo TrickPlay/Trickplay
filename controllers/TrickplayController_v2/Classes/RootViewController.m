@@ -30,7 +30,7 @@
     
     // Initialize the NSNetServiceBrowser stuff
     netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
-    
+        
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
@@ -57,6 +57,8 @@
     [gestureViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
     [gestureViewController startService];
     */
+    
+    [netServiceManager stop];
     [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
     if ([appBrowserViewController fetchApps]) {
         [appBrowserViewController.theTableView reloadData];
@@ -111,7 +113,6 @@
       willShowViewController:(UIViewController *)viewController 
                     animated:(BOOL)animated {
     NSLog(@"navigation controller tag = %d", viewController.view.tag);
-    NSLog(@"navigation controller tag = %d", self.view.tag);
 
     // if popping back to self, release everything else
     if (viewController.view.tag == self.view.tag) {
@@ -123,13 +124,14 @@
             [appBrowserViewController release];
             appBrowserViewController = nil;
         }
+        [netServiceManager start];
     }
     // if popping back to app browser
     else if (viewController.view.tag == appBrowserViewController.view.tag) {
         [appBrowserViewController fetchApps];
         [appBrowserViewController.theTableView reloadData];
+        appBrowserViewController.pushingViewController = NO;
     }
-
     
     [self reloadData];
 }

@@ -30,6 +30,10 @@ NSNetServiceDelegate> {
 
 - (id)initWithDelegate:(id)client;
 
+- (void)stop;
+- (void)start;
+- (void)stopCurrentService;
+
 - (void)handleError:(NSNumber *)error domain:(NSString *)domain;
 
 @property (retain) NSNetService *currentService;

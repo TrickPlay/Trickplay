@@ -30,16 +30,27 @@
         services = [[NSMutableArray alloc] init];
         netServiceBrowser = [[NSNetServiceBrowser alloc] init];
         netServiceBrowser.delegate = self;
-        [netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp" inDomain:@""];
+        //[netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp" inDomain:@""];
     }
     
     return self;
 }
 
+- (void)stop {
+    [self stopCurrentService];
+    [netServiceBrowser stop];
+    [services removeAllObjects];
+}
+
+- (void)start {
+    [self stop];
+    [netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp" inDomain:@""];
+}
 
 - (void)stopCurrentService {
     if (currentService){
         [currentService stop];
+        [currentService release];
     }
 	currentService = nil;
 }
@@ -106,8 +117,7 @@
 	// If a service went away, stop resolving it if it's currently being resolved,
 	// remove it from the list and update the table view if no more events are queued.
 	if (self.currentService && [service isEqual:currentService]) {
-		[currentService stop];
-        currentService = nil;
+		[self stopCurrentService];
 	}
 	[self.services removeObject:service];
 	
@@ -148,6 +158,7 @@
         [currentService release];
     }
     [services release];
+    [netServiceBrowser stop];
     [netServiceBrowser release];
     [super dealloc];
 }

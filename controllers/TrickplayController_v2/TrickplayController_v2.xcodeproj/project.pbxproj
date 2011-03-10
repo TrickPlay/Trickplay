@@ -15,7 +15,7 @@
 		28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* RootViewController.m */; };
 		28F335F11007B36200424DE2 /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28F335F01007B36200424DE2 /* RootViewController.xib */; };
 		CD6229271326B91D003AB721 /* Default~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CD6229261326B91D003AB721 /* Default~ipad.png */; };
-		CD62293D1326BCBC003AB721 /* background~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background~ipad.png */; };
+		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CD62295A1326C331003AB721 /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD6229591326C331003AB721 /* Default~iphone.png */; };
 		CD62297A1326CCFC003AB721 /* Default@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CD6229791326CCFC003AB721 /* Default@2x~iphone.png */; };
 		CDFEBB66130A498600A14307 /* iOS-logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */; };
@@ -56,7 +56,7 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TrickplayController_v2-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayController_v2-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		CD6229261326B91D003AB721 /* Default~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default~ipad.png"; sourceTree = "<group>"; };
-		CD62293C1326BCBC003AB721 /* background~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~ipad.png"; sourceTree = "<group>"; };
+		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CD6229591326C331003AB721 /* Default~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default~iphone.png"; path = "../Default~iphone.png"; sourceTree = "<group>"; };
 		CD6229791326CCFC003AB721 /* Default@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x~iphone.png"; path = "../Default@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB5F130A498600A14307 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iOS-logo-57x57.png"; sourceTree = "<group>"; };
@@ -194,7 +194,7 @@
 			isa = PBXGroup;
 			children = (
 				CD6229261326B91D003AB721 /* Default~ipad.png */,
-				CD62293C1326BCBC003AB721 /* background~ipad.png */,
+				CD62293C1326BCBC003AB721 /* background.png */,
 				CDFEBB6E130A498C00A14307 /* iOS-logo-72x72.png */,
 				CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */,
 			);
@@ -332,7 +332,7 @@
 				CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */,
 				CDFEC3F8131F1BB200A14307 /* AppBrowserViewController.xib in Resources */,
 				CD6229271326B91D003AB721 /* Default~ipad.png in Resources */,
-				CD62293D1326BCBC003AB721 /* background~ipad.png in Resources */,
+				CD62293D1326BCBC003AB721 /* background.png in Resources */,
 				CD62295A1326C331003AB721 /* Default~iphone.png in Resources */,
 				CD62297A1326CCFC003AB721 /* Default@2x~iphone.png in Resources */,
 			);
