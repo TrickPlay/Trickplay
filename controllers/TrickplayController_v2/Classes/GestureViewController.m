@@ -414,9 +414,9 @@
     //backgroundView.image = [UIImage imageNamed:@"background.png"];
     
     styleAlert = [[UIActionSheet alloc] initWithTitle:@"TrickPlay Multiple Choice"
-                                              delegate:self cancelButtonTitle:nil
-                                destructiveButtonTitle:nil
-                                     otherButtonTitles:nil];
+                                             delegate:self cancelButtonTitle:nil
+                               destructiveButtonTitle:nil
+                                    otherButtonTitles:nil];
     
     multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
     
@@ -479,6 +479,7 @@
     [loadingIndicator release];
     [theTextField release];
     [backgroundView release];
+    
     [super dealloc];
 }
 

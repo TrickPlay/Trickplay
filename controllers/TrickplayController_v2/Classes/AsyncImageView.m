@@ -51,7 +51,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)theConnection {
-    NSLog(@"Connection did finish loading");
+    NSLog(@"Connection did finish loading %@", resourceKey);
     [connection cancel];
     [connection release];
     connection = nil;
@@ -80,6 +80,10 @@
     [loadingIndicator removeFromSuperview];
 }
 
+- (void)connection:(NSURLConnection *)theConnection didFailWithError:(NSError *)error {
+    NSLog(@"Image did fail with error: %@", error);
+}
+
 - (UIImageView *)imageView {
     return [[self subviews] objectAtIndex:0];
 }
@@ -102,6 +106,7 @@
         dataCacheDelegate = nil;
     }
     //*/
+    
     [super dealloc];
 }
 

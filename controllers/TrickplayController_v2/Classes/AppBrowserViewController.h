@@ -26,6 +26,8 @@ UITableViewDataSource> {
     GestureViewController *gestureViewController;
     
     NSString *currentAppName;
+    
+    BOOL pushingViewController;
 }
 /*
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *appShopButton;
@@ -35,6 +37,7 @@ UITableViewDataSource> {
 @property (retain) IBOutlet UITableView *theTableView;
 @property (retain) NSArray *appsAvailable;
 @property (nonatomic, retain) NSString *currentAppName;
+@property (nonatomic, assign) BOOL pushingViewController;
 
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;

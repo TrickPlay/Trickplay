@@ -14,6 +14,7 @@
 @synthesize theTableView;
 @synthesize appsAvailable;
 @synthesize currentAppName;
+@synthesize pushingViewController;
 
 /*
 @synthesize appShopButton;
@@ -79,7 +80,6 @@
 }
 
 - (void)launchApp:(NSDictionary *)appInfo {
-    
     NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
     NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", hostName, port, appID];
     NSLog(@"Launching app via url '%@'", launchString);
@@ -92,6 +92,13 @@
 
 - (void)createGestureView {
     gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
+    
+    CGFloat
+    x = self.view.frame.origin.x,
+    y = self.view.frame.origin.y,
+    width = self.view.frame.size.width,
+    height = self.view.frame.size.height;
+    gestureViewController.view.frame = CGRectMake(x, y, width, height);
     [gestureViewController setupService:port hostname:hostName thetitle:@"Current Service"];
     if (![gestureViewController startService]) {
         [gestureViewController release];
@@ -106,6 +113,7 @@
     NSLog(@"AppBrowserView Loaded!");
     
     [theTableView setDelegate:self];
+    pushingViewController = NO;
     //NSLog(@"theTableView %@", theTableView);
     //NSLog(@"appShopButton %@", appShopButton);
     //NSLog(@"showcaseButton %@", showcaseButton);
@@ -135,15 +143,7 @@
  * Customize the number of rows in the table view.
  */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	/*
-	NSUInteger count = [netServiceManager.services count];
-	if (count == 0) {
-		return 1;
-	}
-    
-	return count;
-     */
-    if (!appsAvailable || [appsAvailable count] == 0) {
+	if (!appsAvailable || [appsAvailable count] == 0) {
         return 1;
     }
     return [appsAvailable count];
@@ -228,7 +228,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSLog(@"Selected row %@\n", indexPath);
     
-    if (!appsAvailable || [appsAvailable count] == 0) {
+    if (!appsAvailable || [appsAvailable count] == 0 || pushingViewController) {
         return;
     }
     
@@ -242,6 +242,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [gestureViewController clean];
         [self launchApp:(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row]];
     }
+    pushingViewController = YES;
     [self.navigationController pushViewController:gestureViewController animated:YES];    
     
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
@@ -283,6 +284,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentAppName) {
         [currentAppName release];
     }
+    if (hostName) {
+        [hostName release];
+    }
+    
     [super dealloc];
 }
 
