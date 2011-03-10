@@ -423,7 +423,6 @@ function editor.n_selected(obj, call_by_inspector)
 end  
 
 function editor.close()
-
 	clear_bg()
         if(g.extra.video ~= nil) then 
 	    g.extra.video = nil
@@ -1126,6 +1125,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    attr_n = attr_t[i][1] 
 	    attr_v = attr_t[i][2] 
 	    attr_s = attr_t[i][3] 
+
             attr_v = tostring(attr_v)
 
 	    if(attr_s == nil) then attr_s = "" end 

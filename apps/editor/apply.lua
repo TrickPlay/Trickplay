@@ -62,6 +62,9 @@ function inspector_apply (v, inspector)
        ["vert_arrow_x"] = function()
 	       v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
 		end,
+       ["reactive"] = function()
+	       v.extra.reactive = toboolean(item_group:find_child("reactive"):find_child("input_text").text)
+	       end,
       }       
 
       if is_this_widget(v) == true  then
@@ -77,17 +80,18 @@ function inspector_apply (v, inspector)
       for i, j in pairs(item_group.children) do 
 	  
 	   if j.name then
-	      if j.name == "editable" then 
-                     v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
-              elseif (attr_map[j.name]) then
+	      --if j.name == "editable" then 
+                     --v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
+              if (attr_map[j.name]) then
                      attr_map[j.name]()
               elseif(v[j.name] ~= nil)then 
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
                             v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
                      else 
-                            v[j.name] = item_group:find_child(j.name):find_child("input_text").text
-			    if v[j.name] == "true" or v[j.name] == "false" then
+			    if v[j.name] == true or v[j.name] == false then
 				v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
+			    else 
+                                v[j.name] = tostring(item_group:find_child(j.name):find_child("input_text").text)
 			    end 
                      end
 	      elseif string.find(j.name,"color") then
@@ -124,13 +128,15 @@ function inspector_apply (v, inspector)
                             local clip_t = {}
                             local clip_use = toboolean(item_group:find_child("clip_use"):find_child("input_text").text)
                             if (clip_use == true) then 
+				print("nonono")
                                    clip_t[1] = item_group:find_child("cx"):find_child("input_text").text
                                    clip_t[2] = item_group:find_child("cy"):find_child("input_text").text
                                    clip_t[3] = item_group:find_child("cw"):find_child("input_text").text
                                    clip_t[4] = item_group:find_child("ch"):find_child("input_text").text
                                    v.clip = clip_t
                             else 
-                                   v.clip = {0,0, v.w, v.h}
+				  print ("hhihihihihi")
+                                   v.clip = nil
                             end
                      end 	
 		elseif j.name == "bw" or j.name == "bh" then

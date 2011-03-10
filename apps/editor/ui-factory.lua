@@ -1824,7 +1824,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              return group
 	elseif item_n == "message" then 
 	     input_box_width = WIDTH 
-	     
         else  
     	     text = Text {name = "attr", text = item_s}:set(STYLE)
              text.position  = {WIDTH - space , PADDING_Y}

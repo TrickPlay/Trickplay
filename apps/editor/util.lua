@@ -484,8 +484,10 @@ function make_attr_t(v)
                 local clip_t = v.clip
                 if clip_t == nil then
                      clip_t = {0,0 ,v.w, v.h}
+                     table.insert(attr_t, {"clip_use", false, "Use"})
+		else 
+                     table.insert(attr_t, {"clip_use", true, "Use"})
                 end
-                table.insert(attr_t, {"clip_use", false, "Use"})
                 table.insert(attr_t, {"cx", clip_t[1], "X"})
                 table.insert(attr_t, {"cy", clip_t[2], "Y"})
                 table.insert(attr_t, {"cw", clip_t[3], "W"})
@@ -565,7 +567,7 @@ function make_attr_t(v)
        ["ScrollImage"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point"} end,
        ["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point"} end,
        --["DropDown"] = function() return {"skin", "font","items"
-       ["DropDown"] = function() return {"skin", "font", "item_spacing", "item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up",} end,
+       ["DropDown"] = function() return {"skin", "font", "item_spacing", "item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive", "focus"} end,
    }
   
   if is_this_widget(v) == true  then
@@ -621,14 +623,28 @@ function make_attr_t(v)
   
   for i,j in pairs(obj_map[obj_type]()) do 
 		
+	if (j == "message") then 
+	print (j)
+	end 
        	if attr_map[j] then
              attr_map[j](j)
         elseif type(v[j]) == "number" then 
              table.insert(attr_t, {j, math.floor(v[j]), stringTotitle(j)})
 	elseif type(v[j]) == "string" then 
+	     if j == "message" then 
+             table.insert(attr_t, {"caption", stringTotitle(j)})
+	     end 
              table.insert(attr_t, {j, v[j], stringTotitle(j)})
 	elseif type(v[j]) == "boolean" then 
-             table.insert(attr_t, {j, v[j], stringTotitle(j)})
+	     if j == "reactive" then 
+		  if v.extra.reactive ~= nil then 
+                       table.insert(attr_t, {j, v.extra.reactive, stringTotitle(j)})
+		  else 
+                       table.insert(attr_t, {j, true, stringTotitle(j)})
+		  end 
+	     else 
+                  table.insert(attr_t, {j, v[j], stringTotitle(j)})
+	     end 
 	elseif string.find(j,"color") then
              attr_map["color"](j)
 	elseif string.find(j,"size") then
@@ -709,7 +725,11 @@ function itemTostring(v, d_list, t_list)
 	      elseif type(v[j]) == "string" then 
 	          item_string = item_string..head..j.." = \""..v[j].."\""..tail 
 	      elseif type(v[j]) == "boolean" then 
-	          item_string = item_string..head..j.." = "..tostring(v[j])..tail 
+		  if j == "reactive" then 
+		       item_string = item_string..head..j.." = "..tostring(v.extra.reactive)..tail
+		  else 
+	               item_string = item_string..head..j.." = "..tostring(v[j])..tail 
+		  end 
 	      elseif type(v[j]) == "table" then 
 		  if(type(v[j][1]) == "table") then  
 			local tiles_name_table = {} 
@@ -749,7 +769,7 @@ function itemTostring(v, d_list, t_list)
     end 
   
     if (v.type == "Image") then
-	if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
+	--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
 	 src = v.source 
 	 if is_in_list(src.name, d_list) == false then  --> need debugging this line :(
@@ -831,6 +851,7 @@ function itemTostring(v, d_list, t_list)
          itm_str = itm_str.."}\n\n"
     end
 
+    if v.extra then 
     if v.extra.focus then 
 	itm_str = itm_str..v.name.."\.extra\.focus = {" 
 	for m,n in pairs (v.extra.focus) do 
@@ -854,6 +875,9 @@ function itemTostring(v, d_list, t_list)
         .."end\n\n"
     end 
 
+    if v.extra.reactive ~= nil then 
+	itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
+    end 
 
     if v.extra.timeline then 
 	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 
@@ -875,6 +899,8 @@ function itemTostring(v, d_list, t_list)
 	    end 
 	    itm_str = itm_str.."}\n\n"
     end 
+
+    end -- if v.extra then 
 
     if(d_list == nil) then  
 	d_list = {v.name}
