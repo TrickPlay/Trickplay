@@ -125,12 +125,20 @@ public:
         return NULL;
     }
 
+    static void ref_counted_destroy( gpointer rc )
+    {
+        RefCounted::unref( ( RefCounted * ) rc );
+    }
+
 protected:
 
     virtual ~RefCounted()
     {}
 
 private:
+
+    RefCounted( const RefCounted & )
+    {}
 
     gint ref_count;
 };
