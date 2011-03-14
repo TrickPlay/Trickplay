@@ -342,7 +342,7 @@ function Make_Bar(loc,index)
         if error_str then
             location.text =""
             err_msg.text=error_str
-            if 
+             
         end
     end
     
