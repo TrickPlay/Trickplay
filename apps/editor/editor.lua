@@ -534,7 +534,7 @@ end
 local function cleanMsgWin(msgw)	
      msgw.children = {}
      screen:remove(msgw)
-     input_mode = S_SELECT
+     --input_mode = S_SELECT 
 end 
 
 function editor.the_image()
@@ -1184,7 +1184,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- inspector scroll function 
 	if v.extra then 
-	       si = widget.scrollWindow{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} 
+	       si = ui_element.scrollPane{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} 
 	       si.content = item_group
 	       si.position = {0,82,0}
 	       si.name ="si"
@@ -1413,7 +1413,7 @@ function editor.save(save_current_f)
 
         local timeline = screen:find_child("timeline")
 	if timeline then
-	      contents = contents .."local timeline = widget.timeline { \n\tpoints = {" 
+	      contents = contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
 	      for m,n in orderedPairs (timeline.points) do 
 		    contents = contents.."["..tostring(m).."] = {"
 		    for q,r in pairs (n) do
@@ -1470,7 +1470,7 @@ function editor.save(save_current_f)
 
 	     local timeline = screen:find_child("timeline")
 	     if timeline then
-	          contents = contents .."local timeline = widget.timeline { \n\tpoints = {" 
+	          contents = contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
 	          for m,n in orderedPairs(timeline.points) do 
 		         contents = contents.."["..tostring(m).."] = {"
 			    for q,r in pairs (n) do
@@ -1626,7 +1626,7 @@ function editor.undo()
 	  elseif undo_item[2] == DEL then 
 	       editor.n_selected(undo_item[3])
 	       if((undo_item[3]).type == "Group") then 
-		    if is_in_list(undo_item[3].extra.type, widgets) == false then 
+		    if is_in_list(undo_item[3].extra.type, uiElements) == false then 
 		        for i, c in pairs(undo_item[3].extra.children) do
 				local c_tmp = g:find_child(c)
 				editor.n_selected(c_tmp)
@@ -1996,7 +1996,7 @@ function editor.ugroup()
 				---[[ 0128 : added for nested group 
         				if(c.type == "Group") then 
 	       				   for j, cc in pairs (c.children) do
-						if is_in_list(c.extra.type, widgets) == false then 
+						if is_in_list(c.extra.type, uiElements) == false then 
                     				cc.reactive = true
 		    				cc.extra.is_in_group = true
 						--print("KKKKKK 55555")
@@ -2751,31 +2751,51 @@ function editor.bring_forward()
     input_mode = S_SELECT
 end
 
-local widget_map = {
-     ["Button"]         = function () return widget.button()       end, 
-     ["TextInputField"] = function () return widget.textField()    end, 
-     ["DialogBox"]      = function () return widget.dialogBox()    end, 
-     ["ToastBox"]       = function () return widget.toastBox()     end,   
-     ["RadioButton"]    = function () return widget.radioButton()  end, 
-     ["CheckBox"]       = function () return widget.checkBox()     end, 
-     ["ButtonPicker"]   = function () return widget.buttonPicker() end, 
-     ["LoadingDots"]    = function () return widget.loadingdots()  end, 
-     ["LoadingBar"]     = function () return widget.loadingbar()   end,
-     ["DropDown"]       = function () return widget.dropDownBar()  end,
-     ["MenuBar"]        = function () return widget.menuBar()      end,
-     ["3D_List"]        = function () return widget.threeDlist()   end,
-     ["ScrollImage"]    = function () return widget.scrollWindow() end, 
-     ["TimeLine"]	= function () return widget.timeline()     end,
+local widget_f_map = {
+     ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() print(input_mode, "Rectangle...") end, 
+     ["Text"]		= function () editor.text() input_mode = S_SELECT end, 
+     ["Image"]		= function () input_mode = S_SELECT  editor.the_image() end, 	
+     ["Video"] 		= function () input_mode = S_SELECT editor.video() end,
+     ["Button"]         = function () return ui_element.button()       end, 
+     ["TextInput"] = function () return ui_element.textInput()    end, 
+     ["DialogBox"]      = function () return ui_element.dialogBox()    end, 
+     ["ToastAlert"]       = function () return ui_element.toastAlert()     end,   
+     ["RadioButton"]    = function () return ui_element.radioButton()  end, 
+     ["CheckBox"]       = function () return ui_element.checkBox()     end, 
+     ["ButtonPicker"]   = function () return ui_element.buttonPicker() end, 
+     ["ProgressSpinner"]    = function () return ui_element.progressSpinner()  end, 
+     ["ProgressBar"]     = function () return ui_element.progressBar()   end,
+     ["MenuButton"]       = function () return ui_element.menuButton()  end,
+     ["MenuBar"]        = function () return ui_element.menuBar()      end,
+     ["LayoutManager"]        = function () return ui_element.layoutManager()   end,
+     ["ScrollPane"]    = function () return ui_element.scrollPane() end, 
+     ["ArrowPane"]    = function () return ui_element.arrowPane() end, 
+}
+
+local widget_n_map = {
+     ["Button"]         = function () return "Button" end, 
+     ["TextInput"] = function () return "Text Input" end, 
+     ["DialogBox"]      = function () return "Dialog Box" end, 
+     ["ToastAlert"]       = function () return "Toast Alert" end,   
+     ["RadioButton"]    = function () return "Radio Button" end, 
+     ["CheckBox"]       = function () return "Checkbox" end, 
+     ["ButtonPicker"]   = function () return "Button Picker" end, 
+     ["ProgressSpinner"]    = function () return "Progress Spinner" end, 
+     ["ProgressBar"]     = function () return "Progress Bar" end,
+     ["MenuButton"]       = function () return "Menu Button" end,
+     ["LayoutManager"]        = function () return "Layout Manager" end,
+     ["ScrollPane"]    = function () return "Scroll Pane" end, 
+     ["ArrowPane"]    = function () return "Arrow Pane" end, 
 }
 
 
-function editor.widgets()
-    local WIDTH = 500
+function editor.ui_elements()
+    local WIDTH = 600
     local L_PADDING = 20
     local R_PADDING = 50
     local TOP_PADDING = 60
     local BOTTOM_PADDING = 12
-    local Y_PADDING = 10 
+    local Y_PADDING = 5
     local X_PADDING = 10
     local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
     local space = WIDTH
@@ -2788,10 +2808,10 @@ function editor.widgets()
          children =
          {
           msgw_bg,
-	  xbox:set{position = {465, 40}},
+	  xbox:set{position = {555, 40}},
          }
     }
-    local widgets_list = Text {name = "w_list", text = "Widgets List"}:set(STYLE)
+    local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
     local text_g
 
     cur_w= (WIDTH - widgets_list.w)/2
@@ -2804,12 +2824,132 @@ function editor.widgets()
     cur_w = L_PADDING
     cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
 
-    for i, v in pairs(widgets) do
-         if (i == 9) then 
-              cur_w =  cur_w + 230
+    for i, v in pairs(uiElements_en) do 
+    	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
+--[[
+Function: buttonPicker
+
+Creates a button picker ui element
+
+Arguments:
+	Table of Button picker properties
+
+	skin - Modify the skin for the Button picker by changing this value
+    	bwidth - Width of the Button picker 
+    	bheight - Height of the Button picker 
+        items - A table containing the items for the Button picker
+    	font - Font of the Button picker items
+    	color - Color of the Button picker items
+		selected_item - The number of the selected item 
+		rotate_func - function that is called by selected item number   
+
+Return:
+ 		bp_group - Group containing the button picker 
+
+Extra Function:
+		on_focus_in() - Grab focus of button picker 
+		on_focus_out() - Release focus of button picker
+		press_left() - Left key press event, apply the selection of button picker
+		press_right() - Right key press event, apply the selection of button picker
+		press_up() - Up key press event, apply the selection of button picker
+		press_down() - Down key press event, apply the selection of button picker
+		press_enter() - Enter key press event, apply the selection of button picker
+		insert_item(item) - Add an item to the items table 
+		remove_item(item) - Remove an item from the items table 
+]]
+
+--[[
+Function: buttonPicker
+
+Creates a button picker ui element
+
+Arguments:
+	Table of Button picker properties
+
+	skin - Modify the skin for the Button picker by changing this value
+    	bwidth - Width of the Button picker 
+    	bheight - Height of the Button picker 
+        items - A table containing the items for the Button picker
+    	font - Font of the Button picker items
+    	color - Color of the Button picker items
+		selected_item - The number of the selected item 
+		rotate_func - function that is called by selected item number   
+
+Return:
+ 		bp_group - Group containing the button picker 
+
+Extra Function:
+		on_focus_in() - Grab focus of button picker 
+		on_focus_out() - Release focus of button picker
+		press_left() - Left key press event, apply the selection of button picker
+		press_right() - Right key press event, apply the selection of button picker
+		press_up() - Up key press event, apply the selection of button picker
+		press_down() - Down key press event, apply the selection of button picker
+		press_enter() - Enter key press event, apply the selection of button picker
+		insert_item(item) - Add an item to the items table 
+		remove_item(item) - Remove an item from the items table 
+]]
+
+	
+	 widget_b.position =  {cur_w, cur_h}
+    	 widget_b.name = v
+    	 widget_b.reactive = true
+
+	 cur_h = cur_h + widget_b.h 
+         msgw:add(widget_b)
+         
+         function widget_b:on_button_down(x,y,button,num_clicks)
+	      widget_f_map[v]() 
+	      cleanMsgWin(msgw)
+        end 
+
+        function widget_t:on_button_down(x,y,button,num_clicks)
+	      widget_f_map[v]() 
+	      cleanMsgWin(msgw)
+	end
+    end 
+--[[
+Function: buttonPicker
+
+Creates a button picker ui element
+
+Arguments:
+	Table of Button picker properties
+
+	skin - Modify the skin for the Button picker by changing this value
+    	bwidth - Width of the Button picker 
+    	bheight - Height of the Button picker 
+        items - A table containing the items for the Button picker
+    	font - Font of the Button picker items
+    	color - Color of the Button picker items
+		selected_item - The number of the selected item 
+		rotate_func - function that is called by selected item number   
+
+Return:
+ 		bp_group - Group containing the button picker 
+
+Extra Function:
+		on_focus_in() - Grab focus of button picker 
+		on_focus_out() - Release focus of button picker
+		press_left() - Left key press event, apply the selection of button picker
+		press_right() - Right key press event, apply the selection of button picker
+		press_up() - Up key press event, apply the selection of button picker
+		press_down() - Down key press event, apply the selection of button picker
+		press_enter() - Enter key press event, apply the selection of button picker
+		insert_item(item) - Add an item to the items table 
+		remove_item(item) - Remove an item from the items table 
+]]
+
+
+    for i, v in pairs(uiElements) do
+         if (i == 5) then 
+              cur_w =  cur_w + 280 + Y_PADDING
               cur_h =  TOP_PADDING + widgets_list.h + Y_PADDING
 	 end 
-	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
+	 
+	print(v, "*****")
+	 local widget_label = widget_n_map[v]() 
+	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , widget_label)
 
     	 widget_b.position =  {cur_w, cur_h}
     	 widget_b.name = v
@@ -2819,17 +2959,17 @@ function editor.widgets()
          msgw:add(widget_b)
          
          function widget_b:on_button_down(x,y,button,num_clicks)
-	      local new_widget = widget_map[v]() 
+	      local new_widget = widget_f_map[v]() 
 	      
 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget
-	      elseif (new_widget.extra.type == "TextInputField") then 
+	      elseif (new_widget.extra.type == "TextInput") then 
 		t=new_widget
 	      elseif (new_widget.extra.type == "DialogBox") then 
 		db=new_widget
-	      elseif (new_widget.extra.type == "ToastBox") then 
+	      elseif (new_widget.extra.type == "ToastAlert") then 
 		tb=new_widget
 	      elseif (new_widget.extra.type == "RadioButton") then 
 		rb=new_widget
@@ -2837,15 +2977,15 @@ function editor.widgets()
 		cb=new_widget
 	      elseif (new_widget.extra.type == "ButtonPicker") then 
 		bp=new_widget
-	      elseif (new_widget.extra.type == "LoadingDots") then 
+	      elseif (new_widget.extra.type == "ProgressSpinner") then 
 		ld=new_widget
-	      elseif (new_widget.extra.type == "LoadingBar") then 
+	      elseif (new_widget.extra.type == "ProgressBar") then 
 		lb=new_widget
-              elseif (new_widget.extra.type == "3D_List") then 
+              elseif (new_widget.extra.type == "LayoutManager") then 
 		d=new_widget
-         elseif (new_widget.extra.type == "ScrollImage") then 
+         elseif (new_widget.extra.type == "ScrollPane") then 
 		si=new_widget
-         elseif (new_widget.extra.type == "DropDown") then 
+         elseif (new_widget.extra.type == "MenuButton") then 
 		dd=new_widget
          elseif (new_widget.extra.type == "MenuBar") then 
 		mb=new_widget
@@ -2872,15 +3012,15 @@ function editor.widgets()
         end 
         function widget_t:on_button_down(x,y,button,num_clicks)
 
-	      local new_widget = widget_map[v]() 
+	      local new_widget = widget_f_map[v]() 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget
-	      elseif (new_widget.extra.type == "TextInputField") then 
+	      elseif (new_widget.extra.type == "TextInput") then 
 		t=new_widget
 	      elseif (new_widget.extra.type == "DialogBox") then 
 		db=new_widget
-	      elseif (new_widget.extra.type == "ToastBox") then 
+	      elseif (new_widget.extra.type == "ToastAlert") then 
 		tb=new_widget
 	      elseif (new_widget.extra.type == "RadioButton") then 
 		rb=new_widget
@@ -2888,15 +3028,15 @@ function editor.widgets()
 		cb=new_widget
 	      elseif (new_widget.extra.type == "ButtonPicker") then 
 		bp=new_widget
-	      elseif (new_widget.extra.type == "LoadingDots") then 
+	      elseif (new_widget.extra.type == "ProgressSpinner") then 
 		ld=new_widget
-	      elseif (new_widget.extra.type == "LoadingBar") then 
+	      elseif (new_widget.extra.type == "ProgressBar") then 
 		lb=new_widget
-              elseif (new_widget.extra.type == "3D_List") then 
+              elseif (new_widget.extra.type == "LayoutManager") then 
 		d=new_widget
-         elseif (new_widget.extra.type == "ScrollImage") then 
+         elseif (new_widget.extra.type == "ScrollPane") then 
 		si=new_widget
-         elseif (new_widget.extra.type == "DropDown") then 
+         elseif (new_widget.extra.type == "MenuButton") then 
 		dd=new_widget
          elseif (new_widget.extra.type == "MenuBar") then 
 		mb=new_widget
@@ -2927,7 +3067,7 @@ function editor.widgets()
          msgw:clear()
 	 screen:remove(msgw)
          screen.grab_key_focus(screen) 
-	 input_mode = S_SELECT
+	 --input_mode = S_SELECT
 	 return true
     end 
 

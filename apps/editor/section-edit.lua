@@ -28,17 +28,17 @@ function( section )
      {
      	["Undo".."\t\t\t".."[U]"]   = function() editor.undo() input_mode = S_SELECT end,
      	["Redo".."\t\t\t".."[E]"]   = function() editor.redo() input_mode = S_SELECT end,
-     	["Text".."\t\t\t\t".."[T]"]   = function() editor.text() input_mode = S_SELECT end,
-     	["Image".."\t\t\t".."[I]"]   = function() input_mode = S_SELECT editor.image()  end,
-     	["Rectangle".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
-     	["Video".."\t\t"..""]   = function() input_mode = S_SELECT editor.video() end,
+     	--["Text".."\t\t\t\t".."[T]"]   = function() editor.text() input_mode = S_SELECT end,
+     	--["Image".."\t\t\t".."[I]"]   = function() input_mode = S_SELECT editor.image()  end,
+     	--["Rectangle".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
+     	--["Video".."\t\t"..""]   = function() input_mode = S_SELECT editor.video() end,
      	["Timeline".."\t\t\t".."[J]"]   = function() input_mode = S_SELECT local tl = widget.timeline() screen:add(tl)
 						     screen:find_child("timeline").extra.show = true end,
-     	["Timeline Hide".."\t\t".."[J]"]   = function() screen:find_child("timeline"):hide() 
+     	["Hide Timeline".."\t\t".."[J]"]   = function() screen:find_child("timeline"):hide() 
 							screen:find_child("timeline").extra.show = false end,
-     	["Timeline Show".."\t".."[J]"]   = function() screen:find_child("timeline"):show() 
+     	["Show Timeline".."\t".."[J]"]   = function() screen:find_child("timeline"):show() 
 						      screen:find_child("timeline").extra.show = true end,
-     	["Widgets ...".."\t\t".."[W]"]   = function() input_mode = S_SELECT editor.widgets()  end,
+     	["Insert UI Elements  ".."".."[W]"]   = function() input_mode = S_SELECT editor.widgets()  end,
      	["Clone".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
      	["Delete".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
      	["Group".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
@@ -57,11 +57,11 @@ function( section )
     
         local f_undo   = factory.make_text_menu_item( assets , ui.strings[ "Undo".."\t\t\t".."[U]" ] )
         local f_redo   = factory.make_text_menu_item( assets , ui.strings[ "Redo".."\t\t\t".."[E]" ] )
-        local f_text   = factory.make_text_menu_item( assets , ui.strings[ "Text".."\t\t\t\t".."[T]" ] )
-        local f_image  = factory.make_text_menu_item( assets , ui.strings[ "Image".."\t\t\t".."[I]" ] )
-        local f_rect   = factory.make_text_menu_item( assets , ui.strings[ "Rectangle".."\t\t".."[R]" ] )
-        local f_video  = factory.make_text_menu_item( assets , ui.strings[ "Video".."\t\t".."" ] )
-        local f_widget = factory.make_text_menu_item( assets , ui.strings[ "Widgets ...".."\t\t".."[W]" ] )
+        --local f_text   = factory.make_text_menu_item( assets , ui.strings[ "Text".."\t\t\t\t".."[T]" ] )
+        --local f_image  = factory.make_text_menu_item( assets , ui.strings[ "Image".."\t\t\t".."[I]" ] )
+        --local f_rect   = factory.make_text_menu_item( assets , ui.strings[ "Rectangle".."\t\t".."[R]" ] )
+        --local f_video  = factory.make_text_menu_item( assets , ui.strings[ "Video".."\t\t".."" ] )
+        local f_widget = factory.make_text_menu_item( assets , ui.strings[ "Insert UI Elements  [W]" ] )
         local f_timeline = factory.make_text_menu_item( assets , ui.strings[ "Timeline".."\t\t\t".."[J]" ] )
         local f_clone  = factory.make_text_menu_item( assets , ui.strings[ "Clone".."\t\t\t".."[C]" ] )
         local f_delete = factory.make_text_menu_item( assets , ui.strings[ "Delete".."\t\t     ".."[Del]" ] )
@@ -71,10 +71,10 @@ function( section )
     
         table.insert( section_items , f_undo )
         table.insert( section_items , f_redo )
-        table.insert( section_items , f_text )
-        table.insert( section_items , f_image )
-        table.insert( section_items , f_rect )
-        table.insert( section_items , f_video )
+        --table.insert( section_items , f_text )
+        --table.insert( section_items , f_image )
+        --table.insert( section_items , f_rect )
+        --table.insert( section_items , f_video )
         table.insert( section_items , f_widget )
         table.insert( section_items , f_timeline )
         table.insert( section_items , f_delete)
@@ -111,9 +111,10 @@ function( section )
              end
        end
 
-        items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_timeline.h + f_widget.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
+        --items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_timeline.h + f_widget.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
+        items_height = items_height + f_undo.h + f_redo.h + f_timeline.h + f_widget.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
         
-
+--[[
         f_rect.extra.on_activate =
             function()
 		input_mode = S_RECTANGLE
@@ -134,6 +135,7 @@ function( section )
 		input_mode = S_SELECT
 		editor.video()
             end
+]]
         f_timeline.extra.on_activate =
             function()
 		input_mode = S_SELECT

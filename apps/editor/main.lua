@@ -198,11 +198,19 @@ local function build_ui( show_it )
 		     end 
 		end 
 		if option then 
-			if option == "Hide" then 
-			item:find_child("caption").text = "Timeline "..option.."\t\t".."[J]"
+		    if option == "Hide" then 
+			if item.name == "guideline" then 
+			    item:find_child("caption").text = option.." Lines"
 			else 
-			item:find_child("caption").text = "Timeline "..option.."\t".."[J]"
+			    item:find_child("caption").text = option.." Timeline\t\t".."[J]"
+			end 
+		    else 
+			if item.name == "guideline" then 
+			    item:find_child("caption").text = option.." Lines"
+			else 
+			    item:find_child("caption").text = option.." Timeline".."\t".."[J]"
 			end
+		    end
 		end 
 		item:find_child("caption").color = {255,255,255,255} 
 	end 
@@ -304,7 +312,18 @@ local function build_ui( show_it )
 		turn_on(section.dropdown:find_child("bring_forward"))
 		turn_on(section.dropdown:find_child("send_back"))
 		turn_on(section.dropdown:find_child("send_backward"))
-
+	     end 
+        elseif (ui.focus == SECTION_SETTING) then 
+             if screen:find_child("h_guideline"..tostring(h_guideline)) or 
+		screen:find_child("v_guideline"..tostring(v_guideline)) then 
+		if section.dropdown:find_child("guideline").extra.show ~= true then 
+		    turn_on(section.dropdown:find_child("guideline"), "Show") 
+		else 
+		    turn_on(section.dropdown:find_child("guideline"), "Hide")
+		end 
+	     else 
+		turn_off(section.dropdown:find_child("guideline"))
+		section.dropdown:find_child("guideline").extra.show = true
 	     end 
 	end 
     end 
@@ -435,9 +454,7 @@ local function build_ui( show_it )
         [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,
         [ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.the_image() end,
-        --[ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.image() end,
         [ keys.n	] = function() animate_out_dropdown() editor.close() input_mode = S_SELECT end,
-        --[ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.open()  end,
         [ keys.o	] = function() animate_out_dropdown() input_mode = S_SELECT editor.the_open()  end,
         [ keys.q	] = function() exit() end,
 	[ keys.r	] = function() animate_out_dropdown() input_mode = S_RECTANGLE screen:grab_key_focus() end,
@@ -466,7 +483,7 @@ local function build_ui( show_it )
 							      end,
         --[ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.export() input_mode = S_SELECT end,
-        [ keys.w	] = function() animate_out_dropdown() editor.widgets() input_mode = S_SELECT end,
+        [ keys.w	] = function() animate_out_dropdown() editor.ui_elements() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
 					    ui.button_focus:show()
         				    ui.bar:show()
@@ -613,7 +630,7 @@ local function build_ui( show_it )
         ["  File "]   = function() move_focus(SECTION_FILE) end,
         ["  Edit  "]  = function() move_focus(SECTION_EDIT) end,
         ["  Arrange"] = function() move_focus(SECTION_ARRANGE) end, 
-        ["  Settings"]    = function() move_focus(SECTION_SETTING ) end
+        ["  View"]    = function() move_focus(SECTION_SETTING ) end
     }
 
     local menu_button_second_down = false
