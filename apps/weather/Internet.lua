@@ -2,7 +2,7 @@
 -- This file handles all of the weather fetching from Weather Underground
 
 --http://wiki.wunderground.com/index.php/API_-_XML
-local fake_it = true--false
+local fake_it = false
 dofile("xml.lua")
 
 local Geo_url      = "http://api.wunderground.com/auto/wui/geo/GeoLookupXML/index.xml?query="

@@ -326,6 +326,11 @@ function Make_Bar(loc,index)
                 conditions[bar.curr_condition]()
             end
             animate_list[bar.func_tbls.loading_sun_fade_out] = bar
+            --[[
+            flare_l:animate{
+                duration   = 8000,
+                z_rotation = 360,
+            }--]]
             for i = 1,5 do
                 fday = fcast_tbl.forecast.simpleforecast.forecastday[i+1]
                 if i == 1 then

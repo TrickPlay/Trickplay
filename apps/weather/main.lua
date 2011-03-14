@@ -117,7 +117,7 @@ imgs = {
 	},
 	bg ={
 		Image{src="assets/bg/bg.png"},
-		--[[
+		---[[
 		Image{src="assets/bg/bg.jpg"},
 		Image{src="assets/bg/1.jpg"},
 		Image{src="assets/bg/2.jpg"},
@@ -173,7 +173,11 @@ imgs = {
 do
 	local clone_source_container = Group{name="Clone Source Container"}
 	
-	apply_func_to_leaves(imgs,clone_source_container.add,clone_source_container)
+	apply_func_to_leaves(
+		imgs,
+		clone_source_container.add,
+		clone_source_container
+	)
 	
 	screen:add(clone_source_container)
 	
@@ -219,7 +223,8 @@ left_faux_bar = Group{
 	children = {
 		Clone{
 			source = imgs.bar.mid,
-			scale  = {faux_len*2,1},
+			width  = faux_len*2,
+			tile   = {true,false},
 			x      = -faux_len
 		},
 		Clone{
@@ -251,7 +256,9 @@ right_faux_bar = Group{
 	children = {
 		Clone{
 			source = imgs.bar.mid,
-			scale  = {faux_len*2,1},
+			--scale  = {faux_len*2,1},
+			width  = faux_len*2,
+			tile   = {true,false},
 			x=screen_w-faux_len,
 		},
 		Clone{
