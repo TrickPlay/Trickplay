@@ -1,10 +1,54 @@
 
---the globally visible list, always empty
+--[[
+    My App_Loop Framework:
+    
+    The only visible aspect of this file is "animate_list"
+    
+    Adding items to this list, appends them to the list of animated items.
+    
+    This list is always empty, the meta-table adds it to the real animate_list
+    
+    
+    How to add an item:
+        animate_list[--function_table--] = object
+    
+    How to delete an item:
+        animate_list[--existing_function_table--] = nil
+            -----or-----
+        animate_list[--object_with_multiple_function_tables--] = nil
+    
+    
+    Definitions:
+        
+        function_table:
+            
+            {
+              duration = 100,
+              loop     = true,
+              name     = "This name is used for error statements",
+              func     = function(this_object,this_func_table,secs,progress) end,
+              elapsed  = 0
+            }
+            The only necessary field is 'func.' If 'duration' is provided,
+            then a progress parameter is passed to 'func.' 'func' is guaranteed
+            to receive a progress value of '1,' at which point it gets removed
+            unless if 'loop' is set to true.
+            'func' can return another func_table. If it does, then the current
+            func_table will be removed and the return on will be added to the
+            animate_list using the same object
+            
+        object:
+            This can be anything really. Pressumably, it is an object that
+            contains the function_table. Passing it to the function allows
+            access to other variable.
+--]]
 animate_list = {}
 
-local iterating = false
+--flag, used to delay the addition/removal of func_table's to the animate_list
+--while it is being iterated across
+local in_idle_loop = false
 
---the actual animation list
+--the real animate_list
 local iterated_list = {}
 
 --the list of items to be deleted and added, these are needed to prevent items
@@ -15,113 +59,123 @@ local to_be_added   = {}
 --meta table used to capture new entries and removals
 local mt = {}
 
-local remove = function(item)
-    if item.on_remove ~= nil then item.on_remove(item) end
-    item.elapsed = 0
-    item.stage   = 1
-    iterated_list[item] = nil
-end
 
+local tot = 0
+local iterated_tot = 0
 function mt.__newindex(t,k,v)
-    assert(#animate_list == 0, "User added something to the animate list")
+    assert(#animate_list == 0, "User added something to the animate list that"..
+                                " wasn't caught by the meta table")
     --assert(type(k) == "table")
     --if an item is being deleted
     if v == nil then
         --if there was no entry of that key, then ignore
         if iterated_list[k] ~= nil then
-            if iterating then
+            if in_idle_loop then
                 table.insert(to_be_deleted,k)
             else
-                remove(iterated_list[k])
+                iterated_list[k]=nil
             end
-        else
-            print("Tried to delete and entry that was not there")
+            tot = tot-1
         end
+        
     --if an item is being added
     else
         if iterated_list[k] ~= nil then
             if iterating then
                 table.insert(to_be_deleted,k)
-                print(1)
             else
-                remove(k)
-                print(2)
+                iterated_list[k]=nil
             end
         end
-        if k.setup then k:setup() end
-        if k.elapsed == nil then k.elapsed = 0 end
-        if k.stage   == nil then k.stage   = 1 end
+        assert(type(k)=="table")
+        if k.func ==nil then
+            dumptable(k)
+            error("no 'func' field")
+        end
+        --assert(type(v)=="table" )
         
-        to_be_added[k] = k
+        --if v.setup ~= nil   then v:setup()     end
+        if k.duration ~= nil then k.elapsed = 0 end
+        
+        to_be_added[k] = v
+        tot = tot+1
     end
+    --print(tot,iterated_tot)
 end
 setmetatable(animate_list, mt)
 
+local first_exec = true
 
-
-
-idle_loop = function(_,seconds)
-    iterating = true
-    --don't rely on the table size while iterating, size is subject to change
-    local num_items = #to_be_added
+local elapsed = 0
+local idle_loop = function(self, seconds)
     
-    --used for indexing and iterating
-    local i = 1
     
-    --used to reduce table look ups
-    local p, curr_stage
-    
-    for _,item in pairs( to_be_added ) do
-        iterated_list[item] = item.stages
+    if first_exec then
+        first_exec = false
+        return
     end
     
+    elapsed = elapsed + seconds*1000
+    
+    for tbl,object in pairs( to_be_added ) do
+        iterated_list[tbl] = object
+    end
     to_be_added = {}
     
-    for item, stages in pairs( iterated_list ) do
-        
-        item.elapsed = item.elapsed + seconds*1000
-        
-        curr_stage   = item.stage
-        --update the progress
-        if item.duration ~= nil and item.duration[curr_stage] ~= nil then
-            p = item.elapsed / item.duration[curr_stage]
+    
+    
+    in_idle_loop = true
+    local iter = 0
+    
+    for func_tbl, object in pairs( iterated_list ) do
+        iter = iter + 1
+        if func_tbl.duration ~= nil then
             
-            --progress caps at 1
-            if p > 1 then
-                p = 1
-                --move to the next stage next time around
-                item.stage = item.stage + 1
-                item.elapsed = 0
-            end
+            func_tbl.elapsed = func_tbl.elapsed+seconds*1000
             
-            --apply the alpha mode if there is one
-            if item.mode ~= nil and item.mode[curr_stage] ~= nil then
-                --print(item.mode[curr_stage])
-                --alpha.mode = item.mode[curr_stage]
-                --p = alpha:on_alpha(p)
+            if func_tbl.elapsed > func_tbl.duration then
+                
+                if func_tbl.loop then
+                    
+                    func_tbl.elapsed = 0
+                    
+                    func_tbl.func(object,func_tbl,seconds,0)
+                    
+                else
+                    
+                    func_tbl.func(object,func_tbl,seconds,1)
+                    
+                    --to_be_deleted[func_tbl] = object
+                    table.insert(to_be_deleted,func_tbl)
+                    
+                end
+                
+            else
+                
+                func_tbl.func(object,func_tbl,seconds,func_tbl.elapsed/func_tbl.duration)
+                
             end
-        --if no duration variable, no progress variable
         else
-            p = nil
-        end
-        --print(p)
-        
-        --execute the current stage
-        if  stages[curr_stage] ~= nil then
-            stages[curr_stage](item,seconds,p)
-        elseif item.loop then
-            item.stage = 1
-            p=0
-            stages[item.stage](item,seconds,p)
-        else
-            --if there is no next stage then remove
-            table.insert(to_be_deleted,item)
+            
+            func_tbl.func(object,func_tbl,seconds)
+            
         end
     end
+    iterated_tot = iter
+    in_idle_loop = false
+    --[[
+    if elapsed >= 1000 then
+        print("iterate len",iterated_tot)
+        elapsed = 0
+    end
+    --]]
     
-    for _,item in pairs( to_be_deleted ) do
-        remove(item)
+    
+    for _,tbl in ipairs( to_be_deleted ) do
+        iterated_list[tbl]=nil
     end
     to_be_deleted = {}
-    iterating = false
+    
 end
+
+idle.on_idle = idle_loop
