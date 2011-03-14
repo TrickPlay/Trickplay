@@ -840,8 +840,10 @@ function Make_Bar(loc,index)
                             bars[#bars].x = MINI_BAR_X + bar_dist
                             bars[#bars].opacity = 255
                             bars[#bars]:go_full()
+                            bars[#bars]:show()
                             right_faux_bar.x = bar_dist
                              next_i = #bars
+                             
                             animate_list[bar.func_tbls.full_move_right] = bar
                         else
                             dumptable(response_tbl)
