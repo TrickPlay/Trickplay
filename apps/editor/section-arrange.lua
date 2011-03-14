@@ -24,12 +24,12 @@ function( section )
     ---------------------------------------------------------------------------
      local dropdown_map =
      {
-	["Left Side      "]   = function() editor.left() input_mode = S_SELECT end,
-        ["Right Side    "]   = function() editor.right() input_mode = S_SELECT end,
+	["Left Edge      "]   = function() editor.left() input_mode = S_SELECT end,
+        ["Right Edge    "]   = function() editor.right() input_mode = S_SELECT end,
         ["Top             "]= function() editor.top() input_mode = S_SELECT end,
         ["Bottom        "] = function() editor.bottom() input_mode = S_SELECT end,
-        ["HORIZ. Center   "] = function() editor.hcenter() input_mode = S_SELECT end,
-        ["VERT. Center    "] = function() editor.vcenter() input_mode = S_SELECT end,
+        ["Horiz. Center   "] = function() editor.hcenter() input_mode = S_SELECT end,
+        ["Vert. Center    "] = function() editor.vcenter() input_mode = S_SELECT end,
         ["Horizontally	  "] = function() editor.hspace() input_mode = S_SELECT end,
         ["Vertically 	  "] = function() editor.vspace() input_mode = S_SELECT end,
         ["Bring To Front"] = function() editor.bring_to_front() input_mode = S_SELECT end,
@@ -49,12 +49,12 @@ function( section )
     
     
         --local all_apps = factory.make_text_menu_item( assets , ui.strings[ "View All My Apps" ] )
-        local f_left  = factory.make_text_menu_item( assets , ui.strings[ "Left Side      " ] )
-        local f_right  = factory.make_text_menu_item( assets , ui.strings[ "Right Side    " ] )
+        local f_left  = factory.make_text_menu_item( assets , ui.strings[ "Left Edge      " ] )
+        local f_right  = factory.make_text_menu_item( assets , ui.strings[ "Right Edge    " ] )
         local f_top  = factory.make_text_menu_item( assets , ui.strings[ "Top             " ] )
         local f_bottom = factory.make_text_menu_item( assets , ui.strings[ "Bottom        " ] )
-        local f_hcenter  = factory.make_text_menu_item( assets , ui.strings[ "HORIZ. Center   " ] )
-        local f_vcenter = factory.make_text_menu_item( assets , ui.strings[ "VERT. Center    " ] )
+        local f_hcenter  = factory.make_text_menu_item( assets , ui.strings[ "Horiz. Center   " ] )
+        local f_vcenter = factory.make_text_menu_item( assets , ui.strings[ "Vert. Center    " ] )
         local f_hspace = factory.make_text_menu_item( assets , ui.strings[ "Horizontally	  " ] )
         local f_vspace = factory.make_text_menu_item( assets , ui.strings[ "Vertically 	  " ] )
         local f_bring_to_front  = factory.make_text_menu_item( assets , ui.strings[ "Bring To Front" ] )

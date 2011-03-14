@@ -111,12 +111,12 @@ end
 
 local icon_map = 
 {
-	["Left Side      "] = function() icon = icon_l return icon end, 
-        ["Right Side    "] = function() icon = icon_r return icon end, 
+	["Left Edge      "] = function() icon = icon_l return icon end, 
+        ["Right Edge    "] = function() icon = icon_r return icon end, 
         ["Top             "] = function() icon = icon_t return icon end, 
         ["Bottom        "] = function() icon = icon_b return icon end, 
-        ["HORIZ. Center   "] = function() icon = icon_hc return icon end, 
-        ["VERT. Center    "] = function() icon = icon_vc return icon end, 
+        ["Horiz. Center   "] = function() icon = icon_hc return icon end, 
+        ["Vert. Center    "] = function() icon = icon_vc return icon end, 
         ["Horizontally	  "] = function() icon = icon_dhc return icon end,  
         ["Vertically 	  "] = function() icon = icon_dvc return icon end 
 }
@@ -132,19 +132,21 @@ local item_map =
      	["Timeline".."\t\t\t".."[J]"]   = function() return "tline" end,
      	["Timeline Show".."\t".."[J]"]   = function() return "tline" end,
      	["Timeline Hide".."\t\t".."[J]"]   = function() return "tline" end,
-	["Left Side      "] = function() return "left" end, 
-        ["Right Side    "] = function() return "right" end, 
+	["Left Edge      "] = function() return "left" end, 
+        ["Right Edge    "] = function() return "right" end, 
         ["Top             "] = function() return "top" end, 
         ["Bottom        "] = function() return "bottom" end, 
-        ["HORIZ. Center   "] = function() return "hcenter" end, 
-        ["VERT. Center    "] = function() return "vcenter" end, 
+        ["Horiz. Center   "] = function() return "hcenter" end, 
+        ["Vert. Center    "] = function() return "vcenter" end, 
         ["Horizontally	  "] = function() return "hspace" end,  
         ["Vertically 	  "] = function() return "vspace" end,
 	["Bring To Front"] = function() return "bring_front" end,
         ["Bring Forward "] = function() return "bring_forward" end,
         ["Send To Back "] = function() return "send_back" end,
         ["Send Backward "] = function() return "send_backward"end,
-	["Reference Image        "] = function() return "bgimage" end
+	["Reference Image        "] = function() return "bgimage" end, 
+	["Show Lines"] = function() return "guideline" end, 
+	["Hide Lines"] = function() return "guideline" end,
 }
 
    
@@ -218,9 +220,11 @@ function factory.make_text_menu_item( assets , caption )
     elseif (caption ==  "Bring To Front" ) then 
 	text_category = Text{ text = "Arrange : "}:set(STYLE)
     elseif ( caption == "Delete".."\t\t     ".."[Del]") then
-	line_category = make_line()
+	--line_category = make_line()
     elseif (caption == "Reference Image        ") then
 	text_category = Text{ text = "Transparency Grid : "}:set(STYLE)
+    elseif (caption == "Add Horiz. Line	[H]") then
+	text_category = Text{ text = "Guide Line : "}:set(STYLE)
     end 
         
     if text_category ~= nil then 
@@ -527,22 +531,23 @@ local color_map =
         [ "Video" ] = function()  size = {500, 525} color = {25,25,25,100}   return size, color end,
 
         [ "Button" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "TextInputField" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "TextInput" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "DialogBox" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "ToastBox" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "ToastAlert" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "RadioButton" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "CheckBox" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ButtonPicker" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "LoadingDots" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "LoadingBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "ProgressSpinner" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "ProgressBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "MenuBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "DropDown" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "3D_List" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "ScrollImage" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "MenuButton" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "LayoutManager" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "ScrollPane" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "ArrowPane" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "TabBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "OSK" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
 
-        [ "widgets" ] = function() size = {500, 600} color = {25,25,25,100}  return size, color end,
+        [ "widgets" ] = function() size = {600, 600} color = {25,25,25,100}  return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
@@ -742,7 +747,7 @@ function factory.make_msgw_widget_item( assets , caption)
     local STYLE         = { font = "DejaVu Sans 30px" , color = "FFFFFF" }
     local PADDING_X     = 7 
     local PADDING_Y     = 7
-    local WIDTH         = 230
+    local WIDTH         = 280
     local HEIGHT        = 60 
     local BORDER_WIDTH  = 1
     local BORDER_COLOR  = "FFFFFF"
@@ -1337,7 +1342,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group.reactive = true
 
 	if v.extra then 
-	   if is_in_list(v.extra.type, widgets) == true  then
+	   if is_in_list(v.extra.type, uiElements) == true  then
 		WIDTH = WIDTH + 33
 	   end 
 	end
@@ -1556,7 +1561,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(plus_minus)
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-	local items_list = widget.threeDlist{num_rows = table.getn(v.items), num_cols = 1, item_w = 300, item_h = 40, grid_gap=5, focus=list_focus}
+	local items_list = ui_element.layoutManager{num_rows = table.getn(v.items), num_cols = 1, item_w = 300, item_h = 40, grid_gap=5, focus=list_focus}
 	--items.focus = nil
         items_list.position = {text.w, text.y + text.h + PADDING_Y}
         items_list.name = "items_list"
@@ -1564,7 +1569,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	for i,j in pairs(v.items) do 
 --hjk
-             local item = widget.textField{wwidth = 350, wheight = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
+             local item = ui_element.textInput{wwidth = 350, wheight = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
 	     item.name = "item_text"..tostring(i)
 	     --local item = Group {}
 	     --item:add(Rectangle{size = {300,40}, color = {0,0,0,0}, border_color = {255, 255, 255, 255}, border_width = 2})
@@ -1702,7 +1707,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end
 
 
-        local skin_picker = widget.buttonPicker{skin = "custom", items = skins, font = "DejaVu Sans 26px", selected_item = selected}
+        local skin_picker = ui_element.buttonPicker{skin = "custom", items = skins, font = "DejaVu Sans 26px", selected_item = selected}
 	skin_picker.wheight = 45
 	skin_picker.wwidth = 210
         skin_picker.position = {text.x + text.w + 50 , 5}

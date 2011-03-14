@@ -109,7 +109,7 @@ ui =
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "  Edit  " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 770,
+                height  = 505,
                 init    = dofile( "section-edit" )
             },
 
@@ -124,9 +124,9 @@ ui =
            [SECTION_SETTING] =
             {
                 button  = assets( "assets/button-blue.png" ),
-                text    = Text  { text = strings[ "  Settings" ] }:set( BUTTON_TEXT_STYLE ),
+                text    = Text  { text = strings[ "  View" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {  24 ,  67 ,  72 , 230 },  -- BLUE
-                height  = 430,
+                height  = 640,
                 init    = dofile( "section-setting" )
             }
         }
@@ -158,12 +158,13 @@ attr_name_list = {"color", "border_color", "border_width", "color", "border_colo
 
 attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "wwidth", "wheight", "f_color", "border_color", "border_width", "border_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src", }
 
-widget = dofile("widget.lua")
+ui_element = dofile("ui_element.lua")
 
-widgets = {"Button", "TextInputField", "DialogBox", "ToastBox", "RadioButton", "CheckBox", 
-           "ButtonPicker", "LoadingDots", "LoadingBar", "DropDown", "MenuBar", "3D_List", "ScrollImage",} 
-	   -- "TabBar", "TimeLine", "OSK", 
-	   -- "expander", "dropDownButton"}
+uiElements_en = {"Rectangle", "Text", "Image", "Video"}
+
+uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBox", --"RadioButton", "CheckBoxGroup", "RadioButtonGroup", 
+           "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane", "ArrowPane", }
+	   -- "TabBar", "OSK",}
 skins = {}
 for i, j in pairs(skin_list) do
 	table.insert(skins, i) 

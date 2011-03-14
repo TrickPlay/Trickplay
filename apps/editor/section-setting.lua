@@ -46,7 +46,25 @@ function( section )
 	["Transparency Grid 40"]   = function() clear_bg() BG_IMAGE_40.opacity = 255 input_mode = S_SELECT end,
 	["Transparency Grid 80"]   = function() clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT end,
         ["White"]   = function() clear_bg() BG_IMAGE_white.opacity = 255 input_mode = S_SELECT end,
-        ["Black"]   = function() clear_bg() input_mode = S_SELECT end
+        ["Black"]   = function() clear_bg() input_mode = S_SELECT end,
+	["Add Horiz. Line	[H]"]   = function() input_mode = S_SELECT editor.h_guideline() end,
+	["Add Vert. Line		[V]"]   = function() input_mode = S_SELECT editor.v_guideline() end,
+	["Show Lines"]   = function()  screen:find_child("guideline").extra.show = true 
+				for i= 1, h_guideline, 1 do 
+					screen:find_child("h_guideline"..tostring(i)):show() 
+			        end 
+				for i= 1, v_guideline, 1 do 
+					screen:find_child("v_guideline"..tostring(i)):show() 
+			        end 
+			   end,
+	["Hide Lines"]   = function()  screen:find_child("guideline").extra.show = false 
+				for i= 1, h_guideline, 1 do 
+					screen:find_child("h_guideline"..tostring(i)):hide() 
+			        end 
+				for i= 1, v_guideline, 1 do 
+					screen:find_child("v_guideline"..tostring(ii)):hide() 
+			        end 
+			   end,
      }
     local function build_dropdown_ui()
     
@@ -67,6 +85,9 @@ function( section )
         local f_tp_80  = factory.make_text_menu_item( assets , ui.strings[ "Transparency Grid 80" ] )
         local f_white  = factory.make_text_menu_item( assets , ui.strings[ "White" ] )
         local f_black  = factory.make_text_menu_item( assets , ui.strings[ "Black" ] )
+	local f_add_horz = factory.make_text_menu_item( assets , ui.strings[ "Add Horiz. Line	[H]"] ) 
+	local f_add_vert = factory.make_text_menu_item( assets , ui.strings[ "Add Vert. Line		[V]"])
+	local f_show_lines = factory.make_text_menu_item( assets , ui.strings[ "Show Lines"]) 
         
         --local categories = factory.make_text_side_selector( assets , ui.strings[ "Recently Used" ] )
     
@@ -76,6 +97,9 @@ function( section )
         table.insert( section_items , f_tp_80)
         table.insert( section_items , f_white)
         table.insert( section_items , f_black)
+        table.insert( section_items , f_add_horz)
+        table.insert( section_items , f_add_vert)
+        table.insert( section_items , f_show_lines)
 
 	for _,item in ipairs( section_items ) do
 	     item.reactive = true
@@ -85,7 +109,6 @@ function( section )
             		animate_out_dropdown()
             		item:on_activate()
             		screen.grab_key_focus(screen)
-			
         	end
 		return true 
 	     end
@@ -104,7 +127,8 @@ function( section )
              end
        end
 
-        items_height = items_height + f_tp_20.h + f_tp_40.h + f_tp_80.h + f_white.h + f_black.h + f_import.h
+        items_height = items_height + f_tp_20.h + f_tp_40.h + f_tp_80.h + f_white.h + f_black.h + f_import.h + f_add_horz.h + 
+		       f_add_vert.h + f_show_lines.h 
         
 	f_import.extra.on_activate = 
 	    function()	input_mode = S_POPUP printMsgWindow("Image File : ") inputMsgWindow("open_imagefile") 
@@ -135,6 +159,35 @@ function( section )
                 screen.grab_key_focus(screen)
             end
         
+	f_add_horz.extra.on_activate =
+            function()
+		editor.h_guideline()
+            end
+	f_add_vert.extra.on_activate =
+            function()
+		editor.v_guideline()
+            end
+	f_show_lines.extra.on_activate =
+            function()
+		 if screen:find_child("guideline").extra.show ~= true then
+		       	screen:find_child("guideline").extra.show = true 
+			for i= 1, h_guideline, 1 do 
+				screen:find_child("h_guideline"..tostring(i)):show() 
+			end 
+			for i= 1, v_guideline, 1 do 
+				screen:find_child("v_guideline"..tostring(i)):show() 
+			end 
+		 else
+	         	screen:find_child("guideline").extra.show = false 
+			for i= 1, h_guideline, 1 do 
+				screen:find_child("h_guideline"..tostring(i)):hide() 
+			end 
+			for i= 1, v_guideline, 1 do 
+				screen:find_child("v_guideline"..tostring(i)):hide() 
+			end 
+		end 
+            end
+
         -- This spaces all items equally.
         -- TODO: If there are less than 3 app tiles, it will be wrong.
         

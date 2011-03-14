@@ -113,7 +113,7 @@ end
     
 function is_this_widget(v)
     if v.extra then 
-        if is_in_list(v.extra.type, widgets) == true then 
+        if is_in_list(v.extra.type, uiElements) == true then 
 	    return true
         else 
 	    return false
@@ -554,20 +554,20 @@ function make_attr_t(v)
        ["Group"] = function() return {"scale","x_rotation","anchor_point","reactive", "focus"} end,
        ["Clone"] = function() return {"scale","x_rotation","anchor_point","reactive", "focus"} end,
        ["Button"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive",  "focus"} end,
-       ["TextInputField"] = function() return {"skin","color","f_color","font","text_indent","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive", "focus"} end,
+       ["TextInput"] = function() return {"skin","color","f_color","font","text_indent","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive", "focus"} end,
        ["DialogBox"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive", "focus"} end,
-       ["ToastBox"] = function() return {"label","message","skin","duration","fade_duration","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
+       ["ToastAlert"] = function() return {"label","message","skin","duration","fade_duration","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point"} end,
        ["ButtonPicker"] = function() return {"skin","color","font","items","selected_item","scale","x_rotation","anchor_point","reactive","focus"} end,
        ["CheckBox"] = function() return {"skin","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","scale","x_rotation","anchor_point","reactive", "focus"} end,
        ["RadioButton"] = function() return {"skin","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space","scale","x_rotation","anchor_point","reactive", "focus"} end,
-       ["LoadingDots"] = function() return {"skin","dot_color","dot_radius","num_dots","anim_radius","anim_duration","clone_src","scale","x_rotation","anchor_point"} end,
-       ["LoadingBar"] = function() return {"shell_upper_color","shell_lower_color","stroke_color","fill_upper_color","fill_lower_color", "scale","x_rotation","anchor_point"} end,
-       ["3D_List"] = function() return {"skin","num_rows", "num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible","scale","x_rotation","anchor_point"} end,
+       ["ProgressSpinner"] = function() return {"skin","dot_color","dot_radius","num_dots","anim_radius","anim_duration","clone_src","scale","x_rotation","anchor_point"} end,
+       ["ProgressBar"] = function() return {"shell_upper_color","shell_lower_color","stroke_color","fill_upper_color","fill_lower_color", "scale","x_rotation","anchor_point"} end,
+       ["LayoutManager"] = function() return {"skin","num_rows", "num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible","scale","x_rotation","anchor_point"} end,
        --["ScrollImage"] = function() return {"skin","color","clip_w","clip_h","border_w","content_h","content_w","arrow_clone_source","arrow_sz","arrows_in_box","arrows_centered","hor_arrow_y","vert_arrow_x"
-       ["ScrollImage"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point"} end,
+       ["ScrollPane"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point"} end,
        ["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point"} end,
        --["DropDown"] = function() return {"skin", "font","items"
-       ["DropDown"] = function() return {"skin", "font", "item_spacing", "item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive", "focus"} end,
+       ["MenuButton"] = function() return {"skin", "font", "item_spacing", "item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive", "focus"} end,
    }
   
   if is_this_widget(v) == true  then
@@ -581,7 +581,7 @@ function make_attr_t(v)
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
       }
-       if (v.extra.type ~= "LoadingDots" and v.extra.type ~= "3D_List" and v.extra.type ~= "ScrollImage" and v.extra.type ~= "MenuBar" and v.extra.type ~= "DropDown") then 
+       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" and v.extra.type ~= "MenuButton") then 
              table.insert(attr_t, {"wwidth", math.floor(v.wwidth), "W"})
              table.insert(attr_t, {"wheight", math.floor(v.wheight), "H"})
        end
@@ -682,18 +682,18 @@ function itemTostring(v, d_list, t_list)
     local group_list = {"name", "position", "scale", "anchor_point", "x_rotation", "y_rotation", "z_rotation", "opacity"}
 
     local widget_map = {
-	["Button"] = function () return "widget.button"  end, 
-	["TextInputField"] = function () return "widget.textField" end, 
-	["DialogBox"] = function () return "widget.dialogBox" end, 
-	["ToastBox"] = function () return "widget.toastBox" end,   
-	["RadioButton"] = function () return "widget.radioButton" end, 
-	["CheckBox"] = function () return "widget.checkBox"  end, 
-	["ButtonPicker"] = function () return "widget.buttonPicker"  end, 
-	["LoadingDots"] = function () return "widget.loadingdots" end, 
-	["LoadingBar"] = function () return "widget.loadingbar" end,
-	["3D_List"] = function () return "widget.threeDlist" end,
-	["ScrollImage"] = function () return "widget.scrollWindow" end, 
-	["DropDown"] = function () return "widget.dropDownBar" end, 
+	["Button"] = function () return "ui_element.button"  end, 
+	["TextInput"] = function () return "ui_element.textInput" end, 
+	["DialogBox"] = function () return "ui_element.dialogBox" end, 
+	["ToastAlert"] = function () return "ui_element.toastAlert" end,   
+	["RadioButton"] = function () return "ui_element.radioButton" end, 
+	["CheckBox"] = function () return "ui_element.checkBox"  end, 
+	["ButtonPicker"] = function () return "ui_element.buttonPicker"  end, 
+	["ProgressSpinner"] = function () return "ui_element.progressSpinner" end, 
+	["ProgressBar"] = function () return "ui_element.progressBar" end,
+	["LayoutManager"] = function () return "ui_element.layoutManager" end,
+	["ScrollPane"] = function () return "ui_element.scrollPane" end, 
+	["MenuButton"] = function () return "ui_element.menuButton" end, 
    }
  
    local function add_attr (list, head, tail) 
@@ -1511,7 +1511,7 @@ function inputMsgWindow_openfile(input_text)
 	  if(v.type == "Group") then 
 	       for j, c in pairs (v.children) do
 		    --if (v.extra.type ~= "ButtonPicker") then 
-		    if is_in_list(v.extra.type, widgets) == false then 
+		    if is_in_list(v.extra.type, uiElements) == false then 
 			print(c.name) 
                         c.reactive = true
 		        c.extra.is_in_group = true
@@ -1705,8 +1705,8 @@ local function copy_widget_imgs ()
 		--print("couldn't copy widget image"..dest_file) 
 	     end 
 	end 
-	source_file = "widget.lua" 
-	dest_file = CURRENT_DIR.."/widget.lua" 
+	source_file = "ui_element.lua" 
+	dest_file = CURRENT_DIR.."/ui_element.lua" 
 	if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
 	end 

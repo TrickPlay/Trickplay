@@ -1,5 +1,5 @@
 
-     local widget = {}
+     local ui_element = {}
      skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
 				   ["button_focus"] = "assets/smallbuttonfocus.png", 
@@ -105,13 +105,13 @@
 --[[
 Function: change_all_skin
 
-Changes all widgets' skins to 'skin_name' item:find_child("textInput").text
+Changes all ui elements' skins to 'skin_name' item:find_child("textInput").text
 
 Arguments:
 	skin_name - name of skin  
 ]]
 
-function widget.change_all_skin(skin_name)
+function ui_element.change_all_skin(skin_name)
     for i = 1, table.getn(g.children), 1 do
 	if g.children[i].skin then 
 	     g.children[i].skin = skin_name
@@ -129,7 +129,7 @@ Arguments:
 ]]
 
 
-function widget.change_button_skin(skin_name)
+function ui_element.change_button_skin(skin_name)
     for i = 1, table.getn(g.children), 1 do
 	if g.children[i].extra.type == "Button" then 
 	     g.children[i].skin = skin_name
@@ -716,7 +716,7 @@ end
 --[[
 Function: timeline
 
-Creates a timeline widget
+Creates a timeline ui element
 
 Arguments:
 	Table of timeline properties
@@ -734,7 +734,7 @@ Extra Function:
 	
 ]]
 
-function widget.timeline(t)
+function ui_element.timeline(t)
 
  --default parameters
     local p = {
@@ -1136,7 +1136,7 @@ end
 --[[
 Function: button
 
-Creates a button widget
+Creates a button ui element
 
 Arguments:
 	Table of button properties
@@ -1166,7 +1166,7 @@ Extra Function:
 	
 ]]
 
-function widget.button(table) 
+function ui_element.button(table) 
 
  --default parameters
     local p = {
@@ -1299,9 +1299,9 @@ end
 
 
 --[[
-Function: textField
+Function: textInput
 
-Creates a text field widget
+Creates a text field ui element
 
 Arguments:
 	Table of text field properties
@@ -1330,7 +1330,7 @@ Extra Function:
 ]]
 
 
-function widget.textField(table) 
+function ui_element.textInput(table) 
  --default parameters
     local p = {
     	skin = "custom", 
@@ -1364,7 +1364,7 @@ function widget.textField(table)
        size = { p.wwidth , p.wheight},
        position = {200, 200, 0},  
        reactive = true, 
-       extra = {type = "TextInputField"} 
+       extra = {type = "TextInput"} 
     }
  
 
@@ -1451,7 +1451,7 @@ end
 --[[
 Function: dialogBox
 
-Creates a Dialog box widget
+Creates a Dialog box ui element
 
 Arguments:
 	Table of Dialog box properties
@@ -1474,7 +1474,7 @@ Return:
  	db_group - group containing the dialog box
 ]]
 
-function widget.dialogBox(table) 
+function ui_element.dialogBox(table) 
  
 --default parameters
    local p = {
@@ -1569,48 +1569,48 @@ function widget.dialogBox(table)
 end 
 
 --[[
-Function: toastBox
+Function: toastAlert
 
-Creates a Toast box widget
+Creates a Toast alert ui element
 
 Arguments:
-	Table of Toast box properties
+	Table of Toast alert properties
 	
-		skin - Modify the skin used for the toast widget by changing this value
-		title - Title of the Toast box
-		message - Message displayed in the Toast box
-    	font - Font used for text in the Toast box
-    	color - Color of the text in the Toast box
-    	bwidth  - Width of the Toast box 
-    	bheight - Height of the Toast box 
-    	border_color - Border color of the Toast box
-    	f_color - Fill color of the Toast box
-    	f_color - Focus color of the Toast box  
-    	border_width - Border width of the Toast box 
-    	padding_x - Padding of the toast box on the X axis 
-    	padding_y - Padding of the toast box on the Y axis
-    	border_radius - Radius of the border for the Toast box 
-	    fade_duration - Time in milleseconds that the Toast box spends fading away
-	    duration - Time in milleseconds that the Toast box spends in view before fading out
+		skin - Modify the skin used for the toast ui element by changing this value
+		title - Title of the Toast alert
+		message - Message displayed in the Toast alert
+    	font - Font used for text in the Toast alert
+    	color - Color of the text in the Toast alert
+    	bwidth  - Width of the Toast alert 
+    	bheight - Height of the Toast alert 
+    	border_color - Border color of the Toast alert
+    	f_color - Fill color of the Toast alert
+    	f_color - Focus color of the Toast alert  
+    	border_width - Border width of the Toast alert 
+    	padding_x - Padding of the toast alert on the X axis 
+    	padding_y - Padding of the toast alert on the Y axis
+    	border_radius - Radius of the border for the Toast alert 
+	    fade_duration - Time in milleseconds that the Toast alert spends fading away
+	    duration - Time in milleseconds that the Toast alert spends in view before fading out
 
 Return:
- 		tb_group - Group containing the Toast box
+ 		tb_group - Group containing the Toast alert
 
 Extra Function:
-		start_timer() - Start the timer of the Toast box
+		start_timer() - Start the timer of the Toast alert
 ]]
 
 
 
-function widget.toastBox(table) 
+function ui_element.toastAlert(table) 
 
  --default parameters
     local p = {
  	skin = "custom",  
 	wwidth = 600,
 	wheight = 200,
-	label = "Toast Box Title",
-	message = "Toast box message ... ",
+	label = "Toast Alert Title",
+	message = "Toast alert message ... ",
 	font = "DejaVu Sans 30px", 
 	color = {255,255,255,255},  --"FFFFFF", 
 	border_width  = 3,
@@ -1638,7 +1638,7 @@ function widget.toastBox(table)
     	  name = "toastb_group",  
     	  position = {200, 200, 0}, 
           reactive = true, 
-          extra = {type = "ToastBox"} 
+          extra = {type = "ToastAlert"} 
      }
 
     local tb_group_cur_y = 10
@@ -1736,7 +1736,7 @@ end
 --[[
 Function: buttonPicker
 
-Creates a button picker widget
+Creates a button picker ui element
 
 Arguments:
 	Table of Button picker properties
@@ -1764,7 +1764,7 @@ Extra Function:
 		insert_item(item) - Add an item to the items table 
 		remove_item(item) - Remove an item from the items table 
 ]]
-function widget.buttonPicker(table) 
+function ui_element.buttonPicker(table) 
     local w_scale = 1
     local h_scale = 1
 
@@ -2079,7 +2079,7 @@ end
 --[[
 Function: radioButton
 
-Creates a Radio button widget
+Creates a Radio button ui element
 
 Arguments:
 	Table of Radio button properties
@@ -2109,7 +2109,7 @@ Extra Function:
 ]]
 
 
-function widget.radioButton(table) 
+function ui_element.radioButton(table) 
 
  --default parameters
     local p = {
@@ -2247,7 +2247,7 @@ end
 --[[
 Function: checkBox
 
-Creates a Check box widget
+Creates a Check box ui element
 
 Arguments:
 	Table of Check box properties
@@ -2279,7 +2279,7 @@ Extra Function:
 ]]
 
 
-function widget.checkBox(table) 
+function ui_element.checkBox(table) 
 
  --default parameters
     local p = {
@@ -2410,9 +2410,9 @@ end
 
 
 --[[
-Function: Loading Dots
+Function: Progress Spinner
 
-Creates a Loading dots widget
+Creates a Loading dots ui element
 
 Arguments:
 	Table of Loading dots box properties
@@ -2432,7 +2432,7 @@ Extra Function:
 ]]
  
 ---[[
-function widget.loadingdots(t) 
+function ui_element.progressSpinner(t) 
     --default parameters
     local p = {
         skin          = "default",
@@ -2454,12 +2454,12 @@ function widget.loadingdots(t)
     
     --the umbrella Group
     local l_dots = Group{ 
-        name     = "loadingdots",
+        name     = "progressSpinner",
         position = {400,400},
         anchor_point = {p.radius,p.radius},
         reactive = true,
         extra = {
-            type = "LoadingDots", 
+            type = "ProgressSpinner", 
             speed_up = function()
                 p.anim_duration = p.anim_duration - 20
                 create_dots()
@@ -2593,9 +2593,9 @@ end
 
 
 --[[
-Function: Loading Bar
+Function: Progress Bar
 
-Creates a Loading bar widget
+Creates a Loading bar ui element
 
 Arguments:
 	Table of Loading bar properties
@@ -2615,7 +2615,7 @@ Extra Function:
 ]]
 
 ---[[
-function widget.loadingbar(t)
+function ui_element.progressBar(t)
 
     --default parameters
     local p={
@@ -2647,12 +2647,12 @@ function widget.loadingbar(t)
             y    = p.wheight
         }
 	local l_bar_group = Group{
-		name     = "loadingbar",
+		name     = "progressBar",
         	position = {400,400},
 	        anchor_point = {p.radius,p.radius},
         	reactive = true,
 	        extra = {
-        	    type = "LoadingBar", 
+        	    type = "ProgressBar", 
         	    set_prog = function(prog)
 	                c_fill.scale = {(p.wwidth-4)*(prog),1}
         	    end,
@@ -2754,7 +2754,7 @@ function widget.loadingbar(t)
 	return l_bar_group
 end
 --[[
-Function: 3D List
+Function: Layout Manager
 
 Creates a 2D grid of items, that animate in with a flipping animation
 
@@ -2775,7 +2775,7 @@ Extra Function:
 	get_tile_group(r,c) - returns group for the tile at row 'r' and column 'c'
     animate_in() - performs the animate-in sequence
 ]]
-function widget.threeDlist(t)
+function ui_element.layoutManager(t)
     --default parameters
     local p = {
         num_rows    = 4,
@@ -2808,11 +2808,11 @@ function widget.threeDlist(t)
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
-        name     = "threeDList",
+        name     = "layoutManager",
         position = {200,100},
         reactive = true,
         extra    = {
-			type = "3D_List",
+			type = "LayoutManager",
             reactive = true,
             replace = function(self,r,c,obj)
                 if p.tiles[r][c] ~= nil then
@@ -3015,7 +3015,7 @@ function widget.threeDlist(t)
     return slate
 end
 --[[
-Function: Scroll Window
+Function: Scroll Pane
 
 Creates a clipped window that can be scrolled
 
@@ -3040,7 +3040,7 @@ Extra Function:
 	on_key_down(key) - contains the scrolling functions for pressing left, right, up, down
     get_content_group() - returns the content group, so that things can be added
 ]]
-function widget.scrollWindow(t)
+function ui_element.scrollPane(t)
 
 	-- reference: http://www.csdgn.org/db/179
 
@@ -3094,11 +3094,11 @@ function widget.scrollWindow(t)
 
     --the umbrella Group, containing the full slate of tiles
     local scroll_group = Group{ 
-        name     = "scrollclip",
+        name     = "scrollPane",
         position = {200,100},
         reactive = true,
         extra    = {
-			type = "ScrollImage",
+			type = "ScrollPane",
             seek_to = function(x,y)
                 local new_x, new_y
                 if p.content_w > p.clip_w then
@@ -3572,7 +3572,13 @@ print("here")
 
     return scroll_group
 end
-function widget.dropDownBar(t)
+
+
+--[[
+Function: Menu Button
+]]
+
+function ui_element.menuButton(t)
     
     --default parameters
     local p = {
@@ -3635,11 +3641,11 @@ function widget.dropDownBar(t)
     local button_focus = nil
     local umbrella
     umbrella     = Group{
-        name="dropdownbar",
+        name="menuButton",
         reactive = true,
         children={button,dropDownMenu},
         extra={
-            type="DropDown",
+            type="MenuButton",
             focus_index = function(cat,i)
                 if curr_cat == cat and curr_index == i then
                     print("Item on Drop Down Bar is already focused")
@@ -4048,19 +4054,22 @@ function widget.dropDownBar(t)
 
     return umbrella
 end
-function widget.menuBar(t)
+
+
+
+function ui_element.menuBar(t)
     local p = {
         bar_widgets = {
-            widget.dropDownBar(),
-            widget.dropDownBar(),
-            widget.dropDownBar(),
-            widget.dropDownBar(),
-            widget.dropDownBar(),
-            widget.button(),
-            widget.button(),
-            widget.button(),
-            widget.button(),
-            widget.button(),
+            ui_element.dropDownBar(),
+            ui_element.dropDownBar(),
+            ui_element.dropDownBar(),
+            ui_element.dropDownBar(),
+            ui_element.dropDownBar(),
+            ui_element.button(),
+            ui_element.button(),
+            ui_element.button(),
+            ui_element.button(),
+            ui_element.button(),
         },
         y_offset  = 20,
         clip_w      = 2/3*screen.w,
@@ -4078,7 +4087,7 @@ function widget.menuBar(t)
     local create
     local index = 0
     
-    local si = widget.scrollWindow{
+    local si = ui_element.scrollPane{
         clip_h    = screen.h,
         content_h = screen.h,
         arrow_sz  = 30,
@@ -4213,7 +4222,7 @@ function widget.menuBar(t)
 
     return umbrella
 end
-function widget.tabBar(t)
+function ui_element.tabBar(t)
     
     --default parameters
     local p = {
@@ -4509,4 +4518,4 @@ end
 
 --]]
 
-return widget
+return ui_element
