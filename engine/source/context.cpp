@@ -1736,7 +1736,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
         {
             if ( context->external_log_handler )
             {
-                context->external_log_handler( log_level, log_domain, message, context->external_log_handler_data );
+                context->external_log_handler( context , log_level, log_domain, message, context->external_log_handler_data );
             }
             else
             {
