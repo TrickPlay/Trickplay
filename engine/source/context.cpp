@@ -621,7 +621,7 @@ int TPContext::console_command_handler( const char * command, const char * param
 
     for ( ConsoleCommandHandlerMultiMap::const_iterator it = range.first; it != range.second; ++it )
     {
-        it->second.first( command, parameters, it->second.second );
+        it->second.first( context , command, parameters, it->second.second );
     }
 
     return range.first != range.second;

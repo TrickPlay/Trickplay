@@ -616,6 +616,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -       The Trickplay context.
+
         command -       A string describing the command. It does not include the initial
                         / and will never be NULL.
 
@@ -629,7 +631,8 @@ typedef struct TPContext TPContext;
     typedef
     void
     (*TPConsoleCommandHandler)(
-                    
+
+        TPContext * context,
         const char * command,
         const char * parameters,
         void * data);
