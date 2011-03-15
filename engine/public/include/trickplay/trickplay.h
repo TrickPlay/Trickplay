@@ -674,6 +674,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         level -     An integer describing the information level of the log message,
                     such as DEBUG, INFO, WARNING, etc.
 
@@ -688,6 +690,7 @@ typedef struct TPContext TPContext;
     void
     (*TPLogHandler)(
     
+        TPContext * context,
         unsigned int level,
         const char * domain,
         const char * message,
