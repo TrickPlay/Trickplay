@@ -496,6 +496,45 @@ typedef struct TPContext TPContext;
         const char * key);
 
 /*-----------------------------------------------------------------------------
+    Function: tp_context_set_user_data
+
+    Associate an opaque pointer with the Trickplay context.
+
+    Arguments:
+
+        context -   A pointer to a TPContext.
+
+        user_data - The user data.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_context_set_user_data(
+
+        TPContext * context,
+        void * user_data);
+
+/*-----------------------------------------------------------------------------
+    Function: tp_context_get_user_data
+
+    Get user data associated with the Trickplay context with <tp_context_set_user_data>.
+
+    Arguments:
+
+        context -   A pointer to a TPContext.
+
+    Returns:
+
+        user_data - The user data.
+*/
+
+    TP_API_EXPORT
+    void *
+    tp_context_get_user_data(
+
+        TPContext * context);
+
+/*-----------------------------------------------------------------------------
     Function: TPRequestHandler
     
     Function prototype for calls to <tp_context_set_request_handler>. To handle
