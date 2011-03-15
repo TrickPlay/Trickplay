@@ -48,7 +48,6 @@ TPContext::TPContext()
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
-    is_first_app( true ),
     media_player_constructor( NULL ),
     media_player( NULL ),
     external_log_handler( NULL ),
@@ -1184,80 +1183,58 @@ int TPContext::run()
 
     g_info( "LOADING APP..." );
 
-    notify( TP_NOTIFICATION_APP_LOADING );
+    App * app = 0;
 
-    result = load_app( &current_app );
+    result = load_app( & app );
 
-    if ( !current_app )
-    {
-        notify( TP_NOTIFICATION_APP_LOAD_FAILED );
-    }
-    else
+    if ( app )
     {
         //.....................................................................
         // Execute the app's script
 
-        result = current_app->run( app_allowed[ current_app->get_id() ] );
+        first_app_id = app->get_id();
+        app->run( app_allowed[ first_app_id ] , app_run_callback );
+        app->unref();
+        app = 0;
 
-        if ( result != TP_RUN_OK )
+        //.................................................................
+
+        Action::post( new RunningAction( this ) );
+
+        //.................................................................
+        // Dip into the loop
+
+        g_info( "ENTERING MAIN LOOP..." );
+
+        while ( true )
         {
-            notify( TP_NOTIFICATION_APP_LOAD_FAILED );
-        }
-        else
-        {
-            current_app->animate_in();
-
-            notify( TP_NOTIFICATION_APP_LOADED );
-
-            //.................................................................
-            // Attach the console to the app
-
-            if ( console )
+            try
             {
-                console->attach_to_lua( current_app->get_lua_state() );
+                clutter_main();
+
+                // This means the run loop ended nicely, so we break
+
+                break;
             }
-
-            //.................................................................
-
-            Action::post( new RunningAction( this ) );
-
-            //.................................................................
-            // Dip into the loop
-
-            g_info( "ENTERING MAIN LOOP..." );
-
-            while ( true )
+            catch ( ... )
             {
-                try
+                if ( ! current_app || current_app->get_id() == first_app_id )
                 {
-                    clutter_main();
+                    g_warning( "CAUGHT EXCEPTION IN RUN LOOP, EXITING" );
 
-                    // This means the run loop ended nicely, so we break
+                    result = TP_RUN_APP_ERROR;
 
                     break;
                 }
-                catch ( ... )
+                else
                 {
-                    if ( is_first_app )
-                    {
-                        g_warning( "CAUGHT EXCEPTION IN RUN LOOP, EXITING" );
+                    g_warning( "CAUGHT EXCEPTION IN RUN LOOP, CLOSING APP" );
 
-                        result = TP_RUN_APP_ERROR;
+                    close_current_app();
 
-                        break;
-                    }
-                    else
-                    {
-                        g_warning( "CAUGHT EXCEPTION IN RUN LOOP, CLOSING APP" );
-
-                        close_app();
-                    }
+                    reload_app();
                 }
             }
-
-            notify( TP_NOTIFICATION_APP_CLOSING );
-
-            notify( TP_NOTIFICATION_APP_CLOSED );
         }
     }
 
@@ -1310,7 +1287,7 @@ int TPContext::run()
 
     if ( current_app )
     {
-        delete current_app;
+        current_app->unref();
         current_app = NULL;
     }
 
@@ -1519,52 +1496,47 @@ int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch )
         return TP_RUN_APP_PREPARE_FAILED;
     }
 
-    int result = new_app->run( app_allowed[ new_app->get_id() ] );
-
-    if ( result != TP_RUN_OK )
-    {
-        delete new_app;
-        return result;
-    }
-
-    g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
-
-    // TODO: Not right to set this before the idle source fires
-
-    is_first_app = false;
+    new_app->run( app_allowed[ new_app->get_id() ] , app_run_callback );
+    new_app->unref();
 
     return 0;
 }
 
 //-----------------------------------------------------------------------------
 
-gboolean TPContext::launch_app_callback( gpointer app )
+void TPContext::app_run_callback( App * app , int result )
 {
-    App * new_app = ( App * )app;
+    TPContext * context = app->get_context();
 
-    TPContext * context = new_app->get_context();
-
-    context->close_current_app();
-
-    if ( context->console )
+    if ( result != TP_RUN_OK )
     {
-        context->console->attach_to_lua( new_app->get_lua_state() );
+        if ( context->first_app_id == app->get_id() )
+        {
+            context->quit();
+        }
     }
+    else
+    {
+        context->close_current_app();
 
-    context->current_app = new_app;
+        if ( context->console )
+        {
+            context->console->attach_to_lua( app->get_lua_state() );
+        }
 
-    new_app->animate_in();
+        context->current_app = app;
 
-    context->notify( TP_NOTIFICATION_APP_LOADED );
+        context->current_app->ref();
 
-    return FALSE;
+        app->animate_in();
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 void TPContext::close_app()
 {
-    if ( is_first_app )
+    if ( ! current_app || current_app->get_id() == first_app_id )
     {
         quit();
     }
@@ -1576,18 +1548,8 @@ void TPContext::close_app()
 
         if ( new_app )
         {
-            if ( new_app->run( app_allowed[ new_app->get_id() ] ) == TP_RUN_OK )
-            {
-                g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
-
-                // TODO Not right to set here
-
-                is_first_app = true;
-            }
-            else
-            {
-                delete new_app;
-            }
+            new_app->run( app_allowed[ new_app->get_id() ] , app_run_callback );
+            new_app->unref();
         }
     }
 }
@@ -1605,9 +1567,7 @@ void TPContext::close_current_app()
     {
         current_app->animate_out();
 
-        notify( TP_NOTIFICATION_APP_CLOSING );
-
-        delete current_app;
+        current_app->unref();
 
         current_app = NULL;
     }
@@ -1627,14 +1587,8 @@ void TPContext::reload_app()
     }
     else
     {
-        if ( new_app->run( app_allowed[ new_app->get_id() ] ) == TP_RUN_OK )
-        {
-            g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
-        }
-        else
-        {
-            delete new_app;
-        }
+        new_app->run( app_allowed[ new_app->get_id() ] , app_run_callback );
+        new_app->unref();
     }
 }
 

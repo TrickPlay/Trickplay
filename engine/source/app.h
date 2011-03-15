@@ -44,7 +44,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-class App : public Notify
+class App : public RefCounted , public Notify
 {
 public:
 
@@ -150,13 +150,11 @@ public:
     static App * get( lua_State * L );
 
     //.........................................................................
-
-    ~App();
-
-    //.........................................................................
     // Runs the app
 
-    int run( const StringSet & allowed_names );
+    typedef void ( * RunCallback )( App * app , int result );
+
+    void run( const StringSet & allowed_names , RunCallback run_callback );
 
     //.........................................................................
     // Get the metadata
@@ -258,9 +256,21 @@ public:
 
     void audio_match( const String & json );
 
+protected:
+
+    ~App();
+
 private:
 
     App( TPContext * context, const Metadata & metadata, const String & data_path, const LaunchInfo & launch );
+
+    //.........................................................................
+
+    class RunAction;
+
+    friend class RunAction;
+
+    void run_part2( const StringSet & allowed_names , RunCallback run_callback );
 
     //.........................................................................
     // Drop the cookie jar
