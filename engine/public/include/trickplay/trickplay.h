@@ -311,11 +311,6 @@ typedef struct TPContext TPContext;
     
     These subjects are used with <tp_context_add_notification_handler>.
 
-    TP_NOTIFICATION_APP_LOADING -                       An application is about to be loaded.
-    TP_NOTIFICATION_APP_LOAD_FAILED -                   An application failed to load.
-    TP_NOTIFICATION_APP_LOADED -                        An application finished loading.
-    TP_NOTIFICATION_APP_CLOSING -                       The current application is about to be closed.
-    TP_NOTIFICATION_APP_CLOSED -                        The current application is finished.
     TP_NOTIFICATION_PROFILE_CHANGING -                  The current profile is about to change.
     TP_NOTIFICATION_PROFILE_CHANGE -                    Internal notification to get things ready for a profile change.
     TP_NOTIFICATION_PROFILE_CHANGED -                   The current profile changed.
@@ -326,11 +321,6 @@ typedef struct TPContext TPContext;
     TP_NOTIFICATION_EXITING -                           Trickplay has exited its main loop and <tp_context_run> will return soon.
 */
 
-#define TP_NOTIFICATION_APP_LOADING                     "app-loading"
-#define TP_NOTIFICATION_APP_LOAD_FAILED                 "app-load-failed"
-#define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
-#define TP_NOTIFICATION_APP_CLOSING                     "app-closing"
-#define TP_NOTIFICATION_APP_CLOSED                      "app-closed"
 #define TP_NOTIFICATION_PROFILE_CHANGING                "profile-changing"
 #define TP_NOTIFICATION_PROFILE_CHANGE                  "profile-change"
 #define TP_NOTIFICATION_PROFILE_CHANGED                 "profile-changed"
