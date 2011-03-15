@@ -1800,7 +1800,7 @@ int TPContext::request( const char * subject )
 {
     RequestHandlerMap::const_iterator it = request_handlers.find( String( subject ) );
 
-    return it == request_handlers.end() ? 1 : it->second.first( subject, it->second.second );
+    return it == request_handlers.end() ? 1 : it->second.first( this , subject , it->second.second );
 }
 
 //-----------------------------------------------------------------------------
