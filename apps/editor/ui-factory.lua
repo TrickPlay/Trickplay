@@ -1262,7 +1262,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
             w - BORDER_WIDTH - PADDING_X * 2 ,
             h - BORDER_WIDTH - PADDING_Y * 2 ,
             BORDER_RADIUS )
-    	--ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
 	if ring.Image then
@@ -1838,6 +1837,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     space = space - string.len(item_s) * 20
              if (item_n =="font" or item_n == "label") then
 	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
+             elseif item_n == "cx" or  item_n == "cy" or  item_n == "cw"  or  item_n == "ch" then 
+	          input_box_width = WIDTH - 300 - ( PADDING_X * 2) 
              elseif(item_n == "wrap_mode" or item_n =="duration" or item_n =="fade_duration") then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
              elseif(string.find(item_n,"color")) then 
@@ -2468,7 +2469,7 @@ text11 = Text
 	{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 26px",
-		text = "Change Focus",
+		text = "Focus Destination",
 		editable = true,
 		wants_enter = true,
 		wrap = true,

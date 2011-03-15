@@ -110,7 +110,7 @@ function inspector_apply (v, inspector)
           	     rotation_t = v[attr_n] 
           	     rotation_t[1] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
 	  	     v[attr_n] = rotation_t 
-	      elseif j.name == "clip_use" or j.name == "cx" or j.name == "cy" or j.name == "cw" or j.name == "ch" then
+	      elseif j.name == "cx" or j.name == "cy" or j.name == "cw" or j.name == "ch" then
                      local not_checkbox = false
                      if v.extra then 
 		         if(v.extra.type == "CheckBox")then
@@ -126,18 +126,11 @@ function inspector_apply (v, inspector)
                      end
                      if not_checkbox then 
                             local clip_t = {}
-                            local clip_use = toboolean(item_group:find_child("clip_use"):find_child("input_text").text)
-                            if (clip_use == true) then 
-				print("nonono")
-                                   clip_t[1] = item_group:find_child("cx"):find_child("input_text").text
-                                   clip_t[2] = item_group:find_child("cy"):find_child("input_text").text
-                                   clip_t[3] = item_group:find_child("cw"):find_child("input_text").text
-                                   clip_t[4] = item_group:find_child("ch"):find_child("input_text").text
-                                   v.clip = clip_t
-                            else 
-				  print ("hhihihihihi")
-                                   v.clip = nil
-                            end
+                            clip_t[1] = item_group:find_child("cx"):find_child("input_text").text
+                            clip_t[2] = item_group:find_child("cy"):find_child("input_text").text
+                            clip_t[3] = item_group:find_child("cw"):find_child("input_text").text
+                            clip_t[4] = item_group:find_child("ch"):find_child("input_text").text
+                            v.clip = clip_t
                      end 	
 		elseif j.name == "bw" or j.name == "bh" then
                      local not_checkbox = false
@@ -180,7 +173,14 @@ function inspector_apply (v, inspector)
 				end 
 			  end 
 		     end 
-		else
+		elseif j.name == "left" or j.name == "top" or  j.name == "width" or j.name == "height" then 
+		     local viewport_t = {}
+                     viewport_t[1] = item_group:find_child("left"):find_child("input_text").text
+                     viewport_t[2] = item_group:find_child("top"):find_child("input_text").text
+                     viewport_t[3] = item_group:find_child("width"):find_child("input_text").text
+                     viewport_t[4] = item_group:find_child("height"):find_child("input_text").text
+                     v.viewport = viewport_t
+		else 
 		     print(j.name, " 처리해 주세요")
 		end 
 	   end 
