@@ -504,6 +504,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         subject -   A string describing the nature of the request.
 
         data -      User data passed to <tp_context_set_request_handler>.
@@ -519,6 +521,7 @@ typedef struct TPContext TPContext;
     int
     (*TPRequestHandler)(
     
+        TPContext * context,
         const char * subject,
         void * data);
 
