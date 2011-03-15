@@ -463,14 +463,18 @@ HandState = Class(nil,function(state, ctrl, ...)
    end
    
    function state:remove_players()
+      local player_removed = false
       local i = 1
       while i <= #players do
          if players[i].money == 0 then
             remove_player(i)
+            player_removed = true
          else
             i=i+1
          end
       end
+
+      return player_removed
    end
 
    function state.showdown(state)

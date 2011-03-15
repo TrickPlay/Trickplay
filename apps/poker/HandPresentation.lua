@@ -9,8 +9,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local ctrl = ctrl
    local allCards = {}
    local burnCards = {}
+   local showdownElements = {}
    
-   potText = Text{ font = PLAYER_ACTION_FONT, color = Colors.WHITE, text = "", position = {MDBL.POT[1] + 40, MDBL.POT[2] + 60}}
+   local potText = Text{ font = PLAYER_ACTION_FONT, color = Colors.WHITE, text = "", position = {MDBL.POT[1] + 40, MDBL.POT[2] + 60}}
    function potText.on_text_changed()
       potText.anchor_point = {potText.w/2, potText.h/2}
    end
@@ -39,7 +40,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
    local function remove_burn_cards()
       
       for _, card in pairs(burnCards) do
-         screen:remove(card.group)
+         card.group:unparent()
       end
       
       burnCards = {}
@@ -72,22 +73,22 @@ HandPresentation = Class(nil,function(pres, ctrl)
    end
    
    -- Remove a player's hole cards
-   local function remove_player_cards(player)
-      local hole_cards = ctrl:get_hole_cards()
-      local hole = hole_cards[player]
-      if hole then
-         for k,card in pairs(hole) do
-            card.group:animate{
-               opacity = 0,
-               duration=300,
-               on_completed = function()
-                  screen:remove(card.group)
-                  card.group.opacity = 255
-               end
-            }
-         end
-      end
-   end
+    local function remove_player_cards(player)
+        local hole_cards = ctrl:get_hole_cards()
+        local hole = hole_cards[player]
+        if hole then
+            for k,card in pairs(hole) do
+                card.group:animate{
+                opacity = 0,
+                duration=300,
+                on_completed = function()
+                    card.group:unparent()
+                    card.group.opacity = 255
+                end
+                }
+            end
+        end
+    end
    
    -- Animate all chips to center and add them to the pot
    local function animate_chips_to_center()
@@ -217,148 +218,148 @@ HandPresentation = Class(nil,function(pres, ctrl)
       end
    end
 
-   local function animate_winning_hands()
-      for _,card in ipairs(ctrl:get_community_cards()) do
-          card.group.opacity = 140
-      end
-      for _,card in ipairs(ctrl:get_deck()) do
-          card.group.opacity = 140
-      end
-      -- make the place holders for the hands and the text
-      local border_group = Group()
-      local back = Canvas{
-          size = {900, 146}
-      }
-      back:begin_painting()
-      back:set_source_color("024B23")
-      back:round_rectangle(0, 0, 720, 146, 15)
-      back:set_source_linear_pattern(0, 0, 0, back.h)
-      back:add_source_pattern_color_stop(0, "010803")
-      back:add_source_pattern_color_stop(1, "024B23")
-      back:fill()
-      back:finish_painting()
-      if back.Image then
-          back = back:Image()
-      end
-      local border = Canvas{
-          size = {906, 152}
-      }
-      border:begin_painting()
-      border:set_source_color("FFFFFF")
-      border:round_rectangle(0, 0, 726, 152, 15)
-      border:fill()
-      border:finish_painting()
-      if border.Image then
-          border = border:Image()
-      end
-      border.position = {-3, -3}
-      border.opacity = 128
-
-      border_group:add(border, back)
-      border_group.opacity = 0
-      screen:add(border_group)
-
-      local final_hands = ctrl:get_final_hands()
-      local in_hands = ctrl:get_in_hands()
-      local hole_cards = ctrl:get_hole_cards()
-
-      da_clones = {}
-      local length = 0
-      for i,hand in pairs(in_hands) do
-         length = length + 1
-      end
-      local counter = 0
-      for player,hand in pairs(in_hands) do
-         local player_text = Text{
-            text = "Player "..player.number,
-            x = 685,
-            font = WINNER_FONT,
-            color = Colors.WHITE,
-            opacity = 0
-         }
-         player_text.anchor_point = {player_text.w/2, player_text.h/2}
-         local winner_text
-         if final_hands[player] then
-            winner_text = Text{
-               text = "WINNER!",
-               x = 685,
-               font = WINNER_FONT,
-               color = "E4D312",
-               opacity = 0
+    local border_group
+    local function animate_winning_hands()
+        for _,card in ipairs(ctrl:get_community_cards()) do
+            card.group.opacity = 140
+        end
+        for _,card in ipairs(ctrl:get_deck()) do
+            card.group.opacity = 140
+        end
+        -- make the place holders for the hands and the text
+        if not border_group then
+            border_group = Group()
+            local back = Canvas{
+                size = {900, 146}
             }
-            winner_text.anchor_point = {winner_text.w/2, winner_text.h/2}
-         end
-          back_clone = Clone{source = border_group}
-         back_clone.anchor_point = {back_clone.w/2, back_clone.h/2}
-         back_clone.x = screen.w/2 + 85
-         screen:add(back_clone, player_text, winner_text)
-         for i,card in ipairs(hand) do
-            local card_group = Group{
-               position = Utils.deepcopy(card.group.position)
-            }
-            local clone = Clone{
-               name = "card_clone"..i,
-               source = card.group
-            }
-            card_group.anchor_point = {
-               clone.w/2,
-               clone.h/2
-            }
-            card_group:add(clone)
-            screen:add(card_group)
-            if card:equals(hole_cards[player][1])
-            or card:equals(hole_cards[player][2]) then
-               card_group:add(Image{src = "assets/hole-overlay.png", x = 5, y = 92})
+            back:begin_painting()
+            back:set_source_color("024B23")
+            back:round_rectangle(0, 0, 720, 146, 15)
+            back:set_source_linear_pattern(0, 0, 0, back.h)
+            back:add_source_pattern_color_stop(0, "010803")
+            back:add_source_pattern_color_stop(1, "024B23")
+            back:fill()
+            back:finish_painting()
+            if back.Image then
+                back = back:Image()
             end
-            ---[[
-            local x_length_between_centroids = card_group.w + 10
-            local y_length_between_centroids = card_group.h + 30
-            local total_x_length = x_length_between_centroids*(#hand-1)
-            local total_y_length = y_length_between_centroids*(length-1)
-            local start_x = screen.w/2 - total_x_length/2
-            local start_y = screen.h/2 - total_y_length/2
-            local pos = {
-               start_x + (i-1)*x_length_between_centroids + 75,
-               start_y + counter*y_length_between_centroids - 30
+            local border = Canvas{
+                size = {906, 152}
             }
-            player_text.y = pos[2]
-            back_clone.y = pos[2]
-            blah = back_clone
+            border:begin_painting()
+            border:set_source_color("FFFFFF")
+            border:round_rectangle(0, 0, 726, 152, 15)
+            border:fill()
+            border:finish_painting()
+            if border.Image then
+                border = border:Image()
+            end
+            border.position = {-3, -3}
+            border.opacity = 128
+
+            border_group:add(border, back)
+            border_group.opacity = 0
+            screen:add(border_group)
+        end
+
+        local final_hands = ctrl:get_final_hands()
+        local in_hands = ctrl:get_in_hands()
+        local hole_cards = ctrl:get_hole_cards()
+
+        local length = 0
+        for i,hand in pairs(in_hands) do
+            length = length + 1
+        end
+        local counter = 0
+        for player,hand in pairs(in_hands) do
+            local player_text = Text{
+                text = "Player "..player.number,
+                x = 685,
+                font = WINNER_FONT,
+                color = Colors.WHITE,
+                opacity = 0
+            }
+            player_text.anchor_point = {player_text.w/2, player_text.h/2}
+            local winner_text
+            if final_hands[player] then
+                winner_text = Text{
+                    text = "WINNER!",
+                    x = 685,
+                    font = WINNER_FONT,
+                    color = "E4D312",
+                    opacity = 0
+                }
+                winner_text.anchor_point = {winner_text.w/2, winner_text.h/2}
+            end
+            back_clone = Clone{source = border_group}
+            back_clone.anchor_point = {back_clone.w/2, back_clone.h/2}
+            back_clone.x = screen.w/2 + 85
+            screen:add(back_clone, player_text, winner_text)
+            for i,card in ipairs(hand) do
+                local card_group = Group{
+                    position = Utils.deepcopy(card.group.position)
+                }
+                local clone = Clone{
+                    name = "card_clone"..i,
+                    source = card.group
+                }
+                card_group.anchor_point = {
+                    clone.w/2,
+                    clone.h/2
+                }
+                card_group:add(clone)
+                screen:add(card_group)
+                if card:equals(hole_cards[player][1])
+                or card:equals(hole_cards[player][2]) then
+                    card_group:add(Image{src = "assets/hole-overlay.png", x = 5, y = 92})
+                end
+                ---[[
+                local x_length_between_centroids = card_group.w + 10
+                local y_length_between_centroids = card_group.h + 30
+                local total_x_length = x_length_between_centroids*(#hand-1)
+                local total_y_length = y_length_between_centroids*(length-1)
+                local start_x = screen.w/2 - total_x_length/2
+                local start_y = screen.h/2 - total_y_length/2
+                local pos = {
+                    start_x + (i-1)*x_length_between_centroids + 75,
+                    start_y + counter*y_length_between_centroids - 30
+                }
+                player_text.y = pos[2]
+                back_clone.y = pos[2]
+                if winner_text then
+                    winner_text.y = pos[2] + 20
+                    player_text.y = pos[2] - 20
+                end
+                card_group:animate{
+                    position = Utils.deepcopy(pos),
+                    duration = TIME,
+                    mode = MODE,
+                    --z_rotation=-3 + math.random(5),
+                    on_completed = function() 
+                        card_group:raise_to_top()
+                        player_text.opacity = 255
+                        if winner_text then winner_text.opacity = 255 end
+                    end
+                }
+                --]]
+                table.insert(showdownElements, card_group)
+            end
+            local done_button = Image{
+                src = "assets/help/button-done-on.png",
+                position = {screen.w/2, 1030}
+            }
+            done_button.anchor_point = {done_button.w/2, done_button.h/2}
+            screen:add(done_button)
+            -- for easy deletion
+            table.insert(showdownElements, player_text)
+            table.insert(showdownElements, done_button)
             if winner_text then
-                winner_text.y = pos[2] + 20
-                player_text.y = pos[2] - 20
+                table.insert(showdownElements, winner_text)
             end
-            card_group:animate{
-               position = Utils.deepcopy(pos),
-               duration = TIME,
-               mode = MODE,
-               --z_rotation=-3 + math.random(5),
-               on_completed = function() 
-                  card_group:raise_to_top()
-                  player_text.opacity = 255
-                  if winner_text then winner_text.opacity = 255 end
-               end
-            }
-            --]]
-            table.insert(allCards, card_group)
-            table.insert(da_clones, clone)
-         end
-         local done_button = Image{
-             src = "assets/help/button-done-on.png",
-             position = {screen.w/2, 1030}
-         }
-         done_button.anchor_point = {done_button.w/2, done_button.h/2}
-         screen:add(done_button)
-         -- for easy deletion
-         table.insert(allCards, player_text)
-         table.insert(allCards, done_button)
-         if winner_text then
-            table.insert(allCards, winner_text)
-         end
-         table.insert(allCards, back_clone)
-         counter = counter + 1
-      end
-   end
+            table.insert(showdownElements, back_clone)
+            counter = counter + 1
+        end
+    end
 
    
    ------------------------- GAME FLOW --------------------------
@@ -401,19 +402,25 @@ HandPresentation = Class(nil,function(pres, ctrl)
       model:notify()
    end
 
-   -- Deal community cards
-   local function deal_cards(start, finish)
-      mediaplayer:play_sound(DEAL_WAV)
-      local cards = ctrl:get_community_cards()
-      for i=start,(finish or start) do
-         cards[i].group:animate{ position = MCL[i], duration = TIME, mode = MODE, z_rotation=-3 + math.random(5), on_completed = function() flipCard(cards[i].group) end }
-         if not cards[i].group.parent then
-             screen:add(cards[i].group)
-         end
-         print("NOW DEALING CARD", i)
-         table.insert(allCards, cards[i])
-      end
-   end
+    -- Deal community cards
+    local function deal_cards(start, finish)
+        mediaplayer:play_sound(DEAL_WAV)
+        local cards = ctrl:get_community_cards()
+        for i=start,(finish or start) do
+            if not cards[i].group.parent then
+                screen:add(cards[i].group)
+            end
+            cards[i].group:animate{
+                position = MCL[i], duration = TIME, mode = MODE,
+                z_rotation = -3 + math.random(5),
+                on_completed = function()
+                    flipCard(cards[i].group)
+                end
+            }
+            print("NOW DEALING CARD", i)
+            table.insert(allCards, cards[i])
+        end
+    end
 
    function pres:deal(round)
       
@@ -491,33 +498,39 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
    end
 
-   -- Clear everything
-   function pres.clear_ui(pres)
+    function pres:clear_showdown()
+        for i,element in ipairs(showdownElements) do
+            element:unparent()
+        end
+
+        showdownElements = {}
+    end
+
+    -- Clear everything
+    function pres.clear_ui(pres)
       
-      potText.text = ""
-      pot_glow_img.opacity = 0
+        potText.text = ""
+        pot_glow_img.opacity = 0
       
-      -- clear cards
-      for i,card in ipairs(allCards) do
-         if card.group then
+        -- clear cards
+        for i,card in ipairs(allCards) do
             resetCardGroup(card.group)
             print(card.group.parent, screen, card.group.parent==screen)
-            if card.group.parent == screen then screen:remove(card.group) end
-         elseif card.parent then
-            card:unparent()
-         end
-      end
+            --screen:remove(card.group)
+            card.group:unparent()
+        end
+        --dumptable(allCards)
       
-      allCards = {}
+        allCards = {}
       
-      -- remove burn cards
-      remove_burn_cards()
+        -- remove burn cards
+        remove_burn_cards()
       
-      -- reset bets
-      remove_all_chips()
+        -- reset bets
+        remove_all_chips()
 
-      REMOVE_ALL_DA_CHIPS()
-   end
+        REMOVE_ALL_DA_CHIPS()
+    end
    
    -------------------------PLAYER TURNS--------------------------
    
