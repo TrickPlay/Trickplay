@@ -65,6 +65,7 @@ function resetCardGroup(cardGroup)
    cardGroup.extra.face = false
    front.opacity = 0
    back.opacity = 255
+   cardGroup.opacity = 255
    cardGroup.extra.rotation = 180
    cardGroup.y_rotation = { cardGroup.extra.rotation, 0, 0 }
 

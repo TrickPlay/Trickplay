@@ -38,6 +38,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         Hook up the connect, disconnect and ui controller events
     --]]
     function controllers:on_controller_connected(controller)
+        print("on_controller_connected controller.name = "..controller.name)
         if number_of_ctrls > max_controllers
         or not accepting_controllers
         or not model:get_active_controller().add_controller then
@@ -45,7 +46,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
         if active_ctrls[controller.name] then
             print("Controller trying to connect has the same NAME as"
-            .." controller already connected")
+            .." controller already connected with name: "..controller.name)
             return
         end
         
@@ -277,8 +278,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     -- before application startup
     function ctrlman:initialize()
         for k,controller in pairs(controllers.connected) do
-            controllers:on_controller_connected(controller)
+            if controller.name ~= "Keyboard" then
+                print("adding controller "..controller.name)
+                controllers:on_controller_connected(controller)
+            end
         end
+        print("\n\ndone")
     end
 
     -- put all controllers into the choose your dog mode

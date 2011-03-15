@@ -18,7 +18,8 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       function(ctrl, event) return ctrl:bet(Rounds.TURN, event) end,
       function(ctrl) return ctrl:deal(Rounds.RIVER) end,
       function(ctrl, event) return ctrl:bet(Rounds.RIVER, event) end,
-      function(ctrl) return ctrl:showdown() end
+      function(ctrl) return ctrl:showdown() end,
+      function(ctrl) pres:clear_showdown() return ctrl:remove_players() end
    }
 
    -- true if everyone's all in
@@ -191,10 +192,10 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       pres:all_in_player(active_player)
    end
 
-   function ctrl.showdown(ctrl)
+   function ctrl:showdown()
       local winners, poker_hand = state:showdown()
       pres:showdown(winners, poker_hand)
-      state:remove_players()
+      --state:remove_players()
       ---[[
       if game:game_won() then
          enable_event_listener(
@@ -205,6 +206,15 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
       end
       --]]enable_event_listener(KbdEvent())
       
+      return true
+   end
+
+   function ctrl:remove_players()
+      if state:remove_players() then
+          enable_event_listener(TimerEvent{interval=800})
+      else
+          enable_event_listener(TimerEvent{interval=200})
+      end
       return true
    end
 

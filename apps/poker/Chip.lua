@@ -9,8 +9,10 @@ function REMOVE_ALL_DA_CHIPS()
     for i = #ALL_DA_CHIPS,1,-1 do
         local chip = ALL_DA_CHIPS[i]
         if chip.group then
-            if chip.group.parent then chip.group:unparent() end
-            chip.group = nil
+            if chip.group.parent then
+                chip.group:unparent()
+                chip.group = nil
+            end
         end
     end
 
@@ -43,7 +45,7 @@ local chip_images = {}
 chipStack = Class(function(self, chipValue, ...)
 
     self.chips = {}
-    self.group = Group{}
+    self.group = Group()
     self.chipValue = chipValue or 0
     self.value = 0
     self.size = 0
@@ -57,7 +59,8 @@ chipStack = Class(function(self, chipValue, ...)
             screen:add(chip_images[self.chipValue])
         end
         local chip = Chip(
-            self.chipValue, Clone{source = chip_images[self.chipValue], name = "a_chip"}
+            self.chipValue, Clone{source = chip_images[self.chipValue],
+            name = tostring(self.chipValue).." chip"}
         )
         self.group:add(chip.image)
         self.chips[self.size + 1] = chip
@@ -96,13 +99,14 @@ chipCollection = Class(function(self, ...)
     -- Return the value of all stacks
     function self:value()
         local value = 0
-        for i, v in ipairs(self.stacks) do
-            value = value + self.stacks[i].value
+        for i, stack in ipairs(self.stacks) do
+            value = value + stack.value
         end
         return value
     end 
 
-    function self:size() return #self.stacks end -- Returns the number of stacks in the collection
+    -- Returns the number of stacks in the collection
+    function self:size() return #self.stacks end 
 
     self.group = Group{}
 
@@ -169,7 +173,8 @@ chipCollection = Class(function(self, ...)
         end
 
         for i=1,self:size() do
-            self.group:remove(self.stacks[i].group)
+            --self.group:remove(self.stacks[i].group)
+            self.stacks[i].group:unparent()
         end
 
         table.sort(self.stacks, stackSort)
