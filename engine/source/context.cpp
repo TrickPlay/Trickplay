@@ -51,7 +51,8 @@ TPContext::TPContext()
     media_player_constructor( NULL ),
     media_player( NULL ),
     external_log_handler( NULL ),
-    external_log_handler_data( NULL )
+    external_log_handler_data( NULL ),
+    user_data( NULL )
 {
     g_log_set_default_handler( TPContext::log_handler, this );
 }
@@ -2707,6 +2708,24 @@ const char * tp_context_get( TPContext * context, const char * key )
     g_assert( context );
 
     return context->get( key );
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_user_data( TPContext * context , void * user_data )
+{
+    g_assert( context );
+
+    context->user_data = user_data;
+}
+
+//-----------------------------------------------------------------------------
+
+void * tp_context_get_user_data( TPContext * context )
+{
+    g_assert( context );
+
+    return context->user_data;
 }
 
 //-----------------------------------------------------------------------------
