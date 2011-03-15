@@ -563,6 +563,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         subject -   A string describing the specific notification.
 
         data -      Opaque user data passed to <tp_context_add_notification_handler>.
@@ -572,6 +574,7 @@ typedef struct TPContext TPContext;
     void
     (*TPNotificationHandler)(
                     
+        TPContext * context,
         const char * subject,
         void * data);
 

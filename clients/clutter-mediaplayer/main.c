@@ -650,25 +650,18 @@ static int mp_constructor(TPMediaPlayer * mp)
 //-----------------------------------------------------------------------------
 // We get notified when Trickplay is running - we start our audio sampler
 
-typedef struct
+static void trickplay_running( TPContext * context , const char * subject , void * data )
 {
-    TPContext * context;
-    void *      sampler;
-}
-SamplerInfo;
+    void * * sampler = ( void * * ) data;
 
-static void trickplay_running( const char * subject , void * data )
-{
-    SamplerInfo * sampler_info = ( SamplerInfo * ) data;
-
-    sampler_info->sampler = connect_audio_sampler( sampler_info->context );
+    * sampler = connect_audio_sampler( context );
 }
 
-static void trickplay_exiting( const char * subject , void * data )
+static void trickplay_exiting( TPContext * context , const char * subject , void * data )
 {
-    SamplerInfo * sampler_info = ( SamplerInfo * ) data;
+    void * * sampler = ( void * * ) data;
 
-    disconnect_audio_sampler( sampler_info->sampler );
+    disconnect_audio_sampler( * sampler );
 }
 
 //-----------------------------------------------------------------------------
@@ -691,10 +684,10 @@ int main(int argc,char * argv[])
     // Populate a sampler info structure with the context
     // and add a notification handler
     
-    SamplerInfo sampler_info = { context , 0 };
+    void * sampler = 0;
 
-    tp_context_add_notification_handler(context,TP_NOTIFICATION_RUNNING,trickplay_running,&sampler_info);
-    tp_context_add_notification_handler(context,TP_NOTIFICATION_EXITING,trickplay_exiting,&sampler_info);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_RUNNING,trickplay_running,&sampler);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_EXITING,trickplay_exiting,&sampler);
 
     // Run the context
 
