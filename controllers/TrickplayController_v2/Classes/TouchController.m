@@ -187,7 +187,7 @@
     for (i = 0; i < [endedTouches count]; i++) {
         // send touch command to Trickplay
         UITouch *touch = [endedTouches objectAtIndex:i];
-        if (![self sendTouch:touch withCommand:@"TM"]) {
+        if (![self sendTouch:touch withCommand:@"TU"]) {
             stillActive = NO;
         }
         // delete touch from active touches

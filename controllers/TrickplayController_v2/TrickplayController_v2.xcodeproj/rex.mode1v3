@@ -282,8 +282,9 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>17</integer>
-									<integer>15</integer>
+									<integer>27</integer>
+									<integer>23</integer>
+									<integer>22</integer>
 									<integer>14</integer>
 									<integer>0</integer>
 								</array>
@@ -308,7 +309,7 @@
 							<real>283</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>2 136 1007 826 0 0 1920 1058 </string>
+						<string>3 135 1007 826 0 0 1920 1058 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -326,7 +327,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>RootViewController.m</string>
+								<string>TouchController.m</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -334,11 +335,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>RootViewController.m</string>
+										<string>TouchController.m</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>CDAF74D0132993D500B324CF</string>
+										<string>CDAF74F41330145D00B324CF</string>
 										<key>history</key>
 										<array>
 											<string>CDFEBB98130A4B4500A14307</string>
@@ -351,7 +352,6 @@
 											<string>CDFEC5C913208B8200A14307</string>
 											<string>CDFEC5CB13208B8200A14307</string>
 											<string>CDFEC5CD13208B8200A14307</string>
-											<string>CDFEC6101321CB6200A14307</string>
 											<string>CDFEC6311325BA6700A14307</string>
 											<string>CDFEC6351325BA6700A14307</string>
 											<string>CDFEC6371325BA6700A14307</string>
@@ -372,18 +372,19 @@
 											<string>CD622A6213285CEE003AB721</string>
 											<string>CD622A6313285CEE003AB721</string>
 											<string>CD622A6413285CEE003AB721</string>
-											<string>CD374ED91328673900EA6051</string>
-											<string>CD374EDA1328673900EA6051</string>
 											<string>CD374EDB1328673900EA6051</string>
-											<string>CD374EDE1328673900EA6051</string>
-											<string>CD374EDF1328673900EA6051</string>
-											<string>CD374EE01328673900EA6051</string>
 											<string>CD374EE11328673900EA6051</string>
 											<string>CD374EE21328673900EA6051</string>
 											<string>CD374EE31328673900EA6051</string>
 											<string>CD374F0C13286AB600EA6051</string>
-											<string>CD374F0D13286AB600EA6051</string>
-											<string>CD374F21132993AF00EA6051</string>
+											<string>CDAF74EC1330145D00B324CF</string>
+											<string>CDAF74ED1330145D00B324CF</string>
+											<string>CDAF74EE1330145D00B324CF</string>
+											<string>CDAF74EF1330145D00B324CF</string>
+											<string>CDAF74F01330145D00B324CF</string>
+											<string>CDAF74F11330145D00B324CF</string>
+											<string>CDAF74F21330145D00B324CF</string>
+											<string>CDAF74F31330145D00B324CF</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -397,7 +398,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {702, 565}}</string>
 								<key>RubberWindowFrame</key>
-								<string>2 136 1007 826 0 0 1920 1058 </string>
+								<string>3 135 1007 826 0 0 1920 1058 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -417,7 +418,7 @@
 								<key>Frame</key>
 								<string>{{0, 570}, {702, 215}}</string>
 								<key>RubberWindowFrame</key>
-								<string>2 136 1007 826 0 0 1920 1058 </string>
+								<string>3 135 1007 826 0 0 1920 1058 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
@@ -581,12 +582,15 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>CDAF74F51330145D00B324CF</string>
+		<string>CDAF74F61330145D00B324CF</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>CDFEBB7D130A49F300A14307</string>
+		<string>1C78EAAD065D492600B07095</string>
 		<string>/Users/rex/Documents/TrickplayController_v2/TrickplayController_v2.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>2 136 1007 826 0 0 1920 1058 </string>
+	<string>3 135 1007 826 0 0 1920 1058 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>
@@ -947,7 +951,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C78EAAD065D492600B07095</string>
-				<string>CD374EEC1328673900EA6051</string>
+				<string>CDAF74DF1329940D00B324CF</string>
 				<string>1C78EAAC065D492600B07095</string>
 			</array>
 			<key>ToolbarConfiguration</key>

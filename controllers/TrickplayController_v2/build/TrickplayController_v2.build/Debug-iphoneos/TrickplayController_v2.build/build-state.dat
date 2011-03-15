@@ -1,7 +1,7 @@
 TTrickplayController_v2
 v7
 r0
-t321493386.220139
+t321917980.456790
 cCheck dependencies
 cCpResource build/Debug-iphoneos/TrickplayController_v2.app/ResourceRules.plist /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/ResourceRules.plist
 cProcessInfoPlistFile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/Info.plist TrickplayController_v2-Info.plist
@@ -43,10 +43,10 @@ cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/NSStreamAdditions.o /Users/rex/Documents/TrickplayController_v2/Classes/NSStreamAdditions.m normal armv7 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/CommandInterpreter.o /Users/rex/Documents/TrickplayController_v2/Classes/CommandInterpreter.m normal armv7 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/NetServiceManager.o /Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m normal armv7 objective-c com.apple.compilers.gcc.4_2
-cLd /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2 normal armv6
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/GestureViewController.o /Users/rex/Documents/TrickplayController_v2/Classes/GestureViewController.m normal armv7 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/AccelerometerController.o /Users/rex/Documents/TrickplayController_v2/Classes/AccelerometerController.m normal armv7 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TouchController.o /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m normal armv7 objective-c com.apple.compilers.gcc.4_2
+cLd /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2 normal armv6
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/AudioController.o /Users/rex/Documents/TrickplayController_v2/Classes/AudioController.m normal armv7 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/AudioStreamer.o /Users/rex/Documents/TrickplayController_v2/Classes/AudioStreamer.m normal armv7 objective-c com.apple.compilers.gcc.4_2
 cCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/ResourceManager.o /Users/rex/Documents/TrickplayController_v2/Classes/ResourceManager.m normal armv7 objective-c com.apple.compilers.gcc.4_2
@@ -318,8 +318,8 @@ i<Foundation/Foundation.h>
 i"GestureViewController.h"
 
 N/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m
-c000000004D782F26000000000000256E
-t1299722022
+c000000004D7FDC93000000000000256E
+t1300225171
 s9582
 i"TouchController.h"
 
@@ -1125,11 +1125,11 @@ t1299183143
 s676124
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app
-t1299800586
+t1300225180
 s782
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app.dSYM
-t1299800585
+t1300225178
 s102
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/.gitignore
@@ -1317,7 +1317,7 @@ t1299203762
 s318
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2
-t1299800585
+t1300225178
 s366464
 
 N/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/a.json
@@ -1757,11 +1757,11 @@ t1299723323
 s28280
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TouchController.o
-t1299723324
-s63200
+t1300225173
+s63236
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2
-t1299800585
+t1300225176
 s182680
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2.LinkFileList
@@ -1874,11 +1874,11 @@ t1299723324
 s27576
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TouchController.o
-t1299723325
-s61328
+t1300225177
+s61364
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2
-t1299800585
+t1300225178
 s178048
 
 N/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2.LinkFileList
@@ -2041,15 +2041,15 @@ s1546
 
 CCheck dependencies
 r0
-lSLF07#2@18"Check dependencies321493384#321493384#0(0"0(0#1#0"8618888640#0"0#
+lSLF07#2@18"Check dependencies321917972#321917973#0(0"0(0#1#0"8606004960#0"0#
 
 CCodeSign /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app
-s321493385.506094
-e321493386.220098
+s321917978.820052
+e321917980.456696
 r1
 xCodeSign
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app
-lSLF07#2@56"CodeSign build/Debug-iphoneos/TrickplayController_v2.app321493385#321493386#0(0"0(0#0#91"/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app8619622464#741"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    setenv _CODESIGN_ALLOCATE_ /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/codesign_allocate    /usr/bin/codesign -f -s "iPhone Developer: Rex Fenley (59V2APUJJ6)" --resource-rules=/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/ResourceRules.plist --entitlements /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2.xcent /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app0#
+lSLF07#2@56"CodeSign build/Debug-iphoneos/TrickplayController_v2.app321917978#321917980#0(0"0(0#0#91"/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app8621741632#741"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    setenv _CODESIGN_ALLOCATE_ /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/codesign_allocate    /usr/bin/codesign -f -s "iPhone Developer: Rex Fenley (59V2APUJJ6)" --resource-rules=/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/ResourceRules.plist --entitlements /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2.xcent /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/AbstractTest.o "/Users/rex/Documents/TrickplayController_v2/JSON v2.3.2 (iOS)/Tests/AbstractTest.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
 s320897128.863983
@@ -2528,8 +2528,8 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@75"Compile /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m321416123#321416123#0(0"0(0#0#67"/Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m8660651040#2151"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch armv6 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=4.2 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources/armv6 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-gldmptallmzdneamemexmfikcugv/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/SocketManager.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TouchController.o /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m normal armv6 objective-c com.apple.compilers.gcc.4_2
-s321416123.914318
-e321416124.091641
+s321917973.353101
+e321917973.728853
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TouchController.o
@@ -2538,7 +2538,7 @@ xnormal
 xarmv6
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m321416123#321416124#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m8661061120#2155"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch armv6 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=4.2 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources/armv6 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-gldmptallmzdneamemexmfikcugv/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TouchController.o0#
+lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m321917973#321917973#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m8605950784#2155"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch armv6 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=4.2 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources/armv6 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-gldmptallmzdneamemexmfikcugv/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TouchController.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2AppDelegate.o /Users/rex/Documents/TrickplayController_v2/Classes/TrickplayController_v2AppDelegate.m normal armv6 objective-c com.apple.compilers.gcc.4_2
 r0
@@ -3064,8 +3064,8 @@ xcom.apple.compilers.gcc.4_2
 lSLF07#2@75"Compile /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m321416124#321416124#0(0"0(0#0#67"/Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m8661373824#2151"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch armv7 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=4.2 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources/armv7 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-diqylpocstvddraaorqzvyqxvdnc/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/SocketManager.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/SocketManager.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TouchController.o /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m normal armv7 objective-c com.apple.compilers.gcc.4_2
-s321416125.000285
-e321416125.283049
+s321917973.644484
+e321917977.382017
 r1
 xCompileC
 xbuild/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TouchController.o
@@ -3074,7 +3074,7 @@ xnormal
 xarmv7
 xobjective-c
 xcom.apple.compilers.gcc.4_2
-lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m321416125#321416125#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m8658959680#2155"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch armv7 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=4.2 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources/armv7 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-diqylpocstvddraaorqzvyqxvdnc/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TouchController.o0#
+lSLF07#2@77"Compile /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m321917973#321917978#0(0"0(0#0#69"/Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m8620234176#2155"    cd /Users/rex/Documents/TrickplayController_v2    setenv LANG en_US.US-ASCII    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -x objective-c -arch armv7 -fmessage-length=0 -pipe -std=c99 -Wno-trigraphs -fpascal-strings -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -fvisibility=hidden -gdwarf-2 -mthumb -miphoneos-version-min=4.2 -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-generated-files.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-own-target-headers.hmap -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-all-target-headers.hmap -iquote /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2-project-headers.hmap -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -I/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/include -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources/armv7 -I/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/DerivedSources -include /var/folders/hs/hsReKrwVE0WUAGFo3RcslE+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/TrickplayController_v2_Prefix-diqylpocstvddraaorqzvyqxvdnc/TrickplayController_v2_Prefix.pch -c /Users/rex/Documents/TrickplayController_v2/Classes/TouchController.m -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TouchController.o0#
 
 CCompileC build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2AppDelegate.o /Users/rex/Documents/TrickplayController_v2/Classes/TrickplayController_v2AppDelegate.m normal armv7 objective-c com.apple.compilers.gcc.4_2
 r0
@@ -4302,43 +4302,43 @@ xJSON v2.3.2 (iOS)/Tests/Data/string.json.terse
 lSLF07#2@51"Copy JSON v2.3.2 (iOS)/Tests/Data/string.json.terse320896562#320896563#0(0"0(0#0#90"/Users/rex/Documents/TrickplayController_v2/JSON v2.3.2 (iOS)/Tests/Data/string.json.terse8813219328#522"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -resolve-src-symlinks "/Users/rex/Documents/TrickplayController_v2/JSON v2.3.2 (iOS)/Tests/Data/string.json.terse" /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app0#
 
 CCreateUniversalBinary /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2 normal "armv6 armv7"
-s321493385.258492
-e321493385.262761
+s321917978.248726
+e321917978.304551
 r1
 xCreateUniversalBinary
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2
 xnormal
 xarmv6 armv7
-lSLF07#2@113"CreateUniversalBinary build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2 normal "armv6 armv7"321493385#321493385#0(0"0(0#0#55"/Users/rex/Documents/TrickplayController_v2/armv6 armv78618784672#658"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/lipo -create /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2 /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2 -output /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v20#
+lSLF07#2@113"CreateUniversalBinary build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2 normal "armv6 armv7"321917978#321917978#0(0"0(0#0#55"/Users/rex/Documents/TrickplayController_v2/armv6 armv78622996800#658"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/lipo -create /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2 /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2 -output /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v20#
 
 CGenerateDSYMFile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app.dSYM /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2
-s321493385.263078
-e321493385.502676
+s321917978.304648
+e321917978.812864
 r1
 xGenerateDSYMFile
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app.dSYM
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2
-lSLF07#2@140"GenerateDSYMFile build/Debug-iphoneos/TrickplayController_v2.app.dSYM build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2321493385#321493385#0(0"0(0#0#114"/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v28619068352#422"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/dsymutil /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2 -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app.dSYM0#
+lSLF07#2@140"GenerateDSYMFile build/Debug-iphoneos/TrickplayController_v2.app.dSYM build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2321917978#321917978#0(0"0(0#0#114"/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v28621564192#422"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/usr/bin/dsymutil /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/TrickplayController_v2 -o /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app.dSYM0#
 
 CLd /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2 normal armv6
-s321493385.182299
-e321493385.245762
+s321917973.728949
+e321917976.593309
 r1
 xLd
 x/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2
 xnormal
 xarmv6
-lSLF07#2@171"Link /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2321493385#321493385#0(0"0(0#0#0"8618750880#1049"    cd /Users/rex/Documents/TrickplayController_v2    setenv IPHONEOS_DEPLOYMENT_TARGET 4.2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -arch armv6 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -L/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -filelist /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2.LinkFileList -dead_strip -all_load -miphoneos-version-min=4.2 -framework Foundation -framework UIKit -framework CoreGraphics -framework YAJLiOS -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v20#
+lSLF07#2@171"Link /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2321917973#321917978#0(0"0(0#0#0"8619391328#1049"    cd /Users/rex/Documents/TrickplayController_v2    setenv IPHONEOS_DEPLOYMENT_TARGET 4.2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -arch armv6 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -L/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -filelist /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v2.LinkFileList -dead_strip -all_load -miphoneos-version-min=4.2 -framework Foundation -framework UIKit -framework CoreGraphics -framework YAJLiOS -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv6/TrickplayController_v20#
 
 CLd /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2 normal armv7
-s321493385.201095
-e321493385.258393
+s321917977.382109
+e321917978.248507
 r1
 xLd
 x/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2
 xnormal
 xarmv7
-lSLF07#2@171"Link /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2321493385#321493385#0(0"0(0#0#0"8616766816#1049"    cd /Users/rex/Documents/TrickplayController_v2    setenv IPHONEOS_DEPLOYMENT_TARGET 4.2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -arch armv7 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -L/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -filelist /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2.LinkFileList -dead_strip -all_load -miphoneos-version-min=4.2 -framework Foundation -framework UIKit -framework CoreGraphics -framework YAJLiOS -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v20#
+lSLF07#2@171"Link /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2321917977#321917978#0(0"0(0#0#0"8616856736#1049"    cd /Users/rex/Documents/TrickplayController_v2    setenv IPHONEOS_DEPLOYMENT_TARGET 4.2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/gcc-4.2 -arch armv7 -isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk -L/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos -F/Users/rex/Documents/TrickplayController_v2 -filelist /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v2.LinkFileList -dead_strip -all_load -miphoneos-version-min=4.2 -framework Foundation -framework UIKit -framework CoreGraphics -framework YAJLiOS -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/Objects-normal/armv7/TrickplayController_v20#
 
 CProcessInfoPlistFile /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app/Info.plist TrickplayController_v2-Info.plist
 s321416117.395708
@@ -4429,10 +4429,10 @@ x/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/
 lSLF07#2@220"ProcessProductPackaging /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/Entitlements.plist build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2.xcent321416126#321416126#0(0"0(0#0#151"/Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2.xcent8658409664#487"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    <com.apple.tools.product-pkg-utility> /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/Entitlements.plist -entitlements -format xml -o /Users/rex/Documents/TrickplayController_v2/build/TrickplayController_v2.build/Debug-iphoneos/TrickplayController_v2.build/TrickplayController_v2.xcent0#
 
 CTouch /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app
-s321493385.502867
-e321493385.505919
+s321917978.813061
+e321917978.819825
 r1
 xTouch
 x/Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app
-lSLF07#2@97"Touch /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app321493385#321493385#0(0"0(0#0#0"8619773824#289"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/touch -c /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app0#
+lSLF07#2@97"Touch /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app321917978#321917978#0(0"0(0#0#0"8622078208#289"    cd /Users/rex/Documents/TrickplayController_v2    setenv PATH "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"    /usr/bin/touch -c /Users/rex/Documents/TrickplayController_v2/build/Debug-iphoneos/TrickplayController_v2.app0#
 
