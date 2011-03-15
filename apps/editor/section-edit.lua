@@ -38,7 +38,7 @@ function( section )
 							screen:find_child("timeline").extra.show = false end,
      	["Show Timeline".."\t".."[J]"]   = function() screen:find_child("timeline"):show() 
 						      screen:find_child("timeline").extra.show = true end,
-     	["Insert UI Elements  ".."".."[W]"]   = function() input_mode = S_SELECT editor.widgets()  end,
+     	["Insert UI Elements  ".."".."[W]"]   = function() input_mode = S_SELECT editor.ui_elements()  end,
      	["Clone".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
      	["Delete".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
      	["Group".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,

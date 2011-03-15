@@ -120,7 +120,7 @@ local function guideline_inspector(v)
         input_box_v.position = {430, 90}
         gw:add(input_box_v)
 
-	save_b, save_t  = factory.make_msgw_button_item( assets , "OK")
+	save_b, save_t  = factory.make_msgw_button_item( assets , "Apply")
         save_b.position = {250, 150}
 	save_b.reactive = true 
 	save_b.name = "apply"
@@ -237,8 +237,7 @@ local function create_on_line_down_f(v)
         function v:on_button_down(x,y,button,num_clicks)
              dragging = {v, x - v.x, y - v.y }
 	     v.color = {50, 50,50,255}
-	     --if(button == 3 or num_clicks >= 2) then
-	     if(button == 3) then
+	     if(button == 3 or num_clicks >= 2) then
 		  guideline_inspector(v)
                   return true
              end 
@@ -268,8 +267,8 @@ function editor.v_guideline()
 
      local v_gl = Rectangle {
 		name="v_guideline"..tostring(v_guideline),
-		border_color= DEFAULT_COLOR, --{255,255,255,255},
-		border_color= DEFAULT_COLOR, -- {255,255,255,255},
+		border_color={255,255,255,255},
+		border_color={255,255,255,255},
 		color={100,255,25,255},
 		size = {4, screen.h},
 		anchor_point = {0,0},
@@ -291,8 +290,8 @@ function editor.h_guideline()
 
      local h_gl = Rectangle {
 		name="h_guideline"..tostring(h_guideline),
-		border_color= DEFAULT_COLOR, --{255,255,255,255},
-		border_color= DEFAULT_COLOR, --{255,255,255,255},
+		border_color={255,255,255,255},
+		border_color={255,255,255,255},
 		color={100,255,25,255},
 		size = {screen.w, 4},
 		anchor_point = {0,0},
@@ -423,6 +422,7 @@ function editor.n_selected(obj, call_by_inspector)
 end  
 
 function editor.close()
+
 	clear_bg()
         if(g.extra.video ~= nil) then 
 	    g.extra.video = nil
@@ -498,28 +498,10 @@ function editor.close()
 	g.extra.canvas_h = screen.h
 	g.extra.scroll_dy = 0
 	g.extra.scroll_dx = 0
-
-	local timeline = screen:find_child("timeline")
-	if timeline then 
-		timeline:clear()
-		screen:remove(timeline)
-		if screen:find_child("tline") then
-		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		end
-	end 
-	
 end 
 
 function editor.open()
 
-     local timeline = screen:find_child("timeline")
-     if timeline then 
-	timeline:clear()
-	screen:remove(timeline)
-	if screen:find_child("tline") then
-	     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-	end 
-     end 
     -- editor.close()
      if(CURRENT_DIR == "") then 
 	set_app_path()
@@ -534,7 +516,7 @@ end
 local function cleanMsgWin(msgw)	
      msgw.children = {}
      screen:remove(msgw)
-     --input_mode = S_SELECT 
+     input_mode = S_SELECT
 end 
 
 function editor.the_image()
@@ -680,7 +662,7 @@ function editor.the_image()
         for i,j in pairs (text_g.children) do 
          function j:on_button_down(x,y,button, num_clicks)
 	      if input_text ~= nil then 
-		    input_text.color = DEFAULT_COLOR -- {255, 255, 255, 255}
+		    input_text.color = {255, 255, 255, 255}
 	      end 
               input_text = j
 	      j.color = {0,255,0,255}
@@ -728,36 +710,10 @@ function editor.the_image()
 --]]
 end 
 
-function editor.export ()
-
-	animate_out_dropdown()
-	ui:hide()
-	if(screen:find_child("xscroll_bar") ~= nil) then 
-		screen:find_child("xscroll_bar"):hide() 
-		screen:find_child("xscroll_box"):hide() 
-		screen:find_child("x_0_mark"):hide()
-		screen:find_child("x_1920_mark"):hide()
-	end 
-	if(screen:find_child("scroll_bar") ~= nil) then 
-		screen:find_child("scroll_bar"):hide() 
-		screen:find_child("scroll_box"):hide() 
-		screen:find_child("y_0_mark"):hide()
-		screen:find_child("y_1080_mark"):hide()
-	end 
-	menu_hide = true 
-	screen:grab_key_focus()
-	screen:remove(g)
-	g:clear()
-	local f = loadfile(current_fn)
-	f(g)
-	screen:add(g)
-	
-end 
-
 
 function editor.the_open()
 ---[[
-       	local WIDTH = 700
+	local WIDTH = 700
 	local L_PADDING = 50
 	local R_PADDING = 50
         local TOP_PADDING = 60
@@ -900,7 +856,7 @@ function editor.the_open()
     for i,j in pairs (text_g.children) do 
          function j:on_button_down(x,y,button, num_clicks)
 	      if input_text ~= nil then 
-		    input_text.color = DEFAULT_COLOR-- {255, 255, 255, 255}
+		    input_text.color = {255, 255, 255, 255}
 	      end 
               input_text = j
 	      j.color = {0,255,0,255}
@@ -923,61 +879,14 @@ function editor.the_open()
 
     function open_b:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
-	       local timeline = screen:find_child("timeline")
-	       if timeline then 
-		     timeline:clear()
-	     	     screen:remove(timeline)
-		     if screen:find_child("tline") then
-		          screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		     end
-	       end 
-               inputMsgWindow_openfile(input_text.text) 
-	       cleanMsgWin(msgw)
-	       local timeline = screen:find_child("timeline") 
-	       if timeline then  
-                 for n,m in pairs (g.children) do 
-	         if m.extra.timeline[0] then 
-	            m:show()
-	            for l,k in pairs (m.extra.timeline[0]) do 
-		        if l ~= "hide" then
-		            m[l] = k
-		        elseif k == true then 
-		            m:hide() 
-		        end 
-	            end
-                end 
-             	end 
-             end 
-
+              inputMsgWindow_openfile(input_text.text) 
+	      cleanMsgWin(msgw)
 	 end 
     end 
     function open_t:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
-	      local timeline = screen:find_child("timeline")
-	      if timeline then 
-		     timeline:clear()
-	     	     screen:remove(timeline)
-		     if screen:find_child("tline") then
-		          screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		     end
-	      end 
               inputMsgWindow_openfile(input_text.text) 
 	      cleanMsgWin(msgw)
-	      local timeline = screen:find_child("timeline") 
-	      if timeline then  
-                 for n,m in pairs (g.children) do 
-	         if m.extra.timeline[0] then 
-	            m:show()
-	            for l,k in pairs (m.extra.timeline[0]) do 
-		        if l ~= "hide" then
-		            m[l] = k
-		        elseif k == true then 
-		            m:hide() 
-		        end 
-	            end
-                end 
-             	end 
-              end 
 	 end 
     end 
 
@@ -995,14 +904,14 @@ function editor.the_open()
 --]]
 end 
 
-function editor.inspector(v, x_pos, y_pos, scroll_y_pos) 
+function editor.inspector(v) 
 
 	local WIDTH = 450 -- width for inspector's contents
 
 	local INSPECTOR_OFFSET = 30 
         local TOP_PADDING = 12
         local BOTTOM_PADDING = 12
-	local xbox_xpos = 490
+	local xbox_xpos = 465
 
 	if(current_inspector ~= nil) then 
 		return 
@@ -1018,14 +927,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- make inspector background image 
 	if v.extra then 
-	   if is_this_widget(v) == true  then
-		  print("editor.lua : => ", v.extra.type)
+	   if is_in_list(v.extra.type, widgets) == true  then
+	     	  xbox_xpos = 490
 	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
 	   else -- rect, img, text 
 	     	  inspector_bg = factory.make_popup_bg(v.type, 0)
 	   end 
 	else -- video  
-	   xbox_xpos = 465
 	   inspector_bg = factory.make_popup_bg(v.type, 0)
 	end 
 
@@ -1093,12 +1001,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- set the inspector location 
 	if(v.type ~= "Video") then
-	   if(x_pos ~= nil and y_pos ~= nil) then 
-	     inspector.x = x_pos	
-	     inspector.y = y_pos	
-	   else
 	     inspector_position() 
-	   end 
 	else 
 	     inspector.x = screen.w/8
 	     inspector.y = screen.h/8
@@ -1110,61 +1013,57 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local attr_n, attr_v, attr_s
 
         local items_height = 0
-        local prev_item_h = 0
-	local prev_y = 0 
-	local space = WIDTH
+	local space = 0
 	local used = 0
 
 	local item_group = Group{name = "item_group"}
-	local H_SPACE = 5 --30
-	local X_INDENT = 25
-	local TOP_PADDING = 30
 	
 	for i=1, #attr_t do 
-            if (attr_t[i] == nil) then break end 
-	    attr_n = attr_t[i][1] 
-	    attr_v = attr_t[i][2] 
-	    attr_s = attr_t[i][3] 
+             if (attr_t[i] == nil) then break end 
 
-            attr_v = tostring(attr_v)
+	     attr_n = attr_t[i][1] 
+	     attr_v = attr_t[i][2] 
+	     attr_s = attr_t[i][3] 
+             attr_v = tostring(attr_v)
 
-	    if(attr_s == nil) then attr_s = "" end 
+	     if(attr_s == nil) then attr_s = "" end 
 	     
-	    local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s) 
-	    if(item.w <= space) then 
-		 if (item.h > prev_item_h) then 
-                     items_height = items_height + (item.h - prev_item_h) 
-		     prev_item_h = item.h
-	         end 
-            	 item.x = used + H_SPACE 
-		 item.y = prev_y
+	     local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s) 
+
+             items_height = items_height + item.h 
+
+	     if(item.w <= space) then 
+                 items_height = items_height - item.h 
+            	 item.x = used + 30
+	     else 
+                 item.x = 25 --( inspector_bg.w - WIDTH ) / 2
+		 space = 0
+		 used = 0
+             end 
+		
+	     
+	     if (attr_n == "caption") then  
+                  item.y = items_height + 10
+	     else 
+                 item.y = items_height 
+	     end 
+	    
+
+	    if(space == 0) then 
+	         space = WIDTH - item.w 
+            else 
 		 space = space - item.w
-	    else 
-		 if (attr_n == "wwidth" or attr_n == "w") then 
-			items_height = items_height - 12 -- imsi !! 
- 		 end 
-		 item.y = items_height 
-                 item.x = X_INDENT 
-		 prev_y = item.y 
-		 items_height = items_height + item.h 
-		 space = WIDTH - item.w
-            end 
-	    used = item.x + item.w 
+	    end
+	    used = used + item.w 
 
 	    if (xbox_xpos == 465) then  
-		if (attr_n == "title") then 
-		    item.y = item.y + TOP_PADDING 
-		    prev_y = item.y 
-		    items_height = items_height + TOP_PADDING *3/2
-	            inspector:add(item)
-		elseif(attr_n == "button") then 
+		if (attr_n == "title" or attr_n == "button") then 
 	            inspector:add(item)
 	    	else 
 	            item_group:add(item)
 	    	end 
 	    else 
 	        if (attr_n == "title") then 
-		    item.y = item.y + TOP_PADDING 
 	            inspector:add(item)
 	    	elseif(attr_n == "button") then 
 		    if(attr_v == "view code") then 
@@ -1175,27 +1074,30 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	            end 
 	            inspector:add(item)
 	        else 
-		    item.y = item.y - TOP_PADDING
+		    item.y = item.y - 82 
 	            item_group:add(item)
 	        end 
 	    end
-	    --print (attr_n,":",item.x,",",item.y)
+	    print (attr_n,":",item.x,",",item.y)
+	
         end 
 
-	-- inspector scroll function 
+--[[ scroll function ]]--
 	if v.extra then 
-	       si = ui_element.scrollPane{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} 
+	   if is_in_list(v.extra.type, widgets) == true  then
+	       si = widget.scrollWindow{clip_w = item_group.w + 40, content_w = item_group.w, content_h = item_group.h, clip_h = 480, border_is_visible = false, arrow_sz = 18, color="FFFFFF5C"} -- 10,18
 	       si.content = item_group
 	       si.position = {0,82,0}
 	       si.name ="si"
-	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
-	       if scroll_y_pos then 
-	           si.seek_to(0, scroll_y_pos) 
-	       end 
+	       si.size = {content_w, item_group.h, 0}
 	       inspector:add(si)
+	   else -- rect, img, text 
+	       inspector:add(item_group) 
+	   end 
 	else -- video  
 	   inspector:add(item_group) 
 	end 
+--[[ scroll function ]]--
 	screen:add(inspector)
 	input_mode = S_POPUP
 	inspector:find_child("name").extra.on_focus_in()
@@ -1207,7 +1109,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
         inspector_xbox.reactive = true
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		editor.n_selected(v, true)
-		inspector:clear() 
+		inspector:clear() -- 0202
 		screen:remove(inspector)
 		current_inspector = nil
 			
@@ -1216,10 +1118,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			c.reactive = true
 		    end 
                 end
-
-		for i, c in pairs(g.children) do
-	     		editor.n_selected(c)
-		end
 
                 screen.grab_key_focus(screen) 
 	        input_mode = S_SELECT
@@ -1231,7 +1129,7 @@ end
 function editor.view_code(v)
 
 	local WIDTH = 750 
-        local TOP_PADDING = 0--12
+        local TOP_PADDING = 12
         local BOTTOM_PADDING = 12
 	local CODE_OFFSET = 30 
         local codes = ""
@@ -1358,7 +1256,7 @@ function editor.view_code(v)
         end 
 
         text_codes = Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
-        color = "FFFFFF" , position = { 25 , 35 } , size = {1400, 910}, editable = false ,
+        color = "FFFFFF" , position = { 50 , 60 } , size = {1400, 910}, editable = false ,
         reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
 	codeViewWin:add(text_codes)
 	screen:add(codeViewWin)
@@ -1377,11 +1275,6 @@ function editor.view_code(v)
 end 
 
 function editor.save(save_current_f)
-
-     if current_time_focus then 
-	current_time_focus.on_focus_out()
-	current_time_focus = nil
-     end 
 
      local screen_rect = g:find_child("screen_rect")
   
@@ -1409,25 +1302,6 @@ function editor.save(save_current_f)
 
 	if (g.extra.video ~= nil) then
 	     contents = contents..itemTostring(g.extra.video)
-	end 
-
-        local timeline = screen:find_child("timeline")
-	if timeline then
-	      contents = contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
-	      for m,n in orderedPairs (timeline.points) do 
-		    contents = contents.."["..tostring(m).."] = {"
-		    for q,r in pairs (n) do
-		         if q == 1 then 
-			      contents = contents.."\""..tostring(r).."\","
-		         else 
-			      contents = contents..tostring(r)..","
-		         end
-		    end 
-		    contents = contents.."},"
-	      end 
-	      contents = contents.."},\n\t" 
-              contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
-              contents = contents.."screen:add(timeline)\n\n"
 	end 
 
 	contents = contents.."\ng:add("..obj_names..")"
@@ -1468,25 +1342,6 @@ function editor.save(save_current_f)
 	          contents = contents..itemTostring(g.extra.video)
 	     end 
 
-	     local timeline = screen:find_child("timeline")
-	     if timeline then
-	          contents = contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
-	          for m,n in orderedPairs(timeline.points) do 
-		         contents = contents.."["..tostring(m).."] = {"
-			    for q,r in pairs (n) do
-				    if q == 1 then 
-				         contents = contents.."\""..tostring(r).."\","
-				    else 
-				         contents = contents..tostring(r)..","
-				    end
-			    end 
-		         contents = contents.."},"
-	         end 
-	         contents = contents.."},\n\t" 
-                 contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
-                 contents = contents.."screen:add(timeline)\n\n"
-	     end 
-
 	     contents = contents.."\ng:add("..obj_names..")"
              contents = "local g = ... \n\n"..contents
              undo_list = {}
@@ -1514,7 +1369,7 @@ function editor.rectangle(x, y)
                 name="rect"..tostring(item_num),
                 border_color= DEFAULT_COLOR,
                 border_width=0,
-                color= DEFAULT_COLOR,
+                color= {255,255,255,255},
                 size = {1,1},
                 position = {x,y,0}, 
 		extra = {org_x = x, org_y = y}
@@ -1540,35 +1395,6 @@ function editor.rectangle_done(x,y)
         end
         item_num = item_num + 1
         screen.grab_key_focus(screen)
-
-
-	local timeline = screen:find_child("timeline")
-	if timeline then 
-	    ui.rect.extra.timeline = {}
-            ui.rect.extra.timeline[0] = {}
-	    local prev_point = 0
-	    local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-	    for l,k in pairs (attr_map["Rectangle"]()) do 
-	        ui.rect.extra.timeline[0][k] = ui.rect[k]
-	    end
-	    if cur_focus_n ~= 0 then 
-                ui.rect.extra.timeline[0]["hide"] = true  
-	    end 
-
-	    for i, j in orderedPairs(timeline.points) do 
-	        if not ui.rect.extra.timeline[i] then 
-		    ui.rect.extra.timeline[i] = {} 
-	            for l,k in pairs (attr_map["Rectangle"]()) do 
-		         ui.rect.extra.timeline[i][k] = ui.rect.extra.timeline[prev_point][k] 
-		    end 
-		    prev_point = i 
-		end 
-	        if i < cur_focus_n  then 
-                    ui.rect.extra.timeline[i]["hide"] = true  
-		end 
-	    end 
-	    
-	end 
 end 
 
 function editor.rectangle_move(x,y)
@@ -1626,7 +1452,7 @@ function editor.undo()
 	  elseif undo_item[2] == DEL then 
 	       editor.n_selected(undo_item[3])
 	       if((undo_item[3]).type == "Group") then 
-		    if is_in_list(undo_item[3].extra.type, uiElements) == false then 
+		    if is_in_list(undo_item[3].extra.type, widgets) == false then 
 		        for i, c in pairs(undo_item[3].extra.children) do
 				local c_tmp = g:find_child(c)
 				editor.n_selected(c_tmp)
@@ -1726,34 +1552,6 @@ function editor.text()
 
         table.insert(undo_list, {ui.text.name, ADD, ui.text})
         g:add(ui.text)
-
-	local timeline = screen:find_child("timeline")
-	if timeline then 
-	    ui.text.extra.timeline = {}
-            ui.text.extra.timeline[0] = {}
-	    local prev_point = 0
-	    local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-	    for l,k in pairs (attr_map["Text"]()) do 
-	        	ui.text.extra.timeline[0][k] = ui.text[k]
-	    end
-	    if cur_focus_n ~= 0 then 
-                ui.text.extra.timeline[0]["hide"] = true  
-	    end 
-
-	    for i, j in orderedPairs(timeline.points) do 
-	        if not ui.text.extra.timeline[i] then 
-		    ui.text.extra.timeline[i] = {} 
-	            for l,k in pairs (attr_map["Text"]()) do 
-		         ui.text.extra.timeline[i][k] = ui.text.extra.timeline[prev_point][k] 
-		    end 
-		    prev_point = i 
-		end 
-	        if i < cur_focus_n  then 
-                    ui.text.extra.timeline[i]["hide"] = true  
-		end 
-	    end 
-	end 
-
 	if(screen:find_child("screen_objects") == nil) then 
              screen:add(g)
 	end
@@ -1822,34 +1620,6 @@ function editor.clone()
         	     }
         	     table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
         	     g:add(ui.clone)
-
-		     local timeline = screen:find_child("timeline")
-		     if timeline then 
-	    		ui.clone.extra.timeline = {}
-            		ui.clone.extra.timeline[0] = {}
-	    		local prev_point = 0
-	        	local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-	    		for l,k in pairs (attr_map["Clone"]()) do 
-	        	     ui.clone.extra.timeline[0][k] = ui.clone[k]
-	    		end
-	    		if cur_focus_n ~= 0 then 
-                		ui.clone.extra.timeline[0]["hide"] = true  
-	    		end 
-	    		for i, j in orderedPairs(timeline.points) do 
-	        	     if not ui.clone.extra.timeline[i] then 
-		    	          ui.clone.extra.timeline[i] = {} 
-	            		  for l,k in pairs (attr_map["Clone"]()) do 
-		         	  	ui.clone.extra.timeline[i][k] = ui.clone.extra.timeline[prev_point][k] 
-		    		  end 
-		                  prev_point = i 
-			     end 
-	        	     if i < cur_focus_n  then 
-                    		  ui.clone.extra.timeline[i]["hide"] = true  
-			     end 
-	    	        end 
-		     end 
- 
-		     
 	             if(screen:find_child("screen_objects") == nil) then 
         	          screen:add(g)        
 		     end 
@@ -1883,11 +1653,6 @@ function editor.delete()
             end
         end
 
-	if table.getn(g.children) == 0 then 
-	    if screen:find_child("timeline") then 
-		screen:remove(screen:find_child("timeline"))
-	    end 
-	end 
 	input_mode = S_SELECT
 end
 	
@@ -1941,6 +1706,7 @@ function editor.group()
 	for i, v in pairs (ui.group.children) do 
 		if ui.group:find_child(v.name) then 
 			v.extra.is_in_group = true
+			--print("KKKKK 4444") 
 			v.extra.group_position = ui.group.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
@@ -1950,32 +1716,6 @@ function editor.group()
         g:add(ui.group)
 	if(screen:find_child("screen_objects") == nil) then 
              screen:add(g)
-	end 
-	
-	local timeline = screen:find_child("timeline")
-	if timeline then 
-	     ui.group.extra.timeline = {}
-             ui.group.extra.timeline[0] = {}
-	     local prev_point = 0
-	     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-	     for l,k in pairs (attr_map["Group"]()) do 
-	          ui.group.extra.timeline[0][k] = ui.group[k]
-	     end
-	     if cur_focus_n ~= 0 then 
-                 ui.group.extra.timeline[0]["hide"] = true  
-	     end 
-	     for i, j in orderedPairs(timeline.points) do 
-	        if not ui.group.extra.timeline[i] then 
-	             ui.group.extra.timeline[i] = {} 
-	             for l,k in pairs (attr_map["Group"]()) do 
-		         ui.group.extra.timeline[i][k] = ui.group.extra.timeline[prev_point][k] 
-		     end 
-		     prev_point = i 
-		end 
-	        if i < cur_focus_n  then 
-                     ui.group.extra.timeline[i]["hide"] = true  
-		end 
-	     end 
 	end 
 
         item_num = item_num + 1
@@ -1996,7 +1736,7 @@ function editor.ugroup()
 				---[[ 0128 : added for nested group 
         				if(c.type == "Group") then 
 	       				   for j, cc in pairs (c.children) do
-						if is_in_list(c.extra.type, uiElements) == false then 
+						if is_in_list(c.extra.type, widgets) == false then 
                     				cc.reactive = true
 		    				cc.extra.is_in_group = true
 						--print("KKKKKK 55555")
@@ -2751,51 +2491,28 @@ function editor.bring_forward()
     input_mode = S_SELECT
 end
 
-local widget_f_map = {
-     ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() print(input_mode, "Rectangle...") end, 
-     ["Text"]		= function () editor.text() input_mode = S_SELECT end, 
-     ["Image"]		= function () input_mode = S_SELECT  editor.the_image() end, 	
-     ["Video"] 		= function () input_mode = S_SELECT editor.video() end,
-     ["Button"]         = function () return ui_element.button()       end, 
-     ["TextInput"] = function () return ui_element.textInput()    end, 
-     ["DialogBox"]      = function () return ui_element.dialogBox()    end, 
-     ["ToastAlert"]       = function () return ui_element.toastAlert()     end,   
-     ["RadioButton"]    = function () return ui_element.radioButton()  end, 
-     ["CheckBox"]       = function () return ui_element.checkBox()     end, 
-     ["ButtonPicker"]   = function () return ui_element.buttonPicker() end, 
-     ["ProgressSpinner"]    = function () return ui_element.progressSpinner()  end, 
-     ["ProgressBar"]     = function () return ui_element.progressBar()   end,
-     ["MenuButton"]       = function () return ui_element.menuButton()  end,
-     ["MenuBar"]        = function () return ui_element.menuBar()      end,
-     ["LayoutManager"]        = function () return ui_element.layoutManager()   end,
-     ["ScrollPane"]    = function () return ui_element.scrollPane() end, 
-     ["ArrowPane"]    = function () return ui_element.arrowPane() end, 
-}
-
-local widget_n_map = {
-     ["Button"]         = function () return "Button" end, 
-     ["TextInput"] = function () return "Text Input" end, 
-     ["DialogBox"]      = function () return "Dialog Box" end, 
-     ["ToastAlert"]       = function () return "Toast Alert" end,   
-     ["RadioButton"]    = function () return "Radio Button" end, 
-     ["CheckBox"]       = function () return "Checkbox" end, 
-     ["ButtonPicker"]   = function () return "Button Picker" end, 
-     ["ProgressSpinner"]    = function () return "Progress Spinner" end, 
-     ["ProgressBar"]     = function () return "Progress Bar" end,
-     ["MenuButton"]       = function () return "Menu Button" end,
-     ["LayoutManager"]        = function () return "Layout Manager" end,
-     ["ScrollPane"]    = function () return "Scroll Pane" end, 
-     ["ArrowPane"]    = function () return "Arrow Pane" end, 
+local widget_map = {
+	["Button"] = function () return widget.button()  end, 
+	["TextInputField"] = function () return widget.textField() end, 
+	["DialogBox"] = function () return widget.dialogBox() end, 
+	["ToastBox"] = function () return widget.toastBox() end,   
+	["RadioButton"] = function () return widget.radioButton() end, 
+	["CheckBox"] = function () return widget.checkBox()  end, 
+	["ButtonPicker"] = function () return widget.buttonPicker()  end, 
+	["LoadingDots"] = function () return widget.loadingdots() end, 
+	["LoadingBar"] = function () return widget.loadingbar() end,
+	["3D_List"] = function () return widget.threeDlist() end,
+	["ScrollImage"] = function () return widget.scrollWindow() end, 
 }
 
 
-function editor.ui_elements()
-    local WIDTH = 600
+function editor.widgets()
+    local WIDTH = 500
     local L_PADDING = 20
     local R_PADDING = 50
     local TOP_PADDING = 60
     local BOTTOM_PADDING = 12
-    local Y_PADDING = 5
+    local Y_PADDING = 10 
     local X_PADDING = 10
     local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
     local space = WIDTH
@@ -2808,10 +2525,10 @@ function editor.ui_elements()
          children =
          {
           msgw_bg,
-	  xbox:set{position = {555, 40}},
+	  xbox:set{position = {465, 40}},
          }
     }
-    local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
+    local widgets_list = Text {name = "w_list", text = "Widgets List"}:set(STYLE)
     local text_g
 
     cur_w= (WIDTH - widgets_list.w)/2
@@ -2824,131 +2541,12 @@ function editor.ui_elements()
     cur_w = L_PADDING
     cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
 
-    for i, v in pairs(uiElements_en) do 
-    	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
---[[
-Function: buttonPicker
-
-Creates a button picker ui element
-
-Arguments:
-	Table of Button picker properties
-
-	skin - Modify the skin for the Button picker by changing this value
-    	bwidth - Width of the Button picker 
-    	bheight - Height of the Button picker 
-        items - A table containing the items for the Button picker
-    	font - Font of the Button picker items
-    	color - Color of the Button picker items
-		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
-
-Return:
- 		bp_group - Group containing the button picker 
-
-Extra Function:
-		on_focus_in() - Grab focus of button picker 
-		on_focus_out() - Release focus of button picker
-		press_left() - Left key press event, apply the selection of button picker
-		press_right() - Right key press event, apply the selection of button picker
-		press_up() - Up key press event, apply the selection of button picker
-		press_down() - Down key press event, apply the selection of button picker
-		press_enter() - Enter key press event, apply the selection of button picker
-		insert_item(item) - Add an item to the items table 
-		remove_item(item) - Remove an item from the items table 
-]]
-
---[[
-Function: buttonPicker
-
-Creates a button picker ui element
-
-Arguments:
-	Table of Button picker properties
-
-	skin - Modify the skin for the Button picker by changing this value
-    	bwidth - Width of the Button picker 
-    	bheight - Height of the Button picker 
-        items - A table containing the items for the Button picker
-    	font - Font of the Button picker items
-    	color - Color of the Button picker items
-		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
-
-Return:
- 		bp_group - Group containing the button picker 
-
-Extra Function:
-		on_focus_in() - Grab focus of button picker 
-		on_focus_out() - Release focus of button picker
-		press_left() - Left key press event, apply the selection of button picker
-		press_right() - Right key press event, apply the selection of button picker
-		press_up() - Up key press event, apply the selection of button picker
-		press_down() - Down key press event, apply the selection of button picker
-		press_enter() - Enter key press event, apply the selection of button picker
-		insert_item(item) - Add an item to the items table 
-		remove_item(item) - Remove an item from the items table 
-]]
-
-	
-	 widget_b.position =  {cur_w, cur_h}
-    	 widget_b.name = v
-    	 widget_b.reactive = true
-
-	 cur_h = cur_h + widget_b.h 
-         msgw:add(widget_b)
-         
-         function widget_b:on_button_down(x,y,button,num_clicks)
-	      widget_f_map[v]() 
-	      cleanMsgWin(msgw)
-        end 
-
-        function widget_t:on_button_down(x,y,button,num_clicks)
-	      widget_f_map[v]() 
-	      cleanMsgWin(msgw)
-	end
-    end 
---[[
-Function: buttonPicker
-
-Creates a button picker ui element
-
-Arguments:
-	Table of Button picker properties
-
-	skin - Modify the skin for the Button picker by changing this value
-    	bwidth - Width of the Button picker 
-    	bheight - Height of the Button picker 
-        items - A table containing the items for the Button picker
-    	font - Font of the Button picker items
-    	color - Color of the Button picker items
-		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
-
-Return:
- 		bp_group - Group containing the button picker 
-
-Extra Function:
-		on_focus_in() - Grab focus of button picker 
-		on_focus_out() - Release focus of button picker
-		press_left() - Left key press event, apply the selection of button picker
-		press_right() - Right key press event, apply the selection of button picker
-		press_up() - Up key press event, apply the selection of button picker
-		press_down() - Down key press event, apply the selection of button picker
-		press_enter() - Enter key press event, apply the selection of button picker
-		insert_item(item) - Add an item to the items table 
-		remove_item(item) - Remove an item from the items table 
-]]
-
-
-    for i, v in pairs(uiElements) do
-         if (i == 5) then 
-              cur_w =  cur_w + 280 + Y_PADDING
+    for i, v in pairs(widgets) do
+         if (i == 8) then 
+              cur_w =  cur_w + 230
               cur_h =  TOP_PADDING + widgets_list.h + Y_PADDING
 	 end 
-	 
-	 local widget_label = widget_n_map[v]() 
-	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , widget_label)
+	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
 
     	 widget_b.position =  {cur_w, cur_h}
     	 widget_b.name = v
@@ -2958,17 +2556,16 @@ Extra Function:
          msgw:add(widget_b)
          
          function widget_b:on_button_down(x,y,button,num_clicks)
-	      local new_widget = widget_f_map[v]() 
-	      
+	      new_widget = widget_map[v]() 
 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget
-	      elseif (new_widget.extra.type == "TextInput") then 
+	      elseif (new_widget.extra.type == "TextInputField") then 
 		t=new_widget
 	      elseif (new_widget.extra.type == "DialogBox") then 
 		db=new_widget
-	      elseif (new_widget.extra.type == "ToastAlert") then 
+	      elseif (new_widget.extra.type == "ToastBox") then 
 		tb=new_widget
 	      elseif (new_widget.extra.type == "RadioButton") then 
 		rb=new_widget
@@ -2976,50 +2573,40 @@ Extra Function:
 		cb=new_widget
 	      elseif (new_widget.extra.type == "ButtonPicker") then 
 		bp=new_widget
-	      elseif (new_widget.extra.type == "ProgressSpinner") then 
+	      elseif (new_widget.extra.type == "LoadingDots") then 
 		ld=new_widget
-	      elseif (new_widget.extra.type == "ProgressBar") then 
+	      elseif (new_widget.extra.type == "LoadingBar") then 
 		lb=new_widget
-              elseif (new_widget.extra.type == "LayoutManager") then 
+              elseif (new_widget.extra.type == "3D_List") then 
 		d=new_widget
-         elseif (new_widget.extra.type == "ScrollPane") then 
+         elseif (new_widget.extra.type == "ScrollImage") then 
 		si=new_widget
-         elseif (new_widget.extra.type == "MenuButton") then 
-		dd=new_widget
-         elseif (new_widget.extra.type == "MenuBar") then 
-		mb=new_widget
-         elseif (new_widget.extra.type == "TabBar") then 
-		tb=new_widget
-	end
+	      end
 --imsi 
-	if new_widget.name:find("timeline") then 
-		    screen:add(new_widget)
-	else 
-	           while (is_available(new_widget.name..tostring(item_num)) == false) do  
-		     item_num = item_num + 1
-	           end 
-	           new_widget.name = new_widget.name..tostring(item_num)
-                   table.insert(undo_list, {new_widget.name, ADD, new_widget})
-	           g:add(new_widget)
-                   create_on_button_down_f(new_widget)
-	           screen:add(g)
-	           screen:grab_key_focus()
-	end 
+	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
+		item_num = item_num + 1
+	      end 
+	      new_widget.name = new_widget.name..tostring(item_num)
+              table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	      g:add(new_widget)
+              create_on_button_down_f(new_widget)
 --kk
+	      screen:add(g)
+	      screen:grab_key_focus()
 
 	      cleanMsgWin(msgw)
         end 
         function widget_t:on_button_down(x,y,button,num_clicks)
 
-	      local new_widget = widget_f_map[v]() 
+	      new_widget = widget_map[v]() 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget
-	      elseif (new_widget.extra.type == "TextInput") then 
+	      elseif (new_widget.extra.type == "TextInputField") then 
 		t=new_widget
 	      elseif (new_widget.extra.type == "DialogBox") then 
 		db=new_widget
-	      elseif (new_widget.extra.type == "ToastAlert") then 
+	      elseif (new_widget.extra.type == "ToastBox") then 
 		tb=new_widget
 	      elseif (new_widget.extra.type == "RadioButton") then 
 		rb=new_widget
@@ -3027,25 +2614,16 @@ Extra Function:
 		cb=new_widget
 	      elseif (new_widget.extra.type == "ButtonPicker") then 
 		bp=new_widget
-	      elseif (new_widget.extra.type == "ProgressSpinner") then 
+	      elseif (new_widget.extra.type == "LoadingDots") then 
 		ld=new_widget
-	      elseif (new_widget.extra.type == "ProgressBar") then 
+	      elseif (new_widget.extra.type == "LoadingBar") then 
 		lb=new_widget
-              elseif (new_widget.extra.type == "LayoutManager") then 
+              elseif (new_widget.extra.type == "3D_List") then 
 		d=new_widget
-         elseif (new_widget.extra.type == "ScrollPane") then 
+         elseif (new_widget.extra.type == "ScrollImage") then 
 		si=new_widget
-         elseif (new_widget.extra.type == "MenuButton") then 
-		dd=new_widget
-         elseif (new_widget.extra.type == "MenuBar") then 
-		mb=new_widget
-         elseif (new_widget.extra.type == "TabBar") then 
-		tb=new_widget
 	      end
 --imsi 
-	if new_widget.name:find("timeline") then 
-		    screen:add(new_widget)
-	else
  	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	      end 
@@ -3056,7 +2634,6 @@ Extra Function:
 	      screen:add(g)
 	      screen:grab_key_focus()
 
-	end 
 	      cleanMsgWin(msgw)
           end 
     end 
@@ -3066,7 +2643,7 @@ Extra Function:
          msgw:clear()
 	 screen:remove(msgw)
          screen.grab_key_focus(screen) 
-	 --input_mode = S_SELECT
+	 input_mode = S_SELECT
 	 return true
     end 
 

@@ -1,63 +1,8 @@
-----------
+-----------
 -- Utils 
 -----------
 
 local factory = ui.factory
-
-
-
-function table_removekey(table, key)
-	local element = table[key]
-	table[key] = nil
-	return element
-end
-
-
-function __genOrderedIndex( t )
-    local orderedIndex = {}
-    for key in pairs(t) do
-        table.insert( orderedIndex, key )
-    end
-    table.sort( orderedIndex )
-    return orderedIndex
-end
-
-local function orderedNext(t, state)
-    -- Equivalent of the next function, but returns the keys in the alphabetic
-    -- order. We use a temporary ordered key table that is stored in the
-    -- table being iterated.
-
-    --print("orderedNext: state = "..tostring(state) )
-    if state == nil then
-        -- the first time, generate the index
-        t.__orderedIndex = __genOrderedIndex( t )
-        key = t.__orderedIndex[1]
-        return key, t[key]
-    end
-    -- fetch the next value
-    key = nil
-    for i = 1,table.getn(t.__orderedIndex) do
-        if t.__orderedIndex[i] == state then
-            key = t.__orderedIndex[i+1]
-        end
-    end
-
-    if key then
-        return key, t[key]
-    end
-
-    -- no more value to return, cleanup
-    t.__orderedIndex = nil
-    return
-end
-
-function orderedPairs(t)
-    -- Equivalent of the pairs() function on tables. Allows to iterate
-    -- in order
-    return orderedNext, t, nil
-end
-
-
 
 function is_available(new_name)
     if(g:find_child(new_name) ~= nil) then 
@@ -95,32 +40,6 @@ function is_mp4_file(fn)
 	     else 
 		return false
 	     end 
-end 
-
-
-function is_in_list(item, list)
-    if list == nil then 
-        return false
-    end 
-
-    for i, j in pairs (list) do
-	if item == j then 
-		return true
-	end 
-    end 
-    return false
-end 
-    
-function is_this_widget(v)
-    if v.extra then 
-        if is_in_list(v.extra.type, uiElements) == true then 
-	    return true
-        else 
-	    return false
-        end 
-    else 
-        return false
-    end 
 end 
 
 -- Clear background images 
@@ -209,20 +128,12 @@ function create_on_button_down_f(v)
 	local org_object, new_object 
 	
         function v:on_button_down(x,y,button,num_clicks)
-
-	   if is_this_widget(v) == true then
-	        --v.on_focus_in()
-	   end 
-
 	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
 	     if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
 	       if (v.extra.is_in_group == true and control == false) then 
 		    local p_obj = find_parent(v)
-                    if(button == 3) then -- imsi : num_clicks is not correct ! 
-                    --if(button == 3 or num_clicks >= 2) then
-		    print ("button", button)
-		    print ("num_clicks", num_clicks)
+                    if(button == 3 or num_clicks >= 2) then
                          editor.inspector(p_obj)
                          return true
                     end 
@@ -231,21 +142,18 @@ function create_on_button_down_f(v)
 		     	editor.selected(p_obj)
 	            elseif (p_obj.extra.selected == true) then 
 		     	editor.n_select(p_obj)
-		    end
+	       	    end
 	            org_object = copy_obj(p_obj)
            	    dragging = {p_obj, x - p_obj.x, y - p_obj.y }
            	    return true
 	      else 
-                    if(button == 3) then-- imsi : num_clicks is not correct ! 
-		    --if(button == 3 or num_clicks >= 2) then
-		    print ("button", button)
-		    print ("num_clicks", num_clicks)
+                    if(button == 3 or num_clicks >= 2) then
                          editor.inspector(v)
                          return true
                     end 
 	            if(input_mode == S_SELECT and v.extra.selected == false) then 
 		     	editor.selected(v) 
-		    elseif (v.extra.selected == true) then 
+	            elseif (v.extra.selected == true) then 
 			if(v.type == "Text") then 
 			      v:set{cursor_visible = true}
 			      v:set{editable= true}
@@ -256,20 +164,11 @@ function create_on_button_down_f(v)
 	            org_object = copy_obj(v)
            	    dragging = {v, x - v.x, y - v.y }
            	    return true
-	     end
-	    elseif (input_mode == S_FOCUS) then 
-			if (v.name ~= "inspector") then 
-		     		editor.selected(v)
-		     		screen:find_child("text"..focus_type).text = v.name 
-			end 
-			input_mode = S_FOCUS
-           		return true
-
-            end
-	
+	   	 end
+              end
 	   elseif( input_mode ~= S_RECTANGLE) then  
-                dragging = {v, x - v.x, y - v.y }
-           	return true
+                 dragging = {v, x - v.x, y - v.y }
+           	 return true
            end
 	  end
            --return true .. 렉탱글 안에서 또 렉탱글 글릴때 안되아서.. 뺌
@@ -296,12 +195,6 @@ function create_on_button_down_f(v)
 		    return true 
 		elseif( input_mode ~= S_RECTANGLE) then  
 	      	    if(dragging ~= nil) then 
-
-	       	       local actor = unpack(dragging) 
-		       if (actor.name == "scroll_window") then  
-				dragging = nil 
-				return true 
-		       end 
 	               local actor , dx , dy = unpack( dragging )
 		       new_object = copy_obj(v)
 	               new_object.position = {x-dx, y-dy}
@@ -396,530 +289,413 @@ function get_group_position(child_obj)
           end
      end
 end 
+
+
+	
+
 	
 function set_obj (f, v)
-      for i,j in pairs(attr_name_list) do 
-           if f[j] then f[j] = v[j] end 
+
+      if f == nil then 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
+	    print("ERROR f is nill") 
       end 
-end 
+
+      if(f.type == "Rectangle") then
+           f.color = v.color
+           f.border_color = v.border_color
+           f.border_width = v.border_width
+
+       elseif (v.type == "Text") then
+           f.color = v.color
+           f.font = v.font
+           f.text = v.text
+           f.editable = v.editable
+           f.wants_enter = v.wants_enter
+           f.wrap = v.wrap
+           f.wrap_mode = v.wrap_mode
+       elseif (v.type == "Image") then
+           f.src = v.src
+           f.clip = v.clip
+       elseif (v.type == "Clone") then
+	   f.scale = v.scale
+           f.source = v.source
+       elseif (v.type == "Group") then
+	   f.scale = v.scale
+       end
+       f.x_rotation = v.x_rotation
+       f.y_rotation = v.y_rotation
+       f.z_rotation = v.z_rotation
+       f.anchor_point = v.anchor_point
+       f.name = v.name
+       f.x = v.x
+       f.y = v.y
+       f.z = v.z
+       f.w = v.w
+       f.h = v.h
+       f.opacity = v.opacity
+       return new_object
+end	
 
 
 function copy_obj (v)
 
-      local new_map = {
-	["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
-	["Text"] = function() new_obj = Text{} return new_obj end, 
-	["Image"] = function() new_obj = Image{} return new_obj end, 
-	["Clone"] = function() new_obj = Clone{} return new_obj end, 
-	["Group"] = function() new_obj = Group{} return new_obj end, 
-	["Video"] = function() new_obj = {} return new_obj end, 
-      }
-	
-      local new_object = new_map[v.type]()
+      local new_object
+      if(v.type == "Rectangle") then
+           new_object = Rectangle{}
+           new_object.color = v.color
+           new_object.border_color = v.border_color
+           new_object.border_width = v.border_width
 
-      set_obj(new_object, v)
-
-      return new_object
+       elseif (v.type == "Text") then
+           new_object = Text{}
+           new_object.color = v.color
+           new_object.font = v.font
+           new_object.text = v.text
+           new_object.editable = v.editable
+           new_object.wants_enter = v.wants_enter
+           new_object.wrap = v.wrap
+           new_object.wrap_mode = v.wrap_mode
+       elseif (v.type == "Image") then
+           new_object = Image{}
+           new_object.src = v.src
+           new_object.clip = v.clip
+       elseif (v.type == "Clone") then
+           new_object = Clone{}
+	   new_object.scale = v.scale
+           new_object.source = v.source
+       elseif (v.type == "Group") then
+           new_object = Group{}
+	   new_object.scale = v.scale
+       end
+       new_object.x_rotation = v.x_rotation
+       new_object.y_rotation = v.y_rotation
+       new_object.z_rotation = v.z_rotation
+       new_object.anchor_point = v.anchor_point
+       new_object.name = v.name
+       new_object.x = v.x
+       new_object.y = v.y
+       new_object.z = v.z
+       new_object.w = v.w
+       new_object.h = v.h
+       new_object.opacity = v.opacity
+       return new_object
 end	
 
-
-function make_attr_t(v)
-
-  local attr_t
-  local obj_type = v.type
-
-  local function stringTotitle(str)
-      local i,j = string.find(str,"_")
-      if i then str = string.upper(str:sub(1,1))..str:sub(2,i-1).." "..string.upper(str:sub(i+1, i+1))..str:sub(i+2,-1)
-      else str = string.upper(str:sub(1,1))..str:sub(2,-1)
-      end
-
-      if str == "Color" and v.type == "Rectangle" then 
-          str = "Fill Color" 
-      elseif str == "Color" and v.type == "Text" then 
-          str = "Text Color" 
-      end 
-
-      return str
-  end
-
-  local function stringToitem(str)
-       local first = ""
-       local second = ""
-       local last
-
-       local i, j = str:find("_")
-       if i then 
-       	first = str:sub(1,1)
-       	last = str:sub(i+1,-1)
-	i, j = last:find("_")
-	if i then 
-	    second = last:sub(1,1)
-        end 
-       end 
-      
-       return first..second
-  end 
-
-  local attr_map = {
-	["items"] = function ()
-		table.insert(attr_t, {"items", v.items, "Items"})
-                table.insert(attr_t, {"line", "", "hide"})
-                table.insert(attr_t, {"line", "", "hide"})
-		end,
-	["scale"] = function()
- 		table.insert(attr_t, {"line","", "hide"})
-		table.insert(attr_t, {"caption", "Scale"})
-		local scale_t = v.scale
-        	if scale_t == nil then
-             		scale_t = {1,1} 
-        	end
-        	table.insert(attr_t, {"x_scale", scale_t[1], "X"})
-        	table.insert(attr_t, {"y_scale", scale_t[2], "Y"})
-		end,
-	["x_rotation"] = function()
- 		table.insert(attr_t, {"caption", "Angle Of Rotation About"})
-        	local x_rotation_t = v.x_rotation 
-        	local y_rotation_t = v.y_rotation 
-        	local z_rotation_t = v.z_rotation 
-        	table.insert(attr_t, {"x_angle", x_rotation_t[1], "X"})
-        	table.insert(attr_t, {"y_angle", y_rotation_t[1], "Y"})
-        	table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
-		end,  
-       ["clip"] = function()
-                table.insert(attr_t, {"caption", "Clipping Region"})
-                local clip_t = v.clip
-                if clip_t == nil then
-                     clip_t = {0,0 ,v.w, v.h}
-                end
-                table.insert(attr_t, {"cx", clip_t[1], "X"})
-                table.insert(attr_t, {"cy", clip_t[2], "Y"})
-                table.insert(attr_t, {"cw", clip_t[3], "W"})
-                table.insert(attr_t, {"ch", clip_t[4], "H"})
-		end,
-        ["anchor_point"] = function()	
- 		table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
-		end,
-	["src"] = function()
-        	table.insert(attr_t, {"caption", "Source Location"})
-        	table.insert(attr_t, {"src", v.src,"Source"})
-		end,
-	["color"] = function(j)
-		table.insert(attr_t, {"caption", stringTotitle(j)})
-             	local color_t = v[j] 
-             	if color_t == nil then 
-                 	color_t = {0,0,0,0}
-	     	end
-	     	table.insert(attr_t, {j.."r", color_t[1], "R"})
-             	table.insert(attr_t, {j.."g", color_t[2], "G"})
-             	table.insert(attr_t, {j.."b", color_t[3], "B"})
-       	     	table.insert(attr_t, {j.."a", color_t[4], "A"})    
-		end,
-	["size"] = function(j)
-		table.insert(attr_t, {"caption", stringTotitle(j)})
-             	local size_t = v[j] 
-             	if size_t == nil then 
-                 	size_t = {0,0}
-	     	end
-             	local size_k = ""
-             	if j:sub(1,1) ~= "s" then
-                 	size_k = j:sub(1,1) 
-             	end 
-	     	table.insert(attr_t, {size_k.."w", size_t[1], "W"})
-             	table.insert(attr_t, {size_k.."h", size_t[2], "H"})
-		end,
-	["pos"] = function(j)
-		table.insert(attr_t, {"caption", stringTotitle(j)})
-             	local pos_t = v[j] 
-             	if pos_t == nil then 
-                 	pos_t = {0,0,0,0}
-	     	end
-             	local pos_k = ""
-             	if j:sub(1,1) ~= "p" then 
-                 	pos_k = j:sub(1,1) 
-             	end 
-	     	table.insert(attr_t, {pos_k.."x", pos_t[1], "X"})
-             	table.insert(attr_t, {pos_k.."y", pos_t[2], "Y"})
-		end,
-	["focus"]= function()
- 		if v.extra.focus then 
- 		     table.insert(attr_t, {"focus", v.extra.focus, "Focus"})
- 		else 
- 		     table.insert(attr_t, {"focus", {"1","2","3","4","5"}, "Focus"})
- 		end 
- 		end, 
-	
-  }
-  
-  local obj_map = {
-       ["Rectangle"] = function() return {"x_rotation", "anchor_point", "opacity", "color", "border_color", "border_width", "reactive", "focus"} end,
-       ["Text"] = function() return {"x_rotation", "anchor_point","opacity", "color", "font", "wrap_mode","reactive", "focus"} end,
-       ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point","opacity", "reactive", "focus"} end,
-       ["Group"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Clone"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","opacity", "reactive",  "focus"} end,
-       ["TextInput"] = function() return {"skin","color","f_color","font","text_indent","border_width","border_color","border_radius","scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["DialogBox"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive","opacity",  "focus"} end,
-       ["ToastAlert"] = function() return {"label","message","skin","duration","fade_duration","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","opacity", "anchor_point"} end,
-       ["ButtonPicker"] = function() return {"skin","color","font","items","selected_item","scale","x_rotation","anchor_point","opacity", "reactive","focus"} end,
-       ["CheckBox"] = function() return {"skin","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["RadioButton"] = function() return {"skin","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space","scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["ProgressSpinner"] = function() return {"skin","dot_color","dot_radius","num_dots","anim_radius","anim_duration","clone_src","scale","x_rotation","anchor_point","opacity", } end,
-       ["ProgressBar"] = function() return {"shell_upper_color","shell_lower_color","stroke_color","fill_upper_color","fill_lower_color", "scale","x_rotation","anchor_point", "opacity"} end,
-       ["LayoutManager"] = function() return {"skin","num_rows", "num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible","scale","x_rotation","anchor_point", "opacity"} end,
-       --["ScrollImage"] = function() return {"skin","color","clip_w","clip_h","border_w","content_h","content_w","arrow_clone_source","arrow_sz","arrows_in_box","arrows_centered","hor_arrow_y","vert_arrow_x"
-       ["ScrollPane"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
-       ["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,
-       --["DropDown"] = function() return {"skin", "font","items"
-       ["MenuButton"] = function() return {"skin", "font", "item_spacing", "item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive", "focus", "opacity"} end,
-   }
-  
-  if is_this_widget(v) == true  then
-       obj_type = v.extra.type
-	attr_t =
-      {
-             {"title", "Inspector : "..(v.extra.type)},
-             {"caption", "Object Name"},
-             {"name", v.name,"name"},
-             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
-             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
-             {"z", math.floor(v.z), "Z"},
-      }
-       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" and v.extra.type ~= "MenuButton") then 
-             table.insert(attr_t, {"wwidth", math.floor(v.wwidth), "W"})
-             table.insert(attr_t, {"wheight", math.floor(v.wheight), "H"})
-       end
-
-  elseif v.type ~= "Video" then  --Rectangle, Image, Text, Group, Clone
-	attr_t =
-      {
-             {"title", "Inspector : "..(v.type)},
-             {"caption", "Object Name"},
-             {"name", v.name,"name"},
-             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
-             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
-             {"z", math.floor(v.z), "Z"},
-             {"w", math.floor(v.w), "W"},
-             {"h", math.floor(v.h), "H"},
-      }
-
-  else -- Video 
-      attr_t =
-      {
-             {"title", "Inspector : "..(v.type)},
-             {"caption", "Object Name"},
-             {"name", v.name,"name"},
-             {"caption", "Source"},
-             {"source", v.source, "source"},
-             {"caption", "View Port"},
-             {"left", v.viewport[1], "X"},
-             {"top", v.viewport[2], "Y"},
-             {"width", v.viewport[3], "W"},
-             {"height", v.viewport[4], "H"},
-             {"volume", v.volume, "Volume"},
-             {"loop", v.loop, "Loop"},
-             {"button", "view code", "View code"},
-             {"button", "apply", "OK"},
-             {"button", "cancel", "Cancel"},
-      }
-      return attr_t 
-  end 
-  
-  for i,j in pairs(obj_map[obj_type]()) do 
-		
-	if (j == "message") then 
-	print (j)
-	end 
-       	if attr_map[j] then
-             attr_map[j](j)
-        elseif type(v[j]) == "number" then 
-             table.insert(attr_t, {j, math.floor(v[j]), stringTotitle(j)})
-	elseif type(v[j]) == "string" then 
-	     if j == "message" then 
-             table.insert(attr_t, {"caption", stringTotitle(j)})
-	     end 
-             table.insert(attr_t, {j, v[j], stringTotitle(j)})
-	elseif type(v[j]) == "boolean" then 
-	     if j == "reactive" then 
-		  if v.extra.reactive ~= nil then 
-                       table.insert(attr_t, {j, v.extra.reactive, stringTotitle(j)})
-		  else 
-                       table.insert(attr_t, {j, true, stringTotitle(j)})
-		  end 
-	     else 
-                  table.insert(attr_t, {j, v[j], stringTotitle(j)})
-	     end 
-	elseif string.find(j,"color") then
-             attr_map["color"](j)
-	elseif string.find(j,"size") then
-             attr_map["size"](j)
-	elseif string.find(j,"pos") then
-             attr_map["pos"](j)
-	elseif j == "hor_arrow_y"or j == "vert_arrow_x" then 
-             table.insert(attr_t, {j, "nil", stringTotitle(j)})
-	else
-	     print("make_attr_t() : ", j, " 처리해 주세용 ~")
-	end 
-   end 
- 
-   --table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
-   table.insert(attr_t, {"button", "view code", "View code"})
-   table.insert(attr_t, {"button", "apply", "OK"})
-   table.insert(attr_t, {"button", "cancel", "Cancel"})
-   
-   return attr_t
-end
-
+--------------------------------
+-- Inspector 
+--------------------------------
 
 local input_t
+function make_attr_t(v)
+function toboolean(s) if (s == "true") then return true else return false end end
+  local attr_t 
 
-function itemTostring(v, d_list, t_list)
-    local itm_str  = ""
-    local itm_str2 = ""
-    local indent   = "\n\t\t"
-    local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive"}
+  if(v.type ~= "Video") then
+     if (v.extra.type == "Button") then 
+	attr_t =
+      {
+             {"title", "INSPECTOR : "..string.upper(v.extra.type)},
+             {"caption", "OBJECT NAME"},
+             {"name", v.name,"name"},
+             {"line",""},
+             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
+             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
+             {"z", math.floor(v.z), "z"},
+             {"bw", math.floor(v.bwidth), "bw"},
+             {"bh", math.floor(v.bheight), "bh"},
+             {"line",""}
+      }
 
-    local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+     else 
+	attr_t =
+      {
+             {"title", "INSPECTOR : "..string.upper(v.type)},
+             {"caption", "OBJECT NAME"},
+             {"name", v.name,"name"},
+             {"line",""},
+             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "x"},
+             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "y"},
+             {"z", math.floor(v.z), "z"},
+             {"w", math.floor(v.w), "w"},
+             {"h", math.floor(v.h), "h"},
+             {"line",""}
+      }
 
-    local group_list = {"name", "position", "scale", "anchor_point", "x_rotation", "y_rotation", "z_rotation", "opacity"}
+     end 
+  else 
+      attr_t =
+      {
+             {"title", "INSPECTOR : "..string.upper(v.type)},
+             {"caption", "OBJECT NAME"},
+             {"name", v.name,"name"},
+             {"line",""},
+             {"caption", "SOURCE"},
+             {"source", v.source, "source"},
+             {"line",""},
+             {"caption", "VIEW PORT"},
+             {"left", v.viewport[1], "x"},
+             {"top", v.viewport[2], "y"},
+             {"width", v.viewport[3], "w"},
+             {"height", v.viewport[4], "h"},
+             {"line",""},
+             {"volume", v.volume, "volume"},
+             {"loop", v.loop, "loop"},
+             {"line",""}
+      }
+  end 
 
-    local widget_map = {
-	["Button"] = function () return "ui_element.button"  end, 
-	["TextInput"] = function () return "ui_element.textInput" end, 
-	["DialogBox"] = function () return "ui_element.dialogBox" end, 
-	["ToastAlert"] = function () return "ui_element.toastAlert" end,   
-	["RadioButton"] = function () return "ui_element.radioButton" end, 
-	["CheckBox"] = function () return "ui_element.checkBox"  end, 
-	["ButtonPicker"] = function () return "ui_element.buttonPicker"  end, 
-	["ProgressSpinner"] = function () return "ui_element.progressSpinner" end, 
-	["ProgressBar"] = function () return "ui_element.progressBar" end,
-	["LayoutManager"] = function () return "ui_element.layoutManager" end,
-	["ScrollPane"] = function () return "ui_element.scrollPane" end, 
-	["MenuButton"] = function () return "ui_element.menuButton" end, 
-   }
- 
-   local function add_attr (list, head, tail) 
-       local item_string =""
-       for i,j in pairs(list) do 
-          if v[j] then 
-	      if j == "position" then 
-		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
-	      elseif j == "children" then 
-                  local children = ""
-		  for k,l in pairs(v.children) do
-		      if (l ~= nil) then 
-		      if k == 1 then
-		         children = children..l.name
-		      else 
-		         children = children..","..l.name
-		      end
-		      end 
-                  end 
-		  item_string = item_string..head.."children = {"..children.."}"..tail
-	      elseif j == "items" then 
-		  local items = ""
-		  for i,j in pairs(v.items) do 
-			items = items.."\""..j.."\", "
-		  end
-    		  item_string = item_string..head.."items = {"..items.."}"..tail
-	      elseif type(v[j]) == "number" then 
-	          item_string = item_string..head..j.." = "..v[j]..tail 
-	      elseif type(v[j]) == "string" then 
-	          item_string = item_string..head..j.." = \""..v[j].."\""..tail 
-	      elseif type(v[j]) == "boolean" then 
-		  if j == "reactive" then 
-		       item_string = item_string..head..j.." = "..tostring(v.extra.reactive)..tail
-		  else 
-	               item_string = item_string..head..j.." = "..tostring(v[j])..tail 
-		  end 
-	      elseif type(v[j]) == "table" then 
-		  if(type(v[j][1]) == "table") then  
-			local tiles_name_table = {} 
-			for m,n in pairs(v[j]) do 
-				local tile_name_table = {}
-				for q,r in pairs(n) do 
-				   if r.name ~= "nil" then 
-				     table.insert(tile_name_table, r.name)
-				   end 
-				end 
-				if table.getn(tile_name_table) ~= 0 then 
-					table.insert(tiles_name_table, tile_name_table)
-				end
-			end 
-	          	item_string = item_string..head..j.." = {"
-			for m,n in pairs(tiles_name_table) do 
-	          	     item_string = item_string.." {"..table.concat(n,",").."},"
-			end 
-			item_string = item_string.."}"..tail
-		  else 
-	          	item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
-		  end 
-	      elseif v[j].type == "Group" then 
-		        item_string = item_string..head..j.."= Group { children = {"
-			for m,n in pairs (v[j].children) do
-				item_string = item_string .. n.name..","
-			end 
-			item_string = item_string.."} }"..tail
-	      elseif type(v[j]) == "userdata" then 
-		  item_string = item_string..head..j.." = "..v[j].name..tail 
-	      else
-	          print("--", j, " 처리해 주세용 ~")
-	      end 
-	  end 
-       end 
-       return item_string
-    end 
-  
-    if (v.type == "Image") then
-	--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
-    elseif (v.type == "Clone") then
-	 src = v.source 
-	 if is_in_list(src.name, d_list) == false then  --> need debugging this line :(
-							--  LUA PANIC : /Users/hjkim/code/trickplay/apps/editor/./util.lua:698: attempt to index global 'src' (a nil value)
-	     if(t_list == nil) then 
-		t_list = {src.name}
-	     else 
-		table.insert(t_list, src.name) 
-	     end
-         end 
+      if (v.type == "Text") then
+        table.insert(attr_t, {"caption", "COLOR "})
+        local color_t = v.color 
+        if color_t == nil then 
+             color_t = {0,0,0}
+        end
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"r", color_t[1], "r"})
+        table.insert(attr_t, {"g", color_t[2], "g"})
+        table.insert(attr_t, {"b", color_t[3], "b"})
+        table.insert(attr_t, {"font", v.font,"font "})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"editable", v.editable,"editable"})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"wrap", v.wrap, "wrap"})
+        table.insert(attr_t, {"wrap_mode", v.wrap_mode,"wrap mode"})
+	table.insert(attr_t, {"line",""})
+ 	table.insert(attr_t, {"caption", "ROTATION  "})
+        local x_rotation_t = v.x_rotation 
+        local y_rotation_t = v.y_rotation 
+        local z_rotation_t = v.z_rotation 
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
 
-    elseif (v.type == "Group") and is_this_widget(v) == false then 
-	 local org_d_list = {}
+ 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
 
-	 if(d_list ~= nil) then 
-	     for i,j in pairs (d_list) do 
-		 org_d_list[i] = j 
-	     end      
-	 end 
+      elseif (v.type  == "Rectangle") then
+        color_t = v.color 
+        if color_t == nil then 
+             color_t = {0,0,0,0}
+        end
+        table.insert(attr_t, {"caption", "FILL COLOR"})
+        table.insert(attr_t, {"rect_r", color_t[1], "r"})
+        table.insert(attr_t, {"rect_g", color_t[2], "g"})
+        table.insert(attr_t, {"rect_b", color_t[3], "b"})
+        table.insert(attr_t, {"rect_a", color_t[4], "a"})
+        color_t = v.border_color 
+        if color_t == nil then 
+             color_t = {0,0,0}
+        end
+        table.insert(attr_t, {"caption", "BORDER COLOR"})
+        table.insert(attr_t, {"bord_r", color_t[1], "r"})
+        table.insert(attr_t, {"bord_g", color_t[2], "g"})
+        table.insert(attr_t, {"bord_b", color_t[3], "b"})
+        table.insert(attr_t, {"bwidth", v.border_width, "border width"})
+        table.insert(attr_t, {"line",""})
+	table.insert(attr_t, {"caption", "ROTATION  "})
+        local x_rotation_t = v.x_rotation 
+        local y_rotation_t = v.y_rotation 
+        local z_rotation_t = v.z_rotation 
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
 
-         for e in values(v.children) do
-	     result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
-	     if(result ~= nil) then 
-		 itm_str = itm_str..result
-	     end
-	     if(result2 ~= nil) then 
-		 itm_str2 = result2..itm_str2
-	     end 
-		
-	     d_list = done_list
-	     t_list = todo_list
-	 end
-    end
+ 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
 
-    if (v.type == "Video") then
-  	 itm_str = itm_str.."\n"..v.name.." = ".."{"..indent..
-         "name=\""..v.name.."\","..indent..
-         "type=\""..v.type.."\","..indent..
-         "source=\""..v.source.."\","..indent..
-         "viewport={"..table.concat(v.viewport,",").."},"..indent..
-         "loop = "..tostring(v.loop)..","..indent..
-         "volume = "..v.volume..b_indent.."}\n"..b_indent
+      elseif (v.type  == "Image") then
+        table.insert(attr_t, {"caption", "SOURCE LOCATION"})
+        table.insert(attr_t, {"src", v.src,"source"})
+        table.insert(attr_t, {"line",""})
+        table.insert(attr_t, {"caption", "CLIPPING REGION"})
+        local clip_t = v.clip
+        if clip_t == nil then
+             clip_t = {0,0 ,v.w, v.h}
+        end
+        table.insert(attr_t, {"clip_use", false, "use"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"cx", clip_t[1], "x"})
+        table.insert(attr_t, {"cy", clip_t[2], "y"})
+        table.insert(attr_t, {"cw", clip_t[3], "w"})
+        table.insert(attr_t, {"ch", clip_t[4], "h"})
+        table.insert(attr_t, {"line",""})
+ 	table.insert(attr_t, {"caption", "ROTATION  "})
+        local x_rotation_t = v.x_rotation 
+        local y_rotation_t = v.y_rotation 
+        local z_rotation_t = v.z_rotation 
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
 
-	 itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
-	 "mediaplayer.on_loaded = function(self) self:play() end"..b_indent..
-	 "if ("..v.name..".loop == true) then"..b_indent..
-     	 "     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
-	 "else"..b_indent..
-	 "     mediaplayer.on_end_of_stream = function(self) self:seek(0) end"..b_indent..
-	 "end"..b_indent..
-	 "mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
-	 "mediaplayer.volume = "..v.name..".volume\n\n"
-	 itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
+ 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
 
-    elseif is_this_widget(v) == true then 	 
-	 if v.content then 
-	    for m,n in pairs (v.content.children) do
-		itm_str= itemTostring(n) .. itm_str
-	    end 
-	 end 
-	 if v.tiles then 
-	     for m,n in pairs(v.tiles) do 
-	          for q,r in pairs(n) do 
-			if r.name ~= "nil" then
-		            itm_str= itemTostring(r)..itm_str
-			end 
-	          end 
-	     end 
-	 end 
-         itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
-	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
-	 itm_str = itm_str:sub(1,-2)
-         itm_str = itm_str.."}\n\n"
-	 itm_str = itm_str..add_attr(group_list, v.name..".", "\n")
-    else 
-         itm_str = itm_str.."\n"..v.name.." = "..v.type..b_indent.."{"..indent
-	 itm_str = itm_str..add_attr(nw_attr_list, "", ","..indent)
-	 itm_str = itm_str:sub(1,-2)
-         itm_str = itm_str.."}\n\n"
-    end
+      elseif (v.type  == "Group" or v.type == "Clone") then
 
-    if v.extra then 
-    if v.extra.focus then 
-	itm_str = itm_str..v.name.."\.extra\.focus = {" 
-	for m,n in pairs (v.extra.focus) do 
-		itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+        table.insert(attr_t, {"caption", "SCALE"})
+	local scale_t = v.scale
+        if scale_t == nil then
+             scale_t = {1,1} 
+        end
+
+        table.insert(attr_t, {"x_scale", scale_t[1], "x"})
+        table.insert(attr_t, {"y_scale", scale_t[2], "y"})
+
+	table.insert(attr_t, {"line",""})
+ 	table.insert(attr_t, {"caption", "ROTATION  "})
+        local x_rotation_t = v.x_rotation 
+        local y_rotation_t = v.y_rotation 
+        local z_rotation_t = v.z_rotation 
+        table.insert(attr_t, {"x_angle", x_rotation_t[1], "x"})
+        table.insert(attr_t, {"y_angle", y_rotation_t[1], "y"})
+        table.insert(attr_t, {"z_angle", z_rotation_t[1], "z"})
+
+ 	table.insert(attr_t, {"anchor_point", v.anchor_point,"ANCHOR POINT"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
+        table.insert(attr_t, {"line","", "hide"})
+
+	if (v.extra.type == "Button") then 
+             table.insert(attr_t, {"Caption","Button", "Caption"})
 	end 
-	itm_str = itm_str.."}\n\n"
 
-	itm_str = itm_str.."function "..v.name..":on_key_down(key)\n\t"
-	.."if "..v.name..".focus[key] then\n\t\t" 
-	.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
-	..v.name..".focus[key]()\n\t\t"
-	.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
-	.."if "..v.name..".on_focus_out then\n\t\t\t\t"
-	..v.name..".on_focus_out()\n\t\t\t".."end\n\t\t\t"
-	.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
-	.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
-        .."screen:find_child("..v.name..".focus[key]).on_focus_in()\n\t\t\t".."end\n\t\t\t"
-	.."end\n\t"
-	.."end\n\t"
-	.."return true\n"
-        .."end\n\n"
-    end 
+      end
 
-    if v.extra.reactive ~= nil then 
-	itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
-    end 
+      if(v.type ~= "Video") then
+      	table.insert(attr_t, {"line",""})
+      	table.insert(attr_t, {"opacity", v.opacity, "opacity"})
+      	table.insert(attr_t, {"line",""})
+      end 
 
-    if v.extra.timeline then 
-	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 
-	    for m,n in pairs (v.extra.timeline) do 
-	         itm_str = itm_str.."["..m.."] = { \n"
-	         for q,r in pairs (n) do
-	             itm_str = itm_str.."[\""..q.."\"] = "
-		     if type(r) == "table" then 
-		          itm_str = itm_str.."{"
-		          for s,t in pairs (r) do
-			      itm_str = itm_str..t..","
-		          end 
-		          itm_str = itm_str.."},"
-		     else 
-		          itm_str = itm_str..tostring(r).."," 
-		     end
-	         end
-	         itm_str = itm_str.."},\n"
-	    end 
-	    itm_str = itm_str.."}\n\n"
-    end 
+      table.insert(attr_t, {"button", "view code", "view code"})
+      table.insert(attr_t, {"button", "apply", "apply"})
+      table.insert(attr_t, {"button", "cancel", "cancel"})
 
-    end -- if v.extra then 
-
-    if(d_list == nil) then  
-	d_list = {v.name}
-    else 
-        table.insert(d_list, v.name) 
-    end 
-
-    -- 만약 문제가 된다면 Clone일 경 아래 조건문은 빼세요    
-    if is_in_list(v.name, t_list) == true  then 
-	return "", d_list, t_list, itm_str
-    end 
-
-    return itm_str, d_list, t_list, itm_str2
+      return attr_t
 end
 
+function itemTostring(v, first)
+    local itm_str = ""
+    local indent       = "\n\t\t"
+    local b_indent       = "\n\t"
+    
+    if(v.type == "Rectangle") then
+         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "border_color={"..table.concat(v.border_color,",").."},"..indent..
+         "border_width="..v.border_width..","..indent.."color={"..table.concat(v.color,",").."},"..indent..
+         "size = {"..table.concat(v.size,",").."},"..indent..
+         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
+         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
+         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
+         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Image") then
+
+	if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
+         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "src=\""..v.src.."\","..indent..
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
+         "size = {"..table.concat(v.size,",").."},"..indent..
+         "clip = {"..table.concat(v.clip,",").."},"..indent..
+         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
+         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
+         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
+         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
+         "opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Text") then
+         itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "text=\""..v.text.."\","..indent..
+         "font=\""..v.font.."\","..indent..
+         "color={"..table.concat(v.color,",").."},"..indent..
+         "size={"..table.concat(v.size,",").."},"..indent..
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
+         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
+         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
+         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
+         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
+         "editable="..tostring(v.editable)..","..indent..
+         "reactive="..tostring(v.reactive)..","..indent..
+         "wants_enter="..tostring(v.wants_enter)..","..indent..
+         "wrap="..tostring(v.wrap)..","..indent..
+         "wrap_mode=\""..v.wrap_mode.."\","..indent.."opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Clone") then
+	itm_str =  itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+         "name=\""..v.name.."\","..indent..
+         "size={"..table.concat(v.size,",").."},"..indent..
+         "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
+         "source="..v.source.name..","..indent..
+         "scale = {"..table.concat(v.scale,",").."},"..indent..
+         "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
+         "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
+         "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
+         "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
+         "opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Group") then
+	local i = 1
+        local children = ""
+        for e in values(v.children) do
+		itm_str = itm_str..itemTostring(e)
+		if i == 1 then
+			children = children..e.name
+		else 
+			children = children..","..e.name
+		end
+		i = i + 1
+        end 
+
+	itm_str = itm_str..v.name.." = "..v.type..b_indent.."{"..indent..
+        "name=\""..v.name.."\","..indent..
+        "size={"..table.concat(v.size,",").."},"..indent..
+        "position = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."},"..indent..
+	"children = {"..children.."},"..indent..
+        "scale = {"..table.concat(v.scale,",").."},"..indent..
+        "anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
+        "x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
+        "y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
+        "z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
+        "opacity = "..v.opacity..b_indent.."}\n\n"
+    elseif (v.type == "Video") then
+	itm_str = itm_str..v.name.." = ".."{"..indent..
+        "name=\""..v.name.."\","..indent..
+        "type=\""..v.type.."\","..indent..
+        "source=\""..v.source.."\","..indent..
+        "viewport={"..table.concat(v.viewport,",").."},"..indent..
+        "loop = "..tostring(v.loop)..","..indent..
+        "volume = "..v.volume..b_indent.."}\n"..b_indent
+	
+	itm_str = itm_str.."mediaplayer:load("..v.name..".source)"..b_indent..
+	"mediaplayer.on_loaded = function(self) self:play() end"..b_indent..
+	"if ("..v.name..".loop == true) then"..b_indent..
+     	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) self:play() end"..b_indent..
+	"else"..b_indent..
+	"     mediaplayer.on_end_of_stream = function(self) self:seek(0) end"..b_indent..
+	"end"..b_indent..
+	"mediaplayer:set_viewport_geometry("..v.name..".viewport[1], "..v.name..".viewport[2], "..v.name..".viewport[3], "..v.name..".viewport[4])"..b_indent..
+	"mediaplayer.volume = "..v.name..".volume\n\n"
+
+	itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
+
+    end
+
+    return itm_str
+end
 
 local msgw_focus = ""
 
@@ -959,7 +735,6 @@ local function create_small_input_box(txt)
      	local box_g = Group {}
      	local box = factory.draw_small_ring()
      	local box_focus = factory.draw_small_focus_ring()
-
 	box_g.name = "input_b"
         box.position  = {0,0}
         box.reactive = true
@@ -1077,10 +852,6 @@ function printMsgWindow(txt, name)
         end 
      end 
      local msgw_bg = factory.make_popup_bg("msgw", txt_sz)
-     if msgw_bg.Image then
-  	 msgw_bg= msgw_bg:Image()
-     end
-
      msgw:add(msgw_bg)
      input_mode = S_POPUP
      msgw:add(Text{name= name, text = txt, font= "DejaVu Sans 32px",
@@ -1092,8 +863,7 @@ function printMsgWindow(txt, name)
          msgw_cur_x = msgw_cur_x + string.len(txt) * 20
 	 
      	 for i, j in pairs (projects) do  
-	     --local prj_text = Text {text = j, color = {255,255,255,255}, font= "DejaVu Sans 32px", color = "FFFFFF"}
-	     local prj_text = Text {text = j, color = DEFAULT_COLOR, font= "DejaVu Sans 32px", color = "FFFFFF"}
+	     local prj_text = Text {text = j, color = {255,255,255,255}, font= "DejaVu Sans 32px", color = "FFFFFF"}
 	     prj_text.reactive = true
 	     prj_text.position = {msgw_cur_x, msgw_cur_y+10}
 	     prj_text.extra.index = i 
@@ -1477,13 +1247,6 @@ function inputMsgWindow_openfile(input_text)
            current_fn = input_t.text
            local f = loadfile(current_fn)
            f(g) 
-	   if screen:find_child("timeline") then 
-	      for i,j in pairs (screen:find_child("timeline").children) do
-	         if j.name:find("pointer") then 
-		    j.extra.set = true
-	         end      
-	      end      
-	   end 
      else 
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen)
@@ -1514,13 +1277,9 @@ function inputMsgWindow_openfile(input_text)
           create_on_button_down_f(v)
 	  if(v.type == "Group") then 
 	       for j, c in pairs (v.children) do
-		    --if (v.extra.type ~= "ButtonPicker") then 
-		    if is_in_list(v.extra.type, uiElements) == false then 
-			print(c.name) 
-                        c.reactive = true
-		        c.extra.is_in_group = true
-                        create_on_button_down_f(c)
-		    end 
+                    c.reactive = true
+		    c.extra.is_in_group = true
+                    create_on_button_down_f(c)
 	       end 
 	  end 
 
@@ -1652,35 +1411,6 @@ function inputMsgWindow_openimage(input_purpose, input_text)
           create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, ADD, ui.image})
           g:add(ui.image)
-	  
-	  local timeline = screen:find_child("timeline")
-  	  if timeline then 
-	     ui.image.extra.timeline = {}
-             ui.image.extra.timeline[0] = {}
-	     local prev_point = 0
-	     local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-	     for l,k in pairs (attr_map["Image"]()) do 
-	          ui.image.extra.timeline[0][k] = ui.image[k]
-	     end
- 	     if cur_focus_n ~= 0 then 
-                 ui.image.extra.timeline[0]["hide"] = true  
-	     end 
-	     for i, j in orderedPairs(timeline.points) do 
-	        if not ui.image.extra.timeline[i] then 
-	             ui.image.extra.timeline[i] = {} 
-	             for l,k in pairs (attr_map["Image"]()) do 
-		         ui.image.extra.timeline[i][k] = ui.image.extra.timeline[prev_point][k] 
-		     end 
-		     prev_point = i 
-		end 
-	        if i < cur_focus_n  then 
-                     ui.image.extra.timeline[i]["hide"] = true  
-		end 
-	     end 
-	  end 
-
-
-	
           if(screen:find_child("screen_objects") == nil) then
                screen:add(g)
           end 
@@ -1701,7 +1431,6 @@ local input_purpose     = ""
 
 local function copy_widget_imgs ()
 	local source_files = editor_lb:readdir("assets/")
-	local source_file, dest_file
 	for i, j in pairs(source_files) do 
 	     source_file = "assets/"..j 
 	     dest_file = CURRENT_DIR.."/assets/"..j 
@@ -1709,17 +1438,6 @@ local function copy_widget_imgs ()
 		--print("couldn't copy widget image"..dest_file) 
 	     end 
 	end 
-	source_file = "ui_element.lua" 
-	dest_file = CURRENT_DIR.."/ui_element.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	end 
-	source_file = "localized/strings.lua" 
-	dest_file = CURRENT_DIR.."/strings.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	end 
-
 end 
 
 local function set_project_path ()
@@ -2009,7 +1727,6 @@ function inputMsgWindow(input_purpose)
 	 msgw:find_child(msgw_focus).extra.on_focus_out()
 	 input_box.extra.on_focus_in()
     end 
-
     function input_box:on_button_down(x,y,button,num)
 	 msgw:find_child(msgw_focus).extra.on_focus_out()
 	 input_box.extra.on_focus_in()
