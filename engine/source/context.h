@@ -10,6 +10,12 @@
 #include "app.h"
 
 //-----------------------------------------------------------------------------
+// Internal notifications
+
+#define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
+#define TP_NOTIFICATION_APP_CLOSING                     "app-closing"
+
+//-----------------------------------------------------------------------------
 // Internal configuration keys
 
 #define PROFILE_ID              "profile_id"
