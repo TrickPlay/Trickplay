@@ -972,7 +972,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
         g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
 
-        notify( TP_NOTIFICATION_APP_LOADED );
+        notify( context , TP_NOTIFICATION_APP_LOADED );
     }
 
     run_callback( this , result );
@@ -988,7 +988,7 @@ App::~App()
 
 #endif
 
-    notify( TP_NOTIFICATION_APP_CLOSING );
+    notify( context , TP_NOTIFICATION_APP_CLOSING );
 
     context->remove_notification_handler( "*", forward_notification_handler, this );
     context->remove_notification_handler( TP_NOTIFICATION_PROFILE_CHANGE, profile_notification_handler, this );
@@ -1266,15 +1266,15 @@ String App::get_user_agent() const
 //-----------------------------------------------------------------------------
 // This one forwards all notifications from the context to our listeners
 
-void App::forward_notification_handler( const char * subject, void * data )
+void App::forward_notification_handler( TPContext * context , const char * subject, void * data )
 {
-    ( ( App * )data )->notify( subject );
+    ( ( App * )data )->notify( context , subject );
 }
 
 //-----------------------------------------------------------------------------
 // Notification handler for profile switches
 
-void App::profile_notification_handler( const char * subject, void * data )
+void App::profile_notification_handler( TPContext * context , const char * subject, void * data )
 {
     ( ( App * )data )->profile_switch();
 }

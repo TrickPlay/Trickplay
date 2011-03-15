@@ -280,7 +280,7 @@ private:
     //.........................................................................
     // Notification handler for profile switches
 
-    static void profile_notification_handler( const char * subject, void * data );
+    static void profile_notification_handler( TPContext * context , const char * subject, void * data );
 
     void profile_switch();
 
@@ -291,7 +291,7 @@ private:
     //.........................................................................
     // Notification handler to forward everything to our listeners
 
-    static void forward_notification_handler( const char * subject, void * data );
+    static void forward_notification_handler( TPContext * context , const char * subject, void * data );
 
     //.........................................................................
     // Gets called in an idle source to animate the screen out

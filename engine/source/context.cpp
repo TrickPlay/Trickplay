@@ -943,7 +943,7 @@ private:
 
     virtual bool run()
     {
-        context->notify( TP_NOTIFICATION_RUNNING );
+        context->notify( context , TP_NOTIFICATION_RUNNING );
 
         return false;
     }
@@ -1025,7 +1025,7 @@ int TPContext::run()
     //.........................................................................
     // Let the world know that the profile has changed
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGED );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGED );
 
     //.........................................................................
     // Create the controller server
@@ -1240,7 +1240,7 @@ int TPContext::run()
 
     //.....................................................................
 
-    notify( TP_NOTIFICATION_EXITING );
+    notify( this , TP_NOTIFICATION_EXITING );
 
     //.....................................................................
 
@@ -2335,15 +2335,15 @@ bool TPContext::profile_switch( int id )
         return false;
     }
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGING );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGING );
 
     get_db()->set( TP_DB_CURRENT_PROFILE_ID, id );
     set( PROFILE_ID, id );
     set( PROFILE_NAME, profile.name );
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGE );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGE );
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGED );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGED );
 
     return true;
 }
