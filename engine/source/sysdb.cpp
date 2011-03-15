@@ -808,6 +808,25 @@ std::list<int> SystemDatabase::get_profiles_for_app( const String & app_id )
 
 //.............................................................................
 
+bool SystemDatabase::is_app_in_current_profile( const String & app_id )
+{
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return false;
+    }
+
+    SQLite::Statement select( db, "select 1 from profile_apps where app_id = ?1 and profile_id = ?2;" );
+
+    select.bind( 1, app_id );
+    select.bind( 2, profile.id );
+
+    return select.step_row();
+}
+
+//.............................................................................
+
 SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile()
 {
     AppActionMap result;

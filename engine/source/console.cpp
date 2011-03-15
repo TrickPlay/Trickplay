@@ -45,6 +45,7 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
     context( ctx ),
     L( NULL ),
     channel( NULL ),
+    watch( 0 ),
     stdin_buffer( NULL ),
     server( NULL )
 {
@@ -60,7 +61,7 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
             {
                 stdin_buffer = g_string_new( NULL );
 
-                g_io_add_watch( channel, G_IO_IN, channel_watch, this );
+                watch = g_io_add_watch( channel, G_IO_IN, channel_watch, this );
 
 #ifdef TP_HAS_READLINE
 
@@ -101,6 +102,11 @@ Console::~Console()
 {
     if ( channel )
     {
+        if ( watch )
+        {
+            g_source_remove( watch );
+        }
+
         g_io_channel_unref( channel );
     }
 

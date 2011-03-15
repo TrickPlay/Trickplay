@@ -1,4 +1,6 @@
 [[
+#include "gio/gio.h"
+
 #include "common.h"
 #include "util.h"
 #include "app.h"
@@ -127,5 +129,15 @@ restricted global editor [[ void * ]]
 
              result = f;
          ]];
+
+     bool file_copy(string src_file_name, string dest_file_name)
+         [[
+             GFile * source = g_file_new_for_path( src_file_name );
+             GFile * dest = g_file_new_for_path(dest_file_name);
+             result = g_file_copy ( source , dest , G_FILE_COPY_NONE, NULL, NULL, NULL, NULL);
+             g_object_unref( source );
+             g_object_unref( dest );
+         ]];
+
 }
 

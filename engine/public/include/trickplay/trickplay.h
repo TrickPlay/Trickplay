@@ -33,8 +33,8 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    16
-#define TP_PATCH_VERSION    2
+#define TP_MINOR_VERSION    17
+#define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -160,6 +160,12 @@ typedef struct TPContext TPContext;
                             service.
                             Defaults to "TrickPlay".
                             
+    TP_CONTROLLERS_MDNS_ENABLED -   Whether controller discovery via mDNS is enabled.
+                                    Defaults to "TRUE".
+
+    TP_CONTROLLERS_UPNP_ENABLED -   Whether controller discovery via UPnP is enabled.
+                                    Defaults to "FALSE".
+
     TP_LOG_DEBUG -          Whether to log DEBUG messages. Set to "0" to prevent
                             DEBUG messages from being logged.
                             Defaults to "1".
@@ -218,6 +224,18 @@ typedef struct TPContext TPContext;
                                 but it won't do anything.
                                 Defaults to "true".
 
+    TP_AUDIO_SAMPLER_MAX_INTERVAL - How many seconds' worth of audio should the sampler accumulate
+                                    before it passes the samples to audio detection plugins.
+                                    Default is 10.
+
+    TP_AUDIO_SAMPLER_MAX_BUFFER_KB - The maximum buffer (in KB) of audio samples that the
+                                     audio sampler keeps.
+                                     Defaults to 5000.
+
+    TP_TOAST_JSON_PATH -        Path to a file containing the JSON definition
+                                for the toast UI.
+                                Default is not set.
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -240,6 +258,8 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_ENABLED          "controllers_enabled"
 #define TP_CONTROLLERS_PORT             "controllers_port"
 #define TP_CONTROLLERS_NAME             "controllers_name"
+#define TP_CONTROLLERS_UPNP_ENABLED     "controllers_upnp_enabled"
+#define TP_CONTROLLERS_MDNS_ENABLED     "controllers_mdns_enabled"
 #define TP_LOG_DEBUG                    "log_debug"
 #define TP_LOG_APP_ONLY                 "log_app_only"
 #define TP_FONTS_PATH                   "fonts_path"
@@ -257,6 +277,9 @@ typedef struct TPContext TPContext;
 #define TP_RANDOM_SEED                  "random_seed"
 #define TP_PLUGINS_PATH                 "plugins_path"
 #define TP_AUDIO_SAMPLER_ENABLED        "audio_sampler_enabled"
+#define TP_AUDIO_SAMPLER_MAX_BUFFER_KB  "audio_sampler_max_buffer_kb"
+#define TP_AUDIO_SAMPLER_MAX_INTERVAL   "audio_sampler_max_interval"
+#define TP_TOAST_JSON_PATH              "toast_json_path"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -288,24 +311,16 @@ typedef struct TPContext TPContext;
     
     These subjects are used with <tp_context_add_notification_handler>.
 
-    TP_NOTIFICATION_APP_LOADING -                       An application is about to be loaded.
-    TP_NOTIFICATION_APP_LOAD_FAILED -                   An application failed to load.
-    TP_NOTIFICATION_APP_LOADED -                        An application finished loading.
-    TP_NOTIFICATION_APP_CLOSING -                       The current application is about to be closed.
-    TP_NOTIFICATION_APP_CLOSED -                        The current application is finished.
     TP_NOTIFICATION_PROFILE_CHANGING -                  The current profile is about to change.
     TP_NOTIFICATION_PROFILE_CHANGE -                    Internal notification to get things ready for a profile change.
     TP_NOTIFICATION_PROFILE_CHANGED -                   The current profile changed.
     TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD -            The app no longer needs to use the numeric keypad.
     TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS -    The app no longer needs the transport control keys.
     TP_NOTIFICATION_RELEASE_KEYBOARD -                  The app no longer needs the keyboard.
+    TP_NOTIFICATION_RUNNING -                           Trickplay is running and has entered its main loop.
+    TP_NOTIFICATION_EXITING -                           Trickplay has exited its main loop and <tp_context_run> will return soon.
 */
 
-#define TP_NOTIFICATION_APP_LOADING                     "app-loading"
-#define TP_NOTIFICATION_APP_LOAD_FAILED                 "app-load-failed"
-#define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
-#define TP_NOTIFICATION_APP_CLOSING                     "app-closing"
-#define TP_NOTIFICATION_APP_CLOSED                      "app-closed"
 #define TP_NOTIFICATION_PROFILE_CHANGING                "profile-changing"
 #define TP_NOTIFICATION_PROFILE_CHANGE                  "profile-change"
 #define TP_NOTIFICATION_PROFILE_CHANGED                 "profile-changed"
@@ -313,6 +328,9 @@ typedef struct TPContext TPContext;
 #define TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD          "release-numeric-keypad"
 #define TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS  "release-transport-control-keys"
 #define TP_NOTIFICATION_RELEASE_KEYBOARD                "release-keyboard"
+
+#define TP_NOTIFICATION_RUNNING                         "running"
+#define TP_NOTIFICATION_EXITING                         "exiting"
 
 
 /*-----------------------------------------------------------------------------
@@ -478,6 +496,45 @@ typedef struct TPContext TPContext;
         const char * key);
 
 /*-----------------------------------------------------------------------------
+    Function: tp_context_set_user_data
+
+    Associate an opaque pointer with the Trickplay context.
+
+    Arguments:
+
+        context -   A pointer to a TPContext.
+
+        user_data - The user data.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_context_set_user_data(
+
+        TPContext * context,
+        void * user_data);
+
+/*-----------------------------------------------------------------------------
+    Function: tp_context_get_user_data
+
+    Get user data associated with the Trickplay context with <tp_context_set_user_data>.
+
+    Arguments:
+
+        context -   A pointer to a TPContext.
+
+    Returns:
+
+        user_data - The user data.
+*/
+
+    TP_API_EXPORT
+    void *
+    tp_context_get_user_data(
+
+        TPContext * context);
+
+/*-----------------------------------------------------------------------------
     Function: TPRequestHandler
     
     Function prototype for calls to <tp_context_set_request_handler>. To handle
@@ -486,6 +543,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         subject -   A string describing the nature of the request.
 
         data -      User data passed to <tp_context_set_request_handler>.
@@ -501,6 +560,7 @@ typedef struct TPContext TPContext;
     int
     (*TPRequestHandler)(
     
+        TPContext * context,
         const char * subject,
         void * data);
 
@@ -542,6 +602,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         subject -   A string describing the specific notification.
 
         data -      Opaque user data passed to <tp_context_add_notification_handler>.
@@ -551,6 +613,7 @@ typedef struct TPContext TPContext;
     void
     (*TPNotificationHandler)(
                     
+        TPContext * context,
         const char * subject,
         void * data);
 
@@ -592,6 +655,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -       The Trickplay context.
+
         command -       A string describing the command. It does not include the initial
                         / and will never be NULL.
 
@@ -605,7 +670,8 @@ typedef struct TPContext TPContext;
     typedef
     void
     (*TPConsoleCommandHandler)(
-                    
+
+        TPContext * context,
         const char * command,
         const char * parameters,
         void * data);
@@ -647,6 +713,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         level -     An integer describing the information level of the log message,
                     such as DEBUG, INFO, WARNING, etc.
 
@@ -661,6 +729,7 @@ typedef struct TPContext TPContext;
     void
     (*TPLogHandler)(
     
+        TPContext * context,
         unsigned int level,
         const char * domain,
         const char * message,

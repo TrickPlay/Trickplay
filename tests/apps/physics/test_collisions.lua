@@ -30,6 +30,7 @@ local function make_ball( color , filter )
     ball:fill()
     ball:finish_painting()
 
+	ball = ball:Image()
     ball = physics:Body(
     
         ball,

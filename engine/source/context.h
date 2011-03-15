@@ -10,6 +10,12 @@
 #include "app.h"
 
 //-----------------------------------------------------------------------------
+// Internal notifications
+
+#define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
+#define TP_NOTIFICATION_APP_CLOSING                     "app-closing"
+
+//-----------------------------------------------------------------------------
 // Internal configuration keys
 
 #define PROFILE_ID              "profile_id"
@@ -227,6 +233,8 @@ private:
     //.........................................................................
     // This launches a new app in an idle source
 
+    static void app_run_callback( App * app , int result );
+
     static gboolean launch_app_callback( gpointer new_app );
 
     //.........................................................................
@@ -252,6 +260,8 @@ private:
     friend void tp_context_set( TPContext * context, const char * key, const char * value );
     friend void tp_context_set_int( TPContext * context, const char * key, int value );
     friend const char * tp_context_get( TPContext * context, const char * key );
+    friend void tp_context_set_user_data( TPContext * context , void * user_data );
+    friend void * tp_context_get_user_data( TPContext * context );
     friend void tp_context_add_notification_handler( TPContext * context, const char * subject, TPNotificationHandler handler, void * data );
     friend void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data );
     friend void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data );
@@ -266,6 +276,8 @@ private:
     friend void tp_context_remove_controller( TPContext * context, TPController * controller );
 
     friend TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
+
+
 
 private:
 
@@ -293,13 +305,15 @@ private:
 
     App *                       current_app;
 
-    bool                        is_first_app;
+    String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
 
     TPLogHandler                external_log_handler;
     void *                      external_log_handler_data;
+
+    void *                      user_data;
 
     typedef std::pair<TPConsoleCommandHandler, void *>          ConsoleCommandHandlerClosure;
     typedef std::multimap<String, ConsoleCommandHandlerClosure> ConsoleCommandHandlerMultiMap;
