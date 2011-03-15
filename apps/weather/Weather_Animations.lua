@@ -1,3 +1,4 @@
+local temp_var
 sun = {
     state="SET",
     setup = function(self)
@@ -33,12 +34,22 @@ sun = {
             self.sun.position={self.sun.w/2,self.sun.h/2}
             --self.state="SET"
         end
-        animate_list[self.func_tbls.shine] = self
+        --animate_list[self.func_tbls.shine] = self
+        sun.flare[1]:complete_animation()
+        sun.flare[2]:complete_animation()
+        sun.flare[3]:complete_animation()
+        
+        sun.flare[1]:animate{duration=5000,loop=true,z_rotation=360}
+        sun.flare[2]:animate{duration=5000,loop=true,z_rotation=-360}
+        sun.flare[3]:animate{duration=5000,loop=true,z_rotation=720}
+        
+        sun.group:animate{duration=2000,y=701}
+        
         curr_condition:add(self.group)
     end,
     
     
-    
+    --[[
     func_tbls = {
         rise  = {
             duration=2000,
@@ -74,7 +85,7 @@ sun = {
             func=function(this_obj,this_func_tbl,secs,p)
                 this_obj.group.y = 701 + (screen_h-701)*(1-math.sin(math.pi/2*p+math.pi/2))
                 if p == 1 then
-                    animate_list[this_obj.func_tbls.shine] = nil
+                    --animate_list[this_obj.func_tbls.shine] = nil
                     this_obj:remove()
                 end
             end
@@ -92,7 +103,7 @@ sun = {
             end
         },
     },
-    
+    --]]
     remove = function(self)
         self.group:unparent()
     end
@@ -114,12 +125,25 @@ moon = {
                     y=63 + (screen_h-709)
             }
             self.group:add(self.stars,self.star,self.moon)
+            self.twinkle_timer = Timer{interval=3000,on_timer =
+                function()
+                    self.star.position = {
+                        math.random(10,self.stars.w),
+                        math.random(0,self.stars.h)
+                    }
+                    self.star.opacity = 255
+                    self.star:animate{duration=200,opacity=0}
+                end
+            }
             --self.state="SET"
         end
         curr_condition:add(self.group)
+        self.group:animate{duration=2000,y=63}
+        self.stars:animate{duration=2000,opacity=255}
+        self.twinkle_timer:start()
         self.group:lower_to_bottom()
     end,
-
+--[[
     func_tbls = {
         rise  = {
             duration=2000,
@@ -128,7 +152,7 @@ moon = {
                 this_obj.moon.y = 63 + (screen_h-709) *(1-math.sin(math.pi/2*p))
                 if p == 1 then
                     this_obj.state="RISEN"
-                    animate_list[this_obj.func_tbls.twinkle] = this_obj
+                    --animate_list[this_obj.func_tbls.twinkle] = this_obj
                 end
             end
         },
@@ -162,6 +186,7 @@ moon = {
             end
         }
     },
+    --]]
     on_remove = function(self)
         self.group:unparent()
     end,
@@ -185,7 +210,7 @@ lg_cloud = function() return{
         
         curr_condition:add(self.img)
     end,
-    
+    --[[
     func_tbls = {
         drift = {
             
@@ -210,6 +235,7 @@ lg_cloud = function() return{
             end
         },
     },
+    --]]
     hurry_out = function(self)
         self.speed = 300
     end
@@ -234,7 +260,7 @@ sm_cloud = function() return{
     end,
     
     fading = false,
-    
+    --[[
     func_tbls = {
         drift_in = {
             func = function(this_obj,this_func_tbl,secs,p)
@@ -258,6 +284,7 @@ sm_cloud = function() return{
             end
         }
     },
+    --]]
     hurry_out = function(self)
         self.speed = 300
     end
@@ -276,14 +303,76 @@ cloud_spawner = {
     state="NONE",
     
     last_cloud = nil,
-    
+    setup = function(self)
+        if self.lg_cloud_timer == nil then
+            self.lg_cloud_timer=Timer{interval=60000,on_timer=
+                function()
+                    local r = math.random(1,#imgs.reg_clouds.lg)
+                    temp_var = Clone{
+                        name="lg_cloud",
+                        source=imgs.reg_clouds.lg[r],
+                        x=40,--self.start,
+                        y=670+math.random(0,150),
+                        opacity=0
+                    }
+                    temp_var:animate{duration=4000,opacity=255,on_completed=
+                        function()
+                            temp_var:animate{
+                                duration=(temp_var.x+temp_var.img.w)/math.random(4,6),
+                                x=-temp_var.img.w,
+                                on_completed = function()
+                                    temp_var:unparent()
+                                    
+                                end
+                            }
+                        end
+                    }
+                    cloud_list[temp_var] = temp_var
+                end
+            }
+            self.sm_cloud_timer=Timer{interval=40000,on_timer=
+                function()
+                    local r = math.random(1,#imgs.reg_clouds.lg)
+                    temp_var = Clone{
+                        name="lg_cloud",
+                        source=imgs.reg_clouds.sm[r],
+                        x=-imgs.reg_clouds.sm[r].w,--self.start,
+                        y=850+math.random(0,100),
+                        opacity=0
+                    }
+                    temp_var:animate{
+                        duration=(temp_var.x+200)/math.random(4,6),
+                        x=200,
+                        on_completed=function()
+                            temp_var:animate{
+                                duration=(100)/math.random(4,6),
+                                x=temp_var.x+100,
+                                opacity=0,
+                                on_completed = function()
+                                    temp_var:unparent()
+                                end
+                            }
+                        end
+                    }
+                    cloud_list[temp_var] = temp_var
+                end
+            }
+        end
+        self.sm_cloud_timer:start()
+        self.lg_cloud_timer:start()
+        
+        self.sm_cloud_timer.on_timer()
+        self.lg_cloud_timer.on_timer()
+
+    end,
+    --[[
     func_tbls = {
         spawn_loop = {
             func = function(this_obj,this_func_tbl,secs,p)
                 
                 this_obj.lg_elapsed_1 = this_obj.lg_elapsed_1 + secs*1000
                 this_obj.lg_elapsed_2 = this_obj.lg_elapsed_2 + secs*1000
-                this_obj.sm_elapsed   = this_obj.sm_elapsed + secs*1000
+                this_obj.sm_elapsed   = this_obj.sm_elapsed   + secs*1000
                 
                 
                 if this_obj.lg_elapsed_1 > this_obj.lg_thresh then
@@ -315,59 +404,40 @@ cloud_spawner = {
             end,
         }
     },
+    --]]
     cloud_list = {},
     rem_last_cloud = function(self)
         if self.last_cloud == nil then return end
-        self.last_cloud:hurry_out()
+        --self.last_cloud:hurry_out()
+        self.last_cloud:animate{duration=300,opacity=0,
+            on_timer=function()
+                self.last_cloud:unparent()
+                
+            end
+        }
+        self.cloud_list[self.last_cloud] = nil
         self.last_cloud = nil
     end,
     remove = function(self)
-        for k,v in pairs(self.cloud_list) do
-            k:hurry_out()
+        for i,v in pairs(self.cloud_list) do
+            v:animate{duration=200,opacity=0,on_timer=function() v:unparent() end}
         end
-        animate_list[self.func_tbls.spawn_loop] = nil
+        self.cloud_list={}
+        --animate_list[self.func_tbls.spawn_loop] = nil
         self.state = "NONE"
         self.last_cloud = nil
+        --[[
         self.lg_elapsed_1 = 60000
         self.lg_elapsed_2 = 90000
         self.sm_elapsed   = 40000
-        
+        --]]
+        self.sm_cloud_timer:stop()
+        self.lg_cloud_timer:stop()
     end
     
 }
 
-rain_drops = function(x,y,clone_src,speed,flipped) return{
-    
-    setup = function(self)
-        self.speed = speed
-        local r = math.random(1,#imgs.reg_clouds.sm)
-        self.img = Clone{
-            name="small",
-            source=clone_src,
-            x=x,--+math.random(0,10)*10,
-            y=y,
-            opacity=255*.5
-        }
-        if flipped then
-            self.img.y_rotation={180,0,0}
-            self.img.x = self.img.x + self.img.w
-        end
-        curr_condition:add(self.img)
-    end,
-    func_tbls={
-        drop={
-            func=function(this_obj,this_func_tbl,secs,p)
-                this_obj.img.y = this_obj.img.y + this_obj.speed*secs
-                if this_obj.img.y > screen_h then
-                    animate_list[this_func_tbl]=nil
-                    this_obj.img:unparent()
-                    --this_obj.img = nil
-                end
-            end
-        }
-    },
 
-}end
 window_snow = function(x,y,deg) return{
     
     setup = function(self)
@@ -559,11 +629,88 @@ wiper = {
         self.wiper_freeze:unparent()
         self.wiper_blade:unparent()
         self.snow_blade:unparent()
-        animate_list[self.func_tbls.rain_loop] = nil
-        animate_list[self.func_tbls.snow_loop] = nil
+        --animate_list[self.func_tbls.rain_loop] = nil
+        --animate_list[self.func_tbls.snow_loop] = nil
     end,
     
     setup    = function(self)
+        if self.wipe_timer == nil then
+            self.wiper_tl = Timeline{
+                duration     = 2000,
+                on_new_frame = function(self,msecs,p)
+                    if p < .5 then
+                        for k,v in pairs(this_obj.drops) do
+                            k:check_wipe_up(this_obj.wiper_blade.z_rotation[1],(p)*-200-5)
+                        end
+                        --this_obj.func_tbls.wipe_up(this_obj,p*4)
+                        this_obj.wiper_blade.z_rotation={-100*p*2,0,0}
+                    else
+                        for k,v in pairs(this_obj.drops) do
+                            k:check_wipe_down(this_obj.wiper_blade.z_rotation[1],-(1-p*2)*100)
+                        end
+                        --this_obj.func_tbls.wipe_up(this_obj,2-p*4)
+                        this_obj.wiper_blade.z_rotation={-100*(1-p*2),0,0}
+                    end
+                end
+            }
+            self.wiper_timer = Timer{
+                interval = 4000,
+                on_timer = function()
+                    self.wiper_tl:start()
+                end
+            }
+            self.rain_timer = Timer{
+                interval = 100,
+                on_timer = function()
+                    local rad = math.random(1,(self.wiper_blade.w-30)/4)*4
+                    local deg = math.random(1,20)*-4
+                    local r   = math.random(1,#imgs.rain.drops)
+                    local droplet = Clone{
+                        name="small",
+                        source=imgs.rain.drops[r],
+                        x=self.wiper_blade.x+rad*math.cos(math.pi/180*deg),
+                        y=self.wiper_blade.y+rad*math.sin(math.pi/180*deg),
+                        opacity=255*.75,
+                        anchor_point = {imgs.rain.drops[r].w/2,imgs.rain.drops[r].h/2},
+                        scale = {0,0},
+                        extra = {
+                            deg = deg,
+                        }
+                    }
+                    droplet.anchor_point = {droplet.img.w/2,droplet.img.h/2}
+                    curr_condition:add(droplet.img)
+                    
+                    droplet:animate{duration=math.random(300,600),scale={1,1}}
+                    
+                    self.drops[droplet] = droplet
+                end
+            }
+            self.snow_timer = Timer{
+                interval = 150,
+                on_timer = function()
+                    local rad = math.random(1,(self.wiper_blade.w-30)/4)*4
+                    local deg = math.random(1,20)*-4
+                    local r   = math.random(1,#imgs.snow_flake.lg)
+                    local droplet = Clone{
+                        name="small",
+                        source=imgs.snow_flake.lg[r],
+                        x=self.wiper_blade.x+rad*math.cos(math.pi/180*deg),
+                        y=self.wiper_blade.y+rad*math.sin(math.pi/180*deg),
+                        opacity=255*.4,
+                        anchor_point = {imgs.snow_flake.lg[r].w/2,imgs.snow_flake.lg[r].h/2},
+                        scale = {0,0},
+                        extra = {
+                            deg = deg,
+                        }
+                    }
+                    curr_condition:add(droplet.img)
+                    
+                    droplet:animate{duration=math.random(300,600),scale={1,1}}
+                    
+                    self.drops[droplet] = droplet
+                end
+            }
+        end
         curr_condition:add(
             self.wiper_rain,
             self.wiper_freeze,
@@ -900,6 +1047,51 @@ chance_of = {
     }
     
 }
+--[[
+local prev_rain_drops = {}
+rain_drops = function(x,y,clone_src,speed,flipped) return{
+    
+    setup = function(self)
+        if #prev_rain_drops ~= 0 then
+            
+        end
+        --self.speed = speed
+        local r = math.random(1,#imgs.reg_clouds.sm)
+        self.img = Clone{
+            name="small",
+            source=clone_src,
+            x=x,--+math.random(0,10)*10,
+            y=y,
+            opacity=255*.5
+        }
+        if flipped then
+            self.img.y_rotation={180,0,0}
+            self.img.x = self.img.x + self.img.w
+        end
+        curr_condition:add(self.img)
+        self.img:animate{duration=(screen_h-self.img.y)/speed,y=screen_h,on_completed=
+            function()
+                self.img.unparent()
+                tabl.insert(prev_rain_drops,self)
+            end
+        }
+    end,
+    func_tbls={
+        drop={
+            func=function(this_obj,this_func_tbl,secs,p)
+                this_obj.img.y = this_obj.img.y + this_obj.speed*secs
+                if this_obj.img.y > screen_h then
+                    animate_list[this_func_tbl]=nil
+                    this_obj.img:unparent()
+                    --this_obj.img = nil
+                end
+            end
+        }
+    },
+
+}end
+--]]
+local prev_t_drops = {}
 
 --rain = {
 tstorm = {
@@ -918,9 +1110,84 @@ tstorm = {
     glow_cloud = Clone{source=imgs.glow_cloud,y=650,opacity=0},
     base_cloud = Clone{source=imgs.rain_clouds.lg[1],y=650,x=-imgs.rain_clouds.lg[1].w},
     lightning  = Clone{source=imgs.lightning[1],y=screen_h-imgs.lightning[1].h*2/3,opacity=0},
+    
 
     setup = function(self)
+            if self.rain_timer == nil then
+                self.rain_timer = Timer{interval=200,on_timer=
+                    function()
+                        self.r_flip = not self.r_flip
+                        
+                        temp_var = Clone{
+                            source=imgs.rain.falling,
+                            x=-30,--+math.random(0,10)*10,
+                            y=765,
+                            opacity=255*.5
+                        }
+                        if self.r_flip then
+                            temp_var.y_rotation={180,0,0}
+                            temp_var.x = temp_var.x + temp_var.w
+                        end
+                        temp_var:animate{duration=(screen_h-temp_var.y)/600,y=screen_h,on_completed=
+                            function()
+                                temp_var.unparent()
+                                tabl.insert(prev_rain_drops,temp_var)
+                            end
+                        }
+                        curr_conditions:add(temp_var)
+                        
+                        temp_var = Clone{
+                            source=imgs.rain.falling,
+                            x=221-30,--+math.random(0,10)*10,
+                            y=777,
+                            opacity=255*.5
+                        }
+                        if self.r_flip then
+                            temp_var.y_rotation={180,0,0}
+                            temp_var.x = temp_var.x + temp_var.w
+                        end
+                        temp_var:animate{duration=(screen_h-temp_var.y)/600,y=screen_h,on_completed=
+                            function()
+                                temp_var.unparent()
+                                tabl.insert(prev_rain_drops,temp_var)
+                            end
+                        }
+                        curr_conditions:add(temp_var)
+                        self.base_cloud:raise_to_top()
+                        --[[
+                        temp_var = rain_drops(-30,765,imgs.rain.falling,600,self.r_flip)
+                        temp_var:setup()
+                        --animate_list[r.func_tbls.drop] = r
+                        temp_var = rain_drops(221-30,777,imgs.rain.falling,600,self.r_flip)
+                        temp_var:setup()
+                        --animate_list[r.func_tbls.drop] = r
+                        --]]
+                    end
+                }
+                self.l_timer = Timer{interval=5000,on_timer=
+                    function()
+                        if interval == 5000 then
+                            interval = 200
+                        else
+                            interval = 5000
+                        end
+                        self.l_index = self.l_index%#imgs.lightning+1
+                        self.lightning.source=imgs.lightning[self.l_index]
+                        self.lightning.opacity=255
+                        self.glow_cloud.opacity=255
+                        self.lightning:animate{duration=100,opacity=0}
+                        self.glow_cloud:animate{duration=100,opacity=0}
+                    end
+                }
+            end
             curr_condition:add(self.lightning,self.base_cloud,self.glow_cloud)
+            
+            self.base_cloud:animate{duration=400,x=0,on_completed=
+                function()
+                    self.l_timer:start()
+                    self.rain_timer:start()
+                end
+            }
     end,
     
     func_tbls = {
@@ -1273,40 +1540,62 @@ local set_states = function(t)
     
     if t.sun ~= nil and t.sun ~= sun.state then
         if t.sun == "SET" then
-            animate_list[sun.func_tbls.rise]=nil
-            animate_list[sun.func_tbls.set]=sun
+            --animate_list[sun.func_tbls.rise]=nil
+            --animate_list[sun.func_tbls.set]=sun
+            sun.group:animate{duration=2000,y=screen_h,on_completed=
+                function()
+                    sun.flare[1]:complete_animation()
+                    sun.flare[2]:complete_animation()
+                    sun.flare[3]:complete_animation()
+                end
+            }
         end
         if sun.state == "SET" then
             sun:setup()
-            animate_list[sun.func_tbls.set]=nil
-            animate_list[sun.func_tbls.rise]=sun
-        end
-        if t.sun == "HALF" then
-            animate_list[sun.func_tbls.half_to_full_opacity]=nil
-            animate_list[sun.func_tbls.full_to_half_opacity]=sun
-        elseif t.sun == "FULL" then
-            animate_list[sun.func_tbls.full_to_half_opacity]=nil
-            animate_list[sun.func_tbls.half_to_full_opacity]=sun
+            --animate_list[sun.func_tbls.set]=nil
+            --animate_list[sun.func_tbls.rise]=sun
+            if t.sun == "HALF" then
+                sun.group.opacity=255*.5
+            else
+                sun.group.opacity=255
+            end
+        else
+            if t.sun == "HALF" then
+                --animate_list[sun.func_tbls.half_to_full_opacity]=nil
+                --animate_list[sun.func_tbls.full_to_half_opacity]=sun
+                sun.group:animate{duration=2000,opacity=255*.5}
+            elseif t.sun == "FULL" then
+                --animate_list[sun.func_tbls.full_to_half_opacity]=nil
+                --animate_list[sun.func_tbls.half_to_full_opacity]=sun
+                sun.group:animate{duration=2000,opacity=255}
+            end
         end
         sun.state = t.sun
     end
     
     if t.moon ~= nil and t.moon ~= moon.state then
         if t.moon == "SET" then
-            animate_list[moon.func_tbls.set]=moon
+            --animate_list[moon.func_tbls.set]=moon
+            moon.group:animate{duration=2000,y=63 + (screen_h-709)}
+            moon.stars:animate{duration=2000,opacity=0}
+            moon.twinkle_timer:stop()
         else
             moon:setup()
-            animate_list[moon.func_tbls.rise]=moon
+            --animate_list[moon.func_tbls.rise]=moon
         end
+        moon.state = t.moon
     end
     
     if t.tstorm ~= nil and t.tstorm ~= tstorm.state then
         print("oooo")
         if t.tstorm == "ON" then
             tstorm:setup()
-            animate_list[tstorm.func_tbls.fade_in]=tstorm
+            --animate_list[tstorm.func_tbls.fade_in]=tstorm
         else
-            animate_list[tstorm.func_tbls.fade_out]=tstorm
+            tstorm.l_timer:stop()
+            tstorm.rain_timer:stop()
+            tstorm.base_cloud:animate{duration=400,x=-this_obj.base_cloud.w}
+            --animate_list[tstorm.func_tbls.fade_out]=tstorm
         end
         tstorm.state = t.tstorm
     end
@@ -1314,17 +1603,19 @@ local set_states = function(t)
     if t.clouds ~= nil and t.clouds ~= cloud_spawner.state then
         
         if cloud_spawner.state == "NONE" then
-            animate_list[cloud_spawner.func_tbls.spawn_loop] = cloud_spawner
+            --animate_list[cloud_spawner.func_tbls.spawn_loop] = cloud_spawner
+            cloud_spawner:setup()
         end
         
         if t.clouds == "NONE" then
             cloud_spawner:remove()
         elseif t.clouds == "PARTLY" then
             cloud_spawner:rem_last_cloud()
-            cloud_spawner.state="PARTLY"
+            cloud_spawner.lg_cloud_timer.interval=60000
+            cloud_spawner.sm_cloud_timer.interval=40000
         elseif t.clouds == "MOSTLY" then
-
-            cloud_spawner.state="MOSTLY"
+            cloud_spawner.lg_cloud_timer.interval=40000
+            cloud_spawner.sm_cloud_timer.interval=20000
         end
         cloud_spawner.state = t.clouds
     end
@@ -1332,26 +1623,38 @@ local set_states = function(t)
     if t.wiper ~= nil and t.wiper ~= wiper.state then
         if wiper.state == "NONE" then
             wiper:setup()
-            animate_list[wiper.func_tbls.reg_fade_in]=wiper
+            --animate_list[wiper.func_tbls.reg_fade_in]=wiper
+            wiper.wiper_rain:animate{duration=500,opacity=255}
+            wiper.wiper_blade:animate{duration=500,opacity=255}
         end
         
         if t.wiper == "NONE" then
-            animate_list[wiper.func_tbls.reg_fade_out]=wiper
+            --animate_list[wiper.func_tbls.reg_fade_out]=wiper
+            wiper.wiper_rain:animate{ duration=500,opacity=0}
+            wiper.rain_timer:stop()
+            wiper.wiper_timer:stop()
             if wiper.state == "F_RAIN" then
-                animate_list[wiper.func_tbls.frost_fade_out]=wiper
+                --animate_list[wiper.func_tbls.frost_fade_out]=wiper
+                wiper.wiper_blade:animate{ duration=500,opacity=0}
+                wiper.wiper_freeze:animate{duration=500,opacity=0}
+                
             elseif wiper.state == "SLEET" then
-                animate_list[wiper.func_tbls.sleet_fade_out]=wiper
+                --animate_list[wiper.func_tbls.sleet_fade_out]=wiper
+                wiper.snow_blade:animate{duration=500,opacity=0}
+                wiper.snow_timer:stop()
+            else
+                wiper.wiper_blade:animate{duration=500,opacity=0}
             end
         elseif t.wiper == "F_RAIN" then
             if wiper.state == "SLEET" then
-                animate_list[wiper.func_tbls.sleet_fade_out]=wiper
+                --animate_list[wiper.func_tbls.sleet_fade_out]=wiper
             end
-            animate_list[wiper.func_tbls.frost_fade_in]=wiper
+            --animate_list[wiper.func_tbls.frost_fade_in]=wiper
         elseif t.wiper == "SLEET" then
             if wiper.state == "F_RAIN" then
-                animate_list[wiper.func_tbls.frost_fade_out]=wiper
+                --animate_list[wiper.func_tbls.frost_fade_out]=wiper
             end
-            animate_list[wiper.func_tbls.sleet_fade_in]=wiper
+            --animate_list[wiper.func_tbls.sleet_fade_in]=wiper
         end
         wiper.state = t.wiper
     end
