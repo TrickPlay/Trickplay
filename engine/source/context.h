@@ -227,6 +227,8 @@ private:
     //.........................................................................
     // This launches a new app in an idle source
 
+    static void app_run_callback( App * app , int result );
+
     static gboolean launch_app_callback( gpointer new_app );
 
     //.........................................................................
@@ -293,7 +295,7 @@ private:
 
     App *                       current_app;
 
-    bool                        is_first_app;
+    String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
