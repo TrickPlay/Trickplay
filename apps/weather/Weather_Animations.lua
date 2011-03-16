@@ -891,7 +891,120 @@ chance_of = {
     wiper_freeze   = Clone{name="wiper freeze",source=imgs.wiper.freezing, y=760,opacity=0},
     lightning = Clone{source=imgs.lightning[1],y=850,opacity=0},
     
+    state_tbl = {
+        ["FLURRIES"] = function(self)
+            self.snow_timer:start()
+        end,
+        ["RAIN"]     = function(self)
+            self.rain_timer:start()
+        end,
+        ["F_RAIN"]   = function(self)
+            self.rain_timer:start()
+            self.wiper_freeze:animate={duration=200,opacity=255}
+        end,
+        ["SLEET"]    = function(self)
+            self.rain_timer:start()
+            self.snow_timer:start()
+        end,
+        ["SNOW"]     = function(self)
+            self.snow_timer:start()
+        end,
+        ["TSTORMS"]  = function(self)
+            self.rain_timer:start()
+            self.lightning_timer:start()
+        end,
+
+    }
+    
     setup = function(self)
+        
+        if self.rain_timer == nil then
+            self.pause_timer = Timer{interval=8000,
+                on_timer = function()
+                    self.state_tbl[self.state](self)
+                end
+            }
+            self.rain_timer = Timer{interval = 300,
+                on_timer = function()
+                    self.rain_timer.count = self.rain_timer.count + 1
+                    if self.rain_timer.count > 10 then
+                        self.rain_timer.count = 0
+                        self.rain_timer:stop()
+                        if self.state == "F_RAIN" then
+                            self.wiper_freeze:animate={duration=200,opacity=0}
+                        end
+                        return
+                    end
+                    self.r_flip = not self.r_flip
+                        
+                    temp_var = Clone{
+                        source=imgs.rain.light,
+                        x=0,
+                        y=806,
+                        opacity=255*.5
+                    }
+                    if self.r_flip then
+                        temp_var.y_rotation={180,0,0}
+                        temp_var.x = temp_var.x + temp_var.w
+                    end
+                    temp_var:animate{duration=(screen_h-temp_var.y)/600,y=screen_h,on_completed=
+                        function()
+                            temp_var.unparent()
+                            tabl.insert(prev_rain_drops,temp_var)
+                        end
+                    }
+                    curr_conditions:add(temp_var)
+                        
+                        
+                    self.cloud_1:raise_to_top()
+                    self.cloud_2:raise_to_top()
+                end
+            }
+            self.snow_timer = Timer{interval = 300,
+                on_timer = function()
+                    self.rain_timer.count = self.rain_timer.count + 1
+                    if self.rain_timer.count > 10 then
+                        self.rain_timer.count = 0
+                        self.rain_timer:stop()
+                        if self.state == "F_RAIN" then
+                            self.wiper_freeze:animate={duration=200,opacity=0}
+                        end
+                        return
+                    end
+                    self.r_flip = not self.r_flip
+                        
+                    temp_var = Clone{
+                        source=imgs.rain.light,
+                        x=0,
+                        y=806,
+                        opacity=255*.5
+                    }
+                    if self.r_flip then
+                        temp_var.y_rotation={180,0,0}
+                        temp_var.x = temp_var.x + temp_var.w
+                    end
+                    temp_var:animate{duration=(screen_h-temp_var.y)/600,y=screen_h,on_completed=
+                        function()
+                            temp_var.unparent()
+                            tabl.insert(prev_rain_drops,temp_var)
+                        end
+                    }
+                    curr_conditions:add(temp_var)
+                        
+                        
+                    self.cloud_1:raise_to_top()
+                    self.cloud_2:raise_to_top()
+                end
+            }
+            self.lightning_timer = Timer{interval = 300,
+                on_timer = function()
+                    self.state_tbl[self.state](self)
+                end
+            }
+        end
+        
+        
+        
         curr_condition:add(self.wiper_freeze,self.lightning,self.cloud_1,self.cloud_2)
         self.wiper_freeze:lower_to_bottom()
         animate_list[self.func_tbls.fade_in] = self
@@ -1383,7 +1496,7 @@ snow_flake_lg = function(speed_x,speed_y,x,y)
         }
     end
 end
-
+local prev_flakes = {}
 snow = {
     thresh   = 689,
     elapsed  = 2000,
@@ -1395,9 +1508,61 @@ snow = {
         self.snow_corner:unparent()
     end,
     setup = function(self)
-        curr_condition:add(self.frost_corner,self.snow_corner,self.base_cloud)
+        if self.flake_timer == nil then
+            self.flake_timer = Timer{
+                interval = 700,
+                on_timer = function()
+                    local flake
+                    if #prev_flakes ~= 0 then
+                        flake = table.remove(prev_flakes)
+                    else
+                        local s = math.random(12,20)/20*math.random(12,20)/20
+                        flake = Clone{
+                            source = imgs.snow_flake.lg[math.random(1,#imgs.snow_flake.lg)],
+                            scale  = {s,s},
+                            opacity=255*s*(1+math.random(-10,10)/50),
+                        }
+                    end
+                    if self.state == "SNOW" then
+                        flake.anchor_point = {
+                            flake.w/2-math.random(60,120),
+                            flake.h/2
+                        }
+                        flake:animate={
+                            duration=400,
+                            x = math.random(200,screen_w/2),
+                            y = screen_h+100,
+                            z_rotation = math.random(100,360),
+                            on_completed=function()
+                                
+                            end
+                        }
+                    else
+                        flake.anchor_point = {
+                            flake.w/2-math.random(10,60),
+                            flake.h/2
+                        }
+                        flake:animate={
+                            duration=4000,
+                            x = math.random(100,screen_w/4),
+                            y = screen_h+100,
+                            z_rotation = math.random(100,360),
+                            on_completed=function()
+                                
+                            end
+                        }
+                    end
+                    
+                    curr_condition:add(flake)
+                end
+            }
+        end
+        curr_condition:add(self.snow_corner)
     end,
-    
+    remove = function(self)
+        self.snow_corner:unparent()
+    end
+    --[[
     func_tbls = {
         flurry_loop = {
             func = function(this_obj,this_func_tbl,secs,p)
@@ -1437,7 +1602,7 @@ snow = {
             func = function(this_obj,this_func_tbl,secs,p)
                 this_obj.elapsed = this_obj.elapsed + secs*1000
                 this_obj.sm_elapsed = this_obj.sm_elapsed + secs*1000
-                ---[[
+                
                 if this_obj.elapsed > this_obj.thresh/16 then
                     
                     local r = snow_flake_lg(
@@ -1459,14 +1624,18 @@ snow = {
             end,
         },
     }
+    --]]
 }
 
 
 fog = {
     state="NONE",
+    img = Clone{source=imgs.fog,opacity=0,y=screen_h-imgs.fog.h},
     setup = function(self)
-        self.img = Clone{source=imgs.fog,opacity=0,y=screen_h-imgs.fog.h}
         curr_condition:add(self.img)
+    end,
+    remove = function(self)
+        self.img:unparent()
     end,
     func_tbls ={
         fade_in = {
@@ -1623,59 +1792,69 @@ local set_states = function(t)
     if t.wiper ~= nil and t.wiper ~= wiper.state then
         if wiper.state == "NONE" then
             wiper:setup()
-            --animate_list[wiper.func_tbls.reg_fade_in]=wiper
             wiper.wiper_rain:animate{duration=500,opacity=255}
-            wiper.wiper_blade:animate{duration=500,opacity=255}
+            wiper.rain_timer:start()
+        elseif wiper.state == "F_RAIN"
+            wiper.wiper_freeze:animate{duration=500,opacity=0}
+        elseif wiper.state == "SLEET"
+            wiper.snow_blade:animate{duration=500,opacity=0}
+            wiper.snow_timer:stop()
+        elseif wiper.state == "RAIN"
         end
         
-        if t.wiper == "NONE" then
-            --animate_list[wiper.func_tbls.reg_fade_out]=wiper
-            wiper.wiper_rain:animate{ duration=500,opacity=0}
+        wiper.state = t.wiper
+        
+        if wiper.state == "NONE" then
+            wiper.wiper_rain:animate{duration=500,opacity=0}
             wiper.rain_timer:stop()
-            wiper.wiper_timer:stop()
-            if wiper.state == "F_RAIN" then
-                --animate_list[wiper.func_tbls.frost_fade_out]=wiper
-                wiper.wiper_blade:animate{ duration=500,opacity=0}
-                wiper.wiper_freeze:animate{duration=500,opacity=0}
-                
-            elseif wiper.state == "SLEET" then
-                --animate_list[wiper.func_tbls.sleet_fade_out]=wiper
-                wiper.snow_blade:animate{duration=500,opacity=0}
-                wiper.snow_timer:stop()
-            else
+            if wiper.wiper_blade.opacity==255 then
                 wiper.wiper_blade:animate{duration=500,opacity=0}
             end
-        elseif t.wiper == "F_RAIN" then
-            if wiper.state == "SLEET" then
-                --animate_list[wiper.func_tbls.sleet_fade_out]=wiper
-            end
-            --animate_list[wiper.func_tbls.frost_fade_in]=wiper
-        elseif t.wiper == "SLEET" then
-            if wiper.state == "F_RAIN" then
-                --animate_list[wiper.func_tbls.frost_fade_out]=wiper
-            end
-            --animate_list[wiper.func_tbls.sleet_fade_in]=wiper
+        elseif wiper.state == "F_RAIN"
+            wiper.wiper_freeze:animate{duration=500,opacity=255}
+        elseif wiper.state == "SLEET"
+            wiper.snow_timer:start()
+            wiper.snow_blade:animate{duration=500,opacity=255}
+        elseif wiper.state == "RAIN"
+            wiper.wiper_blade:animate{duration=500,opacity=255}
         end
-        wiper.state = t.wiper
     end
     
     if t.fog ~= nil and t.fog ~= fog.state then
         
         if t.fog == "NONE" then
-            animate_list[fog.func_tbls.fade_out]=fog
+            --animate_list[fog.func_tbls.fade_out]=fog
+            fog.img:animate{duration=500,opacity=0,on_completed=function fog:remove() end}
         end
         if fog.state == "NONE" then
             fog:setup()
-            animate_list[fog.func_tbls.fade_in]=fog
+            --animate_list[fog.func_tbls.fade_in]=fog
         end
         if t.fog == "HALF" then
-            animate_list[fog.func_tbls.full_to_half_opacity]=fog
+            --animate_list[fog.func_tbls.full_to_half_opacity]=fog
+            fog.img:animate{duration=500,opacity=255*.5}
         elseif t.fog == "FULL" then
-            animate_list[fog.func_tbls.half_to_full_opacity]=fog
+            --animate_list[fog.func_tbls.half_to_full_opacity]=fog
+            fog.img:animate{duration=500,opacity=255}
         end
     end
     if t.snow ~= nil and t.snow ~= snow.state then
+        if snow.state == "NONE" then
+            snow:setup()
+            --animate_list[snow.func_tbls.fade_in] = snow
+            snow.snow_corner:animate{duration=500,opacity=255}
+        end
         
+        snow.state = t.snow
+        
+        if snow.state == "NONE" then
+            snow.snow_corner:animate{duration=500,opacity=0,
+                on_completed=function()
+                    snow:remove()
+                end
+            }
+        end
+        --[[
         if snow.state == "NONE" then
             snow:setup()
             animate_list[snow.func_tbls.fade_in] = snow
@@ -1694,6 +1873,7 @@ local set_states = function(t)
         elseif snow.state == "SNOW" then
             animate_list[snow.func_tbls.snow_loop]   = snow
         end
+        --]]
         
     end
     if t.chance_of ~= nil and t.chance_of ~= chance_of.state then
