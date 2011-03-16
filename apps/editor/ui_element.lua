@@ -3084,14 +3084,14 @@ function ui_element.scrollPane(t)
         --hor_arrow_y     = nil,
         --vert_arrow_x    = nil,
 	    scroll_bars_visible = true,
-        bar_color_inner     = {234, 40,120},
-        bar_color_outer     = { 90,210,230},
-        empty_color_inner   = {100,200,180},
-        empty_color_outer   = {240,190,140},
+        bar_color_inner     = {180,180,180},
+        bar_color_outer     = {30,30,30},
+        empty_color_inner   = {120,120,120},
+        empty_color_outer   = {255,255,255},
         frame_thickness     =    2,
         border_color        = {60, 60,60},
         bar_thickness       =   15,
-        bar_offset          =    -15,
+        bar_offset          =    5,
         vert_bar_visible    = true,
         horz_bar_visbile    = true,
         
@@ -3108,18 +3108,18 @@ function ui_element.scrollPane(t)
     end
 	
 	--Group that Clips the content
-	local window  = Group{}
+	local window  = Group{name="scroll_window"}
 	--Group that contains all of the content
 	--local content = Group{}
 	--declarations for dependencies from scroll_group
-	local scroll
+	local scroll, scroll_x, scroll_y
 	--flag to hold back key presses while animating content group
 	local animating = false
 
 	local border = Rectangle{ color = "00000000" }
 	
 	
-	local track_h, track_w
+	local track_h, track_w, grip_hor, grip_vert
 	
 
     --the umbrella Group, containing the full slate of tiles
@@ -3131,26 +3131,26 @@ function ui_element.scrollPane(t)
 			type = "ScrollPane",
             seek_to = function(x,y)
                 local new_x, new_y
-                if p.content_w > p.clip_w then
-                    if x > p.content_w - p.clip_w/2 then
-                        new_x = -p.content_w + p.clip_w
-                    elseif x < p.clip_w/2 then
+                if p.virtual_w > p.visible_w then
+                    if x > p.virtual_w - p.visible_w/2 then
+                        new_x = -p.virtual_w + p.visible_w
+                    elseif x < p.visible_w/2 then
                         new_x = 0
                     else
-                        new_x = -x + p.clip_w/2
+                        new_x = -x + p.visible_w/2
                     end
                 else
                     new_x =0
                 end
-                if p.content_h > p.clip_h then
-                    if y > p.content_h - p.clip_h/2 then
-                        new_y = -p.content_h + p.clip_h
+                if p.virtual_h > p.visible_h then
+                    if y > p.virtual_h - p.visible_h/2 then
+                        new_y = -p.virtual_h + p.visible_h
                         print(1)
-                    elseif y < p.clip_h/2 then
+                    elseif y < p.visible_h/2 then
                         new_y = 0
                         print(2)
                     else
-                        new_y = -y + p.clip_h/2
+                        new_y = -y + p.visible_h/2
                         print(3)
                     end
                 else
@@ -3167,26 +3167,26 @@ function ui_element.scrollPane(t)
                         end
                     }
                 
-                    if new_y < -(p.content_h - p.clip_h) then
-                        grip_vert.y = grip_vert_base_y+(track_h-grip_h)
+                    if new_y < -(p.virtual_h - p.visible_h) then
+                        grip_vert.y = track_h-grip_vert.h
                     elseif new_y > 0 then
-                        grip_vert.y = grip_vert_base_y
+                        grip_vert.y = 0
                     elseif new_y ~= p.content.y then
                         grip_vert:complete_animation()
                         grip_vert:animate{
                             duration= 200,
-                            y = grip_vert_base_y-(track_h-grip_h)*new_y/(p.content_h - p.clip_h)
+                            y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
                         }
                     end
-                    if new_x < -(p.content_w - p.clip_w) then
-                        grip_hor.x = grip_hor_base_x+(track_w-grip_h)
+                    if new_x < -(p.virtual_w - p.visible_w) then
+                        grip_hor.x = track_w-grip_hor.w
                     elseif new_x > 0 then
-                        grip_hor.x = grip_hor_base_x
+                        grip_hor.x = 0
                     elseif new_x ~= p.content.x then
                         grip_hor:complete_animation()
                         grip_hor:animate{
                             duration= 200,
-                            x = grip_hor_base_x-(track_w-grip_h)*new_x/(p.content_w - p.clip_w)
+                            x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
                         }
                     end
                 end
@@ -3202,22 +3202,22 @@ function ui_element.scrollPane(t)
 	--Key Handler
 	local keys={
 		[keys.Left] = function()
-			if p.content_w > p.clip_w then
+			if p.visible_w < p.virtual_w then
 				scroll_x(1)
 			end
 		end,
 		[keys.Right] = function()
-			if p.content_w > p.clip_w then
+			if p.visible_w < p.virtual_w then
 				scroll_x(-1)
 			end
 		end,
 		[keys.Up] = function()
-			if p.content_h > p.clip_h then
+			if p.visible_h < p.virtual_h then
 				scroll_y(1)
 			end
 		end,
 		[keys.Down] = function()
-			if p.content_h > p.clip_h then
+			if p.visible_h < p.virtual_h then
 				scroll_y(-1)
 			end
 		end,
@@ -3236,10 +3236,10 @@ function ui_element.scrollPane(t)
 			duration = 200,
 			y = new_y,
 			on_completed = function()
-				if p.content.y < -(p.content_h - p.clip_h) then
+				if p.content.y < -(p.virtual_h - p.visible_h) then
 					p.content:animate{
 						duration = 200,
-						y = -(p.content_h - p.clip_h),
+						y = -(p.virtual_h - p.visible_h),
 						on_completed = function()
 							animating = false
 						end
@@ -3258,31 +3258,32 @@ function ui_element.scrollPane(t)
 			end
 		}
 		
-		if new_y < -(p.content_h - p.clip_h) then
-			grip_vert.y = grip_vert_base_y+(track_h-grip_h)
+		if new_y < -(p.virtual_h - p.visible_h) then
+			grip_vert.y = track_h-grip_vert.h
 		elseif new_y > 0 then
-			grip_vert.y = grip_vert_base_y
+			grip_vert.y = 0
 		else
 			grip_vert:complete_animation()
 			grip_vert:animate{
 				duration= 200,
-				y = grip_vert_base_y-(track_h-grip_h)*new_y/(p.content_h - p.clip_h)
+				y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
 			}
 		end
 	end
 	
 	
 	scroll_x = function(dir)
+              print("gaaaaa")
 		local new_x = p.content.x+ dir*10
 		animating = true
 		p.content:animate{
 			duration = 200,
 			x = new_x,
 			on_completed = function()
-				if p.content.x < -(p.content_w - p.clip_w) then
+				if p.content.x < -(p.virtual_w - p.visible_w) then
 					p.content:animate{
 						duration = 200,
-						y = -(p.content_w - p.clip_w),
+						y = -(p.virtual_w - p.visible_w),
 						on_completed = function()
 							animating = false
 						end
@@ -3301,26 +3302,26 @@ function ui_element.scrollPane(t)
 			end
 		}
 		
-		if new_x < -(p.content_w - p.clip_w) then
-			grip_hor.x = grip_hor_base_x+(track_w-grip_h)
+		if new_x < -(p.virtual_w - p.visible_h) then
+			grip_hor.x = track_w-grip_hor.w
 		elseif new_x > 0 then
-			grip_hor.x = grip_hor_base_x
+			grip_hor.x = 0
 		else
 			grip_hor:complete_animation()
 			grip_hor:animate{
 				duration= 200,
-				x = grip_hor_base_x-(track_w-grip_h)*new_x/(p.content_w - p.clip_w)
+				x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
 			}
 		end
 	end
-    local function make_bar(w,h,ratio)
+    local function make_hor_bar(w,h,ratio)
         local bar = Group{}
         
 		local shell = Canvas{
 				size = {w,h},
 		}
 		local fill  = Canvas{
-				size = {w*ratio,h},
+				size = {w*ratio,h-p.frame_thickness},
 		}  
         
 		
@@ -3346,7 +3347,8 @@ function ui_element.scrollPane(t)
 		shell:curve_to(left,top,left,top,left+RAD,top)
         
 		shell:set_source_linear_pattern(
-			shell.w/2,0,
+            
+            shell.w/2,0,
 			shell.w/2,shell.h
 		)
 		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
@@ -3405,7 +3407,102 @@ function ui_element.scrollPane(t)
         shell.name="track"
         fill.name="grip"
         fill.reactive=true
+        fill.y=p.frame_thickness/2 
+        return bar
+    end
+    local function make_vert_bar(w,h,ratio)
+        local bar = Group{}
         
+		local shell = Canvas{
+				size = {w,h},
+		}
+		local fill  = Canvas{
+				size = {w-p.frame_thickness,h*ratio},
+		}  
+        
+		
+		local RAD = 6
+        
+		local top    =           math.ceil(p.frame_thickness/2)
+		local bottom = shell.h - math.ceil(p.frame_thickness/2)
+		local left   =           math.ceil(p.frame_thickness/2)
+		local right  = shell.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		shell:move_to(        left,         top )
+		shell:line_to(   right-RAD,         top )
+		shell:curve_to( right, top,right,top,right,top+RAD)
+		shell:line_to(       right,  bottom-RAD )
+		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		shell:line_to(           left+RAD,          bottom )
+		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		shell:line_to(           left,            top+RAD )
+		shell:curve_to(left,top,left,top,left+RAD,top)
+        
+		shell:set_source_linear_pattern(
+			0,shell.h/2,
+            shell.w,shell.h/2
+		)
+		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        
+		shell:fill(true)
+		shell:set_line_width(   p.frame_thickness )
+		shell:set_source_color( p.border_color )
+		shell:stroke( true )
+		shell:finish_painting()
+        
+        -----------------------------------------------------
+        
+		top    =          math.ceil(p.frame_thickness/2)
+		bottom = fill.h - math.ceil(p.frame_thickness/2)
+		left   =          math.ceil(p.frame_thickness/2)
+		right  = fill.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		fill:move_to(        left,         top )
+		fill:line_to(   right-RAD,         top )
+		fill:curve_to( right, top,right,top,right,top+RAD)
+		fill:line_to(       right,  bottom-RAD )
+		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		fill:line_to(           left+RAD,          bottom )
+		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		fill:line_to(           left,            top+RAD )
+		fill:curve_to(left,top,left,top,left+RAD,top)
+        
+		fill:set_source_linear_pattern(
+			0,fill.h/2,
+            fill.w,fill.h/2
+		)
+		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+		fill:fill(true)
+        fill:set_line_width(   p.frame_thickness )
+		fill:set_source_color( p.border_color )
+		fill:stroke( true )
+		fill:finish_painting()
+        
+        -----------------------------------------------------
+        
+		if shell.Image then
+			shell = shell:Image()
+		end
+		if fill.Image then
+			fill = fill:Image()
+		end
+        
+		bar:add(shell,fill)
+        
+        shell.name="track"
+        fill.name="grip"
+        fill.reactive=true
+        fill.x=p.frame_thickness/2 
         return bar
     end
 	
@@ -3413,8 +3510,7 @@ function ui_element.scrollPane(t)
 	--this function creates the whole scroll bar box
 	local function create()
         window.position={ p.box_width, p.box_width }
-		window.clip = { 0,0, p.visible_w, p.visibile_h }
-        
+		window.clip = { 0,0, p.visible_w, p.visible_h }
         border:set{
             w = p.visible_w+2*p.box_width,
             h = p.visible_h+2*p.box_width,
@@ -3422,6 +3518,14 @@ function ui_element.scrollPane(t)
             border_color =    p.box_color,
         }
 		
+        if  scroll_group:find_child("Horizontal Scroll Bar") then
+            scroll_group:find_child("Horizontal Scroll Bar"):unparent()
+        end
+        
+        if  scroll_group:find_child("Vertical Scroll Bar") then
+            scroll_group:find_child("Vertical Scroll Bar"):unparent()
+        end
+        
         if p.box_visible then border.opacity=255
         else border.opacity=0 end 
         
@@ -3433,7 +3537,7 @@ function ui_element.scrollPane(t)
             track_h = p.visible_h
         end
         if p.visible_w/p.virtual_w < 1 then
-            hor_s_bar = make_bar(
+            hor_s_bar = make_hor_bar(
                 track_w,
                 p.bar_thickness,
                 track_w/p.virtual_w
@@ -3445,7 +3549,7 @@ function ui_element.scrollPane(t)
             }
             scroll_group:add(hor_s_bar)
             
-            local grip_hor = hor_s_bar:find_child("grip")
+            grip_hor = hor_s_bar:find_child("grip")
             
             function grip_hor:on_button_down(x,y,button,num_clicks)
                 
@@ -3469,22 +3573,25 @@ function ui_element.scrollPane(t)
 	   	
                 return true
             end
+        else
+            grip_hor=nil
         end
         if p.visible_h/p.virtual_h < 1 then
-            vert_s_bar = make_bar(
-                track_h,
+            vert_s_bar = make_vert_bar(
+                
                 p.bar_thickness,
-                p.visible_h/p.virtual_h
+                track_h,
+                track_h/p.virtual_h
             )
             vert_s_bar.name = "Vertical Scroll Bar"
             vert_s_bar.position={
-                p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness,
+                p.box_width*2+p.visible_w+p.bar_offset,
                 p.box_width
             }
-            vert_s_bar.z_rotation={90,0,0}
+            --vert_s_bar.z_rotation={90,0,0}
             scroll_group:add(vert_s_bar)
             
-            local grip_vert = vert_s_bar:find_child("grip")
+            grip_vert = vert_s_bar:find_child("grip")
             
             function grip_vert:on_button_down(x,y,button,num_clicks)
                 
@@ -3497,18 +3604,21 @@ function ui_element.scrollPane(t)
 	   			
 	   			        if  grip_vert.y < 0 then
 	   				        grip_vert.y = 0
-	   			        elseif grip_vert.y > track_h-grip_vert.w then
-	   				           grip_vert.y = track_h-grip_vert.w
+	   			        elseif grip_vert.y > track_h-grip_vert.h then
+	   				           grip_vert.y = track_h-grip_vert.h
 	   			        end
 	   			
-	   			        p.content.y = -(grip_vert.x) * p.virtual_h/track_h
+	   			        p.content.y = -(grip_vert.y) * p.virtual_h/track_h
 	   			
 	   		        end 
 	   	        }
 	   	
                 return true
             end
+        else
+            grip_vert=nil
         end
+        
 		
 
   --[[
