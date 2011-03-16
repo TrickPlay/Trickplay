@@ -3484,6 +3484,10 @@ function ui_element.scrollPane(t)
 			arrow_dn.opacity=0
 			grip_vert.opacity=0
 		end
+
+  --[[
+          scroll_group.size = {p.visible_w, p.visible_h}
+ ]]
 	end
 	
     create()
@@ -3573,6 +3577,29 @@ function ui_element.menuButton(t)
     
     --default parameters
     local p = {
+
+--[[
+
+
+button 
+
+        text_font = "DejaVu Sans 30px",
+    	text_color = {255,255,255,255}, --"FFFFFF",
+    	skin = "default", 
+    	wwidth = 180,
+    	wheight = 60, 
+
+    	label = "Button", 
+    	focus_color = {27,145,27,255}, --"1b911b", 
+    	button_color = {255,255,255,255}, --"FFFFFF"
+    	border_width = 1,
+    	border_corner_radius = 12,
+
+
+]]
+
+
+
         name  = "dropdownbar",
         font  = "DejaVu Sans 26px",
         items = {
@@ -3597,6 +3624,20 @@ function ui_element.menuButton(t)
                 }
             },
         },
+
+
+--[[
+
+
+items = {
+            {label, "Subgroup A:"}, -- type, text, function if it is item
+            {item, "Item A1", nil},
+            {seperator}
+        }     
+
+
+
+]]
         item_bg_clone_src    = nil,
         item_focus_clone_src = nil,
         item_spacing = 7,
@@ -3826,6 +3867,10 @@ function ui_element.menuButton(t)
                 end
             end
         }
+
+  --[[
+    umbrella.size = {p.wwidth, p.wheight}
+ ]]
     }
     local function make_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
