@@ -3093,7 +3093,7 @@ function ui_element.scrollPane(t)
         bar_thickness       =   15,
         bar_offset          =    5,
         vert_bar_visible    = true,
-        horz_bar_visbile    = true,
+        hor_bar_visbile     = true,
         
         box_visible = true,
         box_color = {160,160,160},
@@ -3536,7 +3536,7 @@ function ui_element.scrollPane(t)
             track_w = p.visible_w
             track_h = p.visible_h
         end
-        if p.visible_w/p.virtual_w < 1 then
+        if p.hor_bar_visible and p.visible_w/p.virtual_w < 1 then
             hor_s_bar = make_hor_bar(
                 track_w,
                 p.bar_thickness,
@@ -3576,7 +3576,7 @@ function ui_element.scrollPane(t)
         else
             grip_hor=nil
         end
-        if p.visible_h/p.virtual_h < 1 then
+        if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
             vert_s_bar = make_vert_bar(
                 
                 p.bar_thickness,
