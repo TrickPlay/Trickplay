@@ -170,6 +170,10 @@ public:
     gpointer get_internal( gpointer key );
 
     //.........................................................................
+
+    void set_escape_quits( bool _escape_quits );
+
+    //.........................................................................
     // This one is thread-safe, it receives a snippet of JSON that came from
     // an audio detection plugin. In the future, we could make it more generic,
     // and just let the outside world give us contextual information. It could
@@ -277,7 +281,12 @@ private:
 
     friend TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
 
+#ifndef TP_PRODUCTION
 
+    static gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context );
+    static gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context );
+
+#endif
 
 private:
 
@@ -306,6 +315,8 @@ private:
     App *                       current_app;
 
     String                      first_app_id;
+
+    bool                        escape_quits;
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
