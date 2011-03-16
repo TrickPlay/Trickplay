@@ -48,6 +48,7 @@ TPContext::TPContext()
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
+    escape_quits( true ),
     media_player_constructor( NULL ),
     media_player( NULL ),
     external_log_handler( NULL ),
@@ -879,13 +880,17 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
 // This one deals with escape to exit current app
 
-gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer context )
+gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context )
 {
     if ( event && event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) )
     {
-        ( ( TPContext * )context )->close_app();
+        TPContext * context = ( TPContext * ) _context;
 
-        return TRUE;
+        if ( context->escape_quits )
+        {
+            context->close_app();
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -894,7 +899,7 @@ gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer co
 
 // This one deals with tilde to reload current app
 
-gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
+gboolean TPContext::tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
     if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
     {
@@ -2566,6 +2571,12 @@ gpointer TPContext::get_internal( gpointer key )
     return 0;
 }
 
+//-----------------------------------------------------------------------------
+
+void TPContext::set_escape_quits( bool _escape_quits )
+{
+    escape_quits = _escape_quits;
+}
 
 //-----------------------------------------------------------------------------
 // Called by other threads...

@@ -139,5 +139,9 @@ restricted global editor [[ void * ]]
              g_object_unref( dest );
          ]];
 
+    disable_exit()
+         [[
+             App::get( L )->get_context()->set_escape_quits( false );
+         ]];
 }
 
