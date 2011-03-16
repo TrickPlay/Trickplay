@@ -324,13 +324,13 @@ function create_on_button_down_f(v)
 			     local gx = screen:find_child("v_guideline"..i).x 
 			     if(15 >= math.abs(gx - x + dx)) then  
 				new_object.x = gx
-				v.x = gx
+				v.x = gx + screen:find_child("v_guideline"..i).w 
 				if (am ~= nil) then 
 			     	     am.x = am.x - (x-dx-gx)
 				end
 			     elseif(15>= math.abs(gx - x + dx - new_object.w)) then
-				new_object.x = gx - new_object.w
-				v.x = gx - new_object.w
+				new_object.x = gx - new_object.w  
+				v.x = gx - new_object.w 
 				if (am ~= nil) then 
 			     	     am.x = am.x - (x-dx+new_object.w - gx)
 				end
@@ -343,13 +343,13 @@ function create_on_button_down_f(v)
 			      local gy =  screen:find_child("h_guideline"..i).y 
 			      if(15 >= math.abs(gy - y + dy)) then 
 				new_object.y = gy
-				v.y = gy
+				v.y =gy + screen:find_child("h_guideline"..i).h 
 				if (am ~= nil) then 
 			     	     am.y = am.y - (y-dy - gy) 
 				end
 			      elseif(15>= math.abs(gy - y + dy - new_object.h)) then
 				new_object.y = gy - new_object.h
-				v.y =  gy - new_object.h
+				v.y =  gy - new_object.h 
 				if (am ~= nil) then 
 			     	     am.y = am.y - (y-dy + new_object.h - gy)  
 				end
