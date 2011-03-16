@@ -1244,11 +1244,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     local input_box_width     
     local item_group 
  
-
-    if item_n then print("item_n", item_n) end 
-    if item_v then print("item_v", item_v) end 
-    if item_s then print("item_s", item_s) end 
-
     local function text_reactive()
 	for i, c in pairs(g.children) do
 	     if(c.type == "Text") then 
@@ -1683,7 +1678,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         skin_picker.position = {text.x + text.w + 50 , 5}
 	skin_picker.name = "skin_picker"
 
-        group:add(skin_picker) 
+        --group:add(skin_picker) 
 	
 	unfocus = skin_picker:find_child("unfocus")
 	function unfocus:on_button_down (x,y,b,n)
@@ -1766,6 +1761,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end 
 
 
+	group:add(skin_picker)
 
         function group.extra.on_focus_in()
 		 group:find_child("skin_picker").extra.on_focus_in()
@@ -1776,36 +1772,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		 group:find_child("skin_picker").extra.on_focus_out()
         end 
 
-	group:add(skin_picker)
 
         return group
-    elseif(item_n == "reactive" or item_n == "loop") then  -- Attribute with single checkbox
-	group:clear()
-	group.name = item_n
-	group.reactive = true
+    elseif(item_n == "reactive") then  -- Attribute with single checkbox
 
-        local space = WIDTH - PADDING_X  
-
-	text = Text {name = "attr", text = item_s}:set(STYLE)
-        text.position  = {WIDTH - space , 5}
-    	group:add(text)
-        
-	local reactive_checkbox
-	
-	if item_v == "true" then 
-	     print("TRUE true !!!")
-	     reactive_checkbox = ui_element.checkBox {wwidth = 200, wheight = 100, items = {""}, selected_items = {1},}
-	else 
-	     print("FALSE false!!!")
-	     reactive_checkbox = ui_element.checkBox {wwidth = 200, wheight = 100, items = {""}, selected_items = {},}
-	end 
-
-	reactive_checkbox.position = {text.x + text.w + 10 , 10}
-	reactive_checkbox.name = "reactive_check"
-
-	group:add(reactive_checkbox)
-
-	return group
     else 	---- Attributes with focusable ring 
         group:clear()
 	group.name = item_n
