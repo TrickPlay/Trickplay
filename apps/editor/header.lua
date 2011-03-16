@@ -150,20 +150,18 @@ icon_vc = Image{src = "assets/align-vertically-center.png", opacity = 175}
 icon_dhc = Image{src = "assets/distribute-horizontal-center.png", opacity = 185}
 icon_dvc = Image{src = "assets/distribute-vertical-center.png", opacity = 185}
 
--- Inspector ( inspector_apply ) : attribute name index 
-attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "wwidth", "wheight", "bw", "bh", "label", "message", "w", "h", "skin",  "r", "g", "b", "a","fr","fg","fb","fa","font", "itemsList", "selected_item", "text indent", "duration", "fade_duration", "border_width", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa", "border_radius", "text",  "x_scale", "y_scale", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "clip_use", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
+-- inspector - ui-factory.lua
+attr_t_idx = {"name", "source", "left", "top", "width", "height", "volume", "loop", "x", "y", "z", "wwidth", "wheight", "bw", "bh", "label", "message", "w", "h", "skin",  "r", "g", "b", "a","fr","fg","fb","fa","font","text_font","title_font", "message_font", "itemsList", "selected_item", "text indent", "duration", "fade_duration", "border_width", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa", "border_corner_radius", "text",  "x_scale", "y_scale", "editable", "wants_enter", "wrap", "wrap_mode", "rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth", "src", "clip_use", "cx", "cy", "cw", "ch", "x_angle", "y_angle", "z_angle",  "opacity", "view code", "apply", "cancel"}
 
--- itemTostring : attribute name list 
-attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "wwidth", "wheight", "f_color", "border_color", "border_width", "border_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src", }
-
-attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "wwidth", "wheight", "f_color", "border_color", "border_width", "border_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src", }
+-- create_on_button_f -> copy_obj -> set_obj - util.lua   
+attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "wwidth", "wheight", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src", }
 
 ui_element = dofile("ui_element.lua")
 
 uiElements_en = {"Rectangle", "Text", "Image", "Video"}
 
-uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBox", --"RadioButton", "CheckBoxGroup", "RadioButtonGroup", 
-           "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane", "ArrowPane", }
+uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", --"CheckBox", "RadioButton", "CheckBoxGroup", "RadioButtonGroup", "ArrowPane",
+           "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane",  }
 	   -- "TabBar", "OSK",}
 skins = {}
 for i, j in pairs(skin_list) do

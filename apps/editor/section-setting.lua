@@ -37,10 +37,14 @@ function( section )
 			if(CURRENT_DIR == "") then 
 				set_app_path() 
 			else 
+				input_mode = S_SELECT  
+				editor.the_image()
+--[[
 				input_mode = S_POPUP 
 				printMsgWindow("Image File : ") 
 			        inputMsgWindow("open_bg_imagefile") 
 				input_mode = S_SELECTION 
+  ]]
 			end end, 
 	["Transparency Grid 20"]   = function() clear_bg() BG_IMAGE_20.opacity = 255 input_mode = S_SELECT end,
 	["Transparency Grid 40"]   = function() clear_bg() BG_IMAGE_40.opacity = 255 input_mode = S_SELECT end,

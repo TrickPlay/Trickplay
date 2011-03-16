@@ -547,7 +547,7 @@ local color_map =
         [ "TabBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "OSK" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
 
-        [ "widgets" ] = function() size = {600, 600} color = {25,25,25,100}  return size, color end,
+        [ "widgets" ] = function() size = {600, 540} color = {25,25,25,100}  return size, color end,
         [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
@@ -1816,7 +1816,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         local space = WIDTH - PADDING_X  
 	local text
 
-        if(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source") then 
+        if(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source" or item_n == "icon") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	elseif item_n == "anchor_point" then 
 	     text = Text {name = "attr", text = item_s}:set(STYLE)
@@ -1826,8 +1826,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     anchor_pnt.position = {300, 0}
 	     group:add(anchor_pnt)
              return group
-	elseif item_n == "message" then 
-	     input_box_width = WIDTH 
+	elseif item_n == "message" or item_n == "label" then 
+	     input_box_width = WIDTH - ( PADDING_X * 2) 
         else  
     	     text = Text {name = "attr", text = item_s}:set(STYLE)
              text.position  = {WIDTH - space , PADDING_Y}
@@ -1835,8 +1835,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	     input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
 	     space = space - string.len(item_s) * 20
-             if (item_n =="font" or item_n == "label") then
-	          input_box_width = WIDTH - 100 - ( PADDING_X * 2) 
+             if item_n:find("font") then 
+	          input_box_width = WIDTH - 110 - ( PADDING_X * 2) 
              elseif item_n == "cx" or  item_n == "cy" or  item_n == "cw"  or  item_n == "ch" then 
 	          input_box_width = WIDTH - 300 - ( PADDING_X * 2) 
              elseif(item_n == "wrap_mode" or item_n =="duration" or item_n =="fade_duration") then 

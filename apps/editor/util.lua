@@ -434,10 +434,17 @@ function make_attr_t(v)
       else str = string.upper(str:sub(1,1))..str:sub(2,-1)
       end
 
+      i,j = string.find(str,"_") 
+      if i then 
+	    str = str:sub(1,i-1).." "..string.upper(str:sub(i+1, i+1))..str:sub(i+2,-1)
+      end
+	   
       if str == "Color" and v.type == "Rectangle" then 
           str = "Fill Color" 
       elseif str == "Color" and v.type == "Text" then 
           str = "Text Color" 
+      elseif str == "Message Font" and v.extra.type == "ToastAlert" then 
+          str = "Msg Font" 
       end 
 
       return str
@@ -504,6 +511,10 @@ function make_attr_t(v)
         	table.insert(attr_t, {"caption", "Source Location"})
         	table.insert(attr_t, {"src", v.src,"Source"})
 		end,
+	["icon"] = function()
+        	table.insert(attr_t, {"caption", "Icon Location"})
+        	table.insert(attr_t, {"icon", v.icon,"Icon"})
+		end,
 	["color"] = function(j)
 		table.insert(attr_t, {"caption", stringTotitle(j)})
              	local color_t = v[j] 
@@ -548,7 +559,14 @@ function make_attr_t(v)
  		     table.insert(attr_t, {"focus", {"1","2","3","4","5"}, "Focus"})
  		end 
  		end, 
-	
+	["label"]= function()
+		if v.extra.type == "ToastAlert" then 
+		     table.insert(attr_t, {"caption", "Title"})
+		else 
+		     table.insert(attr_t, {"caption", "Label"})
+		end 
+        	table.insert(attr_t, {"label", v.label,"Label"})
+		end,
   }
   
   local obj_map = {
@@ -557,21 +575,19 @@ function make_attr_t(v)
        ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point","opacity", "reactive", "focus"} end,
        ["Group"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","opacity", "reactive",  "focus"} end,
-       ["TextInput"] = function() return {"skin","color","f_color","font","text_indent","border_width","border_color","border_radius","scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["DialogBox"] = function() return {"label","skin","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","anchor_point","reactive","opacity",  "focus"} end,
-       ["ToastAlert"] = function() return {"label","message","skin","duration","fade_duration","color","f_color","font","border_width","border_color","border_radius","scale","x_rotation","opacity", "anchor_point"} end,
-       ["ButtonPicker"] = function() return {"skin","color","font","items","selected_item","scale","x_rotation","anchor_point","opacity", "reactive","focus"} end,
-       ["CheckBox"] = function() return {"skin","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["RadioButton"] = function() return {"skin","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space","scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["ProgressSpinner"] = function() return {"skin","dot_color","dot_radius","num_dots","anim_radius","anim_duration","clone_src","scale","x_rotation","anchor_point","opacity", } end,
-       ["ProgressBar"] = function() return {"shell_upper_color","shell_lower_color","stroke_color","fill_upper_color","fill_lower_color", "scale","x_rotation","anchor_point", "opacity"} end,
-       ["LayoutManager"] = function() return {"skin","num_rows", "num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible","scale","x_rotation","anchor_point", "opacity"} end,
-       --["ScrollImage"] = function() return {"skin","color","clip_w","clip_h","border_w","content_h","content_w","arrow_clone_source","arrow_sz","arrows_in_box","arrows_centered","hor_arrow_y","vert_arrow_x"
+       ["Button"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
+       ["TextInput"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","text_indent","border_width","border_corner_radius", "reactive", "focus"} end,
+       ["DialogBox"] = function() return {"skin","label","x_rotation","anchor_point","opacity","border_color","fill_color","border_width","border_corner_radius","title_color","title_font","title_seperator_color","title_seperator_thickness",} end,
+       ["ToastAlert"] = function() return {"skin","x_rotation", "anchor_point","icon","label","message","opacity","title_color","title_font","message_color","message_font","fill_color","border_color","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
+       ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","items","selected_item","reactive","focus"} end,
+       ["ProgressSpinner"] = function() return {"skin","x_rotation","anchor_point","opacity","anim_radius","dot_radius","dot_color","num_dots","anim_duration", } end,
+       ["ProgressBar"] = function() return {"x_rotation","anchor_point", "opacity","shell_upper_color","shell_lower_color","fill_upper_color","fill_lower_color","stroke_color",} end,
+       ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible",} end,
        ["ScrollPane"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
+       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","opacity","font","item_spacing","item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive","focus",} end,
+       ["CheckBox"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
+       ["RadioButton"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
        ["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,
-       --["DropDown"] = function() return {"skin", "font","items"
-       ["MenuButton"] = function() return {"skin", "font", "item_spacing", "item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive", "focus", "opacity"} end,
    }
   
   if is_this_widget(v) == true  then
@@ -613,7 +629,7 @@ function make_attr_t(v)
              {"source", v.source, "source"},
              {"caption", "View Port"},
              {"left", v.viewport[1], "X"},
-             {"top", v.viewport[2], "Y"},
+             {"top", v.viewport[2], "Y"},"text_color",
              {"width", v.viewport[3], "W"},
              {"height", v.viewport[4], "H"},
              {"volume", v.volume, "Volume"},
@@ -670,7 +686,6 @@ function make_attr_t(v)
    return attr_t
 end
 
-
 local input_t
 
 function itemTostring(v, d_list, t_list)
@@ -679,7 +694,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_radius", "padding_x", "padding_y", "label", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "font", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive"}
+    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_radius", "dot_color", "num_dots", "anim_radius", "anim_duration", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 

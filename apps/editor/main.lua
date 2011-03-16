@@ -465,7 +465,7 @@ local function build_ui( show_it )
         [ keys.h	] = function() animate_out_dropdown() editor.h_guideline() input_mode = S_SELECT end,
         [ keys.j	] = function() animate_out_dropdown() if not screen:find_child("timeline") then 
 							         if table.getn(g.children) > 0 then
-								     input_mode = S_SELECT local tl = widget.timeline() screen:add(tl)
+								     input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
 							             screen:find_child("timeline").extra.show = true 
 							         end
 						 	      elseif table.getn(g.children) == 0 then 

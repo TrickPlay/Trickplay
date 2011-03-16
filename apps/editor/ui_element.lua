@@ -93,6 +93,7 @@
 
 
 	
+	-- used for timeline 
         attr_map = {
           	["Rectangle"] = function() return {"x", "y", "z", "w","h","opacity","color","border_color", "border_width", "x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
         	["Image"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
@@ -185,16 +186,11 @@ local assets = setmetatable( {} , _mt )
 -- UI Factory
 -------------------
 
--- make_xbox() : make closing box 
+-- make_titile_seperator() : make a title seperator line
 
-local function make_xbox()
-    local BORDER_WIDTH= 3 
-    local BORDER_COLOR="FFFFFF5C"
+local function make_title_seperator(thickness, color, length)
 
-    local XBOX_SIZE = 25
-    local PADDING = 10
-
-    local c = Canvas{ size = {XBOX_SIZE + PADDING, XBOX_SIZE + PADDING} }
+    local c = Canvas{ size = {length, thickness} }
 
     c:begin_painting()
     c:new_path()
@@ -204,20 +200,9 @@ local function make_xbox()
     local y=0
 
     c:move_to ( x, y)
-    c:line_to ( x + XBOX_SIZE, y + XBOX_SIZE)
-    c:move_to ( x + XBOX_SIZE, y)
-    c:line_to ( x, y + XBOX_SIZE)
-  -- Draw x button box
-    c:move_to ( x, y)
-    c:line_to ( x + XBOX_SIZE, y)
-    c:move_to ( x + XBOX_SIZE, y)
-    c:line_to ( x + XBOX_SIZE, y + XBOX_SIZE)
-    c:move_to ( x + XBOX_SIZE, y + XBOX_SIZE)
-    c:line_to ( x, y + XBOX_SIZE)
-    c:move_to ( x, y + XBOX_SIZE)
-    c:line_to ( x, y)
-    c:set_line_width (3)
-    c:set_source_color( BORDER_COLOR )
+    c:line_to ( x + length, y)
+    c:set_line_width (thickness)
+    c:set_source_color(color)
     c:stroke (true)
     c:fill (true)
 
@@ -233,21 +218,21 @@ end
 
 -- make_dialogBox_bg() : make message window background 
 
---make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
-local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
+--make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_corner_radius) 
+local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
 
     local size = {w, h} 
-    local color = fc --"6d2b17"
+    local color = fc 
     local BORDER_WIDTH= bw
     local POINT_HEIGHT=34
     local POINT_WIDTH=60
     local BORDER_COLOR=bc
-    local CORNER_RADIUS=br --22
+    local CORNER_RADIUS=br 
     local POINT_CORNER_RADIUS=2
     local H_BORDER_WIDTH = BORDER_WIDTH / 2
 
     local XBOX_SIZE = 25
-    local PADDING = px -- 10
+    local PADDING = px 
 
     local function draw_path( c )
 
@@ -322,13 +307,15 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br)
     c:stroke( true )
 
   -- Draw title line
+    if tst > 0 then 
     c:new_path()
     c:move_to (0, 74)
     c:line_to (c.w, 74)
-    c:set_line_width (3)
-    c:set_source_color( BORDER_COLOR )
+    c:set_line_width (tst)
+    c:set_source_color(tsc)
     c:stroke (true)
     c:fill (true)
+    end 
   --  end
 
     c:finish_painting()
@@ -1141,18 +1128,18 @@ Creates a button ui element
 Arguments:
 	Table of button properties
 	
-		skin - Modify the skin for the button by changing this value
+	skin - Modify the skin for the button by changing this value
     	bwidth  - Width of the button
     	bheight - Height of the button
-    	border_color - Border color of the button
-    	f_color - Focus color of the button
+    	button_color - Border color of the button
+    	focus_color - Focus color of the button
     	border_width - Border width of the button
     	text - Caption of the button
-    	font - Font of the button text
-    	color - Color of the button text
+    	text_font - Font of the button text
+    	text_color - Color of the button text
     	padding_x - Padding of the button image on the X axis
     	padding_y - Padding of the button image on the Y axis
-    	border_radius - Radius of the border for the button
+    	border_corner_radius - Radius of the border for the button
 	pressed - Function that is called by on_focus_in() or on_key_down() event
 	release - Function that is called by on_focus_out()
 
@@ -1170,20 +1157,17 @@ function ui_element.button(table)
 
  --default parameters
     local p = {
-    	font = "DejaVu Sans 30px",
-    	color = {255,255,255,255}, --"FFFFFF",
+    	text_font = "DejaVu Sans 30px",
+    	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	wwidth = 180,
     	wheight = 60, 
 
     	label = "Button", 
-    	f_color = {27,145,27,255}, --"1b911b", 
-
-    	border_color = {255,255,255,255}, --"FFFFFF"
+    	focus_color = {27,145,27,255}, --"1b911b", 
+    	button_color = {255,255,255,255}, --"FFFFFF"
     	border_width = 1,
-    	padding_x = 0,
-    	padding_y = 0,
-    	border_radius = 12,
+    	border_corner_radius = 12,
 	pressed = nil, 
 	released = nil, 
 
@@ -1216,10 +1200,10 @@ function ui_element.button(table)
 	end
         b_group:clear()
         b_group.size = { p.wwidth , p.wheight}
-        ring = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+        ring = make_ring(p.wwidth, p.wheight, p.button_color, p.border_width, 0, 0, p.border_corner_radius)
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
-        focus_ring = make_ring(p.wwidth, p.wheight, p.f_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+        focus_ring = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
@@ -1231,7 +1215,7 @@ function ui_element.button(table)
 	     button = Image{}
 	     focus = Image{}
 	end 
-        text = Text{name = "text", text = p.label, font = p.font, color = p.color} --reactive = true 
+        text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
         text:set{name = "text", position = { (p.wwidth  -text.w)/2, (p.wheight - text.h)/2}}
 
         b_group:add(ring, focus_ring, button, focus, text)
@@ -1310,15 +1294,13 @@ Arguments:
     	bwidth  - Width of the text field
     	bheight - Height of the text field 
     	border_color - Border color of the text field
-    	f_color - Focus color of the text field
+    	focus_color - Focus color of the text field
+    	text_color - Color of the text in the text field
+    	text_font - Font of the text in the text field
     	border_width - Border width of the text field 
+    	padding - Size of the text indentiation 
+    	border_corner_radius - Radius of the border for the button image 
     	text - Caption of the text field  
-    	text_indent - Size of the text indentiation 
-    	font - Font of the text in the text field
-    	color - Color of the text in the text field
-    	padding_x - Padding of the button image on the X axis
-    	padding_y - Padding of the button image on the Y axis
-    	border_radius - Radius of the border for the button image 
 
 Return:
  	t_group - The group contaning the text field
@@ -1337,15 +1319,13 @@ function ui_element.textInput(table)
     	wwidth = 200 ,
     	wheight = 60 ,
     	text = "" ,
-    	text_indent = 20 ,
+    	padding = 20 ,
     	border_width  = 4 ,
     	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-    	f_color  = {0,255,0,255}, --"1b911b" , 
-    	font = "DejaVu Sans 30px"  , 
-    	color =  {255,255,255,255}, -- "FFFFFF" , 
-    	padding_x = 0 ,
-    	padding_y = 0 ,
-    	border_radius = 12 ,
+    	focus_color  = {0,255,0,255}, --"1b911b" , 
+    	text_font = "DejaVu Sans 30px"  , 
+    	text_color =  {255,255,255,255}, -- "FFFFFF" , 
+    	border_corner_radius = 12 ,
 
     }
  --overwrite defaults
@@ -1372,10 +1352,10 @@ function ui_element.textInput(table)
     	t_group:clear()
         t_group.size = { p.wwidth , p.wheight}
 
-    	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+    	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, 0, 0, p.border_corner_radius)
     	box:set{name="box", position = {0 ,0}}
 
-    	focus_box = make_ring(p.wwidth, p.wheight, p.f_color, p.border_width, p.padding_x, p.padding_y, p.border_radius)
+    	focus_box = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
@@ -1388,8 +1368,8 @@ function ui_element.textInput(table)
 	     focus_img = Image{}
 	end 
 
-    	text = Text{text = p.text, editable = false, cursor_visible = false, wants_enter = false, reactive = true, font = p.font, color = p.color}
-    	text:set{name = "textInput", position = {p.text_indent, (p.wheight - text.h)/2} }
+    	text = Text{text = p.text, editable = false, cursor_visible = false, wants_enter = false, reactive = true, font = p.text_font, color = p.text_color}
+    	text:set{name = "textInput", position = {p.padding, (p.wheight - text.h)/2} }
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
     	if (p.skin == "custom") then box_img.opacity = 0
@@ -1456,19 +1436,20 @@ Creates a Dialog box ui element
 Arguments:
 	Table of Dialog box properties
 
-		skin - Modify the skin used for the dialog box by changing this value
+	skin - Modify the skin used for the dialog box by changing this value
     	bwidth  - Width of the dialog box 
     	bheight - Height of the dialog box
-    	f_color - Fill color of the dialog box
-    	border_color - Border color of the dialog box
-    	f_color - Focus color of the dialog box
-    	border_width - Border width of the dialog box  
     	label - Title in the dialog box
-    	font - Font of the text in the dialog box
-    	color - Color of the dialog box text 
+    	fill_color - Background color of the dialog box
+    	border_color - Border color of the dialog box
+    	title_color - Color of the dialog box text 
+    	title_font - Font of the text in the dialog box
+    	border_width - Border width of the dialog box  
+    	border_corner_radius - The radius of the border of the dialog box
+	title_seperator_thickness - Thickness of the title seperator 
+	title_seperator_color - Color of the title seperator 
     	padding_x - Padding of the dialog box on the X axis
     	padding_y - Padding of the dialog box on the Y axis
-    	border_radius - The radius of the border of the dialog box
 
 Return:
  	db_group - group containing the dialog box
@@ -1482,14 +1463,16 @@ function ui_element.dialogBox(table)
 	wwidth = 900 ,
 	wheight = 500 ,
 	label = "Dialog Box Title" ,
-	font = "DejaVu Sans 30px" , 
-	color = {255,255,255,255} , --"FFFFFF" , 
-	border_width  = 3 ,
 	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-	f_color  = {25,25,25,100},
+	fill_color  = {25,25,25,100},
+	title_color = {255,255,255,255} , --"FFFFFF" , 
+	title_font = "DejaVu Sans 30px" , 
+	border_width  = 4 ,
 	padding_x = 0 ,
 	padding_y = 0 ,
-	border_radius = 22 ,
+	border_corner_radius = 22 ,
+	title_seperator_thickness = 4, 
+	title_seperator_color = {255,255,255,255},
     }
 
  --overwrite defaults
@@ -1501,7 +1484,7 @@ function ui_element.dialogBox(table)
 
  --the umbrella Group
     local db_group_cur_y = 6
-    local d_box, x_box, title, d_box_img, x_box_img
+    local d_box, title_seperator, title, d_box_img, title_seperator_img
 
     local  db_group = Group {
     	  name = "dialogBox",  
@@ -1516,27 +1499,29 @@ function ui_element.dialogBox(table)
         db_group:clear()
         db_group.size = { p.wwidth , p.wheight - 34}
 
-        d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
+        d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_seperator_thickness, p.title_seperator_color) 
 	d_box.y = d_box.y - 34
 	d_box:set{name="d_box"} 
+	db_group:add(d_box)
+--[[
+	if p.title_seperator_thickness >  0 then 
+             title_seperator = make_title_seperator(p.title_seperator_thickness, p.title_seperator_color, p.wwidth)
+             title_seperator:set{name = "title_seperator", position  = {0, db_group_cur_y + 30}}
+	     db_group:add(title_seperator)
+	end
+  ]]
 
-        x_box = make_xbox()
-        x_box:set{name = "x_box", position  = {p.wwidth - 50, db_group_cur_y}}
-
-        title= Text{text = p.label, font= p.font, color = p.color}     
+        title= Text{text = p.label, font= p.title_font, color = p.title_color}     
         title:set{name = "title", position = {(p.wwidth - title.w - 50)/2 , db_group_cur_y - 5}}
 
 	if(p.skin ~= "custom") then 
         	d_box_img = assets(skin_list[p.skin]["dialogbox"])
         	d_box_img:set{name="d_box_img", size = { p.wwidth , p.wheight } , opacity = 0}
-        	x_box_img = assets(skin_list[p.skin]["dialogbox_x"])
-        	x_box_img:set{name="x_box_img", size = { p.wwidth , p.wheight } , opacity = 0}
 	else 
 		d_box_img = Image{} 
-        	x_box_img = Image{} 
 	end
 
-	db_group:add(d_box, x_box, title, d_box_img, x_box_img)
+	db_group:add(d_box_img, title)
 
 	if (p.skin == "custom") then d_box_img.opacity = 0
         else d_box.opacity = 0 end 
@@ -1576,22 +1561,24 @@ Creates a Toast alert ui element
 Arguments:
 	Table of Toast alert properties
 	
-		skin - Modify the skin used for the toast ui element by changing this value
-		title - Title of the Toast alert
-		message - Message displayed in the Toast alert
-    	font - Font used for text in the Toast alert
-    	color - Color of the text in the Toast alert
+	skin - Modify the skin used for the toast ui element by changing this value
+	title - Title of the Toast alert
+	message - Message displayed in the Toast alert
+    	title_font - Font used for text in the Toast alert
+    	message_font - Font used for text in the Toast alert
+    	title_color - Color of the text in the Toast alert
+    	message_color - Color of the text in the Toast alert
     	bwidth  - Width of the Toast alert 
     	bheight - Height of the Toast alert 
     	border_color - Border color of the Toast alert
-    	f_color - Fill color of the Toast alert
-    	f_color - Focus color of the Toast alert  
+    	fill_color - Fill color of the Toast alert
     	border_width - Border width of the Toast alert 
     	padding_x - Padding of the toast alert on the X axis 
     	padding_y - Padding of the toast alert on the Y axis
-    	border_radius - Radius of the border for the Toast alert 
-	    fade_duration - Time in milleseconds that the Toast alert spends fading away
-	    duration - Time in milleseconds that the Toast alert spends in view before fading out
+    	border_corner_radius - Radius of the border for the Toast alert 
+	fade_duration - Time in milleseconds that the Toast alert spends fading away
+	on_screen_duration - Time in milleseconds that the Toast alert spends in view before fading out
+	icon - The image file name for the icon 
 
 Return:
  		tb_group - Group containing the Toast alert
@@ -1610,17 +1597,19 @@ function ui_element.toastAlert(table)
 	wwidth = 600,
 	wheight = 200,
 	label = "Toast Alert Title",
-	message = "Toast alert message ... ",
-	font = "DejaVu Sans 30px", 
-	color = {255,255,255,255},  --"FFFFFF", 
+	message = "Toast alert message",
+	title_font = "DejaVu Sans 32px", 
+	message_font = "DejaVu Sans 28px", 
+	title_color = {255,255,255,255},  
+	message_color = {255,255,255,255}, 
 	border_width  = 3,
 	border_color  = {255,255,255,255}, --"FFFFFFC0", 
-	f_color  = {25,25,25,100},
+	fill_color  = {25,25,25,100},
 	padding_x = 0,
 	padding_y = 0,
-	border_radius = 22,
+	border_corner_radius = 22,
 	fade_duration = 2000,
-	duration = 5000,
+	on_screen_duration = 5000,
 	icon = "assets/voice-1.png"
     }
 
@@ -1652,17 +1641,17 @@ function ui_element.toastAlert(table)
     	tb_group:clear()
         tb_group.size = { p.wwidth , p.wheight}
 
-    	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_radius) 
+    	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
     	t_box:set{name="t_box"}
 	tb_group.anchor_point = {p.wwidth/2, p.wheight/2}
 
 	icon = assets(p.icon)
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
-    	title= Text{text = p.label, font= "DejaVu Sans 32px", color = "FFFFFF"}     
+    	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
     	title:set{name = "title", position = {(p.wwidth - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
 
-    	message= Text{text = p.message, font= "DejaVu Sans 28px", color = "FFFFFF"}     
+    	message= Text{text = p.message, font= p.message_font, color = p.message_color}     
     	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 + title.h }} 
 
 	if(p.skin ~= "custom") then 
@@ -1680,7 +1669,7 @@ function ui_element.toastAlert(table)
     	if (p.skin == "custom") then t_box_img.opacity = 0
     	else t_box.opacity = 0 end 
 
-    	tb_group_timer.interval = p.duration 
+    	tb_group_timer.interval = p.on_screen_duration 
     	tb_group_timeline.duration = p.fade_duration
     	tb_group_timeline.direction = "FORWARD"
     	tb_group_timeline.loop = false
@@ -1745,13 +1734,15 @@ Arguments:
     	bwidth - Width of the Button picker 
     	bheight - Height of the Button picker 
         items - A table containing the items for the Button picker
-    	font - Font of the Button picker items
-    	color - Color of the Button picker items
-		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
+    	text_font - Font of the Button picker items
+    	text_color - Color of the Button picker items
+    	border_color - Color of the Button 
+    	focus_color - Focus color of the Button 
+	selected_item - The number of the selected item 
+	rotate_func - function that is called by selected item number   
 
 Return:
- 		bp_group - Group containing the button picker 
+ 	bp_group - Group containing the button picker 
 
 Extra Function:
 		on_focus_in() - Grab focus of button picker 
@@ -1774,8 +1765,10 @@ function ui_element.buttonPicker(table)
 	wwidth =  180,
 	wheight = 60,
 	items = {"item1", "item2", "item3"},
-	font = "DejaVu Sans 30px" , 
-	color = {255,255,255,255}, --"FFFFFF", 
+	text_font = "DejaVu Sans 30px" , 
+	text_color = {255,255,255,255}, 
+	border_color = {255,255,255,255},
+	focus_color = {0,255,0,255},
 	rotate_func = nil, 
         selected_item = 1, 
     }
@@ -1813,10 +1806,10 @@ function ui_element.buttonPicker(table)
 	items:clear()
         bp_group.size = { p.wwidth , p.wheight}
 
-	ring = make_ring(p.wwidth, p.wheight, "FFFFFF", 1, 7, 7, 12)
+	ring = make_ring(p.wwidth, p.wheight, p.border_color, 1, 7, 7, 12)
         ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
 
-        focus_ring = make_ring(p.wwidth, p.wheight, {0, 255, 0, 255}, 1, 7, 7, 12)
+        focus_ring = make_ring(p.wwidth, p.wheight, p.focus_color, 1, 7, 7, 12)
         focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
 
 
@@ -1850,7 +1843,7 @@ function ui_element.buttonPicker(table)
 	focus:set{name = "focus",  position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
 
      	for i, j in pairs(p.items) do 
-               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, opacity = 255})     
+               items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, opacity = 255})     
      	end 
 
 	local j_padding
@@ -1924,8 +1917,6 @@ function ui_element.buttonPicker(table)
 	    local prev_new_y = p.wheight/2 - j.height/2
 	    local next_new_x = p.wwidth/2 - j.width/2
 	    local next_new_y = p.wheight/2 - j.height/2
-
-
 
 	    if t ~= nil then
 	       t:stop()
