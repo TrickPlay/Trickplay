@@ -837,7 +837,7 @@ local function build_ui( show_it )
 		    end 
 	       end 
 	      
-	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar") then
+	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar" and actor.name ~= "grip") then
 	            actor.x =  x - dx 
 	            actor.y =  y - dy  
 	       else
