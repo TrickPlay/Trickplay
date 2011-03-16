@@ -2280,14 +2280,14 @@ function ui_element.checkBox(table)
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", 
 	color = {255,255,255,255}, 
-		box_color = {255,255,255,255},
-		f_color = {255,255,255,50},
-		box_width = 2,
-		box_size = {25,25},
-		check_size = {25,25},
-		line_space = 40,   
-		b_pos = {0, 0},  
-		item_pos = {50,-5},  
+	box_color = {255,255,255,255},
+	f_color = {255,255,255,0},
+	box_width = 2,
+	box_size = {25,25},
+	check_size = {25,25},
+	line_space = 40,   
+	b_pos = {0, 0},  
+	item_pos = {50,-5},  
 	selected_items = {1},  
 	direction = 1,  -- 1:vertical 2:horizontal
 		rotate_func = nil,  
@@ -2336,29 +2336,50 @@ function ui_element.checkBox(table)
 
          local pos = {0, 0}
          for i, j in pairs(p.items) do 
-	       
+	      local box, check
 	      if(p.direction == 1) then --vertical 
                   pos= {0, i * p.line_space - p.line_space}
 	      end   			
 
 	      items:add(Text{name="item"..tostring(i), text = j, font=p.font, color = p.color, position = pos})     
 	      if p.skin == "custom" then 
-    	           boxes:add(Rectangle{name="box"..tostring(i),  color= p.f_color, border_color= p.box_color, border_width= p.box_width, 
-				       size = p.box_size, position = pos, opacity = 255}) 
-	           checks:add(Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, opacity = 0}) 
-	      else
-	           boxes:add(Clone{name = "item"..tostring(i),  source=p.button_image, size = p.box_size, position = pos, opacity = 255}) 
-	           checks:add(Image{name = "check"..tostring(i),  src=p.check_image, size = p.check_size, position = pos, opacity = 0}) 
-	      end 
+		   box = Rectangle{name="box"..tostring(i),  color= p.f_color, border_color= p.box_color, border_width= p.box_width, 
+				       size = p.box_size, position = pos, reactive = true, opacity = 255}
+    	           boxes:add(box) 
+		   	
+		   check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
+	           checks:add(check) 
+	     else
+	           box = Clone{name = "box"..tostring(i),  source=p.button_image, size = p.box_size, position = pos, reactive = true, opacity = 255}
+		   boxes:add(box) 
+		  
+		   check = Image{name = "check"..tostring(i),  src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
+	           checks:add(check)
+	     end 
+	     function box:on_button_down (x,y,b,n)
+		local box_num = tonumber(box.name:sub(4,-1))
+		p.selected_items = table_insert(p.selected_items, box_num)
+		cb_group:find_child("check"..tostring(box_num)).opacity = 255
+		cb_group:find_child("check"..tostring(box_num)).reactive = true
+		return true
+	     end 
+	     function check:on_button_down(x,y,b,n)
+		local check_num = tonumber(check.name:sub(6,-1))
+		p.selected_items = table_removeval(p.selected_items, check_num)
+		check.opacity = 0
+		check.reactive = false
+		return true
+	     end 
 
-	      if(p.direction == 2) then --horizontal
+	     if(p.direction == 2) then --horizontal
 		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
-	      end 
+	     end 
          end 
 
 	 for i,j in pairs(p.selected_items) do 
              checks:find_child("check"..tostring(j)).opacity = 255 
 	 end 
+
 
 	 cb_group:add(boxes, items, checks)
     end

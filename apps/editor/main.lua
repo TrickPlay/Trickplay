@@ -790,7 +790,7 @@ local function build_ui( show_it )
 
 	       local actor = unpack(dragging) 
 
-	       if (actor.name == "scroll_window") then  
+	       if (actor.name == "grip") then  
 	             local actor,s_on_motion = unpack(dragging) 
 	             s_on_motion(x, y)
 	             return true

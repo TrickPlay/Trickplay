@@ -4,8 +4,20 @@
 
 local factory = ui.factory
 
-
-
+function table_insert(t, val)
+	if t then 
+	    table.insert(t, val) 
+	end 
+	return t
+end 
+function table_removeval(t, val)
+	for i,j in pairs (t) do
+		if j == val then 
+		     table.remove(t, i)
+		end 
+	end 
+	return t
+end 
 function table_removekey(table, key)
 	local element = table[key]
 	table[key] = nil
@@ -298,7 +310,7 @@ function create_on_button_down_f(v)
 	      	    if(dragging ~= nil) then 
 
 	       	       local actor = unpack(dragging) 
-		       if (actor.name == "scroll_window") then  
+		       if (actor.name == "grip") then  
 				dragging = nil 
 				return true 
 		       end 
@@ -629,7 +641,7 @@ function make_attr_t(v)
              {"source", v.source, "source"},
              {"caption", "View Port"},
              {"left", v.viewport[1], "X"},
-             {"top", v.viewport[2], "Y"},"text_color",
+             {"top", v.viewport[2], "Y"},
              {"width", v.viewport[3], "W"},
              {"height", v.viewport[4], "H"},
              {"volume", v.volume, "Volume"},

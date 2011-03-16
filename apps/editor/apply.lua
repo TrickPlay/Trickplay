@@ -63,7 +63,13 @@ function inspector_apply (v, inspector)
 	       v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
 		end,
        ["reactive"] = function()
-	       v.extra.reactive = toboolean(item_group:find_child("reactive"):find_child("input_text").text)
+	       if item_group:find_child("reactive_check"):find_child("check1").opacity > 0 then 
+		    print("reactive true !!")
+	            v.extra.reactive = true
+	       else 
+		    print("reactive false!!")
+	            v.extra.reactive = false
+	       end
 	       end,
       }       
 
