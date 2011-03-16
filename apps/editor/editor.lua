@@ -2752,7 +2752,7 @@ function editor.bring_forward()
 end
 
 local widget_f_map = {
-     ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() print(input_mode, "Rectangle...") end, 
+     ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() end, 
      ["Text"]		= function () editor.text() input_mode = S_SELECT end, 
      ["Image"]		= function () input_mode = S_SELECT  editor.the_image() end, 	
      ["Video"] 		= function () input_mode = S_SELECT editor.video() end,
@@ -2803,7 +2803,7 @@ function editor.ui_elements()
     local xbox = factory.make_xbox()
 
     local msgw = Group {
-         position ={500, 200},
+         position ={650, 250},
 	 anchor_point = {0,0},
          children =
          {
@@ -2826,70 +2826,6 @@ function editor.ui_elements()
 
     for i, v in pairs(uiElements_en) do 
     	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
---[[
-Function: buttonPicker
-
-Creates a button picker ui element
-
-Arguments:
-	Table of Button picker properties
-
-	skin - Modify the skin for the Button picker by changing this value
-    	bwidth - Width of the Button picker 
-    	bheight - Height of the Button picker 
-        items - A table containing the items for the Button picker
-    	font - Font of the Button picker items
-    	color - Color of the Button picker items
-		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
-
-Return:
- 		bp_group - Group containing the button picker 
-
-Extra Function:
-		on_focus_in() - Grab focus of button picker 
-		on_focus_out() - Release focus of button picker
-		press_left() - Left key press event, apply the selection of button picker
-		press_right() - Right key press event, apply the selection of button picker
-		press_up() - Up key press event, apply the selection of button picker
-		press_down() - Down key press event, apply the selection of button picker
-		press_enter() - Enter key press event, apply the selection of button picker
-		insert_item(item) - Add an item to the items table 
-		remove_item(item) - Remove an item from the items table 
-]]
-
---[[
-Function: buttonPicker
-
-Creates a button picker ui element
-
-Arguments:
-	Table of Button picker properties
-
-	skin - Modify the skin for the Button picker by changing this value
-    	bwidth - Width of the Button picker 
-    	bheight - Height of the Button picker 
-        items - A table containing the items for the Button picker
-    	font - Font of the Button picker items
-    	color - Color of the Button picker items
-		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
-
-Return:
- 		bp_group - Group containing the button picker 
-
-Extra Function:
-		on_focus_in() - Grab focus of button picker 
-		on_focus_out() - Release focus of button picker
-		press_left() - Left key press event, apply the selection of button picker
-		press_right() - Right key press event, apply the selection of button picker
-		press_up() - Up key press event, apply the selection of button picker
-		press_down() - Down key press event, apply the selection of button picker
-		press_enter() - Enter key press event, apply the selection of button picker
-		insert_item(item) - Add an item to the items table 
-		remove_item(item) - Remove an item from the items table 
-]]
-
 	
 	 widget_b.position =  {cur_w, cur_h}
     	 widget_b.name = v
@@ -2908,41 +2844,10 @@ Extra Function:
 	      cleanMsgWin(msgw)
 	end
     end 
---[[
-Function: buttonPicker
-
-Creates a button picker ui element
-
-Arguments:
-	Table of Button picker properties
-
-	skin - Modify the skin for the Button picker by changing this value
-    	bwidth - Width of the Button picker 
-    	bheight - Height of the Button picker 
-        items - A table containing the items for the Button picker
-    	font - Font of the Button picker items
-    	color - Color of the Button picker items
-		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
-
-Return:
- 		bp_group - Group containing the button picker 
-
-Extra Function:
-		on_focus_in() - Grab focus of button picker 
-		on_focus_out() - Release focus of button picker
-		press_left() - Left key press event, apply the selection of button picker
-		press_right() - Right key press event, apply the selection of button picker
-		press_up() - Up key press event, apply the selection of button picker
-		press_down() - Down key press event, apply the selection of button picker
-		press_enter() - Enter key press event, apply the selection of button picker
-		insert_item(item) - Add an item to the items table 
-		remove_item(item) - Remove an item from the items table 
-]]
 
 
     for i, v in pairs(uiElements) do
-         if (i == 5) then 
+         if (i == 4) then 
               cur_w =  cur_w + 280 + Y_PADDING
               cur_h =  TOP_PADDING + widgets_list.h + Y_PADDING
 	 end 
@@ -2959,8 +2864,6 @@ Extra Function:
          
          function widget_b:on_button_down(x,y,button,num_clicks)
 	      local new_widget = widget_f_map[v]() 
-	      
-
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
 		b=new_widget
@@ -3005,9 +2908,7 @@ Extra Function:
 	           screen:add(g)
 	           screen:grab_key_focus()
 	end 
---kk
-
-	      cleanMsgWin(msgw)
+	cleanMsgWin(msgw)
         end 
         function widget_t:on_button_down(x,y,button,num_clicks)
 
@@ -3033,32 +2934,33 @@ Extra Function:
 		lb=new_widget
               elseif (new_widget.extra.type == "LayoutManager") then 
 		d=new_widget
-         elseif (new_widget.extra.type == "ScrollPane") then 
+              elseif (new_widget.extra.type == "Scro1 Rectangle...llPane") then 
 		si=new_widget
-         elseif (new_widget.extra.type == "MenuButton") then 
+              elseif (new_widget.extra.type == "MenuButton") then 
 		dd=new_widget
-         elseif (new_widget.extra.type == "MenuBar") then 
+              elseif (new_widget.extra.type == "MenuBar") then 
 		mb=new_widget
-         elseif (new_widget.extra.type == "TabBar") then 
+              elseif (new_widget.extra.type == "TabBar") then 
 		tb=new_widget
 	      end
---imsi 
-	if new_widget.name:find("timeline") then 
+--imsi  : for debugging, will be deleted 
+	
+             if new_widget.name:find("timeline") then 
 		    screen:add(new_widget)
-	else
- 	      while (is_available(new_widget.name..tostring(item_num)) == false) do  
-		item_num = item_num + 1
-	      end 
-	      new_widget.name = new_widget.name..tostring(item_num)
-              table.insert(undo_list, {new_widget.name, ADD, new_widget})
-	      g:add(new_widget)
-              create_on_button_down_f(new_widget)
-	      screen:add(g)
-	      screen:grab_key_focus()
+	     else
+ 	     	while (is_available(new_widget.name..tostring(item_num)) == false) do  
+			item_num = item_num + 1
+	      	end 
+	      	new_widget.name = new_widget.name..tostring(item_num)
+              	table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	      	g:add(new_widget)
+              	create_on_button_down_f(new_widget)
+	      	screen:add(g)
+	      	screen:grab_key_focus()
 
-	end 
-	      cleanMsgWin(msgw)
-          end 
+	    end 
+	    cleanMsgWin(msgw)
+       end 
     end 
 
     xbox.reactive = true
@@ -3071,7 +2973,6 @@ Extra Function:
     end 
 
     screen:add(msgw)
---]]
 end 
 
 
