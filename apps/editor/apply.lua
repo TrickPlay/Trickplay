@@ -64,11 +64,16 @@ function inspector_apply (v, inspector)
 		end,
        ["reactive"] = function()
 	       if item_group:find_child("reactive_check"):find_child("check1").opacity > 0 then 
-		    print("reactive true !!")
 	            v.extra.reactive = true
 	       else 
-		    print("reactive false!!")
 	            v.extra.reactive = false
+	       end
+	       end,
+       ["loop"] = function()
+	       if item_group:find_child("reactive_check"):find_child("check1").opacity > 0 then 
+	            v.loop = true
+	       else 
+	            v.loop = false
 	       end
 	       end,
       }       
