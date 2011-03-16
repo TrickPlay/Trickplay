@@ -2448,11 +2448,11 @@ function ui_element.progressSpinner(t)
     --default parameters
     local p = {
         skin          = "default",
-        dot_radius    = 5,
+        dot_diameter    = 5,
         dot_color     = {255,255,255,255},
-        num_dots      = 12,
-        anim_radius   = 50,
-        anim_duration = 150,
+        number_of_dots      = 12,
+        overall_diameter   = 50,
+        cycle_time = 150*12,
         clone_src     = nil
     }
     --overwrite defaults
@@ -2468,16 +2468,16 @@ function ui_element.progressSpinner(t)
     local l_dots = Group{ 
         name     = "progressSpinner",
         position = {400,400},
-        anchor_point = {p.radius,p.radius},
+        anchor_point = {p.overall_diameter/2,p.overall_diameter/2},
         reactive = true,
         extra = {
             type = "ProgressSpinner", 
             speed_up = function()
-                p.anim_duration = p.anim_duration - 20
+                p.cycle_time = p.cycle_time - 50
                 create_dots()
             end,
             speed_down = function()
-                p.anim_duration = p.anim_duration + 20
+                p.cycle_time = p.cycle_time + 50
                 create_dots()
             end,
         },
@@ -2488,9 +2488,9 @@ function ui_element.progressSpinner(t)
     
     --the Canvas used to create the dots
     local make_dot = function(x,y)
-          local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius}}
+          local dot  = Canvas{size={p.dot_diameter, p.dot_diameter}}
           dot:begin_painting()
-          dot:arc(p.dot_radius,p.dot_radius,p.dot_radius,0,360)
+          dot:arc(p.dot_diameter/2,p.dot_diameter/2,p.dot_diameter/2,0,360)
           dot:set_source_color(p.dot_color)
           dot:fill(true)
           dot:finish_painting()
@@ -2498,7 +2498,7 @@ function ui_element.progressSpinner(t)
           if dot.Image then
               dot = dot:Image()
           end
-          dot.anchor_point ={p.dot_radius,p.dot_radius}
+          dot.anchor_point ={p.dot_diameter/2,p.dot_diameter/2}
           dot.name         = "Loading Dot"
           dot.position     = {x,y}
 	  
@@ -2513,15 +2513,15 @@ function ui_element.progressSpinner(t)
 	
         local rad
         
-        for i = 1, p.num_dots do
+        for i = 1, p.number_of_dots do
             --they're radial position
-            rad = (2*math.pi)/(p.num_dots) * i
+            rad = (2*math.pi)/(p.number_of_dots) * i
             print(p.clone_src)
             if p.clone_src == nil and skin_list[p.skin]["loadingdot"] == nil then
                 print(1)
                 dots[i] = make_dot(
-                    math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
-                    math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                    math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                    math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                 )
 	    elseif skin_list[p.skin]["loadingdot"] ~= nil then
 		img = assets(skin_list[p.skin]["loadingdot"])
@@ -2531,8 +2531,8 @@ function ui_element.progressSpinner(t)
                     }
 		img.position = {
 
-                        math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
-                        math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                        math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                        math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                     }
 		dots[i] = img
             else
@@ -2541,8 +2541,8 @@ function ui_element.progressSpinner(t)
                     source = p.clone_src,
                     position = {
 
-                        math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
-                        math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                        math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                        math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                     },
                     anchor_point = {
                         p.clone_src.w/2,
@@ -2562,20 +2562,20 @@ function ui_element.progressSpinner(t)
         {
             name      = "Loading Animation",
             loop      =  true,
-            duration  =  p.anim_duration * (p.num_dots),
+            duration  =  p.cycle_time,
             direction = "FORWARD", 
         }
 
 	-- table.insert( fff , load_timeline )
 
-        local increment = math.ceil(255/p.num_dots)
+        local increment = math.ceil(255/p.number_of_dots)
         
         function load_timeline.on_new_frame(t)
-            local start_i   = math.ceil(t.elapsed/p.anim_duration)
+            local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
             local curr_i    = nil
             
-            for i = 1, p.num_dots do
-                curr_i = (start_i + (i-1))%(p.num_dots) +1
+            for i = 1, p.number_of_dots do
+                curr_i = (start_i + (i-1))%(p.number_of_dots) +1
                 
                 dots[curr_i].opacity = increment*i
             end
@@ -2638,6 +2638,7 @@ function ui_element.progressBar(t)
         stroke_color       = {160,160,160,255},
         fill_upper_color  = {255,0,0,255},
         fill_lower_color  = {96,48,48,255},
+        progress          = 0,
     }
     --overwrite defaults
     if t ~= nil then
@@ -2742,6 +2743,7 @@ function ui_element.progressBar(t)
 		end
         c_fill.x=stroke_width
         c_fill.y=stroke_width/2
+        c_fill.scale = {(p.wwidth-4)*(p.progress),1}
 		l_bar_group:add(c_shell,c_fill)
 	end
     
@@ -2754,7 +2756,11 @@ function ui_element.progressBar(t)
     
     mt.__newindex = function(t,k,v)
         p[k] = v
-        create_loading_bar()
+        if k == "progress" then
+            c_fill.scale = {(p.wwidth-4)*(v),1}
+        else
+            create_loading_bar()
+        end
     end
     
     mt.__index = function(t,k)       
