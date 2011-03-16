@@ -2792,8 +2792,8 @@ function ui_element.layoutManager(t)
     end
 	
     local x_y_from_index = function(r,c)
-		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
-		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
+		return (p.cell_w+p.cell_spacing)*(c-1)+p.cell_w/2,
+		       (p.cell_h+p.cell_spacing)*(r-1)+p.cell_h/2
 	end
     
 
@@ -2818,8 +2818,20 @@ function ui_element.layoutManager(t)
                 obj.anchor_point = {obj.w/2,obj.h/2}
                 obj.delay = p.cell_timing_offset*(r+c-1)
 			end,
+            add_next = function(self,obj)
+                self:replace(focus_i[1],focus_i[2],obj)
+                if focus_i[2]+1 > p.columns then
+                    if focus_i[1] + 1 >p.rows then
+                        self.focus_to(1,1)
+                    else
+                        self.focus_to(focus_i[1]+1,1)
+                    end
+                else
+                    self.focus_to(focus_i[1],focus_i[2]+1)
+                end
+            end,
             set_function = function(r,c,f)
-                if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                if r > p.rows or r < 1 or c < 1 or c > p.columns then
                     print("invalid row/col")
                     return
                 end
@@ -2831,7 +2843,7 @@ function ui_element.layoutManager(t)
                 end
             end,
             focus_to = function(r,c)
-                if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                if r > p.rows or r < 1 or c < 1 or c > p.columns then
                     print("invalid row/col")
                     return
                 end
@@ -2935,7 +2947,7 @@ function ui_element.layoutManager(t)
         focus.x, focus.y = x_y_from_index(focus_i[1],focus_i[2])
         slate:add(focus)
         
-        if p.focus_visible then
+        if p.cells_focusable then
             focus.opacity=255
         else
             focus.opacity=0
@@ -2952,7 +2964,7 @@ function ui_element.layoutManager(t)
                     slate:add(g)
                     p.tiles[r][c] = g
                     g.x, g.y = x_y_from_index(r,c)
-                    g.delay = p.cascade_delay*(r+c-1)
+                    g.delay = p.cell_timing_offset*(r+c-1)
                 else
                     g = p.tiles[r][c]
                     if g.parent ~= nil then
@@ -3037,21 +3049,34 @@ function ui_element.scrollPane(t)
 
     --default parameters
     local p = {
-        clip_w    =  600,
-	color     =  {255,255,255,255},
-        clip_h    =  600,
-	border_w  =    2,
+        visible_w    =  600,
+	--color     =  {255,255,255,255},
+        visible_h    =  600,
+	    border_w  =    2,
         content   = Group{},
-        content_h =  1000,
-	content_w =  1000,
-	arrow_clone_source = nil,
-	arrow_sz  = 10,
-	arrows_in_box = false,
-	arrows_centered = false,
-        hor_arrow_y     = nil,
-        vert_arrow_x    = nil,
-	grip_is_visible = true,
-        border_is_visible = true,
+        virtual_h = 1000,
+	    virtual_w = 1000,
+	--arrow_clone_source = nil,
+	
+	--arrows_in_box = false,
+	--arrows_centered = false,
+        --hor_arrow_y     = nil,
+        --vert_arrow_x    = nil,
+	    scroll_bars_visible = true,
+        bar_color_inner     = {234, 40,120},
+        bar_color_outer     = { 90,210,230},
+        empty_color_inner   = {100,200,180},
+        empty_color_outer   = {240,190,140},
+        frame_thickness     =    2,
+        border_color        = {60, 60,60},
+        bar_thickness       =   15,
+        bar_offset          =    -15,
+        vert_bar_visible    = true,
+        horz_bar_visbile    = true,
+        
+        box_visible = true,
+        box_color = {160,160,160},
+        box_width = 2,
         skin="default",
     }
     --overwrite defaults
@@ -3072,15 +3097,8 @@ function ui_element.scrollPane(t)
 
 	local border = Rectangle{ color = "00000000" }
 	
-	local arrow_up, arrow_dn, arrow_l, arrow_r
 	
 	local track_h, track_w
-	local grip_h, grip_w
-	
-	
-	local grip_vert_base_y, grip_hor_base_x
-	local grip_vert = Rectangle{name="scroll_window",reactive=true}
-	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
 	
 
     --the umbrella Group, containing the full slate of tiles
@@ -3274,273 +3292,217 @@ function ui_element.scrollPane(t)
 			}
 		end
 	end
+    local function make_bar(w,h,ratio)
+        local bar = Group{}
+        
+		local shell = Canvas{
+				size = {w,h},
+		}
+		local fill  = Canvas{
+				size = {w*ratio,h},
+		}  
+        
+		
+		local RAD = 6
+        
+		local top    =           math.ceil(p.frame_thickness/2)
+		local bottom = shell.h - math.ceil(p.frame_thickness/2)
+		local left   =           math.ceil(p.frame_thickness/2)
+		local right  = shell.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		shell:move_to(        left,         top )
+		shell:line_to(   right-RAD,         top )
+		shell:curve_to( right, top,right,top,right,top+RAD)
+		shell:line_to(       right,  bottom-RAD )
+		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		shell:line_to(           left+RAD,          bottom )
+		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		shell:line_to(           left,            top+RAD )
+		shell:curve_to(left,top,left,top,left+RAD,top)
+        
+		shell:set_source_linear_pattern(
+			shell.w/2,0,
+			shell.w/2,shell.h
+		)
+		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        
+		shell:fill(true)
+		shell:set_line_width(   p.frame_thickness )
+		shell:set_source_color( p.border_color )
+		shell:stroke( true )
+		shell:finish_painting()
+        
+        -----------------------------------------------------
+        
+		top    =          math.ceil(p.frame_thickness/2)
+		bottom = fill.h - math.ceil(p.frame_thickness/2)
+		left   =          math.ceil(p.frame_thickness/2)
+		right  = fill.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		fill:move_to(        left,         top )
+		fill:line_to(   right-RAD,         top )
+		fill:curve_to( right, top,right,top,right,top+RAD)
+		fill:line_to(       right,  bottom-RAD )
+		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		fill:line_to(           left+RAD,          bottom )
+		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		fill:line_to(           left,            top+RAD )
+		fill:curve_to(left,top,left,top,left+RAD,top)
+        
+		fill:set_source_linear_pattern(
+			fill.w/2,0,
+			fill.w/2,fill.h
+		)
+		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+		fill:fill(true)
+        fill:set_line_width(   p.frame_thickness )
+		fill:set_source_color( p.border_color )
+		fill:stroke( true )
+		fill:finish_painting()
+        
+        -----------------------------------------------------
+        
+		if shell.Image then
+			shell = shell:Image()
+		end
+		if fill.Image then
+			fill = fill:Image()
+		end
+        
+		bar:add(shell,fill)
+        
+        shell.name="track"
+        fill.name="grip"
+        fill.reactive=true
+        
+        return bar
+    end
 	
 	
 	--this function creates the whole scroll bar box
 	local function create()
-        window.position={ p.border_w, p.border_w }
-		window.clip = { 0,0, p.clip_w, p.clip_h }
-		border.w = p.clip_w+2*p.border_w
-		border.h = p.clip_h+2*p.border_w
-		border.border_width = p.border_w
-		border.border_color = p.color
-		if p.border_is_visible then border.opacity=255
-        else border.opacity=0 end
+        window.position={ p.box_width, p.box_width }
+		window.clip = { 0,0, p.visible_w, p.visibile_h }
         
+        border:set{
+            w = p.visible_w+2*p.box_width,
+            h = p.visible_h+2*p.box_width,
+            border_width =    p.box_width,
+            border_color =    p.box_color,
+        }
+		
+        if p.box_visible then border.opacity=255
+        else border.opacity=0 end 
         
-		if p.arrow_clone_source == nil and skin_list[p.skin]["scroll_arrow"] == nil then
-			
-			if arrow_up ~= nil then arrow_up:unparent() end
-			
-			arrow_up = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_up:begin_painting()
-			arrow_up:move_to( arrow_up.w/2,          0 )
-			arrow_up:line_to(   arrow_up.w, arrow_up.h )
-			arrow_up:line_to(            0, arrow_up.h )
-			arrow_up:line_to( arrow_up.w/2,          0 )
-			arrow_up:set_source_color(p.color)
-
-			arrow_up:fill(true)
-			arrow_up:finish_painting()
-			if arrow_up.Image then
-				arrow_up = arrow_up:Image()
-			end
-			
-			
-			if arrow_dn ~= nil then arrow_dn:unparent() end
-			
-			arrow_dn = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_dn:begin_painting()
-			arrow_dn:move_to(            0,          0 )
-			arrow_dn:line_to(   arrow_dn.w,          0 )
-			arrow_dn:line_to( arrow_dn.w/2, arrow_dn.h )
-			arrow_dn:line_to(            0,          0 )
-			arrow_dn:set_source_color(p.color)
-			arrow_dn:fill(true)
-			arrow_dn:finish_painting()
-			if arrow_dn.Image then
-				arrow_dn = arrow_dn:Image()
-			end
-			
-			
-			if arrow_l ~= nil then arrow_l:unparent() end
-			
-			arrow_l = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_l:begin_painting()
-			arrow_l:move_to(   arrow_l.w,           0 )
-			arrow_l:line_to(   arrow_l.w,   arrow_l.h )
-			arrow_l:line_to(           0, arrow_l.h/2 )
-			arrow_l:line_to(   arrow_l.w,           0 )
-			arrow_l:set_source_color(p.color)
-			arrow_l:fill(true)
-			arrow_l:finish_painting()
-			if arrow_l.Image then
-				arrow_l = arrow_l:Image()
-			end
-			
-			
-			if arrow_r ~= nil then arrow_r:unparent() end
-			
-			arrow_r = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_r:begin_painting()
-			arrow_r:move_to(         0,           0 )
-			arrow_r:line_to( arrow_r.w, arrow_l.h/2 )
-			arrow_r:line_to(         0,   arrow_l.h )
-			arrow_r:line_to(         0,           0 )
-			arrow_r:set_source_color(p.color)
-			arrow_r:fill(true)
-			arrow_r:finish_painting()
-			if arrow_r.Image then
-				arrow_r = arrow_r:Image()
-			end
-		elseif p.arrow_clone_source ~= nil then
-			arrow_up = Clone{source=p.arrow_clone_source}
-			arrow_dn = Clone{source=p.arrow_clone_source, z_rotation={180,0,0}}
-			arrow_l  = Clone{source=p.arrow_clone_source, z_rotation={-90,0,0}}
-			arrow_r  = Clone{source=p.arrow_clone_source, z_rotation={ 90,0,0}}
+        if p.bar_offset < 0 then
+            track_w = p.visible_w+p.bar_offset
+            track_h = p.visible_h+p.bar_offset
         else
-            arrow_up = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_dn = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_dn.z_rotation={180,0,0}
-            arrow_l  = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_l.z_rotation={-90,0,0}
-            arrow_r  = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_r.z_rotation={90,0,0}
-		end
-		
-		arrow_up.anchor_point = {arrow_up.w/2,arrow_up.h/2}
-		arrow_dn.anchor_point = {arrow_dn.w/2,arrow_dn.h/2}
-		arrow_l.anchor_point  = { arrow_l.w/2, arrow_l.h/2}
-		arrow_r.anchor_point  = { arrow_r.w/2, arrow_r.h/2}
-		
-		arrow_up.reactive = true
-        arrow_dn.reactive = true
-        arrow_l.reactive=true
-        arrow_r.reactive=true
-        
-		function arrow_up:on_button_down(x,y,button,num_clicks)
-            scroll_y(1)
+            track_w = p.visible_w
+            track_h = p.visible_h
         end
-        function arrow_dn:on_button_down(x,y,button,num_clicks)
-            scroll_y(-1)
-        end
-		function arrow_l:on_button_down(x,y,button,num_clicks)
-            scroll_x(1)
-        end
-        function arrow_r:on_button_down(x,y,button,num_clicks)
-            scroll_x(-1)
-        end
-		
-		scroll_group:add(arrow_up,arrow_dn,arrow_l,arrow_r)
-		
-		-- re-used values
-		grip_vert_base_y =  arrow_up.h+5
-		track_h     = (p.clip_h-2*arrow_up.h-10+2*p.border_w)
-		grip_h      = 
- p.clip_h/p.content_h*track_h
-		if grip_h < p.arrow_sz then
-			grip_h = p.arrow_sz
-		elseif grip_h > track_h then
-			grip_h = track_h
-		end
-		
-		grip_hor_base_x = arrow_l.w+5
-		track_w     = (p.clip_w-2*arrow_l.w-10+2*p.border_w)
-		grip_w      =  p.clip_w/p.content_w*track_w
-		if grip_w < p.arrow_sz then
-			grip_w = p.arrow_sz
-		elseif grip_w > track_h then
-			grip_w = track_h
-		end
-		
-		
-		grip_vert.w        = p.arrow_sz
-		grip_vert.h        = grip_h
-		grip_vert.color    = p.color
-		grip_vert.position = {border.w+5,grip_vert_base_y}
-		
-		grip_hor.h        = p.arrow_sz
-		grip_hor.w        = grip_h
-		grip_hor.color    = p.color
-		grip_hor.position = {grip_hor_base_x,border.h+5}
-		
-		if p.grip_is_visible and not p.arrows_centered then
-			grip_hor.opacity  = 255
-			grip_vert.opacity = 255
-		else
-			grip_hor.opacity  = 0
-			grip_vert.opacity = 0
-		end
-		
-        if p.hor_arrows_y ~= nil or p.vert_arrows_x ~= nil then
-            if p.vert_arrows_x ~= nil then
-                arrow_up.position = {p.vert_arrows_x,-arrow_up.h/2-5 }
-                arrow_dn.position = {p.vert_arrows_x,border.h+arrow_dn.h/2+5}
+        if p.visible_w/p.virtual_w < 1 then
+            hor_s_bar = make_bar(
+                track_w,
+                p.bar_thickness,
+                track_w/p.virtual_w
+            )
+            hor_s_bar.name = "Horizontal Scroll Bar"
+            hor_s_bar.position={
+                p.box_width,
+                p.box_width*2+p.visible_h+p.bar_offset
+            }
+            scroll_group:add(hor_s_bar)
+            
+            local grip_hor = hor_s_bar:find_child("grip")
+            
+            function grip_hor:on_button_down(x,y,button,num_clicks)
+                
+                local dx = x - grip_hor.x
+	   	        
+                dragging = {grip_hor,
+	   		        function(x,y)
+	   			
+	   			        grip_hor.x = x - dx
+	   			
+	   			        if  grip_hor.x < 0 then
+	   				        grip_hor.x = 0
+	   			        elseif grip_hor.x > track_w-grip_hor.w then
+	   				           grip_hor.x = track_w-grip_hor.w
+	   			        end
+	   			
+	   			        p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
+	   			
+	   		        end 
+	   	        }
+	   	
+                return true
             end
-            if p.hor_arrows_y ~= nil then
-                arrow_l.position  = {-arrow_l.w/2-5,        p.hor_arrows_y}
-                arrow_r.position  = {border.w+arrow_r.w/2+5,p.hor_arrows_y}
+        end
+        if p.visible_h/p.virtual_h < 1 then
+            vert_s_bar = make_bar(
+                track_h,
+                p.bar_thickness,
+                p.visible_h/p.virtual_h
+            )
+            vert_s_bar.name = "Vertical Scroll Bar"
+            vert_s_bar.position={
+                p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness,
+                p.box_width
+            }
+            vert_s_bar.z_rotation={90,0,0}
+            scroll_group:add(vert_s_bar)
+            
+            local grip_vert = vert_s_bar:find_child("grip")
+            
+            function grip_vert:on_button_down(x,y,button,num_clicks)
+                
+                local dy = y - grip_vert.y
+	   	        
+                dragging = {grip_vert,
+	   		        function(x,y)
+	   			
+	   			        grip_vert.y = y - dy
+	   			
+	   			        if  grip_vert.y < 0 then
+	   				        grip_vert.y = 0
+	   			        elseif grip_vert.y > track_h-grip_vert.w then
+	   				           grip_vert.y = track_h-grip_vert.w
+	   			        end
+	   			
+	   			        p.content.y = -(grip_vert.x) * p.virtual_h/track_h
+	   			
+	   		        end 
+	   	        }
+	   	
+                return true
             end
-		elseif p.arrows_centered then
-			if p.arrows_in_box then
-				arrow_up.position = {border.w/2+arrow_up.w/2+5,arrow_up.h/2+5 }
-				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h-arrow_dn.h/2-5}
-				arrow_l.position  = {arrow_l.w/2+5,border.h/2 + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w-arrow_r.w/2-5,border.h/2 + 5 + arrow_up.h/2}
-			else
-				arrow_up.position = {border.w/2+arrow_up.w/2+5,-arrow_up.h/2-5}
-				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h+arrow_dn.h/2+5}
-				arrow_l.position  = {-arrow_l.w/2-5,border.h/2}-- + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w+arrow_r.w/2+5,border.h/2}-- + 5 + arrow_up.h/2}
-			end
-		else
-			if p.arrows_in_box then
-				arrow_up.position = {border.w-arrow_up.w/2-5,arrow_up.h/2+5}
-				arrow_dn.position = {border.w-arrow_dn.w/2-5,border.h-arrow_dn.h*3/2}
-				arrow_l.position  = {         arrow_l.w/2+5,   border.h - 5 - arrow_up.h/2}
-				arrow_r.position  = {border.w-arrow_r.w/2*3/2-5,   border.h - 5 - arrow_up.h/2}
-				grip_hor_base_x = arrow_l.x + arrow_l.w+5
-				grip_vert_base_y =  arrow_up.y+arrow_up.h+5
-				grip_vert.position = {border.w-arrow_up.w-5,grip_vert_base_y}
-				grip_hor.position = {grip_hor_base_x,border.h-5- arrow_up.h}
-			else
-				arrow_up.position = {border.w+arrow_up.w/2+5,arrow_up.h/2}
-				arrow_dn.position = {border.w+arrow_dn.w/2+5,border.h-arrow_dn.h/2}
-				arrow_l.position  = {         arrow_l.w/2,   border.h + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w-arrow_r.w/2,   border.h + 5 + arrow_up.h/2}
-				grip_vert.position = {border.w+5,grip_vert_base_y}
-				grip_hor.position = {grip_hor_base_x,border.h+5}
-			end
-		end
+        end
 		
-		if p.content_w <= p.clip_w then
-			arrow_r.opacity=0
-			arrow_l.opacity=0
-			grip_hor.opacity=0
-		end
-		
-		if p.content_h <= p.clip_h then
-			arrow_up.opacity=0
-			arrow_dn.opacity=0
-			grip_vert.opacity=0
-		end
 
   --[[
           scroll_group.size = {p.visible_w, p.visible_h}
  ]]
 	end
 	
+    
+	scroll_group:add(border,window)
     create()
-	scroll_group:add(border,grip_hor,grip_vert,window)
 	window:add(p.content)
 	
 	
 	
-	--The mouse events for the grips
-	function grip_hor:on_button_down(x,y,button,num_clicks)
-		
-		local dx = x - grip_hor.x
-		
-        dragging = {grip_hor,
-			function(x,y)
-				
-				grip_hor.x = x - dx
-				
-				if  grip_hor.x < grip_hor_base_x then
-					grip_hor.x = grip_hor_base_x
-				elseif grip_hor.x > grip_hor_base_x+(track_w-grip_w) then
-					   grip_hor.x = grip_hor_base_x+(track_w-grip_w)
-				end
-				
-				p.content.x = -(grip_hor.x - grip_hor_base_x) * p.content_w/track_w
-				
-			end 
-		}
-		
-        return true
-    end
-	function grip_vert:on_button_down(x,y,button,num_clicks)
-		
-		local dy = y - grip_vert.y
-		
-        dragging = {grip_vert, function(x,y)
-				
-				grip_vert.y = y - dy
-				
-				if  grip_vert.y < grip_vert_base_y then
-					grip_vert.y = grip_vert_base_y
-				elseif grip_vert.y > grip_vert_base_y+(track_h-grip_h) then
-					   grip_vert.y = grip_vert_base_y+(track_h-grip_h)
-				end
-				
-				p.content.y = -(grip_vert.y - grip_vert_base_y) * p.content_h/track_h
-				
-			end
-		}
-		
-        return true
 
-    end 
 
 	--set the meta table to overwrite the parameters
     mt = {}
