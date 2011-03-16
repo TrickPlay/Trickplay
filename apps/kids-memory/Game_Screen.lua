@@ -310,6 +310,9 @@ local board_key_handler = {
 back_button_key_handler = {
     [keys.OK] = function()
         game_state.in_game = false
+        if first_selected ~= nil then
+            first_selected.flip_b()
+        end
         give_keys("SPLASH")
         play_sound_wrapper(audio.button)
     end,
