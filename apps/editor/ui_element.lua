@@ -2769,16 +2769,16 @@ Extra Function:
 function ui_element.layoutManager(t)
     --default parameters
     local p = {
-        num_rows    = 4,
-        num_cols    = 3,
-        item_w      = 300,
-        item_h      = 200,
-        grid_gap    = 40,
-	duration_per_tile = 300,
-	cascade_delay     = 200,
+        rows    = 4,
+        columns    = 3,
+        cell_w      = 300,
+        cell_h      = 200,
+        cell_spacing    = 40,
+	cell_timing = 300,
+	cell_timing_offset     = 200,
         tiles       = {},
         focus       = nil,
-        focus_visible = true,
+        cells_focusable = true,
         skin="default",
     }
     
@@ -2816,7 +2816,7 @@ function ui_element.layoutManager(t)
                 self:add(obj)
                 obj.x, obj.y = x_y_from_index(r,c)
                 obj.anchor_point = {obj.w/2,obj.h/2}
-                obj.delay = p.cascade_delay*(r+c-1)
+                obj.delay = p.cell_timing_offset*(r+c-1)
 			end,
             set_function = function(r,c,f)
                 if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
@@ -2850,7 +2850,7 @@ function ui_element.layoutManager(t)
             end,
             animate_in = function()
 				local tl = Timeline{
-					duration =p.cascade_delay*(p.num_rows+p.num_cols-2)+ p.duration_per_tile
+					duration =p.cell_timing_offset*(p.rows+p.columns-2)+ p.cell_timing
 				}
 				function tl:on_started()
 					for r = 1, p.num_rows  do
@@ -2866,11 +2866,11 @@ function ui_element.layoutManager(t)
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
 							item = p.tiles[r][c] 
-							if msecs > item.delay and msecs < (item.delay+p.duration_per_tile) then
-								prog = (msecs-item.delay) / p.duration_per_tile
+							if msecs > item.delay and msecs < (item.delay+p.cell_timing) then
+								prog = (msecs-item.delay) / p.cell_timing
 								item.y_rotation = {90*(1-prog),0,0}
 								item.opacity = 255*prog
-							elseif msecs > (item.delay+p.duration_per_tile) then
+							elseif msecs > (item.delay+p.cell_timing) then
 								item.y_rotation = {0,0,0}
 								item.opacity = 255
 							end
@@ -2878,8 +2878,8 @@ function ui_element.layoutManager(t)
 					end
 				end
 				function tl:on_completed()
-					for r = 1, p.num_rows  do
-						for c = 1, p.num_cols do
+					for r = 1, p.rows  do
+						for c = 1, p.columns do
 							p.tiles[r][c].y_rotation={0,0,0}
 							p.tiles[r][c].opacity = 255
 						end
@@ -2892,7 +2892,7 @@ function ui_element.layoutManager(t)
 
 
 	local make_tile = function()
-        local c = Canvas{size={p.item_w, p.item_h}}
+        local c = Canvas{size={p.cell_w, p.cell_h}}
         c:begin_painting()
         c:move_to(            0,          0 )
         c:line_to(   c.w,          0 )
@@ -2913,9 +2913,9 @@ function ui_element.layoutManager(t)
     local make_focus = function()
         return Rectangle{
             name="Focus",
-            size={ p.item_w+5, p.item_h+5},
+            size={ p.cell_w+5, p.cell_h+5},
             color="00000000",
-            anchor_point = { (p.item_w+5)/2, (p.item_h+5)/2},
+            anchor_point = { (p.cell_w+5)/2, (p.cell_h+5)/2},
             border_width=5,
             border_color="FFFFFFFF",
         }
@@ -2941,12 +2941,12 @@ function ui_element.layoutManager(t)
             focus.opacity=0
         end
         
-		for r = 1, p.num_rows  do
+		for r = 1, p.rows  do
             if p.tiles[r] == nil then
                 p.tiles[r]   = {}
                 functions[r] = {}
             end
-			for c = 1, p.num_cols do
+			for c = 1, p.columns do
                 if p.tiles[r][c] == nil then
                     g = make_tile()
                     slate:add(g)
@@ -2961,13 +2961,13 @@ function ui_element.layoutManager(t)
                     slate:add(g)
                     g.x, g.y = x_y_from_index(r,c)
                     g.anchor_point = {g.w/2,g.h/2}
-                    g.delay = p.cascade_delay*(r+c-1)
+                    g.delay = p.cell_timing_offset*(r+c-1)
                 end
 			end
 		end
         
-        if p.num_rows < #p.tiles then
-            for r = p.num_rows + 1, #tiles do
+        if p.rows < #p.tiles then
+            for r = p.rows + 1, #tiles do
                 for c = 1, #p.tiles[r] do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c] = nil
@@ -2976,8 +2976,8 @@ function ui_element.layoutManager(t)
                 functions[r] = nil
             end
         end
-        if p.num_cols < #p.tiles[1] then
-            for c = p.num_cols + 1, #tiles[r] do
+        if p.columns < #p.tiles[1] then
+            for c = p.columns + 1, #tiles[r] do
                 for r = 1, #p.tiles do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c]   = nil
