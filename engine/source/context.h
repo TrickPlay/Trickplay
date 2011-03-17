@@ -171,7 +171,9 @@ public:
 
     //.........................................................................
 
-    void set_escape_quits( bool _escape_quits );
+    void set_first_app_exits( bool value );
+
+    bool is_first_app() const;
 
     //.........................................................................
     // This one is thread-safe, it receives a snippet of JSON that came from
@@ -316,8 +318,6 @@ private:
     App *                       current_app;
 
     String                      first_app_id;
-
-    bool                        escape_quits;
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
