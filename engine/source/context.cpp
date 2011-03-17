@@ -876,14 +876,24 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
 #endif
 
-#ifndef TP_PRODUCTION
-
-// This one deals with escape to exit current app
+//-----------------------------------------------------------------------------
+// This one deals with the ESCAPE and EXIT keys to exit the current app. If the current
+// app is the first one, this will also exit from the call to tp_context_run.
 
 gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context )
 {
     if ( event && event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) )
     {
+        // In production builds, the ESCAPE key is not used - it just passes through
+
+#ifdef TP_PRODUCTION
+
+        if ( event->key.keyval == CLUTTER_Escape )
+        {
+            return FALSE;
+        }
+#endif
+
         TPContext * context = ( TPContext * ) _context;
 
         if ( context->escape_quits )
@@ -896,6 +906,10 @@ gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, 
     return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+
+
+#ifndef TP_PRODUCTION
 
 // This one deals with tilde to reload current app
 
@@ -1141,9 +1155,10 @@ int TPContext::run()
 
 #endif
 
+    g_signal_connect( stage, "captured-event", ( GCallback ) escape_handler, this );
+
 #ifndef TP_PRODUCTION
 
-    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
     g_signal_connect( stage, "captured-event", ( GCallback )tilde_handler, this );
 
 #endif

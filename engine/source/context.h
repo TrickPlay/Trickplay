@@ -281,9 +281,10 @@ private:
 
     friend TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
 
+    static gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context );
+
 #ifndef TP_PRODUCTION
 
-    static gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context );
     static gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context );
 
 #endif
