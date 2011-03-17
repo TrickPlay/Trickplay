@@ -2008,6 +2008,7 @@ void TPContext::load_external_configuration()
         TP_AUDIO_SAMPLER_MAX_INTERVAL,
         TP_AUDIO_SAMPLER_MAX_BUFFER_KB,
         TP_TOAST_JSON_PATH,
+        TP_FIRST_APP_EXITS,
 
         NULL
     };
@@ -2206,6 +2207,10 @@ void TPContext::validate_configuration()
     {
         set( TP_SCREEN_HEIGHT, TP_SCREEN_HEIGHT_DEFAULT );
     }
+
+    // first app exits
+
+    escape_quits = get_bool( TP_FIRST_APP_EXITS , true );
 
     // Allowed secure objects
 
