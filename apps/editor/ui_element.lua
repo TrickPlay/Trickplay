@@ -3673,7 +3673,6 @@ Function: Menu Button
 ]]
 
 function ui_element.menuButton(t)
-    
     --default parameters
     local p = {
 
@@ -3681,12 +3680,12 @@ function ui_element.menuButton(t)
 
 
 button 
-
-        text_font = "DejaVu Sans 30px",
-    	text_color = {255,255,255,255}, --"FFFFFF",
+--]]
+        label_font = "DejaVu Sans 30px",
+    	label_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
-    	wwidth = 180,
-    	wheight = 60, 
+    	button_width = 180,
+    	button_height = 60, 
 
     	label = "Button", 
     	focus_color = {27,145,27,255}, --"1b911b", 
@@ -3695,13 +3694,14 @@ button
     	border_corner_radius = 12,
 
 
-]]
+--]]
 
 
 
         name  = "dropdownbar",
-        font  = "DejaVu Sans 26px",
+        menu_font  = "DejaVu Sans 26px",
         items = {
+        --[[
             {
                 name="Subgroup A:",
                 items={
@@ -3721,38 +3721,34 @@ button
                     {txt="Item 1",f=nil},
                     {txt="Item 2",f=nil}
                 }
-            },
+            },--]]
+            {type="label", string="Subgroup A:"},
+            {type="item",  string="Item A1", f=nil},
+            {type="item",  string="Item A2", f=nil},
+            --{type="seperator"},
+            {type="label", string="Subgroup B:"},
+            {type="item",  string="Item B1", f=nil},
+            {type="item",  string="Item B2", f=nil},
+            {type="seperator"},
+            {type="item",  string="Item 1", f=nil},
+            {type="item",  string="Item 2", f=nil},
+            {type="seperator"},
+            {type="label", string="Subgroup B:"},
+            {type="item",  string="Item B1", f=nil},
+            {type="item",  string="Item B2", f=nil},
         },
-
-
---[[
-
-
-items = {
-            {label, "Subgroup A:"}, -- type, text, function if it is item
-            {item, "Item A1", nil},
-            {seperator}
-        }     
-
-
-
-]]
-        item_bg_clone_src    = nil,
-        item_focus_clone_src = nil,
-        item_spacing = 7,
-        item_start_y = 45,
+        vert_spacing = 5,
+        hor_spacing  = 10,
+        vert_offset  = 40,
         
-        
-        txt_color    = {255,255,255,255},
+        menu_text_color    = {255,255,255,255},
         bg_color     = {255,0,0,255},
-        bg_clone_src = nil,
-        bg_w         = 300,
-        padding      = 5,
+        menu_width   = 220,
+        hor_padding  = 10,
         divider_h    = 2,
-        bg_goes_up   = false,
+        expansion_location   = false,
         
-        top_img       = nil,
-        top_focus_img = nil,
+        
         skin          = "default",
     }
     --overwrite defaults
@@ -3765,11 +3761,22 @@ items = {
     local create
     local curr_cat = 1
     local curr_index = 0
-    local focus_sel_items  = {}
+    local selectable_items  = {}
     
     local dropDownMenu = Group{}
-    local button       = Group{}
-    local button_focus = nil
+    local button       = ui_element.button{
+        text_font=p.label_font,
+    	text_color=p.label_color,
+    	skin=p.skin,
+    	wwidth=p.wwidth,
+    	wheight=p.wheight, 
+        
+    	label=p.label, 
+    	focus_color=p.focus_color,
+    	button_color=p.button_color, 
+    	border_width=p.border_width,
+    	border_corner_radius=p.border_corner_radius,
+    }
     local umbrella
     umbrella     = Group{
         name="menuButton",
@@ -3777,27 +3784,25 @@ items = {
         children={button,dropDownMenu},
         extra={
             type="MenuButton",
-            focus_index = function(cat,i)
+            focus_index = function(i)
                 if curr_cat == cat and curr_index == i then
                     print("Item on Drop Down Bar is already focused")
                     return
                 end
-                if focus_sel_items[curr_cat] ~= nil and
-                   focus_sel_items[curr_cat][curr_index] ~= nil then
+                if selectable_items[curr_index] ~= nil then
                     
-                    focus_sel_items[curr_cat][curr_index]:complete_animation()
-                    focus_sel_items[curr_cat][curr_index].opacity=255
-                    focus_sel_items[curr_cat][curr_index]:animate{
+                    selectable_items[curr_index]:complete_animation()
+                    selectable_items[curr_index].opacity=255
+                    selectable_items[curr_index]:animate{
                         duration=300,
                         opacity=0
                     }
                 end
-                if focus_sel_items[cat] ~= nil and
-                   focus_sel_items[cat][i] ~= nil then
+                if selectable_items[i] ~= nil then
                    
-                    focus_sel_items[cat][i]:complete_animation()
-                    focus_sel_items[cat][i].opacity=0
-                    focus_sel_items[cat][i]:animate{
+                    selectable_items[i]:complete_animation()
+                    selectable_items[i].opacity=0
+                    selectable_items[i]:animate{
                         duration=300,
                         opacity=255
                     }
@@ -3807,80 +3812,52 @@ items = {
             end,
             press_up = function()
                 if curr_index == 1 then
-                    if curr_cat == 1 then
-                        return
-                    else
-                        umbrella.focus_index(curr_cat-1,#focus_sel_items[curr_cat])
-                    end
+                    return
                 else
-                    umbrella.focus_index(curr_cat,curr_index-1)
+                    umbrella.focus_index(curr_index-1)
                 end
             end,
             press_down = function()
-                if curr_index == #focus_sel_items[curr_cat] then
-                    if curr_cat == #focus_sel_items then
-                        return
-                    else
-                        umbrella.focus_index(curr_cat+1,1)
-                    end
+                if curr_index == #selectable_items then
+                    return
                 else
-                    umbrella.focus_index(curr_cat,curr_index+1)
+                    umbrella.focus_index(curr_index+1)
                 end
             end,
-            replace_item = function (cat,index,item)
+            insert_item = function (index,item)
                 assert(type(item)=="table","invalid item")
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+                assert(index > 0 and index <= #p.items, "invalid index")
                 
-                if type(item)=="table" then
-                    p.items[cat].items[index]=item
-                elseif type(item)=="string" then
-                    p.items[cat].items[index].txt=item
-                end
+                table.insert(p.items,index,item)
                 create()
             end,
-            insert_item = function (cat,index,item)
-                assert(type(item)=="table","invalid item")
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
-                
-                table.insert(p.items[cat].items,index,item)
-                create()
-            end,
-            remove_item = function (cat,index)
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
-                
-                table.remove(p.items[cat].items,index)
-                create()
-            end,
-            rename_category = function (index,name)
-                assert(index > 0 and index <= #p.items, "invalid category index")
-                
-                p.items[index].name=name
-                create()
-            end,
-            insert_category = function (index,cat)
-                assert(index > 0 and index <= #p.items, "invalid category index")
-                
-                if type(cat) == "table" then
-                    table.insert(p.items,index,cat)
-                elseif type(cat) == "string" then
-                    table.insert(p.items,index,{name=cat,items={}})
-                end
-                
-                create()
-            end,
-            remove_category = function (index)
-                assert(index > 0 and index <= #p.items, "invalid category index")
+            remove_item = function (index)
+                assert(index > 0 and index <= #p.items, "invalid index")
                 
                 table.remove(p.items,index)
+                
+                create()
+            end,
+            move_item_up = function (index)
+                assert(index > 1 and index <= #p.items, "invalid index")
+                
+                local swp = p.items[index]
+                p.items[index] = p.items[index-1]
+                p.items[index-1] = swp
+                
+                create()
+            end,
+            move_item_down = function (index)
+                assert(index > 0 and index < #p.items, "invalid index")
+                
+                local swp = p.items[index]
+                p.items[index] = p.items[index+1]
+                p.items[index+1] = swp
+                
                 create()
             end,
             spin_in = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
                 dropDownMenu.y_rotation={90,0,0}
                 dropDownMenu.opacity=0
                 dropDownMenu:animate{
@@ -3888,20 +3865,14 @@ items = {
                     opacity=255,
                     y_rotation=0
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                if focus_sel_items[curr_cat][curr_index] then
-                    focus_sel_items[curr_cat][curr_index].opacity=0
+                button:on_focus_in()
+                if selectable_items[curr_index] then
+                    selectable_items[curr_index].opacity=0
                 end
-                curr_cat   = 1
                 curr_index = 0
             end,
             spin_out = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=255
                 dropDownMenu:animate{
@@ -3909,58 +3880,43 @@ items = {
                     opacity=0,
                     y_rotation=-90
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
+                button:on_focus_out()
             end,
             fade_in = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=0
                 dropDownMenu:animate{
                     duration=300,
                     opacity=255,
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                if focus_sel_items[curr_cat][curr_index] then
-                    focus_sel_items[curr_cat][curr_index].opacity=0
+                if selectable_items[curr_index] then
+                    selectable_items[curr_index].opacity=0
                 end
-                curr_cat   = 1
+                button:on_focus_in()
                 curr_index = 0
             end,
             fade_out = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=255
                 dropDownMenu:animate{
                     duration=300,
                     opacity=0,
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
+                button:on_focus_out()
             end,
-            set_item_function = function(cat,index,f)
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+            set_item_function = function(index,f)
+                assert(index > 0 and index <= #p.selectable_items, "invalid index")
                 
-                p.items[cat].items[index].f=f
+                p.selectable_items[index].f=f
                 
             end,
             press_enter = function(p)
-                if p.items[curr_cat] ~= nil and
-                   p.items[curr_cat].items[curr_index].f ~= nil then
+                if p.selectable_items[curr_index] ~= nil and
+                   p.selectable_items[curr_index].f ~= nil then
                    
-                    p.items[curr_cat].items[curr_index].f(p)
+                    p.selectable_items[curr_index].f(p)
                 else
                     print("no function")
                 end
@@ -3971,10 +3927,10 @@ items = {
     umbrella.size = {p.wwidth, p.wheight}
  ]]
     }
-    local function make_ring(w,h,padding)
+    local function make_item_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
         ring:begin_painting()
-        ring:set_source_color( p.txt_color )
+        ring:set_source_color( p.menu_text_color )
         ring:round_rectangle(
             padding + 2 / 2,
             padding + 2 / 2,
@@ -4005,107 +3961,106 @@ items = {
         --reset globals
         curr_cat   = 1
         curr_index = 0
-        focus_sel_items  = {}
+        selectable_items  = {}
         dropDownMenu:clear()
         dropDownMenu.opacity=0
         
-        if p.bg_clone_src == nil then
-            curr_y = 45
-        else
-            curr_y = p.item_start_y
-        end
+        
+        
+        button.text_font=p.label_font
+    	button.text_color=p.label_color
+    	button.skin=p.skin
+    	button.wwidth=p.button_width
+    	button.wheight=p.button_height
+        
+    	button.label=p.label
+    	button.focus_color=p.focus_color
+    	button.button_color=p.button_color
+    	button.border_width=p.border_width
+    	button.border_corner_radius=p.border_corner_radius
+        
+        
+        curr_y = p.vert_offset
         
         --For each category
-        for cat = 1, #p.items do
+        for i = 1, #p.items do
+            local item=p.items[i]
+            --focus_sel_items[cat] = {}
             
-            focus_sel_items[cat] = {}
-            
-            --Don't place a divider at the top
-            if cat ~= 1 and p.divider_h ~= 0 then
+            if item.type == "seperator" then
                 dropDownMenu:add(
                     Rectangle{
-                        x     = p.padding,
+                        x     = p.hor_padding,
                         y     = curr_y,
-                        name  = "divider "..(cat-1),
-                        w     = p.bg_w-2*p.padding,
+                        name  = "divider "..i,
+                        w     = p.menu_width-2*p.hor_padding,
                         h     = p.divider_h,
                         color = txt_color
                     }
                 )
-                curr_y = curr_y + p.divider_h + txt_spacing
-            end
-            
-            --Category title
-            if p.items[cat].name ~= nil then
-                dropDownMenu:add(
-                    Text{
-                        text  = p.items[cat].name,
-                        font  = p.font,
-                        color = p.txt_color,
-                        x     = p.padding,
-                        y     = curr_y,
-                    }
-                )
-                curr_y = curr_y + txt_h + txt_spacing
-            end
-            
-            --For each item in that categoryitem
-            for item = 1, #p.items[cat].items do
+                curr_y = curr_y + p.divider_h + p.vert_spacing
+            elseif item.type == "item" then
                 
-                --Make the base_img for each item
-                if p.item_bg_clone_src ~= nil then
-                    ui_ele = Clone{source=p.item_bg_clone_src}
-                else
-                    ui_ele = make_ring(p.bg_w,txt_h+15,7)
-                end
-                
-                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                ui_ele.position     = {   p.bg_w/2, curr_y+txt_h/2 }
-                dropDownMenu:add(ui_ele)
-                
-                
-                --Make the focus for each item
-                if p.item_focus_clone_src ~= nil then
-                    ui_ele = Clone{source=p.item_focus_clone_src}
-                else
-                    ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    ui_ele.size = {p.bg_w,txt_h+15}
-                end
-                
-                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                ui_ele.position     = {   p.bg_w/2, curr_y+txt_h/2 }
-                ui_ele.opacity      = 0
-                dropDownMenu:add(ui_ele)
-                table.insert(focus_sel_items[cat],ui_ele)
                 
                 
                 --Make the text label for each item
-                dropDownMenu:add(
-                    Text{
-                        text  = p.items[cat].items[item].txt,
-                        font  = p.font,
-                        color = p.txt_color,
-                        x     = p.padding+inset,
+                local txt = Text{
+                        text  = item.string,
+                        font  = p.menu_font,
+                        color = p.menu_text_color,
+                        x     = p.hor_padding+p.hor_spacing,
                         y     = curr_y,
                     }
+                    txt.anchor_point={0,txt.h/2}
+                    txt.y = txt.y+txt.h/2
+                dropDownMenu:add(
+                    txt
                 )
-                curr_y = curr_y + txt_h + txt_spacing
+                ui_ele = make_item_ring(p.menu_width-2*p.hor_spacing,txt.h+10,7)
+                
+                ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                ui_ele.position     = {  p.hor_spacing, txt.y }
+                dropDownMenu:add(ui_ele)
+                
+                
+                
+                ui_ele = assets(skin_list[p.skin]["button_focus"])
+                ui_ele.size = {p.bg_w,txt_h+15}
+                
+                
+                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
+                ui_ele.position     = {   p.menu_width/2, curr_y+txt_h/2 }
+                ui_ele.opacity      = 0
+                dropDownMenu:add(ui_ele)
+                table.insert(selectable_items,ui_ele)
+                
+                curr_y = curr_y + txt.h + p.vert_spacing
+            elseif item.type == "label" then
+                txt = Text{
+                        text  = item.string,
+                        font  = p.menu_font,
+                        color = p.menu_text_color,
+                        x     = p.hor_spacing,
+                        y     = curr_y,
+                    }
+                dropDownMenu:add(
+                    txt
+                )
+                curr_y = curr_y + txt.h + p.vert_spacing
+            else
+                print("Invalid type in the item list. Type: ",item.type)
             end
         end
         
         
-        if p.bg_clone_src == nil then
-            if skin_list[p.skin]["drop_down_bg"] then
-                ui_ele = assets(skin_list[p.skin]["drop_down_bg"])
-                ui_ele.size = { p.bg_w , curr_y }
-            else
-                ui_ele = ui.factory.make_dropdown(
-                    { p.bg_w , curr_y } ,
-                    p.bg_color
-                )
-            end
+        if skin_list[p.skin]["drop_down_bg"] then
+            ui_ele = assets(skin_list[p.skin]["drop_down_bg"])
+            ui_ele.size = { p.bg_w , curr_y }
         else
-            ui_ele = Clone{source=p.bg_clone_src}
+            ui_ele = ui.factory.make_dropdown(
+                { p.menu_width , curr_y } ,
+                p.bg_color
+            )
         end
         dropDownMenu:add(ui_ele)
         ui_ele:lower_to_bottom()
@@ -4114,58 +4069,27 @@ items = {
         if p.bg_goes_up then
             ui_ele.x_rotation={180,0,0}
             ui_ele.y = ui_ele.h+p.item_start_y
-            dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.item_start_y}
+            dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.vert_offset}
         else
             dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
         end
         
-        button:clear()
-        if p.top_img ~= nil then
-            if p.top_img.parent ~= nil then
-                p.top_img.unparent()
-            end
-            p.top_img.anchor_point = {p.top_img.w/2,p.top_img.h/2}
-            button:add(p.top_img)
-        else
-            ui_ele = assets(skin_list[p.skin]["button"])
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            ui_ele.reactive=true
-            button:add(ui_ele)
-        end
-        
-        
-        
-        if p.top_focus_img ~= nil then
-            if p.top_focus_img.parent ~= nil then
-                p.top_focus_img.unparent()
-            end
-            p.top_focus_img.anchor_point = {p.top_focus_img.w/2,p.top_focus_img.h/2}
-            button:add(p.top_focus_img)
-            button_focus = p.top_focus_img
-        else
-            button_focus = assets(skin_list[p.skin]["button_focus"])
-            button_focus.anchor_point = {button_focus.w/2,button_focus.h/2}
-            button:add(button_focus)
-        end
-        
-        button_focus.opacity = 0
-        
         button.reactive=true
+        
         function button:on_button_down(x,y,b,n)
-            if button_focus.opacity == 0 then
+            if dropDownMenu.opacity == 0 then
                 umbrella.spin_in()
             else
                 umbrella.spin_out()
             end
         end
         
-        ui_ele = Text{text=p.name,font=p.font,color = p.txt_color}
-        ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        button:add(ui_ele)
+        
         
         button.position = {button.w/2,button.h/2}
+        button.anchor_point = {button.w/2,button.h/2}
         dropDownMenu.x = button.w/2
-        if p.bg_goes_up then
+        if p.expansion_location then
             dropDownMenu.y = dropDownMenu.y -10
         else
             dropDownMenu.y = dropDownMenu.y + button.h+10
