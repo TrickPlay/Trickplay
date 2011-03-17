@@ -48,7 +48,6 @@ TPContext::TPContext()
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
-    escape_quits( true ),
     media_player_constructor( NULL ),
     media_player( NULL ),
     external_log_handler( NULL ),
@@ -896,7 +895,7 @@ gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, 
 
         TPContext * context = ( TPContext * ) _context;
 
-        if ( context->escape_quits )
+        if ( ! context->is_first_app() || context->get_bool( TP_FIRST_APP_EXITS , true ) )
         {
             context->close_app();
             return TRUE;
@@ -1239,7 +1238,7 @@ int TPContext::run()
             }
             catch ( ... )
             {
-                if ( ! current_app || current_app->get_id() == first_app_id )
+                if ( is_first_app() )
                 {
                     g_warning( "CAUGHT EXCEPTION IN RUN LOOP, EXITING" );
 
@@ -1557,7 +1556,7 @@ void TPContext::app_run_callback( App * app , int result )
 
 void TPContext::close_app()
 {
-    if ( ! current_app || current_app->get_id() == first_app_id )
+    if ( is_first_app() )
     {
         quit();
     }
@@ -2208,10 +2207,6 @@ void TPContext::validate_configuration()
         set( TP_SCREEN_HEIGHT, TP_SCREEN_HEIGHT_DEFAULT );
     }
 
-    // first app exits
-
-    escape_quits = get_bool( TP_FIRST_APP_EXITS , true );
-
     // Allowed secure objects
 
     const gchar * allowed_config = get( TP_APP_ALLOWED, TP_APP_ALLOWED_DEFAULT );
@@ -2593,9 +2588,21 @@ gpointer TPContext::get_internal( gpointer key )
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_escape_quits( bool _escape_quits )
+void TPContext::set_first_app_exits( bool value )
 {
-    escape_quits = _escape_quits;
+    set( TP_FIRST_APP_EXITS , value ? 1 : 0 );
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::is_first_app() const
+{
+    if ( ! current_app )
+    {
+        return true;
+    }
+
+    return current_app->get_id() == first_app_id;
 }
 
 //-----------------------------------------------------------------------------
