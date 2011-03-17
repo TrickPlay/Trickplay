@@ -2934,7 +2934,7 @@ function editor.ui_elements()
 		lb=new_widget
               elseif (new_widget.extra.type == "LayoutManager") then 
 		d=new_widget
-              elseif (new_widget.extra.type == "Scro1 Rectangle...llPane") then 
+              elseif (new_widget.extra.type == "Scro1lPane") then 
 		si=new_widget
               elseif (new_widget.extra.type == "MenuButton") then 
 		dd=new_widget
