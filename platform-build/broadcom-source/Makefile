@@ -120,8 +120,6 @@ LDFLAGS += -L$(TRICKPLAY_LIB) \
 	-Wl,--end-group 
 
 
-EXTRA_OBJS := esutil.c
-
 # Implicit rule for building local apps
 %$(APPSUFFIX): %.c $(EXTRA_OBJS) $(VXOBJS)
 	@echo [Compile... $<]
