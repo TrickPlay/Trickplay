@@ -1469,8 +1469,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      text_reactive()
 		      editor.n_selected(v, true)
 	     end 
+	     if v.extra then 
 	     if v.extra.type == "MenuButton" then 
                   v.spin_out()
+	     end 
 	     end 
 	     for i, c in pairs(g.children) do
 	     	editor.n_selected(c)
@@ -1827,7 +1829,32 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(item_picker)
 
         return group
-    elseif(item_n == "reactive" or item_n == "loop") then  -- Attribute with single checkbox
+    elseif item_n == "expansion_location" then -- Attribute with radio button
+	group:clear()
+	group.name = item_n
+	group.reactive = true
+
+	text = Text {name = "attr", text = item_s}:set(STYLE)
+        text.position  = {PADDING_X, 5}
+    	group:add(text)
+
+	local radio_b, sel_item = 1
+	
+	if item_v == "above" then 
+	    sel_item = 1
+	else  
+	    sel_item = 2
+	end 
+	print("SEL ITEM : ", sel_item)	
+        radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+	radio_b.position = {PADDING_X/2, 40}
+	radio_b.name = "radioB"
+
+	group:add(radio_b)
+
+	return group
+
+    elseif item_n == "reactive" or item_n == "loop" or item_n == "vert_bar_visible" or item_n == "hor_bar_visible" or item_n == "cells_focusable"  then  -- Attribute with single checkbox
 	group:clear()
 	group.name = item_n
 	group.reactive = true
@@ -1847,7 +1874,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end 
 
 	reactive_checkbox.position = {text.x + text.w + 10 , 10}
-	reactive_checkbox.name = "reactive_check"
+	reactive_checkbox.name = "bool_check"
 
 	group:add(reactive_checkbox)
 
