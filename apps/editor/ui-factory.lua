@@ -1365,6 +1365,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              if key == keys.Return then
                   if (item_v == "view code") then 
 		      screen:remove(inspector)
+		      if v.extra.type == "MenuButton" then 
+                      	   v.spin_out()
+		      end 
 		      input_mode = S_SELECT
 		      current_inspector = nil
 		      for i, c in pairs(g.children) do
@@ -1378,6 +1381,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      editor.n_selected(v, true)
 		      inspector_apply (v, inspector) 
 		      screen:remove(inspector)
+		      if v.extra.type == "MenuButton" then 
+                      	   v.spin_out()
+		      end 
 		      input_mode = S_SELECT
 		      current_inspector = nil
                       screen:grab_key_focus(screen) 
@@ -1388,6 +1394,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	              return true
 		  elseif (item_v == "cancel") then 
 		      screen:remove(inspector)
+		      if v.extra.type == "MenuButton" then 
+                      	   v.spin_out()
+		      end 
 		      input_mode = S_SELECT
 		      current_inspector = nil
 		      editor.n_selected(v, true)
@@ -1459,6 +1468,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                       screen:grab_key_focus(screen) 
 		      text_reactive()
 		      editor.n_selected(v, true)
+	     end 
+	     if v.extra.type == "MenuButton" then 
+                  v.spin_out()
 	     end 
 	     for i, c in pairs(g.children) do
 	     	editor.n_selected(c)

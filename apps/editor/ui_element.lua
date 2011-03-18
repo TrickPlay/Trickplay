@@ -4053,7 +4053,8 @@ button
         end
         
         button.reactive=true
-        
+       
+	if editor_lb == nil then  
         function button:on_button_down(x,y,b,n)
             if dropDownMenu.opacity == 0 then
                 umbrella.spin_in()
@@ -4061,6 +4062,7 @@ button
                 umbrella.spin_out()
             end
         end
+ 	end 
         
         
         
