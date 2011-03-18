@@ -1188,7 +1188,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- inspector scroll function 
 	if v.extra then 
-	       si = ui_element.scrollPane{visible_w = item_group.w + 40, virtual_w = item_group.w, virtual_h = item_group.h, visible_w = 480, border_is_visible = false} 
+	       si = ui_element.scrollPane{visible_w = item_group.w + 40, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, frame_thickness = 0} 
 	       si.content = item_group
 	       si.position = {0,82,0}
 	       si.name ="si"
