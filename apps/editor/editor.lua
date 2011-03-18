@@ -1200,6 +1200,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	   inspector:add(item_group) 
 	end 
 	screen:add(inspector)
+
+
+	if v.extra.type == "MenuButton" then 
+                v.spin_in()
+	end 
+
 	input_mode = S_POPUP
 	inspector:find_child("name").extra.on_focus_in()
 	
@@ -1226,6 +1232,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
                 screen.grab_key_focus(screen) 
 	        input_mode = S_SELECT
+		if v.extra.type == "MenuButton" then 
+                	v.spin_out()
+	        end 
 		return true
         end 
 
