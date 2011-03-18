@@ -790,7 +790,7 @@ local function build_ui( show_it )
 
 	       local actor = unpack(dragging) 
 
-	       if (actor.name == "grip") then  
+	       if (actor.name == "scroll_window") then  -- grip
 	             local actor,s_on_motion = unpack(dragging) 
 	             s_on_motion(x, y)
 	             return true
@@ -837,7 +837,7 @@ local function build_ui( show_it )
 		    end 
 	       end 
 	      
-	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar" and actor.name ~= "grip") then
+	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar") then
 	            actor.x =  x - dx 
 	            actor.y =  y - dy  
 	       else
