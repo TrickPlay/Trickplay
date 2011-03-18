@@ -579,6 +579,55 @@ function make_attr_t(v)
 		end 
         	table.insert(attr_t, {"label", v.label,"Label"})
 		end,
+	["empty_top_color"] = function()
+		     table.insert(attr_t, {"caption", "Empty Bar :"})
+		     local color_t = v.empty_top_color 
+             	     if color_t == nil then 
+                 	color_t = {0,0,0,0}
+	     	     end
+		     table.insert(attr_t, {"caption", "Gradient Top Color"})
+	     	     table.insert(attr_t, {"empty_top_color".."r", color_t[1], "R"})
+             	     table.insert(attr_t, {"empty_top_color".."g", color_t[2], "G"})
+             	     table.insert(attr_t, {"empty_top_color".."b", color_t[3], "B"})
+       	     	     table.insert(attr_t, {"empty_top_color".."a", color_t[4], "A"})    
+		     end,
+	["empty_bottom_color"] = function()
+		     local color_t = v.empty_bottom_color 
+             	     if color_t == nil then 
+                 	color_t = {0,0,0,0}
+	     	     end
+		     table.insert(attr_t, {"caption", "Gradient Bottom Color"})
+	     	     table.insert(attr_t, {"empty_bottom_color".."r", color_t[1], "R"})
+             	     table.insert(attr_t, {"empty_bottom_color".."g", color_t[2], "G"})
+             	     table.insert(attr_t, {"empty_bottom_color".."b", color_t[3], "B"})
+       	     	     table.insert(attr_t, {"empty_bottom_color".."a", color_t[4], "A"})    
+		     end,
+	["filled_top_color"] = function()
+		     table.insert(attr_t, {"caption", "Filled Bar :"})
+		     local color_t = v.filled_top_color 
+             	     if color_t == nil then 
+                 	color_t = {0,0,0,0}
+	     	     end
+		     table.insert(attr_t, {"caption", "Gradient Top Color"})
+	     	     table.insert(attr_t, {"filled_top_color".."r", color_t[1], "R"})
+             	     table.insert(attr_t, {"filled_top_color".."g", color_t[2], "G"})
+             	     table.insert(attr_t, {"filled_top_color".."b", color_t[3], "B"})
+       	     	     table.insert(attr_t, {"filled_top_color".."a", color_t[4], "A"})    
+
+		     end,
+	["filled_bottom_color"] = function()
+		     local color_t = v.filled_bottom_color 
+             	     if color_t == nil then 
+                 	color_t = {0,0,0,0}
+	     	     end
+		     table.insert(attr_t, {"caption", "Gradient Bottom Color"})
+	     	     table.insert(attr_t, {"filled_bottom_color".."r", color_t[1], "R"})
+             	     table.insert(attr_t, {"filled_bottom_color".."g", color_t[2], "G"})
+             	     table.insert(attr_t, {"filled_bottom_color".."b", color_t[3], "B"})
+       	     	     table.insert(attr_t, {"filled_bottom_color".."a", color_t[4], "A"})   
+		     end,
+		
+		
   }
   
   local obj_map = {
@@ -593,10 +642,10 @@ function make_attr_t(v)
        ["ToastAlert"] = function() return {"skin","x_rotation", "anchor_point","icon","label","message","opacity","title_color","title_font","message_color","message_font","fill_color","border_color","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","items","selected_item","reactive","focus"} end,
        ["ProgressSpinner"] = function() return {"skin","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
-       ["ProgressBar"] = function() return {"x_rotation","anchor_point", "opacity","shell_upper_color","shell_lower_color","fill_upper_color","fill_lower_color","stroke_color",} end,
+       ["ProgressBar"] = function() return {"skin","x_rotation","anchor_point", "opacity","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","stroke_color","progress"} end,
        ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible",} end,
        ["ScrollPane"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
-       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","opacity","font","item_spacing","item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive","focus",} end,
+       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_font","border_width","border_corner_radius","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","reactive","focus",} end,
        ["CheckBox"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
        ["RadioButton"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
        ["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,
@@ -613,7 +662,7 @@ function make_attr_t(v)
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
       }
-       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" and v.extra.type ~= "MenuButton") then 
+       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) then 
              table.insert(attr_t, {"ui_width", math.floor(v.ui_width), "W"})
              table.insert(attr_t, {"ui_height", math.floor(v.ui_height), "H"})
        end
@@ -661,7 +710,11 @@ function make_attr_t(v)
        	if attr_map[j] then
              attr_map[j](j)
         elseif type(v[j]) == "number" then 
-             table.insert(attr_t, {j, math.floor(v[j]), stringTotitle(j)})
+	     if j ~= "progress" then 
+                 table.insert(attr_t, {j, math.floor(v[j]), stringTotitle(j)})
+	     else 
+                 table.insert(attr_t, {j, v[j], stringTotitle(j)})
+	     end
 	elseif type(v[j]) == "string" then 
 	     if j == "message" then 
              table.insert(attr_t, {"caption", stringTotitle(j)})
@@ -706,7 +759,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive"}
+    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","empty_top_color", "empty_bottom_color", "stroke_color", "progress", "filled_top_color", "filled_bottom_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive", "menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
