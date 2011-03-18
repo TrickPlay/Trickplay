@@ -4031,15 +4031,12 @@ button
         end
         
         
-        if skin_list[p.skin]["drop_down_bg"] then
-            ui_ele = assets(skin_list[p.skin]["drop_down_bg"])
-            ui_ele.size = { p.bg_w , curr_y }
-        else
-            ui_ele = ui.factory.make_dropdown(
-                { p.menu_width , curr_y } ,
-                p.background_color
-            )
-        end
+        
+        ui_ele = ui.factory.make_dropdown(
+            { p.menu_width , curr_y } ,
+            p.background_color
+        )
+        
         dropDownMenu:add(ui_ele)
         ui_ele:lower_to_bottom()
         
