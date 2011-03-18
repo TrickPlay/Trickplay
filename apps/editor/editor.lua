@@ -1023,7 +1023,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	-- make inspector background image 
 	if v.extra then 
 	   if is_this_widget(v) == true  then
-		  print("editor.lua : => ", v.extra.type)
 	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
 	   else -- rect, img, text 
 	     	  inspector_bg = factory.make_popup_bg(v.type, 0)
@@ -1188,7 +1187,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- inspector scroll function 
 	if v.extra then 
-	       si = ui_element.scrollPane{visible_w = item_group.w + 40, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, frame_thickness = 0} 
+	       si = ui_element.scrollPane{visible_w = item_group.w + 40, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
 	       si.content = item_group
 	       si.position = {0,82,0}
 	       si.name ="si"

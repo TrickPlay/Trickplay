@@ -1566,7 +1566,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(plus) 
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-	local items_list = ui_element.layoutManager{num_rows = table.getn(v.items), num_cols = 1, item_w = 300, item_h = 40, grid_gap=5, focus=list_focus}
+	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 1, cell_w = 300, cell_h = 40, cell_spacing=5, focus=list_focus}
         items_list.position = {text.w, text.y + text.h + PADDING_Y}
         items_list.name = "items_list"
 	items_list:find_child("Focus").opacity = 0 
@@ -2053,6 +2053,10 @@ function factory.draw_anchor_point(v, inspector)
     local v_pos = 0
     local cur_posint = left_top
     local center, left_top, left_mid, left_bottom, mid_top, mid_bottom, right_top, right_mid, right_bottom
+
+
+    dumptable(v.anchor_point)
+    dumptable(v.size)
  
     local function find_current_anchor (v)
         if(v.anchor_point == nil) then 
