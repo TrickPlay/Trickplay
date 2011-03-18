@@ -3129,7 +3129,7 @@ function ui_element.scrollPane(t)
     end
 	
 	--Group that Clips the content
-	local window  = Group{name="scroll_window"}
+	local window  = Group{name="window"}
 	--Group that contains all of the content
 	--local content = Group{}
 	--declarations for dependencies from scroll_group

@@ -310,7 +310,7 @@ function create_on_button_down_f(v)
 	      	    if(dragging ~= nil) then 
 
 	       	       local actor = unpack(dragging) 
-		       if (actor.name == "scroll_window") then  
+		       if (actor.name == "grip") then  -- scroll_window -> grip
 				dragging = nil 
 				return true 
 		       end 
@@ -593,7 +593,7 @@ function make_attr_t(v)
        ["ToastAlert"] = function() return {"skin","x_rotation", "anchor_point","icon","label","message","opacity","title_color","title_font","message_color","message_font","fill_color","border_color","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","items","selected_item","reactive","focus"} end,
        ["ProgressSpinner"] = function() return {"skin","x_rotation","anchor_point","opacity","anim_radius","dot_radius","dot_color","num_dots","anim_duration", } end,
-       ["ProgressBar"] = function() rscroll_windoweturn {"x_rotation","anchor_point", "opacity","shell_upper_color","shell_lower_color","fill_upper_color","fill_lower_color","stroke_color",} end,
+       ["ProgressBar"] = function() return {"x_rotation","anchor_point", "opacity","shell_upper_color","shell_lower_color","fill_upper_color","fill_lower_color","stroke_color",} end,
        ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible",} end,
        ["ScrollPane"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
        ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","opacity","font","item_spacing","item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive","focus",} end,
