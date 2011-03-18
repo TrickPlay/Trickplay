@@ -4045,9 +4045,9 @@ button
         ui_ele:lower_to_bottom()
         
         dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        if p.bg_goes_up then
+        if p.expansion_location then
             ui_ele.x_rotation={180,0,0}
-            ui_ele.y = ui_ele.h+p.item_start_y
+            ui_ele.y = ui_ele.h+p.vert_offset
             dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.vert_offset}
         else
             dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
