@@ -1573,7 +1573,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	for i,j in pairs(v.items) do 
 
-             local item = ui_element.textInput{wwidth = 350, wheight = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
+             local item = ui_element.textInput{ui_width = 350, ui_height = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
 	     item.name = "item_text"..tostring(i)
 
 	     function item:on_button_down()
@@ -1715,8 +1715,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end
 	
         local item_picker = ui_element.buttonPicker{skin = "custom", items = itemLists, text_font = "DejaVu Sans 26px", selected_item = selected}
-	item_picker.wheight = 45
-	item_picker.wwidth = 210
+	item_picker.ui_height = 45
+	item_picker.ui_width = 210
         item_picker.position = {text.x + text.w + 50 , 0}
 	item_picker.name = "item_picker"
 
@@ -1829,9 +1829,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	local reactive_checkbox
 	
 	if item_v == "true" then 
-	     reactive_checkbox = ui_element.checkBox {wwidth = 200, wheight = 100, items = {""}, selected_items = {1},}
+	     reactive_checkbox = ui_element.checkBox {ui_width = 200, ui_height = 100, items = {""}, selected_items = {1},}
 	else 
-	     reactive_checkbox = ui_element.checkBox {wwidth = 200, wheight = 100, items = {""}, selected_items = {},}
+	     reactive_checkbox = ui_element.checkBox {ui_width = 200, ui_height = 100, items = {""}, selected_items = {},}
 	end 
 
 	reactive_checkbox.position = {text.x + text.w + 10 , 10}
@@ -1867,7 +1867,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     group:add(input_text) 
 	     
 
-	     local filechooser = ui_element.button{wwidth = 150, wheight = 45, text_font ="DejaVu Sans 25px" , label = "Choose ...", }
+	     local filechooser = ui_element.button{ui_width = 150, ui_height = 45, text_font ="DejaVu Sans 25px" , label = "Choose ...", }
 	     filechooser.position = {ring.x + ring.w, ring.y }
 
 	     if v.type == "Video" then 
@@ -2055,9 +2055,6 @@ function factory.draw_anchor_point(v, inspector)
     local center, left_top, left_mid, left_bottom, mid_top, mid_bottom, right_top, right_mid, right_bottom
 
 
-    dumptable(v.anchor_point)
-    dumptable(v.size)
- 
     local function find_current_anchor (v)
         if(v.anchor_point == nil) then 
 	     return h_pos, v_pos
