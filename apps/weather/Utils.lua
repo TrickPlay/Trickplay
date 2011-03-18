@@ -45,3 +45,233 @@ function Shadow_Text(t)
     
     return g
 end
+
+
+imgs = {
+	rain_clouds = {
+		lg = {
+			--Image{src="assets/clouds/clouds-stormy1.png"},
+			"assets/clouds/clouds-stormy2.png",
+		},--[[
+		sm = {
+			Image{src="assets/clouds/clouds-stormy-small1.png"},
+			Image{src="assets/clouds/clouds-stormy-small2.png"},
+		}--]]
+	},
+	reg_clouds = {
+		lg = {
+			"assets/clouds/clouds-fluffy1.png",
+			"assets/clouds/clouds-fluffy2.png",
+			"assets/clouds/clouds-fluffy4.png",
+			"assets/clouds/clouds-fluffy6.png",
+			"assets/clouds/clouds-fluffy7.png",
+			"assets/clouds/clouds-fluffy8.png",
+			"assets/clouds/clouds-fluffy9.png",
+		},
+		sm = {
+			"assets/clouds/clouds-fluffy-small1.png",
+			"assets/clouds/clouds-fluffy-small2.png",
+			"assets/clouds/clouds-fluffy-small3.png",
+			"assets/clouds/clouds-fluffy-small4.png",
+			"assets/clouds/clouds-fluffy-small5.png",
+		},
+	},
+	fog = "assets/clouds/fog.png",
+	glow_cloud = "assets/clouds/clouds-stormy-glow.png",
+	moon  = "assets/night/moon.png",
+	star  = "assets/night/star.png",
+	stars = "assets/night/stars.png",
+	rain  = {
+		falling = "assets/rain/falling.png",
+		--[[
+		streak = {
+			Image{src="assets/rain/rain-streak.png"},
+			Image{src="assets/rain/rain-streak2.png"},
+		},--]]
+		light  = "assets/rain/rain-light.png",
+		--[[
+		clump  = Image{src="assets/rain/rain-clump.png"},
+		--]]
+		drops  = {
+			"assets/rain/raindrop1.png",
+			"assets/rain/raindrop2.png",
+			"assets/rain/raindrop3.png",
+			"assets/rain/raindrop4.png",
+			"assets/rain/raindrop5.png",
+		},
+	},
+	--frost_corner = Image{src="assets/snow/frost.png"},
+	snow_corner  = "assets/snow/snow.png",
+	snow_flake = {
+		lg = {
+			"assets/snow/snowflake-lg1.png",
+			"assets/snow/snowflake-lg2.png",
+			"assets/snow/snowflake-lg3.png",
+			"assets/snow/snowflake-lg4.png",
+		},--[[
+		lg_blur = {
+			Image{src="assets/snow/snowflake-lg-blur1.png"},
+			Image{src="assets/snow/snowflake-lg-blur2.png"},
+			Image{src="assets/snow/snowflake-lg-blur3.png"},
+			Image{src="assets/snow/snowflake-lg-blur4.png"},
+			Image{src="assets/snow/snowflake-lg-blur5.png"},
+		},--]]
+		sm = {
+			"assets/snow/snowflake-small1.png",
+			"assets/snow/snowflake-small2.png",
+			"assets/snow/snowflake-small3.png",
+		}
+	},
+	sun = {
+		base  = "assets/sun/sun_base.png",
+		flare = {
+			"assets/sun/sun_flare1.png",
+			"assets/sun/sun_flare2.png",
+			"assets/sun/sun_flare3.png",
+		}
+	},
+	arrows = {
+		left  = "assets/ui/arrow_left.png",
+		right = "assets/ui/arrow_right.png",
+	},
+	bar = {
+		side = "assets/ui/bar/end.png",
+		mid  = "assets/ui/bar/middle.png",
+		--full = Image{src="assets/ui/bar-full.png"},
+		--mini = Image{src="assets/ui/bar-mini.png"},
+	},
+	gradient = {
+		full = "assets/ui/gradient-full.png",
+		mini = "assets/ui/gradient-mini.png"
+	},
+	color_button = {
+		green_less  = "assets/ui/button-less.png",
+		green_more  = "assets/ui/button-more.png",
+		blue_5_day  = "assets/ui/button-5day.png",
+		blue_today  = "assets/ui/button-today.png",
+		yellow      = "assets/ui/button-options.png",
+	},
+	logo      = "assets/ui/logo.png",
+	lightning = {
+		"assets/lightning/lightning-bolt.png",
+		"assets/lightning/lightning-bolt2.png",
+		"assets/lightning/lightning-bolt3.png",
+	},
+	bg ={
+		"assets/bg/bg.png",
+		"assets/bg/bg.jpg",
+		"assets/bg/1.jpg",
+		"assets/bg/2.jpg",
+		"assets/bg/3.jpg",
+		"assets/bg/4.jpg",
+		"assets/bg/5.jpg",
+		"assets/bg/6.jpg",
+		"assets/bg/7.jpg",
+		"assets/bg/8.jpg",
+		"assets/bg/9.jpg",
+	},
+	wiper     = {
+		arm        = "assets/rain/rain-wiper-arm.png",
+		blade      = "assets/rain/rain-wiper-blade.png",
+		snow_blade = "assets/rain/rain-wiper-blade-snow.png",
+		corner     = "assets/rain/rain-corner.png",
+		freezing   = "assets/rain/frost2.png",
+	},
+	qmark = "assets/ui/questionmark.png",
+	load = {
+		sun_base    = "assets/ui/loading/load-sun-center.png",
+		light_flare = "assets/ui/loading/load-sun-spin.png",
+		dark_flare  = "assets/ui/loading/load-sun-shadow.png",
+		error       = "assets/ui/loading/load-error.png"
+	},
+	
+	icons = {
+		chanceflurries = "assets/icons/icon-chanceflurries.png",
+		chancerain     = "assets/icons/icon-chancerain.png",
+		chancesleet    = "assets/icons/icon-chancesleet.png",
+		chancesnow     = "assets/icons/icon-chancesnow.png",
+		chancetstorms  = "assets/icons/icon-chancetstorm.png",
+		clear          = nil,
+		cloudy         = "assets/icons/icon-cloudy.png",
+		flurries       = "assets/icons/icon-flurries.png",
+		fog            = "assets/icons/icon-fog.png",
+		hazy           = "assets/icons/icon-hazy.png",
+		mostlycloudy   = "assets/icons/icon-mostlycloudy.png",
+		mostlysunny    = nil,
+		partlycloudy   = "assets/icons/icon-partlycloudy.png",
+		partlysunny    = nil,
+		rain           = "assets/icons/icon-rain.png",
+		sleet          = "assets/icons/icon-sleet.png",
+		snow           = "assets/icons/icon-snow.png",
+		sunny          = "assets/icons/icon-sunny.png",
+		tstorms        = "assets/icons/icon-tstorm.png",
+		unknown        = "assets/icons/icon-unknown.png",
+	}
+}
+imgs.icons.partlysunny = imgs.icons.mostlycloudy
+imgs.icons.mostlysunny = imgs.icons.partlycloudy
+imgs.icons.clear       = imgs.icons.sunny
+
+local clone_sources_group = Group{name="clone sources"}
+local clone_sources_table = {}
+
+screen:add(clone_sources_group)
+clone_sources_group:hide()
+
+--save the function pointer to the old Clone constructor
+local TP_Clone = Clone
+local TP_Image = Image
+Image = nil
+--local deletion_spy
+--The new Clone Constructor
+Clone = function(t)
+	
+	--must be created the same way you typically create Clones
+	assert(type(t) == "table","Clone receives a table as its parameter,"..
+		" received a parameter of type "..type(t))
+	assert(t.source ~= nil,"Clone requires a source")
+	
+	--If an asset has not been loaded in yet, then load it
+	if clone_sources_table[t.source] == nil then
+		
+		clone_sources_table[t.source] = TP_Image{src=t.source,extra={count=0}}
+		
+		clone_sources_group:add(clone_sources_table[t.source])
+		
+	end
+	
+	
+	clone_sources_table[t.source].count = clone_sources_table[t.source].count+1
+	
+	print("I HAVE THIS MANY",clone_sources_table[t.source].count)
+	
+	local deletion_spy = newproxy(true)
+	
+	local sauce = t.source
+	
+	getmetatable( deletion_spy ).__gc = function()
+		
+		clone_sources_table[sauce].count = clone_sources_table[sauce].count - 1
+		
+		print("DECREMENTTTTTT",clone_sources_table[sauce].count)
+		
+		if clone_sources_table[sauce].count == 0 then
+			
+			clone_sources_table[sauce]:unparent()
+			
+			clone_sources_table[sauce] = nil
+			
+		end
+	end
+	
+	--replace the string with the UI_Element
+	t.source = clone_sources_table[t.source]
+	
+	
+	--return a Clone
+	t= TP_Clone(t)
+	
+	t.deletion_spy = deletion_spy
+
+	return t
+end
