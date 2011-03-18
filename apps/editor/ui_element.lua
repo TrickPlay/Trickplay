@@ -2463,10 +2463,10 @@ function ui_element.progressSpinner(t)
     --default parameters
     local p = {
         skin          = "default",
-        dot_diameter    = 5,
+        dot_diameter    = 10,
         dot_color     = {255,255,255,255},
         number_of_dots      = 12,
-        overall_diameter   = 50,
+        overall_diameter   = 100,
         cycle_time = 150*12,
         clone_src     = nil
     }
@@ -3416,12 +3416,8 @@ function ui_element.scrollPane(t)
         
         -----------------------------------------------------
         
-		if shell.Image then
-			shell = shell:Image()
-		end
-		if fill.Image then
-			fill = fill:Image()
-		end
+		if shell.Image then shell = shell:Image() end
+		if  fill.Image then  fill =  fill:Image() end
         
 		bar:add(shell,fill)
         
@@ -3698,10 +3694,10 @@ button
         label_font = "DejaVu Sans 30px",
     	label_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
-    	button_width = 180,
+    	button_width = 250,
     	button_height = 60, 
 
-    	label = "Button", 
+    	label = "Menu Button", 
     	focus_color = {27,145,27,255}, --"1b911b", 
     	button_color = {255,255,255,255}, --"FFFFFF"
     	border_width = 1,
@@ -3737,19 +3733,9 @@ button
                 }
             },--]]
             {type="label", string="Subgroup A:"},
+            {type="seperator"},
             {type="item",  string="Item A1", f=nil},
-            {type="item",  string="Item A2", f=nil},
-            --{type="seperator"},
-            {type="label", string="Subgroup B:"},
-            {type="item",  string="Item B1", f=nil},
-            {type="item",  string="Item B2", f=nil},
-            {type="seperator"},
-            {type="item",  string="Item 1", f=nil},
-            {type="item",  string="Item 2", f=nil},
-            {type="seperator"},
-            {type="label", string="Subgroup B:"},
-            {type="item",  string="Item B1", f=nil},
-            {type="item",  string="Item B2", f=nil},
+            
         },
         vert_spacing = 5,
         hor_spacing  = 10,
@@ -3757,7 +3743,7 @@ button
         
         menu_text_color    = {255,255,255,255},
         bg_color     = {255,0,0,255},
-        menu_width   = 220,
+        menu_width   = 250,
         hor_padding  = 10,
         seperator_thickness    = 2,
         expansion_location   = false,
@@ -3795,6 +3781,7 @@ button
     umbrella     = Group{
         name="menuButton",
         reactive = true,
+        position={300,300},
         children={button,dropDownMenu},
         extra={
             type="MenuButton",
@@ -3993,7 +3980,7 @@ button
     	button.border_width=p.border_width
     	button.border_corner_radius=p.border_corner_radius
         
-        
+        umbrella.size = {button.wwidth,button.wheight}
         curr_y = p.vert_offset
         
         --For each category
