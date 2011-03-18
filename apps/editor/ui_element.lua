@@ -2463,11 +2463,11 @@ function ui_element.progressSpinner(t)
     --default parameters
     local p = {
         skin          = "default",
-        dot_radius    = 5,
+        dot_diameter    = 5,
         dot_color     = {255,255,255,255},
-        num_dots      = 12,
-        anim_radius   = 50,
-        anim_duration = 150,
+        number_of_dots      = 12,
+        overall_diameter   = 50,
+        cycle_time = 150*12,
         clone_src     = nil
     }
     --overwrite defaults
@@ -2483,16 +2483,16 @@ function ui_element.progressSpinner(t)
     local l_dots = Group{ 
         name     = "progressSpinner",
         position = {400,400},
-        anchor_point = {p.radius,p.radius},
+        anchor_point = {p.overall_diameter/2,p.overall_diameter/2},
         reactive = true,
         extra = {
             type = "ProgressSpinner", 
             speed_up = function()
-                p.anim_duration = p.anim_duration - 20
+                p.cycle_time = p.cycle_time - 50
                 create_dots()
             end,
             speed_down = function()
-                p.anim_duration = p.anim_duration + 20
+                p.cycle_time = p.cycle_time + 50
                 create_dots()
             end,
         },
@@ -2503,9 +2503,9 @@ function ui_element.progressSpinner(t)
     
     --the Canvas used to create the dots
     local make_dot = function(x,y)
-          local dot  = Canvas{size={2*p.dot_radius, 2*p.dot_radius}}
+          local dot  = Canvas{size={p.dot_diameter, p.dot_diameter}}
           dot:begin_painting()
-          dot:arc(p.dot_radius,p.dot_radius,p.dot_radius,0,360)
+          dot:arc(p.dot_diameter/2,p.dot_diameter/2,p.dot_diameter/2,0,360)
           dot:set_source_color(p.dot_color)
           dot:fill(true)
           dot:finish_painting()
@@ -2513,7 +2513,7 @@ function ui_element.progressSpinner(t)
           if dot.Image then
               dot = dot:Image()
           end
-          dot.anchor_point ={p.dot_radius,p.dot_radius}
+          dot.anchor_point ={p.dot_diameter/2,p.dot_diameter/2}
           dot.name         = "Loading Dot"
           dot.position     = {x,y}
 	  
@@ -2528,15 +2528,15 @@ function ui_element.progressSpinner(t)
 	
         local rad
         
-        for i = 1, p.num_dots do
+        for i = 1, p.number_of_dots do
             --they're radial position
-            rad = (2*math.pi)/(p.num_dots) * i
+            rad = (2*math.pi)/(p.number_of_dots) * i
             print(p.clone_src)
             if p.clone_src == nil and skin_list[p.skin]["loadingdot"] == nil then
                 print(1)
                 dots[i] = make_dot(
-                    math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
-                    math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                    math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                    math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                 )
 	    elseif skin_list[p.skin]["loadingdot"] ~= nil then
 		img = assets(skin_list[p.skin]["loadingdot"])
@@ -2546,8 +2546,8 @@ function ui_element.progressSpinner(t)
                     }
 		img.position = {
 
-                        math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
-                        math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                        math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                        math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                     }
 		dots[i] = img
             else
@@ -2556,8 +2556,8 @@ function ui_element.progressSpinner(t)
                     source = p.clone_src,
                     position = {
 
-                        math.floor( p.anim_radius * math.cos(rad) )+p.anim_radius+p.dot_radius,
-                        math.floor( p.anim_radius * math.sin(rad) )+p.anim_radius+p.dot_radius
+                        math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                        math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                     },
                     anchor_point = {
                         p.clone_src.w/2,
@@ -2577,20 +2577,20 @@ function ui_element.progressSpinner(t)
         {
             name      = "Loading Animation",
             loop      =  true,
-            duration  =  p.anim_duration * (p.num_dots),
+            duration  =  p.cycle_time,
             direction = "FORWARD", 
         }
 
 	-- table.insert( fff , load_timeline )
 
-        local increment = math.ceil(255/p.num_dots)
+        local increment = math.ceil(255/p.number_of_dots)
         
         function load_timeline.on_new_frame(t)
-            local start_i   = math.ceil(t.elapsed/p.anim_duration)
+            local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
             local curr_i    = nil
             
-            for i = 1, p.num_dots do
-                curr_i = (start_i + (i-1))%(p.num_dots) +1
+            for i = 1, p.number_of_dots do
+                curr_i = (start_i + (i-1))%(p.number_of_dots) +1
                 
                 dots[curr_i].opacity = increment*i
             end
@@ -2653,6 +2653,7 @@ function ui_element.progressBar(t)
         stroke_color       = {160,160,160,255},
         fill_upper_color  = {255,0,0,255},
         fill_lower_color  = {96,48,48,255},
+        progress          = 0,
     }
     --overwrite defaults
     if t ~= nil then
@@ -2757,6 +2758,7 @@ function ui_element.progressBar(t)
 		end
         c_fill.x=stroke_width
         c_fill.y=stroke_width/2
+        c_fill.scale = {(p.wwidth-4)*(p.progress),1}
 		l_bar_group:add(c_shell,c_fill)
 	end
     
@@ -2769,7 +2771,11 @@ function ui_element.progressBar(t)
     
     mt.__newindex = function(t,k,v)
         p[k] = v
-        create_loading_bar()
+        if k == "progress" then
+            c_fill.scale = {(p.wwidth-4)*(v),1}
+        else
+            create_loading_bar()
+        end
     end
     
     mt.__index = function(t,k)       
@@ -2805,16 +2811,16 @@ Extra Function:
 function ui_element.layoutManager(t)
     --default parameters
     local p = {
-        num_rows    = 4,
-        num_cols    = 3,
-        item_w      = 300,
-        item_h      = 200,
-        grid_gap    = 40,
-	duration_per_tile = 300,
-	cascade_delay     = 200,
+        rows    = 4,
+        columns    = 3,
+        cell_w      = 300,
+        cell_h      = 200,
+        cell_spacing    = 40,
+	cell_timing = 300,
+	cell_timing_offset     = 200,
         tiles       = {},
         focus       = nil,
-        focus_visible = true,
+        cells_focusable = true,
         skin="default",
     }
     
@@ -2828,8 +2834,8 @@ function ui_element.layoutManager(t)
     end
 	
     local x_y_from_index = function(r,c)
-		return (p.item_w+p.grid_gap)*(c-1)+p.item_w/2,
-		       (p.item_h+p.grid_gap)*(r-1)+p.item_h/2
+		return (p.cell_w+p.cell_spacing)*(c-1)+p.cell_w/2,
+		       (p.cell_h+p.cell_spacing)*(r-1)+p.cell_h/2
 	end
     
 
@@ -2852,10 +2858,22 @@ function ui_element.layoutManager(t)
                 self:add(obj)
                 obj.x, obj.y = x_y_from_index(r,c)
                 obj.anchor_point = {obj.w/2,obj.h/2}
-                obj.delay = p.cascade_delay*(r+c-1)
+                obj.delay = p.cell_timing_offset*(r+c-1)
 			end,
+            add_next = function(self,obj)
+                self:replace(focus_i[1],focus_i[2],obj)
+                if focus_i[2]+1 > p.columns then
+                    if focus_i[1] + 1 >p.rows then
+                        self.focus_to(1,1)
+                    else
+                        self.focus_to(focus_i[1]+1,1)
+                    end
+                else
+                    self.focus_to(focus_i[1],focus_i[2]+1)
+                end
+            end,
             set_function = function(r,c,f)
-                if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                if r > p.rows or r < 1 or c < 1 or c > p.columns then
                     print("invalid row/col")
                     return
                 end
@@ -2867,7 +2885,7 @@ function ui_element.layoutManager(t)
                 end
             end,
             focus_to = function(r,c)
-                if r > p.num_rows or r < 1 or c < 1 or c > p.num_cols then
+                if r > p.rows or r < 1 or c < 1 or c > p.columns then
                     print("invalid row/col")
                     return
                 end
@@ -2886,7 +2904,7 @@ function ui_element.layoutManager(t)
             end,
             animate_in = function()
 				local tl = Timeline{
-					duration =p.cascade_delay*(p.num_rows+p.num_cols-2)+ p.duration_per_tile
+					duration =p.cell_timing_offset*(p.rows+p.columns-2)+ p.cell_timing
 				}
 				function tl:on_started()
 					for r = 1, p.num_rows  do
@@ -2902,11 +2920,11 @@ function ui_element.layoutManager(t)
 					for r = 1, p.num_rows  do
 						for c = 1, p.num_cols do
 							item = p.tiles[r][c] 
-							if msecs > item.delay and msecs < (item.delay+p.duration_per_tile) then
-								prog = (msecs-item.delay) / p.duration_per_tile
+							if msecs > item.delay and msecs < (item.delay+p.cell_timing) then
+								prog = (msecs-item.delay) / p.cell_timing
 								item.y_rotation = {90*(1-prog),0,0}
 								item.opacity = 255*prog
-							elseif msecs > (item.delay+p.duration_per_tile) then
+							elseif msecs > (item.delay+p.cell_timing) then
 								item.y_rotation = {0,0,0}
 								item.opacity = 255
 							end
@@ -2914,8 +2932,8 @@ function ui_element.layoutManager(t)
 					end
 				end
 				function tl:on_completed()
-					for r = 1, p.num_rows  do
-						for c = 1, p.num_cols do
+					for r = 1, p.rows  do
+						for c = 1, p.columns do
 							p.tiles[r][c].y_rotation={0,0,0}
 							p.tiles[r][c].opacity = 255
 						end
@@ -2928,7 +2946,7 @@ function ui_element.layoutManager(t)
 
 
 	local make_tile = function()
-        local c = Canvas{size={p.item_w, p.item_h}}
+        local c = Canvas{size={p.cell_w, p.cell_h}}
         c:begin_painting()
         c:move_to(            0,          0 )
         c:line_to(   c.w,          0 )
@@ -2949,9 +2967,9 @@ function ui_element.layoutManager(t)
     local make_focus = function()
         return Rectangle{
             name="Focus",
-            size={ p.item_w+5, p.item_h+5},
+            size={ p.cell_w+5, p.cell_h+5},
             color="00000000",
-            anchor_point = { (p.item_w+5)/2, (p.item_h+5)/2},
+            anchor_point = { (p.cell_w+5)/2, (p.cell_h+5)/2},
             border_width=5,
             border_color="FFFFFFFF",
         }
@@ -2971,24 +2989,24 @@ function ui_element.layoutManager(t)
         focus.x, focus.y = x_y_from_index(focus_i[1],focus_i[2])
         slate:add(focus)
         
-        if p.focus_visible then
+        if p.cells_focusable then
             focus.opacity=255
         else
             focus.opacity=0
         end
         
-		for r = 1, p.num_rows  do
+		for r = 1, p.rows  do
             if p.tiles[r] == nil then
                 p.tiles[r]   = {}
                 functions[r] = {}
             end
-			for c = 1, p.num_cols do
+			for c = 1, p.columns do
                 if p.tiles[r][c] == nil then
                     g = make_tile()
                     slate:add(g)
                     p.tiles[r][c] = g
                     g.x, g.y = x_y_from_index(r,c)
-                    g.delay = p.cascade_delay*(r+c-1)
+                    g.delay = p.cell_timing_offset*(r+c-1)
                 else
                     g = p.tiles[r][c]
                     if g.parent ~= nil then
@@ -2997,13 +3015,13 @@ function ui_element.layoutManager(t)
                     slate:add(g)
                     g.x, g.y = x_y_from_index(r,c)
                     g.anchor_point = {g.w/2,g.h/2}
-                    g.delay = p.cascade_delay*(r+c-1)
+                    g.delay = p.cell_timing_offset*(r+c-1)
                 end
 			end
 		end
         
-        if p.num_rows < #p.tiles then
-            for r = p.num_rows + 1, #tiles do
+        if p.rows < #p.tiles then
+            for r = p.rows + 1, #tiles do
                 for c = 1, #p.tiles[r] do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c] = nil
@@ -3012,8 +3030,8 @@ function ui_element.layoutManager(t)
                 functions[r] = nil
             end
         end
-        if p.num_cols < #p.tiles[1] then
-            for c = p.num_cols + 1, #tiles[r] do
+        if p.columns < #p.tiles[1] then
+            for c = p.columns + 1, #tiles[r] do
                 for r = 1, #p.tiles do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c]   = nil
@@ -3073,21 +3091,34 @@ function ui_element.scrollPane(t)
 
     --default parameters
     local p = {
-        clip_w    =  600,
-	color     =  {255,255,255,255},
-        clip_h    =  600,
-	border_w  =    2,
+        visible_w    =  600,
+	--color     =  {255,255,255,255},
+        visible_h    =  600,
+	    border_w  =    2,
         content   = Group{},
-        content_h =  1000,
-	content_w =  1000,
-	arrow_clone_source = nil,
-	arrow_sz  = 10,
-	arrows_in_box = false,
-	arrows_centered = false,
-        hor_arrow_y     = nil,
-        vert_arrow_x    = nil,
-	grip_is_visible = true,
-        border_is_visible = true,
+        virtual_h = 1000,
+	    virtual_w = 1000,
+	--arrow_clone_source = nil,
+	
+	--arrows_in_box = false,
+	--arrows_centered = false,
+        --hor_arrow_y     = nil,
+        --vert_arrow_x    = nil,
+	    scroll_bars_visible = true,
+        bar_color_inner     = {180,180,180},
+        bar_color_outer     = {30,30,30},
+        empty_color_inner   = {120,120,120},
+        empty_color_outer   = {255,255,255},
+        frame_thickness     =    2,
+        border_color        = {60, 60,60},
+        bar_thickness       =   15,
+        bar_offset          =    5,
+        vert_bar_visible    = true,
+        hor_bar_visbile     = true,
+        
+        box_visible = true,
+        box_color = {160,160,160},
+        box_width = 2,
         skin="default",
     }
     --overwrite defaults
@@ -3098,25 +3129,18 @@ function ui_element.scrollPane(t)
     end
 	
 	--Group that Clips the content
-	local window  = Group{}
+	local window  = Group{name="scroll_window"}
 	--Group that contains all of the content
 	--local content = Group{}
 	--declarations for dependencies from scroll_group
-	local scroll
+	local scroll, scroll_x, scroll_y
 	--flag to hold back key presses while animating content group
 	local animating = false
 
 	local border = Rectangle{ color = "00000000" }
 	
-	local arrow_up, arrow_dn, arrow_l, arrow_r
 	
-	local track_h, track_w
-	local grip_h, grip_w
-	
-	
-	local grip_vert_base_y, grip_hor_base_x
-	local grip_vert = Rectangle{name="scroll_window",reactive=true}
-	local grip_hor  = Rectangle{name="scroll_window",reactive=true}
+	local track_h, track_w, grip_hor, grip_vert
 	
 
     --the umbrella Group, containing the full slate of tiles
@@ -3128,26 +3152,26 @@ function ui_element.scrollPane(t)
 			type = "ScrollPane",
             seek_to = function(x,y)
                 local new_x, new_y
-                if p.content_w > p.clip_w then
-                    if x > p.content_w - p.clip_w/2 then
-                        new_x = -p.content_w + p.clip_w
-                    elseif x < p.clip_w/2 then
+                if p.virtual_w > p.visible_w then
+                    if x > p.virtual_w - p.visible_w/2 then
+                        new_x = -p.virtual_w + p.visible_w
+                    elseif x < p.visible_w/2 then
                         new_x = 0
                     else
-                        new_x = -x + p.clip_w/2
+                        new_x = -x + p.visible_w/2
                     end
                 else
                     new_x =0
                 end
-                if p.content_h > p.clip_h then
-                    if y > p.content_h - p.clip_h/2 then
-                        new_y = -p.content_h + p.clip_h
+                if p.virtual_h > p.visible_h then
+                    if y > p.virtual_h - p.visible_h/2 then
+                        new_y = -p.virtual_h + p.visible_h
                         print(1)
-                    elseif y < p.clip_h/2 then
+                    elseif y < p.visible_h/2 then
                         new_y = 0
                         print(2)
                     else
-                        new_y = -y + p.clip_h/2
+                        new_y = -y + p.visible_h/2
                         print(3)
                     end
                 else
@@ -3164,26 +3188,26 @@ function ui_element.scrollPane(t)
                         end
                     }
                 
-                    if new_y < -(p.content_h - p.clip_h) then
-                        grip_vert.y = grip_vert_base_y+(track_h-grip_h)
+                    if new_y < -(p.virtual_h - p.visible_h) then
+                        grip_vert.y = track_h-grip_vert.h
                     elseif new_y > 0 then
-                        grip_vert.y = grip_vert_base_y
+                        grip_vert.y = 0
                     elseif new_y ~= p.content.y then
                         grip_vert:complete_animation()
                         grip_vert:animate{
                             duration= 200,
-                            y = grip_vert_base_y-(track_h-grip_h)*new_y/(p.content_h - p.clip_h)
+                            y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
                         }
                     end
-                    if new_x < -(p.content_w - p.clip_w) then
-                        grip_hor.x = grip_hor_base_x+(track_w-grip_h)
+                    if new_x < -(p.virtual_w - p.visible_w) then
+                        grip_hor.x = track_w-grip_hor.w
                     elseif new_x > 0 then
-                        grip_hor.x = grip_hor_base_x
+                        grip_hor.x = 0
                     elseif new_x ~= p.content.x then
                         grip_hor:complete_animation()
                         grip_hor:animate{
                             duration= 200,
-                            x = grip_hor_base_x-(track_w-grip_h)*new_x/(p.content_w - p.clip_w)
+                            x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
                         }
                     end
                 end
@@ -3199,22 +3223,22 @@ function ui_element.scrollPane(t)
 	--Key Handler
 	local keys={
 		[keys.Left] = function()
-			if p.content_w > p.clip_w then
+			if p.visible_w < p.virtual_w then
 				scroll_x(1)
 			end
 		end,
 		[keys.Right] = function()
-			if p.content_w > p.clip_w then
+			if p.visible_w < p.virtual_w then
 				scroll_x(-1)
 			end
 		end,
 		[keys.Up] = function()
-			if p.content_h > p.clip_h then
+			if p.visible_h < p.virtual_h then
 				scroll_y(1)
 			end
 		end,
 		[keys.Down] = function()
-			if p.content_h > p.clip_h then
+			if p.visible_h < p.virtual_h then
 				scroll_y(-1)
 			end
 		end,
@@ -3233,10 +3257,10 @@ function ui_element.scrollPane(t)
 			duration = 200,
 			y = new_y,
 			on_completed = function()
-				if p.content.y < -(p.content_h - p.clip_h) then
+				if p.content.y < -(p.virtual_h - p.visible_h) then
 					p.content:animate{
 						duration = 200,
-						y = -(p.content_h - p.clip_h),
+						y = -(p.virtual_h - p.visible_h),
 						on_completed = function()
 							animating = false
 						end
@@ -3255,31 +3279,32 @@ function ui_element.scrollPane(t)
 			end
 		}
 		
-		if new_y < -(p.content_h - p.clip_h) then
-			grip_vert.y = grip_vert_base_y+(track_h-grip_h)
+		if new_y < -(p.virtual_h - p.visible_h) then
+			grip_vert.y = track_h-grip_vert.h
 		elseif new_y > 0 then
-			grip_vert.y = grip_vert_base_y
+			grip_vert.y = 0
 		else
 			grip_vert:complete_animation()
 			grip_vert:animate{
 				duration= 200,
-				y = grip_vert_base_y-(track_h-grip_h)*new_y/(p.content_h - p.clip_h)
+				y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
 			}
 		end
 	end
 	
 	
 	scroll_x = function(dir)
+              print("gaaaaa")
 		local new_x = p.content.x+ dir*10
 		animating = true
 		p.content:animate{
 			duration = 200,
 			x = new_x,
 			on_completed = function()
-				if p.content.x < -(p.content_w - p.clip_w) then
+				if p.content.x < -(p.virtual_w - p.visible_w) then
 					p.content:animate{
 						duration = 200,
-						y = -(p.content_w - p.clip_w),
+						y = -(p.virtual_w - p.visible_w),
 						on_completed = function()
 							animating = false
 						end
@@ -3298,285 +3323,338 @@ function ui_element.scrollPane(t)
 			end
 		}
 		
-		if new_x < -(p.content_w - p.clip_w) then
-			grip_hor.x = grip_hor_base_x+(track_w-grip_h)
+		if new_x < -(p.virtual_w - p.visible_h) then
+			grip_hor.x = track_w-grip_hor.w
 		elseif new_x > 0 then
-			grip_hor.x = grip_hor_base_x
+			grip_hor.x = 0
 		else
 			grip_hor:complete_animation()
 			grip_hor:animate{
 				duration= 200,
-				x = grip_hor_base_x-(track_w-grip_h)*new_x/(p.content_w - p.clip_w)
+				x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
 			}
 		end
 	end
+    local function make_hor_bar(w,h,ratio)
+        local bar = Group{}
+        
+		local shell = Canvas{
+				size = {w,h},
+		}
+		local fill  = Canvas{
+				size = {w*ratio,h-p.frame_thickness},
+		}  
+        
+		
+		local RAD = 6
+        
+		local top    =           math.ceil(p.frame_thickness/2)
+		local bottom = shell.h - math.ceil(p.frame_thickness/2)
+		local left   =           math.ceil(p.frame_thickness/2)
+		local right  = shell.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		shell:move_to(        left,         top )
+		shell:line_to(   right-RAD,         top )
+		shell:curve_to( right, top,right,top,right,top+RAD)
+		shell:line_to(       right,  bottom-RAD )
+		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		shell:line_to(           left+RAD,          bottom )
+		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		shell:line_to(           left,            top+RAD )
+		shell:curve_to(left,top,left,top,left+RAD,top)
+        
+		shell:set_source_linear_pattern(
+            
+            shell.w/2,0,
+			shell.w/2,shell.h
+		)
+		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        
+		shell:fill(true)
+		shell:set_line_width(   p.frame_thickness )
+		shell:set_source_color( p.border_color )
+		shell:stroke( true )
+		shell:finish_painting()
+        
+        -----------------------------------------------------
+        
+		top    =          math.ceil(p.frame_thickness/2)
+		bottom = fill.h - math.ceil(p.frame_thickness/2)
+		left   =          math.ceil(p.frame_thickness/2)
+		right  = fill.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		fill:move_to(        left,         top )
+		fill:line_to(   right-RAD,         top )
+		fill:curve_to( right, top,right,top,right,top+RAD)
+		fill:line_to(       right,  bottom-RAD )
+		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		fill:line_to(           left+RAD,          bottom )
+		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		fill:line_to(           left,            top+RAD )
+		fill:curve_to(left,top,left,top,left+RAD,top)
+        
+		fill:set_source_linear_pattern(
+			fill.w/2,0,
+			fill.w/2,fill.h
+		)
+		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+		fill:fill(true)
+        fill:set_line_width(   p.frame_thickness )
+		fill:set_source_color( p.border_color )
+		fill:stroke( true )
+		fill:finish_painting()
+        
+        -----------------------------------------------------
+        
+		if shell.Image then
+			shell = shell:Image()
+		end
+		if fill.Image then
+			fill = fill:Image()
+		end
+        
+		bar:add(shell,fill)
+        
+        shell.name="track"
+        fill.name="grip"
+        fill.reactive=true
+        fill.y=p.frame_thickness/2 
+        return bar
+    end
+    local function make_vert_bar(w,h,ratio)
+        local bar = Group{}
+        
+		local shell = Canvas{
+				size = {w,h},
+		}
+		local fill  = Canvas{
+				size = {w-p.frame_thickness,h*ratio},
+		}  
+        
+		
+		local RAD = 6
+        
+		local top    =           math.ceil(p.frame_thickness/2)
+		local bottom = shell.h - math.ceil(p.frame_thickness/2)
+		local left   =           math.ceil(p.frame_thickness/2)
+		local right  = shell.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		shell:move_to(        left,         top )
+		shell:line_to(   right-RAD,         top )
+		shell:curve_to( right, top,right,top,right,top+RAD)
+		shell:line_to(       right,  bottom-RAD )
+		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		shell:line_to(           left+RAD,          bottom )
+		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		shell:line_to(           left,            top+RAD )
+		shell:curve_to(left,top,left,top,left+RAD,top)
+        
+		shell:set_source_linear_pattern(
+			0,shell.h/2,
+            shell.w,shell.h/2
+		)
+		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        
+		shell:fill(true)
+		shell:set_line_width(   p.frame_thickness )
+		shell:set_source_color( p.border_color )
+		shell:stroke( true )
+		shell:finish_painting()
+        
+        -----------------------------------------------------
+        
+		top    =          math.ceil(p.frame_thickness/2)
+		bottom = fill.h - math.ceil(p.frame_thickness/2)
+		left   =          math.ceil(p.frame_thickness/2)
+		right  = fill.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		fill:move_to(        left,         top )
+		fill:line_to(   right-RAD,         top )
+		fill:curve_to( right, top,right,top,right,top+RAD)
+		fill:line_to(       right,  bottom-RAD )
+		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		fill:line_to(           left+RAD,          bottom )
+		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		fill:line_to(           left,            top+RAD )
+		fill:curve_to(left,top,left,top,left+RAD,top)
+        
+		fill:set_source_linear_pattern(
+			0,fill.h/2,
+            fill.w,fill.h/2
+		)
+		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+		fill:fill(true)
+        fill:set_line_width(   p.frame_thickness )
+		fill:set_source_color( p.border_color )
+		fill:stroke( true )
+		fill:finish_painting()
+        
+        -----------------------------------------------------
+        
+		if shell.Image then
+			shell = shell:Image()
+		end
+		if fill.Image then
+			fill = fill:Image()
+		end
+        
+		bar:add(shell,fill)
+        
+        shell.name="track"
+        fill.name="grip"
+        fill.reactive=true
+        fill.x=p.frame_thickness/2 
+        return bar
+    end
 	
 	
 	--this function creates the whole scroll bar box
 	local function create()
-        window.position={ p.border_w, p.border_w }
-		window.clip = { 0,0, p.clip_w, p.clip_h }
-		border.w = p.clip_w+2*p.border_w
-		border.h = p.clip_h+2*p.border_w
-		border.border_width = p.border_w
-		border.border_color = p.color
-		if p.border_is_visible then border.opacity=255
-        else border.opacity=0 end
+        window.position={ p.box_width, p.box_width }
+		window.clip = { 0,0, p.visible_w, p.visible_h }
+        border:set{
+            w = p.visible_w+2*p.box_width,
+            h = p.visible_h+2*p.box_width,
+            border_width =    p.box_width,
+            border_color =    p.box_color,
+        }
+		
+        if  scroll_group:find_child("Horizontal Scroll Bar") then
+            scroll_group:find_child("Horizontal Scroll Bar"):unparent()
+        end
         
+        if  scroll_group:find_child("Vertical Scroll Bar") then
+            scroll_group:find_child("Vertical Scroll Bar"):unparent()
+        end
         
-		if p.arrow_clone_source == nil and skin_list[p.skin]["scroll_arrow"] == nil then
-			
-			if arrow_up ~= nil then arrow_up:unparent() end
-			
-			arrow_up = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_up:begin_painting()
-			arrow_up:move_to( arrow_up.w/2,          0 )
-			arrow_up:line_to(   arrow_up.w, arrow_up.h )
-			arrow_up:line_to(            0, arrow_up.h )
-			arrow_up:line_to( arrow_up.w/2,          0 )
-			arrow_up:set_source_color(p.color)
-
-			arrow_up:fill(true)
-			arrow_up:finish_painting()
-			if arrow_up.Image then
-				arrow_up = arrow_up:Image()
-			end
-			
-			
-			if arrow_dn ~= nil then arrow_dn:unparent() end
-			
-			arrow_dn = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_dn:begin_painting()
-			arrow_dn:move_to(            0,          0 )
-			arrow_dn:line_to(   arrow_dn.w,          0 )
-			arrow_dn:line_to( arrow_dn.w/2, arrow_dn.h )
-			arrow_dn:line_to(            0,          0 )
-			arrow_dn:set_source_color(p.color)
-			arrow_dn:fill(true)
-			arrow_dn:finish_painting()
-			if arrow_dn.Image then
-				arrow_dn = arrow_dn:Image()
-			end
-			
-			
-			if arrow_l ~= nil then arrow_l:unparent() end
-			
-			arrow_l = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_l:begin_painting()
-			arrow_l:move_to(   arrow_l.w,           0 )
-			arrow_l:line_to(   arrow_l.w,   arrow_l.h )
-			arrow_l:line_to(           0, arrow_l.h/2 )
-			arrow_l:line_to(   arrow_l.w,           0 )
-			arrow_l:set_source_color(p.color)
-			arrow_l:fill(true)
-			arrow_l:finish_painting()
-			if arrow_l.Image then
-				arrow_l = arrow_l:Image()
-			end
-			
-			
-			if arrow_r ~= nil then arrow_r:unparent() end
-			
-			arrow_r = Canvas{size={p.arrow_sz,p.arrow_sz}}
-			arrow_r:begin_painting()
-			arrow_r:move_to(         0,           0 )
-			arrow_r:line_to( arrow_r.w, arrow_l.h/2 )
-			arrow_r:line_to(         0,   arrow_l.h )
-			arrow_r:line_to(         0,           0 )
-			arrow_r:set_source_color(p.color)
-			arrow_r:fill(true)
-			arrow_r:finish_painting()
-			if arrow_r.Image then
-				arrow_r = arrow_r:Image()
-			end
-		elseif p.arrow_clone_source ~= nil then
-			arrow_up = Clone{source=p.arrow_clone_source}
-			arrow_dn = Clone{source=p.arrow_clone_source, z_rotation={180,0,0}}
-			arrow_l  = Clone{source=p.arrow_clone_source, z_rotation={-90,0,0}}
-			arrow_r  = Clone{source=p.arrow_clone_source, z_rotation={ 90,0,0}}
+        if p.box_visible then border.opacity=255
+        else border.opacity=0 end 
+        
+        if p.bar_offset < 0 then
+            track_w = p.visible_w+p.bar_offset
+            track_h = p.visible_h+p.bar_offset
         else
-            arrow_up = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_dn = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_dn.z_rotation={180,0,0}
-            arrow_l  = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_l.z_rotation={-90,0,0}
-            arrow_r  = assets(skin_list[p.skin]["scroll_arrow"])
-            arrow_r.z_rotation={90,0,0}
-		end
-		
-		arrow_up.anchor_point = {arrow_up.w/2,arrow_up.h/2}
-		arrow_dn.anchor_point = {arrow_dn.w/2,arrow_dn.h/2}
-		arrow_l.anchor_point  = { arrow_l.w/2, arrow_l.h/2}
-		arrow_r.anchor_point  = { arrow_r.w/2, arrow_r.h/2}
-		
-		arrow_up.reactive = true
-        arrow_dn.reactive = true
-        arrow_l.reactive=true
-        arrow_r.reactive=true
+            track_w = p.visible_w
+            track_h = p.visible_h
+        end
+        if p.hor_bar_visible and p.visible_w/p.virtual_w < 1 then
+            hor_s_bar = make_hor_bar(
+                track_w,
+                p.bar_thickness,
+                track_w/p.virtual_w
+            )
+            hor_s_bar.name = "Horizontal Scroll Bar"
+            hor_s_bar.position={
+                p.box_width,
+                p.box_width*2+p.visible_h+p.bar_offset
+            }
+            scroll_group:add(hor_s_bar)
+            
+            grip_hor = hor_s_bar:find_child("grip")
+            
+            function grip_hor:on_button_down(x,y,button,num_clicks)
+                
+                local dx = x - grip_hor.x
+	   	        
+                dragging = {grip_hor,
+	   		        function(x,y)
+	   			
+	   			        grip_hor.x = x - dx
+	   			
+	   			        if  grip_hor.x < 0 then
+	   				        grip_hor.x = 0
+	   			        elseif grip_hor.x > track_w-grip_hor.w then
+	   				           grip_hor.x = track_w-grip_hor.w
+	   			        end
+	   			
+	   			        p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
+	   			
+	   		        end 
+	   	        }
+	   	
+                return true
+            end
+        else
+            grip_hor=nil
+        end
+        if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
+            vert_s_bar = make_vert_bar(
+                
+                p.bar_thickness,
+                track_h,
+                track_h/p.virtual_h
+            )
+            vert_s_bar.name = "Vertical Scroll Bar"
+            vert_s_bar.position={
+                p.box_width*2+p.visible_w+p.bar_offset,
+                p.box_width
+            }
+            --vert_s_bar.z_rotation={90,0,0}
+            scroll_group:add(vert_s_bar)
+            
+            grip_vert = vert_s_bar:find_child("grip")
+            
+            function grip_vert:on_button_down(x,y,button,num_clicks)
+                
+                local dy = y - grip_vert.y
+	   	        
+                dragging = {grip_vert,
+	   		        function(x,y)
+	   			
+	   			        grip_vert.y = y - dy
+	   			
+	   			        if  grip_vert.y < 0 then
+	   				        grip_vert.y = 0
+	   			        elseif grip_vert.y > track_h-grip_vert.h then
+	   				           grip_vert.y = track_h-grip_vert.h
+	   			        end
+	   			
+	   			        p.content.y = -(grip_vert.y) * p.virtual_h/track_h
+	   			
+	   		        end 
+	   	        }
+	   	
+                return true
+            end
+        else
+            grip_vert=nil
+        end
         
-		function arrow_up:on_button_down(x,y,button,num_clicks)
-            scroll_y(1)
-        end
-        function arrow_dn:on_button_down(x,y,button,num_clicks)
-            scroll_y(-1)
-        end
-		function arrow_l:on_button_down(x,y,button,num_clicks)
-            scroll_x(1)
-        end
-        function arrow_r:on_button_down(x,y,button,num_clicks)
-            scroll_x(-1)
-        end
 		
-		scroll_group:add(arrow_up,arrow_dn,arrow_l,arrow_r)
-		
-		-- re-used values
-		grip_vert_base_y =  arrow_up.h+5
-		track_h     = (p.clip_h-2*arrow_up.h-10+2*p.border_w)
-		grip_h      = 
- p.clip_h/p.content_h*track_h
-		if grip_h < p.arrow_sz then
-			grip_h = p.arrow_sz
-		elseif grip_h > track_h then
-			grip_h = track_h
-		end
-		
-		grip_hor_base_x = arrow_l.w+5
-		track_w     = (p.clip_w-2*arrow_l.w-10+2*p.border_w)
-		grip_w      =  p.clip_w/p.content_w*track_w
-		if grip_w < p.arrow_sz then
-			grip_w = p.arrow_sz
-		elseif grip_w > track_h then
-			grip_w = track_h
-		end
-		
-		
-		grip_vert.w        = p.arrow_sz
-		grip_vert.h        = grip_h
-		grip_vert.color    = p.color
-		grip_vert.position = {border.w+5,grip_vert_base_y}
-		
-		grip_hor.h        = p.arrow_sz
-		grip_hor.w        = grip_h
-		grip_hor.color    = p.color
-		grip_hor.position = {grip_hor_base_x,border.h+5}
-		
-		if p.grip_is_visible and not p.arrows_centered then
-			grip_hor.opacity  = 255
-			grip_vert.opacity = 255
-		else
-			grip_hor.opacity  = 0
-			grip_vert.opacity = 0
-		end
-		
-        if p.hor_arrows_y ~= nil or p.vert_arrows_x ~= nil then
-            if p.vert_arrows_x ~= nil then
-                arrow_up.position = {p.vert_arrows_x,-arrow_up.h/2-5 }
-                arrow_dn.position = {p.vert_arrows_x,border.h+arrow_dn.h/2+5}
-            end
-            if p.hor_arrows_y ~= nil then
-                arrow_l.position  = {-arrow_l.w/2-5,        p.hor_arrows_y}
-                arrow_r.position  = {border.w+arrow_r.w/2+5,p.hor_arrows_y}
-            end
-		elseif p.arrows_centered then
-			if p.arrows_in_box then
-				arrow_up.position = {border.w/2+arrow_up.w/2+5,arrow_up.h/2+5 }
-				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h-arrow_dn.h/2-5}
-				arrow_l.position  = {arrow_l.w/2+5,border.h/2 + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w-arrow_r.w/2-5,border.h/2 + 5 + arrow_up.h/2}
-			else
-				arrow_up.position = {border.w/2+arrow_up.w/2+5,-arrow_up.h/2-5}
-				arrow_dn.position = {border.w/2+arrow_dn.w/2+5,border.h+arrow_dn.h/2+5}
-				arrow_l.position  = {-arrow_l.w/2-5,border.h/2}-- + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w+arrow_r.w/2+5,border.h/2}-- + 5 + arrow_up.h/2}
-			end
-		else
-			if p.arrows_in_box then
-				arrow_up.position = {border.w-arrow_up.w/2-5,arrow_up.h/2+5}
-				arrow_dn.position = {border.w-arrow_dn.w/2-5,border.h-arrow_dn.h*3/2}
-				arrow_l.position  = {         arrow_l.w/2+5,   border.h - 5 - arrow_up.h/2}
-				arrow_r.position  = {border.w-arrow_r.w/2*3/2-5,   border.h - 5 - arrow_up.h/2}
-				grip_hor_base_x = arrow_l.x + arrow_l.w+5
-				grip_vert_base_y =  arrow_up.y+arrow_up.h+5
-				grip_vert.position = {border.w-arrow_up.w-5,grip_vert_base_y}
-				grip_hor.position = {grip_hor_base_x,border.h-5- arrow_up.h}
-			else
-				arrow_up.position = {border.w+arrow_up.w/2+5,arrow_up.h/2}
-				arrow_dn.position = {border.w+arrow_dn.w/2+5,border.h-arrow_dn.h/2}
-				arrow_l.position  = {         arrow_l.w/2,   border.h + 5 + arrow_up.h/2}
-				arrow_r.position  = {border.w-arrow_r.w/2,   border.h + 5 + arrow_up.h/2}
-				grip_vert.position = {border.w+5,grip_vert_base_y}
-				grip_hor.position = {grip_hor_base_x,border.h+5}
-			end
-		end
-		
-		if p.content_w <= p.clip_w then
-			arrow_r.opacity=0
-			arrow_l.opacity=0
-			grip_hor.opacity=0
-		end
-		
-		if p.content_h <= p.clip_h then
-			arrow_up.opacity=0
-			arrow_dn.opacity=0
-			grip_vert.opacity=0
-		end
 
   --[[
           scroll_group.size = {p.visible_w, p.visible_h}
  ]]
 	end
 	
+    
+	scroll_group:add(border,window)
     create()
-	scroll_group:add(border,grip_hor,grip_vert,window)
 	window:add(p.content)
 	
 	
 	
-	--The mouse events for the grips
-	function grip_hor:on_button_down(x,y,button,num_clicks)
-		
-		local dx = x - grip_hor.x
-		
-        dragging = {grip_hor,
-			function(x,y)
-				
-				grip_hor.x = x - dx
-				
-				if  grip_hor.x < grip_hor_base_x then
-					grip_hor.x = grip_hor_base_x
-				elseif grip_hor.x > grip_hor_base_x+(track_w-grip_w) then
-					   grip_hor.x = grip_hor_base_x+(track_w-grip_w)
-				end
-				
-				p.content.x = -(grip_hor.x - grip_hor_base_x) * p.content_w/track_w
-				
-			end 
-		}
-		
-        return true
-    end
-	function grip_vert:on_button_down(x,y,button,num_clicks)
-		
-		local dy = y - grip_vert.y
-		
-        dragging = {grip_vert, function(x,y)
-				
-				grip_vert.y = y - dy
-				
-				if  grip_vert.y < grip_vert_base_y then
-					grip_vert.y = grip_vert_base_y
-				elseif grip_vert.y > grip_vert_base_y+(track_h-grip_h) then
-					   grip_vert.y = grip_vert_base_y+(track_h-grip_h)
-				end
-				
-				p.content.y = -(grip_vert.y - grip_vert_base_y) * p.content_h/track_h
-				
-			end
-		}
-		
-        return true
 
-    end 
 
 	--set the meta table to overwrite the parameters
     mt = {}
@@ -3609,7 +3687,6 @@ Function: Menu Button
 ]]
 
 function ui_element.menuButton(t)
-    
     --default parameters
     local p = {
 
@@ -3617,12 +3694,12 @@ function ui_element.menuButton(t)
 
 
 button 
-
-        text_font = "DejaVu Sans 30px",
-    	text_color = {255,255,255,255}, --"FFFFFF",
+--]]
+        label_font = "DejaVu Sans 30px",
+    	label_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
-    	wwidth = 180,
-    	wheight = 60, 
+    	button_width = 180,
+    	button_height = 60, 
 
     	label = "Button", 
     	focus_color = {27,145,27,255}, --"1b911b", 
@@ -3631,13 +3708,14 @@ button
     	border_corner_radius = 12,
 
 
-]]
+--]]
 
 
 
         name  = "dropdownbar",
-        font  = "DejaVu Sans 26px",
+        menu_font  = "DejaVu Sans 26px",
         items = {
+        --[[
             {
                 name="Subgroup A:",
                 items={
@@ -3657,38 +3735,34 @@ button
                     {txt="Item 1",f=nil},
                     {txt="Item 2",f=nil}
                 }
-            },
+            },--]]
+            {type="label", string="Subgroup A:"},
+            {type="item",  string="Item A1", f=nil},
+            {type="item",  string="Item A2", f=nil},
+            --{type="seperator"},
+            {type="label", string="Subgroup B:"},
+            {type="item",  string="Item B1", f=nil},
+            {type="item",  string="Item B2", f=nil},
+            {type="seperator"},
+            {type="item",  string="Item 1", f=nil},
+            {type="item",  string="Item 2", f=nil},
+            {type="seperator"},
+            {type="label", string="Subgroup B:"},
+            {type="item",  string="Item B1", f=nil},
+            {type="item",  string="Item B2", f=nil},
         },
-
-
---[[
-
-
-items = {
-            {label, "Subgroup A:"}, -- type, text, function if it is item
-            {item, "Item A1", nil},
-            {seperator}
-        }     
-
-
-
-]]
-        item_bg_clone_src    = nil,
-        item_focus_clone_src = nil,
-        item_spacing = 7,
-        item_start_y = 45,
+        vert_spacing = 5,
+        hor_spacing  = 10,
+        vert_offset  = 40,
         
-        
-        txt_color    = {255,255,255,255},
+        menu_text_color    = {255,255,255,255},
         bg_color     = {255,0,0,255},
-        bg_clone_src = nil,
-        bg_w         = 300,
-        padding      = 5,
-        divider_h    = 2,
-        bg_goes_up   = false,
+        menu_width   = 220,
+        hor_padding  = 10,
+        seperator_thickness    = 2,
+        expansion_location   = false,
         
-        top_img       = nil,
-        top_focus_img = nil,
+        
         skin          = "default",
     }
     --overwrite defaults
@@ -3701,11 +3775,22 @@ items = {
     local create
     local curr_cat = 1
     local curr_index = 0
-    local focus_sel_items  = {}
+    local selectable_items  = {}
     
     local dropDownMenu = Group{}
-    local button       = Group{}
-    local button_focus = nil
+    local button       = ui_element.button{
+        text_font=p.label_font,
+    	text_color=p.label_color,
+    	skin=p.skin,
+    	wwidth=p.wwidth,
+    	wheight=p.wheight, 
+        
+    	label=p.label, 
+    	focus_color=p.focus_color,
+    	button_color=p.button_color, 
+    	border_width=p.border_width,
+    	border_corner_radius=p.border_corner_radius,
+    }
     local umbrella
     umbrella     = Group{
         name="menuButton",
@@ -3713,27 +3798,25 @@ items = {
         children={button,dropDownMenu},
         extra={
             type="MenuButton",
-            focus_index = function(cat,i)
+            focus_index = function(i)
                 if curr_cat == cat and curr_index == i then
                     print("Item on Drop Down Bar is already focused")
                     return
                 end
-                if focus_sel_items[curr_cat] ~= nil and
-                   focus_sel_items[curr_cat][curr_index] ~= nil then
+                if selectable_items[curr_index] ~= nil then
                     
-                    focus_sel_items[curr_cat][curr_index]:complete_animation()
-                    focus_sel_items[curr_cat][curr_index].opacity=255
-                    focus_sel_items[curr_cat][curr_index]:animate{
+                    selectable_items[curr_index]:complete_animation()
+                    selectable_items[curr_index].opacity=255
+                    selectable_items[curr_index]:animate{
                         duration=300,
                         opacity=0
                     }
                 end
-                if focus_sel_items[cat] ~= nil and
-                   focus_sel_items[cat][i] ~= nil then
+                if selectable_items[i] ~= nil then
                    
-                    focus_sel_items[cat][i]:complete_animation()
-                    focus_sel_items[cat][i].opacity=0
-                    focus_sel_items[cat][i]:animate{
+                    selectable_items[i]:complete_animation()
+                    selectable_items[i].opacity=0
+                    selectable_items[i]:animate{
                         duration=300,
                         opacity=255
                     }
@@ -3743,80 +3826,52 @@ items = {
             end,
             press_up = function()
                 if curr_index == 1 then
-                    if curr_cat == 1 then
-                        return
-                    else
-                        umbrella.focus_index(curr_cat-1,#focus_sel_items[curr_cat])
-                    end
+                    return
                 else
-                    umbrella.focus_index(curr_cat,curr_index-1)
+                    umbrella.focus_index(curr_index-1)
                 end
             end,
             press_down = function()
-                if curr_index == #focus_sel_items[curr_cat] then
-                    if curr_cat == #focus_sel_items then
-                        return
-                    else
-                        umbrella.focus_index(curr_cat+1,1)
-                    end
+                if curr_index == #selectable_items then
+                    return
                 else
-                    umbrella.focus_index(curr_cat,curr_index+1)
+                    umbrella.focus_index(curr_index+1)
                 end
             end,
-            replace_item = function (cat,index,item)
+            insert_item = function (index,item)
                 assert(type(item)=="table","invalid item")
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+                assert(index > 0 and index <= #p.items, "invalid index")
                 
-                if type(item)=="table" then
-                    p.items[cat].items[index]=item
-                elseif type(item)=="string" then
-                    p.items[cat].items[index].txt=item
-                end
+                table.insert(p.items,index,item)
                 create()
             end,
-            insert_item = function (cat,index,item)
-                assert(type(item)=="table","invalid item")
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
-                
-                table.insert(p.items[cat].items,index,item)
-                create()
-            end,
-            remove_item = function (cat,index)
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
-                
-                table.remove(p.items[cat].items,index)
-                create()
-            end,
-            rename_category = function (index,name)
-                assert(index > 0 and index <= #p.items, "invalid category index")
-                
-                p.items[index].name=name
-                create()
-            end,
-            insert_category = function (index,cat)
-                assert(index > 0 and index <= #p.items, "invalid category index")
-                
-                if type(cat) == "table" then
-                    table.insert(p.items,index,cat)
-                elseif type(cat) == "string" then
-                    table.insert(p.items,index,{name=cat,items={}})
-                end
-                
-                create()
-            end,
-            remove_category = function (index)
-                assert(index > 0 and index <= #p.items, "invalid category index")
+            remove_item = function (index)
+                assert(index > 0 and index <= #p.items, "invalid index")
                 
                 table.remove(p.items,index)
+                
+                create()
+            end,
+            move_item_up = function (index)
+                assert(index > 1 and index <= #p.items, "invalid index")
+                
+                local swp = p.items[index]
+                p.items[index] = p.items[index-1]
+                p.items[index-1] = swp
+                
+                create()
+            end,
+            move_item_down = function (index)
+                assert(index > 0 and index < #p.items, "invalid index")
+                
+                local swp = p.items[index]
+                p.items[index] = p.items[index+1]
+                p.items[index+1] = swp
+                
                 create()
             end,
             spin_in = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
                 dropDownMenu.y_rotation={90,0,0}
                 dropDownMenu.opacity=0
                 dropDownMenu:animate{
@@ -3824,20 +3879,14 @@ items = {
                     opacity=255,
                     y_rotation=0
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                if focus_sel_items[curr_cat][curr_index] then
-                    focus_sel_items[curr_cat][curr_index].opacity=0
+                button:on_focus_in()
+                if selectable_items[curr_index] then
+                    selectable_items[curr_index].opacity=0
                 end
-                curr_cat   = 1
                 curr_index = 0
             end,
             spin_out = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=255
                 dropDownMenu:animate{
@@ -3845,58 +3894,43 @@ items = {
                     opacity=0,
                     y_rotation=-90
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
+                button:on_focus_out()
             end,
             fade_in = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=0
                 dropDownMenu:animate{
                     duration=300,
                     opacity=255,
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                if focus_sel_items[curr_cat][curr_index] then
-                    focus_sel_items[curr_cat][curr_index].opacity=0
+                if selectable_items[curr_index] then
+                    selectable_items[curr_index].opacity=0
                 end
-                curr_cat   = 1
+                button:on_focus_in()
                 curr_index = 0
             end,
             fade_out = function()
                 dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=255
                 dropDownMenu:animate{
                     duration=300,
                     opacity=0,
                 }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
+                button:on_focus_out()
             end,
-            set_item_function = function(cat,index,f)
-                assert(cat   > 0 and cat   <= #p.items, "invalid category index")
-                assert(index > 0 and index <= #p.items[cat].items, "invalid index")
+            set_item_function = function(index,f)
+                assert(index > 0 and index <= #p.selectable_items, "invalid index")
                 
-                p.items[cat].items[index].f=f
+                p.selectable_items[index].f=f
                 
             end,
             press_enter = function(p)
-                if p.items[curr_cat] ~= nil and
-                   p.items[curr_cat].items[curr_index].f ~= nil then
+                if p.selectable_items[curr_index] ~= nil and
+                   p.selectable_items[curr_index].f ~= nil then
                    
-                    p.items[curr_cat].items[curr_index].f(p)
+                    p.selectable_items[curr_index].f(p)
                 else
                     print("no function")
                 end
@@ -3907,10 +3941,10 @@ items = {
     umbrella.size = {p.wwidth, p.wheight}
  ]]
     }
-    local function make_ring(w,h,padding)
+    local function make_item_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
         ring:begin_painting()
-        ring:set_source_color( p.txt_color )
+        ring:set_source_color( p.menu_text_color )
         ring:round_rectangle(
             padding + 2 / 2,
             padding + 2 / 2,
@@ -3941,107 +3975,106 @@ items = {
         --reset globals
         curr_cat   = 1
         curr_index = 0
-        focus_sel_items  = {}
+        selectable_items  = {}
         dropDownMenu:clear()
         dropDownMenu.opacity=0
         
-        if p.bg_clone_src == nil then
-            curr_y = 45
-        else
-            curr_y = p.item_start_y
-        end
+        
+        
+        button.text_font=p.label_font
+    	button.text_color=p.label_color
+    	button.skin=p.skin
+    	button.wwidth=p.button_width
+    	button.wheight=p.button_height
+        
+    	button.label=p.label
+    	button.focus_color=p.focus_color
+    	button.button_color=p.button_color
+    	button.border_width=p.border_width
+    	button.border_corner_radius=p.border_corner_radius
+        
+        
+        curr_y = p.vert_offset
         
         --For each category
-        for cat = 1, #p.items do
+        for i = 1, #p.items do
+            local item=p.items[i]
+            --focus_sel_items[cat] = {}
             
-            focus_sel_items[cat] = {}
-            
-            --Don't place a divider at the top
-            if cat ~= 1 and p.divider_h ~= 0 then
+            if item.type == "seperator" then
                 dropDownMenu:add(
                     Rectangle{
-                        x     = p.padding,
+                        x     = p.hor_padding,
                         y     = curr_y,
-                        name  = "divider "..(cat-1),
-                        w     = p.bg_w-2*p.padding,
-                        h     = p.divider_h,
+                        name  = "divider "..i,
+                        w     = p.menu_width-2*p.hor_padding,
+                        h     = p.seperator_thickness,
                         color = txt_color
                     }
                 )
-                curr_y = curr_y + p.divider_h + txt_spacing
-            end
-            
-            --Category title
-            if p.items[cat].name ~= nil then
-                dropDownMenu:add(
-                    Text{
-                        text  = p.items[cat].name,
-                        font  = p.font,
-                        color = p.txt_color,
-                        x     = p.padding,
-                        y     = curr_y,
-                    }
-                )
-                curr_y = curr_y + txt_h + txt_spacing
-            end
-            
-            --For each item in that categoryitem
-            for item = 1, #p.items[cat].items do
+                curr_y = curr_y + p.seperator_thickness + p.vert_spacing
+            elseif item.type == "item" then
                 
-                --Make the base_img for each item
-                if p.item_bg_clone_src ~= nil then
-                    ui_ele = Clone{source=p.item_bg_clone_src}
-                else
-                    ui_ele = make_ring(p.bg_w,txt_h+15,7)
-                end
-                
-                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                ui_ele.position     = {   p.bg_w/2, curr_y+txt_h/2 }
-                dropDownMenu:add(ui_ele)
-                
-                
-                --Make the focus for each item
-                if p.item_focus_clone_src ~= nil then
-                    ui_ele = Clone{source=p.item_focus_clone_src}
-                else
-                    ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    ui_ele.size = {p.bg_w,txt_h+15}
-                end
-                
-                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                ui_ele.position     = {   p.bg_w/2, curr_y+txt_h/2 }
-                ui_ele.opacity      = 0
-                dropDownMenu:add(ui_ele)
-                table.insert(focus_sel_items[cat],ui_ele)
                 
                 
                 --Make the text label for each item
-                dropDownMenu:add(
-                    Text{
-                        text  = p.items[cat].items[item].txt,
-                        font  = p.font,
-                        color = p.txt_color,
-                        x     = p.padding+inset,
+                local txt = Text{
+                        text  = item.string,
+                        font  = p.menu_font,
+                        color = p.menu_text_color,
+                        x     = p.hor_padding+p.hor_spacing,
                         y     = curr_y,
                     }
+                    txt.anchor_point={0,txt.h/2}
+                    txt.y = txt.y+txt.h/2
+                dropDownMenu:add(
+                    txt
                 )
-                curr_y = curr_y + txt_h + txt_spacing
+                ui_ele = make_item_ring(p.menu_width-2*p.hor_spacing,txt.h+10,7)
+                
+                ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                ui_ele.position     = {  p.hor_spacing, txt.y }
+                dropDownMenu:add(ui_ele)
+                
+                
+                
+                ui_ele = assets(skin_list[p.skin]["button_focus"])
+                ui_ele.size = {p.bg_w,txt_h+15}
+                
+                
+                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
+                ui_ele.position     = {   p.menu_width/2, curr_y+txt_h/2 }
+                ui_ele.opacity      = 0
+                dropDownMenu:add(ui_ele)
+                table.insert(selectable_items,ui_ele)
+                
+                curr_y = curr_y + txt.h + p.vert_spacing
+            elseif item.type == "label" then
+                txt = Text{
+                        text  = item.string,
+                        font  = p.menu_font,
+                        color = p.menu_text_color,
+                        x     = p.hor_spacing,
+                        y     = curr_y,
+                    }
+                dropDownMenu:add(
+                    txt
+                )
+                curr_y = curr_y + txt.h + p.vert_spacing
+            else
+                print("Invalid type in the item list. Type: ",item.type)
             end
         end
         
         
-        if p.bg_clone_src == nil then
-            if skin_list[p.skin]["drop_down_bg"] then
-                ui_ele = assets(skin_list[p.skin]["drop_down_bg"])
-                ui_ele.size = { p.bg_w , curr_y }
-            else
-                ui_ele = ui.factory.make_dropdown(
-                    { p.bg_w , curr_y } ,
-                    p.bg_color
-                )
-            end
+        if skin_list[p.skin]["drop_down_bg"] then
+            ui_ele = assets(skin_list[p.skin]["drop_down_bg"])
+            ui_ele.size = { p.bg_w , curr_y }
         else
-            ui_ele = Clone{source=p.bg_clone_src}
+            ui_ele = ui.factory.make_dropdown(
+                { p.menu_width , curr_y } ,
+                p.bg_color
+            )
         end
         dropDownMenu:add(ui_ele)
         ui_ele:lower_to_bottom()
@@ -4050,58 +4083,27 @@ items = {
         if p.bg_goes_up then
             ui_ele.x_rotation={180,0,0}
             ui_ele.y = ui_ele.h+p.item_start_y
-            dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.item_start_y}
+            dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.vert_offset}
         else
             dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
         end
         
-        button:clear()
-        if p.top_img ~= nil then
-            if p.top_img.parent ~= nil then
-                p.top_img.unparent()
-            end
-            p.top_img.anchor_point = {p.top_img.w/2,p.top_img.h/2}
-            button:add(p.top_img)
-        else
-            ui_ele = assets(skin_list[p.skin]["button"])
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            ui_ele.reactive=true
-            button:add(ui_ele)
-        end
-        
-        
-        
-        if p.top_focus_img ~= nil then
-            if p.top_focus_img.parent ~= nil then
-                p.top_focus_img.unparent()
-            end
-            p.top_focus_img.anchor_point = {p.top_focus_img.w/2,p.top_focus_img.h/2}
-            button:add(p.top_focus_img)
-            button_focus = p.top_focus_img
-        else
-            button_focus = assets(skin_list[p.skin]["button_focus"])
-            button_focus.anchor_point = {button_focus.w/2,button_focus.h/2}
-            button:add(button_focus)
-        end
-        
-        button_focus.opacity = 0
-        
         button.reactive=true
+        
         function button:on_button_down(x,y,b,n)
-            if button_focus.opacity == 0 then
+            if dropDownMenu.opacity == 0 then
                 umbrella.spin_in()
             else
                 umbrella.spin_out()
             end
         end
         
-        ui_ele = Text{text=p.name,font=p.font,color = p.txt_color}
-        ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        button:add(ui_ele)
+        
         
         button.position = {button.w/2,button.h/2}
+        button.anchor_point = {button.w/2,button.h/2}
         dropDownMenu.x = button.w/2
-        if p.bg_goes_up then
+        if p.expansion_location then
             dropDownMenu.y = dropDownMenu.y -10
         else
             dropDownMenu.y = dropDownMenu.y + button.h+10
