@@ -310,7 +310,7 @@ function create_on_button_down_f(v)
 	      	    if(dragging ~= nil) then 
 
 	       	       local actor = unpack(dragging) 
-		       if (actor.name == "grip") then  
+		       if (actor.name == "scroll_window") then  
 				dragging = nil 
 				return true 
 		       end 
@@ -588,12 +588,12 @@ function make_attr_t(v)
        ["Group"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Button"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
-       ["TextInput"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","text_indent","border_width","border_corner_radius", "reactive", "focus"} end,
+       ["TextInput"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
        ["DialogBox"] = function() return {"skin","label","x_rotation","anchor_point","opacity","border_color","fill_color","border_width","border_corner_radius","title_color","title_font","title_seperator_color","title_seperator_thickness",} end,
        ["ToastAlert"] = function() return {"skin","x_rotation", "anchor_point","icon","label","message","opacity","title_color","title_font","message_color","message_font","fill_color","border_color","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","items","selected_item","reactive","focus"} end,
        ["ProgressSpinner"] = function() return {"skin","x_rotation","anchor_point","opacity","anim_radius","dot_radius","dot_color","num_dots","anim_duration", } end,
-       ["ProgressBar"] = function() return {"x_rotation","anchor_point", "opacity","shell_upper_color","shell_lower_color","fill_upper_color","fill_lower_color","stroke_color",} end,
+       ["ProgressBar"] = function() rscroll_windoweturn {"x_rotation","anchor_point", "opacity","shell_upper_color","shell_lower_color","fill_upper_color","fill_lower_color","stroke_color",} end,
        ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible",} end,
        ["ScrollPane"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
        ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","opacity","font","item_spacing","item_start_y","txt_color","bg_color","bg_w","padding","divider_h","bg_goes_up","reactive","focus",} end,
@@ -638,7 +638,7 @@ function make_attr_t(v)
              {"caption", "Object Name"},
              {"name", v.name,"name"},
              {"caption", "Source"},
-             {"source", v.source, "source"},
+             {"source", v.source, "Source Location"},
              {"caption", "View Port"},
              {"left", v.viewport[1], "X"},
              {"top", v.viewport[2], "Y"},
@@ -729,8 +729,9 @@ function itemTostring(v, d_list, t_list)
  
    local function add_attr (list, head, tail) 
        local item_string =""
+	dumptable(list)
        for i,j in pairs(list) do 
-          if v[j] then 
+          if v[j] ~= nil then 
 	      if j == "position" then 
 		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
 	      elseif j == "children" then 
@@ -1606,22 +1607,20 @@ function inputMsgWindow_yn(txt)
      screen:grab_key_focus(screen) 
 end
 
-function inputMsgWindow_openvideo()
+function inputMsgWindow_openvideo(notused, parm_txt)
      
-     if(is_mp4_file(input_t.text) == true) then 
-          mediaplayer:load(input_t.text)
+     if(is_mp4_file(parm_txt) == true) then 
+          mediaplayer:load(parm_txt)
      else 
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen)
-          printMsgWindow("The file is not a video file.\nFile Name : ","err_msg")
-          inputMsgWindow("reopen_videofile")
           return 
      end 
 
      video1 = { name = "video1", 
                 type ="Video",
-                viewport ={0,0,screen.w/2,screen.h/2},
-           	source= input_t.text,
+                viewport ={0,0,screen.w * screen.scale[1] ,screen.h * screen.scale[2]},
+           	source= parm_txt,
            	loop= false, 
                 volume=0.5  
               }
@@ -1638,6 +1637,7 @@ function inputMsgWindow_openvideo()
      screen:grab_key_focus(screen)
 
 end
+
 
 function inputMsgWindow_openimage(input_purpose, input_text)
 

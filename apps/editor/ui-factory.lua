@@ -1245,10 +1245,11 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     local item_group 
  
 
+--[[
     if item_n then print("item_n", item_n) end 
     if item_v then print("item_v", item_v) end 
     if item_s then print("item_s", item_s) end 
-
+]]
     local function text_reactive()
 	for i, c in pairs(g.children) do
 	     if(c.type == "Text") then 
@@ -1502,7 +1503,20 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		for m, n in pairs (v.extra.focus) do
 		     focus_changer:find_child("text"..focus_map[m]).text = n
 		end 	
-	
+	elseif v.extra.type == "Button" or v.extra.type == "TextInput" or v.extra.type == "MenuButton" then
+		focus_changer:find_child("textE").text = v.name 
+		focus_changer:find_child("gE").opacity = 150 
+		focus_changer:find_child("gE").reactive = false 
+	elseif v.extra.type == "ButtonPicker" then 
+		focus_changer:find_child("textE").text = v.name 
+		focus_changer:find_child("gE").opacity = 150 
+		focus_changer:find_child("gE").reactive = false 
+		focus_changer:find_child("textL").text = v.name 
+		focus_changer:find_child("gL").opacity = 150 
+		focus_changer:find_child("gL").reactive = false 
+		focus_changer:find_child("textR").text = v.name 
+		focus_changer:find_child("gR").opacity = 150 
+		focus_changer:find_child("gR").reactive = false 
 	end 	
 
 	local space = WIDTH - PADDING_X  
@@ -1511,6 +1525,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         group:add(focus_changer)
 	return group
     elseif(item_n == "items") then 
+
+	local plus, item_plus, label_plus, seperator_plus
+
 	group:clear()
 	group.name = "itemsList"
 	group.reactive = true
@@ -1521,38 +1538,32 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         text.position  = {WIDTH - space , 5}
     	group:add(text)
 
-	local plus_minus = factory.draw_plus_minus()
-	local plus = plus_minus:find_child("plus")
-	local minus = plus_minus:find_child("minus")
-	plus_minus.position = {text.x + text.w + PADDING_X, 5}
-	plus.reactive = true 
-	minus.reactive = true 
-
-	function plus:on_button_down()
-		table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
-		screen:remove(inspector)
-		input_mode = S_SELECT
-		current_inspector = nil
-                screen:grab_key_focus(screen) 
-		text_reactive()
-		editor.n_selected(v, true)
-		editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-		return true
+	if v.extra.type == "ButtonPicker" then 
+		plus = factory.draw_plus_item()
+		plus.position = {text.x + text.w + PADDING_X, 5}
+		plus.reactive = true
+		dumptable(plus.position)
+		dumptable(plus.size)
+		function plus:on_button_down(x,y)
+			print(x,y)
+			table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+                	screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true
+		end 
+	elseif v.extra.type =="MenuButton" then 
+		plus = factory.draw_plus_items()
+		plus.position = {text.x + text.w + PADDING_X, 5}
+		item_plus = plus_minus:find_child("item_plus")
+		label_plus = plus_minus:find_child("label_plus")
+		seperator_plus = plus_minus:find_child("seperator_plus")
 	end 
-
-	function minus:on_button_down()
-		table.remove(v.items)
-		screen:remove(inspector)
-		input_mode = S_SELECT
-		current_inspector = nil
-                screen:grab_key_focus(screen) 
-		text_reactive()
-		editor.n_selected(v, true)
-		editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		return true 
-	end 
-
-	group:add(plus_minus)
+	group:add(plus) 
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
 	local items_list = ui_element.layoutManager{num_rows = table.getn(v.items), num_cols = 1, item_w = 300, item_h = 40, grid_gap=5, focus=list_focus}
@@ -1561,6 +1572,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	items_list:find_child("Focus").opacity = 0 
 
 	for i,j in pairs(v.items) do 
+
              local item = ui_element.textInput{wwidth = 350, wheight = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
 	     item.name = "item_text"..tostring(i)
 
@@ -1570,8 +1582,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		item.on_focus_in()
 		return true
 	     end 
- 
-	    function item:on_key_down(key)
+	     function item:on_key_down(key)
 	       local si = inspector:find_child("si")
     	       if is_this_widget(v) == true  then
                     item_group = si.content
@@ -1636,7 +1647,30 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		    end 
 	       end 
 	     end 
+---
+	     local minus = factory.draw_minus ()
+	     minus.position = {}
+	     local up_down = factory.draw_up_down ()
+	     up_down.position = {}
+	     local up = up_down:find_child("up")
+	     local down = up_down:find_child("down")
 
+--[[
+	
+	function minus:on_button_down()
+		table.remove(v.items)
+		screen:remove(inspector)
+		input_mode = S_SELECT
+		current_inspector = nil
+                screen:grab_key_focus(screen) 
+		text_reactive()
+		editor.n_selected(v, true)
+		editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		return true 
+	end 
+]]
+
+---
 	     items_list:replace(i,1,item)
 	end
 
@@ -1658,7 +1692,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(items_list) 
 	return group
 
-    elseif(item_n == "skin") then  -- Attribute with button picker 
+    elseif item_n == "skin" or item_n == "wrap_mode" then  -- Attribute with button picker 
 	group:clear()
 	group.name = item_n
 	group.reactive = true
@@ -1669,55 +1703,57 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         text.position  = {WIDTH - space , 5}
     	group:add(text)
 	
-	local selected
-	for i,j in pairs(skins) do 
+	local selected = 1
+  	local itemLists
+	
+	if item_n == "skin" then itemLists = skins else itemLists = {"NONE", "CHAR", "WORD", "WORD_CHAR"} if v.wrap == false then item_v = "NONE" end  end--hjk
+
+	for i,j in pairs(itemLists) do 
 	    if(item_v == j)then 
 		selected = i 
 	    end
 	end
-
-
-        local skin_picker = ui_element.buttonPicker{skin = "custom", items = skins, font = "DejaVu Sans 26px", selected_item = selected}
-	skin_picker.wheight = 45
-	skin_picker.wwidth = 210
-        skin_picker.position = {text.x + text.w + 50 , 5}
-	skin_picker.name = "skin_picker"
-
-        group:add(skin_picker) 
 	
-	unfocus = skin_picker:find_child("unfocus")
+        local item_picker = ui_element.buttonPicker{skin = "custom", items = itemLists, text_font = "DejaVu Sans 26px", selected_item = selected}
+	item_picker.wheight = 45
+	item_picker.wwidth = 210
+        item_picker.position = {text.x + text.w + 50 , 0}
+	item_picker.name = "item_picker"
+
+        group:add(item_picker) 
+	
+	unfocus = item_picker:find_child("unfocus")
 	function unfocus:on_button_down (x,y,b,n)
-	        print("oipiop")
    		current_focus.extra.on_focus_out()
 	        current_focus = group
-		skin_picker.on_focus_in()
-	        skin_picker:grab_key_focus()
+		item_picker.on_focus_in()
+	        item_picker:grab_key_focus()
 		return true
 	end 
 
-        left_arrow = skin_picker:find_child("left_un")
+        left_arrow = item_picker:find_child("left_un")
 	left_arrow.reactive = true 
 	function left_arrow:on_button_down(x, y, b, n)
 		current_focus.extra.on_focus_out()
 	        current_focus = group
-		skin_picker.on_focus_in()
-	        skin_picker:grab_key_focus()
-		skin_picker.press_left()
+		item_picker.on_focus_in()
+	        item_picker:grab_key_focus()
+		item_picker.press_left()
 		return true 
 	end 
 
-	right_arrow = skin_picker:find_child("right_un")
+	right_arrow = item_picker:find_child("right_un")
 	right_arrow.reactive = true 
 	function right_arrow:on_button_down(x, y, b, n)
 		current_focus.extra.on_focus_out()
 	        current_focus = group
-		skin_picker.on_focus_in()
-	        skin_picker:grab_key_focus()
-		skin_picker.press_right()
+		item_picker.on_focus_in()
+	        item_picker:grab_key_focus()
+		item_picker.press_right()
 		return true 
 	end 
 
-	function skin_picker:on_key_down(key)
+	function item_picker:on_key_down(key)
 	     local si = inspector:find_child("si")
     	     if is_this_widget(v) == true  then
                 item_group = (inspector:find_child("si")).content
@@ -1725,11 +1761,11 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
          	item_group = inspector:find_child("item_group")
     	     end 
 	       if key == keys.Left then 
-		     skin_picker.press_left()
+		     item_picker.press_left()
 	       elseif key == keys.Right then  
-		     skin_picker.press_right()
+		     item_picker.press_right()
 	       elseif (key == keys.Tab and shift == false) or key == keys.Down then
-		     skin_picker.on_focus_out()
+		     item_picker.on_focus_out()
 		     for i, v in pairs(attr_t_idx) do
 		     if(item_n == v or item_v == v) then 
 		          while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
@@ -1740,13 +1776,13 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		               local n_item = attr_t_idx[i+1]
 			       item_group:find_child(n_item).extra.on_focus_in()	
 			       si.seek_to(0, item_group:find_child(n_item).y)
-			       print("SEEK_TO: FROM-",skin_picker.parent.y,"TO-",item_group:find_child(n_item).y)
+			       print("SEEK_TO: FROM-",item_picker.parent.y,"TO-",item_group:find_child(n_item).y)
 			       break
 		          end
 		     end 
     		     end
 	       elseif key == keys.Up or (key == keys.Tab and shift == true )then 
-		     skin_picker.on_focus_out()
+		     item_picker.on_focus_out()
 		      for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
 			     if(attr_t_idx[i-1] == nil) then return true end 
@@ -1757,7 +1793,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
 				si.seek_to(0, item_group:find_child(p_item))
-			        print("SEEK_TO: FROM-",skin_picker.parent.y,"TO-",item_group:find_child(p_item).y)
+			        print("SEEK_TO: FROM-",item_picker.parent.y,"TO-",item_group:find_child(p_item).y)
 				break
 			     end
 			end 
@@ -1768,15 +1804,15 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 
         function group.extra.on_focus_in()
-		 group:find_child("skin_picker").extra.on_focus_in()
-	         group:find_child("skin_picker"):grab_key_focus()
+		 group:find_child("item_picker").extra.on_focus_in()
+	         group:find_child("item_picker"):grab_key_focus()
         end
 
         function group.extra.on_focus_out()
-		 group:find_child("skin_picker").extra.on_focus_out()
+		 group:find_child("item_picker").extra.on_focus_out()
         end 
 
-	group:add(skin_picker)
+	group:add(item_picker)
 
         return group
     elseif(item_n == "reactive" or item_n == "loop") then  -- Attribute with single checkbox
@@ -1793,10 +1829,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	local reactive_checkbox
 	
 	if item_v == "true" then 
-	     print("TRUE true !!!")
 	     reactive_checkbox = ui_element.checkBox {wwidth = 200, wheight = 100, items = {""}, selected_items = {1},}
 	else 
-	     print("FALSE false!!!")
 	     reactive_checkbox = ui_element.checkBox {wwidth = 200, wheight = 100, items = {""}, selected_items = {},}
 	end 
 
@@ -1814,7 +1848,45 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         local space = WIDTH - PADDING_X  
 	local text
 
-        if(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source" or item_n == "icon") then 
+	if item_n == "icon" or item_n =="source"  or item_n == "src" then -- File Chooser Button 
+	     input_box_width = WIDTH * 5 / 8
+	     ring = make_ring(input_box_width, HEIGHT + 5 ) 
+	     ring.name = "ring"
+	     if (text) then 
+	     	ring.position = {text.x+text.w+5, 0}
+	     else 
+	        ring.position = {WIDTH - space, 0}
+  	     end
+             ring.opacity = 180
+	     ring.reactive = false
+             group:add(ring)
+
+	     input_text = Text {name = "file_name", text =item_v, editable=false,
+             reactive = false, wants_enter = false, cursor_visible = false, font = "DejaVu Sans 26px" , color = {180,180,180,255}}
+             input_text.position  = {ring.x + 15, ring.y + 5}
+	     group:add(input_text) 
+	     
+
+	     local filechooser = ui_element.button{wwidth = 150, wheight = 45, text_font ="DejaVu Sans 25px" , label = "Choose ...", }
+	     filechooser.position = {ring.x + ring.w, ring.y }
+
+	     if v.type == "Video" then 
+	          filechooser.pressed = editor.the_video
+	     else 
+	          filechooser.pressed = editor.the_image
+	     end
+
+ 	     function filechooser:on_button_down(x,y,b,n)
+		if current_focus then 
+		     current_focus.on_focus_out()
+		end
+		filechooser.on_focus_in()
+		return true
+	     end 
+
+	     group:add(filechooser)
+	     return group
+        elseif(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	elseif item_n == "anchor_point" then 
 	     text = Text {name = "attr", text = item_s}:set(STYLE)
@@ -1851,7 +1923,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	if (text) then 
 	     ring.position = {text.x+text.w+5, y_space}
 	else 
-	     ring.position = {WIDTH = space, y_space}
+	     ring.position = {WIDTH - space, y_space}
 	end
         ring.opacity = 255
         group:add(ring)
@@ -1869,7 +1941,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	space = space - PADDING_B
 
-	if(item_v == "CHAR" or item_v == "WORD" or item_v =="WORD_CHAR") then item_v = string.lower(item_v) end 
+	-- if(item_v == "CHAR" or item_v == "WORD" or item_v =="WORD_CHAR") then item_v = string.lower(item_v) end 
 
     	input_text = Text {name = "input_text", text =item_v, editable=true,
         reactive = true, wants_enter = false, cursor_visible = false}:set(STYLE)
@@ -2190,11 +2262,6 @@ function factory.draw_anchor_point(v, inspector)
     return anchor_pnt
 end 
 
-
-
-
-
-
 function factory.draw_anchor_pointer() 
 
 sero = Rectangle
@@ -2295,6 +2362,443 @@ mouse_pointer = Group
 	mouse_pointer.anchor_point = {mouse_pointer.w/2, mouse_pointer.h/2}
 	return mouse_pointer
 end 
+
+function factory.draw_minus()
+local l_col = {150,150,150,200}
+local l_wid = 4
+local l_scale = 0.9
+
+rect_minus = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect_minus",
+		position = {0,0,0},
+		size = {40,40},
+		opacity = 255,
+		reactive = true,
+	}
+
+
+text_minus = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans bold 30px",
+		text = "-",
+		editable = true,
+		wants_enter = true,
+		wrap = false,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text_minus",
+		position = {12,4,0},
+		size = {30,30},
+		opacity = 255,
+		reactive = true,
+	}
+
+
+minus = Group
+	{
+		scale = {l_scale,l_scale,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "minus",
+		position = {536,727,0},
+		size = {42,40},
+		opacity = 255,
+		children = {rect_minus,text_minus},
+		reactive = true,
+	}
+
+return minus
+end
+
+function factory.draw_up_down()
+local l_col = {150,150,150,200}
+local l_wid = 4
+local l_scale = 0.9
+rect_up = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect_up",
+		position = {0,0,0},
+		size = {40,40},
+		opacity = 255,
+		reactive = nil,
+	}
+
+
+img_up = Image
+	{
+		src = "left.png",
+		clip = {0,0,16,33},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {90,0,0},
+		anchor_point = {0,0},
+		name = "img_up",
+		position = {38,11,0},
+		size = {16,33},
+		opacity = 255,
+		reactive = nil,
+	}
+
+
+up = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "up",
+		position = {0,0,0},
+		size = {40,40},
+		opacity = 255,
+		children = {rect_up,img_up},
+		reactive = true,
+	}
+
+
+rect_down = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect_down",
+		position = {0,0,0},
+		size = {40,40},
+		opacity = 255,
+		reactive = nil,
+	}
+
+
+img_down = Image
+	{
+		src = "left.png",
+		clip = {0,0,16,33},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {270,0,0},
+		anchor_point = {0,0},
+		name = "img_down",
+		position = {2,33,0},
+		size = {16,33},
+		opacity = 255,
+		reactive = nil,
+	}
+
+
+down = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "down",
+		position = {52,0,0},
+		size = {40,40},
+		opacity = 255,
+		children = {rect_down,img_down},
+		reactive = true,
+	}
+
+up_down = Group
+	{
+		scale = {l_scale,l_scale,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "up_down",
+		position = {536,729,0},
+		size = {92,40},
+		opacity = 255,
+		children = {up,down},
+		reactive = true,
+	}
+
+return up_down
+end
+
+function factory.draw_plus_item()
+local l_col = {150,150,150,200}
+local l_wid = 4
+local l_scale = 1
+
+rect_plus = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect_plus",
+		position = {0,0,0},
+		size = {30,30},
+		opacity = 255,
+		reactive = true,
+	}
+
+
+text_plus = Text
+	{
+		color = l_col, 
+		font = "DejaVu Sans bold 30px",
+		text = "+",
+		editable = false,
+		wants_enter = false,
+		wrap = false,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text_plus",
+		position = {3,-5,0},
+		size = {30,30},
+		opacity = 255,
+		cursor_visible = false,
+		reactive = true,
+	}
+
+
+plus = Group
+	{
+		scale = {l_scale,l_scale,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "plus",
+		position = {0,0,0},
+		size = {30,30},
+		opacity = 255,
+		children = {rect_plus,text_plus},
+		reactive = true,
+	}
+
+return plus
+end
+
+function factory.draw_plus_items()
+local l_col = {150,150,150,200}
+local l_wid = 4
+local l_scale = 0.9
+
+text_label = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "Label +",
+		editable = false,
+		wants_enter = true,
+		wrap = false,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text_label",
+		position = {7,10,0},
+		size = {120,30},
+		opacity = 255,
+		reactive = true,
+	}
+
+rect_label = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect_label",
+		position = {0,0,0},
+		size = {120,46},
+		opacity = 255,
+		reactive = true,
+	}
+
+label_plus = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "label_plus",
+		position = {0,0,0},
+		size = {127,46},
+		opacity = 255,
+		children = {text_label,rect_label},
+		reactive = true,
+	}
+
+
+text_item = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "Item +",
+		editable = false,
+		wants_enter = true,
+		wrap = false,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text_item",
+		position = {10,9,0},
+		size = {120,30},
+		opacity = 255,
+		reactive = true,
+	}
+
+rect_item = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect_item",
+		position = {0,0,0},
+		size = {110,46},
+		opacity = 255,
+		reactive = true,
+	}
+
+item_plus = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "item_plus",
+		position = {129,0,0},
+		size = {130,46},
+		opacity = 255,
+		children = {text_item,rect_item},
+		reactive = true,
+	}
+
+
+text_seperator = Text
+	{
+		color = {255,255,255,255},
+		font = "DejaVu Sans 26px",
+		text = "Seperator +",
+		editable = false,
+		wants_enter = true,
+		wrap = false,
+		wrap_mode = "CHAR",
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "text_seperator",
+		position = {7,10,0},
+		size = {180,30},
+		opacity = 255,
+		reactive = true,
+	}
+
+
+rect_seperator = Rectangle
+	{
+		color = {255,255,255,0},
+		border_color = l_col,
+		border_width = l_wid,
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "rect_seperator",
+		position = {0,0,0},
+		size = {180,46},
+		opacity = 255,
+		reactive = true,
+	}
+
+seperator_plus = Group
+	{
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "seperator_plus",
+		position = {249,0,0},
+		size = {187,46},
+		opacity = 255,
+		children = {text_seperator,rect_seperator},
+		reactive = true,
+	}
+
+
+items_plus = Group
+	{
+		scale = {l_scale,l_scale,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "items_plus",
+		position = {335,534,0},
+		size = {436,46},
+		opacity = 255,
+		children = {label_plus,item_plus,seperator_plus},
+		reactive = true,
+	}
+
+return items_plus
+
+end
 
 function factory.draw_plus_minus()
 

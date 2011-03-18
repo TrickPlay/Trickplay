@@ -34,14 +34,24 @@ function inspector_apply (v, inspector)
 		 end
               end,
        ["skin"] = function()
-              v["skin"] = skins[tonumber(item_group:find_child("skin"):find_child("skin_picker").selected_item)]
+              v["skin"] = skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
               end,
        ["anchor_point"] = function()
                v:move_anchor_point(item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[1], 
 	      item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
               end,     
        ["wrap_mode"] = function()
-              v.wrap_mode = string.upper(item_group:find_child("wrap_mode"):find_child("input_text").text)
+
+	      local itemLists = {"none", "char", "word", "word_char"}
+	      if tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item) == 1 then 
+		   print("wrap false")
+		   v.wrap = false
+                   v.wrap_mode = "CHAR"
+	      else 
+		   print("wrap true")
+		   v.wrap = true
+                   v.wrap_mode = string.upper(itemLists[tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item)])
+	      end 
               end,        
        ["bwidth"] = function()
               v.border_width = tonumber(item_group:find_child("bwidth"):find_child("input_text").text)
@@ -76,6 +86,16 @@ function inspector_apply (v, inspector)
 	            v.loop = false
 	       end
 	       end,
+	["icon"] = function()
+               v.icon = tostring(item_group:find_child("icon"):find_child("file_name").text)
+	       end,
+	["source"] = function()
+               v.source = tostring(item_group:find_child("source"):find_child("file_name").text)
+	       end,
+	["src"] = function()
+               v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
+	       end,
+
       }       
 
       if is_this_widget(v) == true  then

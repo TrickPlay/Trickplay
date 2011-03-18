@@ -538,7 +538,6 @@ local function cleanMsgWin(msgw)
 end 
 
 function editor.the_image()
----[[
 	local WIDTH = 700
 	local L_PADDING = 50
 	local R_PADDING = 50
@@ -558,8 +557,6 @@ function editor.the_image()
 
 	dir_text.position = {cur_w,cur_h,0}
 
-	--local line = factory.draw_line()
-	
 	function get_file_list_sz() 
 	     local iw = cur_w
 	     local ih = cur_h
@@ -703,13 +700,21 @@ function editor.the_image()
 
     function open_b:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
-	      inputMsgWindow_openimage("open_imagefile", input_text.text)
+	      if screen:find_child("inspector") then 
+		    screen:find_child("file_name").text = input_text.text
+	      else 
+	            inputMsgWindow_openimage("open_imagefile", input_text.text)
+	      end 
 	      cleanMsgWin(msgw)
 	 end 
     end 
     function open_t:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
-	      inputMsgWindow_openimage("open_imagefile", input_text.text)
+	      if screen:find_child("inspector") then 
+		    screen:find_child("file_name").text = input_text.text
+	      else 
+	            inputMsgWindow_openimage("open_imagefile", input_text.text)
+	      end
 	      cleanMsgWin(msgw)
 	 end 
     end 
@@ -725,7 +730,6 @@ function editor.the_image()
     end 
 
     screen:add(msgw)
---]]
 end 
 
 function editor.export ()
@@ -1719,7 +1723,7 @@ function editor.text()
      	color = DEFAULT_COLOR, 
 	position ={700, 500, 0}, 
 	editable = true , reactive = true, 
-	wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
+	wants_enter = true, size = {300, 100},wrap=false, wrap_mode="CHAR", 
 	extra = {org_x = 700, org_y = 500}
 	} 
 
@@ -1801,6 +1805,201 @@ function editor.video()
 	end
 end
 	
+function editor.the_video()
+	local WIDTH = 700
+	local L_PADDING = 50
+	local R_PADDING = 50
+        local TOP_PADDING = 60
+        local BOTTOM_PADDING = 12
+        local Y_PADDING = 10 
+	local X_PADDING = 10
+	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+	local space = WIDTH
+
+	local dir = editor_lb:readdir(CURRENT_DIR)
+	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR}:set(STYLE)
+
+	local cur_w= (WIDTH - dir_text.w)/2
+	local cur_h= TOP_PADDING/2 + Y_PADDING
+
+
+	dir_text.position = {cur_w,cur_h,0}
+
+	function get_file_list_sz() 
+	     local iw = cur_w
+	     local ih = cur_h
+	     cur_w = L_PADDING
+	     cur_h = cur_h + dir_text.h + Y_PADDING
+
+     	     for i, v in pairs(dir) do
+	          if (is_mp4_file(v) == true) then 
+	               text = Text {name = tostring(i), text = v}:set(STYLE)
+
+                       text.position  = {cur_w, cur_h,0}
+		       if(cur_w == L_PADDING) then
+				cur_w = cur_w + 7*L_PADDING
+		       else 
+	               		cur_w = L_PADDING 
+	               		cur_h = cur_h + text.h + Y_PADDING
+		       end
+                  end 
+             end
+
+	     local return_h = cur_h - 40
+
+	     cur_w = iw
+	     cur_h = ih
+	     return return_h 
+        end 
+
+	local file_list_size = get_file_list_sz()
+        local scroll_box 
+        local scroll_bar 
+	
+	if (file_list_size > 500) then 
+             scroll_box = factory.make_msgw_scroll_box()
+             scroll_bar = factory.make_msgw_scroll_bar(file_list_size)
+	     file_list_size = 500 
+	end 
+	
+	local msgw_bg = factory.make_popup_bg("file_ls", file_list_size)
+
+	local msgw = Group {
+	     position ={500, 100,0},
+	     anchor_point = {0,0},
+             children =
+             {
+              msgw_bg,
+             }
+	}
+
+        msgw:add(dir_text)
+
+	local text_g
+	local input_text
+	function print_file_list() 
+	     cur_w = L_PADDING
+             cur_h = TOP_PADDING + dir_text.h + Y_PADDING
+	     text_g = Group{position = {cur_w, cur_h,0}}
+	     text_g.extra.org_y = cur_h
+	     text_g.reactive  = true 
+
+	     cur_w = 0
+	     cur_h = 0 
+     	     for i, v in pairs(dir) do
+	          if (is_mp4_file(v) == true) then 
+	               text = Text {name = tostring(i), text = v}:set(STYLE)
+
+                       text.position = {cur_w, cur_h,0}
+	 	       text.reactive = true
+    	               text_g:add(text)
+
+		       if(cur_w == 0) then
+				cur_w = cur_w + 7*L_PADDING
+		       else 
+	               		cur_w = 0
+	               		cur_h = cur_h + text.h + Y_PADDING
+		       end
+                  end
+             end
+
+	     cur_w = cur_w + L_PADDING
+	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
+	     text_g.clip = {0,0,text_g.w,500}
+    	     msgw:add(text_g)
+        end 
+	
+	print_file_list()
+	if(scroll_bar ~= nil) then 
+	     scroll_box.position = {720, TOP_PADDING + dir_text.h + Y_PADDING}
+	     scroll_bar.position = {724, TOP_PADDING + dir_text.h + Y_PADDING + 4}
+	     scroll_bar.extra.org_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
+	     scroll_bar.extra.txt_y = text_g.extra.org_y
+	     scroll_bar.extra.h_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
+	     scroll_bar.extra.l_y = scroll_bar.extra.h_y + 500 - scroll_bar.h
+	     scroll_bar.extra.text_clip = text_g.clip 
+	     scroll_bar.extra.text_position = text_g.position 
+	     msgw:add(scroll_box)
+	     msgw:add(scroll_bar)
+ 
+             function scroll_bar:on_button_down(x,y,button,num_clicks)
+	     	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
+        	return true
+    	     end 
+
+    	     function scroll_bar:on_button_up(x,y,button,num_clicks)
+	 	if(dragging ~= nil) then 
+	      	      local actor , dx , dy = unpack( dragging )
+	       		if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
+	           		local dif = y - dy - scroll_bar.extra.org_y
+	           		scroll_bar.y = y - dy 
+	           		text_g.position = {text_g.x, text_g.extra.org_y -dif}
+	           		text_g.clip = {0,dif,text_g.w,500}
+	      		end 
+	      		dragging = nil
+	 	end 
+         	return true
+            end 
+ 	end 
+
+        for i,j in pairs (text_g.children) do 
+         function j:on_button_down(x,y,button, num_clicks)
+	      if input_text ~= nil then 
+		    input_text.color = DEFAULT_COLOR -- {255, 255, 255, 255}
+	      end 
+              input_text = j
+	      j.color = {0,255,0,255}
+	      return true
+         end 
+        end 
+
+    local open_b, open_t  = factory.make_msgw_button_item( assets , "open")
+    open_b.position = {(WIDTH - 2*open_b.w - X_PADDING)/2, file_list_size + 110}
+    open_b.name = "openfile"
+    open_b.reactive = true
+
+    local cancel_b, cancel_t = factory.make_msgw_button_item( assets , "cancel")
+    cancel_b.position = {open_b.x + open_b.w + X_PADDING, file_list_size + 110}
+    cancel_b.name = "cancel"
+    cancel_b.reactive = true 
+	
+    msgw:add(open_b)
+    msgw:add(cancel_b)
+
+    function open_b:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then 
+ 	      if screen:find_child("inspector") then 
+		    screen:find_child("file_name").text = input_text.text
+	      else 
+	            inputMsgWindow_openvideo("open_videofile", input_text.text)
+	      end
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+    function open_t:on_button_down(x,y,button,num_clicks)
+	 if (input_text ~= nil) then	
+ 	      if screen:find_child("inspector") then 
+		    screen:find_child("file_name").text = input_text.text
+	      else 
+    	            inputMsgWindow_openvideo("open_videofile", input_text.text)
+	      end 
+	      cleanMsgWin(msgw)
+	 end 
+    end 
+
+    function cancel_b:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    function cancel_t:on_button_down(x,y,button,num_clicks)
+	 cleanMsgWin(msgw)
+	 screen:grab_key_focus(screen)
+    end 
+
+    screen:add(msgw)
+	     
+end 
 function editor.clone()
         if(table.getn(selected_objs) == 0 )then 
 		print("there are no selected objects") 
@@ -2755,7 +2954,7 @@ local widget_f_map = {
      ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() end, 
      ["Text"]		= function () editor.text() input_mode = S_SELECT end, 
      ["Image"]		= function () input_mode = S_SELECT  editor.the_image() end, 	
-     ["Video"] 		= function () input_mode = S_SELECT editor.video() end,
+     ["Video"] 		= function () input_mode = S_SELECT editor.the_video() end,
      ["Button"]         = function () return ui_element.button()       end, 
      ["TextInput"] = function () return ui_element.textInput()    end, 
      ["DialogBox"]      = function () return ui_element.dialogBox()    end, 

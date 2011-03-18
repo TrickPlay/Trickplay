@@ -1,4 +1,3 @@
-
      local ui_element = {}
      skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
@@ -102,7 +101,13 @@
         	["Clone"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point", "scale"} end,
         }
 
-	
+ -- for mouse control 
+
+if controllers.start_pointer then 
+  controllers:start_pointer()
+end
+
+
 --[[
 Function: change_all_skin
 
@@ -1191,6 +1196,38 @@ function ui_element.button(table)
         reactive = true,
         extra = {type = "Button"}
     } 
+    
+    function b_group.extra.on_focus_in() 
+	current_focus = b_group
+        if (p.skin == "custom") then 
+	     ring.opacity = 0
+	     focus_ring.opacity = 255
+        else
+	     button.opacity = 0
+             focus.opacity = 255
+        end 
+	if p.pressed then 
+		p.pressed()
+	end 
+
+	b_group:grab_key_focus(b_group)
+    end
+    
+    function b_group.extra.on_focus_out() 
+        if (p.skin == "custom") then 
+	     ring.opacity = 255
+	     focus_ring.opacity = 0
+             focus.opacity = 0
+        else
+	     button.opacity = 255
+             focus.opacity = 0
+	     focus_ring.opacity = 0
+        end
+	if p.released then 
+		p.released()
+	end 
+ 
+    end
 
     local create_button = function() 
 
@@ -1223,40 +1260,18 @@ function ui_element.button(table)
         if (p.skin == "custom") then button.opacity = 0 
         else ring.opacity = 0 end 
 
+	if editor_lb == nil then 
+	     function b_group:on_button_down(x,y,b,n)
+		if current_focus then 
+		     current_focus.on_focus_out()
+		end
+		b_group.extra.on_focus_in()
+		return true
+	     end 
+	end 
     end 
 
     create_button()
-
-    function b_group.extra.on_focus_in() 
-        if (p.skin == "custom") then 
-	     ring.opacity = 0
-	     focus_ring.opacity = 255
-        else
-	     button.opacity = 0
-             focus.opacity = 255
-        end 
-	if p.pressed then 
-		p.pressed()
-	end 
-
-	b_group:grab_key_focus(b_group)
-    end
-    
-    function b_group.extra.on_focus_out() 
-        if (p.skin == "custom") then 
-	     ring.opacity = 255
-	     focus_ring.opacity = 0
-             focus.opacity = 0
-        else
-	     button.opacity = 255
-             focus.opacity = 0
-	     focus_ring.opacity = 0
-        end
-	if p.released then 
-		p.released()
-	end 
- 
-    end
 	
     mt = {}
     mt.__newindex = function (t, k, v)
@@ -1380,6 +1395,7 @@ function ui_element.textInput(table)
      create_textInputField()
 
      function t_group.extra.on_focus_in()
+	  current_focus = t_group
           if (p.skin == "custom") then 
 	     box.opacity = 0
 	     focus_box.opacity = 255
@@ -1625,7 +1641,7 @@ function ui_element.toastAlert(table)
     local t_box, icon, title, message, t_box_img  
     local tb_group = Group {
     	  name = "toastb_group",  
-    	  position = {200, 200, 0}, 
+    	  position = {800, 600, 0}, 
           reactive = true, 
           extra = {type = "ToastAlert"} 
      }
@@ -1882,6 +1898,7 @@ function ui_element.buttonPicker(table)
      create_buttonPicker()
 
      function bp_group.extra.on_focus_in()
+	current_focus = bp_group
 	if(p.skin == "custom") then 
              ring.opacity = 0 
 	     focus_ring.opacity = 255
@@ -2346,16 +2363,14 @@ function ui_element.checkBox(table)
 		   box = Rectangle{name="box"..tostring(i),  color= p.f_color, border_color= p.box_color, border_width= p.box_width, 
 				       size = p.box_size, position = pos, reactive = true, opacity = 255}
     	           boxes:add(box) 
-		   	
-		   check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
-	           checks:add(check) 
 	     else
 	           box = Clone{name = "box"..tostring(i),  source=p.button_image, size = p.box_size, position = pos, reactive = true, opacity = 255}
 		   boxes:add(box) 
-		  
-		   check = Image{name = "check"..tostring(i),  src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
-	           checks:add(check)
 	     end 
+
+	     check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
+	     checks:add(check) 
+
 	     function box:on_button_down (x,y,b,n)
 		local box_num = tonumber(box.name:sub(4,-1))
 		p.selected_items = table_insert(p.selected_items, box_num)
@@ -3575,7 +3590,6 @@ function ui_element.scrollPane(t)
             v.position={0,0}
             v.reactive = false
             window:add(v)
-print("here")
         end
         p[k] = v
         create()
