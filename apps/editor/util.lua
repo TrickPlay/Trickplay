@@ -517,7 +517,6 @@ function make_attr_t(v)
                 table.insert(attr_t, {"ch", clip_t[4], "H"})
 		end,
         ["anchor_point"] = function()	
-		dumptable(v.anchor_point)
  		table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 		end,
 	["src"] = function()
@@ -615,8 +614,8 @@ function make_attr_t(v)
              {"z", math.floor(v.z), "Z"},
       }
        if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" and v.extra.type ~= "MenuButton") then 
-             table.insert(attr_t, {"wwidth", math.floor(v.wwidth), "W"})
-             table.insert(attr_t, {"wheight", math.floor(v.wheight), "H"})
+             table.insert(attr_t, {"ui_width", math.floor(v.ui_width), "W"})
+             table.insert(attr_t, {"ui_height", math.floor(v.ui_height), "H"})
        end
 
   elseif v.type ~= "Video" then  --Rectangle, Image, Text, Group, Clone
@@ -707,7 +706,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "wwidth", "wheight", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive"}
+    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","shell_upper_color", "shell_lower_color", "stroke_color", "fill_upper_color", "fill_lower_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
@@ -730,7 +729,7 @@ function itemTostring(v, d_list, t_list)
  
    local function add_attr (list, head, tail) 
        local item_string =""
-	dumptable(list)
+       dumptable(list)
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
 	      if j == "position" then 

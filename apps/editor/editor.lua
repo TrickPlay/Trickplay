@@ -1143,7 +1143,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		 item.y = prev_y
 		 space = space - item.w
 	    else 
-		 if (attr_n == "wwidth" or attr_n == "w") then 
+		 if (attr_n == "ui_width" or attr_n == "w") then 
 			items_height = items_height - 12 -- imsi !! 
  		 end 
 		 item.y = items_height 

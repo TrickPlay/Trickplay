@@ -223,7 +223,7 @@ end
 
 -- make_dialogBox_bg() : make message window background 
 
---make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_corner_radius) 
+--make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_corner_radius) 
 local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
 
     local size = {w, h} 
@@ -1165,8 +1165,8 @@ function ui_element.button(table)
     	text_font = "DejaVu Sans 30px",
     	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
-    	wwidth = 180,
-    	wheight = 60, 
+    	ui_width = 180,
+    	ui_height = 60, 
 
     	label = "Button", 
     	focus_color = {27,145,27,255}, --"1b911b", 
@@ -1191,7 +1191,7 @@ function ui_element.button(table)
     local b_group = Group
     {
         name = "button", 
-        size = { p.wwidth , p.wheight},
+        size = { p.ui_width , p.ui_height},
         position = {100, 100, 0},  
         reactive = true,
         extra = {type = "Button"}
@@ -1236,24 +1236,24 @@ function ui_element.button(table)
 		p.focus_image  = assets(skin_list[p.skin]["button_focus"])
 	end
         b_group:clear()
-        b_group.size = { p.wwidth , p.wheight}
-        ring = make_ring(p.wwidth, p.wheight, p.button_color, p.border_width, 0, 0, p.border_corner_radius)
+        b_group.size = { p.ui_width , p.ui_height}
+        ring = make_ring(p.ui_width, p.ui_height, p.button_color, p.border_width, 0, 0, p.border_corner_radius)
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
-        focus_ring = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
+        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
             button = assets(skin_list[p.skin]["button"])
-            button:set{name="button", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 255}
+            button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
             focus = assets(skin_list[p.skin]["button_focus"])
-            focus:set{name="focus", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 0}
+            focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 	else 
 	     button = Image{}
 	     focus = Image{}
 	end 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
-        text:set{name = "text", position = { (p.wwidth  -text.w)/2, (p.wheight - text.h)/2}}
+        text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
 
         b_group:add(ring, focus_ring, button, focus, text)
 
@@ -1276,7 +1276,7 @@ function ui_element.button(table)
     mt = {}
     mt.__newindex = function (t, k, v)
         if k == "bsize" then  
-	    p.wwidth = v[1] p.wheight = v[2]  
+	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -1285,7 +1285,7 @@ function ui_element.button(table)
 
     mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.wwidth, p.wheight}  
+	    return {p.ui_width, p.ui_height}  
         else 
 	    return p[k]
         end 
@@ -1331,8 +1331,8 @@ function ui_element.textInput(table)
  --default parameters
     local p = {
     	skin = "custom", 
-    	wwidth = 200 ,
-    	wheight = 60 ,
+    	ui_width = 200 ,
+    	ui_height = 60 ,
     	text = "" ,
     	padding = 20 ,
     	border_width  = 4 ,
@@ -1356,7 +1356,7 @@ function ui_element.textInput(table)
     local t_group = Group
     {
        name = "t_group", 
-       size = { p.wwidth , p.wheight},
+       size = { p.ui_width , p.ui_height},
        position = {200, 200, 0},  
        reactive = true, 
        extra = {type = "TextInput"} 
@@ -1365,26 +1365,26 @@ function ui_element.textInput(table)
 
     local create_textInputField= function()
     	t_group:clear()
-        t_group.size = { p.wwidth , p.wheight}
+        t_group.size = { p.ui_width , p.ui_height}
 
-    	box = make_ring(p.wwidth, p.wheight, p.border_color, p.border_width, 0, 0, p.border_corner_radius)
+    	box = make_ring(p.ui_width, p.ui_height, p.border_color, p.border_width, 0, 0, p.border_corner_radius)
     	box:set{name="box", position = {0 ,0}}
 
-    	focus_box = make_ring(p.wwidth, p.wheight, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
+    	focus_box = make_ring(p.ui_width, p.ui_height, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
     	     box_img = assets(skin_list[p.skin]["textinput"])
-    	     box_img:set{name="box_img", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 0 }
+    	     box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
     	     focus_img = assets(skin_list[p.skin]["textinput_focus"])
-    	     focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.wwidth , p.wheight } , opacity = 0 }
+    	     focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
 	else 
 	     box_img = Image{}
 	     focus_img = Image{}
 	end 
 
     	text = Text{text = p.text, editable = false, cursor_visible = false, wants_enter = false, reactive = true, font = p.text_font, color = p.text_color}
-    	text:set{name = "textInput", position = {p.padding, (p.wheight - text.h)/2} }
+    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2} }
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
     	if (p.skin == "custom") then box_img.opacity = 0
@@ -1424,7 +1424,7 @@ function ui_element.textInput(table)
      mt = {}
      mt.__newindex = function (t, k, v)
 	if k == "bsize" then  
-	    p.wwidth = v[1] p.wheight = v[2]  
+	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -1433,7 +1433,7 @@ function ui_element.textInput(table)
 
      mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.wwidth, p.wheight}  
+	    return {p.ui_width, p.ui_height}  
         else 
 	    return p[k]
         end 
@@ -1476,8 +1476,8 @@ function ui_element.dialogBox(table)
 --default parameters
    local p = {
 	skin = "custom", 
-	wwidth = 900 ,
-	wheight = 500 ,
+	ui_width = 900 ,
+	ui_height = 500 ,
 	label = "Dialog Box Title" ,
 	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
@@ -1513,26 +1513,26 @@ function ui_element.dialogBox(table)
     local create_dialogBox  = function ()
    
         db_group:clear()
-        db_group.size = { p.wwidth , p.wheight - 34}
+        db_group.size = { p.ui_width , p.ui_height - 34}
 
-        d_box = make_dialogBox_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_seperator_thickness, p.title_seperator_color) 
+        d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_seperator_thickness, p.title_seperator_color) 
 	d_box.y = d_box.y - 34
 	d_box:set{name="d_box"} 
 	db_group:add(d_box)
 --[[
 	if p.title_seperator_thickness >  0 then 
-             title_seperator = make_title_seperator(p.title_seperator_thickness, p.title_seperator_color, p.wwidth)
+             title_seperator = make_title_seperator(p.title_seperator_thickness, p.title_seperator_color, p.ui_width)
              title_seperator:set{name = "title_seperator", position  = {0, db_group_cur_y + 30}}
 	     db_group:add(title_seperator)
 	end
   ]]
 
         title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-        title:set{name = "title", position = {(p.wwidth - title.w - 50)/2 , db_group_cur_y - 5}}
+        title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
 
 	if(p.skin ~= "custom") then 
         	d_box_img = assets(skin_list[p.skin]["dialogbox"])
-        	d_box_img:set{name="d_box_img", size = { p.wwidth , p.wheight } , opacity = 0}
+        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
 	else 
 		d_box_img = Image{} 
 	end
@@ -1549,8 +1549,8 @@ function ui_element.dialogBox(table)
      mt = {}
      mt.__newindex = function (t, k, v)
 	 if k == "bsize" then  
-	    p.wwidth = v[1] 
-	    p.wheight = v[2]  
+	    p.ui_width = v[1] 
+	    p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -1559,7 +1559,7 @@ function ui_element.dialogBox(table)
 
      mt.__index = function (t,k)
 	if k == "bsize" then 
-	    return {p.wwidth, p.wheight}  
+	    return {p.ui_width, p.ui_height}  
         else 
 	    return p[k]
         end 
@@ -1610,8 +1610,8 @@ function ui_element.toastAlert(table)
  --default parameters
     local p = {
  	skin = "custom",  
-	wwidth = 600,
-	wheight = 200,
+	ui_width = 600,
+	ui_height = 200,
 	label = "Toast Alert Title",
 	message = "Toast alert message",
 	title_font = "DejaVu Sans 32px", 
@@ -1655,24 +1655,24 @@ function ui_element.toastAlert(table)
     local create_toastBox = function()
 
     	tb_group:clear()
-        tb_group.size = { p.wwidth , p.wheight}
+        tb_group.size = { p.ui_width , p.ui_height}
 
-    	t_box = make_toastb_group_bg(p.wwidth, p.wheight, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
+    	t_box = make_toastb_group_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
     	t_box:set{name="t_box"}
-	tb_group.anchor_point = {p.wwidth/2, p.wheight/2}
+	tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
 	icon = assets(p.icon)
     	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-    	title:set{name = "title", position = {(p.wwidth - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
+    	title:set{name = "title", position = {(p.ui_width - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
 
     	message= Text{text = p.message, font= p.message_font, color = p.message_color}     
     	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 + title.h }} 
 
 	if(p.skin ~= "custom") then 
     	     t_box_img = assets(skin_list[p.skin]["toast"])
-    	     t_box_img:set{name="t_box_img", size = { p.wwidth , p.wheight } , opacity = 255}
+    	     t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
 	else 
 	     t_box_img = Image{}
 	end 
@@ -1718,7 +1718,7 @@ function ui_element.toastAlert(table)
      mt = {}
      mt.__newindex = function (t, k, v)
         if k == "bsize" then  
-	    p.wwidth = v[1] p.wheight = v[2]  
+	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -1727,7 +1727,7 @@ function ui_element.toastAlert(table)
 
      mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.wwidth, p.wheight}  
+	    return {p.ui_width, p.ui_height}  
         else 
 	    return p[k]
         end 
@@ -1778,8 +1778,8 @@ function ui_element.buttonPicker(table)
  --default parameters 
     local p = {
 	skin = "default", 
-	wwidth =  180,
-	wheight = 60,
+	ui_width =  180,
+	ui_height = 60,
 	items = {"item1", "item2", "item3"},
 	text_font = "DejaVu Sans 30px" , 
 	text_color = {255,255,255,255}, 
@@ -1820,12 +1820,12 @@ function ui_element.buttonPicker(table)
 	index = p.selected_item 
 	bp_group:clear()
 	items:clear()
-        bp_group.size = { p.wwidth , p.wheight}
+        bp_group.size = { p.ui_width , p.ui_height}
 
-	ring = make_ring(p.wwidth, p.wheight, p.border_color, 1, 7, 7, 12)
+	ring = make_ring(p.ui_width, p.ui_height, p.border_color, 1, 7, 7, 12)
         ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
 
-        focus_ring = make_ring(p.wwidth, p.wheight, p.focus_color, 1, 7, 7, 12)
+        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, 1, 7, 7, 12)
         focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
 
 
@@ -1850,13 +1850,13 @@ function ui_element.buttonPicker(table)
 	right_un.scale = {w_scale, h_scale}
 	right_sel.scale = {w_scale, h_scale}
 
-	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 255, reactive = true}
-	left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.wheight/5}, opacity = 0}
-	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.wheight/5}, opacity = 255, reactive = true}
+	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
+	left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
+	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
 	right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
 
-     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 255, reactive = true}
-	focus:set{name = "focus",  position = {pos[1], pos[2]}, size = {p.wwidth, p.wheight}, opacity = 0}
+     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
+	focus:set{name = "focus",  position = {pos[1], pos[2]}, size = {p.ui_width, p.ui_height}, opacity = 0}
 
      	for i, j in pairs(p.items) do 
                items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, opacity = 255})     
@@ -1866,26 +1866,26 @@ function ui_element.buttonPicker(table)
 
 	for i, j in pairs(items.children) do 
 	  if i == p.selected_item then  -- i == 1
-               j.position = {p.wwidth/2 - j.width/2, p.wheight/2 - j.height/2}
+               j.position = {p.ui_width/2 - j.width/2, p.ui_height/2 - j.height/2}
 	       j_padding = 5 * j.x -- 5 는 진정한 해답이 아니고.. 이걸 바꿔 줘야함.. 그리고 박스 크기가 문자열과 비례해서 적당히 커줘야하고.. ^^;;;
 	  else 
-               --j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
+               --j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
 	  end 
      	end 
 
 	for i, j in pairs(items.children) do 
 	  if i > p.selected_item then  -- i == 1
-               j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
+               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
 	  end 
      	end 
 
 	for i, j in pairs(items.children) do 
 	  if i < p.selected_item then  -- i == 1
-               j.position = {p.wwidth/2 - j.width/2 + j_padding, p.wheight/2 - j.height/2}
+               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
 	  end 
      	end 
 
-	items.clip = { 0, 0, p.wwidth, p.wheight }
+	items.clip = { 0, 0, p.ui_width, p.ui_height }
 
    	bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
 
@@ -1926,14 +1926,14 @@ function ui_element.buttonPicker(table)
 	    index = next_i
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
-	    local prev_old_x = p.wwidth/2 - j.width/2
-	    local prev_old_y = p.wheight/2 - j.height/2
-	    local next_old_x = p.wwidth/2 - j.width/2 + focus.w
-	    local next_old_y = p.wheight/2 - j.height/2
-	    local prev_new_x = p.wwidth/2 - j.width/2 - focus.w
-	    local prev_new_y = p.wheight/2 - j.height/2
-	    local next_new_x = p.wwidth/2 - j.width/2
-	    local next_new_y = p.wheight/2 - j.height/2
+	    local prev_old_x = p.ui_width/2 - j.width/2
+	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
+	    local next_old_y = p.ui_height/2 - j.height/2
+	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
+	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local next_new_x = p.ui_width/2 - j.width/2
+	    local next_new_y = p.ui_height/2 - j.height/2
 
 	    if t ~= nil then
 	       t:stop()
@@ -1981,14 +1981,14 @@ function ui_element.buttonPicker(table)
 	    index = next_i
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
-	    local prev_old_x = p.wwidth/2 - j.width/2
-	    local prev_old_y = p.wheight/2 - j.height/2
-	    local next_old_x = p.wwidth/2 - j.width/2 - focus.w
-	    local next_old_y = p.wheight/2 - j.height/2
-	    local prev_new_x = p.wwidth/2 - j.width/2 + focus.w
-	    local prev_new_y = p.wheight/2 - j.height/2
-	    local next_new_x = p.wwidth/2 - j.width/2
-	    local next_new_y = p.wheight/2 - j.height/2
+	    local prev_old_x = p.ui_width/2 - j.width/2
+	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
+	    local next_old_y = p.ui_height/2 - j.height/2
+	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
+	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local next_new_x = p.ui_width/2 - j.width/2
+	    local next_new_y = p.ui_height/2 - j.height/2
 
 	    if t ~= nil then
 		t:stop()
@@ -2051,14 +2051,14 @@ function ui_element.buttonPicker(table)
         mt.__newindex = function (t, k, v)
 
              if k == "bsize" then  
-	    	p.wwidth = v[1] 	
-		p.wheight = v[2]  
+	    	p.ui_width = v[1] 	
+		p.ui_height = v[2]  
 		w_scale = v[1]/180
 		h_scale = v[2]/60
-             elseif k == "wwidth" then 
+             elseif k == "ui_width" then 
 		w_scale = v/180
                 p[k] = v
-	     elseif k == "wheight" then   
+	     elseif k == "ui_height" then   
 		h_scale = v/60
                 p[k] = v
 	     else 
@@ -2072,7 +2072,7 @@ function ui_element.buttonPicker(table)
 
         mt.__index = function (t,k)
              if k == "bsize" then 
-	        return {p.wwidth, p.wheight}  
+	        return {p.ui_width, p.ui_height}  
              else 
 	        return p[k]
              end 
@@ -2122,8 +2122,8 @@ function ui_element.radioButton(table)
  --default parameters
     local p = {
 	skin = "custom", 
-	wwidth = 600,
-	wheight = 200,
+	ui_width = 600,
+	ui_height = 200,
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", -- items 
 	color = {255,255,255,255}, --"FFFFFF", -- items 
@@ -2170,7 +2170,7 @@ function ui_element.radioButton(table)
          rb_group:clear()
          rings:clear()
          items:clear()
-         --rb_group.size = { p.wwidth , p.wheight},
+         --rb_group.size = { p.ui_width , p.ui_height},
 	
          if(p.skin == "custom") then 
 	     select_img = create_select_circle(p.select_radius, p.select_color)
@@ -2229,7 +2229,7 @@ function ui_element.radioButton(table)
      mt = {}
      mt.__newindex = function (t, k, v)
 	if k == "bsize" then  
-	    p.wwidth = v[1] p.wheight = v[2]  
+	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -2238,7 +2238,7 @@ function ui_element.radioButton(table)
 
      mt.__index = function (t,k)
 	if k == "bsize" then 
-	    return {p.wwidth, p.wheight}  
+	    return {p.ui_width, p.ui_height}  
         else 
 	    return p[k]
         end 
@@ -2292,8 +2292,8 @@ function ui_element.checkBox(table)
  --default parameters
     local p = {
 	skin = "custom", 
-	wwidth = 600,
-	wheight = 200,
+	ui_width = 600,
+	ui_height = 200,
 	items = {"item1", "item2", "item3"},
 	font = "DejaVu Sans 30px", 
 	color = {255,255,255,255}, 
@@ -2415,7 +2415,7 @@ function ui_element.checkBox(table)
     mt = {}
     mt.__newindex = function (t, k, v)
     	if k == "bsize" then  
-	    p.wwidth = v[1] p.wheight = v[2]  
+	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -2424,7 +2424,7 @@ function ui_element.checkBox(table)
 
     mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.wwidth, p.wheight}  
+	    return {p.ui_width, p.ui_height}  
         else 
 	    return p[k]
         end 
@@ -2646,8 +2646,8 @@ function ui_element.progressBar(t)
 
     --default parameters
     local p={
-        wwidth             = 300,
-        wheight            = 50,
+        ui_width             = 300,
+        ui_height            = 50,
         shell_upper_color  = {0,0,0,255},
         shell_lower_color  = {127,127,127,255},
         stroke_color       = {160,160,160,255},
@@ -2665,14 +2665,14 @@ function ui_element.progressBar(t)
 	
 
 	local c_shell = Canvas{
-            size = {p.wwidth,p.wheight},
-            x    = p.wwidth,
-            y    = p.wheight
+            size = {p.ui_width,p.ui_height},
+            x    = p.ui_width,
+            y    = p.ui_height
         }
 	local c_fill  = Canvas{
-            size = {1,p.wheight},
-            x    = p.wwidth+2,
-            y    = p.wheight
+            size = {1,p.ui_height},
+            x    = p.ui_width+2,
+            y    = p.ui_height
         }
 	local l_bar_group = Group{
 		name     = "progressBar",
@@ -2682,7 +2682,7 @@ function ui_element.progressBar(t)
 	        extra = {
         	    type = "ProgressBar", 
         	    set_prog = function(prog)
-	                c_fill.scale = {(p.wwidth-4)*(prog),1}
+	                c_fill.scale = {(p.ui_width-4)*(prog),1}
         	    end,
 	        },
 	}
@@ -2691,10 +2691,10 @@ function ui_element.progressBar(t)
 		l_bar_group:clear()
         local stroke_width = 2
 		c_shell = Canvas{
-				size = {p.wwidth,p.wheight},
+				size = {p.ui_width,p.ui_height},
 		}
 		c_fill  = Canvas{
-				size = {1,p.wheight-stroke_width},
+				size = {1,p.ui_height-stroke_width},
 		}  
         
 		
@@ -2758,7 +2758,7 @@ function ui_element.progressBar(t)
 		end
         c_fill.x=stroke_width
         c_fill.y=stroke_width/2
-        c_fill.scale = {(p.wwidth-4)*(p.progress),1}
+        c_fill.scale = {(p.ui_width-4)*(p.progress),1}
 		l_bar_group:add(c_shell,c_fill)
 	end
     
@@ -2772,7 +2772,7 @@ function ui_element.progressBar(t)
     mt.__newindex = function(t,k,v)
         p[k] = v
         if k == "progress" then
-            c_fill.scale = {(p.wwidth-4)*(v),1}
+            c_fill.scale = {(p.ui_width-4)*(v),1}
         else
             create_loading_bar()
         end
@@ -3694,8 +3694,8 @@ button
         label_font = "DejaVu Sans 30px",
     	label_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
-    	button_width = 250,
-    	button_height = 60, 
+    	ui_width = 250,
+    	ui_height = 60, 
 
     	label = "Menu Button", 
     	focus_color = {27,145,27,255}, --"1b911b", 
@@ -3768,8 +3768,8 @@ button
         text_font=p.label_font,
     	text_color=p.label_color,
     	skin=p.skin,
-    	wwidth=p.wwidth,
-    	wheight=p.wheight, 
+    	ui_width=p.ui_width,
+    	ui_height=p.ui_height, 
         
     	label=p.label, 
     	focus_color=p.focus_color,
@@ -3925,7 +3925,7 @@ button
         }
 
   --[[
-    umbrella.size = {p.wwidth, p.wheight}
+    umbrella.size = {p.ui_width, p.ui_height}
  ]]
     }
     local function make_item_ring(w,h,padding)
@@ -3971,8 +3971,8 @@ button
         button.text_font=p.label_font
     	button.text_color=p.label_color
     	button.skin=p.skin
-    	button.wwidth=p.button_width
-    	button.wheight=p.button_height
+    	button.ui_width=p.ui_width
+    	button.ui_height=p.ui_height
         
     	button.label=p.label
     	button.focus_color=p.focus_color
@@ -3980,7 +3980,7 @@ button
     	button.border_width=p.border_width
     	button.border_corner_radius=p.border_corner_radius
         
-        umbrella.size = {button.wwidth,button.wheight}
+        umbrella.size = {button.ui_width,button.ui_height}
         curr_y = p.vert_offset
         
         --For each category
