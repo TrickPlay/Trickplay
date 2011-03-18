@@ -323,6 +323,7 @@ function Make_Bar(loc,index)
             end
             if bar_i == bar_index then
                 time_of_day = bar.local_time_of_day
+                print(bar.curr_condition)
                 conditions[bar.curr_condition]()
             end
             animate_list[bar.func_tbls.loading_sun_fade_out] = bar
