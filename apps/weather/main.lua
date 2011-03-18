@@ -50,13 +50,14 @@ imgs = {
 		light  = Image{src="assets/rain/rain-light.png"},
 		--[[
 		clump  = Image{src="assets/rain/rain-clump.png"},
+		--]]
 		drops  = {
 			Image{src="assets/rain/raindrop1.png"},
 			Image{src="assets/rain/raindrop2.png"},
 			Image{src="assets/rain/raindrop3.png"},
 			Image{src="assets/rain/raindrop4.png"},
 			Image{src="assets/rain/raindrop5.png"},
-		},--]]
+		},
 	},
 	--frost_corner = Image{src="assets/snow/frost.png"},
 	snow_corner  = Image{src="assets/snow/snow.png"},

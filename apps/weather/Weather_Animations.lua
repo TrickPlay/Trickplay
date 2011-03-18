@@ -1473,6 +1473,6 @@ conditions["Cloudy"]                 = conditions["Mostly Cloudy"]
 conditions["Mostly Sunny"]           = conditions["Partly Cloudy"]
 conditions["Scattered Clouds"]       = conditions["Partly Cloudy"]
 conditions["Thunderstorm"]           = conditions["Thunderstorms"]
-conditions["Chance of Thunderstorm"] = conditions["Chance of Thunderstorms"]
+conditions["Chance of a Thunderstorm"] = conditions["Chance of Thunderstorms"]
 
 --conditions["Chance of Rain"]()
