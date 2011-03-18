@@ -3745,7 +3745,7 @@ button
         bg_color     = {255,0,0,255},
         menu_width   = 220,
         hor_padding  = 10,
-        divider_h    = 2,
+        seperator_thickness    = 2,
         expansion_location   = false,
         
         
@@ -3994,11 +3994,11 @@ button
                         y     = curr_y,
                         name  = "divider "..i,
                         w     = p.menu_width-2*p.hor_padding,
-                        h     = p.divider_h,
+                        h     = p.seperator_thickness,
                         color = txt_color
                     }
                 )
-                curr_y = curr_y + p.divider_h + p.vert_spacing
+                curr_y = curr_y + p.seperator_thickness + p.vert_spacing
             elseif item.type == "item" then
                 
                 
