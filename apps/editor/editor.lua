@@ -1023,7 +1023,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	-- make inspector background image 
 	if v.extra then 
 	   if is_this_widget(v) == true  then
-		  print("editor.lua : => ", v.extra.type)
 	          inspector_bg = factory.make_popup_bg(v.extra.type, 0)
 	   else -- rect, img, text 
 	     	  inspector_bg = factory.make_popup_bg(v.type, 0)
