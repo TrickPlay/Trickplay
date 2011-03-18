@@ -546,8 +546,8 @@ c:curve_to(  center_x-radius , center_y-radius*kappa,
 			 )
 			 		 
 c:set_source_color( color )
-c:fill(false)
-c:stroke(false)
+c:set_line_width(3)
+c:stroke(true)
 -- Finishes painting on Canvas
 c:finish_painting()
 if c.Image then
@@ -2128,9 +2128,9 @@ function ui_element.radioButton(table)
 	font = "DejaVu Sans 30px", -- items 
 	color = {255,255,255,255}, --"FFFFFF", -- items 
 		button_color = {255,255,255,200}, -- items 
-		select_color = {100, 100, 100, 255}, -- items 
+		select_color = {255, 255, 255, 255}, -- items 
 		button_radius = 10, -- items 
-		select_radius = 5,  -- items 
+		select_radius = 4,  -- items 
 		b_pos = {0, 0},  -- items 
 		item_pos = {50,-5},  -- items 
 		line_space = 40,  -- items 
@@ -2182,25 +2182,37 @@ function ui_element.radioButton(table)
 
 	 local pos = {0,0}
          for i, j in pairs(p.items) do 
+	      local donut 
 	      if(p.direction == 1) then --vertical 
                   pos= {0, i * p.line_space - p.line_space}
 	      end   	
               items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = pos})     
 	      if p.skin == "custom" then 
-    	           rings:add(create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}} ) 
+		   donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
+    	           rings:add(donut) 
 	      else
-	           rings:add(Clone{name = "item"..tostring(i),  source=p.button_image, position = {pos[1], pos[2] - 8}}) 
+	           donut = Clone{name = "item"..tostring(i),  source=p.button_image, position = {pos[1], pos[2] - 8}}
+    	           rings:add(donut) 
 	      end 
 
 	      if(p.direction == 2) then --horizontal
 		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
 	      end 
-
+	      donut.reactive = true
+  
+	     function donut:on_button_down (x,y,b,n)
+		local ring_num = tonumber(donut.name:sub(5,-1))
+		p.selected_item = ring_num
+		select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
+	    	select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
+		return true
+	     end 
          end 
 	 rings:set{name = "rings", position = p.b_pos} 
 	 items:set{name = "items", position = p.item_pos} 
-     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 10
-     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 2 
+
+     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
+     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 
 
 	 rb_group:add(rings, items, select_img)
 
@@ -2815,12 +2827,12 @@ function ui_element.layoutManager(t)
         columns    = 3,
         cell_w      = 300,
         cell_h      = 200,
-        cell_spacing    = 40,
-	cell_timing = 300,
+        cell_spacing    = 40, --grid_gap
+	cell_timing = 300, -- duration_per_time
 	cell_timing_offset     = 200,
         tiles       = {},
         focus       = nil,
-        cells_focusable = true,
+        cells_focusable = true, --focus_visible
         skin="default",
     }
     
@@ -3094,30 +3106,27 @@ function ui_element.scrollPane(t)
         visible_w    =  600,
 	--color     =  {255,255,255,255},
         visible_h    =  600,
-	    border_w  =    2,
         content   = Group{},
         virtual_h = 1000,
-	    virtual_w = 1000,
+	virtual_w = 1000,
 	--arrow_clone_source = nil,
 	
 	--arrows_in_box = false,
 	--arrows_centered = false,
         --hor_arrow_y     = nil,
         --vert_arrow_x    = nil,
-	    scroll_bars_visible = true,
-        bar_color_inner     = {180,180,180},
-        bar_color_outer     = {30,30,30},
-        empty_color_inner   = {120,120,120},
-        empty_color_outer   = {255,255,255},
+        bar_color_inner     = {180,180,180,255},
+        bar_color_outer     = {30,30,30,255},
+        empty_color_inner   = {120,120,120,255},
+        empty_color_outer   = {255,255,255,255},
         frame_thickness     =    2,
-        border_color        = {60, 60,60},
+        frame_color        = {60, 60,60,255},
         bar_thickness       =   15,
         bar_offset          =    5,
         vert_bar_visible    = true,
-        hor_bar_visbile     = true,
+        hor_bar_visible     = true,
         
-        box_visible = true,
-        box_color = {160,160,160},
+        box_color = {160,160,160,255},
         box_width = 2,
         skin="default",
     }
@@ -3377,7 +3386,7 @@ function ui_element.scrollPane(t)
         
 		shell:fill(true)
 		shell:set_line_width(   p.frame_thickness )
-		shell:set_source_color( p.border_color )
+		shell:set_source_color( p.frame_color )
 		shell:stroke( true )
 		shell:finish_painting()
         
@@ -3410,7 +3419,7 @@ function ui_element.scrollPane(t)
 		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
 		fill:fill(true)
         fill:set_line_width(   p.frame_thickness )
-		fill:set_source_color( p.border_color )
+		fill:set_source_color( p.frame_color )
 		fill:stroke( true )
 		fill:finish_painting()
         
@@ -3468,7 +3477,7 @@ function ui_element.scrollPane(t)
         
 		shell:fill(true)
 		shell:set_line_width(   p.frame_thickness )
-		shell:set_source_color( p.border_color )
+		shell:set_source_color( p.frame_color )
 		shell:stroke( true )
 		shell:finish_painting()
         
@@ -3501,7 +3510,7 @@ function ui_element.scrollPane(t)
 		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
 		fill:fill(true)
         fill:set_line_width(   p.frame_thickness )
-		fill:set_source_color( p.border_color )
+		fill:set_source_color( p.frame_color )
 		fill:stroke( true )
 		fill:finish_painting()
         
@@ -3542,9 +3551,6 @@ function ui_element.scrollPane(t)
         if  scroll_group:find_child("Vertical Scroll Bar") then
             scroll_group:find_child("Vertical Scroll Bar"):unparent()
         end
-        
-        if p.box_visible then border.opacity=255
-        else border.opacity=0 end 
         
         if p.bar_offset < 0 then
             track_w = p.visible_w+p.bar_offset
