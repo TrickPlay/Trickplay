@@ -2483,7 +2483,7 @@ function ui_element.progressSpinner(t)
     local l_dots = Group{ 
         name     = "progressSpinner",
         position = {400,400},
-        anchor_point = {p.overall_diameter/2,p.overall_diameter/2},
+        --anchor_point = {p.overall_diameter/2,p.overall_diameter/2},
         reactive = true,
         extra = {
             type = "ProgressSpinner", 
@@ -2525,7 +2525,6 @@ function ui_element.progressSpinner(t)
     create_dots = function()
         l_dots:clear()
         dots = {}
-	
         local rad
         
         for i = 1, p.number_of_dots do
@@ -2646,14 +2645,15 @@ function ui_element.progressBar(t)
 
     --default parameters
     local p={
-        wwidth             = 300,
-        wheight            = 50,
-        shell_upper_color  = {0,0,0,255},
-        shell_lower_color  = {127,127,127,255},
-        stroke_color       = {160,160,160,255},
-        fill_upper_color  = {255,0,0,255},
-        fill_lower_color  = {96,48,48,255},
-        progress          = 0,
+        wwidth              =  300,
+        wheight             =   50,
+        empty_top_color     = {  0,  0,  0,255},
+        empty_bottom_color  = {127,127,127,255},
+        stroke_color        = {160,160,160,255},
+        filled_top_color    = {255,  0,  0,255},
+        filled_bottom_color = { 96, 48, 48,255},
+        progress            = 0,
+        skin                = "default"
     }
     --overwrite defaults
     if t ~= nil then
@@ -2723,8 +2723,8 @@ function ui_element.progressBar(t)
 			c_shell.w/2,0,
 			c_shell.w/2,c_shell.h
 		)
-		c_shell:add_source_pattern_color_stop( 0 , p.shell_upper_color )
-		c_shell:add_source_pattern_color_stop( 1 , p.shell_lower_color )
+		c_shell:add_source_pattern_color_stop( 0 , p.empty_top_color )
+		c_shell:add_source_pattern_color_stop( 1 , p.empty_bottom_color )
         
 		c_shell:fill(true)
 		c_shell:set_line_width(   stroke_width )
@@ -2746,8 +2746,8 @@ function ui_element.progressBar(t)
 			c_shell.w/2,0,
 			c_shell.w/2,c_shell.h
 		)
-		c_fill:add_source_pattern_color_stop( 0 , p.fill_upper_color )
-		c_fill:add_source_pattern_color_stop( 1 , p.fill_lower_color )
+		c_fill:add_source_pattern_color_stop( 0 , p.filled_top_color )
+		c_fill:add_source_pattern_color_stop( 1 , p.filled_bottom_color )
 		c_fill:fill(true)
 		c_fill:finish_painting()
 		if c_shell.Image then
@@ -2948,11 +2948,11 @@ function ui_element.layoutManager(t)
 	local make_tile = function()
         local c = Canvas{size={p.cell_w, p.cell_h}}
         c:begin_painting()
-        c:move_to(            0,          0 )
-        c:line_to(   c.w,          0 )
-        c:line_to( c.w, c.h )
-        c:line_to( 0, c.h )
-        c:line_to(            0,          0 )
+        c:move_to(  0,   0 )
+        c:line_to(c.w,   0 )
+        c:line_to(c.w, c.h )
+        c:line_to(  0, c.h )
+        c:line_to(  0,   0 )
         c:set_source_color("ffffff")
         c:set_line_width( 4 )
         c:set_dash(0,{10,10})
@@ -3711,31 +3711,9 @@ button
         name  = "dropdownbar",
         menu_font  = "DejaVu Sans 26px",
         items = {
-        --[[
-            {
-                name="Subgroup A:",
-                items={
-                    {txt="Item A1",f=nil},
-                    {txt="Item A2",f=nil}
-                }
-            },
-            {
-                name="Subgroup B:",
-                items={
-                    {txt="Item B1",f=nil},
-                    {txt="Item B2",f=nil}
-                }
-            },
-            {
-                items={
-                    {txt="Item 1",f=nil},
-                    {txt="Item 2",f=nil}
-                }
-            },--]]
             {type="label", string="Subgroup A:"},
             {type="seperator"},
             {type="item",  string="Item A1", f=nil},
-            
         },
         vert_spacing = 5,
         hor_spacing  = 10,
