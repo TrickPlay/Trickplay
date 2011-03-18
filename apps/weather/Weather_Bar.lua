@@ -325,15 +325,11 @@ function Make_Bar(loc,index)
                 time_of_day = bar.local_time_of_day
                 conditions[bar.curr_condition]()
             end
-            --animate_list[bar.func_tbls.loading_sun_fade_out] = bar
-            ---[[
-            loading_sun:animate{
-                duration   = 500,
-                opacity = 0,
-                on_completed=function()
-                    flare_d:complete_animation()
-                    flare_l:complete_animation()
-                end
+            animate_list[bar.func_tbls.loading_sun_fade_out] = bar
+            --[[
+            flare_l:animate{
+                duration   = 8000,
+                z_rotation = 360,
             }--]]
             for i = 1,5 do
                 fday = fcast_tbl.forecast.simpleforecast.forecastday[i+1]
@@ -665,50 +661,13 @@ function Make_Bar(loc,index)
                 bars[next_i].x = MINI_BAR_X - bar_dist/2
                 bars[next_i].opacity = 255
                 bars[next_i]:go_mini()
-                --animate_list[bar.func_tbls.mini_move_left] = bar
-                bar:animate{
-                    duration=500,
-                    opacity=0,
-                    x=MINI_BAR_X + bar_dist/2,
-                    on_completed = function()
-                        bar:hide()
-                    end
-                }
-                bars[next_i]:animate{
-                    duration=500,
-                    x=MINI_BAR_X,
-                    on_completed = function()
-                        bars[next_i]:grab_key_focus()
-                    end
-                }
+                animate_list[bar.func_tbls.mini_move_left] = bar
             else
                 bars[next_i].x = MINI_BAR_X - bar_dist
                 bars[next_i].opacity = 255
                 bars[next_i]:go_full()
                 left_faux_bar.x = -bar_dist
-                --animate_list[bar.func_tbls.full_move_left] = bar
-                bar:animate{
-                    duration=500,
-                    x = MINI_BAR_X + bar_dist,
-                    on_completed=function()
-                        bar:hide()
-                    end
-                }
-                bars[next_i]:animate{
-                    duration=500,
-                    x = MINI_BAR_X,
-                    on_completed = function()
-                        bars[next_i]:grab_key_focus()
-                    end
-                }
-                right_faux_bar:animate{
-                    duration=500,
-                    x=bar_dist*2,
-                }
-                left_faux_bar:animate{
-                    duration=500,
-                    x=0,
-                }
+                animate_list[bar.func_tbls.full_move_left] = bar
             end
             time_of_day = bars[next_i].local_time_of_day
             conditions[bars[next_i].curr_condition]()
@@ -742,50 +701,13 @@ function Make_Bar(loc,index)
                 bars[next_i].x = MINI_BAR_X + bar_dist/2
                 bars[next_i].opacity = 0
                 bars[next_i]:go_mini()
-                --animate_list[bar.func_tbls.mini_move_right] = bar
-                bar:animate{
-                    duration=500,
-                    x = MINI_BAR_X - bar_dist/2,
-                    on_completed=function()
-                        bar:hide()
-                    end
-                }
-                bars[next_i]:animate{
-                    duration=500,
-                    x=MINI_BAR_X,
-                    opacity=255,
-                    on_completed = function()
-                        bars[next_i]:grab_key_focus()
-                    end
-                }
+                animate_list[bar.func_tbls.mini_move_right] = bar
             else
                 bars[next_i].x = MINI_BAR_X + bar_dist
                 bars[next_i].opacity = 255
                 bars[next_i]:go_full()
                 right_faux_bar.x = bar_dist
-                --animate_list[bar.func_tbls.full_move_right] = bar
-                bar:animate{
-                    duration=500,
-                    x = MINI_BAR_X - bar_dist/2,
-                    on_completed=function()
-                        bar:hide()
-                    end
-                }
-                bars[next_i]:animate{
-                    duration=500,
-                    x=MINI_BAR_X,
-                    on_completed = function()
-                        bars[next_i]:grab_key_focus()
-                    end
-                }
-                right_faux_bar:animate{
-                    duration=500,
-                    x=0,
-                }
-                left_faux_bar:animate{
-                    duration=500,
-                    x=- bar_dist,
-                }
+                animate_list[bar.func_tbls.full_move_right] = bar
             end
             time_of_day = bars[next_i].local_time_of_day
             conditions[bars[next_i].curr_condition]()
@@ -813,7 +735,7 @@ function Make_Bar(loc,index)
                 bars[next_i].opacity = 255
                 bars[next_i]:go_full()
                 right_faux_bar.x = bar_dist
-                --animate_list[bar.func_tbls.full_move_right] = bar
+                animate_list[bar.func_tbls.full_move_right] = bar
                 bar_i = next_i
                 
             end
@@ -826,73 +748,13 @@ function Make_Bar(loc,index)
             
             if zip_entry.opacity~=0 then
                 blurb_txt:show()
-                zip_entry:animate{
-                    duration=600,
-                    opacity=0,
-                    on_completed=function()
-                        zip_entry:hide()
-                        bar:grab_key_focus()
-                    end
-                }
-                blue_button_5_day:animate{
-                    duration=600,
-                    opacity=255,
-                }
-                blue_button_today:animate{
-                    duration=600,
-                    opacity=0,
-                }
-                blurb_txt:animate{
-                    duration=600,
-                    opacity=255,
-                }
-                --animate_list[bar.func_tbls.xfade_in_blurb_from_zip] = bar
+                animate_list[bar.func_tbls.xfade_in_blurb_from_zip] = bar
             elseif five_day.opacity == 0 then
                 five_day:show()
-                five_day:animate{
-                    duration=600,
-                    opacity=255,
-                }
-                blue_button_5_day:animate{
-                    duration=600,
-                    opacity=255,
-                }
-                blue_button_today:animate{
-                    duration=600,
-                    opacity=0,
-                }
-                blurb_txt:animate{
-                    duration=600,
-                    opacity=0,
-                    on_completed=function()
-                        blurb_txt:hide()
-                        bar:grab_key_focus()
-                    end
-                }
-                --animate_list[bar.func_tbls.xfade_in_5_day] = bar
+                animate_list[bar.func_tbls.xfade_in_5_day] = bar
             else
                 blurb_txt:show()
-                five_day:animate{
-                    duration=600,
-                    opacity=0,
-                    on_completed=function()
-                        five_day:hide()
-                        bar:grab_key_focus()
-                    end
-                }
-                blue_button_5_day:animate{
-                    duration=600,
-                    opacity=0,
-                }
-                blue_button_today:animate{
-                    duration=600,
-                    opacity=255,
-                }
-                blurb_txt:animate{
-                    duration=600,
-                    opacity=255,
-                }
-                --animate_list[bar.func_tbls.xfade_in_blurb] = bar
+                animate_list[bar.func_tbls.xfade_in_blurb] = bar
             end
         end,
         [keys.RED]    = function()
@@ -901,60 +763,10 @@ function Make_Bar(loc,index)
             screen:grab_key_focus()
             if mini then
                 full_bar:show()
-                --animate_list[bar.func_tbls.expand_to_full]=bar
-                bar:find_child("mid"):animate{
-                    duration=600,
-                    w=FULL_BAR_W,
-                    on_completed=function()
-                        mini_bar:animate{duration=200,opacity=0,on_completed=
-                            function()
-                                mini_bar:hide()
-                                bar:grab_key_focus()
-                            end
-                        }
-                        full_bar:animate{duration=200,opacity=255}
-                    end
-                }
-                bar:find_child("right"):animate{
-                    duration=600,
-                    x=imgs.bar.side.w +FULL_BAR_W,
-                }
-                left_faux_bar:animate{
-                    duration=600,
-                    x = -faux_len-imgs.bar.side.w
-                }
-                right_faux_bar:animate{
-                    duration=600,
-                    x = faux_len+imgs.bar.side.w
-                }
+                animate_list[bar.func_tbls.expand_to_full]=bar
             else
                 mini_bar:show()
-                --animate_list[bar.func_tbls.xfade_to_mini]=bar
-                bar:find_child("mid"):animate{
-                    duration=600,
-                    w=mini_width,
-                    on_completed=function()
-                        full_bar:animate{duration=200,opacity=0,on_completed=
-                            function()
-                                mini_bar:hide()
-                                bar:grab_key_focus()
-                            end
-                        }
-                        mini_bar:animate{duration=200,opacity=255}
-                    end
-                }
-                bar:find_child("right"):animate{
-                    duration=600,
-                    x=imgs.bar.side.w + mini_width,
-                }
-                left_faux_bar:animate{
-                    duration=600,
-                    x = 0
-                }
-                right_faux_bar:animate{
-                    duration=600,
-                    x = 0
-                }
+                animate_list[bar.func_tbls.xfade_to_mini]=bar
             end
             mini = not mini
             
@@ -975,49 +787,13 @@ function Make_Bar(loc,index)
                 us_only.text="(US only)"
                 zip_entry:show()
                 if five_day.opacity == 0 then 
-                    --animate_list[bar.func_tbls.xfade_in_zip_from_blurb] = bar
-                    blurb_txt:animate{
-                        duration=600,
-                        opacity=0,
-                        on_completed=function()
-                            blurb_txt:hide()
-                            bar:grab_key_focus()
-                        end
-                    }
-                    zip_entry:animate{
-                        duration=600,
-                        opacity=255,
-                    }
+                    animate_list[bar.func_tbls.xfade_in_zip_from_blurb] = bar
                 else
-                    --animate_list[bar.func_tbls.xfade_in_zip_from_5_day] = bar
-                    five_day:animate{
-                        duration=600,
-                        opacity=0,
-                        on_completed=function()
-                            five_day:hide()
-                            bar:grab_key_focus()
-                        end
-                    }
-                    zip_entry:animate{
-                        duration=600,
-                        opacity=255,
-                    }
+                    animate_list[bar.func_tbls.xfade_in_zip_from_5_day] = bar
                 end
             else
                 blurb_txt:show()
                 animate_list[bar.func_tbls.xfade_in_blurb_from_zip] = bar
-                blurb_txt:animate{
-                    duration=600,
-                    opacity=255,
-                }
-                zip_entry:animate{
-                    duration=600,
-                    opacity=0,
-                    on_completed=function()
-                        zip_entry:hide()
-                        bar:grab_key_focus()
-                    end
-                }
             end
         end,
     }
@@ -1115,17 +891,7 @@ function Make_Bar(loc,index)
     
     forecast_query(loc, bar.update)
     
-    --animate_list[bar.func_tbls.loading_sun] = bar
-    flare_l:animate{
-        duration   = 8000,
-        loop       = true,
-        z_rotation = 360,
-    }
-    flare_d:animate{
-        duration   = 8000,
-        loop       = true,
-        z_rotation = 360,
-    }
+    animate_list[bar.func_tbls.loading_sun] = bar
     bar:hide()
     return bar
 end
