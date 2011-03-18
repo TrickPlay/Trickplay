@@ -2053,6 +2053,10 @@ function factory.draw_anchor_point(v, inspector)
     local v_pos = 0
     local cur_posint = left_top
     local center, left_top, left_mid, left_bottom, mid_top, mid_bottom, right_top, right_mid, right_bottom
+
+
+    dumptable(v.anchor_point)
+    dumptable(v.size)
  
     local function find_current_anchor (v)
         if(v.anchor_point == nil) then 

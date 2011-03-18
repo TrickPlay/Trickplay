@@ -2443,11 +2443,11 @@ Creates a Loading dots ui element
 
 Arguments:
 	Table of Loading dots box properties
-		dot_radius - Radius of the individual dots
+		dot_diameter - Radius of the individual dots
 		dot_color - Color of the individual dots
-		num_dots - Number of dots in the loading circle
-		anim_radius - Radius of the circle of dots
-		anim_duration - Millisecs spent on a dot, this number times the number of dots is the time for the animation to make a full circle
+		number_of_dots - Number of dots in the loading circle
+		overall_diameter - Radius of the circle of dots
+		cycle_time - Millisecs spent on a dot, this number times the number of dots is the time for the animation to make a full circle
 
 Return:
 
