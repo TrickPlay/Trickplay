@@ -3729,7 +3729,7 @@ button
         menu_width   = 250,       -- bg_w 
         hor_padding  = 10, -- padding 
         seperator_thickness    = 2, --divider_h
-        expansion_location   = false, --bg_goes_up -> true => "above" / false == below
+        expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         
         
         skin          = "default",
@@ -4047,7 +4047,7 @@ button
         ui_ele:lower_to_bottom()
         
         dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        if p.expansion_location then
+        if p.expansion_location == "above" then
             ui_ele.x_rotation={180,0,0}
             ui_ele.y = ui_ele.h+p.vert_offset
             dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.vert_offset}
@@ -4072,7 +4072,7 @@ button
         button.position = {button.w/2,button.h/2}
         button.anchor_point = {button.w/2,button.h/2}
         dropDownMenu.x = button.w/2
-        if p.expansion_location then
+        if p.expansion_location == "above"  then
             dropDownMenu.y = dropDownMenu.y -10
         else
             dropDownMenu.y = dropDownMenu.y + button.h+10
