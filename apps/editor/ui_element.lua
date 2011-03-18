@@ -3691,8 +3691,8 @@ function ui_element.menuButton(t)
 
 button 
 --]]
-        label_font = "DejaVu Sans 30px",
-    	label_color = {255,255,255,255}, --"FFFFFF",
+        text_font = "DejaVu Sans 30px",
+    	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	ui_width = 250,
     	ui_height = 60, 
@@ -3706,25 +3706,24 @@ button
 
 --]]
 
-
-
         name  = "dropdownbar",
-        menu_font  = "DejaVu Sans 26px",
         items = {
             {type="label", string="Subgroup A:"},
             {type="seperator"},
             {type="item",  string="Item A1", f=nil},
         },
-        vert_spacing = 5,
-        hor_spacing  = 10,
-        vert_offset  = 40,
+        vert_spacing = 5, --item_spacing
+        hor_spacing  = 10, -- new 
+        vert_offset  = 40, --item_start_y
         
-        menu_text_color    = {255,255,255,255},
-        bg_color     = {255,0,0,255},
-        menu_width   = 250,
-        hor_padding  = 10,
-        seperator_thickness    = 2,
-        expansion_location   = false,
+        menu_font  = "DejaVu Sans 26px",   -- not needed
+        menu_text_color    = {255,255,255,255}, -- not needed 
+
+        background_color     = {255,0,0,255},
+        menu_width   = 250,       -- bg_w 
+        hor_padding  = 10, -- padding 
+        seperator_thickness    = 2, --divider_h
+        expansion_location   = false, --bg_goes_up -> true => "above" / false == below
         
         
         skin          = "default",
@@ -3743,8 +3742,8 @@ button
     
     local dropDownMenu = Group{}
     local button       = ui_element.button{
-        text_font=p.label_font,
-    	text_color=p.label_color,
+        text_font=p.text_font,
+    	text_color=p.text_color,
     	skin=p.skin,
     	ui_width=p.ui_width,
     	ui_height=p.ui_height, 
@@ -3946,8 +3945,8 @@ button
         
         
         
-        button.text_font=p.label_font
-    	button.text_color=p.label_color
+        button.text_font=p.text_font
+    	button.text_color=p.text_color
     	button.skin=p.skin
     	button.ui_width=p.ui_width
     	button.ui_height=p.ui_height
@@ -4038,7 +4037,7 @@ button
         else
             ui_ele = ui.factory.make_dropdown(
                 { p.menu_width , curr_y } ,
-                p.bg_color
+                p.background_color
             )
         end
         dropDownMenu:add(ui_ele)
