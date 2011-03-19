@@ -25,7 +25,7 @@ Colors={
     FIRE_BRICK                   ="B22222",
     LIME_GREEN                   ="32CD32",
     TURQUOISE                    ="40E0D0",
-    BLACK                        ="000000",
+    LACK                        ="000000",
     RED                          ="FF0000",
     ERASER_RUST                  ="5E2308",
     YELLOW                       ="FFFF00",
@@ -63,6 +63,28 @@ DEFAULT_COLOR = Colors.WHITE
 CHIP_W = 55
 CHIP_H = 5
 
+CHIP_COLLECTION_POSITIONS = {
+    [1] = {200, 600},
+    [2] = {550, 350},
+    [3] = {1400, 350},
+    [4] = {1720, 600},
+    [5] = {550, 850},
+    [6] = {1400, 850},
+    POT = {925, 650}
+}
+
+---------- Deck Positions -------------------
+
+CARD_LOCATIONS = {
+    [1] = {726, 510},
+    [2] = {843, 510},
+    [3] = {966, 510},
+    [4] = {1084, 510},
+    [5] = {1205, 510},
+    DECK = {785, 650},
+    BURN = {1145, 650}
+}
+
 ---------- Gameplay stuff -------------------
 
 SMALL_BLIND = 1
@@ -70,6 +92,7 @@ BIG_BLIND = 2
 INITIAL_ENDOWMENT = 200
 -- randomly subtracts or adds up to this amount to endowments
 RANDOMNESS = 0
+DEFAULT_BET = 2
 
 
 Rounds = {

@@ -186,6 +186,7 @@ function()
       if event:is_a(KbdEvent) then
          print("enable_event_listener(KbdEvent())")
          if old_on_key_down then
+             print("\n\nwtf mate\n\n")
             screen.on_key_down, old_on_key_down = old_on_key_down, nil
          end
       elseif event:is_a(TimerEvent) then
