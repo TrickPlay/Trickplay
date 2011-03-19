@@ -14,13 +14,17 @@ Events = {
     NOTIFY = 3
 }
 
+dofile("Class.lua")
+dofile("AssetManager.lua")
+assetman = AssetManager()
 dofile("DoFiles.lua")
 
 
 -- Router initialization
 router = Router()
-assetman = AssetManager()
 dofile("EventHandling.lua")
+add_to_key_handler(keys.a, assetman.show_all)
+
 screen:show()
 -- Animation loop initialization
 --gameloop = GameLoop()
@@ -34,6 +38,8 @@ local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves", Components
 local new_map_dialog = DialogBox("Start a new game\non this layout?", Components.NEW_MAP_DIALOG, router)
 --]]
 
+local game = GameControl(router)
+local character_selection = CharacterSelectionController(router)
 local splash = SplashController(router)
 router:start_app(Components.SPLASH)
 --router:start_app(Components.NO_MOVES_DIALOG)

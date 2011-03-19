@@ -289,14 +289,18 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     -- put all controllers into the choose your dog mode
     function ctrlman:choose_dog()
         for k,controller in pairs(controllers.connected) do
-            controller:choose_dog()
+            if controller.name ~= "Keyboard" then
+                controller:choose_dog()
+            end
         end
     end
 
     -- update the waiting room for all controllers
     function ctrlman:update_waiting_room()
         for k,controller in pairs(controllers.connected) do
-            controller:update_waiting_room()
+            if controller.name ~= "Keyboard" then
+                controller:update_waiting_room()
+            end
         end
     end
 

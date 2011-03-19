@@ -30,12 +30,12 @@ function is_key_hint_on(key)
 end
 
 function disable_event_listeners()
-    --t:disable()
+    t:disable()
     event_listener_en = false
 end
 
 function enable_event_listeners()
-    -- t:enable()
+    --t:enable()
     event_listener_en = true
 end
 
@@ -45,7 +45,7 @@ function enable_event_listener(event)
     if not event:is_a(Event) then error("event must be of Class Event", 2) end
 
     if event:is_a(KbdEvent) then
-        screen.on_key_down, old_on_key_down = old_on_key_down, nil
+        --screen.on_key_down, old_on_key_down = old_on_key_down, nil
     elseif event:is_a(TimerEvent) then
         local cb = event.cb or
             function()

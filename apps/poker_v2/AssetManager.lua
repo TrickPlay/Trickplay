@@ -2,8 +2,24 @@ AssetManager = Class(function(assetman, ...)
 
     local images = {}
     local groups = {}
+    local texts = {}
+    local rects = {}
     -- always increasing, does not decrease on deletion
     local number_of_groups_made = 0
+    local number_of_texts_made = 0
+    local number_of_rects_made = 0
+
+    function assetman:show_all()
+        print("\n\nIMAGES\n")
+        for k,image in pairs(images) do
+            print("\tImage: name = "..image.image.name)
+            print("\t\tCLONES = "..image.times_cloned.."\n")
+            for _,clone in pairs(image.clones) do
+                print("\t\t\tClone: name = "..clone.name.." parent = "
+                    ..tostring(clone.parent))
+            end
+        end
+    end
 
     function assetman:load_image(path, name, overwrite)
         assert(type(name) == "string")
@@ -19,6 +35,9 @@ AssetManager = Class(function(assetman, ...)
             name = name,
             opacity = 0
         }
+        if not image then
+            error("image could not be loaded", 2)
+        end
 
         if images[name] then
             assetman:remove_image(name)
@@ -55,6 +74,10 @@ AssetManager = Class(function(assetman, ...)
 
         images[image_name].clones[clone] = clone
 
+        function clone:dealloc()
+            assetman:remove_clone(self)
+        end
+
         return clone
     end
 
@@ -86,7 +109,7 @@ AssetManager = Class(function(assetman, ...)
             args.name = "group "..tostring(number_of_groups_made)
         end
         if groups[args.name] and not overwrite then
-            error("all groups must have different names", 2)
+            error("group name "..args.name.." already in use", 2)
         end
         if groups[args.name] then
             self:remove_group(args.name)
@@ -96,6 +119,16 @@ AssetManager = Class(function(assetman, ...)
         groups[args.name] = group
         number_of_groups_made = number_of_groups_made + 1
 
+        function group:dealloc()
+            for i,child in ipairs(self.children) do
+                print("deleting child with name "..child.name
+                    .." from group with name "..self.name)
+                child:dealloc()
+            end
+            print("deleting group with name "..self.name)
+            assetman:remove_group(self.name)
+        end
+
         return group
     end
 
@@ -104,10 +137,90 @@ AssetManager = Class(function(assetman, ...)
             error("group name must be a string", 2)
         end
 
+        if groups[name].children[1] then
+            print("WARNING: deleting group "..group.." of name "..group.name
+                .." that has children!")
+        end
+
         if groups[name].parent then
             groups[name]:unparent()
         end
         groups[name] = nil
+    end
+
+    function assetman:create_text(args, overwrite)
+        if type(args) ~= "table" then
+            error("args must be a table", 2)
+        end
+        if not args.text then
+            error("args must have a text property", 2)
+        end
+        if not args.name then
+            args.name = args.text
+        end
+        if texts[args.name] and not overwrite then
+            error("text name "..args.name.." already in use", 2)
+        end
+        if texts[args.name] then
+            self:remove_text(args.name)
+        end
+
+        local text = Text(args)
+        texts[args.name] = text
+        number_of_texts_made = number_of_texts_made + 1
+
+        function text:dealloc()
+            assetman:remove_text(self.name)
+        end
+
+        return text
+    end
+
+    function assetman:remove_text(name)
+        if type(name) ~= "string" then
+            error("text name must be a string", 2)
+        end
+
+        if texts[name].parent then
+            texts[name]:unparent()
+        end
+        texts[name] = nil
+    end
+
+    function assetman:create_rect(args, overwrite)
+        if type(args) ~= "table" then
+            error("args must be a table", 2)
+        end
+        if not args.name then
+            args.name = "rect_"..number_of_rects_made
+        end
+        if rects[args.name] and not overwrite then
+            error("rect name "..args.name.." already in use", 2)
+        end
+        if rects[args.name] then
+            self:remove_rects(args.name)
+        end
+
+        local rect = Rectangle(args)
+        rects[args.name] = rect
+        number_of_rects_made = number_of_rects_made + 1
+
+        function rect:dealloc()
+            assetman:remove_rect(self.name)
+        end
+
+        return rect
+    end
+
+    function assetman:remove_rect(name)
+        if type(name) ~= "string" then
+            error("rect name must be a string", 2)
+        end
+
+        if rects[name].parent then
+            rects[name]:unparent()
+        end
+        rects[name] = nil
     end
 
 end)

@@ -34,6 +34,8 @@ ChipStack = Class(function(chipstack, chip_value, ...)
         return #chips
     end
 
+    function chipstack:get_value() return value end
+
     function chipstack:dealloc()
         for i,chip in ipairs(chips) do
             chip:dealloc()
@@ -73,10 +75,16 @@ ChipStack = Class(function(chipstack, chip_value, ...)
 end)
 
 
-ChipCollection = Class(function(chip_collect, ...)
+ChipCollection = Class(function(chip_collect, dog_number, ...)
 
     local stacks = {}
     chip_collect.group = assetman:create_group({})
+    if dog_number then
+        chip_collect.group.position = {
+            CHIP_COLLECTION_POSITIONS[dog_number][1],
+            CHIP_COLLECTION_POSITIONS[dog_number][2]
+        }
+    end
 
     local chip_position = {
         [1] = {0, 0},
@@ -86,6 +94,7 @@ ChipCollection = Class(function(chip_collect, ...)
     }
 
     function chip_collect:dealloc()
+        print("ChipCollection dealloc")
         for i,stack in ipairs(stacks) do
             stack:dealloc()
         end
@@ -97,7 +106,7 @@ ChipCollection = Class(function(chip_collect, ...)
     function chip_collect:value()
         local value = 0
         for i,stack in ipairs(stacks) do
-            value = value + stacks.value
+            value = value + stack:get_value()
         end
         return value
     end

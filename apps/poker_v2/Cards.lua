@@ -164,9 +164,12 @@ function(self, rank, suit)
     end
 
     function self:dealloc()
-        assetman:remove_clone(self.front)
-        assetman:remove_clone(self.back)
-        assetman:remove_group(self.group.name)
+        self.front:dealloc()
+        self.front = nil
+        self.back:dealloc()
+        self.back = nil
+        self.group:dealloc()
+        self.group = nil
         self.front = nil
         self.back = nil
         self.group = nil
@@ -192,6 +195,7 @@ for i = 1,52 do
     table.insert(Cards, Card("ACE", "HEARTS"))
 end
 --]]
+---[[
 function get_rigged_cards()
     return {
         Card("ACE","HEARTS"),
@@ -234,6 +238,7 @@ function get_rigged_cards()
         Card("KING","DIAMONDS")
     }
 end
+--]]
 
 Deck = Class(nil,
 function(self, ...)

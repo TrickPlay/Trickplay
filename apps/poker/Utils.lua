@@ -98,12 +98,14 @@ function hand_print(hand)
 end
 
 Utils = {}
-Utils.clamp = function(a, b, c)
-    if b < a then return a
-    elseif b > c then return c
-    end
+Utils.clamp = function(min, element, max)
+    if not element then error("Utils.clamp: nil element", 2) end
+    if not min then error("Utils.clamp: nil min", 2) end
+    if not max then error("Utils.clamp: nil max", 2) end
 
-    return b
+    if element < min then return min end
+    if element > max then return max end
+    return element
 end
 
 Utils.deepcopy = function(t)

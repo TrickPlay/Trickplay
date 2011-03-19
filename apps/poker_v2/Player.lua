@@ -1,23 +1,23 @@
 Player = Class(function(player, args, ...)
-    player.isHuman = false
-    player.number = 0
-    player.bet = model.bet.DEFAULT_BET
-    player.money = args.endowment
-    player.position = false
-    player.table_position = nil
-    player.chipPosition = nil
+    player.bet = DEFAULT_BET
+    player.money = args.endowment or error("must provide an endowment", 2)
     player.difficulty = math.random(Difficulty.HARD,Difficulty.EASY)
     for k,v in pairs(args) do
+        --[[
+            properties gained should include
+            - is_human
+            - player_number (from order dog is selected, ie player 1/2/3/...)
+            - dog_number (relative to dog going clockwise from bottom left)
+            - endowment (starting money)
+            - controller (a controller [ipod/pad] or nil)
+            - dog_view
+        --]]
         player[k] = v
     end
 
-    player.glow = DOG_GLOW[ player.table_position ]
-    player.dog = DOGS[ player.table_position ]
-    --player.dog.position = player.position
-    player.dog.opacity = 255
-
     --[[
         If User disconnects controller the player becomes an AI.
+        TODO: fix this
     --]]
     if player.controller then
         local temp_func = player.controller.on_disconnected
@@ -35,58 +35,57 @@ Player = Class(function(player, args, ...)
     end
 
     function player:dim()
-        player.dog:animate{opacity = 50, duration = 300}
-        player.glow:animate{opacity = 0, duration = 300}
+        self.dog_view:dim()
     end
 
-    function player:hide()
-        player.dog:animate{opacity = 0, duration = 300}
-        player.glow:animate{opacity = 0, duration = 300}
+    function player:fade_out()
+        self.dog_view:fade_out()
     end
 
-    function player:show()
-        player.dog:animate{opacity = 255, duration = 300}
+    function player:fade_in()
+        self.dog_view:fade_in()
     end
 
+-------------- AI Stuff -----------------
 
     function player:get_position(state)
       
-      local num_of_players = 0
-      for _,__ in ipairs(state:get_players()) do
-         num_of_players = num_of_players + 1
-      end
+        local num_of_players = 0
+        for _,__ in ipairs(state:get_players()) do
+            num_of_players = num_of_players + 1
+        end
 
-      local active_player = state:get_active_player()
-      local action_player = 0
-      for i,v in ipairs(state:get_players()) do
-         if(active_player == v) then
-            action_player = i
-         end
-      end
-      assert(action_player > 0)
-      assert(action_player <= num_of_players)
+        local active_player = state:get_active_player()
+        local action_player = 0
+        for i,v in ipairs(state:get_players()) do
+            if(active_player == v) then
+                action_player = i
+            end
+        end
+        assert(action_player > 0)
+        assert(action_player <= num_of_players)
 
-      --eliminate obvious cases
-      if(action_player == state:get_sb_p()) then
-         return Position.SMALL_BLIND
-      elseif(action_player == state:get_bb_p()) then
-         return Position.BIG_BLIND
-      elseif(action_player == state:get_dealer()) then
-         return Position.LATE
-      else
-      --other cases
-         local position = action_player - state:get_bb_p()
-         if(position < 0) then
-            position = position + num_of_players
-         end
-         --edge case
-         if(num_of_players == 5) then
-            position = position + 1
-         end
-         assert(position < Position.LATE)
-         return position
-      end
-      error("error calculation position")
+        --eliminate obvious cases
+        if(action_player == state:get_sb_p()) then
+            return Position.SMALL_BLIND
+        elseif(action_player == state:get_bb_p()) then
+            return Position.BIG_BLIND
+        elseif(action_player == state:get_dealer()) then
+            return Position.LATE
+        else
+            --other cases
+            local position = action_player - state:get_bb_p()
+            if(position < 0) then
+                position = position + num_of_players
+            end
+            --edge case
+            if(num_of_players == 5) then
+                position = position + 1
+            end
+            assert(position < Position.LATE)
+            return position
+        end
+        error("error calculation position")
     end
 
     local function do_fold(call_bet, pot, orig_bet)
@@ -430,7 +429,7 @@ Player = Class(function(player, args, ...)
 
     end
 
-    player.status = PlayerStatusView(model, nil, player)
+    player.status = PlayerStatusView(player)
     player.status:display()
     assert(player.status)
 

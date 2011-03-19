@@ -99,7 +99,7 @@ function(router, ...)
         end
         self.previous_component = self.active_component
         self.active_component = comp
-        print("set active component to",comp)
+        print("set active component to ", comp)
     end
 
     function router:set_keys()
@@ -161,7 +161,7 @@ Controller = Class(Observer, function(ctrl, router, id)
         if event:is_a(KbdEvent) then
             ctrl:on_key_down(event.key)
         elseif event:is_a(NotifyEvent) then
-            ctrl:update(event)
+            ctrl:notify(event)
         elseif event:is_a(ResetEvent) then
             ctrl:reset_game()
         end
@@ -175,12 +175,8 @@ Controller = Class(Observer, function(ctrl, router, id)
     function ctrl:get_view() return self.view end
 
     -- prototypes
-    function ctrl:run_callback()
-        error("run_callback() not defined for this controller")
-    end
-
     function ctrl:move(dir)
-        error("move_selector() not defined for this controller")
+        print("move() not defined for this controller")
     end
 
     local ControlKeyTable = {
@@ -190,14 +186,18 @@ Controller = Class(Observer, function(ctrl, router, id)
         [keys.Right] = function() ctrl:move(Directions.RIGHT) end,
         [keys.BackSpace] =
             function()
-                if not pcall(function() ctrl:back_pressed() end) then
+                if ctrl.back_pressed then
                     print("ctrl.back_pressed not defined for controller id #"..id)
+                else
+                    ctrl:back_pressed()
                 end
             end,
         [keys.Return] =
             function()
-                if not pcall(function() ctrl:return_pressed() end) then
-                    print("ctrl.return_pressed not define for controller id #"..id)
+                if not ctrl.return_pressed then
+                    print("ctrl.return_pressed not defined for controller id #"..id)
+                else
+                    ctrl:return_pressed()
                 end
             end
     }

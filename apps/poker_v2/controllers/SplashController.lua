@@ -10,6 +10,6 @@ function(ctrl, router, ...)
         router:notify()
     end
 
-    function ctrl:update(event) view:update(event) end
+    function ctrl:notify(event) view:update(event) end
 
 end)
