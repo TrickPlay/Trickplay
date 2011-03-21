@@ -1,7 +1,12 @@
 
+
+
 screen_w = screen.w
 screen_h = screen.h
 screen:show()
+screen:add(Rectangle{name="A Grey Background for the APP",w=screen_w,h=screen_h,color={60,60,60}})
+
+function post_main()
 
 dofile("App_Loop.lua")
 dofile("Utils.lua")
@@ -25,31 +30,7 @@ end
 --]]
 
 
-local bg = Group{}
-do
-	local bgs = {}
-	local clone = nil
-	local curr_i = math.random(1,#imgs.bg)
-	
-	for i,pic in ipairs(imgs.bg) do
-		clone = Clone{source=pic,opacity=0}
-		bgs[i] = clone
-		bg:add(clone)
-	end
-	
-	bgs[curr_i].opacity=255
-	
-	local t = Timer{
-		interval=10000,
-		on_timer = function()
-			bgs[curr_i].opacity=0
-			curr_i = curr_i%#bgs+1
-			bgs[curr_i].opacity=255
-		end,
-	}
-	t:start{}
-end
-screen:add(bg)
+
 fade_in_full_gradient = nil
 fade_in_mini_gradient = nil
 
@@ -108,25 +89,25 @@ right_faux_bar = Group{
 
 logo = Clone{source=imgs.logo,x=1670,y=1042}
 
-left_faux_bar.x=-faux_len-imgs.bar.side.w
+left_faux_bar.x=-left_faux_bar.w
 
-right_faux_bar.x=faux_len+imgs.bar.side.w
+right_faux_bar.x=left_faux_bar.w
 
 
 
 m_grad = Clone{
 		name     = "Mini Gradient",
 		source   = imgs.gradient.mini,
-		y        = screen_h-imgs.gradient.mini.h,
+		
 		--opacity  = 0
 	}
+m_grad.y        = screen_h-m_grad.h
 	f_grad = Clone{
 		name     = "Full Gradient",
 		source   = imgs.gradient.full,
-		y        = screen_h-imgs.gradient.full.h,
 		opacity  = 0
 	}
-	
+	f_grad.y        = screen_h-f_grad.h
 	
 	screen:add(m_grad,f_grad,logo)
 	
@@ -138,7 +119,7 @@ m_grad = Clone{
 --load saved settings, or default to Palo Alto,CA
 locations = --[[settings.locations or]] {94019,94022,}
 bar_i = 1
-curr_condition=Group{}
+curr_condition=Group{name="Bottom Corner Weather conditions"}
 
 bars={}
 screen:add(curr_condition,left_faux_bar,right_faux_bar)
@@ -186,3 +167,5 @@ screen:add(unpack(bars))
 bars[1].opacity=255
 bars[1]:show()
 dolater(bars[1].grab_key_focus,bars[1])
+end
+dolater(post_main)

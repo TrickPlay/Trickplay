@@ -173,7 +173,7 @@ lg_cloud = function() return{
     setup = function(self)
         self.speed = math.random(4,6)
         local r = math.random(1,#imgs.reg_clouds.lg)
-        self.start = -imgs.reg_clouds.lg[r].w
+        --self.start = -imgs.reg_clouds.lg[r].w
         self.img = Clone{
             name="lg_cloud",
             source=imgs.reg_clouds.lg[r],
@@ -221,7 +221,7 @@ sm_cloud = function() return{
     setup = function(self)
         self.speed = math.random(4,8)
         local r = math.random(1,#imgs.reg_clouds.sm)
-        self.start = -imgs.reg_clouds.sm[r].w
+        --self.start = -imgs.reg_clouds.sm[r].w
         self.img = Clone{
             name="small",
             source=imgs.reg_clouds.sm[r],
@@ -379,7 +379,7 @@ window_snow = function(x,y,deg) return{
             x=x,--+math.random(0,10)*10,
             y=y,
             opacity=255*.4,
-            anchor_point = {imgs.snow_flake.lg[r].w/2,imgs.snow_flake.lg[r].h/2},
+            --anchor_point = {imgs.snow_flake.lg[r].w/2,imgs.snow_flake.lg[r].h/2},
             scale = {0,0}
         }
         self.anchor_point = {self.img.w/2,self.img.h/2}
@@ -455,7 +455,7 @@ window_drops = function(x,y,deg) return{
             x=x,--+math.random(0,10)*10,
             y=y,
             opacity=255*.75,
-            anchor_point = {imgs.rain.drops[r].w/2,imgs.rain.drops[r].h/2},
+            --anchor_point = {imgs.rain.drops[r].w/2,imgs.rain.drops[r].h/2},
             scale = {0,0}
         }
         self.anchor_point = {self.img.w/2,self.img.h/2}
@@ -529,41 +529,46 @@ wiper = {
     snow_elapsed  =   0,
     state    = "NONE", -- "RAIN", "F_RAIN", "SLEET"
     
-    snow_blade   = Clone{
-        source=imgs.wiper.snow_blade,
-        x=-124+50,
-        y=screen_h+30,
-        anchor_point={50,imgs.wiper.snow_blade.h},
-        opacity=0
-    },
-    wiper_blade  = Clone{
-        source=imgs.wiper.blade,
-        x=-124+50,
-        y=screen_h+30,
-        anchor_point={50,imgs.wiper.blade.h},
-        opacity=0
-    },
-    wiper_rain   = Clone{
-        source=imgs.wiper.corner,
-        y=573,
-        opacity=0
-    },
-    wiper_freeze = Clone{
-        source=imgs.wiper.freezing,
-        y=760,
-        opacity=0
-    },
-    
     remove   = function(self)
         self.wiper_rain:unparent()
         self.wiper_freeze:unparent()
         self.wiper_blade:unparent()
         self.snow_blade:unparent()
+        
+        self.wiper_rain   = nil
+        self.wiper_freeze = nil
+        self.wiper_blade  = nil
+        self.snow_blade   = nil
+        
         animate_list[self.func_tbls.rain_loop] = nil
         animate_list[self.func_tbls.snow_loop] = nil
     end,
     
     setup    = function(self)
+        self.snow_blade   = Clone{
+            source=imgs.wiper.snow_blade,
+            x=-124+50,
+            y=screen_h+30,
+            opacity=0
+        }
+        self.wiper_blade  = Clone{
+            source=imgs.wiper.blade,
+            x=-124+50,
+            y=screen_h+30,
+            opacity=0
+        }
+        self.wiper_rain   = Clone{
+            source=imgs.wiper.corner,
+            y=573,
+            opacity=0
+        }
+        self.wiper_freeze = Clone{
+            source=imgs.wiper.freezing,
+            y=760,
+            opacity=0
+        }
+        self.snow_blade.anchor_point = {50,self.snow_blade.h}
+        self.snow_blade.anchor_point = {50,self.wiper_blade.h}
         curr_condition:add(
             self.wiper_rain,
             self.wiper_freeze,
@@ -664,6 +669,13 @@ wiper = {
             func = function(this_obj,this_func_tbl,secs,p)
                 this_obj.wiper_rain.opacity=255*(1-p)
                 this_obj.wiper_blade.opacity=255*(1-p)
+                if p == 1 then
+                    animate_list[this_obj.func_tbls.rain_loop] = nil
+                    for k,v in pairs(this_obj.drops) do
+                        k.img:unparent()
+                    end
+                    this_obj.drops = {}
+                end
             end,
         },
         frost_fade_out = {
@@ -694,8 +706,9 @@ falling_snow = function(speed_x,speed_y,x,y) return{
             x=self.x,--+math.random(0,10)*10,
             y=y,
             opacity=255,
-            anchor_point = {imgs.snow_flake.sm[r].w/2,imgs.snow_flake.sm[r].h/2-20}
+            --anchor_point = {imgs.snow_flake.sm[r].w/2,imgs.snow_flake.sm[r].h/2-20}
         }
+        self.img.anchor_point={self.img.w/2,self.img.h/2-20}
         curr_condition:add(self.img)
     end,
     func_tbls={
@@ -739,13 +752,22 @@ chance_of = {
     r_flip = true,
     state="NONE",
     
-    cloud_1   = Clone{source=imgs.reg_clouds.lg[2],x=-imgs.reg_clouds.lg[6].w-50,y=802,},
-    cloud_2   = Clone{source=imgs.reg_clouds.lg[1],x=-imgs.reg_clouds.lg[7].w-20,y=812,},
-    wiper_freeze   = Clone{name="wiper freeze",source=imgs.wiper.freezing, y=760,opacity=0},
-    lightning = Clone{source=imgs.lightning[1],y=850,opacity=0},
+    lightning={},
+    
     
     setup = function(self)
-        curr_condition:add(self.wiper_freeze,self.lightning,self.cloud_1,self.cloud_2)
+        
+        self.cloud_1   = Clone{source=imgs.reg_clouds.lg[2],y=802,}
+        self.cloud_2   = Clone{source=imgs.reg_clouds.lg[1],y=812,}
+        self.wiper_freeze   = Clone{name="wiper freeze",source=imgs.wiper.freezing, y=760,opacity=0}
+        for i = 1,#imgs.lightning do
+            self.lightning[i]   = Clone{source=imgs.lightning[i],opacity=0,y=850}
+        end
+        
+        curr_condition:add(unpack(self.lightning))
+        self.cloud_1.x=-self.cloud_1.w-50
+        self.cloud_2.x=-self.cloud_2.w-20
+        curr_condition:add(self.wiper_freeze,self.cloud_1,self.cloud_2)
         self.wiper_freeze:lower_to_bottom()
         animate_list[self.func_tbls.fade_in] = self
     end,
@@ -754,7 +776,15 @@ chance_of = {
         self.cloud_1:unparent()
         self.cloud_2:unparent()
         self.wiper_freeze:unparent()
-        self.lightning:unparent()
+        
+        self.cloud_1 = nil
+        self.cloud_2 = nil
+        self.wiper_freeze = nil
+        for i = 1, #self.lightning do
+            self.lightning[i]:unparent()
+            self.lightning[i] = nil
+        end
+        
     end,
     
     func_tbls = {
@@ -872,28 +902,27 @@ chance_of = {
             loop = true,
             func = function(this_obj,this_func_tbl,secs,p)
                 if p < .7 then
-                    this_obj.lightning.opacity=0
+                    this_obj.lightning[this_obj.l_index].opacity=0
                     return
                 end
                 this_obj.l_elapsed = this_obj.l_elapsed + secs*1000
                 if this_obj.l_elapsed < this_obj.l_len or
                   (this_obj.l_elapsed > 3*this_obj.l_len and
                    this_obj.l_elapsed < 4*this_obj.l_len) then
-                    this_obj.lightning.opacity=255
+                    this_obj.lightning[this_obj.l_index].opacity=255
                     --this_obj.glow_cloud.opacity=255
                 elseif this_obj.l_elapsed > this_obj.l_thresh then
                     
                     this_obj.l_elapsed = 0
                     --self.l_index = self.l_index%#imgs.lightning+1
                     --self.lightning.source=imgs.lightning[self.l_index]
-                    this_obj.lightning.opacity=255
+                    this_obj.lightning[this_obj.l_index].opacity=255
                     --this_obj.glow_cloud.opacity=255
-                elseif this_obj.lightning.opacity==255 then
-                    this_obj.lightning.opacity=0
+                elseif this_obj.lightning[this_obj.l_index].opacity==255 then
+                    this_obj.lightning[this_obj.l_index].opacity=0
                     --this_obj.glow_cloud.opacity=0
                     
                     this_obj.l_index = this_obj.l_index%#imgs.lightning+1
-                    this_obj.lightning.source=imgs.lightning[this_obj.l_index]
                 end
             end
         },
@@ -915,12 +944,19 @@ tstorm = {
     r_flip = true,
     state="OFF",
     
-    glow_cloud = Clone{source=imgs.glow_cloud,y=650,opacity=0},
-    base_cloud = Clone{source=imgs.rain_clouds.lg[1],y=650,x=-imgs.rain_clouds.lg[1].w},
-    lightning  = Clone{source=imgs.lightning[1],y=screen_h-imgs.lightning[1].h*2/3,opacity=0},
+    lightning = {},
+
 
     setup = function(self)
-            curr_condition:add(self.lightning,self.base_cloud,self.glow_cloud)
+        self.glow_cloud = Clone{source=imgs.glow_cloud,y=650,opacity=0}
+        self.base_cloud = Clone{source=imgs.rain_clouds.lg[1],y=650,x=-imgs.rain_clouds.lg[1].w}
+        for i = 1,#imgs.lightning do
+            self.lightning[i]   = Clone{source=imgs.lightning[i],opacity=0}
+            self.lightning[i].y = screen_h - self.lightning[i].h*2/3
+        end
+        
+        curr_condition:add(unpack(self.lightning))
+        curr_condition:add(self.base_cloud,self.glow_cloud)
     end,
     
     func_tbls = {
@@ -945,21 +981,21 @@ tstorm = {
                 if this_obj.l_elapsed < this_obj.l_len or
                   (this_obj.l_elapsed > 3*this_obj.l_len and
                    this_obj.l_elapsed < 4*this_obj.l_len) then
-                    this_obj.lightning.opacity=255
+                    this_obj.lightning[this_obj.l_index].opacity=255
                     this_obj.glow_cloud.opacity=255
                 elseif this_obj.l_elapsed > this_obj.l_thresh then
                     
                     this_obj.l_elapsed = 0
                     --self.l_index = self.l_index%#imgs.lightning+1
                     --self.lightning.source=imgs.lightning[self.l_index]
-                    this_obj.lightning.opacity=255
+                    this_obj.lightning[this_obj.l_index].opacity=255
                     this_obj.glow_cloud.opacity=255
-                elseif this_obj.lightning.opacity==255 then
-                    this_obj.lightning.opacity=0
+                elseif this_obj.lightning[this_obj.l_index].opacity==255 then
+                    this_obj.lightning[this_obj.l_index].opacity=0
                     this_obj.glow_cloud.opacity=0
                     
                     this_obj.l_index = this_obj.l_index%#imgs.lightning+1
-                    this_obj.lightning.source=imgs.lightning[this_obj.l_index]
+                    --this_obj.lightning.source=imgs.lightning[this_obj.l_index]
                 end
                 this_obj.base_cloud:raise_to_top()
                 --print("tis")
@@ -977,10 +1013,10 @@ tstorm = {
                 
                 this_obj.base_cloud.x = -this_obj.base_cloud.w*(p)
                 
-                if this_obj.lightning.opacity - 255/200*secs < 0 then
-                    this_obj.lightning.opacity = 0
+                if this_obj.lightning[this_obj.l_index].opacity - 255/200*secs < 0 then
+                    this_obj.lightning[this_obj.l_index].opacity = 0
                 else
-                    this_obj.lightning.opacity = this_obj.lightning.opacity - 255/200*secs
+                    this_obj.lightning[this_obj.l_index].opacity = this_obj.lightning[this_obj.l_index].opacity - 255/200*secs
                 end
                 
             end
@@ -1000,8 +1036,14 @@ tstorm = {
     remove = function(self)
         self.glow_cloud:unparent()
         self.base_cloud:unparent()
-        self.lightning:unparent()
-
+        
+        self.glow_cloud = nil
+        self.base_cloud = nil
+        
+        for i = 1, #self.lightning do
+            self.lightning[i]:unparent()
+            self.lightning[i] = nil
+        end
     end
 }
 
@@ -1021,8 +1063,8 @@ local ss = s*(1+math.random(-10,10)/50)
             y=y,
             opacity=255*s*(1+math.random(-10,10)/50),
             scale = {s,s},
-            anchor_point = {imgs.snow_flake.lg[r].w/2-math.random(10,60),imgs.snow_flake.lg[r].h/2}
         }
+        self.img.anchor_point = {self.img.w/2-math.random(10,60),self.img.h/2}
         curr_condition:add(self.img)
     end,
     func_tbls={
@@ -1083,8 +1125,9 @@ snow_flake_lg = function(speed_x,speed_y,x,y)
                     y=y,
                     opacity=255*s*(1+math.random(-10,10)/50),
                     scale = {s,s},
-                    anchor_point = {imgs.snow_flake.lg[r].w/2-math.random(60,120),imgs.snow_flake.lg[r].h/2}
+                    
                 }
+                self.img.anchor_point = {self.img.w/2-math.random(60,120),self.img.h/2}
                 curr_condition:add(self.img)
             end,
             func_tbls={
@@ -1121,14 +1164,17 @@ snow = {
     thresh   = 689,
     elapsed  = 2000,
     sm_elapsed  = 2000,
-    snow_corner = Clone{source=imgs.snow_corner,y=screen_h-imgs.snow_corner.h+30,x=-10,opacity=0},
+    
     
     state="NONE",
     remove=function(self)
         self.snow_corner:unparent()
+        self.snow_corner = nil
     end,
     setup = function(self)
-        curr_condition:add(self.frost_corner,self.snow_corner,self.base_cloud)
+        self.snow_corner = Clone{source=imgs.snow_corner,x=-10,opacity=0}
+        self.snow_corner.y=screen_h-self.snow_corner.h+30
+        curr_condition:add(self.snow_corner)
     end,
     
     func_tbls = {
@@ -1198,7 +1244,8 @@ snow = {
 fog = {
     state="NONE",
     setup = function(self)
-        self.img = Clone{source=imgs.fog,opacity=0,y=screen_h-imgs.fog.h}
+        self.img = Clone{source=imgs.fog,opacity=0}
+        self.img.y=screen_h-self.img.h
         curr_condition:add(self.img)
     end,
     func_tbls ={
@@ -1206,8 +1253,7 @@ fog = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
                 if this_obj.img == nil then
-                    this_obj.img = Clone{source=imgs.fog,opacity=0,y=screen_h-imgs.fog.h}
-                    curr_condition:add(this_obj.img)
+                    this_obj:setup()
                 end
                 this_obj.img.opacity=255*p
                 if p == 1 then
@@ -1222,6 +1268,7 @@ fog = {
                 if p == 1 then
                     this_obj.state="NONE"
                     this_obj.img:unparent()
+                    this_obj.img=nil
                 end
             end
         },
