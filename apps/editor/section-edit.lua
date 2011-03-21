@@ -32,7 +32,7 @@ function( section )
      	--["Image".."\t\t\t".."[I]"]   = function() input_mode = S_SELECT editor.image()  end,
      	--["Rectangle".."\t\t".."[R]"]   = function() input_mode = S_RECTANGLE end,
      	--["Video".."\t\t"..""]   = function() input_mode = S_SELECT editor.video() end,
-     	["Timeline".."\t\t\t".."[J]"]   = function() input_mode = S_SELECT local tl = widget.timeline() screen:add(tl)
+     	["Timeline".."\t\t\t".."[J]"]   = function() input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
 						     screen:find_child("timeline").extra.show = true end,
      	["Hide Timeline".."\t\t".."[J]"]   = function() screen:find_child("timeline"):hide() 
 							screen:find_child("timeline").extra.show = false end,
@@ -40,6 +40,7 @@ function( section )
 						      screen:find_child("timeline").extra.show = true end,
      	["Insert UI Elements  ".."".."[W]"]   = function() input_mode = S_SELECT editor.ui_elements()  end,
      	["Clone".."\t\t\t".."[C]"]   = function() editor.clone() input_mode = S_SELECT end,
+     	["Duplicate".."\t\t".."[D]"]   = function() editor.duplicate() input_mode = S_SELECT end,
      	["Delete".."\t\t     ".."[Del]"]   = function() editor.delete() input_mode = S_SELECT end,
      	["Group".."\t\t\t".."[G]"]   = function() editor.group() input_mode = S_SELECT end,
      	["UnGroup".."\t\t\t"..""]   = function() editor.ugroup() input_mode = S_SELECT end
@@ -64,6 +65,7 @@ function( section )
         local f_widget = factory.make_text_menu_item( assets , ui.strings[ "Insert UI Elements  [W]" ] )
         local f_timeline = factory.make_text_menu_item( assets , ui.strings[ "Timeline".."\t\t\t".."[J]" ] )
         local f_clone  = factory.make_text_menu_item( assets , ui.strings[ "Clone".."\t\t\t".."[C]" ] )
+        local f_duplicate  = factory.make_text_menu_item( assets , ui.strings[ "Duplicate".."\t\t".."[D]" ] )
         local f_delete = factory.make_text_menu_item( assets , ui.strings[ "Delete".."\t\t     ".."[Del]" ] )
         local f_group  = factory.make_text_menu_item( assets , ui.strings[ "Group".."\t\t\t".."[G]" ] )
         local f_ugroup = factory.make_text_menu_item( assets , ui.strings[ "UnGroup".."\t\t\t".."" ] )
@@ -79,6 +81,7 @@ function( section )
         table.insert( section_items , f_timeline )
         table.insert( section_items , f_delete)
         table.insert( section_items , f_clone )
+        table.insert( section_items , f_duplicate )
         table.insert( section_items , f_group )
         table.insert( section_items , f_ugroup )
         
@@ -112,7 +115,7 @@ function( section )
        end
 
         --items_height = items_height + f_undo.h + f_redo.h + f_text.h + f_image.h + f_rect.h + f_video.h + f_timeline.h + f_widget.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
-        items_height = items_height + f_undo.h + f_redo.h + f_timeline.h + f_widget.h + f_delete.h + f_clone.h + f_group.h -- + f_insert.h
+        items_height = items_height + f_undo.h + f_redo.h + f_timeline.h + f_widget.h + f_delete.h + f_clone.h + f_duplicate.h + f_group.h -- + f_insert.h
         
 --[[
         f_rect.extra.on_activate =
@@ -171,6 +174,11 @@ function( section )
         f_delete.extra.on_activate =
             function()
 		editor.delete()
+		input_mode = S_SELECT
+            end
+        f_duplicate.extra.on_activate =
+            function()
+		editor.duplicate()
 		input_mode = S_SELECT
             end
         f_clone.extra.on_activate =

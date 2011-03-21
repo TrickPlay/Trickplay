@@ -265,6 +265,20 @@ function create_on_button_down_f(v)
 			end 
 			editor.n_select(v) 
 	       	    end
+
+		    -- Debugging : 841 
+
+		    if v.type ~= "Text" then 
+			for i, j in pairs (g.children) do  
+	           	if j.type == "Text" then 
+	            	if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
+			  ui.text = j	
+	                  ui.text:on_key_down(keys.Return)
+		    	end
+	           	end 
+	        	end 
+	           end 
+
 	            org_object = copy_obj(v)
            	    dragging = {v, x - v.x, y - v.y }
            	    return true
@@ -280,7 +294,7 @@ function create_on_button_down_f(v)
             end
 	
 	   elseif( input_mode ~= S_RECTANGLE) then  
-                dragging = {v, x - v.x, y - v.y }
+		dragging = {v, x - v.x, y - v.y }
            	return true
            end
 	  end
@@ -436,6 +450,10 @@ end
 
 
 function make_attr_t(v)
+
+	if v.expansion_location then 
+		print(v.expansion_location) 
+ 	end 
 
   local attr_t
   local obj_type = v.type
@@ -626,8 +644,24 @@ function make_attr_t(v)
              	     table.insert(attr_t, {"filled_bottom_color".."b", color_t[3], "B"})
        	     	     table.insert(attr_t, {"filled_bottom_color".."a", color_t[4], "A"})   
 		     end,
-		
-		
+	["rows"] = function() 
+                     table.insert(attr_t, {"line", "", "hide"})
+                     table.insert(attr_t, {"rows", v.rows, "Rows"})
+		     end,  	
+	["visible_w"] = function ()
+		     table.insert(attr_t, {"caption", "Visible : "})
+        	     table.insert(attr_t, {"visible_w", v.visible_w,"W"})
+		     end, 
+	["visible_h"] = function ()
+        	     table.insert(attr_t, {"visible_h", v.visible_h,"H"})
+		     end, 
+	["virtual_w"] = function ()
+		     table.insert(attr_t, {"caption", "Virtual : "})
+        	     table.insert(attr_t, {"virtual_w", v.virtual_w,"W"})
+		     end, 
+	["virtual_h"] = function ()
+        	     table.insert(attr_t, {"virtual_h", v.virtual_h,"H"})
+		     end, 
   }
   
   local obj_map = {
@@ -643,12 +677,13 @@ function make_attr_t(v)
        ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","items","selected_item","reactive","focus"} end,
        ["ProgressSpinner"] = function() return {"skin","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"skin","x_rotation","anchor_point", "opacity","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","stroke_color","progress"} end,
-       ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","focus_visible",} end,
-       ["ScrollPane"] = function() return {"skin","color","border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
+       ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","rows","columns","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable",} end,
+       ["ScrollPane"] = function() return {"skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width"} end,  
+-- "border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
        ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_font","border_width","border_corner_radius","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","reactive","focus",} end,
        ["CheckBox"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
        ["RadioButton"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
-       ["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,
+       --["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,
    }
   
   if is_this_widget(v) == true  then
@@ -759,7 +794,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","empty_top_color", "empty_bottom_color", "stroke_color", "progress", "filled_top_color", "filled_bottom_color","num_rows","num_cols","item_w","item_h","grid_gap","duration_per_tile","cascade_delay","tiles","focus","focus_visible","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive", "menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location"}
+    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","empty_top_color", "empty_bottom_color", "stroke_color", "progress", "filled_top_color", "filled_bottom_color","rows","columns","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","tiles","focus","cells_focusable","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive", "menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 

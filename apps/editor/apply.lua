@@ -4,6 +4,7 @@ local factory = ui.factory
 
 
 function inspector_apply (v, inspector)
+
       local org_object, new_object, item_group 
       local function toboolean(s) if (s == "true") then return true else return false end end
       local obj_map = {
@@ -73,19 +74,51 @@ function inspector_apply (v, inspector)
 	       v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
 		end,
        ["reactive"] = function()
-	       if item_group:find_child("reactive_check"):find_child("check1").opacity > 0 then 
+	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
 	            v.extra.reactive = true
 	       else 
 	            v.extra.reactive = false
 	       end
 	       end,
        ["loop"] = function()
-	       if item_group:find_child("reactive_check"):find_child("check1").opacity > 0 then 
+	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
 	            v.loop = true
 	       else 
 	            v.loop = false
 	       end
 	       end,
+	["vert_bar_visible"] = function()
+	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+	            v.vert_bar_visible = true
+	       else 
+	            v.vert_bar_visible = false
+	       end
+	       end,
+
+	["hor_bar_visible"] = function()
+ 	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+	            v.hor_bar_visible = true
+	       else 
+	            v.hor_bar_visible = false
+	       end
+	       end,
+
+	["cells_focusable"] = function()
+ 	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+	            v.cells_focusable = true
+	       else 
+	            v.cells_focusable = false
+	       end
+	       end,
+	["expansion_location"] = function()
+		if  item_group:find_child("radioB").selected_item == 1 then 
+			print("expansion_location set to ", v.expansion_location)
+		     v.expansion_location = "above"
+	        else 
+			print("expansion_location set to ", v.expansion_location)
+		     v.expansion_location = "below"
+		end
+		end,
 	["icon"] = function()
                v.icon = tostring(item_group:find_child("icon"):find_child("file_name").text)
 	       end,
@@ -104,13 +137,23 @@ function inspector_apply (v, inspector)
               item_group = inspector:find_child("item_group")
       end 
 
+
       org_object, new_object = obj_map[v.type]()
       set_obj(org_object, v) 
 
 
       for i, j in pairs(item_group.children) do 
-	  
+          	  
 	   if j.name then
+		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "vert_bar_visible" and j.name ~= "hor_bar_visible" and j.name ~= "cells_focusable" then 
+		 if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
+			print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
+	        	return 0 
+		end 
+           end 
+
+
+
 	      --if j.name == "editable" then 
                      --v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
               if (attr_map[j.name]) then
@@ -122,6 +165,10 @@ function inspector_apply (v, inspector)
 			    if v[j.name] == true or v[j.name] == false then
 				v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
 			    else 
+
+				if j.name == "message" then 
+					print (tostring(item_group:find_child(j.name):find_child("input_text").text)) 
+				end 
                                 v[j.name] = tostring(item_group:find_child(j.name):find_child("input_text").text)
 			    end 
                      end

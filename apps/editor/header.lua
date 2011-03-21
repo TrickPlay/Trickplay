@@ -109,7 +109,7 @@ ui =
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "  Edit  " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 505,
+                height  = 555,
                 init    = dofile( "section-edit" )
             },
 
@@ -160,7 +160,7 @@ ui_element = dofile("ui_element.lua")
 
 uiElements_en = {"Rectangle", "Text", "Image", "Video"}
 
-uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", -- "CheckBox",  "RadioButton", "CheckBoxGroup", "RadioButtonGroup", "ArrowPane",
+uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", --"CheckBox",  "RadioButton", "CheckBoxGroup", "RadioButtonGroup", "ArrowPane",
            "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane",  }
 	   -- "TabBar", "OSK",}
 skins = {}
