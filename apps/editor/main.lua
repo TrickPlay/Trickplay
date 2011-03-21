@@ -230,11 +230,13 @@ local function build_ui( show_it )
 
 	     if table.getn(selected_objs) == 0 then 
 		turn_off(section.dropdown:find_child("clone")) 
+		turn_off(section.dropdown:find_child("duplicate")) 
 		turn_off(section.dropdown:find_child("delete")) 
 		turn_off(section.dropdown:find_child("group")) 
 		turn_off(section.dropdown:find_child("ungroup")) 
 	     else 
 		turn_on(section.dropdown:find_child("clone")) 
+		turn_on(section.dropdown:find_child("duplicate")) 
 		turn_on(section.dropdown:find_child("delete")) 
 		turn_on(section.dropdown:find_child("group")) 
 		turn_on(section.dropdown:find_child("ungroup")) 
@@ -451,6 +453,7 @@ local function build_ui( show_it )
         [ keys.a	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(false) end,
 	[ keys.b	] = function() animate_out_dropdown() editor.undo_history() input_mode = S_SELECT end,
         [ keys.c	] = function() animate_out_dropdown() editor.clone() input_mode = S_SELECT end,
+        [ keys.d	] = function() animate_out_dropdown() editor.duplicate() input_mode = S_SELECT end,
         [ keys.e	] = function() animate_out_dropdown() editor.redo() input_mode = S_SELECT end,
         [ keys.g	] = function() animate_out_dropdown() editor.group() input_mode = S_SELECT end,
         [ keys.i	] = function() animate_out_dropdown() input_mode = S_SELECT  editor.the_image() end,
@@ -636,10 +639,21 @@ local function build_ui( show_it )
     local menu_button_second_down = false
 
     function ui:menu_button_down() 
-        for _,section in ipairs( ui.sections ) do
+        for i,section in ipairs( ui.sections ) do
 	     section.button.reactive = true
              section.button.name = section.text.text
              function section.button:on_button_down(x,y,button,num_clicks)
+		 
+		  if i == ui.focus then  --- hjk added 0321
+			local s= ui.sections[ui.focus]
+        		ui.button_focus.position = s.button.position
+        		ui.button_focus.opacity = 0
+			animate_out_dropdown() 
+			screen:grab_key_focus()
+			input_mode = S_SELECT
+			return true
+		  end 
+
 	          if(screen:find_child("mouse_pointer") ~= nil) then 
              		screen:remove(mouse_pointer) 
         	  end 
@@ -720,24 +734,34 @@ local function build_ui( show_it )
      end
 
      function screen:on_button_down(x,y,button,num_clicks)
+
+	  for i, j in pairs (g.children) do  
+	       if j.type == "Text" then 
+	            if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
+			  ui.text = j	
+	                  ui.text:on_key_down(keys.Return)
+		    end
+	       end 
+	  end 
+
           mouse_state = BUTTON_DOWN
-          if(input_mode == S_RECTANGLE) then editor.rectangle(x, y) end
+          if(input_mode == S_RECTANGLE) then 
+		editor.rectangle(x, y) 
+	  end
           if(input_mode == S_MENU) then
-		     local s= ui.sections[ui.focus]
-        	     ui.button_focus.position = s.button.position
-        	     ui.button_focus.opacity = 0
-		     animate_out_dropdown() 
-		     screen:grab_key_focus()
-		     input_mode = S_SELECT
+		local s= ui.sections[ui.focus]
+        	ui.button_focus.position = s.button.position
+        	ui.button_focus.opacity = 0
+		animate_out_dropdown() 
+		screen:grab_key_focus()
+		input_mode = S_SELECT
           elseif(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	       if(current_inspector == nil) then 
 		   -- if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then
 		    if(button == 3) and (g.extra.video ~= nil) then -- imsi : num_clicks is not correct in engine 17
-			 print("Button Number -- ", button)
-			 print("Number of click-- ", num_clicks)
                          editor.inspector(g.extra.video)
                     end 
-		    		    if(shift == true) then 
+		    if(shift == true) then 
 			editor.multi_select(x,y)
 		    end 
 	       end 

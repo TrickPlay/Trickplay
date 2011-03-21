@@ -126,6 +126,7 @@ local item_map =
         ["Undo".."\t\t\t".."[U]"]   = function()  return "undo" end,
      	["Redo".."\t\t\t".."[E]"]   = function()  return "redo" end,
      	["Clone".."\t\t\t".."[C]"]   = function() return "clone" end,
+     	["Duplicate".."\t\t".."[D]"]   = function() return "duplicate" end,
      	["Delete".."\t\t     ".."[Del]"]   = function() return "delete" end,
      	["Group".."\t\t\t".."[G]"]   = function() return "group" end,
      	["UnGroup".."\t\t\t"..""]   = function() return "ungroup" end,
@@ -1469,8 +1470,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      text_reactive()
 		      editor.n_selected(v, true)
 	     end 
+	     if v.extra then 
 	     if v.extra.type == "MenuButton" then 
                   v.spin_out()
+	     end 
 	     end 
 	     for i, c in pairs(g.children) do
 	     	editor.n_selected(c)
@@ -1547,7 +1550,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	local space = WIDTH - PADDING_X  
 
 	local text = Text {name = "attr", text = item_s}:set(STYLE)
-        text.position  = {WIDTH - space , 5}
+        text.position  = {PADDING_X, 5}
     	group:add(text)
 
 	if v.extra.type == "ButtonPicker" then 
@@ -1579,7 +1582,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
 	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 1, cell_w = 300, cell_h = 40, cell_spacing=5, focus=list_focus}
-        items_list.position = {text.w, text.y + text.h + PADDING_Y}
+        items_list.position = {PADDING_X, text.y + text.h + PADDING_Y}
         items_list.name = "items_list"
 	items_list:find_child("Focus").opacity = 0 
 
@@ -1827,7 +1830,32 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(item_picker)
 
         return group
-    elseif(item_n == "reactive" or item_n == "loop") then  -- Attribute with single checkbox
+    elseif item_n == "expansion_location" then -- Attribute with radio button
+	group:clear()
+	group.name = item_n
+	group.reactive = true
+
+	text = Text {name = "attr", text = item_s}:set(STYLE)
+        text.position  = {PADDING_X, 5}
+    	group:add(text)
+
+	local radio_b, sel_item = 1
+	
+	if item_v == "above" then 
+	    sel_item = 1
+	else  
+	    sel_item = 2
+	end 
+	print("SEL ITEM : ", sel_item)	
+        radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+	radio_b.position = {PADDING_X/2, 40}
+	radio_b.name = "radioB"
+
+	group:add(radio_b)
+
+	return group
+
+    elseif item_n == "reactive" or item_n == "loop" or item_n == "vert_bar_visible" or item_n == "hor_bar_visible" or item_n == "cells_focusable"  then  -- Attribute with single checkbox
 	group:clear()
 	group.name = item_n
 	group.reactive = true
@@ -1847,7 +1875,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end 
 
 	reactive_checkbox.position = {text.x + text.w + 10 , 10}
-	reactive_checkbox.name = "reactive_check"
+	reactive_checkbox.name = "bool_check"
 
 	group:add(reactive_checkbox)
 
@@ -2581,7 +2609,6 @@ rect_plus = Rectangle
 		position = {0,0,0},
 		size = {30,30},
 		opacity = 255,
-		reactive = true,
 	}
 
 
@@ -2604,7 +2631,6 @@ text_plus = Text
 		size = {30,30},
 		opacity = 255,
 		cursor_visible = false,
-		reactive = true,
 	}
 
 
@@ -2629,7 +2655,7 @@ end
 function factory.draw_plus_items()
 local l_col = {150,150,150,200}
 local l_wid = 4
-local l_scale = 0.9
+local l_scale = 1
 
 text_label = Text
 	{

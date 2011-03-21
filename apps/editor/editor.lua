@@ -373,11 +373,9 @@ function editor.selected(obj, call_by_inspector)
 end  
 
 function editor.n_select(obj, call_by_inspector, drag)
-
      if(obj.name == nil) then return end 
 
      if(obj.type ~= "Video") then 
-
      if(shift == false)then 
 	while(table.getn(selected_objs) ~= 0) do
 		local t_border = screen:find_child(table.remove(selected_objs)) 
@@ -409,7 +407,6 @@ function editor.n_select(obj, call_by_inspector, drag)
 end  
 
 function editor.n_selected(obj, call_by_inspector)
-
      if(obj.name == nil) then return end 
      if(obj.type ~= "Video") then 
         screen:remove(screen:find_child(obj.name.."border"))
@@ -419,7 +416,6 @@ function editor.n_selected(obj, call_by_inspector)
         table.remove(selected_objs)
         obj.extra.selected = false
      end 
-
 end  
 
 function editor.close()
@@ -1201,9 +1197,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end 
 	screen:add(inspector)
 
-
+	if v.extra then 
 	if v.extra.type == "MenuButton" then 
                 v.spin_in()
+	end 
 	end 
 
 	input_mode = S_POPUP
@@ -1232,8 +1229,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
                 screen.grab_key_focus(screen) 
 	        input_mode = S_SELECT
+		if v.extra then 
 		if v.extra.type == "MenuButton" then 
                 	v.spin_out()
+	        end 
 	        end 
 		return true
         end 
@@ -1440,6 +1439,7 @@ function editor.save(save_current_f)
 	      contents = contents.."},\n\t" 
               contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
               contents = contents.."screen:add(timeline)\n\n"
+	      contents = contents.."if editor_lb == nil then\n\tscreen:find_child(\"timeline\"):hide()\nend\n\n"
 	end 
 
 	contents = contents.."\ng:add("..obj_names..")"
@@ -1497,6 +1497,7 @@ function editor.save(save_current_f)
 	         contents = contents.."},\n\t" 
                  contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
                  contents = contents.."screen:add(timeline)\n\n"
+	         contents = contents.."if editor_lb == nil then\n\tscreen:find_child(\"timeline\"):hide()\nend\n\n"
 	     end 
 
 	     contents = contents.."\ng:add("..obj_names..")"
@@ -1731,7 +1732,7 @@ function editor.text()
      	color = DEFAULT_COLOR, 
 	position ={700, 500, 0}, 
 	editable = true , reactive = true, 
-	wants_enter = true, size = {300, 100},wrap=false, wrap_mode="CHAR", 
+	wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
 	extra = {org_x = 700, org_y = 500}
 	} 
 
@@ -1773,7 +1774,7 @@ function editor.text()
         local n = table.getn(g.children)
 
      	function ui.text:on_key_down(key)
-             if key == keys.Return then
+             if key == keys.Return and shift == false then
 		ui.text:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
 		ui.text:set{editable= false}
@@ -1788,6 +1789,7 @@ function editor.text()
 		return true
 	     end 
 	end 
+
 	ui.text.reactive = true
 	create_on_button_down_f(ui.text)
 
@@ -2070,6 +2072,66 @@ function editor.clone()
 	input_mode = S_SELECT
 end
 	
+function editor.duplicate()
+        if(table.getn(selected_objs) == 0 )then 
+		print("there are no selected objects") 
+                screen:grab_key_focus()
+	        input_mode = S_SELECT
+		return 
+        end 
+	for i, v in pairs(g.children) do
+            if g:find_child(v.name) then
+	        if(v.extra.selected == true) then
+		     while(is_available(string.lower(v.type)..tostring(item_num))== false) do
+		         item_num = item_num + 1
+	             end 
+		     editor.n_selected(v)
+		     ui.dup = copy_obj(v)  
+                     ui.dup.name=string.lower(v.type)..tostring(item_num)
+		     ui.dup.position = {v.x + 20, v.y +20}
+        	     table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
+        	     g:add(ui.dup)
+
+		     local timeline = screen:find_child("timeline")
+		     if timeline then 
+	    		ui.dup.extra.timeline = {}
+            		ui.dup.extra.timeline[0] = {}
+	    		local prev_point = 0
+	        	local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+	    		for l,k in pairs (attr_map["Clone"]()) do 
+	        	     ui.dup.extra.timeline[0][k] = ui.dup[k]
+	    		end
+	    		if cur_focus_n ~= 0 then 
+                		ui.dup.extra.timeline[0]["hide"] = true  
+	    		end 
+	    		for i, j in orderedPairs(timeline.points) do 
+	        	     if not ui.dup.extra.timeline[i] then 
+		    	          ui.dup.extra.timeline[i] = {} 
+	            		  for l,k in pairs (attr_map["Clone"]()) do 
+		         	  	ui.dup.extra.timeline[i][k] = ui.dup.extra.timeline[prev_point][k] 
+		    		  end 
+		                  prev_point = i 
+			     end 
+	        	     if i < cur_focus_n  then 
+                    		  ui.dup.extra.timeline[i]["hide"] = true  
+			     end 
+	    	        end 
+		     end 
+ 
+		     
+	             if(screen:find_child("screen_objects") == nil) then 
+        	          screen:add(g)        
+		     end 
+        	     ui.dup.reactive = true
+		     create_on_button_down_f(ui.dup)
+		     item_num = item_num + 1
+		end 
+            end
+        end
+
+	input_mode = S_SELECT
+end
+
 function editor.delete()
         if(table.getn(selected_objs) == 0 )then 
 		print("there are no selected objects") 
