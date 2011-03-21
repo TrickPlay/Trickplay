@@ -3621,7 +3621,7 @@ function ui_element.scrollPane(t)
             scroll_group:add(hor_s_bar)
             
             grip_hor = hor_s_bar:find_child("grip")
-            track_hor = vert_s_bar:find_child("track")
+            track_hor = hor_s_bar:find_child("track")
             
             function grip_hor:on_button_down(x,y,button,num_clicks)
                 
@@ -3649,13 +3649,13 @@ function ui_element.scrollPane(t)
                 
                 local rel_x = x - track_hor.transformed_position[1]/screen.scale[1]
 	   	        
-                if rel_x < grip_hor.h/2 then
-                    rel_x = grip_hor.h/2
-                elseif rel_x > (track_hor.h-grip_hor.h/2) then
-                    rel_x = (track_hor.h-grip_hor.h/2)
+                if rel_x < grip_hor.w/2 then
+                    rel_x = grip_hor.w/2
+                elseif rel_x > (track_hor.w-grip_hor.w/2) then
+                    rel_x = (track_hor.w-grip_hor.w/2)
                 end
                 
-                grip_hor.x = rel_y-grip_hor.h/2
+                grip_hor.x = rel_x-grip_hor.w/2
                 
                 p.content.x = -(grip_hor.x) * p.virtual_w/track_w
                 
