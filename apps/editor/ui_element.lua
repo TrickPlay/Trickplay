@@ -147,6 +147,52 @@ end
 -- Util
 -------------
 
+
+local function __genOrderedIndex( t )
+    local orderedIndex = {}
+    for key in pairs(t) do
+        table.insert( orderedIndex, key )
+    end
+    table.sort( orderedIndex )
+    return orderedIndex
+end
+
+local function orderedNext(t, state)
+    -- Equivalent of the next function, but returns the keys in the alphabetic
+    -- order. We use a temporary ordered key table that is stored in the
+    -- table being iterated.
+
+    --print("orderedNext: state = "..tostring(state) )
+    if state == nil then
+        -- the first time, generate the index
+        t.__orderedIndex = __genOrderedIndex( t )
+        key = t.__orderedIndex[1]
+        return key, t[key]
+    end
+    -- fetch the next value
+    key = nil
+    for i = 1,table.getn(t.__orderedIndex) do
+        if t.__orderedIndex[i] == state then
+            key = t.__orderedIndex[i+1]
+        end
+    end
+
+    if key then
+        return key, t[key]
+    end
+
+    -- no more value to return, cleanup
+    t.__orderedIndex = nil
+    return
+end
+
+local function orderedPairs(t)
+    -- Equivalent of the pairs() function on tables. Allows to iterate
+    -- in order
+    return orderedNext, t, nil
+end
+
+
 -- Localized string table
 
 local strings = dofile( "localized:strings.lua" ) or {}
@@ -928,7 +974,7 @@ function ui_element.timeline(t)
 	 	--if(b == 3 or n >= 2) then
 			-- point_inspector()
 	   	else
-                 	dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
+                 	--imsi : dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
            	 	return true
 	   	end 
 	   end 
@@ -1094,7 +1140,7 @@ function ui_element.timeline(t)
 
 	make_on_button_down("pointer0")
 	for i, j in orderedPairs(p.points) do 
-	     make_on_button_down("pointer"..tostring(i))
+	      make_on_button_down("pointer"..tostring(i))
         end 
     end 
 
@@ -1667,8 +1713,8 @@ function ui_element.toastAlert(table)
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
     	title:set{name = "title", position = {(p.ui_width - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
 
-    	message= Text{text = p.message, font= p.message_font, color = p.message_color}     
-    	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 + title.h }} 
+    	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
+    	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 + title.h }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
 	if(p.skin ~= "custom") then 
     	     t_box_img = assets(skin_list[p.skin]["toast"])
