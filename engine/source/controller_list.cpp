@@ -2,6 +2,11 @@
 #include "controller_list.h"
 #include "clutter_util.h"
 
+//=============================================================================
+// If defined, will time and report times for controller events.
+
+//#define TP_TIME_CONTROLLER_EVENTS   1
+
 //==============================================================================
 // This is the structure we give the outside world. To them, it is opaque.
 // It has a pointer to a Controller instance, the associated ControllerList
@@ -67,7 +72,12 @@ public:
 
         event->type = type;
         event->controller = controller;
-        event->time = controller->get_tp_controller()->list->time();
+
+#ifdef TP_TIME_CONTROLLER_EVENTS
+
+        event->create_time = timestamp();
+
+#endif
 
         if ( type == UI )
         {
@@ -135,6 +145,12 @@ public:
 
     inline void process()
     {
+
+#ifdef TP_TIME_CONTROLLER_EVENTS
+
+        g_debug( "EVENT PROCESS TIME TYPE %d : %d ms" , type , int( timestamp() - create_time ) );
+#endif
+
         switch ( type )
         {
             case ADDED:
@@ -142,8 +158,7 @@ public:
                 break;
 
             case REMOVED:
-                controller->disconnected();
-                controller->unref();
+                controller->get_tp_controller()->list->controller_removed( controller );
                 break;
 
             case KEY_DOWN:
@@ -188,16 +203,16 @@ public:
         }
     }
 
-    inline gdouble get_time()
-    {
-        return time;
-    }
-
 private:
 
     Type            type;
     Controller   *  controller;
-    gdouble         time;
+
+#ifdef TP_TIME_CONTROLLER_EVENTS
+
+    gulong          create_time;
+
+#endif
 
     union
     {
@@ -238,9 +253,9 @@ Controller::Controller( ControllerList * _list, const char * _name, const TPCont
     name( _name ),
     spec( *_spec ),
     data( _data ),
-    accelerometer_started( false ),
-    pointer_started( false ),
-    touch_started( false )
+    ts_accelerometer_started( 0 ),
+    ts_pointer_started( 0 ),
+    ts_touch_started( 0 )
 {
     // If the outside world did not provide a function to execute commands,
     // we set our own which always fails.
@@ -595,9 +610,9 @@ void Controller::remove_delegate( Delegate * delegate )
 
 bool Controller::reset()
 {
-    accelerometer_started = false;
-    pointer_started = false;
-    touch_started = false;
+    g_atomic_int_set( & ts_accelerometer_started , 0 );
+    g_atomic_int_set( & ts_pointer_started , 0 );
+    g_atomic_int_set( & ts_touch_started , 0 );
 
     return
         ( connected ) &&
@@ -635,18 +650,20 @@ bool Controller::start_accelerometer( AccelerometerFilter filter, double interva
 
     parameters.interval = interval;
 
-    accelerometer_started = spec.execute_command(
+    bool accelerometer_started = spec.execute_command(
                tp_controller,
                TP_CONTROLLER_COMMAND_START_ACCELEROMETER,
                &parameters,
                data ) == 0;
+
+    g_atomic_int_set( & ts_accelerometer_started , accelerometer_started ? 1 : 0 );
 
     return accelerometer_started;
 }
 
 bool Controller::stop_accelerometer()
 {
-    accelerometer_started = false;
+    g_atomic_int_set( & ts_accelerometer_started , 0 );
 
     return
         ( connected ) &&
@@ -660,7 +677,7 @@ bool Controller::stop_accelerometer()
 
 bool Controller::start_pointer()
 {
-    pointer_started =
+    bool pointer_started =
         ( connected ) &&
         ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) &&
         ( spec.execute_command(
@@ -669,12 +686,14 @@ bool Controller::start_pointer()
               NULL,
               data ) == 0 );
 
+    g_atomic_int_set( & ts_pointer_started , pointer_started ? 1 : 0 );
+
     return pointer_started;
 }
 
 bool Controller::stop_pointer()
 {
-    pointer_started = false;
+    g_atomic_int_set( & ts_pointer_started , 0 );
 
     return
         ( connected ) &&
@@ -688,7 +707,7 @@ bool Controller::stop_pointer()
 
 bool Controller::start_touches()
 {
-    touch_started =
+    bool touch_started =
         ( connected ) &&
         ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) &&
         ( spec.execute_command(
@@ -697,12 +716,14 @@ bool Controller::start_touches()
               NULL,
               data ) == 0 );
 
+    g_atomic_int_set( & ts_touch_started , touch_started ? 1 : 0 );
+
     return touch_started;
 }
 
 bool Controller::stop_touches()
 {
-    touch_started = false;
+    g_atomic_int_set( & ts_touch_started , 0 );
 
     return
         ( connected ) &&
@@ -896,8 +917,7 @@ bool Controller::enter_text( const String & label, const String & text )
 
 ControllerList::ControllerList()
     :
-    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
-    timer( g_timer_new() )
+    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) )
 {
     g_static_rec_mutex_init( &mutex );
 }
@@ -913,8 +933,6 @@ ControllerList::~ControllerList()
 
     g_static_rec_mutex_free( &mutex );
     g_async_queue_unref( queue );
-
-    g_timer_destroy( timer );
 }
 
 //.............................................................................
@@ -940,9 +958,6 @@ gboolean ControllerList::process_events( gpointer self )
 
     while ( Event * event = ( Event * )g_async_queue_try_pop( list->queue ) )
     {
-#if 0
-        g_debug( "EVENT PROCESS TIME %f ms" , ( list->time() - event->get_time() ) * 1000 );
-#endif
         event->process();
         Event::destroy( event );
     }
@@ -963,10 +978,6 @@ TPController * ControllerList::add_controller( const char * name, const TPContro
 
     TPController * result = controller->get_tp_controller();
 
-    LOCK;
-
-    controllers.insert( result );
-
     post_event( Event::make( Event::ADDED, controller ) );
 
     return result;
@@ -980,12 +991,7 @@ void ControllerList::remove_controller( TPController * controller )
 {
     TPController::check( controller );
 
-    LOCK;
-
-    if ( controllers.erase( controller ) == 1 )
-    {
-        post_event( Event::make( Event::REMOVED, controller->controller ) );
-    }
+    post_event( Event::make( Event::REMOVED, controller->controller ) );
 }
 
 //.............................................................................
@@ -993,10 +999,22 @@ void ControllerList::remove_controller( TPController * controller )
 
 void ControllerList::controller_added( Controller * controller )
 {
+    controllers.insert( controller->get_tp_controller() );
+
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->connected( controller );
     }
+}
+
+//.............................................................................
+
+void ControllerList::controller_removed( Controller * controller )
+{
+    controllers.erase( controller->get_tp_controller() );
+
+    controller->disconnected();
+    controller->unref();
 }
 
 //.............................................................................
