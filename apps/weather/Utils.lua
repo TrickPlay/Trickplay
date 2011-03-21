@@ -221,7 +221,7 @@ clone_sources_group:hide()
 --save the function pointer to the old Clone constructor
 local TP_Clone = Clone
 local TP_Image = Image
-Image = nil
+--Image = nil
 --local deletion_spy
 --The new Clone Constructor
 Clone = function(t)
@@ -229,7 +229,11 @@ Clone = function(t)
 	--must be created the same way you typically create Clones
 	assert(type(t) == "table","Clone receives a table as its parameter,"..
 		" received a parameter of type "..type(t))
-	assert(t.source ~= nil,"Clone requires a source")
+    if t.source == nil then
+        dumptable(t)
+        error("Clone requires a source")
+    end
+	
 	
 	--If an asset has not been loaded in yet, then load it
 	if clone_sources_table[t.source] == nil then
@@ -243,7 +247,7 @@ Clone = function(t)
 	
 	clone_sources_table[t.source].count = clone_sources_table[t.source].count+1
 	
-	print("I HAVE THIS MANY",clone_sources_table[t.source].count)
+	--print("I HAVE THIS MANY",clone_sources_table[t.source].count)
 	
 	local deletion_spy = newproxy(true)
 	
@@ -253,7 +257,7 @@ Clone = function(t)
 		
 		clone_sources_table[sauce].count = clone_sources_table[sauce].count - 1
 		
-		print("DECREMENTTTTTT",clone_sources_table[sauce].count)
+		--print("DECREMENTTTTTT",clone_sources_table[sauce].count)
 		
 		if clone_sources_table[sauce].count == 0 then
 			

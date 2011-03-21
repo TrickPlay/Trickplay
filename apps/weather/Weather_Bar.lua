@@ -1,4 +1,6 @@
 local MINI_BAR_X = 110
+local bar_side_w = 61
+local bar_side_h = 195
 
 local BAR_X = 166
 local BAR_Y = 873
@@ -12,7 +14,7 @@ local BLURB_X     = 775
 local BLURB_Y     = 58
 local BAR_SPACE   = 40
 local MINI_BAR_MIN_W = 500
-local FULL_BAR_W     = screen_w-MINI_BAR_X*2-imgs.bar.side.w*2--1478
+local FULL_BAR_W     = screen_w-MINI_BAR_X*2-bar_side_w*2--1478
 local COLOR_BUTTON_SPACING = 19
 
 local FONT          = "DejaVuSans "
@@ -33,6 +35,121 @@ local SHADOW_COLOR   = {  0,  0,  0}
 local SHADOW_OPACITY =  255   *  .4
 
 local FULL_BAR_X = 166
+local function make_five_day(fday)
+
+    local c = Canvas(170*5,300)
+    c:begin_painting()
+    local icon 
+    ---[[
+    for i = 1,5 do
+        
+        c:new_path()
+        c:move_to(39+170*(i-1),0)
+        if i == 1 then
+            c:text_path(FONT..DAY_SZ,"Tomorrow")
+        else
+            c:text_path(FONT..DAY_SZ,fday[i+1].date.weekday)
+        end
+        c:set_source_color(TEXT_COLOR)
+        c:fill(true)
+        
+        icon = Bitmap(imgs.icons[fday[i+1].icon])
+        
+        c:new_path()
+        c:move_to(7+170*(i-1),12)
+        c:line_to(7+170*(i-1)+icon.w,12)
+        c:line_to(7+170*(i-1)+icon.w,12+icon.h)
+        c:line_to(7+170*(i-1),12+icon.h)
+        c:line_to(7+170*(i-1),12)
+        c:set_source_bitmap(icon,7+170*(i-1),12)
+        c:fill(true)
+        
+        c:new_path()
+        c:move_to(36+170*(i-1),73)
+        c:text_path(FONT.."Bold "..DAY_HI_LO_SZ,fday[i+1].high.fahrenheit..DEG)
+        c:set_source_color(HI_TEMP_COLOR)
+        c:fill(true)
+        
+        c:new_path()
+        c:move_to(100+170*(i-1),73)
+        c:text_path(FONT.."Bold "..DAY_HI_LO_SZ,fday[i+1].low.fahrenheit.. DEG)
+        c:set_source_color(LO_TEMP_COLOR)
+        c:fill(true)
+        
+    end
+    --]]
+    c:finish_painting()
+    return c:Image{name="5 day blit",x = 750,y = 45}
+
+end
+
+local function make_curr_temps(curr_temp_tbl,fday,w)
+
+    local c = Canvas(w,300)
+    c:begin_painting()
+    
+    
+    --Curr temp
+    c:new_path()
+    c:move_to(0+2,CURR_TEMP_Y-30+2)
+    c:text_path(FONT.."Bold Condensed "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
+    c:set_source_color({0,0,0,255*.4})
+    c:fill(true) 
+    
+    c:new_path()
+    c:move_to(0,CURR_TEMP_Y-30)
+    c:text_path(FONT.."Bold Condensed "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
+    c:set_source_color(HI_TEMP_COLOR)
+    c:fill(true)
+    
+    
+    --Hi temp
+    c:new_path()
+    c:move_to(HI_LO_X-CURR_TEMP_X+2,HI_LO_Y-10+2)
+    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.high.fahrenheit..DEG)
+    c:set_source_color({0,0,0,255*.4})
+    c:fill(true)
+    
+    c:new_path()
+    c:move_to(HI_LO_X-CURR_TEMP_X,HI_LO_Y-10)
+    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.high.fahrenheit..DEG)
+    c:set_source_color(HI_TEMP_COLOR)
+    c:fill(true)
+    
+    
+    --Lo temp
+    c:new_path()
+    c:move_to(HI_LO_X-CURR_TEMP_X+80+2,HI_LO_Y-10+2)
+    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
+    c:set_source_color({0,0,0,255*.4})
+    c:fill(true)
+    
+    c:new_path()
+    c:move_to(HI_LO_X-CURR_TEMP_X+80,HI_LO_Y-10)
+    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
+    c:set_source_color(LO_TEMP_COLOR)
+    c:fill(true)
+    
+    
+    --Location
+    c:new_path()
+    c:move_to(LOCATION_X-CURR_TEMP_X+2,LOCATION_Y-10+2)
+    c:text_path(FONT..LOCATION_SZ,curr_temp_tbl.current_observation.location.city..
+                    ", "..curr_temp_tbl.current_observation.location.state)
+    c:set_source_color({0,0,0,255*.4})
+    c:fill(true)
+    
+    c:new_path()
+    c:move_to(LOCATION_X-CURR_TEMP_X,LOCATION_Y-10)
+    c:text_path(FONT..LOCATION_SZ,curr_temp_tbl.current_observation.location.city..
+                    ", "..curr_temp_tbl.current_observation.location.state)
+    c:set_source_color(TEXT_COLOR)
+    c:fill(true)
+    
+    c:finish_painting()
+    return c:Image{name="Curr Temp Info",x = CURR_TEMP_X,y = 0}
+
+end
 
 function Make_Bar(loc,index)
     local bar_index = index
@@ -48,20 +165,20 @@ function Make_Bar(loc,index)
                 name       = "left",
                 source     = imgs.bar.side,
                 y_rotation = {180,0,0},
-                x          = imgs.bar.side.w
+                x          = bar_side_w
             },
             Clone{
                 name   = "mid",
                 source = imgs.bar.mid,
                 tile   = {true,false},
                 --scale  = {408,1},
-                x      = imgs.bar.side.w,
+                x      = bar_side_w,
                 w      = 408,
             },
             Clone{
                 name   = "right",
                 source = imgs.bar.side,
-                x      = imgs.bar.side.w + 408
+                x      = bar_side_w + 408
             },
         }
     }
@@ -82,15 +199,13 @@ function Make_Bar(loc,index)
     }
     
     --Base Bar Elements
-    local arrow_l = Clone{
-        source = imgs.arrows.left,
-        x=34-imgs.arrows.left.w/2,
-        y=imgs.bar.side.h/2-imgs.arrows.left.h/2,
-    }
-    local arrow_r = Clone{
-        source = imgs.arrows.right,
-        y=imgs.bar.side.h/2-imgs.arrows.right.h/2,
-    }
+    local arrow_l = Clone{source = imgs.arrows.left}
+    arrow_l.x=34-arrow_l.w/2
+    arrow_l.y=bar_side_h/2-arrow_l.h/2
+    local arrow_r = Clone{source = imgs.arrows.right}
+    arrow_r.y=bar_side_h/2-arrow_r.h/2
+    
+    --[[
     local curr_temp = Shadow_Text{
         name  = "Curr Temp",
         x     = CURR_TEMP_X,
@@ -99,14 +214,9 @@ function Make_Bar(loc,index)
         color = HI_TEMP_COLOR,
         text  = ""
     }
-    local err_msg = Shadow_Text{
-        name  = "Error Message",
-        x     = LOCATION_X,
-        y     = LOCATION_Y-10,
-        font  = FONT..DAY_HI_LO_SZ,
-        color = HI_TEMP_COLOR,
-        text  = ""
-    }
+    --]]
+    
+    --[[
     local hi_temp = Shadow_Text{
         name  = "High Temp",
         x     = HI_LO_X,
@@ -123,12 +233,13 @@ function Make_Bar(loc,index)
         color = LO_TEMP_COLOR,
         text  = ""
     }
-    local location = Shadow_Text{
+    --]]
+    local mesg = Shadow_Text{
         name  = "Location",
         x     = LOCATION_X,
         y     = LOCATION_Y-10,
-        font  = FONT..LOCATION_SZ,
-        color = TEXT_COLOR,
+        font  = FONT..DAY_HI_LO_SZ,
+        color = HI_TEMP_COLOR,
         text  = "Getting Weather..."
     }
     
@@ -175,7 +286,7 @@ function Make_Bar(loc,index)
         wrap  = true,
         text  = "",
     }
-
+    --[[
     local days = {}
     for i = 1,5 do
         days[i] = Group{
@@ -183,11 +294,7 @@ function Make_Bar(loc,index)
             x = 170*(i-1)
         }
         days[i]:add(
-            Clone{
-                name = "icon",
-                y    = 7,
-                x    = 12,
-            },
+
             Text{
                 name  = "day",
                 x     = 39,
@@ -215,10 +322,15 @@ function Make_Bar(loc,index)
         )
         five_day:add(days[i])
     end
+    --]]
     
     local sun_b   = Clone{source=imgs.load.sun_base}
-    local flare_l = Clone{source=imgs.load.light_flare, x=-10+imgs.load.light_flare.w/2,y=-10+imgs.load.light_flare.h/2,anchor_point={imgs.load.light_flare.w/2,imgs.load.light_flare.h/2}}
-    local flare_d = Clone{source=imgs.load.dark_flare,  x= -8+imgs.load.dark_flare.w/2, y=-10+imgs.load.dark_flare.h/2,anchor_point={ imgs.load.dark_flare.w/2, imgs.load.dark_flare.h/2}}
+    local flare_l = Clone{source=imgs.load.light_flare}
+    flare_l.position={-10+flare_l.w/2,-10+flare_l.h/2}
+    flare_l.anchor_point={flare_l.w/2,flare_l.h/2}
+    local flare_d = Clone{source=imgs.load.dark_flare}
+    flare_d.position={-8+flare_d.w/2,-10+flare_d.h/2}
+    flare_d.anchor_point={flare_d.w/2,flare_d.h/2}
     local loading_sun = Group{
         x=100,
         y=50,
@@ -226,15 +338,15 @@ function Make_Bar(loc,index)
     local loading_error = Clone{source=imgs.load.error,opacity=0,x=100,y=50}
     loading_sun:add(flare_d,sun_b,flare_l)
     
-    mini_width = location.x+location.w-bar.x+75
+    mini_width = mesg.x+mesg.w-bar.x+75
     if mini then
         --bar:find_child("mid").scale={mini_width,1}
         bar:find_child("mid").w=mini_width
-        bar:find_child("right").x=imgs.bar.side.w + mini_width
+        bar:find_child("right").x=bar_side_w + mini_width
     end
     
-    green_button_mini.x = MINI_BAR_X + mini_width -imgs.bar.side.w/2- green_button_mini.w
-    arrow_r.x = MINI_BAR_X + mini_width -imgs.bar.side.w/2+1
+    green_button_mini.x = MINI_BAR_X + mini_width -bar_side_w/2- green_button_mini.w
+    arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
     
     
     local zip_code_prompt = Text{
@@ -286,34 +398,37 @@ function Make_Bar(loc,index)
     five_day:hide()
     mini_bar:add(green_button_mini)
     
-    bar:add(arrow_l,arrow_r,curr_temp,hi_temp,lo_temp,location,full_bar,err_msg,mini_bar,loading_sun,loading_error)
-    
+    bar:add(arrow_l,arrow_r,mesg,--[[curr_temp,hi_temp,lo_temp,location,]]full_bar,err_msg,mini_bar,loading_sun,loading_error)
+    local pws_tbl
+    local f_tbl
     --Callback to the Weather query
     bar.update = function(curr_temp_tbl,fcast_tbl,error_str)
         if curr_temp_tbl ~= nil then
-            curr_temp.text  = string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG
-            ---[[
-            location.text   = curr_temp_tbl.current_observation.location.city..
-                    ", "..curr_temp_tbl.current_observation.location.state
-            --]]
+            pws_tbl = curr_temp_tbl
+            --curr_temp.text  = string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG
             
             
+            
+            
+            --[[
             mini_width = location.x+location.w-MINI_BAR_X+100
             if mini then
                 --bar:find_child("mid").scale = {mini_width,1}
                 bar:find_child("mid").w = mini_width
-                bar:find_child("right").x   = imgs.bar.side.w + mini_width
+                bar:find_child("right").x   = bar_side_w + mini_width
             end
             green_button_mini.x = MINI_BAR_X+mini_width -83--+ mini_width -imgs.bar.side.w/2- green_button_mini.w
-            arrow_r.x = MINI_BAR_X + mini_width -imgs.bar.side.w/2+1
+            arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
+            --]]
         end
         
         if fcast_tbl ~= nil then
+            f_tbl = fcast_tbl.forecast.simpleforecast.forecastday[1]
             local fday = fcast_tbl.forecast.simpleforecast.forecastday[1]
             blurb_txt.text      = fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
             
-            hi_temp.text = fday.high.fahrenheit..DEG
-            lo_temp.text = fday.low.fahrenheit.. DEG
+            --hi_temp.text = fday.high.fahrenheit..DEG
+            --lo_temp.text = fday.low.fahrenheit.. DEG
             bar.curr_condition = fcast_tbl.forecast.simpleforecast.forecastday[1].conditions
             local time_str = fcast_tbl.forecast.txt_forecast.forecastday[1].title
             if string.match(time_str,"night") == "night" or string.match(time_str,"Night") == "Night" then
@@ -326,12 +441,21 @@ function Make_Bar(loc,index)
                 print(bar.curr_condition)
                 conditions[bar.curr_condition]()
             end
-            animate_list[bar.func_tbls.loading_sun_fade_out] = bar
+            
             --[[
             flare_l:animate{
                 duration   = 8000,
                 z_rotation = 360,
             }--]]
+            
+            five_day:unparent()
+            
+            five_day = make_five_day(fcast_tbl.forecast.simpleforecast.forecastday)
+            
+            bar:add(five_day)
+            five_day.opacity=0
+            five_day:hide()
+            --[[
             for i = 1,5 do
                 fday = fcast_tbl.forecast.simpleforecast.forecastday[i+1]
                 if i == 1 then
@@ -341,18 +465,41 @@ function Make_Bar(loc,index)
                 end
                 days[i]:find_child("hi").text = fday.high.fahrenheit..DEG
                 days[i]:find_child("lo").text = fday.low.fahrenheit.. DEG
-                days[i]:find_child("icon").source = imgs.icons[fday.icon]
+                days[i]:add(Clone{
+                    name = "icon",
+                    y    = 7,
+                    x    = 12,
+                    source = imgs.icons[fday.icon]
+                })
             end
+            --]]
+        end
+        if f_tbl ~= nil and pws_tbl ~= nil then
+            mini_width = Text{
+                font=FONT.."Bold Condensed "..LOCATION_SZ,
+                text=curr_temp_tbl.current_observation.location.city..
+                    ", "..curr_temp_tbl.current_observation.location.state
+            }.w + LOCATION_X - MINI_BAR_X + 100
+            mesg:unparent()
+            mesg=nil
+            bar:add(make_curr_temps(pws_tbl,f_tbl,mini_width))
+            if mini then
+                --bar:find_child("mid").scale = {mini_width,1}
+                bar:find_child("mid").w = mini_width
+                bar:find_child("right").x   = bar_side_w + mini_width
+            end
+            green_button_mini.x = MINI_BAR_X+mini_width -83
+            arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
             
+            animate_list[bar.func_tbls.loading_sun_fade_out] = bar
         end
         if error_str then
-            location.text =""
-            err_msg.text=error_str
-             
+            mesg.text=error_str
+            
         end
     end
     
-    local bar_dist = 1905-imgs.bar.side.w-MINI_BAR_X
+    local bar_dist = 1905-bar_side_w-MINI_BAR_X
     local next_i = bar_index
     
     bar.func_tbls = {
@@ -471,12 +618,12 @@ function Make_Bar(loc,index)
                 
                 --bar:find_child("mid").scale={w,1}
                 bar:find_child("mid").w=w
-                bar:find_child("right").x=imgs.bar.side.w + w
-                arrow_r.x = MINI_BAR_X + w -imgs.bar.side.w/2+1
+                bar:find_child("right").x=bar_side_w + w
+                arrow_r.x = MINI_BAR_X + w -bar_side_w/2+1
                 
                 f_grad.opacity=255*p
-                left_faux_bar.x =(-faux_len-imgs.bar.side.w)*(1-1.05*math.sin((math.pi/2+.30984)*p))
-                right_faux_bar.x=( faux_len+imgs.bar.side.w)*(1-1.05*math.sin((math.pi/2+.30984)*p))
+                left_faux_bar.x =(-faux_len-bar_side_w)*(1-1.05*math.sin((math.pi/2+.30984)*p))
+                right_faux_bar.x=( faux_len+bar_side_w)*(1-1.05*math.sin((math.pi/2+.30984)*p))
                 
                 if p == 1 then
                     animate_list[bar.func_tbls.xfade_to_full]=bar
@@ -509,12 +656,12 @@ function Make_Bar(loc,index)
                 
                 --bar:find_child("mid").scale={w,1}
                 bar:find_child("mid").w=w
-                bar:find_child("right").x=imgs.bar.side.w + w
-                arrow_r.x = MINI_BAR_X + w -imgs.bar.side.w/2+1
+                bar:find_child("right").x=bar_side_w + w
+                arrow_r.x = MINI_BAR_X + w -bar_side_w/2+1
                 f_grad.opacity=255*(1-p)
             	
-                left_faux_bar.x=(-faux_len-imgs.bar.side.w)*p
-                right_faux_bar.x=(faux_len+imgs.bar.side.w)*p
+                left_faux_bar.x=(-faux_len-bar_side_w)*p
+                right_faux_bar.x=(faux_len+bar_side_w)*p
                 if p == 1 then
                     bar:grab_key_focus()
                 end
@@ -602,8 +749,10 @@ function Make_Bar(loc,index)
             duration = 8000,
             loop=true,
             func = function(this_obj,this_func_tbl,secs,p)
+                if loading_sun == nil then return end
                 flare_l.z_rotation = {360*p,0,0}
                 flare_d.z_rotation = {360*p,0,0}
+                
             end
         },
         loading_sun_fade_out = {
@@ -613,6 +762,13 @@ function Make_Bar(loc,index)
                 if p == 1 then
                     animate_list[this_func_tbl] = nil
                     animate_list[this_obj.func_tbls.loading_sun] = nil
+                    loading_sun:unparent()
+                    loading_sun = nil
+                    flare_d = nil
+                    flare_l = nil
+                    sun_b   = nil
+                    this_obj.func_tbls.loading_sun = nil
+                    this_obj.func_tbls.loading_sun_fade_out = nil
                 end
             end
         },
@@ -866,8 +1022,8 @@ function Make_Bar(loc,index)
         mini_bar:hide()
         --bar:find_child("mid").scale={FULL_BAR_W,1}
         bar:find_child("mid").w=FULL_BAR_W
-        bar:find_child("right").x=imgs.bar.side.w + FULL_BAR_W
-        arrow_r.x = MINI_BAR_X + FULL_BAR_W -imgs.bar.side.w/2+1
+        bar:find_child("right").x=bar_side_w + FULL_BAR_W
+        arrow_r.x = MINI_BAR_X + FULL_BAR_W -bar_side_w/2+1
         blurb_txt.opacity=255
         blurb_txt:show()
         zip_entry.opacity=0
@@ -883,8 +1039,8 @@ function Make_Bar(loc,index)
         mini_bar:show()
         --bar:find_child("mid").scale={mini_width,1}
         bar:find_child("mid").w = mini_width
-        bar:find_child("right").x=imgs.bar.side.w + mini_width
-        arrow_r.x = MINI_BAR_X + mini_width -imgs.bar.side.w/2+1
+        bar:find_child("right").x=bar_side_w + mini_width
+        arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
     end
     
     --send weather query
