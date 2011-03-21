@@ -980,6 +980,11 @@ globals
 	        result = tv.tv_sec + double( tv.tv_usec ) / G_USEC_PER_SEC;
         ]];
 
+	double timestamp()
+        [[
+            result = timestamp();
+        ]];
+
 	table split( string source , string delimiter , int max_tokens = 0 )
         [[
             lua_newtable( L );

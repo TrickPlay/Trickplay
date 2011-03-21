@@ -29,21 +29,21 @@ void Notify::remove_notification_handler( const char * subject, TPNotificationHa
 
 //-----------------------------------------------------------------------------
 
-void Notify::notify( const char * subject )
+void Notify::notify( TPContext * context , const char * subject )
 {
     std::pair<HandlerMultiMap::const_iterator, HandlerMultiMap::const_iterator>
     range = handlers.equal_range( String( subject ) );
 
     for ( HandlerMultiMap::const_iterator it = range.first; it != range.second; ++it )
     {
-        it->second.first( subject, it->second.second );
+        it->second.first( context , subject, it->second.second );
     }
 
     range = handlers.equal_range( String( "*" ) );
 
     for ( HandlerMultiMap::const_iterator it = range.first; it != range.second; ++it )
     {
-        it->second.first( subject, it->second.second );
+        it->second.first( context , subject, it->second.second );
     }
 }
 

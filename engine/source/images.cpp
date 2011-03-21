@@ -646,6 +646,17 @@ Images::~Images()
         delete external_decoder;
     }
 
+#ifndef TP_PRODUCTION
+
+    // Get rid of the weak ref in case an image is destroyed after we are.
+
+    for ( ImageMap::iterator it = images.begin(); it != images.end(); ++it )
+    {
+        g_object_weak_unref( G_OBJECT( it->first ), texture_destroyed_notify, this );
+    }
+
+#endif
+
 #if TP_IMAGE_CACHE_ENABLED
 
     for( CacheMap::iterator it = cache.begin(); it != cache.end(); ++it )
