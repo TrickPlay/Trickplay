@@ -265,6 +265,20 @@ function create_on_button_down_f(v)
 			end 
 			editor.n_select(v) 
 	       	    end
+
+		    -- Debugging : 841 
+
+		    if v.type ~= "Text" then 
+			for i, j in pairs (g.children) do  
+	           	if j.type == "Text" then 
+	            	if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
+			  ui.text = j	
+	                  ui.text:on_key_down(keys.Return)
+		    	end
+	           	end 
+	        	end 
+	           end 
+
 	            org_object = copy_obj(v)
            	    dragging = {v, x - v.x, y - v.y }
            	    return true
@@ -280,7 +294,7 @@ function create_on_button_down_f(v)
             end
 	
 	   elseif( input_mode ~= S_RECTANGLE) then  
-                dragging = {v, x - v.x, y - v.y }
+		dragging = {v, x - v.x, y - v.y }
            	return true
            end
 	  end

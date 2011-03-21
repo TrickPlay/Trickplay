@@ -145,28 +145,11 @@ function inspector_apply (v, inspector)
       for i, j in pairs(item_group.children) do 
           	  
 	   if j.name then
-
-		 if j.name ~= "anchor_point" and 
-		    j.name ~= "reactive" and 
-		    j.name ~= "focusChanger" and 
-		    j.name ~= "src" and 
-		    j.name ~= "source" and 
-		    j.name ~= "loop" and 
-		    j.name ~= "skin" and 
-		    j.name ~= "wrap_mode" and 
-		    j.name ~= "items" and 
-		    j.name ~= "itemsList" and 
-		    j.name ~= "icon" and 
-		    j.name ~= "items" and 
-		    j.name ~= "expansion_location" and 
-		    j.name ~= "vert_bar_visible" and 
-		    j.name ~= "hor_bar_visible" and
-		    j.name ~= "cells_focusable" and 
-		    item_group:find_child(j.name):find_child("input_text") == nil then 
-		print(j.name) 
-		--item_group:find_child(j.name):find_child("input_text").text == "" or item_group:find_child(j.name):find_child("input_text").text == nil then 
-		print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
-	        return 0 
+		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "vert_bar_visible" and j.name ~= "hor_bar_visible" and j.name ~= "cells_focusable" then 
+		 if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
+			print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
+	        	return 0 
+		end 
            end 
 
 
@@ -182,6 +165,10 @@ function inspector_apply (v, inspector)
 			    if v[j.name] == true or v[j.name] == false then
 				v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
 			    else 
+
+				if j.name == "message" then 
+					print (tostring(item_group:find_child(j.name):find_child("input_text").text)) 
+				end 
                                 v[j.name] = tostring(item_group:find_child(j.name):find_child("input_text").text)
 			    end 
                      end

@@ -126,6 +126,7 @@ local item_map =
         ["Undo".."\t\t\t".."[U]"]   = function()  return "undo" end,
      	["Redo".."\t\t\t".."[E]"]   = function()  return "redo" end,
      	["Clone".."\t\t\t".."[C]"]   = function() return "clone" end,
+     	["Duplicate".."\t\t".."[D]"]   = function() return "duplicate" end,
      	["Delete".."\t\t     ".."[Del]"]   = function() return "delete" end,
      	["Group".."\t\t\t".."[G]"]   = function() return "group" end,
      	["UnGroup".."\t\t\t"..""]   = function() return "ungroup" end,
@@ -1549,7 +1550,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	local space = WIDTH - PADDING_X  
 
 	local text = Text {name = "attr", text = item_s}:set(STYLE)
-        text.position  = {WIDTH - space , 5}
+        text.position  = {PADDING_X, 5}
     	group:add(text)
 
 	if v.extra.type == "ButtonPicker" then 
@@ -1581,7 +1582,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
 	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 1, cell_w = 300, cell_h = 40, cell_spacing=5, focus=list_focus}
-        items_list.position = {text.w, text.y + text.h + PADDING_Y}
+        items_list.position = {PADDING_X, text.y + text.h + PADDING_Y}
         items_list.name = "items_list"
 	items_list:find_child("Focus").opacity = 0 
 
@@ -2608,7 +2609,6 @@ rect_plus = Rectangle
 		position = {0,0,0},
 		size = {30,30},
 		opacity = 255,
-		reactive = true,
 	}
 
 
@@ -2631,7 +2631,6 @@ text_plus = Text
 		size = {30,30},
 		opacity = 255,
 		cursor_visible = false,
-		reactive = true,
 	}
 
 
@@ -2656,7 +2655,7 @@ end
 function factory.draw_plus_items()
 local l_col = {150,150,150,200}
 local l_wid = 4
-local l_scale = 0.9
+local l_scale = 1
 
 text_label = Text
 	{

@@ -109,7 +109,7 @@ ui =
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "  Edit  " ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 505,
+                height  = 555,
                 init    = dofile( "section-edit" )
             },
 
