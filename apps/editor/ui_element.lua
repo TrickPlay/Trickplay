@@ -3140,7 +3140,7 @@ function ui_element.scrollPane(t)
 	local border = Rectangle{ color = "00000000" }
 	
 	
-	local track_h, track_w, grip_hor, grip_vert
+	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
 	
 
     --the umbrella Group, containing the full slate of tiles
@@ -3422,6 +3422,7 @@ function ui_element.scrollPane(t)
 		bar:add(shell,fill)
         
         shell.name="track"
+        shell.reactive = true
         fill.name="grip"
         fill.reactive=true
         fill.y=p.frame_thickness/2 
@@ -3517,6 +3518,7 @@ function ui_element.scrollPane(t)
 		bar:add(shell,fill)
         
         shell.name="track"
+        shell.reactive = true
         fill.name="grip"
         fill.reactive=true
         fill.x=p.frame_thickness/2 
@@ -3567,6 +3569,7 @@ function ui_element.scrollPane(t)
             scroll_group:add(hor_s_bar)
             
             grip_hor = hor_s_bar:find_child("grip")
+            track_hor = vert_s_bar:find_child("track")
             
             function grip_hor:on_button_down(x,y,button,num_clicks)
                 
@@ -3590,8 +3593,25 @@ function ui_element.scrollPane(t)
 	   	
                 return true
             end
+            function track_hor:on_button_down(x,y,button,num_clicks)
+                
+                local rel_x = x - track_hor.transformed_position[1]/screen.scale[1]
+	   	        
+                if rel_x < grip_hor.h/2 then
+                    rel_x = grip_hor.h/2
+                elseif rel_x > (track_hor.h-grip_hor.h/2) then
+                    rel_x = (track_hor.h-grip_hor.h/2)
+                end
+                
+                grip_hor.x = rel_y-grip_hor.h/2
+                
+                p.content.x = -(grip_hor.x) * p.virtual_w/track_w
+                
+                return true
+            end
         else
             grip_hor=nil
+            track_hor=nil
         end
         if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
             vert_s_bar = make_vert_bar(
@@ -3609,6 +3629,7 @@ function ui_element.scrollPane(t)
             scroll_group:add(vert_s_bar)
             
             grip_vert = vert_s_bar:find_child("grip")
+            track_vert = vert_s_bar:find_child("track")
             
             function grip_vert:on_button_down(x,y,button,num_clicks)
                 
@@ -3632,8 +3653,25 @@ function ui_element.scrollPane(t)
 	   	
                 return true
             end
+            function track_vert:on_button_down(x,y,button,num_clicks)
+                
+                local rel_y = y - track_vert.transformed_position[2]/screen.scale[2]
+	   	        
+                if rel_y < grip_vert.h/2 then
+                    rel_y = grip_vert.h/2
+                elseif rel_y > (track_vert.h-grip_vert.h/2) then
+                    rel_y = (track_vert.h-grip_vert.h/2)
+                end
+                
+                grip_vert.y = rel_y-grip_vert.h/2
+                
+                p.content.y = -(grip_vert.y) * p.virtual_h/track_h
+                
+                return true
+            end
         else
             grip_vert=nil
+            track_vert=nil
         end
         
 		
