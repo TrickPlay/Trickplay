@@ -1188,14 +1188,15 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	       si.position = {0,82,0}
 	       si.name ="si"
 	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
-	       if scroll_y_pos then 
-	           si.seek_to(0, scroll_y_pos) 
-	       end 
 	       inspector:add(si)
 	else -- video  
 	   inspector:add(item_group) 
 	end 
 	screen:add(inspector)
+
+	if scroll_y_pos then 
+	   --imsi :   screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+	end 
 
 	if v.extra then 
 	if v.extra.type == "MenuButton" then 
