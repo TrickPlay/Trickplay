@@ -2890,6 +2890,8 @@ function ui_element.layoutManager(t)
             p[k] = v
         end
     end
+    
+    local make_grid
 	
     local x_y_from_index = function(r,c)
 		return (p.cell_w+p.cell_spacing)*(c-1)+p.cell_w/2,
@@ -2918,6 +2920,39 @@ function ui_element.layoutManager(t)
                 obj.anchor_point = {obj.w/2,obj.h/2}
                 obj.delay = p.cell_timing_offset*(r+c-1)
 			end,
+            remove_row = function(self,r)
+                if r > 0 and r <= #p.tiles then
+                    table.remove(p.tiles,r)
+                    p.rows = p.rows - 1
+                    make_grid()
+                end
+            end,
+            remove_col = function(self,c)
+                if c > 0 and c <= #p.tiles[1] then
+                    for r = 1,#p.tiles do
+                        table.remove(p.tiles[r],c)
+                    end
+                    p.columns = p.columns - 1
+                    make_grid()
+                end
+            end,
+            add_row = function(self,r)
+                if r > 0 and r <= #p.tiles then
+                    table.insert(p.tiles,r,{})
+                    p.rows = p.rows + 1
+                    make_grid()
+                end
+            end,
+            add_col = function(self,c)
+                if c > 0 and c <= #p.tiles[1] then
+                    for r = 1,#p.tiles do
+                        table.insert(p.tiles[r],c,c)
+                        p.tiles[r][c] = nil
+                    end
+                    p.columns = p.columns + 1
+                    make_grid()
+                end
+            end,
             add_next = function(self,obj)
                 self:replace(focus_i[1],focus_i[2],obj)
                 if focus_i[2]+1 > p.columns then
@@ -3033,7 +3068,7 @@ function ui_element.layoutManager(t)
         }
     end
 	
-	local make_grid = function()
+	make_grid = function()
         
 		local g
         slate:clear()
@@ -3044,6 +3079,8 @@ function ui_element.layoutManager(t)
             focus = p.focus
             focus.anchor_point={focus.w/2,focus.h/2}
         end
+        focus_i[1] = 1
+        focus_i[2] = 1
         focus.x, focus.y = x_y_from_index(focus_i[1],focus_i[2])
         slate:add(focus)
         
@@ -3063,18 +3100,18 @@ function ui_element.layoutManager(t)
                     g = make_tile()
                     slate:add(g)
                     p.tiles[r][c] = g
-                    g.x, g.y = x_y_from_index(r,c)
-                    g.delay = p.cell_timing_offset*(r+c-1)
+                    
                 else
                     g = p.tiles[r][c]
                     if g.parent ~= nil then
                         g:unparent()
                     end
-                    slate:add(g)
-                    g.x, g.y = x_y_from_index(r,c)
-                    g.anchor_point = {g.w/2,g.h/2}
-                    g.delay = p.cell_timing_offset*(r+c-1)
+                    
                 end
+                slate:add(g)
+                g.x, g.y = x_y_from_index(r,c)
+                g.delay = p.cell_timing_offset*(r+c-1)
+                g.anchor_point = {g.w/2,g.h/2}
 			end
 		end
         
