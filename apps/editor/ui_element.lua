@@ -3243,6 +3243,7 @@ function ui_element.scrollPane(t)
                         end
                     }
                 
+                    if grip_vert ~= nil then
                     if new_y < -(p.virtual_h - p.visible_h) then
                         grip_vert.y = track_h-grip_vert.h
                     elseif new_y > 0 then
@@ -3254,6 +3255,8 @@ function ui_element.scrollPane(t)
                             y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
                         }
                     end
+                    end
+                    if grip_hor ~= nil then
                     if new_x < -(p.virtual_w - p.visible_w) then
                         grip_hor.x = track_w-grip_hor.w
                     elseif new_x > 0 then
@@ -3264,6 +3267,7 @@ function ui_element.scrollPane(t)
                             duration= 200,
                             x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
                         }
+                    end
                     end
                 end
             end
