@@ -3205,7 +3205,7 @@ function ui_element.scrollPane(t)
         reactive = true,
         extra    = {
 			type = "ScrollPane",
-            seek_to = function(x,y)
+            seek_to_middle = function(x,y)
                 local new_x, new_y
                 if p.virtual_w > p.visible_w then
                     if x > p.virtual_w - p.visible_w/2 then
@@ -3278,6 +3278,9 @@ function ui_element.scrollPane(t)
             --]]
         }
     }
+    scroll_group.extra.seek_to = function(x,y)
+        scroll_group.extra.seek_to_middle(x+p.visible_w/2,y+p.visible_h/2)
+    end
 	
 	--Key Handler
 	local keys={
