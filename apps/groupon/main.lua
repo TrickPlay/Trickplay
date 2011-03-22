@@ -2,6 +2,16 @@ GROUPON = dofile("groupon.lua")
 
 local deals = GROUPON:get_deals()
 
+local tile_positions = {
+    { x=300,  y=30 + 2*screen.h/3 },
+    { x=1180, y=30   },
+    { x=1180, y=30 + 2*screen.h/3 },
+    { x=300,  y=30 +   screen.h/3 },
+    { x=300,  y=30   },
+    { x=1180, y=30 +   screen.h/3 },
+}
+
+local tile_position
 local make_tile = function (image, title)
     local i = Image { src = image }
     local t = Text { text = title, color = 'ffffff', font = 'Diavlo 36px' }
@@ -14,8 +24,11 @@ local make_tile = function (image, title)
     t.x = (i.w - t.w) / 2
     r.x, r.y = t.x, t.y
 
-    g.x = math.random(10,screen.w-g.w-10)
-    g.y = math.random(10 + 100 ,screen.h-g.h-10)
+    repeat
+        tile_position = next(tile_positions,tile_position)
+    until tile_position
+    local the_tile = tile_positions[tile_position]
+    g.x, g.y = the_tile.x, the_tile.y
 
     screen:add(g)
     g.x_rotation = { -90, 0, 0 }
@@ -39,8 +52,9 @@ end
 
 print("We got ",#(deals.deals)," deals")
 
-local title = Text { text = 'Groupon deals!', color = 'ffffff', font = 'Diavlo 96px' }
+local title = Text { text = "Groupon\nDEALS", alignment = "CENTER", color = 'ffffff', font = 'Diavlo 72px' }
 title.x = (screen.w-title.w)/2
+title.y = 450
 screen:add(title)
 screen:show()
 
