@@ -1565,6 +1565,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                 	screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
+			print("si.content.y",  si.content.y)
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true
 		end 
@@ -1584,10 +1585,23 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	items_list:find_child("Focus").opacity = 0 
 
 	for i,j in pairs(v.items) do 
+              local item = ui_element.textInput{ui_width = 350, ui_height = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
+	      item.name = "item_text"..tostring(i)
+	      minus = factory.draw_minus_item()
+	      function minus:on_button_down(x,y)
+		     table.remove(v.items)
+		     screen:remove(inspector)
+		     input_mode = S_SELECT
+		     current_inspector = nil
+                     screen:grab_key_focus(screen) 
+		     text_reactive()
+		     editor.n_selected(v, true)
+		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     return true 
+	      end 
 
-             local item = ui_element.textInput{ui_width = 350, ui_height = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
-	     item.name = "item_text"..tostring(i)
 
+		
 	      function item:on_button_down()
    		current_focus.extra.on_focus_out()
 	        current_focus = group
@@ -1667,20 +1681,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     local up = up_down:find_child("up")
 	     local down = up_down:find_child("down")
 
---[[
-	
-	function minus:on_button_down()
-		table.remove(v.items)
-		screen:remove(inspector)
-		input_mode = S_SELECT
-		current_inspector = nil
-                screen:grab_key_focus(screen) 
-		text_reactive()
-		editor.n_selected(v, true)
-		editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		return true 
-	end 
-]]
 
 ---
 	     items_list:replace(i,1,item)
@@ -2401,10 +2401,10 @@ mouse_pointer = Group
 	return mouse_pointer
 end 
 
-function factory.draw_minus()
+function factory.draw_minus_item()
 local l_col = {150,150,150,200}
 local l_wid = 4
-local l_scale = 0.9
+local l_scale = 1
 
 rect_minus = Rectangle
 	{
@@ -2420,7 +2420,6 @@ rect_minus = Rectangle
 		position = {0,0,0},
 		size = {40,40},
 		opacity = 255,
-		reactive = true,
 	}
 
 
@@ -2442,7 +2441,6 @@ text_minus = Text
 		position = {12,4,0},
 		size = {30,30},
 		opacity = 255,
-		reactive = true,
 	}
 
 

@@ -1195,7 +1195,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	screen:add(inspector)
 
 	if scroll_y_pos then 
-	   --imsi :   screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+	     print("scroll_y_pos",  math.floor(math.abs(scroll_y_pos)))
+	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 	end 
 
 	if v.extra then 
