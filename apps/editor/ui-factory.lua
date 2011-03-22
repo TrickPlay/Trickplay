@@ -1557,10 +1557,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		plus = factory.draw_plus_item()
 		plus.position = {text.x + text.w + PADDING_X, 5}
 		plus.reactive = true
-		dumptable(plus.position)
-		dumptable(plus.size)
 		function plus:on_button_down(x,y)
-			print(x,y)
 			table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
 			screen:remove(inspector)
 			input_mode = S_SELECT
@@ -1581,8 +1578,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(plus) 
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 1, cell_w = 300, cell_h = 40, cell_spacing=5, focus=list_focus}
-        items_list.position = {PADDING_X, text.y + text.h + PADDING_Y}
+	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 300, cell_h = 40, cell_spacing=5, focus=list_focus}
+        items_list.position = {PADDING_X + 25, text.y + text.h + PADDING_Y}
         items_list.name = "items_list"
 	items_list:find_child("Focus").opacity = 0 
 
@@ -1591,13 +1588,13 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              local item = ui_element.textInput{ui_width = 350, ui_height = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
 	     item.name = "item_text"..tostring(i)
 
-	     function item:on_button_down()
+	      function item:on_button_down()
    		current_focus.extra.on_focus_out()
 	        current_focus = group
 		item.on_focus_in()
 		return true
-	     end 
-	     function item:on_key_down(key)
+	      end 
+	      function item:on_key_down(key)
 	       local si = inspector:find_child("si")
     	       if is_this_widget(v) == true  then
                     item_group = si.content
