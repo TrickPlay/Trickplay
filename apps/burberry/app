@@ -1,9 +1,9 @@
 app=
 {
-    id          = "com.trickplay.sudoku",
-    release     = "2",
-    version     = ".6",
-    name        = "Sudoku",
-    author      = "Trickplay, Jr.",
+    id          = "com.trickplay.burberry",
+    release     = "1",
+    version     = ".1",
+    name        = "Burberry",
+    author      = "Indaco, Alex",
     copyright   = "© Trickplay Inc."
 }
