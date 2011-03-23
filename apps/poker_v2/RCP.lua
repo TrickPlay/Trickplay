@@ -77,8 +77,10 @@ function(router, ...)
     end
 
     function router:get_active_controller()
-       assert(self.controllers[self.active_component])
-       return self.controllers[self.active_component]
+        if not self.controllers[self.active_component] then
+            error("no active controller", 2)
+        end
+        return self.controllers[self.active_component]
     end
 
     function router:get_active_component()
@@ -150,6 +152,7 @@ View = Class(Observer, function(view, router, ...)
 end)
 
 Controller = Class(Observer, function(ctrl, router, id)
+    assert(router)
     assert(id)
 
     -- class fields

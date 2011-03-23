@@ -7,6 +7,7 @@ local key_handler = {}
 local key_hints = {}
 function screen:on_key_down(k)
     if k == keys.g then dumptable(_G) end
+    if k == keys.i then INITIAL_ENDOWMENT = 4 end
     if key_handler[k] then
         key_hints[k] = not key_hints[k]
         key_handler[k]()
@@ -46,6 +47,7 @@ function enable_event_listener(event)
 
     if event:is_a(KbdEvent) then
         --screen.on_key_down, old_on_key_down = old_on_key_down, nil
+        event_listener_en = true
     elseif event:is_a(TimerEvent) then
         local cb = event.cb or
             function()
@@ -53,7 +55,6 @@ function enable_event_listener(event)
             end
         t:enable{on_timer = cb, interval = event.interval}
     end
-    event_listener_en = true
 end
 
 function event_listener_enabled()

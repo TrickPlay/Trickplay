@@ -1,7 +1,7 @@
 CharacterSelectionController = Class(Controller,
 function(ctrl, router, ...)
     ctrl._base.init(ctrl, router, Components.CHARACTER_SELECTION)
-    router:attach(ctrl, Components.SPLASH)
+    router:attach(ctrl, Components.CHARACTER_SELECTION)
 
     local view = CharacterSelectionView(ctrl)
     local players = {}
@@ -89,6 +89,8 @@ function(ctrl, router, ...)
     end
 
     help_button_selector.press = function()
+        router:set_active_component(Components.TUTORIAL)
+        router:notify()
     end
     start_button_selector.press = function()
         start_a_game()

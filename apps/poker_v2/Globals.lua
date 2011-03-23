@@ -19,7 +19,7 @@ Directions = {
     UP = {0,-1}
 }
 
-Colors={
+Colors = {
     SLATE_GRAY                   ="708090",
     WHITE                        ="FFFFFF",
     FIRE_BRICK                   ="B22222",
@@ -83,6 +83,15 @@ CARD_LOCATIONS = {
     [5] = {1205, 510},
     DECK = {785, 650},
     BURN = {1145, 650}
+}
+
+PLAYER_CARD_LOCATIONS = {
+    [1] = {412, 819},
+    [2] = {115, 441},
+    [3] = {499, 219},
+    [4] = {1129, 160},
+    [5] = {1471, 389},
+    [6] = {1497, 910}
 }
 
 ---------- Gameplay stuff -------------------

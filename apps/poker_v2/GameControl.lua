@@ -1,5 +1,6 @@
 if not GameState then dofile("GameState.lua") end
 if not GamePresentation then dofile("GamePresentation.lua") end
+if not HandControl then dofile("HandControl.lua") end
 
 GameControl = Class(Controller,
 function(ctrl, router, ...)
@@ -26,7 +27,6 @@ function(ctrl, router, ...)
         -- stage where we play through a hand
         function(ctrl, event)
             local continue = hand_ctrl:on_event(event)
-            enable_event_listener(TimerEvent{interval = 1000})
             return continue
         end,
         -- clean hand
@@ -115,6 +115,16 @@ function(ctrl, router, ...)
     end
 
     function ctrl:on_event(event)
+        assert(event:is_a(Event))
+        if event:is_a(BetEvent) then
+            print("GameControl:on_event(BetEvent)")
+        elseif event:is_a(TimerEvent) then
+            print("GameControl:on_event(TimerEvent)")
+        elseif event:is_a(KbdEvent) then
+            print("GameControl:on_event(KbdEvent)")
+        else
+            print("GameControl:on_event(Event)")
+        end
         print(#game_pipeline, "entries left in game pipeline")
         disable_event_listeners()
 
