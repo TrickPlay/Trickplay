@@ -1542,18 +1542,18 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     elseif(item_n == "items") then 
 
 	local plus, item_plus, label_plus, seperator_plus
-
+	local item_string_t
 	group:clear()
 	group.name = "itemsList"
 	group.reactive = true
 
 	local space = WIDTH - PADDING_X  
-
-	local text = Text {name = "attr", text = item_s}:set(STYLE)
-        text.position  = {PADDING_X, 5}
-    	group:add(text)
-
 	if v.extra.type == "ButtonPicker" then 
+
+		local text = Text {name = "attr", text = item_s}:set(STYLE)
+        	text.position  = {PADDING_X, 5}
+    		group:add(text)
+
 		plus = factory.draw_plus_item()
 		plus.position = {text.x + text.w + PADDING_X, 5}
 		plus.reactive = true
@@ -1571,25 +1571,109 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		end 
 	elseif v.extra.type =="MenuButton" then 
 		plus = factory.draw_plus_items()
-		plus.position = {text.x + text.w + PADDING_X, 5}
-		item_plus = plus_minus:find_child("item_plus")
-		label_plus = plus_minus:find_child("label_plus")
-		seperator_plus = plus_minus:find_child("seperator_plus")
+		plus.position = {PADDING_X, 5}
+		item_plus = plus:find_child("item_plus")
+		label_plus = plus:find_child("label_plus")
+		seperator_plus = plus:find_child("seperator_plus")
+
+		
+		function seperator_plus:on_button_down(x,y)
+			table.insert(v.items, {type="seperator"})
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+                	screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			print("si.content.y",  si.content.y)
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true
+		end 
+
+		function item_plus:on_button_down(x,y)
+			table.insert(v.items, {type="item", string="Item ...", f=nil})
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+                	screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			print("si.content.y",  si.content.y)
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true
+		end 
+
+		function label_plus:on_button_down(x,y)
+			table.insert(v.items, {type="label", string="Label ..."})
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+                	screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			print("si.content.y",  si.content.y)
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true
+		end 
+
 	end 
 	group:add(plus) 
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 300, cell_h = 40, cell_spacing=5, focus=list_focus}
-        items_list.position = {PADDING_X + 25, text.y + text.h + PADDING_Y}
+	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=0, focus=list_focus}
+	if text then 
+        	items_list.position = {PADDING_X + 25, text.y + text.h + PADDING_Y}
+	else 
+        	items_list.position = {PADDING_X + 25, plus.y + plus.h + PADDING_Y/2}
+	end 
         items_list.name = "items_list"
 	items_list:find_child("Focus").opacity = 0 
 
+	
 	for i,j in pairs(v.items) do 
-              local item = ui_element.textInput{ui_width = 350, ui_height = 40, text = j, font = "DejaVu Sans 26px", border_width = 2}
+	      local input_txt, item_type 
+	      if v.extra.type =="MenuButton" then 
+		  if j["type"] == "label" then 
+		     input_txt = j["string"] 
+		     item_type = "label"
+		  elseif j["type"] == "item" then 
+		     input_txt = "   "..j["string"] 
+		     item_type = "item"
+		  elseif j["type"] == "seperator" then 
+		     input_txt = "--------------"
+		     item_type = "seperator"
+		  end 
+	      else 
+		     input_txt = j 
+	      end  
+		
+              local item = ui_element.textInput{ui_width = 200, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} -- imsi : ui_width = 350 
 	      item.name = "item_text"..tostring(i)
-	      minus = factory.draw_minus_item()
+	     
+	      local minus = factory.draw_minus_item()
+	      minus.name = "item_minus"..tostring(i)
+	      local up = factory.draw_up()
+	      up.name = "item_up"..tostring(i)
+	      local down = factory.draw_down()
+	      down.name = "item_down"..tostring(i)
+
+
 	      function minus:on_button_down(x,y)
-		     table.remove(v.items)
+		     v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+		     --items_list:remove_row(tonumber(string.sub(minus.name, 11,-1)))
+		     screen:remove(inspector)
+		     input_mode = S_SELECT
+		     current_inspector = nil
+                     screen:grab_key_focus(screen) 
+		     text_reactive()
+		     editor.n_selected(v, true)
+		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     return true 
+	      end 
+
+	      
+	      function up:on_button_down(x,y)
+		     table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
 		     current_inspector = nil
@@ -1601,11 +1685,27 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	      end 
 
 
+	      function down:on_button_down(x,y)
+		     table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
+		     screen:remove(inspector)
+		     input_mode = S_SELECT
+		     current_inspector = nil
+                     screen:grab_key_focus(screen) 
+		     text_reactive()
+		     editor.n_selected(v, true)
+		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     return true 
+	      end 
+
 		
 	      function item:on_button_down()
    		current_focus.extra.on_focus_out()
 	        current_focus = group
 		item.on_focus_in()
+		if item_type then 
+                   item:find_child("textInput").extra.item_type = item_type
+	        end 
+
 		return true
 	      end 
 	      function item:on_key_down(key)
@@ -1621,7 +1721,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		  local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
 		  if (item_group:find_child("item_text"..tostring(next_i))) then
 			item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
-		  	si.seek_to(0,item_group:find_child("item_text"..tostring(next_i)).y) 
+		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
 			print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child("item_text"..tostring(next_i)).y)
 		  else 	
 		     for i, v in pairs(attr_t_idx) do
@@ -1636,7 +1736,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		               		local n_item = attr_t_idx[i+1]
 			       		if item_group:find_child(n_item).extra.on_focus_in then 
 			           		item_group:find_child(n_item).extra.on_focus_in()	
-		  			        si.seek_to(0,item_group:find_child(n_item).y) 
+		  			        si.seek_to_middle(0,item_group:find_child(n_item).y) 
 					        print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child(n_item).y)
 			       		else
 				   		there()
@@ -1652,7 +1752,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		     local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     if (item_group:find_child("item_text"..tostring(prev_i))) then
 			item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
-		  	si.seek_to(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
+		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
 			print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child("item_text"..tostring(prev_i)).y)
 		     else 	
 		      for i, v in pairs(attr_t_idx) do
@@ -1664,7 +1764,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
-		  	        si.seek_to(0,item_group:find_child(p_item).y) 
+		  	        si.seek_to_middle(0,item_group:find_child(p_item).y) 
 			        print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child(p_item).y)
 				break
 			     end
@@ -1673,17 +1773,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		    end 
 	       end 
 	     end 
----
-	     local minus = factory.draw_minus ()
-	     minus.position = {}
-	     local up_down = factory.draw_up_down ()
-	     up_down.position = {}
-	     local up = up_down:find_child("up")
-	     local down = up_down:find_child("down")
-
-
----
 	     items_list:replace(i,1,item)
+	     items_list:replace(i,2,minus)
+	     items_list:replace(i,3,up)
+	     items_list:replace(i,4,down)
 	end
 
 	function group.extra.on_focus_in()
@@ -1787,7 +1880,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		          if(item_group:find_child(attr_t_idx[i+1])) then
 		               local n_item = attr_t_idx[i+1]
 			       item_group:find_child(n_item).extra.on_focus_in()	
-			       si.seek_to(0, item_group:find_child(n_item).y)
+			       si.seek_to_middle(0, item_group:find_child(n_item).y)
 			       print("SEEK_TO: FROM-",item_picker.parent.y,"TO-",item_group:find_child(n_item).y)
 			       break
 		          end
@@ -1804,7 +1897,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
-				si.seek_to(0, item_group:find_child(p_item))
+				si.seek_to_middle(0, item_group:find_child(p_item))
 			        print("SEEK_TO: FROM-",item_picker.parent.y,"TO-",item_group:find_child(p_item).y)
 				break
 			     end
@@ -2028,7 +2121,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		               local n_item = attr_t_idx[i+1]
 			       item_group:find_child(n_item).extra.on_focus_in()	
 			       if (si) then 
-				    si.seek_to(0, item_group:find_child(n_item).y)
+				    si.seek_to_middle(0, item_group:find_child(n_item).y)
 			            print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(n_item).y)
 			       end
 			       break
@@ -2049,7 +2142,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 				if item_group:find_child(p_item).extra.on_focus_in then 	
 				     item_group:find_child(p_item).extra.on_focus_in()	
 			             if (si) then 
-				          si.seek_to(0, item_group:find_child(p_item).y)
+				          si.seek_to_middle(0, item_group:find_child(p_item).y)
 			                  print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(p_item).y)
 			             end
 				else 
@@ -2411,34 +2504,25 @@ rect_minus = Rectangle
 		color = {255,255,255,0},
 		border_color = l_col,
 		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "rect_minus",
 		position = {0,0,0},
-		size = {40,40},
+		size = {30,30},
 		opacity = 255,
 	}
 
 
 text_minus = Text
 	{
-		color = {255,255,255,255},
+		color = l_col, 
 		font = "DejaVu Sans bold 30px",
 		text = "-",
-		editable = true,
-		wants_enter = true,
+		editable = false,
+		wants_enter = false,
 		wrap = false,
 		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "text_minus",
-		position = {12,4,0},
+		cursor_visible = false,
+		position = {10,-5,0},
 		size = {30,30},
 		opacity = 255,
 	}
@@ -2447,13 +2531,9 @@ text_minus = Text
 minus = Group
 	{
 		scale = {l_scale,l_scale,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "minus",
 		position = {536,727,0},
-		size = {42,40},
+		size = {30,30},
 		opacity = 255,
 		children = {rect_minus,text_minus},
 		reactive = true,
@@ -2462,128 +2542,90 @@ minus = Group
 return minus
 end
 
-function factory.draw_up_down()
+function factory.draw_up()
 local l_col = {150,150,150,200}
 local l_wid = 4
-local l_scale = 0.9
+local l_scale = 0.8
 rect_up = Rectangle
 	{
 		color = {255,255,255,0},
 		border_color = l_col,
 		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "rect_up",
 		position = {0,0,0},
-		size = {40,40},
+		size = {30,30},
 		opacity = 255,
-		reactive = nil,
 	}
 
 
 img_up = Image
 	{
 		src = "left.png",
-		clip = {0,0,16,33},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
+		scale = {l_scale,l_scale,0,0},
 		z_rotation = {90,0,0},
 		anchor_point = {0,0},
 		name = "img_up",
-		position = {38,11,0},
-		size = {16,33},
+		position = {30,5,0},
 		opacity = 255,
-		reactive = nil,
 	}
 
 
 up = Group
 	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "up",
 		position = {0,0,0},
-		size = {40,40},
+		size = {30,30},
 		opacity = 255,
 		children = {rect_up,img_up},
 		reactive = true,
 	}
 
+return up
+end
+
+
+function factory.draw_down()
+local l_col = {150,150,150,200}
+local l_wid = 4
+local l_scale = 0.8
 
 rect_down = Rectangle
 	{
 		color = {255,255,255,0},
 		border_color = l_col,
 		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "rect_down",
 		position = {0,0,0},
-		size = {40,40},
+		size = {30,30},
 		opacity = 255,
-		reactive = nil,
 	}
 
 
 img_down = Image
 	{
 		src = "left.png",
-		clip = {0,0,16,33},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
+		scale = {l_scale,l_scale,0,0},
 		z_rotation = {270,0,0},
 		anchor_point = {0,0},
 		name = "img_down",
-		position = {2,33,0},
-		size = {16,33},
+		position = {0,23,0},
 		opacity = 255,
-		reactive = nil,
 	}
 
 
 down = Group
 	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "down",
-		position = {52,0,0},
-		size = {40,40},
+		position = {0,0,0},
+		size = {30,30},
 		opacity = 255,
 		children = {rect_down,img_down},
 		reactive = true,
 	}
 
-up_down = Group
-	{
-		scale = {l_scale,l_scale,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "up_down",
-		position = {536,729,0},
-		size = {92,40},
-		opacity = 255,
-		children = {up,down},
-		reactive = true,
-	}
-
-return up_down
+return down
 end
+
 
 function factory.draw_plus_item()
 local l_col = {150,150,150,200}
@@ -2667,10 +2709,9 @@ text_label = Text
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "text_label",
-		position = {7,10,0},
+		position = {7,0,0},
 		size = {120,30},
 		opacity = 255,
-		reactive = true,
 	}
 
 rect_label = Rectangle
@@ -2685,9 +2726,8 @@ rect_label = Rectangle
 		anchor_point = {0,0},
 		name = "rect_label",
 		position = {0,0,0},
-		size = {120,46},
+		size = {120,35},
 		opacity = 255,
-		reactive = true,
 	}
 
 label_plus = Group
@@ -2699,7 +2739,7 @@ label_plus = Group
 		anchor_point = {0,0},
 		name = "label_plus",
 		position = {0,0,0},
-		size = {127,46},
+		size = {127,35},
 		opacity = 255,
 		children = {text_label,rect_label},
 		reactive = true,
@@ -2721,10 +2761,9 @@ text_item = Text
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "text_item",
-		position = {10,9,0},
+		position = {10,0,0},
 		size = {120,30},
 		opacity = 255,
-		reactive = true,
 	}
 
 rect_item = Rectangle
@@ -2739,9 +2778,8 @@ rect_item = Rectangle
 		anchor_point = {0,0},
 		name = "rect_item",
 		position = {0,0,0},
-		size = {110,46},
+		size = {110,35},
 		opacity = 255,
-		reactive = true,
 	}
 
 item_plus = Group
@@ -2753,7 +2791,7 @@ item_plus = Group
 		anchor_point = {0,0},
 		name = "item_plus",
 		position = {129,0,0},
-		size = {130,46},
+		size = {130,35},
 		opacity = 255,
 		children = {text_item,rect_item},
 		reactive = true,
@@ -2775,10 +2813,9 @@ text_seperator = Text
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "text_seperator",
-		position = {7,10,0},
+		position = {7,0,0},
 		size = {180,30},
 		opacity = 255,
-		reactive = true,
 	}
 
 
@@ -2794,9 +2831,8 @@ rect_seperator = Rectangle
 		anchor_point = {0,0},
 		name = "rect_seperator",
 		position = {0,0,0},
-		size = {180,46},
+		size = {180,35},
 		opacity = 255,
-		reactive = true,
 	}
 
 seperator_plus = Group
@@ -2808,7 +2844,7 @@ seperator_plus = Group
 		anchor_point = {0,0},
 		name = "seperator_plus",
 		position = {249,0,0},
-		size = {187,46},
+		size = {187,35},
 		opacity = 255,
 		children = {text_seperator,rect_seperator},
 		reactive = true,
@@ -2827,7 +2863,6 @@ items_plus = Group
 		size = {436,46},
 		opacity = 255,
 		children = {label_plus,item_plus,seperator_plus},
-		reactive = true,
 	}
 
 return items_plus
