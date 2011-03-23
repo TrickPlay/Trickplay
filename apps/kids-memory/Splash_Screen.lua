@@ -1,6 +1,6 @@
 --umbrella group for all members of the splash screen
 splash_screen = Group{}
-local button_backing = Image{src="assets/button-start.png"}
+local button_backing = Assets:Clone{src="assets/button-start.png"}
 screen:add(button_backing)
 button_backing:hide()
 local difficulty_items = {
@@ -14,19 +14,19 @@ for i = 1,#difficulty_items do
     difficulty_items[i].position={1255,96+(i-1)*(button_backing.h+38)}
     difficulty_items[i]:move_anchor_point(button_backing.w/2,button_backing.h/2)
 end
-local t = Image{src="assets/level-start-easy.png",position={button_backing.w/2,button_backing.h/2}}
+local t = Assets:Clone{src="assets/level-start-easy.png",position={button_backing.w/2,button_backing.h/2}}
 t.anchor_point={t.w/2,t.h/2}
 
 difficulty_items[1]:add(t)
-t = Image{src="assets/level-start-medium.png",position={button_backing.w/2,button_backing.h/2}}
+t = Assets:Clone{src="assets/level-start-medium.png",position={button_backing.w/2,button_backing.h/2}}
 t.anchor_point={t.w/2,t.h/2}
 difficulty_items[2]:add(t)
-t = Image{src="assets/level-start-hard.png",position={button_backing.w/2,button_backing.h/2}}
+t = Assets:Clone{src="assets/level-start-hard.png",position={button_backing.w/2,button_backing.h/2}}
 t.anchor_point={t.w/2,t.h/2}
 difficulty_items[3]:add(t)
 local diff_i = 1
-local bg = Image{src="assets/background-start.jpg"}
-local start_monkey = Image{src="assets/start-monkey.png",y=314,x=40}
+local bg = Assets:Clone{src="assets/background-start.jpg"}
+local start_monkey = Assets:Clone{src="assets/start-monkey.png",y=314,x=40}
 start_monkey:move_anchor_point(start_monkey.w/2,start_monkey.h/4)
 local monkey_business = {
         duration = {2000},
@@ -43,13 +43,13 @@ splash_screen:add(bg,start_monkey)
 screen:add(splash_screen)
 --splash_screen:hide()
 
-local focus = Image{src="assets/focus-rectangle-start.png",x=diff_x+button_backing.w/2,y=difficulty_items[1].y}
+local focus = Assets:Clone{src="assets/focus-rectangle-start.png",x=diff_x+button_backing.w/2,y=difficulty_items[1].y}
 focus.anchor_point={focus.w/2,focus.h/2}
 splash_screen:add(focus)
 splash_screen:add(unpack(difficulty_items))
 
-local exit_focus  = Image{src="assets/focus-exit-btn.png",x=8,y=957}
-local exit_button = Image{src="assets/button-exit.png",x=29,y=978}
+local exit_focus  = Assets:Clone{src="assets/focus-exit-btn.png",x=8,y=957}
+local exit_button = Assets:Clone{src="assets/button-exit.png",x=29,y=978}
 exit_focus.opacity=0
 splash_screen:add(exit_focus,exit_button)
 
