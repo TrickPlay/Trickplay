@@ -2912,6 +2912,8 @@ function ui_element.layoutManager(t)
         return x,y
 	end
     
+    
+    
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
@@ -3044,7 +3046,31 @@ function ui_element.layoutManager(t)
 					end
 				end
 				tl:start()
-            end
+            end,
+            r_c_from_abs_position = function(self,x,y)
+                x = x - self.transformed_position[1]
+                y = y - self.transformed_position[2]
+                if p.cell_size == "fixed" then
+	        	    return math.floor(x/(p.cell_w+p.cell_spacing))+1,
+                           math.floor(y/(p.cell_h+p.cell_spacing))+1
+                end
+                
+                local curr_x = x
+                local curr_y = y
+                local r = 1
+                local c = 1
+                for i = 1, p.columns do
+                    if curr_x < (col_ws[i] or p.cell_w) then break end
+                    curr_x = curr_x - (col_ws[i] or p.cell_w) - p.cell_spacing
+                    r = r + 1
+                end
+                for i = 1, p.rows do
+                    if curr_y < (row_hs[i] or p.cell_h) then break end
+                    curr_y = curr_y - (row_hs[i] or p.cell_h) - p.cell_spacing
+                    c = c + 1
+                end
+                return r,c
+	        end
         }
     }
 
