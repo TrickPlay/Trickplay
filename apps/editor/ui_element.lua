@@ -1101,8 +1101,8 @@ function ui_element.timeline(t)
      
 	  first_point = next_point
      end 
-    dumptable(timeline_timers)
-    dumptable(timeline_timelines)
+    --dumptable(timeline_timers)
+    --dumptable(timeline_timelines)
 
      -- start_timer() function 
      function g.extra.start_timer()
@@ -1441,6 +1441,7 @@ function ui_element.textInput(table)
      create_textInputField()
 
      function t_group.extra.on_focus_in()
+	if t_group:find_child("textInput").text ~= "--------------" then 
 	  current_focus = t_group
           if (p.skin == "custom") then 
 	     box.opacity = 0
@@ -1453,6 +1454,7 @@ function ui_element.textInput(table)
 	  text.cursor_visible = true
 	  text.reactive = true 
           text:grab_key_focus(text)
+	end
      end
 
      function t_group.extra.on_focus_out()
@@ -3821,9 +3823,9 @@ function ui_element.scrollPane(t)
         
 		
 
-  --[[
+  ---[[
           scroll_group.size = {p.visible_w, p.visible_h}
- ]]
+ --]]
 	end
 	
     
@@ -3891,9 +3893,9 @@ button
 
         name  = "dropdownbar",
         items = {
-            {type="label", string="Subgroup A:"},
+            {type="label", string="Label ..."},
             {type="seperator"},
-            {type="item",  string="Item A1", f=nil},
+            {type="item",  string="Item ...", f=nil},
         },
         vert_spacing = 5, --item_spacing
         hor_spacing  = 10, -- new 

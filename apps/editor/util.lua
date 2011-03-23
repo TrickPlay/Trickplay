@@ -10,6 +10,46 @@ function table_insert(t, val)
 	end 
 	return t
 end 
+
+function table_move_up(t, itemNum)
+	print("itemNum", itemNum)
+	local prev_i, prev_j 
+	for i,j in pairs (t) do 
+	     if i == itemNum then 
+		if prev_i then 
+		     print(prev_i, j, i, prev_j)
+		     t[prev_i] = j 
+		     t[i] = prev_j 
+		     return
+		else 
+		     return 
+		end 
+	     end 
+	     prev_i = i 
+	     prev_j = j 
+	end 
+end 
+function table_move_down(t, itemNum)
+	print("itemNum", itemNum)
+	local i, j, next_i, next_j 
+	for i,j in pairs (t) do 
+	     if i == itemNum then 
+	          next_i = i + 1 
+		  if t[next_i] then 
+	     		print(i,next_j, i, t[next_i])
+	     		next_j = t[next_i] 
+	     		t[i] = next_j
+	     		t[next_i] = j 
+			return 
+		  else 
+		     return     
+		  end 
+
+	     end 
+	end 
+	return     
+end 
+
 function table_removeval(t, val)
 	for i,j in pairs (t) do
 		if j == val then 
@@ -18,10 +58,25 @@ function table_removeval(t, val)
 	end 
 	return t
 end 
+
+
+--[[ org, used in timeline functions  
 function table_removekey(table, key)
-	local element = table[key]
 	table[key] = nil
-	return element
+	end 
+	return 
+end
+
+]]
+function table_removekey(table, key)
+	local idx = 1	
+	local temp_t = {}
+	table[key] = nil
+	for i, j in pairs (table) do 
+		temp_t[idx] = j 
+		idx = idx + 1 
+	end 
+	return temp_t
 end
 
 
@@ -331,19 +386,68 @@ function create_on_button_down_f(v)
 	               local actor , dx , dy = unpack( dragging )
 		       new_object = copy_obj(v)
 	               new_object.position = {x-dx, y-dy}
-	
+---[[ Content Setting 
+		       local function is_in_container_group(x_pos, y_pos) 
+			   for i, j in pairs (g.children) do 
+				if j.x < x and x < j.x + j.w and j.y < y and y < j.y + j.h then 
+					if j.extra then 
+					    if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
+					        return true 
+					    end 
+					end 
+				end 
+			   end 
+		           return false 
+		       end 
+
+		       local function find_container(x_pos, y_pos)
+			   for i, j in pairs (g.children) do 
+				if j.x < x and x < j.x + j.w and j.y < y and y < j.y + j.h then 
+					if j.extra then 
+					    if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
+					        return j, j.extra.type 
+					    end 
+					end 
+				end 
+			   end 
+		       end 
+
+		       if control == true and is_in_container_group(x,y) then 
+			     local c, t 
+			     v:unparent()
+			     --v.reactive = false
+			     c, t = find_container(x,y) 
+			     if c and t then 
+			     print (t) 
+			     print (c.name)
+			     end 
+			     v.position = {v.x - c.x, v.y - c.y,0}
+			     v.extra.is_in_group = true
+			     screen:find_child(v.name.."border").position = v.position
+			     screen:find_child(v.name.."a_m").position = v.position 
+			     if t == "ScrollPane" or t == "DialogBox" then 
+			          c.content:add(v) 
+			     elseif t == "LayoutManager" then 
+				  c:replace(1,1,v) 
+			     end 
+		       end 
+
+
+---]] Content Setting 
 		       local border = screen:find_child(v.name.."border")
+		       local am = screen:find_child(v.name.."a_m") 
 		       local group_pos
 	       	       if(border ~= nil) then 
 		             if (v.extra.is_in_group == true) then
 			     group_pos = get_group_position(v)
 	                     border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+	                     am.position = {am.x + group_pos[1], am.y + group_pos[2]}
 		             else 
 	                     border.position = {x -dx, y -dy}
+	                     am.position = {x -dx, y -dy}
 		             end 
 	                end 
 
-			local am = screen:find_child(v.name.."a_m") 
  
 			for i=1, v_guideline,1 do 
 			   if(screen:find_child("v_guideline"..i) ~= nil) then 
@@ -500,9 +604,14 @@ function make_attr_t(v)
 
   local attr_map = {
 	["items"] = function ()
-		table.insert(attr_t, {"items", v.items, "Items"})
-                table.insert(attr_t, {"line", "", "hide"})
-                table.insert(attr_t, {"line", "", "hide"})
+		if v.extra.type == "ButtonPicker" then 
+		    table.insert(attr_t, {"items", v.items, "Items"})
+                    table.insert(attr_t, {"line", "", "hide"})
+                    table.insert(attr_t, {"line", "", "hide"})
+		else 
+		    table.insert(attr_t, {"caption", "Menu Contents"})
+		    table.insert(attr_t, {"items", v.items, "Items"})
+		end 
 		end,
 	["scale"] = function()
  		table.insert(attr_t, {"line","", "hide"})
@@ -680,7 +789,7 @@ function make_attr_t(v)
        ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","rows","columns","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable",} end,
        ["ScrollPane"] = function() return {"skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width"} end,  
 -- "border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
-       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_font","border_width","border_corner_radius","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","reactive","focus",} end,
+       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_font","border_width","border_corner_radius","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","items", "reactive","focus",} end,
        ["CheckBox"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
        ["RadioButton"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
        --["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,

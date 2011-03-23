@@ -1195,7 +1195,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	screen:add(inspector)
 
 	if scroll_y_pos then 
-	     print("scroll_y_pos",  math.floor(math.abs(scroll_y_pos)))
+	     --print("scroll_y_pos",  math.floor(math.abs(scroll_y_pos)))
 	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 	end 
 
@@ -2150,6 +2150,16 @@ function editor.delete()
 	     		screen:remove(screen:find_child(v.name.."a_m"))
                      end
         	     g:remove(v)
+		elseif v.extra.type == "ScrollPane" then 
+			for j, k in pairs (v.content.children) do 
+			 if(k.extra.selected == true) then
+		     	     editor.n_selected(k)
+        	     	     if (screen:find_child(k.name.."a_m") ~= nil) then 
+	     		 	screen:remove(screen:find_child(k.name.."a_m"))
+                     	     end
+        	     	     v.content:remove(k)
+			 end 
+			end 
 		end 
             end
         end

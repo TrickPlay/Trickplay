@@ -30,7 +30,19 @@ function inspector_apply (v, inspector)
                      local next = 1
                      for next, _ in pairs(items.tiles) do 
 		       item = items.tiles[next][1]
-		       v.items[next] = item:find_child("textInput").text
+
+		       if v.extra.type == "ButtonPicker" then 
+		            v.items[next] = item:find_child("textInput").text
+		       --else 
+		            --print ("content : ", item:find_child("textInput").text)
+		            --print ("item_type : ", item:find_child("textInput").extra.item_type)
+	 	       elseif item:find_child("textInput").text == "--------------" then 
+			    v.items[next] = {type="seperator"}
+		       elseif item:find_child("textInput").extra.item_type == "label" then 
+			    v.items[next] = {type="label", string=item:find_child("textInput").text}
+		       elseif item:find_child("textInput").extra.item_type == "item" then 
+			    v.items[next] = {type="label", string=item:find_child("textInput").text, f=nil}
+		       end 
                      end 
 		 end
               end,
@@ -45,11 +57,11 @@ function inspector_apply (v, inspector)
 
 	      local itemLists = {"none", "char", "word", "word_char"}
 	      if tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item) == 1 then 
-		   print("wrap false")
+		   --print("wrap false")
 		   v.wrap = false
                    v.wrap_mode = "CHAR"
 	      else 
-		   print("wrap true")
+		   --print("wrap true")
 		   v.wrap = true
                    v.wrap_mode = string.upper(itemLists[tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item)])
 	      end 
@@ -112,10 +124,8 @@ function inspector_apply (v, inspector)
 	       end,
 	["expansion_location"] = function()
 		if  item_group:find_child("radioB").selected_item == 1 then 
-			print("expansion_location set to ", v.expansion_location)
 		     v.expansion_location = "above"
 	        else 
-			print("expansion_location set to ", v.expansion_location)
 		     v.expansion_location = "below"
 		end
 		end,
