@@ -938,6 +938,12 @@ local function build_ui( show_it )
 	       if (screen:find_child(actor.name.."a_m") ~= nil) then 
 		     local anchor_mark = screen:find_child(actor.name.."a_m")
 		     anchor_mark.position = {actor.x, actor.y, actor.z}
+
+		     if (actor.extra.is_in_group == true) then
+			 local group_pos = get_group_position(actor)
+	                  anchor_mark.position = {actor.x + group_pos[1], actor.y + group_pos[2]}
+		     end 
+
                end
           end
 
