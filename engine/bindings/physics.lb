@@ -847,7 +847,7 @@ global physics [[ Physics::World * ]]
             running = self->running();
         ]];
 
-    start( int velocity_iterations = 6, int position_iterations = 2 )
+    start( int velocity_iterations = 10, int position_iterations = 10 )
         [[
             self->start( velocity_iterations , position_iterations );
         ]];
@@ -857,7 +857,7 @@ global physics [[ Physics::World * ]]
             self->stop();
         ]];
 		
-	step( double time_step = 1.0f/60.0f , int velocity_iterations = 6, int position_iterations = 2 )
+	step( double time_step = 1.0f/60.0f , int velocity_iterations = 10, int position_iterations = 10 )
 		[[
             self->step( time_step , velocity_iterations , position_iterations );
 		]];
