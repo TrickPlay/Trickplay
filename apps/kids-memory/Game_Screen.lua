@@ -1,18 +1,18 @@
 --umbrella group for all members of the splash screen
 game_screen = Group{}
 --back icon
-local back_button = Image{src="assets/button-back.png",x=28,y=870}
-local back_focus  = Image{src="assets/focus-back-btn.png"}
+local back_button = Assets:Clone{src="assets/button-back.png",x=28,y=870}
+local back_focus  = Assets:Clone{src="assets/focus-back-btn.png"}
 back_button:move_anchor_point(back_button.w/2,back_button.h/2)
 back_focus:move_anchor_point(back_focus.w/2,back_focus.h/2)
 back_focus.position={back_button.x,back_button.y}
 --background
-game_screen:add(Image{src="assets/background-game.jpg"})
+game_screen:add(Assets:Clone{src="assets/background-game.jpg"})
 screen:add(game_screen)
 --game_screen:hide()
 
 --the Focus indicator, and its index-position
-local focus = Image{src="assets/focus-square-tiles.png"}
+local focus = Assets:Clone{src="assets/focus-square-tiles.png"}
 focus.anchor_point      = {focus.w/2,focus.h/2}
 
 local focus_i = {1,1}

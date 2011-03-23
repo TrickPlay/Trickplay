@@ -6,25 +6,25 @@
 
 
 --the source for cloning the backs of the tiles
-local backing = Image{src="assets/tile-front.png"}
+local backing = Assets:Clone{src="assets/tile-front.png"}
 tile_size = backing.w
 screen:add(backing)
 backing:hide()
-local face_base = Image{src="assets/tile-back.png"}
+local face_base = Assets:Clone{src="assets/tile-back.png"}
 screen:add(face_base)
 face_base:hide()
-local win_img = Image{src="assets/win/victory-text-winner.png",position={screen_w/2,screen_h/2}}
+local win_img = Assets:Clone{src="assets/win/victory-text-winner.png",position={screen_w/2,screen_h/2}}
 win_img.anchor_point = {win_img.w/2,win_img.h/2}
 
 local match     = 1
 local no_match  = 1
 local win_sound = 1
 
-local curly = Image{src="assets/win/victory-curly.png",opacity=0}
+local curly = Assets:Clone{src="assets/win/victory-curly.png",opacity=0}
 local spiral = {
-    Image{src="assets/win/streamer1.png",opacity=0},
-    Image{src="assets/win/streamer2.png",opacity=0},
-    Image{src="assets/win/streamer3.png",opacity=0}
+    Assets:Clone{src="assets/win/streamer1.png",opacity=0},
+    Assets:Clone{src="assets/win/streamer2.png",opacity=0},
+    Assets:Clone{src="assets/win/streamer3.png",opacity=0}
 }
 screen:add(curly)
 screen:add(unpack(spiral))

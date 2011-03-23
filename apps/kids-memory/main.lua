@@ -1,3 +1,6 @@
+
+local function main()
+
 --Kid's Memory Game
 --
 -- main.lua - this file merely sets up a few globals, loads the files
@@ -6,7 +9,6 @@
 
 --display the screen
 screen.perspective = {1,1,screen.perspective[3],100}
-screen:show()
 
 ---------------------
 ---- Globals
@@ -194,3 +196,38 @@ function mediaplayer:on_loaded()
 end
 mediaplayer:load(audio.opening_song)
 
+end
+
+-------------------------------------------------------------------------------
+
+Assets = dofile( "Assets" )
+
+do
+
+    local r = Rectangle
+    {
+        color = "00000099",
+        size = { 0 , 20 },
+        x = 10,
+        y = screen.h - 26
+    }
+    local b = Image{ src = "splash.jpg" }
+    b.scale = { screen.w / b.w , screen.h / b.h }
+    screen:add( b , r )
+    screen:show()
+    
+    local function progress( percent , src , failed )
+        r.w = ( screen.w - 20 ) * percent
+    end
+    
+    local function finished()
+        screen:remove( r , b )
+        r = nil
+        b = nil
+        main()
+    end
+    
+    Assets:queue_app_contents()
+    
+    Assets:load( progress , finished )
+end

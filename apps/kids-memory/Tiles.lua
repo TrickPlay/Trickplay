@@ -10,17 +10,17 @@ local mouth_start = 90
 local mouth_end   = 100
 tile_faces[1]     = {}
 tile_faces[1].tbl = {
-        Image{src="assets/critters/monkey_tail.png",x=110,y=20},
+        Assets:Clone{src="assets/critters/monkey_tail.png",x=110,y=20},
         Group{
             position = {10,50},
             children = {
-                Image{src="assets/critters/monkey_body.png",  },
-                Image{src="assets/critters/monkey-mouth.png",name="mouth",x=105,y=mouth_start},
-                Image{src="assets/critters/monkey-nose.png", x=87,y=90},
-                Image{src="assets/critters/monkey_blink.png",name="eyes",x=70,y=30,opacity=0}
+                Assets:Clone{src="assets/critters/monkey_body.png",  },
+                Assets:Clone{src="assets/critters/monkey-mouth.png",name="mouth",x=105,y=mouth_start},
+                Assets:Clone{src="assets/critters/monkey-nose.png", x=87,y=90},
+                Assets:Clone{src="assets/critters/monkey_blink.png",name="eyes",x=70,y=30,opacity=0}
             }
         },
-        Image{src="assets/critters/monkey_feet.png",x=50,y=160},
+        Assets:Clone{src="assets/critters/monkey_feet.png",x=50,y=160},
 }
 tile_faces[1].reset = function(tbl)
     --tbl[2].x = 50
@@ -114,11 +114,11 @@ end
 
 tile_faces[2]   = {}
 tile_faces[2].tbl = {
-        Image{src="assets/critters/butterfly_wing.png",x=35,y=25, scale={.75,.75}},
-        Image{src="assets/critters/butterfly_body.png",x=60,y=120},
-        Image{src="assets/critters/butterfly_wing.png",x=20,y=85},
-        Image{src="assets/critters/butterfly_head.png",x=110,y=40},
-        Image{src="assets/critters/butterfly_blink.png",x=110,y=70},
+        Assets:Clone{src="assets/critters/butterfly_wing.png",x=35,y=25, scale={.75,.75}},
+        Assets:Clone{src="assets/critters/butterfly_body.png",x=60,y=120},
+        Assets:Clone{src="assets/critters/butterfly_wing.png",x=20,y=85},
+        Assets:Clone{src="assets/critters/butterfly_head.png",x=110,y=40},
+        Assets:Clone{src="assets/critters/butterfly_blink.png",x=110,y=70},
 }
 tile_faces[2].reset = function(tbl)
 --[[
@@ -192,10 +192,10 @@ tile_faces[2].stages = {
 
 tile_faces[3]   = {}
 tile_faces[3].tbl = {
-        Image{src="assets/critters/toucan_body.png", x= 50,y=10},
-        Image{src="assets/critters/toucan_beak1.png",x=110,y=80},
-        Image{src="assets/critters/toucan_beak2.png",x=130,y=70},
-        Image{src="assets/critters/toucan_blink.png",x=90,y=30},
+        Assets:Clone{src="assets/critters/toucan_body.png", x= 50,y=10},
+        Assets:Clone{src="assets/critters/toucan_beak1.png",x=110,y=80},
+        Assets:Clone{src="assets/critters/toucan_beak2.png",x=130,y=70},
+        Assets:Clone{src="assets/critters/toucan_blink.png",x=90,y=30},
 }
 tile_faces[3].reset = function(tbl)
     tbl[2]:move_anchor_point(tbl[2].w/2,0)
@@ -318,10 +318,10 @@ tile_faces[3].stages = {
 
 tile_faces[4]   = {}
 tile_faces[4].tbl = {
-        Image{src="assets/critters/mouse_body.png", x= 60,y=120},
-        Image{src="assets/critters/mouse_arm.png",  x=50,y=140},
-        Image{src="assets/critters/mouse_head.png", x=20,y=20},
-        Image{src="assets/critters/mouse_blink.png", x=70,y=60},
+        Assets:Clone{src="assets/critters/mouse_body.png", x= 60,y=120},
+        Assets:Clone{src="assets/critters/mouse_arm.png",  x=50,y=140},
+        Assets:Clone{src="assets/critters/mouse_head.png", x=20,y=20},
+        Assets:Clone{src="assets/critters/mouse_blink.png", x=70,y=60},
 }
 tile_faces[4].reset = function(tbl)
     --tbl[3].y = 20
@@ -477,11 +477,11 @@ do
     local tail_mid   = (tail_end - tail_start)/2
     tile_faces[5]   = {}
     tile_faces[5].tbl = {
-        Image{src="assets/critters/squirrel_tail.png", x= 120,y=20},
-        Image{src="assets/critters/squirrel_arm.png", x=30,y=130},
-        Image{src="assets/critters/squirrel_body.png",  x=30,y=30},
-        Image{src="assets/critters/squirrel_nut.png", x=0,y=100},
-        Image{src="assets/critters/squirrel_blink.png", x=70,y=60},
+        Assets:Clone{src="assets/critters/squirrel_tail.png", x= 120,y=20},
+        Assets:Clone{src="assets/critters/squirrel_arm.png", x=30,y=130},
+        Assets:Clone{src="assets/critters/squirrel_body.png",  x=30,y=30},
+        Assets:Clone{src="assets/critters/squirrel_nut.png", x=0,y=100},
+        Assets:Clone{src="assets/critters/squirrel_blink.png", x=70,y=60},
     }
     tile_faces[5].reset = function(tbl)
         --tbl[3].y = 20
@@ -592,16 +592,16 @@ do
     local angle_max = 3
     tile_faces[6]   = {}
     tile_faces[6].tbl = {
-        Image{src="assets/critters/duck_water2.png",y=tile_size-64-20},-- w=2*tile_size-75, tile={true,false}},
+        Assets:Clone{src="assets/critters/duck_water2.png",y=tile_size-64-20},-- w=2*tile_size-75, tile={true,false}},
         Group{
             position={0,dip},
             children = {
-                Image{src="assets/critters/duck.png"},
-                Image{src="assets/critters/duck_blink.png",name="eyes",y=50,x=70},
+                Assets:Clone{src="assets/critters/duck.png"},
+                Assets:Clone{src="assets/critters/duck_blink.png",name="eyes",y=50,x=70},
             }
         },        
-        Image{src="assets/critters/duck_water1.png",y=tile_size-64-20},-- w=2*tile_size-75, tile={true,false} },
-        Image{src="assets/critters/duck_water3.png",y=tile_size-64,x=1},
+        Assets:Clone{src="assets/critters/duck_water1.png",y=tile_size-64-20},-- w=2*tile_size-75, tile={true,false} },
+        Assets:Clone{src="assets/critters/duck_water3.png",y=tile_size-64,x=1},
     }
     tile_faces[6].clip = true
     tile_faces[6].reset = function(tbl)
@@ -687,13 +687,13 @@ do
     local mouth_end   = 171
     tile_faces[7]   = {}
     tile_faces[7].tbl = {
-        Image{src="assets/critters/cow_body.png" ,x=30,y=50},
-        Image{src="assets/critters/cow_mouth.png",x=43,y=mouth_start},
+        Assets:Clone{src="assets/critters/cow_body.png" ,x=30,y=50},
+        Assets:Clone{src="assets/critters/cow_mouth.png",x=43,y=mouth_start},
         Group{
             position = {10,40},
             children = {
-                Image{src="assets/critters/cow_head.png", name="head" },
-                Image{src="assets/critters/cow_blink.png",name="eyes",x=20,y=20},
+                Assets:Clone{src="assets/critters/cow_head.png", name="head" },
+                Assets:Clone{src="assets/critters/cow_blink.png",name="eyes",x=20,y=20},
             }
         }
         
@@ -853,11 +853,11 @@ do
     local tail_rot = -20
     tile_faces[8]   = {}
     tile_faces[8].tbl = {
-        Image{src="assets/critters/cat_tail.png" ,x=130,y=50},
-        Image{src="assets/critters/cat_body.png",x=40,y=130},
-        Image{src="assets/critters/cat_head.png" ,x=20,y=30},
-        Image{src="assets/critters/cat_paw.png" ,x=40,y=140},
-        Image{src="assets/critters/cat_blink.png" ,x=40,y=60},
+        Assets:Clone{src="assets/critters/cat_tail.png" ,x=130,y=50},
+        Assets:Clone{src="assets/critters/cat_body.png",x=40,y=130},
+        Assets:Clone{src="assets/critters/cat_head.png" ,x=20,y=30},
+        Assets:Clone{src="assets/critters/cat_paw.png" ,x=40,y=140},
+        Assets:Clone{src="assets/critters/cat_blink.png" ,x=40,y=60},
     }
     
     tile_faces[8].reset = function(tbl)
@@ -1075,12 +1075,12 @@ do
     
     tile_faces[9]   = {}
     tile_faces[9].tbl = {
-        Image{src="assets/critters/ladybug_body.png" ,x=40,y=90},
+        Assets:Clone{src="assets/critters/ladybug_body.png" ,x=40,y=90},
         Group{
             position = { 20, head_high },
             children = {
-                Image{src="assets/critters/ladybug_head.png"},
-                Image{src="assets/critters/ladybug_blink.png",name="eyes",y=40},
+                Assets:Clone{src="assets/critters/ladybug_head.png"},
+                Assets:Clone{src="assets/critters/ladybug_blink.png",name="eyes",y=40},
             }
         }
     }
@@ -1146,10 +1146,10 @@ do
     local tail_rot = -15
     tile_faces[10]   = {}
     tile_faces[10].tbl = {
-        Image{src="assets/critters/pig_tail.png",x=200,y= 70},
-        Image{src="assets/critters/pig_body.png",x= 10,y= 40},
-        Image{src="assets/critters/pig_nose.png",x= 50,y=100},
-        Image{src="assets/critters/pig_blink.png",x= 30,y=60}
+        Assets:Clone{src="assets/critters/pig_tail.png",x=200,y= 70},
+        Assets:Clone{src="assets/critters/pig_body.png",x= 10,y= 40},
+        Assets:Clone{src="assets/critters/pig_nose.png",x= 50,y=100},
+        Assets:Clone{src="assets/critters/pig_blink.png",x= 30,y=60}
         
     }
     
@@ -1223,12 +1223,12 @@ do
     local r_eye_r_edge = 75
     tile_faces[11]   = {}
     tile_faces[11].tbl = {
-        Image{src="assets/critters/frog_fly_perch.png" ,x= 160,y= 40},
-        Image{src="assets/critters/frog_no_fly.png"    ,x=  50,y= 30},
-        Image{src="assets/critters/frog-eye.png"    ,x=  r_eye_center,y= 60},
-        Image{src="assets/critters/frog-eye.png"    ,x=  l_eye_center,y= 52},
-        Image{src="assets/critters/frog_fly_buzz1.png" ,x=  20,y= 30},
-        Image{src="assets/critters/frog_fly_buzz2.png" ,x=  40,y=140},
+        Assets:Clone{src="assets/critters/frog_fly_perch.png" ,x= 160,y= 40},
+        Assets:Clone{src="assets/critters/frog_no_fly.png"    ,x=  50,y= 30},
+        Assets:Clone{src="assets/critters/frog-eye.png"    ,x=  r_eye_center,y= 60},
+        Assets:Clone{src="assets/critters/frog-eye.png"    ,x=  l_eye_center,y= 52},
+        Assets:Clone{src="assets/critters/frog_fly_buzz1.png" ,x=  20,y= 30},
+        Assets:Clone{src="assets/critters/frog_fly_buzz2.png" ,x=  40,y=140},
 
     }
     
@@ -1351,11 +1351,11 @@ do
     local jaw_rot = 30
     tile_faces[12]   = {}
     tile_faces[12].tbl = {
-        Image{src="assets/critters/turtle-mouth.png",x= 65,y=122},
-        Image{src="assets/critters/turtle-tail.png",x= 202,y=140},
-        Image{src="assets/critters/turtle-no-jaw.png",x=0,y= 0},
-        Image{src="assets/critters/turtle-grass.png",x= 62,y=135},
-        Image{src="assets/critters/turtle_blink.png",x= 50,y=70},
+        Assets:Clone{src="assets/critters/turtle-mouth.png",x= 65,y=122},
+        Assets:Clone{src="assets/critters/turtle-tail.png",x= 202,y=140},
+        Assets:Clone{src="assets/critters/turtle-no-jaw.png",x=0,y= 0},
+        Assets:Clone{src="assets/critters/turtle-grass.png",x= 62,y=135},
+        Assets:Clone{src="assets/critters/turtle_blink.png",x= 50,y=70},
     }
     
     tile_faces[12].reset = function(tbl)
