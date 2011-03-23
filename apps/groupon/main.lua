@@ -52,9 +52,10 @@ end
 
 print("We got ",#(deals.deals)," deals")
 
-local title = Text { text = "Groupon\nDEALS", alignment = "CENTER", color = 'ffffff', font = 'Diavlo 72px' }
+local title = Image { src = "assets/powered_by_groupon.png", width = 400, keep_aspect_ratio=true }
 title.x = (screen.w-title.w)/2
 title.y = 450
+screen:add(Rectangle { size = {screen.w,screen.h}, color = "aaaaaa" })
 screen:add(title)
 screen:show()
 
