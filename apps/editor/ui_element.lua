@@ -3069,7 +3069,7 @@ function ui_element.layoutManager(t)
                     curr_y = curr_y - (row_hs[i] or p.cell_h) - p.cell_spacing
                     c = c + 1
                 end
-                return r,c
+                return c, r
 	        end
         }
     }

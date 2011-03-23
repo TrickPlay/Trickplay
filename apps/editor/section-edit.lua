@@ -91,6 +91,7 @@ function( section )
              function item:on_button_down(x,y,button,num_clicks)
         	if item.on_activate then
 	    		item:on_focus_out()
+			ui.button_focus.opacity = 0
             		animate_out_dropdown()
             		item:on_activate()
             		screen.grab_key_focus(screen)

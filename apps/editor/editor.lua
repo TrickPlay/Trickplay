@@ -997,6 +997,13 @@ end
 
 function editor.inspector(v, x_pos, y_pos, scroll_y_pos) 
 
+	local save_items 
+	if not scroll_y_pos then 
+	     save_items = true 
+	else 
+	     save_items = false 
+	end 
+
 	local WIDTH = 450 -- width for inspector's contents
 
 	local INSPECTOR_OFFSET = 30 
@@ -1129,7 +1136,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	    if(attr_s == nil) then attr_s = "" end 
 	     
-	    local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s) 
+	    local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items) 
 	    if(item.w <= space) then 
 		 if (item.h > prev_item_h) then 
                      items_height = items_height + (item.h - prev_item_h) 

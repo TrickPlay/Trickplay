@@ -730,7 +730,6 @@ function factory.make_msgw_button_item( assets , caption)
     function group.extra.on_focus_in()
         focus.opacity = 255
 	group:grab_key_focus(group)
-	--print (caption, "button group grab key focus")
     end
     
     function group.extra.on_focus_out()
@@ -799,7 +798,6 @@ function factory.make_msgw_widget_item( assets , caption)
     function group.extra.on_focus_in()
         focus.opacity = 255
 	group:grab_key_focus(group)
-	--print (caption, "button group grab key focus")
     end
     
     function group.extra.on_focus_out()
@@ -1225,10 +1223,11 @@ function factory.draw_line()
 end 
 
 
+local org_items
 -------------------------------------------------------------------------------
 -- Makes a popup window contents (attribute name, input text, input button)
 -------------------------------------------------------------------------------
-function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item_s) 
+function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item_s, save_items) 
     local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
     local TEXT_SIZE     = 26
     local PADDING_X     = 7
@@ -1365,6 +1364,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     	     end 
              if key == keys.Return then
                   if (item_v == "view code") then 
+		      if v.items then 
+			   v.items = org_items
+		      end 
 		      screen:remove(inspector)
 		      if v.extra.type == "MenuButton" then 
                       	   v.spin_out()
@@ -1394,6 +1396,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      end
 	              return true
 		  elseif (item_v == "cancel") then 
+		      if v.items then 
+			   v.items = org_items
+		      end 
 		      screen:remove(inspector)
 		      if v.extra.type == "MenuButton" then 
                       	   v.spin_out()
@@ -1448,6 +1453,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     current_focus = group
 	     group.extra.on_focus_in()
 	     if (item_v == "view code") then 
+		      if v.items then 
+			   v.items = org_items
+		      end 
 		      screen:remove(inspector)
 		      input_mode = S_SELECT
 		      current_inspector = nil
@@ -1463,6 +1471,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      text_reactive()
 		      editor.n_selected(v, true)
 	     elseif (item_v == "cancel") then 
+		      if v.items then 
+			   v.items = org_items
+		      end 
 		      screen:remove(inspector)
 		      input_mode = S_SELECT
 		      current_inspector = nil
@@ -1540,6 +1551,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         group:add(focus_changer)
 	return group
     elseif(item_n == "items") then 
+	if save_items == true then 
+	     org_items = table_copy(v.items)
+	end 
 
 	local plus, item_plus, label_plus, seperator_plus
 	local item_string_t
@@ -1565,7 +1579,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                 	screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			print("si.content.y",  si.content.y)
+			inspector_apply (v, inspector)
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true
 		end 
@@ -1585,7 +1599,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                 	screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			print("si.content.y",  si.content.y)
+			inspector_apply (v, inspector)
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true
 		end 
@@ -1598,7 +1612,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                 	screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			print("si.content.y",  si.content.y)
+			inspector_apply (v, inspector)
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true
 		end 
@@ -1611,7 +1625,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                 	screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			print("si.content.y",  si.content.y)
+			inspector_apply (v, inspector)
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true
 		end 
@@ -1627,9 +1641,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         	items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
 	end 
         items_list.name = "items_list"
-	--items_list:find_child("Focus").opacity = 0 
 
-	
 	for i,j in pairs(v.items) do 
 	      local input_txt, item_type 
 	      if v.extra.type =="MenuButton" then 
@@ -1657,10 +1669,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	      local down = factory.draw_down()
 	      down.name = "item_down"..tostring(i)
 
-
 	      function minus:on_button_down(x,y)
 		     v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
-		     --items_list:remove_row(tonumber(string.sub(minus.name, 11,-1)))
+		     dumptable(v.items)
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
 		     current_inspector = nil
@@ -1673,6 +1684,19 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	      
 	      function up:on_button_down(x,y)
+		     if v.extra.type == "ButtonPicker" then 
+		          for i, j in pairs (v.items) do
+				v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	  end 
+		     else
+		          for i, j in pairs (v.items) do
+				if j["type"] == "label" then 
+		    		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  		elseif j["type"] == "item" then 
+		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+				end
+		     	  end 
+		     end 
 		     table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
@@ -1686,6 +1710,19 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 
 	      function down:on_button_down(x,y)
+		     if v.extra.type == "ButtonPicker" then 
+		          for i, j in pairs (v.items) do
+				v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	  end 
+		     else
+		          for i, j in pairs (v.items) do
+				if j["type"] == "label" then 
+		    		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  		elseif j["type"] == "item" then 
+		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+				end
+		     	  end 
+		     end
 		     table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
@@ -1708,7 +1745,17 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 		return true
 	      end 
+--[[
+	       local text_in = item:find_child("textInput")
+	       local item_num = tonumber(string.sub(item.name, 10,-1))
+	       function text_in:on_key_down(key)
+	       		v.items[item_num] = item:find_child("textInput").text 
+	       		print(item:find_child("textInput").text)
+	       end 
+ ]]
+
 	      function item:on_key_down(key)
+	       
 	       local si = inspector:find_child("si")
     	       if is_this_widget(v) == true  then
                     item_group = si.content
@@ -1920,7 +1967,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(item_picker)
 
         return group
-    elseif item_n == "expansion_location" then -- Attribute with radio button
+    elseif item_n == "expansion_location" or item_n == "cell_size" then -- Attribute with radio button
 	group:clear()
 	group.name = item_n
 	group.reactive = true
@@ -1931,13 +1978,17 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	local radio_b, sel_item = 1
 	
-	if item_v == "above" then 
+	if item_v == "above" or item_v == "fixed" then 
 	    sel_item = 1
 	else  
 	    sel_item = 2
 	end 
-	print("SEL ITEM : ", sel_item)	
-        radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+	--print("SEL ITEM : ", sel_item)	
+	if v.extra.type == "LayoutManager" then 
+             radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+	else 
+             radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+	end 
 	radio_b.position = {PADDING_X/2, 40}
 	radio_b.name = "radioB"
 
@@ -1998,6 +2049,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     
 
 	     local filechooser = ui_element.button{ui_width = 150, ui_height = 45, text_font ="DejaVu Sans 25px" , label = "Choose ...", }
+	     filechooser.name = "filechooser"
 	     filechooser.position = {ring.x + ring.w, ring.y }
 
 	     if v.type == "Video" then 
@@ -2016,7 +2068,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	     group:add(filechooser)
 	     return group
-        elseif(item_n == "name" or item_n == "text" or item_n == "src" or item_n == "source") then 
+        elseif(item_n == "name" or item_n == "text") then 
 	     input_box_width = WIDTH - ( PADDING_X * 2) 
 	elseif item_n == "anchor_point" then 
 	     text = Text {name = "attr", text = item_s}:set(STYLE)
@@ -2109,22 +2161,42 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                  (key == keys.Tab and shift == false) or 
                  key == keys.Down then
 	       	 group.extra.on_focus_out()
-		 for i, v in pairs(attr_t_idx) do
-		     if(item_n == v or item_v == v) then 
-		          while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-		               i = i + 1
+		 for i, j in pairs(attr_t_idx) do
+		     if(item_n == j or item_v == j) then 
+		          while(item_group:find_child(attr_t_idx[i+1]) == nil ) do 
+				--if v[attr_t_idx[i+1]] == nil then 
+				--end 
+		                i = i + 1
 			       if(attr_t_idx[i+1] == nil) then return true end 
 		          end 
 		          if item_group:find_child("skin") then 
 	                  end 	
 		          if(item_group:find_child(attr_t_idx[i+1])) then
 		               local n_item = attr_t_idx[i+1]
-			       item_group:find_child(n_item).extra.on_focus_in()	
-			       if (si) then 
-				    si.seek_to_middle(0, item_group:find_child(n_item).y)
-			            print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(n_item).y)
-			       end
-			       break
+			       print("NEXT ITEM : ", n_item)
+			       if item_group:find_child(n_item).extra.on_focus_in then 
+			       		item_group:find_child(n_item).extra.on_focus_in()	
+			       		if (si) then 
+				    		si.seek_to_middle(0, item_group:find_child(n_item).y)
+			            		print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(n_item).y)
+			       		end
+			       		break
+			       elseif n_item == "src" or n_item == "icon" or n_item == "source" then 
+				        if key == keys.Return then 
+					     item_group:find_child("filechooser").extra.on_focus_in()
+				        else
+					     local temp_f = item_group:find_child("filechooser").pressed 
+					     item_group:find_child("filechooser").pressed = nil
+					     item_group:find_child("filechooser").extra.on_focus_in()
+					     item_group:find_child("filechooser").pressed = temp_f
+					end 
+			       elseif n_item == "items" then 
+				    if v.extra.type == "ButtonPicker" then 
+				    end 
+					-- 	
+			       elseif n_item == "reactive" then 
+					-- 
+			       end --added 
 		          end
 		     end 
     		end

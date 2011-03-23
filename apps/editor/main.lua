@@ -644,7 +644,7 @@ local function build_ui( show_it )
              section.button.name = section.text.text
              function section.button:on_button_down(x,y,button,num_clicks)
 		 
-		  if i == ui.focus then  --- hjk added 0321
+		  if i == ui.focus and ui.button_focus.opacity ~= 0 then  --- hjk added 0321
 			local s= ui.sections[ui.focus]
         		ui.button_focus.position = s.button.position
         		ui.button_focus.opacity = 0
