@@ -832,12 +832,18 @@ idle.limit = step
 
 function idle:on_idle( seconds )
 
-    physics:step( math.min( seconds , step ) )
-    
-    for i = 1 , # step_functions do
-    
-        step_functions[ i ]( seconds )
+    local iterations = math.ceil(seconds/step)
+    local step = seconds/iterations
+
+    -- Step physics multiple times per redraw frame to keep the physics at ~60 steps per second
+    for iteration = 1, iterations do
+        physics:step(step)
         
+        for i = 1 , # step_functions do
+        
+            step_functions[ i ]( step )
+            
+        end
     end
     
    --physics:draw_debug()
