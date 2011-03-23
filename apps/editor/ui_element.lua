@@ -2880,6 +2880,7 @@ function ui_element.layoutManager(t)
         focus       = nil,
         cells_focusable = true, --focus_visible
         skin="default",
+        cell_size="fixed",
     }
     
     local functions={}
@@ -2892,10 +2893,21 @@ function ui_element.layoutManager(t)
     end
     
     local make_grid
+    
+    local row_hs = {}
+    local col_ws = {}
 	
     local x_y_from_index = function(r,c)
-		return (p.cell_w+p.cell_spacing)*(c-1)+p.cell_w/2,
-		       (p.cell_h+p.cell_spacing)*(r-1)+p.cell_h/2
+        if p.cell_size == "fixed" then
+		    return (p.cell_w+p.cell_spacing)*(c-1)+p.cell_w/2,
+		           (p.cell_h+p.cell_spacing)*(r-1)+p.cell_h/2
+        end
+        
+        local x = (col_ws[1] or p.cell_w)/2
+        local y = (row_hs[1] or p.cell_h)/2
+        for i = 1, c-1 do x = x + (col_ws[i] or p.cell_w)/2 + (col_ws[i+1] or p.cell_w)/2 + p.cell_spacing end
+        for i = 1, r-1 do y = y + (row_hs[i] or p.cell_h)/2 + (row_hs[i+1] or p.cell_h)/2 + p.cell_spacing end
+        return x,y
 	end
     
 
@@ -2915,10 +2927,7 @@ function ui_element.layoutManager(t)
                 
                 if obj.parent ~= nil then obj:unparent() end
                 
-                self:add(obj)
-                obj.x, obj.y = x_y_from_index(r,c)
-                obj.anchor_point = {obj.w/2,obj.h/2}
-                obj.delay = p.cell_timing_offset*(r+c-1)
+                make_grid()
 			end,
             remove_row = function(self,r)
                 if r > 0 and r <= #p.tiles then
@@ -3038,8 +3047,8 @@ function ui_element.layoutManager(t)
     }
 
 
-	local make_tile = function()
-        local c = Canvas{size={p.cell_w, p.cell_h}}
+	local make_tile = function(w,h)
+        local c = Canvas{size={w,h}}
         c:begin_painting()
         c:move_to(  0,   0 )
         c:line_to(c.w,   0 )
@@ -3054,7 +3063,7 @@ function ui_element.layoutManager(t)
         if c.Image then
             c = c:Image()
         end
-        c.name="nil"
+        c.name="placeholder"
 		return c
 	end
     local make_focus = function()
@@ -3089,7 +3098,21 @@ function ui_element.layoutManager(t)
         else
             focus.opacity=0
         end
-        
+        if p.cell_size == "variable" then
+            for r = 1, p.rows  do
+			    for c = 1, p.columns do
+                    if p.tiles[r]    == nil then break end
+                    if p.tiles[r][c] ~= nil and p.tiles[r][c].name ~= "placeholder" then 
+                    if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
+                        row_hs[r] = p.tiles[r][c].h
+                    end
+                    if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
+                        col_ws[c] = p.tiles[r][c].w
+                    end
+                    end
+                end
+            end
+        end
 		for r = 1, p.rows  do
             if p.tiles[r] == nil then
                 p.tiles[r]   = {}
@@ -3097,16 +3120,16 @@ function ui_element.layoutManager(t)
             end
 			for c = 1, p.columns do
                 if p.tiles[r][c] == nil then
-                    g = make_tile()
-                    slate:add(g)
-                    p.tiles[r][c] = g
-                    
+                    if p.cell_size == "variable" then
+                        g = make_tile(col_ws[c] or p.cell_w, row_hs[r] or p.cell_h)
+                    else
+                        g = make_tile(p.cell_w,p.cell_h)
+                    end
                 else
                     g = p.tiles[r][c]
                     if g.parent ~= nil then
                         g:unparent()
                     end
-                    
                 end
                 slate:add(g)
                 g.x, g.y = x_y_from_index(r,c)
