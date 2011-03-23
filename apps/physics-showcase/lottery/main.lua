@@ -823,6 +823,12 @@ end
 
 
 -------------------------------------------------------------------------------
+-- Set up some stuff for fullscreen rotation
+-- We move the anchor point to the center of the logo so it'll spin in place when we rotate it below
+screen.anchor_point = {screen.w/2, screen.h/2}
+
+-- And now position the anchor point (and image) in the middle of the screen
+screen.position = { screen.display_size[1]/2, screen.display_size[2]/2 }
 
 screen:show()
 
@@ -863,3 +869,47 @@ function screen:on_key_down( key )
     end
 end
 
+
+function controllers.on_controller_connected(controllers,controller)
+    if(controller.has_accelerometer) then
+    	controller:start_accelerometer("L",0.01)
+    	
+    	function controller.on_accelerometer(controller, x, y, z)
+    		--[[
+				Decompose rotation into 2 rotations, about y-axis onto x-z plane, then about x-axis onto negative y-axis
+				Then rotate about z-axis to align tilt
+    		]]--
+
+    		-- Accelerometer measurements are based on axes from http://www.switchonthecode.com/sites/default/files/825/images/device_axes.png
+
+    		-- Angle to the x-z plane
+    		local theta_to_xz_plane = math.deg(math.atan2(x, z))
+    		-- Correct now for quadrant
+    		if z <= 0 then
+    			theta_to_xz_plane = 180 - theta_to_xz_plane
+    		end
+
+    		-- Angle to the x-axis is the atan.  Then we move another 90º to hit the negative y-axis (which is where gravity lives)
+    		local theta_to_z_axis = math.deg(math.atan2(y, math.sqrt(x^2 + z^2)))
+    		local theta_to_negative_y_axis = theta_to_z_axis + 90
+    		-- Correct now for quadrant
+    		if z > 0 then
+    			theta_to_negative_y_axis = - theta_to_negative_y_axis
+    		end
+
+			-- Angle the phone is titled relative to ground
+			local theta_for_tilt = math.deg(x, math.sqrt(x^2 + z^2))
+
+
+			-- And now do the rotations!
+			screen.y_rotation = { theta_to_xz_plane, 0, 0 }
+			screen.x_rotation = { theta_to_negative_y_axis-90, 0, 0 }
+			screen.z_rotation = { theta_for_tilt, 0, 0 }
+    	end
+    end
+end
+
+local controller
+for _,controller in pairs(controllers.connected) do
+	controllers:on_controller_connected( controller )
+end
