@@ -428,7 +428,9 @@ function create_on_button_down_f(v)
 			     if t == "ScrollPane" or t == "DialogBox" then 
 			          c.content:add(v) 
 			     elseif t == "LayoutManager" then 
-				  c:replace(1,1,v) 
+				  local raw, col =  c:r_c_from_abs_position(x,y)
+				  print (raw, ":", col)
+				  c:replace(raw,col,v) 
 			     end 
 		       end 
 
@@ -440,8 +442,10 @@ function create_on_button_down_f(v)
 	       	       if(border ~= nil) then 
 		             if (v.extra.is_in_group == true) then
 			     group_pos = get_group_position(v)
-	                     border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
-	                     am.position = {am.x + group_pos[1], am.y + group_pos[2]}
+			     	if group_pos then 
+	                     		border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+	                     		am.position = {am.x + group_pos[1], am.y + group_pos[2]}
+				end
 		             else 
 	                     border.position = {x -dx, y -dy}
 	                     am.position = {x -dx, y -dy}
