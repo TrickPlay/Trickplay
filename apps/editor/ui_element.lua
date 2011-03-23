@@ -3048,8 +3048,8 @@ function ui_element.layoutManager(t)
 				tl:start()
             end,
             r_c_from_abs_position = function(self,x,y)
-                x = x - self.transformed_position[1]
-                y = y - self.transformed_position[2]
+                x = x - self.transformed_position[1]/screen.scale[1]
+                y = y - self.transformed_position[2]/screen.scale[2]
                 if p.cell_size == "fixed" then
 	        	    return math.floor(x/(p.cell_w+p.cell_spacing))+1,
                            math.floor(y/(p.cell_h+p.cell_spacing))+1
