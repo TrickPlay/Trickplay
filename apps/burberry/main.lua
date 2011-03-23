@@ -1,4 +1,4 @@
 screen:show()
 
-dofile("FrontPage.lua")
+dofile("App_Loop.lua")
 dofile("FrontPage.lua")
