@@ -1620,14 +1620,14 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(plus) 
 
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=0, focus=list_focus}
+	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=10, cell_size="variable", cells_focusable=false}
 	if text then 
-        	items_list.position = {PADDING_X + 25, text.y + text.h + PADDING_Y}
+        	items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
 	else 
-        	items_list.position = {PADDING_X + 25, plus.y + plus.h + PADDING_Y/2}
+        	items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
 	end 
         items_list.name = "items_list"
-	items_list:find_child("Focus").opacity = 0 
+	--items_list:find_child("Focus").opacity = 0 
 
 	
 	for i,j in pairs(v.items) do 
@@ -1647,7 +1647,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		     input_txt = j 
 	      end  
 		
-              local item = ui_element.textInput{ui_width = 200, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} -- imsi : ui_width = 350 
+              local item = ui_element.textInput{ui_width = 300, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} 
 	      item.name = "item_text"..tostring(i)
 	     
 	      local minus = factory.draw_minus_item()
