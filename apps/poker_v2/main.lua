@@ -38,6 +38,8 @@ local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves", Components
 local new_map_dialog = DialogBox("Start a new game\non this layout?", Components.NEW_MAP_DIALOG, router)
 --]]
 
+local betting = BettingController(router)
+TutorialView(router):initialize()
 local game = GameControl(router)
 local character_selection = CharacterSelectionController(router)
 local splash = SplashController(router)

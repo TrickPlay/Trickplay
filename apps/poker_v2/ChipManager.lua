@@ -43,7 +43,7 @@ ChipStack = Class(function(chipstack, chip_value, ...)
         chips = nil
         value = nil
         self.chip_value = nil
-        assetman:remove_group(self.group.name)
+        self.group:dealloc()
         self.group = nil
     end
 
@@ -99,7 +99,7 @@ ChipCollection = Class(function(chip_collect, dog_number, ...)
             stack:dealloc()
         end
         stacks = nil
-        assetman:remove_group(self.group.name)
+        self.group:dealloc()
         self.group = nil
     end
 

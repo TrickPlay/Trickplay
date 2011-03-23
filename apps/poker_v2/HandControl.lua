@@ -84,7 +84,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
     end
 
 
-    function ctrl.deal(ctrl, rd)
+    function ctrl:deal(rd)
         round = rd
         pres:deal(round)
         enable_event_listener(TimerEvent{interval=1000})
@@ -99,9 +99,9 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
     -- proper event listener set up. if current active player is a
     -- human, then event listener waits for on_event call from 
 
-    print("defined and set waiting_for_bet to false")
+    print("HandControl defined and set waiting_for_bet = false")
     ctrl.waiting_for_bet = false
-    function ctrl.bet(ctrl, rd, event)
+    function ctrl:bet(rd, event)
         bets_done = state:get_bets_done()
         if bets_done then
             enable_event_listener(TimerEvent{interval=300})
@@ -111,27 +111,31 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
         round = rd
         local continue = false
         if ctrl.waiting_for_bet and event:is_a(BetEvent) then
+            print("first")
             ctrl.waiting_for_bet = false
             local active_player = state:get_active_player()
             continue = state:execute_bet(event.fold, event.bet)
             pres:finish_turn(active_player)
             enable_event_listener(TimerEvent{interval=1000})
         elseif not ctrl.waiting_for_bet then
+            print("second")
             ctrl.waiting_for_bet = true
             local active_player = state:get_active_player()
             pres:start_turn(active_player)
-            if active_player.isHuman then
-                model.currentPlayer = active_player
-                model.orig_bet = state:get_player_bets()[active_player]
-                model.orig_money = model.orig_bet + active_player.money
-                model.call_bet = state:get_call_bet()
-                model.min_raise = state:get_min_raise()
-                model.max_bet = state:get_max_bet()
-                model.in_players = state:get_in_players()
-                model.bb_p = state:get_bb_p()
-                model.bb_qty = state:get_bb_qty()
-                model:set_active_component(Components.PLAYER_BETTING)
-                model:get_active_controller():set_callback(
+            if active_player.is_human then
+                router:set_active_component(Components.PLAYER_BETTING)
+                router:get_active_controller():ready_bet{
+                    current_player = active_player,
+                    orig_bet = state:get_player_bets()[active_player],
+                    orig_money = state:get_player_bets()[active_player] + active_player.money,
+                    call_bet = state:get_call_bet(),
+                    min_raise = state:get_min_raise(),
+                    max_bet = state:get_max_bet(),
+                    in_players = state:get_in_players(),
+                    bb_p = state:get_bb_p(),
+                    bb_qty = state:get_bb_qty()
+                }
+                router:get_active_controller():set_callback(
                     function(fold, bet) 
                         enable_event_listener(
                             TimerEvent{
@@ -141,7 +145,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
                                 end})
                     end)
                 enable_event_listener(KbdEvent())
-                model:notify()
+                router:notify()
             else
                 local fold, bet = active_player:get_move(state)
                 local orig_bet = state:get_player_bets()[state:get_active_player()]
@@ -222,7 +226,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
         return true
     end
 
-    function ctrl.on_event(ctrl, event)
+    function ctrl:on_event(event)
         print(#hand_pipeline, "entries left in hand_pipeline")
         if #hand_pipeline > 0 then
             local next_action = hand_pipeline[1]
@@ -240,7 +244,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
         end
     end
 
-    function ctrl.cleanup(ctrl)
+    function ctrl:cleanup()
         pres:clear_ui()
         return true
     end

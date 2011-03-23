@@ -4,10 +4,12 @@ AssetManager = Class(function(assetman, ...)
     local groups = {}
     local texts = {}
     local rects = {}
+    local other_clones = {}
     -- always increasing, does not decrease on deletion
     local number_of_groups_made = 0
     local number_of_texts_made = 0
     local number_of_rects_made = 0
+    local number_of_other_clones_made = 0
 
     function assetman:show_all()
         print("\n\nIMAGES\n")
@@ -17,6 +19,13 @@ AssetManager = Class(function(assetman, ...)
             for _,clone in pairs(image.clones) do
                 print("\t\t\tClone: name = "..clone.name.." parent = "
                     ..tostring(clone.parent))
+            end
+        end
+        print("\n\nGROUPS\n")
+        for k,group in pairs(groups) do
+            print("\tGroup: name = "..group.name)
+            for k,child in pairs(group.children) do
+                print("\t\tchild", child, "name = ", child.name)
             end
         end
     end
@@ -69,13 +78,32 @@ AssetManager = Class(function(assetman, ...)
         args.name = image_name.."_"..tostring(images[image_name].times_cloned)
 
         local clone = Clone(args)
-        clone.image_name = name
+        clone.image_name = image_name
         images[image_name].times_cloned = images[image_name].times_cloned + 1
 
         images[image_name].clones[clone] = clone
 
         function clone:dealloc()
             assetman:remove_clone(self)
+        end
+
+        return clone
+    end
+
+    function assetman:clone(item, args)
+        if not item then error("No item to clone", 2) end
+        args.source = item
+        if not args.name then args.name = "clone_"..number_of_other_clones_made end
+
+        local clone = Clone(args)
+        if not other_clones[item] then other_clones[item] = {} end
+        other_clones[item][clone] = clone
+        number_of_other_clones_made = number_of_other_clones_made + 1
+        function clone:dealloc()
+            if clone.parent then
+                clone:unparent()
+            end
+            other_clones[item][clone] = nil
         end
 
         return clone
@@ -92,7 +120,7 @@ AssetManager = Class(function(assetman, ...)
     function assetman:remove_image(name)
         assert(type(name) == "string")
         for k,clone in pairs(images[name].clones) do
-            assetman:remove_clone(clone)
+            clone:dealloc()
         end
 
         if images[name].image.parent then
@@ -136,16 +164,32 @@ AssetManager = Class(function(assetman, ...)
         if type(name) ~= "string" then
             error("group name must be a string", 2)
         end
+        if not groups[name] then
+            error("deleting a group that does not exist", 2)
+        end
 
         if groups[name].children[1] then
-            print("WARNING: deleting group "..group.." of name "..group.name
-                .." that has children!")
+            local group = groups[name]
+            print("WARNING: deleting group", group, "of name", group.name,
+                  "that has children!")
+            for k,child in pairs(groups[name].children) do
+                print("\tchild", child, "name = ", child.name)
+                if child.children then
+                    for kk,grandchild in pairs(child.children) do
+                        print("\tgrandchild", grandchild, "name = ", grandchild.name)
+                    end
+                end
+            end
         end
 
         if groups[name].parent then
             groups[name]:unparent()
         end
         groups[name] = nil
+    end
+
+    function assetman:has_text_of_name(name)
+        return texts[name]
     end
 
     function assetman:create_text(args, overwrite)

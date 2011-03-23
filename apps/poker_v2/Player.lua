@@ -14,6 +14,7 @@ Player = Class(function(player, args, ...)
         --]]
         player[k] = v
     end
+    player.table_position = player.dog_number
 
     --[[
         If User disconnects controller the player becomes an AI.
@@ -25,9 +26,9 @@ Player = Class(function(player, args, ...)
             temp_func(player.controller)
             local human_count = 0
             for i,player in ipairs(model.players) do
-                if player.isHuman then human_count = human_count + 1 end
+                if player.is_human then human_count = human_count + 1 end
             end
-            player.isHuman = (human_count <= 1)
+            player.is_human = (human_count <= 1)
             if player.controller.name ~= "Keyboard" then
                 player.controller = nil
             end

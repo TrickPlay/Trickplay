@@ -14,6 +14,18 @@ function(event, args, ...)
 end)
 
 --[[
+    Someone bet
+--]]
+BetEvent = Class(Event, function(event, args, ...)
+    if args then
+        assert(type(args) == "table", "Event constructor uses named parameters. e.g. pass in a table.")
+        event.fold = args.fold
+        event.bet = args.bet
+        event.cb = args.cb
+    end
+end)
+
+--[[
     Resets the game
 --]]
 ResetEvent = Class(Event,

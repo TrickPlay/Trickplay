@@ -80,4 +80,8 @@ function(dog_view, dog_number, ...)
         dog_glow_clone.opacity = 0
     end
 
+    function dog_view:glow_on()
+        dog_glow_clone.opacity = 255
+    end
+
 end)
