@@ -1200,7 +1200,7 @@ void TPAudioSampler::Thread::process()
 
                 if ( ! float_samples )
                 {
-                    g_warning( "FAILED TO ALLOCATE MEMORY FOR FLOAT SAMPLES : NEED %" G_GOFFSET_FORMAT " BYTES" , info.frames * info.channels );
+                    g_warning( "FAILED TO ALLOCATE MEMORY FOR FLOAT SAMPLES : NEED %llu BYTES" , info.frames * info.channels );
                 }
                 else
                 {
