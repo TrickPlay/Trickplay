@@ -179,8 +179,8 @@ class Bitmap [[ Bitmap * ]]
 
                     lua_pop( L , 4 );
 
-                    if ( x < 0 ||
-                         y < 0 ||
+                    if (// x < 0 ||
+                        // y < 0 || -- commented these out cos they're unsigned so this is always true
                          w <= 0 ||
                          h <= 0 ||
                          guint( x + w ) > image->width() ||

@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    17
+#define TP_MINOR_VERSION    18
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -236,6 +236,12 @@ typedef struct TPContext TPContext;
                                 for the toast UI.
                                 Default is not set.
 
+    TP_FIRST_APP_EXITS -        If set to true, when you press the EXIT key within the
+                                first app launched by Trickplay, tp_context_run will return.
+                                Otherwise, the first app launched will remain running and the
+                                EXIT key will be passed to it.
+                                Defaults is true.
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -280,6 +286,7 @@ typedef struct TPContext TPContext;
 #define TP_AUDIO_SAMPLER_MAX_BUFFER_KB  "audio_sampler_max_buffer_kb"
 #define TP_AUDIO_SAMPLER_MAX_INTERVAL   "audio_sampler_max_interval"
 #define TP_TOAST_JSON_PATH              "toast_json_path"
+#define TP_FIRST_APP_EXITS              "first_app_exits"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

@@ -889,7 +889,7 @@ globals
                     --nargs;
                 }
 
-                lb_checkfunction( L , f );
+                (void)lb_checkfunction( L , f );
 
                 --nargs;
 
