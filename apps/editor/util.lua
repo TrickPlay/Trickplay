@@ -198,6 +198,19 @@ function is_this_widget(v)
     end 
 end 
 
+ 
+function is_this_container(v)
+    if v.extra then 
+        if is_in_list(v.extra.type, uiContainers) == true then 
+	    return true
+        else 
+	    return false
+        end 
+    else 
+        return false
+    end 
+end 
+
 -- Clear background images 
 function clear_bg()
     BG_IMAGE_20.opacity = 0
@@ -400,7 +413,8 @@ function create_on_button_down_f(v)
 			   for i, j in pairs (g.children) do 
 				if j.x < x and x < j.x + j.w and j.y < y and y < j.y + j.h then 
 					if j.extra then 
-					    if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
+					    if is_this_container(j) then
+					    --if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
 					        return true 
 					    end 
 					end 
@@ -413,7 +427,8 @@ function create_on_button_down_f(v)
 			   for i, j in pairs (g.children) do 
 				if j.x < x and x < j.x + j.w and j.y < y and y < j.y + j.h then 
 					if j.extra then 
-					    if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
+					    --if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
+					    if is_this_container(j) then
 					        return j, j.extra.type 
 					    end 
 					end 
@@ -426,14 +441,14 @@ function create_on_button_down_f(v)
 			     local c, t = find_container(x,y) 
 
 			     if c then 
-			          print("Container : ",c.name)
+			          --print("Container : ",c.name)
 			     end 
-			          print("Content Item : ",v.name)
+			          --print("Content Item : ",v.name)
 			
-			     if (v.extra.type ~= "ScrollPane" and v.extra.type ~= "DialogBox" and v.extra.type == "LayoutManager") or c.name ~= v.name  then 
-			     	print ("Container Type : ", t) 
----[[
-			     if c and t then 
+			     --if (v.extra.type ~= "ScrollPane" and v.extra.type ~= "DialogBox" and v.extra.type ~= "LayoutManager") or c.name ~= v.name  then 
+			       if not is_this_container(v) or c.name ~= v.name then
+			     	--print ("Container Type : ", t) 
+			     	if c and t then 
 			        v:unparent()
 			        v.position = {v.x - c.x, v.y - c.y,0}
 			        v.extra.is_in_group = true
@@ -450,9 +465,8 @@ function create_on_button_down_f(v)
 				     print (row, ":", col)
 				     c:replace(row,col,v) 
 			        end 
---]]
-			     end 
-			     end 
+			     	end 
+			       end 
 		       end 
 
 
@@ -955,7 +969,7 @@ function itemTostring(v, d_list, t_list)
  
    local function add_attr (list, head, tail) 
        local item_string =""
-       dumptable(list)
+       --dumptable(list)
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
 	      if j == "position" then 
@@ -1008,14 +1022,17 @@ function itemTostring(v, d_list, t_list)
 	      elseif type(v[j]) == "table" then 
 		  if(type(v[j][1]) == "table") then  
 			local tiles_name_table = {} 
-			for m,n in pairs(v[j]) do 
+			for m=1, v.rows, 1 do -- rows
 				local tile_name_table = {}
-				for q,r in pairs(n) do 
-				   if r.name ~= "nil" then 
-				     table.insert(tile_name_table, r.name)
+				for i= 1,v.columns,1 do  --cols 
+				   local element = v.tiles[m][i]
+				   if element then 
+				     table.insert(tile_name_table, element.name)
+				   else 
+				     table.insert(tile_name_table, "nil")
 				   end 
 				end 
-				if table.getn(tile_name_table) ~= 0 then 
+		        	if table.getn(tile_name_table) ~= 0 then 
 					table.insert(tiles_name_table, tile_name_table)
 				end
 			end 
@@ -1106,7 +1123,6 @@ function itemTostring(v, d_list, t_list)
 	    end 
 	 end 
 	 if v.tiles then 
---[[ imsi -- 
 	    for m,n in pairs(v.tiles) do 
 	          for q,r in pairs(n) do 
 			if r.name ~= "nil" then
@@ -1114,7 +1130,6 @@ function itemTostring(v, d_list, t_list)
 			end 
 	          end 
 	     end 
-]]
 	 end 
          itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
@@ -1132,7 +1147,9 @@ function itemTostring(v, d_list, t_list)
     if v.extra.focus then 
 	itm_str = itm_str..v.name.."\.extra\.focus = {" 
 	for m,n in pairs (v.extra.focus) do 
-		itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+		if type(n) ~= "function" then 
+		     itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+		end 
 	end 
 	itm_str = itm_str.."}\n\n"
 
@@ -1176,6 +1193,14 @@ function itemTostring(v, d_list, t_list)
 	    end 
 	    itm_str = itm_str.."}\n\n"
     end 
+
+    if v.extra.type == "ButtonPicker" then 
+	itm_str = itm_str..v.name..".focus[keys.Right] = "..v.name..".press_right\n"
+	itm_str = itm_str..v.name..".focus[keys.Left] = "..v.name..".press_left\n"
+    end
+
+--buttonPicker1.focus[keys.Right] = buttonPicker1.press_right
+--buttonPicker1.focus[keys.Left] = buttonPicker1.press_left
 
     end -- if v.extra then 
 

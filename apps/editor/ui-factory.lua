@@ -1527,7 +1527,14 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	if v.extra.focus then 
 		for m, n in pairs (v.extra.focus) do
-		     focus_changer:find_child("text"..focus_map[m]).text = n
+		     if type(n) ~= "function" then 
+		          focus_changer:find_child("text"..focus_map[m]).text = n
+		     else 
+		          focus_changer:find_child("text"..focus_map[m]).text = v.name
+		          focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
+		          focus_changer:find_child("text"..focus_map[m]).reactive = false
+			
+		     end 
 		end 	
 	elseif v.extra.type == "Button" or v.extra.type == "TextInput" or v.extra.type == "MenuButton" then
 		focus_changer:find_child("textE").text = v.name 
