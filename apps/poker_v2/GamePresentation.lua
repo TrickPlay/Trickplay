@@ -84,7 +84,6 @@ function(pres, ctrl)
     end
 
     function pres:finish_hand()
-
         local SCP = STATUS_CHIP_POSITIONS
         local players = ctrl:get_players()
         -- Animate chips
@@ -151,7 +150,7 @@ function(pres, ctrl)
         info_grp = nil
         -- get the status chips off da grid yo
         dealer_chip:dealloc()
-        deal_chip = nil
+        dealer_chip = nil
         bb_chip:dealloc()
         bb_chip = nil
         sb_chip:dealloc()
@@ -181,7 +180,7 @@ function(pres, ctrl)
             Popup:new{group = r, time = 5000}
             Popup:new{group = m, time = 5000}
         end
-   end
+    end
 
     -- called when sb_qty and bb_qty updated
     function pres:update_blinds()

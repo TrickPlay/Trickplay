@@ -15,7 +15,7 @@ AssetManager = Class(function(assetman, ...)
         print("\n\nIMAGES\n")
         for k,image in pairs(images) do
             print("\tImage: name = "..image.image.name)
-            print("\t\tCLONES = "..image.times_cloned.."\n")
+            print("\t\tIMAGE CLONES = "..image.times_cloned.."\n")
             for _,clone in pairs(image.clones) do
                 print("\t\t\tClone: name = "..clone.name.." parent = "
                     ..tostring(clone.parent))
@@ -26,6 +26,13 @@ AssetManager = Class(function(assetman, ...)
             print("\tGroup: name = "..group.name)
             for k,child in pairs(group.children) do
                 print("\t\tchild", child, "name = ", child.name)
+            end
+        end
+        print("\n\nOTHER CLONES\n")
+        for source,clones in pairs(other_clones) do
+            print("\tSource =", source, "with name", source.name)
+            for k,clone in pairs(clones) do
+                print("\t\tClone: name =", clone.name)
             end
         end
     end
@@ -92,6 +99,7 @@ AssetManager = Class(function(assetman, ...)
 
     function assetman:clone(item, args)
         if not item then error("No item to clone", 2) end
+        args = args or {}
         args.source = item
         if not args.name then args.name = "clone_"..number_of_other_clones_made end
 
@@ -134,7 +142,7 @@ AssetManager = Class(function(assetman, ...)
             error("args must be a table", 2)
         end
         if not args.name then
-            args.name = "group "..tostring(number_of_groups_made)
+            args.name = "group_"..tostring(number_of_groups_made)
         end
         if groups[args.name] and not overwrite then
             error("group name "..args.name.." already in use", 2)
@@ -149,11 +157,11 @@ AssetManager = Class(function(assetman, ...)
 
         function group:dealloc()
             for i,child in ipairs(self.children) do
-                print("deleting child with name "..child.name
-                    .." from group with name "..self.name)
+                print("deleting child", child,"with name", child.name,
+                      "from group with name", self.name)
                 child:dealloc()
             end
-            print("deleting group with name "..self.name)
+            print("deleting group with name", self.name)
             assetman:remove_group(self.name)
         end
 

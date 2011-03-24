@@ -434,4 +434,8 @@ Player = Class(function(player, args, ...)
     player.status:display()
     assert(player.status)
 
+    function player:dealloc()
+        player.status:dealloc()
+    end
+
 end)

@@ -3,7 +3,7 @@ local MODE = "EASE_OUT_QUAD"
 
 --realPrint = print
 --print = function() end
-local print = function() end --realPrint
+--local print = function() end --realPrint
 
 HandPresentation = Class(nil,function(pres, ctrl)
     local ctrl = ctrl
@@ -34,6 +34,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
     -------------------------LOCAL FUNCTIONS--------------------------
 
     local function create_pot_chips()
+    print("pot_chips created")
         if not pot_chips then
             pot_chips = ChipCollection("POT")
             screen:add(pot_chips.group)
@@ -44,6 +45,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
             pot_chips = nil
             create_pot_chips()
         end
+        blah = pot_chips
     end
    
     -- Create a burn card
@@ -175,8 +177,10 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
     -- Animate all chips to winner
     local function animate_chips_to_winner(winner)
+        print("chips to winner")
         for _,player in pairs(ctrl:get_players()) do
             if player.bet_chips then
+                if not winner.bet_chips then error("no winner bet chips", 2) end
                 player.bet_chips.group:animate{
                     position = {
                         STATUS_CHIP_POSITIONS[winner.dog_number][1] + 55,
@@ -201,14 +205,17 @@ HandPresentation = Class(nil,function(pres, ctrl)
     -- Give the pot to a player after he wins
     local function animate_pot_to_player(player)
         -- for the split pots case
-        if type(player) == "table" then
+        if not (player.is_a and player:is_a(Player)) then
+            print("split pot animate")
             -- create a temporary group to store the animating groups
             local temp_group = assetman:create_group({})
             screen:add(temp_group)
             -- correctly adjust the amount of the pot to the division each player will
             -- receive
             -- TODO: im not sure how safe or accurate this is
+            --[[
             pot_chips:set(math.floor(pot_chips:value()/3))
+            --]]
             -- add it to the temp group
             pot_chips.group:unparent()
             temp_group:add(pot_chips.group)
@@ -233,6 +240,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
             -- clones
             pot_chips.group = temp_group
         else
+            print("single pot animate")
         -- for any other case
             pot_chips.group:animate{
                 position = {
@@ -247,6 +255,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
     local border_group
     assetman:load_image("assets/help/button-done-on.png", "done_button")
+    assetman:load_image("assets/hole-overlay.png", "hole_overlay")
     local function animate_winning_hands()
         for _,card in ipairs(ctrl:get_community_cards()) do
             card.group.opacity = 140
@@ -258,7 +267,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
         if not border_group then
             border_group = assetman:create_group({name = "border_group"})
             local back = Canvas{
-                size = {900, 146}
+                size = {900, 146},
+                name = "back_of_border_group"
             }
             back:begin_painting()
             back:set_source_color("024B23")
@@ -272,7 +282,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
                 back = back:Image()
             end
             local border = Canvas{
-                size = {906, 152}
+                size = {906, 152},
+                name = "border_of_border_group"
             }
             border:begin_painting()
             border:set_source_color("FFFFFF")
@@ -302,7 +313,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
         for player,hand in pairs(in_hands) do
             local player_text = assetman:create_text{
                 text = "Player "..player.player_number,
-                name = "showdown player "..player.player_number,
+                name = "showdown_player_"..player.player_number,
                 x = 685,
                 font = WINNER_FONT,
                 color = Colors.WHITE,
@@ -328,7 +339,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
                 local card_group = assetman:create_group{
                     position = Utils.deepcopy(card.group.position)
                 }
-                local clone = assetman:clone(card.group, {name = "card_clone"..i})
+                local clone = assetman:clone(card.group, {
+                    name = "card_clone_"..getCardImageName(card).."_"..i
+                })
                 card_group.anchor_point = {
                     clone.w/2,
                     clone.h/2
@@ -337,7 +350,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
                 screen:add(card_group)
                 if card:equals(hole_cards[player][1])
                 or card:equals(hole_cards[player][2]) then
-                    card_group:add(Image{src = "assets/hole-overlay.png", x = 5, y = 92})
+                    local overlay = assetman:get_clone("hole_overlay", {x = 5, y = 92})
+                    card_group:add(overlay)
                 end
                 ---[[
                 local x_length_between_centroids = card_group.w + 10
@@ -416,12 +430,13 @@ HandPresentation = Class(nil,function(pres, ctrl)
         end
 
         create_pot_chips()
+        for k,player in pairs(ctrl:get_players()) do
+            add_player_chips(player)
+        end
       
         -- Initialize SB and BB player chip collections
         local sb_player = ctrl:get_players()[ctrl:get_sb_p()]
         local bb_player = ctrl:get_players()[ctrl:get_bb_p()]
-        add_player_chips(sb_player)
-        add_player_chips(bb_player)
         local player_bets = ctrl:get_player_bets()
         sb_player.bet_chips:set(player_bets[sb_player])
         bb_player.bet_chips:set(player_bets[bb_player])
@@ -540,6 +555,10 @@ HandPresentation = Class(nil,function(pres, ctrl)
     function pres:clear_ui()
         pot_text.text = ""
         pot_glow_clone.opacity = 0
+        if pot_chips then
+            pot_chips:dealloc()
+            pot_chips = nil
+        end
       
         -- clear cards
         for i,card in ipairs(all_cards) do
@@ -630,7 +649,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
         local bet = ctrl:get_player_bets()[player]
         if not player.bet_chips then add_player_chips(player) end
         player.bet_chips:set(bet)
-        player.status:update( GET_ALLIN_STRING() )
+        player.status:update_text(GET_ALLIN_STRING())
     end
 
     -- FINISH TURN
@@ -658,6 +677,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
     function pres:win_from_bets(only_player)
         assert(only_player)
         only_player.status:update_text("weaksauce")
+        if not only_player.bet_chips then add_player_chips(only_player) end
         animate_pot_to_player(only_player)
         animate_chips_to_winner(only_player)
     end

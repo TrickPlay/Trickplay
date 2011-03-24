@@ -73,11 +73,12 @@ function(self, router, ...)
         opacity = 0
     })
     local down_button_clone = assetman:get_clone("-button", {
-        x = BETTING_BUTTON_POSITIONS.DOWN[1],
-        y = BETTING_BUTTON_POSITIONS.DOWN[2],
+        x = BETTING_BUTTON_POSITIONS.DOWN[1]-BETTING_BUTTON_POSITIONS.BET[1],
+        y = BETTING_BUTTON_POSITIONS.DOWN[2]-BETTING_BUTTON_POSITIONS.BET[2],
         opacity = 0
     })
-    bet_selector.object:add(up_button_clone, down_button_clone)
+    bet_selector.object:add(up_button_clone)
+    bet_selector.object:add(down_button_clone)
 
     help_selector[Directions.LEFT] = new_deal_selector
     help_selector[Directions.RIGHT] = exit_selector
@@ -279,15 +280,18 @@ function(self, router, ...)
             print("fold_selector: player.money was $"
                   ..old_money..", now $"..current_player.money)
         elseif current_selector == call_selector then
+            local old_money = current_player.money
             if call_bet <= current_player.bet + current_player.money then
-                local old_money = current_player.money
                 current_player.bet, current_player.money =
                     call_bet, current_player.money + current_player.bet - call_bet
             else
                 current_player.bet, current_player.money =
                     current_player.bet + current_player.money, 0
             end
-        elseif subselection == bet_selector then
+            print("call_selector: player.money was $"
+                  ..old_money..", now $"..current_player.money)
+        elseif current_selector == bet_selector then
+            local old_money = current_player.money
             local bet = call_bet + min_raise
             if call_bet < current_player.bet + current_player.money
             and current_player.bet + current_player.money < bet then
@@ -296,6 +300,8 @@ function(self, router, ...)
             minRaiseBet = bet
             current_player.bet, current_player.money =
                 bet, current_player.bet + current_player.money - bet
+            print("bet_selector: player.money was $"
+                  ..old_money..", now $"..current_player.money)
         end
         bet_text.text = "$"..current_player.bet
         current_player.bet_chips:set(current_player.bet)

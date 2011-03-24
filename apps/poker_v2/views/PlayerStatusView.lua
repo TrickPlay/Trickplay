@@ -122,15 +122,15 @@ function(self, player, args, ...)
     function self:update_text(text)
         --if self.show then self.group.opacity = 240 else self.group.opacity = 0 end
         self.title.text = self.name.."  $"..self.player.money
-        self.title.anchor_point = { self.title.w/2, self.title.h/2 }
-        self.title.position = { self.top.w/2, self.top.h/2 }
+        self.title.anchor_point = {self.title.w/2, self.title.h/2}
+        self.title.position = {self.top.w/2, self.top.h/2}
 
         if text then
             self.action.text = text 
-            self.bottom_group:animate{opacity=255,duration=300, y = 60}
+            self.bottom_group:animate{opacity = 255, duration = 300, y = 60}
         end
         self.action.anchor_point = {self.action.w/2, self.action.h/2}
-        self.action.position = { self.bottom.w/2, self.bottom.h/2 + self.bottom.y }
+        self.action.position = {self.bottom.w/2, self.bottom.h/2 + self.bottom.y}
     end
 
     function self:update_name(name)
@@ -140,7 +140,7 @@ function(self, player, args, ...)
     end
 
     function self:hide_bottom()
-        self.bottom_group:animate{opacity=0,duration=300, y = 0}
+        self.bottom_group:animate{opacity = 0,duration = 300, y = 0}
     end
 
     function self:dim()
@@ -149,13 +149,31 @@ function(self, player, args, ...)
     end
 
     function self:hide()
-        self.group:animate{opacity = 0, duration=300}
+        self.group:animate{opacity = 0, duration = 300}
         --self.show = 0
     end
 
     function self:display()
         self.group:animate{opacity = 240, duration=300}
         --self.show = 1
+    end
+
+    function self:dealloc()
+        self.top:dealloc()
+        self.top = nil
+        self.bottom:dealloc()
+        self.bottom = nil
+        self.action:dealloc()
+        self.action = nil
+        self.bottom_group:dealloc()
+        self.bottom_group = nil
+        self.popup = nil
+        self.focus:dealloc()
+        self.focus = nil
+        self.title:dealloc()
+        self.title = nil
+        self.group:dealloc()
+        self.group = nil
     end
 
 end)
