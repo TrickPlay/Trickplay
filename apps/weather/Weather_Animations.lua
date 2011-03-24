@@ -949,7 +949,8 @@ tstorm = {
 
     setup = function(self)
         self.glow_cloud = Clone{source=imgs.glow_cloud,y=650,opacity=0}
-        self.base_cloud = Clone{source=imgs.rain_clouds.lg[1],y=650,x=-imgs.rain_clouds.lg[1].w}
+        self.base_cloud = Clone{source=imgs.rain_clouds.lg[1],y=650}
+        self.base_cloud.x = -self.base_cloud.w
         for i = 1,#imgs.lightning do
             self.lightning[i]   = Clone{source=imgs.lightning[i],opacity=0}
             self.lightning[i].y = screen_h - self.lightning[i].h*2/3
