@@ -90,8 +90,8 @@ do
         border_color = "#B9B9B9FF"
     }
 
-    --mediaplayer:load("video/glee-1.mp4")
-    --mediaplayer.mute = true
+    mediaplayer:load("video/glee-1.mp4")
+    mediaplayer.mute = true
     
     function mediaplayer:on_loaded()
         mediaplayer:play()
@@ -104,7 +104,7 @@ do
             mediaplayer_h * screen.scale[2]
         )
         mediaplayer:seek(3000)
-        mediaplayer:pause()
+        --mediaplayer:pause()
     end
     function mediaplayer:on_end_of_stream()
         mediaplayer:seek(0)
