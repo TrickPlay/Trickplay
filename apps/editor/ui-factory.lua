@@ -1769,7 +1769,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		  if (item_group:find_child("item_text"..tostring(next_i))) then
 			item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
 		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
-			print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child("item_text"..tostring(next_i)).y)
 		  else 	
 		     for i, v in pairs(attr_t_idx) do
  		        if("itemsList" == v) then 
@@ -1784,7 +1783,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			       		if item_group:find_child(n_item).extra.on_focus_in then 
 			           		item_group:find_child(n_item).extra.on_focus_in()	
 		  			        si.seek_to_middle(0,item_group:find_child(n_item).y) 
-					        print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child(n_item).y)
 			       		else
 				   		there()
 			       		end 
@@ -1800,7 +1798,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		     if (item_group:find_child("item_text"..tostring(prev_i))) then
 			item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
 		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
-			print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child("item_text"..tostring(prev_i)).y)
 		     else 	
 		      for i, v in pairs(attr_t_idx) do
 			if("itemsList" == v) then 
@@ -1812,7 +1809,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
 		  	        si.seek_to_middle(0,item_group:find_child(p_item).y) 
-			        print("SEEK_TO: FROM-",item.parent.y,"TO-",item_group:find_child(p_item).y)
 				break
 			     end
 			end 
@@ -1928,7 +1924,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		               local n_item = attr_t_idx[i+1]
 			       item_group:find_child(n_item).extra.on_focus_in()	
 			       si.seek_to_middle(0, item_group:find_child(n_item).y)
-			       print("SEEK_TO: FROM-",item_picker.parent.y,"TO-",item_group:find_child(n_item).y)
 			       break
 		          end
 		     end 
@@ -1944,8 +1939,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
-				si.seek_to_middle(0, item_group:find_child(p_item))
-			        print("SEEK_TO: FROM-",item_picker.parent.y,"TO-",item_group:find_child(p_item).y)
+				si.seek_to_middle(0, item_group:find_child(p_item).y)
 				break
 			     end
 			end 
@@ -2178,10 +2172,10 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			       		item_group:find_child(n_item).extra.on_focus_in()	
 			       		if (si) then 
 				    		si.seek_to_middle(0, item_group:find_child(n_item).y)
-			            		print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(n_item).y)
 			       		end
 			       		break
 			       elseif n_item == "src" or n_item == "icon" or n_item == "source" then 
+--[[
 				        if key == keys.Return then 
 					     item_group:find_child("filechooser").extra.on_focus_in()
 				        else
@@ -2190,12 +2184,16 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 					     item_group:find_child("filechooser").extra.on_focus_in()
 					     item_group:find_child("filechooser").pressed = temp_f
 					end 
+]]
 			       elseif n_item == "items" then 
+--[[
 				    if v.extra.type == "ButtonPicker" then 
 				    end 
-					-- 	
+]]
 			       elseif n_item == "reactive" then 
+--[[
 					-- 
+]]
 			       end --added 
 		          end
 		     end 
@@ -2215,7 +2213,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 				     item_group:find_child(p_item).extra.on_focus_in()	
 			             if (si) then 
 				          si.seek_to_middle(0, item_group:find_child(p_item).y)
-			                  print("SEEK_TO: FROM-",input_text.parent.y,"TO-",item_group:find_child(p_item).y)
 			             end
 				else 
 				     i = i -1
