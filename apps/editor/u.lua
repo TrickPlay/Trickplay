@@ -1537,7 +1537,6 @@ function ui_element.dialogBox(table)
 	border_corner_radius = 22 ,
 	title_seperator_thickness = 4, 
 	title_seperator_color = {255,255,255,255},
-	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
     }
 
  --overwrite defaults
@@ -1587,9 +1586,7 @@ function ui_element.dialogBox(table)
 	end
 
 	db_group:add(d_box_img, title)
-	if p.content then 
-	     db_group:add(p.content)
-	end 
+
 	if (p.skin == "custom") then d_box_img.opacity = 0
         else d_box.opacity = 0 end 
 

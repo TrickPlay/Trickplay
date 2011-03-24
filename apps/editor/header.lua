@@ -172,6 +172,8 @@ uiElements_en = {"Rectangle", "Text", "Image", "Video"}
 uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", --"CheckBox",  "RadioButton", "CheckBoxGroup", "RadioButtonGroup", "ArrowPane",
            "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane",  }
 	   -- "TabBar", "OSK",}
+uiContainers = {"DialogBox", "LayoutManager", "ScrollPane",} 
+
 skins = {}
 for i, j in pairs(skin_list) do
 	table.insert(skins, i) 
