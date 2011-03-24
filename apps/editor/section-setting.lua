@@ -38,7 +38,7 @@ function( section )
 				set_app_path() 
 			else 
 				input_mode = S_SELECT  
-				editor.the_image()
+				editor.the_image(true)
 --[[
 				input_mode = S_POPUP 
 				printMsgWindow("Image File : ") 

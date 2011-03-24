@@ -365,6 +365,7 @@ function create_on_button_down_f(v)
         end
 
         function v:on_button_up(x,y,button,num_clicks)
+	print("VVVVVVVV",v.name)
 	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
 	     if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
@@ -421,24 +422,36 @@ function create_on_button_down_f(v)
 		       end 
 
 		       if control == true and is_in_container_group(x,y) then 
-			     local c, t 
-			     v:unparent()
-			     --v.reactive = false
-			     c, t = find_container(x,y) 
-			     if c and t then 
-			     print (t) 
-			     print (c.name)
+
+			     local c, t = find_container(x,y) 
+
+			     if c then 
+			          print("Container : ",c.name)
 			     end 
-			     v.position = {v.x - c.x, v.y - c.y,0}
-			     v.extra.is_in_group = true
-			     screen:find_child(v.name.."border").position = v.position
-			     screen:find_child(v.name.."a_m").position = v.position 
-			     if t == "ScrollPane" or t == "DialogBox" then 
-			          c.content:add(v) 
-			     elseif t == "LayoutManager" then 
-				  local row, col =  c:r_c_from_abs_position(x,y)
-				  print (row, ":", col)
-				  c:replace(row,col,v) 
+			          print("Content Item : ",v.name)
+			
+			     if (v.extra.type ~= "ScrollPane" and v.extra.type ~= "DialogBox" and v.extra.type == "LayoutManager") or c.name ~= v.name  then 
+			     	print ("Container Type : ", t) 
+---[[
+			     if c and t then 
+			        v:unparent()
+			        v.position = {v.x - c.x, v.y - c.y,0}
+			        v.extra.is_in_group = true
+				if screen:find_child(v.name.."border") then 
+			             screen:find_child(v.name.."border").position = v.position
+				end
+				if screen:find_child(v.name.."a_m") then 
+			             screen:find_child(v.name.."a_m").position = v.position 
+			        end 
+			        if t == "ScrollPane" or t == "DialogBox" then 
+			            c.content:add(v) 
+			        elseif t == "LayoutManager" then 
+				     local col , row=  c:r_c_from_abs_position(x,y)
+				     print (row, ":", col)
+				     c:replace(row,col,v) 
+			        end 
+--]]
+			     end 
 			     end 
 		       end 
 
@@ -912,7 +925,14 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
+--[[ old 
+
     local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","empty_top_color", "empty_bottom_color", "stroke_color", "progress", "filled_top_color", "filled_bottom_color","rows","columns","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","tiles","focus","cells_focusable","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive", "menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","cell_size"}
+
+
+]] 
+
+    local w_attr_list =  {"ui_width","ui_height","skin","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","stroke_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
@@ -954,16 +974,33 @@ function itemTostring(v, d_list, t_list)
 		  item_string = item_string..head.."children = {"..children.."}"..tail
 	      elseif j == "items" then 
 		  local items = ""
-		  for i,j in pairs(v.items) do 
-			items = items.."\""..j.."\", "
-		  end
-    		  item_string = item_string..head.."items = {"..items.."}"..tail
+		  if v.extra.type == "MenuButton" then 
+		  	for i,j in pairs(v.items) do 
+				items = items.."\t\t\t{type=\""..j["type"].."\","
+				if j["string"] then 
+					items = items.." string=\""..j["string"].."\","
+				end
+				if j["type"] == "item" then 
+					items = items.." f=nil"
+				end
+				items = items.."},\n"
+		  	end
+    		  	item_string = item_string..head.."items = {\n"..items.."\t\t}"..tail
+		  else 
+		  	for i,j in pairs(v.items) do 
+				items = items.."\""..j.."\", "
+		  	end
+    		  	item_string = item_string..head.."items = {"..items.."}"..tail
+		  end 
 	      elseif type(v[j]) == "number" then 
 	          item_string = item_string..head..j.." = "..v[j]..tail 
 	      elseif type(v[j]) == "string" then 
 	          item_string = item_string..head..j.." = \""..v[j].."\""..tail 
 	      elseif type(v[j]) == "boolean" then 
 		  if j == "reactive" then 
+		       if v.extra.reactive == nil then 
+				v.extra.reactive = true
+		       end 
 		       item_string = item_string..head..j.." = "..tostring(v.extra.reactive)..tail
 		  else 
 	               item_string = item_string..head..j.." = "..tostring(v[j])..tail 
@@ -1069,13 +1106,15 @@ function itemTostring(v, d_list, t_list)
 	    end 
 	 end 
 	 if v.tiles then 
-	     for m,n in pairs(v.tiles) do 
+--[[ imsi -- 
+	    for m,n in pairs(v.tiles) do 
 	          for q,r in pairs(n) do 
 			if r.name ~= "nil" then
 		            itm_str= itemTostring(r)..itm_str
 			end 
 	          end 
 	     end 
+]]
 	 end 
          itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
@@ -1748,13 +1787,34 @@ function inputMsgWindow_openfile(input_text)
           create_on_button_down_f(v)
 	  if(v.type == "Group") then 
 	       for j, c in pairs (v.children) do
-		    --if (v.extra.type ~= "ButtonPicker") then 
 		    if is_in_list(v.extra.type, uiElements) == false then 
 			print(c.name) 
                         c.reactive = true
 		        c.extra.is_in_group = true
                         create_on_button_down_f(c)
 		    end 
+	       end 
+	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" then 
+		    for j, c in pairs(v.content.children) do -- Group { children = {button4,rect3,} },
+			print(c.name)
+			c.reactive = true
+		        c.extra.is_in_group = true
+                        create_on_button_down_f(c)
+		    end 
+	       elseif v.extra.type == "LayoutManager" then 
+		   local f 
+		   f = function (k, c) 
+     		      if type(c) == "table" then
+	 		   table.foreach(c, f)
+     		      elseif not c.extra.is_in_group then 
+	 		   print(c.name) 
+			   c.reactive = true
+		           c.extra.is_in_group = true
+                           create_on_button_down_f(c)
+     		      end 
+		   end 
+		
+		   table.foreach(v.tiles, f)
 	       end 
 	  end 
 
