@@ -533,7 +533,7 @@ local function cleanMsgWin(msgw)
      --input_mode = S_SELECT 
 end 
 
-function editor.the_image()
+function editor.the_image(bg_image)
 	local WIDTH = 700
 	local L_PADDING = 50
 	local R_PADDING = 50
@@ -696,7 +696,14 @@ function editor.the_image()
 
     function open_b:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
-	      if screen:find_child("inspector") then 
+	      if bg_image then
+		   BG_IMAGE_20.opacity = 0
+	           BG_IMAGE_40.opacity = 0
+	           BG_IMAGE_80.opacity = 0
+	           BG_IMAGE_white.opacity = 0
+	           BG_IMAGE_import:set{src = input_text.text, opacity = 255} 
+	           input_mode = S_SELECT
+	      elseif screen:find_child("inspector") then 
 		    screen:find_child("file_name").text = input_text.text
 	      else 
 	            inputMsgWindow_openimage("open_imagefile", input_text.text)
@@ -706,7 +713,14 @@ function editor.the_image()
     end 
     function open_t:on_button_down(x,y,button,num_clicks)
 	 if (input_text ~= nil) then 
-	      if screen:find_child("inspector") then 
+	      if bg_image then
+		   BG_IMAGE_20.opacity = 0
+	           BG_IMAGE_40.opacity = 0
+	           BG_IMAGE_80.opacity = 0
+	           BG_IMAGE_white.opacity = 0
+	           BG_IMAGE_import:set{src = input_text.text, opacity = 255} 
+	           input_mode = S_SELECT
+	      elseif screen:find_child("inspector") then 
 		    screen:find_child("file_name").text = input_text.text
 	      else 
 	            inputMsgWindow_openimage("open_imagefile", input_text.text)
@@ -1003,6 +1017,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	else 
 	     save_items = false 
 	end 
+	print("editor.inspector save_items --", save_itmes)
 
 	local WIDTH = 450 -- width for inspector's contents
 
