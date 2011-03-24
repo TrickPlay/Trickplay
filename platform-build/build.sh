@@ -41,11 +41,11 @@ DYNAMIC_BUILD=${DYNAMIC_BUILD:-0}
 
 if [[ ${DYNAMIC_BUILD} == 1 ]]
 then
-    BUILD_TP_CORE_DYNAMIC="-DBUILD_SHARED_LIBS=1"
+    TP_CORE_SHARED="-DTP_CORE_SHARED=1"
     SHARED="--enable-shared --disable-static"
     echo "DYMAMIC build selected"
 else
-    BUILD_TP_CORE_DYNAMIC=""
+    TP_CORE_SHARED=""
     SHARED="--disable-shared"
     echo "STATIC build selected"
 fi
@@ -90,7 +90,7 @@ GLIB_COMMANDS="PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore
 
 GLIB_HOST_DIST="glib-${GLIB_V}.tar.gz"
 GLIB_HOST_SOURCE="glib-${GLIB_V}"
-GLIB_HOST_COMMANDS="env -i PATH=$PATH ./configure --prefix=$PREFIX/host && make ${NUM_MAKE_JOBS} install && cd .. && rm -rf ./$GLIB_HOST_SOURCE"
+GLIB_HOST_COMMANDS="env -i PATH=$PATH ./configure --prefix=$PREFIX/host --disable-fam && make ${NUM_MAKE_JOBS} install && cd .. && rm -rf ./$GLIB_HOST_SOURCE"
 
 #------------------------------------------------------------------------------
 # sqlite
@@ -305,7 +305,7 @@ AVAHI_V="0.6.25"
 AVAHI_URL="http://avahi.org/download/avahi-${AVAHI_V}.tar.gz"
 AVAHI_DIST="avahi-${AVAHI_V}.tar.gz"
 AVAHI_SOURCE="avahi-${AVAHI_V}"
-AVAHI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-qt3 --disable-qt4 --disable-gtk --disable-dbus --disable-gdbm --disable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-xml --with-distro=none --disable-nls $SHARED && make ${NUM_MAKE_JOBS} install"
+AVAHI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-qt3 --disable-qt4 --disable-gtk --disable-dbus --disable-gdbm --disable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-xml --with-distro=none --disable-nls --disable-stack-protector $SHARED && make ${NUM_MAKE_JOBS} install"
 AVAHI_DEPENDS="GLIB"
 
 #------------------------------------------------------------------------------
@@ -554,8 +554,8 @@ then
         
         cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-                ${BUILD_TP_CORE_DYNAMIC} \
                 -DTP_CLUTTER_BACKEND_EGL=1 \
+                $TP_CORE_SHARED \
 	            $TP_PROFILING \
                 "${THERE}/../"   
     fi

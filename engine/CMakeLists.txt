@@ -444,9 +444,17 @@ list( APPEND
 
 #------------------------------------------------------------------------------
 
+if (TP_CORE_SHARED)
+    set(TP_CORE_LIBRARY_TYPE SHARED)
+else (TP_CORE_SHARED)
+    set(TP_CORE_LIBRARY_TYPE STATIC)
+endif (TP_CORE_SHARED)
+
 add_library(
     
     tpcore
+    
+    ${TP_CORE_LIBRARY_TYPE}
     
 	${ENGINE_SOURCE_FILES}    
     
@@ -478,7 +486,7 @@ target_link_libraries(
 
 #------------------------------------------------------------------------------
 
-install( TARGETS tpcore ARCHIVE DESTINATION lib )
+install( TARGETS tpcore LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 install( DIRECTORY public/include/trickplay DESTINATION include )
 
 
