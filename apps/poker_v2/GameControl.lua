@@ -80,7 +80,7 @@ function(ctrl, router, ...)
         enable_event_listener(TimerEvent{interval = 1000})
     end
 
-    function reset()
+    function ctrl:reset()
         hand_ctrl:cleanup()
         hand_ctrl:reset()
         pres:return_to_main_menu(ctrl:human_still_playing(), true)

@@ -15,7 +15,7 @@ function(ctrl, router, ...)
 --------------- Private methods ------------------
 
     local function start_a_game()
-        ctrl:reset()
+        ctrl:hide_start_button()
         for i,dog_selector in ipairs(dog_selectors) do
             dog_selector.dog_view:glow_off()
         end
@@ -209,7 +209,17 @@ function(ctrl, router, ...)
     end
 
     function ctrl:reset()
+        for k,player in pairs(players) do
+            player:dealloc()
+        end
+        players = {}
         self:hide_start_button()
+        ctrl.number_of_players = 0
+        for i,dog_selector in ipairs(dog_selectors) do
+            dog_selector.dog_view:reset()
+            dog_selector.seat_button_view:reset()
+        end
+        current_selector = dog_selectors[1]
     end
 
 end)
