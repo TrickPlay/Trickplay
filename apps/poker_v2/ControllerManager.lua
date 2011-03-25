@@ -198,7 +198,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:add_image("dog_"..pos, 192, 100, 256, 256)
             if controller:enter_text("Name Your Dog", "Name Your Dog") then
                 function controller:on_ui_event(text)
-                    if text ~= "" then
+                    if text ~= "" and text ~= "Name Your Dog" then
                         controller.player.status:update_name(text)
                     end
                     controller.on_ui_event = function() end
@@ -216,15 +216,17 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 controller:add_image("player_"..i, 0, (i-1)*115+86, 640, 115)
             end
             controller:add_image("start_button", 0, 6*115+86, 640, 95)
-            controller:update_waiting_room()
+            controller:update_waiting_room(
+                router:get_active_controller():get_players()
+            )
 
             controller.state = ControllerStates.WAITING
         end
 
-        function controller:update_waiting_room()
+        function controller:update_waiting_room(players)
             local playing = {}
-            for i,player in ipairs(game:get_players()) do
-                local pos = player.table_position
+            for i,player in ipairs(players) do
+                local pos = player.dog_number
                 controller:add_image("ready_label", 167, (pos-1)*115+86+60, 122, 34)
                 if player.isHuman then
                     controller:add_image("human_label", 330, (pos-1)*115+86+20, 122, 34)
@@ -296,10 +298,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     end
 
     -- update the waiting room for all controllers
-    function ctrlman:update_waiting_room()
+    function ctrlman:update_waiting_room(players)
         for k,controller in pairs(controllers.connected) do
             if controller.name ~= "Keyboard" then
-                controller:update_waiting_room()
+                controller:update_waiting_room(players)
             end
         end
     end
