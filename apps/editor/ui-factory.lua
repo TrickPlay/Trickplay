@@ -789,7 +789,7 @@ function factory.make_msgw_widget_item( assets , caption)
         {
             ring:set{ position = { 0 , 0 } },
             focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
-            text:set{ position = { (WIDTH  -text.w)/2, (HEIGHT - text.h)/2} }
+            text:set{ size = {WIDTH, HEIGHT}, position = { (WIDTH  -text.w)/2, (HEIGHT - text.h)/2} }
         }
     }
     
@@ -1753,6 +1753,30 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 		return true
 	      end 
+
+	      local item_txt = item:find_child("textInput")
+	      item_txt.reactive = true
+	      function item_txt:on_button_down()
+		print("HAHAH")
+		current_focus.extra.on_focus_out()
+	        current_focus = group
+		item.on_focus_in()
+		if item_type then 
+                   item:find_child("textInput").extra.item_type = item_type
+	        end 
+		return true
+	      end 
+
+	      function item:on_button_down()
+   		current_focus.extra.on_focus_out()
+	        current_focus = group
+		item.on_focus_in()
+		if item_type then 
+                   item:find_child("textInput").extra.item_type = item_type
+	        end 
+		return true
+	      end 
+	
 --[[
 	       local text_in = item:find_child("textInput")
 	       local item_num = tonumber(string.sub(item.name, 10,-1))
@@ -2020,8 +2044,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end 
 
 	reactive_checkbox.position = {text.x + text.w + 10 , 10}
-	reactive_checkbox.name = "bool_check"
-
+	reactive_checkbox.name = "bool_check"..item_n
 	group:add(reactive_checkbox)
 
 	return group

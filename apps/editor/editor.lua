@@ -1266,16 +1266,13 @@ end
 function editor.view_code(v)
 
 	local WIDTH = 750 
-        local TOP_PADDING = 0--12
+        local TOP_PADDING = 0
         local BOTTOM_PADDING = 12
 	local CODE_OFFSET = 30 
         local codes = ""
 	local codeViewWin_bg 
 	local xbox = factory.make_xbox()
 	local codeViewWin 
-
-
-
 
 	if is_this_widget(v) == true then 
 	     codeViewWin_bg = factory.make_popup_bg("Code", "Widget")
@@ -1393,9 +1390,17 @@ function editor.view_code(v)
         end 
 
         text_codes = Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
-        color = "FFFFFF" , position = { 25 , 35 } , size = {1400, 910}, editable = false ,
+        color = "FFFFFF" , position = { 25 , 35 } , size = {1400, 1500}, editable = false ,
         reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
-	codeViewWin:add(text_codes)
+
+	-- scroll function 
+	si = ui_element.scrollPane{virtual_w =text_codes.w , virtual_h = text_codes.h , visible_w = 750, visible_h = 700, border_is_visible = false, box_width = 0} 
+	si.content = text_codes
+	si.position = {20,70,0}
+	si.name ="si"
+	--si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
+	codeViewWin:add(si)
+	--codeViewWin:add(text_codes)
 	screen:add(codeViewWin)
         create_on_button_down_f(codeViewWin)
 	input_mode = S_POPUP
