@@ -9,7 +9,8 @@ screen:show()
 --local fp_sp_trans
 --recreate their gradient background using Canvas
 
-
+tags = {}
+hash_tag_map = {}
 
 --Global Text info
 TV_Station_Font  = "Helvetica bold 24px"
@@ -51,17 +52,18 @@ tv_show = {}
 --                        ...
 --                )
 tv_show[1] = ShowObject(
-        "assets/titlecards/tile_community.png",
-        "Community",
-        "For the people",
-        "NBC 3",
-        "Thursday",
-        6,
+        "assets/titlecards/tile_glee.png",
+        "Glee",
+        "Kurt is officially a Dalton Academy Warbler.",
+        "FOX 5",
+        "Tuesday",
+        8,
         "pm",
-        "assets/posters/banner_community.jpg",
-        {"nbccommunity","community"},
-        {"Jeff Winger","Britta","Abed","Troy Barnes"}
+        "assets/posters/banner_glee.jpg",
+        {"glee","gleek","fox_glee"},
+        {"Quinn Fabray", "Kurt Hummel", "Terri Schuester", "Will Schuester"}
 )
+
 tv_show[2] = ShowObject(
         "assets/titlecards/tile_dexter.png",
         "Dexter",
@@ -88,16 +90,16 @@ tv_show[3] = ShowObject(
         "Brian Griffin", "Chris Griffin", "Stewie, Quagmire"}
 )
 tv_show[4] = ShowObject(
-        "assets/titlecards/tile_glee.png",
-        "Glee",
-        "Kurt is officially a Dalton Academy Warbler.",
-        "FOX 5",
-        "Tuesday",
-        8,
+        "assets/titlecards/tile_community.png",
+        "Community",
+        "For the people",
+        "NBC 3",
+        "Thursday",
+        6,
         "pm",
-        "assets/posters/banner_glee.jpg",
-        {"glee","gleek","fox_glee"},
-        {"Quinn Fabray", "Kurt Hummel", "Terri Schuester", "Will Schuester"}
+        "assets/posters/banner_community.jpg",
+        {"nbccommunity","community"},
+        {"Jeff Winger","Britta","Abed","Troy Barnes"}
 )
 tv_show[5] = ShowObject(
         "assets/titlecards/tile_sons_of_anarchy.png",
@@ -169,6 +171,8 @@ function screen:on_key_down(key)
         _G[page].keys[  _G[page].focus  ][key]()
     end
 end
+stream_request.prep_track()
+stream_request:stream()
 --[[
 function idle:on_idle(elapsed)
     --ping active stream

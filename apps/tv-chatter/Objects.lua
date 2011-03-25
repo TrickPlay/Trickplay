@@ -1,5 +1,4 @@
 
-
 ShowObject = Class(function(self,
                         title_card,  
                         show_name ,  
@@ -21,6 +20,9 @@ ShowObject = Class(function(self,
             if i ~= #hash_tags then
                 query = query.."+OR+"
             end
+            table.insert(tags,"#"..hash_tags[i])
+            
+            hash_tag_map[hash_tags[i]:lower()] = self
         end
         
         for i=1,#char_names do
@@ -29,7 +31,7 @@ ShowObject = Class(function(self,
             end
             --print(char_names[i])
             query = query.."%22"..string.gsub(char_names[i]," ","%%20").."%22"
-            
+            --table.insert(tags,"#"..char_names[i])
         end
     end
     

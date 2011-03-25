@@ -59,7 +59,7 @@ do
     back.x    = exit.x   - up_r_spacing - back.w
     options.x = back.x   - up_r_spacing - options.w
     
-    fp_group:add(logo, recents_title, options, back, exit)
+    fp_group:add(Rectangle{name="black bg",color="000000",w=screen_w,h=screen_h},logo, recents_title, options, back, exit)
 end
 
 
@@ -87,7 +87,7 @@ local Titlecards_Bar = Class(function(self,parent,...)
     --Rectangle{w=title_card_w+20,h=title_card_h+20,color="#FFFFFF",y=clip.y-10,x=-10}
     clip:add(tiles)
     group:add(focus,title,clip)
-    fp_group:add(Rectangle{name="black bg",color="000000",w=screen_w,h=screen_h},group)
+    fp_group:add(group)
     local imgs      = {}
     local list_i  = 1
     local vis_loc = 1
