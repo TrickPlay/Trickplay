@@ -13,6 +13,10 @@ function(ctrl, router, ...)
     ctrl.number_of_players = 0
     local current_selector
 
+--------------- Public methods ------------------
+
+    function ctrl:get_players() return players end
+
 --------------- Private methods ------------------
 
     local function start_a_game()
@@ -52,6 +56,7 @@ function(ctrl, router, ...)
     end
 
     local function set_up_player(dog_number, human, controller)
+        if not dog_number then error("no dog_number", 2) end
         if players[dog_number] then return false end
         ctrl.number_of_players = ctrl.number_of_players + 1
 
@@ -284,6 +289,9 @@ function(ctrl, router, ...)
 
             correct_selector(pos)
 
+            -- maybe being too redundant, but seems like the safest approach
+            current_selector.dog_view:pressed()
+            current_selector.seat_button_view:pressed()
             if not set_up_player(pos, true, controller) then return end
             controller:name_dog(pos)
         elseif controller.state == ControllerStates.WAITING then
@@ -291,8 +299,8 @@ function(ctrl, router, ...)
             -- AI selected
             if pos > 0 and pos <= 6 then
                 correct_selector(pos)
-                set_up_player(nil, pos, false)
-                ctrlman:update_waiting_room()
+                self:return_pressed()
+                ctrlman:update_waiting_room(players)
             -- check x range for "Start" button press
             elseif pos > 6 and x/controller.x_ratio > 640/3
             and x/controller.x_ratio < 2*640/3 then

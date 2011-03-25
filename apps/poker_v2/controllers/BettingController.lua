@@ -391,7 +391,10 @@ function(self, router, ...)
     local EXIT_Y_1 = 780
     local EXIT_Y_2 = 837
     function self:handle_click(controller, x, y)
-        if controller ~= game:get_current_player().controller then return end 
+        if not current_player.controller
+        or controller ~= current_player.controller then 
+            return
+        end
 
         y = y/controller.y_ratio
         x = x/controller.x_ratio
@@ -402,7 +405,9 @@ function(self, router, ...)
             change_selector(call_selector)
             self:handle_bet_change()
         elseif x > BET_X_1 and x < BET_X_2 and y > BET_Y_1 and y < BET_Y_2 then
-            if current_player.bet + current_player.money > call_bet then
+            if current_selector == bet_selector then
+                -- be awesome
+            elseif current_player.bet + current_player.money > call_bet then
                 change_selector(bet_selector)
                 self:handle_bet_change()
             else
@@ -410,7 +415,9 @@ function(self, router, ...)
                 return
             end
         elseif x > UP_X_1 and x < UP_X_2 and y > UP_Y_1 and y < UP_Y_2 then
-            if current_player.bet + current_player.money > call_bet then
+            if current_selector == bet_selector then
+                self:move(Directions.UP)
+            elseif current_player.bet + current_player.money > call_bet then
                 change_selector(bet_selector)
                 self:handle_bet_change()
                 self:move(Directions.UP)
@@ -419,7 +426,9 @@ function(self, router, ...)
             end
             return
         elseif x > DOWN_X_1 and x < DOWN_X_2 and y > DOWN_Y_1 and y < DOWN_Y_2 then
-            if current_player.bet + current_player.money > call_bet then
+            if current_selector == bet_selector then
+                self:move(Directions.DOWN)
+            elseif current_player.bet + current_player.money > call_bet then
                 change_selector(bet_selector)
                 self:handle_bet_change()
                 self:move(Directions.DOWN)

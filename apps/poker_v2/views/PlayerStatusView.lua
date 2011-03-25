@@ -135,7 +135,7 @@ function(self, player, args, ...)
     function self:update_name(name)
         if type(name) ~= "string" then return end
         self.name = string.sub(name, 1, 1)..string.lower(string.sub(name, 2, 8))
-        self:update()
+        self:update_text()
     end
 
     function self:hide_bottom()
