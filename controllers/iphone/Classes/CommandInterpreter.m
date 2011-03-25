@@ -17,7 +17,7 @@
  * Initialize and create a mutable string that will act as the command line.
  */
 - (id)init:(id <CommandInterpreterDelegate>)theDelegate {
-    if (self = [super init]) {
+    if ((self = [super init])) {
         commandLine = [[NSMutableString alloc] initWithCapacity:40];
         
         delegate = theDelegate;

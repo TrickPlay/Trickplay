@@ -23,7 +23,7 @@
  *                     and NSNetServiceBrowser events.
  */
 -(id)initWithDelegate:(id)client{
-    if (self = [super init])
+    if ((self = [super init]))
     {
         delegate = client;
         currentService = nil;

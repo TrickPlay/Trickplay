@@ -12,7 +12,7 @@
 @implementation AccelerometerController
 
 - (id)initWithSocketManager:(SocketManager *)sockMan {
-    if (self = [super init]) {
+    if ((self = [super init])) {
         socketManager = [sockMan retain];
     
         accelerationX = 0;
