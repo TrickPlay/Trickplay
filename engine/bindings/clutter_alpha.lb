@@ -212,11 +212,14 @@ gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp)
     
     lua_pushnumber(L,clutter_timeline_get_progress(clutter_alpha_get_timeline(self)));
     
-    UserData::invoke_callback( G_OBJECT( self ) , "on_alpha" , 1 , 1 , L );
+    if ( UserData::invoke_callback( G_OBJECT( self ) , "on_alpha" , 1 , 1 , L ) )
+    {
+        gdouble result(lua_tonumber(L,-1));
+        lua_pop(L,1);
     
-    gdouble result(lua_tonumber(L,-1));
-    lua_pop(L,1);
+        return result;
+    }
     
-    return result;    
+    return 0;
 }
 ]]

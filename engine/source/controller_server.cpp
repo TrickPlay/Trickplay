@@ -4,9 +4,11 @@
 #include <cstdlib>
 
 #include "clutter/clutter.h"
+#include "uriparser/Uri.h"
 
 #include "controller_server.h"
 #include "util.h"
+#include "sysdb.h"
 
 //-----------------------------------------------------------------------------
 
@@ -21,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
-#define DISCONNECT_TIMEOUT_SEC  120
+#define DISCONNECT_TIMEOUT_SEC  30
 
 //-----------------------------------------------------------------------------
 
@@ -50,14 +52,27 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
 #ifdef TP_CONTROLLER_DISCOVERY_MDNS
 
-        discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+        if ( context->get_bool( TP_CONTROLLERS_MDNS_ENABLED , true ) )
+        {
+            discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+        }
+        else
+        {
+            g_info( "CONTROLLER MDNS DISCOVERY IS DISABLED" );
+        }
 
 #endif
 
 #ifdef TP_CONTROLLER_DISCOVERY_UPNP
 
-        discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
-
+        if ( context->get_bool( TP_CONTROLLERS_UPNP_ENABLED , false ) )
+        {
+            discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
+        }
+        else
+        {
+            g_info( "CONTROLLER UPNP DISCOVERY IS DISABLED" );
+        }
 #endif
 
     }
@@ -154,15 +169,16 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_START_CLICKS          :
+
+        case TP_CONTROLLER_COMMAND_START_POINTER         :
         {
-            server->write( connection, "SC\n" );
+            server->write( connection, "SP\n" );
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_STOP_CLICKS           :
+        case TP_CONTROLLER_COMMAND_STOP_POINTER          :
         {
-            server->write( connection, "PC\n" );
+            server->write( connection, "PP\n" );
             break;
         }
 
@@ -456,6 +472,14 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         if ( info.version < 2 )
         {
             g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 2" );
+            info.version = 0;
+            return;
+        }
+
+        if ( info.version < 3 )
+        {
+            g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 3" );
+            info.version = 0;
             return;
         }
 
@@ -483,9 +507,14 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ACCELEROMETER;
                 }
+                else if ( cmp2( cap, "PT" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_POINTER;
+                }
                 else if ( cmp2( cap, "CK" ) )
                 {
-                    spec.capabilities |= TP_CONTROLLER_HAS_CLICKS;
+                    // Deprecated
+                    // spec.capabilities |= TP_CONTROLLER_HAS_CLICKS;
                 }
                 else if ( cmp2( cap, "TC" ) )
                 {
@@ -605,12 +634,9 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         // Click
         // CK <x> <y>
 
-        if ( count < 3 || !info.controller )
-        {
-            return;
-        }
+        // deprecated
 
-        tp_controller_click( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        return;
     }
     else if ( cmp2( cmd, "AX" ) )
     {
@@ -636,41 +662,77 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         tp_controller_ui_event( info.controller, parts[1] );
     }
-    else if ( cmp2( cmd, "TD" ) )
+    else if ( cmp2( cmd, "PD" ) )
     {
-        // Touch down
-        // TD <x> <y>
+        // Pointer button down
+        // PD <button> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_pointer_button_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+    }
+    else if ( cmp2( cmd, "PM" ) )
+    {
+        // Pointer move
+        // PM <x> <y>
 
         if ( count < 3 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_pointer_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+    }
+    else if ( cmp2( cmd, "PU" ) )
+    {
+        // Pointer button up
+        // PU <button> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_pointer_button_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+    }
+    else if ( cmp2( cmd, "TD" ) )
+    {
+        // Touch down
+        // TD <finger> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
     }
     else if ( cmp2( cmd, "TM" ) )
     {
         // Touch move
-        // TM <x> <y>
+        // TM <finger> <x> <y>
 
-        if ( count < 3 || !info.controller )
+        if ( count < 4 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
     }
     else if ( cmp2( cmd, "TU" ) )
     {
         // Touch up
-        // TU <x> <y>
+        // TU <finger> <x> <y>
 
-        if ( count < 3 || !info.controller )
+        if ( count < 4 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
     }
     else if ( cmp2( cmd, "GE" ) )
     {
@@ -772,9 +834,20 @@ void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & i
 
             if ( !found )
             {
-                server->write_printf( connection, "%s 404 Not found\r\nContent-Length: 0\r\n\r\n", hi.version.c_str() );
+                String response = handle_http_api( connection , hi.url );
 
-                g_debug( "  NOT FOUND" );
+                if ( ! response.empty() )
+                {
+                    server->write_printf( connection , "%s 200 OK\r\nContent-Length: %" G_GSIZE_FORMAT "\r\nContent-Type: application/json\r\n\r\n" , hi.version.c_str() , response.size() );
+                    server->write( connection , response.data() , response.size() );
+                    g_debug( "  API RESPONSE" );
+                }
+                else
+                {
+                    server->write_printf( connection, "%s 404 Not found\r\nContent-Length: 0\r\n\r\n", hi.version.c_str() );
+
+                    g_debug( "  NOT FOUND" );
+                }
             }
 
             hi.reset();
@@ -861,6 +934,123 @@ void ControllerServer::drop_web_server_group( const String & group )
             ++it;
         }
     }
+}
+
+//-----------------------------------------------------------------------------
+
+String ControllerServer::handle_http_api( gpointer connection , const String & url )
+{
+    //.........................................................................
+    // Crack the URL into the path and query
+
+    UriParserStateA state;
+    UriUriA uri;
+
+    state.uri = & uri;
+
+    String      path;
+    StringMap   query;
+
+    if ( URI_SUCCESS == uriParseUriA( & state , url.c_str() ) )
+    {
+        for( UriPathSegmentA * segment = uri.pathHead; segment; segment = segment->next )
+        {
+            path += "/";
+            path += String( segment->text.first , segment->text.afterLast - segment->text.first );
+        }
+
+        UriQueryListA * q = 0;
+
+        if ( URI_SUCCESS == uriDissectQueryMallocExA( & q , 0 , uri.query.first , uri.query.afterLast , URI_TRUE , URI_BR_DONT_TOUCH ) )
+        {
+            for( UriQueryListA * n = q; n ; n = n->next )
+            {
+                query[ n->key ] = n->value ? n->value : "";
+            }
+        }
+
+        uriFreeQueryListA( q );
+    }
+
+    uriFreeUriMembersA( & uri );
+
+    //.........................................................................
+
+    String result;
+
+    if ( path == "/api/apps" )
+    {
+        if ( SystemDatabase * db = context->get_db() )
+        {
+            SystemDatabase::AppInfo::List apps = db->get_apps_for_current_profile();
+
+            JsonArray * array = json_array_new();
+
+            SystemDatabase::AppInfo::List::const_iterator it;
+
+            for( it = apps.begin(); it != apps.end(); ++it )
+            {
+                JsonObject * o = json_object_new();
+
+                json_object_set_string_member( o , "name" , it->name.c_str() );
+                json_object_set_string_member( o , "id" , it->id.c_str() );
+                json_object_set_string_member( o , "version" , it->version.c_str() );
+                json_object_set_int_member( o , "release" , it->release );
+                json_object_set_string_member( o , "badge_style" , it->badge_style.c_str() );
+                json_object_set_string_member( o , "badge_text" , it->badge_text.c_str() );
+
+                json_array_add_object_element( array , o );
+            }
+
+            JsonNode * node = json_node_new( JSON_NODE_ARRAY );
+
+            json_node_set_array( node , array );
+
+            json_array_unref( array );
+
+            JsonGenerator * gen = json_generator_new();
+
+            json_generator_set_root( gen , node );
+
+            gsize length = 0;
+
+            gchar * json = json_generator_to_data( gen , & length );
+
+            result = String( json , length );
+
+            g_free( json );
+
+            g_object_unref( gen );
+        }
+    }
+    else if ( path == "/api/launch" )
+    {
+        String app_id( query[ "id" ] );
+
+        if ( ! app_id.empty() )
+        {
+            if ( SystemDatabase * db = context->get_db() )
+            {
+                if ( db->is_app_in_current_profile( app_id ) )
+                {
+                    App::LaunchInfo launch_info;
+
+                    // TODO: We could populate the launch info with stuff that may
+                    // be interesting to the app.
+
+                    // TODO: Not very well protected - could launch the app that is
+                    // running now.
+
+                    if ( TP_RUN_OK == context->launch_app( app_id.c_str() , launch_info ) )
+                    {
+                        result = "{'result':0}";
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------

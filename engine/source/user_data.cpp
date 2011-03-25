@@ -662,6 +662,32 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
 
 //.............................................................................
 
+int UserData::invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults )
+{
+    g_assert( L );
+    g_assert( global );
+
+    int result = 0;
+
+    lua_getglobal( L , global );
+
+    int top = lua_gettop( L );
+
+    if ( ! lua_isnil( L , top ) )
+    {
+        if ( UserData * ud = UserData::get( L , top ) )
+        {
+            result = ud->invoke_callback( name , nargs , nresults );
+        }
+    }
+
+    lua_remove( L , top );
+
+    return result;
+}
+
+//.............................................................................
+
 void UserData::connect_signal( const gchar * name, const gchar * detailed_signal, GCallback handler, gpointer data, int flags )
 {
     g_assert( master );

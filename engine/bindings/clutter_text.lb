@@ -391,6 +391,49 @@ class Text [[ClutterActor*]] actor
 		[[clutter_text_set_password_char(CLUTTER_TEXT(self),password_char);]];
 	
 
+    /*
+        Property: baseline
+
+        Returns the Y position of the baseline of the first line.
+    */
+
+    readonly int baseline
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                baseline = pango_layout_get_baseline( p ) / PANGO_SCALE;
+            }
+            else
+            {
+                baseline = 0;
+            }
+        ]];
+
+    /*
+        Property: line_spacing
+
+        Space (in pixels) between lines.
+    */
+
+    int line_spacing
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                line_spacing = pango_layout_get_spacing( p ) / PANGO_SCALE;
+            }
+            else
+            {
+                line_spacing = 0;
+            }
+        ]]
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                pango_layout_set_spacing( p , line_spacing * PANGO_SCALE );
+                clutter_actor_queue_redraw( self );
+            }
+        ]];
+
     set_selection( int start_pos , int end_pos )
 	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
 	    
@@ -433,6 +476,7 @@ class Text [[ClutterActor*]] actor
 				G_CALLBACK(Text_on_text_changed),
 				L);	    
 		]];
+
 }
 
 [[

@@ -34,28 +34,14 @@ void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
 
 //.............................................................................
 
-void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
+ClutterColor ClutterUtil::string_to_color( const char * s )
 {
-    LSG;
+    ClutterColor result = { 0 , 0 , 0 , 0 };
 
-    if ( lua_istable( L, index ) )
-    {
-        lua_rawgeti( L, index, 1 );
-        lua_rawgeti( L, index, 2 );
-        lua_rawgeti( L, index, 3 );
-        lua_rawgeti( L, index, 4 );
-        color->red = luaL_optint( L, -4, 0 );
-        color->green = luaL_optint( L, -3, 0 );
-        color->blue = luaL_optint( L, -2, 0 );
-        color->alpha = luaL_optint( L, -1, 255 );
-        lua_pop( L, 4 );
-    }
-    else if ( lua_isstring( L, index ) )
+    if ( s )
     {
         int colors[4] = {0, 0, 0, 255};
         char buffer[3] = {0, 0, 0};
-
-        const char * s = lua_tostring( L, index );
 
         if ( *s == '#' )
         {
@@ -85,10 +71,36 @@ void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * col
             i++;
         }
 
-        color->red   = colors[0];
-        color->green = colors[1];
-        color->blue  = colors[2];
-        color->alpha = colors[3];
+        result.red   = colors[0];
+        result.green = colors[1];
+        result.blue  = colors[2];
+        result.alpha = colors[3];
+    }
+
+    return result;
+}
+
+//.............................................................................
+
+void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
+{
+    LSG;
+
+    if ( lua_istable( L, index ) )
+    {
+        lua_rawgeti( L, index, 1 );
+        lua_rawgeti( L, index, 2 );
+        lua_rawgeti( L, index, 3 );
+        lua_rawgeti( L, index, 4 );
+        color->red = luaL_optint( L, -4, 0 );
+        color->green = luaL_optint( L, -3, 0 );
+        color->blue = luaL_optint( L, -2, 0 );
+        color->alpha = luaL_optint( L, -1, 255 );
+        lua_pop( L, 4 );
+    }
+    else if ( lua_isstring( L, index ) )
+    {
+        * color = string_to_color( lua_tostring( L, index ) );
     }
     else
     {
@@ -278,7 +290,7 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_PRESS );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
@@ -305,10 +317,93 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_RELEASE );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
+
+    clutter_event_put( event );
+
+    clutter_event_free( event );
+
+    clutter_threads_leave();
+
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
+
+#endif
+}
+
+void ClutterUtil::inject_motion( gfloat x , gfloat y )
+{
+    clutter_threads_enter();
+
+    ClutterEvent * event = clutter_event_new( CLUTTER_MOTION );
+    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.time = timestamp();
+    event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->motion.x = x;
+    event->motion.y = y;
+
+    clutter_event_put( event );
+
+    clutter_event_free( event );
+
+    clutter_threads_leave();
+
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
+
+#endif
+}
+
+void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y )
+{
+    clutter_threads_enter();
+
+    ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_PRESS );
+    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.time = timestamp();
+    event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->button.button = button;
+    event->button.x = x;
+    event->button.y = y;
+
+    clutter_event_put( event );
+
+    clutter_event_free( event );
+
+    clutter_threads_leave();
+
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
+
+#endif
+}
+
+void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y )
+{
+    clutter_threads_enter();
+
+    ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_RELEASE );
+    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.time = timestamp();
+    event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->button.button = button;
+    event->button.x = x;
+    event->button.y = y;
 
     clutter_event_put( event );
 
@@ -330,15 +425,15 @@ void ClutterUtil::stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *
 {
     ClutterContainer *stage = (ClutterContainer*)clutter_stage_get_default();
 
-    ClutterActor *screen = clutter_container_find_child_by_name(stage, "screen");
+    if ( ClutterActor * screen = clutter_container_find_child_by_name(stage, "screen") )
+    {
+        gdouble scale_x, scale_y;
 
-    g_assert(screen);
+        clutter_actor_get_scale(screen, &scale_x, &scale_y);
 
-    gdouble scale_x, scale_y;
-    clutter_actor_get_scale(screen, &scale_x, &scale_y);
-
-    *x = *x/scale_x;
-    *y = *y/scale_y;
+        *x /= scale_x;
+        *y /= scale_y;
+    }
 }
 
 
