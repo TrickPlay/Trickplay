@@ -1380,7 +1380,7 @@ function ui_element.textInput(table)
 	end 
 
     	text = Text{text = p.text, editable = false, cursor_visible = false, wants_enter = false, reactive = true, font = p.text_font, color = p.text_color}
-    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2} }
+    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},  }
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
     	if (p.skin == "custom") then box_img.opacity = 0

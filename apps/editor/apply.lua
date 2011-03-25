@@ -83,21 +83,21 @@ function inspector_apply (v, inspector)
 	       v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
 		end,
        ["reactive"] = function()
-	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+	       if item_group:find_child("bool_checkreactive"):find_child("check1").opacity > 0 then 
 	            v.extra.reactive = true
 	       else 
 	            v.extra.reactive = false
 	       end
 	       end,
        ["loop"] = function()
-	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+	       if item_group:find_child("bool_checkloop"):find_child("check1").opacity > 0 then 
 	            v.loop = true
 	       else 
 	            v.loop = false
 	       end
 	       end,
 	["vert_bar_visible"] = function()
-	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+	       if item_group:find_child("bool_checkvert_bar_visible"):find_child("check1").opacity > 0 then 
 	            v.vert_bar_visible = true
 	       else 
 	            v.vert_bar_visible = false
@@ -105,7 +105,7 @@ function inspector_apply (v, inspector)
 	       end,
 
 	["hor_bar_visible"] = function()
- 	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+ 	       if item_group:find_child("bool_checkhor_bar_visible"):find_child("check1").opacity > 0 then 
 	            v.hor_bar_visible = true
 	       else 
 	            v.hor_bar_visible = false
@@ -113,7 +113,7 @@ function inspector_apply (v, inspector)
 	       end,
 
 	["cells_focusable"] = function()
- 	       if item_group:find_child("bool_check"):find_child("check1").opacity > 0 then 
+ 	       if item_group:find_child("bool_checkcells_focusable"):find_child("check1").opacity > 0 then 
 	            v.cells_focusable = true
 	       else 
 	            v.cells_focusable = false
