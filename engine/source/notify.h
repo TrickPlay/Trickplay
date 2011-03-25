@@ -10,7 +10,7 @@ public:
     void add_notification_handler( const char * subject, TPNotificationHandler handler, void * data );
     void remove_notification_handler( const char * subject, TPNotificationHandler handler, void * data );
 
-    void notify( const char * subject );
+    void notify( TPContext * context , const char * subject );
 
 private:
 

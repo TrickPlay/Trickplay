@@ -103,6 +103,11 @@ public:
         else
         {
             g_assert( image->pixels == NULL );
+
+            // We change to unsupported format so that no matter what
+            // the external decoder does, we try the internal decoders.
+
+            result = TP_IMAGE_UNSUPPORTED_FORMAT;
         }
 
         return result;
@@ -640,6 +645,17 @@ Images::~Images()
     {
         delete external_decoder;
     }
+
+#ifndef TP_PRODUCTION
+
+    // Get rid of the weak ref in case an image is destroyed after we are.
+
+    for ( ImageMap::iterator it = images.begin(); it != images.end(); ++it )
+    {
+        g_object_weak_unref( G_OBJECT( it->first ), texture_destroyed_notify, this );
+    }
+
+#endif
 
 #if TP_IMAGE_CACHE_ENABLED
 

@@ -21,7 +21,7 @@ public:
 
 private:
 
-    static void command_handler( const char * command, const char * parameters, void * me );
+    static void command_handler( TPContext * context , const char * command, const char * parameters, void * me );
 
     void handle_command( const char * parameters );
 

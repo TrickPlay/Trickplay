@@ -22,7 +22,7 @@ public:
     ~Server();
 
     void close_connection( gpointer connection );
-    bool write( gpointer connection, const char * data );
+    bool write( gpointer connection, const char * data , gssize size = -1 );
     bool write_printf( gpointer connection, const char * format, ... );
     void write_to_all( const char * data );
     bool write_file( gpointer connection, const char * path, bool http_headers );

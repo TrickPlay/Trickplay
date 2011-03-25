@@ -23,7 +23,7 @@ include_directories(
     ${TPCMP_INCLUDE_DIRS}    
     )
 
-add_executable( tp-cmp main.c )
+add_executable( tp-cmp main.c audio.c )
 
 # This one must come before the clutter libraries - so we
 # get the json symbols from here
@@ -53,3 +53,4 @@ set_target_properties( tp-cmp
 
 install(TARGETS tp-cmp RUNTIME DESTINATION bin)
 
+add_definitions( -DG_LOG_DOMAIN="tp-cmp" )
