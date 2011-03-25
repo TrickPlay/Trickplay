@@ -149,7 +149,7 @@ function( section )
         f_widget.extra.on_activate =
             function()
 		input_mode = S_SELECT
-		editor.uiElements()
+		editor.ui_elements()
             end
         f_undo.extra.on_activate =
             function()
