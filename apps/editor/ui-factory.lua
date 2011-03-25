@@ -806,6 +806,7 @@ function factory.make_msgw_widget_item( assets , caption)
 	
 --group.name = name -- (savefile, cancel, yes, no, openfile, reopenfile, open_imagefile, reopenImg, open_videofile)
 
+	group.reactive = true
     return group, text
 
 end
@@ -1929,9 +1930,11 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		          end 
 		          if(item_group:find_child(attr_t_idx[i+1])) then
 		               local n_item = attr_t_idx[i+1]
-			       item_group:find_child(n_item).extra.on_focus_in()	
-			       si.seek_to_middle(0, item_group:find_child(n_item).y)
-			       break
+				if item_group:find_child(n_item).extra.on_focus_in then 
+			       		item_group:find_child(n_item).extra.on_focus_in()	
+			       		si.seek_to_middle(0, item_group:find_child(n_item).y)
+				end 
+			        break
 		          end
 		     end 
     		     end
@@ -2174,7 +2177,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	                  end 	
 		          if(item_group:find_child(attr_t_idx[i+1])) then
 		               local n_item = attr_t_idx[i+1]
-			       print("NEXT ITEM : ", n_item)
+			       --print("NEXT ITEM : ", n_item)
 			       if item_group:find_child(n_item).extra.on_focus_in then 
 			       		item_group:find_child(n_item).extra.on_focus_in()	
 			       		if (si) then 
