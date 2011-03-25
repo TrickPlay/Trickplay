@@ -15,7 +15,7 @@
 @synthesize socketManager;
 
 - (id)initWithView:aView socketManager:(SocketManager *)sockman {
-    if (self = [super init]) {
+    if ((self = [super init])) {
         self.view = aView;
         self.socketManager = sockman;
         touchEventsAllowed = NO;
