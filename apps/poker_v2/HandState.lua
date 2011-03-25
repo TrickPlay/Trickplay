@@ -184,8 +184,9 @@ HandState = Class(nil,function(state, ctrl, ...)
 
         -- holds everyone's current money put into the pot
         running_money = {}
-        for _, player in ipairs(players) do
+        for _,player in ipairs(players) do
             running_money[player] = player_bets[player]
+            player.status:update_text()
         end
 
         call_bet = bb_qty
@@ -527,7 +528,7 @@ HandState = Class(nil,function(state, ctrl, ...)
             test_pot = test_pot + running_money[player]
         end
         if test_pot ~= pot then
-            print("sum of runningmoney was " .. test_pot .. " but should be " .. pot)
+            print("sum of running_money was " .. test_pot .. " but should be " .. pot)
         end
 
         print("splitting $" .. pot .. " pot " .. #winners .. " ways")

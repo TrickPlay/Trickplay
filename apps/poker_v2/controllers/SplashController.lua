@@ -8,6 +8,7 @@ function(ctrl, router, ...)
     function ctrl:on_key_down(k)
         router:set_active_component(Components.CHARACTER_SELECTION)
         router:notify()
+        ctrlman:choose_dog()
     end
 
     function ctrl:notify(event) view:update(event) end

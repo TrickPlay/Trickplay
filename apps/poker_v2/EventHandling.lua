@@ -6,11 +6,12 @@ local event_listener_en = true
 local key_handler = {}
 local key_hints = {}
 function screen:on_key_down(k)
-    if k == keys.g then dumptable(_G) end
-    if k == keys.i then INITIAL_ENDOWMENT = 4 end
+    if k == keys.g then dumptable(_G) return end
+    if k == keys.i then INITIAL_ENDOWMENT = 4 return end
     if key_handler[k] then
         key_hints[k] = not key_hints[k]
         key_handler[k]()
+        return
     end
     if event_listener_en then
         router:delegate(KbdEvent({key = k}), {router:get_active_component()})

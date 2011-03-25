@@ -212,4 +212,12 @@ Controller = Class(Observer, function(ctrl, router, id)
         end
     end
 
+    function ctrl:add_controller()
+        print("Controller attempting to add itself to game")
+    end
+
+    function ctrl:handle_click()
+        print("Click consumed")
+    end
+
 end)

@@ -110,7 +110,6 @@ function(self, player, args, ...)
         self.bottom.h/2 + self.bottom.y
     }
 
-    print(#self.group.children)
     screen:add(self.group)
 
     if args then

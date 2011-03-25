@@ -223,6 +223,13 @@ function(self, router, ...)
         self:update_views()
     end
 
+    local function change_selector(selector)
+        current_selector.object:off_focus()
+        current_selector = selector
+        current_selector.object:on_focus()
+        self:handle_bet_change()
+    end
+
     function self:move(dir)
         if current_selector[dir] then
             if type(current_selector[dir]) == "function" then
@@ -325,25 +332,22 @@ function(self, router, ...)
         end
     end
 
-    local popup_ok = true
     function self:show_all_in_notification()
-        if popup_ok then
-            local text = assetman:create_text{
-                text = "You can't bet anymore, you're already pushing everyone all in!",
-                font = "Sans 36px",
-                color = "FFFFFF",
-                position = {screen.w/2, 400},
-                opacity = 0
-            }
-            text.anchor_point = {text.w/2, text.h/2}
-            screen:add(text)
-            Popup:new{
-                group = text,
-                time = 1000,
-                on_fade_out = function() popup_ok = true end
-            }
-            popup_ok = false
+        if assetman:has_text_of_name("cant_bet_any_more_text") then
+            return
         end
+        local text = assetman:create_text{
+            text = "You can't bet anymore, you're already"..
+                   "pushing everyone all in!",
+            name = "cant_bet_any_more_text",
+            font = "Sans 36px",
+            color = "FFFFFF",
+            position = {screen.w/2, 400},
+            opacity = 0
+        }
+        text.anchor_point = {text.w/2, text.h/2}
+        screen:add(text)
+        Popup:new{group = text, time = 1000}
     end
 
     -- constants define coordinate space of button presses
@@ -386,57 +390,55 @@ function(self, router, ...)
     local EXIT_X_2 = 567
     local EXIT_Y_1 = 780
     local EXIT_Y_2 = 837
-    function self:handle_click(ctrl, x, y)
-        if ctrl ~= game:get_current_player().controller then return end 
+    function self:handle_click(controller, x, y)
+        if controller ~= game:get_current_player().controller then return end 
 
-        y = y/ctrl.y_ratio
-        x = x/ctrl.x_ratio
+        y = y/controller.y_ratio
+        x = x/controller.x_ratio
 
         if x > FOLD_X_1 and x < FOLD_X_2 and y > FOLD_Y_1 and y < FOLD_Y_2 then
-            selected = PlayerGroups.TOP
-            subselection = SubGroups.FOLD
-            self:handle_bet_change()
+            change_selector(fold_selector)
         elseif x > CALL_X_1 and x < CALL_X_2 and y > CALL_Y_1 and y < CALL_Y_2 then
-            selected = PlayerGroups.TOP
-            subselection = SubGroups.CALL
+            change_selector(call_selector)
             self:handle_bet_change()
         elseif x > BET_X_1 and x < BET_X_2 and y > BET_Y_1 and y < BET_Y_2 then
-            if selected ~= PlayerGroups.TOP or subselection ~= SubGroups.RAISE then
-                selected = PlayerGroups.TOP
-                subselection = SubGroups.RAISE
+            if current_player.bet + current_player.money > call_bet then
+                change_selector(bet_selector)
                 self:handle_bet_change()
+            else
+                mediaplayer:play_sound(BONK_MP3)
+                return
             end
         elseif x > UP_X_1 and x < UP_X_2 and y > UP_Y_1 and y < UP_Y_2 then
-            if selected ~= PlayerGroups.TOP or subselection ~= SubGroups.RAISE then
-                selected = PlayerGroups.TOP
-                subselection = SubGroups.RAISE
+            if current_player.bet + current_player.money > call_bet then
+                change_selector(bet_selector)
                 self:handle_bet_change()
+                self:move(Directions.UP)
+            else
+                mediaplayer:play_sound(BONK_MP3)
             end
-            PlayerSelectionKeyTable[keys.Up](self)
             return
         elseif x > DOWN_X_1 and x < DOWN_X_2 and y > DOWN_Y_1 and y < DOWN_Y_2 then
-            if selected ~= PlayerGroups.TOP or subselection ~= SubGroups.RAISE then
-                selected = PlayerGroups.TOP
-                subselection = SubGroups.RAISE
+            if current_player.bet + current_player.money > call_bet then
+                change_selector(bet_selector)
                 self:handle_bet_change()
+                self:move(Directions.DOWN)
+            else
+                mediaplayer:play_sound(BONK_MP3)
             end
-            PlayerSelectionKeyTable[keys.Down](self)
             return
         elseif x > DEAL_X_1 and x < DEAL_X_2 and y > DEAL_Y_1 and y < DEAL_Y_2 then
-            selected = PlayerGroups.BOTTOM
-            subselection = SubGroups2.NEW_DEAL
+            change_selector(new_deal_selector)
         elseif x > HELP_X_1 and x < HELP_X_2 and y > HELP_Y_1 and y < HELP_Y_2 then
-            selected = PlayerGroups.BOTTOM
-            subselection = SubGroups2.HELP
+            change_selector(help_selector)
         elseif x > EXIT_X_1 and x < EXIT_X_2 and y > EXIT_Y_1 and y < EXIT_Y_2 then
-            selected = PlayerGroups.BOTTOM
-            subselection = SubGroups2.EXIT
+            change_selector(exit_selector)
         else
             print("nothing selected")
             return
         end
         self:update_views()
-        PlayerSelectionKeyTable[keys.Return](self)
+        self:return_pressed()
     end
 
 end)
