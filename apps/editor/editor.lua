@@ -769,8 +769,162 @@ function editor.export ()
 end 
 
 
+local function draw_dialogbox()
+        local scrollPane1 = ui_element.scrollPane
+	{
+		skin = "default",
+		reactive = true,
+		visible_w = 850,
+		visible_h = 300,
+		virtual_w = 1000,
+		virtual_h = 500,
+		bar_color_inner = {180,180,180,255},
+		bar_color_outer = {30,30,30,255},
+		empty_color_inner = {120,120,120,255},
+		empty_color_outer = {255,255,255,255},
+		frame_thickness = 2,
+		frame_color = {60,60,60,255},
+		bar_thickness = 15,
+		bar_offset = 5,
+		vert_bar_visible = true,
+		hor_bar_visible = false,
+		box_color = {160,160,160,255},
+		box_width = 0,
+		content= Group { children = {} },
+	}
+
+scrollPane1.name = "scrollPane1"
+scrollPane1.position = {16,64,0}
+scrollPane1.scale = {1,1,0,0}
+scrollPane1.anchor_point = {0,0}
+scrollPane1.x_rotation = {0,0,0}
+scrollPane1.y_rotation = {0,0,0}
+scrollPane1.z_rotation = {0,0,0}
+scrollPane1.opacity = 255
+scrollPane1.extra.reactive = true
+
+
+	local button1 = ui_element.button
+	{
+		ui_width = 445,
+		ui_height = 60,
+		skin = "default",
+		label = "Open",
+		button_color = {255,255,255,255},
+		focus_color = {27,145,27,255},
+		text_color = {255,255,255,255},
+		text_font = "DejaVu Sans 30px",
+		border_width = 1,
+		border_corner_radius = 12,
+		reactive = true,
+	}
+
+button1.name = "button1"
+button1.position = {444,390,0}
+button1.scale = {1,1,0,0}
+button1.anchor_point = {0,0}
+button1.x_rotation = {0,0,0}
+button1.y_rotation = {0,0,0}
+button1.z_rotation = {0,0,0}
+button1.opacity = 255
+button1.extra.focus = {[65293] = "button1", }
+
+function button1:on_key_down(key)
+	if button1.focus[key] then
+		if type(button1.focus[key]) == "function" then
+			button1.focus[key]()
+		elseif screen:find_child(button1.focus[key]) then
+			if button1.on_focus_out then
+				button1.on_focus_out()
+			end
+			screen:find_child(button1.focus[key]):grab_key_focus()
+			if screen:find_child(button1.focus[key]).on_focus_in then
+				screen:find_child(button1.focus[key]).on_focus_in()
+			end
+			end
+	end
+	return true
+end
+
+button1.extra.reactive = true
+
+
+	local button0 = ui_element.button
+	{
+		ui_width = 445,
+		ui_height = 60,
+		skin = "default",
+		label = "Cancel",
+		button_color = {255,255,255,255},
+		focus_color = {27,145,27,255},
+		text_color = {255,255,255,255},
+		text_font = "DejaVu Sans 30px",
+		border_width = 1,
+		border_corner_radius = 12,
+		reactive = true,
+	}
+
+button0.name = "button0"
+button0.position = {6,390,0}
+button0.scale = {1,1,0,0}
+button0.anchor_point = {0,0}
+button0.x_rotation = {0,0,0}
+button0.y_rotation = {0,0,0}
+button0.z_rotation = {0,0,0}
+button0.opacity = 255
+button0.extra.focus = {[65293] = "button0", }
+
+function button0:on_key_down(key)
+	if button0.focus[key] then
+		if type(button0.focus[key]) == "function" then
+			button0.focus[key]()
+		elseif screen:find_child(button0.focus[key]) then
+			if button0.on_focus_out then
+				button0.on_focus_out()
+			end
+			screen:find_child(button0.focus[key]):grab_key_focus()
+			if screen:find_child(button0.focus[key]).on_focus_in then
+				screen:find_child(button0.focus[key]).on_focus_in()
+			end
+			end
+	end
+	return true
+end
+
+button0.extra.reactive = true
+
+
+	local dialogBox0 = ui_element.dialogBox
+	{
+		ui_width = 900,
+		ui_height = 500,
+		skin = "custom",
+		label = "Dialog Box Title",
+		border_width = 4,
+		border_corner_radius = 22,
+		reactive = true,
+		border_color = {255,255,255,255},
+		fill_color = {25,25,25,100},
+		title_color = {255,255,255,255},
+		title_font = "DejaVu Sans 30px",
+		title_seperator_color = {255,255,255,255},
+		title_seperator_thickness = 4,
+		content= Group { children = {button0,button1,scrollPane1,} },
+	}
+
+dialogBox0.name = "dialogBox0"
+dialogBox0.position = {430,210,0}
+dialogBox0.scale = {1,1,0,0}
+dialogBox0.anchor_point = {0,0}
+dialogBox0.x_rotation = {0,0,0}
+dialogBox0.y_rotation = {0,0,0}
+dialogBox0.z_rotation = {0,0,0}
+dialogBox0.opacity = 255
+dialogBox0.extra.reactive = true
+
+return dialogBox0
+end 
 function editor.the_open()
----[[
        	local WIDTH = 700
 	local L_PADDING = 50
 	local R_PADDING = 50
@@ -788,10 +942,13 @@ function editor.the_open()
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 
 
+	local dialog = draw_dialogbox()
+	dialog.label =  "File Location : "..CURRENT_DIR
+	dialog.title_font = "DejaVu Sans 28px"
+
+--[[
 	dir_text.position = {cur_w,cur_h}
 
-	--local line = factory.draw_line()
-	
 	function get_file_list_sz() 
 	     local iw = cur_w
 	     local ih = cur_h
@@ -842,8 +999,9 @@ function editor.the_open()
 	}
 
         msgw:add(dir_text)
+]]---  
 
-	local text_g
+	local text_g 
 	local input_text
 	function print_file_list() 
 	     cur_w = L_PADDING
@@ -859,7 +1017,7 @@ function editor.the_open()
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
 
                        text.position = {cur_w, cur_h}
-	 	       text.reactive = true
+		       text.reactive = true
     	               text_g:add(text)
 
 		       if(cur_w == 0) then
@@ -874,10 +1032,54 @@ function editor.the_open()
 	     cur_w = cur_w + L_PADDING
 	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
 	     text_g.clip = {0,0,text_g.w,500}
-    	     msgw:add(text_g)
+    	     
+	     --msgw:add(text_g)
+	     return text_g
+
         end 
 	
-	print_file_list()
+	text_g = print_file_list()
+	dumptable(text_g.position)
+	dialog.content:find_child("scrollPane1").content = text_g 
+	dialog.content:find_child("scrollPane1").content.x = 100	
+	cancel_b = dialog.content:find_child("button0")
+	cancel_b.pressed = function ()
+	end 
+
+	open_b = dialog.content:find_child("button1")
+	function open_b:on_button_down()
+	if (input_text ~= nil) then 
+	       local timeline = screen:find_child("timeline")
+	       if timeline then 
+		     timeline:clear()
+	     	     screen:remove(timeline)
+		     if screen:find_child("tline") then
+		          screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		     end
+	       end 
+               inputMsgWindow_openfile(input_text.text) 
+	       screen:remove(dialog)
+	       local timeline = screen:find_child("timeline") 
+	       if timeline then  
+                 for n,m in pairs (g.children) do 
+	         if m.extra.timeline[0] then 
+	            m:show()
+	            for l,k in pairs (m.extra.timeline[0]) do 
+		        if l ~= "hide" then
+		            m[l] = k
+		        elseif k == true then 
+		            m:hide() 
+		        end 
+	            end
+                end 
+             	end 
+             end 
+
+	 end 
+
+	end 
+
+--[[
 	if(scroll_bar ~= nil) then 
 	     scroll_box.position = {720, TOP_PADDING + dir_text.h + Y_PADDING}
 	     scroll_bar.position = {724, TOP_PADDING + dir_text.h + Y_PADDING + 4}
@@ -911,6 +1113,8 @@ function editor.the_open()
     	end 
     end 
 
+]] -- 
+
     for i,j in pairs (text_g.children) do 
          function j:on_button_down(x,y,button, num_clicks)
 	      if input_text ~= nil then 
@@ -922,6 +1126,7 @@ function editor.the_open()
          end 
     end 
 
+--[[
     local open_b, open_t  = factory.make_msgw_button_item( assets , "open")
     open_b.position = {(WIDTH - 2*open_b.w - X_PADDING)/2, file_list_size + 110}
     open_b.name = "openfile"
@@ -1006,7 +1211,10 @@ function editor.the_open()
     end 
 
     screen:add(msgw)
---]]
+]]
+
+    screen:add(dialog)
+	
 end 
 
 function editor.inspector(v, x_pos, y_pos, scroll_y_pos) 
