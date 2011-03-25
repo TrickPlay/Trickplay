@@ -11,11 +11,18 @@ AssetManager = Class(function(assetman, ...)
     local number_of_rects_made = 0
     local number_of_other_clones_made = 0
 
+    local number_of_groups_deleted = 0
+    local number_of_texts_deleted = 0
+    local number_of_rects_deleted = 0
+    local number_of_other_clones_deleted = 0
+
     function assetman:show_all()
         print("\n\nIMAGES\n")
         for k,image in pairs(images) do
             print("\tImage: name = "..image.image.name)
-            print("\t\tIMAGE CLONES = "..image.times_cloned.."\n")
+            print("\t\tIMAGE CLONES: times cloned =", image.times_cloned,
+                  "; clones deleted =", image.times_deleted, "; remaining =",
+                  image.times_cloned-image.times_deleted)
             for _,clone in pairs(image.clones) do
                 print("\t\t\tClone: name = "..clone.name.." parent = "
                     ..tostring(clone.parent))
@@ -28,6 +35,9 @@ AssetManager = Class(function(assetman, ...)
                 print("\t\tchild", child, "name = ", child.name)
             end
         end
+        print("\t total created", number_of_groups_made, "total deleted",
+              number_of_groups_deleted, "remaining", number_of_groups_made
+              - number_of_groups_deleted)
         print("\n\nOTHER CLONES\n")
         for source,clones in pairs(other_clones) do
             print("\tSource =", source, "with name", source.name)
@@ -35,6 +45,9 @@ AssetManager = Class(function(assetman, ...)
                 print("\t\tClone: name =", clone.name)
             end
         end
+        print("\t total created", number_of_other_clones_made, "total deleted",
+              number_of_other_clones_deleted, "remaining", number_of_other_clones_made
+              - number_of_other_clones_deleted)
     end
 
     function assetman:load_image(path, name, overwrite)
@@ -62,7 +75,8 @@ AssetManager = Class(function(assetman, ...)
         images[name] = {
             image = image,
             clones = {},
-            times_cloned = 0
+            times_cloned = 0,
+            times_deleted = 0
         }
     end
 
@@ -112,6 +126,12 @@ AssetManager = Class(function(assetman, ...)
                 clone:unparent()
             end
             other_clones[item][clone] = nil
+            local more_clones = false
+            for _,__ in pairs(other_clones[item]) do
+                more_clones = true
+            end
+            if not more_clones then other_clones[item] = nil end
+            number_of_other_clones_deleted = number_of_other_clones_deleted + 1
         end
 
         return clone
@@ -123,6 +143,7 @@ AssetManager = Class(function(assetman, ...)
             clone:unparent()
         end
         images[image_name].clones[clone] = nil
+        images[image_name].times_deleted = images[image_name].times_deleted + 1
     end
 
     function assetman:remove_image(name)
@@ -194,6 +215,7 @@ AssetManager = Class(function(assetman, ...)
             groups[name]:unparent()
         end
         groups[name] = nil
+        number_of_groups_deleted = number_of_groups_deleted + 1
     end
 
     function assetman:has_text_of_name(name)
@@ -237,6 +259,7 @@ AssetManager = Class(function(assetman, ...)
             texts[name]:unparent()
         end
         texts[name] = nil
+        number_of_texts_deleted = number_of_texts_deleted + 1
     end
 
     function assetman:create_rect(args, overwrite)
@@ -273,6 +296,7 @@ AssetManager = Class(function(assetman, ...)
             rects[name]:unparent()
         end
         rects[name] = nil
+        number_of_rects_deleted = number_of_rects_deleted + 1
     end
 
 end)

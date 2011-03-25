@@ -13,7 +13,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
     local pot_chips = nil
     
-    assetman:load_image("asests/UI/new/pot_glow.png", "pot_glow")
+    assetman:load_image("assets/UI/new/pot_glow.png", "pot_glow")
     local pot_glow_clone = assetman:get_clone("pot_glow",
         {opacity = 0, position = {839, 627}})
     local pot_text = assetman:create_text{
@@ -208,13 +208,13 @@ HandPresentation = Class(nil,function(pres, ctrl)
         if not (player.is_a and player:is_a(Player)) then
             print("split pot animate")
             -- create a temporary group to store the animating groups
-            local temp_group = assetman:create_group({})
+            local temp_group = assetman:create_group({name = "a_temp_group"})
             screen:add(temp_group)
             -- correctly adjust the amount of the pot to the division each player will
             -- receive
             -- TODO: im not sure how safe or accurate this is
-            --[[
-            pot_chips:set(math.floor(pot_chips:value()/3))
+            ---[[
+            pot_chips:set(math.floor(pot_chips:value()/#player))
             --]]
             -- add it to the temp group
             pot_chips.group:unparent()
@@ -223,7 +223,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
             -- create clones and animations
             for _,winner in ipairs(player) do
                 local clone = assetman:clone(pot_chips.group, {
-                    position = Utils.deepcopy(pot_chips.group.position)
+                    position = Utils.deepcopy(pot_chips.group.position),
+                    name = pot_chips.group.name.."clone"
                 })
                 temp_group:add(clone)
                 clone:animate{ 
@@ -232,7 +233,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
                         STATUS_CHIP_POSITIONS[winner.dog_number][2]
                     },
                     duration = 500,
-                    mode = "EASE_OUT_QUAD"
+                    mode = "EASE_OUT_QUAD",
+                    callback = function()
+                        if winner.bet_chips then
+                            winner.bet_chips:set(
+                                winner.bet_chips:value() + pot_chips:value()
+                            )
+                        end
+                    end
                 }
             end
             -- set the group to temp_group, variable is deleted in another function.
@@ -248,7 +256,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
                     STATUS_CHIP_POSITIONS[player.table_position][2]
                 },
                 duration = 500,
-                mode = "EASE_OUT_QUAD"
+                mode = "EASE_OUT_QUAD",
+                callback = function()
+                    if player.bet_chips then
+                        player.bet_chips:set(
+                            player.bet_chips:value() + pot_chips:value()
+                        )
+                    end
+                end
             }
         end
     end
@@ -324,6 +339,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
             if final_hands[player] then
                 winner_text = assetman:create_text{
                     text = "WINNER!",
+                    name = "WINNER!"..tostring(player.player_number),
                     x = 685,
                     font = WINNER_FONT,
                     color = "E4D312",
@@ -520,31 +536,34 @@ HandPresentation = Class(nil,function(pres, ctrl)
         end
     end
    
-   -- End of the game
-   function pres:showdown(winners, poker_hand)
-      mediaplayer:play_sound(SHOWDOWN_WAV)
-      animate_chips_to_center()
-      pres:all_cards_up()
-      print(poker_hand.name .. " passed to pres:showdown()")
+    -- End of the game
+    function pres:showdown(winners, poker_hand)
+        mediaplayer:play_sound(SHOWDOWN_WAV)
+        animate_chips_to_center()
+        pres:all_cards_up()
+        print(poker_hand.name .. " passed to pres:showdown()")
 
-      local won = {}
-      for _,winner in ipairs(winners) do
-         winner.status:update_text(poker_hand.name)
-         won[winner] = true
-      end
+        local won = {}
+        for _,winner in ipairs(winners) do
+            winner.status:update_text(poker_hand.name)
+            won[winner] = true
+        end
 
-      for _,player in ipairs(ctrl:get_players()) do
-         if not won[player] then
-            player.status:hide()
-         end
-      end
-      animate_pot_to_player(winners)
-      -- TODO: might want winning hands to animate a bit after pot to player
-      animate_winning_hands()
-   end
+        for _,player in ipairs(ctrl:get_players()) do
+            if not won[player] then
+                player.status:hide()
+            end
+        end
+    end
+   
+    function pres:showdown_animations(winners)
+        animate_pot_to_player(winners)
+        -- TODO: might want winning hands to animate a bit after pot to player
+        animate_winning_hands()
+    end
 
     function pres:clear_showdown()
-        for i,element in ipairs(showdown_elements) do
+        for i,element in pairs(showdown_elements) do
             element:dealloc()
         end
 
@@ -576,6 +595,9 @@ HandPresentation = Class(nil,function(pres, ctrl)
       
         -- reset bets
         remove_all_chips()
+
+        -- if any showdown_elements are left destroy them
+        self:clear_showdown()
     end
    
    -------------------------PLAYER TURNS--------------------------
@@ -660,13 +682,14 @@ HandPresentation = Class(nil,function(pres, ctrl)
 
     -- SOMEONE LEFT A SEAT
     function pres:remove_player(removed_player)
+        if not removed_player then error("no removed_player", 2) end
         local foldtimer = Timer{interval=1}
         function foldtimer.on_timer(t)
             t:stop()
             remove_player_cards(removed_player)
          
             removed_player.status:hide()
-            removed_player:hide()
+            removed_player:fade_out()
         end
 
         mediaplayer:play_sound(FOLD_WAV)

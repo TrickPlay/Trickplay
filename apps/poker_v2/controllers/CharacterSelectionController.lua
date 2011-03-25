@@ -11,10 +11,12 @@ function(ctrl, router, ...)
 --------------- Some helper variables --------------
 
     ctrl.number_of_players = 0
+    local current_selector
 
 --------------- Private methods ------------------
 
     local function start_a_game()
+        ctrlman:stop_accepting_ctrls()
         ctrl:hide_start_button()
         for i,dog_selector in ipairs(dog_selectors) do
             dog_selector.dog_view:glow_off()
@@ -29,8 +31,28 @@ function(ctrl, router, ...)
         router:notify()
     end
 
+    local function correct_selector(dog_number)
+        current_selector:off_focus()
+        current_selector = dog_selectors[dog_number]
+        current_selector:on_focus()
+        view:update()
+    end
+
+    local function find_next_dog(dog_number)
+        while players[dog_number] do
+            dog_number = dog_number + 1
+        end
+        if dog_number > 6 then
+            dog_number = 1
+        end
+        while players[dog_number] do
+            dog_number = dog_number + 1
+        end
+        correct_selector(dog_number)
+    end
+
     local function set_up_player(dog_number, human, controller)
-        if players[dog_number] then return end
+        if players[dog_number] then return false end
         ctrl.number_of_players = ctrl.number_of_players + 1
 
         local is_human = human or false
@@ -57,7 +79,11 @@ function(ctrl, router, ...)
         end
         if ctrl.number_of_players >= 6 then
             start_a_game()
+        else
+            find_next_dog(dog_number)
         end
+
+        return true
     end
 
 --------------- Here lies the model for the ui ------------------
@@ -169,7 +195,7 @@ function(ctrl, router, ...)
         start_button_selector.object:hide()
     end
 
-    local current_selector = dog_selectors[1]
+    current_selector = dog_selectors[1]
     current_selector:on_focus()
 
 
@@ -179,10 +205,14 @@ function(ctrl, router, ...)
             current_selector = current_selector[dir]
             current_selector:on_focus()
             view:update()
+            mediaplayer:play_sound(ARROW_MP3)
+        else
+            mediaplayer:play_sound(BONK_MP3)
         end
     end
 
     function ctrl:return_pressed()
+        mediaplayer:play_sound(ENTER_MP3)
         current_selector.press()
     end
 
@@ -203,6 +233,7 @@ function(ctrl, router, ...)
                     selector:on_focus()
                 end
             end
+            ctrlman:start_accepting_ctrls()
         end
 
         view:update()
@@ -220,6 +251,56 @@ function(ctrl, router, ...)
             dog_selector.seat_button_view:reset()
         end
         current_selector = dog_selectors[1]
+
+        ctrlman:choose_dog()
+    end
+
+    function ctrl:add_controller(controller)
+        controller:choose_dog()
+    end
+
+    function ctrl:handle_click(controller, x, y)
+        assert(controller)
+        assert(x)
+        assert(y)
+
+        if controller.state == ControllerStates.CHOOSE_DOG then
+            -- based off of click position grab the correct dog position (pos)
+            local pos
+            local col = 1
+            local row = 1
+            if x > controller.ui_size[1]/2 then
+                col = 2
+            end
+            if y > (100+256)*controller.y_ratio then
+                row = 2
+                if y > (100+256*2)*controller.y_ratio then
+                    row = 3
+                end
+            end
+            pos = row*col
+            if row == 2 and col == 1 then pos = 3 end
+            if row == 3 and col == 1 then pos = 5 end
+
+            correct_selector(pos)
+
+            if not set_up_player(pos, true, controller) then return end
+            controller:name_dog(pos)
+        elseif controller.state == ControllerStates.WAITING then
+            local pos = math.floor((y/controller.y_ratio-86)/115+1)
+            -- AI selected
+            if pos > 0 and pos <= 6 then
+                correct_selector(pos)
+                set_up_player(nil, pos, false)
+                ctrlman:update_waiting_room()
+            -- check x range for "Start" button press
+            elseif pos > 6 and x/controller.x_ratio > 640/3
+            and x/controller.x_ratio < 2*640/3 then
+                if ctrl.number_of_players >= 2 then
+                    start_a_game()
+                end
+            end
+        end
     end
 
 end)

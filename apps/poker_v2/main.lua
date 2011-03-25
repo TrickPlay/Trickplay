@@ -26,17 +26,9 @@ dofile("EventHandling.lua")
 add_to_key_handler(keys.a, assetman.show_all)
 
 screen:show()
--- Animation loop initialization
---gameloop = GameLoop()
 
--- View/Controller initialization
---game = GameControl(router, Components.GAME)
---[[
-game_menu = MenuView(router)
-game_menu:initialize()
-local no_moves_dialog = DialogBox("Sorry!\nThere are no\nmore moves", Components.NO_MOVES_DIALOG, router)
-local new_map_dialog = DialogBox("Start a new game\non this layout?", Components.NEW_MAP_DIALOG, router)
---]]
+-- handles ipods/pads/HIDs/etc
+ctrlman = ControllerManager(false, false, true, nil, 7)
 
 local betting = BettingController(router)
 TutorialView(router):initialize()
@@ -44,5 +36,5 @@ local game = GameControl(router)
 local character_selection = CharacterSelectionController(router)
 local splash = SplashController(router)
 router:start_app(Components.SPLASH)
---router:start_app(Components.NO_MOVES_DIALOG)
---router:start_app(Components.NEW_MAP_DIALOG)
+
+ctrlman:initialize()
