@@ -2481,7 +2481,7 @@ function ui_element.progressSpinner(t)
         number_of_dots      = 12,
         overall_diameter   = 100,
         cycle_time = 150*12,
-        clone_src     = nil
+        style = "orbitting"
     }
     --overwrite defaults
     if t ~= nil then
@@ -2533,49 +2533,46 @@ function ui_element.progressSpinner(t)
 
           return dot
     end
-    local img
+    local make_big_dot = function()
+
+          return Rectangle{
+              w=p.overall_diameter,
+              h=p.overall_diameter,
+              color = p.dot_color,
+              anchor_point={p.overall_diameter/2,p.overall_diameter/2}
+          }
+          
+    end
+    local img, load_timeline
     --function used to remake the dots upon a parameter change
     create_dots = function()
         l_dots:clear()
         dots = {}
+        
+        if p.style == "orbitting" then
+        
         local rad
         
         for i = 1, p.number_of_dots do
             --they're radial position
             rad = (2*math.pi)/(p.number_of_dots) * i
-            print(p.clone_src)
-            if p.clone_src == nil and skin_list[p.skin]["loadingdot"] == nil then
-                print(1)
+            if skin_list[p.skin]["loadingdot"] == nil then
                 dots[i] = make_dot(
                     math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
                     math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                 )
-	    elseif skin_list[p.skin]["loadingdot"] ~= nil then
-		img = assets(skin_list[p.skin]["loadingdot"])
-		img.anchor_point = {
+	        else
+		        img = assets(skin_list[p.skin]["loadingdot"])
+		        img.anchor_point = {
                         img.w/2,
                         img.h/2
                     }
-		img.position = {
-
+		        img.position = {
                         math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
                         math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
                     }
-		dots[i] = img
-            else
-                print(2)
-                dots[i] = Clone{
-                    source = p.clone_src,
-                    position = {
-
-                        math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
-                        math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
-                    },
-                    anchor_point = {
-                        p.clone_src.w/2,
-                        p.clone_src.h/2
-                    }
-                }
+                    img.size={p.dot_diameter, p.dot_diameter}
+		        dots[i] = img
             end
             l_dots:add(dots[i])
         end
@@ -2585,7 +2582,7 @@ function ui_element.progressSpinner(t)
             load_timeline:stop()
             load_timeline = nil
         end
-        local load_timeline = Timeline
+        load_timeline = Timeline
         {
             name      = "Loading Animation",
             loop      =  true,
@@ -2593,7 +2590,6 @@ function ui_element.progressSpinner(t)
             direction = "FORWARD", 
         }
 
-	-- table.insert( fff , load_timeline )
 
         local increment = math.ceil(255/p.number_of_dots)
         
@@ -2609,7 +2605,36 @@ function ui_element.progressSpinner(t)
             
         end
         load_timeline:start()
-
+        
+        else
+        if skin_list[p.skin]["loadingdot"] == nil then
+            img = make_big_dot()
+            l_dots:add(img)
+        else
+            img = assets(skin_list[p.skin]["loadingdot"])
+            img.anchor_point={img.w/2,img.h/2}
+            
+            l_dots:add(img)
+        end
+        img.position={img.w/2,img.h/2}
+        if load_timeline ~= nil and load_timeline.is_playing then
+            load_timeline:stop()
+            load_timeline = nil
+        end
+        load_timeline = Timeline
+        {
+            name      = "Loading Animation",
+            loop      =  true,
+            duration  =  p.cycle_time,
+            direction = "FORWARD", 
+        }
+        function load_timeline.on_new_frame(t,msces,p)
+            img.z_rotation={360*p,0,0}
+        end
+        load_timeline:start()
+        
+        end
+        
 	
     end
     create_dots()
