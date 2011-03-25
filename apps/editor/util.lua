@@ -474,9 +474,9 @@ function create_on_button_down_f(v)
 			     local c, t = find_container(x,y) 
 
 			     if c then 
-			          print("Container : ",c.name)
+			          --print("Container : ",c.name)
 			     end 
-			          print("Content Item : ",v.name)
+			          --print("Content Item : ",v.name)
 			
 			     --if (v.extra.type ~= "ScrollPane" and v.extra.type ~= "DialogBox" and v.extra.type ~= "LayoutManager") or c.name ~= v.name  then 
 			       if not is_this_container(v) or c.name ~= v.name then
