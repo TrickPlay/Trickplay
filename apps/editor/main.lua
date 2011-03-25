@@ -1086,6 +1086,10 @@ function main()
   	controllers:start_pointer()
     end
     
+    if editor_lb.disable_exit then
+	editor_lb:disable_exit()
+    end
+
     screen:add(BG_IMAGE_20)
     screen:add(BG_IMAGE_40)
     screen:add(BG_IMAGE_80)
@@ -1100,5 +1104,6 @@ function main()
     
 end
 dolater(main)
+
 --main()
 
