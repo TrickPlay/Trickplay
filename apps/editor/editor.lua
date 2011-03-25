@@ -3161,11 +3161,11 @@ function editor.ui_elements()
     	 widget_b.position =  {cur_w, cur_h}
     	 widget_b.name = v
     	 widget_b.reactive = true
-
 	 cur_h = cur_h + widget_b.h 
          msgw:add(widget_b)
          
          function widget_b:on_button_down(x,y,button,num_clicks)
+		print("djfahsdjfhalsdhfk")
 	      local new_widget = widget_f_map[v]() 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
@@ -3237,7 +3237,7 @@ function editor.ui_elements()
 		lb=new_widget
               elseif (new_widget.extra.type == "LayoutManager") then 
 		d=new_widget
-              elseif (new_widget.extra.type == "Scro1lPane") then 
+              elseif (new_widget.extra.type == "ScrollPane") then 
 		si=new_widget
               elseif (new_widget.extra.type == "MenuButton") then 
 		dd=new_widget

@@ -342,6 +342,40 @@ function create_on_button_down_f(v)
 			editor.n_select(v) 
 	       	    end
 
+-----[[ 	SHOW POSSIBLE CONTAINERS
+
+		    if control == true then 
+			local odr 
+			for i,j in pairs (g.children) do 
+				if j.name == v.name then 
+					odr = i
+				end 
+			end 
+
+
+			if odr then 
+			for i,j in pairs (g.children) do 
+				if is_this_container(j) == true then 
+					if i > odr then 
+						j.extra.org_opacity = j.opacity
+                       				j:set{opacity = 50}
+					end 	
+				elseif i ~= odr then  
+					j.extra.org_opacity = j.opacity
+                       			j:set{opacity = 50}
+
+				end 
+			end 
+			end
+
+			
+		    end 
+
+-----]]]] 
+
+
+
+
 		    -- Debugging : 841 
 
 		    if v.type ~= "Text" then 
@@ -378,7 +412,6 @@ function create_on_button_down_f(v)
         end
 
         function v:on_button_up(x,y,button,num_clicks)
-	print("VVVVVVVV",v.name)
 	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
 	     if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
@@ -467,10 +500,20 @@ function create_on_button_down_f(v)
 			        end 
 			     	end 
 			       end 
+
+				for i,j in pairs (g.children) do 
+
+					if j.extra then 
+						if j.extra.org_opacity then 
+							j.opacity = j.extra.org_opacity
+						end 
+					end 
+				end 
+
 		       end 
 
-
 ---]] Content Setting 
+
 		       local border = screen:find_child(v.name.."border")
 		       local am = screen:find_child(v.name.."a_m") 
 		       local group_pos
@@ -810,7 +853,7 @@ function make_attr_t(v)
   }
   
   local obj_map = {
-       ["Rectangle"] = function() return {"x_rotation", "anchor_point", "opacity", "color", "border_color", "border_width", "reactive", "focus"} end,
+       ["Rectangle"] = function() return {"x_rotation", "anchor_point", "opacity", "border_color", "color", "border_width", "reactive", "focus"} end,
        ["Text"] = function() return {"x_rotation", "anchor_point","opacity", "color", "font", "wrap_mode","reactive", "focus"} end,
        ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point","opacity", "reactive", "focus"} end,
        ["Group"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
