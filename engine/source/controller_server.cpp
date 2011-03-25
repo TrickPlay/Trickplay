@@ -1082,7 +1082,7 @@ String ControllerServer::handle_http_api( gpointer connection , const String & u
 
             g_object_unref( gen );
         } else {
-            result = "null";
+            result = "{}";
         }
     }
 
