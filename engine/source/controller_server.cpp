@@ -6,6 +6,7 @@
 #include "clutter/clutter.h"
 #include "uriparser/Uri.h"
 
+#include "app.h"
 #include "controller_server.h"
 #include "util.h"
 #include "sysdb.h"
@@ -1047,6 +1048,41 @@ String ControllerServer::handle_http_api( gpointer connection , const String & u
                     }
                 }
             }
+        }
+    }
+    else if ( path == "/api/current_app" )
+    {
+        App *current_app = context->get_current_app();
+        if(NULL != current_app)
+        {
+            JsonObject * o = json_object_new();
+
+            json_object_set_string_member( o, "name", current_app->get_metadata().name.c_str() );
+            json_object_set_string_member( o, "id", current_app->get_id().c_str() );
+            json_object_set_string_member( o, "version", current_app->get_metadata().version.c_str() );
+            json_object_set_int_member( o, "release", current_app->get_metadata().release );
+
+            JsonNode * node = json_node_new ( JSON_NODE_OBJECT );
+
+            json_node_set_object( node, o );
+
+            json_object_unref( o );
+
+            JsonGenerator * gen  = json_generator_new();
+
+            json_generator_set_root( gen, node );
+
+            gsize length = 0;
+
+            gchar * json = json_generator_to_data( gen, &length );
+
+            result = String( json, length );
+
+            g_free( json );
+
+            g_object_unref( gen );
+        } else {
+            result = "null";
         }
     }
 
