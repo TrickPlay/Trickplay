@@ -1,4 +1,63 @@
---look at the global "focus"
+local delimiter = "\r\n"
+local partial_response = ""
+stream_request = URLRequest{
+    url = "http://stream.twitter.com/1/statuses/filter.json",
+	
+    method = "POST",
+	
+	headers={["Authorization"]="Basic "..base64_encode("alexindaco:FR_06_co")},
+	
+    body = "track=#glee",
+	
+	on_response_chunk = function(request,response)
+		
+		if response.body then 
+            
+			partial_response = partial_response..response.body
+			
+			local i = string.find(partial_response,delimiter)
+			
+			if i == 1 then
+				
+				partial_response = string.sub(partial_response,i+2)
+				
+			elseif i then
+				
+				local json_parse = json:parse(string.sub(partial_response,1,i))
+				
+				partial_response = string.sub(partial_response,i+delimiter:len())
+				
+				if json_parse ~= nil then
+                    
+					for i,v in ipairs(json_parse.entities.hashtags) do
+                        
+                        if hash_tag_map[v.text:lower()] then
+                            
+                            hash_tag_map[v.text:lower()].tweetstream:receive_tweet(json_parse)
+                            
+                            break
+                            
+            end end end end
+			
+		else
+			
+			print("NO Response Body\n",response.status)
+			
+		end
+		
+	end
+}
+
+stream_request.prep_track = function()
+    stream_request.body = "track="
+    for i = 1, #tags do
+        stream_request.body = stream_request.body..tags[i]
+        if i~=#tags then
+            stream_request.body = stream_request.body..","
+        end
+    end
+end
+
 local months   = {
     Jan = 1,
     Feb = 2,
@@ -19,16 +78,16 @@ local time_diff = function(tweet_time)
     local diff = {
         day   = curr.day   - tweet_time.day,
         month = curr.month - tweet_time.month,
-        year  = curr.year  - tweet_time.year,
+        --year  = curr.year  - tweet_time.year,
         hour  = curr.hour  - tweet_time.hour,
         min   = curr.min   - tweet_time.min,
         sec   = curr.sec   - tweet_time.sec
     }
-    if diff.year ~= 0 then
+    --[[if diff.year ~= 0 then
         if diff.year == 1 then  return "1 year ago"
         else                    return diff.year  .." years ago"
         end
-    elseif diff.month ~= 0 then 
+    else]]if diff.month ~= 0 then 
         if diff.month == 1 then return "1 month ago"
         else                    return diff.month .." months ago"
         end
@@ -44,9 +103,12 @@ local time_diff = function(tweet_time)
         if diff.min == 1 then   return "1 minute ago"
         else                    return diff.min  .." minutes ago"
         end
+        
     else                        return "1 minute ago"
+    
     end
 end
+---[=[
 local req_page = function(keywords, callback, since_id)
     --dolater(callback,false)
     --return
@@ -59,8 +121,8 @@ local req_page = function(keywords, callback, since_id)
     else
         url = url.."&rpp="..40
     end
-        print(url)
-
+    print(url)
+    
     local req = URLRequest{
         url = url,
         on_complete = function(request,response)
@@ -77,7 +139,7 @@ local req_page = function(keywords, callback, since_id)
 --    error_message.text = "Latest tweet, waiting for more..."
 --]]
 end
-
+--]=]
 
 
 
@@ -99,6 +161,7 @@ TweetStream = Class(function(t,parent,...)
     local manual_scroll  = nil
     local scroll_thresh  = Timer{interval=10000} --wait-time to scrolling again
     local auto_scrolling  = true
+    
     
     local fade_in_hl     = Timeline
         {
@@ -125,6 +188,7 @@ TweetStream = Class(function(t,parent,...)
     local sel_i          = 0
     local hl_border      = 25
     --state
+    local is_in_view      = false
     local requesting      = false
     local at_bottom       = true
     local since_id        = 0
@@ -218,16 +282,18 @@ TweetStream = Class(function(t,parent,...)
         return group
     end
     function t:in_view()
-        if #tweets ~= 0 then
+        if #tweets ~= 0 or #results_cache ~= 0 then
             animate_tweets:start()
         elseif not requesting then
             requesting = true
-            req_page(show_obj.query,  t.url_callback,  since_id)
+            --req_page(show_obj.query,  t.url_callback,  since_id)
         end
+        is_in_view = true
         --active_stream = t
     end
     function t:out_view()
         animate_tweets:stop()
+        is_in_view = false
         --active_stream = nil
     end
     function t:select_tweet(i)
@@ -532,7 +598,7 @@ TweetStream = Class(function(t,parent,...)
                 self:select_tweet(top_tweet+1)
                 sel_i = top_tweet+1
             --if the top tweet is hanging half way off the bottom of the tweet stream then
-            --bring that nigga up
+            --bring it up
             elseif tweets[top_tweet].group.y + tweets[top_tweet].h >= group.clip[4] then
                 print("hangin below")
                 tweets[top_tweet].group.y = group.clip[4] - tweets[top_tweet].h
@@ -567,7 +633,9 @@ TweetStream = Class(function(t,parent,...)
         highlight.opacity=0
         scroll_thresh:stop()
     end
+    ---[[
     function t.url_callback(data)
+        --[[
         if data == false then
             if attempt == 5 then
                 error_message.text = "Twitter isn't sending responds, giving up"
@@ -602,6 +670,7 @@ TweetStream = Class(function(t,parent,...)
             error_message.text = "Latest tweet, waiting for more..."
             return
         end
+        --]]
         error_message.text = ""
         print("received actual data")
         local d,t,text
@@ -642,7 +711,40 @@ TweetStream = Class(function(t,parent,...)
         at_bottom  = false
         animate_tweets:start()
     end
-    
+    req_page(show_obj.query,  t.url_callback,  0)
+    --]]
+    function t:receive_tweet(d)
+        local t = { string.match( d.created_at ,
+            --"^(%u%a%a), (%d%d) (%u%a%a) (%d%d%d%d)"..
+            --" (%d%d):(%d%d):(%d%d) .*" )
+            "^(%u%a%a) (%u%a%a) (%d%d)"..
+            " (%d%d):(%d%d):(%d%d) .*" )
+        }
+
+        local text = string.gsub(d.text,"&apos;","'")
+        text = string.gsub(text,"&quot;","\"")
+        text = string.gsub(text,"&lt;","<")
+        text = string.gsub(text,"&gt;",">")
+        text = string.gsub(text,"&amp;","&")
+        
+        table.insert(results_cache,
+            TweetObj(
+                d.user.name,
+                d.user.profile_image_url,
+                text,
+                {
+                    day   = t[3] ,
+                    month = months[ t[2] ] ,
+                    --year  = t[4] ,
+                    hour  = t[4] ,
+                    min   = t[5] ,
+                    sec   = t[6]
+                }
+            )
+        )
+        at_bottom  = false
+        if is_in_view then animate_tweets:start() end
+    end
     --Grabs the next stored search result and adds it to the visible tweets
     function t:next_tweet()
         --print("next_tweet")
@@ -725,10 +827,12 @@ TweetStream = Class(function(t,parent,...)
         last_msec = animate_tweets.elapsed/1000
         
         --if you start running out of tweets and didn't already request more
+        --[[
         if #results_cache <= 5 and not requesting then
             requesting = true
             req_page(show_obj.query,  t.url_callback,  since_id)
         end
+        --]]
         --if still auto scrolling and you haven't reached the bottom yet
         if auto_scrolling and not at_bottom then
             error_message.opacity = 0
