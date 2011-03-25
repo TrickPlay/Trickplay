@@ -474,45 +474,48 @@ function create_on_button_down_f(v)
 			     local c, t = find_container(x,y) 
 
 			     if c then 
-			          --print("Container : ",c.name)
+			          print("Container : ",c.name)
 			     end 
-			          --print("Content Item : ",v.name)
+			          print("Content Item : ",v.name)
 			
 			     --if (v.extra.type ~= "ScrollPane" and v.extra.type ~= "DialogBox" and v.extra.type ~= "LayoutManager") or c.name ~= v.name  then 
 			       if not is_this_container(v) or c.name ~= v.name then
 			     	--print ("Container Type : ", t) 
 			     	if c and t then 
-			        v:unparent()
-			        v.position = {v.x - c.x, v.y - c.y,0}
-			        v.extra.is_in_group = true
-				if screen:find_child(v.name.."border") then 
-			             screen:find_child(v.name.."border").position = v.position
-				end
-				if screen:find_child(v.name.."a_m") then 
-			             screen:find_child(v.name.."a_m").position = v.position 
-			        end 
-			        if t == "ScrollPane" or t == "DialogBox" then 
-			            c.content:add(v) 
-			        elseif t == "LayoutManager" then 
-				     local col , row=  c:r_c_from_abs_position(x,y)
-				     print (row, ":", col)
-				     c:replace(row,col,v) 
-			        end 
-			     	end 
+				   	
+				    if (v.extra.selected == true and c.x < v.x and c.y < v.y) then 
+			        	v:unparent()
+			        	v.position = {v.x - c.x, v.y - c.y,0}
+			        	v.extra.is_in_group = true
+					if screen:find_child(v.name.."border") then 
+			             		screen:find_child(v.name.."border").position = v.position
+						end
+						if screen:find_child(v.name.."a_m") then 
+			             		screen:find_child(v.name.."a_m").position = v.position 
+			        		end 
+			        		if t == "ScrollPane" or t == "DialogBox" then 
+			            				c.content:add(v) 
+			        		elseif t == "LayoutManager" then 
+				     		local col , row=  c:r_c_from_abs_position(x,y)
+				     		print (row, ":", col)
+				     		c:replace(row,col,v) 
+			        		end 
+			     	       end 
+				    end 
 			       end 
 
-				for i,j in pairs (g.children) do 
-
-					if j.extra then 
-						if j.extra.org_opacity then 
-							j.opacity = j.extra.org_opacity
-						end 
-					end 
-				end 
-
+				
 		       end 
 
 ---]] Content Setting 
+
+		       for i,j in pairs (g.children) do 
+			     if j.extra then 
+				   if j.extra.org_opacity then 
+					j.opacity = j.extra.org_opacity
+				   end 
+			     end 
+		       end 
 
 		       local border = screen:find_child(v.name.."border")
 		       local am = screen:find_child(v.name.."a_m") 
