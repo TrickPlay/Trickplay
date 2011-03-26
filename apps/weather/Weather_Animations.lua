@@ -115,8 +115,9 @@ moon = {
             }
             self.group:add(self.stars,self.star,self.moon)
             --self.state="SET"
+            curr_condition:add(self.group)
         end
-        curr_condition:add(self.group)
+        
         self.group:lower_to_bottom()
     end,
 
@@ -798,8 +799,8 @@ chance_of = {
         fade_out = {
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                this_obj.cloud_1.x = -50-this_obj.cloud_1.w*(1-p)
-                this_obj.cloud_2.x = -20-this_obj.cloud_2.w*(1-p)
+                this_obj.cloud_1.x = -50-this_obj.cloud_1.w*(p)
+                --this_obj.cloud_2.x = -20-this_obj.cloud_2.w*(1-p)
                 this_obj.rain_elapsed=0
                 this_obj.l_elapsed=1000
                 if p == 1 then
@@ -1341,10 +1342,14 @@ local set_states = function(t)
     
     if t.moon ~= nil and t.moon ~= moon.state then
         if t.moon == "SET" then
+            animate_list[moon.func_tbls.rise]=nil
             animate_list[moon.func_tbls.set]=moon
+            moon.state = "SET"
         else
             moon:setup()
+            animate_list[moon.func_tbls.set]=nil
             animate_list[moon.func_tbls.rise]=moon
+            moon.state = "RISEN"
         end
     end
     
@@ -1354,6 +1359,7 @@ local set_states = function(t)
             tstorm:setup()
             animate_list[tstorm.func_tbls.fade_in]=tstorm
         else
+            animate_list[tstorm.func_tbls.tstorm_loop]=nil
             animate_list[tstorm.func_tbls.fade_out]=tstorm
         end
         tstorm.state = t.tstorm
@@ -1492,26 +1498,26 @@ conditions = {
     ["Chance of Sleet"]          = function() set_states{sun="FULL",chance_of="SLEET"} end,
     ["Chance of Snow"]           = function() set_states{sun="FULL",chance_of="SNOW"} end,
     ["Chance of Thunderstorms"]  = function() set_states{sun="FULL",chance_of="TSTORMS"} end,
-    ["Chance of a Thunderstorm"] = nil,
-    ["Clear"]                    = nil,
-    ["Cloudy"]                   = nil,
+    --["Chance of a Thunderstorm"] = nil,
+    --["Clear"]                    = nil,
+    --["Cloudy"]                   = nil,
     ["Flurries"]                 = function() set_states{snow="FLURRY"} end,
     ["Fog"]                      = function() set_states{sun="FULL",clouds="PARTLY",fog="FULL"} end,
     ["Haze"]                     = function() set_states{sun="FULL",fog="FULL"} end,
     ["Mostly Cloudy"]            = function() set_states{sun="FULL", clouds="MOSTLY"} end,
-    ["Mostly Sunny"]             = nil,
+    --["Mostly Sunny"]             = nil,
     ["Partly Cloudy"]            = function() set_states{sun="FULL",clouds="PARTLY"} end,
-    ["Partly Sunny"]             = nil,
+    --["Partly Sunny"]             = nil,
     ["Freezing Rain"]            = function() set_states{wiper  = "F_RAIN"} end,
     ["Rain"]                     = function() set_states{wiper="RAIN"} end,
     ["Sleet"]                    = function() set_states{wiper="SLEET"} end,
     ["Snow"]                     = function() set_states{fog="HALF",snow="SNOW"} end,
     ["Sunny"]                    = function() set_states{sun="FULL"} end,
     ["Thunderstorms"]            = function() set_states{tstorm="ON"} end,
-    ["Thunderstorm"]             = nil,
+    --["Thunderstorm"]             = nil,
     ["Unknown"]                  = function() set_states{} end,
     ["Overcast"]                 = function() set_states{sun="HALF",clouds="MOSTLY",fog="FULL"} end,
-    ["Scattered Clouds"]         = nil,
+    --["Scattered Clouds"]         = nil,
 }
 
 conditions["Clear"]                  = conditions["Sunny"]
@@ -1522,5 +1528,33 @@ conditions["Mostly Sunny"]           = conditions["Partly Cloudy"]
 conditions["Scattered Clouds"]       = conditions["Partly Cloudy"]
 conditions["Thunderstorm"]           = conditions["Thunderstorms"]
 conditions["Chance of a Thunderstorm"] = conditions["Chance of Thunderstorms"]
+--from curr conditions
+conditions["Rain Showers"]        = conditions["Rain"]
+conditions["Drizzle"]             = conditions["Rain"]
+conditions["Snow Grains"]         = conditions["Snow"]
+conditions["Ice Crystals"]        = conditions["Snow"]
+conditions["Ice Pellets"]         = conditions["Snow"]
+conditions["Hail"]                = conditions["Snow"]
+conditions["Mist"]                = conditions["Haze"]
+conditions["Smoke"]               = conditions["Fog"]
+conditions["Low Drifting Snow"]   = conditions["Flurries"]
+conditions["Blowing Snow"]        = conditions["Snow"]
+conditions["Ice Pellets Showers"] = conditions["Snow"]
+conditions["Hail Showers"]        = conditions["Snow"]
+conditions["Small Hail Showers"]  = conditions["Snow"]
+conditions["Thunderstorms and Rain"]        = conditions["Thunderstorms"]
+conditions["Thunderstorms and Snow"]        = conditions["Thunderstorms"]
+conditions["Thunderstorms and Ice Pellets"] = conditions["Thunderstorms"]
+conditions["Thunderstorms and Hail"]        = conditions["Thunderstorms"]
+conditions["Thunderstorms and Small Hail"]  = conditions["Thunderstorms"]
+
+
+
+
+
+
+
+
+
 
 --conditions["Chance of Rain"]()

@@ -153,7 +153,7 @@ end
 
 function Make_Bar(loc,index)
     local bar_index = index
-    local mini_width = MINI_BAR_MIN_W 
+    local mini_width = MINI_BAR_MIN_W
 
     local bar = Group{
         name = loc.." Weather Bar",
@@ -405,41 +405,41 @@ function Make_Bar(loc,index)
     bar.update = function(curr_temp_tbl,fcast_tbl,error_str)
         if curr_temp_tbl ~= nil then
             pws_tbl = curr_temp_tbl
-            --curr_temp.text  = string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG
             
+            --print()
+            local t = {string.match( curr_temp_tbl.current_observation.observation_time ,
+                "^.* (%d*):%d* (%u%u) .*" )}
             
-            
-            
-            --[[
-            mini_width = location.x+location.w-MINI_BAR_X+100
-            if mini then
-                --bar:find_child("mid").scale = {mini_width,1}
-                bar:find_child("mid").w = mini_width
-                bar:find_child("right").x   = bar_side_w + mini_width
+            t[1] = tonumber(t[1])
+            if t[1] >= 7 and t[2] =="PM" or t[1] <= 5 and t[2] =="AM" then
+                bar.local_time_of_day = "NIGHT"
+            else
+                bar.local_time_of_day = "DAY"
             end
-            green_button_mini.x = MINI_BAR_X+mini_width -83--+ mini_width -imgs.bar.side.w/2- green_button_mini.w
-            arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
-            --]]
+            
         end
         
         if fcast_tbl ~= nil then
             f_tbl = fcast_tbl.forecast.simpleforecast.forecastday[1]
             local fday = fcast_tbl.forecast.simpleforecast.forecastday[1]
             blurb_txt.text      = fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
+            --[[
+            if blurb_txt.h > yellow_button.y+yellow_button.h-blurb_txt.y then
+                blurb_txt.clip = {0,0,blurb_txt.w,yellow_button.y+yellow_button.h-blurb_txt.y}
+                bar.func_tbls.blurb.dy = blurb_txt.h-blurb_txt.clip[4]
+            end--]]
             
             --hi_temp.text = fday.high.fahrenheit..DEG
             --lo_temp.text = fday.low.fahrenheit.. DEG
             bar.curr_condition = fcast_tbl.forecast.simpleforecast.forecastday[1].conditions
-            local time_str = fcast_tbl.forecast.txt_forecast.forecastday[1].title
-            if string.match(time_str,"night") == "night" or string.match(time_str,"Night") == "Night" then
-                bar.local_time_of_day = "NIGHT"
-            else
-                bar.local_time_of_day = "DAY"
-            end
+            
             if bar_i == bar_index then
                 time_of_day = bar.local_time_of_day
                 print(bar.curr_condition)
                 conditions[bar.curr_condition]()
+                if blurb_txt.has_clip then
+                    animate_list[bar.func_tbls.blurb] = bar
+                end
             end
             
             --[[
@@ -455,24 +455,7 @@ function Make_Bar(loc,index)
             bar:add(five_day)
             five_day.opacity=0
             five_day:hide()
-            --[[
-            for i = 1,5 do
-                fday = fcast_tbl.forecast.simpleforecast.forecastday[i+1]
-                if i == 1 then
-                    days[i]:find_child("day").text = "Tomorrow"
-                else
-                    days[i]:find_child("day").text = fday.date.weekday
-                end
-                days[i]:find_child("hi").text = fday.high.fahrenheit..DEG
-                days[i]:find_child("lo").text = fday.low.fahrenheit.. DEG
-                days[i]:add(Clone{
-                    name = "icon",
-                    y    = 7,
-                    x    = 12,
-                    source = imgs.icons[fday.icon]
-                })
-            end
-            --]]
+            
         end
         if f_tbl ~= nil and pws_tbl ~= nil then
             mini_width = Text{
@@ -783,6 +766,13 @@ function Make_Bar(loc,index)
             func = function(this_obj,this_func_tbl,secs,p)
                 loading_error.opacity = 255*(1-p)
             end
+        },
+        blurb = {
+            duration = 5000,
+            dy = nil,
+            func = function(this_obj,this_func_tbl,secs,p)
+                blurb_txt.y = BLURB_Y+this_func_tbl.dy*(1-math.cos(2*math.pi)*p)
+            end
         }
     }
     
@@ -827,7 +817,11 @@ function Make_Bar(loc,index)
                 animate_list[bar.func_tbls.full_move_left] = bar
             end
             time_of_day = bars[next_i].local_time_of_day
-            conditions[bars[next_i].curr_condition]()
+            if conditions[bars[next_i].curr_condition] then
+                conditions[bars[next_i].curr_condition]()
+            else
+                conditions["Unknown"]()
+            end
             print("switching to "..next_i)
             bar_i = next_i
         end,
@@ -867,7 +861,11 @@ function Make_Bar(loc,index)
                 animate_list[bar.func_tbls.full_move_right] = bar
             end
             time_of_day = bars[next_i].local_time_of_day
-            conditions[bars[next_i].curr_condition]()
+            if conditions[bars[next_i].curr_condition] then
+                conditions[bars[next_i].curr_condition]()
+            else
+                conditions["Unknown"]()
+            end
             print("switching to "..next_i)
             bar_i = next_i
         end,
