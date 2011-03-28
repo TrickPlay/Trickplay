@@ -1128,6 +1128,10 @@ int TPContext::run()
     color.alpha = 0;
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
+    
+    clutter_stage_set_use_alpha( CLUTTER_STAGE( stage ) , TRUE );
+    
+    clutter_actor_set_opacity( stage , 0 );
 
 #ifdef TP_PROFILING
 
