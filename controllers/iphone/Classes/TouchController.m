@@ -26,7 +26,7 @@
         //activeTouches = [[NSMutableDictionary alloc] initWithCapacity:10];
         openFinger = 1;
         
-        [view setMultipleTouchEnabled:YES];
+        [view setMultipleTouchEnabled:NO];
     }
     
     return self;
@@ -67,11 +67,16 @@
     openFinger++;
 }
 
+- (BOOL)stillActive:(UITouch *)touch {
+    return socketManager && CFDictionaryGetValue(activeTouches, touch);
+}
+
+
 /**
  * Returns whether or not the touch was sent.
  */
 - (BOOL)sendTouch:(UITouch *)touch withCommand:(NSString *)command {
-    if (!socketManager || !touchEventsAllowed || !CFDictionaryGetValue(activeTouches, touch)) {//![activeTouches objectForKey:touch]) {
+    if (![self stillActive:touch] || !touchEventsAllowed) {
         return NO;
     }
     
@@ -114,7 +119,8 @@
     BOOL stillActive;
     for (i = 0; i < [movedTouches count]; i++) {
         UITouch *touch = [movedTouches objectAtIndex:i];
-        if (![self sendTouch:touch withCommand:@"TM"]) {
+        [self sendTouch:touch withCommand:@"TM"];
+        if (![self stillActive:touch]) {
             stillActive = NO;
         }
     }
@@ -187,7 +193,8 @@
     for (i = 0; i < [endedTouches count]; i++) {
         // send touch command to Trickplay
         UITouch *touch = [endedTouches objectAtIndex:i];
-        if (![self sendTouch:touch withCommand:@"TU"]) {
+        [self sendTouch:touch withCommand:@"TU"];
+        if (![self stillActive:touch]) {
             stillActive = NO;
         }
         // delete touch from active touches

@@ -242,7 +242,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [gestureViewController clean];
         [self launchApp:(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row]];
     }
+    
     pushingViewController = YES;
+    
+    UIBarButtonItem *newBackButton = [[UIBarButtonItem alloc] initWithTitle: @"Apps List" style: UIBarButtonItemStyleBordered target: nil action: nil];
+    [[self navigationItem] setBackBarButtonItem: newBackButton];
+    [newBackButton release];
+    
     [self.navigationController pushViewController:gestureViewController animated:YES];    
     
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
