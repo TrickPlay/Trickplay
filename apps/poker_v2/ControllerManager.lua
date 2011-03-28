@@ -117,10 +117,13 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         function controller:on_key_down(key)
             print("controller keypress:", key)
+            --[[
             if controller.name == "Keyboard" then return true end
             print("key consumed")
 
             return false
+            --]]
+            return true
         end
 
 
@@ -128,6 +131,23 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         
         function controller:on_disconnected()
             print("DISCONNECTED", controller.name)
+
+            controller.set_hole_cards = nil
+            controller.name_dog = nil
+            controller.choose_dog = nil
+            controller.state = nil
+            controller.add_image = nil
+            controller.clear_and_set_background = nil
+            controller.on_key_down = nil
+            controller.on_disconnected = nil
+            controller.on_click = nil
+            controller.on_accelerometer = nil
+            controller.on_touch_down = nil
+            controller.on_touch_up = nil
+            controller.on_touch_move = nil
+            controller.waiting_room = nil
+            controller.update_waiting_room = nil
+            print("here")
 
             active_ctrls[controller.name] = nil
             number_of_ctrls = number_of_ctrls - 1
@@ -183,6 +203,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
             controller.state = ControllerStates.CHOOSE_DOG
         end
+
 
         --[[
             Brings up the name your dog screen on the iphone. Player may enter a name
@@ -299,9 +320,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
     -- update the waiting room for all controllers
     function ctrlman:update_waiting_room(players)
+        print("updating waiting room")
         for k,controller in pairs(controllers.connected) do
             if controller.name ~= "Keyboard" then
-                controller:update_waiting_room(players)
+                controller:waiting_room(players)
             end
         end
     end

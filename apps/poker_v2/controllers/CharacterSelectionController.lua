@@ -75,7 +75,7 @@ function(ctrl, router, ...)
             dog_view = dog_selectors[dog_number].dog_view
         }
 
-        local player = Player(args)
+        local player = Player(players, args)
         if controller then controller.player = player end
         players[dog_number] = player
 

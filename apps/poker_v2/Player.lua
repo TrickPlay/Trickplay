@@ -1,4 +1,4 @@
-Player = Class(function(player, args, ...)
+Player = Class(function(player, players, args, ...)
     player.bet = DEFAULT_BET
     player.money = args.endowment or error("must provide an endowment", 2)
     player.difficulty = math.random(Difficulty.HARD,Difficulty.EASY)
@@ -25,7 +25,7 @@ Player = Class(function(player, args, ...)
         function player.controller:on_disconnected()
             temp_func(player.controller)
             local human_count = 0
-            for i,player in ipairs(model.players) do
+            for i,player in ipairs(players) do
                 if player.is_human then human_count = human_count + 1 end
             end
             player.is_human = (human_count <= 1)
