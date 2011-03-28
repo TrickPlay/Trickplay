@@ -1414,7 +1414,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		      end
 	              return true
 		  end 
- 	     elseif (key == keys.Tab and shift == false) or key == keys.Down then 
+ 	     elseif (key == keys.Tab and shift == false) then 
                   group.extra.on_focus_out()
 		  for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
@@ -1430,8 +1430,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			end 
     		  end
 		  return true
-	     elseif key == keys.Up or 
-		    (key == keys.Tab and shift == true )then 
+	     elseif (key == keys.Tab and shift == true )then 
 		  group.extra.on_focus_out()
 		  for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
@@ -1795,7 +1794,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
          	    item_group = inspector:find_child("item_group")
     	       end 
 
-	       if (key == keys.Tab and shift == false) or key == keys.Down then
+	       if (key == keys.Tab and shift == false) then
 		  item.on_focus_out()
 		  local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
 		  if (item_group:find_child("item_text"..tostring(next_i))) then
@@ -1824,7 +1823,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		        end 
     		     end
 		  end
-	       elseif key == keys.Up or (key == keys.Tab and shift == true )then 
+	       elseif (key == keys.Tab and shift == true )then 
 		     item.on_focus_out()
 		     local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     if (item_group:find_child("item_text"..tostring(prev_i))) then
@@ -1944,7 +1943,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		     item_picker.press_left()
 	       elseif key == keys.Right then  
 		     item_picker.press_right()
-	       elseif (key == keys.Tab and shift == false) or key == keys.Down then
+	       elseif (key == keys.Tab and shift == false) then
 		     item_picker.on_focus_out()
 		     for i, v in pairs(attr_t_idx) do
 		     if(item_n == v or item_v == v) then 
@@ -1962,7 +1961,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		          end
 		     end 
     		     end
-	       elseif key == keys.Up or (key == keys.Tab and shift == true )then 
+	       elseif (key == keys.Tab and shift == true )then 
 		     item_picker.on_focus_out()
 		      for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
@@ -2186,9 +2185,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
             else 
          	item_group = inspector:find_child("item_group")
     	    end 
-	    if key == keys.Return or
-                 (key == keys.Tab and shift == false) or 
-                 key == keys.Down then
+	    if key == keys.Return or (key == keys.Tab and shift == false)  then
 	       	 group.extra.on_focus_out()
 		 for i, j in pairs(attr_t_idx) do
 		     if(item_n == j or item_v == j) then 
@@ -2233,7 +2230,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		          end
 		     end 
     		end
-	     elseif key == keys.Up or (key == keys.Tab and shift == true )then 
+	     elseif (key == keys.Tab and shift == true )then 
 		    group.extra.on_focus_out()
  		    for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
