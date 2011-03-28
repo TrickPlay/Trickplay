@@ -24,6 +24,9 @@ function(ctrl, router, ...)
         ctrl:hide_start_button()
         for i,dog_selector in ipairs(dog_selectors) do
             dog_selector.dog_view:glow_off()
+            if not players[i] then
+                dog_selector.dog_view:fade_out()
+            end
         end
         router:set_active_component(Components.GAME)
         game:initialize_game{
