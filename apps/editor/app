@@ -1,9 +1,9 @@
 app=
 {
     id          = "com.trickplay.editor",
-    release     = "2",
+    release     = "4",
     version     = "1.0",
-    name        = "TrickPlay",
+    name        = "Visual Editor",
     copyright   = "© Trickplay Inc."
 }
 
