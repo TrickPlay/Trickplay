@@ -2210,15 +2210,21 @@ function editor.duplicate()
 			     	   	   	end 
 						ui.dup[j] = temp_g
 					 elseif j == "tiles" then 
-						--[[
-			        			elseif t == "LayoutManager" then 
-				     				local col , row=  c:r_c_from_abs_position(x,y)
-				     				print (row, ":", col)
-				     			        c:replace(row,col,v) 
-			        				end 
-			     	       			end 
-]]
-
+						   for k,l in pairs (v[j]) do 
+							if type(l) == "table" then 
+							     for o,p in pairs(l) do 
+								  while(is_available(string.lower(p.type)..tostring(item_num))== false) do
+		         						item_num = item_num + 1
+	             						  end 
+								  t_obj = copy_obj(p)
+								  t_obj.name = string.lower(p.type)..tostring(item_num)
+								  t_obj.extra.is_in_group = true
+								  t_obj.reactive = true
+				     			          ui.dup:replace(k,o,t_obj) 
+		     						  create_on_button_down_f(t_obj)
+							     end  
+							end 
+						   end
 					 elseif type(v[j]) == "table" then  
 						   local temp_t = {}
 						   for k,l in pairs (v[j]) do 
