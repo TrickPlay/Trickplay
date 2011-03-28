@@ -348,11 +348,18 @@ function Make_Bar(loc,index, master)
             local t = {string.match( curr_temp_tbl.current_observation.observation_time ,
                 "^.* (%d*):%d* (%u%u) .*" )}
             
+            dumptable(t)
+            
             t[1] = tonumber(t[1])
-            if t[1] >= 7 and t[2] =="PM" or t[1] <= 5 and t[2] =="AM" then
+            
+            if t[1] >= 7 and t[2] =="PM" and t[1] ~= 12 or (t[1] <= 5 or t[1] == 12) and t[2] =="AM" then
+                
                 bar.local_time_of_day = "NIGHT"
+                
             else
+                
                 bar.local_time_of_day = "DAY"
+                
             end
             
         end
