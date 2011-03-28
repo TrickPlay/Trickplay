@@ -121,6 +121,7 @@ locations = --[[settings.locations or]] {94019,94022,}
 bar_i = 1
 curr_condition=Group{name="Bottom Corner Weather conditions"}
 
+all_anims = {}
 bars={}
 screen:add(curr_condition,left_faux_bar,right_faux_bar)
 dofile("Internet.lua")

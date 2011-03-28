@@ -213,6 +213,7 @@ lg_cloud = function() return{
     },
     hurry_out = function(self)
         self.speed = 300
+        animate_list[self.func_tbls.drift]=self
     end
 
 }end
@@ -391,6 +392,7 @@ window_snow = function(x,y,deg) return{
             --animate_list[self.func_tbls.fade_out] = self
             --self.img.opacity=0
             self.img:unparent()
+            
         end
     end,
     check_wipe_up = function(self,deg_1,deg_2)
@@ -445,7 +447,22 @@ window_snow = function(x,y,deg) return{
     },
 
 }end
-window_drops = function(x,y,deg) return{
+local prev_drops = {}
+window_drops = function(x,y,deg)
+
+    if #prev_drops ~= 0 then
+        local drop = table.remove(prev_drops)
+        drop.setup = function(self)
+            self.img.x =   x
+            self.img.y =   y
+            self.deg   = deg
+            self.img.scale={0,0}
+            self.img.opacity=255*.75
+            curr_condition:add(self.img)
+        end
+        return drop
+    end
+    return{
     
     setup = function(self)
         self.deg = deg
@@ -467,6 +484,10 @@ window_drops = function(x,y,deg) return{
             --animate_list[self.func_tbls.fade_out] = self
             --self.img.opacity=0
             self.img:unparent()
+            table.insert(prev_drops,self)
+            animate_list[self.func_tbls.drop]=nil
+            animate_list[self.func_tbls.stick]=nil
+            animate_list[self.func_tbls.wobble]=nil
         end
     end,
     check_wipe_up = function(self,deg_1,deg_2)
@@ -474,6 +495,10 @@ window_drops = function(x,y,deg) return{
             --animate_list[self.func_tbls.fade_out] = self
             --self.img.opacity=0
             self.img:unparent()
+            table.insert(prev_drops,self)
+            animate_list[self.func_tbls.drop]=nil
+            animate_list[self.func_tbls.stick]=nil
+            animate_list[self.func_tbls.wobble]=nil
         end
     end,
     func_tbls={
@@ -493,6 +518,9 @@ window_drops = function(x,y,deg) return{
                 this_obj.img.opacity=255*.75*(1-p)
                 if p == 1 then
                     this_obj.img:unparent()
+                    animate_list[self.func_tbls.drop]=nil
+                    animate_list[self.func_tbls.stick]=nil
+                    animate_list[self.func_tbls.wobble]=nil
                 end
             end
         },
@@ -620,8 +648,8 @@ wiper = {
         },
         snow_loop = {
             func = function(this_obj,this_func_tbl,secs,p)
-                this_obj.rain_elapsed = this_obj.rain_elapsed + secs*1000
-                if this_obj.rain_elapsed > 150 then
+                this_obj.snow_elapsed = this_obj.snow_elapsed + secs*1000
+                if this_obj.snow_elapsed > 100 then
                     
                     local rad = math.random(1,(this_obj.wiper_blade.w-30)/4)*4
                     local deg = math.random(1,20)*-4
@@ -634,7 +662,7 @@ wiper = {
                     this_obj.drops[r] = r
                     animate_list[r.func_tbls.stick] = r
                     
-                    this_obj.rain_elapsed = 0
+                    this_obj.snow_elapsed = 0
                 end
             end
         },
@@ -661,6 +689,7 @@ wiper = {
                 this_obj.snow_blade.opacity=255*p
                 if p == 1 then
                     animate_list[this_obj.func_tbls.snow_loop] = this_obj
+                    
                 end
             end,
         },
@@ -689,6 +718,9 @@ wiper = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
                 this_obj.snow_blade.opacity=255*(1-p)
+                if p == 1 then
+                    animate_list[this_obj.func_tbls.snow_loop]=nil
+                end
             end,
         },
     }
@@ -1052,8 +1084,8 @@ tstorm = {
 snow_flake_flurry = function(speed_x,speed_y,x,y) return{
     
     setup = function(self)
-        local s = math.random(12,20)/20*math.random(12,20)/20
-local ss = s*(1+math.random(-10,10)/50)
+        local s  = math.random(12,20)/20*math.random(12,20)/20
+        local ss = s*(1+math.random(-10,10)/50)
         self.speed_x = speed_x*s
         self.speed_y = speed_y
         self.x = x
@@ -1078,6 +1110,7 @@ local ss = s*(1+math.random(-10,10)/50)
                 if this_obj.img.y > screen_h+200 then
                     animate_list[this_func_tbl]=nil
                     this_obj.img:unparent()
+                    snow.flakes[this_obj]=nil
                     --this_obj.img = nil
                 end
             end
@@ -1105,7 +1138,8 @@ snow_flake_lg = function(speed_x,speed_y,x,y)
         local flake = table.remove(prev_snow_flake_lg)
         flake.setup = function(self)
             self.img.x   = -100
-            self.img.y   = y
+            self.img.y   = y,
+            
             curr_condition:add(self.img)
         end
         return flake
@@ -1115,7 +1149,6 @@ snow_flake_lg = function(speed_x,speed_y,x,y)
         return{
             setup = function(self)
                 local s = math.random(12,20)/20*math.random(12,20)/20
-                local ss = s*(1+math.random(-10,10)/50)
                 self.speed_x = speed_x*s
                 self.speed_y = speed_y
                 self.x = x
@@ -1127,10 +1160,12 @@ snow_flake_lg = function(speed_x,speed_y,x,y)
                     y=y,
                     opacity=255*s*(1+math.random(-10,10)/50),
                     scale = {s,s},
-                    
                 }
                 self.img.anchor_point = {self.img.w/2-math.random(60,120),self.img.h/2}
                 curr_condition:add(self.img)
+            end,
+            hurry_out = function(self)
+                self.speed_y=200
             end,
             func_tbls={
                 drop={
@@ -1145,6 +1180,7 @@ snow_flake_lg = function(speed_x,speed_y,x,y)
                             animate_list[this_func_tbl]=nil
                             this_obj.img:unparent()
                             table.insert(prev_snow_flake_lg,this_obj)
+                            snow.flakes[this_obj]=nil
                             --this_obj.img = nil
                         end
                     end
@@ -1166,7 +1202,7 @@ snow = {
     thresh   = 689,
     elapsed  = 2000,
     sm_elapsed  = 2000,
-    
+    flakes = {},
     
     state="NONE",
     remove=function(self)
@@ -1178,7 +1214,11 @@ snow = {
         self.snow_corner.y=screen_h-self.snow_corner.h+30
         curr_condition:add(self.snow_corner)
     end,
-    
+    hurry_out_flakes = function(self)
+        for k,v in pairs(self.flakes) do
+            k:hurry_out()
+        end
+    end,
     func_tbls = {
         flurry_loop = {
             func = function(this_obj,this_func_tbl,secs,p)
@@ -1190,6 +1230,7 @@ snow = {
                         math.random(50,100),20,
                         math.random(-100,-10),math.random(750,950)
                     )
+                    this_obj.flakes[r] = r
                     r:setup()
                     animate_list[r.func_tbls.drop] = r
                     
@@ -1228,6 +1269,7 @@ snow = {
                         math.random(600,950)
                     )
                     r:setup()
+                    this_obj.flakes[r] = r
                     animate_list[r.func_tbls.drop] = r
                     
                     
@@ -1354,7 +1396,6 @@ local set_states = function(t)
     end
     
     if t.tstorm ~= nil and t.tstorm ~= tstorm.state then
-        print("oooo")
         if t.tstorm == "ON" then
             tstorm:setup()
             animate_list[tstorm.func_tbls.fade_in]=tstorm
@@ -1406,6 +1447,12 @@ local set_states = function(t)
                 animate_list[wiper.func_tbls.frost_fade_out]=wiper
             end
             animate_list[wiper.func_tbls.sleet_fade_in]=wiper
+        elseif t.wiper == "RAIN" then
+            if wiper.state == "F_RAIN" then
+                animate_list[wiper.func_tbls.frost_fade_out]=wiper
+            elseif wiper.state == "SLEET" then
+                animate_list[wiper.func_tbls.sleet_fade_out]=wiper
+            end
         end
         wiper.state = t.wiper
     end
@@ -1437,6 +1484,7 @@ local set_states = function(t)
         end
         
         snow.state = t.snow
+        snow:hurry_out_flakes()
         
         if snow.state == "NONE" then
             animate_list[snow.func_tbls.fade_out] = snow
@@ -1519,6 +1567,9 @@ conditions = {
     ["Overcast"]                 = function() set_states{sun="HALF",clouds="MOSTLY",fog="FULL"} end,
     --["Scattered Clouds"]         = nil,
 }
+for k,_ in pairs(conditions) do
+    table.insert(all_anims,k)
+end
 
 conditions["Clear"]                  = conditions["Sunny"]
 --conditions["Chance of Sleet"]        = conditions["Chance of Freezing Rain"]
