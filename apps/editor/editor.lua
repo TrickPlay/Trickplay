@@ -9,6 +9,44 @@ local g_init_x = 0
 local g_init_y = 0
 local factory = ui.factory
 
+
+local widget_f_map = {
+     ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() end, 
+     ["Text"]		= function () editor.text() input_mode = S_SELECT end, 
+     ["Image"]		= function () input_mode = S_SELECT  editor.the_image() end, 	
+     ["Video"] 		= function () input_mode = S_SELECT editor.the_video() end,
+     ["Button"]         = function () return ui_element.button()       end, 
+     ["TextInput"] = function () return ui_element.textInput()    end, 
+     ["DialogBox"]      = function () return ui_element.dialogBox()    end, 
+     ["ToastAlert"]       = function () return ui_element.toastAlert()     end,   
+     ["RadioButton"]    = function () return ui_element.radioButton()  end, 
+     ["CheckBox"]       = function () return ui_element.checkBox()     end, 
+     ["ButtonPicker"]   = function () return ui_element.buttonPicker() end, 
+     ["ProgressSpinner"]    = function () return ui_element.progressSpinner()  end, 
+     ["ProgressBar"]     = function () return ui_element.progressBar()   end,
+     ["MenuButton"]       = function () return ui_element.menuButton()  end,
+     ["MenuBar"]        = function () return ui_element.menuBar()      end,
+     ["LayoutManager"]        = function () return ui_element.layoutManager()   end,
+     ["ScrollPane"]    = function () return ui_element.scrollPane() end, 
+     ["ArrowPane"]    = function () return ui_element.arrowPane() end, 
+}
+
+local widget_n_map = {
+     ["Button"]         = function () return "Button" end, 
+     ["TextInput"] = function () return "Text Input" end, 
+     ["DialogBox"]      = function () return "Dialog Box" end, 
+     ["ToastAlert"]       = function () return "Toast Alert" end,   
+     ["RadioButton"]    = function () return "Radio Button" end, 
+     ["CheckBox"]       = function () return "Checkbox" end, 
+     ["ButtonPicker"]   = function () return "Button Picker" end, 
+     ["ProgressSpinner"]    = function () return "Progress Spinner" end, 
+     ["ProgressBar"]     = function () return "Progress Bar" end,
+     ["MenuButton"]       = function () return "Menu Button" end,
+     ["LayoutManager"]        = function () return "Layout Manager" end,
+     ["ScrollPane"]    = function () return "Scroll Pane" end, 
+     ["ArrowPane"]    = function () return "Arrow Pane" end, 
+}
+
 function guideline_type(name) 
     local i, j = string.find(name,"v_guideline")
     if(i ~= nil and j ~= nil)then 
@@ -2100,18 +2138,109 @@ function editor.duplicate()
 	        input_mode = S_SELECT
 		return 
         end 
+
 	for i, v in pairs(g.children) do
             if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     while(is_available(string.lower(v.type)..tostring(item_num))== false) do
-		         item_num = item_num + 1
-	             end 
-		     editor.n_selected(v)
-		     ui.dup = copy_obj(v)  
-                     ui.dup.name=string.lower(v.type)..tostring(item_num)
-		     ui.dup.position = {v.x + 20, v.y +20}
-        	     table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
-        	     g:add(ui.dup)
+		     if is_this_widget(v) == false  then	
+			while(is_available(string.lower(v.type)..tostring(item_num))== false) do
+		         	item_num = item_num + 1
+	             	end 
+		     	editor.n_selected(v)
+		     	ui.dup = copy_obj(v)  
+                     	ui.dup.name=string.lower(v.type)..tostring(item_num)
+		     	ui.dup.position = {v.x + 20, v.y +20}
+
+		        if v.type == "Group" then 
+			      for i,j in pairs(v.children) do 
+			     	   if j.name then 
+					while(is_available(string.lower(j.type)..tostring(item_num))== false) do
+		         			item_num = item_num + 1
+	             			end 
+					ui.dup_c = copy_obj(j) 
+					ui.dup_c.name=string.lower(j.type)..tostring(item_num)
+        	     	        	ui.dup:add(ui.dup_c)
+		     			create_on_button_down_f(ui.dup_c)
+		     			item_num = item_num + 1
+	
+			     	   end 
+			      end 
+			end 
+        	     	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
+        	     	g:add(ui.dup)
+		     else 
+
+    			local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","stroke_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+
+		 	ui.dup = widget_f_map[v.extra.type]() 
+
+			while(is_available(ui.dup.name..tostring(item_num))== false) do
+		         			item_num = item_num + 1
+	             	end 
+
+	           	ui.dup.name = ui.dup.name..tostring(item_num)
+	           	ui.dup.position = {v.x + 50, v.y + 50, 0}
+				
+			for i,j in pairs(w_attr_list) do 
+			     if v[j] ~= nil then 
+				   if j ~= "name" and j ~= "position" then  
+					 if j == "content" then  
+						local temp_g = copy_obj(v[j])
+						for m,n in pairs(v.content.children) do 
+			     	   		     if n.name then 
+							while(is_available(string.lower(n.type)..tostring(item_num))== false) do
+		         					item_num = item_num + 1
+	             					end 
+						        temp_g_c = copy_obj(n) 
+							temp_g_c.name=string.lower(n.type)..tostring(item_num)
+							temp_g_c.extra.is_in_group = true
+							temp_g_c.reactive = true
+						
+							if screen:find_child(temp_g_c.name.."border") then 
+			             				screen:find_child(temp_g_c.name.."border").position = temp_g_c.position
+						        end
+							if screen:find_child(temp_g_c.name.."a_m") then 
+			             				screen:find_child(temp_g_c.name.."a_m").position = temp_g_c.position 
+			        			end 
+
+        	     	        			temp_g:add(temp_g_c)
+		     					create_on_button_down_f(temp_g_c)
+		     					item_num = item_num + 1
+			     	   	   	     end 
+			     	   	   	end 
+						ui.dup[j] = temp_g
+					 elseif j == "tiles" then 
+						--[[
+			        			elseif t == "LayoutManager" then 
+				     				local col , row=  c:r_c_from_abs_position(x,y)
+				     				print (row, ":", col)
+				     			        c:replace(row,col,v) 
+			        				end 
+			     	       			end 
+]]
+
+					 elseif type(v[j]) == "table" then  
+						   local temp_t = {}
+						   for k,l in pairs (v[j]) do 
+							temp_t[k] = l
+							ui.dup[j][k] = l
+						   end
+						   
+						   if j == "items" then 
+					           	ui.dup[j] = temp_t
+						   end 
+					 elseif ui.dup[j] ~= v[j]  then  
+					           ui.dup[j] = v[j] 
+					           print(j, v[j], ui.dup[j])
+					 end 
+				   end 
+			     end 
+			end
+
+                   	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
+	           	g:add(ui.dup)
+		     end
+		     
 
 		     local timeline = screen:find_child("timeline")
 		     if timeline then 
@@ -2310,6 +2439,11 @@ function editor.ugroup()
 				     c.x = c.x + v.x 
 				     c.y = c.y + v.y 
 		     		     g:add(c)
+				     -- 0328 
+				     if not c.reactive then 
+					c.reactive = true	
+				     end 
+				     -- 0328 
 				     --c.reactive = true
         			     --create_on_button_down_f(c)
 				     if(c.type == "Text") then
@@ -3051,43 +3185,6 @@ function editor.bring_forward()
     input_mode = S_SELECT
 end
 
-local widget_f_map = {
-     ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() end, 
-     ["Text"]		= function () editor.text() input_mode = S_SELECT end, 
-     ["Image"]		= function () input_mode = S_SELECT  editor.the_image() end, 	
-     ["Video"] 		= function () input_mode = S_SELECT editor.the_video() end,
-     ["Button"]         = function () return ui_element.button()       end, 
-     ["TextInput"] = function () return ui_element.textInput()    end, 
-     ["DialogBox"]      = function () return ui_element.dialogBox()    end, 
-     ["ToastAlert"]       = function () return ui_element.toastAlert()     end,   
-     ["RadioButton"]    = function () return ui_element.radioButton()  end, 
-     ["CheckBox"]       = function () return ui_element.checkBox()     end, 
-     ["ButtonPicker"]   = function () return ui_element.buttonPicker() end, 
-     ["ProgressSpinner"]    = function () return ui_element.progressSpinner()  end, 
-     ["ProgressBar"]     = function () return ui_element.progressBar()   end,
-     ["MenuButton"]       = function () return ui_element.menuButton()  end,
-     ["MenuBar"]        = function () return ui_element.menuBar()      end,
-     ["LayoutManager"]        = function () return ui_element.layoutManager()   end,
-     ["ScrollPane"]    = function () return ui_element.scrollPane() end, 
-     ["ArrowPane"]    = function () return ui_element.arrowPane() end, 
-}
-
-local widget_n_map = {
-     ["Button"]         = function () return "Button" end, 
-     ["TextInput"] = function () return "Text Input" end, 
-     ["DialogBox"]      = function () return "Dialog Box" end, 
-     ["ToastAlert"]       = function () return "Toast Alert" end,   
-     ["RadioButton"]    = function () return "Radio Button" end, 
-     ["CheckBox"]       = function () return "Checkbox" end, 
-     ["ButtonPicker"]   = function () return "Button Picker" end, 
-     ["ProgressSpinner"]    = function () return "Progress Spinner" end, 
-     ["ProgressBar"]     = function () return "Progress Bar" end,
-     ["MenuButton"]       = function () return "Menu Button" end,
-     ["LayoutManager"]        = function () return "Layout Manager" end,
-     ["ScrollPane"]    = function () return "Scroll Pane" end, 
-     ["ArrowPane"]    = function () return "Arrow Pane" end, 
-}
-
 
 function editor.ui_elements()
     local WIDTH = 600
@@ -3162,7 +3259,6 @@ function editor.ui_elements()
          msgw:add(widget_b)
          
          function widget_b:on_button_down(x,y,button,num_clicks)
-		print("djfahsdjfhalsdhfk")
 	      local new_widget = widget_f_map[v]() 
 --imsi  : for debugging, will be deleted 
 	      if (new_widget.extra.type == "Button") then 
