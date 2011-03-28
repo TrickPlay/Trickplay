@@ -381,6 +381,7 @@
 				GCC_PREFIX_HEADER = TrickplayController_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TrickplayController-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "Take Control";
 			};
@@ -399,6 +400,7 @@
 				GCC_PREFIX_HEADER = TrickplayController_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TrickplayController-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "Take Control";
 				VALIDATE_PRODUCT = YES;

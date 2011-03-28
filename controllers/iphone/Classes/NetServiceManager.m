@@ -23,8 +23,7 @@
  *                     and NSNetServiceBrowser events.
  */
 -(id)initWithDelegate:(id)client{
-    if ((self = [super init]))
-    {
+    if ((self = [super init])) {
         delegate = client;
         currentService = nil;
         services = [[NSMutableArray alloc] init];
@@ -48,7 +47,7 @@
 }
 
 - (void)stopCurrentService {
-    if (currentService){
+    if (currentService) {
         [currentService stop];
         [currentService release];
     }
