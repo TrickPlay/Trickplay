@@ -151,10 +151,13 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
 
 end
 
-function Make_Bar(loc,index)
+function Make_Bar(loc,index, master)
     local bar_index = index
     local mini_width = MINI_BAR_MIN_W
-
+    local master_i = nil
+    if master then
+        master_i = 1
+    end
     local bar = Group{
         name = loc.." Weather Bar",
         opacity = 0,
@@ -205,35 +208,7 @@ function Make_Bar(loc,index)
     local arrow_r = Clone{source = imgs.arrows.right}
     arrow_r.y=bar_side_h/2-arrow_r.h/2
     
-    --[[
-    local curr_temp = Shadow_Text{
-        name  = "Curr Temp",
-        x     = CURR_TEMP_X,
-        y     = CURR_TEMP_Y-30,
-        font  = FONT.."Bold Condensed "..LARGE_TEMP_SZ,
-        color = HI_TEMP_COLOR,
-        text  = ""
-    }
-    --]]
     
-    --[[
-    local hi_temp = Shadow_Text{
-        name  = "High Temp",
-        x     = HI_LO_X,
-        y     = HI_LO_Y-10,
-        font  = FONT.."Bold Condensed "..HI_LO_SZ,
-        color = HI_TEMP_COLOR,
-        text  = ""
-    }
-    local lo_temp = Shadow_Text{
-        name  = "Low Temp",
-        x     = HI_LO_X+80,
-        y     = HI_LO_Y-10,
-        font  = FONT.."Bold Condensed "..HI_LO_SZ,
-        color = LO_TEMP_COLOR,
-        text  = ""
-    }
-    --]]
     local mesg = Shadow_Text{
         name  = "Location",
         x     = LOCATION_X,
@@ -286,43 +261,6 @@ function Make_Bar(loc,index)
         wrap  = true,
         text  = "",
     }
-    --[[
-    local days = {}
-    for i = 1,5 do
-        days[i] = Group{
-            name = "Day "..i,
-            x = 170*(i-1)
-        }
-        days[i]:add(
-
-            Text{
-                name  = "day",
-                x     = 39,
-                y     = -5,
-                font  = FONT..DAY_SZ,
-                text  = "",
-                color = TEXT_COLOR,
-            },
-            Text{
-                name  = "hi",
-                x     = 36,
-                y     = 73,
-                font  = FONT.."Bold "..DAY_HI_LO_SZ,
-                text  = "",
-                color = HI_TEMP_COLOR,
-            },
-            Text{
-                name  = "lo",
-                x     = 100,
-                y     = 73,
-                font  = FONT.."Bold "..DAY_HI_LO_SZ,
-                text  = "",
-                color = LO_TEMP_COLOR,
-            }
-        )
-        five_day:add(days[i])
-    end
-    --]]
     
     local sun_b   = Clone{source=imgs.load.sun_base}
     local flare_l = Clone{source=imgs.load.light_flare}
@@ -433,6 +371,7 @@ function Make_Bar(loc,index)
             --lo_temp.text = fday.low.fahrenheit.. DEG
             bar.curr_condition = fcast_tbl.forecast.simpleforecast.forecastday[1].conditions
             
+            print(bar_i,bar_index)
             if bar_i == bar_index then
                 time_of_day = bar.local_time_of_day
                 print(bar.curr_condition)
@@ -781,8 +720,28 @@ function Make_Bar(loc,index)
     --Key Handler
     local bar_keys = {
         [keys.Up]     = function()
+            
+            if master_i ~= nil then
+                
+                master_i = (master_i-2)%(#all_anims) + 1
+                print("And the Lord said.. Let there be ",all_anims[master_i])
+                bar.curr_condition = all_anims[master_i]
+                conditions[bar.curr_condition]()
+                mesg.text = bar.curr_condition..", USA"
+            end
+            
         end,
         [keys.Down]   = function()
+            
+            if  master_i ~= nil then
+                
+                master_i = master_i%(#all_anims) + 1
+                print("And the Lord said.. Let there be ",all_anims[master_i])
+                bar.curr_condition = all_anims[master_i]
+                conditions[bar.curr_condition]()
+                mesg.text = bar.curr_condition..", USA"
+            end
+            
         end,
         [keys.Left]   = function()
             
@@ -971,6 +930,21 @@ function Make_Bar(loc,index)
                 
                 next_i = #bars
                 
+                if zip == "00000" then
+                    zip_code_prompt.text = "Success"
+                    table.insert(locations,zip)
+                    table.insert(bars,Make_Bar(zip,#locations,true))
+                    screen:add(bars[#bars])
+                    bars[#bars].x = MINI_BAR_X + bar_dist
+                    bars[#bars].opacity = 255
+                    bars[#bars]:go_full()
+                    bars[#bars]:show()
+                    right_faux_bar.x = bar_dist
+                    next_i = #bars
+                    bar_i  = #bars
+                    animate_list[bar.func_tbls.full_move_right] = bar
+                end
+                
                 us_only.text=""
                 zip_code_prompt.text = "Searching"
                 animate_list[bar.func_tbls.zip_ellipsis]=bar
@@ -997,8 +971,8 @@ function Make_Bar(loc,index)
                             bars[#bars]:go_full()
                             bars[#bars]:show()
                             right_faux_bar.x = bar_dist
-                             next_i = #bars
-                             
+                            next_i = #bars
+                            bar_i  = #bars
                             animate_list[bar.func_tbls.full_move_right] = bar
                         else
                             dumptable(response_tbl)
@@ -1042,11 +1016,21 @@ function Make_Bar(loc,index)
     end
     
     --send weather query
-    curr_conditions_query(loc, bar.update)
+    if master_i == nil then
+        
+        curr_conditions_query(loc, bar.update)
+        
+        forecast_query(loc, bar.update)
+        
+        animate_list[bar.func_tbls.loading_sun] = bar
+        
+    else
+        
+        blurb_txt.text = "Testing bar, Press up and down to view all the animations"
+        
+    end
     
-    forecast_query(loc, bar.update)
     
-    animate_list[bar.func_tbls.loading_sun] = bar
     bar:hide()
     return bar
 end
