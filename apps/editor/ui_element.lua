@@ -4259,11 +4259,11 @@ end
 function ui_element.menuBar(t)
     local p = {
         bar_widgets = {
-            ui_element.dropDownBar(),
-            ui_element.dropDownBar(),
-            ui_element.dropDownBar(),
-            ui_element.dropDownBar(),
-            ui_element.dropDownBar(),
+            ui_element.menuButton(),
+            ui_element.menuButton(),
+            ui_element.menuButton(),
+            ui_element.menuButton(),
+            ui_element.menuButton(),
             ui_element.button(),
             ui_element.button(),
             ui_element.button(),
