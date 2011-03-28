@@ -458,7 +458,9 @@ window_drops = function(x,y,deg)
             self.deg   = deg
             self.img.scale={0,0}
             self.img.opacity=255*.75
+            if self.img.parent == nil then
             curr_condition:add(self.img)
+            end
         end
         return drop
     end
@@ -527,8 +529,8 @@ window_drops = function(x,y,deg)
         stick = {
             duration = 100,
             func=function(this_obj,this_func_tbl,secs,p)
-                local s = .75*math.sin(math.pi/2*p)
-                this_obj.img.scale={s,s}
+                this_func_tbl.s = .75*math.sin(math.pi/2*p)
+                this_obj.img.scale={this_func_tbl.s,this_func_tbl.s}
                 --this_obj.img.y = this_obj.img.y + this_obj.speed*secs
                 if p == 1 then
                     --animate_list[this_obj.func_tbls.wobble]=this_obj
@@ -538,8 +540,8 @@ window_drops = function(x,y,deg)
         wobble = {
             duration = math.random(200,1000),
             func=function(this_obj,this_func_tbl,secs,p)
-                local s = 1 + .05*math.cos(1/2*math.pi*p)
-                this_obj.img.scale={s,s}
+                this_func_tbl.s = 1 + .05*math.cos(1/2*math.pi*p)
+                this_obj.img.scale={this_func_tbl.s,this_func_tbl.s}
                 --this_obj.img.y = this_obj.img.y + this_obj.speed*secs
                 if p == 1 then
                     --animate_list[this_obj.func_tbls.drop]=this_obj
