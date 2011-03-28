@@ -1995,7 +1995,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(item_picker)
 
         return group
-    elseif item_n == "expansion_location" or item_n == "cell_size" then -- Attribute with radio button
+    elseif item_n == "expansion_location" or item_n == "cell_size" or item_n == "style"  then -- Attribute with radio button
 	group:clear()
 	group.name = item_n
 	group.reactive = true
@@ -2006,7 +2006,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	local radio_b, sel_item = 1
 	
-	if item_v == "above" or item_v == "fixed" then 
+	if item_v == "above" or item_v == "fixed" or item_v == "orbitting" then 
 	    sel_item = 1
 	else  
 	    sel_item = 2
@@ -2014,7 +2014,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	--print("SEL ITEM : ", sel_item)	
 	if v.extra.type == "LayoutManager" then 
              radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
-	else 
+	elseif  v.extra.type == "ProgressSpinner" then
+             radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"orbitting", "spinning"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+	else
              radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
 	end 
 	radio_b.position = {PADDING_X/2, 40}
