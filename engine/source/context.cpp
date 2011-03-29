@@ -1943,6 +1943,20 @@ void TPContext::load_external_configuration()
         }
     }
 
+    gchar * d = g_path_get_dirname( file_name );
+
+    if ( ! strcmp( d , "." ) )
+    {
+        g_free( d );
+
+        d = g_get_current_dir();
+    }
+
+    lua_pushstring( L , d );
+    lua_rawseti( L , -2 , 0 );
+
+    g_free( d );
+
     lua_setglobal( L, "args" );
 
     //.....................................................................
