@@ -7,7 +7,7 @@ test_api = "set_source_bitmap"
 
 function generate_test_image ()
 
-local bitmap1 = Bitmap( "packages/"..test_folder.."/assets/globe.png",false)
+local bitmap1 = Bitmap( "packages/assets/globe.png",false)
 
 	local test_image = Canvas (screen.w, screen.h)
 	test_image:rectangle(200, 200, 400, 400 )

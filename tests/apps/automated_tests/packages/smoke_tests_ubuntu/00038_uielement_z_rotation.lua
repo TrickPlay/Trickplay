@@ -10,28 +10,28 @@ function generate_test_image ()
 
 	local myImg = Image {
 	            	name = "myImage",
-			src = "packages/"..test_folder.."/assets/globe.png",
+			src = "packages/assets/globe.png",
 			x = screen.w/6,
 			y = 300
 		}
 
 	local myImg1 = Image {
 	            	name = "myImage1",
-			src = "packages/"..test_folder.."/assets/globe.png",
+			src = "packages/assets/globe.png",
 			x = screen.w/6 * 2,
 			y = 300
 		}
 
 	local myImg2 = Image {
 	            	name = "myImage2",
-			src = "packages/"..test_folder.."/assets/globe.png",
+			src = "packages/assets/globe.png",
 			x = screen.w/6 * 3,
 			y = 300
 		   }
 
 	local myImg3 = Image {
         		name = "myImage4",
-			src = "packages/"..test_folder.."/assets/globe.png",
+			src = "packages/assets/globe.png",
 			x = screen.w/6 * 4,
 			y = 300
 		   }

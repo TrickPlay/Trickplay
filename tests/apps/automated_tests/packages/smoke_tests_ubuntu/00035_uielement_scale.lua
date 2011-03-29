@@ -12,14 +12,14 @@ function generate_test_image ()
 	        children = {
 	            Image {
 	            	name = "myImage",
-			src = "packages/"..test_folder.."/assets/medium_640x420_panda.jpg",
+			src = "packages/assets/medium_640x420_panda.jpg",
 			x = screen.w/6,
 			y = screen.h/6,
 			scale = {0.1, 0.1}
 		   },
 		Image {
 	            	name = "myImage1",
-			src = "packages/"..test_folder.."/assets/medium_640x420_panda.jpg",
+			src = "packages/assets/medium_640x420_panda.jpg",
 			x = screen.w/6 * 2,
 			y = screen.h/6,
 			scale = {0.5, 0.5}
@@ -32,21 +32,21 @@ function generate_test_image ()
 		},
 		Image {
 	            	name = "myImage2",
-			src = "packages/"..test_folder.."/assets/medium_640x420_panda.jpg",
+			src = "packages/assets/medium_640x420_panda.jpg",
 			x = screen.w/6 * 4,
 			y = screen.h/6,
 			scale = {1, 1}
 		   },
 		Image {
 	            	name = "myImage3",
-			src = "packages/"..test_folder.."/assets/medium_640x420_panda.jpg",
+			src = "packages/assets/medium_640x420_panda.jpg",
 			x = 100,
 			y = screen.h/6 * 3,
 			scale = {1.5, 1.5}
 		   },
 		Image {
 	            	name = "myImage3",
-			src = "packages/"..test_folder.."/assets/medium_640x420_panda.jpg",
+			src = "packages/assets/medium_640x420_panda.jpg",
 			x = screen.w/6 * 4,
 			y = screen.h/6 * 5,
 			scale = {1, 0.5}
