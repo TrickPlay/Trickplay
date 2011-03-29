@@ -1,0 +1,272 @@
+[
+{
+"name": "00001_rectangle_basic.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "00002_canvas_line_width.lua",
+"checksum": "882c0d76bc1f1c66e7beed7bc5124c6a",
+"active": "true"
+},
+{
+"name": "00003_canvas_miter_limit.lua",
+"checksum": "9f76c1fab8f21cbe9f778ab2f90394c2",
+"active": "true"
+},
+{
+"name": "00004_canvas_fill_rule.lua",
+"checksum": "2fe918f45d0097af26dc4f4131d7f6fe",
+"active": "true"
+},
+{
+"name": "00005_canvas_line_cap.lua",
+"checksum": "c86100be443b432f558bd836741e886d",
+"active": "true"
+},
+{
+"name": "00006_canvas_line_join.lua",
+"checksum": "3e051c69f5c45136b4db9810ada9ce58",
+"active": "true"
+},
+{
+"name": "00007_canvas_op_clear.lua",
+"checksum": "0a96ec1f1f7ee5e477a9042289646f8d",
+"active": "true"
+},
+{
+"name": "00008_canvas_op_source.lua",
+"checksum": "44230e37071f3251c9871a4f27f7c3f2",
+"active": "true"
+},
+{
+"name": "00009_canvas_op_over.lua",
+"checksum": "b50eec0923bb890a004db6a6ada891e0",
+"active": "true"
+},
+{
+"name": "00010_canvas_op_in.lua",
+"checksum": "1ef81e791ff2fd515cbd2fe5d905ae12",
+"active": "true"
+},
+{
+"name": "00011_canvas_op_out.lua",
+"checksum": "b9c47fd0d41e516ea5ff0fba741da809",
+"active": "true"
+},
+{
+"name": "00012_canvas_op_atop.lua",
+"checksum": "3b35548e415620501099580d1eb1cc68",
+"active": "true"
+},
+{
+"name": "00013_canvas_op_dest.lua",
+"checksum": "a62499fe0ec45edebf3b0fd0d7100792",
+"active": "true"
+},
+{
+"name": "00014_canvas_op_dest_over.lua",
+"checksum": "d5b0aae59d38f9ed80ec148a82bf5176",
+"active": "true"
+},
+{
+"name": "00015_canvas_op_dest_in.lua",
+"checksum": "2382de163c481f7ef660d81040939f71",
+"active": "true"
+},
+{
+"name": "00016_canvas_op_dest_out.lua",
+"checksum": "651b40b5018d61455bf9b7631817d9bc",
+"active": "true"
+},
+{
+"name": "00017_canvas_op_dest_atop.lua",
+"checksum": "40030a9c6dcc088d313f1185963693d7",
+"active": "true"
+},
+{
+"name": "00018_canvas_op_xor.lua",
+"checksum": "791df3702283d8d580be34458a8f8f57",
+"active": "true"
+},
+{
+"name": "00019_canvas_op_add.lua",
+"checksum": "fe46b695cb0420c6d0031fe52852393d",
+"active": "true"
+},
+{
+"name": "00020_canvas_op_saturate.lua",
+"checksum": "3da9283244b5b212f1cb46bf160ae4ee",
+"active": "true"
+},
+{
+"name": "00021_canvas_set_dash.lua",
+"checksum": "fc53cff71fa983d248d9e9641be53f5c",
+"active": "true"
+},
+{
+"name": "00022_canvas_save_restore.lua",
+"checksum": "9c82d96c08e324b4135b07b395a9153d",
+"active": "true"
+},
+{
+"name": "00023_canvas_translate.lua",
+"checksum": "5912157b709d3b8bd38aaaeb3659cf12",
+"active": "true"
+},
+{
+"name": "00024_canvas_rotate.lua",
+"checksum": "c220a01017ca5810a41e0498618a082c",
+"active": "true"
+},
+{
+"name": "00025_canvas_arc.lua",
+"checksum": "7e64042a27da8b5b949532ffd661c4c5",
+"active": "true"
+},
+{
+"name": "00026_canvas_arc.lua",
+"checksum": "4b42e840479e6ca07661bcba51650a7a",
+"active": "true"
+},
+{
+"name": "00027_canvas_clip.lua",
+"checksum": "7b48e493e2f00f05a68193a7abf747cb",
+"active": "true"
+},
+{
+"name": "00028_canvas_curve_to.lua",
+"checksum": "33fdeaad26d5773236dec914dda15860",
+"active": "true"
+},
+{
+"name": "00029_canvas_reset_clip.lua",
+"checksum": "f4c1e31124eecee4855a7863e3e0be88",
+"active": "true"
+},
+{
+"name": "00030_canvas_round_rectangle.lua",
+"checksum": "537a7206c41f244a562bf55ec3fd6465",
+"active": "true"
+},
+{
+"name": "00031_canvas_set_source_linear_pattern.lua",
+"checksum": "442bcfb509f5f9c8a5be8e494ccc1478",
+"active": "true"
+},
+{
+"name": "00032_canvas_set_source_radial_pattern.lua",
+"checksum": "c3013da88a608c42be3232ffd3783713",
+"active": "true"
+},
+{
+"name": "00033_uielement_properties_basic.lua",
+"checksum": "7bbdae796485125eb6cd7e08d031d944",
+"active": "true"
+},
+{
+"name": "00034_uielement_anchor_point.lua",
+"checksum": "a5500369720bfa1790191e98062255c3",
+"active": "true"
+},
+{
+"name": "00035_uielement_scale.lua",
+"checksum": "a22e54d8467af9a418eebfdf8ed113ed",
+"active": "true"
+},
+{
+"name": "00036_uielement_x_rotation.lua",
+"checksum": "48be76b0d82bb6bb377a8305b28222f5",
+"active": "true"
+},
+{
+"name": "00037_uielement_y_rotation.lua",
+"checksum": "bcea3ebb876e62ca88da232431fa465d",
+"active": "true"
+},
+{
+"name": "00038_uielement_z_rotation.lua",
+"checksum": "1bc5ce83cd678e44b2760bff19338886",
+"active": "true"
+},
+{
+"name": "00039_uielement_opacity.lua",
+"checksum": "ff50d9f3fd4ad76cf273e441bf4115b2",
+"active": "true"
+},
+{
+"name": "00040_uielement_clip.lua",
+"checksum": "3efbd862095942ebab53b51b66caa92c",
+"active": "true"
+},
+{
+"name": "00041_uielement_set_source_bitmap.lua",
+"checksum": "cce3704f2f59ca7ce5babbf3191de590",
+"active": "true"
+},
+{
+"name": "00042_canvas_gradients.lua",
+"checksum": "5e93f471eb19e4958191b5919f243453",
+"active": "true"
+},
+{
+"name": "00043_text_color.lua",
+"checksum": "ad8dbe01494f282ad73226287b4dcf96",
+"active": "true"
+},
+{
+"name": "00044_text_font_1.lua",
+"checksum": "df3348b665c2e435274649afa0da414c",
+"active": "true"
+},
+{
+"name": "00045_text_font_2.lua",
+"checksum": "4e9c96040a12e54af6b09cfb3ef885f8",
+"active": "true"
+},
+{
+"name": "00046_text_font_3.lua",
+"checksum": "899b8359a9d024e76e97caf63e9cb19f",
+"active": "true"
+},
+{
+"name": "00047_text_justify.lua",
+"checksum": "cbe6c0bc5462d8a52c2f07ddf1d2ed15",
+"active": "true"
+},
+{
+"name": "00048_text_wrap.lua",
+"checksum": "a8d2d57c8ade8ccaa451e040b116abfb",
+"active": "true"
+},
+{
+"name": "00049_text_use_markup.lua",
+"checksum": "f331932eb0da32d3de7be0b2ad532407",
+"active": "true"
+},
+{
+"name": "00050_text_ellipsize.lua",
+"checksum": "312ebfe38dac2d79c07452394ba4dc6b",
+"active": "true"
+},
+{
+"name": "00051_text_alignment.lua",
+"checksum": "c5fb1570e1a6a2cc72e14d69f7dbeb8a",
+"active": "true"
+},
+{
+"name": "00052_text_max_length.lua",
+"checksum": "13eee65853f0205012ce4b954253a784",
+"active": "true"
+},
+{
+"name": "00053_text_selection_end.lua",
+"checksum": "d70c1ceb29eabc4cfd3c8109f35a0335",
+"active": "true"
+},
+{
+"name": "00054_text_single_line.lua",
+"checksum": "6c09d09a0a24769f424fffd28f81d5c1",
+"active": "true"
+}
+]
