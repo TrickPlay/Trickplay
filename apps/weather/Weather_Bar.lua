@@ -10,8 +10,8 @@ local LOCATION_X  = 290
 local LOCATION_Y  = 62
 local HI_LO_X     = 290
 local HI_LO_Y     = 104
-local BLURB_X     = 700
-local BLURB_Y     = 58
+local BLURB_X     = 775
+local BLURB_Y     = 45
 local BAR_SPACE   = 40
 local MINI_BAR_MIN_W = 500
 local FULL_BAR_W     = screen_w-MINI_BAR_X*2-bar_side_w*2--1478
@@ -369,15 +369,15 @@ function Make_Bar(loc,index, master)
         if fcast_tbl ~= nil then
             f_tbl = fcast_tbl.forecast.simpleforecast.forecastday[1]
             local fday = fcast_tbl.forecast.simpleforecast.forecastday[1]
-            blurb_txt.text      =--[["Oh snap! Look who just ate Apple and Google's lunch here? Minutes ago, Amazon rolled out its very own music streaming service which is conveniently dubbed the Amazon Cloud Player. Existing Amazon customers in the US can now upload their MP3 purchases to their 5GB cloud space -- upgradable to a one-year 20GB plan for free upon purchasing an MP3 album, with additional plans starting at $20 a year -- and then start streaming on their computers or Android devices. Oh, and did we mention that this service is free of charge as well? Meanwhile, someone will have some catching up to do, but we have a feeling it won't take them too long."]]
+            blurb_txt.text      ="Oh snap! Look who just ate Apple and Google's lunch here? Minutes ago, Amazon rolled out its very own music streaming service which is conveniently dubbed the Amazon Cloud Player. Existing Amazon customers in the US can now upload their MP3 purchases to their 5GB cloud space -- upgradable to a one-year 20GB plan for free upon purchasing an MP3 album, with additional plans starting at $20 a year -- and then start streaming on their computers or Android devices. Oh, and did we mention that this service is free of charge as well? Meanwhile, someone will have some catching up to do, but we have a feeling it won't take them too long."--]]
             
-            fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
+            --fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
             
             
             
             ---[[
             if blurb_txt.h > yellow_button.y+yellow_button.h-blurb_txt.y then
-                blurb_txt.clip = {0,0,blurb_txt.w,90}--yellow_button.y+yellow_button.h-blurb_txt.y}
+                blurb_txt.clip = {0,0,blurb_txt.w,100}--yellow_button.y+yellow_button.h-blurb_txt.y}
                 --print(yellow_button.y+yellow_button.h-blurb_txt.y)
                 bar.func_tbls.blurb.dy = blurb_txt.h-blurb_txt.clip[4]
                 bar.func_tbls.blurb_up.dy = blurb_txt.h-blurb_txt.clip[4]
@@ -742,7 +742,7 @@ function Make_Bar(loc,index, master)
                     0,
                     this_func_tbl.dy*(.5-.5*math.cos(math.pi*p)),
                     blurb_txt.w,
-                    90--yellow_button.y+yellow_button.h-blurb_txt.y
+                    100--yellow_button.y+yellow_button.h-blurb_txt.y
                 }
                 if p == 1 then
                     animate_list[bar.func_tbls.blurb_up] = bar
