@@ -216,6 +216,9 @@ local function build_ui( show_it )
 	end 
 
 	if (ui.focus == SECTION_EDIT) then 
+		turn_off(section.dropdown:find_child("undo")) 
+		turn_off(section.dropdown:find_child("redo")) 
+--[[
 	     if table.getn(undo_list) == 0 then
 		turn_off(section.dropdown:find_child("undo")) 
 	     else 
@@ -227,7 +230,7 @@ local function build_ui( show_it )
 	     else 
 		turn_on(section.dropdown:find_child("redo")) 
 	     end
-
+]]
 	     if table.getn(selected_objs) == 0 then 
 		turn_off(section.dropdown:find_child("clone")) 
 		turn_off(section.dropdown:find_child("duplicate")) 
