@@ -4,7 +4,7 @@
 screen_w = screen.w
 screen_h = screen.h
 screen:show()
-screen:add(Rectangle{name="A Grey Background for the APP",w=screen_w,h=screen_h,color={60,60,60}})
+--screen:add(Rectangle{name="A Grey Background for the APP",w=screen_w,h=screen_h,color={60,60,60}})
 dofile("App_Loop.lua")
 dofile("Utils.lua")
 
