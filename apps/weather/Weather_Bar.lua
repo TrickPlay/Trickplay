@@ -369,9 +369,9 @@ function Make_Bar(loc,index, master)
         if fcast_tbl ~= nil then
             f_tbl = fcast_tbl.forecast.simpleforecast.forecastday[1]
             local fday = fcast_tbl.forecast.simpleforecast.forecastday[1]
-            blurb_txt.text      ="Oh snap! Look who just ate Apple and Google's lunch here? Minutes ago, Amazon rolled out its very own music streaming service which is conveniently dubbed the Amazon Cloud Player. Existing Amazon customers in the US can now upload their MP3 purchases to their 5GB cloud space -- upgradable to a one-year 20GB plan for free upon purchasing an MP3 album, with additional plans starting at $20 a year -- and then start streaming on their computers or Android devices. Oh, and did we mention that this service is free of charge as well? Meanwhile, someone will have some catching up to do, but we have a feeling it won't take them too long."
+            blurb_txt.text      =--[["Oh snap! Look who just ate Apple and Google's lunch here? Minutes ago, Amazon rolled out its very own music streaming service which is conveniently dubbed the Amazon Cloud Player. Existing Amazon customers in the US can now upload their MP3 purchases to their 5GB cloud space -- upgradable to a one-year 20GB plan for free upon purchasing an MP3 album, with additional plans starting at $20 a year -- and then start streaming on their computers or Android devices. Oh, and did we mention that this service is free of charge as well? Meanwhile, someone will have some catching up to do, but we have a feeling it won't take them too long."]]
             
-            --fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
+            fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
             
             
             
