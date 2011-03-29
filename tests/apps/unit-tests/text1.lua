@@ -1,0 +1,51 @@
+--[[
+Filename: Text1.lua
+Author: Peter von dem Hagen
+Date: January 20, 2011
+Description:   Verify use_markup returns correct value
+--]]
+
+
+
+
+-- Test Set up --
+
+-- test with markup
+local myText_markup = Text ()
+myText_markup.font = "DejaVu Sans 38px"
+myText_markup.color = "FFFFFFAA"
+textString = "\<span foreground\=\"blue\" size\=\"x\-large\"\>Trickplay\<\/span> rizzocks the \<i\>hizzouse\<\/i\>\!" 
+myText_markup.markup = string.format( "%s" , textString ) 
+screen:add(myText_markup)
+
+-- test with no markup
+local myText_no_markup = Text ()
+myText_no_markup = "Trickplay rizzocks the hizzouse!"
+screen:add(myText_no_markup)
+
+
+screen:show()
+
+-- Tests --
+
+
+function test_Text_use_markup ()
+    assert_equal( myText_markup.use_markup , true, "use market ~= true" )
+    assert_false( myText_no_markup.use_markup , "use market ~= false" )
+end
+
+
+-- Test Tear down --
+
+
+
+
+
+
+
+
+
+
+
+
+
