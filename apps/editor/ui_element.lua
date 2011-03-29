@@ -1390,15 +1390,43 @@ function ui_element.textInput(table)
 		return true
 	end 
 
-	function text:on_key_down(key) 
+	local c_pos_max 
+
+	local t_pos_max = p.ui_width - 2 * p.padding
+
+	function text:on_key_down(key)
+		local t_w = t_group:find_child("textInput").w
+		local c_pos = t_group:find_child("textInput").cursor_position
+	        local scroll_w = t_w  - t_pos_max 
+
+		if scroll_w > 0 then 
+		    t_group:find_child("textInput").x = scroll_w * -1
+		    t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+		end
+
 		if key == keys.Return and shift == false then 
 			screen:grab_key_focus()
 			t_group.extra.on_focus_out()
-			print(t_group.text) 
+			print(t_group:find_child("textInput").text) 
 			return true
+		elseif key == keys.Left then 
+			if c_pos_max == nil then 
+				c_pos_max = c_pos
+			else
+				c_pos_max = c_pos_max -1 
+				print(c_pos_max) 
+--[[
+				if c_pos_max == 0 then 
+		    			t_group:find_child("textInput").x = t_group:find_child("textInput").x + 10
+					scroll_w = scroll_w + 10
+		    			t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+				end 
+]]
+			end 
 		end 
+		 
+
 	end 
-	--end 
 
     	if (p.skin == "custom") then box_img.opacity = 0
     	else box.opacity = 0 box_img.opacity = 255 end 
