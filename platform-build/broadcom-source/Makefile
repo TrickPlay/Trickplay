@@ -22,6 +22,19 @@ include $(NEXUS_TOP)/platforms/$(PLATFORM)/build/platform_app.inc
 
 THEAPPS = trickplay
 
+BSEAV = $(NEXUS_TOP)/../BSEAV
+include $(BSEAV)/lib/bfile/bfile.inc
+ifeq ($(MEDIA_AVI_SUPPORT),y)
+include $(BSEAV)/lib/avi/bavi.inc
+endif
+ifeq ($(MEDIA_ASF_SUPPORT),y)
+include $(BSEAV)/lib/asf/basf.inc
+endif
+include $(BSEAV)/lib/media/rmff/brmff.inc
+include $(BSEAV)/lib/media/bmedia.inc
+CFLAGS += $(addprefix -I,$(BMEDIA_INCLUDES) $(BFILE_MEDIA_INCLUDES)) -I$(BSEAV)/lib/mpeg2_ts_parse -I$(BSEAV)/lib/tspsi
+CFLAGS += $(addprefix -D,$(BMEDIA_PROBE_DEFINES))
+
 CFLAGS += -lm
 CFLAGS += -I$(MAGNUM)/../rockford/middleware/$(V3DIP_REV)/khronos/include/
 
@@ -64,7 +77,6 @@ endif
 ifndef TRICKPLAY_LIB
 $(error TRICKPLAY_LIB is not defined)
 endif
-
 
 CFLAGS += -I$(TRICKPLAY_INCLUDE)
 
@@ -119,6 +131,7 @@ LDFLAGS += -L$(TRICKPLAY_LIB) \
 	-lsndfile \
 	-Wl,--end-group 
 
+EXTRA_OBJS:=mediaplayer.c cmdline_args.c
 
 # Implicit rule for building local apps
 %$(APPSUFFIX): %.c $(EXTRA_OBJS) $(VXOBJS)

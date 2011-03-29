@@ -92,7 +92,9 @@
 #include "trickplay/trickplay.h"
 #include "trickplay/controller.h"
 #include "trickplay/keys.h"
+#include "trickplay/mediaplayer.h"
 
+NEXUS_PlatformConfiguration   platform_config;
 NEXUS_DisplayHandle     nexus_display = 0;
 EGLNativeDisplayType    native_display = 0;
 EGL_NEXUS_WIN_T         egl_window;
@@ -100,7 +102,7 @@ NEXUS_IrInputHandle     mIRHandle = 0;
 
 TPController *          controller = 0;
 
-
+extern int nmp_constructor( TPMediaPlayer * );
 
 
 static void irCallback(void *pParam, int iParam)
@@ -134,7 +136,6 @@ bool InitDisplay()
    NEXUS_PlatformSettings        platform_settings;
    NEXUS_DisplaySettings         display_settings;
    NEXUS_GraphicsSettings        graphics_settings;
-   NEXUS_PlatformConfiguration   platform_config;
    NEXUS_IrInputSettings         irSettings;
 #ifdef SIXTY_HZ
    NEXUS_PanelOutputSettings     panelOutputSettings;
@@ -200,11 +201,20 @@ bool InitDisplay()
    native_display = BRCM_RegisterDisplay(nexus_display);
 
    NEXUS_Display_GetGraphicsSettings(nexus_display, &graphics_settings);
-   /* *aspect = (float)graphics_settings.position.width / graphics_settings.position.height; */
+   
+   graphics_settings.enabled = true;
+#if 1
+   graphics_settings.sourceBlendFactor = NEXUS_CompositorBlendFactor_eSourceAlpha;
+   graphics_settings.destBlendFactor = NEXUS_CompositorBlendFactor_eInverseSourceAlpha;
+#else
+   graphics_settings.sourceBlendFactor = NEXUS_CompositorBlendFactor_eConstantAlpha;
+   graphics_settings.destBlendFactor = NEXUS_CompositorBlendFactor_eInverseConstantAlpha;
+   graphics_settings.constantAlpha = 0x80;
+   
+#endif
 
-   /* egl_window is a structure that wraps the nexus display and the desired 3D window size
-    * This is the 'native' window handle for Nexus based applications
-    */
+   NEXUS_Display_SetGraphicsSettings( nexus_display , & graphics_settings );
+
    BRCM_GetDefaultNativeWindowSettings(&egl_window);
    egl_window.rect.x = 0;
    egl_window.rect.y = 0;
@@ -243,20 +253,20 @@ static void install_controller( TPContext * ctx )
 	    { 0x28d704fb , TP_KEY_BACK },
 	    { 0x5ba404fb , TP_KEY_EXIT },
 	    { 0x728d04fb , TP_KEY_RED },
-        { 0x718e04fb , TP_KEY_GREEN },
-        { 0x639c04fb , TP_KEY_YELLOW },
-        { 0x619e04fb , TP_KEY_BLUE },
-        
-        { 0x10ef04fb , TP_KEY_0 },
-        { 0x11ee04fb , TP_KEY_1 },
-        { 0x12ed04fb , TP_KEY_2 },
-        { 0x13ec04fb , TP_KEY_3 },
-        { 0x14eb04fb , TP_KEY_4 },
-        { 0x15ea04fb , TP_KEY_5 },
-        { 0x16e904fb , TP_KEY_6 },
-        { 0x17e804fb , TP_KEY_7 },
-        { 0x18e704fb , TP_KEY_8 },
-        { 0x19e604fb , TP_KEY_9 },
+            { 0x718e04fb , TP_KEY_GREEN },
+            { 0x639c04fb , TP_KEY_YELLOW },
+            { 0x619e04fb , TP_KEY_BLUE },
+            
+            { 0x10ef04fb , TP_KEY_0 },
+            { 0x11ee04fb , TP_KEY_1 },
+            { 0x12ed04fb , TP_KEY_2 },
+            { 0x13ec04fb , TP_KEY_3 },
+            { 0x14eb04fb , TP_KEY_4 },
+            { 0x15ea04fb , TP_KEY_5 },
+            { 0x16e904fb , TP_KEY_6 },
+            { 0x17e804fb , TP_KEY_7 },
+            { 0x18e704fb , TP_KEY_8 },
+            { 0x19e604fb , TP_KEY_9 },
 	    
 	    {0,0}
 	};
@@ -286,6 +296,8 @@ int main(int argc, char** argv)
       ctx = tp_context_new();
       
       install_controller( ctx );
+      
+      tp_context_set_media_player_constructor( ctx , nmp_constructor );
       
       result = tp_context_run( ctx );
       
