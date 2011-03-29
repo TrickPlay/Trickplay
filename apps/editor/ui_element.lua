@@ -1382,19 +1382,18 @@ function ui_element.textInput(table)
     	text = Text{text = p.text, editable = true, cursor_visible = true, wants_enter = true, reactive = true, font = p.text_font, color = p.text_color}
     	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
     	t_group:add(box, focus_box, box_img, focus_img, text)
---kk
-	--if editor_lb == nil then 
-	function t_group:on_button_down()
+
+--kkkkk
+	if editor_lb == nil then 
+	   function t_group:on_button_down()
 		t_group.extra.on_focus_in()
 		text:grab_key_focus()
 		return true
-	end 
+	   end 
 
-	local c_pos_max 
+	   local t_pos_max = p.ui_width - 2 * p.padding
 
-	local t_pos_max = p.ui_width - 2 * p.padding
-
-	function text:on_key_down(key)
+	   function text:on_key_down(key)
 		local t_w = t_group:find_child("textInput").w
 		local c_pos = t_group:find_child("textInput").cursor_position
 	        local scroll_w = t_w  - t_pos_max 
@@ -1407,26 +1406,22 @@ function ui_element.textInput(table)
 		if key == keys.Return and shift == false then 
 			screen:grab_key_focus()
 			t_group.extra.on_focus_out()
-			print(t_group:find_child("textInput").text) 
 			return true
 		elseif key == keys.Left then 
-			if c_pos_max == nil then 
-				c_pos_max = c_pos
-			else
-				c_pos_max = c_pos_max -1 
-				print(c_pos_max) 
---[[
-				if c_pos_max == 0 then 
-		    			t_group:find_child("textInput").x = t_group:find_child("textInput").x + 10
-					scroll_w = scroll_w + 10
-		    			t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
-				end 
-]]
-			end 
-		end 
-		 
+			if pablo_f then 
+				local x,y,lh = pablo_f(c_pos)
+				local tx, ty, tlh = pablo_f(c_pos - 1)
+				local letter_sz = x - tx 
 
+				if (x <= p.padding) then 
+		    			t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz
+		    			t_group:find_child("textInput").clip = {scroll_w + p.padding + letter_sz, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+				end
+			end 
+	        end 
+	   end 
 	end 
+
 
     	if (p.skin == "custom") then box_img.opacity = 0
     	else box.opacity = 0 box_img.opacity = 255 end 
