@@ -10,13 +10,13 @@
 --
 
 -- Test package location
-test_folder = "smoke_tests_ubuntu"
+local test_folder = "smoke_tests_ubuntu"
 local test_file = "smoke_tests_ubuntu.txt"
 
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
-local automation_option = 3
-local test_to_run = 55 -- if automation_option == 2
+local automation_option = 1
+local test_to_run = 34 -- if automation_option == 2
 
 -- if option 2 then it prints test results in a JSON formatted table to be copied and pasted into
 -- the package file. 
@@ -25,7 +25,7 @@ local console_display_option_choices = { test_results = 1, dump_screensum = 2 }
 local console_display_option = 1
 
 -- Time interval between tests
-local test_interval = 0.2
+local test_interval = 0.1
 
 -- Globals --
 local test_list

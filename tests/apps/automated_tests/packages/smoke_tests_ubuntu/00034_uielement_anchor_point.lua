@@ -13,7 +13,7 @@ local g = Group
 	        children = {
 	            Image {
 	            	name = "myImage",
-			src = "packages/"..test_folder.."/assets/medium_640x420_panda.jpg",
+			src = "packages/assets/medium_640x420_panda.jpg",
 			x = screen.w/2,
 			y = screen.h/2
 		   }

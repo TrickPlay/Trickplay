@@ -9,7 +9,7 @@ function generate_test_image ()
 	local g = Group ()
 	local img = Image ()
 	
-	img.src = "packages/"..test_folder.."/assets/globe.png"
+	img.src = "packages/assets/globe.png"
 	img.anchor_point = { img.w/2, img.h/2 }
 	img.position = { screen.w/2, screen.h/2 }
 	g:add (img)
