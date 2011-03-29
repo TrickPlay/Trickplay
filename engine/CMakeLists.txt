@@ -203,7 +203,7 @@ else (TP_CLUTTER_BACKEND_EGL)
 
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	
-	    list( APPEND ENGINE_LIBRARY_NAMES clutter-glx-1.0 )
+	    list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 )
 	    
 	else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	
