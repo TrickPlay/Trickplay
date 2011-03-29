@@ -1401,6 +1401,8 @@ function ui_element.textInput(table)
 		if scroll_w > 0 then 
 		    t_group:find_child("textInput").x = scroll_w * -1
 		    t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+		    print( t_group:find_child("textInput").x )
+		    dumptable( t_group:find_child("textInput").clip )
 		end
 
 		if key == keys.Return and shift == false then 
@@ -1409,18 +1411,31 @@ function ui_element.textInput(table)
 			return true
 		elseif key == keys.Left then 
 			if t_group:find_child("textInput").position_to_coordinates then 
-				print("PABLO ~~~")
-				--t_group:find_child("textInput").position_to_coordinates
---[[
-				local x,y,lh = pablo_f(c_pos)
-				local tx, ty, tlh = pablo_f(c_pos - 1)
-				local letter_sz = x - tx 
+				local temp, temp2
 
-				if (x <= p.padding) then 
-		    			t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz
-		    			t_group:find_child("textInput").clip = {scroll_w + p.padding + letter_sz, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
-				end
-]]
+				if c_pos ~= -1 and c_pos ~= 0 then 
+				     if t_group:find_child("textInput").clip then 
+
+					print(c_pos, "<- cpos")
+		                     temp = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
+		                     temp2 = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
+				     local x = temp[1] 
+				     local y = temp[2] 
+				     local lh = temp[3] 
+				     local letter_sz = x - temp2[1] 
+	
+				     print("clip x" , t_group:find_child("textInput").clip[1])
+				     print("cursor_pos x", x)
+
+				     if (t_group:find_child("textInput").clip[1] - 2* p.padding > x ) then 
+		    			    t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz 
+		    			    t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - letter_sz ,  
+					    t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
+					    print("new x" , t_group:find_child("textInput").x )
+					    dumptable(t_group:find_child("textInput").clip )
+				     end
+				    end
+			       end 
 			end 
 	        end 
 	   end 
