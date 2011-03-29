@@ -397,7 +397,14 @@ static void nmp_reset( TPMediaPlayer * mp )
     NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(nmp->audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
     NEXUS_AudioDecoder_Close(nmp->audioDecoder);
     
-    memset( & nmp->opts , 0 , sizeof( nmp->opts ) );
+    NEXUS_Rect vp;
+    
+    vp = nmp->viewport;
+    
+    memset( nmp , 0 , sizeof( * nmp ) );
+    
+    nmp->mp = mp;
+    nmp->viewport = vp;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -514,10 +521,10 @@ static int nmp_get_viewport_geometry( TPMediaPlayer * mp,
 {
     NMP * nmp = get_nmp( mp );
     
-    * left = nmp->viewport.x;
-    * top = nmp->viewport.y;
-    * width = nmp->viewport.width;
-    * height = nmp->viewport.height;
+    * left = nmp->viewport.x * 0.5;
+    * top = nmp->viewport.y * 0.5;
+    * width = nmp->viewport.width * 0.5;
+    * height = nmp->viewport.height * 0.5;
     
     return 0;                    
 }
@@ -541,10 +548,10 @@ static int nmp_set_viewport_geometry(
     
     NEXUS_Rect r;
     
-    r.x = left;
-    r.y = top;
-    r.width = width;
-    r.height = height;
+    r.x = left * 2;
+    r.y = top * 2;
+    r.width = width * 2;
+    r.height = height * 2;
     
     if ( nmp->window )
     {
