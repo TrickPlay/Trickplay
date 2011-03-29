@@ -13,7 +13,7 @@
 
 - (id)initWithResourceManager:(ResourceManager *)resman
                socketManager:(SocketManager *)sockman {
-    if (self = [super init]) {
+    if ((self = [super init])) {
         resourceManager = [resman retain];
         socketManager = [sockman retain];
         soundLoopName = nil;

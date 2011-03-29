@@ -203,6 +203,9 @@
     [args release];
 }
 
+/**
+ * Updating the bacground
+ */
 - (void)do_UB:(NSArray *)args {
     NSLog(@"Updating Background");
     [args retain];
@@ -233,7 +236,9 @@
     [args release];
 }
 
-
+/**
+ * Update a graphics element
+ */
 - (void)do_UG:(NSArray *)args {
     NSLog(@"Updating Graphics");
     [args retain];

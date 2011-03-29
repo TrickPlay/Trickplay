@@ -12,7 +12,7 @@
 @implementation ResourceManager
 
 - (id)initWithSocketManager:(SocketManager *)sockman {
-    if (self = [super init]) {
+    if ((self = [super init])) {
         socketManager = [sockman retain];
         resourceNames = [[NSMutableDictionary alloc] initWithCapacity:40];
         resources = [[NSMutableDictionary alloc] initWithCapacity:40];
@@ -35,7 +35,7 @@
     NSLog(@"Fetching resource %@", name);
     NSData *tempData;
     
-    if (tempData = [resources objectForKey:name]) {
+    if ((tempData = [resources objectForKey:name])) {
         NSLog(@" from dictionary");
         return tempData;
     } else {    // pull resource
@@ -70,7 +70,7 @@
     AsyncImageView *imageView = [[[AsyncImageView alloc] initWithFrame:frame] autorelease];
     
     NSData *tempData;
-    if (tempData = [resources objectForKey:name]) {
+    if ((tempData = [resources objectForKey:name])) {
         // image data already cached, set it to the view
         imageView.image = [UIImage imageWithData:tempData];
     } else {
