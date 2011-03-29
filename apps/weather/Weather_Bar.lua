@@ -10,7 +10,7 @@ local LOCATION_X  = 290
 local LOCATION_Y  = 62
 local HI_LO_X     = 290
 local HI_LO_Y     = 104
-local BLURB_X     = 775
+local BLURB_X     = 700
 local BLURB_Y     = 58
 local BAR_SPACE   = 40
 local MINI_BAR_MIN_W = 500
@@ -258,7 +258,7 @@ function Make_Bar(loc,index, master)
     local blurb_txt = Text{
         x     = BLURB_X,
         y     = BLURB_Y-10,
-        w     = FULL_BAR_W - BLURB_X + 40,
+        w     = FULL_BAR_W - BLURB_X + 20,
         font  = FONT..BLURB_SZ,
         color = TEXT_COLOR,
         wrap  = true,
@@ -369,11 +369,20 @@ function Make_Bar(loc,index, master)
         if fcast_tbl ~= nil then
             f_tbl = fcast_tbl.forecast.simpleforecast.forecastday[1]
             local fday = fcast_tbl.forecast.simpleforecast.forecastday[1]
-            blurb_txt.text      = fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
-            --[[
+            blurb_txt.text      ="Oh snap! Look who just ate Apple and Google's lunch here? Minutes ago, Amazon rolled out its very own music streaming service which is conveniently dubbed the Amazon Cloud Player. Existing Amazon customers in the US can now upload their MP3 purchases to their 5GB cloud space -- upgradable to a one-year 20GB plan for free upon purchasing an MP3 album, with additional plans starting at $20 a year -- and then start streaming on their computers or Android devices. Oh, and did we mention that this service is free of charge as well? Meanwhile, someone will have some catching up to do, but we have a feeling it won't take them too long."
+            
+            --fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
+            
+            
+            
+            ---[[
             if blurb_txt.h > yellow_button.y+yellow_button.h-blurb_txt.y then
-                blurb_txt.clip = {0,0,blurb_txt.w,yellow_button.y+yellow_button.h-blurb_txt.y}
+                blurb_txt.clip = {0,0,blurb_txt.w,90}--yellow_button.y+yellow_button.h-blurb_txt.y}
+                --print(yellow_button.y+yellow_button.h-blurb_txt.y)
                 bar.func_tbls.blurb.dy = blurb_txt.h-blurb_txt.clip[4]
+                bar.func_tbls.blurb_up.dy = blurb_txt.h-blurb_txt.clip[4]
+                bar.func_tbls.blurb.duration = bar.func_tbls.blurb.dy/8*1000
+                print(bar.func_tbls.blurb.duration)
             end--]]
             
             --hi_temp.text = fday.high.fahrenheit..DEG
@@ -384,7 +393,8 @@ function Make_Bar(loc,index, master)
                 time_of_day = bar.local_time_of_day
                 print(bar.curr_condition)
                 conditions[bar.curr_condition]()
-                if blurb_txt.has_clip then
+                
+                if blurb_txt.has_clip and full_bar.opacity ~= 0 and blurb_txt.opacity ~= 0 then
                     animate_list[bar.func_tbls.blurb] = bar
                 end
             end
@@ -407,8 +417,8 @@ function Make_Bar(loc,index, master)
         if f_tbl ~= nil and pws_tbl ~= nil then
             mini_width = Text{
                 font=FONT.."Bold Condensed "..LOCATION_SZ,
-                text=curr_temp_tbl.current_observation.location.city..
-                    ", "..curr_temp_tbl.current_observation.location.state
+                text=pws_tbl.current_observation.location.city..
+                    ", "..pws_tbl.current_observation.location.state
             }.w + LOCATION_X - MINI_BAR_X + 100
             mesg:unparent()
             mesg=nil
@@ -557,6 +567,9 @@ function Make_Bar(loc,index, master)
                 
                 if p == 1 then
                     animate_list[bar.func_tbls.xfade_to_full]=bar
+                    if blurb_txt.has_clip and blurb_txt.opacity ~= 0 then
+                        animate_list[bar.func_tbls.blurb] = bar
+                    end
                 end
             end
         },
@@ -576,7 +589,7 @@ function Make_Bar(loc,index, master)
                     
                     
                     
-                    
+                    animate_list[bar.func_tbls.blurb] = nil
                     animate_list[bar.func_tbls.expand_to_mini]=bar
                 end
             end
@@ -609,6 +622,7 @@ function Make_Bar(loc,index, master)
                 if p == 1 then
                     blurb_txt:hide()
                     bar:grab_key_focus()
+                    animate_list[bar.func_tbls.blurb] = nil
                 end
             end
         },
@@ -622,6 +636,9 @@ function Make_Bar(loc,index, master)
                 if p == 1 then
                     five_day:hide()
                     bar:grab_key_focus()
+                    if blurb_txt.has_clip and blurb_txt.opacity ~= 0 then
+                        animate_list[bar.func_tbls.blurb] = bar
+                    end
                 end
             end
         },
@@ -717,10 +734,35 @@ function Make_Bar(loc,index, master)
             end
         },
         blurb = {
-            duration = 5000,
+            duration = 30000,
             dy = nil,
             func = function(this_obj,this_func_tbl,secs,p)
-                blurb_txt.y = BLURB_Y+this_func_tbl.dy*(1-math.cos(2*math.pi)*p)
+                blurb_txt.y = BLURB_Y-this_func_tbl.dy*(.5-.5*math.cos(math.pi*p))
+                blurb_txt.clip = {
+                    0,
+                    this_func_tbl.dy*(.5-.5*math.cos(math.pi*p)),
+                    blurb_txt.w,
+                    90--yellow_button.y+yellow_button.h-blurb_txt.y
+                }
+                if p == 1 then
+                    animate_list[bar.func_tbls.blurb_up] = bar
+                end
+            end
+        },
+        blurb_up = {
+            duration = 3000,
+            dy = nil,
+            func = function(this_obj,this_func_tbl,secs,p)
+                blurb_txt.y = BLURB_Y-this_func_tbl.dy*(.5-.5*math.cos(math.pi*p+math.pi))
+                blurb_txt.clip = {
+                    0,
+                    this_func_tbl.dy*(.5-.5*math.cos(math.pi*p+math.pi)),
+                    blurb_txt.w,
+                    90--yellow_button.y+yellow_button.h-blurb_txt.y
+                }
+                if p == 1 then
+                    animate_list[bar.func_tbls.blurb] = bar
+                end
             end
         },
         wait_500 = {
@@ -764,7 +806,7 @@ function Make_Bar(loc,index, master)
             
         end,
         [keys.Left]   = function()
-            
+            if #bars == 1 then return end
             if zip_entry.opacity~=0 then
                 if zip_focus <= #zip_backing then
                     zip_backing[zip_focus].color={255,255,255}
@@ -805,7 +847,7 @@ function Make_Bar(loc,index, master)
             bar_i = next_i
         end,
         [keys.Right]  = function()
-            
+            if #bars == 1 then return end
             if zip_entry.opacity~=0 then
                 if zip_focus <= 5 then
                     zip_backing[zip_focus].color={255,255,255}
@@ -895,7 +937,7 @@ function Make_Bar(loc,index, master)
             
         end,
         [keys.RED]    = function()
-            if #bars == 2 then return end
+            if #bars == 1 then return end
             if zip_entry.opacity~=0 then
                 if zip_focus <= 5 then
                     zip_backing[zip_focus].color={255,255,255}
@@ -1081,6 +1123,9 @@ function Make_Bar(loc,index, master)
             five_day:hide()
             blurb_txt.opacity=255
             blurb_txt:show()
+            if blurb_txt.has_clip and blurb_txt.opacity ~= 0 then
+                animate_list[bar.func_tbls.blurb] = bar
+            end
         end
     end
     bar.go_mini = function()
