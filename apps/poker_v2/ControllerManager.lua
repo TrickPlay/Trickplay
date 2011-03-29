@@ -164,14 +164,14 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:start_clicks()
         end
 
-        if start_accel then
+        if start_accel and controller.has_accelerometer then
             function controller:on_accelerometer(x, y, z)
                 print("accelerometer: x", x, "y", y, "z", z)
             end
             controller:start_accelerometer("L", 1)
         end
 
-        if start_touch then
+        if start_touch and controller.has_touches then
             print("can accept touches!")
             function controller:on_touch_down(finger, x, y)
                 print("answered", controller.name, x, y)
@@ -184,6 +184,9 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             function controller:on_touch_up(finger, x, y)
             end
             function controller:on_touch_move(finger, x, y)
+            end
+            function controller:on_key_down()
+                return false
             end
             controller:start_touches()
         end
