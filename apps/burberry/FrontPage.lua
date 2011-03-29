@@ -19,10 +19,15 @@ local right_i  = 1
 
 local umbrella = Group{}
 
---local title_s = Text{color="000000",font="Engravers MT "..(TITLE_SZ+2).."px",text="BURBERRY",x=TITLE_X-1,y=TITLE_Y-1}
-local title = Text{color="ffffff",font="Engravers MT "..TITLE_SZ.."px",text="BURBERRY",x=TITLE_X,y=TITLE_Y}
-local sub_title = Text{color="ffffff",font="Engravers MT "..SUB_TITLE_SZ.."px",text="SPRING/SUMMER\n2011",x=SUB_TITLE_X,y=SUB_TITLE_Y}
-local left_img = Image{src="assets/main-bg-frame.jpg"}
+--local left_img = Image{src="assets/main-2011-image.png"}
+local left_i = 1
+local left_panes = {
+    Image{src="assets/main-2011-image.png",  },
+    Image{src="assets/main-beauty-image.png",x=screen_w},
+    Image{src="assets/main-biker-image.png", x=screen_w},
+    Image{src="assets/main-mens-image.png",  x=screen_w},
+    Image{src="assets/main-womens-image.png",x=screen_w},
+}
 local right_tiles = {
     Image{src="assets/tile-main-womens1.png" , x=RIGHT_PANE_X,y=TILE_H*0},
     Image{src="assets/tile-main-mens1.png"  , x=RIGHT_PANE_X,y=TILE_H*1},
@@ -39,12 +44,12 @@ local bottom_buttons_base = {
     Group{
         x = VIEW_COL_X,
         y = VIEW_COL_Y,
-        opacity = 255*.3,
+        opacity = 255*.4,
     },
     Group{
         x = NEXT_X,
         y = NEXT_Y,
-        opacity = 255*.3,
+        opacity = 255*.4,
     },
 }
 local bottom_buttons_foci = {
@@ -186,8 +191,8 @@ do
         Clone{source=imgs.fp.foc_end,x=26*2+149,y_rotation={180,0,0}}
     )
 end
-
-umbrella:add(left_img,title_s,title,sub_title)
+umbrella:add(unpack(left_panes))
+umbrella:add(title_s,title,sub_title)
 umbrella:add(unpack(right_tiles))
 umbrella:add(unpack(bottom_buttons_base))
 umbrella:add(unpack(bottom_buttons_foci))
@@ -196,17 +201,27 @@ front_page = {
     group = umbrella,
     func_tbls = {
         fade_in_from = {
-            
+            ["collection_page"] = {
+                duration = 300,
+                func = function(this_obj,this_func_tbl,secs,p)
+                    this_obj.group.opacity=255*p
+                end
+            }
         },
-        fade_out_from = {
-            
+        fade_out_to = {
+            ["collection_page"] = {
+                duration = 300,
+                func = function(this_obj,this_func_tbl,secs,p)
+                    this_obj.group.opacity=255*(1-p)
+                end
+            }
         },
         focus_out_button = {
             index = 1,
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 
-                bottom_buttons_base[this_func_tbl.index].opacity=255*(.3+.7*(1-p))
+                bottom_buttons_base[this_func_tbl.index].opacity=255*(.4+.6*(1-p))
                 bottom_buttons_foci[this_func_tbl.index].opacity=255*(1-p)
             end
         },
@@ -214,7 +229,7 @@ front_page = {
             index = 1,
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                bottom_buttons_base[this_func_tbl.index].opacity=255*(.3+.7*(p))
+                bottom_buttons_base[this_func_tbl.index].opacity=255*(.4+.6*(p))
                 bottom_buttons_foci[this_func_tbl.index].opacity=255*(p)
             end
         },
@@ -243,7 +258,7 @@ front_page = {
             index = 1,
             duration  = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                bottom_buttons_base[3].opacity=255*(.3+.7*(1-p))
+                bottom_buttons_base[3].opacity=255*(.4+.6*(1-p))
                 bottom_buttons_foci[3].opacity=255*(1-p)
                 right_tiles[this_func_tbl.index].opacity=255*(1-p)
                 right_focus.opacity=255*p
@@ -267,6 +282,38 @@ front_page = {
                     this_obj.func_tbls.focus_in_button.index = 3
                 end
             end
+        },
+        slide_main_pane_right = {
+            duration = 500,
+            func = function(this_obj,this_func_tbl,secs,p)
+                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*p
+                left_panes[this_func_tbl.index].opacity=255*(.5+.5*(1-p))
+                if p == 1 then
+                    left_panes[this_func_tbl.index].opacity=255
+                end
+            end,
+        },
+        slide_new_pane_right = {
+            duration = 500,
+            func = function(this_obj,this_func_tbl,secs,p)
+                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*(1-p)
+            end,
+        },
+        slide_main_pane_left = {
+            duration = 500,
+            func = function(this_obj,this_func_tbl,secs,p)
+                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*p
+                left_panes[this_func_tbl.index].opacity=255*(.6+.4*(1-p))
+                if p == 1 then
+                    left_panes[this_func_tbl.index].opacity=255
+                end
+            end,
+        },
+        slide_new_pane_left = {
+            duration = 500,
+            func = function(this_obj,this_func_tbl,secs,p)
+                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*(1-p)
+            end,
         },
     },
     keys = {
@@ -324,6 +371,25 @@ front_page = {
             bottom_i = bottom_i + 1
         end,
         [keys.OK] = function(self)
+            if bottom_i == 1 then
+                if mediaplayer.state ~= "PLAYING" then
+                    self.func_tbls.slide_main_pane_right.index=left_i
+                    animate_list[self.func_tbls.slide_main_pane_right] = self
+                end
+                left_i = (left_i-2)%#left_panes+1
+                self.func_tbls.slide_new_pane_right.index=left_i
+                animate_list[self.func_tbls.slide_new_pane_right] = self
+            elseif bottom_i == 3 then
+                if mediaplayer.state ~= "PLAYING" then
+                    self.func_tbls.slide_main_pane_left.index=left_i
+                    animate_list[self.func_tbls.slide_main_pane_left] = self
+                end
+                left_i = (left_i)%#left_panes+1
+                self.func_tbls.slide_new_pane_left.index=left_i
+                animate_list[self.func_tbls.slide_new_pane_left] = self
+            elseif bottom_i == 4 then
+                change_page_to("collection_page")
+            end
         end,
     }
 }
