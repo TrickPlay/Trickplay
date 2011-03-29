@@ -60,17 +60,33 @@
     
     [netServiceManager stop];
     [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
-    if ([appBrowserViewController fetchApps]) {
-        [appBrowserViewController.theTableView reloadData];
+    if ([appBrowserViewController hasRunningApp]) {
+        [self.navigationController pushViewController:appBrowserViewController animated:NO];
+        [appBrowserViewController pushApp];
+    } else {
+        [self.navigationController pushViewController:appBrowserViewController animated:YES];
+        if ([appBrowserViewController fetchApps]) {
+            [appBrowserViewController.theTableView reloadData];
+        }
     }
 }
 
 - (void)didNotResolveService {
     if (gestureViewController) {
-        [self.navigationController popViewControllerAnimated:YES];
+        if (self.navigationController.visibleViewController == gestureViewController) {
+            [self.navigationController popViewControllerAnimated:NO];
+        } else {
+            [gestureViewController release];
+            gestureViewController = nil;
+        }
     }
     if (appBrowserViewController) {
-        [self.navigationController popViewControllerAnimated:YES];
+        if (self.navigationController.visibleViewController == appBrowserViewController) {
+            [self.navigationController popViewControllerAnimated:YES];
+        } else {
+            [appBrowserViewController release];
+            appBrowserViewController = nil;
+        }
     }
     [self reloadData];
 }
@@ -265,7 +281,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
     }
     
-    [self.navigationController pushViewController:appBrowserViewController animated:YES];
+    //[self.navigationController pushViewController:appBrowserViewController animated:YES];
     
 	netServiceManager.currentService = [services objectAtIndex:indexPath.row];
 	[netServiceManager.currentService setDelegate:netServiceManager];
