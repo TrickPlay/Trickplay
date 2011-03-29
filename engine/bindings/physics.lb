@@ -1055,6 +1055,7 @@ global physics [[ Physics::World * ]]
 
     #..........................................................................
 
+    callback on_step;
 
 	callback on_begin_contact( table contact )
         [[
