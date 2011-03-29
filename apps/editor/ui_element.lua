@@ -1379,9 +1379,26 @@ function ui_element.textInput(table)
 	     focus_img = Image{}
 	end 
 
-    	text = Text{text = p.text, editable = false, cursor_visible = false, wants_enter = false, reactive = true, font = p.text_font, color = p.text_color}
-    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},  }
+    	text = Text{text = p.text, editable = true, cursor_visible = true, wants_enter = true, reactive = true, font = p.text_font, color = p.text_color}
+    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
     	t_group:add(box, focus_box, box_img, focus_img, text)
+--kk
+	--if editor_lb == nil then 
+	function t_group:on_button_down()
+		t_group.extra.on_focus_in()
+		text:grab_key_focus()
+		return true
+	end 
+
+	function text:on_key_down(key) 
+		if key == keys.Return and shift == false then 
+			screen:grab_key_focus()
+			t_group.extra.on_focus_out()
+			print(t_group.text) 
+			return true
+		end 
+	end 
+	--end 
 
     	if (p.skin == "custom") then box_img.opacity = 0
     	else box.opacity = 0 box_img.opacity = 255 end 
