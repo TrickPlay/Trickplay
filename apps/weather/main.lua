@@ -5,11 +5,12 @@ screen_w = screen.w
 screen_h = screen.h
 screen:show()
 screen:add(Rectangle{name="A Grey Background for the APP",w=screen_w,h=screen_h,color={60,60,60}})
+dofile("App_Loop.lua")
+dofile("Utils.lua")
 
 function post_main()
 
-dofile("App_Loop.lua")
-dofile("Utils.lua")
+
 
 
 
@@ -117,8 +118,9 @@ m_grad.y        = screen_h-m_grad.h
 
 
 --load saved settings, or default to Palo Alto,CA
-locations = --[[settings.locations or]] {94019,94022,}
+locations = settings.locations or {94019,94022,}
 bar_i = 1
+view_5_day=false
 curr_condition=Group{name="Bottom Corner Weather conditions"}
 
 all_anims = {}
@@ -131,10 +133,17 @@ dofile("Weather_Animations.lua")
 
 
 
+
 --save the queried locations
 function app:on_closing()
 	
-	settings.locations = locations
+	local save_tbl = {}
+	local loc_i
+	for i = 1,#locations do
+		loc_i = (i+bar_i-2)%#locations+1
+		save_tbl[i] = locations[i+bar_i-1]
+	end
+	settings.locations = save_tbl
 	
 end
 

@@ -190,6 +190,9 @@ function Make_Bar(loc,index, master)
     bar.get_mini_w = function(self)
         return mini_width
     end
+    function bar.set_bar_index(i)
+        bar_index=i
+    end
     
     local full_bar  = Group{name="Full Bar",opacity=0}
     local mini_bar  = Group{name="Mini Bar"}
@@ -348,7 +351,6 @@ function Make_Bar(loc,index, master)
             local t = {string.match( curr_temp_tbl.current_observation.observation_time ,
                 "^.* (%d*):%d* (%u%u) .*" )}
             
-            dumptable(t)
             
             t[1] = tonumber(t[1])
             
@@ -378,7 +380,6 @@ function Make_Bar(loc,index, master)
             --lo_temp.text = fday.low.fahrenheit.. DEG
             bar.curr_condition = fcast_tbl.forecast.simpleforecast.forecastday[1].conditions
             
-            print(bar_i,bar_index)
             if bar_i == bar_index then
                 time_of_day = bar.local_time_of_day
                 print(bar.curr_condition)
@@ -398,7 +399,7 @@ function Make_Bar(loc,index, master)
             
             five_day = make_five_day(fcast_tbl.forecast.simpleforecast.forecastday)
             
-            bar:add(five_day)
+            full_bar:add(five_day)
             five_day.opacity=0
             five_day:hide()
             
@@ -566,14 +567,16 @@ function Make_Bar(loc,index, master)
                 mini_bar.opacity = 255*(p)
                 if p == 1 then
                     full_bar:hide()
-                    blurb_txt.opacity = 255
-                    blurb_txt:show()
-                    blue_button_today.opacity = 255
-                    blue_button_5_day.opacity = 0
-                    five_day.opacity = 0
-                    five_day:hide()
-                    zip_entry.opacity = 0
-                    zip_entry:hide()
+                    if zip_entry.opacity ~= 0 then
+                        zip_entry.opacity = 0
+                        zip_entry:hide()
+                        blurb_txt.opacity = 255
+                        blurb_txt:show()
+                    end
+                    
+                    
+                    
+                    
                     animate_list[bar.func_tbls.expand_to_mini]=bar
                 end
             end
@@ -719,6 +722,14 @@ function Make_Bar(loc,index, master)
             func = function(this_obj,this_func_tbl,secs,p)
                 blurb_txt.y = BLURB_Y+this_func_tbl.dy*(1-math.cos(2*math.pi)*p)
             end
+        },
+        wait_500 = {
+            duration=500,
+            func = function(this_obj,this_func_tbl,secs,p)
+                if p==1 then
+                    bar:grab_key_focus()
+                end
+            end
         }
     }
     
@@ -729,24 +740,26 @@ function Make_Bar(loc,index, master)
         [keys.Up]     = function()
             
             if master_i ~= nil then
-                
+                screen:grab_key_focus()
                 master_i = (master_i-2)%(#all_anims) + 1
                 print("And the Lord said.. Let there be ",all_anims[master_i])
                 bar.curr_condition = all_anims[master_i]
                 conditions[bar.curr_condition]()
                 mesg.text = bar.curr_condition..", USA"
+                animate_list[bar.func_tbls.wait_500]=bar
             end
             
         end,
         [keys.Down]   = function()
             
             if  master_i ~= nil then
-                
+                screen:grab_key_focus()
                 master_i = master_i%(#all_anims) + 1
                 print("And the Lord said.. Let there be ",all_anims[master_i])
                 bar.curr_condition = all_anims[master_i]
                 conditions[bar.curr_condition]()
                 mesg.text = bar.curr_condition..", USA"
+                animate_list[bar.func_tbls.wait_500]=bar
             end
             
         end,
@@ -867,18 +880,69 @@ function Make_Bar(loc,index, master)
             
             screen:grab_key_focus()
             
-            if zip_entry.opacity~=0 then
-                blurb_txt:show()
-                animate_list[bar.func_tbls.xfade_in_blurb_from_zip] = bar
-            elseif five_day.opacity == 0 then
-                five_day:show()
-                animate_list[bar.func_tbls.xfade_in_5_day] = bar
-            else
+            if view_5_day then
+                view_5_day = false
                 blurb_txt:show()
                 animate_list[bar.func_tbls.xfade_in_blurb] = bar
+            elseif zip_entry.opacity~=0 then
+                blurb_txt:show()
+                animate_list[bar.func_tbls.xfade_in_blurb_from_zip] = bar
+            else
+                view_5_day=true
+                five_day:show()
+                animate_list[bar.func_tbls.xfade_in_5_day] = bar
             end
+            
         end,
         [keys.RED]    = function()
+            if #bars == 2 then return end
+            if zip_entry.opacity~=0 then
+                if zip_focus <= 5 then
+                    zip_backing[zip_focus].color={255,255,255}
+                end
+                zip_focus = zip_focus + 1
+                if zip_focus == #zip_backing + 1 then
+                    zip_focus = 1
+                    
+                end
+                zip_backing[zip_focus].color = {140,140,140}
+                return
+            end
+            
+            table.remove(bars,bar_index)
+            
+            for i,v in ipairs(bars) do
+                bars[i].set_bar_index(i)
+            end
+            
+            next_i = 1
+
+            
+            screen:grab_key_focus()
+            bars[next_i]:show()
+            if mini then
+                bars[next_i].x = MINI_BAR_X + bar_dist/2
+                bars[next_i].opacity = 0
+                bars[next_i]:go_mini()
+                animate_list[bar.func_tbls.mini_move_right] = bar
+            else
+                bars[next_i].x = MINI_BAR_X + bar_dist
+                bars[next_i].opacity = 255
+                bars[next_i]:go_full()
+                right_faux_bar.x = bar_dist
+                animate_list[bar.func_tbls.full_move_right] = bar
+            end
+            time_of_day = bars[next_i].local_time_of_day
+            if conditions[bars[next_i].curr_condition] then
+                conditions[bars[next_i].curr_condition]()
+            else
+                conditions["Unknown"]()
+            end
+            
+            
+            
+            print("switching to "..next_i)
+            bar_i = next_i
         end,
         [keys.GREEN]  = function()
             screen:grab_key_focus()
@@ -1003,13 +1067,21 @@ function Make_Bar(loc,index, master)
         bar:find_child("mid").w=FULL_BAR_W
         bar:find_child("right").x=bar_side_w + FULL_BAR_W
         arrow_r.x = MINI_BAR_X + FULL_BAR_W -bar_side_w/2+1
-        blurb_txt.opacity=255
-        blurb_txt:show()
+        
         zip_entry.opacity=0
         zip_entry:hide()
-        five_day.opacity=0
-        five_day:hide()
         
+        if view_5_day then
+            five_day.opacity=255
+            five_day:show()
+            blurb_txt.opacity=0
+            blurb_txt:hide()
+        else
+            five_day.opacity=0
+            five_day:hide()
+            blurb_txt.opacity=255
+            blurb_txt:show()
+        end
     end
     bar.go_mini = function()
         full_bar.opacity=0
