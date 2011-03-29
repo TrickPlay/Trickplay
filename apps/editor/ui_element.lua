@@ -1408,7 +1408,10 @@ function ui_element.textInput(table)
 			t_group.extra.on_focus_out()
 			return true
 		elseif key == keys.Left then 
-			if pablo_f then 
+			if t_group:find_child("textInput").position_to_coordinates then 
+				print("PABLO ~~~")
+				--t_group:find_child("textInput").position_to_coordinates
+--[[
 				local x,y,lh = pablo_f(c_pos)
 				local tx, ty, tlh = pablo_f(c_pos - 1)
 				local letter_sz = x - tx 
@@ -1417,6 +1420,7 @@ function ui_element.textInput(table)
 		    			t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz
 		    			t_group:find_child("textInput").clip = {scroll_w + p.padding + letter_sz, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
 				end
+]]
 			end 
 	        end 
 	   end 
