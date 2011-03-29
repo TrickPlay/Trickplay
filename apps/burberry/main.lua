@@ -16,8 +16,12 @@ end
 dofile("App_Loop.lua")
 dofile("Utils.lua")
 dofile("FrontPage.lua") -- global: front_page
+dofile("CollectionPage.lua")
+dofile("CategoryPage.lua")
 
 screen:add(
+	category_page.group,
+	collection_page.group,
 	front_page.group
 )
 
