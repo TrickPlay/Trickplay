@@ -1040,21 +1040,23 @@ tstorm = {
         fade_out = {
             duration = 400,
             func = function(this_obj,this_func_tbl,secs,p)
-                
-                if this_obj.glow_cloud.opacity - 255/200*secs < 0 then
+                --[[
+                if this_obj.glow_cloud.opacity < 255/200*secs then
                     this_obj.glow_cloud.opacity = 0
                 else
                     this_obj.glow_cloud.opacity = this_obj.glow_cloud.opacity - 255/200*secs
                 end
-                
+                --]]
                 this_obj.base_cloud.x = -this_obj.base_cloud.w*(p)
-                
-                if this_obj.lightning[this_obj.l_index].opacity - 255/200*secs < 0 then
+                --[[
+                if this_obj.lightning[this_obj.l_index].opacity < 255/200*secs then
                     this_obj.lightning[this_obj.l_index].opacity = 0
                 else
                     this_obj.lightning[this_obj.l_index].opacity = this_obj.lightning[this_obj.l_index].opacity - 255/200*secs
                 end
-                
+                --]]
+                this_obj.lightning[this_obj.l_index].opacity = 255*(1-p)
+                this_obj.glow_cloud.opacity= 255*(1-p)
             end
         },
         fade_in = {
