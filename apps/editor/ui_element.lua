@@ -1394,50 +1394,64 @@ function ui_element.textInput(table)
 	   local t_pos_max = p.ui_width - 2 * p.padding
 
 	   function text:on_key_down(key)
+	        local c_x, prev_c_x
 		local t_w = t_group:find_child("textInput").w
+	        local scroll_w = t_w - t_pos_max 
 		local c_pos = t_group:find_child("textInput").cursor_position
-	        local scroll_w = t_w  - t_pos_max 
-
-		if scroll_w > 0 then 
-		    t_group:find_child("textInput").x = scroll_w * -1
-		    t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
-		    print( t_group:find_child("textInput").x )
-		    dumptable( t_group:find_child("textInput").clip )
-		end
-
+	
 		if key == keys.Return and shift == false then 
 			screen:grab_key_focus()
 			t_group.extra.on_focus_out()
 			return true
 		elseif key == keys.Left then 
 			if t_group:find_child("textInput").position_to_coordinates then 
-				local temp, temp2
-
-				if c_pos ~= -1 and c_pos ~= 0 then 
-				     if t_group:find_child("textInput").clip then 
-
-					print(c_pos, "<- cpos")
-		                     temp = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
-		                     temp2 = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
-				     local x = temp[1] 
-				     local y = temp[2] 
-				     local lh = temp[3] 
-				     local letter_sz = x - temp2[1] 
+				if t_group:find_child("textInput").clip then 
+		                     	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
+				     	local x = c_x[1] 
+				     	local letter_sz 
+					print(c_pos)
+					if c_pos ~= -1 and c_pos ~= 0 then 
+		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
+				     	     letter_sz =  x - prev_c_x[1] 
+					end 
 	
-				     print("clip x" , t_group:find_child("textInput").clip[1])
-				     print("cursor_pos x", x)
-
-				     if (t_group:find_child("textInput").clip[1] - 2* p.padding > x ) then 
+				     	if (t_group:find_child("textInput").clip[1] > x-p.padding ) and letter_sz then 
 		    			    t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz 
 		    			    t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - letter_sz ,  
 					    t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
-					    print("new x" , t_group:find_child("textInput").x )
-					    dumptable(t_group:find_child("textInput").clip )
-				     end
-				    end
-			       end 
+					    letter_sz = nil
+					    c_x = nil
+					    prev_c_x = nil
+				     	end
+			        end
 			end 
+		elseif key == keys.Right then 
+			if t_group:find_child("textInput").position_to_coordinates then 
+				if t_group:find_child("textInput").clip then 
+			        	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
+				     	local x = c_x[1] 
+				     	local letter_sz 
+					print(c_pos)
+					if c_pos ~= -1 then
+		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
+				     	     letter_sz = x - prev_c_x[1]
+
+		             		    if (t_group:find_child("textInput").clip[3] < x+p.padding )then 
+		    			         t_group:find_child("textInput").x = t_group:find_child("textInput").x - letter_sz 
+		    			         t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] + letter_sz ,  
+					         t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] + letter_sz ,  t_group:find_child("textInput").clip[4]}
+					    	 letter_sz = nil
+					         c_x = nil
+					         prev_c_x = nil
+					    end
+					end 
+				end 
+			end 
+		elseif scroll_w > 0 then 
+		    t_group:find_child("textInput").x = scroll_w * -1
+		    t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
 	        end 
+
 	   end 
 	end 
 
