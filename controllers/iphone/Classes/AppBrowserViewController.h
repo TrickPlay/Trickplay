@@ -42,9 +42,12 @@ UITableViewDataSource> {
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;
 - (void)createGestureView;
+- (NSDictionary *)getCurrentAppInfo;
 - (BOOL)fetchApps;
 - (void)setupService:(NSInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n;
+- (BOOL)hasRunningApp;
+- (void)pushApp;
 
 @end

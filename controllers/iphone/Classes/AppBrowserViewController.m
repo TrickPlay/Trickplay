@@ -56,6 +56,49 @@
     [self createGestureView];
 }
 
+- (void)pushApp {
+    pushingViewController = YES;
+    NSLog(@"\n\nFIRST\n\n");
+    if (self.navigationController.visibleViewController != self) {
+        NSLog(@"\n\nSECOND\n\n");
+        [self.navigationController pushViewController:self animated:NO];
+    }
+    
+    UIBarButtonItem *newBackButton = [[UIBarButtonItem alloc] initWithTitle: @"Apps List" style: UIBarButtonItemStyleBordered target: nil action: nil];
+    [[self navigationItem] setBackBarButtonItem: newBackButton];
+    [newBackButton release];
+    
+    [self.navigationController pushViewController:gestureViewController animated:YES];
+}
+
+/**
+ *  Returns true if app is running and pushes that app to the view.
+ */
+- (BOOL)hasRunningApp {
+    NSDictionary *currentAppInfo = [self getCurrentAppInfo];
+    NSLog(@"Received JSON dictionary current app data = %@", currentAppInfo);
+    self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
+    if (currentAppName && ![currentAppName isEqualToString:@"Empty"]) {
+        return YES;
+    }
+    
+    return NO;
+}
+
+/**
+ * Returns current app data.
+ */
+- (NSDictionary *)getCurrentAppInfo {
+    // grab json data and put it into an array
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", hostName, port];
+    //NSLog(@"JSONString = %@", JSONString);
+    NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
+    //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
+    //NSArray *JSONArray = [JSONData yajl_JSON];
+    return (NSDictionary *)[[[JSONData yajl_JSON] retain] autorelease];
+}
+
+
 - (BOOL)fetchApps {
     if (!port || !hostName) {
         return NO;
@@ -242,8 +285,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [gestureViewController clean];
         [self launchApp:(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row]];
     }
-    pushingViewController = YES;
-    [self.navigationController pushViewController:gestureViewController animated:YES];    
+    
+    [self pushApp];   
     
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
 	if (indexPath2 != nil)

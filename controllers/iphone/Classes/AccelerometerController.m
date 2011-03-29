@@ -12,7 +12,7 @@
 @implementation AccelerometerController
 
 - (id)initWithSocketManager:(SocketManager *)sockMan {
-    if (self = [super init]) {
+    if ((self = [super init])) {
         socketManager = [sockMan retain];
     
         accelerationX = 0;
@@ -39,10 +39,13 @@
         accelMode = 2;
         [[UIAccelerometer sharedAccelerometer] setUpdateInterval:interval];
     }
+    
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
 }
 
 - (void)pauseAccelerometer {
     accelMode = 0;
+    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
 }
 
 - (void)accelerometer:(UIAccelerometer *)accelerometer
@@ -67,8 +70,6 @@
 		accelerationZ = acceleration.z * FILTERING_FACTOR + accelerationZ * (1.0 - FILTERING_FACTOR);
 		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", accelerationX,accelerationY,accelerationZ];
 		[socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
-		
-		
 	}
     // keep the raw reading, to use during calibrations
     //currentRawReading = atan2(accelerationY, accelerationX);
