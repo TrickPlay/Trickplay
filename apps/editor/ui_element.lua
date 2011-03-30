@@ -3218,17 +3218,17 @@ function ui_element.layoutManager(t)
 		end
         
         if p.rows < #p.tiles then
-            for r = p.rows + 1, #tiles do
+            for r = p.rows + 1, #p.tiles do
                 for c = 1, #p.tiles[r] do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c] = nil
                 end
-                tiles[r]     = nil
+                p.tiles[r]     = nil
                 functions[r] = nil
             end
         end
         if p.columns < #p.tiles[1] then
-            for c = p.columns + 1, #tiles[r] do
+            for c = p.columns + 1, #p.tiles[r] do
                 for r = 1, #p.tiles do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c]   = nil
