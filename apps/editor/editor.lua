@@ -29,6 +29,7 @@ local widget_f_map = {
      ["LayoutManager"]        = function () return ui_element.layoutManager()   end,
      ["ScrollPane"]    = function () return ui_element.scrollPane() end, 
      ["ArrowPane"]    = function () return ui_element.arrowPane() end, 
+     ["MenuBar"]    = function () return ui_element.menuBar() end, 
 }
 
 local widget_n_map = {
@@ -45,6 +46,7 @@ local widget_n_map = {
      ["LayoutManager"]        = function () return "Layout Manager" end,
      ["ScrollPane"]    = function () return "Scroll Pane" end, 
      ["ArrowPane"]    = function () return "Arrow Pane" end, 
+     ["MenuBar"]    = function () return "Menu Bar" end, 
 }
 
 function guideline_type(name) 
