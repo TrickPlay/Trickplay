@@ -11,7 +11,7 @@
 
 #define HORIZ_SWIPE_DRAG_MIN  30
 #define VERT_SWIPE_DRAG_MIN    30
-#define TAP_DISTANCE_MAX    4
+#define TAP_DISTANCE_MAX    10
 
 
 @interface TouchController : NSObject <ViewControllerTouchDelegate> {
@@ -29,6 +29,9 @@
     CFMutableDictionaryRef activeTouches;
     //NSMutableDictionary *activeTouches;
     NSUInteger openFinger;
+    
+    CGPoint startTouchPosition;
+    BOOL swipeStarted;
 }
 
 @property (retain) SocketManager *socketManager;
