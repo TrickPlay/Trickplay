@@ -168,10 +168,12 @@ function _mt.__call( t , k , f )
     local asset = rawget( list , k )
     if not asset then
         asset = ( f or make_image )( k )
+	if k then 
         assert( asset , "Failed to create asset "..k )
         asset:set{ opacity = 0 }
         rawset( list , k , asset )
         screen:add( asset )
+	end
     end
     return Clone{ source = asset , opacity = 255 }
 end
@@ -2922,8 +2924,8 @@ Extra Function:
 function ui_element.layoutManager(t)
     --default parameters
     local p = {
-        rows    = 4,
-        columns    = 3,
+        rows    = 1,
+        columns    = 5,
         cell_w      = 300,
         cell_h      = 200,
         cell_spacing    = 40, --grid_gap
@@ -4287,7 +4289,7 @@ button
         
         button.reactive=true
        
-	if editor_lb == nil then  
+	 if editor_lb == nil then  
         function button:on_button_down(x,y,b,n)
             if dropDownMenu.opacity == 0 then
                 umbrella.spin_in()
@@ -4360,11 +4362,11 @@ function ui_element.menuBar(t)
     local index = 0
     
     local si = ui_element.scrollPane{
-        clip_h    = screen.h,
-        content_h = screen.h,
-        arrow_sz  = 30,
-        arrows_centered   = true,
-        border_is_visible = false,
+        visible_h    = screen.h,
+        vitual_h = screen.h,
+        --arrow_sz  = 30, --kkk
+        --arrows_centered   = true,
+        --border_is_visible = false,
     }
     si.position={40,0}
     local func = {
@@ -4372,14 +4374,14 @@ function ui_element.menuBar(t)
             fade_in = "on_focus_in",
             fade_out = "on_focus_out"
         },
-        ["DropDown"] ={
+        ["MenuButton"] ={
             fade_in = "spin_in",
             fade_out = "spin_out"
         }
     }
     local width = {
         ["Button"]   = 200,
-        ["DropDown"] = 300
+        ["MenuButton"] = 300
     }
     local umbrella = Group{
         name     = "menubar",
@@ -4455,9 +4457,9 @@ function ui_element.menuBar(t)
         
         umbrella:add(si)
         si.seek_to(0,0)
-        si.clip_w       = p.clip_w
+        si.visible_w       = p.clip_w
         si.skin         = p.skin
-        si.hor_arrows_y = p.arrow_y
+        --si.hor_arrows_y = p.arrow_y --kkkk
         index = 0
         
         local curr_w = 0
@@ -4465,7 +4467,7 @@ function ui_element.menuBar(t)
             
             assert(
                 p.bar_widgets[i].extra.type == "Button" or
-                p.bar_widgets[i].extra.type == "DropDown",
+                p.bar_widgets[i].extra.type == "MenuButton",
                 "invalid widget added to the dropdown bar"
             )
             si.content:add(p.bar_widgets[i])
@@ -4475,7 +4477,7 @@ function ui_element.menuBar(t)
             curr_w = curr_w + width[p.bar_widgets[i].extra.type] + 15
             
         end
-        si.content_w = curr_w
+        si.virtual_w = curr_w
     end
     
     create()

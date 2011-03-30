@@ -1077,14 +1077,21 @@ local function build_ui( show_it )
     
 end
 
+local function screen_add_bg()
 
-    
+    screen:add(BG_IMAGE_20)
+    screen:add(BG_IMAGE_40)
+    screen:add(BG_IMAGE_80)
+    screen:add(BG_IMAGE_white)
+    screen:add(BG_IMAGE_import)
+
+end 
+
 -------------------------------------------------------------------------------
 -- Main
 -------------------------------------------------------------------------------
 
 function main()
-
     if controllers.start_pointer then 
   	controllers:start_pointer()
     end
@@ -1093,13 +1100,10 @@ function main()
 	editor_lb:disable_exit()
     end
 
-    screen:add(BG_IMAGE_20)
-    screen:add(BG_IMAGE_40)
-    screen:add(BG_IMAGE_80)
-    screen:add(BG_IMAGE_white)
-    screen:add(BG_IMAGE_import)
+    screen_add_bg()
     screen:show()
     screen.reactive=true
+
     ui = build_ui(true)
     ui:animate_in()
     ui:menu_button_down() 
@@ -1107,6 +1111,3 @@ function main()
     
 end
 dolater(main)
-
---main()
-
