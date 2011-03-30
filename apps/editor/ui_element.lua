@@ -3051,9 +3051,9 @@ function ui_element.layoutManager(t)
                 focus:complete_animation()
                 if p.cell_size == "variable" then
                     local w,h 
-                    if p.tiles[focus_i[1]][focus_i[2]] == nil then
-                        w = col_ws[focus_i[2]]
-                        h = row_hs[focus_i[1]]
+                    if p.tiles[r][c] == nil then
+                        w = col_ws[r] or p.cell_w
+                        h = row_hs[c] or p.cell_h
                     else
                         w=p.tiles[r][c].w
                         h=p.tiles[r][c].h
@@ -3065,7 +3065,7 @@ function ui_element.layoutManager(t)
                         y=y,
                         w=w,
                         h=h,
-                        anchor_point={w/2,h/2}
+                        anchor_point={(col_ws[r] or p.cell_w)/2,(row_hs[c] or p.cell_h)/2}
                     }
                 else
                     focus:animate{
