@@ -85,8 +85,19 @@
 #define SIXTY_HZ
 
 #include "nexus_platform.h"
+#include "nexus_pid_channel.h"
+#include "nexus_stc_channel.h"
 #include "nexus_display.h"
+#include "nexus_video_window.h"
+#include "nexus_composite_output.h"
+#include "nexus_component_output.h"
+#include "nexus_hdmi_input.h"
+#include "nexus_audio_decoder.h"
+#include "nexus_audio_dac.h"
+#include "nexus_audio_output.h"
+#include "bstd.h"
 #include "bkni.h"
+
 #include "nexus_ir_input.h"
 
 #include "trickplay/trickplay.h"
@@ -94,11 +105,19 @@
 #include "trickplay/keys.h"
 #include "trickplay/mediaplayer.h"
 
+#define LINE fprintf( stderr , "%s:%d\n" , __FILE__ , __LINE__ )
+
 NEXUS_PlatformConfiguration   platform_config;
-NEXUS_DisplayHandle     nexus_display = 0;
-EGLNativeDisplayType    native_display = 0;
-EGL_NEXUS_WIN_T         egl_window;
-NEXUS_IrInputHandle     mIRHandle = 0;
+NEXUS_DisplayHandle           nexus_display = 0;
+EGLNativeDisplayType          native_display = 0;
+EGL_NEXUS_WIN_T               egl_window;
+NEXUS_IrInputHandle           mIRHandle = 0;
+
+NEXUS_VideoWindowHandle       video_window = 0;
+
+NEXUS_HdmiInputHandle         hdmiInput = 0;
+NEXUS_AudioDecoderHandle      hdmiAudioDecoder = 0;
+
 
 TPController *          controller = 0;
 
@@ -129,6 +148,89 @@ static void irCallback(void *pParam, int iParam)
          }
       }
    }
+}
+
+void disconnect_hdmi()
+{
+   NEXUS_VideoWindow_RemoveAllInputs( video_window );   
+
+   if ( hdmiInput )
+   {
+      NEXUS_AudioDecoder_Stop( hdmiAudioDecoder );
+   
+      NEXUS_AudioOutput_RemoveInput(NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]),
+                NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
+   
+      NEXUS_AudioOutput_RemoveInput(NEXUS_SpdifOutput_GetConnector(platform_config.outputs.spdif[0]),
+                NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
+   
+      NEXUS_AudioOutput_RemoveAllInputs( NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]) );
+  
+      NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));         
+      NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eMultichannel ));
+      NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
+      NEXUS_AudioInput_Shutdown( NEXUS_HdmiInput_GetAudioConnector( hdmiInput ) ); 
+   
+      NEXUS_VideoInput_Shutdown( NEXUS_HdmiInput_GetVideoConnector( hdmiInput ) );
+      NEXUS_AudioDecoder_Close( hdmiAudioDecoder );
+
+      NEXUS_HdmiInput_Close( hdmiInput );
+   }
+   
+   hdmiInput = 0;
+   hdmiAudioDecoder = 0;
+}
+
+
+void connect_hdmi()
+{
+   NEXUS_VideoWindowSettings windowSettings;
+
+   NEXUS_VideoWindow_GetSettings(video_window, &windowSettings);
+   
+   windowSettings.position.x = 0;
+   windowSettings.position.y = 0;
+   windowSettings.position.width = 1920;
+   windowSettings.position.height = 1080;
+   NEXUS_VideoWindow_SetSettings(video_window, &windowSettings);
+   
+   
+   NEXUS_AudioDecoderStartSettings audioProgram;
+   NEXUS_StcChannelSettings stcSettings;
+   NEXUS_HdmiInputSettings hdmiInputSettings;
+   NEXUS_TimebaseSettings timebaseSettings;
+   
+   NEXUS_Timebase_GetSettings(NEXUS_Timebase_e0, &timebaseSettings);
+   timebaseSettings.sourceType = NEXUS_TimebaseSourceType_eHdDviIn;
+   NEXUS_Timebase_SetSettings(NEXUS_Timebase_e0, &timebaseSettings);
+   
+   NEXUS_HdmiInput_GetDefaultSettings(&hdmiInputSettings);
+   hdmiInputSettings.timebase = NEXUS_Timebase_e0;
+   hdmiInput = NEXUS_HdmiInput_Open(0, &hdmiInputSettings);
+   
+   if ( ! hdmiInput )
+   {
+      fprintf( stderr , "FAILED TO OPEN HDMI INPUT\n" ); 
+   }
+   else
+   {
+      NEXUS_VideoWindow_AddInput(video_window, NEXUS_HdmiInput_GetVideoConnector(hdmiInput));
+   
+      hdmiAudioDecoder = NEXUS_AudioDecoder_Open(0, NULL);
+      NEXUS_AudioDecoder_GetDefaultStartSettings(&audioProgram);
+      audioProgram.input = NEXUS_HdmiInput_GetAudioConnector(hdmiInput);
+      NEXUS_StcChannel_GetDefaultSettings(0, &stcSettings);
+      stcSettings.timebase = NEXUS_Timebase_e0;
+      stcSettings.autoConfigTimebase = false;
+      audioProgram.stcChannel = NEXUS_StcChannel_Open(0, &stcSettings);
+      NEXUS_AudioOutput_AddInput(NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]),
+                                 NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
+
+      NEXUS_AudioOutput_AddInput(NEXUS_SpdifOutput_GetConnector(platform_config.outputs.spdif[0]),
+                                 NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
+
+      NEXUS_AudioDecoder_Start(hdmiAudioDecoder, &audioProgram);
+   }   
 }
 
 bool InitDisplay()
@@ -203,15 +305,8 @@ bool InitDisplay()
    NEXUS_Display_GetGraphicsSettings(nexus_display, &graphics_settings);
    
    graphics_settings.enabled = true;
-#if 1
    graphics_settings.sourceBlendFactor = NEXUS_CompositorBlendFactor_eSourceAlpha;
    graphics_settings.destBlendFactor = NEXUS_CompositorBlendFactor_eInverseSourceAlpha;
-#else
-   graphics_settings.sourceBlendFactor = NEXUS_CompositorBlendFactor_eConstantAlpha;
-   graphics_settings.destBlendFactor = NEXUS_CompositorBlendFactor_eInverseConstantAlpha;
-   graphics_settings.constantAlpha = 0x80;
-   
-#endif
 
    NEXUS_Display_SetGraphicsSettings( nexus_display , & graphics_settings );
 
@@ -226,6 +321,13 @@ bool InitDisplay()
    irSettings.dataReady.callback = irCallback;
    irSettings.dataReady.context = &mIRHandle;
    mIRHandle = NEXUS_IrInput_Open(0, &irSettings);
+   
+   
+   video_window = NEXUS_VideoWindow_Open(nexus_display, 0);
+
+#if 1
+   connect_hdmi();   
+#endif
 
    return true;
 }
@@ -306,8 +408,12 @@ int main(int argc, char** argv)
 
    if (nexus_display != 0)
    {
-       EGLDisplay   eglDisplay;
+      disconnect_hdmi();
+      
+      NEXUS_VideoWindow_Close( video_window );
+   
       /* Terminate EGL */
+      EGLDisplay   eglDisplay;
 
       eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
       eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);

@@ -106,6 +106,10 @@ static void stop_audio(const struct util_opts_t *opts, NEXUS_AudioDecoderHandle 
 
 extern NEXUS_DisplayHandle           nexus_display;
 extern NEXUS_PlatformConfiguration   platform_config;
+extern NEXUS_VideoWindowHandle       video_window;
+
+extern void disconnect_hdmi();
+extern void connect_hdmi();
 
 struct nmp_t
 {
@@ -120,7 +124,6 @@ struct nmp_t
     NEXUS_PidChannelHandle              pcrPidChannel;
     NEXUS_StcChannelHandle              stcChannel;
     NEXUS_StcChannelSettings            stcSettings;
-    NEXUS_VideoWindowHandle             window;
     NEXUS_VideoWindowSettings           windowSettings;
     NEXUS_VideoDecoderHandle            videoDecoder;
     NEXUS_VideoDecoderStartSettings     videoProgram;
@@ -222,6 +225,8 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
     BDBG_ASSERT( nmp->playpump );
     BDBG_ASSERT( nmp->playback );
     
+    disconnect_hdmi();
+ 
     NEXUS_StcChannel_GetDefaultSettings(0, &nmp->stcSettings);
     nmp->stcSettings.timebase = NEXUS_Timebase_e0;
     nmp->stcSettings.mode = NEXUS_StcChannelMode_eAuto;
@@ -272,15 +277,14 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
         NEXUS_AudioDecoder_GetConnector(nmp->audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
     BDBG_ASSERT(!rc);
 
-    nmp->window = NEXUS_VideoWindow_Open(nexus_display, 0);
-
-    NEXUS_VideoWindow_GetSettings(nmp->window, &nmp->windowSettings);
+    
+    NEXUS_VideoWindow_GetSettings(video_window, &nmp->windowSettings);
     nmp->windowSettings.contentMode = nmp->opts.contentMode;
     /*
     printf( "%d - %d - %d - %d\n" , nmp->windowSettings.position.x, nmp->windowSettings.position.y,nmp->windowSettings.position.width,nmp->windowSettings.position.height);
     */
     nmp->windowSettings.position = nmp->viewport;
-    rc = NEXUS_VideoWindow_SetSettings(nmp->window, &nmp->windowSettings);
+    rc = NEXUS_VideoWindow_SetSettings(video_window, &nmp->windowSettings);
     BDBG_ASSERT(!rc);
     
     NEXUS_VideoDecoder_GetDefaultOpenSettings(&nmp->openSettings);
@@ -295,7 +299,7 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
     }
     
     nmp->videoDecoder = NEXUS_VideoDecoder_Open(nmp->opts.videoDecoder, &nmp->openSettings);
-    rc = NEXUS_VideoWindow_AddInput(nmp->window, NEXUS_VideoDecoder_GetConnector(nmp->videoDecoder));
+    rc = NEXUS_VideoWindow_AddInput(video_window, NEXUS_VideoDecoder_GetConnector(nmp->videoDecoder));
     BDBG_ASSERT(!rc);
     
     
@@ -382,10 +386,9 @@ static void nmp_reset( TPMediaPlayer * mp )
     NEXUS_Playpump_Close(nmp->playpump);
 
 
-    NEXUS_VideoWindow_RemoveInput(nmp->window, NEXUS_VideoDecoder_GetConnector(nmp->videoDecoder));
+    NEXUS_VideoWindow_RemoveInput(video_window, NEXUS_VideoDecoder_GetConnector(nmp->videoDecoder));
     NEXUS_VideoInput_Shutdown(NEXUS_VideoDecoder_GetConnector(nmp->videoDecoder));
     NEXUS_VideoDecoder_Close(nmp->videoDecoder);
-    NEXUS_VideoWindow_Close(nmp->window);
 
     NEXUS_AudioOutput_RemoveInput(
         NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]),
@@ -405,6 +408,8 @@ static void nmp_reset( TPMediaPlayer * mp )
     
     nmp->mp = mp;
     nmp->viewport = vp;
+    
+    connect_hdmi();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -553,14 +558,14 @@ static int nmp_set_viewport_geometry(
     r.width = width * 2;
     r.height = height * 2;
     
-    if ( nmp->window )
+    if ( nmp->playback )
     {
         NEXUS_VideoWindowSettings settings;
         
-        NEXUS_VideoWindow_GetSettings( nmp->window , & settings );
+        NEXUS_VideoWindow_GetSettings( video_window , & settings );
         settings.position = r;
         NEXUS_Error rc;
-        rc = NEXUS_VideoWindow_SetSettings( nmp->window , & settings );
+        rc = NEXUS_VideoWindow_SetSettings( video_window , & settings );
         if ( rc )
         {
             return rc;
