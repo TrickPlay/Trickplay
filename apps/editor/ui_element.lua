@@ -3051,12 +3051,32 @@ function ui_element.layoutManager(t)
                 focus_i = {r,c}
                 local x,y = x_y_from_index(r,c)
                 focus:complete_animation()
-                focus:animate{
-                    duration=300,
-                    mode="EASE_OUT_CIRC",
-                    x=x,
-                    y=y
-                }
+                if p.cell_size == "variable" then
+                    local w,h 
+                    if p.tiles[r][c] == nil then
+                        w = col_ws[r] or p.cell_w
+                        h = row_hs[c] or p.cell_h
+                    else
+                        w=p.tiles[r][c].w
+                        h=p.tiles[r][c].h
+                    end
+                    focus:animate{
+                        duration=300,
+                        mode="EASE_OUT_CIRC",
+                        x=x,
+                        y=y,
+                        w=w,
+                        h=h,
+                        anchor_point={(col_ws[r] or p.cell_w)/2,(row_hs[c] or p.cell_h)/2}
+                    }
+                else
+                    focus:animate{
+                        duration=300,
+                        mode="EASE_OUT_CIRC",
+                        x=x,
+                        y=y
+                    }
+                end
             end,
             press_enter = function(p)
                 functions[focus_i[1]][focus_i[2]](p)
@@ -3104,25 +3124,25 @@ function ui_element.layoutManager(t)
                 x = x - self.transformed_position[1]/screen.scale[1]
                 y = y - self.transformed_position[2]/screen.scale[2]
                 if p.cell_size == "fixed" then
+                            print(math.floor(y/(p.cell_h+p.cell_spacing))+1,
+                           math.floor(x/(p.cell_w+p.cell_spacing))+1)
 	        	    return math.floor(x/(p.cell_w+p.cell_spacing))+1,
                            math.floor(y/(p.cell_h+p.cell_spacing))+1
                 end
                 
-                local curr_x = x
-                local curr_y = y
                 local r = 1
                 local c = 1
                 for i = 1, p.columns do
-                    if curr_x < (col_ws[i] or p.cell_w) then break end
-                    curr_x = curr_x - (col_ws[i] or p.cell_w) - p.cell_spacing
+                    if x < (col_ws[i] or p.cell_w) then break end
+                    x = x - (col_ws[i] or p.cell_w) - p.cell_spacing
                     r = r + 1
                 end
                 for i = 1, p.rows do
-                    if curr_y < (row_hs[i] or p.cell_h) then break end
-                    curr_y = curr_y - (row_hs[i] or p.cell_h) - p.cell_spacing
+                    if y < (row_hs[i] or p.cell_h) then break end
+                    y = y - (row_hs[i] or p.cell_h) - p.cell_spacing
                     c = c + 1
                 end
-                return c, r
+                return  r,c
 	        end
         }
     }
@@ -3150,9 +3170,9 @@ function ui_element.layoutManager(t)
     local make_focus = function()
         return Rectangle{
             name="Focus",
-            size={ p.cell_w+5, p.cell_h+5},
+            size={ p.cell_w+10, p.cell_h+10},
             color="00000000",
-            anchor_point = { (p.cell_w+5)/2, (p.cell_h+5)/2},
+            anchor_point = { (p.cell_w+10)/2, (p.cell_h+10)/2},
             border_width=5,
             border_color="FFFFFFFF",
         }
@@ -3220,17 +3240,17 @@ function ui_element.layoutManager(t)
 		end
         
         if p.rows < #p.tiles then
-            for r = p.rows + 1, #tiles do
+            for r = p.rows + 1, #p.tiles do
                 for c = 1, #p.tiles[r] do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c] = nil
                 end
-                tiles[r]     = nil
+                p.tiles[r]     = nil
                 functions[r] = nil
             end
         end
         if p.columns < #p.tiles[1] then
-            for c = p.columns + 1, #tiles[r] do
+            for c = p.columns + 1, #p.tiles[r] do
                 for r = 1, #p.tiles do
                     p.tiles[r][c]:unparent()
                     p.tiles[r][c]   = nil
@@ -3238,7 +3258,16 @@ function ui_element.layoutManager(t)
                 end
             end
         end
-        
+        if p.cell_size == "variable" then
+            if p.tiles[focus_i[1]][focus_i[2]] == nil then
+                focus.w = col_ws[focus_i[2]] or p.cell_w
+                focus.h = row_hs[focus_i[1]] or p.cell_h
+            else
+                focus.w = p.tiles[focus_i[1]][focus_i[2]].w
+                focus.h = p.tiles[focus_i[1]][focus_i[2]].h
+            end
+            focus.anchor_point = { (focus.w)/2, (focus.h)/2}
+        end
 	end
 	make_grid()
 
