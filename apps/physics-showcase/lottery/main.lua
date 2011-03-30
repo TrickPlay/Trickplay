@@ -869,11 +869,12 @@ function screen:on_key_down( key )
     end
 end
 
-
+local finger_places = {}
 function controllers.on_controller_connected(controllers,controller)
+    -- Track this controller's fingers
+    finger_places[controller] = {}
+
     if(controller.has_accelerometer) then
-    	controller:start_accelerometer("L",0.01)
-    	
     	function controller.on_accelerometer(controller, x, y, z)
     		--[[
 				Decompose rotation into 2 rotations, about y-axis onto x-z plane, then about x-axis onto negative y-axis
@@ -906,6 +907,39 @@ function controllers.on_controller_connected(controllers,controller)
 			screen.x_rotation = { theta_to_negative_y_axis-90, 0, 0 }
 			screen.z_rotation = { theta_for_tilt, 0, 0 }
     	end
+
+    	controller:start_accelerometer("L",0.01)
+    end
+
+    if(controller.has_touches) then
+        function controller.on_touch_down(controller, finger, x, y)
+            print("TOUCH DOWN: ",finger,x,y)
+            -- Record where this finger went down
+            finger_places[controller][finger] = { x=x, y=y }
+        end
+        
+        function controller.on_touch_move(controller, finger, x, y)
+            print("TOUCH MOVE: ",finger,x,y)
+            -- Record where this finger went down
+            finger_places[controller][finger] = { x=x, y=y }
+        end
+        
+        function controller.on_touch_up(controller, finger, x, y)
+            print("TOUCH UP:   ", finger, x, y)
+            print("WENT DOWN:  ", finger_places[controller][finger].x, finger_places[controller][finger].y)
+            print("DELTA:      ", x-finger_places[controller][finger].x, y-finger_places[controller][finger].y,"(",math.sqrt(math.abs(x-finger_places[controller][finger].x)^2 + math.abs(y-finger_places[controller][finger].y)^2),")")
+            finger_places[controller][finger] = nil
+        end
+
+        controller:start_touches()
+    end
+
+    function controller.on_disconnected(controller)
+        finger_places[controller] = nil
+    end
+
+    function controller.on_key_down(controller, key)
+        print("GOT KEY: ",key)
     end
 end
 
