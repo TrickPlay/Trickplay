@@ -137,11 +137,11 @@ static void irCallback(void *pParam, int iParam)
       NEXUS_IrInputEvent irEvent;
       rc = NEXUS_IrInput_GetEvents(irHandle, &irEvent, 1, &numEvents, &overflow);
 
-      if (numEvents && (irEvent.code == 0x5da2a55a || irEvent.repeat)) /* Ignore non-repeat events. We always seem to get at least 2 (except for exit). */
+      if (numEvents) 
       {
-         BKNI_Printf("irCallback: rc: %d, code: %08x, repeat: %s\n", rc, irEvent.code, irEvent.repeat ? "true" : "false");
+         BKNI_Printf("  rc: %d, code: %08x, repeat: %s\n", rc, irEvent.code, irEvent.repeat ? "true" : "false");
          
-         if ( controller )
+         if ( controller && ! irEvent.repeat )
          {
             tp_controller_key_down( controller , irEvent.code , 0 );
             tp_controller_key_up( controller , irEvent.code , 0 );
@@ -318,6 +318,7 @@ bool InitDisplay()
    egl_window.stretchToDisplay = 1;
 
    NEXUS_IrInput_GetDefaultSettings(&irSettings);
+   irSettings.repeatFilterTime = 80;
    irSettings.dataReady.callback = irCallback;
    irSettings.dataReady.context = &mIRHandle;
    mIRHandle = NEXUS_IrInput_Open(0, &irSettings);
