@@ -1766,11 +1766,15 @@ function ui_element.toastAlert(table)
     	tb_group_timeline.direction = "FORWARD"
     	tb_group_timeline.loop = false
 
-     	function tb_group_timeline.on_new_frame(t, m, p)
-		tb_group.opacity = 255 * (1-p) 
-		if(tb_group.scale[1] > 0.8) then 
-		     tb_group.scale = {(1-p/10), (1-p/10)} 
-	        end 
+
+	local my_alpha = Alpha{timeline=tb_group_timeline,mode="EASE_OUT_SINE"}
+
+	local opacity_interval = Interval(255, 0)
+	local scale_interval = Interval(1,0.8)
+
+     	function tb_group_timeline.on_new_frame(t, m)
+		tb_group.opacity = opacity_interval:get_value(my_alpha.alpha)
+		tb_group.scale = {scale_interval:get_value(my_alpha.alpha),scale_interval:get_value(my_alpha.alpha)}
      	end  
 
      	function tb_group_timeline.on_completed()
