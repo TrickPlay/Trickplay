@@ -549,7 +549,8 @@ local color_map =
         [ "OSK" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
 
         [ "widgets" ] = function() size = {600, 540} color = {25,25,25,100}  return size, color end,
-        [ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
+        --[ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
+        [ "Code" ] = function(file_list_size) size = {800, 600} color =  {25, 25, 25, 100}  return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = {25,25,25,100}  return size, color end
