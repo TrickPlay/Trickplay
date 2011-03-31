@@ -40,15 +40,15 @@ local tiles = {
 local shadows ={}
 
 local primary_focus = Group{}
-local glare_clip = Group{}
+--local glare_clip = Group{}
 local top_button = Group{x=210,y=60,opacity = 255*.3}
 local top_focus  = Group{x=200,y=50,opacity = 0}
-local shine=Image{src="assets/highlight-center-tile.png"}
+local shine=Image{src="assets/highlight-alone.png"}
 shine.anchor_point={shine.w/2,shine.h/2}
 shine.x=TILE_W/2
-shine.y=-20
-shine.scale={2,1}
---shine.opacity=255*.75
+shine.y=shine.h/2+5
+--shine.scale={2,1}
+shine.opacity=255*.25--.75
 umbrella:add(left_img,top_focus,top_button,shadow_group,tile_group,primary_focus)
 tile_group:add(unpack(tiles))
 --[[local idled = Timer{interval=2000}
@@ -138,11 +138,12 @@ do
         y=TILE_H,
         x=TILE_W
     }
+    primary_focus:add(shine)--glare_clip)
     primary_focus:add(tl_corner,top,tr_corner,left,right,btm,bl_corner,br_corner)
-    glare_clip.clip={0,0,TILE_W,TILE_H}
-    glare_clip:add(shine)
-    glare_clip.y=3
-    primary_focus:add(glare_clip)
+    --glare_clip.clip={0,0,TILE_W,TILE_H}
+    --glare_clip:add(shine)
+    --glare_clip.y=3
+    
     
     local rect = Rectangle{w=152,h=55,color="000000"}
     local text = Text{
@@ -269,9 +270,9 @@ do
             phase=(5-1)/#tiles,
             func=function(this_obj,this_func_tbl,secs,p)
                 primary_focus.y_rotation={10*math.sin(math.pi*2*(p+this_func_tbl.phase)),0,0}
-                shine.x=TILE_W/2-TILE_W/5*math.sin(math.pi*2*(p+this_func_tbl.phase))
-                shine.y=-10-10*math.cos(math.pi*4*(p+this_func_tbl.phase))
-                --shine.opacity=255*(.75-.25*math.sin(math.pi*2*p))
+                shine.x=TILE_W/2-TILE_W/30*math.sin(math.pi*2*(p+this_func_tbl.phase))
+                --shine.y=-10-10*math.cos(math.pi*4*(p+this_func_tbl.phase))
+                shine.opacity=255*(.25+.2*math.sin(math.pi*2*(p+this_func_tbl.phase)))
             end
         },
         rephase = {
@@ -286,7 +287,22 @@ do
     }
 end
 
-
+local start_dianas = function()
+    for index=1,9 do
+        --local index = (left_i+i-2)%#tiles+1
+        if index < 5 then
+            tiles[index].func_tbls.diana.center=15
+        elseif index == 5 then
+            tiles[index].func_tbls.diana.center=0
+            primary_focus.func_tbls.diana.delay = 5
+            animate_list[primary_focus.func_tbls.diana] = primary_focus
+        elseif index > 5 then
+            tiles[index].func_tbls.diana.center=-15
+        end
+        --tiles[index].func_tbls.diana.delay = 800*(index-1)
+        animate_list[tiles[index].func_tbls.diana] = tiles[index]
+    end
+end
 category_page = {
     group = umbrella,
     func_tbls = {
@@ -298,6 +314,21 @@ category_page = {
                 end
             },
             ["front_page"] = {
+                duration = 300,
+                first = true,
+                func = function(this_obj,this_func_tbl,secs,p)
+                    if this_func_tbl.first then
+                        start_dianas()
+                        this_func_tbl.first = false
+                    end
+                    this_obj.group.opacity=255*p
+                    if p == 1 then
+                        restore_keys()
+                        this_func_tbl.first = true
+                    end
+                end
+            },
+            ["product_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*p
@@ -313,7 +344,13 @@ category_page = {
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*(1-p)
                 end
-            }
+            },
+            ["product_page"] = {
+                duration = 300,
+                func = function(this_obj,this_func_tbl,secs,p)
+                    this_obj.group.opacity=255*(1-p)
+                end
+            },
         },
         fade_out_back_button = {
             duration = 300,
@@ -578,21 +615,10 @@ category_page = {
                 lose_keys()
                 change_page_to("front_page")
             else
+                lose_keys()
+                change_page_to("product_page")
             end
         end,
     }
 }
-    for index=1,9 do
-        --local index = (left_i+i-2)%#tiles+1
-        if index < 5 then
-            tiles[index].func_tbls.diana.center=15
-        elseif index == 5 then
-            tiles[index].func_tbls.diana.center=0
-            primary_focus.func_tbls.diana.delay = 5
-            animate_list[primary_focus.func_tbls.diana] = primary_focus
-        elseif index > 5 then
-            tiles[index].func_tbls.diana.center=-15
-        end
-        --tiles[index].func_tbls.diana.delay = 800*(index-1)
-        animate_list[tiles[index].func_tbls.diana] = tiles[index]
-    end
+    

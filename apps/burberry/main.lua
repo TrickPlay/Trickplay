@@ -18,11 +18,13 @@ dofile("Utils.lua")
 dofile("FrontPage.lua") -- global: front_page
 --dofile("CollectionPage.lua")
 dofile("CategoryPage.lua")
+dofile("ProductPage.lua")
 
 screen:add(
 	category_page.group,
 	--collection_page.group,
-	front_page.group
+	front_page.group,
+	product_page.group
 )
 
 function key_handler(self,key)
