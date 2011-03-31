@@ -369,7 +369,11 @@ static void install_controller( TPContext * ctx )
             { 0x17e804fb , TP_KEY_7 },
             { 0x18e704fb , TP_KEY_8 },
             { 0x19e604fb , TP_KEY_9 },
-	    
+            
+            /* RCA remote */
+            
+            { 0x1ae504fb , TP_KEY_BACK },
+            
 	    {0,0}
 	};
 
