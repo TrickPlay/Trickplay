@@ -4,38 +4,32 @@ local TITLE_SZ = 54
 local SUB_TITLE_X = 275
 local SUB_TITLE_Y = 547
 local SUB_TITLE_SZ = 30
-local PRIOR_X = 280
-local PRIOR_Y = 898
-local VIEW_COL_X = 646
-local VIEW_COL_Y = 898
-local NEXT_X = 1113
-local NEXT_Y = 898
-local RIGHT_PANE_X = 1578
+local PRIOR_X = 175
+local PRIOR_Y = 20
+local VIEW_COL_X = 591
+local VIEW_COL_Y = 20
+local NEXT_X = 1158
+local NEXT_Y = 20
+local RIGHT_PANE_X = 1545
 local TILE_TEXT_Y_OFFSET = 236
-local TILE_H = 310
+local TILE_W = 260
+local TILE_H = 236
 
 local bottom_i = 1
 local right_i  = 1
 
-local umbrella = Group{}
+local umbrella = Group{opacity=0}
 
---local left_img = Image{src="assets/main-2011-image.png"}
-local left_i = 1
-local left_panes = {
-    Image{src="assets/main-2011-image.png",  },
-    Image{src="assets/main-beauty-image.png",x=screen_w},
-    --Image{src="assets/main-biker-image.png", x=screen_w},
-    --Image{src="assets/main-mens-image.png",  x=screen_w},
-    --Image{src="assets/main-womens-image.png",x=screen_w},
-}
+local bg = Image{src="assets/beauty-frames-for-video.png"}
+local left_img = Image{src="assets/beauty-main-image.png",x=75,y=75}
 local right_tiles = {
-    Image{src="assets/tile-main-womens1.png" , x=RIGHT_PANE_X,y=TILE_H*0},
-    Image{src="assets/tile-main-mens1.png"  , x=RIGHT_PANE_X,y=TILE_H*1},
-    Image{src="assets/tile-main-beauty1.png", x=RIGHT_PANE_X,y=TILE_H*2},
-    Image{src="assets/tile-main-biker1a.png", x=RIGHT_PANE_X,y=TILE_H*3},
+    Image{src="assets/tile-260x236-eyes.png" , x=RIGHT_PANE_X,y=31},
+    Image{src="assets/tile-260x236-glow.png"  , x=RIGHT_PANE_X,y=290},
+    Image{src="assets/tile-260x236-lips.png", x=RIGHT_PANE_X,y=550},
+    Image{src="assets/tile-260x236-skin.png", x=RIGHT_PANE_X,y=810},
 }
-local right_focus = Group{x=RIGHT_PANE_X,opacity=0}
-local bottom_buttons_base = {
+local right_focus = Group{x=RIGHT_PANE_X,y=30,opacity=0}
+local top_buttons_base = {
     Group{
         x = PRIOR_X,
         y = PRIOR_Y,
@@ -44,50 +38,44 @@ local bottom_buttons_base = {
     Group{
         x = VIEW_COL_X,
         y = VIEW_COL_Y,
-        opacity = 255*.4,
+        opacity = 255*.3,
     },
     Group{
         x = NEXT_X,
         y = NEXT_Y,
-        opacity = 255*.4,
+        opacity = 255*.3,
     },
 }
-local bottom_buttons_foci = {
+local top_buttons_foci = {
     Group{
         x = PRIOR_X-10,
-        y = PRIOR_Y-11,
+        y = PRIOR_Y-10,
         --opacity = 0,
     },
     Group{
         x = VIEW_COL_X-10,
-        y = VIEW_COL_Y-11,
+        y = VIEW_COL_Y-10,
         opacity = 0,
     },
     Group{
         x = NEXT_X-10,
-        y = NEXT_Y-11,
+        y = NEXT_Y-10,
         opacity = 0,
     },
 }
-local overlay = Rectangle{
-    w=screen_w-RIGHT_PANE_X,
-    x=RIGHT_PANE_X,
-    h=screen_h,
-    opacity=255*.5,
-    color="000000"
-}
+
 do
     
     local tl_corner = Clone{source=imgs.box_foc_corner}
     local top  = Clone{
         source=imgs.box_foc_side,
-        x=tl_corner.w,w=screen_w-RIGHT_PANE_X-2*tl_corner.w,
+        x=tl_corner.w,w=TILE_W-2*tl_corner.w,
         tiles
     }
     local tr_corner = Clone{
         source=imgs.box_foc_corner,
         z_rotation={90,0,0},
-        x=screen_w-RIGHT_PANE_X
+        x=TILE_W
     }
     local left = Clone{
         source=imgs.box_foc_side,
@@ -100,16 +88,16 @@ do
         source=imgs.box_foc_side,
         z_rotation={90,0,0},
         w=TILE_H-2*tl_corner.w,
-        x=screen_w-RIGHT_PANE_X,
+        x=TILE_W,
         y=tl_corner.w,
         tiles
     }
     local btm  = Clone{
         source=imgs.box_foc_side,
         z_rotation={180,0,0},
-        x=screen_w-RIGHT_PANE_X-tl_corner.w,
+        x=TILE_W-tl_corner.w,
         y=TILE_H,
-        w=screen_w-RIGHT_PANE_X-2*tl_corner.w,
+        w=TILE_W-2*tl_corner.w,
         tiles
     }
     local bl_corner = Clone{
@@ -121,104 +109,84 @@ do
         source=imgs.box_foc_corner,
         z_rotation={180,0,0},
         y=TILE_H,
-        x=screen_w-RIGHT_PANE_X
+        x=TILE_W
     }
     right_focus:add(tl_corner,top,tr_corner,left,right,btm,bl_corner,br_corner)
     
-    local arrow = Clone{source=imgs.fp.arrow, y_rotation={180,0,0}}
-    local rect = Rectangle{w=204,h=55,color="000000"}
+    local rect = Rectangle{w=152,h=55,color="000000"}
     local text = Text{
         font="Engravers MT "..SUB_TITLE_SZ.."px",
-        text="PRIOR",
-        position={rect.w/2+(arrow.w+22)/2,rect.h/2},
+        text="BACK",
+        position={rect.w/2,rect.h/2},
         color="ffffff",
     }
     text.anchor_point={text.w/2,text.h/2}
-    arrow.anchor_point={0,arrow.h/2}
-    arrow.y=rect.h/2
-    arrow.x=text.x-text.w/2-(arrow.w+22)/2
     
-    bottom_buttons_base[1]:add(rect,arrow,text)
+    top_buttons_base[1]:add(rect,text)
     
     local left  = Clone{source=imgs.fp.foc_end}
-    local mid   = Clone{source=imgs.fp.foc_mid,x=left.w,w=172,tiles}
+    local mid   = Clone{source=imgs.fp.foc_mid,x=left.w,w=120,tiles}
     local right = Clone{source=imgs.fp.foc_end,x=2*left.w+mid.w,y_rotation={180,0,0}}
     
-    bottom_buttons_foci[1]:add(left,mid,right)
+    top_buttons_foci[1]:add(left,mid,right)
     
-    
-    arrow = Clone{source=imgs.fp.arrow}
-    
+       
     rect = Rectangle{w=304,h=55,color="000000"}
     text = Text{
         font="Engravers MT "..SUB_TITLE_SZ.."px",
         text="PLAY VIDEO",
-        position={rect.w/2+(arrow.w+22)/2,rect.h/2},
+        position={rect.w/2,rect.h/2},
         color="ffffff",
     }
     text.anchor_point={text.w/2,text.h/2}
-    arrow.anchor_point={0,arrow.h/2}
-    arrow.y=rect.h/2
-    arrow.x=text.x-text.w/2-(2*arrow.w+22)/2
     
-    bottom_buttons_base[2]:add(rect,arrow,text)
+    top_buttons_base[2]:add(rect,text)
     
-    bottom_buttons_foci[2]:add(
+    top_buttons_foci[2]:add(
         Clone{source=imgs.fp.foc_end},
         Clone{source=imgs.fp.foc_mid,x=26,w=272,tiles},
         Clone{source=imgs.fp.foc_end,x=26*2+272,y_rotation={180,0,0}}
     )
     
     
-    arrow = Clone{source=imgs.fp.arrow}
     rect = Rectangle{w=181,h=55,color="000000"}
     text = Text{
         font="Engravers MT "..SUB_TITLE_SZ.."px",
-        text="NEXT",
-        position={rect.w/2-(2*arrow.w+22)/2,rect.h/2},
+        text="BROWSE",
+        position={rect.w/2,rect.h/2},
         color="ffffff",
     }
     text.anchor_point={text.w/2,text.h/2}
-    arrow.anchor_point={0,arrow.h/2}
-    arrow.y=rect.h/2
-    arrow.x=text.x+text.w/2+(2*arrow.w+22)/2
+
     
-    bottom_buttons_base[3]:add(rect,text,arrow)
+    top_buttons_base[3]:add(rect,text)
     
-    bottom_buttons_foci[3]:add(
+    top_buttons_foci[3]:add(
         Clone{source=imgs.fp.foc_end},
         Clone{source=imgs.fp.foc_mid,x=26,w=149,tiles},
         Clone{source=imgs.fp.foc_end,x=26*2+149,y_rotation={180,0,0}}
     )
 end
-umbrella:add(unpack(left_panes))
-umbrella:add(title_s,title,sub_title)
+
+
 umbrella:add(unpack(right_tiles))
-umbrella:add(unpack(bottom_buttons_base))
-umbrella:add(unpack(bottom_buttons_foci))
+umbrella:add(left_img,bg)
+umbrella:add(unpack(top_buttons_base))
+umbrella:add(unpack(top_buttons_foci))
 umbrella:add(right_focus,overlay)
-front_page = {
+collection_page = {
     group = umbrella,
     func_tbls = {
         fade_in_from = {
-            ["collection_page"] = {
+            ["front_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*p
-                end
-            },
-            ["category_page"] = {
-                duration = 300,
-                func = function(this_obj,this_func_tbl,secs,p)
-                    this_obj.group.opacity=255*p
-                    if p == 1 then
-                        restore_keys()
-                    end
                 end
             }
         },
         fade_out_to = {
-            ["collection_page"] = {
+            ["front_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*(1-p)
@@ -236,19 +204,16 @@ front_page = {
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 
-                bottom_buttons_base[this_func_tbl.index].opacity=255*(.4+.6*(1-p))
-                bottom_buttons_foci[this_func_tbl.index].opacity=255*(1-p)
+                top_buttons_base[this_func_tbl.index].opacity=255*(.3+.7*(1-p))
+                top_buttons_foci[this_func_tbl.index].opacity=255*(1-p)
             end
         },
         focus_in_button = {
             index = 1,
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                bottom_buttons_base[this_func_tbl.index].opacity=255*(.4+.6*(p))
-                bottom_buttons_foci[this_func_tbl.index].opacity=255*(p)
-                if p == 1 then
-                    restore_keys()
-                end
+                top_buttons_base[this_func_tbl.index].opacity=255*(.3+.7*(p))
+                top_buttons_foci[this_func_tbl.index].opacity=255*(p)
             end
         },
         move_to_tile  = {
@@ -257,11 +222,9 @@ front_page = {
             duration  = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 right_tiles[this_func_tbl.curr_tile].opacity=255*p
-                --right_focus.y=TILE_H*(this_func_tbl.curr_tile-1) +(this_func_tbl.next_tile-this_func_tbl.curr_tile)*TILE_H*p
-                right_focus.opacity=255*(1-p)
+                right_focus.y=30+TILE_W*(this_func_tbl.curr_tile-1) +(this_func_tbl.next_tile-this_func_tbl.curr_tile)*TILE_W*p
                 if p == 1 then
                     --mediaplayer:load()
-                    right_focus.y = TILE_H*(this_func_tbl.next_tile-1)
                     this_obj.func_tbls.play_next_tile.next_tile = this_func_tbl.next_tile
                     animate_list[this_obj.func_tbls.play_next_tile] = this_obj
                 end
@@ -272,25 +235,19 @@ front_page = {
             duration  = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 right_tiles[this_func_tbl.next_tile].opacity=255*(1-p)
-                right_focus.opacity=255*p
-                if p == 1 then
-                    restore_keys()
-                end
             end
         },
         focus_tile_from_buttons = {
             index = 1,
             duration  = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                bottom_buttons_base[3].opacity=255*(.4+.6*(1-p))
-                bottom_buttons_foci[3].opacity=255*(1-p)
+                top_buttons_base[3].opacity=255*(.3+.7*(1-p))
+                top_buttons_foci[3].opacity=255*(1-p)
                 right_tiles[this_func_tbl.index].opacity=255*(1-p)
                 right_focus.opacity=255*p
-                overlay.opacity=255*.5*(1-p)
                 if p == 1 then
                     --mediaplayer:load()
                     this_obj.func_tbls.play_next_tile.next_tile = right_i
-                    restore_keys()
                 end
             end
         },
@@ -298,60 +255,19 @@ front_page = {
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 right_tiles[right_i].opacity=255*p
-                bottom_buttons_base[3].opacity=255*(.3+.7*(p))
-                bottom_buttons_foci[3].opacity=255*(p)
+                top_buttons_base[3].opacity=255*(.3+.7*(p))
+                top_buttons_foci[3].opacity=255*(p)
                 right_focus.opacity=255*(1-p)
-                overlay.opacity=255*.5*p
                 if p == 1 then
                     --mediaplayer:load()
                     this_obj.func_tbls.focus_in_button.index = 3
-                    restore_keys()
                 end
             end
-        },
-        slide_main_pane_right = {
-            duration = 500,
-            func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*p
-                left_panes[this_func_tbl.index].opacity=255*(.5+.5*(1-p))
-                if p == 1 then
-                    left_panes[this_func_tbl.index].opacity=255
-                end
-            end,
-        },
-        slide_new_pane_right = {
-            duration = 500,
-            func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*(1-p)
-                if p == 1 then
-                    restore_keys()
-                end
-            end,
-        },
-        slide_main_pane_left = {
-            duration = 500,
-            func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*p
-                left_panes[this_func_tbl.index].opacity=255*(.6+.4*(1-p))
-                if p == 1 then
-                    left_panes[this_func_tbl.index].opacity=255
-                end
-            end,
-        },
-        slide_new_pane_left = {
-            duration = 500,
-            func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*(1-p)
-                if p == 1 then
-                    restore_keys()
-                end
-            end,
         },
     },
     keys = {
         [keys.Up] = function(self)
             if bottom_i ~= 4 or right_i == 1 then return end
-            lose_keys()
             self.func_tbls.move_to_tile.curr_tile = right_i
             self.func_tbls.move_to_tile.next_tile = right_i - 1
             animate_list[self.func_tbls.move_to_tile] = self
@@ -361,7 +277,6 @@ front_page = {
         end,
         [keys.Down] = function(self)
             if bottom_i ~= 4 or right_i == 4 then return end
-            lose_keys()
             self.func_tbls.move_to_tile.curr_tile = right_i
             self.func_tbls.move_to_tile.next_tile = right_i + 1
             animate_list[self.func_tbls.move_to_tile] = self
@@ -370,7 +285,6 @@ front_page = {
         end,
         [keys.Left] = function(self)
             if bottom_i == 1 then return end
-            lose_keys()
             if bottom_i == 4 then
                 
                 animate_list[self.func_tbls.fade_buttons_from_tile] = self
@@ -389,7 +303,6 @@ front_page = {
         end,
         [keys.Right] = function(self)
             if bottom_i == 4 then return end
-            lose_keys()
             if bottom_i == 3 then
                 
                 self.func_tbls.focus_tile_from_buttons.index = right_i
@@ -407,27 +320,9 @@ front_page = {
             bottom_i = bottom_i + 1
         end,
         [keys.OK] = function(self)
-            
             if bottom_i == 1 then
-                lose_keys()
-                if mediaplayer.state ~= "PLAYING" then
-                    self.func_tbls.slide_main_pane_right.index=left_i
-                    animate_list[self.func_tbls.slide_main_pane_right] = self
-                end
-                left_i = (left_i-2)%#left_panes+1
-                self.func_tbls.slide_new_pane_right.index=left_i
-                animate_list[self.func_tbls.slide_new_pane_right] = self
+                change_page_to("front_page")
             elseif bottom_i == 3 then
-                lose_keys()
-                if mediaplayer.state ~= "PLAYING" then
-                    self.func_tbls.slide_main_pane_left.index=left_i
-                    animate_list[self.func_tbls.slide_main_pane_left] = self
-                end
-                left_i = (left_i)%#left_panes+1
-                self.func_tbls.slide_new_pane_left.index=left_i
-                animate_list[self.func_tbls.slide_new_pane_left] = self
-            elseif bottom_i == 4 then
-                lose_keys()
                 change_page_to("category_page")
             end
         end,

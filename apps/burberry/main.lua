@@ -16,19 +16,29 @@ end
 dofile("App_Loop.lua")
 dofile("Utils.lua")
 dofile("FrontPage.lua") -- global: front_page
-dofile("CollectionPage.lua")
+--dofile("CollectionPage.lua")
 dofile("CategoryPage.lua")
 
 screen:add(
 	category_page.group,
-	collection_page.group,
+	--collection_page.group,
 	front_page.group
 )
 
-function screen:on_key_down(key)
+function key_handler(self,key)
 	if _G[curr_page].keys[key] == nil then
 		print("\""..curr_page.."\" does not support that key.")
 	else
 		_G[curr_page].keys[key](_G[curr_page])
 	end
 end
+
+function restore_keys()
+	screen.on_key_down = key_handler
+end
+
+function lose_keys()
+	screen.on_key_down = nil
+end
+
+restore_keys()
