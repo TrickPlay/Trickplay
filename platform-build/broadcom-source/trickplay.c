@@ -310,11 +310,22 @@ bool InitDisplay()
 
    NEXUS_Display_SetGraphicsSettings( nexus_display , & graphics_settings );
 
+   const char * hd = getenv( "TP_BRCM_1080P" );
+
    BRCM_GetDefaultNativeWindowSettings(&egl_window);
    egl_window.rect.x = 0;
    egl_window.rect.y = 0;
-   egl_window.rect.width = 960;
-   egl_window.rect.height = 540;
+   
+   if ( hd && atoi( hd ) )
+   {
+      egl_window.rect.width = 1920;
+      egl_window.rect.height = 1080;      
+   }
+   else
+   {
+      egl_window.rect.width = 960;
+      egl_window.rect.height = 540;
+   }
    egl_window.stretchToDisplay = 1;
 
    NEXUS_IrInput_GetDefaultSettings(&irSettings);
@@ -403,6 +414,9 @@ int main(int argc, char** argv)
       ctx = tp_context_new();
       
       install_controller( ctx );
+      
+      tp_context_set_int( ctx , TP_SCREEN_WIDTH , egl_window.rect.width );
+      tp_context_set_int( ctx , TP_SCREEN_HEIGHT , egl_window.rect.height );
       
       tp_context_set_media_player_constructor( ctx , nmp_constructor );
       
