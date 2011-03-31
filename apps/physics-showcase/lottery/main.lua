@@ -929,7 +929,7 @@ function controllers.on_controller_connected(controllers,controller)
                 screen.x = screen.display_size[1]/2 + dx
             else
                 screen.z = dy*10
-                screen.x = screen.display_size[1]/2 + dx*-dy/50
+                screen.x = screen.display_size[1]/2 - dx*dy/50
             end
         end
 
@@ -963,7 +963,7 @@ function controllers.on_controller_connected(controllers,controller)
                     end
                 end
             end
-            screen:animate({duration = 600, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
+            screen:animate({duration = 400, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
         end
 
         controller:start_touches()
