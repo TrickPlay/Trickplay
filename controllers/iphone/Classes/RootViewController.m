@@ -1,84 +1,183 @@
 //
 //  RootViewController.m
-//  TrickplayRemote
+//  TrickplayController_v2
 //
-//  Created by Kenny Ham on 1/21/10.
-//  Copyright __MyCompanyName__ 2010. All rights reserved.
+//  Created by Rex Fenley on 2/14/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import "RootViewController.h"
 
-#import "AppDelegate.h"
 
 @implementation RootViewController
 
+@synthesize window;
+//@synthesize navigationController;
 
-@synthesize currentResolve;
-@synthesize netServiceBrowser;
-@synthesize services;
-@synthesize gestureViewController;
+
+#pragma mark -
+#pragma mark View lifecycle
 
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"Remote Services";
-	self.view.tag = 1;
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    
+    // Customize the View
+    self.title = @"TV";
+    self.view.tag = 1;
+    
+    self.navigationController.delegate = self;
+    
+    // Initialize the NSNetServiceBrowser stuff
+    netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
+        
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-	NSNetServiceBrowser *aNetServiceBrowser = [[NSNetServiceBrowser alloc] init];
-	if(!aNetServiceBrowser) {
-        // The NSNetServiceBrowser couldn't be allocated and initialized.
-		return;
+}
+
+- (void)reloadData {
+    [(UITableView *)self.view reloadData];
+}
+
+- (void)serviceResolved:(NSNetService *)service {
+    /*
+    if (gestureViewController == nil)
+	{
+		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
 	}
-	self.services = [[NSMutableArray alloc] init];
-    self.navigationController.delegate = self;
-	aNetServiceBrowser.delegate = self;
-	self.netServiceBrowser = aNetServiceBrowser;
-	[aNetServiceBrowser release];
-	[self.netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp" inDomain:@""];
-	//For my personal one I need to use this:
-	//_http._tcp:local
-	//[self.netServiceBrowser searchForServicesOfType:@"_http._tcp" inDomain:@""];
-	
-	
-	[self.tableView reloadData];
-	
+    
+	[gestureViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+
+	[self.navigationController pushViewController:gestureViewController animated:YES];
+	//[[self navigationController] presentModalViewController:gestureViewController animated:YES];
+	//self.title = @"Disconnect"; 
+     //*/
+    
+    /*
+    [gestureViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+    [gestureViewController startService];
+    */
+    
+    [netServiceManager stop];
+    [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+    if ([appBrowserViewController hasRunningApp]) {
+        [self.navigationController pushViewController:appBrowserViewController animated:NO];
+        [appBrowserViewController pushApp];
+    } else {
+        [self.navigationController pushViewController:appBrowserViewController animated:YES];
+        if ([appBrowserViewController fetchApps]) {
+            [appBrowserViewController.theTableView reloadData];
+        }
+    }
 }
 
-- (void)didReceiveMemoryWarning {
-	// Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-	
-	// Release any cached data, images, etc that aren't in use.
+- (void)didNotResolveService {
+    if (gestureViewController) {
+        if (self.navigationController.visibleViewController == gestureViewController) {
+            [self.navigationController popViewControllerAnimated:NO];
+        } else {
+            [gestureViewController release];
+            gestureViewController = nil;
+        }
+    }
+    if (appBrowserViewController) {
+        if (self.navigationController.visibleViewController == appBrowserViewController) {
+            [self.navigationController popViewControllerAnimated:YES];
+        } else {
+            [appBrowserViewController release];
+            appBrowserViewController = nil;
+        }
+    }
+    [self reloadData];
 }
 
-- (void)viewDidUnload {
-	// Release anything that can be recreated in viewDidLoad or on demand.
-	// e.g. self.myOutlet = nil;
+
+/*
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+}
+*/
+/*
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+}
+*/
+/*
+- (void)viewWillDisappear:(BOOL)animated {
+	[super viewWillDisappear:animated];
+}
+*/
+/*
+- (void)viewDidDisappear:(BOOL)animated {
+	[super viewDidDisappear:animated];
+}
+*/
+
+/*
+ // Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+	// Return YES for supported orientations.
+	return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+ */
+
+
+#pragma mark -
+#pragma mark Navigation Controller Delegate methods
+
+- (void)navigationController:(UINavigationController *)navigationController 
+      willShowViewController:(UIViewController *)viewController 
+                    animated:(BOOL)animated {
+    NSLog(@"navigation controller tag = %d", viewController.view.tag);
+
+    // if popping back to self, release everything else
+    if (viewController.view.tag == self.view.tag) {
+        if (gestureViewController) {
+            [gestureViewController release];
+            gestureViewController = nil;
+        }
+        if (appBrowserViewController) {
+            [appBrowserViewController release];
+            appBrowserViewController = nil;
+        }
+        [netServiceManager start];
+    }
+    // if popping back to app browser
+    else if (viewController.view.tag == appBrowserViewController.view.tag) {
+        [appBrowserViewController fetchApps];
+        [appBrowserViewController.theTableView reloadData];
+        appBrowserViewController.pushingViewController = NO;
+    }
+    
+    [self reloadData];
 }
 
 
-#pragma mark Table view methods
+#pragma mark -
+#pragma mark Table view data source
 
+// Customize the number of sections in the table view.
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
 }
 
 
-// Customize the number of rows in the table view.
+/**
+ * Customize the number of rows in the table view.
+ */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	
-	NSUInteger count = [self.services count];
-	if (count == 0 )
+	NSUInteger count = [netServiceManager.services count];
+	if (count == 0) {
 		return 1;
-	
-	return count;
+	}
     
+	return count;
 }
 
-
-// Customize the appearance of table view cells.
+/**
+ * Customize the appearance of table view cells.
+ */
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     static NSString *tableCellIdentifier = @"UITableViewCell";
@@ -86,12 +185,13 @@
 	if (cell == nil) {
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
-	
-	NSUInteger count = [self.services count];
+    
+    NSMutableArray *services = netServiceManager.services;
+	NSUInteger count = [services count];
+    NSLog(@"number of services = %d", count);
 	if (count == 0) {
         // If there are no services and searchingForServicesString is set, show one row explaining that to the user.
         cell.textLabel.text = @"Searching for services...";
-		//cell.textLabel.textColor = [UIColor colorWithWhite:0.5 alpha:0.5];
 		cell.accessoryType = UITableViewCellAccessoryNone;
 		// Make sure to get rid of the activity indicator that may be showing if we were resolving cell zero but
 		// then got didRemoveService callbacks for all services (e.g. the network connection went down).
@@ -101,7 +201,7 @@
 	}
 	
 	// Set up the text for the cell
-	NSNetService* service = [self.services objectAtIndex:indexPath.row];
+	NSNetService* service = [services objectAtIndex:indexPath.row];
 	cell.textLabel.text = [service name];
 	cell.textLabel.textColor = [UIColor blackColor];
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator ;
@@ -111,20 +211,83 @@
 }
 
 
+/*
+// Override to support conditional editing of the table view.
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    // Return NO if you do not want the specified item to be editable.
+    return YES;
+}
+*/
 
-// Override to support row selection in the table view.
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    if ([self.services count] == 0) return;
+/*
+// Override to support editing the table view.
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-	self.currentResolve = [self.services objectAtIndex:indexPath.row];
-	[self.currentResolve setDelegate:self];
-	if (gestureViewController == nil)
-	{
-		gestureViewController = [[GestureView alloc] initWithNibName:@"GestureView" bundle:nil];
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        // Delete the row from the data source.
+        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    }   
+    else if (editingStyle == UITableViewCellEditingStyleInsert) {
+        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+    }   
+}
+*/
+
+
+/*
+// Override to support rearranging the table view.
+- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+}
+*/
+
+
+/*
+// Override to support conditional rearranging of the table view.
+- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+    // Return NO if you do not want the item to be re-orderable.
+    return YES;
+}
+*/
+
+
+#pragma mark -
+#pragma mark Table view delegate
+
+/**
+ * Override to support row selection in the table view.
+ */
+- (void)tableView:(UITableView *)tableView
+didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    NSLog(@"Selected row %@\n", indexPath);
+    
+    NSMutableArray *services = netServiceManager.services;
+    NSLog(@"services %@\n", services);
+    NSLog(@"count %d\n", [services count]);
+    
+    if ([services count] == 0) return;
+    
+    /*
+    //NSLog(@"pushing gestureViewController = %@\n", gestureViewController);
+    if (gestureViewController == nil) {
+		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
 	}
-		
-	[self.currentResolve resolveWithTimeout:0.0];
+    
+	[self.navigationController pushViewController:gestureViewController animated:YES];    
+    */
+    //NSLog(@"pushing appBrowserViewController = %@", appBrowserViewController);
+    if (appBrowserViewController == nil) {
+        appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
+    }
+    
+    //[self.navigationController pushViewController:appBrowserViewController animated:YES];
+    
+	netServiceManager.currentService = [services objectAtIndex:indexPath.row];
+	[netServiceManager.currentService setDelegate:netServiceManager];
+    
+	[netServiceManager.currentService resolveWithTimeout:0.0];
+    
 	
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
 	if (indexPath2 != nil)
@@ -135,111 +298,32 @@
 }
 
 
-- (void)stopCurrentResolve {
-	//self.needsActivityIndicator = NO;
-	//self.timer = nil;
-	
-	[self.currentResolve stop];
-	self.currentResolve = nil;
-}
+#pragma mark -
+#pragma mark Memory management
 
-
-//--------------  NSNetServiceBrowser delegate methods  -----------------------------------------------
-- (void)netServiceBrowser:(NSNetServiceBrowser*)netServiceBrowser didRemoveService:(NSNetService*)service moreComing:(BOOL)moreComing {
-	// If a service went away, stop resolving it if it's currently being resolved,
-	// remove it from the list and update the table view if no more events are queued.
-	if (self.currentResolve && [service isEqual:self.currentResolve]) {
-		[self stopCurrentResolve];
-	}
-	[self.services removeObject:service];
-	
-	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
-	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
-	if (!moreComing) {
-		[self.tableView reloadData];
-	}
-}	
-
-
-- (void)netServiceBrowser:(NSNetServiceBrowser*)netServiceBrowser didFindService:(NSNetService*)service moreComing:(BOOL)moreComing {
-	// If a service came online, add it to the list and update the table view if no more events are queued.
-	[self.services addObject:service];
-	
-	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
-	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
-	if (!moreComing) {
-		[self.tableView reloadData];
-	}
-}	
-
-
-// This should never be called, since we resolve with a timeout of 0.0, which means indefinite
-- (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
-	[self stopCurrentResolve];
-	[self.tableView reloadData];
-}
-
-
-- (void)netServiceDidResolveAddress:(NSNetService *)service {
-	assert(service == self.currentResolve);
-	
-	[service retain];
-	[self stopCurrentResolve];
-	
-	//[self.delegate browserViewController:self didResolveInstance:service];
-	
-	
-	NSInteger theport = [service port];
-	NSLog(@"Did resolve address");
-	
-	[gestureViewController setTheParent:self];
-	[self.navigationController pushViewController:gestureViewController animated:YES];
-	//[[self navigationController] presentModalViewController:gestureViewController animated:YES];
-	self.title = @"Disconnect"; 
-	
-	[gestureViewController setupService:theport hostname:[service hostName] thetitle:[service name]];
-	
-	[service release];
-	
-	//Socket examples:
-	//http://www.iphonedevsdk.com/forum/iphone-sdk-development/2998-how-socket-connection.html
-	//http://www.mobileorchard.com/tutorial-networking-and-bonjour-on-iphone/
-	//http://stackoverflow.com/questions/1083017/iphone-socket-program
-	//http://code.google.com/p/cocoaasyncsocket/
-}
-
-- (void)removeTheChildview
-{
-	[[self navigationController] popToRootViewControllerAnimated:YES];
-}
-
-- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
-{
-	NSLog(@"navcontroller tag=%d",viewController.view.tag );
-	if (viewController.view.tag == 1)
-	{
-		if (gestureViewController != nil)
-		{
-			[gestureViewController removeServiceFromCollection];
-		}
-		self.title = @"Remote Services";
-	}
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
     
-	
-	
-	
+    // Relinquish ownership any cached data, images, etc that aren't in use.
 }
 
-
-//---------------------------------------------------------------------------------------
-
+- (void)viewDidUnload {
+    // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
+    // For example: self.myOutlet = nil;
+}
 
 
 - (void)dealloc {
-	[self stopCurrentResolve];
-	self.services = nil;
-	[self.netServiceBrowser stop];
-	self.netServiceBrowser = nil;
+    NSLog(@"RootViewController dealloc");
+    [netServiceManager release];
+    if (gestureViewController) {
+        [gestureViewController release];
+    }
+    if (appBrowserViewController) {
+        [appBrowserViewController release];
+    }
+
     [super dealloc];
 }
 

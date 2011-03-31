@@ -872,6 +872,10 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     stage_allocation_handler = g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , GINT_TO_POINTER( screen_gid ) );
 
+    // Call it now to set the screen's initial scale
+
+    stage_allocation_notify( 0 , 0 , GINT_TO_POINTER( screen_gid ) );
+
     secure_lua_state( allowed_names );
 
     // Open our stuff

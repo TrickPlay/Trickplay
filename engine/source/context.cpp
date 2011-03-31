@@ -875,26 +875,44 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
 #endif
 
-#ifndef TP_PRODUCTION
+//-----------------------------------------------------------------------------
+// This one deals with the ESCAPE and EXIT keys to exit the current app. If the current
+// app is the first one, this will also exit from the call to tp_context_run.
 
-// This one deals with escape to exit current app
-
-gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer context )
+gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context )
 {
     if ( event && event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) )
     {
-        ( ( TPContext * )context )->close_app();
+        // In production builds, the ESCAPE key is not used - it just passes through
 
-        return TRUE;
+#ifdef TP_PRODUCTION
+
+        if ( event->key.keyval == CLUTTER_Escape )
+        {
+            return FALSE;
+        }
+#endif
+
+        TPContext * context = ( TPContext * ) _context;
+
+        if ( ! context->is_first_app() || context->get_bool( TP_FIRST_APP_EXITS , true ) )
+        {
+            context->close_app();
+            return TRUE;
+        }
     }
 
     return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+
+
+#ifndef TP_PRODUCTION
 
 // This one deals with tilde to reload current app
 
-gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
+gboolean TPContext::tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
     if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
     {
@@ -1140,9 +1158,10 @@ int TPContext::run()
 
 #endif
 
+    g_signal_connect( stage, "captured-event", ( GCallback ) escape_handler, this );
+
 #ifndef TP_PRODUCTION
 
-    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
     g_signal_connect( stage, "captured-event", ( GCallback )tilde_handler, this );
 
 #endif
@@ -1223,7 +1242,7 @@ int TPContext::run()
             }
             catch ( ... )
             {
-                if ( ! current_app || current_app->get_id() == first_app_id )
+                if ( is_first_app() )
                 {
                     g_warning( "CAUGHT EXCEPTION IN RUN LOOP, EXITING" );
 
@@ -1541,7 +1560,7 @@ void TPContext::app_run_callback( App * app , int result )
 
 void TPContext::close_app()
 {
-    if ( ! current_app || current_app->get_id() == first_app_id )
+    if ( is_first_app() )
     {
         quit();
     }
@@ -1928,6 +1947,20 @@ void TPContext::load_external_configuration()
         }
     }
 
+    gchar * d = g_path_get_dirname( file_name );
+
+    if ( ! strcmp( d , "." ) )
+    {
+        g_free( d );
+
+        d = g_get_current_dir();
+    }
+
+    lua_pushstring( L , d );
+    lua_rawseti( L , -2 , 0 );
+
+    g_free( d );
+
     lua_setglobal( L, "args" );
 
     //.....................................................................
@@ -1992,6 +2025,7 @@ void TPContext::load_external_configuration()
         TP_AUDIO_SAMPLER_MAX_INTERVAL,
         TP_AUDIO_SAMPLER_MAX_BUFFER_KB,
         TP_TOAST_JSON_PATH,
+        TP_FIRST_APP_EXITS,
 
         NULL
     };
@@ -2570,6 +2604,24 @@ gpointer TPContext::get_internal( gpointer key )
     return 0;
 }
 
+//-----------------------------------------------------------------------------
+
+void TPContext::set_first_app_exits( bool value )
+{
+    set( TP_FIRST_APP_EXITS , value ? 1 : 0 );
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::is_first_app() const
+{
+    if ( ! current_app )
+    {
+        return true;
+    }
+
+    return current_app->get_id() == first_app_id;
+}
 
 //-----------------------------------------------------------------------------
 // Called by other threads...

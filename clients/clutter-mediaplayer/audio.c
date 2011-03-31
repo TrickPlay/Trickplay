@@ -1,4 +1,5 @@
 
+#include <string.h>
 #include "glib.h"
 #include "gst/video/video.h"
 
@@ -335,12 +336,12 @@ void * connect_audio_sampler( TPContext * context )
 
     if ( ! enabled )
     {
-        return;
+        return NULL;;
     }
 
     if ( strcmp( enabled , "1" ) )
     {
-        return;
+        return NULL;
     }
 
     gst_init( 0 , 0 );
