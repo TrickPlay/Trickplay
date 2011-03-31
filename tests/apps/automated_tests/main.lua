@@ -16,7 +16,7 @@ local test_file = "smoke_tests_ubuntu.txt"
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
 local automation_option = 1
-local test_to_run = 34 -- if automation_option == 2
+local test_to_run = 59 -- if automation_option == 2
 
 -- if option 2 then it prints test results in a JSON formatted table to be copied and pasted into
 -- the package file. 
