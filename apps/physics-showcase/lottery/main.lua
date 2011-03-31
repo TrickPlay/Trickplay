@@ -870,6 +870,7 @@ function screen:on_key_down( key )
 end
 
 local finger_places = {}
+local screen_z_target = 0
 function controllers.on_controller_connected(controllers,controller)
     -- Track this controller's fingers
     finger_places[controller] = {}
@@ -913,25 +914,64 @@ function controllers.on_controller_connected(controllers,controller)
 
     if(controller.has_touches) then
         function controller.on_touch_down(controller, finger, x, y)
-            print("TOUCH DOWN: ",finger,x,y)
             -- Record where this finger went down
             finger_places[controller][finger] = { x=x, y=y }
-        end
-        
-        function controller.on_touch_move(controller, finger, x, y)
-            print("TOUCH MOVE: ",finger,x,y)
-            -- Record where this finger went down
-            finger_places[controller][finger] = { x=x, y=y }
-        end
-        
-        function controller.on_touch_up(controller, finger, x, y)
-            print("TOUCH UP:   ", finger, x, y)
-            print("WENT DOWN:  ", finger_places[controller][finger].x, finger_places[controller][finger].y)
-            print("DELTA:      ", x-finger_places[controller][finger].x, y-finger_places[controller][finger].y,"(",math.sqrt(math.abs(x-finger_places[controller][finger].x)^2 + math.abs(y-finger_places[controller][finger].y)^2),")")
-            finger_places[controller][finger] = nil
         end
 
-        controller:start_touches()
+        function controller.on_touch_move(controller, finger, x, y)
+            -- d = sqrt(dx^2 + dy^2)
+            local dx = x - finger_places[controller][finger].x
+            local dy = y - finger_places[controller][finger].y
+            local delta = math.sqrt( dx^2 + dy^2 )
+
+            if(dy > 0) then
+                screen.z = dy*2
+                screen.x = screen.display_size[1]/2 + dx
+            else
+                screen.z = dy*10
+                screen.x = screen.display_size[1]/2 + dx*-dy/50
+            end
+        end
+
+        function controller.on_touch_up(controller, finger, x, y)
+            -- d = sqrt(dx^2 + dy^2)
+            local dx = x - finger_places[controller][finger].x
+            local dy = y - finger_places[controller][finger].y
+            local delta = math.sqrt( dx^2 + dy^2 )
+
+            -- Forget where the finger went down
+            finger_places[controller][finger] = nil
+
+            if(delta < 100) then
+                -- This is a tap not a swipe
+                if(controller.has_accelerometer) then
+                    controller:stop_touches()
+                    controller:start_accelerometer("L",0.01)
+                end
+            else
+                -- This is a swipe not a tap
+                -- So determine swipe predominate direction
+                if(math.abs(dx) > math.abs(dy)) then
+                    -- Horizontal swipe
+                    if(dx > 0) then
+                        -- Swipe right
+                    else
+                        -- Swipe left
+                    end
+                else
+                    -- Vertical swipe
+                    if(dy > 0) then
+                        -- Swipe down
+                        screen_z_target = math.min(1000,screen_z_target + 500)
+                    else
+                        -- Swipe up
+                        screen_z_target = math.max(-2000,screen_z_target - 500)
+                    end
+
+                    screen:animate({duration = 600, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
+                end
+            end
+        end
     end
 
     function controller.on_disconnected(controller)
@@ -939,7 +979,15 @@ function controllers.on_controller_connected(controllers,controller)
     end
 
     function controller.on_key_down(controller, key)
-        print("GOT KEY: ",key)
+        if(keys.Return == key) then
+            if(controller.has_touches) then
+                if(controller.has_accelerometer) then
+                    controller:stop_accelerometer()
+                end
+
+                controller:start_touches()
+            end
+        end
     end
 end
 
