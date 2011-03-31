@@ -1306,11 +1306,15 @@ function editor.view_code(v)
 	local xbox = factory.make_xbox()
 	local codeViewWin 
 
+
+	codeViewWin_bg = factory.make_popup_bg("Code","")
+--[[
 	if is_this_widget(v) == true then 
 	     codeViewWin_bg = factory.make_popup_bg("Code", "Widget")
 	else 
 	     codeViewWin_bg = factory.make_popup_bg("Code", v.type)
 	end 
+]]
 
 	if(v.type ~= "Video") then 
 	     codeViewWin = Group {
@@ -1421,14 +1425,14 @@ function editor.view_code(v)
 	     codeViewWin.y = screen.h / 16
         end 
 
-        text_codes = Text{name="codes",text = codes,font="DejaVu Sans 30px" ,
-        color = "FFFFFF" , position = { 25 , 35 } , size = {1400, 1500}, editable = false ,
-        reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
+        text_codes = Text{name="codes",text = codes,font="DejaVu Sans 25px" ,
+        color = "FFFFFF" , position = { 25 , 0} , editable = false ,
+        reactive = false, wants_enter = false, }
 
 	-- scroll function 
-	si = ui_element.scrollPane{virtual_w =text_codes.w , virtual_h = text_codes.h , visible_w = 750, visible_h = 700, border_is_visible = false, box_width = 0} 
-	si.content = text_codes
-	si.position = {20,70,0}
+	si = ui_element.scrollPane{virtual_w =text_codes.w , virtual_h = text_codes.h , visible_w = 765, visible_h = 500, border_is_visible = false, box_width = 0} 
+	si.content:add(text_codes)
+	si.position = {0,80,0}
 	si.name ="si"
 	--si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
 	codeViewWin:add(si)
@@ -2172,7 +2176,7 @@ function editor.duplicate()
         	     	g:add(ui.dup)
 		     else 
 
-    			local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","stroke_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+    			local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
 		 	ui.dup = widget_f_map[v.extra.type]() 
 

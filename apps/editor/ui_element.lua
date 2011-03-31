@@ -432,7 +432,7 @@ end
 
 -- make_ring() : make ring for button or text input field 
 
-local function make_ring(w,h,bc,bw,px,py,br)
+local function make_ring(w,h,bc,fc,bw,px,py,br)
         local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
         ring:set_source_color(bc)
@@ -442,7 +442,16 @@ local function make_ring(w,h,bc,bw,px,py,br)
             w - bw - px * 2 ,
             h - bw - py * 2 ,
             br )
-        ring:stroke()
+	if fc then 
+		ring:set_source_color( fc )
+    		ring:fill(true)
+
+		ring:set_line_width (bw)
+    		ring:set_source_color(bc)
+	end
+    	ring:stroke(true)
+	
+
         ring:finish_painting()
     	if ring.Image then
             ring = ring:Image()
@@ -1167,8 +1176,11 @@ function ui_element.button(table)
     	ui_height = 60, 
 
     	label = "Button", 
-    	focus_color = {27,145,27,255}, --"1b911b", 
-    	button_color = {255,255,255,255}, --"FFFFFF"
+    	focus_color = {27,145,27,255}, 
+    	focus_fill_color = {27,145,27,0}, 
+    	focus_text_color = {255,255,255,255},
+    	border_color = {255,255,255,255}, 
+    	fill_color = {255,255,255,0},
     	border_width = 1,
     	border_corner_radius = 12,
 	pressed = nil, 
@@ -1204,6 +1216,8 @@ function ui_element.button(table)
 	     button.opacity = 0
              focus.opacity = 255
         end 
+        b_group:find_child("text").color = p.focus_text_color
+	
 	if p.pressed then 
 		p.pressed()
 	end 
@@ -1221,6 +1235,7 @@ function ui_element.button(table)
              focus.opacity = 0
 	     focus_ring.opacity = 0
         end
+        b_group:find_child("text").color = p.text_color
 	if p.released then 
 		p.released()
 	end 
@@ -1235,10 +1250,10 @@ function ui_element.button(table)
 	end
         b_group:clear()
         b_group.size = { p.ui_width , p.ui_height}
-        ring = make_ring(p.ui_width, p.ui_height, p.button_color, p.border_width, 0, 0, p.border_corner_radius)
+        ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
-        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
+        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
@@ -1334,10 +1349,13 @@ function ui_element.textInput(table)
     	text = "" ,
     	padding = 20 ,
     	border_width  = 4 ,
-    	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-    	focus_color  = {0,255,0,255}, --"1b911b" , 
+    	border_color  = {255,255,255,255}, 
+    	fill_color = {255,255,255,0},
+    	focus_color  = {0,255,0,255},
+    	focus_fill_color = {27,145,27,0}, 
+    	cursor_color = {255,255,255,255},
     	text_font = "DejaVu Sans 30px"  , 
-    	text_color =  {255,255,255,255}, -- "FFFFFF" , 
+    	text_color =  {255,255,255,255},
     	border_corner_radius = 12 ,
 
     }
@@ -1365,10 +1383,10 @@ function ui_element.textInput(table)
     	t_group:clear()
         t_group.size = { p.ui_width , p.ui_height}
 
-    	box = make_ring(p.ui_width, p.ui_height, p.border_color, p.border_width, 0, 0, p.border_corner_radius)
+    	box = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
     	box:set{name="box", position = {0 ,0}}
 
-    	focus_box = make_ring(p.ui_width, p.ui_height, p.focus_color, p.border_width, 0, 0, p.border_corner_radius)
+    	focus_box = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin ~= "custom") then 
@@ -1381,11 +1399,11 @@ function ui_element.textInput(table)
 	     focus_img = Image{}
 	end 
 
-    	text = Text{text = p.text, editable = true, cursor_visible = true, wants_enter = true, reactive = true, font = p.text_font, color = p.text_color}
+    	text = Text{text=p.text, editable=true, cursor_visible=false, cursor_color = p.cursor_color, wants_enter = true, reactive = true, font = p.text_font, color = p.text_color}
     	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
---kkkkk
+--kkk
 	if editor_lb == nil then 
 	   function t_group:on_button_down()
 		t_group.extra.on_focus_in()
@@ -1862,12 +1880,17 @@ function ui_element.buttonPicker(table)
 	ui_height = 60,
 	items = {"item1", "item2", "item3"},
 	text_font = "DejaVu Sans 30px" , 
+	focus_text_font = "DejaVu Sans 30px" , 
 	text_color = {255,255,255,255}, 
+	focus_text_color = {255,255,255,255}, 
 	border_color = {255,255,255,255},
+	fill_color = {255,255,255,0},
 	focus_color = {0,255,0,255},
+	focus_fill_color = {0,255,0,0},
 	rotate_func = nil, 
         selected_item = 1, 
     }
+--qqq
 
  --overwrite defaults
      if table ~= nil then 
@@ -1902,10 +1925,10 @@ function ui_element.buttonPicker(table)
 	items:clear()
         bp_group.size = { p.ui_width , p.ui_height}
 
-	ring = make_ring(p.ui_width, p.ui_height, p.border_color, 1, 7, 7, 12)
+	ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 12)
         ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
 
-        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, 1, 7, 7, 12)
+        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 12)
         focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
 
 
@@ -1986,6 +2009,9 @@ function ui_element.buttonPicker(table)
              unfocus.opacity = 0
 	     focus.opacity   = 255
 	end 
+     	for i, j in pairs(p.items) do 
+             bp_group:find_child("item"..tostring(i)).color = p.focus_text_color
+	end 
 
      end
      function bp_group.extra.on_focus_out()
@@ -1996,6 +2022,9 @@ function ui_element.buttonPicker(table)
             unfocus.opacity = 255
 	    focus.opacity   = 0
 	end 
+     	for i, j in pairs(p.items) do 
+             bp_group:find_child("item"..tostring(i)).color = p.text_color
+	end
      end
 
      function bp_group.extra.press_left()
@@ -2745,7 +2774,7 @@ Arguments:
 		bsize - Size of the loading bar
 		shell_upper_color - The upper color for the inside of the loading bar
 		shell_lower_color - The upper color for the inside of the loading bar
-		stroke_color - Color for the border
+		border_color - Color for the border
 		fill_upper_color - The upper color for the loading bar fill
 		fill_lower_color - The lower color for the loading bar fill
 
@@ -2766,7 +2795,7 @@ function ui_element.progressBar(t)
         ui_height             =   50,
         empty_top_color     = {  0,  0,  0,255},
         empty_bottom_color  = {127,127,127,255},
-        stroke_color        = {160,160,160,255},
+        border_color        = {160,160,160,255},
         filled_top_color    = {255,  0,  0,255},
         filled_bottom_color = { 96, 48, 48,255},
         progress            = 0,
@@ -2845,7 +2874,7 @@ function ui_element.progressBar(t)
         
 		c_shell:fill(true)
 		c_shell:set_line_width(   stroke_width )
-		c_shell:set_source_color( p.stroke_color )
+		c_shell:set_source_color( p.border_color )
 		c_shell:stroke( true )
 		c_shell:finish_painting()
         
@@ -3344,7 +3373,7 @@ function ui_element.scrollPane(t)
         bar_thickness       =   15,
         bar_offset          =    5,
         vert_bar_visible    = true,
-        hor_bar_visible     = true,
+        horz_bar_visible     = true,
         
         box_color = {160,160,160,255},
         box_width = 2,
@@ -3788,7 +3817,7 @@ function ui_element.scrollPane(t)
             track_w = p.visible_w
             track_h = p.visible_h
         end
-        if p.hor_bar_visible and p.visible_w/p.virtual_w < 1 then
+        if p.horz_bar_visible and p.visible_w/p.virtual_w < 1 then
             hor_s_bar = make_hor_bar(
                 track_w,
                 p.bar_thickness,
@@ -3969,11 +3998,13 @@ button
     	ui_height = 60, 
 
     	label = "Menu Button", 
+	focus_text_color =  {255,255,255,255},   
     	focus_color = {27,145,27,255}, --"1b911b", 
-    	button_color = {255,255,255,255}, --"FFFFFF"
+    	focus_fill_color = {27,145,27,0}, --"1b911b", 
+    	border_color = {255,255,255,255}, --"FFFFFF"
+    	fill_color = {255,255,255,0}, --"FFFFFF"
     	border_width = 1,
     	border_corner_radius = 12,
-
 
 --]]
 
@@ -3984,7 +4015,7 @@ button
             {type="item",  string="Item ...", f=nil},
         },
         vert_spacing = 5, --item_spacing
-        hor_spacing  = 10, -- new 
+        horz_spacing  = 10, -- new 
         vert_offset  = 40, --item_start_y
         
         menu_font  = "DejaVu Sans 26px",   -- not needed
@@ -3992,7 +4023,7 @@ button
 
         background_color     = {255,0,0,255},
         menu_width   = 250,       -- bg_w 
-        hor_padding  = 10, -- padding 
+        horz_padding  = 10, -- padding 
         seperator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         
@@ -4015,13 +4046,16 @@ button
     local button       = ui_element.button{
         text_font=p.text_font,
     	text_color=p.text_color,
+    	focus_text_color=p.focus_text_color,
     	skin=p.skin,
     	ui_width=p.ui_width,
     	ui_height=p.ui_height, 
         
     	label=p.label, 
     	focus_color=p.focus_color,
-    	button_color=p.button_color, 
+    	focus_fill_color=p.focus_fill_color,
+    	border_color=p.border_color, 
+    	fill_color=p.fill_color, 
     	border_width=p.border_width,
     	border_corner_radius=p.border_corner_radius,
     }
@@ -4039,7 +4073,6 @@ button
                     return
                 end
                 if selectable_items[curr_index] ~= nil then
-                    
                     selectable_items[curr_index]:complete_animation()
                     selectable_items[curr_index].opacity=255
                     selectable_items[curr_index]:animate{
@@ -4239,10 +4272,10 @@ button
             if item.type == "seperator" then
                 dropDownMenu:add(
                     Rectangle{
-                        x     = p.hor_padding,
+                        x     = p.horz_padding,
                         y     = curr_y,
                         name  = "divider "..i,
-                        w     = p.menu_width-2*p.hor_padding,
+                        w     = p.menu_width-2*p.horz_padding,
                         h     = p.seperator_thickness,
                         color = txt_color
                     }
@@ -4257,7 +4290,7 @@ button
                         text  = item.string,
                         font  = p.menu_font,
                         color = p.menu_text_color,
-                        x     = p.hor_padding+p.hor_spacing,
+                        x     = p.horz_padding+p.horz_spacing,
                         y     = curr_y,
                     }
                     txt.anchor_point={0,txt.h/2}
@@ -4265,10 +4298,10 @@ button
                 dropDownMenu:add(
                     txt
                 )
-                ui_ele = make_item_ring(p.menu_width-2*p.hor_spacing,txt.h+10,7)
+                ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
                 
                 ui_ele.anchor_point = { 0,     ui_ele.h/2 }
-                ui_ele.position     = {  p.hor_spacing, txt.y }
+                ui_ele.position     = {  p.horz_spacing, txt.y }
                 dropDownMenu:add(ui_ele)
                 
                 
@@ -4289,7 +4322,7 @@ button
                         text  = item.string,
                         font  = p.menu_font,
                         color = p.menu_text_color,
-                        x     = p.hor_spacing,
+                        x     = p.horz_spacing,
                         y     = curr_y,
                     }
                 dropDownMenu:add(

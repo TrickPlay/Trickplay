@@ -732,7 +732,7 @@ function make_attr_t(v)
         	table.insert(attr_t, {"src", v.src,"Source"})
 		end,
 	["icon"] = function()
-        	table.insert(attr_t, {"caption", "Icon Location"})
+        	table.insert(attr_t, {"caption", "Icon Source"})
         	table.insert(attr_t, {"icon", v.icon,"Icon"})
 		end,
 	["color"] = function(j)
@@ -861,17 +861,17 @@ function make_attr_t(v)
        ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point","opacity", "reactive", "focus"} end,
        ["Group"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
-       ["TextInput"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
+       ["Button"] = function() return {"skin","x_rotation","anchor_point","label","opacity","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
+       ["TextInput"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
+       ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","items","selected_item","reactive","focus"} end,
+       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","items", "reactive","focus",} end,
        ["DialogBox"] = function() return {"skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_seperator_color","title_seperator_thickness",} end,
        ["ToastAlert"] = function() return {"skin","x_rotation", "anchor_point","icon","label","message","opacity","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
-       ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","focus_color","text_color","text_font","items","selected_item","reactive","focus"} end,
        ["ProgressSpinner"] = function() return {"skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
-       ["ProgressBar"] = function() return {"skin","x_rotation","anchor_point", "opacity","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","stroke_color","progress"} end,
+       ["ProgressBar"] = function() return {"skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress"} end,
        ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable",} end,
-       ["ScrollPane"] = function() return {"skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width"} end,  
+       ["ScrollPane"] = function() return {"skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
 -- "border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
-       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","label","opacity","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","items", "reactive","focus",} end,
        ["CheckBox"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
        ["RadioButton"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
        --["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,
@@ -915,10 +915,10 @@ function make_attr_t(v)
              {"caption", "Source"},
              {"source", v.source, "Source Location"},
              {"caption", "View Port"},
-             {"left", v.viewport[1], "X"},
-             {"top", v.viewport[2], "Y"},
-             {"width", v.viewport[3], "W"},
-             {"height", v.viewport[4], "H"},
+             {"left", math.floor(v.viewport[1]), "X"},
+             {"top", math.floor(v.viewport[2]), "Y"},
+             {"width", math.floor(v.viewport[3]), "W"},
+             {"height", math.floor(v.viewport[4]), "H"},
              {"volume", v.volume, "Volume"},
              {"loop", v.loop, "Loop"},
              {"button", "view code", "View code"},
@@ -987,12 +987,12 @@ function itemTostring(v, d_list, t_list)
 
 --[[ old 
 
-    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","empty_top_color", "empty_bottom_color", "stroke_color", "progress", "filled_top_color", "filled_bottom_color","rows","columns","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","tiles","focus","cells_focusable","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive", "menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","cell_size"}
+    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","empty_top_color", "empty_bottom_color", "border_color", "progress", "filled_top_color", "filled_bottom_color","rows","columns","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","tiles","focus","cells_focusable","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive", "menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","cell_size"}
 
 
 ]] 
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","stroke_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text"}
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
@@ -1956,7 +1956,7 @@ function inputMsgWindow_openvideo(notused, parm_txt)
 
      video1 = { name = "video1", 
                 type ="Video",
-                viewport ={0,0,screen.w * screen.scale[1] ,screen.h * screen.scale[2]},
+                viewport ={0,0,math.floor(screen.w * screen.scale[1]) ,math.floor(screen.h * screen.scale[2])},
            	source= parm_txt,
            	loop= false, 
                 volume=0.5  
