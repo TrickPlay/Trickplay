@@ -20,10 +20,18 @@ local function set_focus( s )
         focus.position = { balloon.x - 20 , balloon.y - 20 }
         focus.extra.focus = s
         g_focus = s
+        balloon:unblur()
+        balloon:saturate()
+        lottery:blur()
+        lottery:desaturate(0.8)
     elseif s == "lottery" then
         focus.position = { lottery.x - 20 , lottery.y - 20 }
         focus.extra.focus = s
         g_focus = s
+        balloon:blur()
+        balloon:desaturate(0.8)
+        lottery:unblur()
+        lottery:saturate()
     end
 end
 
