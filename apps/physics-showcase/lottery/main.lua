@@ -944,10 +944,6 @@ function controllers.on_controller_connected(controllers,controller)
 
             if(delta < 100) then
                 -- This is a tap not a swipe
-                if(controller.has_accelerometer) then
-                    controller:stop_touches()
-                    controller:start_accelerometer("L",0.01)
-                end
             else
                 -- This is a swipe not a tap
                 -- So determine swipe predominate direction
@@ -962,22 +958,22 @@ function controllers.on_controller_connected(controllers,controller)
                     -- Vertical swipe
                     if(dy > 0) then
                         -- Swipe down
-                        screen_z_target = math.min(1000,screen_z_target + 500)
                     else
                         -- Swipe up
-                        screen_z_target = math.max(-2000,screen_z_target - 500)
                     end
-
-                    screen:animate({duration = 600, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
                 end
             end
+            screen:animate({duration = 600, x=screen.display_size[1]/2, z=0, mode = "EASE_OUT_SINE"})
         end
+
+        controller:start_touches()
     end
 
     function controller.on_disconnected(controller)
         finger_places[controller] = nil
     end
 
+--[[
     function controller.on_key_down(controller, key)
         if(keys.Return == key) then
             if(controller.has_touches) then
@@ -989,6 +985,7 @@ function controllers.on_controller_connected(controllers,controller)
             end
         end
     end
+]]--
 end
 
 local controller
