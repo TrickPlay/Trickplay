@@ -271,17 +271,107 @@
 },
 {
 "name": "00055_text_cursor_color.lua",
-"checksum": "6c09d09a0a24769f424fffd28f81d5c1",
+"checksum": "1cf65a6c25e7d54e8e56f0cc39921e58",
 "active": "true"
 },
 {
 "name": "00056_text_password_char.lua",
-"checksum": "6c09d09a0a24769f424fffd28f81d5c1",
+"checksum": "59ae7e3e195477c84efa0d9e09af3020",
 "active": "true"
 },
 {
 "name": "00057_text_on_text_changed.lua",
-"checksum": "6c09d09a0a24769f424fffd28f81d5c1",
+"checksum": "33fc21097372908d068fad2541e3c788",
+"active": "true"
+},
+{
+"name": "00058_image_gif.lua",
+"checksum": "03cd5f004e324cd22b3b7610da596edc",
+"active": "true"
+},
+{
+"name": "00059_image_jpg.lua",
+"checksum": "d835ce55a1909cbafb7cc80678544b45",
+"active": "true"
+},
+{
+"name": "00060_image_png.lua",
+"checksum": "e8cf10ef908544b6068a7cb5ffc16c14",
+"active": "true"
+},
+{
+"name": "00061_image_tile.lua",
+"checksum": "438a4d526b54bcfd51478c03a94636bf",
+"active": "true"
+},
+{
+"name": "00062_image_tile_sync.lua",
+"checksum": "a3c59512629cedaee12989889e41f4d7",
+"active": "true"
+},
+{
+"name": "00063_image_src.lua",
+"checksum": "3c33e7163344c473b6421101c7ed3772",
+"active": "true"
+},
+{
+"name": "00064_bitmap_gif.lua",
+"checksum": "c1ce7522147681ee20786f02f3ea8b04",
+"active": "true"
+},
+{
+"name": "00065_bitmap_jpg.lua",
+"checksum": "5e950a01dda2c91b73be61c1e56f947f",
+"active": "true"
+},
+{
+"name": "00066_bitmap_png.lua",
+"checksum": "b7286f53933f6ff3d46dff42373adc90",
+"active": "true"
+},
+{
+"name": "00067_bitmap_src.lua",
+"checksum": "801b01e1716c1c58a9fda9b030635856",
+"active": "true"
+},
+{
+"name": "00068_bitmap_image.lua",
+"checksum": "aa29eaaee40590390aeff07e4432d55c",
+"active": "true"
+},
+{
+"name": "00069_container_add.lua",
+"checksum": "17841cdd1f39d4fa9c555e47afc4dea0",
+"active": "true"
+},
+{
+"name": "00070_container_remove.lua",
+"checksum": "aae0cc89db81d951e98b5f20cd0ac9c2",
+"active": "true"
+},
+{
+"name": "00071_container_clear.lua",
+"checksum": "c319b20c56e6324d613c5d12ea0498f1",
+"active": "true"
+},
+{
+"name": "00072_container_for_each.lua",
+"checksum": "19ea9937bea0ff515a8fa20a856124ce",
+"active": "true"
+},
+{
+"name": "00073_container_find_child.lua",
+"checksum": "46fdc42afd5e9ba22bbb11eead588954",
+"active": "true"
+},
+{
+"name": "00074_container_raise.lua",
+"checksum": "af2c1205d23244f85426c3a0ac53a36c",
+"active": "true"
+},
+{
+"name": "00075_container_lower.lua",
+"checksum": "5db353606d0846f27a8a7190479c7b50",
 "active": "true"
 }
 ]

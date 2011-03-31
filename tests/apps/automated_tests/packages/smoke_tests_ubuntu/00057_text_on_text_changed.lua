@@ -12,15 +12,14 @@ function generate_test_image ()
 	
 	local g = Group ()
 
-	text_txt.on_text_changed = function (text)
-		print ("on_text_changed called")
-		local 	text1_txt = Text {
-			 font="Sans 80px",
-			 text = "On_text_changed called", 
-			 position = { 200, 150 },
-			 width = screen.w - 200,
-			 color = "002EB8"
-			}
+	function text_changed (text)
+		print ("text changed")
+		local text1_txt = Text {
+			font="Sans 80px",
+			color = "002eb8",
+			 text = "on_text_changed called", 
+			 position = { 200, 450 }
+		}
 		g:add(text1_txt)
 	end
 
@@ -31,12 +30,23 @@ function generate_test_image ()
 			 single_line = true,
 			 width = screen.w - 200
 			}
+	text_txt.on_text_changed = text_changed
+	text_txt.text = "text changed"
 	g:add(text_txt)
-
-	text_txt.text = "changed"
 
 	return g
 end
+
+
+
+
+
+
+
+
+
+
+
 
 
 
