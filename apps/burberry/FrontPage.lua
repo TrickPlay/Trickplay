@@ -281,7 +281,14 @@ front_page = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
                     --this_obj.group.opacity=255*(1-p)
-                    
+                    if p==1 then
+                        if right_is_playing then
+                            mediaplayer:pause()
+                        end
+                        right_is_playing = false
+                        right_blurs[right_i].opacity=0
+                        right_tiles[right_i].opacity=255
+                    end
                 end
             }
         },

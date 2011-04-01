@@ -133,6 +133,13 @@ product_page = {
                     this_obj.group.opacity=255*(1-p)
                     if p == 1 then
                         animate_list[product.func_tbls.diana] = nil
+                        bottom_buttons_base[1].opacity=0
+                        bottom_buttons_foci[1].opacity=255
+                        bottom_buttons_base[2].opacity=255
+                        bottom_buttons_foci[2].opacity=0
+                        bottom_buttons_base[3].opacity=255
+                        bottom_buttons_foci[3].opacity=0
+                        bottom_i = 1
                     end
                 end
             }
@@ -196,6 +203,10 @@ product_page = {
                 lose_keys()
                 change_page_to("category_page")
             end
+        end,
+        [keys.BACK] = function(self)
+            lose_keys()
+            change_page_to("category_page")
         end
     }
 }

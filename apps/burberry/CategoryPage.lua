@@ -679,6 +679,10 @@ category_page = {
                 change_page_to("product_page")
             end
         end,
+        [keys.BACK] = function(self)
+            lose_keys()
+            change_page_to("front_page")
+        end
     }
 }
     
