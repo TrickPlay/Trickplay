@@ -1016,87 +1016,147 @@ interface actor [[ClutterActor*]]
     /*
     Function: blur
     
-    This function will apply a blur effect to the actor.  Reversible with unblur()
+    This function will apply a blur effect to the UI element.  Reversible with unblur()
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
 
-    blur()
+    bool blur()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "blur_effect");
-            clutter_actor_add_effect_with_name(self, "blur_effect", clutter_blur_effect_new());
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+
+        clutter_actor_remove_effect_by_name(self, "blur_effect");
+        clutter_actor_add_effect_with_name(self, "blur_effect", clutter_blur_effect_new());
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
-    Function: blur
+    Function: unblur
     
-    Turn off a blur effect on the actor.  The opposite of blur()
+    Turn off a blur effect on the UI element.  The opposite of blur()
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    unblur()
+
+    bool unblur()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "blur_effect");
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "blur_effect");
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
 	Function: desaturate
 	
-	How much to desaturate the actor.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+	How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+
+	Arguments:
+
+        desturation - 0 for fully saturated, 1 for fully desaturated.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    desaturate(double desaturation)
+
+    bool desaturate(double desaturation)
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "desaturation_effect");
-            clutter_actor_add_effect_with_name(self, "desaturation_effect", clutter_desaturate_effect_new( desaturation ));
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+        clutter_actor_add_effect_with_name(self, "desaturation_effect", clutter_desaturate_effect_new( desaturation ));
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
 	Function: saturate
 	
-	Restore saturation to the actor.  This undoes any call to desaturate().
+	Restore saturation to the UI element.  This undoes any call to <desaturate>.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    saturate()
+
+    bool saturate()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "desaturation_effect");
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
     Function: tint
     
-    Turn on a tint effect for the actor.
+    Turn on a tint effect for the UI element.
     
-    color - Required.  The tint color to apply to the actor
+    Arguments:
+
+        color - Required.  The tint color to apply to the UI element.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    tint(...)
+
+    bool tint(...)
     [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
         ClutterColor color;
         ClutterUtil::to_clutter_color(L,2,&color);
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "tint_effect");
-            clutter_actor_add_effect_with_name(self, "tint_effect", clutter_colorize_effect_new( &color ));
-        }
+        clutter_actor_remove_effect_by_name(self, "tint_effect");
+        clutter_actor_add_effect_with_name(self, "tint_effect", clutter_colorize_effect_new( &color ));
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
     Function: untint
     
-    Turn off any existing tint effect for the actor.
+    Turn off any existing tint effect for the UI element.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    untint()
+
+    bool untint()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "tint_effect");
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "tint_effect");
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
