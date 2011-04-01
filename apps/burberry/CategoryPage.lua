@@ -375,7 +375,7 @@ category_page = {
                         print("lala")
                         this_func_tbl.first = false
                     end
-                    this_obj.group.opacity=255*p
+                    --this_obj.group.opacity=255*p
                     if p == 1 then
                         restore_keys()
                         this_func_tbl.first = true
@@ -400,7 +400,7 @@ category_page = {
             ["product_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
-                    this_obj.group.opacity=255*(1-p)
+                    --this_obj.group.opacity=255*(1-p)
                     if p == 1 then
                         back_sel=false
                         primary_focus.opacity=255

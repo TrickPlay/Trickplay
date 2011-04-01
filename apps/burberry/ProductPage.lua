@@ -1,14 +1,19 @@
-local BACK_X = 709
+local BACK_X = 659
 local BACK_Y = 883
-local PLAY_X = 1016
+local PLAY_X = 896
 local PLAY_Y = 883
+local SHARE_X = 1273
+local SHARE_Y = 883
 
 local umbrella = Group{opacity=0}
 local bottom_i = 1
-local bg = Image{src="assets/beauty-product.jpg"}
+local bg = Image{src="assets/bg-product.jpg",scale={2,2}}
 local product_text = Image{src="assets/text-product.png",x=707,y=99}
-product_text:move_anchor_point(product_text.w/2,product_text.h/2)
-product_text.func_tbls = {
+
+local product = Image{src="assets/product-image.png",x=100,y=280}
+product:move_anchor_point(product.w/2,product.h/2)
+
+product.func_tbls = {
     diana = {
             duration=10000,
             loop=true,
@@ -31,6 +36,7 @@ local bottom_buttons_base = {
     },--]]
     Image{src="assets/btn-back-off.png",opacity=0,x = BACK_X,y = BACK_Y,},
     Image{src="assets/btn-playvideo-off.png",x = PLAY_X,y = PLAY_Y,},
+    Image{src="assets/btn-share-off.png",x = SHARE_X,y = SHARE_Y,},
 }
 local bottom_buttons_foci = {
 --[[
@@ -46,6 +52,7 @@ local bottom_buttons_foci = {
     },--]]
     Image{src="assets/btn-back-on.png",x = BACK_X,y = BACK_Y,},
     Image{src="assets/btn-playvideo-on.png",opacity=0,x = PLAY_X,y = PLAY_Y,},
+    Image{src="assets/btn-share-on.png",opacity=0,x = SHARE_X,y = SHARE_Y,},
 }
 do
     --[[
@@ -95,7 +102,7 @@ do
     --]]
 end
 
-umbrella:add(bg,product_text)
+umbrella:add(bg,product_text,product)
 umbrella:add(unpack(bottom_buttons_base))
 umbrella:add(unpack(bottom_buttons_foci))
 product_page = {
@@ -107,7 +114,7 @@ product_page = {
                 first = true,
                 func = function(this_obj,this_func_tbl,secs,p)
                     if this_func_tbl.first then
-                        animate_list[product_text.func_tbls.diana] = product_text
+                        animate_list[product.func_tbls.diana] = product
                         this_func_tbl.first = false
                     end
                     this_obj.group.opacity=255*p
@@ -125,7 +132,7 @@ product_page = {
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*(1-p)
                     if p == 1 then
-                        animate_list[product_text.func_tbls.diana] = nil
+                        animate_list[product.func_tbls.diana] = nil
                     end
                 end
             }
@@ -173,7 +180,7 @@ product_page = {
             bottom_i = bottom_i - 1
         end,
         [keys.Right] = function(self)
-            if bottom_i == 2 then return end
+            if bottom_i == 3 then return end
             lose_keys()
             
             self.func_tbls.focus_out_button.index = bottom_i
