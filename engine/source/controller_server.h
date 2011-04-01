@@ -3,7 +3,7 @@
 
 
 #include "trickplay/controller.h"
-
+#include <sstream>
 #include "common.h"
 #include "server.h"
 #include "context.h"
@@ -69,7 +69,12 @@ private:
             :
             is_http( false ),
             headers_done( false )
-        {}
+        {
+/* FOR POST
+ *         	std::ostringstream * stream_ptr = new std::ostringstream( std::ostringstream::out|std::ostringstream::binary );
+ *       	stream_data.reset( stream_ptr );
+*/
+        }
 
         void reset()
         {
@@ -79,6 +84,10 @@ private:
             version.clear();
             headers.clear();
             headers_done = false;
+/* FOR POST
+        	std::ostringstream * stream_ptr = new std::ostringstream( std::ostringstream::out|std::ostringstream::binary );
+            stream_data.reset( stream_ptr );
+*/
         }
 
         bool        is_http;
@@ -87,6 +96,9 @@ private:
         String      version;
         StringList  headers;
         bool        headers_done;
+ /* FOR POST      std::auto_ptr<std::ostringstream> stream_data;
+        String mime_type;
+*/
     };
 
     //..........................................................................

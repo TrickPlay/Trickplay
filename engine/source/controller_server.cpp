@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "libsoup/soup.h"
 #include "clutter/clutter.h"
 #include "uriparser/Uri.h"
 
@@ -300,6 +301,18 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             break;
         }
 
+        case TP_CONTROLLER_COMMAND_SUBMIT_PICTURE	:
+		{
+			server->write_printf( connection, "PI\n");
+			break;
+		}
+
+        case TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP	:
+		{
+			server->write_printf( connection, "AC\n");
+			break;
+		}
+
         default:
         {
             return 3;
@@ -537,6 +550,14 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_TEXT_ENTRY;
                 }
+                else if ( cmp2( cap, "PS" ) )
+				{
+					spec.capabilities |= TP_CONTROLLER_HAS_PICTURES;
+				}
+                else if ( cmp2( cap, "AC" ) )
+				{
+					spec.capabilities |= TP_CONTROLLER_HAS_AUDIO_CLIPS;
+				}
                 else
                 {
                     g_warning( "UNKNOWN CONTROLLER CAPABILITY '%s'", cap );
@@ -748,6 +769,21 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         handle_http_get( connection, parts[0] );
     }
+    /* For POST
+    else if ( cmp2( cmd, "PO" ) )
+	{
+		// Possibly an HTTP post
+
+		// TODO: what is this ????????????Cannot come from a connection that is already a controller
+
+		if ( info.controller )
+		{
+			return;
+		}
+
+		handle_http_post( connection, parts[0] );
+	}
+	*/
     else
     {
         g_warning( "UNKNOWN CONTROLLER COMMAND '%s'", cmd );
@@ -780,6 +816,31 @@ void ControllerServer::handle_http_get( gpointer connection, const gchar * line 
 }
 
 //-----------------------------------------------------------------------------
+/* For Post
+void ControllerServer::handle_http_post( gpointer connection, const gchar * line )
+{
+    ConnectionInfo * info = find_connection( connection );
+
+    if ( !info )
+    {
+        return;
+    }
+
+    gchar ** parts = g_strsplit( line, " ", 3 );
+
+    if ( g_strv_length( parts ) == 3 && !strcmp( parts[0], "POST" ) )
+    {
+        info->disconnect = false;
+        info->http.is_http = true;
+        info->http.method = parts[0];
+        info->http.url = parts[1];
+        info->http.version = parts[2];
+    }
+
+    g_strfreev( parts );
+}
+*/
+//-----------------------------------------------------------------------------
 
 void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & info, const gchar * line )
 {
@@ -801,9 +862,14 @@ void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & i
                 server->close_connection( connection );
             }
 #endif
+          /* FOR POST  if (hi.mime_type.empty() && strstr(line, "ContentType: ")) {
+
+            }
+          */
         }
         else
         {
+        	hi.headers_done = true;
             // We have received all the headers
 
 #if 0
@@ -812,7 +878,12 @@ void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & i
                 g_debug( "[%s]", it->c_str() );
             }
 #endif
-
+/* For POST
+            if ( hi.method.compare( "POST" ) == 0 ) {
+        // TODO: set connection in stream mode and return
+            	return;
+            }
+*/
             g_debug( "PROCESSING %s '%s'", hi.method.c_str(), hi.url.c_str() );
 
             bool found = false;
@@ -855,6 +926,32 @@ void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & i
         }
     }
 }
+
+/* For POST
+void ControllerServer::handle_http_stream_data( gpointer connection, ConnectionInfo & info, const char * data, int size )
+{
+	HTTPInfo & hi = info.http;
+	if ( size > 0 ) {
+		hi.stream_data->write(data, size);
+	} else {
+		String response = handle_http_api( connection , hi.url );
+
+		if ( ! response.empty() )
+		{
+			server->write_printf( connection , "%s 200 OK\r\nContent-Length: %" G_GSIZE_FORMAT "\r\nContent-Type: application/json\r\n\r\n" , hi.version.c_str() , response.size() );
+			server->write( connection , response.data() , response.size() );
+			g_debug( "  API RESPONSE" );
+		}
+		else
+		{
+			server->write_printf( connection, "%s 404 Not found\r\nContent-Length: 0\r\n\r\n", hi.version.c_str() );
+
+			g_debug( "  NOT FOUND" );
+		}
+		hi.reset();
+	}
+}
+*/
 
 String get_file_extension( const String & path, bool include_dot = true )
 {
@@ -1085,7 +1182,22 @@ String ControllerServer::handle_http_api( gpointer connection , const String & u
             result = "{}";
         }
     }
+    /*
+    else if ( path == "/app/submit_picture" )
+    {
+    	ConnectionMap::iterator it = connections.find( connection );
+    	if ( it != connections.end() )
+		{
+    		ConnectionInfo & info = it->second;
+    		String data = info.http.stream_data->str();
+        	//tp_controller_submit_picture( info.controller, data.c_str(), info.http.);
+		}
+    }
+    else if ( path == "/api/submit_audio_clip" )
+    {
 
+    }
+	*/
     return result;
 }
 
