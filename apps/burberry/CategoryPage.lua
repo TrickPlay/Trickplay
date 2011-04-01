@@ -21,7 +21,7 @@ local back_sel = false
 
 local umbrella = Group{opacity=0}
 
-local left_img = Image{src="assets/category-bg.jpg",size={screen_w,screen_h}}
+local left_img = Assets:Clone{src="assets/category-bg.jpg",size={screen_w,screen_h}}
 local tile_group = Group{}
 local shadow_group = Group{}
 --[[
@@ -39,26 +39,28 @@ local tiles = {
     Image{src="assets/tile-category-skin-foundation.png"},
 }--]]
 local tiles = {
-    Image{src="assets/img-burberry-bty-brush.png"},
-    Image{src="assets/img-burberry-bty-brush2.png"},
-    Image{src="assets/img-eye-definer.png"},
-    Image{src="assets/img-light-glow.png"},
-    Image{src="assets/img-lip-cover.png"},
-    Image{src="assets/img-lip-definer.png"},
-    Image{src="assets/img-lip-glow.png"},
-    Image{src="assets/img-mascara.png"},
-    Image{src="assets/img-sheer-compact.png"},
-    Image{src="assets/img-sheer-eye-shadow.png"},
-    Image{src="assets/img-sheer-foundation.png"},
-    Image{src="assets/img-warm-glow.png"},
+    Assets:Clone{src="assets/img-burberry-bty-brush.png"},
+    Assets:Clone{src="assets/img-burberry-bty-brush2.png"},
+    Assets:Clone{src="assets/img-eye-definer.png"},
+    Assets:Clone{src="assets/img-light-glow.png"},
+    Assets:Clone{src="assets/img-lip-cover.png"},
+    Assets:Clone{src="assets/img-lip-definer.png"},
+    Assets:Clone{src="assets/img-lip-glow.png"},
+    Assets:Clone{src="assets/img-mascara.png"},
+    Assets:Clone{src="assets/img-sheer-compact.png"},
+    Assets:Clone{src="assets/img-sheer-eye-shadow.png"},
+    Assets:Clone{src="assets/img-sheer-foundation.png"},
+    Assets:Clone{src="assets/img-warm-glow.png"},
 }
 local shadows ={}
 
 local primary_focus = Group{}
 --local glare_clip = Group{}
-local top_button = Group{x=210,y=60,opacity = 255*.3}
-local top_focus  = Group{x=200,y=50,opacity = 0}
-local shine=Image{src="assets/highlight-alone.png"}
+
+local top_button=Assets:Clone{src="assets/btn-back-off.png",x = 200,y = 50,}
+local top_focus=Assets:Clone{src="assets/btn-back-on.png",opacity=0,x = 200,y = 50,}
+
+local shine=Assets:Clone{src="assets/highlight-alone.png"}
 shine.anchor_point={shine.w/2,shine.h/2}
 shine.x=TILE_W/2
 shine.y=shine.h/2+5
@@ -108,47 +110,47 @@ function set_tile_attrib(this_tile,this_shadow,i)
 end
 do
     
-    local tl_corner = Clone{source=imgs.box_foc_corner}
-    local top  = Clone{
-        source=imgs.box_foc_side,
+    local tl_corner = Assets:Clone{src=imgs.box_foc_corner}
+    local top  = Assets:Clone{
+        src=imgs.box_foc_side,
         x=tl_corner.w,w=TILE_W-2*tl_corner.w,
         tiles
     }
-    local tr_corner = Clone{
-        source=imgs.box_foc_corner,
+    local tr_corner = Assets:Clone{
+        src=imgs.box_foc_corner,
         z_rotation={90,0,0},
         x=TILE_W
     }
-    local left = Clone{
-        source=imgs.box_foc_side,
+    local left = Assets:Clone{
+        src=imgs.box_foc_side,
         z_rotation={-90,0,0},
         w=TILE_H-2*tl_corner.w,
         y=TILE_H-tl_corner.w,
         tiles
     }
-    local right = Clone{
-        source=imgs.box_foc_side,
+    local right = Assets:Clone{
+        src=imgs.box_foc_side,
         z_rotation={90,0,0},
         w=TILE_H-2*tl_corner.w,
         x=TILE_W,
         y=tl_corner.w,
         tiles
     }
-    local btm  = Clone{
-        source=imgs.box_foc_side,
+    local btm  = Assets:Clone{
+        src=imgs.box_foc_side,
         z_rotation={180,0,0},
         x=TILE_W-tl_corner.w,
         y=TILE_H,
         w=TILE_W-2*tl_corner.w,
         tiles
     }
-    local bl_corner = Clone{
-        source=imgs.box_foc_corner,
+    local bl_corner = Assets:Clone{
+        src=imgs.box_foc_corner,
         z_rotation={-90,0,0},
         y=TILE_H,
     }
-    local br_corner = Clone{
-        source=imgs.box_foc_corner,
+    local br_corner = Assets:Clone{
+        src=imgs.box_foc_corner,
         z_rotation={180,0,0},
         y=TILE_H,
         x=TILE_W
@@ -159,7 +161,7 @@ do
     --glare_clip:add(shine)
     --glare_clip.y=3
     
-    
+    --[[
     local rect = Rectangle{w=152,h=55,color="000000"}
     local text = Text{
         font="Engravers MT "..SUB_TITLE_SZ.."px",
@@ -171,24 +173,26 @@ do
     
     top_button:add(rect,text)
     
-    local left  = Clone{source=imgs.fp.foc_end}
-    local mid   = Clone{source=imgs.fp.foc_mid,x=left.w,w=120,tiles}
-    local right = Clone{source=imgs.fp.foc_end,x=2*left.w+mid.w,y_rotation={180,0,0}}
+    local left  = Assets:Clone{source=imgs.fp.foc_end}
+    local mid   = Assets:Clone{source=imgs.fp.foc_mid,x=left.w,w=120,tiles}
+    local right = Assets:Clone{source=imgs.fp.foc_end,x=2*left.w+mid.w,y_rotation={180,0,0}}
     
     top_focus:add(left,mid,right)
+    --]]
+    
     local c,img
     for i = 1,#tiles do
         img=tiles[i]
         img.anchor_point={img.w/2,img.h/2}
         tiles[i] = Group{}
-        c = Clone{source="assets/tile-bg-50.png"}
+        c = Assets:Clone{src="assets/tile-bg-50.png"}
         c.anchor_point={c.w/2,c.h/2}
         c.scale={2,2}
         c.position={c.w,c.h}
         img.position={c.w,c.h}
         tiles[i]:add(c,img)
         tile_group:add(tiles[i])
-        shadows[i]=Clone{source="assets/shadow-center-tile.png"}
+        shadows[i]=Assets:Clone{src="assets/shadow-center-tile.png"}
         shadows[i].anchor_point={60+TILE_W/2,0}
         shadow_group:add(shadows[i])
         
@@ -392,7 +396,7 @@ category_page = {
                         back_sel=false
                         primary_focus.opacity=255
                         top_focus.opacity=0
-                        top_button.opacity=255*.3
+                        top_button.opacity=255
                         stop_dianas()
                     end
                 end
@@ -405,7 +409,7 @@ category_page = {
                         back_sel=false
                         primary_focus.opacity=255
                         top_focus.opacity=0
-                        top_button.opacity=255*.3
+                        top_button.opacity=255
                         stop_dianas()
                     end
                 end
@@ -414,7 +418,7 @@ category_page = {
         fade_out_back_button = {
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                top_button.opacity=255*(.3+.7*(1-p))
+                top_button.opacity=255*p
                 top_focus.opacity=255*(1-p)
                 primary_focus.opacity=255*(p)
                 if p == 1 then
@@ -425,7 +429,7 @@ category_page = {
         fade_in_back_button = {
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                top_button.opacity=255*(.3+.7*(p))
+                top_button.opacity=255*(1-p)
                 top_focus.opacity=255*(p)
                 primary_focus.opacity=255*(1-p)
                 if p == 1 then

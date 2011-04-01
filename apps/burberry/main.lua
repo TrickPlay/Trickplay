@@ -1,6 +1,7 @@
-screen:show()
+--screen:show()
 screen_w = screen.w
 screen_h = screen.h
+function main()
 local curr_page = "front_page"
 function change_page_to(next_page)
 	
@@ -45,3 +46,37 @@ function lose_keys()
 end
 
 restore_keys()
+
+end
+
+Assets = dofile( "Assets.lua" )
+
+do
+
+    local r = Rectangle
+    {
+        color = "000000b0",
+        size = { 0 , 20 },
+        x = 10,
+        y = screen.h - 26
+    }
+    local b = Image{ src = "splash.jpg" }
+    b.scale = { screen.w / b.w , screen.h / b.h }
+    screen:add( b , r )
+    screen:show()
+    
+    local function progress( percent , src , failed )
+        r.w = ( screen.w - 20 ) * percent
+    end
+    
+    local function finished()
+        screen:remove( r , b )
+        r = nil
+        b = nil
+        main()
+    end
+    
+    Assets:queue_app_contents()
+    
+    Assets:load( progress , finished )
+end
