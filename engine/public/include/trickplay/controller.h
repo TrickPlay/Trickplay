@@ -74,6 +74,11 @@ typedef struct TPController TPController;
     TP_CONTROLLER_HAS_TEXT_ENTRY      - The controller can let the user edit text
                                         sent by TrickPlay. This can be via an on
                                         screen keyboard.
+
+    TP_CONTROLLER_HAS_PICTURES        - The controller can can send pictures to Trickplay.
+
+    TP_CONTROLLER_HAS_AUDIO_CLIPS     - The controller can send audio clips to Trickplay.
+
 */
 
 #define TP_CONTROLLER_HAS_KEYS                      0x0001
@@ -84,6 +89,8 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_SOUND                     0x0020
 #define TP_CONTROLLER_HAS_UI                        0x0040
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
+#define TP_CONTROLLER_HAS_PICTURES                	0x0100
+#define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
 
 /*-----------------------------------------------------------------------------*/
 
@@ -478,6 +485,36 @@ struct TPControllerSpec
 */
 
 #define TP_CONTROLLER_COMMAND_STOP_SOUND            41
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_SUBMIT_PICTURE
+
+    The controller should send a picture.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_PICTURES
+    in its capabilities.
+
+    Parameters:
+
+        None
+*/
+
+#define TP_CONTROLLER_COMMAND_SUBMIT_PICTURE        100
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP
+
+    The controller should send a picture.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_AUDIO_CLIPS
+    in its capabilities.
+
+    Parameters:
+
+        None
+*/
+
+#define TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP     101
 
 /*-----------------------------------------------------------------------------*/
 
@@ -1006,6 +1043,45 @@ struct TPControllerPlaySound
             
         TPController * controller,
         const char * parameters);
+
+
+/*
+	Callback: tp_controller_submit_picture
+
+	Send picture data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_PICTURE>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		data 		-   A pointer to the picture data
+		size		- 	The size of the picture data
+		mime_type	- 	The mime type of the picture data.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_submit_picture(
+        TPController * controller, void * data, unsigned int size, const char * mime_type);
+
+/*
+	Callback: tp_controller_submit_audio_clip
+
+	Send audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		data 		-   A pointer to the audio clip data
+		size		- 	The size of the audio clip data
+		mime_type	- 	The mime type of the audio clip data.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_submit_audio_clip(
+        TPController * controller, void * data, unsigned int size, const char * mime_type);
 
 /*-----------------------------------------------------------------------------*/
 /*
