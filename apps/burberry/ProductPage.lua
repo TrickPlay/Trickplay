@@ -18,6 +18,7 @@ product_text.func_tbls = {
         }
 }
 local bottom_buttons_base = {
+--[[
     Group{
         x = BACK_X,
         y = BACK_Y,
@@ -27,9 +28,12 @@ local bottom_buttons_base = {
         x = PLAY_X,
         y = PLAY_Y,
         opacity = 255*.4,
-    },
+    },--]]
+    Image{src="assets/btn-back-off.png",opacity=0,x = BACK_X,y = BACK_Y,},
+    Image{src="assets/btn-playvideo-off.png",x = PLAY_X,y = PLAY_Y,},
 }
 local bottom_buttons_foci = {
+--[[
     Group{
         x = BACK_X-10,
         y = BACK_Y-11,
@@ -39,9 +43,12 @@ local bottom_buttons_foci = {
         x = PLAY_X-10,
         y = PLAY_Y-11,
         opacity = 0,
-    },
+    },--]]
+    Image{src="assets/btn-back-on.png",x = BACK_X,y = BACK_Y,},
+    Image{src="assets/btn-playvideo-on.png",opacity=0,x = PLAY_X,y = PLAY_Y,},
 }
 do
+    --[[
     local arrow = Clone{source=imgs.fp.arrow, y_rotation={180,0,0}}
     local rect = Rectangle{w=204,h=55,color="000000"}
     local text = Text{
@@ -85,6 +92,7 @@ do
         Clone{source=imgs.fp.foc_mid,x=26,w=272,tiles},
         Clone{source=imgs.fp.foc_end,x=26*2+272,y_rotation={180,0,0}}
     )
+    --]]
 end
 
 umbrella:add(bg,product_text)
@@ -96,11 +104,17 @@ product_page = {
         fade_in_from = {
             ["category_page"] = {
                 duration = 300,
+                first = true,
                 func = function(this_obj,this_func_tbl,secs,p)
+                    if this_func_tbl.first then
+                        animate_list[product_text.func_tbls.diana] = product_text
+                        this_func_tbl.first = false
+                    end
                     this_obj.group.opacity=255*p
                     if p == 1 then
                         restore_keys()
-                        animate_list[product_text.func_tbls.diana] = product_text
+                        
+                        this_func_tbl.first = true
                     end
                 end
             },
@@ -121,7 +135,7 @@ product_page = {
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 
-                bottom_buttons_base[this_func_tbl.index].opacity=255*(.4+.6*(1-p))
+                bottom_buttons_base[this_func_tbl.index].opacity=255*p
                 bottom_buttons_foci[this_func_tbl.index].opacity=255*(1-p)
             end
         },
@@ -129,7 +143,7 @@ product_page = {
             index = 1,
             duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
-                bottom_buttons_base[this_func_tbl.index].opacity=255*(.4+.6*(p))
+                bottom_buttons_base[this_func_tbl.index].opacity=255*(1-(p))
                 bottom_buttons_foci[this_func_tbl.index].opacity=255*(p)
                 if p == 1 then
                     restore_keys()

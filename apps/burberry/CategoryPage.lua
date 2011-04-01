@@ -329,7 +329,6 @@ local start_dianas = function()
         animate_list[tiles[index].func_tbls.diana] = tiles[index]
         tiles[index].func_tbls.diana.delay=0
         tiles[index].func_tbls.diana.elapsed=0
-        print(index,tiles[index].func_tbls.diana.phase)
         
     end
 end
@@ -373,11 +372,13 @@ category_page = {
                 func = function(this_obj,this_func_tbl,secs,p)
                     if this_func_tbl.first then
                         start_dianas()
+                        print("lala")
                         this_func_tbl.first = false
                     end
                     this_obj.group.opacity=255*p
                     if p == 1 then
                         restore_keys()
+                        this_func_tbl.first = true
                     end
                 end
             }
