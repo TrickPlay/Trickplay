@@ -119,6 +119,7 @@ m_grad.y        = screen_h-m_grad.h
 
 --load saved settings, or default to Palo Alto,CA
 locations = settings.locations or {94019,94022,}
+dumptable(locations)
 bar_i = 1
 view_5_day=false
 curr_condition=Group{name="Bottom Corner Weather conditions"}
@@ -140,10 +141,11 @@ function app:on_closing()
 	local save_tbl = {}
 	local loc_i
 	for i = 1,#locations do
-		loc_i = (i+bar_i-2)%#locations+1
+		--loc_i = (i+bar_i-2)%#locations+1
 		save_tbl[i] = locations[i+bar_i-1]
 	end
-	settings.locations = save_tbl
+	dumptable(locations)
+	settings.locations = locations
 	
 end
 
