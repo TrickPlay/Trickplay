@@ -17,6 +17,17 @@ function( section )
         
     local section_items = {}
     
+    local showcases = dofile( "showcase/showcases.lua" )
+    
+    for i = 1 , # showcases do
+        showcases[ i ].dropdown = assets( showcases[ i ].dropdown )
+    end
+    
+    assert( type( showcases ) == "table" )
+    assert( #showcases > 0 )
+    
+    local showcase_index = 1
+    
     ---------------------------------------------------------------------------
     -- Build the initial UI for the section
     ---------------------------------------------------------------------------
@@ -32,29 +43,31 @@ function( section )
         group.name = "showcase-dropdown"
         
         local TOP_PADDING = 60
-        local BOTTOM_PADDING = 40
+        local BOTTOM_PADDING = 20
         
         local space = group.h - ( TOP_PADDING + BOTTOM_PADDING )
         local items_height = 0
         
---        local item1 = factory.make_text_menu_item( assets , ui.strings[ "Honor the Code" ] )
+        local choices = {}
+        for i = 1 , # showcases do
+            table.insert( choices , showcases[ i ].title )
+        end
         
---        table.insert( section_items , item1  )
+        local selector = factory.make_text_side_selector( assets , choices )
+        
+        function selector.extra.on_activate( selector )
+            section:on_default_action()
+            selector:on_focus_out()
+        end
+        
+        table.insert( section_items , selector )
 
-        local image = assets( "showcase/dropdown.png" )
-            
-        table.insert( section_items , image )
-        
+        table.insert( section_items , showcases[ 1 ].dropdown )
         
         for i = 1 , # section_items do
             items_height = items_height + section_items[ i ].h
         end
---[[        
-        item1.extra.on_activate =
         
-            function()
-            end
-]]        
         -- This spaces all items equally.
         -- TODO: If there are less than 3 app tiles, it will be wrong.
         
@@ -75,6 +88,50 @@ function( section )
         
     end
     
+    ---------------------------------------------------------------------------
+    
+    local function switch_showcase_dropdown( index )
+        if not index then
+            return
+        end
+        
+        local old = section_items[ 2 ]
+        local new = showcases[ index ].dropdown
+        new.position = old.position
+        new.opacity = 0
+        old.parent:add( new )
+        section_items[ 2 ] = new
+        showcase_index = index
+        old:grab_key_focus()
+        old.on_key_down = function() return true end
+        new:animate{ duration = 200 , opacity = 255 }
+        old:animate
+        {
+            duration = 200 ,
+            opacity = 0 ,
+            on_completed =
+                function()
+                    section_items[ 1 ]:grab_key_focus()
+                    old:unparent()
+                    old.on_key_down = nil
+                end
+        }
+    end
+
+    local function show_previous()
+        if section.focus == 1 then
+            local i = section_items[ section.focus ]:on_show_previous()
+            switch_showcase_dropdown( i )
+        end
+    end
+    
+    local function show_next()
+        if section.focus == 1 then
+            local i = section_items[ section.focus ]:on_show_next()
+            switch_showcase_dropdown( i )
+        end
+    end
+
     ---------------------------------------------------------------------------
     -- Called each time the drop down is about to be shown
     ---------------------------------------------------------------------------
@@ -129,6 +186,8 @@ function( section )
     {
         [ keys.Up     ] = function() move_focus( -1 ) end,
         [ keys.Down   ] = function() move_focus( 1  ) end,
+        [ keys.Left   ] = show_previous,
+        [ keys.Right  ] = show_next,
         [ keys.Return ] = activate_focused,
     }
 
@@ -139,8 +198,6 @@ function( section )
     
     function section.on_enter( section )
     
-        return false
---[[    
         section.focus = 0
         
         move_focus( 1 )
@@ -157,7 +214,7 @@ function( section )
             end
     
         return true
-]]        
+        
     end
 
     ---------------------------------------------------------------------------
@@ -168,9 +225,11 @@ function( section )
     
         ui:on_exit_section( section )
     
-        local showcase = dofile( "fs-showcase" )( ui )
+        local showcase = showcases[ showcase_index ].enter( ui )
         
-        ui:on_section_full_screen( showcase )
+        if showcase then
+            ui:on_section_full_screen( showcase )
+        end
 
         return false
     

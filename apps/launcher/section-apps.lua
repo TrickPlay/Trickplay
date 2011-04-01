@@ -20,6 +20,10 @@ function( section )
     -- Take myself out
     
     profile_apps[ app.id ] = nil
+    
+    -- TODO: temporary
+    
+    profile_apps[ "com.trickplay.burberry" ] = nil
 
     -- The list of focusable items in the dropdown        
         

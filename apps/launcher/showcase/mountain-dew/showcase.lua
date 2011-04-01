@@ -33,7 +33,7 @@ function( ui )
             return
         end
             
-        local image = Image{ src = "showcase/background.jpg" }
+        local image = Image{ src = "showcase/mountain-dew/background.jpg" }
         
         image.anchor_point = image.center
         
