@@ -991,6 +991,13 @@ globals
             result = timestamp();
         ]];
 
+	udata newudata( table metatable )
+        [[
+            lua_newuserdata( L , 4 );
+	        lua_pushvalue( L , metatable );
+	        lua_setmetatable( L , -2 );
+        ]];
+
 	table split( string source , string delimiter , int max_tokens = 0 )
         [[
             lua_newtable( L );
