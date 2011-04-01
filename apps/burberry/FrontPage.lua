@@ -13,6 +13,7 @@ local NEXT_Y = 898
 local RIGHT_PANE_X = 1578
 local TILE_TEXT_Y_OFFSET = 236
 local TILE_H = 310
+local TILE_W = screen_w-RIGHT_PANE_X
 
 local bottom_i = 1
 local right_i  = 1
@@ -22,17 +23,30 @@ local umbrella = Group{}
 --local left_img = Image{src="assets/main-2011-image.png"}
 local left_i = 1
 local left_panes = {
-    Image{src="assets/main-2011-image.png",  },
-    Image{src="assets/main-beauty-image.png",x=screen_w},
-    --Image{src="assets/main-biker-image.png", x=screen_w},
-    --Image{src="assets/main-mens-image.png",  x=screen_w},
-    --Image{src="assets/main-womens-image.png",x=screen_w},
+    Image{src="assets/main-2011-image.jpg",  scale={2,2},},
+    Image{src="assets/main-beauty-image.jpg",scale={2,2},x=screen_w},
+    Image{src="assets/main-biker-image.jpg", scale={2,2},x=screen_w},
+    Image{src="assets/main-mens-image.jpg",  scale={2,2},x=screen_w},
+    Image{src="assets/main-womens-image.jpg",scale={2,2},x=screen_w},
+}
+local left_videos = {
+    "videos/front_page_left_pane/1.mp4",
+    "videos/front_page_left_pane/2.mp4",
+    nil,
+    nil,
+    "videos/front_page_left_pane/5.mp4",
 }
 local right_tiles = {
     Image{src="assets/tile-main-womens1.png" , x=RIGHT_PANE_X,y=TILE_H*0},
     Image{src="assets/tile-main-mens1.png"  , x=RIGHT_PANE_X,y=TILE_H*1},
     Image{src="assets/tile-main-beauty1.png", x=RIGHT_PANE_X,y=TILE_H*2},
     Image{src="assets/tile-main-biker1a.png", x=RIGHT_PANE_X,y=TILE_H*3},
+}
+local right_videos = {
+    "videos/front_page_right_col/1.mp4",
+    "videos/front_page_right_col/2.mp4",
+    "videos/front_page_right_col/3.mp4",
+    "videos/front_page_right_col/4.mp4",
 }
 local right_focus = Group{x=RIGHT_PANE_X,opacity=0}
 local bottom_buttons_base = {
@@ -263,7 +277,23 @@ front_page = {
                     --mediaplayer:load()
                     right_focus.y = TILE_H*(this_func_tbl.next_tile-1)
                     this_obj.func_tbls.play_next_tile.next_tile = this_func_tbl.next_tile
-                    animate_list[this_obj.func_tbls.play_next_tile] = this_obj
+                    
+                    
+                    mediaplayer.on_loaded = function()
+                        mediaplayer:set_viewport_geometry(
+                            RIGHT_PANE_X*screen.scale[1],
+                            TILE_H*(this_func_tbl.next_tile-1)*screen.scale[2],
+                            TILE_W*screen.scale[1],
+                            TILE_H*screen.scale[2]
+                        )
+                        mediaplayer:play()
+                        animate_list[this_obj.func_tbls.play_next_tile] = this_obj
+                        print(mediaplayer.state)
+                    end
+                    mediaplayer.on_end_of_stream = function()
+                        --animate_list[self.func_tbls.fade_in_left_pane] = self
+                    end
+                    mediaplayer:load(right_videos[this_func_tbl.next_tile])
                 end
             end
         },
@@ -312,7 +342,7 @@ front_page = {
         slide_main_pane_right = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*p
+                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*2*p
                 left_panes[this_func_tbl.index].opacity=255*(.5+.5*(1-p))
                 if p == 1 then
                     left_panes[this_func_tbl.index].opacity=255
@@ -322,7 +352,7 @@ front_page = {
         slide_new_pane_right = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*(1-p)
+                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*2*(1-p)
                 if p == 1 then
                     restore_keys()
                 end
@@ -331,7 +361,7 @@ front_page = {
         slide_main_pane_left = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*p
+                left_panes[this_func_tbl.index].x=-left_panes[this_func_tbl.index].w*2*p
                 left_panes[this_func_tbl.index].opacity=255*(.6+.4*(1-p))
                 if p == 1 then
                     left_panes[this_func_tbl.index].opacity=255
@@ -341,10 +371,22 @@ front_page = {
         slide_new_pane_left = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
-                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*(1-p)
+                left_panes[this_func_tbl.index].x=left_panes[this_func_tbl.index].w*2*(1-p)
                 if p == 1 then
                     restore_keys()
                 end
+            end,
+        },
+        fade_in_left_pane = {
+            duration = 500,
+            func = function(this_obj,this_func_tbl,secs,p)
+                left_panes[left_i].opacity=255*p
+            end,
+        },
+        fade_out_left_pane = {
+            duration = 500,
+            func = function(this_obj,this_func_tbl,secs,p)
+                left_panes[left_i].opacity=255*(1-p)
             end,
         },
     },
@@ -417,9 +459,23 @@ front_page = {
                 left_i = (left_i-2)%#left_panes+1
                 self.func_tbls.slide_new_pane_right.index=left_i
                 animate_list[self.func_tbls.slide_new_pane_right] = self
+            elseif bottom_i == 2 then
+                if mediaplayer.state == mediaplayer.PLAYING then return end
+                
+                mediaplayer.on_loaded = function()
+                    mediaplayer:set_viewport_geometry(0,0,screen_w*screen.scale[1],screen_h*screen.scale[2])
+                    mediaplayer:play()
+                    animate_list[self.func_tbls.fade_out_left_pane] = self
+                    print(mediaplayer.state)
+                end
+                mediaplayer.on_end_of_stream = function()
+                    animate_list[self.func_tbls.fade_in_left_pane] = self
+                end
+                mediaplayer:load(left_videos[left_i])
+                
             elseif bottom_i == 3 then
                 lose_keys()
-                if mediaplayer.state ~= "PLAYING" then
+                if mediaplayer.state ~= mediaplayer.PLAYING then
                     self.func_tbls.slide_main_pane_left.index=left_i
                     animate_list[self.func_tbls.slide_main_pane_left] = self
                 end
