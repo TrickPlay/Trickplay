@@ -980,6 +980,12 @@ globals
 	        result = tv.tv_sec + double( tv.tv_usec ) / G_USEC_PER_SEC;
         ]];
 
+	/*
+	    Function: timestamp
+
+	    Returns the number of milliseconds elapsed since Trickplay was started.
+	*/
+
 	double timestamp()
         [[
             result = timestamp();
