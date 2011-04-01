@@ -6,6 +6,17 @@ local PLAY_Y = 883
 local umbrella = Group{opacity=0}
 local bottom_i = 1
 local bg = Image{src="assets/beauty-product.jpg"}
+local product_text = Image{src="assets/text-product.png",x=707,y=99}
+product_text:move_anchor_point(product_text.w/2,product_text.h/2)
+product_text.func_tbls = {
+    diana = {
+            duration=10000,
+            loop=true,
+            func=function(this_obj,this_func_tbl,secs,p)
+                this_obj.y_rotation={5*math.sin(math.pi*2*p),0,0}
+            end
+        }
+}
 local bottom_buttons_base = {
     Group{
         x = BACK_X,
@@ -76,7 +87,7 @@ do
     )
 end
 
-umbrella:add(bg)
+umbrella:add(bg,product_text)
 umbrella:add(unpack(bottom_buttons_base))
 umbrella:add(unpack(bottom_buttons_foci))
 product_page = {
@@ -89,6 +100,7 @@ product_page = {
                     this_obj.group.opacity=255*p
                     if p == 1 then
                         restore_keys()
+                        animate_list[product_text.func_tbls.diana] = product_text
                     end
                 end
             },
@@ -98,6 +110,9 @@ product_page = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*(1-p)
+                    if p == 1 then
+                        animate_list[product_text.func_tbls.diana] = nil
+                    end
                 end
             }
         },

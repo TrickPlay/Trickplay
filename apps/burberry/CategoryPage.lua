@@ -24,6 +24,7 @@ local umbrella = Group{opacity=0}
 local left_img = Image{src="assets/category-bg.jpg",size={screen_w,screen_h}}
 local tile_group = Group{}
 local shadow_group = Group{}
+--[[
 local tiles = {
     Image{src="assets/tile-category-eye-definer.png"},
     Image{src="assets/tile-category-eye-mascara.png"},
@@ -36,6 +37,20 @@ local tiles = {
     Image{src="assets/tile-category-skin-brush.png"},
     Image{src="assets/tile-category-skin-compact.png"},
     Image{src="assets/tile-category-skin-foundation.png"},
+}--]]
+local tiles = {
+    Image{src="assets/img-burberry-bty-brush.png"},
+    Image{src="assets/img-burberry-bty-brush2.png"},
+    Image{src="assets/img-eye-definer.png"},
+    Image{src="assets/img-light-glow.png"},
+    Image{src="assets/img-lip-cover.png"},
+    Image{src="assets/img-lip-definer.png"},
+    Image{src="assets/img-lip-glow.png"},
+    Image{src="assets/img-mascara.png"},
+    Image{src="assets/img-sheer-compact.png"},
+    Image{src="assets/img-sheer-eye-shadow.png"},
+    Image{src="assets/img-sheer-foundation.png"},
+    Image{src="assets/img-warm-glow.png"},
 }
 local shadows ={}
 
@@ -50,7 +65,7 @@ shine.y=shine.h/2+5
 --shine.scale={2,1}
 shine.opacity=255*.25--.75
 umbrella:add(left_img,top_focus,top_button,shadow_group,tile_group,primary_focus)
-tile_group:add(unpack(tiles))
+
 --[[local idled = Timer{interval=2000}
 idled.on_timer = function()--]]
 
@@ -161,13 +176,23 @@ do
     local right = Clone{source=imgs.fp.foc_end,x=2*left.w+mid.w,y_rotation={180,0,0}}
     
     top_focus:add(left,mid,right)
-    
+    local c,img
     for i = 1,#tiles do
+        img=tiles[i]
+        img.anchor_point={img.w/2,img.h/2}
+        tiles[i] = Group{}
+        c = Clone{source="assets/tile-bg-50.png"}
+        c.anchor_point={c.w/2,c.h/2}
+        c.scale={2,2}
+        c.position={c.w,c.h}
+        img.position={c.w,c.h}
+        tiles[i]:add(c,img)
+        tile_group:add(tiles[i])
         shadows[i]=Clone{source="assets/shadow-center-tile.png"}
         shadows[i].anchor_point={60+TILE_W/2,0}
         shadow_group:add(shadows[i])
         
-        tiles[i].anchor_point={tiles[i].w/2,tiles[i].h/2}
+        tiles[i].anchor_point={c.w,c.h}
         set_tile_attrib(tiles[i],shadows[i],i)
         tiles[i].func_tbls = {
             diana_left = {
@@ -261,7 +286,7 @@ do
     end
     left_img:lower_to_bottom()
     primary_focus:raise_to_top()
-    primary_focus.anchor_point={tiles[1].w/2,tiles[1].h/2}
+    primary_focus.anchor_point={TILE_W/2,TILE_H/2}
     primary_focus.position={screen_w/2,screen_h/2+55}
     primary_focus.func_tbls = {
         diana = {
@@ -288,20 +313,34 @@ do
 end
 
 local start_dianas = function()
-    for index=1,9 do
-        --local index = (left_i+i-2)%#tiles+1
-        if index < 5 then
+    local index
+    for i=1,9 do
+        index = (left_i+i-2)%#tiles+1
+        if i < 5 then
             tiles[index].func_tbls.diana.center=15
-        elseif index == 5 then
+        elseif i == 5 then
             tiles[index].func_tbls.diana.center=0
-            primary_focus.func_tbls.diana.delay = 5
+            primary_focus.func_tbls.diana.phase = tiles[index].func_tbls.diana.phase
             animate_list[primary_focus.func_tbls.diana] = primary_focus
-        elseif index > 5 then
+        elseif i > 5 then
             tiles[index].func_tbls.diana.center=-15
         end
         --tiles[index].func_tbls.diana.delay = 800*(index-1)
         animate_list[tiles[index].func_tbls.diana] = tiles[index]
+        tiles[index].func_tbls.diana.delay=0
+        tiles[index].func_tbls.diana.elapsed=0
+        print(index,tiles[index].func_tbls.diana.phase)
+        
     end
+end
+local stop_dianas = function()
+    local index
+    for i=1,9 do
+        index = (left_i+i-2)%#tiles+1
+        
+        animate_list[tiles[index].func_tbls.diana] = nil
+    end
+    animate_list[primary_focus.func_tbls.diana] = nil
 end
 category_page = {
     group = umbrella,
@@ -330,7 +369,12 @@ category_page = {
             },
             ["product_page"] = {
                 duration = 300,
+                first=true,
                 func = function(this_obj,this_func_tbl,secs,p)
+                    if this_func_tbl.first then
+                        start_dianas()
+                        this_func_tbl.first = false
+                    end
                     this_obj.group.opacity=255*p
                     if p == 1 then
                         restore_keys()
@@ -343,12 +387,26 @@ category_page = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*(1-p)
+                    if p == 1 then
+                        back_sel=false
+                        primary_focus.opacity=255
+                        top_focus.opacity=0
+                        top_button.opacity=255*.3
+                        stop_dianas()
+                    end
                 end
             },
             ["product_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
                     this_obj.group.opacity=255*(1-p)
+                    if p == 1 then
+                        back_sel=false
+                        primary_focus.opacity=255
+                        top_focus.opacity=0
+                        top_button.opacity=255*.3
+                        stop_dianas()
+                    end
                 end
             },
         },
@@ -443,9 +501,10 @@ category_page = {
                 tiles[(left_i+10-2)%#tiles+1].x=screen_w+TILE_W*.6*(1-p)
                 shadows[(left_i+10-2)%#tiles+1].x=screen_w+TILE_W*.6*(1-p)
                 if p == 1 then
-                    left_i = (left_i)%#tiles+1
-                    animate_list[this_obj.func_tbls.end_left]=this_obj
                     
+                    animate_list[this_obj.func_tbls.end_left]=this_obj
+                    animate_list[tiles[left_i].func_tbls.diana]=nil
+                    left_i = (left_i)%#tiles+1
                 end
             end
         },
@@ -514,7 +573,7 @@ category_page = {
                 tiles[(left_i-2)%#tiles+1].x=TILE_W*-.6*(1-p)
                 tiles[(left_i+9-2)%#tiles+1].x=screen_w+TILE_W*.6*(p)
                 if p == 1 then
-                    
+                    animate_list[tiles[(left_i+9-2)%#tiles+1].func_tbls.diana]=nil
                     left_i = (left_i-2)%#tiles+1
                     animate_list[this_obj.func_tbls.end_right]=this_obj
                 end
@@ -547,7 +606,7 @@ category_page = {
                 back_sel = false
             end
         end,
-        [keys.Left] = function(self)
+        [keys.Right] = function(self)
             --idled:start()
             if back_sel then return end
             lose_keys()
@@ -578,7 +637,7 @@ category_page = {
             tiles[(left_i+10-2)%#tiles+1]:lower_to_bottom()
             animate_list[self.func_tbls.shift_left]=self
         end,
-        [keys.Right] = function(self)
+        [keys.Left] = function(self)
             --idled:start()
             if back_sel then return end
             lose_keys()
