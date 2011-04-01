@@ -950,6 +950,7 @@ function Make_Bar(loc,index, master)
             end
             
             table.remove(bars,bar_index)
+            table.remove(locations,bar_index)
             
             for i,v in ipairs(bars) do
                 bars[i].set_bar_index(i)
@@ -1075,6 +1076,7 @@ function Make_Bar(loc,index, master)
                         elseif response_tbl.location ~= nil then
                             zip_code_prompt.text = "Success"
                             table.insert(locations,zip)
+                            dumptable(locations)
                             table.insert(bars,Make_Bar(zip,#locations))
                             screen:add(bars[#bars])
                             bars[#bars].x = MINI_BAR_X + bar_dist
