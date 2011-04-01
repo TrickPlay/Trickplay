@@ -582,9 +582,7 @@ front_page = {
         end,
     }
 }
-mediaplayer.on_loaded = function()
-    mediaplayer:set_viewport_geometry(0,0,screen_w*screen.scale[1],screen_h*screen.scale[2])
-end
+
 mediaplayer.on_end_of_stream = function()
     if left_is_playing then
         left_is_playing = false
