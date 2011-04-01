@@ -37,6 +37,7 @@ TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( atk-1.0 atk/atk.h 			            ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( sndfile.h								ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -89,6 +90,12 @@ list(
 	APPEND
     
     ENGINE_LIBRARY_NAMES
+    
+    #--------------
+    # libsoup
+    #--------------
+    
+    soup-2.4
     
     #--------------
     # glib
@@ -442,6 +449,7 @@ list( APPEND
     ${ENGINE_SRC}/source/bitmap.cpp
     ${ENGINE_SRC}/source/audio_sampling.cpp
     ${ENGINE_SRC}/source/toast.cpp
+    ${ENGINE_SRC}/source/http_server.cpp
 )
 
 #------------------------------------------------------------------------------
