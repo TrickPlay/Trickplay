@@ -1014,6 +1014,92 @@ interface actor [[ClutterActor*]]
 	
     
     /*
+    Function: blur
+    
+    This function will apply a blur effect to the actor.  Reversible with unblur()
+    */
+
+    blur()
+    [[
+        if(CLUTTER_CHECK_VERSION(1,4,0))
+        {
+            clutter_actor_remove_effect_by_name(self, "blur_effect");
+            clutter_actor_add_effect_with_name(self, "blur_effect", clutter_blur_effect_new());
+        }
+    ]];
+
+    /*
+    Function: blur
+    
+    Turn off a blur effect on the actor.  The opposite of blur()
+    */
+    unblur()
+    [[
+        if(CLUTTER_CHECK_VERSION(1,4,0))
+        {
+            clutter_actor_remove_effect_by_name(self, "blur_effect");
+        }
+    ]];
+
+    /*
+	Function: desaturate
+	
+	How much to desaturate the actor.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+    */
+    desaturate(double desaturation)
+    [[
+        if(CLUTTER_CHECK_VERSION(1,4,0))
+        {
+            clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+            clutter_actor_add_effect_with_name(self, "desaturation_effect", clutter_desaturate_effect_new( desaturation ));
+        }
+    ]];
+
+    /*
+	Function: saturate
+	
+	Restore saturation to the actor.  This undoes any call to desaturate().
+    */
+    saturate()
+    [[
+        if(CLUTTER_CHECK_VERSION(1,4,0))
+        {
+            clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+        }
+    ]];
+
+    /*
+    Function: tint
+    
+    Turn on a tint effect for the actor.
+    
+    color - Required.  The tint color to apply to the actor
+    */
+    tint(...)
+    [[
+        ClutterColor color;
+        ClutterUtil::to_clutter_color(L,2,&color);
+        if(CLUTTER_CHECK_VERSION(1,4,0))
+        {
+            clutter_actor_remove_effect_by_name(self, "tint_effect");
+            clutter_actor_add_effect_with_name(self, "tint_effect", clutter_colorize_effect_new( &color ));
+        }
+    ]];
+
+    /*
+    Function: untint
+    
+    Turn off any existing tint effect for the actor.
+    */
+    untint()
+    [[
+        if(CLUTTER_CHECK_VERSION(1,4,0))
+        {
+            clutter_actor_remove_effect_by_name(self, "tint_effect");
+        }
+    ]];
+
+    /*
 	Function: animate
 	
 	This function lets you animate a UI element. The function accepts a table
