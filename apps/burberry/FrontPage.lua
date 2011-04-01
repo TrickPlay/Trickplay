@@ -23,11 +23,11 @@ local umbrella = Group{}
 --local left_img = Image{src="assets/main-2011-image.png"}
 local left_i = 1
 local left_panes = {
-    Image{src="assets/main-2011-image.jpg",  scale={2,2},},
+    Image{src="assets/main-2011-image.jpg",  scale={2,2},},--[[
     Image{src="assets/main-beauty-image.jpg",scale={2,2},x=screen_w},
     Image{src="assets/main-biker-image.jpg", scale={2,2},x=screen_w},
     Image{src="assets/main-mens-image.jpg",  scale={2,2},x=screen_w},
-    Image{src="assets/main-womens-image.jpg",scale={2,2},x=screen_w},
+    Image{src="assets/main-womens-image.jpg",scale={2,2},x=screen_w},--]]
 }
 local left_videos = {
     "videos/front_page_left_pane/1.mp4",
@@ -106,50 +106,55 @@ local overlay = Rectangle{
 }
 do
     
-    local tl_corner = Clone{source=imgs.box_foc_corner}
+    local tl_corner = Clone{source=imgs.box_foc_corner,x=-2,y=-2}
     local top  = Clone{
         source=imgs.box_foc_side,
-        x=tl_corner.w,w=screen_w-RIGHT_PANE_X-2*tl_corner.w,
+        x=tl_corner.w-2,
+        y=-2,
+        w=screen_w-RIGHT_PANE_X-2*tl_corner.w+4,
         tiles
     }
     local tr_corner = Clone{
         source=imgs.box_foc_corner,
         z_rotation={90,0,0},
-        x=screen_w-RIGHT_PANE_X
+        x=screen_w-RIGHT_PANE_X+2,
+        y=-2
     }
     local left = Clone{
         source=imgs.box_foc_side,
         z_rotation={-90,0,0},
-        w=TILE_H-2*tl_corner.w,
-        y=TILE_H-tl_corner.w,
+        w=TILE_H-2*tl_corner.w+4,
+        y=TILE_H-tl_corner.w+2,
+        x=-2,
         tiles
     }
     local right = Clone{
         source=imgs.box_foc_side,
         z_rotation={90,0,0},
-        w=TILE_H-2*tl_corner.w,
-        x=screen_w-RIGHT_PANE_X,
-        y=tl_corner.w,
+        w=TILE_H-2*tl_corner.w+4,
+        x=screen_w-RIGHT_PANE_X+2,
+        y=tl_corner.w-2,
         tiles
     }
     local btm  = Clone{
         source=imgs.box_foc_side,
         z_rotation={180,0,0},
-        x=screen_w-RIGHT_PANE_X-tl_corner.w,
-        y=TILE_H,
-        w=screen_w-RIGHT_PANE_X-2*tl_corner.w,
+        x=screen_w-RIGHT_PANE_X-tl_corner.w+2,
+        y=TILE_H+2,
+        w=screen_w-RIGHT_PANE_X-2*tl_corner.w+4,
         tiles
     }
     local bl_corner = Clone{
         source=imgs.box_foc_corner,
         z_rotation={-90,0,0},
-        y=TILE_H,
+        y=TILE_H+2,
+        x=-2
     }
     local br_corner = Clone{
         source=imgs.box_foc_corner,
         z_rotation={180,0,0},
-        y=TILE_H,
-        x=screen_w-RIGHT_PANE_X
+        y=TILE_H+2,
+        x=screen_w-RIGHT_PANE_X+2
     }
     right_focus:add(tl_corner,top,tr_corner,left,right,btm,bl_corner,br_corner)
     --[[
