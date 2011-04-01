@@ -94,7 +94,7 @@ local function build_ui( show_it )
                 button  = assets( "assets/button-green.png" ),
                 text    = Text  { text = strings[ "Showcase" ] }:set( BUTTON_TEXT_STYLE ),
                 color   = {   5 ,  72 ,  18 , 230 }, -- GREEN
-                height  = 820,
+                height  = 890,
                 init    = dofile( "section-showcase" )
             },
             
@@ -308,7 +308,7 @@ local function build_ui( show_it )
                 function()
                     section.dropdown:hide()
                     if callback then
-                        callback( section )
+                        dolater( callback , section )
                     end
                 end
         }
