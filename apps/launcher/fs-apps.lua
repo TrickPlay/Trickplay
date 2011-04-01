@@ -70,7 +70,7 @@ function( ui , app_list , statistics )
             if i == 1 then
                 TILE_W = tile.w
                 TILE_H = tile.h
-                V_SPACE = ( group.h - ( TILE_H * 4 ) ) / 5
+                V_SPACE = ( group.h - ( TILE_H * 3 ) ) / 4
                 tile_x = LEFT_MARGIN
                 tile_y = V_SPACE
             end
@@ -86,7 +86,7 @@ function( ui , app_list , statistics )
 
             row = row + 1
             
-            if row > 4 then
+            if row > 3 then
             
                 tile_x = tile_x + TILE_W + V_SPACE
                 tile_y = V_SPACE
