@@ -18,6 +18,7 @@ local TILE_W = screen_w-RIGHT_PANE_X
 local bottom_i = 1
 local right_i  = 1
 local left_is_playing = false
+local right_is_playing = false
 local umbrella = Group{}
 
 --local left_img = Image{src="assets/main-2011-image.png"}
@@ -37,17 +38,33 @@ local left_videos = {
     "videos/front_page_left_pane/5.mp4",
 }
 local right_tiles = {
-    Image{src="assets/tile-main-womens1.png" , x=RIGHT_PANE_X,y=TILE_H*0},
+    Image{src="assets/tile-main-womens1.png", x=RIGHT_PANE_X,y=TILE_H*0},
     Image{src="assets/tile-main-mens1.png"  , x=RIGHT_PANE_X,y=TILE_H*1},
     Image{src="assets/tile-main-beauty1.png", x=RIGHT_PANE_X,y=TILE_H*2},
     Image{src="assets/tile-main-biker1a.png", x=RIGHT_PANE_X,y=TILE_H*3},
 }
+local right_blurs = {
+    Image{src="assets/tile-main-womens2.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*0},
+    Image{src="assets/tile-main-mens2.png"  , opacity=0, x=RIGHT_PANE_X,y=TILE_H*1},
+    Image{src="assets/tile-main-beauty2.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*2},
+    Image{src="assets/tile-main-biker1b.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*3},
+}
+local right_text = {
+    Image{src="assets/342x310-text-womens.png", x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*0+TILE_H*3/4},
+    Image{src="assets/342x310-text-mens.png"  , x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*1+TILE_H*3/4},
+    Image{src="assets/342x310-text-beauty.png", x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*2+TILE_H*3/4},
+    Image{src="assets/342x150-text-biker.png",  x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*3+TILE_H*1/4},
+}
+for i = 1, #right_text do
+    right_text[i].anchor_point={right_text[i].w/2,right_text[i].h/2}
+end
 local right_videos = {
     "videos/front_page_right_col/1.mp4",
     "videos/front_page_right_col/2.mp4",
     "videos/front_page_right_col/3.mp4",
     "videos/front_page_right_col/4.mp4",
 }
+local title = Image{src="assets/main-txt-2011.png",x=TITLE_X,y=TITLE_Y}
 local right_focus = Group{x=RIGHT_PANE_X,opacity=0}
 local bottom_buttons_base = {
 --[[
@@ -228,9 +245,11 @@ end
 umbrella:add(unpack(left_panes))
 umbrella:add(title_s,title,sub_title)
 umbrella:add(unpack(right_tiles))
+umbrella:add(unpack(right_blurs))
+umbrella:add(unpack(right_text))
 umbrella:add(unpack(bottom_buttons_base))
 umbrella:add(unpack(bottom_buttons_foci))
-umbrella:add(right_focus,overlay)
+umbrella:add(right_focus,overlay,title)
 front_page = {
     group = umbrella,
     func_tbls = {
@@ -244,7 +263,7 @@ front_page = {
             ["category_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
-                    this_obj.group.opacity=255*p
+                    --this_obj.group.opacity=255*p
                     if p == 1 then
                         restore_keys()
                     end
@@ -261,7 +280,8 @@ front_page = {
             ["category_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
-                    this_obj.group.opacity=255*(1-p)
+                    --this_obj.group.opacity=255*(1-p)
+                    
                 end
             }
         },
@@ -293,11 +313,16 @@ front_page = {
                 right_tiles[this_func_tbl.curr_tile].opacity=255*p
                 --right_focus.y=TILE_H*(this_func_tbl.curr_tile-1) +(this_func_tbl.next_tile-this_func_tbl.curr_tile)*TILE_H*p
                 right_focus.opacity=255*(1-p)
+                if not right_is_playing then
+                    right_blurs[this_func_tbl.curr_tile].opacity=255*(1-p)
+                end
                 if p == 1 then
                     --mediaplayer:load()
                     right_focus.y = TILE_H*(this_func_tbl.next_tile-1)
                     this_obj.func_tbls.play_next_tile.next_tile = this_func_tbl.next_tile
-                    
+                    mediaplayer:seek(0)
+                    mediaplayer:play()
+                    right_is_playing = true
                     --[[
                     mediaplayer.on_loaded = function()
                         mediaplayer:set_viewport_geometry(
@@ -329,6 +354,13 @@ front_page = {
                 if p == 1 then
                     restore_keys()
                 end
+            end
+        },
+        fade_in_blur = {
+            next_tile = 2,
+            duration  = 300,
+            func = function(this_obj,this_func_tbl,secs,p)
+                right_blurs[this_func_tbl.next_tile].opacity=255*(p)
             end
         },
         focus_tile_from_buttons = {
@@ -368,6 +400,7 @@ front_page = {
                     --mediaplayer:load()
                     this_obj.func_tbls.focus_in_button.index = 3
                     restore_keys()
+                    
                 end
             end
         },
@@ -467,6 +500,9 @@ front_page = {
             if bottom_i == 2 then return end
             --if bottom_i == 4 then return end
             lose_keys()
+            mediaplayer:seek(0)
+                    mediaplayer:play()
+                    right_is_playing = true
             --if bottom_i == 3 then
                 
                 self.func_tbls.focus_tile_from_buttons.index = right_i
@@ -496,10 +532,13 @@ front_page = {
                 self.func_tbls.slide_new_pane_right.index=left_i
                 animate_list[self.func_tbls.slide_new_pane_right] = self
                 --]]
-                if left_is_playing then
-                    animate_list[self.func_tbls.fade_in_left_pane] = self
-                else
+                if not left_is_playing then
+                    
                     animate_list[self.func_tbls.fade_out_left_pane] = self
+                    mediaplayer:seek(0)
+                    mediaplayer:play()
+                else
+                    animate_list[self.func_tbls.fade_in_left_pane] = self
                 end
                 
                 left_is_playing = not left_is_playing
@@ -539,3 +578,17 @@ front_page = {
         end,
     }
 }
+mediaplayer.on_loaded = function()
+    mediaplayer:set_viewport_geometry(0,0,screen_w*screen.scale[1],screen_h*screen.scale[2])
+end
+mediaplayer.on_end_of_stream = function()
+    if left_is_playing then
+        left_is_playing = false
+        animate_list[front_page.func_tbls.fade_in_left_pane] = front_page
+    elseif right_is_playing and bottom_i == 2 then
+        front_page.func_tbls.fade_in_blur.next_tile=right_i
+        animate_list[front_page.func_tbls.fade_in_blur] = front_page
+        right_is_playing=false
+    end
+end
+mediaplayer:load("videos/Burberry 1080p.mp4")

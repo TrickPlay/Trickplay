@@ -21,9 +21,10 @@ dofile("CategoryPage.lua")
 dofile("ProductPage.lua")
 
 screen:add(
+	front_page.group,
 	category_page.group,
 	--collection_page.group,
-	front_page.group,
+	
 	product_page.group
 )
 
