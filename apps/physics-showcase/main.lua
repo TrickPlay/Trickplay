@@ -13,6 +13,18 @@ local focus = Rectangle
     h = lottery.h + 40,
 }
 
+local function dummy() end
+
+balloon.extra.blur = dummy
+balloon.extra.unblur = dummy
+balloon.extra.saturate = dummy
+balloon.extra.desaturate = dummy
+
+lottery.extra.blur = dummy
+lottery.extra.unblur = dummy
+lottery.extra.saturate = dummy
+lottery.extra.desaturate = dummy
+
 screen:add( focus , lottery , balloon )
 
 local function set_focus( s )
