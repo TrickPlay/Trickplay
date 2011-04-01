@@ -18,7 +18,7 @@ imgs = {
 		--]]
 	}
 }
-
+--[[
 local clone_sources_group = Group{name="clone sources"}
 local clone_sources_table = {}
 
@@ -86,3 +86,4 @@ Clone = function(t)
 
 	return t
 end
+--]]

@@ -24,11 +24,11 @@ local umbrella = Group{}
 --local left_img = Image{src="assets/main-2011-image.png"}
 local left_i = 1
 local left_panes = {
-    Image{src="assets/main-2011-image.jpg",  scale={2,2},},--[[
-    Image{src="assets/main-beauty-image.jpg",scale={2,2},x=screen_w},
-    Image{src="assets/main-biker-image.jpg", scale={2,2},x=screen_w},
-    Image{src="assets/main-mens-image.jpg",  scale={2,2},x=screen_w},
-    Image{src="assets/main-womens-image.jpg",scale={2,2},x=screen_w},--]]
+    Assets:Clone{src="assets/main-2011-image.jpg",  scale={2,2},},--[[
+    Assets:Clone{src="assets/main-beauty-image.jpg",scale={2,2},x=screen_w},
+    Assets:Clone{src="assets/main-biker-image.jpg", scale={2,2},x=screen_w},
+    Assets:Clone{src="assets/main-mens-image.jpg",  scale={2,2},x=screen_w},
+    Assets:Clone{src="assets/main-womens-image.jpg",scale={2,2},x=screen_w},--]]
 }
 local left_videos = {
     "videos/front_page_left_pane/1.mp4",
@@ -38,22 +38,22 @@ local left_videos = {
     "videos/front_page_left_pane/5.mp4",
 }
 local right_tiles = {
-    Image{src="assets/tile-main-womens1.png", x=RIGHT_PANE_X,y=TILE_H*0},
-    Image{src="assets/tile-main-mens1.png"  , x=RIGHT_PANE_X,y=TILE_H*1},
-    Image{src="assets/tile-main-beauty1.png", x=RIGHT_PANE_X,y=TILE_H*2},
-    Image{src="assets/tile-main-biker1a.png", x=RIGHT_PANE_X,y=TILE_H*3},
+    Assets:Clone{src="assets/tile-main-womens1.png", x=RIGHT_PANE_X,y=TILE_H*0},
+    Assets:Clone{src="assets/tile-main-mens1.png"  , x=RIGHT_PANE_X,y=TILE_H*1},
+    Assets:Clone{src="assets/tile-main-beauty1.png", x=RIGHT_PANE_X,y=TILE_H*2},
+    Assets:Clone{src="assets/tile-main-biker1a.png", x=RIGHT_PANE_X,y=TILE_H*3},
 }
 local right_blurs = {
-    Image{src="assets/tile-main-womens2.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*0},
-    Image{src="assets/tile-main-mens2.png"  , opacity=0, x=RIGHT_PANE_X,y=TILE_H*1},
-    Image{src="assets/tile-main-beauty2.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*2},
-    Image{src="assets/tile-main-biker1b.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*3},
+    Assets:Clone{src="assets/tile-main-womens2.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*0},
+    Assets:Clone{src="assets/tile-main-mens2.png"  , opacity=0, x=RIGHT_PANE_X,y=TILE_H*1},
+    Assets:Clone{src="assets/tile-main-beauty2.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*2},
+    Assets:Clone{src="assets/tile-main-biker1b.png", opacity=0, x=RIGHT_PANE_X,y=TILE_H*3},
 }
 local right_text = {
-    Image{src="assets/342x310-text-womens.png", x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*0+TILE_H*3/4},
-    Image{src="assets/342x310-text-mens.png"  , x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*1+TILE_H*3/4},
-    Image{src="assets/342x310-text-beauty.png", x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*2+TILE_H*3/4},
-    Image{src="assets/342x150-text-biker.png",  x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*3+TILE_H*1/4},
+    Assets:Clone{src="assets/342x310-text-womens.png", x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*0+TILE_H*3/4},
+    Assets:Clone{src="assets/342x310-text-mens.png"  , x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*1+TILE_H*3/4},
+    Assets:Clone{src="assets/342x310-text-beauty.png", x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*2+TILE_H*3/4},
+    Assets:Clone{src="assets/342x150-text-biker.png",  x=RIGHT_PANE_X+TILE_W/2,y=TILE_H*3+TILE_H*1/4},
 }
 for i = 1, #right_text do
     right_text[i].anchor_point={right_text[i].w/2,right_text[i].h/2}
@@ -64,7 +64,7 @@ local right_videos = {
     "videos/front_page_right_col/3.mp4",
     "videos/front_page_right_col/4.mp4",
 }
-local title = Image{src="assets/main-txt-2011.png",x=TITLE_X,y=TITLE_Y}
+local title = Assets:Clone{src="assets/main-txt-2011.png",x=TITLE_X,y=TITLE_Y}
 local right_focus = Group{x=RIGHT_PANE_X,opacity=0}
 local bottom_buttons_base = {
 --[[
@@ -81,8 +81,7 @@ local bottom_buttons_base = {
         --opacity = 255*.4,
     },
     --]]
-    Image{src="assets/btn-playvideo-off.png",opacity=0,x = VIEW_COL_X,
-        y = VIEW_COL_Y,},
+    Assets:Clone{src="assets/btn-playvideo-off.png",opacity=0,x = VIEW_COL_X, y = VIEW_COL_Y,},
     --[[
     Group{
         x = NEXT_X,
@@ -104,8 +103,7 @@ local bottom_buttons_foci = {
         y = VIEW_COL_Y-11,
         --opacity = 0,
     },--]]
-    Image{src="assets/btn-playvideo-on.png",x = VIEW_COL_X,
-        y = VIEW_COL_Y,},
+    Assets:Clone{src="assets/btn-playvideo-on.png",x = VIEW_COL_X, y = VIEW_COL_Y,},
     --[[
     Group{
         x = NEXT_X-10,
@@ -122,53 +120,52 @@ local overlay = Rectangle{
     color="000000"
 }
 do
-    
-    local tl_corner = Clone{source=imgs.box_foc_corner,x=-2,y=-2}
-    local top  = Clone{
-        source=imgs.box_foc_side,
+    local tl_corner = Assets:Clone{src=imgs.box_foc_corner,x=-2,y=-2}
+    local top  = Assets:Clone{
+        src=imgs.box_foc_side,
         x=tl_corner.w-2,
         y=-2,
         w=screen_w-RIGHT_PANE_X-2*tl_corner.w+4,
         tiles
     }
-    local tr_corner = Clone{
-        source=imgs.box_foc_corner,
+    local tr_corner = Assets:Clone{
+        src=imgs.box_foc_corner,
         z_rotation={90,0,0},
         x=screen_w-RIGHT_PANE_X+2,
         y=-2
     }
-    local left = Clone{
-        source=imgs.box_foc_side,
+    local left = Assets:Clone{
+        src=imgs.box_foc_side,
         z_rotation={-90,0,0},
         w=TILE_H-2*tl_corner.w+4,
         y=TILE_H-tl_corner.w+2,
         x=-2,
         tiles
     }
-    local right = Clone{
-        source=imgs.box_foc_side,
+    local right = Assets:Clone{
+        src=imgs.box_foc_side,
         z_rotation={90,0,0},
         w=TILE_H-2*tl_corner.w+4,
         x=screen_w-RIGHT_PANE_X+2,
         y=tl_corner.w-2,
         tiles
     }
-    local btm  = Clone{
-        source=imgs.box_foc_side,
+    local btm  = Assets:Clone{
+        src=imgs.box_foc_side,
         z_rotation={180,0,0},
         x=screen_w-RIGHT_PANE_X-tl_corner.w+2,
         y=TILE_H+2,
         w=screen_w-RIGHT_PANE_X-2*tl_corner.w+4,
         tiles
     }
-    local bl_corner = Clone{
-        source=imgs.box_foc_corner,
+    local bl_corner = Assets:Clone{
+        src=imgs.box_foc_corner,
         z_rotation={-90,0,0},
         y=TILE_H+2,
         x=-2
     }
-    local br_corner = Clone{
-        source=imgs.box_foc_corner,
+    local br_corner = Assets:Clone{
+        src=imgs.box_foc_corner,
         z_rotation={180,0,0},
         y=TILE_H+2,
         x=screen_w-RIGHT_PANE_X+2

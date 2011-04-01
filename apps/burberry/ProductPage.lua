@@ -7,10 +7,10 @@ local SHARE_Y = 883
 
 local umbrella = Group{opacity=0}
 local bottom_i = 1
-local bg = Image{src="assets/bg-product.jpg",scale={2,2}}
-local product_text = Image{src="assets/text-product.png",x=707,y=99}
+local bg = Assets:Clone{src="assets/bg-product.jpg",scale={2,2}}
+local product_text = Assets:Clone{src="assets/text-product.png",x=707,y=99}
 
-local product = Image{src="assets/product-image.png",x=100,y=280}
+local product = Assets:Clone{src="assets/product-image.png",x=100,y=280}
 product:move_anchor_point(product.w/2,product.h/2)
 
 product.func_tbls = {
@@ -34,9 +34,9 @@ local bottom_buttons_base = {
         y = PLAY_Y,
         opacity = 255*.4,
     },--]]
-    Image{src="assets/btn-back-off.png",opacity=0,x = BACK_X,y = BACK_Y,},
-    Image{src="assets/btn-playvideo-off.png",x = PLAY_X,y = PLAY_Y,},
-    Image{src="assets/btn-share-off.png",x = SHARE_X,y = SHARE_Y,},
+    Assets:Clone{src="assets/btn-back-off.png",opacity=0,x = BACK_X,y = BACK_Y,},
+    Assets:Clone{src="assets/btn-playvideo-off.png",x = PLAY_X,y = PLAY_Y,},
+    Assets:Clone{src="assets/btn-share-off.png",x = SHARE_X,y = SHARE_Y,},
 }
 local bottom_buttons_foci = {
 --[[
@@ -50,9 +50,9 @@ local bottom_buttons_foci = {
         y = PLAY_Y-11,
         opacity = 0,
     },--]]
-    Image{src="assets/btn-back-on.png",x = BACK_X,y = BACK_Y,},
-    Image{src="assets/btn-playvideo-on.png",opacity=0,x = PLAY_X,y = PLAY_Y,},
-    Image{src="assets/btn-share-on.png",opacity=0,x = SHARE_X,y = SHARE_Y,},
+    Assets:Clone{src="assets/btn-back-on.png",x = BACK_X,y = BACK_Y,},
+    Assets:Clone{src="assets/btn-playvideo-on.png",opacity=0,x = PLAY_X,y = PLAY_Y,},
+    Assets:Clone{src="assets/btn-share-on.png",opacity=0,x = SHARE_X,y = SHARE_Y,},
 }
 do
     --[[
