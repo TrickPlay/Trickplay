@@ -20,6 +20,7 @@
         self.socketManager = sockman;
         touchEventsAllowed = NO;
         clickEventsAllowed = YES;
+        swipeStarted = NO;
         swipeSent = NO;
         keySent = NO;
         activeTouches = CFDictionaryCreateMutable(NULL, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
@@ -50,6 +51,7 @@
 - (void)resetTouches {
     CFDictionaryRemoveAllValues(activeTouches);
     //[activeTouches removeAllObjects];
+    swipeStarted = NO;
     swipeSent = NO;
 	keySent = NO;
     touchedTime = 0;
@@ -101,6 +103,8 @@
         UITouch *touch = [newActiveTouches objectAtIndex:i];
         [self addTouch:touch];
         [self sendTouch:touch withCommand:@"TD"];
+        
+        startTouchPosition = [touch previousLocationInView:view];
     }
 
     //NSLog(@"multitouch = %d", view.multipleTouchEnabled);
@@ -124,66 +128,61 @@
             stillActive = NO;
         }
     }
+    
     if (![view isMultipleTouchEnabled] && touchedTime > 0 && stillActive) {
         UITouch *touch = [touches anyObject];
         if (keySent) return;
-    
-        int numSwipes = 1;
-        CGPoint startTouchPosition = [touch previousLocationInView:view];
-        CGPoint currentTouchPosition = [touch locationInView:view];
-        //Horizontal swipe
-        // To be a swipe, direction of touch must be horizontal and long enough.
-        //if (fabsf(startTouchPosition.x - currentTouchPosition.x) >= HORIZ_SWIPE_DRAG_MIN &&
-        //fabsf(startTouchPosition.y - currentTouchPosition.y) <= VERT_SWIPE_DRAG_MAX)
-        if (fabsf(startTouchPosition.x - currentTouchPosition.x) >= HORIZ_SWIPE_DRAG_MIN) {
-            if (touchedTime > 0) {
-                NSLog(@"swipe speed horiz :%f ", [NSDate timeIntervalSinceReferenceDate] - touchedTime);
-                if (touchedTime > 0) {
-                    NSLog(@"swipe speed horiz :%f ",[NSDate timeIntervalSinceReferenceDate] - touchedTime);
-                    if (([NSDate timeIntervalSinceReferenceDate]  - touchedTime) < 0.05) {
-                        //numSwipes = 3;
-                    } else if (([NSDate timeIntervalSinceReferenceDate]  - touchedTime) < 0.1) {
-                        //numSwipes = 2;
-                    }
-                }
-                // It appears to be a swipe.
-                if (startTouchPosition.x < currentTouchPosition.x) {
-                    //Send right key -  FF53
-                    NSLog(@"swipe right");
-                    [self sendKeyToTrickplay:@"FF53" thecount:numSwipes];
-                } else {
-                    //Send left key  - FF51
-                    NSLog(@"Swipe Left");
-                    [self sendKeyToTrickplay:@"FF51" thecount:numSwipes];
-                }
-                swipeSent = YES;
-            }
-        }
-        //Vertical swipe
-        //else if (fabsf(startTouchPosition.y - currentTouchPosition.y) >= HORIZ_SWIPE_DRAG_MIN &&
-        //		 fabsf(startTouchPosition.x - currentTouchPosition.x) <= VERT_SWIPE_DRAG_MAX)
-        else if (fabsf(startTouchPosition.y - currentTouchPosition.y) >= VERT_SWIPE_DRAG_MIN) {
-            if (touchedTime > 0) {
-                NSLog(@"swipe speed vertical:%f ",[NSDate timeIntervalSinceReferenceDate]  - touchedTime);
-                if (([NSDate timeIntervalSinceReferenceDate]  - touchedTime) < 0.05) {
-                        //numSwipes = 3;
-                } else if (([NSDate timeIntervalSinceReferenceDate]  - touchedTime) < 0.1) {
-                    //numSwipes = 2;
-                }
-            }
-            // It appears to be a vertical swipe.
-            if (startTouchPosition.y < currentTouchPosition.y) {
-                //Send down key -  FF54
-                NSLog(@"swipe down");
-                [self sendKeyToTrickplay:@"FF54" thecount:numSwipes];
-            } else {
-                //Send up key  - FF52
-                NSLog(@"Swipe up");
-                [self sendKeyToTrickplay:@"FF52" thecount:numSwipes];
-            }
-            swipeSent = YES;            
+        
+        if (!swipeStarted) {
+            startTouchPosition = [touch previousLocationInView:view];
+            swipeStarted = YES;
         }
     }
+}
+
+- (BOOL)doSwipe:(CGPoint)currentTouchPosition {
+    if (!swipeStarted) {
+        return NO;
+    }
+    
+    //Horizontal swipe
+    // To be a swipe, direction of touch must be horizontal and long enough.
+    if (fabsf(startTouchPosition.x - currentTouchPosition.x) >= HORIZ_SWIPE_DRAG_MIN) {
+        if (touchedTime > 0) {
+            NSLog(@"swipe speed horiz :%f ", [NSDate timeIntervalSinceReferenceDate] - touchedTime);
+            // It appears to be a swipe.
+            if (startTouchPosition.x < currentTouchPosition.x) {
+                //Send right key -  FF53
+                NSLog(@"swipe right");
+                [self sendKeyToTrickplay:@"FF53" thecount:1];
+            } else {
+                //Send left key  - FF51
+                NSLog(@"Swipe Left");
+                [self sendKeyToTrickplay:@"FF51" thecount:1];
+            }
+            swipeSent = YES;
+            
+            return YES;
+        }
+    }
+    //Vertical swipe
+    else if (fabsf(startTouchPosition.y - currentTouchPosition.y) >= VERT_SWIPE_DRAG_MIN) {
+        // It appears to be a vertical swipe.
+        if (startTouchPosition.y < currentTouchPosition.y) {
+            //Send down key -  FF54
+            NSLog(@"swipe down");
+            [self sendKeyToTrickplay:@"FF54" thecount:1];
+        } else {
+            //Send up key  - FF52
+            NSLog(@"Swipe up");
+            [self sendKeyToTrickplay:@"FF52" thecount:1];
+        }
+        swipeSent = YES;
+        
+        return YES;
+    }
+    
+    return NO;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -205,32 +204,21 @@
 	if (![view isMultipleTouchEnabled] && !swipeSent && stillActive)
 	{
 		UITouch *touch = [touches anyObject];
-        CGPoint startTouchPosition = [touch previousLocationInView:view];
         CGPoint currentTouchPosition = [touch locationInView:view];
-		//Send 'Enter' key since no swipe occured but they tapped the screen
-		//Don't do this if the start/end points are too far apart
-		if (fabsf(startTouchPosition.x - currentTouchPosition.x) <= TAP_DISTANCE_MAX &&
-			fabsf(startTouchPosition.y - currentTouchPosition.y) <= TAP_DISTANCE_MAX)
-		{
-			//Tap occured, send <ENTER> key
-			[self sendKeyToTrickplay:@"FF0D" thecount:1];
-			//Send click event if click events are enabled
-            /**  depricated!
-			if (socketManager && clickEventsAllowed)
-			{
-				NSString *sentClickData = [NSString stringWithFormat:@"CK\t%f\t%f\t%f\n", currentTouchPosition.x,currentTouchPosition.y,[NSDate timeIntervalSinceReferenceDate]];
-				[socketManager sendData:[sentClickData UTF8String] numberOfBytes:[sentClickData length]];
-			}
-            //*/
-		}
-		else
-		{
-			NSLog(@"no swipe sent, start.x,.y: (%f, %f)  current.x,.y: (%f, %f)",startTouchPosition.x, startTouchPosition.y, currentTouchPosition.x,currentTouchPosition.y);
-		}
-		
-		
+        if (![self doSwipe:currentTouchPosition]) {
+            //Send 'Enter' key since no swipe occured but they tapped the screen
+            //Don't do this if the start/end points are too far apart
+            if (fabsf(startTouchPosition.x - currentTouchPosition.x) <= TAP_DISTANCE_MAX &&
+                fabsf(startTouchPosition.y - currentTouchPosition.y) <= TAP_DISTANCE_MAX) {
+                //Tap occured, send <ENTER> key
+                [self sendKeyToTrickplay:@"FF0D" thecount:1];
+            } else {
+                NSLog(@"no swipe sent, start.x,.y: (%f, %f)  current.x,.y: (%f, %f)",startTouchPosition.x, startTouchPosition.y, currentTouchPosition.x, currentTouchPosition.y);
+            }
+        }
 	}
 
+    swipeStarted = NO;
 	swipeSent = NO;
 	keySent = NO;
     touchedTime = 0;
