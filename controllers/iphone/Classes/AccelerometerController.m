@@ -97,8 +97,6 @@
         //[[mainViewController mainView] aFunction];
         //lastTime = CFAbsoluteTimeGetCurrent();
         //}
-        
-		
     }
 	//NSLog([NSString stringWithFormat: @"acceleration (x,y): %f,%f ", accelerationX,accelerationY]);
     
