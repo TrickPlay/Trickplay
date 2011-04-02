@@ -75,6 +75,9 @@
  *  Returns true if app is running and pushes that app to the view.
  */
 - (BOOL)hasRunningApp {
+    if (![gestureViewController hasConnection]) {
+        return NO;
+    }
     NSDictionary *currentAppInfo = [self getCurrentAppInfo];
     NSLog(@"Received JSON dictionary current app data = %@", currentAppInfo);
     self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
@@ -100,7 +103,7 @@
 
 
 - (BOOL)fetchApps {
-    if (!port || !hostName) {
+    if (!port || !hostName || ![gestureViewController hasConnection]) {
         return NO;
     }
     
@@ -135,6 +138,8 @@
 
 - (void)createGestureView {
     gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
+    
+    gestureViewController.socketDelegate = self;
     
     CGFloat
     x = self.view.frame.origin.x,
@@ -172,6 +177,24 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 */
+
+#pragma mark -
+#pragma mark GestureViewControllerSocketDelegate stuff
+
+- (void)socketErrorOccurred {
+    NSLog(@"Socket Error Occurred in AppBrowser");
+    // everything will get released from the navigation controller's delegate call
+    [self.navigationController.view.layer removeAllAnimations];
+    [self.navigationController popToRootViewControllerAnimated:YES];
+}
+
+- (void)streamEndEncountered {
+    NSLog(@"Socket End Encountered in AppBrowser");
+    // everything will get released from the navigation controller's delegate call
+    [self.navigationController.view.layer removeAllAnimations];
+    [self.navigationController popToRootViewControllerAnimated:YES];
+}
+
 
 #pragma mark -
 #pragma mark Table view data source
