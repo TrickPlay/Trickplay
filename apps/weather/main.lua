@@ -138,13 +138,7 @@ dofile("Weather_Animations.lua")
 --save the queried locations
 function app:on_closing()
 	
-	local save_tbl = {}
-	local loc_i
-	for i = 1,#locations do
-		loc_i = (i+bar_i-2)%#locations+1
-		save_tbl[i] = locations[i+bar_i-1]
-	end
-	settings.locations = save_tbl
+	settings.locations = locations
 	
 end
 
