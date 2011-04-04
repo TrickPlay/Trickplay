@@ -220,6 +220,9 @@ function Make_Bar(loc,index, master)
         color = HI_TEMP_COLOR,
         text  = "Getting Weather..."
     }
+    if master then
+        mesg.text="TEST BAR"
+    end
     
     --Color Buttons
     local green_button_mini = Clone{
@@ -387,15 +390,7 @@ function Make_Bar(loc,index, master)
             --lo_temp.text = fday.low.fahrenheit.. DEG
             bar.curr_condition = fcast_tbl.forecast.simpleforecast.forecastday[1].conditions
             
-            if bar_i == bar_index then
-                time_of_day = bar.local_time_of_day
-                print(bar.curr_condition)
-                conditions[bar.curr_condition]()
-                
-                if blurb_txt.has_clip and full_bar.opacity ~= 0 and blurb_txt.opacity ~= 0 then
-                    animate_list[bar.func_tbls.blurb] = bar
-                end
-            end
+            
             
             --[[
             flare_l:animate{
@@ -428,6 +423,16 @@ function Make_Bar(loc,index, master)
             end
             green_button_mini.x = MINI_BAR_X+mini_width -83
             arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
+            
+            if bar_i == bar_index then
+                time_of_day = bar.local_time_of_day
+                print(bar.curr_condition)
+                conditions[bar.curr_condition]()
+                
+                if blurb_txt.has_clip and full_bar.opacity ~= 0 and blurb_txt.opacity ~= 0 then
+                    animate_list[bar.func_tbls.blurb] = bar
+                end
+            end
             
             animate_list[bar.func_tbls.loading_sun_fade_out] = bar
         end
