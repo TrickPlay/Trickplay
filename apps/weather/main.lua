@@ -118,7 +118,7 @@ m_grad.y        = screen_h-m_grad.h
 
 
 --load saved settings, or default to Palo Alto,CA
-locations = settings.locations or {94019,94022,}
+locations = settings.locations or {"94019","94022",}
 dumptable(locations)
 bar_i = 1
 view_5_day=false
@@ -149,7 +149,11 @@ mini=true
 --make the weather bars for each location
 for i,location in pairs(locations) do
 	
-	table.insert(bars,Make_Bar(location,i))
+	if location == "00000" then
+		table.insert(bars,Make_Bar(location,i,true))
+	else
+		table.insert(bars,Make_Bar(location,i))
+	end
 	
 end
 
