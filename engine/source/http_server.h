@@ -24,6 +24,10 @@ public:
 		virtual StringMap get_parameters( ) const = 0;
 		virtual StringList get_parameter_names( ) const = 0;
 		virtual String get_parameter( const String& name ) const = 0;
+		virtual int get_body_size( ) const = 0;
+		virtual const char * get_body_data( ) const = 0;
+		virtual String get_content_type( ) const = 0;
+		virtual unsigned int get_content_length( ) const = 0;
 
 	};
 
@@ -31,8 +35,10 @@ public:
 	{
 	public:
 		virtual void set_header( const String& name, const String& value ) = 0;
-	    virtual void close( ) = 0;
-	    virtual bool write( const char * data , gssize size ) = 0;
+	    virtual void set_response( const String& mime_type, const char * data, unsigned int size ) = 0;
+	    virtual void setStatus( int sc ) = 0;
+	    virtual void sendError( int sc ) = 0;
+	    virtual void sendError( int sc, const String& msg ) = 0;
 	};
 
 	class RequestHandler
@@ -45,7 +51,7 @@ public:
         virtual void do_head(  const Request& request, Response& response ) {}
     };
 
-    HttpServer( guint16 port );
+    HttpServer( guint16 port = 0 );
 
     ~HttpServer();
 
@@ -56,7 +62,7 @@ public:
     guint16 get_port() const;
 
 private:
-    void service_request( SoupMessage *msg, const char * path, GHashTable *query, SoupClientContext *client );
+    void service_request( SoupMessage *msg, const char* registered_path, const char * requested_path, GHashTable *query, SoupClientContext *client );
     Request* make_request( SoupMessage *msg, const char * path, GHashTable *query, SoupClientContext *client );
     Response* make_response( SoupMessage *msg, const char * path, GHashTable *query, SoupClientContext *client );
 
