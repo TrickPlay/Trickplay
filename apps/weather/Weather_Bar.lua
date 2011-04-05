@@ -418,8 +418,8 @@ function Make_Bar(loc,index, master)
             bar:add(make_curr_temps(pws_tbl,f_tbl,mini_width))
             if mini then
                 --bar:find_child("mid").scale = {mini_width,1}
-                bar:find_child("mid").w = mini_width
-                bar:find_child("right").x   = bar_side_w + mini_width
+                bar:find_child("mid").w   = mini_width
+                bar:find_child("right").x = bar_side_w + mini_width
             end
             green_button_mini.x = MINI_BAR_X+mini_width -83
             arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
@@ -792,6 +792,15 @@ function Make_Bar(loc,index, master)
                 conditions[bar.curr_condition]()
                 mesg.text = bar.curr_condition..", USA"
                 animate_list[bar.func_tbls.wait_500]=bar
+                
+                mini_width = mesg.w + mesg.x - MINI_BAR_X + 100
+                if mini then
+                    --bar:find_child("mid").scale = {mini_width,1}
+                    bar:find_child("mid").w   = mini_width
+                    bar:find_child("right").x = bar_side_w + mini_width
+                    green_button_mini.x = MINI_BAR_X+mini_width -83
+                    arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
+                end
             end
             
         end,
@@ -1059,6 +1068,7 @@ function Make_Bar(loc,index, master)
                     right_faux_bar.x = bar_dist
                     next_i = #bars
                     bar_i  = #bars
+                    bars[#bars].curr_condition="Sunny"
                     animate_list[bar.func_tbls.full_move_right] = bar
                 end
                 
