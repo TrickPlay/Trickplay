@@ -37,7 +37,6 @@
                    		   ["drop_down_color"]={255,0,0},
                    		   ["scroll_arrow"] = nil,
 				  },
- 
 		  }
 
 
@@ -4022,10 +4021,13 @@ button
         menu_text_color    = {255,255,255,255}, -- not needed 
 
         background_color     = {255,0,0,255},
+        
         menu_width   = 250,       -- bg_w 
         horz_padding  = 10, -- padding 
         seperator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
+        
+        show_ring     = true,
         
         
         skin          = "default",
@@ -4137,6 +4139,18 @@ button
                 p.items[index+1] = swp
                 
                 create()
+            end,
+            replace_item = function(index,item)
+                assert(type(item)=="table","invalid item")
+                assert(index > 0 and index <= #p.items, "invalid index")
+                
+                p.items[index] = item
+                create()
+            end,
+            index_from_y = function(y)
+                y = y - umbrella.transformed_position[2]-p.vert_offset
+                
+                
             end,
             spin_in = function()
                 dropDownMenu:complete_animation()
@@ -4298,16 +4312,29 @@ button
                 dropDownMenu:add(
                     txt
                 )
-                ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
+                if item.bg then
+                    ui_ele = item.bg
+                    ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                    ui_ele.position     = {  0, txt.y }
+                    dropDownMenu:add(ui_ele)
+                elseif show_ring then
+                    ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
+                    ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                    ui_ele.position     = {  0, txt.y }
+                    dropDownMenu:add(ui_ele)
+                else
+                    
+                end
                 
-                ui_ele.anchor_point = { 0,     ui_ele.h/2 }
-                ui_ele.position     = {  p.horz_spacing, txt.y }
-                dropDownMenu:add(ui_ele)
                 
                 
                 
-                ui_ele = assets(skin_list[p.skin]["button_focus"])
-                ui_ele.size = {p.bg_w,txt_h+15}
+                if item.focus then
+                    ui_ele = item.focus
+                else
+                    ui_ele = assets(skin_list[p.skin]["button_focus"])
+                    ui_ele.size = {p.bg_w,txt_h+15}
+                end
                 
                 
                 ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
@@ -4316,7 +4343,12 @@ button
                 dropDownMenu:add(ui_ele)
                 table.insert(selectable_items,ui_ele)
                 
-                curr_y = curr_y + txt.h + p.vert_spacing
+                txt:raise_to_top()
+                if item.bg then
+                    curr_y = curr_y + item.bg.h + p.vert_spacing
+                else
+                    curr_y = curr_y + txt.h
+                end
             elseif item.type == "label" then
                 txt = Text{
                         text  = item.string,
@@ -4328,31 +4360,50 @@ button
                 dropDownMenu:add(
                     txt
                 )
-                curr_y = curr_y + txt.h + p.vert_spacing
+                if item.bg then
+                    ui_ele = item.bg
+                    
+                    --ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                    ui_ele.position     = {  0, txt.y }
+                    dropDownMenu:add(ui_ele)
+                    
+                    txt:raise_to_top()
+                    curr_y = curr_y + ui_ele.h + p.vert_spacing
+                else
+                    curr_y = curr_y + txt.h + p.vert_spacing
+                end
+                
+                
             else
                 print("Invalid type in the item list. Type: ",item.type)
             end
         end
         
         
-        
-        ui_ele = ui.factory.make_dropdown(
-            { p.menu_width , curr_y } ,
-            p.background_color
-        )
-        
-        dropDownMenu:add(ui_ele)
-        ui_ele:lower_to_bottom()
-        
-        dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        if p.expansion_location == "above" then
-            ui_ele.x_rotation={180,0,0}
-            ui_ele.y = ui_ele.h+p.vert_offset
-            dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.vert_offset}
+        if p.background_color[4] ~= 0 then
+            ui_ele = ui.factory.make_dropdown(
+                { p.menu_width , curr_y } ,
+                p.background_color
+            )
+            
+            dropDownMenu:add(ui_ele)
+            ui_ele:lower_to_bottom()
+            
+            dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
+            if p.expansion_location == "above" then
+                ui_ele.x_rotation={180,0,0}
+                ui_ele.y = ui_ele.h+p.vert_offset
+                dropDownMenu.position     = {ui_ele.w/2,-ui_ele.h/2-p.vert_offset}
+            else
+                dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
+            end
         else
-            dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
+            if p.expansion_location == "above" then
+                dropDownMenu.position     = {p.menu_width/2,-curr_y/2-p.vert_offset}
+            else
+                dropDownMenu.position     = {p.menu_width/2,curr_y/2}
+            end
         end
-        
         button.reactive=true
        
 	 if editor_lb == nil then  
