@@ -4385,8 +4385,8 @@ button
                 end
                 
                 ui_ele.name="focus"
-                ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                ui_ele.position     = {   (p.menu_width-2*p.horz_spacing)/2, txt.y }
+                ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                ui_ele.position     = {   0, txt.y }
                 ui_ele.opacity      = 0
                 dropDownMenu:add(ui_ele)
                 table.insert(selectable_items,ui_ele)
