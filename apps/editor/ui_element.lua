@@ -1,9 +1,10 @@
      local ui_element = {}
      skin_list = { ["default"] = {
 				   ["button"] = "assets/smallbutton.png", 
-				   ["button_focus"] = "assets/smallbuttonfocus.png", 
+				   ["button_focus"] = "assets/button1-focus.png", 
+				   --["button_focus"] = "assets/smallbuttonfocus.png", 
 			           ["buttonpicker"] = "assets/smallbutton.png",
-     				   ["buttonpicker_focus"] = "assets/smallbuttonfocus.png",
+     				   ["buttonpicker_focus"] = "assets/button1-focus.png",
 				   ["buttonpicker_left_un"] = "assets/left.png",
 				   ["buttonpciker_left_sel"] = "assets/leftfocus.png",
 				   ["buttonpicker_right_un"] = "assets/right.png",
@@ -1185,6 +1186,8 @@ function ui_element.button(table)
     	border_corner_radius = 12,
 	pressed = nil, 
 	released = nil, 
+	button_image = nil,
+	focus_image  = nil,
 
     }
 
@@ -1207,7 +1210,7 @@ function ui_element.button(table)
         extra = {type = "Button"}
     } 
     
-    function b_group.extra.on_focus_in() 
+    function b_group.extra.on_focus_in(key) 
 	current_focus = b_group
         if (p.skin == "custom") then 
 	     ring.opacity = 0
@@ -1218,8 +1221,12 @@ function ui_element.button(table)
         end 
         b_group:find_child("text").color = p.focus_text_color
 	
-	if p.pressed then 
+	if key then 
+		print("key")
+	    if p.pressed and key == keys.Return then
+		print("key.Return")
 		p.pressed()
+	    end 
 	end 
 
 	b_group:grab_key_focus(b_group)
@@ -1243,11 +1250,6 @@ function ui_element.button(table)
     end
 
     local create_button = function() 
-
-	if(p.skin ~= "custom") then 
-		p.button_image = assets(skin_list[p.skin]["button"])
-		p.focus_image  = assets(skin_list[p.skin]["button_focus"])
-	end
         b_group:clear()
         b_group.size = { p.ui_width , p.ui_height}
         ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
@@ -1256,7 +1258,12 @@ function ui_element.button(table)
         focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
-	if(p.skin ~= "custom") then 
+	if(p.skin == "editor") then 
+		button= assets("assets/menu-item.png")
+                button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
+		focus= assets("assets/menu-item-focus.png")
+                focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+	elseif(p.skin ~= "custom") then 
             button = assets(skin_list[p.skin]["button"])
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
             focus = assets(skin_list[p.skin]["button_focus"])
@@ -1278,7 +1285,7 @@ function ui_element.button(table)
 		if current_focus then 
 		     current_focus.on_focus_out()
 		end
-		b_group.extra.on_focus_in()
+		b_group.extra.on_focus_in(keys.Return)
 		return true
 	     end 
 	end 
@@ -1890,7 +1897,6 @@ function ui_element.buttonPicker(table)
 	rotate_func = nil, 
         selected_item = 1, 
     }
---qqq
 
  --overwrite defaults
      if table ~= nil then 
@@ -1996,6 +2002,49 @@ function ui_element.buttonPicker(table)
         else ring.opacity = 0 end 
 
         t = nil
+
+	if editor_lb == nil then 
+
+	local unfocus, left_arrow, right_arrow 
+	unfocus = bp_group:find_child("unfocus")
+	unfocus.reactive = true
+	function unfocus:on_button_down (x,y,b,n)
+		if current_focus then
+   		current_focus.extra.on_focus_out()
+	        current_focus = group
+		end 
+		bp_group.on_focus_in()
+	        bp_group:grab_key_focus()
+		return true
+	end 
+
+        left_arrow = bp_group:find_child("left_un")
+	left_arrow.reactive = true 
+	function left_arrow:on_button_down(x, y, b, n)
+		if current_focus then
+		current_focus.extra.on_focus_out()
+	        current_focus = group
+		end
+		bp_group.on_focus_in()
+	        bp_group:grab_key_focus()
+		bp_group.press_left()
+		return true 
+	end 
+
+	right_arrow = bp_group:find_child("right_un")
+	right_arrow.reactive = true 
+	function right_arrow:on_button_down(x, y, b, n)
+		if current_focus then
+		current_focus.extra.on_focus_out()
+	        current_focus = group
+		end
+		bp_group.on_focus_in()
+	        bp_group:grab_key_focus()
+		bp_group.press_right()
+		return true 
+	end 
+
+	end 
      end 
  
      create_buttonPicker()
@@ -3999,10 +4048,10 @@ button
 
     	label = "Menu Button", 
 	focus_text_color =  {255,255,255,255},   
-    	focus_color = {27,145,27,255}, --"1b911b", 
+    	focus_color = {27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,0}, --"1b911b", 
     	border_color = {255,255,255,255}, --"FFFFFF"
-    	fill_color = {255,255,255,0}, --"FFFFFF"
+    	fill_color = {255,255,255,0},     --"FFFFFF"
     	border_width = 1,
     	border_corner_radius = 12,
 
@@ -4028,7 +4077,7 @@ button
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         
         
-        skin          = "default",
+        skin = "default",
     }
     --overwrite defaults
     if t ~= nil then
@@ -4523,8 +4572,8 @@ function ui_element.menuBar(t)
         
         umbrella:add(si)
         si.seek_to(0,0)
-        si.visible_w       = p.clip_w
-        si.skin         = p.skin
+        si.visible_w = p.clip_w
+        si.skin      = p.skin
         --si.hor_arrows_y = p.arrow_y --kkkk
         index = 0
         
