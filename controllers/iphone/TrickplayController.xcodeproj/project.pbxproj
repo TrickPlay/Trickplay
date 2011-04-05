@@ -21,6 +21,7 @@
 		44AE7A57133C20F0000D7EE2 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A56133C20F0000D7EE2 /* Default@2x.png */; };
 		44AE7A59133C210D000D7EE2 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
+		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
 		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
 		CDFEBB6C130A498600A14307 /* MainWindow-iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */; };
@@ -62,6 +63,7 @@
 		44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TrickplayController-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayController-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
+		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPhone.xib"; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
@@ -134,6 +137,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				CDF509C813469721009870EC /* QuartzCore.framework */,
 				CDFEBB6D130A498C00A14307 /* iPad */,
 				CDFEBB5E130A498600A14307 /* iPhone */,
 				080E96DDFE201D6D7F000001 /* Classes */,

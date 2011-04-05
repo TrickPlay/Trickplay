@@ -11,7 +11,7 @@
 #import "GestureViewController.h"
 
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
-UITableViewDataSource> {
+UITableViewDataSource, GestureViewControllerSocketDelegate> {
     NSString *hostName;
     NSInteger port;
     
@@ -49,5 +49,8 @@ UITableViewDataSource> {
             thetitle:(NSString *)n;
 - (BOOL)hasRunningApp;
 - (void)pushApp;
+
+- (void)socketErrorOccurred;
+- (void)streamEndEncountered;
 
 @end

@@ -15,6 +15,7 @@
 @synthesize backgroundView;
 @synthesize touchDelegate;
 @synthesize accelDelegate;
+@synthesize socketDelegate;
 
 - (void)setupService:(NSInteger)p
             hostname:(NSString *)h
@@ -37,7 +38,7 @@
     
     if (!socketManager) {
         // If null then error connecting, back up to selecting services view
-        [self.navigationController popViewControllerAnimated:YES];
+        [self.navigationController popToRootViewControllerAnimated:YES];
         NSLog(@"Could Not Establish Connection");
         return NO;
     }
@@ -62,16 +63,34 @@
     return YES;
 }
 
+- (BOOL)hasConnection {
+    return socketManager != nil;
+}
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred");
+    [socketManager release];
+    socketManager = nil;
     // everything will get released from the navigation controller's delegate call
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    if (self.navigationController.visibleViewController == self) {
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    } else {
+        [socketDelegate socketErrorOccurred];
+    }
 }
 
 - (void)streamEndEncountered {
+    NSLog(@"Socket End Encountered");
+    [socketManager release];
+    socketManager = nil;
     // everything will get released from the navigation controller's delegate call
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    if (self.navigationController.visibleViewController == self) {
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    } else {
+        [socketDelegate streamEndEncountered];
+    }
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount

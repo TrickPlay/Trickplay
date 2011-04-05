@@ -67,6 +67,9 @@
         [self.navigationController pushViewController:appBrowserViewController animated:YES];
         if ([appBrowserViewController fetchApps]) {
             [appBrowserViewController.theTableView reloadData];
+        } else {
+            [self.navigationController.view.layer removeAllAnimations];
+            [self.navigationController popToRootViewControllerAnimated:YES];
         }
     }
 }
@@ -144,9 +147,12 @@
     }
     // if popping back to app browser
     else if (viewController.view.tag == appBrowserViewController.view.tag) {
-        [appBrowserViewController fetchApps];
-        [appBrowserViewController.theTableView reloadData];
-        appBrowserViewController.pushingViewController = NO;
+        if ([appBrowserViewController fetchApps]) {
+            [appBrowserViewController.theTableView reloadData];
+            appBrowserViewController.pushingViewController = NO;
+        } else {
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
     }
     
     [self reloadData];
