@@ -151,6 +151,7 @@ for i,location in pairs(locations) do
 	
 	if location == "00000" then
 		table.insert(bars,Make_Bar(location,i,true))
+		bars[#bars].curr_condition="Sunny"
 	else
 		table.insert(bars,Make_Bar(location,i))
 	end
