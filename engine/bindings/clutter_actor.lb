@@ -1016,87 +1016,197 @@ interface actor [[ClutterActor*]]
     /*
     Function: blur
     
-    This function will apply a blur effect to the actor.  Reversible with unblur()
+    This function will apply a blur effect to the UI element.  Reversible with unblur()
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
 
-    blur()
+    bool blur()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "blur_effect");
-            clutter_actor_add_effect_with_name(self, "blur_effect", clutter_blur_effect_new());
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+
+        clutter_actor_remove_effect_by_name(self, "blur_effect");
+        clutter_actor_add_effect_with_name(self, "blur_effect", clutter_blur_effect_new());
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
-    Function: blur
+    Function: unblur
     
-    Turn off a blur effect on the actor.  The opposite of blur()
+    Turn off a blur effect on the UI element.  The opposite of blur()
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    unblur()
+
+    bool unblur()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "blur_effect");
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "blur_effect");
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
 	Function: desaturate
 	
-	How much to desaturate the actor.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+	How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+
+	Arguments:
+
+        desturation - 0 for fully saturated, 1 for fully desaturated.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    desaturate(double desaturation)
+
+    bool desaturate(double desaturation)
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "desaturation_effect");
-            clutter_actor_add_effect_with_name(self, "desaturation_effect", clutter_desaturate_effect_new( desaturation ));
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+        clutter_actor_add_effect_with_name(self, "desaturation_effect", clutter_desaturate_effect_new( desaturation ));
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
 	Function: saturate
 	
-	Restore saturation to the actor.  This undoes any call to desaturate().
+	Restore saturation to the UI element.  This undoes any call to <desaturate>.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    saturate()
+
+    bool saturate()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "desaturation_effect");
-        }
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
     Function: tint
     
-    Turn on a tint effect for the actor.
+    Turn on a tint effect for the UI element.
     
-    color - Required.  The tint color to apply to the actor
+    Arguments:
+
+        color - Required.  The tint color to apply to the UI element.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    tint(...)
+
+    bool tint(...)
     [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
         ClutterColor color;
         ClutterUtil::to_clutter_color(L,2,&color);
-        if(CLUTTER_CHECK_VERSION(1,4,0))
-        {
-            clutter_actor_remove_effect_by_name(self, "tint_effect");
-            clutter_actor_add_effect_with_name(self, "tint_effect", clutter_colorize_effect_new( &color ));
-        }
+        clutter_actor_remove_effect_by_name(self, "tint_effect");
+        clutter_actor_add_effect_with_name(self, "tint_effect", clutter_colorize_effect_new( &color ));
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
     Function: untint
     
-    Turn off any existing tint effect for the actor.
+    Turn off any existing tint effect for the UI element.
+
+    Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
     */
-    untint()
+
+    bool untint()
     [[
-        if(CLUTTER_CHECK_VERSION(1,4,0))
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "tint_effect");
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+
+    /*
+    Function: pageturn
+    
+    Apply a "page turn" effect to the UIElement.  The following aspects of the effect can be controlled:
+    
+    period - The period of the page curl, between 0.0 (flat) and 1.0 (fully curled) [defaults to 0]
+    
+    angle - The angle of the page curl, in degrees, between 0.0 and 360.0 [defaults to 45]
+    
+    radius - The radius of the page curl effect, in pixels [defaults to 1/16 width of the UIElement]
+    */
+    
+    bool pageturn(double period=0.5, double angle=45, double radius=0)
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        if(0 == radius)
         {
-            clutter_actor_remove_effect_by_name(self, "tint_effect");
+            radius = clutter_actor_get_width(self)/16;
         }
+        ClutterPageTurnEffect *effect = (ClutterPageTurnEffect *)clutter_actor_get_effect(self, "pageturn_effect");
+        if(effect)
+        {
+            clutter_page_turn_effect_set_period(effect, period);
+            clutter_page_turn_effect_set_angle(effect, angle);
+            clutter_page_turn_effect_set_radius(effect, radius);
+        } else {
+            clutter_actor_add_effect_with_name(self, "pageturn_effect", clutter_page_turn_effect_new(period,angle,radius));
+        }
+#else
+        result = false;
+#endif
+    ]];
+
+    /*
+    Function: pageflatten
+    
+    Remove any "page turn" effect on the UIElement.
+    */
+
+    bool pageflatten()
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "pageturn_effect");
+        result = true;
+#else
+        result = false;
+#endif
     ]];
 
     /*
