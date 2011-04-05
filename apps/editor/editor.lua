@@ -374,7 +374,7 @@ function editor.selected(obj, call_by_inspector)
      obj_border = Rectangle{}
      obj_border.name = obj.name.."border"
      obj_border.color = {0,0,0,0}
-     obj_border.border_color = {255,0,0,255}
+     obj_border.border_color = {0,255,0,255}
      obj_border.border_width = 2
      local group_pos
      if(obj.extra.is_in_group == true)then 
@@ -784,7 +784,9 @@ function editor.the_image(bg_image)
 	
 	local text_g
 	local input_text
+
 	function print_file_list() 
+
 	     cur_w = L_PADDING
              cur_h = TOP_PADDING + dir_text.h + Y_PADDING
 	     text_g = Group{position = {cur_w, cur_h,0}}
@@ -812,7 +814,6 @@ function editor.the_image(bg_image)
 
 	     cur_w = cur_w + L_PADDING
 	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
-	     text_g.clip = {0,0,text_g.w,500}
     	     return text_g
         end 
 	
@@ -828,7 +829,7 @@ function editor.the_image(bg_image)
         for i,j in pairs (text_g.children) do 
          function j:on_button_down(x,y,button, num_clicks)
 	      if input_text ~= nil then 
-		    input_text.color = DEFAULT_COLOR -- {255, 255, 255, 255}
+		    input_text.color = DEFAULT_COLOR   --{255, 255, 255, 255}
 	      end 
               input_text = j
 	      j.color = {0,255,0,255}
@@ -954,11 +955,11 @@ function editor.the_open()
 	     cur_h = 0 
      	     for i, v in pairs(dir) do
 	          if (is_lua_file(v) == true) then 
-			print(v)
+			--print(v)
 		
 	               text = Text {name = tostring(i), text = v}:set(STYLE)
                        text.position = {cur_w, cur_h}
-			dumptable(text.position)
+			--dumptable(text.position)
 		       text.reactive = true
     	               text_g:add(text)
 
@@ -1041,7 +1042,7 @@ function editor.the_open()
 	
 end 
 
-function editor.inspector(v, x_pos, y_pos, scroll_y_pos) 
+function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	local save_items 
 	if not scroll_y_pos then 
@@ -1440,6 +1441,8 @@ function editor.view_code(v)
 	screen:add(codeViewWin)
         create_on_button_down_f(codeViewWin)
 	input_mode = S_POPUP
+
+	si:grab_key_focus()
 
 	xbox.reactive = true
 	function xbox:on_button_down(x,y,button,num_clicks)

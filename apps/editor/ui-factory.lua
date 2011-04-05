@@ -1537,7 +1537,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			
 		     end 
 		end 	
-	elseif v.extra.type == "Button" or v.extra.type == "TextInput" or v.extra.type == "MenuButton" then
+	end
+
+	if v.extra.type == "Button" or v.extra.type == "TextInput" or v.extra.type == "MenuButton" then
 		focus_changer:find_child("textE").text = v.name 
 		focus_changer:find_child("gE").opacity = 150 
 		focus_changer:find_child("gE").reactive = false 
@@ -1893,7 +1895,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		selected = i 
 	    end
 	end
-	
+-----qqq
         local item_picker = ui_element.buttonPicker{skin = "custom", items = itemLists, text_font = "DejaVu Sans 26px", selected_item = selected}
 	item_picker.ui_height = 45
 	item_picker.ui_width = 210
@@ -2502,7 +2504,7 @@ sero = Rectangle
 		name="sero",
 		border_color={255,255,255,192},
 		border_width=0,
-		color={255,0,0,255},
+		color={0,255,0,255},
 		size = {5,30},
 		anchor_point = {0,0},
 		x_rotation={0,0,0},
@@ -2517,7 +2519,7 @@ garo = Rectangle
 		name="garo",
 		border_color={255,255,255,192},
 		border_width=0,
-		color={255,0,0,255},
+		color={0,255,0,255},
 		size = {30,5},
 		anchor_point = {0,0},
 		x_rotation={0,0,0},
