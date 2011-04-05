@@ -20,6 +20,7 @@
 		44AE7A55133C20E4000D7EE2 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A54133C20E4000D7EE2 /* Default.png */; };
 		44AE7A57133C20F0000D7EE2 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A56133C20F0000D7EE2 /* Default@2x.png */; };
 		44AE7A59133C210D000D7EE2 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */; };
+		CD404C0F134A87CF0021D36C /* AdvancedUIObjectManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
@@ -62,6 +63,8 @@
 		44AE7A56133C20F0000D7EE2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TrickplayController-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayController-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		CD404C0D134A87CF0021D36C /* AdvancedUIObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AdvancedUIObjectManager.h; sourceTree = "<group>"; };
+		CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AdvancedUIObjectManager.m; sourceTree = "<group>"; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
@@ -120,8 +123,6 @@
 				CDFEBBA1130A4B8700A14307 /* Modules */,
 				1D3623240D0F684500981E51 /* AppDelegate.h */,
 				1D3623250D0F684500981E51 /* AppDelegate.m */,
-				CDFEC15A1315929800A14307 /* AsyncImageView.h */,
-				CDFEC15B1315929800A14307 /* AsyncImageView.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -180,6 +181,17 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		CD404C09134A74CD0021D36C /* UserInterface */ = {
+			isa = PBXGroup;
+			children = (
+				CDFEC15A1315929800A14307 /* AsyncImageView.h */,
+				CDFEC15B1315929800A14307 /* AsyncImageView.m */,
+				CD404C0D134A87CF0021D36C /* AdvancedUIObjectManager.h */,
+				CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */,
+			);
+			name = UserInterface;
+			sourceTree = "<group>";
+		};
 		CDFEBB5E130A498600A14307 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
@@ -208,6 +220,7 @@
 		CDFEBBA1130A4B8700A14307 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				CD404C09134A74CD0021D36C /* UserInterface */,
 				CDFEBEBA130C704800A14307 /* UserInput */,
 				CDFEBEB9130C6F9A00A14307 /* Networking */,
 				CDFEC0FD13147E6400A14307 /* Audio */,
@@ -364,6 +377,7 @@
 				CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */,
 				CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */,
 				CDFEC3F7131F1BB200A14307 /* AppBrowserViewController.m in Sources */,
+				CD404C0F134A87CF0021D36C /* AdvancedUIObjectManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,7 +399,7 @@
 				GCC_PREFIX_HEADER = TrickplayController_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TrickplayController-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "Take Control";
 			};
@@ -404,7 +418,7 @@
 				GCC_PREFIX_HEADER = TrickplayController_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TrickplayController-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "Take Control";
 				VALIDATE_PRODUCT = YES;

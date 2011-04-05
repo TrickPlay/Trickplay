@@ -44,7 +44,7 @@
             hostname:(NSString *)h
             thetitle:(NSString *)n {
     
-    NSLog(@"Service Setup: %@ host: %@ port: %d", n, h, p);
+    NSLog(@"AppBrowser Service Setup: %@ host: %@ port: %d", n, h, p);
     
     port = p;
     if (hostName) {
@@ -58,9 +58,8 @@
 
 - (void)pushApp {
     pushingViewController = YES;
-    NSLog(@"\n\nFIRST\n\n");
+
     if (self.navigationController.visibleViewController != self) {
-        NSLog(@"\n\nSECOND\n\n");
         [self.navigationController pushViewController:self animated:NO];
     }
     
@@ -298,8 +297,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         return;
     }
     
-    
-    NSLog(@"gestureViewController %@\n", gestureViewController);
     if (!gestureViewController) {
         [self createGestureView];
     }

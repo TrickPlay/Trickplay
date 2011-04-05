@@ -16,12 +16,13 @@
 @synthesize touchDelegate;
 @synthesize accelDelegate;
 @synthesize socketDelegate;
+@synthesize advancedUIDelegate;
 
 - (void)setupService:(NSInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n {
     
-    NSLog(@"Service Setup: %@ host: %@ port: %d", n, h, p);
+    NSLog(@"GestureView Service Setup: %@ host: %@ port: %d", n, h, p);
     
     port = p;
     if (hostName) {
@@ -57,6 +58,7 @@
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view];
     
     //[loadingIndicator stopAnimating];
     
@@ -68,7 +70,7 @@
 }
 
 - (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred");
+    NSLog(@"Socket Error Occurred in GestureView");
     [socketManager release];
     socketManager = nil;
     // everything will get released from the navigation controller's delegate call
@@ -81,7 +83,7 @@
 }
 
 - (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered");
+    NSLog(@"Socket End Encountered in GestureView");
     [socketManager release];
     socketManager = nil;
     // everything will get released from the navigation controller's delegate call
@@ -223,7 +225,7 @@
 }
 
 /**
- * Updating the bacground
+ * Updating the background
  */
 - (void)do_UB:(NSArray *)args {
     NSLog(@"Updating Background");
@@ -386,6 +388,16 @@
     [touchDelegate touchesCancelled:touches withEvent:event];
 }
 
+
+//-------------------- Super Advanced UI stuff -----------------
+
+- (void)do_UX:(NSArray *)args {
+    if ([(NSString *)[args objectAtIndex:0] compare:@"CREATE"] == NSOrderedSame) {
+        [advancedUIDelegate createObject:[args objectAtIndex:1]];
+    }
+}
+
+
 //-------------------- Other View stuff ------------------------
 
 - (void)clean {
@@ -495,6 +507,9 @@
     }
     if (accelDelegate) {
         [(AccelerometerController *)accelDelegate release];
+    }
+    if (advancedUIDelegate) {
+        [(AdvancedUIObjectManager *)advancedUIDelegate release];
     }
     if (styleAlert) {
         [styleAlert release];

@@ -30,6 +30,9 @@
 - (void)do_PA:(NSArray *)args;
 - (void)do_SS:(NSArray *)args;
 
+/** Advanced UI junk **/
+- (void)do_UX:(NSArray *)args;
+
 @end
 
 @interface CommandInterpreter : NSObject {
