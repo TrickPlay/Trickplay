@@ -4089,7 +4089,6 @@ button
     end
     
     local create
-    local curr_cat = 1
     local curr_index = 0
     local selectable_items  = {}
     
@@ -4119,7 +4118,7 @@ button
         extra={
             type="MenuButton",
             focus_index = function(i)
-                if curr_cat == cat and curr_index == i then
+                if curr_index == i then
                     print("Item on Drop Down Bar is already focused")
                     return
                 end
@@ -4137,9 +4136,9 @@ button
                     selectable_items[i].opacity=0
                     selectable_items[i]:animate{
                         duration=300,
-                        opacity=255
+                        opacity=255,
+                        on_completed = function() print(selectable_items[i].name) end
                     }
-                    curr_cat = cat
                     curr_index=i
                 end
             end,
@@ -4382,12 +4381,12 @@ button
                     ui_ele = item.focus
                 else
                     ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    ui_ele.size = {p.bg_w,txt_h+15}
+                    ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
                 end
                 
-                
+                ui_ele.name="focus"
                 ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                ui_ele.position     = {   p.menu_width/2, curr_y+txt_h/2 }
+                ui_ele.position     = {   (p.menu_width-2*p.horz_spacing)/2, txt.y }
                 ui_ele.opacity      = 0
                 dropDownMenu:add(ui_ele)
                 table.insert(selectable_items,ui_ele)
@@ -4427,7 +4426,7 @@ button
                 print("Invalid type in the item list. Type: ",item.type)
             end
         end
-        
+        print(#selectable_items)
         
         if p.background_color[4] ~= 0 then
             ui_ele = ui.factory.make_dropdown(
