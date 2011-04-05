@@ -4136,7 +4136,8 @@ button
                     selectable_items[i].opacity=0
                     selectable_items[i]:animate{
                         duration=300,
-                        opacity=255
+                        opacity=255,
+                        on_completed = function() print(selectable_items[i].name) end
                     }
                     curr_index=i
                 end
@@ -4380,12 +4381,12 @@ button
                     ui_ele = item.focus
                 else
                     ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    ui_ele.size = {p.bg_w,txt_h+15}
+                    ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
                 end
                 
                 ui_ele.name="focus"
                 ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                ui_ele.position     = {   p.menu_width/2, curr_y+txt_h/2 }
+                ui_ele.position     = {   (p.menu_width-2*p.horz_spacing)/2, txt.y }
                 ui_ele.opacity      = 0
                 dropDownMenu:add(ui_ele)
                 table.insert(selectable_items,ui_ele)
