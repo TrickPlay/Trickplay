@@ -1015,7 +1015,6 @@ function itemTostring(v, d_list, t_list)
  
    local function add_attr (list, head, tail) 
        local item_string =""
-       --dumptable(list)
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
 	      if j == "position" then 
@@ -1241,12 +1240,11 @@ function itemTostring(v, d_list, t_list)
     end 
 
     if v.extra.type == "ButtonPicker" then 
-	itm_str = itm_str..v.name..".focus[keys.Right] = "..v.name..".press_right\n"
-	itm_str = itm_str..v.name..".focus[keys.Left] = "..v.name..".press_left\n"
+	if v.extra.focus then 
+	    itm_str = itm_str..v.name..".focus[keys.Right] = "..v.name..".press_right\n"
+	    itm_str = itm_str..v.name..".focus[keys.Left] = "..v.name..".press_left\n"
+	end
     end
-
---buttonPicker1.focus[keys.Right] = buttonPicker1.press_right
---buttonPicker1.focus[keys.Left] = buttonPicker1.press_left
 
     end -- if v.extra then 
 
