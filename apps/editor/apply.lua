@@ -263,7 +263,6 @@ function inspector_apply (v, inspector)
 					     g:find_child(item_group:find_child("text"..n).text).extra.focus = {} 
 					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
 					end
-						
 				end 
 			  end 
 		     end 
