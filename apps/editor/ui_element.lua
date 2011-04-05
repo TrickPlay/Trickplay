@@ -4452,10 +4452,11 @@ button
                 dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
             end
         else
+            dropDownMenu.anchor_point = {p.menu_width/2,0}
             if p.expansion_location == "above" then
                 dropDownMenu.position     = {p.menu_width/2,-curr_y/2-p.vert_offset}
             else
-                dropDownMenu.position     = {p.menu_width/2,curr_y/2}
+                dropDownMenu.position     = {0,p.vert_offset}
             end
         end
         button.reactive=true
@@ -4478,7 +4479,7 @@ button
         if p.expansion_location == "above"  then
             dropDownMenu.y = dropDownMenu.y -10
         else
-            dropDownMenu.y = dropDownMenu.y + button.h+10
+            dropDownMenu.y = dropDownMenu.y + button.h
         end
     end
     
