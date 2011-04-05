@@ -3330,6 +3330,8 @@ function ui_element.layoutManager(t)
                 functions[r] = nil
             end
         end
+	
+	if p.tiles[1] then 
         if p.columns < #p.tiles[1] then
             for c = p.columns + 1, #p.tiles[r] do
                 for r = 1, #p.tiles do
@@ -3349,6 +3351,7 @@ function ui_element.layoutManager(t)
             end
             focus.anchor_point = { (focus.w)/2, (focus.h)/2}
         end
+	end
 	end
 	make_grid()
 
@@ -4157,8 +4160,12 @@ button
                 end
             end,
             insert_item = function (index,item)
+		dumptable(item)
+		dumptable(p.items)
+		print(#p.items,"plp")
+		print(index,"klkl")
                 assert(type(item)=="table","invalid item")
-                assert(index > 0 and index <= #p.items, "invalid index")
+                assert(index > 0 and index <= #p.items + 1, "invalid index")
                 
                 table.insert(p.items,index,item)
                 create()
@@ -4426,7 +4433,6 @@ button
                 print("Invalid type in the item list. Type: ",item.type)
             end
         end
-        print(#selectable_items)
         
         if p.background_color[4] ~= 0 then
             ui_ele = ui.factory.make_dropdown(
