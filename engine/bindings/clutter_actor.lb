@@ -1159,6 +1159,49 @@ interface actor [[ClutterActor*]]
 #endif
     ]];
 
+
+    /*
+    Function: pageturn
+    
+    Apply a "page turn" effect to the UIElement.  The following aspects of the effect can be controlled:
+    
+    period - The period of the page curl, between 0.0 (flat) and 1.0 (fully curled) [defaults to 0]
+    
+    angle - The angle of the page curl, in degrees, between 0.0 and 360.0 [defaults to 45]
+    
+    radius - The radius of the page curl effect, in pixels [defaults to 1/16 width of the UIElement]
+    */
+    
+    bool pageturn(double period=0.5, double angle=45, double radius=0)
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        if(0 == radius)
+        {
+            radius = clutter_actor_get_width(self)/16;
+        }
+        clutter_actor_remove_effect_by_name(self, "pageturn_effect");
+        clutter_actor_add_effect_with_name(self, "pageturn_effect", clutter_page_turn_effect_new(period,angle,radius));
+#else
+        result = false;
+#endif
+    ]];
+
+    /*
+    Function: pageflatten
+    
+    Remove any "page turn" effect on the UIElement.
+    */
+
+    bool unpageturn()
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "pageturn_effect");
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
     /*
 	Function: animate
 	
