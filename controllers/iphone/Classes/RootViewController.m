@@ -270,7 +270,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSMutableArray *services = netServiceManager.services;
     NSLog(@"services %@\n", services);
-    NSLog(@"count %d\n", [services count]);
+    NSLog(@"number of services %d\n", [services count]);
     
     if ([services count] == 0) return;
     

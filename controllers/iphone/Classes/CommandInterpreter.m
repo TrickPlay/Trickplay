@@ -145,6 +145,8 @@
         [delegate do_PA:args];
     } else if ([key compare:@"SS"] == NSOrderedSame) {
         [delegate do_SS:args];
+    } else if ([key compare:@"UX"] == NSOrderedSame) {
+        [delegate do_UX:args];
     } else {
         NSLog(@"Command not recognized %@", key);
     }
