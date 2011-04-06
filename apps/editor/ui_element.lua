@@ -4263,11 +4263,11 @@ button
                 p.selectable_items[index].f=f
                 
             end,
-            press_enter = function(p)
-                if p.selectable_items[curr_index] ~= nil and
-                   p.selectable_items[curr_index].f ~= nil then
+            press_enter = function(j)
+                if selectable_items[curr_index] ~= nil and
+                   selectable_items[curr_index].f ~= nil then
                    
-                    p.selectable_items[curr_index].f(p)
+                    selectable_items[curr_index].f(j)
                 else
                     print("no function")
                 end
@@ -4461,15 +4461,17 @@ button
         end
         button.reactive=true
        
-	 if editor_lb == nil then  
+	 --if editor_lb == nil then  
         function button:on_button_down(x,y,b,n)
             if dropDownMenu.opacity == 0 then
-                umbrella.spin_in()
+                --umbrella.spin_in()
+                umbrella.fade_in()
             else
-                umbrella.spin_out()
+                --umbrella.spin_out()
+                umbrella.fade_out()
             end
         end
- 	end 
+ 	--end 
         
         
         
