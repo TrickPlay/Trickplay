@@ -3,6 +3,7 @@
 -- Global 
 ---------------------
 editor_lb = editor
+editor_use = true
 
 ----------------
 -- Constants 

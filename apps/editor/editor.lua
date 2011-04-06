@@ -273,6 +273,27 @@ local function guideline_inspector(v)
 
 end 
 
+function editor.timeline() 
+         if not screen:find_child("timeline") then 
+		if table.getn(g.children) > 0 then
+			input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
+			screen:find_child("timeline").extra.show = true 
+		end
+	elseif table.getn(g.children) == 0 then 
+		screen:remove(screen:find_child("timeline"))
+		if screen:find_child("tline") then 
+			screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		end 
+	elseif screen:find_child("timeline").extra.show ~= true  then 
+		screen:find_child("timeline"):show()
+		screen:find_child("timeline").extra.show = true
+	else 
+		screen:find_child("timeline"):hide()
+		screen:find_child("timeline").extra.show = false
+	end
+end 
+
+
 local function create_on_line_down_f(v)
         function v:on_button_down(x,y,button,num_clicks)
              dragging = {v, x - v.x, y - v.y }
