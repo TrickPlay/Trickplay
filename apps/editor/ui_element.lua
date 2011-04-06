@@ -4126,34 +4126,38 @@ button
                     return
                 end
                 if selectable_items[curr_index] ~= nil then
-                    selectable_items[curr_index]:complete_animation()
-                    selectable_items[curr_index].opacity=255
-                    selectable_items[curr_index]:animate{
+                    selectable_items[curr_index].focus:complete_animation()
+                    selectable_items[curr_index].focus.opacity=255
+                    selectable_items[curr_index].focus:animate{
                         duration=300,
                         opacity=0
                     }
+                elseif curr_index==0 then
+                    button:on_focus_out()
                 end
                 if selectable_items[i] ~= nil then
                    
-                    selectable_items[i]:complete_animation()
-                    selectable_items[i].opacity=0
-                    selectable_items[i]:animate{
+                    selectable_items[i].focus:complete_animation()
+                    selectable_items[i].focus.opacity=0
+                    selectable_items[i].focus:animate{
                         duration=300,
                         opacity=255,
-                        on_completed = function() print(selectable_items[i].name) end
                     }
+                    curr_index=i
+                elseif i==0 then
+                    button:on_focus_in()
                     curr_index=i
                 end
             end,
             press_up = function()
-                if curr_index == 1 then
+                if curr_index <= 0 then
                     return
                 else
                     umbrella.focus_index(curr_index-1)
                 end
             end,
             press_down = function()
-                if curr_index == #selectable_items then
+                if curr_index >= #selectable_items then
                     return
                 else
                     umbrella.focus_index(curr_index+1)
@@ -4218,7 +4222,7 @@ button
                 }
                 button:on_focus_in()
                 if selectable_items[curr_index] then
-                    selectable_items[curr_index].opacity=0
+                    selectable_items[curr_index].focus.opacity=0
                 end
                 curr_index = 0
             end,
@@ -4242,7 +4246,7 @@ button
                     opacity=255,
                 }
                 if selectable_items[curr_index] then
-                    selectable_items[curr_index].opacity=0
+                    selectable_items[curr_index].focus.opacity=0
                 end
                 button:on_focus_in()
                 curr_index = 0
@@ -4258,16 +4262,16 @@ button
                 button:on_focus_out()
             end,
             set_item_function = function(index,f)
-                assert(index > 0 and index <= #p.selectable_items, "invalid index")
+                assert(index > 0 and index <= #selectable_items, "invalid index")
                 
-                p.selectable_items[index].f=f
+                selectable_items[index].f=f
                 
             end,
-            press_enter = function(j)
+            press_enter = function(...)
                 if selectable_items[curr_index] ~= nil and
                    selectable_items[curr_index].f ~= nil then
                    
-                    selectable_items[curr_index].f(j)
+                    selectable_items[curr_index].f(...)
                 else
                     print("no function")
                 end
@@ -4372,13 +4376,30 @@ button
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
+                    if editor_lb == nil then  
+                        function ui_ele:on_button_down()
+                            if item.f then item.f() end
+                        end
+                        ui_ele.reactive=true
+                    end
                 elseif p.show_ring then
                     ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
+                    if editor_lb == nil then  
+                        function ui_ele:on_button_down()
+                            if item.f then item.f() end
+                        end
+                        ui_ele.reactive=true
+                    end
                 else
-                    
+                    if editor_lb == nil then  
+                        function txt:on_button_down()
+                            if item.f then item.f() end
+                        end
+                        txt.reactive=true
+                    end
                 end
                 
                 
@@ -4389,14 +4410,15 @@ button
                 else
                     ui_ele = assets(skin_list[p.skin]["button_focus"])
                     ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
+                    item.focus  = ui_ele
                 end
                 
                 ui_ele.name="focus"
-                ui_ele.anchor_point = { 0,     ui_ele.h/2 }
-                ui_ele.position     = {   0, txt.y }
+                ui_ele.anchor_point = { 0, ui_ele.h/2 }
+                ui_ele.position     = { 0, txt.y }
                 ui_ele.opacity      = 0
                 dropDownMenu:add(ui_ele)
-                table.insert(selectable_items,ui_ele)
+                table.insert(selectable_items,item)
                 
                 txt:raise_to_top()
                 if item.bg then
