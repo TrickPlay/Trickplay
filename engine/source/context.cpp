@@ -1493,9 +1493,9 @@ int TPContext::load_app( App ** app )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch )
+int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path )
 {
-    String app_path = get_db()->get_app_path( app_id );
+    String app_path = id_is_path ? app_id : get_db()->get_app_path( app_id );
 
     if ( app_path.empty() )
     {

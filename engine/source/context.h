@@ -121,7 +121,7 @@ public:
     //.........................................................................
     // Launches one app from another, and kills the first.
 
-    int launch_app( const char * app_id, const App::LaunchInfo & launch );
+    int launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path = false );
 
     //.........................................................................
     // Kills the current app and either goes back to the previous one, or
