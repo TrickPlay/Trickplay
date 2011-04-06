@@ -4040,8 +4040,12 @@ function ui_element.menuButton(t)
 
 button 
 --]]
-        text_font = "DejaVu Sans 30px",
-    	text_color = {255,255,255,255}, --"FFFFFF",
+        button_text_font = "DejaVu Sans 30px",
+    	button_text_color = {255,255,255,255}, --"FFFFFF",
+        label_text_font = "DejaVu Sans 30px",
+    	label_text_color = {255,255,255,255}, --"FFFFFF",
+        item_text_font = "DejaVu Sans 30px",
+    	item_text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	ui_width = 250,
     	ui_height = 60, 
@@ -4066,6 +4070,7 @@ button
         vert_spacing = 5, --item_spacing
         horz_spacing  = 10, -- new 
         vert_offset  = 40, --item_start_y
+        text_has_shadow = true,
         
         background_color     = {255,0,0,255},
         
@@ -4073,7 +4078,7 @@ button
         horz_padding  = 10, -- padding 
         seperator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
-        
+        align = "left",
         show_ring     = true,
         
         
@@ -4092,8 +4097,8 @@ button
     
     local dropDownMenu = Group{}
     local button       = ui_element.button{
-        text_font=p.text_font,
-    	text_color=p.text_color,
+        text_font=p.button_text_font,
+    	text_color=p.button_text_color,
     	focus_text_color=p.focus_text_color,
     	skin=p.skin,
     	ui_width=p.ui_width,
@@ -4277,7 +4282,7 @@ button
     local function make_item_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
         ring:begin_painting()
-        ring:set_source_color( p.menu_text_color )
+        ring:set_source_color( p.text_color )
         ring:round_rectangle(
             padding + 2 / 2,
             padding + 2 / 2,
@@ -4307,6 +4312,7 @@ button
         
         --local vars used to create the menu
         local ui_ele = nil
+        local txt, s_txt
         local curr_y = 0
         
         local max_item_w = 0
@@ -4325,8 +4331,8 @@ button
         
         
         
-        button.text_font=p.text_font
-    	button.text_color=p.text_color
+        button.button_text_font=p.button_text_font
+    	button.text_color=p.button_text_color
     	button.skin=p.skin
     	button.ui_width=p.ui_width
     	button.ui_height=p.ui_height
@@ -4362,10 +4368,25 @@ button
                 
                 
                 --Make the text label for each item
-                local txt = Text{
+                if p.text_has_shadow then
+                s_txt = Text{
                         text  = item.string,
-                        font  = p.text_font,
-                        color = p.text_color,
+                        font  = p.item_text_font,
+                        color = "000000",
+                        opacity=255*.5,
+                        x     = p.horz_padding+p.horz_spacing+2,
+                        y     = curr_y+2,
+                    }
+                    s_txt.anchor_point={0,s_txt.h/2}
+                    s_txt.y = s_txt.y+s_txt.h/2
+                dropDownMenu:add(
+                    s_txt
+                )
+                end
+                txt = Text{
+                        text  = item.string,
+                        font  = p.item_text_font,
+                        color = p.item_text_color,
                         x     = p.horz_padding+p.horz_spacing,
                         y     = curr_y,
                     }
@@ -4426,9 +4447,23 @@ button
                 ui_ele.anchor_point = { 0, ui_ele.h/2 }
                 ui_ele.position     = { 0, txt.y }
                 ui_ele.opacity      = 0
+                if ui_ele.parent then ui_ele:unparent() end
                 dropDownMenu:add(ui_ele)
                 table.insert(selectable_items,item)
                 
+                if item.icon then
+                    ui_ele = item.icon
+                    if ui_ele.parent then ui_ele:unparent() end
+                    ui_ele.anchor_point = {ui_ele.w,ui_ele.h/2}
+                    ui_ele.position={
+                            p.menu_width-10, txt.y
+                    }
+                    dropDownMenu:add(ui_ele)
+                end
+                
+                if p.text_has_shadow then
+                    s_txt:raise_to_top()
+                end
                 txt:raise_to_top()
                 if item.bg then
                     curr_y = curr_y + item.bg.h + p.vert_spacing
@@ -4436,10 +4471,25 @@ button
                     curr_y = curr_y + txt.h
                 end
             elseif item.type == "label" then
+                if p.text_has_shadow then
+                s_txt = Text{
+                        text  = item.string,
+                        font  = p.label_text_font,
+                        color = "000000",
+                        opacity=255*.5,
+                        x     = p.horz_spacing+2,
+                        y     = curr_y+2,
+                    }
+              s_txt.anchor_point={0,s_txt.h/2}
+                    s_txt.y = s_txt.y+s_txt.h/2
+                dropDownMenu:add(
+                    s_txt
+                )
+                end
                 txt = Text{
                         text  = item.string,
-                        font  = p.text_font,
-                        color = p.text_color,
+                        font  = p.label_text_font,
+                        color = p.label_text_color,
                         x     = p.horz_spacing,
                         y     = curr_y,
                     }
@@ -4454,7 +4504,9 @@ button
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
-                    
+                    if p.text_has_shadow then
+                        s_txt:raise_to_top()
+                    end
                     txt:raise_to_top()
                     curr_y = curr_y + ui_ele.h + p.vert_spacing
                 else
@@ -4513,7 +4565,16 @@ button
         
         button.position = {button.w/2,button.h/2}
         button.anchor_point = {button.w/2,button.h/2}
-        dropDownMenu.x = button.w/2
+        if p.align=="left" then
+              dropDownMenu.x = p.menu_width/2
+        elseif p.aligh == "middle" then
+              dropDownMenu.x = button.w/2
+        elseif p.align == "right" then
+              dropDownMenu.x = button.w
+        else
+              error("drop down alignment received an invalid argument: "..p.align)
+        end
+        
         if p.expansion_location == "above"  then
             dropDownMenu.y = dropDownMenu.y -10
         else
