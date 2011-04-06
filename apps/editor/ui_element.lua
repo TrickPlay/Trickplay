@@ -4069,9 +4069,6 @@ button
         horz_spacing  = 10, -- new 
         vert_offset  = 40, --item_start_y
         
-        menu_font  = "DejaVu Sans 26px",   -- not needed
-        menu_text_color    = {255,255,255,255}, -- not needed 
-
         background_color     = {255,0,0,255},
         
         menu_width   = 250,       -- bg_w 
@@ -4268,7 +4265,7 @@ button
                    selectable_items[curr_index].f ~= nil then
                    
                     selectable_items[curr_index].f(...)
-                    self:fade_out()
+                    self.fade_out()
                 else
                     print("no function")
                 end
@@ -4358,8 +4355,8 @@ button
                 --Make the text label for each item
                 local txt = Text{
                         text  = item.string,
-                        font  = p.menu_font,
-                        color = p.menu_text_color,
+                        font  = p.text_font,
+                        color = p.text_color,
                         x     = p.horz_padding+p.horz_spacing,
                         y     = curr_y,
                     }
@@ -4375,7 +4372,9 @@ button
                     dropDownMenu:add(ui_ele)
                     --if editor_lb == nil then  
                         function ui_ele:on_button_down()
+                            if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f() end
+                            umbrella.fade_out()
                         end
                         ui_ele.reactive=true
                     --end
@@ -4386,14 +4385,18 @@ button
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil then  
                         function ui_ele:on_button_down()
+                            if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f() end
+                            umbrella.fade_out()
                         end
                         ui_ele.reactive=true
                     end
                 else
                     if editor_lb == nil then  
                         function txt:on_button_down()
+                            if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f() end
+                            umbrella.fade_out()
                         end
                         txt.reactive=true
                     end
@@ -4426,8 +4429,8 @@ button
             elseif item.type == "label" then
                 txt = Text{
                         text  = item.string,
-                        font  = p.menu_font,
-                        color = p.menu_text_color,
+                        font  = p.text_font,
+                        color = p.text_color,
                         x     = p.horz_spacing,
                         y     = curr_y,
                     }
