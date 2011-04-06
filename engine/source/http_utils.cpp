@@ -8,8 +8,8 @@
 
 void dump_headers(const HttpServer::Request& request)
 {
-	StringMap header_map = request.get_headers( );
-	StringMap::iterator it;
+	StringMultiMap header_map = request.get_headers( );
+	StringMultiMap::iterator it;
 	g_info(" dumping request headers >>>> ");
 	for (it = header_map.begin(); it != header_map.end(); it++) {
 		g_info( ( it->first + ": " + it->second ).c_str( ) );
