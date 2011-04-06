@@ -4272,6 +4272,7 @@ button
                    selectable_items[curr_index].f ~= nil then
                    
                     selectable_items[curr_index].f(...)
+                    self:fade_out()
                 else
                     print("no function")
                 end
@@ -4434,13 +4435,15 @@ button
                         x     = p.horz_spacing,
                         y     = curr_y,
                     }
+              txt.anchor_point={0,txt.h/2}
+                    txt.y = txt.y+txt.h/2
                 dropDownMenu:add(
                     txt
                 )
                 if item.bg then
                     ui_ele = item.bg
                     
-                    --ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                    ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
                     
