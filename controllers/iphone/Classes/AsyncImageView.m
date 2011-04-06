@@ -55,7 +55,7 @@
     [connection cancel];
     [connection release];
     connection = nil;
-    //**
+
     if ([[self subviews] count] > 0) {
         [[[self subviews] objectAtIndex:0] removeFromSuperview];
     }
@@ -73,7 +73,7 @@
     if (dataCacheDelegate) {
         [dataCacheDelegate dataReceived:data resourcekey:resourceKey];
     }
-    //*/
+
     [data release];
     data = nil;
     [loadingIndicator stopAnimating];
@@ -100,12 +100,10 @@
     if (resourceKey) {
         [resourceKey release];
     }
-    //*
     if (dataCacheDelegate) {
         [(NSObject *)dataCacheDelegate release];
         dataCacheDelegate = nil;
     }
-    //*/
     
     [super dealloc];
 }
