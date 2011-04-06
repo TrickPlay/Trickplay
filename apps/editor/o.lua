@@ -1,7 +1,5 @@
-local g = ... 
 
-
-menu_bar = Image
+local menu_bar = Image
 	{
 		src = "assets/menu-bar.png",
 		clip = {0,0,1920,60},
@@ -17,7 +15,7 @@ menu_bar = Image
 		reactive = true,
 	}
 
-menuButton_file = ui_element.menuButton
+local menuButton_file = ui_element.menuButton
 	{
 		ui_width = 142,
 		ui_height = 61,
@@ -83,7 +81,7 @@ end
 menuButton_file.extra.reactive = true
 
 
-menuButton_edit = ui_element.menuButton
+local menuButton_edit = ui_element.menuButton
 	{
 		ui_width = 142,
 		ui_height = 61,
@@ -113,15 +111,15 @@ menuButton_edit = ui_element.menuButton
 		focus_text_color = {255,255,255,255},
 	}
 
-menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t    Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.undo} )
-menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t    E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.redo} )
-menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t\t    I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements})
-menuButton_edit.insert_item(4,{type="item", string="Timeline...\t\t	J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline}) 
-menuButton_edit.insert_item(5,{type="item", string="Delete		<-", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete})
-menuButton_edit.insert_item(6,{type="item", string="Duplicate\t\t\t    D", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate}) 
-menuButton_edit.insert_item(7,{type="item", string="Clone\t\t\t    C", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone}) 
-menuButton_edit.insert_item(8,{type="item", string="Group\t\t\t    G", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group}) 
-menuButton_edit.insert_item(9,{type="item", string="UnGroup\t\t\t    U", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ugroup}) 
+menuButton_edit.insert_item(1,{type="item", string="Undo\t\t    Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.undo} )
+menuButton_edit.insert_item(2,{type="item", string="Redo\t\t    E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.redo} )
+menuButton_edit.insert_item(3,{type="item", string="Insert UI Element  I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements})
+menuButton_edit.insert_item(4,{type="item", string="Timeline...\t     J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline}) 
+menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete})
+menuButton_edit.insert_item(6,{type="item", string="Duplicate\t    D", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate}) 
+menuButton_edit.insert_item(7,{type="item", string="Clone\t\t    C", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone}) 
+menuButton_edit.insert_item(8,{type="item", string="Group\t\t    G", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group}) 
+menuButton_edit.insert_item(9,{type="item", string="UnGroup\t\t    U", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ugroup}) 
 
 menuButton_edit.name = "menuButton_edit"
 menuButton_edit.position = {489,28,0}
@@ -153,7 +151,7 @@ end
 menuButton_edit.extra.reactive = true
 
 
-menuButton_arrange = ui_element.menuButton
+local menuButton_arrange = ui_element.menuButton
 	{
 		ui_width = 142,
 		ui_height = 61,
@@ -229,7 +227,7 @@ end
 menuButton_arrange.extra.reactive = true
 
 
-menuButton_view = ui_element.menuButton
+local menuButton_view = ui_element.menuButton
 	{
 		ui_width = 142,
 		ui_height = 61,
@@ -303,7 +301,7 @@ end
 menuButton_view.extra.reactive = true
 
 
-menu_text = Text
+local menu_text = Text
 	{
 		color = "#cccccc",
 		font = "FreeSans Medium 20px",
@@ -321,30 +319,9 @@ menu_text = Text
 		position = {1500,47,0},
 		size = {700,20},
 		opacity = 255,
-		reactive = true,
+		reactive = false,
 		cursor_visible =false,
 		alignment ="RIGHT",
 	}
 
-menu_text.extra.focus = {}
-
-function menu_text:on_key_down(key)
-	if menu_text.focus[key] then
-		if type(menu_text.focus[key]) == "function" then
-			menu_text.focus[key]()
-		elseif screen:find_child(menu_text.focus[key]) then
-			if menu_text.on_focus_out then
-				menu_text.on_focus_out()
-			end
-			screen:find_child(menu_text.focus[key]):grab_key_focus()
-			if screen:find_child(menu_text.focus[key]).on_focus_in then
-				screen:find_child(menu_text.focus[key]).on_focus_in()
-			end
-			end
-	end
-	return true
-end
-
-menu_text.extra.reactive = true
-
-g:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text)
+screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text)

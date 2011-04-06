@@ -1102,16 +1102,13 @@ function main()
     end
 
     screen_add_bg()
-
     screen:show()
     screen.reactive=true
-
-    dofile("o.lua") -- create menu bar 
---[[
+---[[
     local f_menu = loadfile("o.lua")
     f_menu(g)
     screen:add(g)
---]]    
+---]]    
 
 --[[
     ui = build_ui(true)
