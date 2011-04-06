@@ -4042,8 +4042,12 @@ function ui_element.menuButton(t)
 
 button 
 --]]
-        text_font = "DejaVu Sans 30px",
-    	text_color = {255,255,255,255}, --"FFFFFF",
+        button_text_font = "DejaVu Sans 30px",
+    	button_text_color = {255,255,255,255}, --"FFFFFF",
+        label_text_font = "DejaVu Sans 30px",
+    	label_text_color = {255,255,255,255}, --"FFFFFF",
+        item_text_font = "DejaVu Sans 30px",
+    	item_text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	ui_width = 250,
     	ui_height = 60, 
@@ -4095,8 +4099,8 @@ button
     
     local dropDownMenu = Group{}
     local button       = ui_element.button{
-        text_font=p.text_font,
-    	text_color=p.text_color,
+        text_font=p.button_text_font,
+    	text_color=p.button_text_color,
     	focus_text_color=p.focus_text_color,
     	skin=p.skin,
     	ui_width=p.ui_width,
@@ -4329,8 +4333,8 @@ button
         
         
         
-        button.text_font=p.text_font
-    	button.text_color=p.text_color
+        button.button_text_font=p.button_text_font
+    	button.text_color=p.button_text_color
     	button.skin=p.skin
     	button.ui_width=p.ui_width
     	button.ui_height=p.ui_height
@@ -4369,11 +4373,11 @@ button
                 if p.text_has_shadow then
                 s_txt = Text{
                         text  = item.string,
-                        font  = p.text_font,
-                        color = "ffffff",
+                        font  = p.item_text_font,
+                        color = "000000",
                         opacity=255*.5,
-                        x     = p.horz_padding+p.horz_spacing+1,
-                        y     = curr_y+1,
+                        x     = p.horz_padding+p.horz_spacing+2,
+                        y     = curr_y+2,
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
@@ -4383,8 +4387,8 @@ button
                 end
                 txt = Text{
                         text  = item.string,
-                        font  = p.text_font,
-                        color = p.text_color,
+                        font  = p.item_text_font,
+                        color = p.item_text_color,
                         x     = p.horz_padding+p.horz_spacing,
                         y     = curr_y,
                     }
@@ -4472,11 +4476,11 @@ button
                 if p.text_has_shadow then
                 s_txt = Text{
                         text  = item.string,
-                        font  = p.text_font,
-                        color = "ffffff",
+                        font  = p.label_text_font,
+                        color = "000000",
                         opacity=255*.5,
-                        x     = p.horz_spacing,
-                        y     = curr_y,
+                        x     = p.horz_spacing+2,
+                        y     = curr_y+2,
                     }
               s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
@@ -4486,8 +4490,8 @@ button
                 end
                 txt = Text{
                         text  = item.string,
-                        font  = p.text_font,
-                        color = p.text_color,
+                        font  = p.label_text_font,
+                        color = p.label_text_color,
                         x     = p.horz_spacing,
                         y     = curr_y,
                     }
