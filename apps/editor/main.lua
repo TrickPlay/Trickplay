@@ -450,7 +450,7 @@ local function build_ui( show_it )
     -------------------------------------------------------------------------------
     -- Handlers
     -------------------------------------------------------------------------------
-
+   
     local key_map =
     {
         [ keys.a	] = function() animate_out_dropdown() input_mode = S_SELECT editor.save(false) end,
@@ -469,7 +469,8 @@ local function build_ui( show_it )
         [ keys.u	] = function() animate_out_dropdown() editor.undo() input_mode = S_SELECT end,
         [ keys.v	] = function() animate_out_dropdown() editor.v_guideline() input_mode = S_SELECT end,
         [ keys.h	] = function() animate_out_dropdown() editor.h_guideline() input_mode = S_SELECT end,
-        [ keys.j	] = function() animate_out_dropdown() if not screen:find_child("timeline") then 
+        [ keys.j	] = function() animate_out_dropdown() editor.timeline()
+							     --[[ if not screen:find_child("timeline") then 
 							         if table.getn(g.children) > 0 then
 								     input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
 							             screen:find_child("timeline").extra.show = true 
@@ -485,7 +486,7 @@ local function build_ui( show_it )
 						 	      else 
 								   screen:find_child("timeline"):hide()
 								   screen:find_child("timeline").extra.show = false
-							      end
+							      end]]
 							      end,
         --[ keys.x	] = function() animate_out_dropdown() editor.debug() input_mode = S_SELECT end,
         [ keys.x	] = function() animate_out_dropdown() editor.export() input_mode = S_SELECT end,
@@ -1104,9 +1105,15 @@ function main()
     screen:show()
     screen.reactive=true
 
+    local f_menu = loadfile("o.lua")
+    f_menu(g)
+    screen:add(g)
+    
+--[[
     ui = build_ui(true)
     ui:animate_in()
     ui:menu_button_down() 
+-]]
     set_app_path()
     
 end
