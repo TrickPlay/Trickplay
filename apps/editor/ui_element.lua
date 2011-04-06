@@ -1221,9 +1221,7 @@ function ui_element.button(table)
         b_group:find_child("text").color = p.focus_text_color
 	
 	if key then 
-		print("key")
 	    if p.pressed and key == keys.Return then
-		print("key.Return")
 		p.pressed()
 	    end 
 	end 
@@ -4501,7 +4499,7 @@ button
             if dropDownMenu.opacity == 0 then
                 --umbrella.spin_in()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.extra.on_focus_out()
 		end 
                 umbrella.fade_in()
             else
