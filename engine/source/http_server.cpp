@@ -83,26 +83,87 @@ struct HttpMessageContext
 
 //=============================================================================
 
+class SoupBufferBody : public HttpServer::Body
+{
+public:
+
+    SoupBufferBody( SoupMessageBody * body )
+    {
+        buffer = body ? soup_message_body_flatten( body ) : 0;
+    }
+
+    virtual ~SoupBufferBody()
+    {
+        if ( buffer )
+        {
+            soup_buffer_free( buffer );
+        }
+    }
+
+    const char * get_data() const
+    {
+        return buffer ? buffer->data : 0;
+    }
+
+    gsize get_length() const
+    {
+        return buffer ? buffer->length : 0;
+    }
+
+private:
+
+    SoupBuffer * buffer;
+};
+
+//=============================================================================
 
 class HttpRequest : public HttpServer::Request
 {
 private:
 
 	HttpMessageContext & message_context;
+	SoupBufferBody       body;
 
 public:
 
 	HttpRequest( HttpMessageContext & ctx )
 	:
-	    message_context( ctx )
+	    message_context( ctx ),
+	    body( ctx.message->request_body )
 	{
+	}
+
+	Method get_method( ) const
+	{
+	    const char * m( message_context.message->method );
+
+	    if ( m == SOUP_METHOD_GET )
+	    {
+	        return HTTP_GET;
+	    }
+        if ( m == SOUP_METHOD_POST )
+        {
+            return HTTP_POST;
+        }
+        if ( m == SOUP_METHOD_PUT )
+        {
+            return HTTP_PUT;
+        }
+        if ( m == SOUP_METHOD_DELETE )
+        {
+            return HTTP_DELETE;
+        }
+        if ( m == SOUP_METHOD_HEAD )
+        {
+            return HTTP_HEAD;
+        }
+        return HttpRequest::OTHER;
 	}
 
 	guint16 get_server_port( ) const
 	{
 		return soup_server_get_port( message_context.server );
 	}
-
 
 	String get_request_uri( ) const
 	{
@@ -111,7 +172,14 @@ public:
 
 	String get_header( const String & name ) const
 	{
-		return String( soup_message_headers_get_one( message_context.message->request_headers, name.c_str() ) );
+	    String result;
+
+	    if ( const char * h = soup_message_headers_get_one( message_context.message->request_headers, name.c_str() ) )
+	    {
+	        result = h;
+	    }
+
+	    return result;
 	}
 
 	StringMultiMap get_headers( ) const
@@ -203,16 +271,6 @@ public:
 		return result;
 	}
 
-	goffset get_body_size( ) const
-	{
-		return message_context.message->request_body->length;
-	}
-
-	const char * get_body_data( ) const
-	{
-		return message_context.message->request_body->data;
-	}
-
 	String get_content_type( ) const
 	{
 		return soup_message_headers_get_content_type( message_context.message->request_headers , 0 );
@@ -222,6 +280,11 @@ public:
 	{
 		return soup_message_headers_get_content_length( message_context.message->request_headers );
 	}
+
+    const HttpServer::Body & get_body() const
+    {
+        return body;
+    }
 
 };
 
@@ -246,12 +309,16 @@ public:
 		soup_message_headers_replace( message_context.message->response_headers, name.c_str(), value.c_str() );
 	}
 
-	virtual void set_response( const String & mime_type , const char * data , unsigned int size )
+	virtual void set_response( const String & content_type , const char * data , gsize size )
 	{
-        g_assert( data );
-		g_assert( size );
-
-		soup_message_set_response( message_context.message, mime_type.c_str(), SOUP_MEMORY_COPY, data, size );
+	    if ( 0 == data || 0 == size )
+	    {
+	        set_content_type( content_type );
+	    }
+	    else
+	    {
+	        soup_message_set_response( message_context.message, content_type.c_str(), SOUP_MEMORY_COPY, data, size );
+	    }
 	}
 
     void set_status( int sc , const String & msg )
@@ -265,6 +332,12 @@ public:
             soup_message_set_status_full ( message_context.message, sc, msg.c_str() );
         }
     }
+
+    void set_content_type( const String & content_type )
+    {
+        soup_message_headers_set_content_type( message_context.message->response_headers , content_type.c_str() , 0 );
+    }
+
 };
 
 //=============================================================================
@@ -289,22 +362,22 @@ void HttpServer::soup_server_callback(
 
     if ( msg->method == SOUP_METHOD_GET )
     {
-        ud->handler->do_get( request , response );
+        ud->handler->handle_http_get( request , response );
     }
     else if ( msg->method == SOUP_METHOD_POST )
     {
-        ud->handler->do_post( request , response );
+        ud->handler->handle_http_post( request , response );
     }
     else if ( msg->method == SOUP_METHOD_PUT )
     {
-        ud->handler->do_put( request , response );
+        ud->handler->handle_http_put( request , response );
     }
     else if ( msg->method ==  SOUP_METHOD_HEAD )
     {
-        ud->handler->do_head( request , response );
+        ud->handler->handle_http_head( request , response );
     }
     else if ( msg->method ==  SOUP_METHOD_DELETE )
     {
-        ud->handler->do_delete( request , response );
+        ud->handler->handle_http_delete( request , response );
     }
 }
