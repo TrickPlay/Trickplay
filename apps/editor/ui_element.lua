@@ -4376,24 +4376,30 @@ button
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
-                    function ui_ele:on_button_down()
-                        if item.f then item.f() end
+                    if editor_lb == nil then  
+                        function ui_ele:on_button_down()
+                            if item.f then item.f() end
+                        end
+                        ui_ele.reactive=true
                     end
-                    ui_ele.reactive=true
                 elseif p.show_ring then
                     ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
-                    function ui_ele:on_button_down()
-                        if item.f then item.f() end
+                    if editor_lb == nil then  
+                        function ui_ele:on_button_down()
+                            if item.f then item.f() end
+                        end
+                        ui_ele.reactive=true
                     end
-                    ui_ele.reactive=true
                 else
-                    function txt:on_button_down()
-                        if item.f then item.f() end
+                    if editor_lb == nil then  
+                        function txt:on_button_down()
+                            if item.f then item.f() end
+                        end
+                        txt.reactive=true
                     end
-                    txt.reactive=true
                 end
                 
                 
