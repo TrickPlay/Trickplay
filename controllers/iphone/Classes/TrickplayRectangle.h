@@ -1,0 +1,19 @@
+//
+//  TrickplayRectangle.h
+//  TrickplayController
+//
+//  Created by Rex Fenley on 4/5/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "TrickplayUIElement.h"
+
+
+@interface TrickplayRectangle : TrickplayUIElement {
+
+}
+
+- (id)initWithID:(NSString *)rectID args:(NSDictionary *)args;
+
+@end

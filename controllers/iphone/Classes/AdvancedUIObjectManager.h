@@ -9,12 +9,16 @@
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
 #import "GestureViewController.h"
+#import "TrickplayImage.h"
+#import "TrickplayRectangle.h"
 
 @interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate> {
     NSMutableDictionary *rectangles;
     NSMutableDictionary *images;
     NSMutableDictionary *textFields;
     NSMutableDictionary *groups;
+    
+    ResourceManager *resourceManager;
     
     UIView *view;
 }
@@ -24,8 +28,11 @@
 @property (nonatomic, retain) NSMutableDictionary *textFields;
 @property (nonatomic, retain) NSMutableDictionary *groups;
 
-- (id)initWithView:(UIView *)aView;
+@property (nonatomic, retain) ResourceManager *resourceManager;
+
+- (id)initWithView:(UIView *)aView resourceManager:(ResourceManager *)aResourceManager;
 
 - (void)createObject:(NSString *)JSON_String;
+- (void)destroyObject:(NSString *)JSON_String;
 
 @end

@@ -15,13 +15,16 @@
 @synthesize images;
 @synthesize textFields;
 @synthesize groups;
+@synthesize resourceManager;
 
-- (id)initWithView:(UIView *)aView {
+- (id)initWithView:(UIView *)aView resourceManager:(ResourceManager *)aResourceManager {
     if ((self = [super init])) {
         self.rectangles = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.images = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.textFields = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.groups = [[NSMutableDictionary alloc] initWithCapacity:20];
+        
+        self.resourceManager = aResourceManager;
         
         view = aView;
     }
@@ -29,28 +32,34 @@
     return self;
 }
 
+
+/**
+ * Creates Images and stores them
+ */
+
+- (void)createImage:(NSString *)imageID withArgs:(NSDictionary *)args {
+    
+    
+    TrickplayImage *image = [[[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager] autorelease];
+    
+    NSLog(@"Image created: %@", image);
+    [images setObject:image forKey:imageID];
+    
+    [view addSubview:image.view];
+}
+
+
 /**
  * Creates Rectangles and stores them.
  */
 
-- (void)createRectangle:(NSString *)id withArgs:(NSDictionary *)args {
-    CGFloat
-    x = [(NSNumber *)[args objectForKey:@"x"] floatValue],
-    y = [(NSNumber *)[args objectForKey:@"x"] floatValue],
-    width = [(NSNumber *)[args objectForKey:@"w"] floatValue],
-    height = [(NSNumber *)[args objectForKey:@"h"] floatValue],
-    red = [(NSNumber *)[(NSArray *)[args objectForKey:@"color"] objectAtIndex:0] floatValue]/255.0,
-    green = [(NSNumber *)[(NSArray *)[args objectForKey:@"color"] objectAtIndex:1] floatValue]/255.0,
-    blue = [(NSNumber *)[(NSArray *)[args objectForKey:@"color"] objectAtIndex:2] floatValue]/255.0;
-    
-    CGRect frame = CGRectMake(x, y, width, height);
-    UIView *rect = [[UIView alloc] initWithFrame:frame];
-    NSLog(@"Color: %@", [UIColor colorWithRed:red green:green blue:blue alpha:(CGFloat)1]);
-    rect.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:(CGFloat)1];
+- (void)createRectangle:(NSString *)rectID withArgs:(NSDictionary *)args {
+    TrickplayRectangle *rect = [[[TrickplayRectangle alloc] initWithID:rectID args:args] autorelease];
     
     NSLog(@"Rectangle created: %@", rect);
+    [rectangles setObject:rect forKey:rectID];
     
-    [view addSubview:rect];
+    [view addSubview:rect.view];
 }
 
 
@@ -68,25 +77,45 @@
         if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
             [self createRectangle:(NSString *)[object objectForKey:@"id"]
                          withArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
+            [self createImage:(NSString *)[object objectForKey:@"id"]
+                     withArgs:object];
         }
     }
 }
 
+
+/**
+ * Object Destruction function.
+ */
+
+- (void)destroyObject:(NSString *)JSON_String {
+    NSArray *JSON_Array = [JSON_String yajl_JSON];
+    NSLog(@"Destroying Objects from JSON: %@", JSON_Array);
+    
+    // Total destruction
+    for (NSDictionary *object in JSON_Array) {
+        // remove from local repository
+        NSLog(@"Destroying object %@", object);
+        if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
+            [[[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] view] removeFromSuperview];
+            [rectangles removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
+            [[[images objectForKey:(NSString *)[object objectForKey:@"id"]] view]removeFromSuperview];
+            [images removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
+        }
+    }
+}
+
+
 - (void)dealloc {
     NSLog(@"AdvancedUIObjectManager dealloc");
     
-    if (rectangles) {
-        [rectangles release];
-    }
-    if (images) {
-        [images release];
-    }
-    if (textFields) {
-        [textFields release];
-    }
-    if (groups) {
-        [groups release];
-    }
+    self.rectangles = nil;
+    self.images = nil;
+    self.textFields = nil;
+    self.groups = nil;
+    self.resourceManager = nil;
     
     [super dealloc];
 }

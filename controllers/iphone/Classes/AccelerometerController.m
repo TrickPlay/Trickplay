@@ -77,16 +77,12 @@
     else if (accelMode == 2) //high pass filter
 	{
 		//Method 2 for high pass filter
-		UIAccelerationValue x, y, z;
-        
+
         //Use a basic high-pass filter to remove the influence of the gravity
         myAcceleration[0] = acceleration.x * FILTERING_FACTOR + myAcceleration[0] * (1.0 - FILTERING_FACTOR);
         myAcceleration[1] = acceleration.y * FILTERING_FACTOR + myAcceleration[1] * (1.0 - FILTERING_FACTOR);
         myAcceleration[2] = acceleration.z * FILTERING_FACTOR + myAcceleration[2] * (1.0 - FILTERING_FACTOR);
-        // Compute values for the three axes of the acceleromater
-        x = acceleration.x - myAcceleration[0];
-        y = acceleration.y - myAcceleration[1];
-        z = acceleration.z - myAcceleration[2];
+
 		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", myAcceleration[0],myAcceleration[1],myAcceleration[2]];
 		[socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 		

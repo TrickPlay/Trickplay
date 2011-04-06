@@ -58,7 +58,7 @@
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
-    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view];
+    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
     
     //[loadingIndicator stopAnimating];
     
@@ -394,6 +394,8 @@
 - (void)do_UX:(NSArray *)args {
     if ([(NSString *)[args objectAtIndex:0] compare:@"CREATE"] == NSOrderedSame) {
         [advancedUIDelegate createObject:[args objectAtIndex:1]];
+    } else if ([(NSString *)[args objectAtIndex:0] compare:@"DESTROY"] == NSOrderedSame) {
+        [advancedUIDelegate destroyObject:[args objectAtIndex:1]];
     }
 }
 
@@ -496,6 +498,9 @@
     if (audioController) {
         [audioController release];
     }
+    if (advancedUIDelegate) {
+        [(AdvancedUIObjectManager *)advancedUIDelegate release];
+    }
     if (resourceManager) {
         [resourceManager release];
     }
@@ -508,9 +513,7 @@
     if (accelDelegate) {
         [(AccelerometerController *)accelDelegate release];
     }
-    if (advancedUIDelegate) {
-        [(AdvancedUIObjectManager *)advancedUIDelegate release];
-    }
+    
     if (styleAlert) {
         [styleAlert release];
     }
