@@ -1258,9 +1258,9 @@ function ui_element.button(table)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin == "editor") then 
-		button= assets("assets/menu-item.png")
-                button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
-		focus= assets("assets/menu-item-focus.png")
+		button= assets("assets/menu-bar-focus.png")
+                button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+		focus= assets("assets/menu-bar-focus.png")
                 focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 	elseif(p.skin ~= "custom") then 
             button = assets(skin_list[p.skin]["button"])
@@ -4164,10 +4164,6 @@ button
                 end
             end,
             insert_item = function (index,item)
-		dumptable(item)
-		dumptable(p.items)
-		print(#p.items,"plp")
-		print(index,"klkl")
                 assert(type(item)=="table","invalid item")
                 assert(index > 0 and index <= #p.items + 1, "invalid index")
                 
@@ -4376,12 +4372,12 @@ button
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
-                    if editor_lb == nil then  
+                    --if editor_lb == nil then  
                         function ui_ele:on_button_down()
                             if item.f then item.f() end
                         end
                         ui_ele.reactive=true
-                    end
+                    --end
                 elseif p.show_ring then
                     ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
@@ -4483,7 +4479,7 @@ button
         end
         button.reactive=true
        
-	 --if editor_lb == nil then  
+	--if editor_lb == nil then  
         function button:on_button_down(x,y,b,n)
             if dropDownMenu.opacity == 0 then
                 --umbrella.spin_in()
@@ -4987,5 +4983,140 @@ function ui_element.tabBar(t)
 end
 
 --]]
+
+
+function ui_element.editor_menuBar(t)
+    local p = {
+        bar_widgets = {},
+        y_offset  = 20,
+        bg_pic      = nil,
+        skin        = "default"
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+    local create
+    local index = 0
+    
+    local func = {
+        ["Button"] = {
+            fade_in = "on_focus_in",
+            fade_out = "on_focus_out"
+        },
+        ["MenuButton"] ={
+            fade_in = "spin_in",
+            fade_out = "spin_out"
+        }
+    }
+    local width = {
+        ["Button"]   = 200,
+        ["MenuButton"] = 300
+    }
+    local umbrella = Group{
+        name     = "menubar",
+        reactive = true,
+        position = {0,0},
+        extra    = {
+            type = "MenuBar",
+            press_left = function()
+                if index > 1 then
+                    if p.bar_widgets[index] ~= nil then
+                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
+                    end
+                    index = index - 1
+                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
+                end
+            end,
+            press_right = function()
+                if index < #p.bar_widgets then
+                    if p.bar_widgets[index] ~= nil then
+                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
+                    end
+                    index = index + 1
+                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
+                    
+                end
+            end,
+            press_up = function()
+                if p.bar_widgets[index].press_up then
+                    p.bar_widgets[index].press_up()
+                end
+            end,
+            press_down = function()
+                if p.bar_widgets[index].press_down then
+                    p.bar_widgets[index].press_down()
+                end
+            end,
+            press_enter= function()
+                if p.bar_widgets[index].press_enter then
+                    p.bar_widgets[index].press_enter()
+                elseif p.bar_widgets[index].pressed then
+                    p.bar_widgets[index].pressed()
+                end
+            end,
+            insert_widget = function(i,w)
+                table.insert(p.bar_widgets,i,w)
+                create()
+            end,
+            replace_widget = function(i,w)
+                p.bar_widgets[i] = w
+                create()
+            end,
+            remove_widget = function(i)
+                table.remove(p.bar_widgets,i)
+                create()
+            end,
+        }
+    }
+    
+    create = function()
+        
+        --clear the groups
+        umbrella:clear()
+        
+        --load the background
+        if p.bg_pic == nil then
+            umbrella:add(assets(skin_list[p.skin]["menu_bar"]))
+        else
+            umbrella:add(p.bg_pic)
+        end
+        
+        index = 0
+        
+        local curr_w = 200
+        for i = 1, #p.bar_widgets do
+            
+            assert(
+                p.bar_widgets[i].extra.type == "Button" or
+                p.bar_widgets[i].extra.type == "MenuButton",
+                "invalid widget added to the dropdown bar"
+            )
+            p.bar_widgets[i].position = {curr_w,0}
+            p.bar_widgets[i].skin     = p.skin
+            
+            curr_w = curr_w + 242
+	    umbrella:add(p.bar_widgets[i])
+        end
+    end
+    
+    create()
+    --set the meta table to overwrite the parameters
+    mt = {}
+    mt.__newindex = function(t,k,v)
+		
+        p[k] = v
+        create()
+		
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(umbrella.extra, mt)
+
+    return umbrella
+end
 
 return ui_element
