@@ -31,8 +31,8 @@ screen:add( focus , lottery , balloon )
 lottery:pageturn(1.0)
 
 local curl_timeline = Timeline { duration = 750 }
-local balloon_on_fn = function(_,_,progress) balloon:pageturn(1-progress,5) lottery:pageturn(progress,5) end
-local lottery_on_fn = function(_,_,progress) balloon:pageturn(progress,5) lottery:pageturn(1-progress,5) end
+local balloon_on_fn = function(_,_,progress) balloon:pageturn(1-progress,85,24) lottery:pageturn(progress,85,24) end
+local lottery_on_fn = function(_,_,progress) balloon:pageturn(progress,85,24) lottery:pageturn(1-progress,85,24) end
 
 local function set_focus( s )
     if s == "balloon" then
