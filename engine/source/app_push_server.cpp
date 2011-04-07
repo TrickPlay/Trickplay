@@ -53,7 +53,7 @@ AppPushServer::~AppPushServer()
 
 void AppPushServer::handle_http_post( const HttpServer::Request & request , HttpServer::Response & response )
 {
-    response.set_status( SOUP_STATUS_BAD_REQUEST );
+    response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
 
     //.........................................................................
     // If the path is /push, they are initiating a push. Otherwise, they are
@@ -288,7 +288,7 @@ void AppPushServer::set_response( HttpServer::Response & response , bool done , 
     {
         response.set_response( "application/json" , json , length );
 
-        response.set_status( SOUP_STATUS_OK );
+        response.set_status( HttpServer::HTTP_STATUS_OK );
     }
     else
     {
@@ -470,7 +470,7 @@ private:
 
 void AppPushServer::handle_push_file( const HttpServer::Request & request , HttpServer::Response & response )
 {
-    response.set_status( SOUP_STATUS_BAD_REQUEST );
+    response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
 
     if ( ! current_push_path )
     {

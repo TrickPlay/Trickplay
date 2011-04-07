@@ -513,15 +513,15 @@ public:
 	    }
 	}
 
-    void set_status( int sc , const String & msg = String() )
+    void set_status( HttpServer::Status status , const String & msg = String() )
     {
         if ( msg.empty() )
         {
-            soup_message_set_status ( message_context.message, sc );
+            soup_message_set_status ( message_context.message, int( status ) );
         }
         else
         {
-            soup_message_set_status_full ( message_context.message, sc, msg.c_str() );
+            soup_message_set_status_full ( message_context.message , int( status ) , msg.c_str() );
         }
     }
 
@@ -578,7 +578,7 @@ public:
 
         set_content_length( size );
 
-        set_status( SOUP_STATUS_OK );
+        set_status( HttpServer::HTTP_STATUS_OK );
 
         new ::StreamBody( message_context , new FileStreamWriter( file ) );
 
@@ -600,7 +600,7 @@ void HttpServer::soup_server_callback(
         gpointer user_data
         )
 {
-    soup_message_set_status( msg , SOUP_STATUS_NOT_FOUND );
+    soup_message_set_status( msg , HttpServer::HTTP_STATUS_NOT_FOUND );
 
     HandlerUserData * ud = ( HandlerUserData * ) user_data;
 
