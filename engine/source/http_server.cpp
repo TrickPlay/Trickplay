@@ -35,6 +35,8 @@ HttpServer::~HttpServer()
 		soup_server_quit( server );
 
 		g_object_unref( server );
+
+		log( "SHUTDOWN" );
 	}
 }
 
@@ -83,7 +85,7 @@ struct HttpMessageContext
 
 //=============================================================================
 
-class SoupBufferBody : public HttpServer::Body
+class SoupBufferBody : public HttpServer::Request::Body
 {
 public:
 
@@ -164,6 +166,11 @@ public:
 	{
 		return soup_server_get_port( message_context.server );
 	}
+
+    String get_path( ) const
+    {
+        return message_context.path;
+    }
 
 	String get_request_uri( ) const
 	{
@@ -273,7 +280,14 @@ public:
 
 	String get_content_type( ) const
 	{
-		return soup_message_headers_get_content_type( message_context.message->request_headers , 0 );
+	    String result;
+
+	    if ( const char * value = soup_message_headers_get_content_type( message_context.message->request_headers , 0 ) )
+	    {
+	        result = value;
+	    }
+
+	    return result;
 	}
 
 	goffset get_content_length( ) const
@@ -281,11 +295,182 @@ public:
 		return soup_message_headers_get_content_length( message_context.message->request_headers );
 	}
 
-    const HttpServer::Body & get_body() const
+    const HttpServer::Request::Body & get_body() const
     {
         return body;
     }
 
+    void print_headers() const
+    {
+        StringMultiMap header_map = get_headers();
+
+        for ( StringMultiMap::iterator it = header_map.begin(); it != header_map.end(); it++)
+        {
+            g_debug( "%s" , ( it->first + ": " + it->second ).c_str( ) );
+        }
+    }
+
+    void print_parameters() const
+    {
+        StringMap parameter_map = get_parameters( );
+        for (StringMap::iterator it = parameter_map.begin(); it != parameter_map.end(); it++)
+        {
+            g_debug( "%s" , ( it->first + "=" + it->second ).c_str( ) );
+        }
+    }
+};
+
+//=============================================================================
+
+class StreamBody : public HttpServer::Response::StreamBody
+{
+public:
+
+    StreamBody( const HttpMessageContext & _ctx , HttpServer::Response::StreamWriter * _stream_writer )
+    :
+        ctx( _ctx ),
+        stream_writer( _stream_writer )
+    {
+        g_assert( ctx.message );
+        g_assert( stream_writer );
+
+        g_object_ref( ctx.message );
+
+        soup_message_body_set_accumulate( ctx.message->response_body , FALSE );
+
+        wrote_headers_handler = g_signal_connect( ctx.message , "wrote_headers", G_CALLBACK( message_wrote_chunk ) , this );
+        wrote_chunk_handler = g_signal_connect( ctx.message , "wrote_chunk", G_CALLBACK( message_wrote_chunk ) , this );
+        finished_handler = g_signal_connect( ctx.message , "finished", G_CALLBACK( message_finished ) , this );
+
+        log( "CREATED RESPONSE BODY %p" , this );
+    }
+
+    ~StreamBody()
+    {
+        if ( wrote_headers_handler )
+        {
+            g_signal_handler_disconnect( ctx.message , wrote_headers_handler );
+        }
+
+        if ( wrote_chunk_handler )
+        {
+            g_signal_handler_disconnect( ctx.message , wrote_chunk_handler );
+        }
+
+        g_signal_handler_disconnect( ctx.message , finished_handler );
+
+        g_object_unref( ctx.message );
+
+        delete stream_writer;
+
+        log( "DESTROYED RESPONSE BODY %p" , this );
+    }
+
+    void append( const char * data , gsize size )
+    {
+        g_assert( data );
+        g_assert( size );
+
+        log( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
+
+        soup_message_body_append( ctx.message->response_body , SOUP_MEMORY_COPY , data , size );
+    }
+
+    void complete()
+    {
+        log( "RESPONSE BODY %p COMPLETE" , this );
+
+        soup_message_body_complete( ctx.message->response_body );
+
+        g_signal_handler_disconnect( ctx.message , wrote_headers_handler );
+        g_signal_handler_disconnect( ctx.message , wrote_chunk_handler );
+
+        wrote_headers_handler = 0;
+        wrote_chunk_handler = 0;
+    }
+
+    void cancel()
+    {
+        log( "RESPONSE BODY %p CANCEL" , this );
+
+        soup_socket_disconnect( soup_client_context_get_socket( ctx.client ) );
+    }
+
+
+private:
+
+    static void message_wrote_chunk( SoupMessage * msg , StreamBody * self )
+    {
+        log( "RESPONSE BODY %p WROTE CHUNK" , self );
+
+        self->stream_writer->write( * self );
+    }
+    static void message_finished( SoupMessage * msg , StreamBody * self )
+    {
+        log( "RESPONSE BODY %p FINISHED" , self );
+
+        delete self;
+    }
+
+    HttpMessageContext                      ctx;
+    HttpServer::Response::StreamWriter *    stream_writer;
+
+    gulong                                  wrote_headers_handler;
+    gulong                                  wrote_chunk_handler;
+    gulong                                  finished_handler;
+};
+
+//=============================================================================
+
+class FileStreamWriter : public HttpServer::Response::StreamWriter
+{
+public:
+
+    FileStreamWriter( GFile * _file )
+    :
+        file( _file ),
+        input_stream( 0 )
+    {
+        g_assert( file );
+
+        g_object_ref( file );
+
+        input_stream = g_file_read( file , 0 , 0 );
+    }
+
+    ~FileStreamWriter()
+    {
+        if ( input_stream )
+        {
+            g_object_unref( input_stream );
+        }
+
+        g_object_unref( file );
+    }
+
+    void write( HttpServer::Response::StreamBody & body )
+    {
+        gssize bytes_read = input_stream ? g_input_stream_read( G_INPUT_STREAM( input_stream ) , buffer , sizeof( buffer ) , 0 , 0 ) : -1;
+
+        if ( bytes_read < 0 )
+        {
+            body.cancel();
+        }
+        else if ( bytes_read == 0 )
+        {
+            body.complete();
+        }
+        else
+        {
+            body.append( buffer , bytes_read );
+        }
+    }
+
+private:
+
+    GFile *             file;
+    GFileInputStream *  input_stream;
+    char                buffer[512];
 };
 
 //=============================================================================
@@ -321,7 +506,7 @@ public:
 	    }
 	}
 
-    void set_status( int sc , const String & msg )
+    void set_status( int sc , const String & msg = String() )
     {
         if ( msg.empty() )
         {
@@ -336,6 +521,63 @@ public:
     void set_content_type( const String & content_type )
     {
         soup_message_headers_set_content_type( message_context.message->response_headers , content_type.c_str() , 0 );
+    }
+
+    void set_content_length( goffset content_length )
+    {
+        soup_message_headers_set_content_length( message_context.message->response_headers , content_length );
+    }
+
+    void set_stream_writer( StreamWriter * stream_writer )
+    {
+        new ::StreamBody( message_context , stream_writer );
+    }
+
+    virtual bool respond_with_file_contents( const String & file_name , const String & content_type )
+    {
+        if ( ! g_file_test( file_name.c_str() , G_FILE_TEST_EXISTS ) )
+        {
+            return false;
+        }
+
+        GFile * file = g_file_new_for_path( file_name.c_str() );
+
+        GFileInfo * info = g_file_query_info( file , G_FILE_ATTRIBUTE_STANDARD_SIZE , G_FILE_QUERY_INFO_NONE , 0 , 0 );
+
+        if ( ! info )
+        {
+            g_object_unref( file );
+            return false;
+        }
+
+        goffset size = g_file_info_get_size( info );
+
+        g_object_unref( info );
+
+        if ( ! size )
+        {
+            g_object_unref( file );
+            return false;
+        }
+
+        if ( content_type.empty() )
+        {
+            set_content_type( "application/octet-stream" );
+        }
+        else
+        {
+            set_content_type( content_type );
+        }
+
+        set_content_length( size );
+
+        set_status( SOUP_STATUS_OK );
+
+        new ::StreamBody( message_context , new FileStreamWriter( file ) );
+
+        g_object_unref( file );
+
+        return true;
     }
 
 };
