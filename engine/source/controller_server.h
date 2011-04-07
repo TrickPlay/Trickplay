@@ -3,10 +3,11 @@
 
 
 #include "trickplay/controller.h"
-#include <sstream>
+
 #include "common.h"
 #include "server.h"
 #include "context.h"
+#include "app_resource_request_handler.h"
 
 class ControllerServer : private Server::Delegate
 {
@@ -22,6 +23,10 @@ public:
     // Returns true if our listener is up and the mDNS service was established
 
     bool is_ready() const;
+
+    //..........................................................................
+    // returns the object which handles all HTTP requests for uri http://<host>:<port>/api/*
+    HttpServer::RequestHandler& get_api_request_handler( ) const;
 
     //..........................................................................
 
@@ -55,51 +60,9 @@ private:
 
     //..........................................................................
 
-    String serve_path( const String & group, const String & path );
-
-    void drop_web_server_group( const String & group );
-
     ControllerServer( const ControllerServer & ) {}
 
     //..........................................................................
-
-    struct HTTPInfo
-    {
-        HTTPInfo()
-            :
-            is_http( false ),
-            headers_done( false )
-        {
-/* FOR POST
- *         	std::ostringstream * stream_ptr = new std::ostringstream( std::ostringstream::out|std::ostringstream::binary );
- *       	stream_data.reset( stream_ptr );
-*/
-        }
-
-        void reset()
-        {
-            is_http = false;
-            method.clear();
-            url.clear();
-            version.clear();
-            headers.clear();
-            headers_done = false;
-/* FOR POST
-        	std::ostringstream * stream_ptr = new std::ostringstream( std::ostringstream::out|std::ostringstream::binary );
-            stream_data.reset( stream_ptr );
-*/
-        }
-
-        bool        is_http;
-        String      method;
-        String      url;
-        String      version;
-        StringList  headers;
-        bool        headers_done;
- /* FOR POST      std::auto_ptr<std::ostringstream> stream_data;
-        String mime_type;
-*/
-    };
 
     //..........................................................................
     // Data for each connection
@@ -116,7 +79,6 @@ private:
         bool            disconnect;
         String		address;
         int		version;
-        HTTPInfo        http;
         TPController *	controller;
     };
 
@@ -164,20 +126,6 @@ private:
     void process_command( gpointer connection, ConnectionInfo & info, gchar ** parts );
 
     //..........................................................................
-
-    void handle_http_get( gpointer connection, const gchar * line );
-    void handle_http_line( gpointer connection, ConnectionInfo & info, const gchar * line );
-
-    String handle_http_api( gpointer connection , const String & url );
-
-    // The key is a hash we generate, the first string is the real path
-    // and the second string is the group.
-
-    typedef std::map<String, StringPair> WebServerPathMap;
-
-    WebServerPathMap    path_map;
-
-    //..........................................................................
     // The map of connections
 
     typedef std::map<gpointer, ConnectionInfo> ConnectionMap;
@@ -187,6 +135,7 @@ private:
     //..........................................................................
 
     TPContext * context;
+    AppResourceRequestHandler * app_resource_request_handler;
 };
 
 

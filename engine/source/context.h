@@ -9,6 +9,10 @@
 #include "controller_list.h"
 #include "app.h"
 
+#include "http_server.h"
+#include "api_request_handler.h"
+#include "app_resource_request_handler.h"
+
 //-----------------------------------------------------------------------------
 // Internal notifications
 
@@ -60,6 +64,7 @@ class Image;
 class ControllerLIRC;
 class AppPushServer;
 class HttpServer;
+class APIRequestHandler;
 
 //-----------------------------------------------------------------------------
 
@@ -328,6 +333,8 @@ private:
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
+
+    APIRequestHandler * 		api_request_handler;
 
     TPLogHandler                external_log_handler;
     void *                      external_log_handler_data;
