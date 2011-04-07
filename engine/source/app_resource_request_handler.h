@@ -19,7 +19,7 @@ public:
 
 	~AppResourceRequestHandler( );
 
-    void do_get( const HttpServer::Request& request, HttpServer::Response& response );
+    void handle_http_request( const HttpServer::Request& request, HttpServer::Response& response );
 
 	String serve_path( const String & group, const String & path );
 

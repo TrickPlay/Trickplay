@@ -55,6 +55,9 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
         app_resource_request_handler = new AppResourceRequestHandler( context );
 
+        //TODO: remove the below line as it is added only for testing
+        String resource_id = app_resource_request_handler->serve_path( "", "hosts" );
+        g_info ( ( String( " resource_id of 'hosts' is " ) + resource_id ).c_str() );
 #ifdef TP_CONTROLLER_DISCOVERY_MDNS
 
         if ( context->get_bool( TP_CONTROLLERS_MDNS_ENABLED , true ) )
