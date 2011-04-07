@@ -61,6 +61,13 @@ void HttpServer::register_handler( const String & path , RequestHandler * handle
 			( GDestroyNotify ) HandlerUserData::destroy );
 }
 
+//-----------------------------------------------------------------------------
+
+void HttpServer::unregister_handler( const String & path )
+{
+    soup_server_remove_handler( server , path.c_str() );
+}
+
 //=============================================================================
 
 struct HttpMessageContext
