@@ -59,6 +59,7 @@ class Installer;
 class Image;
 class ControllerLIRC;
 class AppPushServer;
+class HttpServer;
 
 //-----------------------------------------------------------------------------
 
@@ -154,6 +155,10 @@ public:
     //.........................................................................
 
     Installer * get_installer() const;
+
+    //.........................................................................
+
+    HttpServer * get_http_server() const;
 
     //.........................................................................
 
@@ -308,6 +313,8 @@ private:
     ControllerLIRC *            controller_lirc;
 
     AppPushServer *             app_push_server;
+
+    HttpServer *                http_server;
 
     Console *                   console;
 
