@@ -27,6 +27,7 @@
 #include "versions.h"
 #include "controller_lirc.h"
 #include "app_push_server.h"
+#include "http_server.h"
 
 //-----------------------------------------------------------------------------
 
@@ -44,6 +45,7 @@ TPContext::TPContext()
     controller_server( NULL ),
     controller_lirc( NULL ),
     app_push_server( NULL ),
+    http_server( NULL ),
     console( NULL ),
     downloads( NULL ),
     installer( NULL ),
@@ -1047,6 +1049,10 @@ int TPContext::run()
     notify( this , TP_NOTIFICATION_PROFILE_CHANGED );
 
     //.........................................................................
+
+    http_server = new HttpServer( 0 );
+
+    //.........................................................................
     // Create the controller server
 
     if ( get_bool( TP_CONTROLLERS_ENABLED, TP_CONTROLLERS_ENABLED_DEFAULT ) )
@@ -1353,6 +1359,14 @@ int TPContext::run()
     {
         delete controller_server;
         controller_server = NULL;
+    }
+
+    //.........................................................................
+
+    if ( http_server )
+    {
+        delete http_server;
+        http_server = NULL;
     }
 
     //.........................................................................
@@ -2357,6 +2371,14 @@ Installer * TPContext::get_installer() const
 {
     g_assert( installer );
     return installer;
+}
+
+//-----------------------------------------------------------------------------
+
+HttpServer * TPContext::get_http_server() const
+{
+    g_assert( http_server );
+    return http_server;
 }
 
 //-----------------------------------------------------------------------------
