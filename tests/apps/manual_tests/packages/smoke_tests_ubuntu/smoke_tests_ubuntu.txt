@@ -14,5 +14,9 @@
 {
 "name": "00004_ui_element_animate.lua", 
 "active": "true"
-}
+},
+{
+"name": "00005_clone_fractal.lua", 
+"active": "true"
+},
 ]

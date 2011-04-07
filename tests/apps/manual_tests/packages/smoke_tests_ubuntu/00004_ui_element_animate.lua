@@ -23,7 +23,7 @@ function generate_test_image ()
 	            },
 	         	Image {
 					name = "animated_png",
-	         		src = test_folder.."/".."assets/logo.png",
+	         		src = "/packages/"..test_folder.."/assets/logo.png",
 	         		position = { 200, 200 },
 	         		size = { 100, 100 }
 	         	}
