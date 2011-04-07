@@ -29,6 +29,7 @@
 #include "app_push_server.h"
 #include "http_server.h"
 
+
 //-----------------------------------------------------------------------------
 
 static int g_argc     = 0;
@@ -52,6 +53,7 @@ TPContext::TPContext()
     current_app( NULL ),
     media_player_constructor( NULL ),
     media_player( NULL ),
+    api_request_handler( NULL ),
     external_log_handler( NULL ),
     external_log_handler_data( NULL ),
     user_data( NULL )
@@ -1093,6 +1095,16 @@ int TPContext::run()
     }
 
     //.........................................................................
+	http_server = new HttpServer();
+	// print the port on which http server is bound
+	char port[12];
+	sprintf(port, "%d", http_server->get_port());
+	g_info((String("HttpServer listening on port ") + port).c_str());
+
+	g_info(" registering http request handler for path /api ");
+	api_request_handler = new APIRequestHandler( this );
+
+	//.........................................................................
     // LIRC controller
 
     controller_lirc = ControllerLIRC::make( this );
@@ -1321,7 +1333,7 @@ int TPContext::run()
 
     if ( installer )
     {
-        delete installer;
+        delete installer;String serve_path( const String & group, const String & path );
         installer = NULL;
     }
 

@@ -34,7 +34,8 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
     discovery_mdns( NULL ),
     discovery_upnp( NULL ),
     server( NULL ),
-    context( ctx )
+    context( ctx ),
+    app_resource_request_handler( NULL )
 {
     GError * error = NULL;
 
@@ -51,6 +52,8 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
         server.reset( new_server );
 
         g_info( "CONTROLLER SERVER LISTENER READY ON PORT %d", server->get_port() );
+
+        app_resource_request_handler = new AppResourceRequestHandler( context );
 
 #ifdef TP_CONTROLLER_DISCOVERY_MDNS
 
@@ -84,6 +87,9 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
 ControllerServer::~ControllerServer()
 {
+	if ( app_resource_request_handler ) {
+		delete app_resource_request_handler;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -281,7 +287,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             }
             else if ( g_str_has_prefix( ds->uri, "file://" ) )
             {
-                path = serve_path( "", String( ( ds->uri ) + 7 ) );
+                path = app_resource_request_handler->serve_path( "", String( ( ds->uri ) + 7 ) );
                 uri = path.c_str();
             }
 
@@ -407,24 +413,17 @@ void ControllerServer::connection_data_received( gpointer connection, const char
     {
         return;
     }
+    else {
+		if (!strlen( line )) {
+			return;
+		}
 
-    if ( it->second.http.is_http )
-    {
-        handle_http_line( connection, it->second, line );
-    }
-    else
-    {
-        if ( !strlen( line ) )
-        {
-            return;
-        }
+		gchar ** parts = g_strsplit( line, "\t", 0 );
 
-        gchar ** parts = g_strsplit( line, "\t", 0 );
+		process_command( connection, it->second, parts );
 
-        process_command( connection, it->second, parts );
-
-        g_strfreev( parts );
-    }
+		g_strfreev( parts );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -469,12 +468,6 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        // It is http
-
-        if ( info.http.is_http )
-        {
-            return;
-        }
 
         info.version = atoi( parts[1] );
 
@@ -756,449 +749,9 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
     }
-    else if ( cmp2( cmd, "GE" ) )
-    {
-        // Possibly an HTTP get
-
-        // Cannot come from a connection that is already a controller
-
-        if ( info.controller )
-        {
-            return;
-        }
-
-        handle_http_get( connection, parts[0] );
-    }
-    /* For POST
-    else if ( cmp2( cmd, "PO" ) )
-	{
-		// Possibly an HTTP post
-
-		// TODO: what is this ????????????Cannot come from a connection that is already a controller
-
-		if ( info.controller )
-		{
-			return;
-		}
-
-		handle_http_post( connection, parts[0] );
-	}
-	*/
     else
     {
         g_warning( "UNKNOWN CONTROLLER COMMAND '%s'", cmd );
     }
 }
 
-//-----------------------------------------------------------------------------
-
-void ControllerServer::handle_http_get( gpointer connection, const gchar * line )
-{
-    ConnectionInfo * info = find_connection( connection );
-
-    if ( !info )
-    {
-        return;
-    }
-
-    gchar ** parts = g_strsplit( line, " ", 3 );
-
-    if ( g_strv_length( parts ) == 3 && !strcmp( parts[0], "GET" ) )
-    {
-        info->disconnect = false;
-        info->http.is_http = true;
-        info->http.method = parts[0];
-        info->http.url = parts[1];
-        info->http.version = parts[2];
-    }
-
-    g_strfreev( parts );
-}
-
-//-----------------------------------------------------------------------------
-/* For Post
-void ControllerServer::handle_http_post( gpointer connection, const gchar * line )
-{
-    ConnectionInfo * info = find_connection( connection );
-
-    if ( !info )
-    {
-        return;
-    }
-
-    gchar ** parts = g_strsplit( line, " ", 3 );
-
-    if ( g_strv_length( parts ) == 3 && !strcmp( parts[0], "POST" ) )
-    {
-        info->disconnect = false;
-        info->http.is_http = true;
-        info->http.method = parts[0];
-        info->http.url = parts[1];
-        info->http.version = parts[2];
-    }
-
-    g_strfreev( parts );
-}
-*/
-//-----------------------------------------------------------------------------
-
-void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & info, const gchar * line )
-{
-    HTTPInfo & hi = info.http;
-
-    if ( !hi.headers_done )
-    {
-        if ( strlen( line ) )
-        {
-// We are not using the headers yet
-#if 0
-
-            hi.headers.push_back( line );
-
-            // Protect against too many headers
-
-            if ( hi.headers.size() > 256 )
-            {
-                server->close_connection( connection );
-            }
-#endif
-          /* FOR POST  if (hi.mime_type.empty() && strstr(line, "ContentType: ")) {
-
-            }
-          */
-        }
-        else
-        {
-        	hi.headers_done = true;
-            // We have received all the headers
-
-#if 0
-            for ( StringList::const_iterator it = hi.headers.begin(); it != hi.headers.end(); ++it )
-            {
-                g_debug( "[%s]", it->c_str() );
-            }
-#endif
-/* For POST
-            if ( hi.method.compare( "POST" ) == 0 ) {
-        // TODO: set connection in stream mode and return
-            	return;
-            }
-*/
-            g_debug( "PROCESSING %s '%s'", hi.method.c_str(), hi.url.c_str() );
-
-            bool found = false;
-
-            if ( hi.url.size() > 1 )
-            {
-                String id( hi.url.substr( 1 ) );
-
-                WebServerPathMap::const_iterator it = path_map.find( id );
-
-                if ( it != path_map.end() )
-                {
-                    String path( it->second.first );
-
-                    found = server->write_file( connection, path.c_str(), true );
-
-                    g_debug( "  SERVED '%s'", path.c_str() );
-                }
-            }
-
-            if ( !found )
-            {
-                String response = handle_http_api( connection , hi.url );
-
-                if ( ! response.empty() )
-                {
-                    server->write_printf( connection , "%s 200 OK\r\nContent-Length: %" G_GSIZE_FORMAT "\r\nContent-Type: application/json\r\n\r\n" , hi.version.c_str() , response.size() );
-                    server->write( connection , response.data() , response.size() );
-                    g_debug( "  API RESPONSE" );
-                }
-                else
-                {
-                    server->write_printf( connection, "%s 404 Not found\r\nContent-Length: 0\r\n\r\n", hi.version.c_str() );
-
-                    g_debug( "  NOT FOUND" );
-                }
-            }
-
-            hi.reset();
-        }
-    }
-}
-
-/* For POST
-void ControllerServer::handle_http_stream_data( gpointer connection, ConnectionInfo & info, const char * data, int size )
-{
-	HTTPInfo & hi = info.http;
-	if ( size > 0 ) {
-		hi.stream_data->write(data, size);
-	} else {
-		String response = handle_http_api( connection , hi.url );
-
-		if ( ! response.empty() )
-		{
-			server->write_printf( connection , "%s 200 OK\r\nContent-Length: %" G_GSIZE_FORMAT "\r\nContent-Type: application/json\r\n\r\n" , hi.version.c_str() , response.size() );
-			server->write( connection , response.data() , response.size() );
-			g_debug( "  API RESPONSE" );
-		}
-		else
-		{
-			server->write_printf( connection, "%s 404 Not found\r\nContent-Length: 0\r\n\r\n", hi.version.c_str() );
-
-			g_debug( "  NOT FOUND" );
-		}
-		hi.reset();
-	}
-}
-*/
-
-String get_file_extension( const String & path, bool include_dot = true )
-{
-    String result;
-
-    if ( !path.empty() )
-    {
-        // See if the last character is a separator. If it is,
-        // we bail. Otherwise, g_path_get_basename would give us
-        // the element before the separator and not the last element.
-
-        if ( !g_str_has_suffix( path.c_str(), G_DIR_SEPARATOR_S ) )
-        {
-            gchar * basename = g_path_get_basename( path.c_str() );
-
-            if ( basename )
-            {
-                gchar * * parts = g_strsplit( basename, ".", 0 );
-
-                guint count = g_strv_length( parts );
-
-                if ( count > 1 )
-                {
-                    result = parts[count - 1];
-
-                    if ( !result.empty() && include_dot )
-                    {
-                        result = "." + result;
-                    }
-                }
-
-                g_strfreev( parts );
-
-                g_free( basename );
-            }
-        }
-    }
-
-    return result;
-}
-
-//-----------------------------------------------------------------------------
-
-String ControllerServer::serve_path( const String & group, const String & path )
-{
-    String s = group + ":" + path;
-
-    gchar * id = g_compute_checksum_for_string( G_CHECKSUM_SHA1, s.c_str(), -1 );
-    String result( id );
-    g_free( id );
-
-    result += get_file_extension( path );
-
-    if ( path_map.find( result ) == path_map.end() )
-    {
-        g_debug( "SERVING %s : %s", result.c_str(), path.c_str() );
-
-        path_map[result] = StringPair( path, group );
-    }
-
-    return result;
-}
-
-//-----------------------------------------------------------------------------
-
-void ControllerServer::drop_web_server_group( const String & group )
-{
-    for ( WebServerPathMap::iterator it = path_map.begin(); it != path_map.end(); )
-    {
-        if ( it->second.second == group )
-        {
-            g_debug( "DROPPING %s : %s", it->first.c_str(), it->second.first.c_str() );
-
-            path_map.erase( it++ );
-        }
-        else
-        {
-            ++it;
-        }
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-String ControllerServer::handle_http_api( gpointer connection , const String & url )
-{
-    //.........................................................................
-    // Crack the URL into the path and query
-
-    UriParserStateA state;
-    UriUriA uri;
-
-    state.uri = & uri;
-
-    String      path;
-    StringMap   query;
-
-    if ( URI_SUCCESS == uriParseUriA( & state , url.c_str() ) )
-    {
-        for( UriPathSegmentA * segment = uri.pathHead; segment; segment = segment->next )
-        {
-            path += "/";
-            path += String( segment->text.first , segment->text.afterLast - segment->text.first );
-        }
-
-        UriQueryListA * q = 0;
-
-        if ( URI_SUCCESS == uriDissectQueryMallocExA( & q , 0 , uri.query.first , uri.query.afterLast , URI_TRUE , URI_BR_DONT_TOUCH ) )
-        {
-            for( UriQueryListA * n = q; n ; n = n->next )
-            {
-                query[ n->key ] = n->value ? n->value : "";
-            }
-        }
-
-        uriFreeQueryListA( q );
-    }
-
-    uriFreeUriMembersA( & uri );
-
-    //.........................................................................
-
-    String result;
-
-    if ( path == "/api/apps" )
-    {
-        if ( SystemDatabase * db = context->get_db() )
-        {
-            SystemDatabase::AppInfo::List apps = db->get_apps_for_current_profile();
-
-            JsonArray * array = json_array_new();
-
-            SystemDatabase::AppInfo::List::const_iterator it;
-
-            for( it = apps.begin(); it != apps.end(); ++it )
-            {
-                JsonObject * o = json_object_new();
-
-                json_object_set_string_member( o , "name" , it->name.c_str() );
-                json_object_set_string_member( o , "id" , it->id.c_str() );
-                json_object_set_string_member( o , "version" , it->version.c_str() );
-                json_object_set_int_member( o , "release" , it->release );
-                json_object_set_string_member( o , "badge_style" , it->badge_style.c_str() );
-                json_object_set_string_member( o , "badge_text" , it->badge_text.c_str() );
-
-                json_array_add_object_element( array , o );
-            }
-
-            JsonNode * node = json_node_new( JSON_NODE_ARRAY );
-
-            json_node_set_array( node , array );
-
-            json_array_unref( array );
-
-            JsonGenerator * gen = json_generator_new();
-
-            json_generator_set_root( gen , node );
-
-            gsize length = 0;
-
-            gchar * json = json_generator_to_data( gen , & length );
-
-            result = String( json , length );
-
-            g_free( json );
-
-            g_object_unref( gen );
-        }
-    }
-    else if ( path == "/api/launch" )
-    {
-        String app_id( query[ "id" ] );
-
-        if ( ! app_id.empty() )
-        {
-            if ( SystemDatabase * db = context->get_db() )
-            {
-                if ( db->is_app_in_current_profile( app_id ) )
-                {
-                    App::LaunchInfo launch_info;
-
-                    // TODO: We could populate the launch info with stuff that may
-                    // be interesting to the app.
-
-                    // TODO: Not very well protected - could launch the app that is
-                    // running now.
-
-                    if ( TP_RUN_OK == context->launch_app( app_id.c_str() , launch_info ) )
-                    {
-                        result = "{'result':0}";
-                    }
-                }
-            }
-        }
-    }
-    else if ( path == "/api/current_app" )
-    {
-        App *current_app = context->get_current_app();
-        if(NULL != current_app)
-        {
-            JsonObject * o = json_object_new();
-
-            json_object_set_string_member( o, "name", current_app->get_metadata().name.c_str() );
-            json_object_set_string_member( o, "id", current_app->get_id().c_str() );
-            json_object_set_string_member( o, "version", current_app->get_metadata().version.c_str() );
-            json_object_set_int_member( o, "release", current_app->get_metadata().release );
-
-            JsonNode * node = json_node_new ( JSON_NODE_OBJECT );
-
-            json_node_set_object( node, o );
-
-            json_object_unref( o );
-
-            JsonGenerator * gen  = json_generator_new();
-
-            json_generator_set_root( gen, node );
-
-            gsize length = 0;
-
-            gchar * json = json_generator_to_data( gen, &length );
-
-            result = String( json, length );
-
-            g_free( json );
-
-            g_object_unref( gen );
-        } else {
-            result = "{}";
-        }
-    }
-    /*
-    else if ( path == "/app/submit_picture" )
-    {
-    	ConnectionMap::iterator it = connections.find( connection );
-    	if ( it != connections.end() )
-		{
-    		ConnectionInfo & info = it->second;
-    		String data = info.http.stream_data->str();
-        	//tp_controller_submit_picture( info.controller, data.c_str(), info.http.);
-		}
-    }
-    else if ( path == "/api/submit_audio_clip" )
-    {
-
-    }
-	*/
-    return result;
-}
-
-//-----------------------------------------------------------------------------
