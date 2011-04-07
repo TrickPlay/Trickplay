@@ -24,604 +24,600 @@ AppPushServer * AppPushServer::make( TPContext * context )
         return 0;
     }
 
-    try
-    {
-
-        log( "INITIALIZING" );
-
-        return new AppPushServer( context ,
-            context->get_int( TP_APP_PUSH_PORT , TP_APP_PUSH_PORT_DEFAULT ) );
-    }
-    catch ( const String & e )
-    {
-        g_warning( "FAILED TO START APP PUSH SERVER : %s" , e.c_str() );
-        return 0;
-    }
+    return new AppPushServer( context );
 #endif
+}
+
+//.............................................................................
+
+AppPushServer::AppPushServer( TPContext * _context )
+:
+    context( _context ),
+    current_push_path( 0 )
+{
+    context->get_http_server()->register_handler( "/push" , this );
+
+    log( "READY" );
 }
 
 //.............................................................................
 
 AppPushServer::~AppPushServer()
 {
-    if ( listener )
-    {
-        g_socket_listener_close( listener );
-        g_object_unref( G_OBJECT( listener ) );
-        listener = 0;
-    }
+    context->get_http_server()->unregister_handler( "/push" );
+
+    g_free( current_push_path );
 }
 
 //.............................................................................
 
-AppPushServer::AppPushServer( TPContext * _context , guint16 port )
-:
-    context( _context ),
-    listener( 0 )
+void AppPushServer::handle_http_post( const HttpServer::Request & request , HttpServer::Response & response )
 {
-    GInetAddress * ia = g_inet_address_new_any( G_SOCKET_FAMILY_IPV4 );
+    response.set_status( SOUP_STATUS_BAD_REQUEST );
 
-    GSocketAddress * address = g_inet_socket_address_new( ia, port );
+    //.........................................................................
+    // If the path is /push, they are initiating a push. Otherwise, they are
+    // pushing a file.
 
-    g_object_unref( G_OBJECT( ia ) );
+    String path = request.get_path();
 
-    GSocketAddress * ea = NULL;
-
-    listener = g_socket_listener_new();
-
-    GError * sub_error = NULL;
-
-    g_socket_listener_add_address( listener, address, G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, &ea, &sub_error );
-
-    g_object_unref( G_OBJECT( address ) );
-
-    if ( sub_error )
+    if ( path != "/push" )
     {
-        g_socket_listener_close( listener );
-        g_object_unref( G_OBJECT( listener ) );
-        listener = NULL;
+        if ( ! current_push_path )
+        {
+            return;
+        }
 
-        String e( sub_error->message );
+        if ( path != String( current_push_path ) )
+        {
+            return;
+        }
 
-        g_clear_error( & sub_error );
+        handle_push_file( request , response );
 
-        throw e ;
-    }
-
-    port = g_inet_socket_address_get_port( G_INET_SOCKET_ADDRESS( ea ) );
-
-    g_socket_listener_accept_async( listener, NULL, accept_callback, this );
-
-    if ( ea )
-    {
-        g_object_unref( G_OBJECT( ea ) );
-    }
-
-    log( "READY ON PORT %u" , port );
-}
-
-
-//.............................................................................
-
-void AppPushServer::accept_callback( GObject * source, GAsyncResult * result, gpointer data )
-{
-    GSocketConnection * connection = g_socket_listener_accept_finish( G_SOCKET_LISTENER( source ), result, NULL, NULL );
-
-    if ( connection )
-    {
-        // Get the remote address
-
-        gchar * remote_address = g_inet_address_to_string(
-                g_inet_socket_address_get_address(
-                        G_INET_SOCKET_ADDRESS(
-                                g_socket_connection_get_remote_address(
-                                        connection, NULL ) ) ) );
-
-        log( "CONNECTION ACCEPTED FROM %s" , remote_address );
-
-        g_free( remote_address );
-
-        // Get the input stream for the connection
-        // Start reading from the input stream
-
-        GDataInputStream * input_stream = g_data_input_stream_new( g_io_stream_get_input_stream( G_IO_STREAM( connection ) ) );
-
-        g_assert( input_stream );
-
-        ConnectionState * state = new ConnectionState;
-
-        state->connection = connection;
-        state->state = ConnectionState::APP;
-        state->files_remaining = 0;
-
-        g_object_set_data_full( G_OBJECT( input_stream ) , "tp-state" , state , ( GDestroyNotify ) ConnectionState::destroy );
-
-        g_data_input_stream_read_line_async( input_stream , 0 , NULL , line_read , data );
-
-        g_object_unref( input_stream );
-    }
-
-    // Accept again
-
-    g_socket_listener_accept_async( G_SOCKET_LISTENER( source ), NULL, accept_callback, data );
-}
-
-//.............................................................................
-
-void AppPushServer::line_read( GObject * stream , GAsyncResult * result , gpointer me )
-{
-    ( ( AppPushServer * ) me )->line_read( stream , result );
-}
-
-//.............................................................................
-
-void AppPushServer::line_read( GObject * stream , GAsyncResult * result )
-{
-    ConnectionState * state = ( ConnectionState * ) g_object_get_data( stream , "tp-state" );
-
-    g_assert( state );
-
-    GError * error = 0;
-
-    char * line = g_data_input_stream_read_line_finish( G_DATA_INPUT_STREAM( stream ) , result , NULL , & error );
-
-    if ( error )
-    {
-        log( "READ ERROR : %s" , error->message );
-        g_clear_error( & error );
-        close( state );
         return;
     }
 
-    if ( line )
+
+    //.........................................................................
+    // Check the content type
+
+    if ( request.get_content_type() != "application/json" )
     {
-        //log( "READ LINE [%s]" , g_strstrip( line ) );
-
-        std::vector<String> parts;
-
-        // Split the incoming line by spaces.
-
-        {
-            gint tokens = state->state == ConnectionState::APP ? 3 : 2;
-
-            gchar * * p = g_strsplit( g_strstrip( line ) , " " , tokens );
-
-            for ( guint i = 0; i < g_strv_length( p ); ++i )
-            {
-                parts.push_back( p[ i ] );
-            }
-
-            g_strfreev( p );
-        }
-
-        g_free( line );
-
-        try
-        {
-            switch( state->state )
-            {
-                // We are expecting an APP line, which has the number of files
-                // followed by the contents of the app file.
-
-                case ConnectionState::APP:
-                {
-                    if ( parts.size() != 3 )
-                    {
-                        throw String( "INVALID 'APP' LINE" );
-                    }
-
-                    if ( parts[ 0 ] != "APP" )
-                    {
-                        throw String( "EXPECTING 'APP' LINE" );
-                    }
-
-                    state->app_file = parts[ 2 ];
-                    state->file_count = atoi( parts[ 1 ].c_str() );
-                    state->files_remaining = state->file_count;
-                    state->state = ConnectionState::FILE_LIST;
-
-                    if ( state->file_count <= 0 )
-                    {
-                        throw String( "INVALID FILE COUNT, OR NO FILES" );
-                    }
-                }
-                break;
-
-                // We are reading the list of files after the APP line.
-                // Each line has an MD5 hash followed by the path/file name.
-
-                case ConnectionState::FILE_LIST:
-                {
-                    if ( parts.size() != 2 )
-                    {
-                        throw String( "INVALID FILE LINE" );
-                    }
-
-                    state->file_hashes.push_back( StringPair( parts[ 0 ] , parts[ 1 ] ) );
-
-                    state->files_remaining -= 1;
-
-                    if ( state->files_remaining == 0 )
-                    {
-                        // If we have received all the file lines, we figure out
-                        // what the response will be. This could be to send all
-                        // files, to send some files or that we are up to date
-                        // and need no files at all.
-
-                        send_response( state );
-
-                        state->next_file_index = 0;
-                        state->files_remaining = state->changed_files.size();
-                        state->state = ConnectionState::FILE_SIZE;
-
-                        // The response is that we need no more files. We
-                        // launch the app, close the connection and are done.
-
-                        if ( state->files_remaining == 0 )
-                        {
-                            launch_it( state );
-                            close( state );
-                            return;
-                        }
-                    }
-                }
-                break;
-
-                // We are expecting a line with the size of the next file.
-
-                case ConnectionState::FILE_SIZE:
-                {
-                    if ( parts.size() != 1 )
-                    {
-                        throw String( "INVALID FILE SIZE" );
-                    }
-
-                    state->next_file_size = atoi( parts[ 0 ].c_str() );
-
-                    if ( state->next_file_size < 0 )
-                    {
-                        throw String( "FILE SIZE < 0" );
-                    }
-
-                    // Once we have the size of the file, we switch away
-                    // from line oriented input and instead read the
-                    // file contents.
-
-                    state->state = ConnectionState::FILE_CONTENTS;
-
-                    log( "RECEIVING %s" , state->file_hashes[ state->changed_files[ state->next_file_index ] ].second.c_str() );
-                }
-                break;
-
-                default:
-                {
-                    throw String( "INVALID LINE" );
-                }
-                break;
-
-            }
-        }
-        catch ( const String & e )
-        {
-            log( "%s" , e.c_str() );
-            close( state );
-            return;
-        }
+        return;
     }
 
-    if ( state->state == ConnectionState::FILE_CONTENTS )
+    //.........................................................................
+    // Get the body of the request
+
+    const HttpServer::Request::Body & body( request.get_body() );
+
+    if ( 0 == body.get_length() || 0 == body.get_data() )
     {
-        // Reading file contents - at most the size of our input buffer
-
-        gsize to_read = std::min( sizeof( state->input_buffer ) , size_t( state->next_file_size ) );
-
-        g_input_stream_read_async( G_INPUT_STREAM( stream ) , state->input_buffer , to_read , TRICKPLAY_PRIORITY , NULL , file_read , this );
+        return;
     }
-    else
-    {
-        // Read another line.
-
-        g_data_input_stream_read_line_async( G_DATA_INPUT_STREAM( stream ) , 0 , NULL , line_read , this );
-    }
-}
-
-//.............................................................................
-
-void AppPushServer::close( ConnectionState * state )
-{
-    g_assert( state );
-    GSocketConnection * connection = state->connection;
-    g_io_stream_close( G_IO_STREAM( connection ) , NULL , NULL );
-    g_object_unref( connection );
-}
-
-//.............................................................................
-// Compare the file list against what we have on disk and calculate a 'diff' to
-// send to the client.
-
-void AppPushServer::send_response( ConnectionState * state )
-{
-    g_assert( state );
-    g_assert( state->state == ConnectionState::FILE_LIST );
-    g_assert( state->files_remaining == 0 );
-
-    if ( ! App::load_metadata_from_data( state->app_file.c_str() , state->metadata ) )
-    {
-        throw String( "INVALID APP METADATA" );
-    }
-
-    state->changed_files.clear();
-    state->target_file_names.clear();
 
     FreeLater free_later;
 
-    // Establish the base directory for this app
+    //.........................................................................
+    // Parse the body
 
-    gchar * app_path = g_build_filename( context->get( TP_DATA_PATH ) , "pushed" , state->metadata.id.c_str() , NULL );
+    JsonParser * parser = json_parser_new();
 
-    state->metadata.path = app_path;
+    if ( ! parser )
+    {
+        return;
+    }
+
+    free_later( parser , g_object_unref );
+
+    if ( ! json_parser_load_from_data( parser , body.get_data() , body.get_length() , 0 ) )
+    {
+        return;
+    }
+
+    JsonNode * root = json_parser_get_root( parser );
+
+    if ( ! root )
+    {
+        return;
+    }
+
+    if ( JSON_NODE_TYPE( root ) != JSON_NODE_OBJECT )
+    {
+        return;
+    }
+
+    JsonObject * object = json_node_get_object( root );
+
+    if ( ! object )
+    {
+        return;
+    }
+
+    // The root node should be an object that has a member called 'app'
+    // which is a string and has the contents of the app file.
+    // It should also have an array member called 'files'. This is an
+    // array of 3 element arrays. Each one has the file name, the md5
+    // hash of the file and the size of the file.
+
+    JsonNode * app = json_object_get_member( object , "app" );
+    JsonNode * files = json_object_get_member( object , "files" );
+
+    if ( ! app || ! files )
+    {
+        return;
+    }
+
+    if ( JSON_NODE_TYPE( app ) != JSON_NODE_VALUE || JSON_NODE_TYPE( files ) != JSON_NODE_ARRAY )
+    {
+        return;
+    }
+
+    String app_contents( json_node_get_string( app ) );
+
+    FileInfo::List file_list;
+
+    JsonArray * files_array = json_node_get_array( files );
+
+    if ( ! files_array )
+    {
+        return;
+    }
+
+    for( guint i = 0; i < json_array_get_length( files_array ); ++i )
+    {
+        JsonNode * element = json_array_get_element( files_array , i );
+
+        if ( element && JSON_NODE_TYPE( element ) == JSON_NODE_ARRAY )
+        {
+            if ( JsonArray * file_parts = json_node_get_array( element ) )
+            {
+                if ( json_array_get_length( file_parts ) >= 3 )
+                {
+                    JsonNode * file_name_node = json_array_get_element( file_parts , 0 );
+                    JsonNode * hash_node = json_array_get_element( file_parts , 1 );
+                    JsonNode * size_node = json_array_get_element( file_parts , 2 );
+
+                    if ( JSON_NODE_TYPE( file_name_node ) == JSON_NODE_VALUE &&
+                            JSON_NODE_TYPE( hash_node ) == JSON_NODE_VALUE &&
+                            JSON_NODE_TYPE( size_node ) == JSON_NODE_VALUE )
+                    {
+                        FileInfo info;
+
+                        info.name = json_node_get_string( file_name_node );
+                        info.md5 = json_node_get_string( hash_node );
+                        info.size = json_node_get_int( size_node );
+
+                        file_list.push_back( info );
+                    }
+                }
+            }
+        }
+    }
+
+    //.........................................................................
+    // Now we have app_contents and file_list
+
+    try
+    {
+        PushInfo push_info = compare_files( app_contents , file_list );
+
+        // Stop any other push that is going on
+
+        if ( current_push_path )
+        {
+            g_free( current_push_path );
+
+            current_push_path = 0;
+        }
+
+        if ( push_info.target_files.empty() )
+        {
+            // The app is up to date, we can just launch it
+
+            set_response( response , true , "Nothing changed." );
+
+            current_push_info = push_info;
+
+            launch_it();
+        }
+        else
+        {
+            // Make a new push path
+
+            GTimeVal t;
+
+            g_get_current_time( & t );
+
+            String s = Util::format( "%ld:%ld:%s" , t.tv_sec , t.tv_usec , push_info.metadata.id.c_str() );
+
+            GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 );
+
+            g_checksum_update( ck , ( const guchar * ) s.c_str() , s.length() );
+
+            current_push_path = g_strdup_printf( "/push/%s" , g_checksum_get_string( ck ) );
+
+            g_checksum_free( ck );
+
+            current_push_info = push_info;
+
+            set_response( response , false , "" , push_info.target_files.front().source.name , current_push_path );
+        }
+    }
+    catch( const String & e )
+    {
+        set_response( response , true , e );
+    }
+}
+
+//.............................................................................
+
+void AppPushServer::set_response( HttpServer::Response & response , bool done , const String & msg , const String & file , const String & url )
+{
+    JsonObject * o = json_object_new();
+
+    json_object_set_boolean_member( o , "done" , done );
+    json_object_set_string_member( o , "msg" , msg.c_str() );
+
+    if ( ! file.empty() )
+    {
+        json_object_set_string_member( o , "file" , file.c_str() );
+    }
+
+    if ( ! url.empty() )
+    {
+        json_object_set_string_member( o , "url" , url.c_str() );
+    }
+
+    JsonNode * node = json_node_new( JSON_NODE_OBJECT );
+
+    json_node_take_object( node , o );
+
+    JsonGenerator * g = json_generator_new();
+
+    json_generator_set_root( g , node );
+
+    json_node_free( node );
+
+    gsize length = 0;
+
+    gchar * json = json_generator_to_data( g , & length );
+
+    if ( json && length )
+    {
+        response.set_response( "application/json" , json , length );
+
+        response.set_status( SOUP_STATUS_OK );
+    }
+    else
+    {
+        g_free( json );
+    }
+
+    g_object_unref( g );
+}
+
+//.............................................................................
+
+AppPushServer::PushInfo AppPushServer::compare_files( const String & app_contents , const FileInfo::List & source_files )
+{
+    FreeLater free_later;
+
+    PushInfo push_info;
+
+    //.........................................................................
+    // Load and check the metadata for the app
+
+    if ( app_contents.empty() )
+    {
+        throw String( "App file is empty." );
+    }
+
+    if ( ! App::load_metadata_from_data( app_contents.c_str() , push_info.metadata ) )
+    {
+        throw String( "Invalid app file." );
+    }
+
+    //.........................................................................
+    // Create the root destination path
+
+    gchar * app_path = g_build_filename( context->get( TP_DATA_PATH ) , "pushed" , push_info.metadata.id.c_str() , NULL );
+
+    push_info.metadata.path = app_path;
 
     free_later( app_path );
 
     if ( g_mkdir_with_parents( app_path , 0700 ) != 0 )
     {
-        throw String( "FAILED TO CREATE DESTINATION DIRECTORY" );
+        throw String( "Failed to create destination directory" );
     }
 
-    // Now, go through the file list that was sent and compare hashes
-
-    int index = 0;
-
-    for ( StringPairVector::iterator it = state->file_hashes.begin(); it != state->file_hashes.end(); ++it , ++index )
+    for ( FileInfo::List::const_iterator it = source_files.begin(); it != source_files.end(); ++it )
     {
-        String source_hash( it->first );
-        String source_name( it->second );
+        FreeLater free_later;
 
-        gchar * target_path = Util::rebase_path( app_path , source_name.c_str() );
+        gchar * target_path = Util::rebase_path( app_path , it->name.c_str() , false );
 
-        g_assert( target_path );
+        if ( ! target_path )
+        {
+            throw Util::format( "Invalid file path '%s'" , it->name.c_str() );
+        }
+
+        TargetInfo target_info;
+
+        target_info.source = * it;
+        target_info.path = target_path;
 
         free_later( target_path );
 
-        // If the target file does not exist, we add it to the list of changed files.
+        //.....................................................................
+        // If the target file does not exist, mark it as such and add it to the
+        // list of changed files.
 
         if ( ! g_file_test( target_path , G_FILE_TEST_EXISTS ) )
         {
-            state->changed_files.push_back( index );
-            state->target_file_names.push_back( target_path );
-
-            // Create the destination directory for this file
-
-            gchar * d = g_path_get_dirname( target_path );
-
-            if ( strcmp( d , "." ) )
-            {
-                g_mkdir_with_parents( d , 0700 );
-            }
-
-            g_free( d );
+            push_info.target_files.push_back( target_info );
 
             continue;
         }
 
-        // It exists, so we have to get its MD5 hash
+        //.....................................................................
+        // It exists. Lets get a GFile for it.
 
-        GFile * f = g_file_new_for_path( target_path );
+        GFile * file = g_file_new_for_path( target_path );
 
-        GFileInputStream * input = g_file_read( f , NULL , NULL );
+        free_later( file , g_object_unref );
 
-        if ( ! input )
+        bool hash_it = true;
+
+        //.....................................................................
+        // Try to get the file's current size. If it is different than the size
+        // of the source file, we don't have to hash it to know that it changed.
+
+        GFileInfo * file_info = g_file_query_info( file , G_FILE_ATTRIBUTE_STANDARD_SIZE , G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS , 0 , 0 );
+
+        if ( file_info )
         {
-            g_file_delete( f , NULL , NULL );
-            g_object_unref( f );
-            state->changed_files.push_back( index );
-            state->target_file_names.push_back( target_path );
-        }
+            goffset size = g_file_info_get_size( file_info );
 
-        static guint BUFFER_SIZE = 1024;
+            g_object_unref( file_info );
 
-        guchar buffer[ BUFFER_SIZE ];
-
-
-        String target_hash;
-        GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 );
-
-        while ( true )
-        {
-            gssize read = g_input_stream_read( G_INPUT_STREAM( input ) , buffer , BUFFER_SIZE , NULL , NULL );
-
-            if ( read == 0 )
+            if ( size == 0 || size != target_info.source.size )
             {
-                // Done, populate the hash
-                target_hash = g_checksum_get_string( ck );
-                break;
-            }
-            else if ( read == -1 )
-            {
-                // Break with an empty hash signals a problem
-                break;
-            }
-            else
-            {
-                g_checksum_update( ck , buffer , read );
+                hash_it = false;
             }
         }
 
-        g_checksum_free( ck );
+        //.....................................................................
+        // If we know that it changed, we add it to the list and continue
 
-        g_object_unref( input );
-
-        if ( target_hash == source_hash )
+        if ( ! hash_it )
         {
-            // It is the same, no need to ask for it
-        }
-        else
-        {
-            // It is different, we delete our copy of it, since we will
-            // soon over-write it.
+            push_info.target_files.push_back( target_info );
 
-            g_file_delete( f , NULL , NULL );
-            state->changed_files.push_back( index );
-            state->target_file_names.push_back( target_path );
+            continue;
         }
 
-        g_object_unref( f );
-    }
+        //.....................................................................
+        // Otherwise, we have to get the target file's MD5 hash.
 
-    // Now, state->changed_files contains the indices of all the files we need
-
-    GOutputStream * output = g_io_stream_get_output_stream( G_IO_STREAM( state->connection ) );
-
-    String response;
-
-    if ( state->changed_files.empty() )
-    {
-        response = "DONE";
-    }
-    else if ( state->changed_files.size() == state->file_hashes.size() )
-    {
-        // Shortcut, if we need all files
-
-        response = "SENDALL";
-    }
-    else
-    {
-        response = "SEND";
-
-        for ( IntVector::const_iterator it = state->changed_files.begin(); it != state->changed_files.end(); ++it )
+        if ( GFileInputStream * input = g_file_read( file , NULL , NULL ) )
         {
-            gchar * s = g_strdup_printf( " %d" , *it );
-            response += s;
-            g_free( s );
+            free_later( input , g_object_unref );
+
+            if ( GChecksum * ck = g_checksum_new( G_CHECKSUM_MD5 ) )
+            {
+                static guint BUFFER_SIZE = 1024;
+
+                guchar buffer[ BUFFER_SIZE ];
+
+                String target_hash;
+
+                while ( true )
+                {
+                    gssize read = g_input_stream_read( G_INPUT_STREAM( input ) , buffer , BUFFER_SIZE , NULL , NULL );
+
+                    if ( read == 0 )
+                    {
+                        // Done, populate the hash
+                        target_hash = g_checksum_get_string( ck );
+                        break;
+                    }
+                    else if ( read == -1 )
+                    {
+                        // Break with an empty hash signals a problem
+                        break;
+                    }
+                    else
+                    {
+                        g_checksum_update( ck , buffer , read );
+                    }
+                }
+
+                g_checksum_free( ck );
+
+                // The hash matches, we can move on to the next file.
+
+                if ( target_hash == target_info.source.md5 )
+                {
+                    continue;
+                }
+            }
         }
+
+        //.....................................................................
+        // If we get here, for whatever reason, we assume the file is different
+
+        push_info.target_files.push_back( target_info );
     }
 
-    log( "%s" , response.c_str() );
-
-    response += "\n";
-
-    // Write out the response
-
-    gsize written;
-
-    g_output_stream_write_all( output , response.c_str() , response.length() , & written , NULL , NULL );
+    return push_info;
 }
 
 //.............................................................................
 
-void AppPushServer::file_read( GObject * stream , GAsyncResult * result , gpointer me )
+struct CancelPush
 {
-    ( ( AppPushServer * ) me )->file_read( stream , result );
-}
+    CancelPush( gchar * * _path ) : path( _path ) {}
+    ~CancelPush( ) { if ( path ) { g_free( * path ); * path = 0; } }
+    void reset() { path = 0; }
 
-//.............................................................................
+private:
 
-void AppPushServer::file_read( GObject * stream , GAsyncResult * result )
+    gchar * * path;
+};
+
+void AppPushServer::handle_push_file( const HttpServer::Request & request , HttpServer::Response & response )
 {
-    // When we are reading file contents, this means we got a piece of a file
+    response.set_status( SOUP_STATUS_BAD_REQUEST );
 
-    ConnectionState * state = ( ConnectionState * ) g_object_get_data( stream , "tp-state" );
-
-    g_assert( state );
-
-    gssize read = g_input_stream_read_finish( G_INPUT_STREAM( stream ) , result , NULL );
-
-    // An error (-1) or EOF (0) are treated the same way here - both unexpected
-
-    if ( read <= 0 )
+    if ( ! current_push_path )
     {
-        log( "READ ERROR" );
-        close( state );
         return;
     }
 
-    // Check that the amount of data we read is no more than we expect
+    // If we bail early, this thing will get destroyed and will free and
+    // clear current_push_path. This is a simple way to abort the current
+    // push.
 
-    if ( read > state->next_file_size )
+    CancelPush cancel_push( & current_push_path );
+
+    //.........................................................................
+    // Check the content type
+
+    if ( request.get_content_type() != "application/octet-stream" )
     {
-        log( "DATA READ EXCEEDS FILE SIZE" );
-        close( state );
         return;
     }
 
-    // Now, we append the data to the file. This will create it if it doesn't
-    // exist.
+    //.........................................................................
+    // Get the body of the request
 
-    String target_path = state->target_file_names[ state->next_file_index ];
+    const HttpServer::Request::Body & body( request.get_body() );
 
-    GFile * f = g_file_new_for_path( target_path.c_str() );
-
-    GFileOutputStream * output = g_file_append_to( f , G_FILE_CREATE_NONE , NULL , NULL );
-
-    if ( ! output )
+    if ( 0 == body.get_length() || 0 == body.get_data() )
     {
-        log( "FAILED TO APPEND TO FILE" );
-        close( state );
-        g_object_unref( f );
         return;
     }
 
-    gsize written;
+    FreeLater free_later;
 
-    g_output_stream_write_all( G_OUTPUT_STREAM( output ) , state->input_buffer , read , & written , NULL , NULL );
 
-    g_object_unref( output );
-
-    g_object_unref( f );
-
-    // Update our state, subtracting the bytes we just read/wrote.
-
-    state->next_file_size -= read;
-
-    if ( state->next_file_size == 0 )
+    if ( current_push_info.target_files.empty() )
     {
-        // Done reading this file, move on to the next one, if any
+        return;
+    }
 
-        state->files_remaining -= 1;
+    TargetInfo & target_info = current_push_info.target_files.front();
 
-        if ( state->files_remaining == 0 )
-        {
-            // This was the last file, we launch the app and close the connection
+    // The file that they sent us doesn't match the original size they
+    // told us. Bail.
 
-            launch_it( state );
-            close( state );
-        }
-        else
-        {
-            // Move to the next file.
+    if ( target_info.source.size != gint64( body.get_length() ) )
+    {
+        return;
+    }
 
-            state->next_file_index += 1;
-            state->state = ConnectionState::FILE_SIZE;
+    // The md5 hash for what they sent us does not match what they told
+    // us when they started the push.
 
-            // Read the next file size
+    gchar * ck = g_compute_checksum_for_data( G_CHECKSUM_MD5 , ( const guchar * ) body.get_data() , body.get_length() );
 
-            g_data_input_stream_read_line_async( G_DATA_INPUT_STREAM( stream ) , 0 , NULL , line_read , this );
-        }
+    bool match = ! strcmp( ck , target_info.source.md5.c_str() );
+
+    g_free( ck );
+
+    if ( ! match )
+    {
+        return;
+    }
+
+    // Everything matches.
+
+    try
+    {
+        write_file( target_info , body );
+    }
+    catch ( const String & e )
+    {
+        set_response( response , true , e );
+
+        return;
+    }
+
+    // Pop this file from the list
+
+    current_push_info.target_files.pop_front();
+
+    // If the list is empty, we are done, and we can launch the app
+
+    if ( current_push_info.target_files.empty() )
+    {
+        set_response( response , true , "Finished." );
+
+        launch_it();
     }
     else
     {
-        // Read more
+        // Otherwise, we move on to the next file.
 
-        gsize to_read = std::min( sizeof( state->input_buffer ) , size_t( state->next_file_size ) );
+        set_response( response , false , "" , current_push_info.target_files.front().source.name , current_push_path );
 
-        g_input_stream_read_async( G_INPUT_STREAM( stream ) , state->input_buffer , to_read , TRICKPLAY_PRIORITY , NULL , file_read , this );
+        // Keep it from canceling
+
+        cancel_push.reset();
+    }
+}
+
+
+//.............................................................................
+
+void AppPushServer::write_file( const TargetInfo & target_info , const HttpServer::Request::Body & body )
+{
+    g_assert( body.get_data() );
+    g_assert( body.get_length() );
+
+    if ( ! g_file_test( target_info.path.c_str() , G_FILE_TEST_EXISTS ) )
+    {
+        FreeLater free_later;
+
+        gchar * d = g_path_get_dirname( target_info.path.c_str() );
+
+        if ( ! d )
+        {
+            throw String( "Invalid path." );
+        }
+
+        free_later( d );
+
+        if ( ! strcmp( d , "." ) )
+        {
+            throw String( "Invalid path." );
+        }
+
+        if ( g_mkdir_with_parents( d , 0700 ) != 0 )
+        {
+            throw String( "Failed to create destination directory." );
+        }
+    }
+
+    if ( ! g_file_set_contents( target_info.path.c_str() , body.get_data() , body.get_length() , 0 ) )
+    {
+        throw String( "Failed to write file." );
     }
 }
 
 //.............................................................................
 // When the push is complete, we launch the app.
 
-void AppPushServer::launch_it( ConnectionState * state )
+void AppPushServer::launch_it( )
 {
-    log( "LAUNCHING FROM %s" , state->metadata.path.c_str() );
+    log( "LAUNCHING FROM %s" , current_push_info.metadata.path.c_str() );
 
     context->close_current_app();
 
-    tp_context_set( context , TP_APP_ID , 0 );
-
-    tp_context_set( context , TP_APP_PATH , state->metadata.path.c_str() );
-
-    context->reload_app();
+    context->launch_app( current_push_info.metadata.path.c_str() , App::LaunchInfo() , true );
 }
 
 //.............................................................................
