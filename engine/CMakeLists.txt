@@ -309,6 +309,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_group.lb
     ${BINDINGS_SRC}/clutter_image.lb
     ${BINDINGS_SRC}/clutter_timeline.lb
+	${BINDINGS_SRC}/clutter_score.lb
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb    
     ${BINDINGS_SRC}/clutter_path.lb
@@ -450,7 +451,6 @@ list( APPEND
     ${ENGINE_SRC}/source/audio_sampling.cpp
     ${ENGINE_SRC}/source/toast.cpp
     ${ENGINE_SRC}/source/http_server.cpp
-    ${ENGINE_SRC}/source/http_utils.cpp
     ${ENGINE_SRC}/source/app_resource_request_handler.cpp
     ${ENGINE_SRC}/source/api_request_handler.cpp
 )
