@@ -1109,7 +1109,6 @@ function ui_element.timeline(t)
 
     mt = {}
     mt.__newindex = function (t, k, v)
-	print("NEW NEW NEW")
 	if k ~= "num_point" then
         	p[k] = v
         	create_timeline()
@@ -1187,7 +1186,7 @@ function ui_element.button(table)
 	released = nil, 
 	button_image = nil,
 	focus_image  = nil,
-
+	text_has_shadow = true,
     }
 
  --overwrite defaults
@@ -1198,7 +1197,7 @@ function ui_element.button(table)
     end 
 
  --the umbrella Group
-    local ring, focus_ring, text, button, focus 
+    local ring, focus_ring, text, button, focus, s_txt
 
     local b_group = Group
     {
@@ -1229,7 +1228,8 @@ function ui_element.button(table)
 	b_group:grab_key_focus(b_group)
     end
     
-    function b_group.extra.on_focus_out() 
+    function b_group.extra.on_focus_out(key) 
+	current_focus = nil 
         if (p.skin == "custom") then 
 	     ring.opacity = 255
 	     focus_ring.opacity = 0
@@ -1243,7 +1243,6 @@ function ui_element.button(table)
 	if p.released then 
 		p.released()
 	end 
- 
     end
 
     local create_button = function() 
@@ -1274,15 +1273,35 @@ function ui_element.button(table)
 
         b_group:add(ring, focus_ring, button, focus, text)
 
+
+	if p.text_has_shadow then 
+	       s_txt = Text{
+                        text  = p.label, 
+                        font  = p.text_font,
+                        color = "000000",
+                        opacity=255*.5,
+                        x     = (p.ui_width  -text.w)/2 + 1,
+                        y     = (p.ui_height - text.h)/2 + 1,
+                    }
+                    s_txt.anchor_point={0,s_txt.h/2}
+                    s_txt.y = s_txt.y+s_txt.h/2
+        	b_group:add(s_txt)
+	end 
+
+
         if (p.skin == "custom") then button.opacity = 0 
         else ring.opacity = 0 end 
 
-	if editor_lb == nil then 
+	if editor_lb == nil or editor_use then 
 	     function b_group:on_button_down(x,y,b,n)
-		if current_focus then 
-		     current_focus.on_focus_out()
-		end
-		b_group.extra.on_focus_in(keys.Return)
+		if current_focus ~= b_group then 
+			if current_focus then 
+		     		current_focus.on_focus_out()
+			end
+			b_group.extra.on_focus_in(keys.Return)
+		else 
+		     	current_focus.on_focus_out()
+		end 
 		return true
 	     end 
 	end 
@@ -1433,7 +1452,6 @@ function ui_element.textInput(table)
 		                     	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
 				     	local x = c_x[1] 
 				     	local letter_sz 
-					print(c_pos)
 					if c_pos ~= -1 and c_pos ~= 0 then 
 		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
 				     	     letter_sz =  x - prev_c_x[1] 
@@ -1455,7 +1473,6 @@ function ui_element.textInput(table)
 			        	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
 				     	local x = c_x[1] 
 				     	local letter_sz 
-					print(c_pos)
 					if c_pos ~= -1 then
 		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
 				     	     letter_sz = x - prev_c_x[1]
@@ -3608,7 +3625,6 @@ function ui_element.scrollPane(t)
 	
 	
 	scroll_x = function(dir)
-              print("gaaaaa")
 		local new_x = p.content.x+ dir*10
 		animating = true
 		p.content:animate{
@@ -4036,29 +4052,32 @@ function ui_element.menuButton(t)
     local p = {
 
 --[[
-
-
 button 
 --]]
-        button_text_font = "DejaVu Sans 30px",
-    	button_text_color = {255,255,255,255}, --"FFFFFF",
-        label_text_font = "DejaVu Sans 30px",
-    	label_text_color = {255,255,255,255}, --"FFFFFF",
-        item_text_font = "DejaVu Sans 30px",
-    	item_text_color = {255,255,255,255}, --"FFFFFF",
+        button_text_font = nil,
+    	button_text_color = nil,
+    	button_text_focus_color = nil,
+        label_text_font = nil,
+    	label_text_color = nil,
+    	label_text_focus_color = nil,
+        item_text_font = nil,
+    	item_text_color = nil,
+    	item_text_focus_color = nil,
+
+	text_font = "DejaVu Sans 30px",
+    	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	ui_width = 250,
     	ui_height = 60, 
 
     	label = "Menu Button", 
-	focus_text_color =  {255,255,255,255},   
     	focus_color = {27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,0}, --"1b911b", 
+	focus_text_color =  {255,255,255,255},   
     	border_color = {255,255,255,255}, --"FFFFFF"
     	fill_color = {255,255,255,0},     --"FFFFFF"
     	border_width = 1,
     	border_corner_radius = 12,
-
 --]]
 
         name  = "dropdownbar",
@@ -4094,16 +4113,36 @@ button
     local create
     local curr_index = 0
     local selectable_items  = {}
+
+    local t_f = {"button_text_font", "label_text_font", "item_text_font"}
+    local t_c = {"button_text_color", "label_text_color", "item_text_color",}
+    local f_c = {"button_text_focus_color", "label_text_focus_color", "item_text_focus_color"}
     
+    for k, v in pairs (t_f) do
+	if p[v] == nil then 
+		p[v] = p.text_font
+	end 
+    end 
+    for k, v in pairs (t_c) do
+	if p[v] == nil then 
+		p[v] = p.text_color
+	end 
+    end 
+    for k, v in pairs (f_c) do
+	if p[v] == nil then 
+		p[v] = p.focus_text_color
+	end 
+    end 
+
+
     local dropDownMenu = Group{}
     local button       = ui_element.button{
         text_font=p.button_text_font,
     	text_color=p.button_text_color,
-    	focus_text_color=p.focus_text_color,
+    	focus_text_color=p.button_text_focus_color,
     	skin=p.skin,
     	ui_width=p.ui_width,
     	ui_height=p.ui_height, 
-        
     	label=p.label, 
     	focus_color=p.focus_color,
     	focus_fill_color=p.focus_fill_color,
@@ -4133,7 +4172,7 @@ button
                         opacity=0
                     }
                 elseif curr_index==0 then
-                    button:on_focus_out()
+                    --button:on_focus_out()
                 end
                 if selectable_items[i] ~= nil then
                    
@@ -4149,6 +4188,9 @@ button
                     curr_index=i
                 end
             end,
+	    get_index = function ()
+		return curr_index
+	    end,
             press_up = function()
                 if curr_index <= 0 then
                     return
@@ -4216,7 +4258,6 @@ button
                     opacity=255,
                     y_rotation=0
                 }
-                button:on_focus_in()
                 if selectable_items[curr_index] then
                     selectable_items[curr_index].focus.opacity=0
                 end
@@ -4231,7 +4272,6 @@ button
                     opacity=0,
                     y_rotation=-90
                 }
-                button:on_focus_out()
             end,
             fade_in = function()
                 dropDownMenu:complete_animation()
@@ -4244,7 +4284,6 @@ button
                 if selectable_items[curr_index] then
                     selectable_items[curr_index].focus.opacity=0
                 end
-                button:on_focus_in()
                 curr_index = 0
             end,
             fade_out = function()
@@ -4255,7 +4294,7 @@ button
                     duration=300,
                     opacity=0,
                 }
-                button:on_focus_out()
+		screen:grab_key_focus()
             end,
             set_item_function = function(index,f)
                 assert(index > 0 and index <= #selectable_items, "invalid index")
@@ -4268,16 +4307,14 @@ button
                    selectable_items[curr_index].f ~= nil then
                    
                     selectable_items[curr_index].f(...)
-                    self.fade_out()
+                    --self.fade_out() 
                 else
                     print("no function")
                 end
             end
         }
 
-  --[[
-    umbrella.size = {p.ui_width, p.ui_height}
- ]]
+  	--[[ umbrella.size = {p.ui_width, p.ui_height} ]]
     }
     local function make_item_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
@@ -4297,17 +4334,17 @@ button
         return ring
     end
     
-
     function umbrella.extra.on_focus_in(key) 
-	current_focus = umbrella
+	button.on_focus_in()
 	umbrella.fade_in()
 	umbrella:grab_key_focus(umbrella)
     end
     
     function umbrella.extra.on_focus_out() 
+	button.on_focus_out()
 	umbrella.fade_out()
     end
-
+   
     function create()
         
         --local vars used to create the menu
@@ -4329,9 +4366,7 @@ button
         dropDownMenu:clear()
         dropDownMenu.opacity=0
         
-        
-        
-        button.button_text_font=p.button_text_font
+        button.text_font=p.button_text_font
     	button.text_color=p.button_text_color
     	button.skin=p.skin
     	button.ui_width=p.ui_width
@@ -4339,10 +4374,10 @@ button
         
     	button.label=p.label
     	button.focus_color=p.focus_color
-    	button.button_color=p.button_color
+    	button.fill_color=p.button_color
     	button.border_width=p.border_width
     	button.border_corner_radius=p.border_corner_radius
-        
+
         umbrella.size = {button.ui_width,button.ui_height}
         curr_y = p.vert_offset
         
@@ -4374,8 +4409,8 @@ button
                         font  = p.item_text_font,
                         color = "000000",
                         opacity=255*.5,
-                        x     = p.horz_padding+p.horz_spacing+2,
-                        y     = curr_y+2,
+                        x     = p.horz_padding+p.horz_spacing+1,
+                        y     = curr_y+1,
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
@@ -4404,7 +4439,7 @@ button
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f() end
-                            umbrella.fade_out()
+			    button.on_focus_out() 
                         end
                         ui_ele.reactive=true
                     --end
@@ -4431,9 +4466,6 @@ button
                         txt.reactive=true
                     end
                 end
-                
-                
-                
                 
                 if item.focus then
                     ui_ele = item.focus
@@ -4547,21 +4579,9 @@ button
         button.reactive=true
        
 	if editor_lb == nil or editor_use then  
-        function button:on_button_down(x,y,b,n)
-            if dropDownMenu.opacity == 0 then
-                --umbrella.spin_in()
-		if current_focus then 
-			current_focus.extra.on_focus_out()
-		end 
-                umbrella.fade_in()
-            else
-                --umbrella.spin_out()
-                umbrella.fade_out()
-            end
-        end
+		button.pressed = umbrella.fade_in
+		button.released = umbrella.fade_out
  	end 
-        
-        
         
         button.position = {button.w/2,button.h/2}
         button.anchor_point = {button.w/2,button.h/2}
