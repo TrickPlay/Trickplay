@@ -22,9 +22,14 @@ APIRequestHandler::~APIRequestHandler( )
 
 //-----------------------------------------------------------------------------
 
-void APIRequestHandler::do_get( const HttpServer::Request& request, HttpServer::Response& response )
+void APIRequestHandler::handle_http_request( const HttpServer::Request& request, HttpServer::Response& response )
 {
 
+	if ( request.get_method() != HttpServer::Request::HTTP_GET )
+	{
+		response.set_status( HttpServer::HTTP_STATUS_METHOD_NOT_ALLOWED );
+		return;
+	}
     //.........................................................................
 
     String result;

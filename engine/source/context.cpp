@@ -1053,6 +1053,13 @@ int TPContext::run()
     //.........................................................................
 
     http_server = new HttpServer( 0 );
+	// print the port on which http server is bound
+	char port[12];
+	sprintf(port, "%d", http_server->get_port());
+	g_info((String("HttpServer listening on port ") + port).c_str());
+
+	g_info(" registering http request handler for path /api ");
+	api_request_handler = new APIRequestHandler( this );
 
     //.........................................................................
     // Create the controller server
@@ -1093,16 +1100,6 @@ int TPContext::run()
 
         controller_server = new ControllerServer( this, name, get_int( TP_CONTROLLERS_PORT, TP_CONTROLLERS_PORT_DEFAULT ) );
     }
-
-    //.........................................................................
-	http_server = new HttpServer();
-	// print the port on which http server is bound
-	char port[12];
-	sprintf(port, "%d", http_server->get_port());
-	g_info((String("HttpServer listening on port ") + port).c_str());
-
-	g_info(" registering http request handler for path /api ");
-	api_request_handler = new APIRequestHandler( this );
 
 	//.........................................................................
     // LIRC controller

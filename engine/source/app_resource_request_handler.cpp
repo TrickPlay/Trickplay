@@ -21,8 +21,13 @@ AppResourceRequestHandler::~AppResourceRequestHandler( )
 }
 //-----------------------------------------------------------------------------
 
-void AppResourceRequestHandler::do_get( const HttpServer::Request& request, HttpServer::Response& response )
+void AppResourceRequestHandler::handle_http_request( const HttpServer::Request& request, HttpServer::Response& response )
 {
+	if ( request.get_method() != HttpServer::Request::HTTP_GET )
+	{
+		response.set_status( HttpServer::HTTP_STATUS_METHOD_NOT_ALLOWED );
+		return;
+	}
 	String result;
 	String path = request.get_request_uri( );
 
