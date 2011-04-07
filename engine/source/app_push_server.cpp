@@ -123,7 +123,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
         return;
     }
 
-    if ( ! JSON_NODE_HOLDS( root , JSON_NODE_OBJECT ) )
+    if ( JSON_NODE_TYPE( root ) != JSON_NODE_OBJECT )
     {
         return;
     }
@@ -149,7 +149,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
         return;
     }
 
-    if ( ! JSON_NODE_HOLDS( app , JSON_NODE_VALUE ) || ! JSON_NODE_HOLDS( files , JSON_NODE_ARRAY ) )
+    if ( JSON_NODE_TYPE( app ) != JSON_NODE_VALUE || JSON_NODE_TYPE( files ) != JSON_NODE_ARRAY )
     {
         return;
     }
@@ -169,7 +169,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
     {
         JsonNode * element = json_array_get_element( files_array , i );
 
-        if ( element && JSON_NODE_HOLDS( element , JSON_NODE_ARRAY ) )
+        if ( element && JSON_NODE_TYPE( element ) == JSON_NODE_ARRAY )
         {
             if ( JsonArray * file_parts = json_node_get_array( element ) )
             {
@@ -179,9 +179,9 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
                     JsonNode * hash_node = json_array_get_element( file_parts , 1 );
                     JsonNode * size_node = json_array_get_element( file_parts , 2 );
 
-                    if ( JSON_NODE_HOLDS( file_name_node , JSON_NODE_VALUE ) &&
-                            JSON_NODE_HOLDS( hash_node , JSON_NODE_VALUE ) &&
-                            JSON_NODE_HOLDS( size_node , JSON_NODE_VALUE ) )
+                    if ( JSON_NODE_TYPE( file_name_node ) == JSON_NODE_VALUE &&
+                            JSON_NODE_TYPE( hash_node ) == JSON_NODE_VALUE &&
+                            JSON_NODE_TYPE( size_node ) == JSON_NODE_VALUE )
                     {
                         FileInfo info;
 
