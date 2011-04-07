@@ -131,6 +131,9 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     c:fill(true)
     
     
+    
+    
+    
     --Location
     c:new_path()
     c:move_to(LOCATION_X-CURR_TEMP_X+2,LOCATION_Y-10+2)
@@ -408,11 +411,22 @@ function Make_Bar(loc,index, master)
             
         end
         if f_tbl ~= nil and pws_tbl ~= nil then
+            
             mini_width = Text{
                 font=FONT.."Bold Condensed "..LOCATION_SZ,
                 text=pws_tbl.current_observation.location.city..
                     ", "..pws_tbl.current_observation.location.state
             }.w + LOCATION_X - MINI_BAR_X + 100
+            
+            if mini_width > BLURB_X-40 then
+                pws_tbl.current_observation.location.city =
+                    string.sub(pws_tbl.current_observation.location.city,1,10).."... "
+                mini_width = Text{
+                    font=FONT.."Bold Condensed "..LOCATION_SZ,
+                    text=pws_tbl.current_observation.location.city..
+                        ", "..pws_tbl.current_observation.location.state
+                }.w + LOCATION_X - MINI_BAR_X + 100
+            end
             mesg:unparent()
             mesg=nil
             bar:add(make_curr_temps(pws_tbl,f_tbl,mini_width))
@@ -801,6 +815,7 @@ function Make_Bar(loc,index, master)
                     green_button_mini.x = MINI_BAR_X+mini_width -83
                     arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
                 end
+                print("UP")
             end
             
         end,
@@ -814,6 +829,16 @@ function Make_Bar(loc,index, master)
                 conditions[bar.curr_condition]()
                 mesg.text = bar.curr_condition..", USA"
                 animate_list[bar.func_tbls.wait_500]=bar
+                
+                mini_width = mesg.w + mesg.x - MINI_BAR_X + 100
+                if mini then
+                    --bar:find_child("mid").scale = {mini_width,1}
+                    bar:find_child("mid").w   = mini_width
+                    bar:find_child("right").x = bar_side_w + mini_width
+                    green_button_mini.x = MINI_BAR_X+mini_width -83
+                    arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
+                end
+                print("DOWN")
             end
             
         end,
@@ -855,7 +880,7 @@ function Make_Bar(loc,index, master)
             else
                 conditions["Unknown"]()
             end
-            print("switching to "..next_i)
+            print("LEFT switching to "..next_i..", #bars: "..#bars..", previous bar_i: "..bar_i)
             bar_i = next_i
         end,
         [keys.Right]  = function()
@@ -899,7 +924,7 @@ function Make_Bar(loc,index, master)
             else
                 conditions["Unknown"]()
             end
-            print("switching to "..next_i)
+            print("RIGHT switching to "..next_i..", #bars: "..#bars..", previous bar_i: "..bar_i)
             bar_i = next_i
         end,
         
@@ -925,7 +950,7 @@ function Make_Bar(loc,index, master)
                 right_faux_bar.x = bar_dist
                 animate_list[bar.func_tbls.full_move_right] = bar
                 bar_i = next_i
-                
+                print("ENTER")
             end
         end,
         
@@ -946,7 +971,7 @@ function Make_Bar(loc,index, master)
                 five_day:show()
                 animate_list[bar.func_tbls.xfade_in_5_day] = bar
             end
-            
+            print("BLUE")
         end,
         [keys.RED]    = function()
             if #bars == 1 then return end
@@ -996,7 +1021,7 @@ function Make_Bar(loc,index, master)
             
             
             
-            print("switching to "..next_i)
+            print("RED: switching to "..next_i..", #bars: "..#bars..", previous bar_i: "..bar_i)
             bar_i = next_i
         end,
         [keys.GREEN]  = function()
@@ -1009,7 +1034,7 @@ function Make_Bar(loc,index, master)
                 animate_list[bar.func_tbls.xfade_to_mini]=bar
             end
             mini = not mini
-            
+            print("GREEN")
         end,
         [keys.YELLOW] = function()
             if mini then return end
@@ -1035,6 +1060,7 @@ function Make_Bar(loc,index, master)
                 blurb_txt:show()
                 animate_list[bar.func_tbls.xfade_in_blurb_from_zip] = bar
             end
+            print("YELLOW")
         end,
     }
     
@@ -1102,6 +1128,7 @@ function Make_Bar(loc,index, master)
                             next_i = #bars
                             bar_i  = #bars
                             animate_list[bar.func_tbls.full_move_right] = bar
+                            print("adding bar "..zip)
                         else
                             dumptable(response_tbl)
                             error("Received unexpected response from Wunderground")
