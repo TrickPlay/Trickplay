@@ -4285,6 +4285,8 @@ button
                     selectable_items[curr_index].focus.opacity=0
                 end
                 curr_index = 0
+		umbrella:raise_to_top()
+		input_mode = S_MENU
             end,
             fade_out = function()
                 dropDownMenu:complete_animation()
@@ -4295,6 +4297,7 @@ button
                     opacity=0,
                 }
 		screen:grab_key_focus()
+		input_mode = S_SELECT
             end,
             set_item_function = function(index,f)
                 assert(index > 0 and index <= #selectable_items, "invalid index")

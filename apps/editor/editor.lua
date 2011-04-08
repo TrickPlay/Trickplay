@@ -273,6 +273,73 @@ local function guideline_inspector(v)
 
 end 
 
+function editor.reference_image()
+ 	if(CURRENT_DIR == "") then 
+		--set_app_path() 
+	else 
+		input_mode = S_SELECT  
+		editor.the_image(true)
+	end 
+	screen:find_child("menuButton_view").items[2]["icon"].opacity = 255
+	screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
+    	screen:find_child("menuButton_view").items[4]["icon"].opacity = 0
+    	screen:find_child("menuButton_view").items[5]["icon"].opacity = 0
+    	screen:find_child("menuButton_view").items[6]["icon"].opacity = 0
+    	screen:find_child("menuButton_view").items[7]["icon"].opacity = 0
+
+end 
+
+function editor.small_grid()
+clear_bg() BG_IMAGE_20.opacity = 255 input_mode = S_SELECT
+screen:find_child("menuButton_view").items[3]["icon"].opacity = 255
+end 
+
+function editor.medium_grid()
+clear_bg() BG_IMAGE_40.opacity = 255 input_mode = S_SELECT
+screen:find_child("menuButton_view").items[4]["icon"].opacity = 255
+end 
+
+function editor.large_grid()
+clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT
+screen:find_child("menuButton_view").items[5]["icon"].opacity = 255
+end 
+
+function editor.white_bg()
+clear_bg() BG_IMAGE_white.opacity = 255 input_mode = S_SELECT
+screen:find_child("menuButton_view").items[6]["icon"].opacity = 255
+end 
+
+function editor.black_bg()
+clear_bg() input_mode = S_SELECT
+screen:find_child("menuButton_view").items[7]["icon"].opacity = 255
+end 
+
+
+function editor.show_guides()
+	if guideline_show == false then 
+		screen:find_child("menuButton_view").items[11]["icon"].opacity = 255
+		guideline_show = true
+		for i= 1, h_guideline, 1 do 
+			screen:find_child("h_guideline"..tostring(i)):show() 
+		end 
+		for i= 1, v_guideline, 1 do 
+			screen:find_child("v_guideline"..tostring(i)):show() 
+		end 
+	else 
+		screen:find_child("menuButton_view").items[11]["icon"].opacity = 0
+		guideline_show = false
+		for i= 1, h_guideline, 1 do 
+			screen:find_child("h_guideline"..tostring(i)):hide() 
+		end 
+		for i= 1, v_guideline, 1 do 
+			screen:find_child("v_guideline"..tostring(i)):hide() 
+		end 
+	end
+end 
+
+function editor.snap_guides()
+end 
+
 function editor.timeline() 
          if not screen:find_child("timeline") then 
 		if table.getn(g.children) > 0 then
@@ -1142,13 +1209,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		y_space = v.y 
         	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
 			inspector.y = v.y - inspector.h - INSPECTOR_OFFSET
-			if(inspector.y <= ui.bar_background.h + INSPECTOR_OFFSET) then
-			     inspector.y = ui.bar_background.h + INSPECTOR_OFFSET	
+			if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+			     inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
 			end	
 		else 
                 	inspector.y = (v.y + v.h - inspector.h) /2
-			if(inspector.y <= ui.bar_background.h + INSPECTOR_OFFSET) then
-			     inspector.y = ui.bar_background.h + INSPECTOR_OFFSET	
+			if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+			     inspector.y = screen:find_child("menu_bar").h + INSPECTOR_OFFSET	
 			end	
         	end 
 	    else 
@@ -1159,8 +1226,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			inspector.y = (v.y + v.h - inspector.h)/2
 			if (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h) then 
 				inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
-			elseif (inspector.y <= ui.bar_background.h + INSPECTOR_OFFSET) then
-			     inspector.y = ui.bar_background.h + INSPECTOR_OFFSET	
+			elseif (inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+			     inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
 			end
         	end 
 	    end 
@@ -1416,13 +1483,13 @@ function editor.view_code(v)
 		y_space = v.y 
         	if (codeViewWin.h + CODE_OFFSET < y_space) then 
 			codeViewWin.y = v.y - codeViewWin.h - CODE_OFFSET
-			if(codeViewWin.y <= ui.bar_background.h + CODE_OFFSET) then
-			     codeViewWin.y = ui.bar_background.h + CODE_OFFSET	
+			if(codeViewWin.y <= screen:find_child("menu_bar").h + CODE_OFFSET) then
+			     codeViewWin.y = screen:find_child("menu_bar").h + CODE_OFFSET	
 			end	
 		else 
                 	codeViewWin.y = (v.y + v.h - codeViewWin.h) /2
-			if(codeViewWin.y <= ui.bar_background.h + CODE_OFFSET) then
-			     codeViewWin.y = ui.bar_background.h + CODE_OFFSET	
+			if(codeViewWin.y <= screen:find_child("menu_bar").h + CODE_OFFSET) then
+			     codeViewWin.y = screen:find_child("menu_bar").h + CODE_OFFSET	
 			end	
         	end 
 	    else 
@@ -1433,8 +1500,8 @@ function editor.view_code(v)
 			codeViewWin.y = (v.y + v.h - codeViewWin.h)/2
 			if (codeViewWin.y + codeViewWin.h + CODE_OFFSET >= screen.h) then 
 				codeViewWin.y = screen.h - codeViewWin.h - CODE_OFFSET
-			elseif (codeViewWin.y <= ui.bar_background.h + CODE_OFFSET) then
-			     codeViewWin.y = ui.bar_background.h + CODE_OFFSET	
+			elseif (codeViewWin.y <= screen:find_child("menu_bar").h + CODE_OFFSET) then
+			     codeViewWin.y = screen:find_child("menu_bar").h + CODE_OFFSET	
 			end
         	end 
 	    end 

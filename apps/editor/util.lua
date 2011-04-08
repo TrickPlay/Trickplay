@@ -218,6 +218,12 @@ function clear_bg()
     BG_IMAGE_80.opacity = 0
     BG_IMAGE_white.opacity = 0
     BG_IMAGE_import.opacity = 0
+    screen:find_child("menuButton_view").items[2]["icon"].opacity = 0
+    screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
+    screen:find_child("menuButton_view").items[4]["icon"].opacity = 0
+    screen:find_child("menuButton_view").items[5]["icon"].opacity = 0
+    screen:find_child("menuButton_view").items[6]["icon"].opacity = 0
+    screen:find_child("menuButton_view").items[7]["icon"].opacity = 0
 end
 
 function values(t) 

@@ -55,10 +55,13 @@ mouse_state       = BUTTON_UP
 g = Group{name = "screen_objects", extra={canvas_xf = 0, canvas_f = 0, canvas_xt = 0, canvas_t = 0, canvas_w = screen.w, canvas_h = screen.h, scroll_x = 0, scroll_y = 0, scroll_dy = 1}}
 contents    	  = ""
 item_num 	  = 0
+
+guideline_show	  = true
+snap_on 	  = false
+
 h_guideline = 0
 v_guideline = 0
 focus_type = ""
-
 
 shift 		  = false
 control 	  = false
