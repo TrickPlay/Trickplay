@@ -409,8 +409,12 @@ struct TPControllerSpec
     refer to the resource as well as a URI to the resource. The URI could be
     local (file:) or remote (http:,https:).
     
+    The command also includes a 'group'; a string that groups related resources
+    together. This group is passed to the command <TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP>
+    to give the controller a chance to discard all resources for the group.
+
     The controller should attempt to fetch the resource asynchronously and retain
-    it along with a mapping to its name. In memory constrained environments, the
+    it along with a mapping to its name and group. In memory constrained environments, the
     controller may choose to retain only the name and the URI and fetch the
     resource later, when it is used.
     
@@ -423,6 +427,25 @@ struct TPControllerSpec
 */
 
 #define TP_CONTROLLER_COMMAND_DECLARE_RESOURCE      20
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP
+
+    This command lets the controller know that resources associated with a given
+    group are no longer needed and can be safely discarded.
+
+    If the controller has no knowledge of the group, it can just ignore the command;
+    this is not considered a failure.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_SOUND
+    or TP_CONTROLLER_HAS_UI in its capabilities.
+
+    Parameters:
+
+        A pointer to a <TPControllerDropResourceGroup> structure.
+*/
+
+#define TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP   21
 
 /*
     Constant: TP_CONTROLLER_COMMAND_SET_UI_BACKGROUND
@@ -672,6 +695,38 @@ struct TPControllerDeclareResource
     */
     
     const char *    uri;
+
+    /*
+        Field: group
+
+        A NULL terminated string that assigns this resource to a group. Trickplay
+        may later tell the controller to drop all resources associated with this
+        group by calling execute_command with <TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP>.
+    */
+
+    const char *    group;
+};
+
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerDropResourceGroup TPControllerDropResourceGroup;
+
+/*
+    Struct: TPControllerDropResourceGroup
+
+    A pointer to a structure of this type is passed to execute_command when the
+    command is <TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP>.
+*/
+
+struct TPControllerDropResourceGroup
+{
+    /*
+        Field: group
+
+        A NULL terminated string containing the group to discard.
+    */
+
+    const char *    group;
 };
 
 /*-----------------------------------------------------------------------------*/
