@@ -222,8 +222,8 @@ private:
     friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y );
     friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y );
     friend void tp_controller_ui_event( TPController * controller, const char * parameters );
-    friend void tp_controller_submit_picture( TPController * controller, void * data, unsigned int size, const char * mime_type );
-    friend void tp_controller_submit_audio_clip( TPController * controller, void * data, unsigned int size, const char * mime_type );
+    friend void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type );
+    friend void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type );
 
     //.........................................................................
 
