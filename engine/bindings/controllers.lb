@@ -49,11 +49,14 @@ public:
     virtual void submit_picture( void * data, unsigned int size, const char * mime_type );
     virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
     
+    bool declare_resource( const String & name , const String & uri );
+
 private:
     
     lua_State *                 L;
     Controller *                controller;
     ControllerListDelegate *    list;
+    String                      resource_group;
 };
 
 ]]
@@ -721,7 +724,9 @@ interface controller [[ControllerDelegate*]]
             
             bool is_uri=false;
             
-            gchar * path=App::get(L)->normalize_path(url,&is_uri);
+            App * app = App::get(L);
+
+            gchar * path=app->normalize_path(url,&is_uri);
             
             if (path)
             {
@@ -733,7 +738,7 @@ interface controller [[ControllerDelegate*]]
                     final_uri="file://"+final_uri;
                 }
                 
-                result=self->get_controller()->declare_resource(resource,final_uri);
+                result=self->declare_resource(resource,final_uri);
             }
         ]];
         
@@ -1025,6 +1030,11 @@ ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,C
 
 ControllerDelegate::~ControllerDelegate()
 {
+    if ( ! resource_group.empty() )
+    {
+        controller->drop_resource_group( resource_group );
+    }
+
     controller->remove_delegate(this);
     controller->unref();    
 }
@@ -1206,6 +1216,16 @@ void ControllerDelegate::submit_picture( void * data, unsigned int size, const c
 
 void ControllerDelegate::submit_audio_clip( void * data, unsigned int size, const char * mime_type )
 {
+}
+
+bool ControllerDelegate::declare_resource( const String & name , const String & uri )
+{
+    if ( resource_group.empty() )
+    {
+        resource_group = App::get(L)->get_id();
+    }
+
+    return controller->declare_resource( name , uri , resource_group );
 }
 
 ]]
