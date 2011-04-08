@@ -23,7 +23,7 @@ dofile("editor.lua")
     -- Show Menu
     ----------------------------------------------------------------------------
     
-    local menu_show = function()
+    local menuShow = function()
 	screen:find_child("menu_bar"):show()
 	screen:find_child("menuButton_file"):show()
 	screen:find_child("menuButton_edit"):show()
@@ -75,7 +75,7 @@ dofile("editor.lua")
         [ keys.x	] = function() editor.export() input_mode = S_SELECT end,
         [ keys.w	] = function() editor.ui_elements() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
-					    menu_show()
+					    menuShow()
 					    if(screen:find_child("xscroll_bar") ~= nil) then 
 					    	screen:find_child("xscroll_bar"):show() 
 						screen:find_child("xscroll_box"):show() 
