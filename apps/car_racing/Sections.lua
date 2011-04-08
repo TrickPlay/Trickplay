@@ -119,7 +119,7 @@ function make_curved_section()
         end_point = {base.curve_road.w-base.straight_road.w/2,-base.curve_road.h+base.straight_road.w/2,90},
         path = {
             dist  = (2*math.pi*base.curve_road.w-base.straight_road.w/2)*(90/360),
-            radius=-base.curve_road.w-base.straight_road.w/2,
+            radius=-(base.curve_road.w-base.straight_road.w/2),
             rot=90
         },
         line_up  = {0,0},

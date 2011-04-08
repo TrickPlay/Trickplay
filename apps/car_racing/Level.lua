@@ -170,8 +170,9 @@ function world:move(dx,dr,radius)
         
         cent_x = radius*math.cos(math.pi/180*y_rot)
         cent_y = radius*math.sin(math.pi/180*y_rot)
-        print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot)
+        
         y_rot = y_rot+dr
+        --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
         self.y_rotation={y_rot,0,0}
         ground.y_rotation={y_rot,0,0}
         
