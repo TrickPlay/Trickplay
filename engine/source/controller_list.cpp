@@ -939,7 +939,7 @@ bool Controller::stop_sound()
               data ) == 0 );
 }
 
-bool Controller::declare_resource( const String & resource, const String & uri )
+bool Controller::declare_resource( const String & resource, const String & uri , const String & group )
 {
     if ( !connected || !( spec.capabilities&( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
     {
@@ -950,6 +950,7 @@ bool Controller::declare_resource( const String & resource, const String & uri )
 
     parameters.resource = resource.c_str();
     parameters.uri = uri.c_str();
+    parameters.group = group.c_str();
 
     return spec.execute_command(
                tp_controller,
@@ -957,6 +958,25 @@ bool Controller::declare_resource( const String & resource, const String & uri )
                &parameters,
                data ) == 0;
 }
+
+bool Controller::drop_resource_group( const String & group )
+{
+    if ( !connected || !( spec.capabilities&( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
+    {
+        return false;
+    }
+
+    TPControllerDropResourceGroup parameters;
+
+    parameters.group = group.c_str();
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP,
+               &parameters,
+               data ) == 0;
+}
+
 
 bool Controller::enter_text( const String & label, const String & text )
 {
