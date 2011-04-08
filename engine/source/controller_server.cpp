@@ -290,7 +290,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             }
             else if ( g_str_has_prefix( ds->uri, "file://" ) )
             {
-                path = app_resource_request_handler->serve_path( "", String( ( ds->uri ) + 7 ) );
+                path = app_resource_request_handler->serve_path( ds->group , String( ( ds->uri ) + 7 ) );
                 uri = path.c_str();
             }
 
@@ -299,7 +299,18 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
                 return 5;
             }
 
-            server->write_printf( connection, "DR\t%s\t%s\n", ds->resource, uri );
+            server->write_printf( connection, "DR\t%s\t%s\t%s\n", ds->resource, uri , ds->group );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP   :
+        {
+            TPControllerDropResourceGroup * dg = ( TPControllerDropResourceGroup * ) parameters;
+
+            app_resource_request_handler->drop_web_server_group( dg->group );
+
+            server->write_printf( connection , "DG\t%s\n" , dg->group );
+
             break;
         }
 
@@ -438,6 +449,8 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts )
 {
+    static const char * PROTOCOL_VERSION = "31";
+
     guint count = g_strv_length( parts );
 
     if ( count < 1 )
@@ -579,6 +592,8 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         spec.execute_command = execute_command;
 
         info.controller = tp_context_add_controller( context, name, &spec, this );
+
+        server->write_printf( connection , "WM\t%s\t%u\n" , PROTOCOL_VERSION , context->get_http_server()->get_port() );
     }
     else if ( cmp2( cmd, "KP" ) )
     {

@@ -121,7 +121,9 @@ public:
 
     bool stop_sound();
 
-    bool declare_resource( const String & resource, const String & uri );
+    bool declare_resource( const String & resource, const String & uri , const String & group );
+
+    bool drop_resource_group( const String & group );
 
     bool enter_text( const String & label, const String & text );
 
