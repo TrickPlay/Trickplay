@@ -1109,15 +1109,21 @@ struct TPControllerPlaySound
 
 		controller -    The controller returned by <tp_context_add_controller>.
 
-		data 		-   A pointer to the picture data
-		size		- 	The size of the picture data
-		mime_type	- 	The mime type of the picture data.
+		data 		-   A pointer to the picture data.
+
+		size		- 	The size of the picture data.
+
+		mime_type	- 	The mime type of the picture data. This can be NULL.
 */
 
     TP_API_EXPORT
     void
     tp_controller_submit_picture(
-        TPController * controller, void * data, unsigned int size, const char * mime_type);
+
+        TPController * controller,
+        const void * data,
+        unsigned int size,
+        const char * mime_type);
 
 /*
 	Callback: tp_controller_submit_audio_clip
@@ -1128,15 +1134,21 @@ struct TPControllerPlaySound
 
 		controller -    The controller returned by <tp_context_add_controller>.
 
-		data 		-   A pointer to the audio clip data
-		size		- 	The size of the audio clip data
-		mime_type	- 	The mime type of the audio clip data.
+		data 		-   A pointer to the audio clip data.
+
+		size		- 	The size of the audio clip data.
+
+		mime_type	- 	The mime type of the audio clip data. This can be NULL.
 */
 
     TP_API_EXPORT
     void
     tp_controller_submit_audio_clip(
-        TPController * controller, void * data, unsigned int size, const char * mime_type);
+
+        TPController * controller,
+        const void * data,
+        unsigned int size,
+        const char * mime_type);
 
 /*-----------------------------------------------------------------------------*/
 /*
