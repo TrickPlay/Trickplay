@@ -59,6 +59,7 @@ class Installer;
 class Image;
 class ControllerLIRC;
 class AppPushServer;
+class HttpServer;
 
 //-----------------------------------------------------------------------------
 
@@ -121,7 +122,7 @@ public:
     //.........................................................................
     // Launches one app from another, and kills the first.
 
-    int launch_app( const char * app_id, const App::LaunchInfo & launch );
+    int launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path = false );
 
     //.........................................................................
     // Kills the current app and either goes back to the previous one, or
@@ -154,6 +155,10 @@ public:
     //.........................................................................
 
     Installer * get_installer() const;
+
+    //.........................................................................
+
+    HttpServer * get_http_server() const;
 
     //.........................................................................
 
@@ -308,6 +313,8 @@ private:
     ControllerLIRC *            controller_lirc;
 
     AppPushServer *             app_push_server;
+
+    HttpServer *                http_server;
 
     Console *                   console;
 
