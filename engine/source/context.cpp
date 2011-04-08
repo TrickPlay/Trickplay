@@ -1053,13 +1053,8 @@ int TPContext::run()
     //.........................................................................
 
     http_server = new HttpServer( 0 );
-	// print the port on which http server is bound
-	char port[12];
-	sprintf(port, "%d", http_server->get_port());
-	g_info((String("HttpServer listening on port ") + port).c_str());
 
-	g_info(" registering http request handler for path /api ");
-	api_request_handler = new APIRequestHandler( this );
+    api_request_handler = new APIRequestHandler( this );
 
     //.........................................................................
     // Create the controller server
@@ -1368,6 +1363,14 @@ int TPContext::run()
     {
         delete controller_server;
         controller_server = NULL;
+    }
+
+    //.........................................................................
+
+    if ( api_request_handler )
+    {
+        delete api_request_handler;
+        api_request_handler = 0;
     }
 
     //.........................................................................
