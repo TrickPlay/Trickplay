@@ -449,6 +449,8 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts )
 {
+    static const char * PROTOCOL_VERSION = "31";
+
     guint count = g_strv_length( parts );
 
     if ( count < 1 )
@@ -590,6 +592,8 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         spec.execute_command = execute_command;
 
         info.controller = tp_context_add_controller( context, name, &spec, this );
+
+        server->write_printf( connection , "WM\t%s\t%u\n" , PROTOCOL_VERSION , context->get_http_server()->get_port() );
     }
     else if ( cmp2( cmd, "KP" ) )
     {
