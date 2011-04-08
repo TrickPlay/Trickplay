@@ -28,6 +28,10 @@ void AppResourceRequestHandler::handle_http_request( const HttpServer::Request& 
 		response.set_status( HttpServer::HTTP_STATUS_METHOD_NOT_ALLOWED );
 		return;
 	}
+	else
+	{
+		response.set_status( HttpServer::HTTP_STATUS_OK );
+	}
 	String result;
 	String path = request.get_request_uri( );
 
