@@ -44,6 +44,9 @@ function world:add_next_section()
         sections[section_i]:setup()
     )
     
+    table.insert(path,sections[section_i].path)
+    --dumptable(path)
+    
     --it is expected that setup sets the section's x and y at the line-up point
     
     self:add( active_sections[#active_sections] )
@@ -88,9 +91,17 @@ end
 local new_pos = {}
 local w_ap_x = 0
 local w_ap_y = 0
+local g_dx = 0
+local g_dy = 0
+local g_cent = ground.w/2
+
+local delta_x = 0
+local delta_y = 0
 function world:remove_oldest_section()
     
     table.remove(active_sections,1):unparent()
+    
+    assert(#active_sections > 0)
     
     new_pos.x = active_sections[1].x
     new_pos.y = active_sections[1].y
@@ -129,24 +140,51 @@ end
 local y_rot = 0
 -- turn
 function world:rotate_by(deg)
-    
+    --if deg ~= 0 then print(deg)end
     y_rot = y_rot+deg
     self.y_rotation={y_rot,0,0}
     ground.y_rotation={y_rot,0,0}
 end
 
-
-local g_dx = 0
-local g_dy = 0
-local g_cent = ground.w/2
-
-local delta_x = 0
-local delta_y = 0
--- move forward or backward
-function world:move(delta)
+function world:rotate_about(deg,radius,dr)
     
-    delta_x = delta*math.sin(math.pi/180*y_rot)
-    delta_y = delta*math.cos(math.pi/180*y_rot)
+    
+    
+    
+    y_rot = y_rot+dr
+    self.y_rotation={y_rot,0,0}
+    ground.y_rotation={y_rot,0,0}
+    
+    delta_x = radius*math.sin(math.pi/180*dr)
+    delta_y = radius*math.cos(math.pi/180*dr)
+end
+
+
+
+-- move forward or backward
+function world:move(dx,dr,radius)
+
+    if dr ~= 0 then
+        
+        
+        
+        cent_x = radius*math.cos(math.pi/180*y_rot)
+        cent_y = radius*math.sin(math.pi/180*y_rot)
+        print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot)
+        y_rot = y_rot+dr
+        self.y_rotation={y_rot,0,0}
+        ground.y_rotation={y_rot,0,0}
+        
+        delta_x = radius*math.cos(math.pi/180*y_rot)-cent_x
+        delta_y = -radius*math.sin(math.pi/180*y_rot)+cent_y
+        
+        --delta_x = dx*math.sin(math.pi/180*y_rot)
+        --delta_y = dx*math.cos(math.pi/180*y_rot)
+    else
+        delta_x = dx*math.sin(math.pi/180*y_rot)
+        delta_y = dx*math.cos(math.pi/180*y_rot)
+    end
+    --print(delta_y)
     
     w_ap_x = w_ap_x+delta_x
     w_ap_y = w_ap_y-delta_y

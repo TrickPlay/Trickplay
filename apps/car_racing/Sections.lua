@@ -12,7 +12,7 @@ sections = {}
 function make_straight_section()
     local section = {
         end_point = {0,-base.straight_road.h,0},
-        
+        path = {dist=base.straight_road.h,rot=0,radius=0},
         line_up  = {0,0},
         setup = function(self)
             self.group = Group{
@@ -52,7 +52,11 @@ function make_straight_section()
                     },
                 }
             }
-            dumptable(self.end_point)
+            self.group.check = function(the_world)
+                if self.group.x > the_world.anchor_point[1] then
+                    
+                end
+            end
             return self.group
         end,
     }
@@ -113,6 +117,11 @@ end
 function make_curved_section()
     local section = {
         end_point = {base.curve_road.w-base.straight_road.w/2,-base.curve_road.h+base.straight_road.w/2,90},
+        path = {
+            dist  = (2*math.pi*base.curve_road.w-base.straight_road.w/2)*(90/360),
+            radius=-base.curve_road.w-base.straight_road.w/2,
+            rot=90
+        },
         line_up  = {0,0},
         setup = function(self)
             self.group = Group{
@@ -140,15 +149,15 @@ function make_curved_section()
     return section
 end
 
-sections[1] = make_straight_section()
-sections[2] = make_straight_section()
-sections[3] = make_curved_section()
-sections[4] = make_straight_section()
-sections[5] = make_straight_section()
-sections[6] = make_curved_section()
-sections[7] = make_straight_section()
-sections[8] = make_straight_section()
-sections[9] = make_curved_section()
-sections[10] = make_straight_section()
-sections[11] = make_straight_section()
-sections[12] = make_curved_section()
+table.insert(sections,make_straight_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_curved_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_curved_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_curved_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_curved_section())
