@@ -30,6 +30,10 @@ void APIRequestHandler::handle_http_request( const HttpServer::Request& request,
 		response.set_status( HttpServer::HTTP_STATUS_METHOD_NOT_ALLOWED );
 		return;
 	}
+	else
+	{
+		response.set_status( HttpServer::HTTP_STATUS_OK );
+	}
     //.........................................................................
 
     String result;
