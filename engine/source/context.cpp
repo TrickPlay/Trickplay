@@ -53,7 +53,7 @@ TPContext::TPContext()
     current_app( NULL ),
     media_player_constructor( NULL ),
     media_player( NULL ),
-    api_request_handler( NULL ),
+    http_trickplay_api_support( NULL ),
     external_log_handler( NULL ),
     external_log_handler_data( NULL ),
     user_data( NULL )
@@ -1054,7 +1054,7 @@ int TPContext::run()
 
     http_server = new HttpServer( 0 );
 
-    api_request_handler = new APIRequestHandler( this );
+    http_trickplay_api_support = new HttpTrickplayApiSupport( this );
 
     //.........................................................................
     // Create the controller server
@@ -1367,10 +1367,10 @@ int TPContext::run()
 
     //.........................................................................
 
-    if ( api_request_handler )
+    if ( http_trickplay_api_support )
     {
-        delete api_request_handler;
-        api_request_handler = 0;
+        delete http_trickplay_api_support;
+        http_trickplay_api_support = NULL;
     }
 
     //.........................................................................
