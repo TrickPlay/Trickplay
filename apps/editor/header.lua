@@ -86,6 +86,12 @@ ui =
     {
         assets              = assets,
         factory             = dofile( "ui-factory" ),
+    }
+--[[
+ui =
+    {
+        assets              = assets,
+        factory             = dofile( "ui-factory" ),
         fs_focus            = nil,
         bar                 = Group {},
         bar_background      = assets( "assets/menu-background.png" ),
@@ -132,7 +138,7 @@ ui =
             }
         }
     }
-
+]]
 -- Background image 
 
 BG_IMAGE_20 = Image{src = "assets/transparency-grid-20.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}

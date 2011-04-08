@@ -49,12 +49,32 @@ local menuButton_file = ui_element.menuButton
     		item_text_color = "#ffffff",
 	}
 
+--[[
+local file_icon = Group{}
+local file_icon_text = Text{
+                        text  = 
+                        font  = "FreeSans Medium 20px",
+                        color = "#ffffff",
 
-menuButton_file.insert_item(1,{type="item", string="New", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close} )
-menuButton_file.insert_item(2,{type="item", string="Open ...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_open})
-menuButton_file.insert_item(3,{type="item", string="Save ...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save}) 
-menuButton_file.insert_item(4,{type="item", string="Save As ...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save})
-menuButton_file.insert_item(5,{type="item", string="Quit", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=exit}) 
+                    }
+      file_icon:add(file_icon_text)
+
+local file_icon_text_shadow = Text{
+                        text  = ,
+                        font  = "FreeSans Medium 20px",
+                        color = "000000",
+                        opacity=255*.5,
+                        x     = 1,
+                        y     = 1,
+                    }
+      file_icon:add(file_icon_text_shadow)
+
+]]
+menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close,})
+menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_open})
+menuButton_file.insert_item(3,{type="item", string="Save ...\t\t\t     S", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save}) 
+menuButton_file.insert_item(4,{type="item", string="Save As ...\t\t     A", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save})
+menuButton_file.insert_item(5,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=exit}) 
 
 
 menuButton_file.name = "menuButton_file"
@@ -139,15 +159,15 @@ local menuButton_edit = ui_element.menuButton
     		item_text_color = "#ffffff",
 	}
 
-menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.undo} )
-menuButton_edit.insert_item(2,{type="item", string="Redo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.redo} )
-menuButton_edit.insert_item(3,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements})
-menuButton_edit.insert_item(4,{type="item", string="Timeline ...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline}) 
+menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.undo} )
+menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.redo} )
+menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t     I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements})
+menuButton_edit.insert_item(4,{type="item", string="Timeline ...\t\t     J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline}) --icon=assets("assets/menu-checkmark.png")
 menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete})
-menuButton_edit.insert_item(6,{type="item", string="Duplicate", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate}) 
-menuButton_edit.insert_item(7,{type="item", string="Clone", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone}) 
-menuButton_edit.insert_item(8,{type="item", string="Group", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group}) 
-menuButton_edit.insert_item(9,{type="item", string="UnGroup", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ugroup}) 
+menuButton_edit.insert_item(6,{type="item", string="Duplicate\t\t\t     D", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate}) 
+menuButton_edit.insert_item(7,{type="item", string="Clone\t\t\t     C", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone}) 
+menuButton_edit.insert_item(8,{type="item", string="Group\t\t\t     G", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group}) 
+menuButton_edit.insert_item(9,{type="item", string="UnGroup\t\t\t     U", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ugroup}) 
 
 menuButton_edit.name = "menuButton_edit"
 menuButton_edit.position = {489,28,0}
