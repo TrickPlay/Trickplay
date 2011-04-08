@@ -154,7 +154,7 @@ public:
         return event;
     }
 
-    inline static Event * make_data( Type type, Controller * controller, void * data, unsigned int size, const char * mime_type )
+    inline static Event * make_data( Type type, Controller * controller, const void * data, unsigned int size, const char * mime_type )
 	{
 		Event * event = make( type, controller );
 
@@ -1304,7 +1304,7 @@ int tp_controller_wants_touch_events( TPController * controller )
     return controller->controller->wants_touch_events();
 }
 
-void tp_controller_submit_picture( TPController * controller, void * data, unsigned int size, const char * mime_type )
+void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type )
 {
 	g_assert(data);
 	g_assert(size);
@@ -1313,7 +1313,7 @@ void tp_controller_submit_picture( TPController * controller, void * data, unsig
 	controller->list->post_event( Event::make_data( Event::SUBMIT_PICTURE, controller->controller, data, size, mime_type ) );
 }
 
-void tp_controller_submit_audio_clip( TPController * controller, void * data, unsigned int size, const char * mime_type )
+void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type )
 {
 	g_assert(data);
 	g_assert(size);
