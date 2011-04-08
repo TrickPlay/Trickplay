@@ -34,6 +34,9 @@ dofile("editor.lua")
 	screen:grab_key_focus()
     end 
 
+    ----------------------------------------------------------------------------
+    -- Key Map
+    ----------------------------------------------------------------------------
     
     local key_map =
     {
@@ -54,23 +57,23 @@ dofile("editor.lua")
         [ keys.v	] = function() editor.v_guideline() input_mode = S_SELECT end,
         [ keys.h	] = function() editor.h_guideline() input_mode = S_SELECT end,
         [ keys.j	] = function() if not screen:find_child("timeline") then 
-							         if table.getn(g.children) > 0 then
-								     input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
-							             screen:find_child("timeline").extra.show = true 
-							         end
-						 	      elseif table.getn(g.children) == 0 then 
-		      						    screen:remove(screen:find_child("timeline"))
-		                                                    if screen:find_child("tline") then 
-		                                                         screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		                                                    end 
-							      elseif screen:find_child("timeline").extra.show ~= true  then 
-								   screen:find_child("timeline"):show()
-								   screen:find_child("timeline").extra.show = true
-						 	      else 
-								   screen:find_child("timeline"):hide()
-								   screen:find_child("timeline").extra.show = false
-							      end
-							      end,
+					    if table.getn(g.children) > 0 then
+						input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
+						screen:find_child("timeline").extra.show = true 
+					    end
+				       elseif table.getn(g.children) == 0 then 
+		      			    screen:remove(screen:find_child("timeline"))
+		                            if screen:find_child("tline") then 
+		                            	screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		                            end 
+				      elseif screen:find_child("timeline").extra.show ~= true  then 
+					    screen:find_child("timeline"):show()
+					    screen:find_child("timeline").extra.show = true
+				      else 
+					    screen:find_child("timeline"):hide()
+					    screen:find_child("timeline").extra.show = false
+				      end
+		            end,
         --[ keys.x	] = function() editor.debug() input_mode = S_SELECT end,
         [ keys.x	] = function() editor.export() input_mode = S_SELECT end,
         [ keys.w	] = function() editor.ui_elements() input_mode = S_SELECT end,
@@ -106,7 +109,8 @@ dofile("editor.lua")
 					    menu_hide = true 
 					    screen:grab_key_focus()
 				       end 
-				       input_mode = S_SELECT end,
+				       input_mode = S_SELECT 
+			    end,
 	--[ keys.w	] = function() editor.the_open() input_mode = S_SELECT end,
         [ keys.BackSpace] = function() editor.delete() input_mode = S_SELECT end,
 	[ keys.Shift_L  ] = function() shift = true end,
@@ -235,6 +239,21 @@ dofile("editor.lua")
     end
 
     function screen:on_button_down(x,y,button,num_clicks)
+
+	  if(input_mode == S_MENU) then
+		if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_file").on_focus_out()
+		elseif screen:find_child("menuButton_edit"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_edit").on_focus_out()
+		elseif screen:find_child("menuButton_arrange"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_arrange").on_focus_out()
+		elseif screen:find_child("menuButton_view"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_view").on_focus_out()
+		end
+		screen:grab_key_focus()
+		input_mode = S_SELECT
+	  end 
+
 	  for i, j in pairs (g.children) do  
 	       if j.type == "Text" then 
 	            if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
@@ -248,8 +267,19 @@ dofile("editor.lua")
           if(input_mode == S_RECTANGLE) then 
 		editor.rectangle(x, y) 
 	  end
+
           if(input_mode == S_MENU) then
+		if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_file").on_focus_out()
+		elseif screen:find_child("menuButton_edit"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_edit").on_focus_out()
+		elseif screen:find_child("menuButton_arrange"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_arrange").on_focus_out()
+		elseif screen:find_child("menuButton_view"):find_child("focus").opacity > 0 then 
+			screen:find_child("menuButton_view").on_focus_out()
+		end
 		screen:grab_key_focus()
+
 		input_mode = S_SELECT
           elseif(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	       if(current_inspector == nil) then 
