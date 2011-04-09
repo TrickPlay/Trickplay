@@ -10,7 +10,7 @@
 #include "app.h"
 
 #include "http_server.h"
-#include "api_request_handler.h"
+#include "http_trickplay_api_support.h"
 
 //-----------------------------------------------------------------------------
 // Internal notifications
@@ -63,7 +63,7 @@ class Image;
 class ControllerLIRC;
 class AppPushServer;
 class HttpServer;
-class APIRequestHandler;
+class HttpTrickplayApiSupport;
 
 //-----------------------------------------------------------------------------
 
@@ -333,7 +333,7 @@ private:
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
 
-    APIRequestHandler * 		api_request_handler;
+    HttpTrickplayApiSupport * 	http_trickplay_api_support;
 
     TPLogHandler                external_log_handler;
     void *                      external_log_handler_data;

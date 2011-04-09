@@ -451,7 +451,7 @@ list( APPEND
     ${ENGINE_SRC}/source/audio_sampling.cpp
     ${ENGINE_SRC}/source/toast.cpp
     ${ENGINE_SRC}/source/http_server.cpp
-    ${ENGINE_SRC}/source/api_request_handler.cpp
+    ${ENGINE_SRC}/source/http_trickplay_api_support.cpp
 )
 
 #------------------------------------------------------------------------------
