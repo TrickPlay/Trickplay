@@ -28,6 +28,7 @@
 #include "controller_lirc.h"
 #include "app_push_server.h"
 #include "http_server.h"
+#include "http_trickplay_api_support.h"
 
 
 //-----------------------------------------------------------------------------

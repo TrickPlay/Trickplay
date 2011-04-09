@@ -8,10 +8,6 @@
 #include "mediaplayers.h"
 #include "controller_list.h"
 #include "app.h"
-
-#include "http_server.h"
-#include "http_trickplay_api_support.h"
-
 //-----------------------------------------------------------------------------
 // Internal notifications
 
