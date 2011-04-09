@@ -1,4 +1,5 @@
-
+local paused = true
+local idle_loop
 screen:show()
 clone_sources = Group{name="clone_sources"}
 screen:add(clone_sources)
@@ -14,7 +15,7 @@ dofile(    "Level.lua" )
 
 local keys = {
 	[keys.Up] = function()
-		world:move(100)
+		idle_loop(nil,.1)
 	end,
 	[keys.Down] = function()
 		world:move(-100)
@@ -25,6 +26,14 @@ local keys = {
 	[keys.Right] = function()
 		world:rotate_by(5)
 	end,
+	[keys.RED] = function()
+		if paused then
+			idle.on_idle = idle_loop
+		else
+			idle.on_idle = nil
+		end
+		paused = not paused
+	end,
 }
 function screen:on_key_down(k)
 	if keys[k] then keys[k]() end
@@ -33,7 +42,7 @@ end
 local dx = 0
 local dr = 0
 local speed = 2000
-function idle:on_idle(seconds)
+idle_loop = function(_,seconds)
 	
 	assert(#path > 0)
 	
@@ -44,7 +53,7 @@ function idle:on_idle(seconds)
 	
 	rot_into_path = rot_into_path + dr
 	--print(rot_into_path,dr)
-	if rot_into_path > path[1].rot or
+	if math.abs(rot_into_path) > math.abs(path[1].rot) or
 	   path[1].rot == 0 and dist_into_path > path[1].dist then
 		
 		--old section path
@@ -56,7 +65,7 @@ function idle:on_idle(seconds)
 		
 		dist_into_path = dist_into_path - path[1].dist
 		table.remove(path,1)
-		print("\n\n",rot_into_path)
+		--print("\n\n",rot_into_path)
 		rot_into_path=0
 		assert(#path > 0 )
 		
@@ -75,3 +84,5 @@ function idle:on_idle(seconds)
 	end
 	
 end
+
+--idle.on_idle = idle_loop
