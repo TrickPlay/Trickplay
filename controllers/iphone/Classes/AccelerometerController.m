@@ -99,6 +99,8 @@
 }
 
 - (void)dealloc {
+    NSLog(@"AccelerometerController dealloc");
+    
     [UIAccelerometer sharedAccelerometer].delegate = nil;
     [socketManager release];
     [super dealloc];

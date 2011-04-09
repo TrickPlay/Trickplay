@@ -14,7 +14,7 @@
 @synthesize dataCacheDelegate;
 @synthesize resourceKey;
 
-- (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key{
+- (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key {
     if (connection) {
         [connection cancel];
         [connection release];

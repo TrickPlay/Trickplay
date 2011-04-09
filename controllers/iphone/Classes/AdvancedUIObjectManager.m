@@ -45,7 +45,7 @@
     NSLog(@"Image created: %@", image);
     [images setObject:image forKey:imageID];
     
-    [view addSubview:image.view];
+    [view addSubview:image];
 }
 
 
@@ -59,7 +59,7 @@
     NSLog(@"Rectangle created: %@", rect);
     [rectangles setObject:rect forKey:rectID];
     
-    [view addSubview:rect.view];
+    [view addSubview:rect];
 }
 
 
@@ -98,10 +98,10 @@
         // remove from local repository
         NSLog(@"Destroying object %@", object);
         if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
-            [[[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] view] removeFromSuperview];
+            [[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] removeFromSuperview];
             [rectangles removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
-            [[[images objectForKey:(NSString *)[object objectForKey:@"id"]] view]removeFromSuperview];
+            [[images objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
             [images removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
         }
     }

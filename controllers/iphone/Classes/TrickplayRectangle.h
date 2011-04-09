@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <QuartzCore/CALayer.h>
+#import <QuartzCore/CATransform3D.h>
 #import "TrickplayUIElement.h"
 
 
@@ -15,5 +17,9 @@
 }
 
 - (id)initWithID:(NSString *)rectID args:(NSDictionary *)args;
+
+- (void)setColorFromArgs:(NSDictionary *)args;
+- (void)setBorderColorFromArgs:(NSDictionary *)args;
+- (void)setBorderWidthFromArgs:(NSDictionary *)args;
 
 @end
