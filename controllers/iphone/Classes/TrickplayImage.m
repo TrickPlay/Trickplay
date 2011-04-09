@@ -15,7 +15,9 @@
     if ((self = [super init])) {
         CGRect frame = [self getFrameFromArgs:args];
         
-        self.view = [resourceManager fetchImageViewUsingResource:imageID frame:frame];
+        self.view = [resourceManager fetchImageViewUsingResource:[args objectForKey:@"src"] frame:frame];
+        
+        [self setValuesFromArgs:args];
     }
         
     return self;

@@ -7,20 +7,29 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import <QuartzCore/CALayer.h>
+#import <QuartzCore/CATransform3D.h>
 
 @interface TrickplayUIElement : UIView {
-    CGFloat x, y, width, height;
-    NSArray *scale;
     BOOL is_scaled;
+    NSArray *clip;
     
     UIView *view;
 }
 
-@property (nonatomic, retain) NSArray *scale;
+@property (nonatomic, retain) NSArray *clip;
 @property (nonatomic, retain) UIView *view;
 
 - (CGRect)getFrameFromArgs:(NSDictionary *)args;
-- (void)setValuesWithArgs:(NSDictionary *)args;
+//** TODO refactor all this code to use method dispatching
+//** from a dictionary by mapping methods to property names
+- (void)setPostionFromArgs:(NSDictionary *)args;
+- (void)setSizeFromArgs:(NSDictionary *)args;
+- (void)setAnchorPointFromArgs:(NSDictionary *)args;
+- (void)setScaleFromArgs:(NSDictionary *)args;
+- (void)setRotationsFromArgs:(NSDictionary *)args;
+- (void)setOpacityFromArgs:(NSDictionary *)args;
+
+- (void)setValuesFromArgs:(NSDictionary *)args;
 
 @end

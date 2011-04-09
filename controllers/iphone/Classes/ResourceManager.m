@@ -31,6 +31,10 @@
     return [resourceNames objectForKey:name];
 }
 
+/**
+ * Synchronous method of getting resource
+ */
+
 - (NSData *)fetchResource:(NSString *)name {
     NSLog(@"Fetching resource %@", name);
     NSData *tempData;
@@ -43,16 +47,10 @@
         NSString *dataURLString = [[resourceNames objectForKey:name] objectForKey:@"link"];
         if ([dataURLString hasPrefix:@"http:"] || [dataURLString hasPrefix:@"https:"]) {
             tempData = [NSData dataWithContentsOfURL:[NSURL URLWithString:dataURLString]];
-            /** For testing
-            NSURL *dataurl = [NSURL URLWithString:@"http://www.google.com/logos/2011/womensday11-hp.jpg"];
-            tempData = [NSData dataWithContentsOfURL:dataurl];
-            //*/
         } else {
             //Use the hostname and port to construct the url
             NSURL *dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString]];
-            /** For testing
-            dataurl = [NSURL URLWithString:@"http://www.google.com/logos/2011/womensday11-hp.jpg"];
-            //*/
+            
             tempData = [NSData dataWithContentsOfURL:dataurl];
         }
         if (tempData) {
@@ -64,6 +62,11 @@
     }
     return tempData;
 }
+
+
+/**
+ * Asynchronous method of getting UIImageView with resource.
+ */
 
 - (UIImageView *)fetchImageViewUsingResource:(NSString *)name
                                        frame:(CGRect)frame {
@@ -85,9 +88,7 @@
             //Use the hostname and port to construct the url
             dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString]];
         }
-        /**For testing
-        dataurl = [NSURL URLWithString:@"http://www.google.com/logos/2011/womensday11-hp.jpg"];
-        //*/
+        
         imageView.dataCacheDelegate = self;
         [imageView loadImageFromURL:dataurl resourceKey:name];
     }

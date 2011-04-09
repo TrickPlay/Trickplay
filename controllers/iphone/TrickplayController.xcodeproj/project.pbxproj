@@ -24,6 +24,7 @@
 		CD404C12134BF1C70021D36C /* TrickplayUIElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C11134BF1C70021D36C /* TrickplayUIElement.m */; };
 		CD404C15134BF25E0021D36C /* TrickplayRectangle.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C14134BF25E0021D36C /* TrickplayRectangle.m */; };
 		CD404C18134BF51D0021D36C /* TrickplayImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C17134BF51D0021D36C /* TrickplayImage.m */; };
+		CD404C1B134FF6DE0021D36C /* TrickplayText.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C1A134FF6DC0021D36C /* TrickplayText.m */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
@@ -74,6 +75,8 @@
 		CD404C14134BF25E0021D36C /* TrickplayRectangle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayRectangle.m; sourceTree = "<group>"; };
 		CD404C16134BF51D0021D36C /* TrickplayImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayImage.h; sourceTree = "<group>"; };
 		CD404C17134BF51D0021D36C /* TrickplayImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayImage.m; sourceTree = "<group>"; };
+		CD404C19134FF6D90021D36C /* TrickplayText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayText.h; sourceTree = "<group>"; };
+		CD404C1A134FF6DC0021D36C /* TrickplayText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayText.m; sourceTree = "<group>"; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
@@ -147,7 +150,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				CDF509C813469721009870EC /* QuartzCore.framework */,
 				CDFEBB6D130A498C00A14307 /* iPad */,
 				CDFEBB5E130A498600A14307 /* iPhone */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -183,6 +185,7 @@
 			isa = PBXGroup;
 			children = (
 				CDFEC57E1320608F00A14307 /* Other */,
+				CDF509C813469721009870EC /* QuartzCore.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
@@ -203,6 +206,8 @@
 				CD404C14134BF25E0021D36C /* TrickplayRectangle.m */,
 				CD404C16134BF51D0021D36C /* TrickplayImage.h */,
 				CD404C17134BF51D0021D36C /* TrickplayImage.m */,
+				CD404C19134FF6D90021D36C /* TrickplayText.h */,
+				CD404C1A134FF6DC0021D36C /* TrickplayText.m */,
 			);
 			name = UserInterface;
 			sourceTree = "<group>";
@@ -396,6 +401,7 @@
 				CD404C12134BF1C70021D36C /* TrickplayUIElement.m in Sources */,
 				CD404C15134BF25E0021D36C /* TrickplayRectangle.m in Sources */,
 				CD404C18134BF51D0021D36C /* TrickplayImage.m in Sources */,
+				CD404C1B134FF6DE0021D36C /* TrickplayText.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
