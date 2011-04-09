@@ -1,11 +1,5 @@
-/*
- * api_request_handler.h
- *
- *  Created on: Apr 5, 2011
- */
-
-#ifndef HTTP_TRICKPLAY_API_SUPPORT_H_
-#define HTTP_TRICKPLAY_API_SUPPORT_H_
+#ifndef _TRICKPLAY_HTTP_TRICKPLAY_API_SUPPORT_H
+#define _TRICKPLAY_HTTP_TRICKPLAY_API_SUPPORT_H
 
 #include "http_server.h"
 #include "context.h"
@@ -20,14 +14,15 @@ public:
 
 private:
 
-	HttpTrickplayApiSupport( const HttpTrickplayApiSupport& )
-	{ }
+	HttpTrickplayApiSupport( const HttpTrickplayApiSupport & )
+	{}
 
 	TPContext * context;
 
-	typedef std::list<HttpServer::RequestHandler *> HttpTrickplayApiRequestHandlerList;
+	typedef std::list<  HttpServer::RequestHandler * > HandlerList;
 
-	HttpTrickplayApiRequestHandlerList request_handlers_list;
+	HandlerList handlers;
 
 };
-#endif /* HTTP_TRICKPLAY_API_SUPPORT_H_ */
+
+#endif // _TRICKPLAY_HTTP_TRICKPLAY_API_SUPPORT_H
