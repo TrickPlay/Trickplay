@@ -28,12 +28,13 @@ ground.anchor_point={ground.w/2,ground.h/2}
 
 world = Group{name = "THE WORLD",x_rotation={90,0,0},position={screen.w/2,screen.h},scale={4,4}}
 world:add(prev_end_marker,end_marker)
-local end_point = {0,0,0}
-local dist_to_end_point = {0,0}
+end_point = {0,0,0}
+dist_to_end_point = {0,0}
 local dist_to_start_point = {0,0}
 
 
-
+local w_ap_x = 0
+local w_ap_y = 0
 
 
 
@@ -61,6 +62,7 @@ function world:add_next_section()
     prev_end_marker.position = end_marker.position
     prev_end_marker:raise_to_top()
     --dumptable(end_point)
+    --dumptable(dist_to_end_point)
     --dumptable(sections[section_i].end_point)
     end_point[1] = end_point[1] +
         sections[section_i].end_point[1]*math.cos(math.pi/180*end_point[3]) -
@@ -82,15 +84,21 @@ function world:add_next_section()
         sections[section_i].end_point[2]*math.cos(math.pi/180*end_point[3])
     end_marker:raise_to_top()
     section_i = section_i + 1
+    
+    
+    dist_to_end_point[1] = end_point[1]-w_ap_x
+    dist_to_end_point[2] = end_point[2]-w_ap_y
+    --dumptable(end_point)
+    --print(w_ap_x,w_ap_y)
+    --dumptable(dist_to_end_point)
     if section_i > #sections then
         section_i = 1
     end
-    print("END ADD NEXT SECTION")
+    print("END ADD NEXT SECTION\n\n")
 end
 
 local new_pos = {}
-local w_ap_x = 0
-local w_ap_y = 0
+
 local g_dx = 0
 local g_dy = 0
 local g_cent = ground.w/2
@@ -146,18 +154,6 @@ function world:rotate_by(deg)
     ground.y_rotation={y_rot,0,0}
 end
 
-function world:rotate_about(deg,radius,dr)
-    
-    
-    
-    
-    y_rot = y_rot+dr
-    self.y_rotation={y_rot,0,0}
-    ground.y_rotation={y_rot,0,0}
-    
-    delta_x = radius*math.sin(math.pi/180*dr)
-    delta_y = radius*math.cos(math.pi/180*dr)
-end
 
 
 
@@ -202,7 +198,7 @@ function world:move(dx,dr,radius)
     
     dist_to_start_point[1] = dist_to_start_point[1] +delta_x
     dist_to_start_point[2] = dist_to_start_point[2] -delta_y
----dumptable(dist_to_end_point)
+--dumptable(dist_to_end_point)
     if math.abs(dist_to_end_point[1]) < 10000 and math.abs(dist_to_end_point[2]) < 10000 then
         --[[
         table.insert(
