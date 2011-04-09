@@ -23,6 +23,8 @@
 #endif
 
 //-----------------------------------------------------------------------------
+static Debug_ON log( "CONTROLLER-SERVER" );
+//-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
 #define DISCONNECT_TIMEOUT_SEC  30
@@ -34,8 +36,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
     discovery_mdns( NULL ),
     discovery_upnp( NULL ),
     server( NULL ),
-    context( ctx ),
-    app_resource_request_handler( NULL )
+    context( ctx )
 {
     GError * error = NULL;
 
@@ -51,13 +52,10 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
     {
         server.reset( new_server );
 
-        g_info( "CONTROLLER SERVER LISTENER READY ON PORT %d", server->get_port() );
+        log( "READY ON PORT %d", server->get_port() );
 
-        app_resource_request_handler = new AppResourceRequestHandler( context );
+        context->get_http_server()->register_handler( "/controllers" , this );
 
-        //TODO: remove the below line as it is added only for testing
-        String resource_id = app_resource_request_handler->serve_path( "", "hosts" );
-        g_info ( ( String( " resource_id of 'hosts' is " ) + resource_id ).c_str() );
 #ifdef TP_CONTROLLER_DISCOVERY_MDNS
 
         if ( context->get_bool( TP_CONTROLLERS_MDNS_ENABLED , true ) )
@@ -66,7 +64,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
         }
         else
         {
-            g_info( "CONTROLLER MDNS DISCOVERY IS DISABLED" );
+            log( "MDNS DISCOVERY IS DISABLED" );
         }
 
 #endif
@@ -79,7 +77,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
         }
         else
         {
-            g_info( "CONTROLLER UPNP DISCOVERY IS DISABLED" );
+            log( "UPNP DISCOVERY IS DISABLED" );
         }
 #endif
 
@@ -90,9 +88,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
 ControllerServer::~ControllerServer()
 {
-	if ( app_resource_request_handler ) {
-		delete app_resource_request_handler;
-	}
+    context->get_http_server()->unregister_handler( "/controllers" );
 }
 
 //-----------------------------------------------------------------------------
@@ -130,7 +126,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
     gpointer connection = NULL;
 
-    for ( ConnectionMap::const_iterator it = connections.begin(); it != connections.end(); ++it )
+    for ( ConnectionMap::iterator it = connections.begin(); it != connections.end(); ++it )
     {
         if ( it->second.controller == controller )
         {
@@ -290,7 +286,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             }
             else if ( g_str_has_prefix( ds->uri, "file://" ) )
             {
-                path = app_resource_request_handler->serve_path( ds->group , String( ( ds->uri ) + 7 ) );
+                path = start_serving_resource( connection , ( ds->uri ) + 7 , ds->group );
                 uri = path.c_str();
             }
 
@@ -307,7 +303,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         {
             TPControllerDropResourceGroup * dg = ( TPControllerDropResourceGroup * ) parameters;
 
-            app_resource_request_handler->drop_web_server_group( dg->group );
+            drop_resource_group( connection , dg->group );
 
             server->write_printf( connection , "DG\t%s\n" , dg->group );
 
@@ -323,13 +319,15 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_SUBMIT_PICTURE	:
 		{
-			server->write_printf( connection, "PI\n");
+		    String path = start_post_endpoint( connection , PostInfo::PICTURES );
+			server->write_printf( connection, "PI\t%s\n" , path.c_str() );
 			break;
 		}
 
         case TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP	:
 		{
-			server->write_printf( connection, "AC\n");
+            String path = start_post_endpoint( connection , PostInfo::AUDIO);
+			server->write_printf( connection, "AC\t%s\n" , path.c_str() );
 			break;
 		}
 
@@ -357,7 +355,7 @@ ControllerServer::ConnectionInfo * ControllerServer::find_connection( gpointer c
 
 void ControllerServer::connection_accepted( gpointer connection, const char * remote_address )
 {
-    g_debug( "ACCEPTED CONTROLLER CONNECTION %p FROM %s", connection, remote_address );
+    log( "ACCEPTED CONNECTION %p FROM %s", connection, remote_address );
 
     // This adds the connection to the map and sets its address at the same time
 
@@ -378,7 +376,7 @@ void ControllerServer::connection_accepted( gpointer connection, const char * re
 
 gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 {
-    g_debug( "TIMED DISCONNECT" );
+    log( "TIMED DISCONNECT" );
 
     // Check to see that the controller has reported a version
 
@@ -388,7 +386,7 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 
     if ( ci && ci->disconnect && !ci->version )
     {
-        g_debug( "DROPPING UNIDENTIFIED CONNECTION %p", tc->connection );
+        log( "DROPPING UNIDENTIFIED CONNECTION %p", tc->connection );
 
         if ( tc->self->server.get() )
         {
@@ -412,9 +410,13 @@ void ControllerServer::connection_closed( gpointer connection )
         tp_context_remove_controller( context, info->controller );
     }
 
+    drop_resource_group( connection , String() );
+
+    drop_post_endpoint( connection );
+
     connections.erase( connection );
 
-    g_debug( "CONTROLLER CONNECTION CLOSED %p", connection );
+    log( "CONNECTION CLOSED %p", connection );
 }
 
 //-----------------------------------------------------------------------------
@@ -772,4 +774,177 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         g_warning( "UNKNOWN CONTROLLER COMMAND '%s'", cmd );
     }
 }
+
+//-----------------------------------------------------------------------------
+
+String ControllerServer::start_serving_resource( gpointer connection , const String & file_name , const String & group )
+{
+    String path = group + ":" + file_name;
+
+    gchar * h = g_compute_checksum_for_string( G_CHECKSUM_MD5 , path.c_str() , path.length() );
+
+    path = h;
+
+    g_free( h );
+
+    path = String( "/controllers/resource/" ) + path;
+
+    log( "SERVING %s : %s" , path.c_str() , file_name.c_str() );
+
+    ResourceInfo & info( resources[ path ] );
+
+    info.connection = connection;
+    info.file_name = file_name;
+    info.group = group;
+
+    return path;
+}
+
+//-----------------------------------------------------------------------------
+
+void ControllerServer::drop_resource_group( gpointer connection , const String & group )
+{
+    for ( ResourceMap::iterator it = resources.begin(); it != resources.end(); )
+    {
+        if ( it->second.connection == connection && ( group.empty() || it->second.group == group  ) )
+        {
+            log( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.file_name.c_str() );
+
+            resources.erase( it++ );
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void ControllerServer::handle_http_get( const HttpServer::Request & request , HttpServer::Response & response )
+{
+    ResourceMap::iterator it = resources.find( request.get_path() );
+
+    if ( it == resources.end() )
+    {
+        return;
+    }
+
+    response.respond_with_file_contents( it->second.file_name );
+}
+
+//-----------------------------------------------------------------------------
+
+String random_string( guint length )
+{
+    static const char * pieces = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+    char buffer[ length ];
+
+    for ( guint i = 0; i < length ; ++i )
+    {
+        buffer[ i ] = pieces[ g_random_int_range( 0 , sizeof( pieces ) ) ];
+    }
+
+    return String( buffer , length );
+}
+
+String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Type type )
+{
+    for ( PostMap::const_iterator it = post_map.begin(); it != post_map.end(); ++it )
+    {
+        if ( it->second.connection == connection && it->second.type == type )
+        {
+            return it->first;
+        }
+    }
+
+    // It doesn't exist
+
+    String path;
+
+    do
+    {
+        path = "/controllers";
+        path += type == PostInfo::AUDIO ? "/audio/" : "/picture/";
+        path += random_string( 20 );
+    }
+    while( post_map.find( path ) != post_map.end() );
+
+    log( "STARTED POST END POINT %s" , path.c_str() );
+
+    PostInfo & info( post_map[ path ] );
+
+    info.connection = connection;
+    info.type = type;
+
+    return path;
+}
+
+void ControllerServer::drop_post_endpoint( gpointer connection )
+{
+    for ( PostMap::iterator it = post_map.begin(); it != post_map.end(); )
+    {
+        if ( it->second.connection == connection )
+        {
+            log( "DROPPING POST END POINT %s", it->first.c_str() );
+
+            post_map.erase( it++ );
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void ControllerServer::handle_http_post( const HttpServer::Request & request , HttpServer::Response & response )
+{
+    PostMap::iterator it = post_map.find( request.get_path() );
+
+    if ( it == post_map.end() )
+    {
+        return;
+    }
+
+    ConnectionInfo * info = find_connection( it->second.connection );
+
+    if ( ! info )
+    {
+        return;
+    }
+
+    const HttpServer::Request::Body & body( request.get_body() );
+
+    if ( ! body.get_data() || ! body.get_length() )
+    {
+        response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
+
+        return;
+    }
+
+    String ct( request.get_content_type() );
+
+    const char * content_type = ct.empty() ? 0 : ct.c_str();
+
+    switch( it->second.type )
+    {
+        case PostInfo::AUDIO:
+
+            tp_controller_submit_audio_clip( info->controller , body.get_data() , body.get_length() , content_type );
+            break;
+
+        case PostInfo::PICTURES:
+
+            tp_controller_submit_picture( info->controller , body.get_data() , body.get_length() , content_type );
+            break;
+    }
+
+    response.set_status( HttpServer::HTTP_STATUS_OK );
+}
+
+//-----------------------------------------------------------------------------
+
 
