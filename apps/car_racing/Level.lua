@@ -94,7 +94,7 @@ function world:add_next_section()
     if section_i > #sections then
         section_i = 1
     end
-    print("END ADD NEXT SECTION\n\n")
+    --print("END ADD NEXT SECTION\n\n")
 end
 
 local new_pos = {}

@@ -1,4 +1,4 @@
-local paused = true
+local paused = false
 local idle_loop
 screen:show()
 clone_sources = Group{name="clone_sources"}
@@ -85,4 +85,4 @@ idle_loop = function(_,seconds)
 	
 end
 
---idle.on_idle = idle_loop
+idle.on_idle = idle_loop

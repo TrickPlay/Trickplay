@@ -218,7 +218,13 @@ table.insert(sections,make_right_curved_piece())
 table.insert(sections,make_left_curved_piece())
 
 table.insert(sections,make_right_curved_piece())
+table.insert(sections,make_straight_section())
+
 table.insert(sections,make_left_curved_piece())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_straight_section())
+table.insert(sections,make_right_curved_piece())
+table.insert(sections,make_right_curved_piece())
 
 table.insert(sections,make_right_curved_piece())
 table.insert(sections,make_straight_section())
