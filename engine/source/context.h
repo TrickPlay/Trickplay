@@ -11,7 +11,6 @@
 
 #include "http_server.h"
 #include "api_request_handler.h"
-#include "app_resource_request_handler.h"
 
 //-----------------------------------------------------------------------------
 // Internal notifications
