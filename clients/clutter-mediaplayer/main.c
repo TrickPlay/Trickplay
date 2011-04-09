@@ -665,56 +665,6 @@ static void trickplay_exiting( TPContext * context , const char * subject , void
     disconnect_audio_sampler( * sampler );
 }
 
-TPController * camera = 0;
-
-void command_handler(
-
-     TPContext * context,
-     const char * command,
-     const char * parameters,
-     void * foo )
-{
-	gchar * data;
-	gsize size;
-
-	if ( g_file_get_contents( "/home/bkorlipara/work/trickplay/tests/apps/physics/images/globe.png" , & data , & size , 0 ) )
-	{
-		g_debug( "SUBMITTING PICTURE" );
-
-		tp_controller_submit_picture( camera , data , size , 0 );
-
-		g_free( data );
-
-		g_debug( "DONE" );
-	}
-
-}
-
-int camera_command(
-		TPController * controller,
-        unsigned int command,
-        void * parameters,
-        void * data)
-{
-	if (command == TP_CONTROLLER_COMMAND_SUBMIT_PICTURE)
-	{
-		gchar * data;
-		gsize size;
-
-		if ( g_file_get_contents( "/home/bkorlipara/work/trickplay/tests/apps/physics/images/globe.png" , & data , & size , 0 ) )
-		{
-			g_debug( "SUBMITTING PICTURE" );
-
-			tp_controller_submit_picture( camera , data , size , 0 );
-
-			g_free( data );
-
-			g_debug( "DONE" );
-			return 0;
-		}
-	}
-	return -1;
-}
 //-----------------------------------------------------------------------------
 
 int main(int argc,char * argv[])
@@ -739,18 +689,6 @@ int main(int argc,char * argv[])
 
     tp_context_add_notification_handler(context,TP_NOTIFICATION_RUNNING,trickplay_running,&sampler);
     tp_context_add_notification_handler(context,TP_NOTIFICATION_EXITING,trickplay_exiting,&sampler);
-
-    TPControllerSpec spec;
-
-    memset( & spec , 0 , sizeof( spec ) );
-
-    spec.capabilities = TP_CONTROLLER_HAS_PICTURES;
-    spec.execute_command = camera_command;
-
-
-    camera = tp_context_add_controller( context , "camera" , & spec , 0 );
-
-    tp_context_add_console_command_handler( context , "picture" , command_handler , 0 );
 
     // Run the context
 
