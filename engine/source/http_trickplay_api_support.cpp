@@ -1,53 +1,56 @@
-/*
- * api_request_handler.cpp
- *
- *  Created on: Apr 5, 2011
- */
-
 #include "app.h"
 #include "http_trickplay_api_support.h"
 #include "util.h"
 #include "sysdb.h"
 
+//-----------------------------------------------------------------------------
+
+class Handler : public HttpServer::RequestHandler
+{
+public:
+
+    Handler( TPContext * _context , const String & _path )
+    :
+        context( _context ),
+        path( _path )
+    {
+        g_assert( context );
+
+        context->get_http_server()->register_handler( path , this );
+    }
+
+    virtual ~Handler()
+    {
+        context->get_http_server()->unregister_handler( path );
+    }
+
+protected:
+
+    TPContext * context;
+    String      path;
+
+private:
+
+    Handler() {}
+    Handler( const Handler & ) {}
+};
 
 //-----------------------------------------------------------------------------
-class ListAppsRequestHandler : public HttpServer::RequestHandler
+
+class ListAppsRequestHandler : public Handler
 {
-private:
-	TPContext * context;
 public:
 	ListAppsRequestHandler( TPContext * ctx )
-	: context ( ctx )
+	:
+	    Handler( ctx , "/api/apps" )
 	{
-		g_assert( context );
-		context->get_http_server()->register_handler( "/api/apps", this );
 	}
 
-	~ListAppsRequestHandler( )
+	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
 	{
-		if ( context )
-		{
-			context->get_http_server()->unregister_handler( "/api/apps" );
-		}
-
-	}
-
-	void handle_http_request( const HttpServer::Request& request, HttpServer::Response& response )
-	{
-
-		if ( request.get_method() != HttpServer::Request::HTTP_GET )
-		{
-			response.set_status( HttpServer::HTTP_STATUS_METHOD_NOT_ALLOWED );
-			return;
-		}
-		else
-		{
-			response.set_status( HttpServer::HTTP_STATUS_OK );
-		}
-		//.........................................................................
+	    response.set_status( HttpServer::HTTP_STATUS_OK );
 
 		String result;
-		String path = request.get_request_uri( );
 
 		if ( SystemDatabase * db = context->get_db() )
 		{
@@ -96,56 +99,31 @@ public:
 		if ( ! result.empty() )
 		{
 			response.set_response( "application/json", result.data(), result.size() );
-			g_debug( "  API RESPONSE" );
-		} else {
-			response.set_status(HttpServer::HTTP_STATUS_NOT_FOUND);
-			g_debug( "  NOT FOUND" );
 		}
-
+		else
+		{
+			response.set_status( HttpServer::HTTP_STATUS_NOT_FOUND );
+		}
 	}
 };
 //-----------------------------------------------------------------------------
 
 
-class LaunchAppRequestHandler: public HttpServer::RequestHandler
+class LaunchAppRequestHandler: public Handler
 {
-private:
-	TPContext * context;
-
 public:
+
 	LaunchAppRequestHandler( TPContext * ctx )
-			: context( ctx )
+	:
+	    Handler( ctx , "/api/launch" )
 	{
-		g_assert( context );
-		context->get_http_server()->register_handler( "/api/launch", this );
 	}
 
-	~LaunchAppRequestHandler( )
+	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
 	{
-		if ( context )
-		{
-			context->get_http_server()->unregister_handler("/api/launch");
-		}
-	}
-
-
-	void handle_http_request( const HttpServer::Request& request, HttpServer::Response& response )
-	{
-
-		if ( request.get_method() != HttpServer::Request::HTTP_GET )
-		{
-			response.set_status( HttpServer::HTTP_STATUS_METHOD_NOT_ALLOWED );
-			return;
-		}
-		else
-		{
-			response.set_status( HttpServer::HTTP_STATUS_OK );
-		}
-		//.........................................................................
+	    response.set_status( HttpServer::HTTP_STATUS_OK );
 
 		String result;
-		String path = request.get_request_uri( );
-
 
 		String app_id = request.get_parameter( "id" );
 
@@ -175,57 +153,34 @@ public:
 		if ( ! result.empty() )
 		{
 			response.set_response( "application/json", result.data(), result.size() );
-			g_debug( "  API RESPONSE" );
-		} else {
-			response.set_status(HttpServer::HTTP_STATUS_NOT_FOUND);
-			g_debug( "  NOT FOUND" );
 		}
-
+		else
+		{
+			response.set_status(HttpServer::HTTP_STATUS_NOT_FOUND);
+		}
 	}
 };
 
 //-----------------------------------------------------------------------------
 
-class CurrentAppRequestHandler: public HttpServer::RequestHandler
+class CurrentAppRequestHandler: public Handler
 {
-private:
-	TPContext * context;
-
 public:
-	CurrentAppRequestHandler( TPContext * ctx )
-			: context ( ctx )
+
+    CurrentAppRequestHandler( TPContext * ctx )
+	:
+	    Handler( ctx , "/api/current_app" )
 	{
-		g_assert( context );
-		context->get_http_server()->register_handler( "/api/current_app", this );
 	}
 
-	~CurrentAppRequestHandler( )
+	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
 	{
-		if ( context )
-		{
-			context->get_http_server()->unregister_handler("/api/current_app");
-		}
-	}
-
-	void handle_http_request( const HttpServer::Request& request, HttpServer::Response& response )
-	{
-
-		if ( request.get_method() != HttpServer::Request::HTTP_GET )
-		{
-			response.set_status( HttpServer::HTTP_STATUS_METHOD_NOT_ALLOWED );
-			return;
-		}
-		else
-		{
-			response.set_status( HttpServer::HTTP_STATUS_OK );
-		}
-		//.........................................................................
+		response.set_status( HttpServer::HTTP_STATUS_OK );
 
 		String result;
-		String path = request.get_request_uri( );
-
 
 		App *current_app = context->get_current_app();
+
 		if(NULL != current_app)
 		{
 			JsonObject * o = json_object_new();
@@ -254,7 +209,9 @@ public:
 			g_free( json );
 
 			g_object_unref( gen );
-		} else {
+		}
+		else
+		{
 			result = "{}";
 		}
 
@@ -262,36 +219,31 @@ public:
 		if ( ! result.empty() )
 		{
 			response.set_response( "application/json", result.data(), result.size() );
-			g_debug( "  API RESPONSE" );
-		} else {
-			response.set_status(HttpServer::HTTP_STATUS_NOT_FOUND);
-			g_debug( "  NOT FOUND" );
 		}
-
+		else
+		{
+			response.set_status(HttpServer::HTTP_STATUS_NOT_FOUND);
+		}
 	}
 };
+
 //-----------------------------------------------------------------------------
 
 HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
     :
     context( ctx )
 {
-	request_handlers_list.push_back( new ListAppsRequestHandler( context ) );
-	request_handlers_list.push_back( new LaunchAppRequestHandler( context ) );
-	request_handlers_list.push_back( new CurrentAppRequestHandler( context ) );
+    handlers.push_back( new ListAppsRequestHandler( context ) );
+	handlers.push_back( new LaunchAppRequestHandler( context ) );
+	handlers.push_back( new CurrentAppRequestHandler( context ) );
 }
+
+//-----------------------------------------------------------------------------
 
 HttpTrickplayApiSupport::~HttpTrickplayApiSupport( )
 {
-	HttpTrickplayApiRequestHandlerList::iterator it;
-
-	for( it = request_handlers_list.begin() ; it != request_handlers_list.end(); it++ )
-	{
-		if ( *it )
-		{
-			delete *it;
-		}
-	}
-	request_handlers_list.clear( );
-	// context->get_http_server()->unregister_handler( "/api" );
+    for( HandlerList::iterator it = handlers.begin(); it != handlers.end(); ++it )
+    {
+        delete * it;
+    }
 }
