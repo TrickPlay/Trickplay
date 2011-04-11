@@ -899,8 +899,9 @@ function Make_Bar(loc,index, master)
             end
             
             
-            next_i = bar_index+1
+            next_i = bar_i+1
             if  next_i > #bars then
+                print("greater than ",#bars)
                 next_i = 1
             end
             
@@ -1196,7 +1197,7 @@ function Make_Bar(loc,index, master)
         
     end
     
-    
+    print("making a bar with parameters:",loc,index)
     bar:hide()
     return bar
 end
