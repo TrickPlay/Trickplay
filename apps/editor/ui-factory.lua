@@ -535,8 +535,8 @@ local color_map =
         [ "TextInput" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "DialogBox" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ToastAlert" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "RadioButton" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
-        [ "CheckBox" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "RadioButtonGroup" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "CheckBoxGroup" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ButtonPicker" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ProgressSpinner" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ProgressBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
@@ -548,7 +548,7 @@ local color_map =
         [ "TabBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "OSK" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
 
-        [ "widgets" ] = function() size = {600, 540} color = {25,25,25,100}  return size, color end,
+        [ "widgets" ] = function() size = {600, 570} color = {25,25,25,100}  return size, color end,
         --[ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
         [ "Code" ] = function(file_list_size) size = {800, 600} color =  {25, 25, 25, 100}  return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
@@ -745,7 +745,7 @@ end
 
 function factory.make_msgw_widget_item( assets , caption)
 
-    local STYLE         = { font = "DejaVu Sans 30px" , color = "FFFFFF" }
+    local STYLE         = { font = "DejaVu Sans 25px" , color = "FFFFFF" }
     local PADDING_X     = 7 
     local PADDING_Y     = 7
     local WIDTH         = 280
@@ -1572,7 +1572,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group.reactive = true
 
 	local space = WIDTH - PADDING_X  
-	if v.extra.type == "ButtonPicker" then 
+	if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
 
 		local text = Text {name = "attr", text = item_s}:set(STYLE)
         	text.position  = {PADDING_X, 5}
@@ -1997,7 +1997,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	group:add(item_picker)
 
         return group
-    elseif item_n == "expansion_location" or item_n == "cell_size" or item_n == "style"  then -- Attribute with radio button
+    elseif item_n == "expansion_location" or item_n == "cell_size" or item_n == "style" or item_n == "direction" then -- Attribute with radio button
 	group:clear()
 	group.name = item_n
 	group.reactive = true
@@ -2014,13 +2014,18 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	    sel_item = 2
 	end 
 	--print("SEL ITEM : ", sel_item)	
+	editor_use = true
 	if v.extra.type == "LayoutManager" then 
-             radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
 	elseif  v.extra.type == "ProgressSpinner" then
-             radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"orbitting", "spinning"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"orbitting", "spinning"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
+	elseif v.extra.type == "RadioButtonGroup" then 
+             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"vertical", "horizontal"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
 	else
-             radio_b = ui_element.radioButton{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = 2, font = "DejaVu Sans 26px"}
+             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
 	end 
+	editor_use = true
+	
 	radio_b.position = {PADDING_X/2, 40}
 	radio_b.name = "radioB"
 
@@ -2028,7 +2033,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	return group
 
-    elseif item_n == "reactive" or item_n == "loop" or item_n == "vert_bar_visible" or item_n == "hor_bar_visible" or item_n == "cells_focusable"  then  -- Attribute with single checkbox
+    elseif item_n == "reactive" or item_n == "loop" or item_n == "vert_bar_visible" or item_n == "hor_bar_visible" or item_n == "cells_focusable"  or item_n == "lock" then  -- Attribute with single checkbox
 	group:clear()
 	group.name = item_n
 	group.reactive = true
@@ -2041,11 +2046,13 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         
 	local reactive_checkbox
 	
+	editor_use = true
 	if item_v == "true" then 
-	     reactive_checkbox = ui_element.checkBox {ui_width = 200, ui_height = 100, items = {""}, selected_items = {1},}
+	     reactive_checkbox = ui_element.checkBoxGroup {ui_width = 200, ui_height = 100, items = {""}, selected_items = {1},}
 	else 
-	     reactive_checkbox = ui_element.checkBox {ui_width = 200, ui_height = 100, items = {""}, selected_items = {},}
+	     reactive_checkbox = ui_element.checkBoxGroup {ui_width = 200, ui_height = 100, items = {""}, selected_items = {},}
 	end 
+	editor_use = false
 
 	reactive_checkbox.position = {text.x + text.w + 10 , 10}
 	reactive_checkbox.name = "bool_check"..item_n

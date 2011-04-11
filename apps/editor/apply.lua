@@ -110,6 +110,24 @@ function inspector_apply (v, inspector)
 	       end
 	       end,
 
+	["lock"] = function()
+ 	       if item_group:find_child("lock"):find_child("check1").opacity > 0 then 
+	            v.extra.lock = true
+		    if v.type == "Group" then 
+			for i,j in pairs (v.children) do 
+				j.extra.lock = true
+			end 
+		    end 
+	       else 
+	            v.extra.lock = false
+		    if v.type == "Group" then 
+			for i,j in pairs (v.children) do 
+				j.extra.lock = false
+			end 
+		    end 
+
+	       end
+	       end,
 	["cells_focusable"] = function()
  	       if item_group:find_child("bool_checkcells_focusable"):find_child("check1").opacity > 0 then 
 	            v.cells_focusable = true
@@ -124,6 +142,14 @@ function inspector_apply (v, inspector)
 		     v.expansion_location = "below"
 		end
 		end,
+	["direction"] = function()
+		if  item_group:find_child("radioB").selected_item == 1 then 
+		     v.expansion_location = "vertical"
+	        else 
+		     v.expansion_location = "horizontal"
+		end
+		end,
+		
 	["style"] = function()
 		if  item_group:find_child("radioB").selected_item == 1 then 
 		     v.style = "orbitting"
@@ -163,7 +189,7 @@ function inspector_apply (v, inspector)
       for i, j in pairs(item_group.children) do 
           	  
 	      if j.name then
-		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "hor_bar_visible" and j.name ~= "cells_focusable" then 
+		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "hor_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
 		 if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
 			print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
 	        	return 0 
@@ -207,7 +233,7 @@ function inspector_apply (v, inspector)
 	      elseif j.name == "cx" or j.name == "cy" or j.name == "cw" or j.name == "ch" then
                      local not_checkbox = false
                      if v.extra then 
-		         if(v.extra.type == "CheckBox")then
+		         if(v.extra.type == "CheckBoxGroup")then
                             local csize_t = {}
                             csize_t[1] = item_group:find_child("cw"):find_child("input_text").text
                             csize_t[2] = item_group:find_child("ch"):find_child("input_text").text

@@ -3,7 +3,7 @@
 -- Global 
 ---------------------
 editor_lb = editor
-editor_use = true
+editor_use = false
 
 ----------------
 -- Constants 
@@ -180,7 +180,7 @@ ui_element = dofile("ui_element.lua")
 
 uiElements_en = {"Rectangle", "Text", "Image", "Video"}
 
-uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", --"CheckBox",  "RadioButton", "CheckBoxGroup", "RadioButtonGroup", "ArrowPane",
+uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", --"CheckBox",  "RadioButton",  "ArrowPane",
            "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane",  }
 	   -- "TabBar", "OSK",}
 uiContainers = {"DialogBox", "LayoutManager", "ScrollPane",} 
