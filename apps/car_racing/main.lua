@@ -1,4 +1,4 @@
-local paused = false
+local paused = true--false
 local idle_loop
 screen:show()
 clone_sources = Group{name="clone_sources"}
@@ -69,6 +69,8 @@ idle_loop = function(_,seconds)
 		rot_into_path=0
 		assert(#path > 0 )
 		
+		world:normalize_to(path[1].parent.group)
+		
 		--new section path
 		dx = speed*seconds - dx
 		dr = path[1].rot*dx/path[1].dist
@@ -85,4 +87,4 @@ idle_loop = function(_,seconds)
 	
 end
 
-idle.on_idle = idle_loop
+--idle.on_idle = idle_loop
