@@ -53,11 +53,8 @@ function make_straight_section()
                     },
                 }
             }
-            self.group.check = function(the_world)
-                if self.group.x > the_world.anchor_point[1] then
-                    
-                end
-            end
+            
+            self.path.parent=self
             return self.group
         end,
     }
@@ -95,6 +92,7 @@ function make_right_curved_section()
                     },
                 }
             }
+            self.path.parent=self
             return self.group
         end,
     }
@@ -133,6 +131,7 @@ function make_left_curved_section()
                     },
                 }
             }
+            self.path.parent=self
             return self.group
         end,
     }
@@ -164,6 +163,7 @@ function make_right_curved_piece()
                     },
                 }
             }
+            self.path.parent=self
             return self.group
         end,
     }
@@ -198,6 +198,7 @@ function make_left_curved_piece()
                 }
             }
             self.group:find_child("r"):raise_to_top()
+            self.path.parent=self
             return self.group
         end,
     }

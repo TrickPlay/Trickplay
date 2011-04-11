@@ -140,7 +140,20 @@ function world:remove_oldest_section()
     
 end
 
+function world:normalize_to(section)
+    
+    new_pos.x = w_ap_x-section.x
+    new_pos.y = w_ap_y-section.y
+    
+    dist_to_start_point[1] = dist_to_start_point[1] - new_pos.x
+    dist_to_start_point[2] = dist_to_start_point[2] - new_pos.y
+    
+    self.anchor_point = { dist_to_start_point[1], dist_to_start_point[2] }
+    w_ap_x = dist_to_start_point[1]
+    w_ap_y = dist_to_start_point[2]
 
+    self.anchor_point = { w_ap_x, w_ap_y }
+end
 
 
 -------------------------------------------------------------------------------
