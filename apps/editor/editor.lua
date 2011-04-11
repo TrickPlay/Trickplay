@@ -19,8 +19,8 @@ local widget_f_map = {
      ["TextInput"] = function () return ui_element.textInput()    end, 
      ["DialogBox"]      = function () return ui_element.dialogBox()    end, 
      ["ToastAlert"]       = function () return ui_element.toastAlert()     end,   
-     ["RadioButton"]    = function () return ui_element.radioButton()  end, 
-     ["CheckBox"]       = function () return ui_element.checkBox()     end, 
+     ["RadioButtonGroup"]    = function () return ui_element.radioButtonGroup()  end, 
+     ["CheckBoxGroup"]       = function () return ui_element.checkBoxGroup()     end, 
      ["ButtonPicker"]   = function () return ui_element.buttonPicker() end, 
      ["ProgressSpinner"]    = function () return ui_element.progressSpinner()  end, 
      ["ProgressBar"]     = function () return ui_element.progressBar()   end,
@@ -37,8 +37,8 @@ local widget_n_map = {
      ["TextInput"] = function () return "Text Input" end, 
      ["DialogBox"]      = function () return "Dialog Box" end, 
      ["ToastAlert"]       = function () return "Toast Alert" end,   
-     ["RadioButton"]    = function () return "Radio Button" end, 
-     ["CheckBox"]       = function () return "Checkbox" end, 
+     ["RadioButtonGroup"]    = function () return "Radio Button Group" end, 
+     ["CheckBoxGroup"]       = function () return "Checkbox Group" end, 
      ["ButtonPicker"]   = function () return "Button Picker" end, 
      ["ProgressSpinner"]    = function () return "Progress Spinner" end, 
      ["ProgressBar"]     = function () return "Progress Bar" end,
@@ -338,6 +338,11 @@ function editor.show_guides()
 end 
 
 function editor.snap_guides()
+	if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then 
+		 screen:find_child("menuButton_view").items[12]["icon"].opacity = 0 
+	else 
+		 screen:find_child("menuButton_view").items[12]["icon"].opacity = 255 
+	end
 end 
 
 function editor.timeline() 
@@ -631,7 +636,7 @@ function editor.close()
 		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
 		end
 	end 
-	
+	 screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
 end 
 
 function editor.open()
@@ -949,7 +954,7 @@ function editor.the_image(bg_image)
 	      screen:remove(dialog)
 	 end 
     	end 
-
+    
     screen:add(dialog)
 end 
 
@@ -1138,7 +1143,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	else 
 	     save_items = false 
 	end 
-	print("editor.inspector save_items --", save_itmes)
 
 	local WIDTH = 450 -- width for inspector's contents
 
@@ -1353,6 +1357,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	
 	current_inspector = inspector
         inspector.reactive = true
+	inspector.extra.lock = false
 	create_on_button_down_f(inspector)
 
         inspector_xbox.reactive = true
@@ -1527,6 +1532,7 @@ function editor.view_code(v)
 	codeViewWin:add(si)
 	--codeViewWin:add(text_codes)
 	screen:add(codeViewWin)
+	codeViewWin.extra.lock = false
         create_on_button_down_f(codeViewWin)
 	input_mode = S_POPUP
 
@@ -1544,6 +1550,12 @@ function editor.view_code(v)
 end 
 
 function editor.save(save_current_f)
+
+
+     if save_current_f == nil then 
+	save_current_f = false
+     end 
+	
 
      if current_time_focus then 
 	current_time_focus.on_focus_out()
@@ -1694,7 +1706,8 @@ function editor.rectangle(x, y)
 	if(screen:find_child("screen_objects") == nil) then 
              screen:add(g)
 	end
-
+	
+	ui.rect.extra.lock = false
         create_on_button_down_f(ui.rect) 
 
 end 
@@ -1801,7 +1814,6 @@ function editor.undo()
 				editor.n_selected(c_tmp)
 				g:remove(g:find_child(c))
 				c_tmp.extra.is_in_group = true
-				--print("KKKK 2222")
 				c_tmp.x = c_tmp.x - undo_item[3].x
 				c_tmp.y = c_tmp.y - undo_item[3].y
 				undo_item[3]:add(c_tmp)
@@ -1831,7 +1843,6 @@ function editor.redo()
 			local c_tmp = g:find_child(c)
 			g:remove(g:find_child(c))
 			c_tmp.extra.is_in_group = true
-			--print("KKKK 33333")
 			c_tmp.x = c_tmp.x - redo_item[3].x
 			c_tmp.y = c_tmp.y - redo_item[3].y
 			redo_item[3]:add(c_tmp)
@@ -1947,6 +1958,7 @@ function editor.text()
 	end 
 
 	ui.text.reactive = true
+	ui.text.extra.lock = false
 	create_on_button_down_f(ui.text)
 
 end
@@ -2219,6 +2231,7 @@ function editor.clone()
         	          screen:add(g)        
 		     end 
         	     ui.clone.reactive = true
+		     ui.clone.extra.lock = false
 		     create_on_button_down_f(ui.clone)
 		     item_num = item_num + 1
 		end 
@@ -2229,6 +2242,7 @@ function editor.clone()
 end
 	
 function editor.duplicate()
+	local next_position 
         if(table.getn(selected_objs) == 0 )then 
 		print("there are no selected objects") 
                 screen:grab_key_focus()
@@ -2239,6 +2253,12 @@ function editor.duplicate()
 	for i, v in pairs(g.children) do
             if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
+		     if ui.dup then
+		          if ui.dup.name == v.name then 
+				next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
+			  end 
+		     end 
+			
 		     if is_this_widget(v) == false  then	
 			while(is_available(string.lower(v.type)..tostring(item_num))== false) do
 		         	item_num = item_num + 1
@@ -2246,7 +2266,13 @@ function editor.duplicate()
 		     	editor.n_selected(v)
 		     	ui.dup = copy_obj(v)  
                      	ui.dup.name=string.lower(v.type)..tostring(item_num)
-		     	ui.dup.position = {v.x + 20, v.y +20}
+			if next_position then 
+		     		ui.dup.extra.position = {v.x, v.y}
+		     		ui.dup.position = next_position
+			else 
+		     		ui.dup.extra.position = {v.x, v.y}
+		     		ui.dup.position = {v.x + 20, v.y +20}
+			end 
 
 		        if v.type == "Group" then 
 			      for i,j in pairs(v.children) do 
@@ -2257,6 +2283,7 @@ function editor.duplicate()
 					ui.dup_c = copy_obj(j) 
 					ui.dup_c.name=string.lower(j.type)..tostring(item_num)
         	     	        	ui.dup:add(ui.dup_c)
+		     			ui.dup_c.extra.lock = false
 		     			create_on_button_down_f(ui.dup_c)
 		     			item_num = item_num + 1
 	
@@ -2276,7 +2303,13 @@ function editor.duplicate()
 	             	end 
 
 	           	ui.dup.name = ui.dup.name..tostring(item_num)
-	           	ui.dup.position = {v.x + 50, v.y + 50, 0}
+			if next_position then 
+		     		ui.dup.extra.position = {v.x, v.y}
+		     		ui.dup.position = next_position
+			else 
+		     		ui.dup.extra.position = {v.x, v.y}
+		     		ui.dup.position = {v.x + 50, v.y +50}
+			end 
 				
 			for i,j in pairs(w_attr_list) do 
 			     if v[j] ~= nil then 
@@ -2301,6 +2334,7 @@ function editor.duplicate()
 			        			end 
 
         	     	        			temp_g:add(temp_g_c)
+		     					temp_g_c.extra.lock = false
 		     					create_on_button_down_f(temp_g_c)
 		     					item_num = item_num + 1
 			     	   	   	     end 
@@ -2318,6 +2352,7 @@ function editor.duplicate()
 								  t_obj.extra.is_in_group = true
 								  t_obj.reactive = true
 				     			          ui.dup:replace(k,o,t_obj) 
+		     						  t_obj.extra.lock = false
 		     						  create_on_button_down_f(t_obj)
 							     end  
 							end 
@@ -2376,6 +2411,7 @@ function editor.duplicate()
         	          screen:add(g)        
 		     end 
         	     ui.dup.reactive = true
+		     ui.dup.extra.lock = false
 		     create_on_button_down_f(ui.dup)
 		     item_num = item_num + 1
 		end 
@@ -2511,7 +2547,8 @@ function editor.group()
 	end 
 
         item_num = item_num + 1
-        create_on_button_down_f(ui.group) 
+	ui.group.extra.lock = false
+        --create_on_button_down_f(ui.group) 
         screen.grab_key_focus(screen)
 	input_mode = S_SELECT
 end
@@ -2531,7 +2568,7 @@ function editor.ugroup()
 						if is_in_list(c.extra.type, uiElements) == false then 
                     				cc.reactive = true
 		    				cc.extra.is_in_group = true
-						--print("KKKKKK 55555")
+						cc.extra.lock = false
                     				create_on_button_down_f(cc)
 						end 
 	       				   end 
@@ -2666,6 +2703,7 @@ function editor.group_done(x, y)
         end
 
         item_num = item_num + 1
+	ui.group.extra.lock = false
         create_on_button_down_f(ui.group) 
         screen.grab_key_focus(screen)
 	input_mode = S_SELECT
@@ -2732,7 +2770,6 @@ function editor.left()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     --editor.n_selected(v)
 		     if(v.x ~= basis_obj.x) then
 	                  org_object = copy_obj(v)
 			  v.x = basis_obj.x
@@ -3297,7 +3334,7 @@ function editor.ui_elements()
     local BOTTOM_PADDING = 12
     local Y_PADDING = 5
     local X_PADDING = 10
-    local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+    local STYLE = {font = "DejaVu Sans 25px" , color = "FFFFFF"}
     local space = WIDTH
     local msgw_bg = factory.make_popup_bg("widgets")
     local xbox = factory.make_xbox()
@@ -3322,7 +3359,7 @@ function editor.ui_elements()
 
             
     cur_w = L_PADDING
-    cur_h = TOP_PADDING + widgets_list.h + Y_PADDING
+    cur_h = TOP_PADDING + widgets_list.h - 10
 
     for i, v in pairs(uiElements_en) do 
     	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
@@ -3347,9 +3384,9 @@ function editor.ui_elements()
 
 
     for i, v in pairs(uiElements) do
-         if (i == 4) then 
+         if (i == 5) then 
               cur_w =  cur_w + 280 + Y_PADDING
-              cur_h =  TOP_PADDING + widgets_list.h + Y_PADDING
+              cur_h =  TOP_PADDING + widgets_list.h -10
 	 end 
 	 
 	 local widget_label = widget_n_map[v]() 
@@ -3403,6 +3440,7 @@ function editor.ui_elements()
 	           new_widget.name = new_widget.name..tostring(item_num)
                    table.insert(undo_list, {new_widget.name, ADD, new_widget})
 	           g:add(new_widget)
+		   new_widget.extra.lock = false
                    create_on_button_down_f(new_widget)
 	           screen:add(g)
 	           screen:grab_key_focus()
@@ -3453,6 +3491,7 @@ function editor.ui_elements()
 	      	new_widget.name = new_widget.name..tostring(item_num)
               	table.insert(undo_list, {new_widget.name, ADD, new_widget})
 	      	g:add(new_widget)
+		new_widget.extra.lock = false
               	create_on_button_down_f(new_widget)
 	      	screen:add(g)
 	      	screen:grab_key_focus()

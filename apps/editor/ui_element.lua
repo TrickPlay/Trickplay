@@ -1186,7 +1186,7 @@ function ui_element.button(table)
 	released = nil, 
 	button_image = nil,
 	focus_image  = nil,
-	text_has_shadow = true,
+	text_has_shadow = false,
     }
 
  --overwrite defaults
@@ -1209,6 +1209,7 @@ function ui_element.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
+
 	current_focus = b_group
         if (p.skin == "custom") then 
 	     ring.opacity = 0
@@ -1219,11 +1220,11 @@ function ui_element.button(table)
         end 
         b_group:find_child("text").color = p.focus_text_color
 	
-	if key then 
-	    if p.pressed and key == keys.Return then
+	--if key then 
+	    if p.pressed then --and key == keys.Return then
 		p.pressed()
 	    end 
-	end 
+	--end 
 
 	b_group:grab_key_focus(b_group)
     end
@@ -1427,7 +1428,7 @@ function ui_element.textInput(table)
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
 --kkk
-	if editor_lb == nil then 
+	if editor_lb == nil or editor_use then 
 	   function t_group:on_button_down()
 		t_group.extra.on_focus_in()
 		text:grab_key_focus()
@@ -2017,7 +2018,7 @@ function ui_element.buttonPicker(table)
 
         t = nil
 
-	if editor_lb == nil then 
+	if editor_lb == nil or editor_use then 
 
 	local unfocus, left_arrow, right_arrow 
 	unfocus = bp_group:find_child("unfocus")
@@ -2257,7 +2258,7 @@ end
 
 
 --[[
-Function: radioButton
+Function: radioButtonGroup
 
 Creates a Radio button ui element
 
@@ -2289,7 +2290,7 @@ Extra Function:
 ]]
 
 
-function ui_element.radioButton(table) 
+function ui_element.radioButtonGroup(table) 
 
  --default parameters
     local p = {
@@ -2297,19 +2298,19 @@ function ui_element.radioButton(table)
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	font = "DejaVu Sans 30px", -- items 
-	color = {255,255,255,255}, --"FFFFFF", -- items 
-		button_color = {255,255,255,200}, -- items 
-		select_color = {255, 255, 255, 255}, -- items 
-		button_radius = 10, -- items 
-		select_radius = 4,  -- items 
-		b_pos = {0, 0},  -- items 
-		item_pos = {50,-5},  -- items 
-		line_space = 40,  -- items 
+	text_font = "DejaVu Sans 30px", -- items 
+	text_color = {255,255,255,255}, --"FFFFFF", -- items 
+	button_color = {255,255,255,200}, -- items 
+	select_color = {255, 255, 255, 255}, -- items 
+	button_radius = 10, -- items 
+	select_radius = 4,  -- items 
+	b_pos = {0, 0},  -- items 
+	item_pos = {50,-5},  -- items 
+	line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
 	rotate_func = nil, 
-		direction = 1, 
+	direction = "vertical", 
 	selected_item = 1 
     }
 
@@ -2326,10 +2327,10 @@ function ui_element.radioButton(table)
     local select_img
 
     local rb_group = Group {
-          name = "radioButton",  
+          name = "radioButtonGroup",  
     	  position = {200, 200, 0}, 
           reactive = true, 
-          extra = {type = "RadioButton"}
+          extra = {type = "RadioButtonGroup"}
      }
 
     local create_radioButton = function() 
@@ -2355,10 +2356,10 @@ function ui_element.radioButton(table)
 	 local pos = {0,0}
          for i, j in pairs(p.items) do 
 	      local donut 
-	      if(p.direction == 1) then --vertical 
+	      if(p.direction == "vertical") then --vertical 
                   pos= {0, i * p.line_space - p.line_space}
 	      end   	
-              items:add(Text{name="item"..tostring(i), text = j, font=p.font, color =p.color, position = pos})     
+              items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
 	      if p.skin == "custom" then 
 		   donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
     	           rings:add(donut) 
@@ -2367,18 +2368,20 @@ function ui_element.radioButton(table)
     	           rings:add(donut) 
 	      end 
 
-	      if(p.direction == 2) then --horizontal
+	      if(p.direction == "horizontal") then --horizontal
 		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
 	      end 
 	      donut.reactive = true
   
-	     function donut:on_button_down (x,y,b,n)
-		local ring_num = tonumber(donut.name:sub(5,-1))
-		p.selected_item = ring_num
-		select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-	    	select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
-		return true
-	     end 
+              if editor_lb == nil or editor_use then  
+	     		function donut:on_button_down (x,y,b,n)
+				local ring_num = tonumber(donut.name:sub(5,-1))
+				p.selected_item = ring_num
+				select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
+	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
+				return true
+	     		end 
+	      end
          end 
 	 rings:set{name = "rings", position = p.b_pos} 
 	 items:set{name = "items", position = p.item_pos} 
@@ -2471,7 +2474,7 @@ Extra Function:
 ]]
 
 
-function ui_element.checkBox(table) 
+function ui_element.checkBoxGroup(table) 
 
  --default parameters
     local p = {
@@ -2479,10 +2482,10 @@ function ui_element.checkBox(table)
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	font = "DejaVu Sans 30px", 
-	color = {255,255,255,255}, 
+	text_font = "DejaVu Sans 30px", 
+	text_color = {255,255,255,255}, 
 	box_color = {255,255,255,255},
-	f_color = {255,255,255,0},
+	fill_color = {255,255,255,0},
 	box_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
@@ -2490,7 +2493,7 @@ function ui_element.checkBox(table)
 	b_pos = {0, 0},  
 	item_pos = {50,-5},  
 	selected_items = {1},  
-	direction = 1,  -- 1:vertical 2:horizontal
+	direction = "vertical",  -- 1:vertical 2:horizontal
 		rotate_func = nil,  
     } 
 
@@ -2509,10 +2512,10 @@ function ui_element.checkBox(table)
     local cb_group = Group()
 
     local  cb_group = Group {
-    	  name = "checkBox",  
+    	  name = "checkBoxGroup",  
     	  position = {200, 200, 0}, 
           reactive = true, 
-          extra = {type = "CheckBox"}
+          extra = {type = "CheckBoxGroup"}
      }
 
 
@@ -2538,13 +2541,13 @@ function ui_element.checkBox(table)
          local pos = {0, 0}
          for i, j in pairs(p.items) do 
 	      local box, check
-	      if(p.direction == 1) then --vertical 
+	      if(p.direction == "vertical") then --vertical 
                   pos= {0, i * p.line_space - p.line_space}
 	      end   			
 
-	      items:add(Text{name="item"..tostring(i), text = j, font=p.font, color = p.color, position = pos})     
+	      items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
 	      if p.skin == "custom" then 
-		   box = Rectangle{name="box"..tostring(i),  color= p.f_color, border_color= p.box_color, border_width= p.box_width, 
+		   box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
 				       size = p.box_size, position = pos, reactive = true, opacity = 255}
     	           boxes:add(box) 
 	     else
@@ -2555,22 +2558,24 @@ function ui_element.checkBox(table)
 	     check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
 	     checks:add(check) 
 
-	     function box:on_button_down (x,y,b,n)
-		local box_num = tonumber(box.name:sub(4,-1))
-		p.selected_items = table_insert(p.selected_items, box_num)
-		cb_group:find_child("check"..tostring(box_num)).opacity = 255
-		cb_group:find_child("check"..tostring(box_num)).reactive = true
-		return true
-	     end 
-	     function check:on_button_down(x,y,b,n)
-		local check_num = tonumber(check.name:sub(6,-1))
-		p.selected_items = table_removeval(p.selected_items, check_num)
-		check.opacity = 0
-		check.reactive = false
-		return true
-	     end 
+             if editor_lb == nil or editor_use then  
+	     	function box:on_button_down (x,y,b,n)
+			local box_num = tonumber(box.name:sub(4,-1))
+			p.selected_items = table_insert(p.selected_items, box_num)
+			cb_group:find_child("check"..tostring(box_num)).opacity = 255
+			cb_group:find_child("check"..tostring(box_num)).reactive = true
+			return true
+	     	end 
+	     	function check:on_button_down(x,y,b,n)
+			local check_num = tonumber(check.name:sub(6,-1))
+			p.selected_items = table_removeval(p.selected_items, check_num)
+			check.opacity = 0
+			check.reactive = false
+			return true
+	     	end 
+	     end
 
-	     if(p.direction == 2) then --horizontal
+	     if(p.direction == "horizontal") then --horizontal
 		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
 	     end 
          end 
@@ -4134,6 +4139,13 @@ button
 	end 
     end 
 
+    local shadow 
+    if p.skin == "editor" then
+	shadow = true 
+    else 
+	shadow = false 
+    end 
+
 
     local dropDownMenu = Group{}
     local button       = ui_element.button{
@@ -4150,6 +4162,7 @@ button
     	fill_color=p.fill_color, 
     	border_width=p.border_width,
     	border_corner_radius=p.border_corner_radius,
+	text_has_shadow = shadow,
     }
     local umbrella
     umbrella     = Group{
@@ -4296,7 +4309,7 @@ button
                     duration=300,
                     opacity=0,
                 }
-		screen:grab_key_focus()
+		--screen:grab_key_focus()
 		input_mode = S_SELECT
             end,
             set_item_function = function(index,f)
@@ -4438,20 +4451,20 @@ button
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
-                    --if editor_lb == nil then  
+                    if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f() end
 			    button.on_focus_out() 
                         end
                         ui_ele.reactive=true
-                    --end
+                    end
                 elseif p.show_ring then
                     ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
-                    if editor_lb == nil then  
+                    if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f() end
@@ -4460,7 +4473,7 @@ button
                         ui_ele.reactive=true
                     end
                 else
-                    if editor_lb == nil then  
+                    if editor_lb == nil or editor_use then  
                         function txt:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f() end

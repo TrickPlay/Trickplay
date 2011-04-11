@@ -311,7 +311,7 @@ function create_on_button_down_f(v)
 	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
 	     if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
-	       if (v.extra.is_in_group == true and control == false) then 
+	       if (v.extra.is_in_group == true and control == false ) then 
 		    local p_obj = find_parent(v)
                     if(button == 3) then -- imsi : num_clicks is not correct ! 
                     --if(button == 3 or num_clicks >= 2) then
@@ -327,7 +327,9 @@ function create_on_button_down_f(v)
 		     	editor.n_select(p_obj)
 		    end
 	            org_object = copy_obj(p_obj)
-           	    dragging = {p_obj, x - p_obj.x, y - p_obj.y }
+		    if v.extra.lock == false then -- or  v.name =="inspector" then 
+           	    	dragging = {p_obj, x - p_obj.x, y - p_obj.y }
+		    end 
            	    return true
 	      else 
                     if(button == 3) then-- imsi : num_clicks is not correct ! 
@@ -396,7 +398,9 @@ function create_on_button_down_f(v)
 	           end 
 
 	            org_object = copy_obj(v)
-           	    dragging = {v, x - v.x, y - v.y }
+		    if v.extra.lock == false then -- or v.name == "inspector" then 
+           	    	dragging = {v, x - v.x, y - v.y }
+		    end
            	    return true
 	     end
 	    elseif (input_mode == S_FOCUS) then 
@@ -409,9 +413,11 @@ function create_on_button_down_f(v)
 
             end
 	
-	   elseif( input_mode ~= S_RECTANGLE) then  
+	   elseif( input_mode ~= S_RECTANGLE ) then 
+		if v.extra.lock == false then --or v.name == inspector  then  
 		dragging = {v, x - v.x, y - v.y }
            	return true
+		end 
            end
 	  end
            --return true .. 렉탱글 안에서 또 렉탱글 글릴때 안되아서.. 뺌
@@ -538,8 +544,8 @@ function create_on_button_down_f(v)
 	                     am.position = {x -dx, y -dy}
 		             end 
 	                end 
-
- 
+			
+			if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then  
 			for i=1, v_guideline,1 do 
 			   if(screen:find_child("v_guideline"..i) ~= nil) then 
 			     local gx = screen:find_child("v_guideline"..i).x 
@@ -578,6 +584,8 @@ function create_on_button_down_f(v)
 			   end
 			end
 
+			end 
+
 		        if(border ~= nil )then 
 			     border.position = v.position
 			end 
@@ -603,7 +611,6 @@ function create_on_button_down_f(v)
            end
           end
         end
-
 end
 
 function get_group_position(child_obj)
@@ -859,28 +866,31 @@ function make_attr_t(v)
 	["virtual_h"] = function ()
         	     table.insert(attr_t, {"virtual_h", v.virtual_h,"H"})
 		     end, 
+	["lock"]     = function ()
+                     table.insert(attr_t, {"line", "", "hide"})
+		     table.insert(attr_t, {"lock", v.extra.lock, "Lock"})
+                     table.insert(attr_t, {"line", "", "hide"})
+		     end,
   }
   
   local obj_map = {
-       ["Rectangle"] = function() return {"x_rotation", "anchor_point", "opacity", "border_color", "color", "border_width", "reactive", "focus"} end,
-       ["Text"] = function() return {"x_rotation", "anchor_point","opacity", "color", "font", "wrap_mode","reactive", "focus"} end,
-       ["Image"] = function() return {"src", "clip", "x_rotation", "anchor_point","opacity", "reactive", "focus"} end,
-       ["Group"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Clone"] = function() return {"scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"skin","x_rotation","anchor_point","label","opacity","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
-       ["TextInput"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
-       ["ButtonPicker"] = function() return {"skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","items","selected_item","reactive","focus"} end,
-       ["MenuButton"] = function() return {"skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","items", "reactive","focus",} end,
-       ["DialogBox"] = function() return {"skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_seperator_color","title_seperator_thickness",} end,
-       ["ToastAlert"] = function() return {"skin","x_rotation", "anchor_point","icon","label","message","opacity","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
-       ["ProgressSpinner"] = function() return {"skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
-       ["ProgressBar"] = function() return {"skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress"} end,
-       ["LayoutManager"] = function() return {"skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable",} end,
-       ["ScrollPane"] = function() return {"skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
--- "border_w","arrow_sz","clip_w","clip_h","content_h","content_w","hor_arrow_y","vert_arrow_x","arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","scale","x_rotation","anchor_point", "opacity"} end,
-       ["CheckBox"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","box_color","f_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
-       ["RadioButton"] = function() return {"skin","x_rotation","anchor_point","opacity","color","font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
-       --["MenuBar"] = function() return {"skin", "y_offset", "clip_w", "arrow_y","scale","x_rotation","anchor_point", "opacity"} end,
+       ["Rectangle"] = function() return {"lock","x_rotation", "anchor_point", "opacity", "border_color", "color", "border_width", "reactive", "focus"} end,
+       ["Text"] = function() return {"lock", "x_rotation", "anchor_point","opacity", "color", "font", "wrap_mode","reactive", "focus"} end,
+       ["Image"] = function() return {"lock", "src", "clip", "x_rotation", "anchor_point","opacity", "reactive", "focus"} end,
+       ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
+       ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
+       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
+       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
+       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","items","selected_item","reactive","focus"} end,
+       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","items", "reactive","focus",} end,
+       ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_seperator_color","title_seperator_thickness",} end,
+       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","icon","label","message","opacity","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
+       ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
+       ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress"} end,
+       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable",} end,
+       ["ScrollPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
+       ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","box_color","fill_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
+       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
    }
   
   if is_this_widget(v) == true  then
@@ -971,7 +981,7 @@ function make_attr_t(v)
 	elseif j == "hor_arrow_y"or j == "vert_arrow_x" then 
              table.insert(attr_t, {j, "nil", stringTotitle(j)})
 	else
-	     print("make_attr_t() : ", j, " 처리해 주세용 ~")
+	     print("make_attr_t() : ", j, " 처리해 주세용~ ~")
 	end 
    end 
  
@@ -1009,8 +1019,8 @@ function itemTostring(v, d_list, t_list)
 	["TextInput"] = function () return "ui_element.textInput" end, 
 	["DialogBox"] = function () return "ui_element.dialogBox" end, 
 	["ToastAlert"] = function () return "ui_element.toastAlert" end,   
-	["RadioButton"] = function () return "ui_element.radioButton" end, 
-	["CheckBox"] = function () return "ui_element.checkBox"  end, 
+	["RadioButtonGroup"] = function () return "ui_element.radioButtonGroup" end, 
+	["CheckBoxGroup"] = function () return "ui_element.checkBoxGroup"  end, 
 	["ButtonPicker"] = function () return "ui_element.buttonPicker"  end, 
 	["ProgressSpinner"] = function () return "ui_element.progressSpinner" end, 
 	["ProgressBar"] = function () return "ui_element.progressBar" end,
@@ -1431,9 +1441,11 @@ function printMsgWindow(txt, name)
 
      msgw:add(msgw_bg)
      input_mode = S_POPUP
-     msgw:add(Text{name= name, text = txt, font= "DejaVu Sans 32px",
+     local textText = Text{name= name, text = txt, font= "DejaVu Sans 32px",
      color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
-     reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})     
+     reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
+     msgw:add(textText)     
+     textText:grab_key_focus()
   
 
      if(name == "projectlist") then  
@@ -1530,6 +1542,7 @@ local function inputMsgWindow_savefile()
       if (file_not_exists) then
            current_fn = input_t.text
            editor_lb:writefile(current_fn, contents, true)
+	   screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "> " ..current_fn
            contents = ""
 	   cleanMsgWindow()
            screen:grab_key_focus(screen) 
@@ -1832,6 +1845,7 @@ function inputMsgWindow_openfile(input_text)
 	         end      
 	      end      
 	   end 
+	   screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "> " .. input_t.text
      else 
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen)
@@ -1859,6 +1873,7 @@ function inputMsgWindow_openfile(input_text)
 	     		end 
 		end 
 	  end 
+	  v.extra.lock = false
           create_on_button_down_f(v)
 	  if(v.type == "Group") then 
 	       for j, c in pairs (v.children) do
@@ -1866,6 +1881,7 @@ function inputMsgWindow_openfile(input_text)
 			print(c.name) 
                         c.reactive = true
 		        c.extra.is_in_group = true
+	  		c.extra.lock = false
                         create_on_button_down_f(c)
 		    end 
 	       end 
@@ -1874,6 +1890,7 @@ function inputMsgWindow_openfile(input_text)
 			print(c.name)
 			c.reactive = true
 		        c.extra.is_in_group = true
+	  		c.extra.lock = false
                         create_on_button_down_f(c)
 		    end 
 	       elseif v.extra.type == "LayoutManager" then 
@@ -1885,6 +1902,7 @@ function inputMsgWindow_openfile(input_text)
 	 		   print(c.name) 
 			   c.reactive = true
 		           c.extra.is_in_group = true
+	  		   c.extra.lock = false
                            create_on_button_down_f(c)
      		      end 
 		   end 
@@ -2017,6 +2035,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
           src = input_t.text, opacity = 255 , position = {200,200}, 
 	  extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
+	  ui.image.extra.lock = false
           create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, ADD, ui.image})
           g:add(ui.image)
@@ -2109,6 +2128,9 @@ local function set_project_path ()
         editor_lb:mkdir( asset_path ) 
         --widget_path = editor_lb:build_path( asset_path, "widgets")
         --editor_lb:mkdir( widget_path ) 
+	
+	screen:find_child("menu_text").text = project .. " "
+	screen:find_child("menu_text").extra.project = project .. " "
 
 	copy_widget_imgs()
 	cleanMsgWindow()

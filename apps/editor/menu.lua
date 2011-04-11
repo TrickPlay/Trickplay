@@ -1,4 +1,5 @@
 
+editor_use = true
 local menu_bar = Image
 	{
 		src = "assets/menu-bar.png",
@@ -392,7 +393,7 @@ local menu_text = Text
 	{
 		color = "#cccccc",
 		font = "FreeSans Medium 20px",
-		text = "TestProject::File1.lua::Object1",
+		text = "",
 		editable = true,
 		wants_enter = false,
 		wrap = false,
@@ -416,7 +417,7 @@ local menu_text_shadow = Text
 	{
 		color = "000000",
 		font = "FreeSans Medium 20px",
-		text = "TestProject::File1.lua::Object1",
+		text = "",
 		editable = true,
 		wants_enter = false,
 		wrap = false,
@@ -437,3 +438,4 @@ local menu_text_shadow = Text
 
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
+editor_use = false
