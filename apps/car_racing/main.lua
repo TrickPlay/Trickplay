@@ -4,6 +4,8 @@ screen:show()
 clone_sources = Group{name="clone_sources"}
 screen:add(clone_sources)
 clone_sources:hide()
+strafed_dist = 0
+local STRAFE_CAP = 550
 
 path={}
 local dist_into_path = 0
@@ -12,19 +14,28 @@ local rot_into_path = 0
 dofile( "Sections.lua" )
 dofile(    "Level.lua" )
 
+local dx = 0
+local dr = 0
+local speed = 2000
 
 local keys = {
 	[keys.Up] = function()
-		idle_loop(nil,.1)
+		speed = speed + 1000
 	end,
 	[keys.Down] = function()
-		world:move(-100)
+		speed = speed - 1000
 	end,
 	[keys.Left] = function()
-		world:rotate_by(-5)
+		--world:rotate_by(-5)
+		if strafed_dist > -STRAFE_CAP then
+			strafed_dist = strafed_dist - 50
+		end
 	end,
 	[keys.Right] = function()
-		world:rotate_by(5)
+		--world:rotate_by(5)
+		if strafed_dist < STRAFE_CAP then
+			strafed_dist = strafed_dist + 50
+		end
 	end,
 	[keys.RED] = function()
 		if paused then
@@ -39,9 +50,7 @@ function screen:on_key_down(k)
 	if keys[k] then keys[k]() end
 end
 --[[]]
-local dx = 0
-local dr = 0
-local speed = 2000
+
 idle_loop = function(_,seconds)
 	
 	assert(#path > 0)
@@ -84,7 +93,6 @@ idle_loop = function(_,seconds)
 		--world:rotate_by(dr)
 		world:move(dx,dr,path[1].radius)
 	end
-	
 end
 
 --idle.on_idle = idle_loop
