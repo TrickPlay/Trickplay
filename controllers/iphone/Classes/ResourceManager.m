@@ -31,6 +31,7 @@
     return [resourceNames objectForKey:name];
 }
 
+
 /**
  * Synchronous method of getting resource
  */
@@ -101,6 +102,16 @@
         [resources setObject:data forKey:(NSString *)resourceKey];
     } else {
         NSLog(@"Could not cache data, either no key is specified or the data never arrived over the network");
+    }
+}
+
+- (void)dropResourceGroup:(NSString *)groupName {
+    for (id key in resources) {
+        NSDictionary *resourceInfo = [resourceNames objectForKey:key];
+        if ([resourceInfo objectForKey:@"group"] && [(NSString *)[resourceInfo objectForKey:@"group"] compare:groupName] == NSOrderedSame) {
+            [resources removeObjectForKey:key];
+            [resourceNames removeObjectForKey:key];
+        }
     }
 }
 

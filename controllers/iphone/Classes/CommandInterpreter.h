@@ -15,6 +15,7 @@
 @required
 - (void)do_MC:(NSArray *)args;
 - (void)do_DR:(NSArray *)args;
+- (void)do_DG:(NSArray *)args;
 - (void)do_UB:(NSArray *)args;
 - (void)do_UG:(NSArray *)args;
 - (void)do_RT:(NSArray *)args;
@@ -32,6 +33,12 @@
 
 /** Advanced UI junk **/
 - (void)do_UX:(NSArray *)args;
+
+// Welcome Message
+- (void)do_WM:(NSArray *)args;
+
+// Take pictures
+- (void)do_PI:(NSArray *)args;
 
 @end
 

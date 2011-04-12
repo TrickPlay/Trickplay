@@ -10,9 +10,11 @@
 
 @implementation GestureViewController
 
+@synthesize version;
 @synthesize loadingIndicator;
 @synthesize theTextField;
 @synthesize backgroundView;
+
 @synthesize touchDelegate;
 @synthesize accelDelegate;
 @synthesize socketDelegate;
@@ -29,6 +31,7 @@
         [hostName release];
     }
     hostName = [h retain];
+    http_port = nil;
 }
 
 - (BOOL)startService {
@@ -53,6 +56,8 @@
 	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, width, height, width, height ] dataUsingEncoding:NSUTF8StringEncoding];
 	
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
+    
+    self.camera = nil;
 	
     audioController = [[AudioController alloc] initWithResourceManager:resourceManager socketManager:socketManager];
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
@@ -63,6 +68,14 @@
     //[loadingIndicator stopAnimating];
     
     return YES;
+}
+
+- (void)setHTTPPort:(NSString *)my_http_port {
+    if (http_port) {
+        [http_port release];
+    }
+    http_port = [my_http_port retain];
+    [socketManager setPort:[http_port integerValue]];
 }
 
 - (BOOL)hasConnection {
@@ -118,6 +131,13 @@
 #pragma mark Handling Commands From Server
 
 //------------------- Handling Commands From Server ------------------
+
+//--Welcome message
+
+- (void)do_WM:(NSArray *)args {
+    self.version = [args objectAtIndex:0];
+    [self setHTTPPort:(NSString *)[args objectAtIndex:1]];
+}
 
 //--Audio junk
 
@@ -215,13 +235,24 @@
     NSLog(@"Declaring Resource");
     [args retain];
     
+    // version 3.1 and higher have groups
+    NSString *groupName = nil;
+    if ([args count] > 2) {
+        groupName = [args objectAtIndex:2];
+    }
+    
+    
     [resourceManager declareResourceWithObject:[
-                              NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", @"", @"scale", nil
+                              NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", groupName, @"group", nil
                               ]
                       forKey:[args objectAtIndex:0]
      ];
     
     [args release];
+}
+
+- (void)do_DG:(NSArray *)args {
+    [resourceManager dropResourceGroup:(NSString *)[args objectAtIndex:0]];
 }
 
 /**
@@ -234,7 +265,6 @@
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
     if ([resourceManager getResourceInfo:key]) {
-        //**
         NSData *imageData = [resourceManager fetchResource:key];
         if (imageData) {
             UIImage *tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
@@ -244,14 +274,6 @@
             //**for testing
             //backgroundView.image = [UIImage imageNamed:@"background.png"];
         }
-        //*/
-        /**
-        UIImageView *newBackgroundView = [resourceManager fetchImageViewUsingResource:key frame:backgroundView.frame];
-        [backgroundView removeFromSuperview];
-        self.backgroundView = newBackgroundView;
-        [self.view addSubview:backgroundView];
-        [loadingIndicator stopAnimating];
-        //*/
     }
     
     [args release];
@@ -274,24 +296,7 @@
         height = [[args	objectAtIndex:4] floatValue];
         CGRect frame = CGRectMake(x, y, width, height);
         UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
-        /**
-        // Grab the image, make sure its there.
-        NSData *imageData = [resourceManager fetchResource:key];
-        if (!imageData) return;
-        UIImage *tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
-        // Now we have the image, we need to draw it
-        NSLog(@"Drawing resource");
-        CGFloat
-        x = [[args objectAtIndex:1] floatValue],
-        y = [[args objectAtIndex:2] floatValue],
-        width = [[args objectAtIndex:3] floatValue],
-        height = [[args	objectAtIndex:4] floatValue];
         
-        UIImageView *newImageView = [[UIImageView alloc] initWithImage:tempImage];
-        newImageView.frame = CGRectMake(x, y, width, height);
-        //*/
-        
-        //[self.view addSubview:newImageView];
         // NOTE: Assumes backgroundView is only replaced in clearUI(),
         // hence, replace backgroundView.image, do not replace the entire View
         [backgroundView addSubview:newImageView];
@@ -388,6 +393,28 @@
     [touchDelegate touchesCancelled:touches withEvent:event];
 }
 
+
+//-------------------- Camera stuff ----------------------------
+
+- (void)do_PI:(NSArray *)args {
+    if (!camera) {
+        camera = [[CameraViewController alloc] initWithNibName:@"CameraViewController" bundle:nil];
+    }
+    [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
+    [self.navigationController pushViewController:camera animated:YES];
+}
+
+- (void)finishedPickingImage {
+    NSLog(@"Finished Picking Image");
+}
+
+- (void)finishedSendingImage {
+    NSLog(@"Finished Sending Image");
+}
+
+- (void)canceledPickingImage {
+    NSLog(@"Canceled Picking Image");
+}
 
 //-------------------- Super Advanced UI stuff -----------------
 
@@ -492,8 +519,14 @@
 
 - (void)dealloc {
     NSLog(@"Gesture View Controller dealloc");
+    if (version) {
+        [version release];
+    }
     if (hostName) {
         [hostName release];
+    }
+    if (http_port) {
+        [http_port release];
     }
     if (audioController) {
         [audioController release];
@@ -513,9 +546,11 @@
     if (accelDelegate) {
         [(AccelerometerController *)accelDelegate release];
     }
-    
     if (styleAlert) {
         [styleAlert release];
+    }
+    if (camera) {
+        [camera release];
     }
     [multipleChoiceArray release];
     [loadingIndicator release];

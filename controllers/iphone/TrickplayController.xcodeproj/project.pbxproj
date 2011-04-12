@@ -25,6 +25,9 @@
 		CD404C15134BF25E0021D36C /* TrickplayRectangle.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C14134BF25E0021D36C /* TrickplayRectangle.m */; };
 		CD404C18134BF51D0021D36C /* TrickplayImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C17134BF51D0021D36C /* TrickplayImage.m */; };
 		CD404C1B134FF6DE0021D36C /* TrickplayText.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C1A134FF6DC0021D36C /* TrickplayText.m */; };
+		CD404C271353DCF00021D36C /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C251353DCE50021D36C /* CameraViewController.m */; };
+		CD404C281353DCF10021D36C /* CameraViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD404C261353DCE50021D36C /* CameraViewController.xib */; };
+		CD404C2A1353E18E0021D36C /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD404C291353E18D0021D36C /* MobileCoreServices.framework */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
@@ -77,6 +80,10 @@
 		CD404C17134BF51D0021D36C /* TrickplayImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayImage.m; sourceTree = "<group>"; };
 		CD404C19134FF6D90021D36C /* TrickplayText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayText.h; sourceTree = "<group>"; };
 		CD404C1A134FF6DC0021D36C /* TrickplayText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayText.m; sourceTree = "<group>"; };
+		CD404C241353DCE10021D36C /* CameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraViewController.h; sourceTree = "<group>"; };
+		CD404C251353DCE50021D36C /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraViewController.m; sourceTree = "<group>"; };
+		CD404C261353DCE50021D36C /* CameraViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CameraViewController.xib; sourceTree = "<group>"; };
+		CD404C291353E18D0021D36C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
@@ -117,6 +124,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD404C2A1353E18E0021D36C /* MobileCoreServices.framework in Frameworks */,
 				CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
@@ -185,6 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				CDFEC57E1320608F00A14307 /* Other */,
+				CD404C291353E18D0021D36C /* MobileCoreServices.framework */,
 				CDF509C813469721009870EC /* QuartzCore.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
@@ -259,6 +268,9 @@
 				CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */,
 				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
 				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
+				CD404C241353DCE10021D36C /* CameraViewController.h */,
+				CD404C251353DCE50021D36C /* CameraViewController.m */,
+				CD404C261353DCE50021D36C /* CameraViewController.xib */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -372,6 +384,7 @@
 				44AE7A55133C20E4000D7EE2 /* Default.png in Resources */,
 				44AE7A57133C20F0000D7EE2 /* Default@2x.png in Resources */,
 				44AE7A59133C210D000D7EE2 /* Default-Portrait~ipad.png in Resources */,
+				CD404C281353DCF10021D36C /* CameraViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +415,7 @@
 				CD404C15134BF25E0021D36C /* TrickplayRectangle.m in Sources */,
 				CD404C18134BF51D0021D36C /* TrickplayImage.m in Sources */,
 				CD404C1B134FF6DE0021D36C /* TrickplayText.m in Sources */,
+				CD404C271353DCF00021D36C /* CameraViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
