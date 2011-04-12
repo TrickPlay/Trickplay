@@ -119,6 +119,8 @@
         [delegate do_MC:args];
     } else if ([key compare:@"DR"] == NSOrderedSame) {
         [delegate do_DR:args];
+    } else if ([key compare:@"DG"] == NSOrderedSame) {
+        [delegate do_DG:args];
     } else if ([key compare:@"UB"] == NSOrderedSame) {
         [delegate do_UB:args];
     } else if ([key compare:@"UG"] == NSOrderedSame) {
@@ -147,6 +149,10 @@
         [delegate do_SS:args];
     } else if ([key compare:@"UX"] == NSOrderedSame) {
         [delegate do_UX:args];
+    } else if ([key compare:@"WM"] == NSOrderedSame) {
+        [delegate do_WM:args];
+    } else if ([key compare:@"PI"] == NSOrderedSame) {
+        [delegate do_PI:args];
     } else {
         NSLog(@"Command not recognized %@", key);
     }

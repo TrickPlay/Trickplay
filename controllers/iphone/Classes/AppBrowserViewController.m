@@ -70,6 +70,7 @@
     [self.navigationController pushViewController:gestureViewController animated:YES];
 }
 
+
 /**
  *  Returns true if app is running and pushes that app to the view.
  */

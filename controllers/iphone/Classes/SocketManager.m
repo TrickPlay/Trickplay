@@ -208,8 +208,10 @@
 - (NSInteger)port {
     return port;
 }
-
-
+// Used if switching to http server
+- (void)setPort:(NSInteger)value {
+    port = value;
+}
 
 - (void)dealloc{
     NSLog(@"Socket Manager dealloc");

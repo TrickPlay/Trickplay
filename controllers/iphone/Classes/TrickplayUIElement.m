@@ -235,9 +235,9 @@
         clip_w = [(NSNumber *)[clip objectAtIndex:2] floatValue],
         clip_h = [(NSNumber *)[clip objectAtIndex:3] floatValue];
         // create the bounding box
-        self.frame = CGRectMake(clip_x, clip_y, clip_w, clip_h);
+        self.layer.bounds = CGRectMake(clip_x, clip_y, clip_w, clip_h);
         // adjust the view to the coordinate system of the bounding box
-        
+        self.layer.masksToBounds = YES;
     }
 }
 

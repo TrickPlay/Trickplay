@@ -32,6 +32,8 @@
         */
         
         [self setColorFromArgs:args];
+        [self setBorderColorFromArgs:args];
+        [self setBorderWidthFromArgs:args];
         
         [self addSubview:view];
     }

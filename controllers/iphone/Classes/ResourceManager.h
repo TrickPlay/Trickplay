@@ -14,6 +14,7 @@
 @interface ResourceManager : NSObject <AsyncImageViewDelegate> {
 
     SocketManager *socketManager;
+
     NSMutableDictionary *resourceNames;
     NSMutableDictionary *resources;
     
@@ -26,6 +27,7 @@
 - (UIImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
 - (NSMutableDictionary *)getResourceInfo:(NSString *)name;
 
+- (void)dropResourceGroup:(NSString *)groupName;
 - (void)clean;
 
 @end

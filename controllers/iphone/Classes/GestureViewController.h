@@ -88,13 +88,16 @@
 #import "AccelerometerController.h"
 #import "AudioController.h"
 #import "AdvancedUIObjectManager.h"
+#import "CameraViewController.h"
 
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
+CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     SocketManager *socketManager;
     NSString *hostName;
     NSInteger port;
+    NSString *http_port;
+    NSString *version;
     
     UIActivityIndicatorView *loadingIndicator;
     UITextField *theTextField;
@@ -108,11 +111,15 @@ CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     
     AudioController *audioController;
     
+    CameraViewController *camera;
+    
     id <ViewControllerTouchDelegate> touchDelegate;
     id <ViewControllerAccelerometerDelegate> accelDelegate;
     id <GestureViewControllerSocketDelegate> socketDelegate;
     id <AdvancedUIDelegate> advancedUIDelegate;
 }
+
+@property (nonatomic, retain) NSString *version;
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 @property (nonatomic, retain) IBOutlet UITextField *theTextField;
