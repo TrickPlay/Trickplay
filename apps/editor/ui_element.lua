@@ -51,6 +51,39 @@
         	["Clone"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point", "scale"} end,
         }
 
+current_focus = nil  --- for user code main 
+
+if g == nil then 
+	g= Group()
+end 
+
+function ui_element.populate_to (grp, tbl)
+
+	for i, j in pairs (grp.children) do 
+		tbl[j.name] = j 
+	end 
+	
+	return tbl
+
+end 
+
+function ui_element.transit_to (prev_grp, next_grp)
+	if prev_grp then 
+		screen:remove(prev_grp)
+	end 
+	g = next_grp
+	screen:add(g)
+end 
+
+function ui_element.screen_add(grp)
+	g = grp
+	screen:add(g)
+end 
+
+function ui_element.start_animation()
+	screen:find_child("timeline").start_timer()
+end
+
  -- for mouse control 
 
 if controllers.start_pointer then 
@@ -967,6 +1000,7 @@ function ui_element.timeline(t)
         current_time_focus = timeline:find_child("pointer0") 
 	timeline:find_child("pointer0").on_focus_in()
 
+	
         for n,m in pairs (g.children) do 
 	   if m.extra.timeline then 
 	     if m.extra.timeline[0] then 
@@ -1066,7 +1100,10 @@ function ui_element.timeline(t)
     --dumptable(timeline_timelines)
 
      -- start_timer() function 
-     function g.extra.start_timer()
+     
+     --start_timer = function () 
+     --function g.extra.start_timer()
+     function timeline.extra.start_timer() 
 	if current_time_focus then 
 		current_time_focus.on_focus_out()
 		current_time_focus = nil
@@ -1272,9 +1309,6 @@ function ui_element.button(table)
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
         text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
 
-        b_group:add(ring, focus_ring, button, focus, text)
-
-
 	if p.text_has_shadow then 
 	       s_txt = Text{
                         text  = p.label, 
@@ -1288,6 +1322,10 @@ function ui_element.button(table)
                     s_txt.y = s_txt.y+s_txt.h/2
         	b_group:add(s_txt)
 	end 
+
+        b_group:add(ring, focus_ring, button, focus, text)
+
+
 
 
         if (p.skin == "custom") then button.opacity = 0 
@@ -1427,7 +1465,6 @@ function ui_element.textInput(table)
     	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
     	t_group:add(box, focus_box, box_img, focus_img, text)
 
---kkk
 	if editor_lb == nil or editor_use then 
 	   function t_group:on_button_down()
 		t_group.extra.on_focus_in()
@@ -2333,6 +2370,23 @@ function ui_element.radioButtonGroup(table)
           extra = {type = "RadioButtonGroup"}
      }
 
+    function rb_group.extra.select_button(item_n) 
+	    p.selected_item = item_n
+            if p.rotate_func then
+	       p.rotate_func(p.selected_item)
+	    end
+    end 
+
+    function rb_group.extra.insert_item(itm) 
+	table.insert(p.items, itm) 
+	create_radioButton()
+    end 
+
+    function rb_group.extra.remove_item() 
+	table.remove(p.items)
+	create_radioButton()
+    end 
+
     local create_radioButton = function() 
 
 	if(p.skin ~= "custom") then 
@@ -2376,7 +2430,8 @@ function ui_element.radioButtonGroup(table)
               if editor_lb == nil or editor_use then  
 	     		function donut:on_button_down (x,y,b,n)
 				local ring_num = tonumber(donut.name:sub(5,-1))
-				p.selected_item = ring_num
+				--p.selected_item = ring_num
+				rb_group.extra.select_button(ring_num)
 				select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
 	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
 				return true
@@ -2395,23 +2450,7 @@ function ui_element.radioButtonGroup(table)
 
      create_radioButton()
 
-     function rb_group.extra.select_button(item_n) 
-	    p.selected_item = item_n
-            if p.rotate_func then
-	       p.rotate_func(p.selected_item)
-	    end
-     end 
-
-     function rb_group.extra.insert_item(itm) 
-	table.insert(p.items, itm) 
-	create_radioButton()
-     end 
-
-     function rb_group.extra.remove_item() 
-	table.remove(p.items)
-	create_radioButton()
-     end 
-
+    
 
      mt = {}
      mt.__newindex = function (t, k, v)
@@ -2494,7 +2533,7 @@ function ui_element.checkBoxGroup(table)
 	item_pos = {50,-5},  
 	selected_items = {1},  
 	direction = "vertical",  -- 1:vertical 2:horizontal
-		rotate_func = nil,  
+	rotate_func = nil,  
     } 
 
  --overwrite defaults
@@ -2516,8 +2555,24 @@ function ui_element.checkBoxGroup(table)
     	  position = {200, 200, 0}, 
           reactive = true, 
           extra = {type = "CheckBoxGroup"}
-     }
+    }
 
+    function cb_group.extra.select_button(items) 
+	    p.selected_items = items
+            if p.rotate_func then
+	       p.rotate_func(p.selected_items)
+	    end
+    end 
+
+    function cb_group.extra.insert_item(itm) 
+	table.insert(p.items, itm) 
+	create_checkBox()
+    end 
+
+    function cb_group.extra.remove_item() 
+	table.remove(p.items)
+	create_checkBox()
+    end 
 
     local function create_checkBox()
 
@@ -2564,6 +2619,7 @@ function ui_element.checkBoxGroup(table)
 			p.selected_items = table_insert(p.selected_items, box_num)
 			cb_group:find_child("check"..tostring(box_num)).opacity = 255
 			cb_group:find_child("check"..tostring(box_num)).reactive = true
+    			cb_group.extra.select_button(p.selected_items) 
 			return true
 	     	end 
 	     	function check:on_button_down(x,y,b,n)
@@ -2571,11 +2627,12 @@ function ui_element.checkBoxGroup(table)
 			p.selected_items = table_removeval(p.selected_items, check_num)
 			check.opacity = 0
 			check.reactive = false
+    			cb_group.extra.select_button(p.selected_items) 
 			return true
 	     	end 
 	     end
 
-	     if(p.direction == "horizontal") then --horizontal
+	     if(p.direction == "horizontal") then 
 		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
 	     end 
          end 
@@ -2590,16 +2647,6 @@ function ui_element.checkBoxGroup(table)
     
     create_checkBox()
 
-
-    function cb_group.extra.insert_item(itm) 
-	table.insert(p.items, itm) 
-	create_checkBox()
-    end 
-
-    function cb_group.extra.remove_item() 
-	table.remove(p.items)
-	create_checkBox()
-    end 
 
     mt = {}
     mt.__newindex = function (t, k, v)
@@ -3011,15 +3058,15 @@ Arguments:
     item_w      - width of an item
     item_h      - height of an item
     grid_gap    - the number of pixels in between the grid items
-	duration_per_tile - how long a particular tile flips for
-	cascade_delay     - how long a tile waits to start flipping after its neighbor began flipping
+    duration_per_tile - how long a particular tile flips for
+    cascade_delay     - how long a tile waits to start flipping after its neighbor began flipping
     tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'num_cols' elements in a 2 dimensional table 
-Return:
 
-		Group - Group containing the grid
+Return:
+    Group - Group containing the grid
         
 Extra Function:
-	get_tile_group(r,c) - returns group for the tile at row 'r' and column 'c'
+    get_tile_group(r,c) - returns group for the tile at row 'r' and column 'c'
     animate_in() - performs the animate-in sequence
 ]]
 function ui_element.layoutManager(t)
@@ -3399,12 +3446,12 @@ Creates a clipped window that can be scrolled
 Arguments:
     clip_w    - width of the clip
     clip_h    - height of the clip
-	color     - color of the frame and scrolling items
-	border_w  - width of the border
+    color     - color of the frame and scrolling items
+    border_w  - width of the border
     content_h - height of the group that holds the content being scrolled
-	content_w - width of the group that holds the content being scrolled
-	arrow_clone_source - a Trickplay object that is to be cloned to replace the scroll arrows
-	arrow_sz  - size of the scroll arrows
+    content_w - width of the group that holds the content being scrolled
+    arrow_clone_source - a Trickplay object that is to be cloned to replace the scroll arrows
+    arrow_sz  - size of the scroll arrows
     arrows_in_box - a flag, setting to true positions the arrows inside the border
     arrows_centered - a flag, setting to true positions the arrows along the center axises
     grip_is_visible - a flag that either makes the grips of the scroll bars visible or invisible

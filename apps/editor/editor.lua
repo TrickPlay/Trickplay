@@ -1618,7 +1618,51 @@ function editor.save(save_current_f)
 
 
 	if(current_fn ~= "") then 
-		editor_lb:writefile (current_fn, contents, true)	
+
+--qqqq
+ 	        local fileUpper= string.upper(string.sub(current_fn, 1, -5))
+	   	local fileLower= string.lower(string.sub(current_fn, 1, -5))
+		local main = readfile("main.lua")
+		local added_stub_code = ""
+		if string.find(main, "-- "..fileUpper.." SECTION") ~= nil then 
+		-- input_t.text-새로 저장할 루아 파일에 대한 정보가 메인에 있는지를 확인하고 
+		-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
+		-- 그리고 저장 끝 	
+			for i, j in pairs (g.children) do 
+		   		if need_stub_code(j) == true then 
+	                  		if string.find(main, "-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  			
+					     added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
+					     if j.extra.type == "Button" then 
+					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
+			   		     elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
+	                   			   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   		     elseif j.extra.type == "CheckBoxGroup" then 
+	                   			   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   		     elseif j.extra.type == "MenuButton" then 
+			   			for k,l in pairs (j.items) do 
+			   	     		     if l["type"] == "item" then 
+	                   			           added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+			   	     		     end 
+			   			end 
+			   		     end 
+	                   		     added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
+					end
+				end 
+			end --for
+			local q,w 
+			q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+			local main_first = string.sub(main, 1, q-1)
+			local main_last = string.sub(main, q, -1)
+			if added_stub_code ~= "" then 
+				main = ""
+				main = main_first..added_stub_code..main_last
+				editor_lb:writefile("main.lua",main, true)
+			end 
+
+	       end		
+--qqqq
+
+	       editor_lb:writefile(current_fn, contents, true)	
 	else 
 		editor.save(false)
 		return
