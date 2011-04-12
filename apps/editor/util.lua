@@ -186,6 +186,23 @@ function is_in_list(item, list)
     return false
 end 
     
+
+function need_stub_code(v)
+
+    local lists = {"Button", "ButtonPicker", "RadioButtonGroup", "CheckBoxGroup", "MenuButton"}
+ 
+    if v.extra then 
+        if is_in_list(v.extra.type, lists) == true then 
+	    return true
+        else 
+	    return false
+        end 
+    else 
+        return false
+    end 
+end 
+
+
 function is_this_widget(v)
     if v.extra then 
         if is_in_list(v.extra.type, uiElements) == true then 
@@ -380,9 +397,6 @@ function create_on_button_down_f(v)
 		    end 
 
 -----]]]] 
-
-
-
 
 		    -- Debugging : 841 
 
@@ -1001,13 +1015,6 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
---[[ old 
-
-    local w_attr_list = {"border_color", "border_width", "border_corner_radius", "padding_x", "padding_y", "label", "focus_color", "fill_color", "text_color", "title_color", "message_color", "title_seperator_color", "f_color", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "source", "ui_width", "ui_height", "skin","color", "text_font", "title_font", "message_font", "font", "padding", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "box_color", "box_width", "check_size", "selected_item", "button_color", "select_color", "title_seperator_thickness", "button_radius", "select_radius", "b_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src","bsize","empty_top_color", "empty_bottom_color", "border_color", "progress", "filled_top_color", "filled_bottom_color","rows","columns","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","tiles","focus","cells_focusable","border_w","content","content_h","content_w","arrow_clone_source","arrow_sz","hor_arrow_y","vert_arrow_x", "arrows_in_box","arrows_centered","grip_is_visible","border_is_visible","reactive", "menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","cell_size"}
-
-
-]] 
-
     local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
@@ -1270,6 +1277,7 @@ function itemTostring(v, d_list, t_list)
         table.insert(d_list, v.name) 
     end 
 
+
     -- 만약 문제가 된다면 Clone일 경 아래 조건문은 빼세요    
     if is_in_list(v.name, t_list) == true  then 
 	return "", d_list, t_list, itm_str
@@ -1527,6 +1535,7 @@ function printMsgWindow(txt, name)
 end
 
 local function inputMsgWindow_savefile()
+     local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
      local dir = editor_lb:readdir(CURRENT_DIR)
      for i, v in pairs(dir) do
@@ -1539,7 +1548,115 @@ local function inputMsgWindow_savefile()
                file_not_exists = false
           end
       end
+
+      -- main generation
       if (file_not_exists) then
+	   local main_exist = false
+	   local fileUpper= string.upper(string.sub(input_t.text, 1, -5))
+	   local fileLower= string.lower(string.sub(input_t.text, 1, -5))
+
+	   local function gen_stub_code () 
+		new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\""..input_t.text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+
+		for i, j in pairs (g.children) do 
+		     if need_stub_code(j) == true then 
+	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n" 			
+
+			   if j.extra.type == "Button" then 
+	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
+			   elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
+	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   elseif j.extra.type == "CheckBoxGroup" then 
+	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   elseif j.extra.type == "MenuButton" then 
+			   	for k,l in pairs (j.items) do 
+			   	     if l["type"] == "item" then 
+	                   			new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+			   	     end 
+			   	end 
+			   end 
+	                   new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
+		     end 
+		end 
+		new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n" 
+	   end 
+
+
+     	   for i, v in pairs(dir) do
+          	if("main.lua" == v)then
+			local main = readfile("main.lua")
+			local added_stub_code = ""
+			if string.find(main, "-- "..fileUpper.." SECTION") == nil then 
+--[[
+			-- input_t.text-새로 저장할 루아 파일에 대한 정보가 메인에 있는지를 확인하고 
+			-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
+			-- 그리고 저장 끝 	
+				print("YUGIIIII 111111")
+				for i, j in pairs (g.children) do 
+		    		if need_stub_code(j) == true then 
+	                   		if string.find("-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  			
+					     print("YUGIIIII 222222222")
+					     added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
+					     if j.extra.type == "Button" then 
+					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
+			   		     elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
+	                   			   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   		     elseif j.extra.type == "CheckBoxGroup" then 
+	                   			   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   		     elseif j.extra.type == "MenuButton" then 
+			   			for k,l in pairs (j.items) do 
+			   	     		     if l["type"] == "item" then 
+	                   			           added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+			   	     		     end 
+			   			end 
+			   		     end 
+	                   		     added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
+					end
+				end 
+				end --for
+				local q,w 
+				q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+				print("q,w", q,w)
+				local main_first = string.sub(main, 1, q-1)
+				local main_last = string.sub(main, q, -1)
+				if added_stub_code ~= "" then 
+					print("YUGIIIII 333333333")
+					main = ""
+					main = main_first..added_stub_code..main_last
+					editor_lb:writefile("main.lua",main, true)
+				end 
+
+				
+			else 
+]]
+			-- 적당한 위치 찾아서 이 파일에 대한 내용을 넣어주기만 하면됨 이건 쉽지. 
+				local q,w 
+				q, w = string.find(main, "-- END GLOBAL SECTION\n\n")
+				gen_stub_code()
+				local main_first = string.sub(main, 1, w)
+				local main_last = string.sub(main, w+1, -1)
+				if new_contents then 
+					main = ""
+					main = main_first..new_contents..main_last
+					editor_lb:writefile("main.lua",main, true)
+				end 
+			end 
+		    main_exist = true
+		end 
+	   end 
+
+	   if main_exist == false then 
+		-- main.lua 생성해서 
+
+		global_section_contents = "-- GLOBAL SECTION\nui_element = dofile(\"ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
+	        gen_stub_code()
+		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n--END SCREEN ON_KEY_DOWN SECTION\n-- END GLOBAL SECTION FOOTER \n"
+
+		editor_lb:writefile("main.lua", global_section_contents, true)
+		editor_lb:writefile("main.lua", new_contents, false)
+		editor_lb:writefile("main.lua", global_section_footer_contents, false)
+	   end 
+	 
            current_fn = input_t.text
            editor_lb:writefile(current_fn, contents, true)
 	   screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "> " ..current_fn
