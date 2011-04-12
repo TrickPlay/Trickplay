@@ -9,15 +9,16 @@ local end_marker = Rectangle{
 local prev_end_marker = Rectangle{
     w=100, h=100, color = "ffff00", anchor_point = {50,50}
 }
-local sky = Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="87cefa"}
-local car = Image{name="THE CAR",src="car.png",position={screen.w/2,5*screen.h/6}}
+local sky = Image{src="skyline.png",x=screen.w/2}--Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="172e57"}
+sky.anchor_point={sky.w/2,0}
+car = Image{name="THE CAR",src="car.png",position={screen.w/2,5*screen.h/6},z=10}
 car.anchor_point = {car.w/2,car.h/2}
 
 section_i = 1
 active_sections = {}
 local ground = Image{
     name  = "THE GROUND",
-    src   = "grass1.png",
+    src   = "desert.png",
     tile  = {true,true},
     size  = {40000,40000},
     scale = {4,4},
@@ -35,8 +36,14 @@ local dist_to_start_point = {0,0}
 
 local w_ap_x = 0
 local w_ap_y = 0
+local y_rot = 0
 
-
+function world:adjust_position()
+    self.anchor_point = {
+        w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot),
+        w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot)
+    }
+end
 
 function world:add_next_section()
     
@@ -78,10 +85,7 @@ function world:add_next_section()
     --    sections[section_i].end_point[2]*math.cos(math.pi/180*end_point[3]))
     end_point[3] = end_point[3] + sections[section_i].end_point[3]
     end_marker.position = {end_point[1],end_point[2]}
-    dist_to_end_point[1] = dist_to_end_point[1] + sections[section_i].end_point[1]*math.cos(math.pi/180*end_point[3]) -
-        sections[section_i].end_point[2]*math.sin(math.pi/180*end_point[3])
-    dist_to_end_point[2] = dist_to_end_point[2] + sections[section_i].end_point[1]*math.sin(math.pi/180*end_point[3]) +
-        sections[section_i].end_point[2]*math.cos(math.pi/180*end_point[3])
+    
     end_marker:raise_to_top()
     section_i = section_i + 1
     
@@ -120,9 +124,12 @@ function world:remove_oldest_section()
     end_point[1] = end_point[1] - new_pos.x
     end_point[2] = end_point[2] - new_pos.y
     
-    self.anchor_point = { dist_to_start_point[1], dist_to_start_point[2] }
+    --self.anchor_point = { dist_to_start_point[1]+strafed_dist, dist_to_start_point[2] }
     w_ap_x = dist_to_start_point[1]
     w_ap_y = dist_to_start_point[2]
+    
+    world:adjust_position()
+    
     for _,section in ipairs(active_sections) do
         section.x = section.x - new_pos.x
         section.y = section.y - new_pos.y
@@ -142,23 +149,20 @@ end
 
 function world:normalize_to(section)
     
-    new_pos.x = w_ap_x-section.x
-    new_pos.y = w_ap_y-section.y
+    w_ap_x = section.x
+    w_ap_y = section.y
     
-    dist_to_start_point[1] = dist_to_start_point[1] - new_pos.x
-    dist_to_start_point[2] = dist_to_start_point[2] - new_pos.y
+    dist_to_start_point[1] = w_ap_x
+    dist_to_start_point[2] = w_ap_y
     
-    self.anchor_point = { dist_to_start_point[1], dist_to_start_point[2] }
-    w_ap_x = dist_to_start_point[1]
-    w_ap_y = dist_to_start_point[2]
-
-    self.anchor_point = { w_ap_x, w_ap_y }
+    --self.anchor_point = { w_ap_x+strafed_dist, w_ap_y }
+    world:adjust_position()
 end
 
 
 -------------------------------------------------------------------------------
 -- Movement functions
-local y_rot = 0
+
 -- turn
 function world:rotate_by(deg)
     --if deg ~= 0 then print(deg)end
@@ -176,7 +180,7 @@ function world:move(dx,dr,radius)
     if dr ~= 0 then
         
         
-        
+        --radius = radius - strafed_dist
         cent_x = radius*math.cos(math.pi/180*y_rot)
         cent_y = radius*math.sin(math.pi/180*y_rot)
         
@@ -184,6 +188,7 @@ function world:move(dx,dr,radius)
         --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
         self.y_rotation={y_rot,0,0}
         ground.y_rotation={y_rot,0,0}
+        sky.x = sky.w/2-sky.w/2*math.sin(math.pi/180*y_rot)
         
         delta_x = radius*math.cos(math.pi/180*y_rot)-cent_x
         delta_y = -radius*math.sin(math.pi/180*y_rot)+cent_y
@@ -199,31 +204,28 @@ function world:move(dx,dr,radius)
     w_ap_x = w_ap_x+delta_x
     w_ap_y = w_ap_y-delta_y
     
-    self.anchor_point = { w_ap_x, w_ap_y }
+    --self.anchor_point = { w_ap_x+strafed_dist, w_ap_y }
+    world:adjust_position()
     
     g_dx = (g_dx+delta_x)%TILE_W
     g_dy = (g_dy-delta_y)%TILE_H
     
     ground.anchor_point = { g_cent + g_dx,  g_cent + g_dy }
     
-    dist_to_end_point[1] = dist_to_end_point[1] -delta_x
-    dist_to_end_point[2] = dist_to_end_point[2] +delta_y
+    dist_to_end_point[1]   = dist_to_end_point[1]   - delta_x
+    dist_to_end_point[2]   = dist_to_end_point[2]   + delta_y
+    dist_to_start_point[1] = dist_to_start_point[1] + delta_x
+    dist_to_start_point[2] = dist_to_start_point[2] - delta_y
     
-    dist_to_start_point[1] = dist_to_start_point[1] +delta_x
-    dist_to_start_point[2] = dist_to_start_point[2] -delta_y
---dumptable(dist_to_end_point)
-    if math.abs(dist_to_end_point[1]) < 10000 and math.abs(dist_to_end_point[2]) < 10000 then
-        --[[
-        table.insert(
-            sections,
-            make_straight_section()
-        )
-        --]]
+    if math.abs(dist_to_end_point[1]) < 10000 and
+       math.abs(dist_to_end_point[2]) < 10000 then
+        
         world:add_next_section()
     end
     
-    if math.abs(dist_to_start_point[1]) > 20000 or math.abs(dist_to_start_point[2]) > 20000 then
-        --dumptable(dist_to_start_point)
+    if math.abs(dist_to_start_point[1]) > 20000 or
+       math.abs(dist_to_start_point[2]) > 20000 then
+        
         world:remove_oldest_section()
     end
 end
