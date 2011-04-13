@@ -2,6 +2,7 @@
 #include "http_trickplay_api_support.h"
 #include "util.h"
 #include "sysdb.h"
+#include "json.h"
 
 //-----------------------------------------------------------------------------
 
@@ -56,45 +57,28 @@ public:
 		{
 			SystemDatabase::AppInfo::List apps = db->get_apps_for_current_profile();
 
-			JsonArray * array = json_array_new();
-
-			SystemDatabase::AppInfo::List::const_iterator it;
-
-			for( it = apps.begin(); it != apps.end(); ++it )
 			{
-				JsonObject * o = json_object_new();
+	            using namespace JSON;
 
-				json_object_set_string_member( o , "name" , it->name.c_str() );
-				json_object_set_string_member( o , "id" , it->id.c_str() );
-				json_object_set_string_member( o , "version" , it->version.c_str() );
-				json_object_set_int_member( o , "release" , it->release );
-				json_object_set_string_member( o , "badge_style" , it->badge_style.c_str() );
-				json_object_set_string_member( o , "badge_text" , it->badge_text.c_str() );
+	            Array array;
 
-				json_array_add_object_element( array , o );
+                SystemDatabase::AppInfo::List::const_iterator it;
+
+                for( it = apps.begin(); it != apps.end(); ++it )
+                {
+                    Object & object( array.append().as< Object> () );
+
+                    object[ "name"          ] = it->name;
+                    object[ "id"            ] = it->id;
+                    object[ "version"       ] = it->version;
+                    object[ "release"       ] = it->release;
+                    object[ "badge_style"   ] = it->badge_style;
+                    object[ "badge_text"    ] = it->badge_text;
+                }
+
+                result = array.stringify();
 			}
-
-			JsonNode * node = json_node_new( JSON_NODE_ARRAY );
-
-			json_node_set_array( node , array );
-
-			json_array_unref( array );
-
-			JsonGenerator * gen = json_generator_new();
-
-			json_generator_set_root( gen , node );
-
-			gsize length = 0;
-
-			gchar * json = json_generator_to_data( gen , & length );
-
-			result = String( json , length );
-
-			g_free( json );
-
-			g_object_unref( gen );
 		}
-
 
 		if ( ! result.empty() )
 		{
@@ -143,7 +127,12 @@ public:
 
 					if ( TP_RUN_OK == context->launch_app( app_id.c_str() , launch_info ) )
 					{
-						result = "{'result':0}";
+					    using namespace JSON;
+
+					    Object object;
+					    object[ "result" ] = 0;
+
+						result = object.stringify();
 					}
 				}
 			}
@@ -181,40 +170,29 @@ public:
 
 		App *current_app = context->get_current_app();
 
-		if(NULL != current_app)
-		{
-			JsonObject * o = json_object_new();
+        {
+		    using namespace JSON;
 
-			json_object_set_string_member( o, "name", current_app->get_metadata().name.c_str() );
-			json_object_set_string_member( o, "id", current_app->get_id().c_str() );
-			json_object_set_string_member( o, "version", current_app->get_metadata().version.c_str() );
-			json_object_set_int_member( o, "release", current_app->get_metadata().release );
 
-			JsonNode * node = json_node_new ( JSON_NODE_OBJECT );
+            if( NULL != current_app )
+            {
 
-			json_node_set_object( node, o );
+                const App::Metadata & md( current_app->get_metadata() );
 
-			json_object_unref( o );
+                Object object;
 
-			JsonGenerator * gen  = json_generator_new();
+                object[ "name"    ] = md.name;
+                object[ "id"      ] = md.id;
+                object[ "version" ] = md.version;
+                object[ "release" ] = md.release;
 
-			json_generator_set_root( gen, node );
-
-			gsize length = 0;
-
-			gchar * json = json_generator_to_data( gen, &length );
-
-			result = String( json, length );
-
-			g_free( json );
-
-			g_object_unref( gen );
-		}
-		else
-		{
-			result = "{}";
-		}
-
+                result = object.stringify();
+            }
+            else
+            {
+                result = Object().stringify();
+            }
+        }
 
 		if ( ! result.empty() )
 		{
