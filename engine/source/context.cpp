@@ -8,7 +8,6 @@
 #include "curl/curl.h"
 #include "fontconfig.h"
 #include "sndfile.h"
-#include "json-glib/json-glib.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
