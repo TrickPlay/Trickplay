@@ -139,6 +139,7 @@ public:
 
 		virtual void set_header( const String & name , const String & value ) = 0;
 	    virtual void set_response( const String & content_type , const char * data , gsize size ) = 0;
+        virtual void set_response( const String & content_type , const String & content ) = 0;
 	    virtual void set_status( Status status , const String & msg = String() ) = 0;
 	    virtual void set_content_type( const String & content_type ) = 0;
 	    virtual void set_content_length( goffset content_length ) = 0;

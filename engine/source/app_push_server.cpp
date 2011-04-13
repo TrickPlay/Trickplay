@@ -327,9 +327,7 @@ void AppPushServer::set_response( HttpServer::Response & response , bool done , 
         object[ "url" ] = url;
     }
 
-    String json = object.stringify();
-
-    response.set_response( "application/json" , json.c_str() , json.size() );
+    response.set_response( "application/json" , object.stringify() );
 
     response.set_status( HttpServer::HTTP_STATUS_OK );
 }
