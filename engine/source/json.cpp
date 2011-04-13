@@ -932,7 +932,7 @@ namespace JSON
         {
             for ( const char * p = json; *p; ++p )
             {
-                if ( ! JSON_parser_char( parser , *p ) )
+                if ( ! JSON_parser_char( parser , ( unsigned char ) *p ) )
                 {
                     stack.clear();
                     root.clear();
@@ -946,7 +946,7 @@ namespace JSON
 
             for ( long int i = 0; i < length; ++i , ++p )
             {
-                if ( ! JSON_parser_char( parser , *p ) )
+                if ( ! JSON_parser_char( parser , ( unsigned char ) *p ) )
                 {
                     stack.clear();
                     root.clear();
