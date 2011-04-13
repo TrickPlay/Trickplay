@@ -1694,7 +1694,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	      
 	      function up:on_button_down(x,y)
-		     if v.extra.type == "ButtonPicker" then 
+		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		          for i, j in pairs (v.items) do
 				v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 		     	  end 
@@ -1720,7 +1720,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 
 	      function down:on_button_down(x,y)
-		     if v.extra.type == "ButtonPicker" then 
+		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		          for i, j in pairs (v.items) do
 				v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 		     	  end 
@@ -2008,7 +2008,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	local radio_b, sel_item = 1
 	
-	if item_v == "above" or item_v == "fixed" or item_v == "orbitting" then 
+	if item_v == "above" or item_v == "fixed" or item_v == "orbitting" or item_v == "vertical" then 
 	    sel_item = 1
 	else  
 	    sel_item = 2
@@ -2019,7 +2019,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
 	elseif  v.extra.type == "ProgressSpinner" then
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"orbitting", "spinning"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
-	elseif v.extra.type == "RadioButtonGroup" then 
+	elseif v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"vertical", "horizontal"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
 	else
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
@@ -2671,7 +2671,7 @@ rect_up = Rectangle
 
 img_up = Image
 	{
-		src = "left.png",
+		src = "assets/left.png",
 		scale = {l_scale,l_scale,0,0},
 		z_rotation = {90,0,0},
 		anchor_point = {0,0},
@@ -2714,7 +2714,7 @@ rect_down = Rectangle
 
 img_down = Image
 	{
-		src = "left.png",
+		src = "assets/left.png",
 		scale = {l_scale,l_scale,0,0},
 		z_rotation = {270,0,0},
 		anchor_point = {0,0},

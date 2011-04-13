@@ -2546,7 +2546,7 @@ function ui_element.checkBoxGroup(table)
  --the umbrella Group
     local check_image
     local checks = Group()
-    local items = Group{name = "items"}
+    local items = Group()
     local boxes = Group() 
     local cb_group = Group()
 

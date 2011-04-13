@@ -1634,6 +1634,7 @@ function editor.save(save_current_f)
 					     added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
 					     if j.extra.type == "Button" then 
 					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
+					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
 			   		     elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
 	                   			   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
 			   		     elseif j.extra.type == "CheckBoxGroup" then 
@@ -2480,6 +2481,22 @@ function editor.delete()
         	     if (screen:find_child(v.name.."a_m") ~= nil) then 
 	     		screen:remove(screen:find_child(v.name.."a_m"))
                      end
+		     if need_stub_code(v) == true then 
+			if current_fn then 
+	   		     local fileUpper= string.upper(string.sub(current_fn, 1, -5))
+	   		     local fileLower= string.lower(string.sub(current_fn, 1, -5))
+			     local main = readfile("main.lua")
+			     if string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") ~= nil then  			
+			          local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") 
+				  local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(v.name).." SECTION\n\n")
+				  local main_first = string.sub(main, 1, q-1)
+				  local main_last = string.sub(main, r+1, -1)
+				  main = ""
+				  main = main_first..main_last
+				  editor_lb:writefile("main.lua",main, true)
+	       		     end 
+	       		end 
+	       	     end 
         	     g:remove(v)
 		elseif v.extra.type == "ScrollPane" then 
 			for j, k in pairs (v.content.children) do 

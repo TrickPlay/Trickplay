@@ -31,7 +31,7 @@ function inspector_apply (v, inspector)
                      for next, _ in pairs(items.tiles) do 
 		       item = items.tiles[next][1]
 
-		       if v.extra.type == "ButtonPicker" then 
+		       if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
 		            v.items[next] = item:find_child("textInput").text
 	 	       elseif item:find_child("textInput").text == "--------------" then 
 			    v.items[next] = {type="seperator"}
@@ -144,9 +144,9 @@ function inspector_apply (v, inspector)
 		end,
 	["direction"] = function()
 		if  item_group:find_child("radioB").selected_item == 1 then 
-		     v.expansion_location = "vertical"
+		     v.direction = "vertical"
 	        else 
-		     v.expansion_location = "horizontal"
+		     v.direction= "horizontal"
 		end
 		end,
 		
@@ -173,6 +173,29 @@ function inspector_apply (v, inspector)
 	["src"] = function()
                v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
 	       end,
+	["name"] = function ()
+	       if need_stub_code(v) == true then 
+			if current_fn then 
+	   		     local fileUpper= string.upper(string.sub(current_fn, 1, -5))
+	   		     local fileLower= string.lower(string.sub(current_fn, 1, -5))
+			     local main = readfile("main.lua")
+			     if string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") ~= nil then  			
+			          local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") 
+				  local e, r = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+				  local main_first = string.sub(main, 1, q-1)
+				  local main_temp = string.sub(main, q,r)
+				  local main_last = string.sub(main, r+1, -1)
+				  main_temp = string.gsub(main_temp,string.upper(v.name),string.upper(tostring(item_group:find_child("name"):find_child("input_text").text)))
+				  main_temp = string.gsub(main_temp,v.name,tostring(item_group:find_child("name"):find_child("input_text").text))
+		
+				  main = ""
+				  main = main_first..main_temp..main_last
+				  editor_lb:writefile("main.lua",main, true)
+	       		     end 
+	       		end 
+	       end 
+	       v.name = tostring(item_group:find_child("name"):find_child("input_text").text)
+	       end, 
 
       }       
 
@@ -284,10 +307,10 @@ function inspector_apply (v, inspector)
 				v.extra.focus[focus_map[n]] = item_group:find_child("text"..n).text
 				if focus_match[n] then 
 					if g:find_child(item_group:find_child("text"..n).text).extra.focus then 
-					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = tostring(item_group:find_child("name"):find_child("input_text").text) -- v.name
 					else
 					     g:find_child(item_group:find_child("text"..n).text).extra.focus = {} 
-					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = tostring(item_group:find_child("name"):find_child("input_text").text) --v.name
 					end
 				end 
 			  end 
