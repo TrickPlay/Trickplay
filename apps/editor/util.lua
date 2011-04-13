@@ -1564,6 +1564,7 @@ local function inputMsgWindow_savefile()
 
 			   if j.extra.type == "Button" then 
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
+	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
 			   elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
 			   elseif j.extra.type == "CheckBoxGroup" then 
@@ -1587,49 +1588,7 @@ local function inputMsgWindow_savefile()
 			local main = readfile("main.lua")
 			local added_stub_code = ""
 			if string.find(main, "-- "..fileUpper.." SECTION") == nil then 
---[[
-			-- input_t.text-새로 저장할 루아 파일에 대한 정보가 메인에 있는지를 확인하고 
-			-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
-			-- 그리고 저장 끝 	
-				print("YUGIIIII 111111")
-				for i, j in pairs (g.children) do 
-		    		if need_stub_code(j) == true then 
-	                   		if string.find("-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  			
-					     print("YUGIIIII 222222222")
-					     added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
-					     if j.extra.type == "Button" then 
-					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-			   		     elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   			   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   		     elseif j.extra.type == "CheckBoxGroup" then 
-	                   			   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   		     elseif j.extra.type == "MenuButton" then 
-			   			for k,l in pairs (j.items) do 
-			   	     		     if l["type"] == "item" then 
-	                   			           added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
-			   	     		     end 
-			   			end 
-			   		     end 
-	                   		     added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
-					end
-				end 
-				end --for
-				local q,w 
-				q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
-				print("q,w", q,w)
-				local main_first = string.sub(main, 1, q-1)
-				local main_last = string.sub(main, q, -1)
-				if added_stub_code ~= "" then 
-					print("YUGIIIII 333333333")
-					main = ""
-					main = main_first..added_stub_code..main_last
-					editor_lb:writefile("main.lua",main, true)
-				end 
-
-				
-			else 
-]]
-			-- 적당한 위치 찾아서 이 파일에 대한 내용을 넣어주기만 하면됨 이건 쉽지. 
+				-- 적당한 위치 찾아서 이 파일에 대한 내용을 넣어주기만 하면됨 이건 쉽지. 
 				local q,w 
 				q, w = string.find(main, "-- END GLOBAL SECTION\n\n")
 				gen_stub_code()
