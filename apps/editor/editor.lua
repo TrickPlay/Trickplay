@@ -1618,8 +1618,6 @@ function editor.save(save_current_f)
 
 
 	if(current_fn ~= "") then 
-
---qqqq
  	        local fileUpper= string.upper(string.sub(current_fn, 1, -5))
 	   	local fileLower= string.lower(string.sub(current_fn, 1, -5))
 		local main = readfile("main.lua")
@@ -1630,6 +1628,23 @@ function editor.save(save_current_f)
 		-- 그리고 저장 끝 	
 			for i, j in pairs (g.children) do 
 		   		if need_stub_code(j) == true then 
+					if j.extra.prev_name then 
+						if string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") ~= nil then  			
+			          			local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") 
+				  			local e, r = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+				  			local main_first = string.sub(main, 1, q-1)
+				  			local main_temp = string.sub(main, q,r)
+				  			local main_last = string.sub(main, r+1, -1)
+				  			main_temp = string.gsub(main_temp,string.upper(j.extra.prev_name),string.upper(j.name))
+				  			main_temp = string.gsub(main_temp,j.extra.prev_name,tostring(j.name))
+		
+				  			main = ""
+				  			main = main_first..main_temp..main_last
+				  			editor_lb:writefile("main.lua",main, true)
+	       		     			end 
+
+					end 
+
 	                  		if string.find(main, "-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  			
 					     added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
 					     if j.extra.type == "Button" then 
@@ -1661,8 +1676,6 @@ function editor.save(save_current_f)
 			end 
 
 	       end		
---qqqq
-
 	       editor_lb:writefile(current_fn, contents, true)	
 	else 
 		editor.save(false)

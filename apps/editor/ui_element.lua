@@ -1259,7 +1259,7 @@ function ui_element.button(table)
 	
 	--if key then 
 	    if p.pressed then --and key == keys.Return then
-		p.pressed(...)
+		p.pressed()
 	    end 
 	--end 
 
