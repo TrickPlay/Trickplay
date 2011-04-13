@@ -1053,7 +1053,7 @@ int TPContext::run()
 
     //.........................................................................
 
-    http_server = new HttpServer( 0 );
+    http_server = new HttpServer( get_int( TP_HTTP_PORT , 0 ) );
 
     http_trickplay_api_support = new HttpTrickplayApiSupport( this );
 
@@ -2039,7 +2039,6 @@ void TPContext::load_external_configuration()
         TP_LIRC_UDS,
         TP_LIRC_REPEAT,
         TP_APP_PUSH_ENABLED,
-        TP_APP_PUSH_PORT,
         TP_MEDIAPLAYER_ENABLED,
         TP_IMAGE_DECODER_ENABLED,
         TP_RANDOM_SEED,
@@ -2049,6 +2048,7 @@ void TPContext::load_external_configuration()
         TP_AUDIO_SAMPLER_MAX_BUFFER_KB,
         TP_TOAST_JSON_PATH,
         TP_FIRST_APP_EXITS,
+        TP_HTTP_PORT,
 
         NULL
     };
