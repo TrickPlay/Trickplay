@@ -1259,7 +1259,7 @@ function ui_element.button(table)
 	
 	--if key then 
 	    if p.pressed then --and key == keys.Return then
-		p.pressed()
+		p.pressed(...)
 	    end 
 	--end 
 
@@ -4600,13 +4600,13 @@ button
                 )
                 if item.bg then
                     ui_ele = item.bg
-                    ui_ele.anchor_point = { 0,     ui_ele.h/2 }
+                    ui_ele.anchor_point = { 0, ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
-                            if item.f then item.f() end
+                            if item.f then item.f(item.parameter) end
 			    button.on_focus_out() 
                         end
                         ui_ele.reactive=true
@@ -4619,7 +4619,7 @@ button
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
-                            if item.f then item.f() end
+                            if item.f then item.f(item.parameter) end
                             umbrella.fade_out()
                         end
                         ui_ele.reactive=true

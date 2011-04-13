@@ -46,14 +46,15 @@ dofile("editor.lua")
         [ keys.d	] = function() editor.duplicate() input_mode = S_SELECT end,
         [ keys.e	] = function() editor.redo() input_mode = S_SELECT end,
         [ keys.g	] = function() editor.group() input_mode = S_SELECT end,
-        [ keys.i	] = function() input_mode = S_SELECT  editor.the_image() end,
+        [ keys.u	] = function() editor.ugroup() input_mode = S_SELECT end,
+        [ keys.w	] = function() input_mode = S_SELECT  editor.the_image() end,
         [ keys.n	] = function() editor.close() input_mode = S_SELECT end,
         [ keys.o	] = function() input_mode = S_SELECT editor.the_open()  end,
         [ keys.q	] = function() exit() end,
 	[ keys.r	] = function() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.s	] = function() input_mode = S_SELECT editor.save(true) end,
         [ keys.t	] = function() editor.text() input_mode = S_SELECT end,
-        [ keys.u	] = function() editor.undo() input_mode = S_SELECT end,
+        [ keys.z	] = function() editor.undo() input_mode = S_SELECT end,
         [ keys.v	] = function() editor.v_guideline() input_mode = S_SELECT end,
         [ keys.h	] = function() editor.h_guideline() input_mode = S_SELECT end,
         [ keys.j	] = function() if not screen:find_child("timeline") then 
@@ -76,7 +77,7 @@ dofile("editor.lua")
 		            end,
         --[ keys.x	] = function() editor.debug() input_mode = S_SELECT end,
         [ keys.x	] = function() editor.export() input_mode = S_SELECT end,
-        [ keys.w	] = function() editor.ui_elements() input_mode = S_SELECT end,
+        [ keys.i	] = function() editor.ui_elements() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
 					    menuShow()
 					    if(screen:find_child("xscroll_bar") ~= nil) then 
