@@ -506,7 +506,7 @@ public:
 		soup_message_headers_replace( message_context.message->response_headers, name.c_str(), value.c_str() );
 	}
 
-	virtual void set_response( const String & content_type , const char * data , gsize size )
+	void set_response( const String & content_type , const char * data , gsize size )
 	{
 	    if ( 0 == data || 0 == size )
 	    {
@@ -517,6 +517,12 @@ public:
 	        soup_message_set_response( message_context.message, content_type.c_str(), SOUP_MEMORY_COPY, data, size );
 	    }
 	}
+
+    void set_response( const String & content_type , const String & content )
+    {
+        set_response( content_type , content.data() , content.size() );
+    }
+
 
     void set_status( HttpServer::Status status , const String & msg = String() )
     {

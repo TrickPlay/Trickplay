@@ -82,7 +82,7 @@ public:
 
 		if ( ! result.empty() )
 		{
-			response.set_response( "application/json", result.data(), result.size() );
+			response.set_response( "application/json", result );
 		}
 		else
 		{
@@ -196,7 +196,7 @@ public:
 
 		if ( ! result.empty() )
 		{
-			response.set_response( "application/json", result.data(), result.size() );
+			response.set_response( "application/json", result );
 		}
 		else
 		{
