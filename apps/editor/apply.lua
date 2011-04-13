@@ -174,26 +174,7 @@ function inspector_apply (v, inspector)
                v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
 	       end,
 	["name"] = function ()
-	       if need_stub_code(v) == true then 
-			if current_fn then 
-	   		     local fileUpper= string.upper(string.sub(current_fn, 1, -5))
-	   		     local fileLower= string.lower(string.sub(current_fn, 1, -5))
-			     local main = readfile("main.lua")
-			     if string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") ~= nil then  			
-			          local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") 
-				  local e, r = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
-				  local main_first = string.sub(main, 1, q-1)
-				  local main_temp = string.sub(main, q,r)
-				  local main_last = string.sub(main, r+1, -1)
-				  main_temp = string.gsub(main_temp,string.upper(v.name),string.upper(tostring(item_group:find_child("name"):find_child("input_text").text)))
-				  main_temp = string.gsub(main_temp,v.name,tostring(item_group:find_child("name"):find_child("input_text").text))
-		
-				  main = ""
-				  main = main_first..main_temp..main_last
-				  editor_lb:writefile("main.lua",main, true)
-	       		     end 
-	       		end 
-	       end 
+	       v.extra.prev_name = v.name  
 	       v.name = tostring(item_group:find_child("name"):find_child("input_text").text)
 	       end, 
 
@@ -299,18 +280,20 @@ function inspector_apply (v, inspector)
 		     v.extra.focus = {}
 		     local focus_t_list = {"U","D","E","L","R","Red","G","Y","B"}
 		     local focus_map = {["U"] = keys.Up, ["D"] = keys.Down, ["E"] = keys.Return, ["L"] = keys.Left, ["R"] = keys.Right,["Red"] = keys.RED,["G"] = keys.GREEN,["Y"] = keys.YELLOW,["B"] = keys.BLUE}
-
 		     local focus_match= {["U"] = keys.Down, ["D"] = keys.Up, ["L"] = keys.Right,["R"] = keys.Left,}
-
 		     for m,n in pairs (focus_t_list) do 
 		          if item_group:find_child("text"..n).text ~= "" then 
-				v.extra.focus[focus_map[n]] = item_group:find_child("text"..n).text
+				if item_group:find_child("text"..n).text == v.extra.prev_name then 
+					v.extra.focus[focus_map[n]] = v.name
+				else 
+					v.extra.focus[focus_map[n]] = item_group:find_child("text"..n).text
+				end 
 				if focus_match[n] then 
 					if g:find_child(item_group:find_child("text"..n).text).extra.focus then 
-					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = tostring(item_group:find_child("name"):find_child("input_text").text) -- v.name
+					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
 					else
 					     g:find_child(item_group:find_child("text"..n).text).extra.focus = {} 
-					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = tostring(item_group:find_child("name"):find_child("input_text").text) --v.name
+					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
 					end
 				end 
 			  end 
