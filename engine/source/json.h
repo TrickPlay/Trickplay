@@ -2,19 +2,17 @@
 #define _TRICKPLAY_JSON_H
 
 #include <iostream>
-
-#include "json-glib/json-glib.h"
-
-#if ! JSON_CHECK_VERSION(0,5,0)
-#error "NEED JSON-GLIB VERSION 0.5.0 OR GREATER"
-#endif
-
 #include "common.h"
 
 #include "JSON_parser.h"
 
 namespace JSON
 {
+    class Object;
+    class Array;
+    class Null;
+    class Value;
+
     //.........................................................................
     // A static pointer that represents a Json null in Lua
     // (as a light user data)
@@ -22,39 +20,32 @@ namespace JSON
     gpointer null();
 
     //.........................................................................
-    // Converts the JsonNode to a Lua table and pushes the table
+    // Converts the JSON::Value to a Lua table and pushes the table
     // onto the stack. In case of a problem, pushes nil.
 
-    void to_lua( lua_State * L, JsonNode * node );
+    void to_lua( lua_State * L , const Value & value );
 
     //.........................................................................
-    // Converts the value on the stack at index to a JsonNode. In
-    // case of a problem, will return a valid JsonNode that contains
-    // a NULL.
+    // Converts the value on the stack at index to a JSON::Value.
+    // If there is a problem it will return a value that is Null.
 
-    JsonNode * to_json( lua_State * L, int index );
+    Value to_json( lua_State * L , int index );
 
     //.........................................................................
     // Parses the json_string to a Lua value and pushes the result onto
     // the stack. If anything goes wrong, it pushes a nil and returns
     // false.
 
-    bool parse( lua_State * L, const gchar * json_string );
+    bool parse( lua_State * L , const gchar * json_string );
 
     //.........................................................................
     // Converts the Lua value at index to a JSON string. If anything goes
     // wrong, the resulting string will be empty.
 
-    String stringify( lua_State * L, int index, bool pretty = false );
-};
+    String stringify( lua_State * L , int index , bool pretty = false );
 
-// Newer home-brewed JSON stuff
-
-namespace JSON
-{
-    class Object;
-    class Array;
-    class Null;
+    //.........................................................................
+    // Our own JSON stuff
 
     class Value
     {
@@ -91,6 +82,8 @@ namespace JSON
         template < typename T > bool is() const;
 
         template < typename T > T & as();
+
+        template < typename T > const T & as() const;
 
         Value & operator = ( const char *   value );
         Value & operator = ( const String & value );
@@ -137,6 +130,13 @@ namespace JSON
     template <> bool &      Value::as< bool         >();
     template <> Object &    Value::as< Object       >();
     template <> Array &     Value::as< Array        >();
+
+    template <> const String &      Value::as< String       >() const;
+    template <> const long long &   Value::as< long long    >() const;
+    template <> const double &      Value::as< double       >() const;
+    template <> const bool &        Value::as< bool         >() const;
+    template <> const Object &      Value::as< Object       >() const;
+    template <> const Array &       Value::as< Array        >() const;
 
     //=============================================================================
 
