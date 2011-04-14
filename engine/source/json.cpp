@@ -990,7 +990,7 @@ namespace JSON
                 {
                     self->root.as< Array >();
 
-                    stack.push_back( StackPair( self->root , String() ) );
+                    stack.push_back( StackPair( & self->root , String() ) );
 
                     return 1;
                 }
@@ -1015,7 +1015,7 @@ namespace JSON
                 {
                     self->root.as< Object >();
 
-                    stack.push_back( StackPair( self->root , String() ) );
+                    stack.push_back( StackPair( & self->root , String() ) );
 
                     return 1;
                 }
@@ -1068,7 +1068,7 @@ namespace JSON
                 {
                     return 0;
                 }
-                if ( ! stack.back().first.is< Object >() )
+                if ( ! stack.back().first->is< Object >() )
                 {
                     return 0;
                 }
@@ -1085,19 +1085,19 @@ namespace JSON
             return 0;
         }
 
-        Value & top_value( stack.back().first );
+        Value * top_value = stack.back().first;
 
         Value * to_push = 0;
 
-        if ( top_value.is< Array >() )
+        if ( top_value->is< Array >() )
         {
-            to_push = & ( top_value.as< Array >().append( new_value ) );
+            to_push = & ( top_value->as< Array >().append( new_value ) );
         }
-        else if ( top_value.is< Object >() )
+        else if ( top_value->is< Object >() )
         {
             String & key( stack.back().second );
 
-            to_push = & ( top_value.as< Object >()[ key ] = new_value );
+            to_push = & ( top_value->as< Object >()[ key ] = new_value );
         }
         else
         {
@@ -1106,7 +1106,7 @@ namespace JSON
 
         if ( to_push->is< Array >() || to_push->is< Object >() )
         {
-            stack.push_back( StackPair( * to_push , String() ) );
+            stack.push_back( StackPair( to_push , String() ) );
         }
 
         return 1;

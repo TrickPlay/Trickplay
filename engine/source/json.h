@@ -235,7 +235,7 @@ namespace JSON
 
         static int parser_callback( void * ctx , int type , const struct JSON_value_struct * value );
 
-        typedef std::pair< Value & , String > StackPair;
+        typedef std::pair< Value * , String > StackPair;
 
         typedef std::list< StackPair > Stack;
 
