@@ -59,8 +59,74 @@ end
 
 function ui_element.populate_to (grp, tbl)
 
+	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group"} 
+	 
+	local function is_in_list(item, list)
+    		if list == nil then 
+        		return false
+    		end 
+
+    		for i, j in pairs (list) do
+			if item == j then 
+				return true
+			end 
+    		end 
+    		return false
+	end 
+
+	local function is_this_container(v)
+    		if v.extra then 
+        		if is_in_list(v.extra.type, uiContainers) == true then 
+	    			return true
+        		else 
+	    			return false
+        		end 
+    		else 
+        		return false
+    		end 
+	end 	
+
 	for i, j in pairs (grp.children) do 
-		tbl[j.name] = j 
+	     local function there()
+		if j.extra then 
+			if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" then 
+				for k,l in pairs (j.content.children) do 
+					if is_this_container(l) == true then 
+						j = l 
+						there()
+					else 
+						tbl[l.name] = grp:find_child(l.name) 
+					end 
+				end 
+			elseif j.extra.type == "LayoutManager" then
+				for k,l in pairs (j.tiles) do 
+					for n,m in pairs (l) do 
+						if m then 
+						     if is_this_container(m) == true then 
+							j = m 
+							there()
+						     else 
+							tbl[m.name] = grp:find_child(m.name) 
+						     end 
+						end 
+					end 
+				end 
+			end 
+		elseif j.type == "Group" then 
+			for k,l in pairs (j.children) do 
+				if is_this_container(l) == true then 
+					j = l 
+					there()
+				else 
+					tbl[l.name] = grp:find_child(l.name) 
+				end 
+
+			end 
+		else 
+			tbl[j.name] = j
+		end 
+	     end 
+	     there()
 	end 
 	
 	return tbl
@@ -217,6 +283,28 @@ function _mt.__newindex( t , k , v )
 end
 
 local assets = setmetatable( {} , _mt )
+
+
+
+local function table_remove_val(t, val)
+	for i,j in pairs (t) do
+		if j == val then 
+		     table.remove(t, i)
+		end 
+	end 
+	return t
+end 
+
+local function table_removekey(table, key)
+	local idx = 1	
+	local temp_t = {}
+	table[key] = nil
+	for i, j in pairs (table) do 
+		temp_t[idx] = j 
+		idx = idx + 1 
+	end 
+	return temp_t
+end
 
 -------------------
 -- UI Factory
@@ -2430,7 +2518,6 @@ function ui_element.radioButtonGroup(table)
               if editor_lb == nil or editor_use then  
 	     		function donut:on_button_down (x,y,b,n)
 				local ring_num = tonumber(donut.name:sub(5,-1))
-				--p.selected_item = ring_num
 				rb_group.extra.select_button(ring_num)
 				select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
 	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
@@ -2513,7 +2600,7 @@ Extra Function:
 ]]
 
 
-function ui_element.checkBoxGroup(table) 
+function ui_element.checkBoxGroup(t) 
 
  --default parameters
     local p = {
@@ -2537,8 +2624,8 @@ function ui_element.checkBoxGroup(table)
     } 
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end
@@ -2616,7 +2703,10 @@ function ui_element.checkBoxGroup(table)
              if editor_lb == nil or editor_use then  
 	     	function box:on_button_down (x,y,b,n)
 			local box_num = tonumber(box.name:sub(4,-1))
-			p.selected_items = table_insert(p.selected_items, box_num)
+			dumptable(p.selected_items)
+			print(box.name)
+			print(box_num)
+			table.insert(p.selected_items, box_num)
 			cb_group:find_child("check"..tostring(box_num)).opacity = 255
 			cb_group:find_child("check"..tostring(box_num)).reactive = true
     			cb_group.extra.select_button(p.selected_items) 
@@ -2624,7 +2714,7 @@ function ui_element.checkBoxGroup(table)
 	     	end 
 	     	function check:on_button_down(x,y,b,n)
 			local check_num = tonumber(check.name:sub(6,-1))
-			p.selected_items = table_removeval(p.selected_items, check_num)
+			p.selected_items = table_remove_val(p.selected_items, check_num)
 			check.opacity = 0
 			check.reactive = false
     			cb_group.extra.select_button(p.selected_items) 

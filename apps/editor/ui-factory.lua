@@ -1779,15 +1779,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		return true
 	      end 
 	
---[[
-	       local text_in = item:find_child("textInput")
-	       local item_num = tonumber(string.sub(item.name, 10,-1))
-	       function text_in:on_key_down(key)
-	       		v.items[item_num] = item:find_child("textInput").text 
-	       		print(item:find_child("textInput").text)
-	       end 
- ]]
-
 	      function item:on_key_down(key)
 	       
 	       local si = inspector:find_child("si")
