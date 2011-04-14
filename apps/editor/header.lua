@@ -183,7 +183,7 @@ uiElements_en = {"Rectangle", "Text", "Image", "Video"}
 uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", --"CheckBox",  "RadioButton",  "ArrowPane",
            "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane",  }
 	   -- "TabBar", "OSK",}
-uiContainers = {"DialogBox", "LayoutManager", "ScrollPane",} 
+uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group"} 
 
 skins = {}
 for i, j in pairs(skin_list) do

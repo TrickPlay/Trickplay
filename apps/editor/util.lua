@@ -58,7 +58,7 @@ function table_move_down(t, itemNum)
 	return     
 end 
 
-function table_removeval(t, val)
+function table_remove_val(t, val)
 	for i,j in pairs (t) do
 		if j == val then 
 		     table.remove(t, i)
@@ -67,15 +67,6 @@ function table_removeval(t, val)
 	return t
 end 
 
-
---[[ org, used in timeline functions  
-function table_removekey(table, key)
-	table[key] = nil
-	end 
-	return 
-end
-
-]]
 function table_removekey(table, key)
 	local idx = 1	
 	local temp_t = {}
@@ -86,6 +77,16 @@ function table_removekey(table, key)
 	end 
 	return temp_t
 end
+
+
+--[[ org, used in timeline functions  
+function table_removekey(table, key)
+	table[key] = nil
+	end 
+	return 
+end
+
+]]
 
 
 function __genOrderedIndex( t )
@@ -380,7 +381,9 @@ function create_on_button_down_f(v)
 
 			if odr then 
 			for i,j in pairs (g.children) do 
+				print(j.name)
 				if is_this_container(j) == true then 
+				print(j.name, "container")
 					if i > odr then 
 						j.extra.org_opacity = j.opacity
                        				j:set{opacity = 50}
@@ -525,6 +528,8 @@ function create_on_button_down_f(v)
 				     		local col , row=  c:r_c_from_abs_position(x,y)
 				     		print (row, ":", col)
 				     		c:replace(row,col,v) 
+						elseif t == "Group" then  ---qqq
+						c:add(v)
 			        		end 
 			     	       end 
 				    end 
@@ -1538,6 +1543,7 @@ local function inputMsgWindow_savefile()
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
      local dir = editor_lb:readdir(CURRENT_DIR)
+     local enter_gen_stub_code = false
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                current_fn = input_t.text
@@ -1555,12 +1561,13 @@ local function inputMsgWindow_savefile()
 	   local fileUpper= string.upper(string.sub(input_t.text, 1, -5))
 	   local fileLower= string.lower(string.sub(input_t.text, 1, -5))
 
-	   local function gen_stub_code () 
+	   local function gen_stub_code (grp) 
 		new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\""..input_t.text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
 
-		for i, j in pairs (g.children) do 
+		for i, j in pairs (grp.children) do 
+		     local function there() 
 		     if need_stub_code(j) == true then 
-	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n" 			
+	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
 
 			   if j.extra.type == "Button" then 
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
@@ -1577,9 +1584,34 @@ local function inputMsgWindow_savefile()
 			   	end 
 			   end 
 	                   new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
+		     else -- qqqq if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
+			   if is_this_container(j) == true then 
+				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" then 
+					gen_stub_code(j.content)
+			        elseif j.extra.type == "LayoutManager" then 
+					local content_num = 0 
+			        	for k,l in pairs (j.tiles) do 
+						for n,m in pairs (l) do 
+							if m then 
+								j = m 
+								there()
+							end 
+						end 
+					end 
+				elseif j.extra.type == "Group" then  
+					gen_stub_code(j)
+				end
+
+			   end 
 		     end 
+		     end 
+		     there()	  
 		end 
-		new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n" 
+
+		if enter_gen_stub_code == false then 
+			new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n" 
+			enter_gen_stub_code =true
+		end 
 	   end 
 
 
@@ -1591,7 +1623,7 @@ local function inputMsgWindow_savefile()
 				-- 적당한 위치 찾아서 이 파일에 대한 내용을 넣어주기만 하면됨 이건 쉽지. 
 				local q,w 
 				q, w = string.find(main, "-- END GLOBAL SECTION\n\n")
-				gen_stub_code()
+				gen_stub_code(g)
 				local main_first = string.sub(main, 1, w)
 				local main_last = string.sub(main, w+1, -1)
 				if new_contents then 
@@ -1608,8 +1640,8 @@ local function inputMsgWindow_savefile()
 		-- main.lua 생성해서 
 
 		global_section_contents = "-- GLOBAL SECTION\nui_element = dofile(\"ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
-	        gen_stub_code()
-		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n--END SCREEN ON_KEY_DOWN SECTION\n-- END GLOBAL SECTION FOOTER \n"
+	        gen_stub_code(g)
+		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n-- END GLOBAL SECTION FOOTER \n"
 
 		editor_lb:writefile("main.lua", global_section_contents, true)
 		editor_lb:writefile("main.lua", new_contents, false)

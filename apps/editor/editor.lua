@@ -2567,6 +2567,7 @@ function editor.group()
         }
         ui.group.reactive = false
         ui.group.extra.selected = false
+        ui.group.extra.type = "Group" -- uiContainer
         table.insert(undo_list, {ui.group.name, ADD, ui.group})
 
 	for i, v in pairs(g.children) do
