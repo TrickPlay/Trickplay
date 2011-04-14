@@ -46,6 +46,8 @@
     id <CommandInterpreterDelegate> delegate;
     NSMutableString *commandLine;
     NSMutableDictionary *commandDictionary;
+    
+    BOOL firstCommand;
 }
 
 @property (nonatomic, assign) id <CommandInterpreterDelegate> delegate;

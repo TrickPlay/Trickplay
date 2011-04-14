@@ -11,6 +11,8 @@
 @implementation GestureViewController
 
 @synthesize version;
+@synthesize socketManager;
+
 @synthesize loadingIndicator;
 @synthesize theTextField;
 @synthesize backgroundView;
@@ -53,11 +55,15 @@
 	NSInteger height = mainframe.size.height;
 	height = height - 45;  //subtract the height of navbar
 	NSInteger width = mainframe.size.width;
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, width, height, width, height ] dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *hasPictures = @"";
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+        hasPictures = @"\tPS";
+    }
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, width, height, width, height] dataUsingEncoding:NSUTF8StringEncoding];
 	
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
     
-    self.camera = nil;
+    camera = nil;
 	
     audioController = [[AudioController alloc] initWithResourceManager:resourceManager socketManager:socketManager];
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
@@ -69,6 +75,7 @@
     
     return YES;
 }
+
 
 - (void)setHTTPPort:(NSString *)my_http_port {
     if (http_port) {

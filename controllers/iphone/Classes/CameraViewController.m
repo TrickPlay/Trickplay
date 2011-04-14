@@ -46,14 +46,14 @@
     path = [thePath retain];
     delegate = theDelegate;
     
-    connections = [[NSMutableDictionary alloc] initWithCapacity:20];
+    connections = [[NSMutableArray alloc] initWithCapacity:20];
 }
 
 - (void)sendImage:(UIImage *)image {
     NSData *imageData = UIImagePNGRepresentation(image);
     
     NSURL *postURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", host, port, path]];
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:postURL];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:postURL];
     
     [request setHTTPMethod:@"POST"];
     [request setValue:@"image/png" forHTTPHeaderField:@"Content-type"];
@@ -65,22 +65,34 @@
         NSLog(@"Connection to URL %@ could not be established", postURL);
         return;
     }
-    [connections setObject:connection forKey:connection];
+    
+    [connections addObject:connection];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
-    if ([connections objectForKey:connection] == connection) {
+    NSLog(@"Received Data: %@", incrementalData);
+    /** the data isn't necessary for now
+    BOOL dataCreated = NO;
+    int i;
+    for (i = 0; [connections count]; i++) {
+        if ([connections objectAtIndex:i] == connection) {
+            dataCreated = YES;
+        }
+    }
+    if (!dataCreated) {
         NSMutableData *data = [[[NSMutableData alloc] initWithCapacity:10000] autorelease];
         [connections setObject:data forKey:connection];
     }
     
     [(NSMutableData *)[connections objectForKey:connection] appendData:incrementalData];
+     //*/ 
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    NSLog(@"Camera finished posting image. Response: %@", [connections objectForKey:connection]);
+    NSLog(@"Camera finished posting image for connection: %@", connection);
     [connection cancel];
-    [connections removeObjectForKey:connection];
+    
+    [connections removeObject:connection];
     
     [delegate finishedSendingImage];
 }
@@ -88,9 +100,8 @@
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     NSLog(@"Camera POST fail with error: %@", error);
     [connection cancel];
-    if ([connections objectForKey:connection]) {
-        [connections removeObjectForKey:connection];
-    }
+    
+    [connections removeObject:connection];
 }
 
 
@@ -113,6 +124,37 @@
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+#pragma mark -
+#pragma mark Presenting and dissmissing the camera
+
+- (void)presentTheCamera {
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        if (popOverController) {
+            [popOverController dismissPopoverAnimated:NO];
+            [popOverController release];
+        }
+        popOverController = [[UIPopoverController alloc] initWithContentViewController:imagePickerController];
+        CGRect frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
+        [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+    } else {
+        [self presentModalViewController:imagePickerController animated:YES];
+    }
+}
+
+- (void)dismissTheCamera:(UIImagePickerController *)picker {
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        if (popOverController) {
+            [popOverController dismissPopoverAnimated:NO];
+            [popOverController release];
+            popOverController = nil;
+        }
+    } else {
+        [[picker parentViewController] dismissModalViewControllerAnimated:NO];
+    }
+    
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark -
@@ -157,15 +199,13 @@
         
     }
     
-    [[picker parentViewController] dismissModalViewControllerAnimated:NO];
-    [self.navigationController popViewControllerAnimated:YES];
+    [self dismissTheCamera:picker];
     
     [delegate finishedPickingImage];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-    [[picker parentViewController] dismissModalViewControllerAnimated:NO];
-    [self.navigationController popViewControllerAnimated:YES];
+    [self dismissTheCamera:picker];
     
     [delegate canceledPickingImage];
 }
@@ -186,7 +226,7 @@
     //Hides the controls for image manipulation for now
     imagePickerController.allowsEditing = NO;
     
-    [self presentModalViewController:imagePickerController animated:YES];
+    [self presentTheCamera];
 }
 
 - (IBAction)openLibrary:(id)sender {
@@ -202,13 +242,15 @@
     // Hids the controls for image manipulation for now
     imagePickerController.allowsEditing = NO;
     
-    [self presentModalViewController:imagePickerController animated:YES];
+    [self presentTheCamera];
 }
 
 
 
 - (void)dealloc {
     NSLog(@"CameraViewController dealloc");
+    
+    [self dismissTheCamera:imagePickerController];
     
     [imagePickerController release];
     imagePickerController = nil;
@@ -233,6 +275,10 @@
             [connection cancel];
         }
         [connections release];
+    }
+    if (popOverController) {
+        [popOverController dismissPopoverAnimated:NO];
+        [popOverController release];
     }
     
     [super dealloc];
