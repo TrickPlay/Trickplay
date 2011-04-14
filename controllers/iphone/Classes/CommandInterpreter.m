@@ -22,6 +22,8 @@
         
         delegate = theDelegate;
         
+        firstCommand = YES;
+        
         //[self createCommandDictionary];
     }
     
@@ -115,6 +117,14 @@
         fprintf(stderr, "Unrecognized command %s\n", [key UTF8String]);
     }
     //*/
+    if (firstCommand) {
+        NSLog(@"first");
+        if ([key compare:@"WM"] == NSOrderedSame) {
+            [delegate do_WM:args];
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"PushAppBrowserNotification" object:self];
+        firstCommand = NO;
+    }
     if ([key compare:@"MC"] == NSOrderedSame) {
         [delegate do_MC:args];
     } else if ([key compare:@"DR"] == NSOrderedSame) {
@@ -156,7 +166,6 @@
     } else {
         NSLog(@"Command not recognized %@", key);
     }
-
 }
 
 - (void)dealloc {

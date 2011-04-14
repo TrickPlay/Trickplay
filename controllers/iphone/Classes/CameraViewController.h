@@ -23,13 +23,14 @@
     UIButton *imageLibraryButton;
     
     UIImagePickerController *imagePickerController;
+    UIPopoverController *popOverController;
     UIImageView *backgroundView;
     
     NSInteger port;
     NSString *host;
     NSString *path;
     
-    NSMutableDictionary *connections;
+    NSMutableArray *connections;
     
     id <CameraViewControllerDelegate> delegate;
 }

@@ -120,6 +120,7 @@ CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, U
 }
 
 @property (nonatomic, retain) NSString *version;
+@property (nonatomic, assign) SocketManager *socketManager;
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 @property (nonatomic, retain) IBOutlet UITextField *theTextField;
