@@ -152,6 +152,8 @@ static void irCallback(void *pParam, int iParam)
 
 void disconnect_hdmi()
 {
+   printf( "\n\n\tDISCONNECT HDMI\n\n" );
+   
    NEXUS_VideoWindow_RemoveAllInputs( video_window );   
 
    if ( hdmiInput )
@@ -179,11 +181,17 @@ void disconnect_hdmi()
    
    hdmiInput = 0;
    hdmiAudioDecoder = 0;
+
+   usleep( 200000 );
+   
+   printf( "\n\n\tDISCONNECT HDMI DONE\n\n" );
 }
 
 
 void connect_hdmi()
 {
+   printf( "\n\n\tCONNECT HDMI\n\n" );
+
    NEXUS_VideoWindowSettings windowSettings;
 
    NEXUS_VideoWindow_GetSettings(video_window, &windowSettings);
@@ -231,6 +239,8 @@ void connect_hdmi()
 
       NEXUS_AudioDecoder_Start(hdmiAudioDecoder, &audioProgram);
    }   
+
+   printf( "\n\n\tCONNECT HDMI DONE\n\n" );
 }
 
 bool InitDisplay()
