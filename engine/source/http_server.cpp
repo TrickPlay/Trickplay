@@ -18,8 +18,6 @@ Debug_OFF log2( "HTTP-SERVER" );
 
 HttpServer::HttpServer( guint16 port ) : server( NULL )
 {
-	g_assert( port >= 0 );
-
 	server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
 
 	log( "READY ON PORT %u" , soup_server_get_port( server ) );
