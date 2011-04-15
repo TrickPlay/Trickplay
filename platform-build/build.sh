@@ -343,6 +343,14 @@ SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHAR
 SNDFILE_URL="http://www.mega-nerd.com/libsndfile/files/${SNDFILE_DIST}"
 
 #------------------------------------------------------------------------------
+# libxml2
+
+XML_V="2.7.8"
+XML_DIST="libxml2-${XML_V}.tar.gz"
+XML_SOURCE="libxml2-${XML_V}"
+XML_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
 # libsoup
 
 SOUP_V="2.32.2"
@@ -352,7 +360,7 @@ SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 
 #------------------------------------------------------------------------------
 
-ALL="GLIB_HOST ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+ALL="GLIB_HOST ZLIB EXPAT XML GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -642,6 +650,7 @@ then
 	    -luprof-0.3 \
 	    -lsndfile \
 	    -lsoup-2.4 \
+	    -lxml2 \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group 
 	

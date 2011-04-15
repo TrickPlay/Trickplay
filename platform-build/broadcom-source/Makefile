@@ -130,6 +130,7 @@ LDFLAGS += -L$(TRICKPLAY_LIB) \
 	-luprof-0.3 \
 	-lsndfile \
 	-lsoup-2.4 \
+	-lxml2 \
 	-Wl,--end-group 
 
 EXTRA_OBJS:=mediaplayer.c cmdline_args.c
