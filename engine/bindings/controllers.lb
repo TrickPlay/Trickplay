@@ -5,6 +5,8 @@ module controllers_module;
 #include "app.h"    
 #include "context.h"
 #include "controller_list.h"
+#include "images.h"
+#include "bitmap.h"
 ]]
 
 #==============================================================================
@@ -44,12 +46,17 @@ public:
     virtual void touch_move(int finger,int x,int y);
     virtual void touch_up(int finger,int x,int y);
     virtual void ui_event(const String & parameters);
+    virtual void submit_picture( void * data, unsigned int size, const char * mime_type );
+    virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
     
+    bool declare_resource( const String & name , const String & uri );
+
 private:
     
     lua_State *                 L;
     Controller *                controller;
     ControllerListDelegate *    list;
+    String                      resource_group;
 };
 
 ]]
@@ -291,6 +298,28 @@ interface controller [[ControllerDelegate*]]
     readonly bool has_text_entry
         [[
             has_text_entry=self->has_cap(TP_CONTROLLER_HAS_TEXT_ENTRY);
+        ]];
+    
+    /*
+        Property: has_pictures
+        
+        Whether the controller supports pictures.
+    */
+           
+    readonly bool has_pictures
+        [[
+            has_pictures=self->has_cap(TP_CONTROLLER_HAS_PICTURES);
+        ]];
+    
+    /*
+        Property: has_audio_clips
+        
+        Whether the controller supports audio clips.
+    */
+           
+    readonly bool has_audio_clips
+        [[
+            has_audio_clips=self->has_cap(TP_CONTROLLER_HAS_AUDIO_CLIPS);
         ]];
     
     /*
@@ -695,7 +724,9 @@ interface controller [[ControllerDelegate*]]
             
             bool is_uri=false;
             
-            gchar * path=App::get(L)->normalize_path(url,&is_uri);
+            App * app = App::get(L);
+
+            gchar * path=app->normalize_path(url,&is_uri);
             
             if (path)
             {
@@ -707,7 +738,7 @@ interface controller [[ControllerDelegate*]]
                     final_uri="file://"+final_uri;
                 }
                 
-                result=self->get_controller()->declare_resource(resource,final_uri);
+                result=self->declare_resource(resource,final_uri);
             }
         ]];
         
@@ -736,7 +767,45 @@ interface controller [[ControllerDelegate*]]
             result=self->get_controller()->enter_text(label,text);    
         ]];
 
-	/*
+    /*
+        Function: submit_picture
+        
+        Tells the controller to send a picture. The app will receive the picture via <on_picture>.
+        
+        
+         
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+            
+    bool submit_picture( )
+        [[
+            result=self->get_controller()->submit_picture( );    
+        ]];
+
+    /*
+        Function: submit_audio_clip
+        
+        Tells the controller to send an audio clip. The app will receive the audio clip via <on_audio_clip>.
+        
+        
+         
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+            
+    bool submit_audio_clip( )
+        [[
+            result=self->get_controller()->submit_audio_clip( );    
+        ]];
+      
+     /*
 		Event: on_disconnected
 		
 		This event is triggered when the controller is disconnected from
@@ -924,6 +993,21 @@ interface controller [[ControllerDelegate*]]
     */
     
     callback on_ui_event;
+
+
+    /*
+        Event: on_picture
+        
+        A picture event. This is sent when you use <submit_picture>.
+        
+        Arguments:
+            controller - The controller that generated the event.
+            
+            bitmap - The bitmap received from the controller.
+            
+    */
+    callback on_picture;
+    
 }
 
 #==============================================================================
@@ -946,6 +1030,11 @@ ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,C
 
 ControllerDelegate::~ControllerDelegate()
 {
+    if ( ! resource_group.empty() )
+    {
+        controller->drop_resource_group( resource_group );
+    }
+
     controller->remove_delegate(this);
     controller->unref();    
 }
@@ -1096,6 +1185,47 @@ void ControllerDelegate::ui_event(const String & parameters)
 {
     lua_pushstring(L,parameters.c_str());
     invoke_controller_on_ui_event(L,this,1,0);
+}
+
+void ControllerDelegate::submit_picture( void * data, unsigned int size, const char * mime_type )
+{
+    Image * image = Image::decode(data, size, mime_type);
+    
+    if ( !image ) 
+    {
+        return;
+    }
+    
+    lua_getglobal( L , "Bitmap" );
+    lua_pushliteral( L , "" );
+    lua_call( L , 1 , 1 );
+
+    if ( Bitmap * bitmap = ( Bitmap * ) UserData::get_client( L , lua_gettop( L ) ) )
+    {
+        bitmap->set_image( image ); 
+        
+        invoke_controller_on_picture( L , this , 1 , 0 );
+    }
+    else
+    {
+        lua_pop( L , 1 );
+        
+        delete image;
+    }
+}
+
+void ControllerDelegate::submit_audio_clip( void * data, unsigned int size, const char * mime_type )
+{
+}
+
+bool ControllerDelegate::declare_resource( const String & name , const String & uri )
+{
+    if ( resource_group.empty() )
+    {
+        resource_group = App::get(L)->get_id();
+    }
+
+    return controller->declare_resource( name , uri , resource_group );
 }
 
 ]]

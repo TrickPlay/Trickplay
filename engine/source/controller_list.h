@@ -61,6 +61,10 @@ public:
 
     void ui_event( const String & parameters );
 
+    void submit_picture( void * data, unsigned int size, const char * mime_type );
+
+    void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
+
     //.........................................................................
 
     class Delegate
@@ -77,6 +81,8 @@ public:
         virtual void touch_move( int finger , int x, int y ) = 0;
         virtual void touch_up( int finger , int x, int y ) = 0;
         virtual void ui_event( const String & parameters ) = 0;
+        virtual void submit_picture( void * data, unsigned int size, const char * mime_type ) = 0;
+        virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type ) = 0;
     };
 
     void add_delegate( Delegate * delegate );
@@ -115,9 +121,15 @@ public:
 
     bool stop_sound();
 
-    bool declare_resource( const String & resource, const String & uri );
+    bool declare_resource( const String & resource, const String & uri , const String & group );
+
+    bool drop_resource_group( const String & group );
 
     bool enter_text( const String & label, const String & text );
+
+    bool submit_picture( );
+
+    bool submit_audio_clip( );
 
     inline bool wants_accelerometer_events() const
     {
@@ -210,6 +222,8 @@ private:
     friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y );
     friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y );
     friend void tp_controller_ui_event( TPController * controller, const char * parameters );
+    friend void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type );
+    friend void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type );
 
     //.........................................................................
 

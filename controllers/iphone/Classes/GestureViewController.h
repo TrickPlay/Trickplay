@@ -7,9 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 #import "ResourceManager.h"
 #import "SocketManager.h"
 
+@protocol GestureViewControllerSocketDelegate <NSObject>
+
+@required
+- (void)socketErrorOccurred;
+- (void)streamEndEncountered;
+
+@end
 
 @protocol ViewControllerAccelerometerDelegate
 
@@ -65,6 +73,7 @@ CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     
     id <ViewControllerTouchDelegate> touchDelegate;
     id <ViewControllerAccelerometerDelegate> accelDelegate;
+    id <GestureViewControllerSocketDelegate> socketDelegate;
 }
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
@@ -73,6 +82,7 @@ CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
 
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
 @property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
+@property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
 
 
 - (void)setupService:(NSInteger)port
@@ -80,6 +90,7 @@ CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
             thetitle:(NSString *)name;
 
 - (BOOL)startService;
+- (BOOL)hasConnection;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
 
 - (IBAction)hideTextBox:(id)sender;

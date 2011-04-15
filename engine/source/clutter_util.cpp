@@ -162,6 +162,29 @@ ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
 
 //.............................................................................
 
+ClutterTimeline * ClutterUtil::user_data_to_timeline( lua_State * L, int n )
+{
+    if ( ! lb_check_udata_type( L , n , "Timeline" , false ) )
+    {
+        luaL_where( L , 1 );
+        lua_pop( L , 1 );
+        return NULL;
+    }
+
+    UserData * ud = UserData::get( L , n );
+
+    if ( ! ud )
+    {
+        return NULL;
+    }
+
+    GObject * obj = ud->get_master();
+
+    return CLUTTER_IS_TIMELINE( obj ) ? CLUTTER_TIMELINE( obj ) : NULL;
+}
+
+//.............................................................................
+
 void ClutterUtil::set_props_from_table( lua_State * L, int table )
 {
     LSG;
