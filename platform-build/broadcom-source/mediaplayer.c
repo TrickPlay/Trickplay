@@ -543,6 +543,10 @@ static int nmp_set_viewport_geometry(
         int width,
         int height)
 {
+#if 1    
+    return 0;
+#else
+/*
     /*
     TODO: This doesn't seem to work right. The position appears to be relative
     to the bottom, left of the screen. When resized and repositioned, the
@@ -575,6 +579,7 @@ static int nmp_set_viewport_geometry(
     nmp->viewport = r;
     
     return 0;
+#endif
 }
 
 /*---------------------------------------------------------------------------*/
