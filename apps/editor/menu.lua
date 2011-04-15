@@ -383,6 +383,7 @@ function menuButton_view:on_key_down(key)
 			end
 		end
 	end
+	screen:grab_key_focus()
 	return true
 end
 
@@ -438,4 +439,8 @@ local menu_text_shadow = Text
 
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
+menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow}
+for i, j in pairs (menu_bar_t) do 
+	j:raise_to_top()
+end
 editor_use = false

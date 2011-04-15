@@ -38,11 +38,6 @@
                    		   ["drop_down_color"]={255,0,0},
                    		   ["scroll_arrow"] = nil,
 				  },
-		    ["OOBE"] = { 
-				   ["button"] = "button.png",
-				   ["button_focus"] = "buttonfocus.png", 
-				},
-
 		  }
 
 
@@ -141,30 +136,36 @@ end
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
 	if effect == "fade" then 
+		next_grp.opacity = 0
+		local n_op = next_grp.opacity
+		local p_op = prev_grp.opacity
 
-	screen:add(next_grp)
-    	local fade_timeline = Timeline ()
-	local n_op = next_grp.opacity 
-	local p_op = prev_grp.opacity
-    	fade_timeline.duration = 1000 -- progress duration 
-    	fade_timeline.direction = "FORWARD"
-    	fade_timeline.loop = false
-
-	print(p_op, n_op)
-
-     	function fade_timeline.on_new_frame(t, m, p)
-		next_grp.opacity = n_op * p 
-		prev_grp.opacity = p_op * (1-p) 
-     	end  
-
-     	function fade_timeline.on_completed()
-		next_grp.opacity = 255
-		prev_grp.opacity = 0 
-		screen:remove(prev_grp)
 		g = next_grp
-     	end 
+		screen:add(g)
+		print (n_op, p_op)
+		co_next = coroutine.create(function (n_op) 
+			print("nn")
+			next_grp:animate{duration = 5, opacity = n_op + 1,}
+			coroutine.yield()
+			end)
 
-	fade_timeline:start()
+		co_prev = coroutine.create(function (p_op) 
+			print("pp")
+			prev_grp:animate{duration = 5, opacity = p_op - 1,}
+			coroutine.yield()
+		      	end )
+						
+		while n_op < 255 and p_op > 0  do 
+			print (n_op, p_op)
+			coroutine.resume(co_prev, p_op)
+			p_op = p_op -1 
+			coroutine.resume(co_next, n_op)
+			n_op = n_op +1
+		end 
+
+		if prev_grp then 
+		screen:remove(prev_grp)
+		end 
 	else 
 	if prev_grp then 
 		screen:remove(prev_grp)

@@ -408,7 +408,9 @@ function create_on_button_down_f(v)
 	           	if j.type == "Text" then 
 	            	if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
 			  ui.text = j	
-	                  ui.text:on_key_down(keys.Return)
+			  if ui.text.on_key_down then 
+	                  	ui.text:on_key_down(keys.Return)
+			  end 
 		    	end
 	           	end 
 	        	end 
@@ -2045,7 +2047,7 @@ function inputMsgWindow_openfile(input_text)
      end 
 
      if (x_scroll_to ~= 0 or x_scroll_from ~= 0 or y_scroll_to ~=0 or y_scroll_from ~= 0) then 
-          make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
+          --make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
      end 
 
      cleanMsgWindow()
