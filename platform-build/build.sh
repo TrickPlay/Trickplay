@@ -37,7 +37,8 @@ THERE=`dirname ${THERE}`
 source "${THERE}/env"
 
 
-DYNAMIC_BUILD=${DYNAMIC_BUILD:-0}
+#DYNAMIC_BUILD=${DYNAMIC_BUILD:-0}
+DYNAMIC_BUILD=1
 
 if [[ ${DYNAMIC_BUILD} == 1 ]]
 then
@@ -342,8 +343,16 @@ SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHAR
 SNDFILE_URL="http://www.mega-nerd.com/libsndfile/files/${SNDFILE_DIST}"
 
 #------------------------------------------------------------------------------
+# libsoup
 
-ALL="GLIB_HOST ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE"
+SOUP_V="2.32.2"
+SOUP_DIST="libsoup-${SOUP_V}.tar.gz"
+SOUP_SOURCE="libsoup-${SOUP_V}"
+SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --without-gnome --disable-ssl --disable-glibtest && make && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
+
+ALL="GLIB_HOST ZLIB EXPAT GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -632,6 +641,7 @@ then
 	    -lcairo-gobject \
 	    -luprof-0.3 \
 	    -lsndfile \
+	    -lsoup-2.4 \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group 
 	

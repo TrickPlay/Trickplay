@@ -1,0 +1,13 @@
+Index: libsoup-2.32.2/Makefile.in
+===================================================================
+--- libsoup-2.32.2.orig/Makefile.in	2011-04-14 17:53:03.145537058 -0700
++++ libsoup-2.32.2/Makefile.in	2011-04-14 17:53:19.063037297 -0700
+@@ -305,7 +305,7 @@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ ACLOCAL_AMFLAGS = -I m4
+-SUBDIRS = libsoup tests docs
++SUBDIRS = libsoup docs
+ EXTRA_DIST = \
+ 	libsoup-2.4.pc.in	\
+ 	libsoup-gnome-2.4.pc.in	\
