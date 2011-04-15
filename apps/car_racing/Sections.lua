@@ -1,14 +1,15 @@
 local base = {
-    straight_road = Image{ src="road.png", tile={false,true}, h=50*250},
+    straight_road = Image{ src="road.png", tile={false,true}, h=60*200},
+    single_straight_road = Image{ src="road.png",tile={false,true}, h=2*200 },
     curve_road    = Image{ src="road-curvdde-2.png"   },
-    curve_piece   = Image{ src="curve-piece.png"},
+    curve_piece   = Image{ src="road_curve.png"},
     straight_rail = Image{ src="guardrail.png",     tile={true,false}, w=50*250},
     cactus        = Image{ src="cactus3.png"},
     cactus2       = Image{ src="cactus2.png"},
     sign          = Image{ src="sign-road.png"},
     tree          = Image{ src="tree.png"},
     tree2         = Image{ src="tree2.png"},
-    t_weed          = Image{ src="tumble-weed.png"},
+    t_weed        = Image{ src="tumble-weed.png"},
 }
 for _,v in pairs(base) do
     clone_sources:add(v)
@@ -64,241 +65,275 @@ local doodads = {
         y= -base.straight_road.h/2
     } end,
 }
+
+--the global list of sections
 sections = {}
 
+--upvals
+local section
+local prev_straights = {}
+local prev_sing_straights = {}
+local prev_curves = {}
+
 function make_straight_section()
-    local section = {
-        end_point = {0,-base.straight_road.h,0},
-        path = {dist=base.straight_road.h,rot=0,radius=0},
-        line_up  = {0,0},
-        setup = function(self)
-            self.group = Group{
-                name = "A Straight Section",
-                children = {
-                    Clone{
-                        name   = "Road",
-                        source = base.straight_road,
-                        x_rotation = {180,0,0},
-                        ---[[
-                        anchor_point = {
-                             base.straight_road.w/2,
-                            0
-                        },--]]
-                    },
+    
+    if #prev_straights ~= 0 then
+        section = table.remove(prev_straights)
+        section.position   = {0,0}
+        return section
+        
+    else
+        
+        section =  Clone{
+            
+            name   = "Str8 Road",
+            
+            source = base.straight_road,
+            
+            x_rotation = {180,0,0},
+            
+            anchor_point = { base.straight_road.w/2, 0 },
+            
+            extra = {
+                
+                end_point = { 0, -base.straight_road.h, 0 },
+                
+                path = {
+                    dist   = base.straight_road.h,
+                    rot    = 0,
+                    radius = 0
+                },
+                
+                remove = function(self)
+                    table.insert(prev_straights,self)
+                    self:unparent()
+                end
+            }
+        }
+        
+        section.path.parent = section
+        
+        return section
+    end
+    
+end
+function make_single_straight_section()
+    local rad = 8000
+    local rot = 1
+    if #prev_sing_straights ~= 0 then
+        
+        return table.remove(prev_sing_straights)
+        
+    else
+        
+        section =  Clone{
+            
+            name   = "Str8 Road",
+            
+            source = base.single_straight_road,
+            
+            x_rotation = {180,0,0},
+            
+            anchor_point = { base.single_straight_road.w/2, 0 },
+            
+            extra = {
+                
+                
+                
+                remove = function(self)
+                    table.insert(prev_sing_straights,self)
+                    self:unparent()
+                end,
+                
+                
+                end_point = {
+                    -rad*math.cos(math.pi/180*rot)+rad,
+                    -rad*math.sin(math.pi/180*rot),rot
+                },
+                
+                path = {
                     
-                    --[[
-                    Clone{
-                        name   = "Left Rail",
-                        source = base.straight_rail,
-                        anchor_point = {
-                            0,
-                            base.straight_rail.h
-                        },
-                        x=-base.straight_road.w/2,
-                        z_rotation = {-90,0,0},
-                        x_rotation={-90,0,0}
-                    },
-                    Clone{
-                        name   = "Right Rail",
-                        source = base.straight_rail,
-                        anchor_point = {
-                            base.straight_rail.w,
-                            base.straight_rail.h
-                        },
-                        x = base.straight_road.w/2,
-                        z_rotation = {90,0,0},
-                        x_rotation={-90,0,0}
-                    },
-                    --]]
-                }
+                    dist   = (2*math.pi*(rad))*(rot/360),
+                    
+                    radius = -rad,
+                    
+                    rot    = rot
+                },
             }
-            self.group:add(doodads[2]())--math.random(1,#doodads)]())
-            self.path.parent=self
-            return self.group
-        end,
-    }
+        }
+        
+        section.path.parent = section
+        
+        return section
+    end
     
-    return section
-end
-
-function make_right_curved_section()
-    local rad = base.curve_road.w-base.straight_road.w/2
-    local rot=90
-    local section = {
-        end_point = {-rad*math.cos(math.pi/180*rot)+rad,-rad*math.sin(math.pi/180*rot),rot},
-        path = {
-            dist  = (2*math.pi*(rad))*(rot/360),
-            radius=-rad,
-            rot=rot
-        },
-        line_up  = {0,0},
-        setup = function(self)
-            self.group = Group{
-                name = "Right Curve",
-                children = {
-                    Clone{
-                        name   = "Road",
-                        source = base.curve_road,
-                        anchor_point = {
-                             base.straight_road.w/2,
-                            base.curve_road.h
-                        },
-                        --[[
-                        anchor_point = {
-                             base.straight_road.w/2,
-                            -base.straight_road.h
-                        },--]]
-                    },
-                }
-            }
-            self.path.parent=self
-            return self.group
-        end,
-    }
-    
-    return section
-end
-
-function make_left_curved_section()
-    local rad = -(base.curve_road.w-base.straight_road.w/2)
-    local rot=-90
-    local section = {
-        end_point = {-rad*math.cos(math.pi/180*rot)+rad,-rad*math.sin(math.pi/180*rot),rot},
-        path = {
-            dist  = (2*math.pi*(rad))*(rot/360),
-            radius=-rad,
-            rot=rot
-        },
-        line_up  = {0,0},
-        setup = function(self)
-            self.group = Group{
-                name = "Left Curve",
-                children = {
-                    Clone{
-                        name   = "Road",
-                        source = base.curve_road,
-                        anchor_point = {
-                             base.straight_road.w/2,
-                            base.curve_road.h
-                        },
-                        y_rotation={180,0,0}
-                        --[[
-                        anchor_point = {
-                             base.straight_road.w/2,
-                            -base.straight_road.h
-                        },--]]
-                    },
-                }
-            }
-            self.path.parent=self
-            return self.group
-        end,
-    }
-    
-    return section
 end
 function make_right_curved_piece()
-    local rad = 1000
-    local rot = 45/4
-    local section = {
-        end_point = {-rad*math.cos(math.pi/180*rot)+rad,-rad*math.sin(math.pi/180*rot),rot},
-        path = {
-            dist  = (2*math.pi*(rad))*(rot/360),
-            radius=-rad,
-            rot=rot
-        },
-        line_up  = {0,0},
-        setup = function(self)
-            self.group = Group{
-                name = "Right 22.5* Curve",
-                children = {
-                    Clone{
-                        name   = "Road",
-                        source = base.curve_piece,
-                        anchor_point = {
-                             base.straight_road.w/2,
-                            base.curve_piece.h
-                        },
-                    },
-                }
-            }
-            self.path.parent=self
-            return self.group
-        end,
-    }
+    local rad = 8000*20
+    local rot = 1.4065/20
     
-    return section
+    if #prev_curves ~= 0 then
+        
+        section = table.remove(prev_curves)
+        
+        section.extra.end_point = {
+            -rad*math.cos(math.pi/180*rot)+rad,
+            -rad*math.sin(math.pi/180*rot),rot
+        }
+        section.extra.path = {
+            dist   = (2*math.pi*(rad))*(rot/360),
+            radius = -rad,
+            rot    = rot,
+            parent = section,
+        }
+        
+        section.y_rotation={0,0,0}
+        section.position   = {0,0}
+        
+        return section
+        
+    else
+        
+        section = Clone{
+            
+            name   = "Curved Road",
+            
+            source = base.curve_piece,
+            
+            anchor_point = {
+                
+                base.straight_road.w/2,
+                
+                base.curve_piece.h
+                
+            },
+            
+            extra = {
+                
+                end_point = {
+                    -rad*math.cos(math.pi/180*rot)+rad,
+                    -rad*math.sin(math.pi/180*rot),rot
+                },
+                
+                path = {
+                    
+                    dist   = (2*math.pi*(rad))*(rot/360),
+                    
+                    radius = -rad,
+                    
+                    rot    = rot
+                },
+                
+                remove = function(self)
+                    table.insert(prev_curves,self)
+                    self:unparent()
+                end
+            }
+        }
+        
+        section.path.parent = section
+        
+        return section
+    end
+    
 end
 function make_left_curved_piece()
-    local rad = -1000
-    local rot = -45/4
-    local section = {
-        end_point = {-rad*math.cos(math.pi/180*rot)+rad,-rad*math.sin(math.pi/180*rot),rot},
-        path = {
-            dist  = (2*math.pi*(rad))*(rot/360),
-            radius=-rad,
-            rot=rot
-        },
-        line_up  = {0,0},
-        setup = function(self)
-            self.group = Group{
-                name = "Left 22.5* Curve",
-                children = {
-                    Clone{
-                        name   = "Road",
-                        source = base.curve_piece,
-                        anchor_point = {
-                             base.straight_road.w/2,
-                            base.curve_piece.h
-                        },
-                        y_rotation={180,0,0}
-                    },
-                    Rectangle{name="r",w=70,h=70,color="0000ff",anchor_point={45,45},position={-rad*math.cos(math.pi/180*rot)+rad,-rad*math.sin(math.pi/180*rot)}}
-                }
-            }
-            self.group:find_child("r"):raise_to_top()
-            self.path.parent=self
-            return self.group
-        end,
-    }
+    local rad = -8000*2
+    local rot = -1.4065/2
     
-    return section
+    if #prev_curves ~= 0 then
+        
+        section = table.remove(prev_curves)
+        
+        section.end_point = {
+            -rad*math.cos(math.pi/180*rot)+rad,
+            -rad*math.sin(math.pi/180*rot),rot
+        }
+        section.path = {
+            dist   = (2*math.pi*(rad))*(rot/360),
+            radius = -rad,
+            rot    = rot,
+            parent = section,
+        }
+        
+        section.y_rotation = {180,0,0}
+        section.position   = {0,0}
+        
+        return section
+        
+    else
+        
+        section = Clone{
+            
+            name   = "Curved Road",
+            
+            source = base.curve_piece,
+            
+            anchor_point = {
+                
+                base.straight_road.w/2,
+                
+                base.curve_piece.h
+                
+            },
+            
+            y_rotation={180,0,0},
+            
+            extra = {
+                
+                end_point = {
+                    -rad*math.cos(math.pi/180*rot)+rad,
+                    -rad*math.sin(math.pi/180*rot),rot
+                },
+                
+                path = {
+                    
+                    dist   = (2*math.pi*(rad))*(rot/360),
+                    
+                    radius = -rad,
+                    
+                    rot    = rot
+                },
+                
+                remove = function(self)
+                    table.insert(prev_curves,self)
+                    self:unparent()
+                end
+            }
+        }
+        
+        section.path.parent = section
+        
+        return section
+    end
+    
 end
 
---table.insert(sections,make_right_curved_piece())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_left_curved_piece())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_right_curved_piece())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_right_curved_piece())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_left_curved_piece())
+table.insert(sections,make_straight_section  )
+---[[
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
+table.insert(sections,make_right_curved_piece)
 
 
+table.insert(sections,make_straight_section  )
 --[[
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_left_curved_section())
-table.insert(sections,make_right_curved_section())
-table.insert(sections,make_right_curved_section())
-
-table.insert(sections,make_straight_section())
-
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_right_curved_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_right_curved_section())
-table.insert(sections,make_left_curved_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_right_curved_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_straight_section())
-table.insert(sections,make_right_curved_section())
+table.insert(sections,make_left_curved_piece )
+table.insert(sections,make_left_curved_piece )
+table.insert(sections,make_left_curved_piece )
+table.insert(sections,make_left_curved_piece )
+table.insert(sections,make_left_curved_piece )
 --]]
