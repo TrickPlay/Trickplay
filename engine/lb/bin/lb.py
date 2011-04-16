@@ -223,7 +223,8 @@ def parse( source ):
                     inherits = inherits ,
                     properties = [] ,
                     functions = [] ,
-                    constants = [] )
+                    constants = [] ,
+                    typedefs = {} )
                 )
             
             tokens = []
@@ -235,6 +236,12 @@ def parse( source ):
             if ( len( tokens ) == 2 ) and ( tokens[ 0 ] == "module" ):
                 
                 output.append( dict( type = "module" , name = tokens[ 1 ] ) )
+                
+                tokens = []
+                
+            elif ( len( tokens ) == 3 ) and ( tokens[ 0 ] == "typedef" ):
+            
+                output[ -1 ][ "typedefs" ][ tokens[ 2 ] ] = tokens[ 1 ]
                 
                 tokens = []
             
@@ -452,10 +459,16 @@ def emit( stuff , f ):
         def transform_type( type ):
             if type is None:
                 return None
+            elif type == "void":
+                return None
             elif type in base_types:
                 return type
             else:
-                return "udata"
+                rt = bind[ "typedefs" ].get( type )
+                if not rt is None:
+                    return rt
+                else:
+                    return "udata"
             
         def declare_local( param , index ):
             
