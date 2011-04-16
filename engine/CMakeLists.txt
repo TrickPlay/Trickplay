@@ -322,6 +322,8 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/trickplay.lb
     ${BINDINGS_SRC}/bitmap.lb
     ${BINDINGS_SRC}/canvas.lb
+
+    ${BINDINGS_SRC}/webgl.lb
 )
 
 #------------------------------------------------------------------------------
