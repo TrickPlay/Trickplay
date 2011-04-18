@@ -2024,7 +2024,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	return group
 
-    elseif item_n == "reactive" or item_n == "loop" or item_n == "vert_bar_visible" or item_n == "hor_bar_visible" or item_n == "cells_focusable"  or item_n == "lock" then  -- Attribute with single checkbox
+    elseif item_n == "reactive" or item_n == "loop" or item_n == "vert_bar_visible" or item_n == "horz_bar_visible" or item_n == "cells_focusable"  or item_n == "lock" then  -- Attribute with single checkbox
 	group:clear()
 	group.name = item_n
 	group.reactive = true

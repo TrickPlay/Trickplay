@@ -266,7 +266,9 @@ dofile("editor.lua")
 	       if j.type == "Text" then 
 	            if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
 			  ui.text = j	
-	                  ui.text:on_key_down(keys.Return)
+			  if ui.text.on_key_down then 
+	                  	ui.text:on_key_down(keys.Return)
+			  end 
 		    end
 	       end 
 	  end 
