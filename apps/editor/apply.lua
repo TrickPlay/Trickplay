@@ -102,11 +102,11 @@ function inspector_apply (v, inspector)
 	       end
 	       end,
 
-	["hor_bar_visible"] = function()
- 	       if item_group:find_child("bool_checkhor_bar_visible"):find_child("check1").opacity > 0 then 
-	            v.hor_bar_visible = true
+	["horz_bar_visible"] = function()
+ 	       if item_group:find_child("bool_checkhorz_bar_visible"):find_child("check1").opacity > 0 then 
+	            v.horz_bar_visible = true
 	       else 
-	            v.hor_bar_visible = false
+	            v.horz_bar_visible = false
 	       end
 	       end,
 
@@ -193,7 +193,7 @@ function inspector_apply (v, inspector)
       for i, j in pairs(item_group.children) do 
           	  
 	      if j.name then
-		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "hor_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
+		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
 		 if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
 			print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
 	        	return 0 
@@ -205,6 +205,7 @@ function inspector_apply (v, inspector)
               if (attr_map[j.name]) then
                      attr_map[j.name]()
               elseif(v[j.name] ~= nil)then 
+			print(j.name)
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
                             v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
                      else 

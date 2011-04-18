@@ -160,8 +160,8 @@ local menuButton_edit = ui_element.menuButton
     		item_text_color = "#ffffff",
 	}
 
-menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.undo} )
-menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.redo} )
+menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=nil}) --editor.undo} )
+menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=nil}) --editor.redo} )
 menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t     I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements})
 menuButton_edit.insert_item(4,{type="item", string="Timeline ...\t\t     J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline}) --icon=assets("assets/menu-checkmark.png")
 menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete})
@@ -178,7 +178,7 @@ menuButton_edit.x_rotation = {0,0,0}
 menuButton_edit.y_rotation = {0,0,0}
 menuButton_edit.z_rotation = {0,0,0}
 menuButton_edit.opacity = 255
-menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuButton_edit", [65361] = "menuButton_file", [65364]=menuButton_edit.press_down, [65362]=menuButton_edit.press_up  }
+menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuButton_edit", [65361] = "menuButton_file", [65364]=menuButton_edit.press_down, [65362]=menuButton_edit.press_up}
 
 function menuButton_edit:on_key_down(key)
 	if menuButton_edit.focus[key] then
@@ -365,7 +365,7 @@ function menuButton_view:on_key_down(key)
 		if type(menuButton_view.focus[key]) == "function" then
 			menuButton_view.focus[key]()
 		elseif screen:find_child(menuButton_view.focus[key]) then
-			if screen:find_child(menuButton_arrange.focus[key]) ~= menuButton_arrange then
+			if screen:find_child(menuButton_view.focus[key]) ~= menuButton_view then
 				if menuButton_view.on_focus_out then
 					menuButton_view.on_focus_out()
 				end
@@ -383,7 +383,6 @@ function menuButton_view:on_key_down(key)
 			end
 		end
 	end
-	screen:grab_key_focus()
 	return true
 end
 
@@ -439,8 +438,12 @@ local menu_text_shadow = Text
 
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
-menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow}
-for i, j in pairs (menu_bar_t) do 
-	j:raise_to_top()
-end
+local menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow}
+
+function menu_raise_to_top() 
+	for i, j in pairs (menu_bar_t) do 
+		j:raise_to_top()
+	end
+end 
+
 editor_use = false

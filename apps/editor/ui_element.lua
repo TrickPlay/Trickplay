@@ -39,8 +39,8 @@
                    		   ["scroll_arrow"] = nil,
 				  },
 		    ["OOBE"] = { 
-				   ["button"] = "button.png",
-				   ["button_focus"] = "buttonfocus.png", 
+				   ["button"] = "assets/button-oobe.png",
+				   ["button_focus"] = "assets/buttonfocus-oobe.png", 
 				},
 
 		  }
@@ -1344,7 +1344,7 @@ function ui_element.button(table)
 	released = nil, 
 	button_image = nil,
 	focus_image  = nil,
-	text_has_shadow = false,
+	text_has_shadow = true,
     }
 
  --overwrite defaults
@@ -1436,8 +1436,8 @@ function ui_element.button(table)
                         font  = p.text_font,
                         color = "000000",
                         opacity=255*.5,
-                        x     = (p.ui_width  -text.w)/2 + 1,
-                        y     = (p.ui_height - text.h)/2 + 1,
+                        x     = (p.ui_width  -text.w)/2 - 2,
+                        y     = (p.ui_height - text.h)/2 - 2,
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
@@ -4895,8 +4895,8 @@ button
         button.reactive=true
        
 	if editor_lb == nil or editor_use then  
-		button.pressed = umbrella.fade_in
-		button.released = umbrella.fade_out
+		button.pressed = function() umbrella.fade_in() screen:grab_key_focus() end 
+		button.released = function() umbrella.fade_out() screen:grab_key_focus() end 
  	end 
         
         button.position = {button.w/2,button.h/2}

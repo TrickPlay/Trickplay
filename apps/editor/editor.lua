@@ -350,6 +350,7 @@ function editor.timeline()
 		if table.getn(g.children) > 0 then
 			input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
 			screen:find_child("timeline").extra.show = true 
+			screen:find_child("timeline"):raise_to_top()
 		end
 	elseif table.getn(g.children) == 0 then 
 		screen:remove(screen:find_child("timeline"))
@@ -359,6 +360,7 @@ function editor.timeline()
 	elseif screen:find_child("timeline").extra.show ~= true  then 
 		screen:find_child("timeline"):show()
 		screen:find_child("timeline").extra.show = true
+		screen:find_child("timeline"):raise_to_top()
 	else 
 		screen:find_child("timeline"):hide()
 		screen:find_child("timeline").extra.show = false
@@ -2316,63 +2318,61 @@ function editor.duplicate()
 				next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
 			  end 
 		     end 
-			
-		     if is_this_widget(v) == false  then	
-			while(is_available(string.lower(v.type)..tostring(item_num))== false) do
-		         	item_num = item_num + 1
-	             	end 
-		     	editor.n_selected(v)
-		     	ui.dup = copy_obj(v)  
-                     	ui.dup.name=string.lower(v.type)..tostring(item_num)
-			if next_position then 
-		     		ui.dup.extra.position = {v.x, v.y}
-		     		ui.dup.position = next_position
-			else 
-		     		ui.dup.extra.position = {v.x, v.y}
-		     		ui.dup.position = {v.x + 20, v.y +20}
-			end 
+		     
+                     function dup_function ()
+		         if is_this_widget(v) == false  then	
+                              while(is_available(string.lower(v.type)..tostring(item_num))== false) do
+                                   item_num = item_num + 1
+                              end 
+                              editor.n_selected(v)
+                              ui.dup = copy_obj(v)  
+                              ui.dup.name=string.lower(v.type)..tostring(item_num)
+                              if next_position then 
+                                      ui.dup.extra.position = {v.x, v.y}
+                                      ui.dup.position = next_position
+                              else 
+                                      ui.dup.extra.position = {v.x, v.y}
+                                      ui.dup.position = {v.x + 20, v.y +20}
+                              end 
 
-		        if v.type == "Group" then 
-			      for i,j in pairs(v.children) do 
-			     	   if j.name then 
-					while(is_available(string.lower(j.type)..tostring(item_num))== false) do
+                              if v.type == "Group" then 
+                                    for i,j in pairs(v.children) do 
+                                         if j.name then 
+                                              while(is_available(string.lower(j.type)..tostring(item_num))== false) do
+                                                      item_num = item_num + 1
+                                              end 
+                                              ui.dup_c = copy_obj(j) 
+                                              ui.dup_c.name=string.lower(j.type)..tostring(item_num)
+                                              ui.dup:add(ui.dup_c)
+                                              ui.dup_c.extra.lock = false
+                                              create_on_button_down_f(ui.dup_c)
+                                              item_num = item_num + 1
+                                         end 
+                                    end 
+                              end 
+                         else 
+
+                              local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+
+                              ui.dup = widget_f_map[v.extra.type]() 
+
+                              while(is_available(ui.dup.name..tostring(item_num))== false) do
 		         			item_num = item_num + 1
-	             			end 
-					ui.dup_c = copy_obj(j) 
-					ui.dup_c.name=string.lower(j.type)..tostring(item_num)
-        	     	        	ui.dup:add(ui.dup_c)
-		     			ui.dup_c.extra.lock = false
-		     			create_on_button_down_f(ui.dup_c)
-		     			item_num = item_num + 1
-	
-			     	   end 
-			      end 
-			end 
-        	     	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
-        	     	g:add(ui.dup)
-		     else 
+                              end 
 
-    			local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
-
-		 	ui.dup = widget_f_map[v.extra.type]() 
-
-			while(is_available(ui.dup.name..tostring(item_num))== false) do
-		         			item_num = item_num + 1
-	             	end 
-
-	           	ui.dup.name = ui.dup.name..tostring(item_num)
-			if next_position then 
-		     		ui.dup.extra.position = {v.x, v.y}
-		     		ui.dup.position = next_position
-			else 
-		     		ui.dup.extra.position = {v.x, v.y}
-		     		ui.dup.position = {v.x + 50, v.y +50}
-			end 
+                              ui.dup.name = ui.dup.name..tostring(item_num)
+                              if next_position then 
+                                   ui.dup.extra.position = {v.x, v.y}
+                                   ui.dup.position = next_position
+                              else 
+                                      ui.dup.extra.position = {v.x, v.y}
+                                      ui.dup.position = {v.x + 50, v.y +50}
+                              end 
 				
-			for i,j in pairs(w_attr_list) do 
-			     if v[j] ~= nil then 
-				   if j ~= "name" and j ~= "position" then  
-					 if j == "content" then  
+                              for i,j in pairs(w_attr_list) do 
+                                   if v[j] ~= nil then 
+                                        if j ~= "name" and j ~= "position" then  
+                                             if j == "content" then  
 						local temp_g = copy_obj(v[j])
 						for m,n in pairs(v.content.children) do 
 			     	   		     if n.name then 
@@ -2398,7 +2398,7 @@ function editor.duplicate()
 			     	   	   	     end 
 			     	   	   	end 
 						ui.dup[j] = temp_g
-					 elseif j == "tiles" then 
+                                             elseif j == "tiles" then 
 						   for k,l in pairs (v[j]) do 
 							if type(l) == "table" then 
 							     for o,p in pairs(l) do 
@@ -2415,7 +2415,7 @@ function editor.duplicate()
 							     end  
 							end 
 						   end
-					 elseif type(v[j]) == "table" then  
+                                             elseif type(v[j]) == "table" then  
 						   local temp_t = {}
 						   for k,l in pairs (v[j]) do 
 							temp_t[k] = l
@@ -2425,53 +2425,57 @@ function editor.duplicate()
 						   if j == "items" then 
 					           	ui.dup[j] = temp_t
 						   end 
-					 elseif ui.dup[j] ~= v[j]  then  
+                                             elseif ui.dup[j] ~= v[j]  then  
 					           ui.dup[j] = v[j] 
-					           print(j, v[j], ui.dup[j])
-					 end 
-				   end 
-			     end 
-			end
+					           --print(j, v[j], ui.dup[j])
+                                             end 
+                                        end 
+                                   end 
+                              end --for
 
-                   	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
-	           	g:add(ui.dup)
-		     end
+                          end
+                    	end 
+
+                    	dup_function()
+
+                        table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
+                        g:add(ui.dup)
 		     
 
-		     local timeline = screen:find_child("timeline")
-		     if timeline then 
-	    		ui.dup.extra.timeline = {}
-            		ui.dup.extra.timeline[0] = {}
-	    		local prev_point = 0
-	        	local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-	    		for l,k in pairs (attr_map["Clone"]()) do 
-	        	     ui.dup.extra.timeline[0][k] = ui.dup[k]
-	    		end
-	    		if cur_focus_n ~= 0 then 
-                		ui.dup.extra.timeline[0]["hide"] = true  
-	    		end 
-	    		for i, j in orderedPairs(timeline.points) do 
-	        	     if not ui.dup.extra.timeline[i] then 
-		    	          ui.dup.extra.timeline[i] = {} 
-	            		  for l,k in pairs (attr_map["Clone"]()) do 
-		         	  	ui.dup.extra.timeline[i][k] = ui.dup.extra.timeline[prev_point][k] 
-		    		  end 
-		                  prev_point = i 
-			     end 
-	        	     if i < cur_focus_n  then 
-                    		  ui.dup.extra.timeline[i]["hide"] = true  
-			     end 
-	    	        end 
-		     end 
+                        local timeline = screen:find_child("timeline")
+                        if timeline then 
+                              ui.dup.extra.timeline = {}
+                              ui.dup.extra.timeline[0] = {}
+                              local prev_point = 0
+                              local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+                              for l,k in pairs (attr_map["Clone"]()) do 
+                                  ui.dup.extra.timeline[0][k] = ui.dup[k]
+                              end
+                              if cur_focus_n ~= 0 then 
+                                     ui.dup.extra.timeline[0]["hide"] = true  
+                              end 
+                              for i, j in orderedPairs(timeline.points) do 
+                                  if not ui.dup.extra.timeline[i] then 
+                                       ui.dup.extra.timeline[i] = {} 
+                                       for l,k in pairs (attr_map["Clone"]()) do 
+                                             ui.dup.extra.timeline[i][k] = ui.dup.extra.timeline[prev_point][k] 
+                                       end 
+                                       prev_point = i 
+                                  end 
+                                  if i < cur_focus_n  then 
+                                       ui.dup.extra.timeline[i]["hide"] = true  
+                                  end 
+                              end 
+                        end 
  
 		     
-	             if(screen:find_child("screen_objects") == nil) then 
-        	          screen:add(g)        
-		     end 
-        	     ui.dup.reactive = true
-		     ui.dup.extra.lock = false
-		     create_on_button_down_f(ui.dup)
-		     item_num = item_num + 1
+                        if(screen:find_child("screen_objects") == nil) then 
+                              screen:add(g)        
+                        end 
+                        ui.dup.reactive = true
+                        ui.dup.extra.lock = false
+                        create_on_button_down_f(ui.dup)
+                        item_num = item_num + 1
 		end 
             end
         end
@@ -2844,7 +2848,7 @@ function editor.left()
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
 		     if(v.x ~= basis_obj.x) then
 	                  org_object = copy_obj(v)
 			  v.x = basis_obj.x
@@ -2878,7 +2882,7 @@ function editor.right()
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
 		   --editor.n_selected(v)
 		   if(v.x ~= basis_obj.x + basis_obj.w - v.w) then
 	                org_object = copy_obj(v)
@@ -2912,7 +2916,7 @@ function editor.top()
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.selected == true and v.name ~= basis_obj_name ) then
 		  --   editor.n_selected(v)
 		     if(v.y ~= basis_obj.y) then
 	                org_object = copy_obj(v)
@@ -2945,7 +2949,7 @@ function editor.bottom()
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.selected == true and  v.name ~= basis_obj_name) then
 		     --editor.n_selected(v)
 		     if(v.y ~= basis_obj.y + basis_obj.h - v.h) then 	
 	                org_object = copy_obj(v)
@@ -2979,7 +2983,7 @@ function editor.hcenter()
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
 		     -- editor.n_selected(v)
 		     if(v.x ~= basis_obj.x + basis_obj.w/2 - v.w/2) then 
 	                org_object = copy_obj(v)
@@ -3015,7 +3019,7 @@ function editor.vcenter()
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
+	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
 		     -- editor.n_selected(v)
 		     if(v.y ~=  basis_obj.y + basis_obj.h/2 - v.h/2) then 
 	                org_object = copy_obj(v)

@@ -1022,9 +1022,9 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color"}
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", }
 
-    local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+    local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
     local group_list = {"name", "position", "scale", "anchor_point", "x_rotation", "y_rotation", "z_rotation", "opacity"}
 
@@ -1042,7 +1042,7 @@ function itemTostring(v, d_list, t_list)
 	["ScrollPane"] = function () return "ui_element.scrollPane" end, 
 	["MenuButton"] = function () return "ui_element.menuButton" end, 
    }
- 
+
    local function add_attr (list, head, tail) 
        local item_string =""
        for i,j in pairs(list) do 
@@ -1135,7 +1135,10 @@ function itemTostring(v, d_list, t_list)
        return item_string
     end 
   
-    if (v.type == "Image") then
+ 
+    if (v.type == "Text") then
+	v.cursor_visible = false
+    elseif (v.type == "Image") then
 	--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
 	 src = v.source 
@@ -1237,7 +1240,7 @@ function itemTostring(v, d_list, t_list)
 	..v.name..".on_focus_out()\n\t\t\t".."end\n\t\t\t"
 	.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
 	.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
-        .."screen:find_child("..v.name..".focus[key]).on_focus_in()\n\t\t\t".."end\n\t\t\t"
+        .."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t".."end\n\t\t\t"
 	.."end\n\t"
 	.."end\n\t"
 	.."return true\n"
@@ -1657,6 +1660,7 @@ local function inputMsgWindow_savefile()
 	   cleanMsgWindow()
            screen:grab_key_focus(screen) 
       end
+      menu_raise_to_top()
 end
 
 function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
@@ -2062,6 +2066,8 @@ function inputMsgWindow_openfile(input_text)
 	  end 
           screen:add(g)
      end
+
+     menu_raise_to_top()
      screen:grab_key_focus(screen) 
 end
 
