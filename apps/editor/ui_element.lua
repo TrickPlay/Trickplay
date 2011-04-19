@@ -140,28 +140,27 @@ function ui_element.populate_to (grp, tbl)
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
-	if effect == "fade" then 
 
+	if effect == "fade" then 
+		
 	screen:add(next_grp)
     	local fade_timeline = Timeline ()
-	local n_op = next_grp.opacity 
-	local p_op = prev_grp.opacity
+
     	fade_timeline.duration = 1000 -- progress duration 
     	fade_timeline.direction = "FORWARD"
     	fade_timeline.loop = false
 
-	print(p_op, n_op)
-
      	function fade_timeline.on_new_frame(t, m, p)
-		next_grp.opacity = n_op * p 
-		prev_grp.opacity = p_op * (1-p) 
+		next_grp.opacity = p * 255
+		prev_grp.opacity = (1-p) * 255 
      	end  
 
      	function fade_timeline.on_completed()
-		next_grp.opacity = 255
-		prev_grp.opacity = 0 
+		--next_grp.opacity = 255
+		--prev_grp.opacity = 0 
 		screen:remove(prev_grp)
 		g = next_grp
+		screen:add(g)
      	end 
 
 	fade_timeline:start()
@@ -805,11 +804,13 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 	       function pointer.extra.on_focus_out()
 		 pointer.src = "assets/left.png"
 		 for n,m in pairs (g.children) do 
+		     if m.extra.timeline then 
 		     if m.extra.timeline[name2num(pointerName)] then
 			for l,k in pairs (attr_map[m.type]()) do 
 	     			m.extra.timeline[name2num(pointerName)][k] = m[k]
 			end
                      end 
+		     end 
 	         end 
 		 pointer.extra.set = true
 	       end 
@@ -1161,6 +1162,7 @@ function ui_element.timeline(t)
 
           function tl.on_new_frame(t, m, p) 
 		for n,m in pairs (g.children) do 
+		     if m.extra.timeline then 
 		     if m.extra.timeline[current_point] then  
 			if m.extra.timeline[current_point]["hide"] then 
 			   if  m.extra.timeline[current_point]["hide"] == true then 
@@ -1180,6 +1182,7 @@ function ui_element.timeline(t)
 					m[k] = interval:get_value(p)
 				end
 			end 
+		     end 
 		     end 
 	         end
          end  
