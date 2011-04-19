@@ -2,11 +2,12 @@ local paused = true--false
 local idle_loop
 screen:show()
 screen_w = screen.w
+screen_h = screen.h
 clone_sources = Group{name="clone_sources"}
 screen:add(clone_sources)
 clone_sources:hide()
 strafed_dist = 0
-local STRAFE_CAP = 550
+local STRAFE_CAP =2000
 
 road={
 	newest_segment = nil,
@@ -14,13 +15,13 @@ road={
 	oldest_segment = nil,
 	segments       = {}
 }
-
+other_cars = {}
+dofile( "OtherCars.lua" )
 dofile(  "Sections.lua" )
 dofile(     "Level.lua" )
-dofile( "OtherCars.lua" )
 
 local speed = 2000
-local other_cars = {}
+
 
 local keys = {
 	[keys.Up] = function()
@@ -31,12 +32,12 @@ local keys = {
 	end,
 	[keys.Left] = function()
 		if strafed_dist > -STRAFE_CAP then
-			strafed_dist = strafed_dist - 50
+			strafed_dist = strafed_dist - 100
 		end
 	end,
 	[keys.Right] = function()
 		if strafed_dist < STRAFE_CAP then
-			strafed_dist = strafed_dist + 50
+			strafed_dist = strafed_dist + 100
 		end
 	end,
 	[keys.RED] = function()
@@ -48,7 +49,8 @@ local keys = {
 		paused = not paused
 	end,
 	[keys.a] = function()
-		table.insert(other_cars,make_on_coming_lambo(road.newest_segment,end_point,-50))
+		local lane_one = -600
+		table.insert(other_cars,make_on_coming_impreza(road.newest_segment,end_point,lane_one))
 		world.cars:add(other_cars[#other_cars])
 	end
 }
