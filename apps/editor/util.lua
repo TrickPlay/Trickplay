@@ -1175,7 +1175,7 @@ function itemTostring(v, d_list, t_list)
     end
 
     if (v.type == "Video") then
-  	 itm_str = itm_str.."\n"..v.name.." = ".."{"..indent..
+  	 itm_str = itm_str.."\n local "..v.name.." = ".."{"..indent..
          "name=\""..v.name.."\","..indent..
          "type=\""..v.type.."\","..indent..
          "source=\""..v.source.."\","..indent..
@@ -1209,13 +1209,13 @@ function itemTostring(v, d_list, t_list)
 	          end 
 	     end 
 	 end 
-         itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
+         itm_str = itm_str.."\n local "..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
 	 itm_str = itm_str:sub(1,-2)
          itm_str = itm_str.."}\n\n"
 	 itm_str = itm_str..add_attr(group_list, v.name..".", "\n")
     else 
-         itm_str = itm_str.."\n"..v.name.." = "..v.type..b_indent.."{"..indent
+         itm_str = itm_str.."\n local "..v.name.." = "..v.type..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(nw_attr_list, "", ","..indent)
 	 itm_str = itm_str:sub(1,-2)
          itm_str = itm_str.."}\n\n"
