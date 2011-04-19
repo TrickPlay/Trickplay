@@ -141,35 +141,42 @@ end
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
 
+	for i, j in pairs (g.children) do
+		if j.on_focus_out then 
+				j.on_focus_out()
+		end
+	end 
 	if effect == "fade" then 
 		
-	screen:add(next_grp)
-    	local fade_timeline = Timeline ()
+		screen:add(next_grp)
+    		local fade_timeline = Timeline ()
 
-    	fade_timeline.duration = 1000 -- progress duration 
-    	fade_timeline.direction = "FORWARD"
-    	fade_timeline.loop = false
+    		fade_timeline.duration = 1000 -- progress duration 
+    		fade_timeline.direction = "FORWARD"
+    		fade_timeline.loop = false
 
-     	function fade_timeline.on_new_frame(t, m, p)
-		next_grp.opacity = p * 255
-		prev_grp.opacity = (1-p) * 255 
-     	end  
+     		function fade_timeline.on_new_frame(t, m, p)
+			next_grp.opacity = p * 255
+			prev_grp.opacity = (1-p) * 255 
+     		end  
 
-     	function fade_timeline.on_completed()
-		--next_grp.opacity = 255
-		--prev_grp.opacity = 0 
-		screen:remove(prev_grp)
+     		function fade_timeline.on_completed()
+			screen:remove(prev_grp)
+			g = next_grp
+			screen:add(g)
+			screen:grab_key_focus()
+     		end 
+
+		fade_timeline:start()
+	else 
+		if prev_grp then 
+			screen:remove(prev_grp)
+		end 
 		g = next_grp
 		screen:add(g)
-     	end 
+		screen:grab_key_focus()
 
-	fade_timeline:start()
-	else 
-	if prev_grp then 
-		screen:remove(prev_grp)
-	end 
-	g = next_grp
-	screen:add(g)
+
 	end 
 end 
 
@@ -1381,11 +1388,11 @@ function ui_element.button(table)
         end 
         b_group:find_child("text").color = p.focus_text_color
 	
-	--if key then 
-	    if p.pressed then --and key == keys.Return then
+	if key then 
+	    if p.pressed and key == keys.Return then
 		p.pressed()
 	    end 
-	--end 
+	end 
 
 	b_group:grab_key_focus(b_group)
     end
@@ -4728,8 +4735,8 @@ button
                         font  = p.item_text_font,
                         color = "000000",
                         opacity=255*.5,
-                        x     = p.horz_padding+p.horz_spacing+1,
-                        y     = curr_y+1,
+                        x     = p.horz_padding+p.horz_spacing - 2,
+                        y     = curr_y - 2,
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
@@ -4828,11 +4835,11 @@ button
                         font  = p.label_text_font,
                         color = "000000",
                         opacity=255*.5,
-                        x     = p.horz_spacing+2,
-                        y     = curr_y+2,
+                        x     = p.horz_spacing-2,
+                        y     = curr_y-2,
                     }
-              s_txt.anchor_point={0,s_txt.h/2}
-                    s_txt.y = s_txt.y+s_txt.h/2
+                s_txt.anchor_point={0,s_txt.h/2}
+                s_txt.y = s_txt.y+s_txt.h/2
                 dropDownMenu:add(
                     s_txt
                 )
