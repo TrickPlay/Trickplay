@@ -1,5 +1,5 @@
 local base = {
-    straight_road = Image{ src="road.png", tile={false,true}, h=60*200},
+    straight_road = Image{ src="road.png", tile={false,true}, h=20*200},
     single_straight_road = Image{ src="road.png",tile={false,true}, h=2*200 },
     curve_road    = Image{ src="road-curvdde-2.png"   },
     curve_piece   = Image{ src="road_curve.png"},
@@ -11,6 +11,9 @@ local base = {
     tree2         = Image{ src="tree2.png"},
     t_weed        = Image{ src="tumble-weed.png"},
 }
+
+local road_scale = 4
+
 for _,v in pairs(base) do
     clone_sources:add(v)
 end
@@ -92,14 +95,16 @@ function make_straight_section()
             
             x_rotation = {180,0,0},
             
+            scale={road_scale,road_scale},
+            
             anchor_point = { base.straight_road.w/2, 0 },
             
             extra = {
                 
-                end_point = { 0, -base.straight_road.h, 0 },
+                end_point = { 0, -road_scale*base.straight_road.h, 0 },
                 
                 path = {
-                    dist   = base.straight_road.h,
+                    dist   = road_scale*base.straight_road.h,
                     rot    = 0,
                     radius = 0
                 },
@@ -117,60 +122,9 @@ function make_straight_section()
     end
     
 end
-function make_single_straight_section()
-    local rad = 8000
-    local rot = 1
-    if #prev_sing_straights ~= 0 then
-        
-        return table.remove(prev_sing_straights)
-        
-    else
-        
-        section =  Clone{
-            
-            name   = "Str8 Road",
-            
-            source = base.single_straight_road,
-            
-            x_rotation = {180,0,0},
-            
-            anchor_point = { base.single_straight_road.w/2, 0 },
-            
-            extra = {
-                
-                
-                
-                remove = function(self)
-                    table.insert(prev_sing_straights,self)
-                    self:unparent()
-                end,
-                
-                
-                end_point = {
-                    -rad*math.cos(math.pi/180*rot)+rad,
-                    -rad*math.sin(math.pi/180*rot),rot
-                },
-                
-                path = {
-                    
-                    dist   = (2*math.pi*(rad))*(rot/360),
-                    
-                    radius = -rad,
-                    
-                    rot    = rot
-                },
-            }
-        }
-        
-        section.path.parent = section
-        
-        return section
-    end
-    
-end
 function make_right_curved_piece()
     local rad = 8000*20
-    local rot = 1.4065/20
+    local rot = 1.4065/5
     
     if #prev_curves ~= 0 then
         
@@ -208,6 +162,8 @@ function make_right_curved_piece()
                 
             },
             
+            scale={4,4},
+            
             extra = {
                 
                 end_point = {
@@ -238,8 +194,8 @@ function make_right_curved_piece()
     
 end
 function make_left_curved_piece()
-    local rad = -8000*2
-    local rot = -1.4065/2
+    local rad = -8000*20
+    local rot = -1.4065/5
     
     if #prev_curves ~= 0 then
         
@@ -278,6 +234,8 @@ function make_left_curved_piece()
             },
             
             y_rotation={180,0,0},
+            
+            scale={4,4},
             
             extra = {
                 
@@ -328,8 +286,23 @@ table.insert(sections,make_right_curved_piece)
 table.insert(sections,make_right_curved_piece)
 table.insert(sections,make_right_curved_piece)
 
-
 table.insert(sections,make_straight_section  )
+
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
+table.insert(sections,make_left_curved_piece)
 --[[
 table.insert(sections,make_left_curved_piece )
 table.insert(sections,make_left_curved_piece )

@@ -31,9 +31,9 @@ ground.anchor_point={ground.w/2,ground.h-1000}
 
 --world = Group{name = "THE WORLD",position={screen.w/2,screen.h},x_rotation={90,0,0},scale={4,4}}
 world = {
-    road    = Group{name="Road Layer",   x_rotation={90,0,0},position={screen.w/2,screen.h},scale={4,4}},
-    doodads = Group{name="Doodad Layer", x_rotation={90,0,0},position={screen.w/2,screen.h},scale={4,4}},
-    cars    = Group{name="Car Layer",    x_rotation={90,0,0},position={screen.w/2,screen.h},}--scale={4,4}}
+    road    = Group{name="Road Layer",   x_rotation={90,0,0},position={screen.w/2,screen.h}},
+    doodads = Group{name="Doodad Layer", x_rotation={90,0,0},position={screen.w/2,screen.h}},
+    cars    = Group{name="Car Layer",    x_rotation={90,0,0},position={screen.w/2,screen.h}}
 }
 screen:add(
     ground,
@@ -74,7 +74,7 @@ function world:adjust_position()
         w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot)
     }
     self.cars.anchor_point = {
-        4*(w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot)),
+        (w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot)),
         (w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot))
     }
 end
@@ -87,6 +87,7 @@ function world:add_next_section()
     
     --table.insert( active_sections, next_section )
     
+    
     road.segments[next_section] = next_section.path
     if road.newest_segment then
         next_section.prev_segment        = road.newest_segment
@@ -94,7 +95,10 @@ function world:add_next_section()
     end
     road.newest_segment = next_section
     --table.insert( path, next_section.path )
-    
+    if next_section.name == "Str8 Road" and road.newest_segment ~= nil then
+        table.insert(other_cars,make_passing_subaru(road.newest_segment,end_point,1000))
+		world.cars:add(other_cars[#other_cars])
+    end
     self.road:add( next_section )
     
     --position the next section of road
@@ -163,6 +167,11 @@ function world:remove_oldest_section()
         next_section.y = next_section.y - new_pos.y
     end
     
+    for _,car in ipairs(other_cars) do
+        car.x = car.x - new_pos.x
+        car.y = car.y - new_pos.y
+    end
+    
     prev_end_marker.x = prev_end_marker.x - new_pos.x
     prev_end_marker.y = prev_end_marker.y - new_pos.y
     
@@ -215,7 +224,7 @@ function world:move(dx,dr,radius)
         --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
         self.road.y_rotation   = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
         self.doodads.y_rotation   = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        self.cars.y_rotation   = {4*y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
+        self.cars.y_rotation   = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
         ground.y_rotation = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
         sky.x = screen_w/2-sky.w/2*math.sin(math.pi/180*y_rot)
         
