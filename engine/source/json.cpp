@@ -989,14 +989,14 @@ namespace JSON
 
                 if ( stack.empty() )
                 {
-                    self->root.as< Array >();
+                    self->root = Array();
 
                     stack.push_back( StackPair( & self->root , String() ) );
 
                     return 1;
                 }
 
-                new_value.as< Array >();
+                new_value = Array();
 
                 break;
 
@@ -1014,14 +1014,14 @@ namespace JSON
 
                 if ( stack.empty() )
                 {
-                    self->root.as< Object >();
+                    self->root = Object();
 
                     stack.push_back( StackPair( & self->root , String() ) );
 
                     return 1;
                 }
 
-                new_value.as< Object >();
+                new_value = Object();
                 break;
 
             case JSON_T_OBJECT_END:
