@@ -11,18 +11,29 @@ local prev_end_marker = Rectangle{
     w=100, h=100, color = "ffff00", anchor_point = {50,50}
 }
 prev_end_marker:hide()
-local sky = Image{src="skyline.png",x=screen.w/2}--Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="172e57"}
+local sky = Image{src="skyline.png",x=screen.w/2,y=-17}--Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="172e57"}
 sky.anchor_point={sky.w/2,0}
-car = Image{name="THE CAR",src="assets/Lambo/0.png",position={screen.w/2,5*screen.h/6},scale={1.2,1.1}}
+car = Image{name="THE CAR",src="assets/Lambo/00.png",position={screen.w/2,5*screen.h/6}}
+tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+12},opacity=0}
 car.anchor_point = {car.w/2,car.h/2}
+tail_lights.anchor_point = {tail_lights.w/2,tail_lights.h/2}
+car.col_box = { w = 300,l=600}
 local horizon_grad = Image{src="gradient.png",tile={true,false},w=screen_w,y=sky.h-17,scale={1,2}}
 section_i = 1
 --active_sections = {}
+local ground_backing = Rectangle{w=screen_w,h=screen_h,color="362818"}
+local ground_wall = Image{
+    name  = "THE GROUND WALL",
+    src   = "desert.png",
+    tile  = {true,true},
+    size  = {screen_w*5,screen_h*5},
+    scale = {.2,.2},
+}
 local ground = Image{
     name  = "THE GROUND",
     src   = "desert.png",
     tile  = {true,true},
-    size  = {40000,40000},
+    size  = {4000,10000},
     scale = {4,4},
     position={screen.w/2,screen.h},
     x_rotation={90,0,0},
@@ -36,13 +47,17 @@ world = {
     cars    = Group{name="Car Layer",    x_rotation={90,0,0},position={screen.w/2,screen.h}}
 }
 screen:add(
+    ground_wall,
+    sky,
     ground,
+    
     world.road,
     horizon_grad,
-    sky,
+    
     world.doodads,
     world.cars,
-    car
+    car,
+    tail_lights
 )
 
 world.road:add(prev_end_marker,end_marker)
@@ -80,7 +95,6 @@ function world:adjust_position()
 end
 
 local next_section
-
 function world:add_next_section()
     
     next_section = sections[section_i]()
@@ -95,8 +109,8 @@ function world:add_next_section()
     end
     road.newest_segment = next_section
     --table.insert( path, next_section.path )
-    if next_section.name == "Str8 Road" and road.newest_segment ~= nil then
-        table.insert(other_cars,make_passing_subaru(road.newest_segment,end_point,1000))
+    if next_section.name == "Str8 Road" and road.newest_segment ~= nil  then
+        table.insert(other_cars,make_passing_subaru(road.newest_segment,end_point,960))
 		world.cars:add(other_cars[#other_cars])
     end
     self.road:add( next_section )
@@ -213,12 +227,12 @@ local dist_to_car = -1000
 function world:move(dx,dr,radius)
 
     if dr ~= 0 then
-        
+        --curve_impulse = curve_impulse - dr
         --radius = radius - strafed_dist
         cent_x = radius*math.cos(math.pi/180*y_rot)
         cent_y = radius*math.sin(math.pi/180*y_rot)
         
-        strafed_dist = strafed_dist + 18*dr
+        --strafed_dist = strafed_dist + 20*dr
         
         y_rot = y_rot+dr
         --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
@@ -231,6 +245,7 @@ function world:move(dx,dr,radius)
         delta_x = radius*math.cos(math.pi/180*y_rot)-cent_x
         delta_y = -radius*math.sin(math.pi/180*y_rot)+cent_y
         
+        strafed_dist = strafed_dist - delta_x/4*dr/math.abs(dr)
         --delta_x = dx*math.sin(math.pi/180*y_rot)
         --delta_y = dx*math.cos(math.pi/180*y_rot)
     else
@@ -248,7 +263,8 @@ function world:move(dx,dr,radius)
     g_dx = (g_dx+delta_x)%TILE_W
     g_dy = (g_dy-delta_y)%TILE_H
     
-    ground.anchor_point = { g_cent_x + g_dx,  g_cent_y + g_dy }
+    ground.anchor_point = { g_cent_x,  g_cent_y + g_dy }
+    ground_wall.anchor_point = { 0, g_dy }
     
     dist_to_end_point[1]   = dist_to_end_point[1]   - delta_x
     dist_to_end_point[2]   = dist_to_end_point[2]   + delta_y
