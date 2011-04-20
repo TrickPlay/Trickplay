@@ -131,6 +131,8 @@ public:
 
     bool submit_audio_clip( );
 
+    bool advanced_ui( int command , const String & payload );
+
     inline bool wants_accelerometer_events() const
     {
         return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && g_atomic_int_get( & ts_accelerometer_started );
@@ -208,6 +210,8 @@ public:
 
     void reset_all();
 
+    void stop_events();
+
 private:
 
     void post_event( gpointer event );
@@ -248,6 +252,8 @@ private:
     typedef std::set<Delegate *> DelegateSet;
 
     DelegateSet     delegates;
+
+    gint            stopped;
 };
 
 #endif // _TRICKPLAY_CONTROLLER_LIST_H
