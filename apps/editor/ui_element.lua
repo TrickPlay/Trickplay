@@ -4107,9 +4107,9 @@ function ui_element.scrollPane(t)
             
             grip_hor = hor_s_bar:find_child("grip")
             track_hor = hor_s_bar:find_child("track")
-            
+            local hold = false
             function grip_hor:on_button_down(x,y,button,num_clicks)
-                
+                --[[
                 local dx = x - grip_hor.x
 	   	        
                 dragging = {grip_hor,
@@ -4129,6 +4129,22 @@ function ui_element.scrollPane(t)
 	   	        }
 	   	
                 return true
+                --]]
+                hold = true
+            end
+            function grip_hor:on_button_up(x,y,button,num_clicks)
+                hold = false
+            end
+            function grip_hor:on_motion(dx,dy)
+                grip_hor.x = x - dx
+	   			
+	   			if  grip_hor.x < 0 then
+	   			   grip_hor.x = 0
+	   			elseif grip_hor.x > track_w-grip_hor.w then
+	   			      grip_hor.x = track_w-grip_hor.w
+	   			end
+	   			
+	   			p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
             end
             function track_hor:on_button_down(x,y,button,num_clicks)
                 
@@ -4189,6 +4205,45 @@ function ui_element.scrollPane(t)
 	   	        }
 	   	
                 return true
+            end
+            local hold = false
+            function grip_vert:on_button_down(x,y,button,num_clicks)
+                --[[
+                local dx = x - grip_hor.x
+	   	        
+                dragging = {grip_hor,
+	   		        function(x,y)
+	   			
+	   			        grip_hor.x = x - dx
+	   			
+	   			        if  grip_hor.x < 0 then
+	   				        grip_hor.x = 0
+	   			        elseif grip_hor.x > track_w-grip_hor.w then
+	   				           grip_hor.x = track_w-grip_hor.w
+	   			        end
+	   			
+	   			        p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
+	   			
+	   		        end 
+	   	        }
+	   	
+                return true
+                --]]
+                hold = true
+            end
+            function grip_vert:on_button_up(x,y,button,num_clicks)
+                hold = false
+            end
+            function grip_vert:on_motion(dx,dy)
+                grip_vert.y = y - dy
+	   			
+	   			if  grip_vert.y < 0 then
+	   			    grip_vert.y = 0
+	   			elseif grip_vert.y > track_h-grip_vert.h then
+	   			       grip_vert.y = track_h-grip_vert.h
+	   			end
+	   			
+	   			p.content.y = -(grip_vert.y) * p.virtual_h/track_h
             end
             function track_vert:on_button_down(x,y,button,num_clicks)
                 
