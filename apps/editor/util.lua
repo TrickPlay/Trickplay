@@ -2156,7 +2156,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
 	  end 
 
           ui.image= Image { name="img"..tostring(item_num),
-          src = input_t.text, opacity = 255 , position = {200,200}, 
+          src = "/assets/images/"..input_t.text, opacity = 255 , position = {200,200}, 
 	  extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
 	  ui.image.extra.lock = false
