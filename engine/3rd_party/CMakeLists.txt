@@ -57,3 +57,13 @@ list( APPEND 3RD_PARTY_SOURCE_FILES
 	${BOX2D_SOURCE}/Dynamics/Joints/b2RevoluteJoint.cpp
 	${BOX2D_SOURCE}/Dynamics/Joints/b2WeldJoint.cpp
 )
+
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/json )
+
+list( APPEND 3RD_PARTY_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/json/JSON_parser.c )
+
+
+# Inhibit warnings from 3rd party code. We may want to turn this off
+# when we update code from a 3rd party.
+
+set_source_files_properties( ${3RD_PARTY_SOURCE_FILES} COMPILE_FLAGS "-w" )

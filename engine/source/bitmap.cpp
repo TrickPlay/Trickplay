@@ -6,7 +6,7 @@
 
 //.............................................................................
 
-static Debug_ON log( "BITMAP" );
+static Debug_OFF log( "BITMAP" );
 
 //.............................................................................
 
@@ -24,7 +24,10 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
 
     if ( ! _async )
     {
-        image = app->load_image( _src );
+        if ( strlen( _src ) > 0 )
+        {
+            image = app->load_image( _src );
+        }
     }
     else
     {
@@ -121,4 +124,16 @@ Image * Bitmap::get_image( lua_State * L , int index )
 Image * Bitmap::get_image()
 {
     return image;
+}
+
+//.............................................................................
+
+void Bitmap::set_image( Image * _image )
+{
+    if ( image )
+    {
+        delete image;
+    }
+
+    image = _image;
 }

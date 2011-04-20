@@ -1,0 +1,246 @@
+module clutter_score;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "clutter_util.h"
+]]
+
+[[
+void Score_on_started(ClutterScore*score,lua_State*L);
+void Score_on_completed(ClutterScore*score,lua_State*L);
+void Score_on_paused(ClutterScore*score,lua_State*L);
+
+// We use these signal handlers to keep the timeline alive as long as
+// it is running. There is still an issue with timelines that have
+// delays...while the delay is ticking away, they can get collected.
+
+void Score_started( ClutterScore * score , gpointer )
+{
+    g_object_ref( score );
+}
+
+void Score_paused( ClutterScore * score , gpointer )
+{
+    g_object_unref( score );
+}
+
+void Score_completed( ClutterScore * score , gpointer )
+{
+    if ( ! clutter_score_get_loop( score ) )
+    {
+        g_object_unref( score );
+    }
+}
+
+]]
+
+/*
+    Class: Score
+    
+    A score is for sequencing multiple timelines in order. Using Score it is possible to start multiple timelines at the same time or launch multiple timelines when a particular timeline has completed.
+
+    Create a score, add timelines to it, then start it.
+*/
+
+class Score [[ClutterScore*]]
+{
+    Score(table props = 0)
+	[[
+		self=clutter_score_new();
+		g_object_ref(self);
+		self=lb_construct_gobject(ClutterScore,self);
+    	ClutterUtil::set_props_from_table(L,props);
+
+    	g_signal_connect( self , "started" , ( GCallback ) Score_started , 0 );
+    	g_signal_connect( self , "paused" , ( GCallback ) Score_paused , 0 );
+        g_signal_connect( self , "completed" , ( GCallback ) Score_completed , 0 );
+
+    	g_object_unref(self);
+	]];
+	
+    ~Score()
+	[[
+	]];
+	
+	/*
+		Property: loop
+		
+		Whether the score should loop forever.
+	*/
+	
+    bool loop
+	[[loop=clutter_score_get_loop(self);]]
+	[[clutter_score_set_loop(self,loop);]];
+	
+	/*
+		Property: is_playing
+		
+		True if the score is running.
+	*/
+	
+    readonly bool is_playing
+	[[is_playing=clutter_score_is_playing(self);]];
+	
+	/*
+		Function: start
+		
+		Starts the score.
+	*/
+	
+    start()
+	[[
+	  clutter_score_start(self);
+    ]];
+	
+	/*
+		Function: pause
+		
+		Pauses the score.
+	*/
+    pause()
+	[[clutter_score_pause(self);]];
+	
+	/*
+		Function: stop
+		
+		Stops the score and resets it to the beginning.
+	*/
+	
+    stop()
+	[[clutter_score_stop(self);]];
+	
+	/*
+		Function: rewind
+		
+		Rewinds the score to the beginning.
+	*/
+	
+    rewind()
+	[[clutter_score_rewind(self);]];
+	
+	/*
+		Function: append
+		
+		Appends a timeline to another one existing in the score; the newly appended timeline will be started when parent is complete.
+		
+		Arguments:
+
+			parent - The parent timeline, completion of which will trigger the one being appended.  <nil> to trigger at start of the score.
+
+			timeline - The timeline that will be added to the score.
+	*/
+
+    append(Timeline parent=0, Timeline timeline)
+	[[
+	    ClutterTimeline *tl = ClutterUtil::user_data_to_timeline(L,timeline);
+	    ClutterTimeline *p = ClutterUtil::user_data_to_timeline(L,parent);
+
+        if(tl) clutter_score_append(self,p,tl);
+    ]];
+
+    /*
+        Function append_at_marker
+        
+        Appends timeline at the given marker_name on the parent timeline.
+
+        If you want to append timeline at the end of parent, use append().
+    */
+
+    append_at_marker(Timeline parent=0, string marker, Timeline timeline)
+    [[
+	    ClutterTimeline *tl = ClutterUtil::user_data_to_timeline(L,timeline);
+	    ClutterTimeline *p = ClutterUtil::user_data_to_timeline(L,parent);
+
+        if(tl) clutter_score_append_at_marker(self,p,marker,tl);
+    ]];
+
+    /*
+        Function remove_all
+        
+        Removes all the timelines inside score.
+    */
+    
+    remove_all()
+    [[clutter_score_remove_all(self);]];
+
+	/*
+		Event: on_started
+		
+		Called whenever the score is started.
+		
+		Arguments:
+		
+			score - The score.
+	*/
+	
+    callback on_started
+	[[
+	    UserData::get(L)->connect_signal_if(
+			on_started,
+			"on_started",
+			"started",
+			G_CALLBACK(Score_on_started),
+			L);
+	]];
+    
+    /*
+    	Event: on_completed
+    	
+    	Called whenever the score reaches the end.
+		
+		Arguments:
+		
+			score - The score.
+    */
+    
+    callback on_completed
+	[[
+	    UserData::get(L)->connect_signal_if(
+			on_completed,
+			"on_completed",
+			"completed",
+			G_CALLBACK(Score_on_completed),
+			L);	    	    
+	]];
+	
+	/*
+		Event: on paused
+		
+		Called whenever the score is paused.
+			
+		Arguments:
+		
+			score - The score.
+	*/
+	
+    callback on_paused
+	[[
+	    UserData::get(L)->connect_signal_if(
+			on_paused,
+			"on_paused",
+			"paused",
+			G_CALLBACK(Score_on_paused),
+			L);	    	    
+	]];
+	
+}
+
+[[
+void Score_on_started(ClutterScore*score,lua_State*L)
+{
+    UserData::invoke_callback(G_OBJECT(score),"on_started",0,0,L);
+}
+
+void Score_on_completed(ClutterScore*score,lua_State*L)
+{
+    UserData::invoke_callback(G_OBJECT(score),"on_completed",0,0,L);
+}
+
+void Score_on_paused(ClutterScore*score,lua_State*L)
+{
+    UserData::invoke_callback(G_OBJECT(score),"on_paused",0,0,L);
+}
+
+]]
