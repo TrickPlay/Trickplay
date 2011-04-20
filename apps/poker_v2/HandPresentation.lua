@@ -493,10 +493,8 @@ HandPresentation = Class(nil,function(pres, ctrl)
                     PLAYER_CARD_LOCATIONS[player.table_position][1],
                     PLAYER_CARD_LOCATIONS[player.table_position][2]
                 }
-                local no_flip = false
                 if player.controller then
                     player.controller:set_hole_cards(hole)
-                    no_flip = true
                 end
             
                 -- give the player their cards
@@ -505,16 +503,16 @@ HandPresentation = Class(nil,function(pres, ctrl)
                         screen:add(card.group)
                     end
                     -- Animate and flip the card if the player is human
-                    if not no_flip then
-                        card.group:animate{
-                            x = pos[1] + offset, y = pos[2] + offset,
-                            mode = MODE, duration = TIME,
-                            z_rotation = 0,
-                            on_completed = function()
-                                if player.is_human then flipCard(card.group) end
+                    card.group:animate{
+                        x = pos[1] + offset, y = pos[2] + offset,
+                        mode = MODE, duration = TIME,
+                        z_rotation = 0,
+                        on_completed = function()
+                            if player.is_human and not player.controller then
+                                flipCard(card.group)
                             end
-                        }
-                    end
+                        end
+                    }
                     card.group:raise_to_top()
                     offset = offset + 30
                 end
