@@ -946,7 +946,7 @@ function editor.the_image(bg_image)
 	           BG_IMAGE_40.opacity = 0
 	           BG_IMAGE_80.opacity = 0
 	           BG_IMAGE_white.opacity = 0
-	           BG_IMAGE_import:set{src = input_text.text, opacity = 255} 
+	           BG_IMAGE_import:set{src = "/assets/images/"..input_text.text, opacity = 255} 
 	           input_mode = S_SELECT
 	      elseif screen:find_child("inspector") then 
 		    screen:find_child("file_name").text = input_text.text
@@ -987,6 +987,7 @@ function editor.export ()
 end 
 
 function editor.the_open()
+
        	local WIDTH = 700
 	local L_PADDING = 50
 	local R_PADDING = 50

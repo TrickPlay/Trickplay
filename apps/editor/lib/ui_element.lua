@@ -4006,6 +4006,7 @@ function ui_element.scrollPane(t)
 	
 	
 	--this function creates the whole scroll bar box
+        local hold = false
 	local function create()
         window.position={ p.box_width, p.box_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
@@ -4046,9 +4047,7 @@ function ui_element.scrollPane(t)
             
             grip_hor = hor_s_bar:find_child("grip")
             track_hor = hor_s_bar:find_child("track")
-            local hold = false
             function grip_hor:on_button_down(x,y,button,num_clicks)
-                --[[
                 local dx = x - grip_hor.x
 	   	        
                 dragging = {grip_hor,
@@ -4068,16 +4067,39 @@ function ui_element.scrollPane(t)
 	   	        }
 	   	
                 return true
-                --]]
-                hold = true
             end
+
+--[[
             function grip_hor:on_button_up(x,y,button,num_clicks)
                 hold = false
             end
+]] 
+
+--wwwwww
+if editor_lb == nil then
+            function screen:on_motion(x,y) 
+	  	if dragging then
+	        local actor = unpack(dragging)
+	    	  if (actor.name == "grip") then  
+	             local actor,s_on_motion = unpack(dragging) 
+	             s_on_motion(x, y)
+	             return true
+	    	  end 
+		  return true 
+		end
+	    end 
+	    function screen:on_button_up()
+		if dragging then 
+			dragging = nil 
+		end 
+	    end 
+end
+
+--[[
             function grip_hor:on_motion(dx,dy)
                 if hold then
                     grip_hor.x =  grip_hor.x - dx
-                    
+                   	print("on motion !!!!!!") 
                     if  grip_hor.x < 0 then
                     grip_hor.x = 0
                     elseif grip_hor.x > track_w-grip_hor.w then
@@ -4087,6 +4109,7 @@ function ui_element.scrollPane(t)
                     p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
                 end
             end
+]]
             function track_hor:on_button_down(x,y,button,num_clicks)
                 
                 local rel_x = x - track_hor.transformed_position[1]/screen.scale[1]
@@ -4124,7 +4147,7 @@ function ui_element.scrollPane(t)
             
             grip_vert = vert_s_bar:find_child("grip")
             track_vert = vert_s_bar:find_child("track")
-            
+            --[[
             function grip_vert:on_button_down(x,y,button,num_clicks)
                 
                 local dy = y - grip_vert.y
@@ -4147,8 +4170,13 @@ function ui_element.scrollPane(t)
 	   	
                 return true
             end
-            local hold = false
+
+	    ]]--
+
+
+	    
             function grip_vert:on_button_down(x,y,button,num_clicks)
+	print("hjsfdadhfkahdfjl")
                 --[[
                 local dx = x - grip_hor.x
 	   	        
@@ -4450,6 +4478,7 @@ button
 
     local shadow 
     if p.skin == "editor" then
+	p.horz_offset = -30
 	shadow = true 
     else 
 	shadow = false 

@@ -189,16 +189,16 @@ function menuButton_edit:on_key_down(key)
 				if menuButton_edit.on_focus_out then 
 					menuButton_edit.on_focus_out()
 				end
+				screen:find_child(menuButton_edit.focus[key]):grab_key_focus()
 				if screen:find_child(menuButton_edit.focus[key]).on_focus_in then
 					screen:find_child(menuButton_edit.focus[key]).on_focus_in()
 				end
-				screen:find_child(menuButton_edit.focus[key]):grab_key_focus()
 			else 
 				if menuButton_edit.get_index() ~= 0 then 
 				    menuButton_edit.press_enter()
 			        end
 				menuButton_edit.on_focus_out()
-				--screen:grab_key_focus()
+				screen:grab_key_focus()
 			end 
 		end
 	end
@@ -277,16 +277,16 @@ function menuButton_arrange:on_key_down(key)
 				if menuButton_arrange.on_focus_out then 
 					menuButton_arrange.on_focus_out()
 				end
+				screen:find_child(menuButton_arrange.focus[key]):grab_key_focus()
 				if screen:find_child(menuButton_arrange.focus[key]).on_focus_in then
 					screen:find_child(menuButton_arrange.focus[key]).on_focus_in()
 				end
-				screen:find_child(menuButton_arrange.focus[key]):grab_key_focus()
 			else 
 				if menuButton_arrange.get_index() ~= 0 then 
 				    menuButton_arrange.press_enter()
 			        end
 				menuButton_arrange.on_focus_out()
-				--screen:grab_key_focus()
+				screen:grab_key_focus()
 			end
 		end
 	end
@@ -369,16 +369,17 @@ function menuButton_view:on_key_down(key)
 				if menuButton_view.on_focus_out then
 					menuButton_view.on_focus_out()
 				end
+				screen:find_child(menuButton_view.focus[key]):grab_key_focus()
 				if screen:find_child(menuButton_view.focus[key]).on_focus_in then
 					screen:find_child(menuButton_view.focus[key]).on_focus_in()
 				end
-				screen:find_child(menuButton_view.focus[key]):grab_key_focus()
 			else
 
 			      if menuButton_view.get_index() ~= 0 then 
 				    menuButton_view.press_enter()
 			      end
 			      menuButton_view.on_focus_out()
+			      screen:grab_key_focus()
 			end
 		end
 	end
