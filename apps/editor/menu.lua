@@ -108,7 +108,7 @@ function menuButton_file:on_key_down(key)
 			        end
 
 				menuButton_file.on_focus_out()
-				screen:grab_key_focus()
+				--screen:grab_key_focus()
 			end 
 		end
 	end
@@ -440,10 +440,55 @@ local menu_text_shadow = Text
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
 local menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow}
 
+
+----------------------------------------------------------------------------
+-- Hides Menu 
+----------------------------------------------------------------------------
+    menuHide = function()
+	screen:find_child("menu_bar"):hide()
+	screen:find_child("menuButton_file"):hide()
+	screen:find_child("menuButton_edit"):hide()
+	screen:find_child("menuButton_arrange"):hide()
+	screen:find_child("menuButton_view"):hide()
+	screen:find_child("menu_text"):hide()
+	screen:find_child("menu_text_shadow"):hide()
+	screen:grab_key_focus()
+    end 
+
+----------------------------------------------------------------------------
+-- Show Menu
+----------------------------------------------------------------------------
+    
+    menuShow = function()
+	screen:find_child("menu_bar"):show()
+	screen:find_child("menu_bar"):raise_to_top()
+	screen:find_child("menuButton_file"):show()
+	screen:find_child("menuButton_file"):raise_to_top()
+	screen:find_child("menuButton_edit"):show()
+	screen:find_child("menuButton_edit"):raise_to_top()
+	screen:find_child("menuButton_arrange"):show()
+	screen:find_child("menuButton_arrange"):raise_to_top()
+	screen:find_child("menuButton_view"):show()
+	screen:find_child("menuButton_view"):raise_to_top()
+	screen:find_child("menu_text"):show()
+	screen:find_child("menu_text"):raise_to_top()
+	screen:find_child("menu_text_shadow"):show()
+	screen:find_child("menu_text_shadow"):raise_to_top()
+	screen:grab_key_focus()
+    end 
+
+----------------------------------------------------------------------------
+-- Menu Raise To Top
+----------------------------------------------------------------------------
 function menu_raise_to_top() 
+	--[[
 	for i, j in pairs (menu_bar_t) do 
 		j:raise_to_top()
 	end
+	]]--
+	menuHide()
+	menuShow()
+	--screen:grab_key_focus()
 end 
 
 editor_use = false
