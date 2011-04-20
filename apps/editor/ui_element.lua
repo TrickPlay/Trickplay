@@ -4404,6 +4404,7 @@ button
         vert_spacing = 5, --item_spacing
         horz_spacing  = 10, -- new 
         vert_offset  = 40, --item_start_y
+        horz_offset  = 0,
         text_has_shadow = true,
         
         background_color     = {255,0,0,255},
@@ -4604,8 +4605,8 @@ button
                     duration=300,
                     opacity=255,
                 }
-                if selectable_items[curr_index] then
-                    selectable_items[curr_index].focus.opacity=0
+                for _,s_i in ipairs(selectable_items) do
+                    s_i.focus.opacity=0
                 end
                 curr_index = 0
 		umbrella:raise_to_top()
@@ -4767,6 +4768,12 @@ button
                             if item.f then item.f(item.parameter) end
 			    button.on_focus_out() 
                         end
+                        function ui_ele:on_motion()
+                            for _,s_i in ipairs(selectable_items) do
+                                s_i.focus.opacity=0
+                            end
+                            item.focus.opacity=255
+                        end
                         ui_ele.reactive=true
                     end
                 elseif p.show_ring then
@@ -4780,6 +4787,12 @@ button
                             if item.f then item.f(item.parameter) end
                             umbrella.fade_out()
                         end
+                        function ui_ele:on_motion()
+                            for _,s_i in ipairs(selectable_items) do
+                                s_i.focus.opacity=0
+                            end
+                            item.focus.opacity=255
+                        end
                         ui_ele.reactive=true
                     end
                 else
@@ -4788,6 +4801,12 @@ button
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f(item.parameter) end
                             umbrella.fade_out()
+                        end
+                        function ui_ele:on_motion()
+                            for _,s_i in ipairs(selectable_items) do
+                                s_i.focus.opacity=0
+                            end
+                            item.focus.opacity=255
                         end
                         txt.reactive=true
                     end
@@ -4928,7 +4947,7 @@ button
         end
     end
     
-    
+    dropDownMenu.x = dropDownMenu.x + p.horz_offset
     create()
     --set the meta table to overwrite the parameters
     mt = {}
