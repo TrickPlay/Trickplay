@@ -36,6 +36,8 @@ TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
 TP_FIND_INCLUDE( atk-1.0 atk/atk.h 			            ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( sndfile.h								ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
 
 #------------------------------------------------------------------------------
 # Avahi for MDNS
@@ -90,6 +92,12 @@ list(
     ENGINE_LIBRARY_NAMES
     
     #--------------
+    # libsoup
+    #--------------
+    
+    soup-2.4
+    
+    #--------------
     # glib
     #--------------
 
@@ -139,6 +147,8 @@ list(
     json-glib-1.0
     
     uriparser           
+    
+    sndfile
 )
 
 #--------------
@@ -200,7 +210,7 @@ else (TP_CLUTTER_BACKEND_EGL)
 
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	
-	    list( APPEND ENGINE_LIBRARY_NAMES clutter-glx-1.0 )
+	    list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 )
 	    
 	else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	
@@ -299,6 +309,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_group.lb
     ${BINDINGS_SRC}/clutter_image.lb
     ${BINDINGS_SRC}/clutter_timeline.lb
+	${BINDINGS_SRC}/clutter_score.lb
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb    
     ${BINDINGS_SRC}/clutter_path.lb
@@ -442,6 +453,10 @@ list( APPEND
     
     ${ENGINE_SRC}/source/app_push_server.cpp
     ${ENGINE_SRC}/source/bitmap.cpp
+    ${ENGINE_SRC}/source/audio_sampling.cpp
+    ${ENGINE_SRC}/source/toast.cpp
+    ${ENGINE_SRC}/source/http_server.cpp
+    ${ENGINE_SRC}/source/http_trickplay_api_support.cpp
 )
 
 #------------------------------------------------------------------------------
