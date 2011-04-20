@@ -4973,9 +4973,11 @@ button
         else
             dropDownMenu.y = dropDownMenu.y + button.h
         end
+        
+        dropDownMenu.x = dropDownMenu.x + p.horz_offset
     end
     
-    dropDownMenu.x = dropDownMenu.x + p.horz_offset
+    
     create()
     --set the meta table to overwrite the parameters
     mt = {}
