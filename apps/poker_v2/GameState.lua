@@ -58,12 +58,7 @@ GameState = Class(nil,function(state, ctrl)
         -- since player may select dogs 1, 2 and 6 (for example) need to compress the
         -- table to make stuff easier
         if not args.players then error("No players !", 2) end
-        players = {}
-        for i = 1,6 do
-            if args.players[i] then
-                table.insert(players, args.players[i])
-            end
-        end
+        players = args.players
         randomness = args.randomness or 0
         for _,player in ipairs(players) do
             player.money = player.endowment + math.random(-randomness, randomness)

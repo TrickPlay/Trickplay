@@ -212,8 +212,9 @@ Controller = Class(Observer, function(ctrl, router, id)
         end
     end
 
-    function ctrl:add_controller()
+    function ctrl:add_controller(controller)
         print("Controller attempting to add itself to game")
+        controller:waiting_room()
     end
 
     function ctrl:handle_click()

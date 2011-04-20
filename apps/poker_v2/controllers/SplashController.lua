@@ -29,4 +29,8 @@ function(ctrl, router, ...)
     end
     splash_timer:start()
 
+    function ctrl:add_controller(controller)
+        controller:clear_and_set_background("splash")
+    end
+
 end)
