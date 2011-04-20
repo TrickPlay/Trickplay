@@ -834,19 +834,19 @@ function editor.the_image(bg_image)
         local BOTTOM_PADDING = 12
         local Y_PADDING = 10 
 	local X_PADDING = 10
-	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
 	local space = WIDTH
 
-	local dir = editor_lb:readdir(CURRENT_DIR)
-	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR}:set(STYLE)
+	local dir = editor_lb:readdir(CURRENT_DIR.."/assets/images")
+	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR.."/assets/images"}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 
 
 	local dialog = draw_dialogbox()
-	dialog.label =  "File Location : "..CURRENT_DIR
-	dialog.title_font = "DejaVu Sans 28px"
+	dialog.label =  "File Location : "..CURRENT_DIR.."/assets/images"
+	dialog.title_font = "DejaVu Sans 24px"
 
 	function get_file_list_sz() 
 	     local iw = cur_w
@@ -994,19 +994,19 @@ function editor.the_open()
         local BOTTOM_PADDING = 12
         local Y_PADDING = 10 
 	local X_PADDING = 10
-	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
 	local space = WIDTH
 
-	local dir = editor_lb:readdir(CURRENT_DIR)
-	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR}:set(STYLE)
+	local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR.."/screens"}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 
 
 	local dialog = draw_dialogbox()
-	dialog.label =  "File Location : "..CURRENT_DIR
-	dialog.title_font = "DejaVu Sans 28px"
+	dialog.label =  "File Location : "..CURRENT_DIR.."/screens"
+	dialog.title_font = "DejaVu Sans 24px"
 
 	function get_file_list_sz() 
 	     local iw = cur_w
@@ -1553,7 +1553,6 @@ end
 
 function editor.save(save_current_f)
 
-
      if save_current_f == nil then 
 	save_current_f = false
      end 
@@ -2054,8 +2053,8 @@ function editor.the_video()
 	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
 	local space = WIDTH
 
-	local dir = editor_lb:readdir(CURRENT_DIR)
-	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR}:set(STYLE)
+	local dir = editor_lb:readdir(CURRENT_DIR.."/assets/videos")
+	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR.."/assets/videos"}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
