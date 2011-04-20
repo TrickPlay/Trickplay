@@ -75,7 +75,7 @@ menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=asset
 menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_open})
 menuButton_file.insert_item(3,{type="item", string="Save ...\t\t\t     S", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true}) 
 menuButton_file.insert_item(4,{type="item", string="Save As ...\t\t     A", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=false})
-menuButton_file.insert_item(5,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=exit}) 
+menuButton_file.insert_item(5,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=exit}) 
 
 
 menuButton_file.name = "menuButton_file"
@@ -160,15 +160,15 @@ local menuButton_edit = ui_element.menuButton
     		item_text_color = "#ffffff",
 	}
 
-menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=nil}) --editor.undo} )
-menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=nil}) --editor.redo} )
+menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end}) --editor.undo} )
+menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end}) --editor.redo} )
 menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t     I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements})
 menuButton_edit.insert_item(4,{type="item", string="Timeline ...\t\t     J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline}) --icon=assets("assets/menu-checkmark.png")
 menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete})
 menuButton_edit.insert_item(6,{type="item", string="Duplicate\t\t\t     D", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate}) 
 menuButton_edit.insert_item(7,{type="item", string="Clone\t\t\t     C", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone}) 
 menuButton_edit.insert_item(8,{type="item", string="Group\t\t\t     G", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group}) 
-menuButton_edit.insert_item(9,{type="item", string="UnGroup\t\t\t     U", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ugroup}) 
+menuButton_edit.insert_item(9,{type="item", string="UnGroup\t\t\t     U", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup}) 
 
 menuButton_edit.name = "menuButton_edit"
 menuButton_edit.position = {489,28,0}
@@ -256,7 +256,7 @@ menuButton_arrange.insert_item(11,{type="label", string="  Arrange:", bg=assets(
 menuButton_arrange.insert_item(12,{type="item", string="Bring to Front", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bring_to_front}) 
 menuButton_arrange.insert_item(13,{type="item", string="Bring Forward", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bring_forward}) 
 menuButton_arrange.insert_item(14,{type="item", string="Send to Back", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.send_to_back}) 
-menuButton_arrange.insert_item(15,{type="item", string="Send Backward", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=editor.send_backward}) 
+menuButton_arrange.insert_item(15,{type="item", string="Send Backward", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.send_backward}) 
 
 menuButton_arrange.name = "menuButton_arrange"
 menuButton_arrange.position = {729,28,0}
@@ -348,7 +348,7 @@ menuButton_view.insert_item(8,{type="label", string="  Guides:", bg=assets("asse
 menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline}) 
 menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline}) 
 menuButton_view.insert_item(11,{type="item", string="Show Guides", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.show_guides, icon=assets("assets/menu-checkmark.png")}) 
-menuButton_view.insert_item(12,{type="item", string="Snap to Guides", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-focus.png"), f=editor.snap_guides, icon=assets("assets/menu-checkmark.png")}) 
+menuButton_view.insert_item(12,{type="item", string="Snap to Guides", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.snap_guides, icon=assets("assets/menu-checkmark.png")}) 
 
 menuButton_view.name = "menuButton_view"
 menuButton_view.position = {971,28,0}

@@ -1315,7 +1315,6 @@ function ui_element.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
-
 	current_focus = b_group
         if (p.skin == "custom") then 
 	     ring.opacity = 0
@@ -1409,7 +1408,7 @@ function ui_element.button(table)
 			b_group.extra.on_focus_in(keys.Return)
 		else 
 		     	current_focus.on_focus_in(keys.Return)
-		     	current_focus.on_focus_out()
+		     	--current_focus.on_focus_out()
 		end 
 		return true
 	     end 
@@ -4478,7 +4477,7 @@ button
 
     local shadow 
     if p.skin == "editor" then
-	p.horz_offset = -30
+	p.horz_offset = -4
 	shadow = true 
     else 
 	shadow = false 
