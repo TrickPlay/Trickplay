@@ -210,6 +210,8 @@ public:
 
     void reset_all();
 
+    void stop_events();
+
 private:
 
     void post_event( gpointer event );
@@ -250,6 +252,8 @@ private:
     typedef std::set<Delegate *> DelegateSet;
 
     DelegateSet     delegates;
+
+    gint            stopped;
 };
 
 #endif // _TRICKPLAY_CONTROLLER_LIST_H
