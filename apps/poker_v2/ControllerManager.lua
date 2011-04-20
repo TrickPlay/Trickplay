@@ -29,6 +29,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         Hook up the connect, disconnect and ui controller events
     --]]
     function controllers:on_controller_connected(controller)
+        if not controller.has_ui then return end
         print("on_controller_connected controller.name = "..controller.name)
 
         controller.state = ControllerStates.SPLASH
@@ -226,7 +227,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             end
             controller:add_image("start_button", 0, 6*115+86, 640, 95)
             controller:update_waiting_room(
-                router:get_active_controller():get_players()
+                router:get_controller(Components.CHARACTER_SELECTION):get_players()
             )
 
             controller.state = ControllerStates.WAITING
@@ -303,11 +304,21 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
     end
 
+    function ctrlman:update_choose_dog(players)
+        for i,controller in ipairs(active_ctrls) do
+            if controller.state == ControllerStates.CHOOSE_DOG then
+                controller:choose_dog(players)
+            end
+        end
+    end
+
     -- update the waiting room for all controllers
     function ctrlman:update_waiting_room(players)
         print("updating waiting room")
         for i,controller in ipairs(active_ctrls) do
-            controller:waiting_room(players)
+            if controller.state == ControllerStates.WAITING then
+                controller:waiting_room(players)
+            end
         end
     end
 

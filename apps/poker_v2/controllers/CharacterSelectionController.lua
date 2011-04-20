@@ -28,6 +28,14 @@ function(ctrl, router, ...)
             end
         end
         router:set_active_component(Components.GAME)
+        local temp_table = {}
+        for i = 1,6 do
+            if players[i] then
+                table.insert(temp_table, players[i])
+            end
+        end
+        players = temp_table
+
         game:initialize_game{
             sb = SMALL_BLIND,
             bb = BIG_BLIND,
@@ -295,6 +303,7 @@ function(ctrl, router, ...)
             current_selector.seat_button_view:pressed()
             if not set_up_player(pos, true, controller) then return end
             controller:name_dog(pos)
+            ctrlman:update_choose_dog(players)
         elseif controller.state == ControllerStates.WAITING then
             local pos = math.floor((y/controller.y_ratio-86)/115+1)
             -- AI selected
