@@ -18,5 +18,5 @@
 {
 "name": "00005_clone_fractal.lua", 
 "active": "true"
-},
+}
 ]
