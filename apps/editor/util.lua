@@ -1547,9 +1547,10 @@ end
 local function inputMsgWindow_savefile()
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
-     local dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
+     local screen_dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
+     local main_dir = editor_lb:readdir(CURRENT_DIR)
      local enter_gen_stub_code = false
-     for i, v in pairs(dir) do
+     for i, v in pairs(screen_dir) do
           if(input_t.text == v)then
                current_fn = "screens/"..input_t.text
 	       cleanMsgWindow()
@@ -1621,7 +1622,7 @@ local function inputMsgWindow_savefile()
 	   end 
 
 
-     	   for i, v in pairs(dir) do
+     	   for i, v in pairs(main_dir) do
           	if("main.lua" == v)then
 			local main = readfile("main.lua")
 			local added_stub_code = ""
@@ -1644,6 +1645,8 @@ local function inputMsgWindow_savefile()
 			app_exist = true
 		end 
 	   end 
+
+	   print(main_exist)
 
 	   if main_exist == false then 
 		-- main.lua 생성해서 

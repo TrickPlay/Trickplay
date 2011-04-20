@@ -279,6 +279,7 @@ function editor.reference_image()
 	else 
 		input_mode = S_SELECT  
 		editor.the_image(true)
+		screen:grab_key_focus()
 	end 
 	screen:find_child("menuButton_view").items[2]["icon"].opacity = 255
 	screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
@@ -1620,10 +1621,15 @@ function editor.save(save_current_f)
 
 
 	if(current_fn ~= "") then 
- 	        local fileUpper= string.upper(string.sub(current_fn, 1, -5))
-	   	local fileLower= string.lower(string.sub(current_fn, 1, -5))
+		local j,k = string.find(current_fn, "/")
+ 	        local fileUpper= string.upper(string.sub(current_fn, k+1, -5))
+	   	local fileLower= string.lower(string.sub(current_fn, k+1, -5))
 		local main = readfile("main.lua")
 		local added_stub_code = ""
+
+
+			
+		print("-- "..fileUpper.." SECTION")
 		if string.find(main, "-- "..fileUpper.." SECTION") ~= nil then 
 		-- input_t.text-새로 저장할 루아 파일에 대한 정보가 메인에 있는지를 확인하고 
 		-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
@@ -2511,6 +2517,7 @@ function editor.delete()
 				  main = ""
 				  main = main_first..main_last
 				  editor_lb:writefile("main.lua",main, true)
+				print("OOOOOOOOOOOOO")
 	       		     end 
 	       		end 
 	       	     end 
