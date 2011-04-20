@@ -1,4 +1,6 @@
-local paused = true--false
+
+pixels_per_mile = 45
+paused = true
 local idle_loop
 screen:show()
 screen_w = screen.w
@@ -8,7 +10,12 @@ screen:add(clone_sources)
 clone_sources:hide()
 strafed_dist = 0
 local STRAFE_CAP =2000
-
+local hud = Group{}
+local mph_txt = Text{text="000",font="Sans 60px",color="ffffff",x=screen_w,y=screen_h}
+local mph_sh  = Text{text="000",font="Sans 60px",color="000000",x=screen_w+5,y=screen_h+5}
+mph_txt.anchor_point={mph_txt.w+50,mph_txt.h+50}
+mph_sh.anchor_point ={mph_sh.w+50, mph_sh.h+50}
+hud:add(mph_txt)
 road={
 	newest_segment = nil,
 	curr_segment   = nil,
@@ -19,26 +26,37 @@ other_cars = {}
 dofile( "OtherCars.lua" )
 dofile(  "Sections.lua" )
 dofile(     "Level.lua" )
-
-local speed = 2000
-
-
+screen:add(hud)
+local speed = 0
+ accel = 0
+ mph = 0
+turn_impulse = 0
+curve_impulse = 0
+ccc = nil
+dofile("controller.lua")
 local keys = {
 	[keys.Up] = function()
-		speed = speed + 1000
+		accel = accel + .2
+		if accel > 1 then accel = 1 end
+		
 	end,
 	[keys.Down] = function()
-		speed = speed - 1000
+		accel = -2
+		
 	end,
 	[keys.Left] = function()
-		if strafed_dist > -STRAFE_CAP then
-			strafed_dist = strafed_dist - 100
-		end
+		--if strafed_dist > -STRAFE_CAP then
+		--	strafed_dist = strafed_dist - 100
+		--end
+		turn_impulse = turn_impulse - .4
+		if turn_impulse < -1 then turn_impulse = -1 end
 	end,
 	[keys.Right] = function()
-		if strafed_dist < STRAFE_CAP then
-			strafed_dist = strafed_dist + 100
-		end
+		--if strafed_dist < STRAFE_CAP then
+		--	strafed_dist = strafed_dist + 100
+		--end
+		turn_impulse = turn_impulse + .4
+		if turn_impulse > 1 then turn_impulse = 1 end
 	end,
 	[keys.RED] = function()
 		if paused then
@@ -52,6 +70,7 @@ local keys = {
 		local lane_one = -600
 		table.insert(other_cars,make_on_coming_impreza(road.newest_segment,end_point,lane_one))
 		world.cars:add(other_cars[#other_cars])
+		ccc = other_cars[#other_cars]
 	end
 }
 function screen:on_key_down(k)
@@ -74,13 +93,72 @@ idle_loop = function(_,seconds)
 		end
 	end
 	
-	
 	--assert(#path > 0)
 	assert(road.curr_segment ~= nil)
 	
 	--distance covered this iteration
 	dx = speed*seconds
 	dr = curr_path.rot*dx/curr_path.dist --relative to amount travelled
+	
+	--[[
+	if dr< 0 then
+		turn_impulse = turn_impulse + 2*dr
+		if turn_impulse > 1 then turn_impulse = 1 end
+	elseif dr > 0 then
+		turn_impulse = turn_impulse - .05
+		if turn_impulse < -1 then turn_impulse = -1 end
+	else
+	end
+	--]]
+	
+	
+	strafed_dist = strafed_dist + 40*turn_impulse
+	
+	if turn_impulse > 0.005 then
+		if turn_impulse > .5 then
+			car.src = "assets/Lambo/01.png"
+			car.y_rotation={0,0,0}
+		else
+			car.src = "assets/Lambo/00.png"
+			car.y_rotation={0,0,0}
+		end
+		turn_impulse = turn_impulse-.05
+	elseif turn_impulse < -0.005 then
+		if turn_impulse < -.5 then
+			car.src = "assets/Lambo/01.png"
+			car.y_rotation={180,0,0}
+		else
+			car.src = "assets/Lambo/00.png"
+			car.y_rotation={0,0,0}
+		end
+		turn_impulse = turn_impulse+.05
+	else
+		turn_impulse = 0
+		car.src = "assets/Lambo/00.png"
+		car.y_rotation={0,0,0}
+	end
+	
+	mph = mph + accel
+	if mph > 200 then mph = 200
+	elseif mph < 0 then mph = 0 end
+	
+	speed = mph*pixels_per_mile
+	mph_txt.text = math.floor(mph)
+	mph_txt.anchor_point={mph_txt.w+50,mph_txt.h+50}
+	mph_sh.text = math.floor(mph)
+	mph_sh.anchor_point={mph_sh.w+50,mph_sh.h+50}
+	tail_lights.opacity=0
+	if accel > 0.05 then
+		accel = accel - .1
+	elseif accel < -0.05 then
+		accel = accel + .2
+		tail_lights.opacity=255
+	else
+		accel = 0
+	end
+	
+	
+	
 	
 	
 	--while the amount of distance covered in this iteration extends
