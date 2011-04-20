@@ -295,6 +295,11 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
                 return 5;
             }
 
+            if ( * uri == '/' )
+            {
+                ++uri;
+            }
+
             server->write_printf( connection, "DR\t%s\t%s\t%s\n", ds->resource, uri , ds->group );
             break;
         }
@@ -320,14 +325,14 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         case TP_CONTROLLER_COMMAND_SUBMIT_PICTURE	:
 		{
 		    String path = start_post_endpoint( connection , PostInfo::PICTURES );
-			server->write_printf( connection, "PI\t%s\n" , path.c_str() );
+			server->write_printf( connection, "PI\t%s\n" , path.c_str() + 1 );
 			break;
 		}
 
         case TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP	:
 		{
             String path = start_post_endpoint( connection , PostInfo::AUDIO);
-			server->write_printf( connection, "AC\t%s\n" , path.c_str() );
+			server->write_printf( connection, "AC\t%s\n" , path.c_str() + 1 );
 			break;
 		}
 
