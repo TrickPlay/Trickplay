@@ -1025,6 +1025,24 @@ bool Controller::submit_audio_clip( )
                data ) == 0;
 }
 
+bool Controller::advanced_ui( int command , const String & payload )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_ADVANCED_UI ) || payload.empty() )
+    {
+        return false;
+    }
+
+    TPControllerAdvancedUI parameters;
+
+    parameters.command = command;
+    parameters.payload = payload.c_str();
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_ADVANCED_UI,
+               & parameters,
+               data ) == 0;
+}
 
 //==============================================================================
 

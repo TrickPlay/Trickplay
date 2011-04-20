@@ -336,6 +336,33 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 			break;
 		}
 
+        case TP_CONTROLLER_COMMAND_ADVANCED_UI:
+        {
+            TPControllerAdvancedUI * aui = ( TPControllerAdvancedUI * ) parameters;
+            const char * cmd = 0;
+            switch( aui->command )
+            {
+                case TP_CONTROLLER_ADVANCED_UI_CREATE:
+                    cmd = "CREATE";
+                    break;
+                case TP_CONTROLLER_ADVANCED_UI_DESTROY:
+                    cmd = "DESTROY";
+                    break;
+                case TP_CONTROLLER_ADVANCED_UI_SET:
+                    cmd = "SET";
+                    break;
+                case TP_CONTROLLER_ADVANCED_UI_GET:
+                    cmd = "GET";
+                    break;
+            }
+            if ( ! cmd )
+            {
+                return 4;
+            }
+            server->write_printf( connection , "UX\t%s\t%s\n" , cmd , aui->payload );
+            break;
+        }
+
         default:
         {
             return 3;
@@ -456,7 +483,7 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts )
 {
-    static const char * PROTOCOL_VERSION = "31";
+    static const char * PROTOCOL_VERSION = "32";
 
     guint count = g_strv_length( parts );
 
@@ -574,6 +601,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 				{
 					spec.capabilities |= TP_CONTROLLER_HAS_AUDIO_CLIPS;
 				}
+                else if ( cmp2( cap , "UX" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_ADVANCED_UI;
+                }
                 else
                 {
                     g_warning( "UNKNOWN CONTROLLER CAPABILITY '%s'", cap );
