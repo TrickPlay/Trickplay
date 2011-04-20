@@ -7,6 +7,7 @@ module controllers_module;
 #include "controller_list.h"
 #include "images.h"
 #include "bitmap.h"
+#include "json.h"
 ]]
 
 #==============================================================================
@@ -322,6 +323,17 @@ interface controller [[ControllerDelegate*]]
             has_audio_clips=self->has_cap(TP_CONTROLLER_HAS_AUDIO_CLIPS);
         ]];
     
+    /*
+        Property: has_advanced_ui
+
+        Whether the controller supports advanced UI functions.
+    */
+
+    readonly bool has_advanced_ui
+        [[
+            has_advanced_ui = self->has_cap( TP_CONTROLLER_HAS_ADVANCED_UI );
+        ]];
+
     /*
     	Property: ui_size
     	
@@ -804,7 +816,79 @@ interface controller [[ControllerDelegate*]]
         [[
             result=self->get_controller()->submit_audio_clip( );    
         ]];
+
+    /*
+        Function: advanced_ui_create
+    */
       
+    bool advanced_ui_create( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_CREATE , value.stringify() );
+            }
+        ]];
+
+    /*
+        Function: advanced_ui_destroy
+    */
+
+    bool advanced_ui_destroy( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_DESTROY , value.stringify() );
+            }
+        ]];
+
+    /*
+        Function: advanced_ui_set
+    */
+
+    bool advanced_ui_set( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_SET , value.stringify() );
+            }
+        ]];
+
+    /*
+        Function: advanced_ui_get
+    */
+
+    bool advanced_ui_get( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_GET , value.stringify() );
+            }
+        ]];
+
      /*
 		Event: on_disconnected
 		
