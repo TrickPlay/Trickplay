@@ -9,7 +9,7 @@ function(ctrl, router, ...)
     function ctrl:on_key_down(k)
         router:set_active_component(Components.CHARACTER_SELECTION)
         router:notify()
-        ctrlman:choose_dog()
+        ctrlman:choose_dog({})
         if splash_timer then
             splash_timer:stop()
             splash_timer.on_timer = nil

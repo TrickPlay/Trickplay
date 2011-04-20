@@ -20,7 +20,6 @@ function(ctrl, router, ...)
 --------------- Private methods ------------------
 
     local function start_a_game()
-        ctrlman:stop_accepting_ctrls()
         ctrl:hide_start_button()
         for i,dog_selector in ipairs(dog_selectors) do
             dog_selector.dog_view:glow_off()
@@ -241,7 +240,6 @@ function(ctrl, router, ...)
                     selector:on_focus()
                 end
             end
-            ctrlman:start_accepting_ctrls()
         end
 
         view:update()
@@ -260,11 +258,11 @@ function(ctrl, router, ...)
         end
         current_selector = dog_selectors[1]
 
-        ctrlman:choose_dog()
+        ctrlman:choose_dog(players)
     end
 
     function ctrl:add_controller(controller)
-        controller:choose_dog()
+        controller:choose_dog(players)
     end
 
     function ctrl:handle_click(controller, x, y)
