@@ -696,6 +696,15 @@ namespace JSON
         return os;
     }
 
+    String Value::stringify() const
+    {
+        std::stringstream os;
+
+        os << * this;
+
+        return os.str();
+    }
+
     //=============================================================================
 
     Object::Object()

@@ -99,6 +99,8 @@ namespace JSON
 
         friend std::ostream & operator << ( std::ostream & os , const Value & value );
 
+        String stringify() const;
+
     private:
 
         Type    type;
