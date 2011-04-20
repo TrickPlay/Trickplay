@@ -15,21 +15,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
     local number_of_ctrls = 0
     local active_ctrls = {}
-    local accepting_controllers = true
-
-    function ctrlman:start_accepting_ctrls()
-        accepting_controllers = true
-    end
-    
-    function ctrlman:stop_accepting_ctrls()
-        accepting_controllers = false
-    end
 
     function ctrlman:declare_resource(asset_name, asset)
         if not asset_name or not asset then
             error("Usage: declare_resource(name, object)", 2)
         end
-        for name,controller in pairs(active_ctrls) do
+        for _,controller in pairs(active_ctrls) do
             controller:declare_resource(asset_name, asset)
         end
     end
@@ -39,17 +30,6 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     --]]
     function controllers:on_controller_connected(controller)
         print("on_controller_connected controller.name = "..controller.name)
-        if number_of_ctrls > max_controllers
-        or not accepting_controllers
-        or not router:get_active_controller().add_controller then
-            return
-        end
-        if active_ctrls[controller.name] then
-            print("Controller trying to connect has the same NAME as"
-            .." controller already connected with name: "..controller.name)
-            return
-        end
-        
 
         controller.state = ControllerStates.SPLASH
 
@@ -123,7 +103,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
             return false
             --]]
-            return true
+            --return true
         end
 
 
@@ -147,9 +127,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller.on_touch_move = nil
             controller.waiting_room = nil
             controller.update_waiting_room = nil
-            print("here")
 
-            active_ctrls[controller.name] = nil
+            for i,ctrl in ipairs(active_ctrls) do
+                if ctrl == controller then
+                    table.remove(active_ctrls, i)
+                end
+            end
             number_of_ctrls = number_of_ctrls - 1
         end
 
@@ -191,16 +174,18 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:start_touches()
         end
 
-        function controller:choose_dog()
-            print("choosing dog")
+        function controller:choose_dog(players)
+            print("controller", controller.name, "choosing dog")
 
             controller:clear_and_set_background("bkg")
             controller:add_image("hdr_choose_dog", 95, 30, 450, 50)
             for i = 1,6 do
-                if not controller:add_image("dog_"..i, ((i-1)%2)*(256+8)+60,
-                math.floor((i-1)/2)*256+100, 256, 256) then
-                    -- TODO: figure out some good error handling
-                    print("error setting dog image")
+                if not players[i] then
+                    if not controller:add_image("dog_"..i, ((i-1)%2)*(256+8)+60,
+                    math.floor((i-1)/2)*256+100, 256, 256) then
+                        -- TODO: figure out some good error handling
+                        print("error setting dog image")
+                    end
                 end
             end
 
@@ -287,7 +272,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         number_of_ctrls = number_of_ctrls + 1
 
-        active_ctrls[controller.name] = controller
+        table.insert(active_ctrls, controller)
 
         if resources then
             for name,resource in pairs(resources) do
@@ -303,31 +288,26 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     -- run the on connected for all controllers already connected
     -- before application startup
     function ctrlman:initialize()
-        for k,controller in pairs(controllers.connected) do
-            if controller.name ~= "Keyboard" then
-                print("adding controller "..controller.name)
+        for i,controller in ipairs(controllers.connected) do
+            print("adding controller "..controller.name)
+            if controller.has_ui then
                 controllers:on_controller_connected(controller)
             end
         end
-        print("\n\ndone")
     end
 
     -- put all controllers into the choose your dog mode
-    function ctrlman:choose_dog()
-        for k,controller in pairs(controllers.connected) do
-            if controller.name ~= "Keyboard" then
-                controller:choose_dog()
-            end
+    function ctrlman:choose_dog(players)
+        for i,controller in ipairs(active_ctrls) do
+            controller:choose_dog(players)
         end
     end
 
     -- update the waiting room for all controllers
     function ctrlman:update_waiting_room(players)
         print("updating waiting room")
-        for k,controller in pairs(controllers.connected) do
-            if controller.name ~= "Keyboard" then
-                controller:waiting_room(players)
-            end
+        for i,controller in ipairs(active_ctrls) do
+            controller:waiting_room(players)
         end
     end
 
