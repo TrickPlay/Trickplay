@@ -1175,7 +1175,7 @@ function itemTostring(v, d_list, t_list)
     end
 
     if (v.type == "Video") then
-  	 itm_str = itm_str.."\n local "..v.name.." = ".."{"..indent..
+  	 itm_str = itm_str.."\nlocal "..v.name.." = ".."{"..indent..
          "name=\""..v.name.."\","..indent..
          "type=\""..v.type.."\","..indent..
          "source=\""..v.source.."\","..indent..
@@ -1209,13 +1209,13 @@ function itemTostring(v, d_list, t_list)
 	          end 
 	     end 
 	 end 
-         itm_str = itm_str.."\n local "..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
+         itm_str = itm_str.."\nlocal "..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
 	 itm_str = itm_str:sub(1,-2)
          itm_str = itm_str.."}\n\n"
 	 itm_str = itm_str..add_attr(group_list, v.name..".", "\n")
     else 
-         itm_str = itm_str.."\n local "..v.name.." = "..v.type..b_indent.."{"..indent
+         itm_str = itm_str.."\nlocal "..v.name.." = "..v.type..b_indent.."{"..indent
 	 itm_str = itm_str..add_attr(nw_attr_list, "", ","..indent)
 	 itm_str = itm_str:sub(1,-2)
          itm_str = itm_str.."}\n\n"
@@ -1367,7 +1367,7 @@ end
 local function create_input_box()
      	local box_g = Group {}
         local input_l = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
-              position = {25, 10}, text = project.."/" }
+              position = {25, 10}, text = project.."/screens/" } --hhhhhh
         input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
         -- 0111 position = {input_l.w + 25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
         position = {input_l.w + 25, 10}, text = strings[""] , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
@@ -1547,11 +1547,11 @@ end
 local function inputMsgWindow_savefile()
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
-     local dir = editor_lb:readdir(CURRENT_DIR)
+     local dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
      local enter_gen_stub_code = false
      for i, v in pairs(dir) do
           if(input_t.text == v)then
-               current_fn = input_t.text
+               current_fn = "screens/"..input_t.text
 	       cleanMsgWindow()
                printMsgWindow("The file named "..current_fn..
                " already exists.\nDo you want to replace it? \n", "aleady_exists")
@@ -1563,11 +1563,12 @@ local function inputMsgWindow_savefile()
       -- main generation
       if (file_not_exists) then
 	   local main_exist = false
+	   local app_exist = false
 	   local fileUpper= string.upper(string.sub(input_t.text, 1, -5))
 	   local fileLower= string.lower(string.sub(input_t.text, 1, -5))
 
 	   local function gen_stub_code (grp) 
-		new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\""..input_t.text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+		new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_t.text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
 
 		for i, j in pairs (grp.children) do 
 		     local function there() 
@@ -1639,12 +1640,15 @@ local function inputMsgWindow_savefile()
 			end 
 		    main_exist = true
 		end 
+		if ("app" == v) then 
+			app_exist = true
+		end 
 	   end 
 
 	   if main_exist == false then 
 		-- main.lua 생성해서 
 
-		global_section_contents = "-- GLOBAL SECTION\nui_element = dofile(\"ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
+		global_section_contents = "-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
 	        gen_stub_code(g)
 		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n-- END GLOBAL SECTION FOOTER \n"
 
@@ -1652,10 +1656,14 @@ local function inputMsgWindow_savefile()
 		editor_lb:writefile("main.lua", new_contents, false)
 		editor_lb:writefile("main.lua", global_section_footer_contents, false)
 	   end 
+	   if app_exist == false then 
+		local app_contents = "app=\n{\tid = \"com.trickplay.editor\",\n\trelease = \"1\",\n\tversion = \"1.0\",\n\tname = \"TrickPlay\",\n\tcopyright = \"Trickplay Inc.\"\n}"
+		editor_lb:writefile("app", app_contents, true)
+	   end 
 	 
-           current_fn = input_t.text
+           current_fn = "screens/"..input_t.text
            editor_lb:writefile(current_fn, contents, true)
-	   screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "> " ..current_fn
+	   screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
            contents = ""
 	   cleanMsgWindow()
            screen:grab_key_focus(screen) 
@@ -1929,13 +1937,13 @@ end
 
 function inputMsgWindow_openfile(input_text)
      local file_not_exists = true
-     local dir = editor_lb:readdir(CURRENT_DIR)
+     local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
      if(input_text ~= nil) then
 	  input_t.text = input_text
      end 
      for i, v in pairs(dir) do
           if(input_t.text == v)then
-     	       current_fn = input_t.text
+     	       current_fn = "screens/"..input_t.text
                file_not_exists = false
           end
      end
@@ -1949,7 +1957,7 @@ function inputMsgWindow_openfile(input_text)
      end
      if(is_lua_file(input_t.text) == true) then 
            editor.close()
-           current_fn = input_t.text
+           current_fn = "screens/"..input_t.text
            local f = loadfile(current_fn)
            f(g) 
 	   if screen:find_child("timeline") then 
@@ -1959,7 +1967,7 @@ function inputMsgWindow_openfile(input_text)
 	         end      
 	      end      
 	   end 
-	   screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "> " .. input_t.text
+	   screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_t.text
      else 
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen)
@@ -2076,7 +2084,7 @@ function inputMsgWindow_yn(txt)
      if(txt == "no") then
           editor.save(false)
      elseif(txt =="yes") then 
-          editor_lb:writefile (current_fn, contents, true)
+          editor_lb:writefile(current_fn, contents, true)
           contents = ""
      end
      screen:grab_key_focus(screen) 
@@ -2121,7 +2129,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
      end 
 
      local file_not_exists = true
-     local dir = editor_lb:readdir(CURRENT_DIR)
+     local dir = editor_lb:readdir(CURRENT_DIR.."/assets/images")
      for i, v in pairs(dir) do
           if(input_t.text == v)then
                file_not_exists = false
@@ -2207,18 +2215,54 @@ local function copy_widget_imgs ()
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
 	     source_file = "assets/"..j 
-	     dest_file = CURRENT_DIR.."/assets/"..j 
+	     dest_file = CURRENT_DIR.."/lib/assets/"..j 
 	     if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
 	     end 
 	end 
-	source_file = "ui_element.lua" 
-	dest_file = CURRENT_DIR.."/ui_element.lua" 
+
+	local source_files = editor_lb:readdir("assets/default/")
+	local source_file, dest_file
+	for i, j in pairs(source_files) do 
+	     source_file = "assets/default/"..j 
+	     dest_file = CURRENT_DIR.."/lib/skins/default/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
+	end 
+
+	local source_files = editor_lb:readdir("assets/CarbonCandy/")
+	local source_file, dest_file
+	for i, j in pairs(source_files) do 
+	     source_file = "assets/CarbonCandy/"..j 
+	     dest_file = CURRENT_DIR.."/lib/skins/CarbonCandy/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
+	end 
+
+	local source_files = editor_lb:readdir("assets/OOBE")
+	local source_file, dest_file
+	for i, j in pairs(source_files) do 
+	     source_file = "assets/OOBE/"..j 
+	     dest_file = CURRENT_DIR.."/lib/skins/OOBE/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
+	end 
+
+	source_file = "lib/ui_element.lua" 
+	dest_file = CURRENT_DIR.."/lib/ui_element.lua" 
+	if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	end 
+	source_file = "lib/ui_element_header.lua" 
+	dest_file = CURRENT_DIR.."/lib/ui_element_header.lua" 
 	if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
 	end 
 	source_file = "localized/strings.lua" 
-	dest_file = CURRENT_DIR.."/strings.lua" 
+	dest_file = CURRENT_DIR.."/lib/strings.lua" 
 	if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
 	end 
@@ -2240,10 +2284,37 @@ local function set_project_path ()
 	     CURRENT_DIR = app_path
         end
 
-        asset_path = editor_lb:build_path( app_path, "assets" )
+--- new directory structures 
+        local screens_path = editor_lb:build_path( app_path, "screens" )
+        editor_lb:mkdir( screens_path ) 
+        local asset_path = editor_lb:build_path( app_path, "assets" )
         editor_lb:mkdir( asset_path ) 
-        --widget_path = editor_lb:build_path( asset_path, "widgets")
-        --editor_lb:mkdir( widget_path ) 
+
+        local asset_images_path = editor_lb:build_path( asset_path, "images" )
+        editor_lb:mkdir( asset_images_path ) 
+        local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
+        editor_lb:mkdir( asset_sounds_path ) 
+        local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
+        editor_lb:mkdir( asset_videos_path ) 
+
+        local lib_path = editor_lb:build_path( app_path, "lib" )
+        editor_lb:mkdir( lib_path ) 
+        local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
+        editor_lb:mkdir( lib_assets_path ) 
+        local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
+        editor_lb:mkdir( lib_skins_path ) 
+        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
+        editor_lb:mkdir( lib_skins_default_path ) 
+        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
+        editor_lb:mkdir( lib_skins_default_path ) 
+        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "OOBE" )
+        editor_lb:mkdir( lib_skins_default_path ) 
+--- new directory structures 
+
+--- old directory structures
+        --asset_path = editor_lb:build_path( app_path, "assets" )
+        --editor_lb:mkdir( asset_path ) 
+--- old directory structures 
 	
 	screen:find_child("menu_text").text = project .. " "
 	screen:find_child("menu_text").extra.project = project .. " "

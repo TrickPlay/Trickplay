@@ -6,42 +6,6 @@ dofile("editor.lua")
 -------------------------------------------------------------------------------
    
     ----------------------------------------------------------------------------
-    -- Hides Menu 
-    ----------------------------------------------------------------------------
-    local menuHide = function()
-	screen:find_child("menu_bar"):hide()
-	screen:find_child("menuButton_file"):hide()
-	screen:find_child("menuButton_edit"):hide()
-	screen:find_child("menuButton_arrange"):hide()
-	screen:find_child("menuButton_view"):hide()
-	screen:find_child("menu_text"):hide()
-	screen:find_child("menu_text_shadow"):hide()
-	screen:grab_key_focus()
-    end 
-
-    ----------------------------------------------------------------------------
-    -- Show Menu
-    ----------------------------------------------------------------------------
-    
-    local menuShow = function()
-	screen:find_child("menu_bar"):show()
-	screen:find_child("menu_bar"):raise_to_top()
-	screen:find_child("menuButton_file"):show()
-	screen:find_child("menuButton_file"):raise_to_top()
-	screen:find_child("menuButton_edit"):show()
-	screen:find_child("menuButton_edit"):raise_to_top()
-	screen:find_child("menuButton_arrange"):show()
-	screen:find_child("menuButton_arrange"):raise_to_top()
-	screen:find_child("menuButton_view"):show()
-	screen:find_child("menuButton_view"):raise_to_top()
-	screen:find_child("menu_text"):show()
-	screen:find_child("menu_text"):raise_to_top()
-	screen:find_child("menu_text_shadow"):show()
-	screen:find_child("menu_text_shadow"):raise_to_top()
-	screen:grab_key_focus()
-    end 
-
-    ----------------------------------------------------------------------------
     -- Key Map
     ----------------------------------------------------------------------------
     
@@ -247,7 +211,6 @@ dofile("editor.lua")
     end
 
     function screen:on_button_down(x,y,button,num_clicks)
-
 	  if(input_mode == S_MENU) then
 		if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
 			screen:find_child("menuButton_file").on_focus_out()
