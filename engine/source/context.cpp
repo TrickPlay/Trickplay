@@ -1273,6 +1273,11 @@ int TPContext::run()
     notify( this , TP_NOTIFICATION_EXITING );
 
     //.....................................................................
+    // Keep further events from being processed.
+
+    controller_list.stop_events();
+
+    //.....................................................................
 
     if ( app_push_server )
     {
@@ -1325,7 +1330,7 @@ int TPContext::run()
 
     if ( installer )
     {
-        delete installer;String serve_path( const String & group, const String & path );
+        delete installer;
         installer = NULL;
     }
 
