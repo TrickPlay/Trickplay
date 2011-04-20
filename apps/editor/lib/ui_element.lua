@@ -1,67 +1,5 @@
-     local ui_element = {}
-     skin_list = { ["default"] = {
-				   ["button"] = "assets/smallbutton.png", 
-				   ["button_focus"] = "assets/button1-focus.png", 
-				   --["button_focus"] = "assets/smallbuttonfocus.png", 
-			           ["buttonpicker"] = "assets/smallbutton.png",
-     				   ["buttonpicker_focus"] = "assets/button1-focus.png",
-				   ["buttonpicker_left_un"] = "assets/left.png",
-				   ["buttonpciker_left_sel"] = "assets/leftfocus.png",
-				   ["buttonpicker_right_un"] = "assets/right.png",
-        			   ["buttonpicker_right_sel"] = "assets/rightfocus.png",
-				   ["checkbox_sel"] = "assets/checkmark.png", 
-				   ["loading_dot"]  = nil,
-                   		   ["scroll_arrow"] = nil,
-                   		   ["drop_down_color"]={0,0,0},
-				  },
-
-	            ["custom"] = {},
-		    ["CarbonCandy"] = { 
-				   ["button"] = "assets/button1-blank.png",
-				   ["button_focus"] = "assets/button1-focus.png", 
-				   ["toast"] = "assets/toast.jpg", 
-				   ["textinput"] = "assets/button3-blank.png", 
-				   ["textinput_focus"] = "assets/button3-blank.png", 
-				   ["dialogbox"] = "", 
-			           ["dialogbox_x"] ="", 
-			           ["buttonpicker"] = "assets/button1-blank.png",
-     				   ["buttonpicker_focus"] =  "assets/button1-focus.png",
-				   ["buttonpicker_left_un"] = "assets/left.png",
-				   ["buttonpciker_left_sel"] = "assets/leftfocus.png",
-				   ["buttonpicker_right_un"] = "assets/right.png",
-        			   ["buttonpicker_right_sel"] = "assets/rightfocus.png",
-				   ["radiobutton"] = "", 
-				   ["radiobutton_sel"] = "", 
-				   ["checkbox"] = "assets/checkbox-off.png",
-				   ["checkbox_sel"] = "assets/checkbox-check.png", 
-				   ["loadingdot"] = "assets/spinner.png",
-                   		   ["drop_down_color"]={255,0,0},
-                   		   ["scroll_arrow"] = nil,
-				  },
-		    ["OOBE"] = { 
-				   ["button"] = "assets/button-oobe.png",
-				   ["button_focus"] = "assets/buttonfocus-oobe.png", 
-				},
-
-		  }
-
-
-	
-	-- used for timeline 
-        attr_map = {
-          	["Rectangle"] = function() return {"x", "y", "z", "w","h","opacity","color","border_color", "border_width", "x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
-        	["Image"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
-        	["Text"] = function() return {"x", "y", "z", "w","h","opacity","color","x_rotation", "y_rotation", "z_rotation", "anchor_point"} end,
-        	["Group"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point", "scale"} end,
-        	["Clone"] = function() return {"x", "y", "z", "w","h","opacity","x_rotation", "y_rotation", "z_rotation", "anchor_point", "scale"} end,
-        }
-
-current_focus = nil  --- for user code main 
-
-if g == nil then 
-	g= Group()
-end 
-
+local ui_element = {}
+dofile("/lib/ui_element_header.lua")     
 function ui_element.populate_to (grp, tbl)
 
 	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group"} 
@@ -283,7 +221,7 @@ end
 
 -- Localized string table
 
-local strings = dofile( "localized:strings.lua" ) or {}
+local strings = dofile( "localized:lib/strings.lua" ) or {}
 
 local function missing_localized_string( t , s )
      rawset(t,s,s) 
@@ -785,7 +723,7 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 	})
 
 	timeline:add(Image{
-		src = "assets/left.png",
+		src = "lib/assets/left.png",
 		clip = {0,0,16,33},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -805,11 +743,11 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 	    local pointer = timeline:find_child(pointerName)
 	    if pointer then 
 	       function pointer.extra.on_focus_in()
-		    timeline:find_child(pointer.name).src = "assets/leftfocus.png"
+		    timeline:find_child(pointer.name).src = "lib/assets/leftfocus.png"
 	       end
       
 	       function pointer.extra.on_focus_out()
-		 pointer.src = "assets/left.png"
+		 pointer.src = "lib/assets/left.png"
 		 for n,m in pairs (g.children) do 
 		     if m.extra.timeline then 
 		     if m.extra.timeline[name2num(pointerName)] then
@@ -852,7 +790,7 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 	    prev_text_x = math.floor(p[i][2] * line.w / duration) + prev_text_x
 
 	    timeline:add(Image{
-		src = "assets/left.png",
+		src = "lib/assets/left.png",
 		clip = {0,0,16,33},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1470,6 +1408,7 @@ function ui_element.button(table)
 			end
 			b_group.extra.on_focus_in(keys.Return)
 		else 
+		     	current_focus.on_focus_in(keys.Return)
 		     	current_focus.on_focus_out()
 		end 
 		return true
@@ -1910,7 +1849,7 @@ function ui_element.toastAlert(table)
 	border_corner_radius = 22,
 	fade_duration = 2000,
 	on_screen_duration = 5000,
-	icon = "assets/voice-1.png"
+	icon = "lib/assets/voice-1.png"
     }
 
 
@@ -2716,7 +2655,7 @@ function ui_element.checkBoxGroup(t)
              p.check_image = skin_list[p.skin]["check"]
 	 else 
 	     p.box_image = Image{}
-             p.check_image = "assets/checkmark.png"
+             p.check_image = "lib/assets/checkmark.png"
 	 end
 	
 	 boxes:set{name = "boxes", position = p.b_pos} 
@@ -4515,6 +4454,7 @@ button
 
     local dropDownMenu = Group{}
     local button       = ui_element.button{
+	name = "button",
         text_font=p.button_text_font,
     	text_color=p.button_text_color,
     	focus_text_color=p.button_text_focus_color,
@@ -4653,6 +4593,7 @@ button
                 }
             end,
             fade_in = function()
+                dropDownMenu:show()
                 dropDownMenu:complete_animation()
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=0
@@ -4674,8 +4615,8 @@ button
                 dropDownMenu:animate{
                     duration=300,
                     opacity=0,
+		    on_completed = function()  dropDownMenu:hide()  end,
                 }
-		--screen:grab_key_focus()
 		input_mode = S_SELECT
             end,
             set_item_function = function(index,f)
@@ -4687,9 +4628,7 @@ button
             press_enter = function(...)
                 if selectable_items[curr_index] ~= nil and
                    selectable_items[curr_index].f ~= nil then
-                   
-                    selectable_items[curr_index].f(...)
-                    --self.fade_out() 
+                   selectable_items[curr_index].f(...)
                 else
                     print("no function")
                 end
@@ -4747,6 +4686,7 @@ button
         selectable_items  = {}
         dropDownMenu:clear()
         dropDownMenu.opacity=0
+	dropDownMenu:hide()
         
         button.text_font=p.button_text_font
     	button.text_color=p.button_text_color
@@ -4979,8 +4919,8 @@ button
         button.reactive=true
        
 	if editor_lb == nil or editor_use then  
-		button.pressed = function() umbrella.fade_in() screen:grab_key_focus() end 
-		button.released = function() umbrella.fade_out() screen:grab_key_focus() end 
+		button.pressed = function() umbrella.fade_in() end 
+		button.released = function() umbrella.fade_out() end 
  	end 
         
         button.position = {button.w/2,button.h/2}
@@ -5021,6 +4961,7 @@ button
 end
 
 
+--[[
 
 function ui_element.menuBar(t)
     local p = {
@@ -5187,6 +5128,9 @@ function ui_element.menuBar(t)
 
     return umbrella
 end
+
+
+
 function ui_element.tabBar(t)
     
     --default parameters
@@ -5286,6 +5230,7 @@ function ui_element.tabBar(t)
                 }
             end,
             fade_in = function()
+print("qqqqqqqqq")
                 dropDownMenu:complete_animation()
                 button_focus:complete_animation()
                 button_focus.opacity=0
@@ -5302,6 +5247,7 @@ function ui_element.tabBar(t)
                 curr_index = 0
             end,
             fade_out = function()
+print("dfhalsdhf")
                 dropDownMenu:complete_animation()
                 button_focus:complete_animation()
                 button_focus.opacity=255
@@ -5315,6 +5261,8 @@ function ui_element.tabBar(t)
                     duration=300,
                     opacity=0,
                 }
+                button_focus:hide ()
+		dropDownMenu:hide()
             end,
         }
     }
