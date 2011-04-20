@@ -5,6 +5,7 @@
 
 #include "json.h"
 #include "lb.h"
+#include "util.h"
 
 namespace JSON
 {
@@ -225,13 +226,36 @@ namespace JSON
 
     static String encode_string( const String & string )
     {
+        // Convert to UTF16 using GLib
+
+        GError * error = 0;
+
+        long written = 0;
+
+        gunichar2 * utf16 = g_utf8_to_utf16( string.data() , string.size() , 0 , & written , & error );
+
+        if ( error )
+        {
+            g_warning( "INVALID UTF8 SEQUENCE : %s" , error->message );
+
+            g_clear_error( & error );
+
+            return String( "\"\"" );
+        }
+
+        FreeLater free_later( utf16 );
+
+        // Now spit out the results
+
         std::stringstream result;
 
         result << "\"";
 
-        for ( String::const_iterator it = string.begin(); it != string.end(); ++it )
+        gunichar2 * s = utf16;
+
+        for ( long i = 0; i < written; ++i , ++s )
         {
-            switch( *it )
+            switch( *s )
             {
                 case '"':
                     result << "\\\"";
@@ -258,40 +282,17 @@ namespace JSON
                     result << "\\t";
                     break;
                 default:
-                    if ( *it >= 0 && ( *it < 32 || *it == 127 ) )
+                {
+                    if ( *s >= 32 && *s < 127 )
                     {
-                        result << "\\u" << std::setw(4) << std::setfill( '0' ) << std::hex <<  int( *it ) ;
-                    }
-                    else if ( *it >= 32 && *it < 127 )
-                    {
-                        result << * it;
+                        result << char( *s );
                     }
                     else
                     {
-                        unsigned char b1 = *it;
-
-                        int length = ( b1 & 0xE0 ) == 0xE0 ? 2 : 1;
-
-                        unsigned int x = b1 & 0x1F;
-
-                        ++it;
-
-                        for ( int i = 0; i < length && it != string.end(); ++i , ++it )
-                        {
-                            x = ( x << 6 ) + ( ( ( unsigned char ) *it ) & 0x3F );
-                        }
-
-                        --it;
-
-                        result << "\\u" ;
-                        result << std::setw(4) << std::setfill( '0' ) << std::hex << x;
+                        result << "\\u" << std::setw(4) << std::setfill( '0' ) << std::hex << *s;
                     }
                     break;
-            }
-
-            if ( it == string.end() )
-            {
-                break;
+                }
             }
         }
 
