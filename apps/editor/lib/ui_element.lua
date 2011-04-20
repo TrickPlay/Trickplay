@@ -4075,15 +4075,17 @@ function ui_element.scrollPane(t)
                 hold = false
             end
             function grip_hor:on_motion(dx,dy)
-                grip_hor.x = x - dx
-	   			
-	   			if  grip_hor.x < 0 then
-	   			   grip_hor.x = 0
-	   			elseif grip_hor.x > track_w-grip_hor.w then
-	   			      grip_hor.x = track_w-grip_hor.w
-	   			end
-	   			
-	   			p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
+                if hold then
+                    grip_hor.x =  grip_hor.x - dx
+                    
+                    if  grip_hor.x < 0 then
+                    grip_hor.x = 0
+                    elseif grip_hor.x > track_w-grip_hor.w then
+                        grip_hor.x = track_w-grip_hor.w
+                    end
+                    
+                    p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
+                end
             end
             function track_hor:on_button_down(x,y,button,num_clicks)
                 
@@ -4174,15 +4176,17 @@ function ui_element.scrollPane(t)
                 hold = false
             end
             function grip_vert:on_motion(dx,dy)
-                grip_vert.y = y - dy
-	   			
-	   			if  grip_vert.y < 0 then
-	   			    grip_vert.y = 0
-	   			elseif grip_vert.y > track_h-grip_vert.h then
-	   			       grip_vert.y = track_h-grip_vert.h
-	   			end
-	   			
-	   			p.content.y = -(grip_vert.y) * p.virtual_h/track_h
+                if hold then
+                    grip_vert.y = grip_vert.y - dy
+	   			    
+	   			    if  grip_vert.y < 0 then
+	   			        grip_vert.y = 0
+	   			    elseif grip_vert.y > track_h-grip_vert.h then
+	   			           grip_vert.y = track_h-grip_vert.h
+	   			    end
+	   			    
+	   			    p.content.y = -(grip_vert.y) * p.virtual_h/track_h
+                end
             end
             function track_vert:on_button_down(x,y,button,num_clicks)
                 
