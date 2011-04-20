@@ -18,20 +18,35 @@ Player = Class(function(player, players, args, ...)
 
     --[[
         If User disconnects controller the player becomes an AI.
-        TODO: fix this
     --]]
     if player.controller then
         local temp_func = player.controller.on_disconnected
         function player.controller:on_disconnected()
             temp_func(player.controller)
             local human_count = 0
-            for i,player in ipairs(players) do
+            for i,player in pairs(player.players or players) do
                 if player.is_human then human_count = human_count + 1 end
             end
             player.is_human = (human_count <= 1)
-            if player.controller.name ~= "Keyboard" then
-                player.controller = nil
-            end
+            --player.status:switch_intelligence()
+            player.status:dealloc()
+            player.status = PlayerStatusView(player)
+            player.status:display()
+
+            local text = assetman:create_text{
+                text = "Player "..tostring(player.player_number).." Disconnected",
+                name = tostring(player.status.title).." disconnected",
+                font = "Sans 36px",
+                color = "FFFFFF",
+                position = {screen.w/2, 400},
+                opacity = 0
+            }
+            text.anchor_point = {text.w/2, text.h/2}
+            screen:add(text)
+            Popup:new{group = text, time = 2000}
+
+            router:get_active_controller():on_controller_disconnected(player.controller)
+            player.controller = nil
         end
     end
 

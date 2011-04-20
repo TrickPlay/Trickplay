@@ -450,4 +450,14 @@ function(self, router, ...)
         self:return_pressed()
     end
 
+    function self:on_controller_disconnected(controller)
+        if controller ~= current_player.controller or current_player.is_human then
+            return
+        end
+
+        change_selector(fold_selector)
+        self:update_views()
+        self:return_pressed()
+    end
+
 end)

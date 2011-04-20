@@ -221,4 +221,7 @@ Controller = Class(Observer, function(ctrl, router, id)
         print("Click consumed")
     end
 
+    function ctrl:on_controller_disconnected()
+    end
+
 end)

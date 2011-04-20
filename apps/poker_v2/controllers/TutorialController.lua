@@ -95,4 +95,17 @@ TutorialController = Class(Controller, function(self, view, router, ...)
             view:update(p, c, n)
         end
     end
+
+    function self:on_controller_disconnected()
+        leave_help()
+        local disconnect_timer = Timer()
+        disconnect_timer.interval = 1000
+        function disconnect_timer:on_timer()
+            disconnect_timer:stop()
+            disconnect_timer.on_timer = nil
+            router:get_active_controller():on_controller_disconnected()
+        end
+        disconnect_timer:start()
+    end
+
 end)

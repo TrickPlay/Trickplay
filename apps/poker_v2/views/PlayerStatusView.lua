@@ -32,6 +32,21 @@ function(self, player, args, ...)
     self.bottom_group = assetman:create_group({y = 60})
     self.bottom_group:add(self.bottom)
 
+    function self:switch_intelligence()
+        if player.is_human then
+            color = "green"
+        else
+            color = "black"
+        end
+
+        self.top:dealloc()
+        self.top = assetman:get_clone("bubble_"..color)
+        self.group:add(self.top)
+        
+        self.focus:raise_to_top()
+        self.title:raise_to_top()
+    end
+
     self.group = assetman:create_group({
         children = {self.bottom_group, self.top},
         opacity = 0,
@@ -80,8 +95,8 @@ function(self, player, args, ...)
     end
     self.title.text = "Player "..player.player_number
     self.name = self.title.text
-    self.title.anchor_point = { self.title.w/2, self.title.h/2 }
-    self.title.position = { self.top.w/2, self.top.h/2 }
+    self.title.anchor_point = {self.title.w/2, self.title.h/2}
+    self.title.position = {self.top.w/2, self.top.h/2}
 
     self.action = assetman:create_text{
         font = PLAYER_ACTION_FONT,
@@ -90,7 +105,7 @@ function(self, player, args, ...)
         text = GET_IMIN_STRING()
     }
     self.action.on_text_changed = function()
-        self.action.anchor_point = { self.action.w/2, self.action.h/2 }
+        self.action.anchor_point = {self.action.w/2, self.action.h/2}
         self.action.position = {
             self.bottom.w/2 + self.bottom.x,
             self.bottom.h/2 + self.bottom.y
@@ -98,7 +113,7 @@ function(self, player, args, ...)
     end
 
     -- Align player attributes
-    self.attributes = { self.title, self.action }
+    self.attributes = {self.title, self.action}
     self.group:add(self.title)
     self.bottom_group:add(self.action)
 

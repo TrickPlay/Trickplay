@@ -35,6 +35,9 @@ function(ctrl, router, ...)
             end
         end
         players = temp_table
+        for i,player in ipairs(players) do
+            player.players = players
+        end
 
         game:initialize_game{
             sb = SMALL_BLIND,
