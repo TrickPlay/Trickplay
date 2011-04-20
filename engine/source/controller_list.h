@@ -131,6 +131,8 @@ public:
 
     bool submit_audio_clip( );
 
+    bool advanced_ui( int command , const String & payload );
+
     inline bool wants_accelerometer_events() const
     {
         return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && g_atomic_int_get( & ts_accelerometer_started );

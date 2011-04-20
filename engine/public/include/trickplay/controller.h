@@ -79,6 +79,8 @@ typedef struct TPController TPController;
 
     TP_CONTROLLER_HAS_AUDIO_CLIPS     - The controller can send audio clips to Trickplay.
 
+    TP_CONTROLLER_HAS_ADVANCED_UI     - The controller supports advanced UI operations.
+
 */
 
 #define TP_CONTROLLER_HAS_KEYS                      0x0001
@@ -91,6 +93,8 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
 #define TP_CONTROLLER_HAS_PICTURES                	0x0100
 #define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
+
+#define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
 
 /*-----------------------------------------------------------------------------*/
 
@@ -539,6 +543,16 @@ struct TPControllerSpec
 
 #define TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP     101
 
+/*
+   Constant: TP_CONTROLLER_COMMAND_ADVANCED_UI
+
+   Parameters:
+
+         A pointer to a <TPControllerAdvancedUI> structure.
+*/
+
+#define TP_CONTROLLER_COMMAND_ADVANCED_UI           200
+
 /*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerStartAccelerometer TPControllerStartAccelerometer;
@@ -866,6 +880,49 @@ struct TPControllerPlaySound
     */
     
     unsigned int    loop;
+};
+
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
+
+#define TP_CONTROLLER_ADVANCED_UI_CREATE    1
+#define TP_CONTROLLER_ADVANCED_UI_DESTROY   2
+#define TP_CONTROLLER_ADVANCED_UI_GET       3
+#define TP_CONTROLLER_ADVANCED_UI_SET       4
+
+/*
+    Struct: TPControllerAdvancedUI
+
+    A pointer to this structure is passed to execute_command when the command
+    is <TP_CONTROLLER_COMMAND_ADVANCED_UI>.
+*/
+
+struct TPControllerAdvancedUI
+{
+    /*
+        Field: command
+
+        Values:
+
+            TP_CONTROLLER_ADVANCED_UI_CREATE    - Create UI elements.
+
+            TP_CONTROLLER_ADVANCED_UI_DESTROY   - Detsroy UI elements.
+
+            TP_CONTROLLER_ADVANCED_UI_GET       - Get UI element properties.
+
+            TP_CONTROLLER_ADVANCED_UI_SET       - Set UI element properties.
+    */
+
+    int             command;
+
+    /*
+        Field: payload
+
+        A JSON text describing the advanced UI command.
+    */
+
+    const char *    payload;
 };
 
 /*-----------------------------------------------------------------------------*/
