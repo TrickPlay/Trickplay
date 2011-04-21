@@ -2091,7 +2091,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		if current_focus then 
 		     current_focus.on_focus_out()
 		end
-		filechooser.on_focus_in()
+		filechooser.on_focus_in(keys.Return)
 		return true
 	     end 
 
