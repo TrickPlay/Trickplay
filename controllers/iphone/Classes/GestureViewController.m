@@ -208,14 +208,17 @@
  */
 - (void)do_ET:(NSArray *)args {
     theTextField.hidden = NO;
-    theTextField.clearsOnBeginEditing = YES;
     [theTextField becomeFirstResponder];
+    
     // see if trickplay passed any text
     if ([args count] > 1) {
         theTextField.text = [args objectAtIndex:1];
     } else {
         theTextField.text = @"";
     }
+    [theTextField selectAll:theTextField];
+    [UIMenuController sharedMenuController].menuVisible = NO;
+    // start editing
     [self.view bringSubviewToFront:theTextField];
 }
 
@@ -229,7 +232,11 @@
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
-// UITextFieldDelegate method
+// UITextFieldDelegate methods
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    
+}
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [theTextField resignFirstResponder];
     theTextField.hidden = YES;
