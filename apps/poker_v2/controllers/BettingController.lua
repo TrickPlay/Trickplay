@@ -46,7 +46,7 @@ function(self, router, ...)
             BETTING_BUTTON_POSITIONS.EXIT[2])
     }
     local new_deal_selector = {
-        object = ButtonView("new_deal_button", BETTING_BUTTON_POSITIONS.NEW_DEAL[1],
+        object = ButtonView("new_game_button", BETTING_BUTTON_POSITIONS.NEW_DEAL[1],
             BETTING_BUTTON_POSITIONS.NEW_DEAL[2])
     }
     local fold_selector = {
