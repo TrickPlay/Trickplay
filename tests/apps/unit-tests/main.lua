@@ -3,6 +3,8 @@ dofile( "unit_test.lua" )
 
 -- Unit Tests
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
+
+
 dofile( "Alpha1.lua" ) 
 dofile( "xmlParser1.lua" ) 
 dofile( "xmlParser2.lua" )
@@ -38,7 +40,6 @@ dofile( "Timeline6.lua" )
 dofile( "Interval1.lua" )
 dofile( "Path1.lua" )
 dofile( "Path2.lua" )
-dofile( "app1.lua" )
 dofile( "load_file1.lua" )
 dofile( "readfile1.lua" )
 dofile( "choose1.lua" )
@@ -54,10 +55,12 @@ dofile( "stopwatch1.lua" )
 dofile( "bitmap1.lua") 
 dofile( "canvas1.lua" ) 
 dofile( "profile1.lua" ) 
-dofile( "UIElement12.lua" ) 
-dofile( "UIElement13.lua" ) 
-dofile( "Alpha2.lua" ) 
+dofile( "UIElement12.lua" )  
 dofile( "mediaplayer1.lua" )
+dofile( "UIElement13.lua" ) 
+dofile( "Alpha2.lua" )
+
+dofile( "app1.lua" )
 
 -- Timer to give sometime for any tests to complete before calling unit_test
 local total = 0
