@@ -23,6 +23,9 @@ Player = Class(function(player, players, args, ...)
         local temp_func = player.controller.on_disconnected
         function player.controller:on_disconnected()
             temp_func(player.controller)
+            -- prevents a crash caused by disconnecting after player deallocs
+            if not player.controller then return end
+
             local human_count = 0
             for i,player in pairs(player.players or players) do
                 if player.is_human then human_count = human_count + 1 end
@@ -450,6 +453,7 @@ Player = Class(function(player, players, args, ...)
     assert(player.status)
 
     function player:dealloc()
+        player.controller = nil
         player.status:dealloc()
     end
 

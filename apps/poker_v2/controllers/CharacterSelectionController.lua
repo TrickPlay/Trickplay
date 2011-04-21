@@ -39,6 +39,8 @@ function(ctrl, router, ...)
             player.players = players
         end
 
+        ctrlman:waiting_room(players)
+
         game:initialize_game{
             sb = SMALL_BLIND,
             bb = BIG_BLIND,
@@ -100,6 +102,8 @@ function(ctrl, router, ...)
         else
             find_next_dog(dog_number)
         end
+        ctrlman:update_choose_dog(players)
+        ctrlman:update_waiting_room(players)
 
         return true
     end
@@ -306,14 +310,12 @@ function(ctrl, router, ...)
             current_selector.seat_button_view:pressed()
             if not set_up_player(pos, true, controller) then return end
             controller:name_dog(pos)
-            ctrlman:update_choose_dog(players)
         elseif controller.state == ControllerStates.WAITING then
             local pos = math.floor((y/controller.y_ratio-86)/115+1)
             -- AI selected
             if pos > 0 and pos <= 6 then
                 correct_selector(pos)
                 self:return_pressed()
-                ctrlman:update_waiting_room(players)
             -- check x range for "Start" button press
             elseif pos > 6 and x/controller.x_ratio > 640/3
             and x/controller.x_ratio < 2*640/3 then
