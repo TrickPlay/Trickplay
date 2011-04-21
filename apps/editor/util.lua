@@ -1047,6 +1047,8 @@ function itemTostring(v, d_list, t_list)
        local item_string =""
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
+	      --if j == "src" and v.type == "Image" then 
+	--	item_string = item_string..head..j.." = \"assets\/images\/"..v[j].."\""..tail
 	      if j == "position" then 
 		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
 	      elseif j == "children" then 
@@ -2096,17 +2098,18 @@ end
 function inputMsgWindow_openvideo(notused, parm_txt)
      
      if(is_mp4_file(parm_txt) == true) then 
-          mediaplayer:load(parm_txt)
+          mediaplayer:load("assets/videos/"..parm_txt)
      else 
 	  cleanMsgWindow()
 	  screen:grab_key_focus(screen)
           return 
      end 
 
+
      video1 = { name = "video1", 
                 type ="Video",
                 viewport ={0,0,math.floor(screen.w * screen.scale[1]) ,math.floor(screen.h * screen.scale[2])},
-           	source= parm_txt,
+           	source= "assets/videos/"..parm_txt,
            	loop= false, 
                 volume=0.5  
               }
