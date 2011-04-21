@@ -434,6 +434,48 @@ class Text [[ClutterActor*]] actor
             }
         ]];
 
+    /*
+        Function: position_to_coordinates
+
+        Given a valid character position (or -1), this function returns a table that contains
+        the x, y and line height in pixels of that character position relative to the text element.
+
+        Arguments:
+
+          position - A character position or -1 for the end of the text.
+
+        Returns:
+
+          table - If the position is valid, returns a table with 3 elements, x , y and line height.
+
+          nil - If the position is not valid.
+    */
+
+    table position_to_coordinates( int position )
+        [[
+            gfloat x;
+            gfloat y;
+            gfloat lh;
+
+            if ( clutter_text_position_to_coords( CLUTTER_TEXT( self ) , position , & x , & y , &lh ) )
+            {
+                lua_newtable( L );
+
+                lua_pushnumber( L , x );
+                lua_rawseti( L , -2 , 1 );
+
+                lua_pushnumber( L , y );
+                lua_rawseti( L , -2 , 2 );
+
+                lua_pushnumber( L , lh );
+                lua_rawseti( L , -2 , 3 );
+            }
+            else
+            {
+                lua_pushnil( L );
+            }
+        ]];
+
     set_selection( int start_pos , int end_pos )
 	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
 	    
