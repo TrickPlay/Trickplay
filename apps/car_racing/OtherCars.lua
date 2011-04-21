@@ -232,6 +232,7 @@ make_passing_subaru = function(last_section,end_point, dist_from_center)
                 --print(self.x - self.parent.anchor_point[1],self.parent.anchor_point[2]- self.y)
                 if not self.hit and math.abs(self.x - self.parent.anchor_point[1]) < 310 and self.parent.anchor_point[2]- self.y < 1200 and self.parent.anchor_point[2]- self.y > 0 then
                     self.hit = true
+                    --[[
                     if self.parent.anchor_point[2]- self.y > 1000 then
                         print("I got rear-ended")
                         
@@ -262,9 +263,24 @@ make_passing_subaru = function(last_section,end_point, dist_from_center)
                     else
                         print("we are inside each other")
                     end
+                    --]]
+                    local new_coll_str_x = self.parent.anchor_point[1] - self.x 
+                    local new_coll_str_y = self.parent.anchor_point[2] - self.y
+                    
+                    local old_coll_str_x = collision_strength*math.sin(math.pi/180*collision_angle)
+                    local old_coll_str_y = collision_strength*math.cos(math.pi/180*collision_angle)
+                    
+                    new_coll_str_x = new_coll_str_x - old_coll_str_x
+                    new_coll_str_y = new_coll_str_y - old_coll_str_y
+                    
+                    collision_strength = math.sqrt(
+                        new_coll_str_x*new_coll_str_x +
+                        new_coll_str_y*new_coll_str_y
+                    )
+                    collision_angle = math.atan2(new_coll_str_x,new_coll_str_y)
                 end
                 if self.hit then
-                    self.speed = self.speed -100*seconds
+                    self.speed = self.speed -20*seconds
                     if self.speed<1 then
                         self.speed = 1
                         if self.y > 0 then

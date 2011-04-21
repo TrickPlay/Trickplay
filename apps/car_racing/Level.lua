@@ -17,7 +17,6 @@ car = Image{name="THE CAR",src="assets/Lambo/00.png",position={screen.w/2,5*scre
 tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+12},opacity=0}
 car.anchor_point = {car.w/2,car.h/2}
 tail_lights.anchor_point = {tail_lights.w/2,tail_lights.h/2}
-car.col_box = { w = 300,l=600}
 local horizon_grad = Image{src="gradient.png",tile={true,false},w=screen_w,y=sky.h-17,scale={1,2}}
 section_i = 1
 --active_sections = {}
@@ -222,7 +221,7 @@ end
 
 
 local dist_to_car = -1000
-
+local impulse_dampening = .1
 -- move forward or backward
 function world:move(dx,dr,radius)
 
@@ -236,16 +235,16 @@ function world:move(dx,dr,radius)
         
         y_rot = y_rot+dr
         --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
-        self.road.y_rotation   = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        self.doodads.y_rotation   = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        self.cars.y_rotation   = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        ground.y_rotation = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
+        self.road.y_rotation    = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
+        self.doodads.y_rotation = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
+        self.cars.y_rotation    = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
+        ground.y_rotation       = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
         sky.x = screen_w/2-sky.w/2*math.sin(math.pi/180*y_rot)
         
         delta_x = radius*math.cos(math.pi/180*y_rot)-cent_x
         delta_y = -radius*math.sin(math.pi/180*y_rot)+cent_y
         
-        strafed_dist = strafed_dist - delta_x/4*dr/math.abs(dr)
+        strafed_dist = strafed_dist - delta_x/2*dr/math.abs(dr)
         --delta_x = dx*math.sin(math.pi/180*y_rot)
         --delta_y = dx*math.cos(math.pi/180*y_rot)
     else
