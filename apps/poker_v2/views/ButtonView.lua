@@ -35,9 +35,9 @@ function(button_view, button_type, x, y, ...)
             assetman:load_image("assets/new_buttons/ButtonExit.png", button_type)
             assetman:load_image("assets/new_buttons/ButtonExit-on.png",
                 button_type.."_on")
-        elseif button_type == "new_deal_button" then
-            assetman:load_image("assets/new_buttons/ButtonNewDeal.png", button_type)
-            assetman:load_image("assets/new_buttons/ButtonNewDeal-on.png",
+        elseif button_type == "new_game_button" then
+            assetman:load_image("assets/new_buttons/ButtonNewGame.png", button_type)
+            assetman:load_image("assets/new_buttons/ButtonNewGame-on.png",
                 button_type.."_on")
         elseif button_type == "fold_button" then
             assetman:load_image("assets/new_buttons/ButtonFold.png", button_type)
