@@ -1,4 +1,5 @@
 local ui_element = {}
+
 dofile("/lib/ui_element_header.lua")     
 function ui_element.populate_to (grp, tbl)
 
@@ -1393,9 +1394,6 @@ function ui_element.button(table)
 
         b_group:add(ring, focus_ring, button, focus, text)
 
-
-
-
         if (p.skin == "custom") then button.opacity = 0 
         else ring.opacity = 0 end 
 
@@ -1413,6 +1411,21 @@ function ui_element.button(table)
 		return true
 	     end 
 	end 
+
+	if p.skin == "editor" then 
+	     function b_group:on_motion()
+		if current_focus ~= b_group then 
+			if current_focus then 
+		     		current_focus.on_focus_out()
+			end
+			b_group.extra.on_focus_in(keys.Return)
+		else 
+		     	current_focus.on_focus_in(keys.Return)
+		end 
+		return true
+             end
+	end 
+	
     end 
 
     create_button()
