@@ -1546,13 +1546,15 @@ function printMsgWindow(txt, name)
      end 
 end
 
-local function inputMsgWindow_savefile()
+local function inputMsgWindow_savefile(cfn)
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
      local screen_dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
      local main_dir = editor_lb:readdir(CURRENT_DIR)
      local enter_gen_stub_code = false
-     for i, v in pairs(screen_dir) do
+
+     if cfn == nil then 
+     	for i, v in pairs(screen_dir) do
           if(input_t.text == v)then
                current_fn = "screens/"..input_t.text
 	       cleanMsgWindow()
@@ -1561,10 +1563,11 @@ local function inputMsgWindow_savefile()
                inputMsgWindow("yn")
                file_not_exists = false
           end
+	end
       end
 
       -- main generation
-      if (file_not_exists) then
+      if (file_not_exists or cfn) then
 	   local main_exist = false
 	   local app_exist = false
 	   local fileUpper= string.upper(string.sub(input_t.text, 1, -5))
@@ -2330,11 +2333,17 @@ local function set_project_path ()
         screen:grab_key_focus(screen)
 end 
 
-function inputMsgWindow(input_purpose)
+function inputMsgWindow(input_purpose, cfn)
 
      local save_b, cancel_b, input_box, open_b, yes_b, no_b
      local save_t, cancel_t, input_box, open_t, yes_t, no_t
     
+
+     if cfn then 
+	inputMsgWindow_savefile(cfn)
+	return
+     end 
+
      function create_on_key_down_f(button) 
      	function button:on_key_down(key)
 	     if key == keys.Return then
