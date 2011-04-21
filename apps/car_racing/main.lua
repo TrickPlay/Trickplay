@@ -32,6 +32,8 @@ local speed = 0
  mph = 0
 turn_impulse = 0
 curve_impulse = 0
+collision_strength = 0
+collision_angle = 0
 ccc = nil
 dofile("controller.lua")
 local keys = {
@@ -79,10 +81,10 @@ end
 
 local curr_path = road.segments[road.curr_segment]
 
-local dx = 0
+local dy = 0
 local dr = 0
 
-local dx_remaining_in_path = curr_path.dist
+local dy_remaining_in_path = curr_path.dist
 local dr_remaining_in_path = curr_path.rot
 
 idle_loop = function(_,seconds)
@@ -97,8 +99,8 @@ idle_loop = function(_,seconds)
 	assert(road.curr_segment ~= nil)
 	
 	--distance covered this iteration
-	dx = speed*seconds
-	dr = curr_path.rot*dx/curr_path.dist --relative to amount travelled
+	dy = (speed)*seconds
+	dr = curr_path.rot*dy/curr_path.dist --relative to amount travelled
 	
 	--[[
 	if dr< 0 then
@@ -112,7 +114,29 @@ idle_loop = function(_,seconds)
 	--]]
 	
 	
-	strafed_dist = strafed_dist + 40*turn_impulse
+	
+	
+	mph = mph + accel+collision_strength*math.cos(math.pi/180*collision)
+	if mph > 200 then mph = 200
+	elseif mph < 0 then mph = 0 end
+	
+	speed = mph*pixels_per_mile
+	mph_txt.text = math.floor(mph)
+	mph_txt.anchor_point={mph_txt.w+50,mph_txt.h+50}
+	mph_sh.text = math.floor(mph)
+	mph_sh.anchor_point={mph_sh.w+50,mph_sh.h+50}
+	tail_lights.opacity=0
+	if accel > 0.05 then
+		accel = accel - .1
+	elseif accel < -0.05 then
+		accel = accel + .2
+		tail_lights.opacity=255
+	else
+		accel = 0
+	end
+	
+	strafed_dist = strafed_dist + speed/100*turn_impulse+
+		collision_strength*math.sin(math.pi/180*collision)
 	
 	if turn_impulse > 0.005 then
 		if turn_impulse > .5 then
@@ -138,35 +162,14 @@ idle_loop = function(_,seconds)
 		car.y_rotation={0,0,0}
 	end
 	
-	mph = mph + accel
-	if mph > 200 then mph = 200
-	elseif mph < 0 then mph = 0 end
-	
-	speed = mph*pixels_per_mile
-	mph_txt.text = math.floor(mph)
-	mph_txt.anchor_point={mph_txt.w+50,mph_txt.h+50}
-	mph_sh.text = math.floor(mph)
-	mph_sh.anchor_point={mph_sh.w+50,mph_sh.h+50}
-	tail_lights.opacity=0
-	if accel > 0.05 then
-		accel = accel - .1
-	elseif accel < -0.05 then
-		accel = accel + .2
-		tail_lights.opacity=255
-	else
-		accel = 0
-	end
-	
-	
-	
 	
 	
 	--while the amount of distance covered in this iteration extends
 	--to the end of the current path segment...
-	while dx_remaining_in_path < dx do
+	while dy_remaining_in_path < dy do
 		--move by whatever distance is left in the current path segment
 		world:move(
-			dx_remaining_in_path,
+			dy_remaining_in_path,
 			dr_remaining_in_path,
 			curr_path.radius
 		)
@@ -180,8 +183,8 @@ idle_loop = function(_,seconds)
 		world:normalize_to(curr_path.parent)
 		
 		--update the amount of remaining distance to cover
-		dx = dx - dx_remaining_in_path
-		dr = curr_path.rot*dx/curr_path.dist
+		dy = dy - dy_remaining_in_path
+		dr = curr_path.rot*dy/curr_path.dist
 		
 		--[[
 		if curr_path.rot > 0 then
@@ -199,16 +202,16 @@ idle_loop = function(_,seconds)
 		--]]
 		
 		--set the amount of distance there is to cover in this path segment
-		dx_remaining_in_path = curr_path.dist
+		dy_remaining_in_path = curr_path.dist
 		dr_remaining_in_path = curr_path.rot
 		
 	end
 	
 	--move by the incremental amount
-	world:move(dx,dr,curr_path.radius)
+	world:move(dy,dr,curr_path.radius)
 	
 	--decrement the remaining by the amount travelled
-	dx_remaining_in_path = dx_remaining_in_path - dx
+	dy_remaining_in_path = dy_remaining_in_path - dy
 	dr_remaining_in_path = dr_remaining_in_path - dr
 end
 
