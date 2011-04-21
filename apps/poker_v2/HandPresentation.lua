@@ -416,7 +416,7 @@ HandPresentation = Class(nil,function(pres, ctrl)
         end
     end
 
-   
+ 
    ------------------------- GAME FLOW --------------------------
    
     -- Initialize stuff

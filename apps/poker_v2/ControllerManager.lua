@@ -235,7 +235,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         function controller:update_waiting_room(players)
             local playing = {}
-            for i,player in ipairs(players) do
+            for i,player in pairs(players) do
                 local pos = player.dog_number
                 controller:add_image("ready_label", 167, (pos-1)*115+86+60, 122, 34)
                 if player.isHuman then
@@ -308,6 +308,14 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         for i,controller in ipairs(active_ctrls) do
             if controller.state == ControllerStates.CHOOSE_DOG then
                 controller:choose_dog(players)
+            end
+        end
+    end
+
+    function ctrlman:waiting_room(players)
+        for i,controller in ipairs(active_ctrls) do
+            if controller.state ~= ControllerStates.WAITING then
+                controller:waiting_room(players)
             end
         end
     end

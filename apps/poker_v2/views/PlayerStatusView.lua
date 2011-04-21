@@ -32,6 +32,7 @@ function(self, player, args, ...)
     self.bottom_group = assetman:create_group({y = 60})
     self.bottom_group:add(self.bottom)
 
+--[[
     function self:switch_intelligence()
         if player.is_human then
             color = "green"
@@ -46,6 +47,7 @@ function(self, player, args, ...)
         self.focus:raise_to_top()
         self.title:raise_to_top()
     end
+--]]
 
     self.group = assetman:create_group({
         children = {self.bottom_group, self.top},
@@ -173,6 +175,8 @@ function(self, player, args, ...)
     end
 
     function self:dealloc()
+    print("status dealloc", self)
+    if not self.top then error("wtf",2 ) end
         self.top:dealloc()
         self.top = nil
         self.bottom:dealloc()

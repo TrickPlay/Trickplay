@@ -224,6 +224,12 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
             )
         else
             enable_event_listener(KbdEvent())
+            function game:handle_click()
+                screen:on_key_down(keys.Return)
+                game.handle_click = function()
+                    print("Click consumed")
+                end
+            end
         end
 
         return true
