@@ -12,8 +12,11 @@ local prev_end_marker = Rectangle{
 }
 prev_end_marker:hide()
 local sky = Image{src="skyline.png",x=screen.w/2,y=-17}--Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="172e57"}
+local sky_w = sky.w
 sky.anchor_point={sky.w/2,0}
 car = Image{name="THE CAR",src="assets/Lambo/00.png",position={screen.w/2,5*screen.h/6}}
+car.v_y = 0
+car.v_x = 0
 tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+12},opacity=0}
 car.anchor_point = {car.w/2,car.h/2}
 tail_lights.anchor_point = {tail_lights.w/2,tail_lights.h/2}
@@ -21,39 +24,22 @@ local horizon_grad = Image{src="gradient.png",tile={true,false},w=screen_w,y=sky
 section_i = 1
 --active_sections = {}
 local ground_backing = Rectangle{w=screen_w,h=screen_h,color="362818"}
-local ground_wall = Image{
-    name  = "THE GROUND WALL",
-    src   = "desert.png",
-    tile  = {true,true},
-    size  = {screen_w*5,screen_h*5},
-    scale = {.2,.2},
-}
-local ground = Image{
-    name  = "THE GROUND",
-    src   = "desert.png",
-    tile  = {true,true},
-    size  = {4000,10000},
-    scale = {4,4},
-    position={screen.w/2,screen.h},
-    x_rotation={90,0,0},
-}
-ground.anchor_point={ground.w/2,ground.h-1000}
+
 
 --world = Group{name = "THE WORLD",position={screen.w/2,screen.h},x_rotation={90,0,0},scale={4,4}}
 world = {
     road    = Group{name="Road Layer",   x_rotation={90,0,0},position={screen.w/2,screen.h}},
-    doodads = Group{name="Doodad Layer", x_rotation={90,0,0},position={screen.w/2,screen.h}},
     cars    = Group{name="Car Layer",    x_rotation={90,0,0},position={screen.w/2,screen.h}}
 }
 screen:add(
-    ground_wall,
+    ground_backing,
+    --ground_wall,
     sky,
-    ground,
+    --ground,
     
     world.road,
     horizon_grad,
     
-    world.doodads,
     world.cars,
     car,
     tail_lights
@@ -70,11 +56,6 @@ local w_ap_y = 0
 local y_rot = 0
 local new_pos = {}
 
-local g_dx = 0
-local g_dy = 0
-local g_cent_x = ground.anchor_point[1]
-local g_cent_y = ground.anchor_point[2]
-
 local delta_x = 0
 local delta_y = 0
 
@@ -83,16 +64,12 @@ function world:adjust_position()
         w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot),
         w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot)
     }
-    self.doodads.anchor_point = {
-        w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot),
-        w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot)
-    }
     self.cars.anchor_point = {
         (w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot)),
         (w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot))
     }
 end
-
+local pos = {-960,-960/3,960/3,960}
 local next_section
 function world:add_next_section()
     
@@ -108,10 +85,20 @@ function world:add_next_section()
     end
     road.newest_segment = next_section
     --table.insert( path, next_section.path )
+    ---[[
     if next_section.name == "Str8 Road" and road.newest_segment ~= nil  then
-        table.insert(other_cars,make_passing_subaru(road.newest_segment,end_point,960))
+        if num_passing_cars < 4 then
+            table.insert(other_cars,make_car(road.newest_segment,end_point,pos[math.random(3,4)]))
+            world.cars:add(other_cars[#other_cars])
+            other_cars[#other_cars]:lower_to_bottom()
+            num_passing_cars = num_passing_cars + 1
+        end
+        print(num_passing_cars)
+        table.insert(other_cars,make_car(road.newest_segment,end_point,pos[math.random(1,2)]))
 		world.cars:add(other_cars[#other_cars])
+        other_cars[#other_cars]:lower_to_bottom()
     end
+    --]]
     self.road:add( next_section )
     
     --position the next section of road
@@ -211,14 +198,6 @@ end
 -------------------------------------------------------------------------------
 -- Movement functions
 
--- turn
-function world:rotate_by(deg)
-    --if deg ~= 0 then print(deg)end
-    y_rot = y_rot+deg
-    self.y_rotation={y_rot,0,0}
-    ground.y_rotation={y_rot,0,0}
-end
-
 
 local dist_to_car = -1000
 local impulse_dampening = .1
@@ -236,17 +215,13 @@ function world:move(dx,dr,radius)
         y_rot = y_rot+dr
         --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
         self.road.y_rotation    = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        self.doodads.y_rotation = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
         self.cars.y_rotation    = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        ground.y_rotation       = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        sky.x = screen_w/2-sky.w/2*math.sin(math.pi/180*y_rot)
+        sky.x = screen_w/2-sky_w/2*math.sin(math.pi/180*y_rot)
         
         delta_x = radius*math.cos(math.pi/180*y_rot)-cent_x
         delta_y = -radius*math.sin(math.pi/180*y_rot)+cent_y
         
         strafed_dist = strafed_dist - delta_x/2*dr/math.abs(dr)
-        --delta_x = dx*math.sin(math.pi/180*y_rot)
-        --delta_y = dx*math.cos(math.pi/180*y_rot)
     else
         delta_x = dx*math.sin(math.pi/180*y_rot)
         delta_y = dx*math.cos(math.pi/180*y_rot)
@@ -259,19 +234,13 @@ function world:move(dx,dr,radius)
     --self.anchor_point = { w_ap_x+strafed_dist, w_ap_y }
     world:adjust_position()
     
-    g_dx = (g_dx+delta_x)%TILE_W
-    g_dy = (g_dy-delta_y)%TILE_H
-    
-    ground.anchor_point = { g_cent_x,  g_cent_y + g_dy }
-    ground_wall.anchor_point = { 0, g_dy }
-    
     dist_to_end_point[1]   = dist_to_end_point[1]   - delta_x
     dist_to_end_point[2]   = dist_to_end_point[2]   + delta_y
     --dist_to_start_point[1] = dist_to_start_point[1] + delta_x
     --dist_to_start_point[2] = dist_to_start_point[2] - delta_y
     
-    if math.abs(dist_to_end_point[1]) < 10000 and
-       math.abs(dist_to_end_point[2]) < 10000 then
+    if math.abs(dist_to_end_point[1]) < 30000 and
+       math.abs(dist_to_end_point[2]) < 30000 then
         
         world:add_next_section()
     end
