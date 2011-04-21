@@ -4031,6 +4031,26 @@ function ui_element.scrollPane(t)
             track_w = p.visible_w
             track_h = p.visible_h
         end
+        
+if editor_lb == nil then
+            function screen:on_motion(x,y) 
+	  	if dragging then
+	        local actor = unpack(dragging)
+	    	  if (actor.name == "grip") then  
+	             local actor,s_on_motion = unpack(dragging) 
+	             s_on_motion(x, y)
+	             return true
+	    	  end 
+		  return true 
+		end
+	    end 
+	    function screen:on_button_up()
+		if dragging then 
+			dragging = nil 
+		end 
+	    end 
+end
+        
         if p.horz_bar_visible and p.visible_w/p.virtual_w < 1 then
             hor_s_bar = make_hor_bar(
                 track_w,
@@ -4093,6 +4113,7 @@ function ui_element.scrollPane(t)
 		end 
 	    end 
 	    end
+
 
 --[[
             function grip_hor:on_motion(dx,dy)
@@ -4176,6 +4197,7 @@ function ui_element.scrollPane(t)
 	    
             ---[[
             function grip_vert:on_button_down(x,y,button,num_clicks)
+
                 local dx = x - grip_hor.x
 	   	        
                 dragging = {grip_hor,
@@ -4213,6 +4235,7 @@ function ui_element.scrollPane(t)
 	   			    
 	   			    p.content.y = -(grip_vert.y) * p.virtual_h/track_h
                 end
+                
             end
             function track_vert:on_button_down(x,y,button,num_clicks)
                 
