@@ -4072,10 +4072,10 @@ function ui_element.scrollPane(t)
             function grip_hor:on_button_up(x,y,button,num_clicks)
                 hold = false
             end
-]] 
+-]] 
 
 --wwwwww
-if editor_lb == nil then
+	    if editor_lb == nil then
             function screen:on_motion(x,y) 
 	  	if dragging then
 	        local actor = unpack(dragging)
@@ -4092,7 +4092,7 @@ if editor_lb == nil then
 			dragging = nil 
 		end 
 	    end 
-end
+	    end
 
 --[[
             function grip_hor:on_motion(dx,dy)
@@ -4108,7 +4108,7 @@ end
                     p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
                 end
             end
-]]
+--]]
             function track_hor:on_button_down(x,y,button,num_clicks)
                 
                 local rel_x = x - track_hor.transformed_position[1]/screen.scale[1]
@@ -4146,7 +4146,7 @@ end
             
             grip_vert = vert_s_bar:find_child("grip")
             track_vert = vert_s_bar:find_child("track")
-            --[[
+            ---[[
             function grip_vert:on_button_down(x,y,button,num_clicks)
                 
                 local dy = y - grip_vert.y
@@ -4170,13 +4170,12 @@ end
                 return true
             end
 
-	    ]]--
+	    --]]
 
 
 	    
+            ---[[
             function grip_vert:on_button_down(x,y,button,num_clicks)
-	print("hjsfdadhfkahdfjl")
-                --[[
                 local dx = x - grip_hor.x
 	   	        
                 dragging = {grip_hor,
@@ -4195,10 +4194,10 @@ end
 	   		        end 
 	   	        }
 	   	
-                return true
-                --]]
                 hold = true
+                return true
             end
+            --]]
             function grip_vert:on_button_up(x,y,button,num_clicks)
                 hold = false
             end
