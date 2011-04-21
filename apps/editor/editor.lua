@@ -1619,17 +1619,15 @@ function editor.save(save_current_f)
         undo_list = {}
         redo_list = {}
 
+	editor_lb:writefile(current_fn, contents, true)	
 
-	if(current_fn ~= "") then 
+	local main = readfile("main.lua")
+	if(current_fn ~= "" and main ) then 
 		local j,k = string.find(current_fn, "/")
  	        local fileUpper= string.upper(string.sub(current_fn, k+1, -5))
 	   	local fileLower= string.lower(string.sub(current_fn, k+1, -5))
-		local main = readfile("main.lua")
 		local added_stub_code = ""
-
-
 			
-		print("-- "..fileUpper.." SECTION")
 		if string.find(main, "-- "..fileUpper.." SECTION") ~= nil then 
 		-- input_t.text-새로 저장할 루아 파일에 대한 정보가 메인에 있는지를 확인하고 
 		-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
@@ -1683,9 +1681,13 @@ function editor.save(save_current_f)
 				editor_lb:writefile("main.lua",main, true)
 			end 
 
-	       end		
-	       editor_lb:writefile(current_fn, contents, true)	
-	else 
+	       else 
+			inputMsgWindow("savefile",current_fn)
+	       end	
+	       -- editor_lb:writefile(current_fn, contents, true)	
+	elseif (current_fn ~= "" and main == nil) then 
+		inputMsgWindow("savefile",current_fn)
+	else
 		editor.save(false)
 		return
 	end 

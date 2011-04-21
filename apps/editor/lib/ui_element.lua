@@ -4094,25 +4094,6 @@ end
             end
 -]] 
 
---wwwwww
-	    if editor_lb == nil then
-            function screen:on_motion(x,y) 
-	  	if dragging then
-	        local actor = unpack(dragging)
-	    	  if (actor.name == "grip") then  
-	             local actor,s_on_motion = unpack(dragging) 
-	             s_on_motion(x, y)
-	             return true
-	    	  end 
-		  return true 
-		end
-	    end 
-	    function screen:on_button_up()
-		if dragging then 
-			dragging = nil 
-		end 
-	    end 
-	    end
 
 
 --[[
@@ -4195,48 +4176,6 @@ end
 
 
 	    
-            ---[[
-            function grip_vert:on_button_down(x,y,button,num_clicks)
-
-                local dx = x - grip_hor.x
-	   	        
-                dragging = {grip_hor,
-	   		        function(x,y)
-	   			
-	   			        grip_hor.x = x - dx
-	   			
-	   			        if  grip_hor.x < 0 then
-	   				        grip_hor.x = 0
-	   			        elseif grip_hor.x > track_w-grip_hor.w then
-	   				           grip_hor.x = track_w-grip_hor.w
-	   			        end
-	   			
-	   			        p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
-	   			
-	   		        end 
-	   	        }
-	   	
-                hold = true
-                return true
-            end
-            --]]
-            function grip_vert:on_button_up(x,y,button,num_clicks)
-                hold = false
-            end
-            function grip_vert:on_motion(dx,dy)
-                if hold then
-                    grip_vert.y = grip_vert.y - dy
-	   			    
-	   			    if  grip_vert.y < 0 then
-	   			        grip_vert.y = 0
-	   			    elseif grip_vert.y > track_h-grip_vert.h then
-	   			           grip_vert.y = track_h-grip_vert.h
-	   			    end
-	   			    
-	   			    p.content.y = -(grip_vert.y) * p.virtual_h/track_h
-                end
-                
-            end
             function track_vert:on_button_down(x,y,button,num_clicks)
                 
                 local rel_y = y - track_vert.transformed_position[2]/screen.scale[2]
