@@ -102,7 +102,8 @@ CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, U
     UIActivityIndicatorView *loadingIndicator;
     UITextField *theTextField;
     UIImageView *backgroundView;
-    //NSMutableArray *displayedImageViews;
+    NSInteger backgroundHeight;
+    NSInteger backgroundWidth;
     
     NSMutableArray *multipleChoiceArray;
     UIActionSheet *styleAlert;
