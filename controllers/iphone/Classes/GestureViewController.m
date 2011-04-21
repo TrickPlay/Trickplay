@@ -52,14 +52,14 @@
     // Made a connection, let the service know!
 	// Get the actual width and height of the available area
 	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
-	NSInteger height = mainframe.size.height;
-	height = height - 45;  //subtract the height of navbar
-	NSInteger width = mainframe.size.width;
+	backgroundHeight = mainframe.size.height;
+	backgroundHeight = backgroundHeight - 45;  //subtract the height of navbar
+	backgroundWidth = mainframe.size.width;
     NSString *hasPictures = @"";
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
         hasPictures = @"\tPS";
     }
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, width, height, width, height] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
     
@@ -208,6 +208,7 @@
  */
 - (void)do_ET:(NSArray *)args {
     theTextField.hidden = NO;
+    theTextField.clearsOnBeginEditing = YES;
     [theTextField becomeFirstResponder];
     // see if trickplay passed any text
     if ([args count] > 1) {
@@ -303,6 +304,8 @@
         height = [[args	objectAtIndex:4] floatValue];
         CGRect frame = CGRectMake(x, y, width, height);
         UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
+        newImageView.contentMode = UIViewContentModeScaleAspectFit;
+        newImageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
         
         // NOTE: Assumes backgroundView is only replaced in clearUI(),
         // hence, replace backgroundView.image, do not replace the entire View
@@ -446,6 +449,14 @@
     [theTextField resignFirstResponder];
 	theTextField.hidden = YES;
     
+    /*
+    backgroundView.image = [UIImage imageNamed:@"background.png"];
+    for (UIView *subview in backgroundView.subviews) {
+        [subview removeFromSuperview];
+    }
+    //*/
+    
+    //*
     CGFloat
     x = self.view.frame.origin.x,
     y = self.view.frame.origin.y,
@@ -458,8 +469,8 @@
     self.backgroundView = newImageView;
     [self.view addSubview:backgroundView];
     [newImageView release];
+    //*/
 }
-
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*

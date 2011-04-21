@@ -50,14 +50,15 @@
             tempData = [NSData dataWithContentsOfURL:[NSURL URLWithString:dataURLString]];
         } else {
             //Use the hostname and port to construct the url
-            NSURL *dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString]];
+            dataURLString = [NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString];
+            NSURL *dataurl = [NSURL URLWithString:dataURLString];
             
             tempData = [NSData dataWithContentsOfURL:dataurl];
         }
         if (tempData) {
             [resources setObject:tempData forKey:name];
         } else {
-            NSLog(@"Trouble pulling resource %@ from network! Will set as nil\n", [resourceNames objectForKey:name]);
+            NSLog(@"Trouble pulling resource %@ from network with url %@! Will set as nil\n", [resourceNames objectForKey:name], dataURLString);
         }
         
     }
@@ -106,12 +107,16 @@
 }
 
 - (void)dropResourceGroup:(NSString *)groupName {
+    NSMutableArray *keys = [NSMutableArray arrayWithCapacity:40];
     for (id key in resources) {
         NSDictionary *resourceInfo = [resourceNames objectForKey:key];
         if ([resourceInfo objectForKey:@"group"] && [(NSString *)[resourceInfo objectForKey:@"group"] compare:groupName] == NSOrderedSame) {
-            [resources removeObjectForKey:key];
-            [resourceNames removeObjectForKey:key];
+            [keys addObject:key];
         }
+    }
+    for (id key in keys) {
+        [resources removeObjectForKey:key];
+        [resourceNames removeObjectForKey:key];
     }
 }
 
