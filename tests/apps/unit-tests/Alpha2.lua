@@ -16,11 +16,10 @@ myTimeline.duration = 1000
 
 local on_alpha_called = false
 
-local alpha1 = Alpha ()
-alpha1.timeline = myTimeline
+local alpha = Alpha ()
+alpha.timeline = myTimeline
 
-alpha1.on_alpha = function (alpha, progress )
-	print ("on_alpha called")
+alpha.on_alpha = function (alpha, progress )
 	on_alpha_called = true
 end
 

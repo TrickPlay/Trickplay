@@ -3,10 +3,7 @@ dofile( "unit_test.lua" )
 
 -- Unit Tests
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
---dofile( "Alpha1.lua" )  -- Failing because of bug 713.
---dofile( "profile1.lua" ) -- Failing. Need to investigate how to set profile property.
-
-
+dofile( "Alpha1.lua" ) 
 dofile( "xmlParser1.lua" ) 
 dofile( "xmlParser2.lua" )
 dofile( "timer1.lua")
@@ -41,7 +38,6 @@ dofile( "Timeline6.lua" )
 dofile( "Interval1.lua" )
 dofile( "Path1.lua" )
 dofile( "Path2.lua" )
--- dofile( "Alpha2.lua" )  ** 03/25/2011: pvdhagen - unit test bug. Need to investigate.
 dofile( "app1.lua" )
 dofile( "load_file1.lua" )
 dofile( "readfile1.lua" )
@@ -54,10 +50,14 @@ dofile( "trickplay1.lua" )
 dofile( "settings1.lua" )
 dofile( "system1.lua" )
 dofile( "uri1.lua" )
-dofile( "stopwatch1.lua" )
-dofile( "mediaplayer1.lua" ) 
+dofile( "stopwatch1.lua" ) 
 dofile( "bitmap1.lua") 
 dofile( "canvas1.lua" ) 
+dofile( "profile1.lua" ) 
+dofile( "UIElement12.lua" ) 
+dofile( "UIElement13.lua" ) 
+dofile( "Alpha2.lua" ) 
+dofile( "mediaplayer1.lua" )
 
 -- Timer to give sometime for any tests to complete before calling unit_test
 local total = 0
@@ -65,7 +65,15 @@ local total = 0
 function idle.on_idle( idle , seconds )
       total = total + seconds
       if total >= 3 then
-        local results = unit_test()   --run unit_test
+
+	-- Enter any setup steps that need to be executed before the unit tests run here
+	if logo_image ~= nil then	
+	   logo_image:grab_key_focus()
+	   globe_image:grab_key_focus()
+	end
+
+	-- run unit test
+        local results = unit_test()  
         idle.on_idle = nil
 	exit ()
       end

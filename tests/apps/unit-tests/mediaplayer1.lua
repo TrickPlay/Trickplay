@@ -63,7 +63,7 @@ function test_mediaplayer_mute ()
 end
 
 function test_mediaplayer_has_audio ()
-    assert_equal ( mediaplayer.has_audio , false,  "mediaplayer.has_audio failed" )
+    assert_equal ( mediaplayer.has_audio , true,  "mediaplayer.has_audio failed" )
 end
 
 function test_mediaplayer_tags ()
