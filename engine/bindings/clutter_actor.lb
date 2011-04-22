@@ -1053,6 +1053,8 @@ interface actor [[ClutterActor*]]
     [[
 #if CLUTTER_CHECK_VERSION(1,4,0)
         clutter_actor_remove_effect_by_name(self, "blur_effect");
+        // Need to force a redraw or it sometimes doesn't update
+        clutter_actor_queue_redraw(self);
         result = true;
 #else
         result = false;
