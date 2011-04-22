@@ -5,13 +5,17 @@ screen_h = screen.h
 crashed = false
 num_passing_cars = 0
 math.randomseed(os.time())
-local splash = Group{}
-local splash_title = Image{src="assets/logo.png",x=screen_w/2,y=screen_h/2}
-splash_title.anchor_point={splash_title.w/2,splash_title.h/2}
-splash:add(splash_title)
+--local splash = Group{}
+--local splash_title = Image{src="assets/logo.png",x=screen_w/2,y=screen_h/2}
+--splash_title.anchor_point={splash_title.w/2,splash_title.h/2}
+--splash:add(splash_title)
 
-end_game = Image{src="assets/crash-message.png",x=screen_w/2,y=screen_h/2}
-end_game.anchor_point={end_game.w/2,end_game.h/2}
+end_game = Group{x=screen_w/2,y=screen_h/2}
+local end_game_text = Text{text="You Crashed\n\nStart Again",font="Digital-7 80px",color="ffd652"}
+local end_game_backing=Rectangle{w=end_game_text.w+50,h=end_game_text.h+50,color="000000",opacity=255*.5}
+end_game_text.anchor_point={end_game_text.w/2,end_game_text.h/2}
+end_game_backing.anchor_point={end_game_backing.w/2,end_game_backing.h/2}
+end_game:add(end_game_backing,end_game_text)
 screen:add(end_game)
 pixels_per_mile = 45
 paused = true
@@ -20,8 +24,8 @@ local idle_loop
 clone_sources = Group{name="clone_sources"}
 screen:add(clone_sources)
 clone_sources:hide()
-strafed_dist = 1400
-local STRAFE_CAP =2000
+strafed_dist = 960
+local STRAFE_CAP =1400
 local hud = Group{name="hud"}
 local speedo = Image{src="assets/speedo.png",x=screen_w,y=screen_h}
 speedo.anchor_point={speedo.w,speedo.h}
@@ -46,7 +50,7 @@ screen:add(hud,splash)
 speed = 0
 throttle_position = 0
  accel = 0
- mph = 0
+ mph = 65
 turn_impulse = 0
 curve_impulse = 0
 collision_strength = 0
@@ -97,7 +101,7 @@ local keys = {
 }
 function screen:on_key_down(k)
 	
-	if splash ~= nil then
+	--[[if splash ~= nil then
 		splash:unparent()
 		splash = nil
 		car:show()
@@ -111,12 +115,16 @@ function screen:on_key_down(k)
 		dr_remaining_in_path = curr_path.rot
 		paused = false
 		idle.on_idle = idle_loop
-	elseif not crashed then
+	else]]if not crashed then
 		if keys[k] then keys[k]() end
-	elseif dead_time > 5 then
+	elseif dead_time > 2 then
 		points = 0
 		dead_time = 0
 		world:reset()
+		
+		curr_path = road.segments[road.curr_segment]
+		dy_remaining_in_path = curr_path.dist
+		dr_remaining_in_path = curr_path.rot
 	end
 end
 
@@ -137,17 +145,73 @@ local curr_accel_rate = accel_rates[1]
 local braking_rate = 100/4.32
 local damping_effect = 1000
 
+local spawn_on_coming_car_timer  = 0
+local spawn_on_coming_car_thresh = 1.25
+local spawn_passing_car_timer    = 0
+local spawn_passing_car_thresh   = 1.5*spawn_on_coming_car_thresh
+
+local pos = {-960,-960/3,960/3,960}
+local lane3, lane4, rand
+
 idle_loop = function(_,seconds)
+	--increment the dead timer
 	if crashed then
 		dead_time = dead_time + seconds
 	end
+	--move other cars
 	for i = #other_cars,1,-1 do
-		if other_cars[i]:move(seconds) then
-			table.remove(other_cars,i)
-			print("del")
+		if other_cars[i]:move( seconds ) then
+			table.remove( other_cars, i )
+			print( "del" )
 		end
 	end
 	
+	spawn_on_coming_car_timer = spawn_on_coming_car_timer + seconds
+	spawn_passing_car_timer   = spawn_passing_car_timer   + seconds
+	
+	if mph > 60 and spawn_passing_car_timer > spawn_passing_car_thresh then
+		
+		spawn_passing_car_timer = 0
+		lane3 = false
+		lane4 = false
+		for i = #other_cars,1,-1 do
+			if math.abs(other_cars[i].y -road.newest_segment.y) < 1200 then
+				if other_cars[i].x == pos[3] then
+					lane3 = true
+					print(3)
+				elseif other_cars[i].x == pos[4] then
+					lane4 = true
+					print(4)
+				end
+			end
+		end
+		
+		if not(lane3 and lane4) then
+			if lane3 then rand = pos[4]
+			elseif lane4 then rand = pos[3]
+			else rand = pos[math.random(3,4)]
+			end
+			table.insert(other_cars,
+				make_car(
+					road.newest_segment,
+					{
+						road.newest_segment.x,
+						road.newest_segment.y,
+						road.newest_segment.z_rotation[1]
+					},
+					rand
+				)
+			)
+			world.cars:add(other_cars[#other_cars])
+			other_cars[#other_cars]:lower_to_bottom()
+		end
+	end
+	if spawn_on_coming_car_timer > spawn_on_coming_car_thresh then
+		spawn_on_coming_car_timer = 0
+		table.insert(other_cars,make_car(road.newest_segment,end_point,pos[math.random(1,2)]))
+		world.cars:add(other_cars[#other_cars])
+        other_cars[#other_cars]:lower_to_bottom()
+	end
 	--Move the ground
 	
 	
@@ -157,17 +221,6 @@ idle_loop = function(_,seconds)
 	--distance covered this iteration
 	dy = (speed)*seconds
 	dr = curr_path.rot*dy/curr_path.dist --relative to amount travelled
-	
-	--[[
-	if dr< 0 then
-		turn_impulse = turn_impulse + 2*dr
-		if turn_impulse > 1 then turn_impulse = 1 end
-	elseif dr > 0 then
-		turn_impulse = turn_impulse - .05
-		if turn_impulse < -1 then turn_impulse = -1 end
-	else
-	end
-	--]]
 	
 	
 	
@@ -205,6 +258,12 @@ idle_loop = function(_,seconds)
 	
 	strafed_dist = strafed_dist + car.v_x*seconds--+collision_strength*math.sin(math.pi/180*collision_angle)
 	
+	if math.abs(strafed_dist) > 1300 then
+		car.v_y = car.v_y - 1500*seconds
+		if car.v_y < 800 then
+			car.v_y = 800
+		end
+	end
 	if math.abs(car.v_x) > 20 then
 		car.v_x = car.v_x/10
 	else
@@ -285,3 +344,11 @@ idle_loop = function(_,seconds)
 end
 
 --idle.on_idle = idle_loop
+
+		car:show()
+		hud:show()
+		curr_path = road.segments[road.curr_segment]
+		dy_remaining_in_path = curr_path.dist
+		dr_remaining_in_path = curr_path.rot
+		paused = false
+		idle.on_idle = idle_loop

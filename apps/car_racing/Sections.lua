@@ -1,15 +1,15 @@
 local base = {
     straight_road = Image{ src="road.png", tile={false,true}, h=6*200},
-    single_straight_road = Image{ src="road.png",tile={false,true}, h=2*200 },
-    curve_road    = Image{ src="road-curvdde-2.png"   },
+    --single_straight_road = Image{ src="road.png",tile={false,true}, h=2*200 },
+    --curve_road    = Image{ src="road-curvdde-2.png"   },
     curve_piece   = Image{ src="road_curve.png"},
-    straight_rail = Image{ src="guardrail.png",     tile={true,false}, w=50*250},
-    cactus        = Image{ src="cactus3.png"},
-    cactus2       = Image{ src="cactus2.png"},
-    sign          = Image{ src="sign-road.png"},
-    tree          = Image{ src="tree.png"},
-    tree2         = Image{ src="tree2.png"},
-    t_weed        = Image{ src="tumble-weed.png"},
+    --straight_rail = Image{ src="guardrail.png",     tile={true,false}, w=50*250},
+    --cactus        = Image{ src="cactus3.png"},
+    --cactus2       = Image{ src="cactus2.png"},
+    --sign          = Image{ src="sign-road.png"},
+    --tree          = Image{ src="tree.png"},
+    --tree2         = Image{ src="tree2.png"},
+    --t_weed        = Image{ src="tumble-weed.png"},
 }
 
 local road_scale = 4
@@ -17,7 +17,7 @@ local road_scale = 4
 for _,v in pairs(base) do
     clone_sources:add(v)
 end
-
+--[[
 local doodads = {
     function() return Clone{
         name = "Cactus",
@@ -68,7 +68,7 @@ local doodads = {
         y= -base.straight_road.h/2
     } end,
 }
-
+--]]
 --the global list of sections
 sections = {}
 
