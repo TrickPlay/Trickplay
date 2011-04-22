@@ -61,7 +61,7 @@ make_car = function(last_section,end_point, dist_from_center,debug)
         anchor_point = {model[3].w/2,model[3].h},
         
         x_rotation   = {-90,0,0},
-        
+        opacity=0,
         scale={2.5,1},
         
         position = {
@@ -91,6 +91,11 @@ make_car = function(last_section,end_point, dist_from_center,debug)
             
             move = function(self,seconds)
                 
+                if 255 > self.opacity + 255/2*seconds then
+                    self.opacity = self.opacity + 255/2*seconds
+                else
+                    self.opacity = 255
+                end
                 if self.curr_section.parent == nil then
                     self:unparent()
                     return true
@@ -226,12 +231,12 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                 self.prev_pt.y = self.y
                 
                 --determine which side of the player's car this car is on
-                if t_pt.x < screen_w/2 and orientation == 1 then
+                if t_pt.x < screen_w/2 then
                     self.z_rotation={0,0,0}
                 else
                     self.z_rotation={180,0,0}
                 end
-                
+                if orientation == -1 then self.z_rotation={self.z_rotation[1]+180,0,0} end
                 --determine which car image to use to match the perceived angle
                 if math.abs(self.perceived_dir) < 10 then
                     self.source_i =6.5-orientation*5.5         --1 or 12

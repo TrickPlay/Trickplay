@@ -1,7 +1,19 @@
 
 
-base = -.8
-brakes = .1
+base = .3
+
+
+--flat is 0,0
+
+--tilting the top downward -> 0,1
+    -- contineuing to face down is -> 0,0
+        --contineuing to bottom down is -> 0,-1
+--tilting the bottom downward -> 0,-1
+    -- contineuing to face down is -> 0,0
+        --contineuing to bottom down is -> 0,-1
+        
+--right down is 1,0
+--left down is -1,0
 
 function controllers.on_controller_connected( controllers , controller )
 
@@ -10,21 +22,17 @@ function controllers.on_controller_connected( controllers , controller )
         controller:start_accelerometer( "L" , 20/1000 )
         
         function controller.on_accelerometer( controller , x , y , z )
+        x = 1 - math.abs(x)
         if paused then
             base = (base+x)/2
         end
-        --[[
-            if math.abs( x ) > 1 then
-                my_plane.h_speed = clamp( my_plane.h_speed + ( x * 0.4 )  * ( my_plane.max_h_speed * 0.05 ) ,
-                -my_plane.max_h_speed , my_plane.max_h_speed )
-            end
-            if math.abs( y ) > 1 then
-                my_plane.v_speed = clamp( my_plane.v_speed - ( y * 0.9 )  * ( my_plane.max_v_speed * 0.25 ) ,
-                -my_plane.max_v_speed , my_plane.max_v_speed )
-            end
-        --]]
-        print("accel",x,y)
-        accel = (accel+(x-base))/2-brakes
+        
+        if x > base then
+            throttle_position = 2*(x-base)/(1-base)
+        else
+            throttle_position = -10*(base-x)/base
+        end
+        --print("accel",string.format("%.3f\t%.3f",x,y))
         turn_impulse = -y
         end
     
