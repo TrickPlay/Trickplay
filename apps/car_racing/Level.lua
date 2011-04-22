@@ -70,8 +70,8 @@ function world:reset()
     section_i = 1
     crashed = false
     num_passing_cars = 0
-    car.v_x = 70*pixels_per_mile
-    car.v_y = 0
+    car.v_y = 70*pixels_per_mile
+    car.v_x = 0
     w_ap_x = 0
     w_ap_y = 0
     other_cars = {}

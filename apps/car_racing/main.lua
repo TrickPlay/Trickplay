@@ -11,7 +11,7 @@ math.randomseed(os.time())
 --splash:add(splash_title)
 
 end_game = Group{x=screen_w/2,y=screen_h/2}
-local end_game_text = Text{text="You Crashed\n\nStart Again",font="Digital-7 80px",color="ffd652"}
+end_game_text = Text{text="You Crashed\n\nRestarting in 5",font="Digital-7 80px",color="ffd652"}
 local end_game_backing=Rectangle{w=end_game_text.w+50,h=end_game_text.h+50,color="000000",opacity=255*.5}
 end_game_text.anchor_point={end_game_text.w/2,end_game_text.h/2}
 end_game_backing.anchor_point={end_game_backing.w/2,end_game_backing.h/2}
@@ -49,8 +49,7 @@ dofile(     "Level.lua" )
 screen:add(hud,splash)
 speed = 0
 throttle_position = 0
- accel = 0
- mph = 65
+mph = 0
 turn_impulse = 0
 curve_impulse = 0
 collision_strength = 0
@@ -63,11 +62,11 @@ local dr_remaining_in_path = 0
 local keys = {
 	[keys.Up] = function()
 		throttle_position = throttle_position + .2
-		if throttle_position > 1 then throttle_position = 1 end
+		if throttle_position > 2 then throttle_position = 2 end
 		
 	end,
 	[keys.Down] = function()
-		throttle_position = -2
+		throttle_position = -10
 		
 	end,
 	[keys.Left] = function()
@@ -157,6 +156,17 @@ idle_loop = function(_,seconds)
 	--increment the dead timer
 	if crashed then
 		dead_time = dead_time + seconds
+		end_game_text.text = "You Crashed\n\nRestarting in "..math.ceil(5-dead_time)
+		if dead_time > 5 then
+			points = 0
+			dead_time = 0
+			world:reset()
+			
+			curr_path = road.segments[road.curr_segment]
+			dy_remaining_in_path = curr_path.dist
+			dr_remaining_in_path = curr_path.rot
+			return
+		end
 	end
 	--move other cars
 	for i = #other_cars,1,-1 do
@@ -169,7 +179,7 @@ idle_loop = function(_,seconds)
 	spawn_on_coming_car_timer = spawn_on_coming_car_timer + seconds
 	spawn_passing_car_timer   = spawn_passing_car_timer   + seconds
 	
-	if mph > 60 and spawn_passing_car_timer > spawn_passing_car_thresh then
+	if not crashed and mph > 60 and spawn_passing_car_timer > spawn_passing_car_thresh then
 		
 		spawn_passing_car_timer = 0
 		lane3 = false
@@ -206,7 +216,7 @@ idle_loop = function(_,seconds)
 			other_cars[#other_cars]:lower_to_bottom()
 		end
 	end
-	if spawn_on_coming_car_timer > spawn_on_coming_car_thresh then
+	if not crashed and spawn_on_coming_car_timer > spawn_on_coming_car_thresh then
 		spawn_on_coming_car_timer = 0
 		table.insert(other_cars,make_car(road.newest_segment,end_point,pos[math.random(1,2)]))
 		world.cars:add(other_cars[#other_cars])
@@ -243,9 +253,9 @@ idle_loop = function(_,seconds)
 	
 	tail_lights.opacity=0
 	if throttle_position > 0.05 then
-		throttle_position = throttle_position - .1
+		throttle_position = throttle_position - 1*seconds
 	elseif throttle_position < -0.05 then
-		throttle_position = throttle_position + .2
+		throttle_position = throttle_position + 10*seconds
 		tail_lights.opacity=255
 	else
 		throttle_position = 0
