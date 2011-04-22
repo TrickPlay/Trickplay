@@ -96,7 +96,7 @@
 
 - (void)interpret:(NSString *)command {
     //fprintf(stderr, "Command recieved: %s\n", [command UTF8String]);
-    NSLog(@"Received command: %@", command);
+    //NSLog(@"Received command: %@", command);
     
     NSArray *components = [[command componentsSeparatedByString:@"\t"] retain];
     NSMutableArray *args = [[[NSMutableArray alloc] initWithCapacity:20] autorelease];

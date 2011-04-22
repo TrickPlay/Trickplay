@@ -46,6 +46,8 @@
     
     NSLog(@"AppBrowser Service Setup: %@ host: %@ port: %d", n, h, p);
     
+    viewDidAppear = NO;
+    
     [self createGestureViewWithPort:p hostName:h];
 }
 
@@ -158,6 +160,14 @@
 }
 //*/
 
+- (void)viewDidAppear:(BOOL)animated {
+    if (self.navigationController.visibleViewController == self && (!gestureViewController || !gestureViewController.socketManager)) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+    
+    viewDidAppear = YES;
+}
+
 /*
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -171,6 +181,10 @@
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in AppBrowser");
+    if (!viewDidAppear) {
+        return;
+    }
+    
     // everything will get released from the navigation controller's delegate call
     [self.navigationController.view.layer removeAllAnimations];
     [self.navigationController popToRootViewControllerAnimated:YES];
@@ -178,6 +192,10 @@
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in AppBrowser");
+    if (!viewDidAppear) {
+        return;
+    }
+    
     // everything will get released from the navigation controller's delegate call
     [self.navigationController.view.layer removeAllAnimations];
     [self.navigationController popToRootViewControllerAnimated:YES];
