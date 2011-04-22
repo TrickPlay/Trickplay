@@ -15,6 +15,7 @@ TutorialController = Class(Controller, function(self, view, router, ...)
         p = 0
         c = 1
         n = 2
+        ctrlman:disable_on_key_down()
         router:set_active_component(router.previous_component)
         router:notify()
     end
@@ -91,6 +92,7 @@ TutorialController = Class(Controller, function(self, view, router, ...)
     
     function self:update_view()
         if router:get_active_component() == Components.TUTORIAL then
+            ctrlman:enable_on_key_down()
             view:move_focus(selector)
             view:update(p, c, n)
         end

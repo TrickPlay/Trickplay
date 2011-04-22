@@ -330,4 +330,22 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
     end
 
+    function ctrlman:enable_on_key_down()
+        print("ctlrman enabling on_key_down")
+        for i,controller in ipairs(active_ctrls) do
+            function controller:on_key_down()
+                return true
+            end
+        end
+    end
+
+    function ctrlman:disable_on_key_down()
+        print("ctrlman disabling on_key_down")
+        for i, controller in ipairs(active_ctrls) do
+            function controller:on_key_down()
+                return false
+            end
+        end
+    end
+
 end)
