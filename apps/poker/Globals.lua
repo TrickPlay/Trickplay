@@ -1,9 +1,3 @@
-SMALL_BLIND = 1
-BIG_BLIND = 2
-INITIAL_ENDOWMENT = 200
--- randomly subtracts or adds up to this amount to endowments
-RANDOMNESS = 0
-
 HELP_ENABLED = true
 
 ASSERTIONS_ENABLED = true
@@ -19,30 +13,34 @@ if not ASSERTIONS_ENABLED then
 end
 
 Directions = {
-   RIGHT = {1,0},
-   LEFT = {-1,0},
-   DOWN = {0,1},
-   UP = {0,-1}
+    RIGHT = {1,0},
+    LEFT = {-1,0},
+    DOWN = {0,1},
+    UP = {0,-1}
 }
 
-Colors={
-   SLATE_GRAY                   ="708090",
-   WHITE                        ="FFFFFF",
-   FIRE_BRICK                   ="B22222",
-   LIME_GREEN                   ="32CD32",
-   TURQUOISE                    ="40E0D0",
-   BLACK                        ="000000",
-   RED                          ="FF0000",
-   YELLOW                       ="FFFF00",
-   GREEN                        ="00FF00",
-   BLUE                         ="0000FF",
-   MAGENTA                      ="FF00FF",
-   CYAN                         ="00FFFF",
-   ORANGE                       ="FFA500",
-   PURPLE                       ="A020F0",
-   PERU                         ="CD853F",
-   FOCUS_RED                    ="602020"
+Colors = {
+    SLATE_GRAY                   ="708090",
+    WHITE                        ="FFFFFF",
+    FIRE_BRICK                   ="B22222",
+    LIME_GREEN                   ="32CD32",
+    TURQUOISE                    ="40E0D0",
+    LACK                        ="000000",
+    RED                          ="FF0000",
+    ERASER_RUST                  ="5E2308",
+    YELLOW                       ="FFFF00",
+    AWESOME_YELLOW               ="FFFF99",
+    GREEN                        ="00FF00",
+    BLUE                         ="0000FF",
+    MAGENTA                      ="FF00FF",
+    CYAN                         ="00FFFF",
+    ORANGE                       ="FFA500",
+    PURPLE                       ="A020F0",
+    PERU                         ="CD853F",
+    FOCUS_RED                    ="602020"
 }
+
+--------- Fonts and junk --------------------
 
 PLAYER_NAME_FONT = "DejaVu Serif Condensed 28px"
 PLAYER_ACTION_FONT = "DejaVu Serif Condensed 34px"
@@ -59,6 +57,52 @@ CUSTOMIZE_NAME_FONT = "KacstArt 144px"
 
 DEFAULT_FONT = "DejaVu Serif 40px"
 DEFAULT_COLOR = Colors.WHITE
+
+---------- ChipManager stuff ----------------
+
+CHIP_W = 55
+CHIP_H = 5
+
+CHIP_COLLECTION_POSITIONS = {
+    [1] = {200, 600},
+    [2] = {550, 350},
+    [3] = {1400, 350},
+    [4] = {1720, 600},
+    [5] = {550, 850},
+    [6] = {1400, 850},
+    POT = {925, 650}
+}
+
+---------- Deck Positions -------------------
+
+CARD_LOCATIONS = {
+    [1] = {726, 510},
+    [2] = {843, 510},
+    [3] = {966, 510},
+    [4] = {1084, 510},
+    [5] = {1205, 510},
+    DECK = {785, 650},
+    BURN = {1145, 650}
+}
+
+PLAYER_CARD_LOCATIONS = {
+    [1] = {412, 819},
+    [2] = {115, 441},
+    [3] = {499, 219},
+    [4] = {1129, 160},
+    [5] = {1471, 389},
+    [6] = {1497, 910}
+}
+
+---------- Gameplay stuff -------------------
+
+SMALL_BLIND = 1
+BIG_BLIND = 2
+INITIAL_ENDOWMENT = 200
+-- randomly subtracts or adds up to this amount to endowments
+RANDOMNESS = 0
+DEFAULT_BET = 2
+
 
 Rounds = {
    HOLE=1,

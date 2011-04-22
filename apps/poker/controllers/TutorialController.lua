@@ -1,8 +1,7 @@
-TutorialController = Class(Controller, function(self, view, ...)
-    self._base.init(self, view, Components.TUTORIAL)
+TutorialController = Class(Controller, function(self, view, router, ...)
+    self._base.init(self, router, Components.TUTORIAL)
     
     local controller = self
-    model = view:get_model()
     
     local selector = 2
 
@@ -16,8 +15,8 @@ TutorialController = Class(Controller, function(self, view, ...)
         p = 0
         c = 1
         n = 2
-        model:set_active_component(model.previous_component)
-        self:get_model():notify()
+        router:set_active_component(router.previous_component)
+        router:notify()
     end
 
     local keyTable = {
@@ -63,7 +62,7 @@ TutorialController = Class(Controller, function(self, view, ...)
         
         end
         
-        self:get_model():notify()
+        router:notify()
     end
 
     function self:move_slide_left()
@@ -71,7 +70,7 @@ TutorialController = Class(Controller, function(self, view, ...)
         c = c - 1
         n = n - 1
 
-        self:get_model():notify()
+        router:notify()
     end
     
     function self:move_slide_right()
@@ -79,13 +78,34 @@ TutorialController = Class(Controller, function(self, view, ...)
         c = c + 1
         n = n + 1
 
-        self:get_model():notify()
+        router:notify()
+    end
+
+    function self:update(event)
+        if event:is_a(KbdEvent) then
+            self:on_key_down(event.key)
+        elseif event:is_a(NotifyEvent) then
+            self:update_view()
+        end
     end
     
-    function self:update()
-        if model:get_active_component() == Components.TUTORIAL then
+    function self:update_view()
+        if router:get_active_component() == Components.TUTORIAL then
             view:move_focus(selector)
             view:update(p, c, n)
         end
     end
+
+    function self:on_controller_disconnected()
+        leave_help()
+        local disconnect_timer = Timer()
+        disconnect_timer.interval = 1000
+        function disconnect_timer:on_timer()
+            disconnect_timer:stop()
+            disconnect_timer.on_timer = nil
+            router:get_active_controller():on_controller_disconnected()
+        end
+        disconnect_timer:start()
+    end
+
 end)

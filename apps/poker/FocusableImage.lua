@@ -9,7 +9,7 @@ FocusableImage = Class(function(focusimg, x, y, image_src, focus_src, ...)
     focusimg.extra = {}
     
     if image_src and type(image_src) == "string" then
-        focusimg.image = AssetLoader:getImage(image_src,{ position = {0, 0} })
+        focusimg.image = assetman:get_clone(image_src,{position = {0, 0}})
     elseif image_src then
         focusimg.image = image_src
     end

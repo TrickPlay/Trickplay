@@ -15,21 +15,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
     local number_of_ctrls = 0
     local active_ctrls = {}
-    local accepting_controllers = true
-
-    function ctrlman:start_accepting_ctrls()
-        accepting_controllers = true
-    end
-    
-    function ctrlman:stop_accepting_ctrls()
-        accepting_controllers = false
-    end
 
     function ctrlman:declare_resource(asset_name, asset)
         if not asset_name or not asset then
             error("Usage: declare_resource(name, object)", 2)
         end
-        for name,controller in pairs(active_ctrls) do
+        for _,controller in pairs(active_ctrls) do
             controller:declare_resource(asset_name, asset)
         end
     end
@@ -38,18 +29,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         Hook up the connect, disconnect and ui controller events
     --]]
     function controllers:on_controller_connected(controller)
+        if not controller.has_ui then return end
         print("on_controller_connected controller.name = "..controller.name)
-        if number_of_ctrls > max_controllers
-        or not accepting_controllers
-        or not model:get_active_controller().add_controller then
-            return
-        end
-        if active_ctrls[controller.name] then
-            print("Controller trying to connect has the same NAME as"
-            .." controller already connected with name: "..controller.name)
-            return
-        end
-        
 
         controller.state = ControllerStates.SPLASH
 
@@ -117,10 +98,13 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         function controller:on_key_down(key)
             print("controller keypress:", key)
+            --[[
             if controller.name == "Keyboard" then return true end
             print("key consumed")
 
             return false
+            --]]
+            --return true
         end
 
 
@@ -129,7 +113,27 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:on_disconnected()
             print("DISCONNECTED", controller.name)
 
-            active_ctrls[controller.name] = nil
+            controller.set_hole_cards = nil
+            controller.name_dog = nil
+            controller.choose_dog = nil
+            controller.state = nil
+            controller.add_image = nil
+            controller.clear_and_set_background = nil
+            controller.on_key_down = nil
+            controller.on_disconnected = nil
+            controller.on_click = nil
+            controller.on_accelerometer = nil
+            controller.on_touch_down = nil
+            controller.on_touch_up = nil
+            controller.on_touch_move = nil
+            controller.waiting_room = nil
+            controller.update_waiting_room = nil
+
+            for i,ctrl in ipairs(active_ctrls) do
+                if ctrl == controller then
+                    table.remove(active_ctrls, i)
+                end
+            end
             number_of_ctrls = number_of_ctrls - 1
         end
 
@@ -137,52 +141,58 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             function controller:on_click(x, y)
                 print("answered", controller.name, x, y)
 
-                print("component "..tostring(model:get_active_component())
+                print("component "..tostring(router:get_active_component())
                 .."handling click")
-                model:get_active_controller():handle_click(controller, x, y)
+                router:get_active_controller():handle_click(controller, x, y)
             end
             controller:start_clicks()
         end
 
-        if start_accel then
+        if start_accel and controller.has_accelerometer then
             function controller:on_accelerometer(x, y, z)
                 print("accelerometer: x", x, "y", y, "z", z)
             end
             controller:start_accelerometer("L", 1)
         end
 
-        if start_touch then
+        if start_touch and controller.has_touches then
             print("can accept touches!")
             function controller:on_touch_down(finger, x, y)
                 print("answered", controller.name, x, y)
 
-                print("component "..tostring(model:get_active_component())
+                print("component "..tostring(router:get_active_component())
                 .." handling click")
                 -- hackish way to do this for now
-                model:get_active_controller():handle_click(controller, x, y)
+                router:get_active_controller():handle_click(controller, x, y)
             end
             function controller:on_touch_up(finger, x, y)
             end
             function controller:on_touch_move(finger, x, y)
             end
+            function controller:on_key_down()
+                return false
+            end
             controller:start_touches()
         end
 
-        function controller:choose_dog()
-            print("choosing dog")
+        function controller:choose_dog(players)
+            print("controller", controller.name, "choosing dog")
 
             controller:clear_and_set_background("bkg")
             controller:add_image("hdr_choose_dog", 95, 30, 450, 50)
             for i = 1,6 do
-                if not controller:add_image("dog_"..i, ((i-1)%2)*(256+8)+60,
-                math.floor((i-1)/2)*256+100, 256, 256) then
-                    -- TODO: figure out some good error handling
-                    print("error setting dog image")
+                if not players[i] then
+                    if not controller:add_image("dog_"..i, ((i-1)%2)*(256+8)+60,
+                    math.floor((i-1)/2)*256+100, 256, 256) then
+                        -- TODO: figure out some good error handling
+                        print("error setting dog image")
+                    end
                 end
             end
 
             controller.state = ControllerStates.CHOOSE_DOG
         end
+
 
         --[[
             Brings up the name your dog screen on the iphone. Player may enter a name
@@ -198,7 +208,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:add_image("dog_"..pos, 192, 100, 256, 256)
             if controller:enter_text("Name Your Dog", "Name Your Dog") then
                 function controller:on_ui_event(text)
-                    if text ~= "" then
+                    if text ~= "" and text ~= "Name Your Dog" then
                         controller.player.status:update_name(text)
                     end
                     controller.on_ui_event = function() end
@@ -216,17 +226,19 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 controller:add_image("player_"..i, 0, (i-1)*115+86, 640, 115)
             end
             controller:add_image("start_button", 0, 6*115+86, 640, 95)
-            controller:update_waiting_room()
+            controller:update_waiting_room(
+                router:get_controller(Components.CHARACTER_SELECTION):get_players()
+            )
 
             controller.state = ControllerStates.WAITING
         end
 
-        function controller:update_waiting_room()
+        function controller:update_waiting_room(players)
             local playing = {}
-            for i,player in ipairs(model.players) do
-                local pos = player.table_position
+            for i,player in pairs(players) do
+                local pos = player.dog_number
                 controller:add_image("ready_label", 167, (pos-1)*115+86+60, 122, 34)
-                if player.isHuman then
+                if player.is_human then
                     controller:add_image("human_label", 330, (pos-1)*115+86+20, 122, 34)
                 else
                     controller:add_image("comp_label", 330, (pos-1)*115+86+20, 196, 34)
@@ -261,7 +273,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         number_of_ctrls = number_of_ctrls + 1
 
-        active_ctrls[controller.name] = controller
+        table.insert(active_ctrls, controller)
 
         if resources then
             for name,resource in pairs(resources) do
@@ -269,7 +281,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             end
         end
         declare_necessary_resources()
-        model:get_active_controller():add_controller(controller)
+        router:get_active_controller():add_controller(controller)
     end
 
 ---------------Controller states---------------
@@ -277,29 +289,43 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
     -- run the on connected for all controllers already connected
     -- before application startup
     function ctrlman:initialize()
-        for k,controller in pairs(controllers.connected) do
-            if controller.name ~= "Keyboard" then
-                print("adding controller "..controller.name)
+        for i,controller in ipairs(controllers.connected) do
+            print("adding controller "..controller.name)
+            if controller.has_ui then
                 controllers:on_controller_connected(controller)
             end
         end
-        print("\n\ndone")
     end
 
     -- put all controllers into the choose your dog mode
-    function ctrlman:choose_dog()
-        for k,controller in pairs(controllers.connected) do
-            if controller.name ~= "Keyboard" then
-                controller:choose_dog()
+    function ctrlman:choose_dog(players)
+        for i,controller in ipairs(active_ctrls) do
+            controller:choose_dog(players)
+        end
+    end
+
+    function ctrlman:update_choose_dog(players)
+        for i,controller in ipairs(active_ctrls) do
+            if controller.state == ControllerStates.CHOOSE_DOG then
+                controller:choose_dog(players)
+            end
+        end
+    end
+
+    function ctrlman:waiting_room(players)
+        for i,controller in ipairs(active_ctrls) do
+            if controller.state ~= ControllerStates.WAITING then
+                controller:waiting_room(players)
             end
         end
     end
 
     -- update the waiting room for all controllers
-    function ctrlman:update_waiting_room()
-        for k,controller in pairs(controllers.connected) do
-            if controller.name ~= "Keyboard" then
-                controller:update_waiting_room()
+    function ctrlman:update_waiting_room(players)
+        print("updating waiting room")
+        for i,controller in ipairs(active_ctrls) do
+            if controller.state == ControllerStates.WAITING then
+                controller:waiting_room(players)
             end
         end
     end
