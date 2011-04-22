@@ -58,6 +58,11 @@ interface TypedArray [[ TypedArray * ]]
             length = self->get_length();
         ]];
 
+    readonly ArrayBuffer buffer
+        [[
+            self->get_buffer()->push( L );
+        ]];
+
     dump()
         [[
             self->dump();
