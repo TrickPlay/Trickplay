@@ -398,6 +398,7 @@ def emit( stuff , f ):
             "table"     : "int",
             "function"  : "int",
             "udata"     : "int",
+            "any"       : "int"
         }
         
         lua_check = {
@@ -410,7 +411,8 @@ def emit( stuff , f ):
             "lstring"   : "luaL_checklstring",
             "table"     : "lb_checktable",
             "function"  : "lb_checkfunction",
-            "udata"     : "lb_checkudata"
+            "udata"     : "lb_checkudata",
+            "any"       : "lb_checkany"
         }
         
         lua_opt  = {
@@ -423,7 +425,8 @@ def emit( stuff , f ):
             "lstring"   : "lb_optlstring",
             "table"     : "lb_opttable",
             "function"  : "lb_optfunction",
-            "udata"     : "lb_optudata"
+            "udata"     : "lb_optudata",
+            "any"       : "lb_optany"
             
         }
 
@@ -437,7 +440,8 @@ def emit( stuff , f ):
             "lstring"   : "lua_pushlstring",
             "table"     : "lua_pushvalue",
             "function"  : "lua_pushvalue",
-            "udata"     : "lua_pushvalue"
+            "udata"     : "lua_pushvalue",
+            "any"       : "lua_pushvalue"
         }
         
         
@@ -453,7 +457,8 @@ def emit( stuff , f ):
             "function",
             "udata",
             "callback",
-            "multi"
+            "multi",
+            "any"
         ]
             
         def transform_type( type ):
