@@ -17,6 +17,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     UIBarButtonItem *showcaseButton;
     UIToolbar *toolBar;
     */
+    BOOL viewDidAppear;
      
     UITableView *theTableView;
     NSArray *appsAvailable;

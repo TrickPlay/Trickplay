@@ -81,7 +81,7 @@
 }
 
 - (void)connection:(NSURLConnection *)theConnection didFailWithError:(NSError *)error {
-    NSLog(@"Image did fail with error: %@", error);
+    //NSLog(@"Image did fail with error: %@", error);
 }
 
 - (UIImageView *)imageView {

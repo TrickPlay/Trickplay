@@ -8,10 +8,6 @@
 
 #import "SocketManager.h"
 
-
-#define HOST "10.0.190.153"
-
-
 @implementation WritePacket
 
 @synthesize data;

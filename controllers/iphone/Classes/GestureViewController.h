@@ -93,6 +93,8 @@
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
 CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
+    BOOL viewDidAppear;
+    
     SocketManager *socketManager;
     NSString *hostName;
     NSInteger port;

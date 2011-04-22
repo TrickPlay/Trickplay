@@ -49,6 +49,8 @@
         return NO;
     }
     
+    viewDidAppear = NO;
+    
     // Made a connection, let the service know!
 	// Get the actual width and height of the available area
 	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
@@ -95,7 +97,10 @@
     socketManager = nil;
     // everything will get released from the navigation controller's delegate call
     if (self.navigationController.visibleViewController == self) {
-        [self.navigationController.view.layer removeAllAnimations];
+        if (!viewDidAppear) {
+            return;
+        }
+        
         [self.navigationController popToRootViewControllerAnimated:YES];
     } else {
         [socketDelegate socketErrorOccurred];
@@ -108,7 +113,10 @@
     socketManager = nil;
     // everything will get released from the navigation controller's delegate call
     if (self.navigationController.visibleViewController == self) {
-        [self.navigationController.view.layer removeAllAnimations];
+        if (!viewDidAppear) {
+            return;
+        }
+        
         [self.navigationController popToRootViewControllerAnimated:YES];
     } else {
         [socketDelegate streamEndEncountered];
@@ -196,8 +204,6 @@
 		[socketManager sendData:[sentData UTF8String]
                   numberOfBytes:[sentData length]];
 	}
-    
-	
 }
 
 //--Text input stuff
@@ -232,10 +238,7 @@
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
-// UITextFieldDelegate methods
-- (void)textFieldDidBeginEditing:(UITextField *)textField {
-    
-}
+//--UITextFieldDelegate methods
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [theTextField resignFirstResponder];
@@ -418,6 +421,7 @@
         camera = [[CameraViewController alloc] initWithNibName:@"CameraViewController" bundle:nil];
     }
     [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
+
     [self.navigationController pushViewController:camera animated:YES];
 }
 
@@ -517,6 +521,14 @@
 	self.navigationItem.rightBarButtonItem = exitItem;
     
     //[self startService];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    if (!socketManager) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+    
+    viewDidAppear = YES;
 }
 //*/
 

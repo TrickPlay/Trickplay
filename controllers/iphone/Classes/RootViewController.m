@@ -58,12 +58,14 @@
 }
 
 - (void)serviceResolved:(NSNetService *)service {
+    NSLog(@"RootViewController serviceResolved");
     [netServiceManager stop];
     [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
     // add mask and spinner
 }
 
 - (void)didNotResolveService {
+    NSLog(@"RootViewController didNotResolveService");
     if (gestureViewController) {
         if (self.navigationController.visibleViewController == gestureViewController) {
             [self.navigationController popViewControllerAnimated:NO];
@@ -202,7 +204,6 @@
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator ;
 	
 	return cell;
-	
 }
 
 
