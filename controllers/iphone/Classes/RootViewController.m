@@ -28,6 +28,8 @@
     
     self.navigationController.delegate = self;
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"PushAppBrowserNotification" object:nil];
+    
     // Initialize the NSNetServiceBrowser stuff
     netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
         
@@ -39,27 +41,8 @@
     [(UITableView *)self.view reloadData];
 }
 
-- (void)serviceResolved:(NSNetService *)service {
-    /*
-    if (gestureViewController == nil)
-	{
-		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
-	}
-    
-	[gestureViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
-
-	[self.navigationController pushViewController:gestureViewController animated:YES];
-	//[[self navigationController] presentModalViewController:gestureViewController animated:YES];
-	//self.title = @"Disconnect"; 
-     //*/
-    
-    /*
-    [gestureViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
-    [gestureViewController startService];
-    */
-    
-    [netServiceManager stop];
-    [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+- (void)pushAppBrowser:(NSNotification *)notification {
+    NSLog(@"Pushing App Browser");
     if ([appBrowserViewController hasRunningApp]) {
         [self.navigationController pushViewController:appBrowserViewController animated:NO];
         [appBrowserViewController pushApp];
@@ -72,6 +55,12 @@
             [self.navigationController popToRootViewControllerAnimated:YES];
         }
     }
+}
+
+- (void)serviceResolved:(NSNetService *)service {
+    [netServiceManager stop];
+    [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+    // add mask and spinner
 }
 
 - (void)didNotResolveService {
@@ -270,24 +259,14 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSMutableArray *services = netServiceManager.services;
     NSLog(@"services %@\n", services);
-    NSLog(@"count %d\n", [services count]);
+    NSLog(@"number of services %d\n", [services count]);
     
     if ([services count] == 0) return;
     
-    /*
-    //NSLog(@"pushing gestureViewController = %@\n", gestureViewController);
-    if (gestureViewController == nil) {
-		gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
-	}
-    
-	[self.navigationController pushViewController:gestureViewController animated:YES];    
-    */
-    //NSLog(@"pushing appBrowserViewController = %@", appBrowserViewController);
+    // Good time to load all this crap while its looking for a connection
     if (appBrowserViewController == nil) {
         appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
     }
-    
-    //[self.navigationController pushViewController:appBrowserViewController animated:YES];
     
 	netServiceManager.currentService = [services objectAtIndex:indexPath.row];
 	[netServiceManager.currentService setDelegate:netServiceManager];
@@ -329,6 +308,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (appBrowserViewController) {
         [appBrowserViewController release];
     }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 
     [super dealloc];
 }
