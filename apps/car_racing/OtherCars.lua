@@ -93,22 +93,18 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                 
                 if self.curr_section.parent == nil then
                     self:unparent()
-                    if orientation == 1 then
-                        num_passing_cars = num_passing_cars - 1
-                        print("dec num passing")
-                    end
-                    print("the section i was driving on got deleted, gg")
                     return true
                 end
                 
+                --using the distance of the car from the anchor_point of its group
+                --for the collision detection
                 coll_x = self.x - self.parent.anchor_point[1]
                 coll_y = self.parent.anchor_point[2]- self.y
                 
-                --print(self.x - self.parent.anchor_point[1],self.parent.anchor_point[2]- self.y)
-                
+                --if the distances is less than the threshold, collision
                 if not self.hit and math.abs(coll_x) < 310 and coll_y < 1200 and coll_y > 0 then
                     self.hit = true
-                    crashed = true
+                    crashed  = true
                     end_game:raise_to_top()
                     
                     local new_coll_str_x = (310-math.abs(coll_x))*coll_x/math.abs(coll_x)
@@ -137,18 +133,15 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                         self.dx_remaining_in_path = self.curr_path.dist
                         self.dr_remaining_in_path = self.curr_path.rot
                     
-                    car.v_y = car.v_y - new_coll_str_y--+ collision_strength*math.cos(math.pi/180*collision_angle)
-                    car.v_x = car.v_x - new_coll_str_x--+ collision_strength*math.sin(math.pi/180*collision_angle)
+                    car.v_y = car.v_y - new_coll_str_y
+                    car.v_x = car.v_x - new_coll_str_x
                     
                     print("Collision",collision_strength,collision_angle,"y",collision_strength*math.cos(math.pi/180*collision_angle),"x",collision_strength*math.sin(math.pi/180*collision_angle))
                 end
+                
+                --a positive y value means that the car is behind the user
                 if self.y > 0 then
                     self:unparent()
-                    if orientation == 1 then
-                        num_passing_cars = num_passing_cars - 1
-                        print("dec num passing")
-                    end
-                    print("y is positive")
                     return true
                 end
                 if self.hit then
@@ -158,18 +151,25 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                         
                     end
                 end
+                
+                --determine the amount the car has moved by during this iteration
                 dx = self.speed*seconds
                 dr = -self.curr_path.rot*dx/self.curr_path.dist
-                --print(self.dx_remaining_in_path,dx)
+                
+                --if the amount the car moved by is greater than the amount
+                --remaining in the current segment of road
                 while self.dx_remaining_in_path < dx  do
+                    
+                    --move the car by the amount remaining
                     self.position = {
                         (self.x + self.dx_remaining_in_path*math.sin(math.pi/180*self.y_rot)),
                         (self.y + self.dx_remaining_in_path*math.cos(math.pi/180*self.y_rot)),
                     }
                     self.y_rot = self.y_rot - self.dr_remaining_in_path 
                     
-                    
+                    --if there is no more road segments left, then delete the car
                     if self.curr_section[next_road] == nil then
+                        --edge case for when the car was collided with
                         if self.hit then
                             self.speed = orientation*1
                             if self.y < 0 then
@@ -177,66 +177,74 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                             end
                         end
                         self:unparent()
-                        print("no more road, gg")
-                        if orientation == 1 then
-                            num_passing_cars = num_passing_cars - 1
-                            print("dec num passing")
-                        end
                         return true
                     end
-                    --print("new")
+                    --load the next path 
                     self.curr_section = self.curr_section[next_road]
                     
+                    --update the counters
                     self.curr_path = self.curr_section.path
                     dx = dx - self.dx_remaining_in_path
                     dr = -self.curr_path.rot*dx/self.curr_path.dist
                     
+                    --set the new 'amount remaining' values
                     self.dx_remaining_in_path = self.curr_path.dist
                     self.dr_remaining_in_path = self.curr_path.rot
                     
                 end
                 
+                --update position inside world.cars
                 self.position = {
                     (self.x + dx*math.sin(math.pi/180*self.y_rot)),
                     (self.y + dx*math.cos(math.pi/180*self.y_rot)),
                 }
                 
+                --update the amount remaining in the current path
+                self.dx_remaining_in_path = self.dx_remaining_in_path - dx
+                self.dr_remaining_in_path = self.dr_remaining_in_path - dr
+                self.y_rot = self.y_rot - dr
+                
+                --calculate current screen position
                 x = screen_w/2+(self.x-self.parent.anchor_point[1])
                 y = -(self.y-self.parent.anchor_point[2])
                 
                 t_pt.x = (y*angle+x)/(screen_w+2*y*angle)*screen_w
                 t_pt.y = screen_h-y*angle/(screen_h+2*y*angle)*screen_h
                 
-                
+                --compare against previous screen position
                 x = screen_w/2+(self.prev_pt.x-self.parent.anchor_point[1])
                 y = -(self.prev_pt.y-self.parent.anchor_point[2])
                 
                 self.prev_pt.x = (y*angle+x)/(screen_w+2*y*angle)*screen_w
                 self.prev_pt.y = screen_h-y*angle/(screen_h+2*y*angle)*screen_h
-                    
+                
+                --use screen positions to estimate the perceived angle of the car
                 self.perceived_dir = math.abs(math.atan((self.prev_pt.x-t_pt.x)/(self.prev_pt.y-t_pt.y))*180/math.pi)
                 
-                self.source_i = 1
+                --save the current screen position for next time around
+                self.prev_pt.x = self.x
+                self.prev_pt.y = self.y
+                
+                --determine which side of the player's car this car is on
                 if t_pt.x < screen_w/2 and orientation == 1 then
                     self.z_rotation={0,0,0}
                 else
                     self.z_rotation={180,0,0}
                 end
                 
-                
-
+                --determine which car image to use to match the perceived angle
                 if math.abs(self.perceived_dir) < 10 then
-                    self.source_i =6.5-orientation*5.5 --1 or 12
+                    self.source_i =6.5-orientation*5.5         --1 or 12
                 elseif math.abs(self.perceived_dir) < 30 then
-                    self.source_i =6.5-orientation*4.5 --2 or 11
+                    self.source_i =6.5-orientation*4.5         --2 or 11
                 elseif math.abs(self.perceived_dir) < 57 then
-                    self.source_i =6.5-orientation*3.5 --3 or 10
+                    self.source_i =6.5-orientation*3.5         --3 or 10
                 elseif math.abs(self.perceived_dir) < 67 then
-                    self.source_i =6.5-orientation*2.5 --4 or 9
+                    self.source_i =6.5-orientation*2.5         --4 or 9
                 elseif math.abs(self.perceived_dir) < 80 then
-                    self.source_i =6.5-orientation*1.5 --5 or 8
+                    self.source_i =6.5-orientation*1.5         --5 or 8
                 else
-                    self.source_i =6.5-orientation*.5  --6 or 7
+                    self.source_i =6.5-orientation*.5          --6 or 7
                 end
                 
                 if debug then
@@ -246,17 +254,10 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                     r:raise_to_top()
                 end
                 
-                self.prev_pt.x = self.x
-                self.prev_pt.y = self.y
-                --print("x",self.x-world.cars.anchor_point[1],"y",self.y-world.cars.anchor_point[2])
-                --print("angles",self.perceived_angle,self.y_rot,world.road.y_rotation[1],self.source_i)
-                --
-                --print(self.source_i)
+                --set the new image for the car
                 self.source=model[self.source_i]
                 self.anchor_point = {model[self.source_i].w/2,model[self.source_i].h*2/3}
-                self.dx_remaining_in_path = self.dx_remaining_in_path - dx
-                self.dr_remaining_in_path = self.dr_remaining_in_path - dr
-                self.y_rot = self.y_rot - dr
+                
                 return false
             end
         }

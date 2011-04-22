@@ -7,7 +7,7 @@ function controllers.on_controller_connected( controllers , controller )
 
     if controller.has_accelerometer then
     
-        controller:start_accelerometer( "L" , 0.01 )
+        controller:start_accelerometer( "L" , 20/1000 )
         
         function controller.on_accelerometer( controller , x , y , z )
         if paused then

@@ -15,10 +15,10 @@ local sky = Image{src="skyline.png",x=screen.w/2,y=-17}--Rectangle{name="THE SKY
 local sky_w = sky.w
 sky.anchor_point={sky.w/2,0}
 car = Image{name="THE CAR",src="assets/Lambo/00.png",position={screen.w/2,5*screen.h/6}}
-car.v_y = 0
+car.v_y = 70*pixels_per_mile
 car.v_x = 0
 car:hide()
-tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+12},opacity=0}
+tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+63},opacity=0}
 car.anchor_point = {car.w/2,car.h/2}
 tail_lights.anchor_point = {tail_lights.w/2,tail_lights.h/2}
 local horizon_grad = Image{src="gradient.png",tile={true,false},w=screen_w,y=sky.h-17,scale={1,2}}
@@ -70,20 +70,23 @@ function world:reset()
     section_i = 1
     crashed = false
     num_passing_cars = 0
-    car.v_x = 0
+    car.v_x = 70*pixels_per_mile
     car.v_y = 0
     w_ap_x = 0
     w_ap_y = 0
     other_cars = {}
-    
+    road={segments={}}
     end_point[1] = 0
     end_point[2] = 0
     end_point[3] = 0
     dist_to_end_point[1] = 0
     dist_to_end_point[2] = 0
     end_game:lower_to_bottom()
-    strafed_dist = 1400
+    strafed_dist = 1000
     world:add_next_section()
+    road.curr_segment   = road.newest_segment
+	road.oldest_segment = road.newest_segment
+	road.newest_segment.prev_segment = road.newest_segment
 end
 function world:adjust_position()
     self.road.anchor_point = {
@@ -111,7 +114,7 @@ function world:add_next_section()
     end
     road.newest_segment = next_section
     --table.insert( path, next_section.path )
-    ---[[
+    --[[
     if next_section.name == "Str8 Road" and road.newest_segment ~= nil  then
         if num_passing_cars < 4 then
             table.insert(other_cars,make_car(road.newest_segment,end_point,pos[math.random(3,4)]))
@@ -282,3 +285,8 @@ end
 
 
 --world:set_bounds()
+
+        world:add_next_section()
+		road.curr_segment   = road.newest_segment
+		road.oldest_segment = road.newest_segment
+		road.newest_segment.prev_segment = road.newest_segment
