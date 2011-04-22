@@ -470,22 +470,44 @@ dofile("editor.lua")
 
     function main()
 
-    if controllers.start_pointer then 
-  	controllers:start_pointer()
-    end
+    	if controllers.start_pointer then 
+  		controllers:start_pointer()
+    	end
     
-    if editor_lb.disable_exit then
-	editor_lb:disable_exit()
-    end
+    	if editor_lb.disable_exit then
+		editor_lb:disable_exit()
+    	end
 
     
-    screen_add_bg()
-    screen:show()
-    screen.reactive=true
+    	screen_add_bg()
+    	screen:show()
+    	screen.reactive=true
     
-    dofile("menu.lua")
-    set_app_path()
-    
+    	dofile("menu.lua")
+    	set_app_path()
+	
+
+	--local duration = 5--secs
+
+	local elapsed  = 0
+	local auto_save = false
+	idle.on_idle = function(self,seconds)
+    		elapsed = elapsed + seconds
+    		--local p = elapsed/duration
+		if current_fn ~= "" and auto_save == false then 
+			--print("auto save !!!")
+			editor.save(true) 
+			elapsed = 0 
+			auto_save = true
+		end 
+		if elapsed > 10 and auto_save == true then 
+			--print("auto save reset")
+			elapsed = 0 
+			auto_save = false 
+		end 
+			
+	end
+
     end
 
     dolater(main)

@@ -2336,6 +2336,49 @@ end
 
 function inputMsgWindow(input_purpose, cfn)
 
+
+
+--idle loop example
+
+--[[
+screen:show()
+
+
+r1=Rectangle{w=100,h=200,color="ff0000"}
+r2=Rectangle{w=100,h=200,color="00ff00"}
+r3=Rectangle{w=100,h=200,y=500,color="00ff00"}
+r4=Rectangle{w=100,h=200,y=500,x=500,color="00ff00"}
+
+
+screen:add(r1,r2,r3,r4)
+
+local duration = 5--secs
+local elapsed  = 0
+local direction = 1
+idle.on_idle = function(self,seconds)
+    
+    elapsed = elapsed + direction*seconds
+    
+    
+    if direction == 1 and elapsed > duration then
+        direction = -1
+    elseif direction == -1 and elapsed < 0 then
+        direction = 1
+    end
+    
+    local p = elapsed/duration
+    --print(elapsed)
+    r1.opacity = p*255
+    r2.opacity = (1-p)*255
+    
+    r3.y = 500 + 1000*p
+    r4.z_rotation = {360*p,0,0}
+end
+
+
+
+--]]
+
      local save_b, cancel_b, input_box, open_b, yes_b, no_b
      local save_t, cancel_t, input_box, open_t, yes_t, no_t
     
