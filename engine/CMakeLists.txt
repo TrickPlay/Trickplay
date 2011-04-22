@@ -324,6 +324,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/canvas.lb
 
     ${BINDINGS_SRC}/webgl.lb
+    ${BINDINGS_SRC}/typed_array.lb
 )
 
 #------------------------------------------------------------------------------
