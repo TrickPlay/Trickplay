@@ -15,6 +15,7 @@
 @required
 - (void)do_MC:(NSArray *)args;
 - (void)do_DR:(NSArray *)args;
+- (void)do_DG:(NSArray *)args;
 - (void)do_UB:(NSArray *)args;
 - (void)do_UG:(NSArray *)args;
 - (void)do_RT:(NSArray *)args;
@@ -30,12 +31,23 @@
 - (void)do_PA:(NSArray *)args;
 - (void)do_SS:(NSArray *)args;
 
+/** Advanced UI junk **/
+- (void)do_UX:(NSArray *)args;
+
+// Welcome Message
+- (void)do_WM:(NSArray *)args;
+
+// Take pictures
+- (void)do_PI:(NSArray *)args;
+
 @end
 
 @interface CommandInterpreter : NSObject {
     id <CommandInterpreterDelegate> delegate;
     NSMutableString *commandLine;
     NSMutableDictionary *commandDictionary;
+    
+    BOOL firstCommand;
 }
 
 @property (nonatomic, assign) id <CommandInterpreterDelegate> delegate;
