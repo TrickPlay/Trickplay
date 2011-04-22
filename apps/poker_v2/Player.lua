@@ -35,6 +35,7 @@ Player = Class(function(player, players, args, ...)
             player.status:dealloc()
             player.status = PlayerStatusView(player)
             player.status:display()
+            player.status:update_text()
 
             local text = assetman:create_text{
                 text = "Player "..tostring(player.player_number).." Disconnected",
