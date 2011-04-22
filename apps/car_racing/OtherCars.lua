@@ -100,9 +100,12 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                     print("the section i was driving on got deleted, gg")
                     return true
                 end
+                
                 coll_x = self.x - self.parent.anchor_point[1]
                 coll_y = self.parent.anchor_point[2]- self.y
+                
                 --print(self.x - self.parent.anchor_point[1],self.parent.anchor_point[2]- self.y)
+                
                 if not self.hit and math.abs(coll_x) < 310 and coll_y < 1200 and coll_y > 0 then
                     self.hit = true
                     crashed = true

@@ -1,26 +1,37 @@
 --print = function() end
-crashed = false
-num_passing_cars = 0
-math.randomseed(os.time())
-end_game = Text{text="YOU CRASHED",font="Sans 60px",x=600,y=500,color="ffffff"}
-screen:add(end_game)
-pixels_per_mile = 45
-paused = false
-local idle_loop
 screen:show()
 screen_w = screen.w
 screen_h = screen.h
+crashed = false
+num_passing_cars = 0
+math.randomseed(os.time())
+local splash = Group{}
+local splash_title = Image{src="assets/logo.png",x=screen_w/2,y=screen_h/2}
+splash_title.anchor_point={splash_title.w/2,splash_title.h/2}
+splash:add(splash_title)
+
+end_game = Image{src="assets/crash-message.png",x=screen_w/2,y=screen_h/2}
+end_game.anchor_point={end_game.w/2,end_game.h/2}
+screen:add(end_game)
+pixels_per_mile = 45
+paused = true
+local idle_loop
+
 clone_sources = Group{name="clone_sources"}
 screen:add(clone_sources)
 clone_sources:hide()
 strafed_dist = 1400
 local STRAFE_CAP =2000
-local hud = Group{}
-local mph_txt = Text{text="000",font="Sans 60px",color="ffffff",x=screen_w,y=screen_h}
-local mph_sh  = Text{text="000",font="Sans 60px",color="000000",x=screen_w+5,y=screen_h+5}
-mph_txt.anchor_point={mph_txt.w+50,mph_txt.h+50}
-mph_sh.anchor_point ={mph_sh.w+50, mph_sh.h+50}
-hud:add(mph_txt)
+local hud = Group{name="hud"}
+local speedo = Image{src="assets/speedo.png",x=screen_w,y=screen_h}
+speedo.anchor_point={speedo.w,speedo.h}
+hud:add(speedo)
+local mph_txt    = Text{text="000",font="Digital-7 60px",color="ffd652",x=1786,y=986}
+local points_txt = Text{text="000000",font="Digital-7 26px",color="ffa752",x=1653,y=1050}
+local points = 0
+local dead_time = 0
+hud:add(mph_txt,points_txt)
+hud:hide()
 road={
 	newest_segment = nil,
 	curr_segment   = nil,
@@ -31,7 +42,7 @@ other_cars = {}
 dofile( "OtherCars.lua" )
 dofile(  "Sections.lua" )
 dofile(     "Level.lua" )
-screen:add(hud)
+screen:add(hud,splash)
 speed = 0
 throttle_position = 0
  accel = 0
@@ -42,6 +53,9 @@ collision_strength = 0
 collision_angle = 0
 ccc = nil
 dofile("controller.lua")
+local curr_path = nil
+local dy_remaining_in_path = 0
+local dr_remaining_in_path = 0
 local keys = {
 	[keys.Up] = function()
 		throttle_position = throttle_position + .2
@@ -83,20 +97,35 @@ local keys = {
 }
 function screen:on_key_down(k)
 	
-	if not crashed then
+	if splash ~= nil then
+		splash:unparent()
+		splash = nil
+		car:show()
+		hud:show()
+		world:add_next_section()
+		road.curr_segment   = road.newest_segment
+		road.oldest_segment = road.newest_segment
+		road.newest_segment.prev_segment = road.newest_segment
+		curr_path = road.segments[road.curr_segment]
+		dy_remaining_in_path = curr_path.dist
+		dr_remaining_in_path = curr_path.rot
+		paused = false
+		idle.on_idle = idle_loop
+	elseif not crashed then
 		if keys[k] then keys[k]() end
-	else
-		print("fff")
+	elseif dead_time > 5 then
+		points = 0
+		dead_time = 0
+		world:reset()
 	end
 end
 
-local curr_path = road.segments[road.curr_segment]
+
 
 local dy = 0
 local dr = 0
 
-local dy_remaining_in_path = curr_path.dist
-local dr_remaining_in_path = curr_path.rot
+
 
 local accel_rates = {
 	30/1.71,
@@ -109,6 +138,9 @@ local braking_rate = 100/4.32
 local damping_effect = 1000
 
 idle_loop = function(_,seconds)
+	if crashed then
+		dead_time = dead_time + seconds
+	end
 	for i = #other_cars,1,-1 do
 		if other_cars[i]:move(seconds) then
 			table.remove(other_cars,i)
@@ -116,7 +148,15 @@ idle_loop = function(_,seconds)
 		end
 	end
 	
-
+	--Move the ground
+	
+	
+	--assert(#path > 0)
+	assert(road.curr_segment ~= nil)
+	
+	--distance covered this iteration
+	dy = (speed)*seconds
+	dr = curr_path.rot*dy/curr_path.dist --relative to amount travelled
 	
 	--[[
 	if dr< 0 then
@@ -144,10 +184,9 @@ idle_loop = function(_,seconds)
 	
 	speed = mph*pixels_per_mile
 	car.v_y = speed
-	mph_txt.text = math.floor(mph)
-	mph_txt.anchor_point={mph_txt.w+50,mph_txt.h+50}
-	mph_sh.text = math.floor(mph)
-	mph_sh.anchor_point={mph_sh.w+50,mph_sh.h+50}
+	mph_txt.text = string.format("%03d",mph)
+	points = points + dy/pixels_per_mile
+	points_txt.text = string.format("%07d",points)
 	
 	tail_lights.opacity=0
 	if throttle_position > 0.05 then
@@ -207,15 +246,7 @@ idle_loop = function(_,seconds)
 	
 	
 	
-	--Move the ground
 	
-	
-	--assert(#path > 0)
-	assert(road.curr_segment ~= nil)
-	
-	--distance covered this iteration
-	dy = (speed)*seconds
-	dr = curr_path.rot*dy/curr_path.dist --relative to amount travelled
 	
 	--while the amount of distance covered in this iteration extends
 	--to the end of the current path segment...
@@ -253,4 +284,4 @@ idle_loop = function(_,seconds)
 	dr_remaining_in_path = dr_remaining_in_path - dr
 end
 
-idle.on_idle = idle_loop
+--idle.on_idle = idle_loop
