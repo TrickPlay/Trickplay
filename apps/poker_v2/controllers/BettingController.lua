@@ -131,6 +131,7 @@ function(self, router, ...)
         end
         bet_text.text = "$"..current_player.bet
         current_player.bet_chips:set(current_player.bet)
+        current_player.status:update_text()
     end
 
     bet_selector[Directions.LEFT] = call_selector
@@ -312,6 +313,7 @@ function(self, router, ...)
         end
         bet_text.text = "$"..current_player.bet
         current_player.bet_chips:set(current_player.bet)
+        current_player.status:update_text()
     end
 
     function self:notify(event)
@@ -364,7 +366,7 @@ function(self, router, ...)
     local BET_X_1 = 420
     local BET_X_2 = 528
     local BET_Y_1 = 600
-    local BET_Y_2 = 640
+    local BET_Y_2 = 645
 
     local UP_X_1 = 420
     local UP_X_2 = 528

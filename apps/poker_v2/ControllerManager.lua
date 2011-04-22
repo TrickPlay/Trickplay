@@ -238,7 +238,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             for i,player in pairs(players) do
                 local pos = player.dog_number
                 controller:add_image("ready_label", 167, (pos-1)*115+86+60, 122, 34)
-                if player.isHuman then
+                if player.is_human then
                     controller:add_image("human_label", 330, (pos-1)*115+86+20, 122, 34)
                 else
                     controller:add_image("comp_label", 330, (pos-1)*115+86+20, 196, 34)
