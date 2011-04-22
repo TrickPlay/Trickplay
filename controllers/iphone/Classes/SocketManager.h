@@ -65,5 +65,6 @@
 
 // Getters/Setters not synthesized
 - (NSInteger)port;
+- (void)setPort:(NSInteger)value;
 
 @end
