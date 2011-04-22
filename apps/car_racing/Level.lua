@@ -17,6 +17,7 @@ sky.anchor_point={sky.w/2,0}
 car = Image{name="THE CAR",src="assets/Lambo/00.png",position={screen.w/2,5*screen.h/6}}
 car.v_y = 0
 car.v_x = 0
+car:hide()
 tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+12},opacity=0}
 car.anchor_point = {car.w/2,car.h/2}
 tail_lights.anchor_point = {tail_lights.w/2,tail_lights.h/2}
@@ -59,6 +60,31 @@ local new_pos = {}
 local delta_x = 0
 local delta_y = 0
 
+function world:reset()
+    self.road:clear()
+    self.cars:clear()
+    self.road.anchor_point = {0,0}
+    self.cars.anchor_point = {0,0}
+    self.road.y_rotation   = {0,0,0}
+    self.cars.y_rotation   = {0,0,0}
+    section_i = 1
+    crashed = false
+    num_passing_cars = 0
+    car.v_x = 0
+    car.v_y = 0
+    w_ap_x = 0
+    w_ap_y = 0
+    other_cars = {}
+    
+    end_point[1] = 0
+    end_point[2] = 0
+    end_point[3] = 0
+    dist_to_end_point[1] = 0
+    dist_to_end_point[2] = 0
+    end_game:lower_to_bottom()
+    strafed_dist = 1400
+    world:add_next_section()
+end
 function world:adjust_position()
     self.road.anchor_point = {
         w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot),
@@ -107,8 +133,8 @@ function world:add_next_section()
     next_section.z_rotation={end_point[3],0,0}
     
     --the previous-end-point marker
-    prev_end_marker.position = end_marker.position
-    prev_end_marker:raise_to_top()
+    --prev_end_marker.position = end_marker.position
+    --prev_end_marker:raise_to_top()
     
     --factor in the end point of the next section
     end_point[1] = end_point[1] +
@@ -122,8 +148,8 @@ function world:add_next_section()
     end_point[3] = end_point[3] + next_section.end_point[3]
     
     --update the debugging end point marker
-    end_marker.position = {end_point[1],end_point[2]}
-    end_marker:raise_to_top()
+    --end_marker.position = {end_point[1],end_point[2]}
+    --end_marker:raise_to_top()
     
     dist_to_end_point[1] = end_point[1]-w_ap_x
     dist_to_end_point[2] = end_point[2]-w_ap_y
@@ -172,11 +198,11 @@ function world:remove_oldest_section()
         car.y = car.y - new_pos.y
     end
     
-    prev_end_marker.x = prev_end_marker.x - new_pos.x
-    prev_end_marker.y = prev_end_marker.y - new_pos.y
+    --prev_end_marker.x = prev_end_marker.x - new_pos.x
+    --prev_end_marker.y = prev_end_marker.y - new_pos.y
     
-    end_marker.x = end_point[1]
-    end_marker.y = end_point[2]
+    --end_marker.x = end_point[1]
+    --end_marker.y = end_point[2]
         
 end
 
@@ -214,8 +240,8 @@ function world:move(dx,dr,radius)
         
         y_rot = y_rot+dr
         --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
-        self.road.y_rotation    = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
-        self.cars.y_rotation    = {y_rot,dist_to_car*math.sin(math.pi/180*y_rot),dist_to_car*math.cos(math.pi/180*y_rot)}
+        self.road.y_rotation    = {y_rot,0,0}
+        self.cars.y_rotation    = {y_rot,0,0}
         sky.x = screen_w/2-sky_w/2*math.sin(math.pi/180*y_rot)
         
         delta_x = radius*math.cos(math.pi/180*y_rot)-cent_x
@@ -253,9 +279,6 @@ function world:move(dx,dr,radius)
     end
 end
 
-world:add_next_section()
 
-road.curr_segment   = road.newest_segment
-road.oldest_segment = road.newest_segment
-road.newest_segment.prev_segment = road.newest_segment
+
 --world:set_bounds()
