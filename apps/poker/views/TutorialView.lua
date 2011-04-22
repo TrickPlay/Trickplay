@@ -1,7 +1,7 @@
-TutorialView = Class(View, function(self, model, ...)
+TutorialView = Class(View, function(self, router, ...)
    
    -- Register view
-    self._base.init(self, model)
+    self._base.init(self, router)
     
     -- Construct the slides
     local tutorial = {}
@@ -45,7 +45,7 @@ TutorialView = Class(View, function(self, model, ...)
     
     -- Initialize
     function self:initialize()
-       self:set_controller(TutorialController(self))
+       self:set_controller(TutorialController(self, router))
     end
     
     -- Update
@@ -65,7 +65,7 @@ TutorialView = Class(View, function(self, model, ...)
 
     function self:update(p, c, n)
     
-        if model:get_active_component() == Components.TUTORIAL then
+        if router:get_active_component() == Components.TUTORIAL then
             tutorialGroup:raise_to_top()
             if not tutorial[1] then
                 -- begin by making an awesome red mask

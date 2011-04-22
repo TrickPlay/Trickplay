@@ -79,37 +79,31 @@ function Popup:new(args)
 end
 
 function Popup:render()
-
     if self.fade == "in" then
-	
-	print("Animating in")
+	    print("Animating in")
             
-	-- On completed function
-	self.animate_in.on_completed = function()
-        pcall(self.on_fade_in, self)
-    end
-	if not self.animate_in.duration then self.animate_in.duration = 300 end
-	
-	self.group:animate( self.animate_in )  
-	self.fade = "out"
-	return
-	
+	    -- On completed function
+        self.animate_in.on_completed = function()
+            pcall(self.on_fade_in, self)
+        end
+        if not self.animate_in.duration then self.animate_in.duration = 300 end
+        
+        self.group:animate( self.animate_in )  
+        self.fade = "out"
+        return
     elseif self.fade == "out" then
-	
-	print("Animating out")
-	
-	-- On completed function
-	self.animate_out.on_completed = function()
-        pcall(self.on_fade_out, self)
+        print("Animating out")
+        
+        -- On completed function
+        self.animate_out.on_completed = function()
+            pcall(self.on_fade_out, self)
+        end
+        if not self.animate_out.duration then self.animate_out.duration = 300 end
+        
+        self.group:animate( self.animate_out )  
+        self.fade = nil
+        return
     end
-	if not self.animate_out.duration then self.animate_out.duration = 300 end
-	
-	self.group:animate( self.animate_out )  
-	self.fade = nil
-	return
-	
-    end
-    
 end
 
 function Popup:setTimer()
@@ -144,7 +138,7 @@ function Popup:on_fade_out()
 
 	print("on_fade_out called")
         
-    self.group:unparent()
+    self.group:dealloc()
 	
 	self = nil
 

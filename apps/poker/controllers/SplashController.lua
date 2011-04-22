@@ -1,26 +1,36 @@
-SplashController = Class(Controller, function(self, view, ...)
-    self._base.init(self, view, Components.SPLASH)
+SplashController = Class(Controller,
+function(ctrl, router, ...)
+    ctrl._base.init(ctrl, router, Components.SPLASH)
+    router:attach(ctrl, Components.SPLASH)
 
-    local controller = self
-    model = view:get_model()
+    local view = SplashView(ctrl)
+    local splash_timer = Timer()
 
-    local KeyTable = {
-        [keys.Return] =
-        function(self)
-            model:set_active_component(Components.CHARACTER_SELECTION)
-            model:notify()
-            ctrlman:choose_dog()
-        end
-    }
-    KeyTable[keys.OK] = KeyTable[keys.Return]
-
-    function self:on_key_down(k)
-        if KeyTable[k] then
-            KeyTable[k](self)
+    function ctrl:on_key_down(k)
+        router:set_active_component(Components.CHARACTER_SELECTION)
+        router:notify()
+        ctrlman:choose_dog({})
+        if splash_timer then
+            splash_timer:stop()
+            splash_timer.on_timer = nil
+            splash_timer = nil
         end
     end
 
-    function self:add_controller()
+    function ctrl:notify(event) view:update(event) end
+
+    -- This will get rid of the splash screen after 7 seconds
+    splash_timer.interval = 7000
+    function splash_timer:on_timer()
+        splash_timer:stop()
+        splash_timer.on_timer = nil
+        splash_timer = nil
+        ctrl:on_key_down(keys.Return)
+    end
+    splash_timer:start()
+
+    function ctrl:add_controller(controller)
+        controller:clear_and_set_background("splash")
     end
 
 end)

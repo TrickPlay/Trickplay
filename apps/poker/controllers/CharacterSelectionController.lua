@@ -1,359 +1,301 @@
-CharacterSelectionController = Class(Controller,function(self, view, ...)
-   self._base.init(self, view, Components.CHARACTER_SELECTION)
+CharacterSelectionController = Class(Controller,
+function(ctrl, router, ...)
+    ctrl._base.init(ctrl, router, Components.CHARACTER_SELECTION)
+    router:attach(ctrl, Components.CHARACTER_SELECTION)
 
-   local controller = self
-   model = view:get_model()
+    local view = CharacterSelectionView(ctrl)
+    local players = {}
+    local dog_selectors = {}
+    local button_selectors
 
-   local CharacterSelectionGroups = {
-      TOP = 1,
-      BOTTOM = 2,
-   }
-   local SubGroups = {
-      LEFT = 1,
-      LEFT_MIDDLE = 2,
-      MIDDLE = 3,
-      RIGHT_MIDDLE = 4,
-      RIGHT = 5,
-   }
+--------------- Some helper variables --------------
 
-   local HELP = SubGroups.LEFT_MIDDLE
-   local START = SubGroups.MIDDLE
-   local EXIT = SubGroups.RIGHT_MIDDLE
+    ctrl.number_of_players = 0
+    local current_selector
 
-   local GroupSize = 0
-   for k, v in pairs(CharacterSelectionGroups) do
-      GroupSize = GroupSize + 1
-   end
-   local SubSize = 0
-   for k,v in pairs(SubGroups) do
-      SubSize = SubSize + 1
-   end
+--------------- Public methods ------------------
 
-   -- the default selected index
-   local selected = CharacterSelectionGroups.BOTTOM
-   local subselection = SubGroups.LEFT
-   assert(selected)
-   assert(subselection)
-   --the number of the current player selecting a seat
-   self.playerCounter = 0
+    function ctrl:get_players() return players end
 
-   local function start_a_game()
-      -- add table text
-      --local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {664, 435}, opacity = 0})
-      local table_text = AssetLoader:getImage("TableText",{name="TableText", position = {674, 445}, opacity = 0})
-      screen:add( table_text )
-      table_text:animate{opacity=255, duration=300, mode = "EASE_OUT_QUAD"}
-      
-      -- reset the CharacterSelectionView for the next game
-      for i,t in ipairs(view.items) do
-          for j,item in ipairs(t) do
-              if item.group then item.group.opacity = 255 else item.opacity = 255 end
-              if view.seats_chosen[i][j].group then
-                  view.seats_chosen[i][j].group.opacity = 0
-              end
-          end
-      end
-      view.start_button.group.opacity = 0
-   
-      -- make sure last dog selected does not continue to glow
-      for _,v in ipairs(DOG_GLOW) do
-         v.opacity = 0
-      end
-      model:set_active_component(Components.GAME)
-      game:initialize_game{
-         sb=SMALL_BLIND,
-         bb=BIG_BLIND,
-         endowment=INITIAL_ENDOWMENT,
-         randomness=RANDOMNESS,
-         players=model.players
-      }
-      model:notify()
-      old_on_key_down = nil
-   end
+--------------- Private methods ------------------
 
-   local CharacterSelectionCallbacks = {
-      [CharacterSelectionGroups.TOP] = {},
-      [CharacterSelectionGroups.BOTTOM] = {
-         [START] = function()
-            if self.playerCounter >= 2 then
-               start_a_game()
-            end
-         end,
-         [EXIT] = function() exit() return end,
-         [HELP] = function()
-            print("starting tutorial")
-            model:set_active_component(Components.TUTORIAL)
-            model:notify()
-         end
-      },
-   }
-
-   function self:getPosition(i, j)
-      
-      local sel = selected
-      local subsel = subselection
-      if i and j then
-          sel = i
-          subsel = j
-      end
-      
-      local num
-      
-      if sel == 2 and subsel == 1 then
-         num = 1
-      elseif sel == 1 then
-         num = 1 + subsel
-      elseif sel == 2 and subsel == 5 then
-         num = 6
-      elseif sel == 2 and subsel == 2 then
-         return "HELP_MENU"
-      elseif sel == 2 and subsel == 3 then
-         return "START"
-      elseif sel == 2 and subsel == 4 then
-         return "EXIT_MENU"
-      else
-         error("error selecting position", 2)
-      end
-
-      return num
-      
-   end
-
-    -- called after a character is selected to rotate to the next available
-    --character
-    function self:new_position()
-        if selected == 2 then
-            if subselection == 1 then
-                selected = 1
-            else
-                subselection = 1
-            end
-        elseif selected == 1 then
-            if subselection < 4 then
-                subselection = subselection + 1
-            else
-                subselection = 5
-                selected = 2
+    local function start_a_game()
+        ctrl:hide_start_button()
+        for i,dog_selector in ipairs(dog_selectors) do
+            dog_selector.dog_view:glow_off()
+            if not players[i] then
+                dog_selector.dog_view:fade_out()
             end
         end
+        router:set_active_component(Components.GAME)
+        local temp_table = {}
+        for i = 1,6 do
+            if players[i] then
+                table.insert(temp_table, players[i])
+            end
+        end
+        players = temp_table
+        for i,player in ipairs(players) do
+            player.players = players
+        end
+
+        ctrlman:waiting_room(players)
+
+        game:initialize_game{
+            sb = SMALL_BLIND,
+            bb = BIG_BLIND,
+            randomness = RANDOMNESS,
+            players = players
+        }
+        router:notify()
     end
 
-    --[[
-        Function for setting a character on the screen. If a user selects a
-        character then this function checks to see if the player is already in use
-        if not in use then a Player() is definied for the position (pos) the player
-        exists on the table and this Player() is added to model.positions[pos].
-        If ctrl (a controller) is defined and human is true the Player() registers
-        this controller as its controller and as being human. The first player
-        selected by any means is always assumed to be human.
+    local function correct_selector(dog_number)
+        current_selector:off_focus()
+        current_selector = dog_selectors[dog_number]
+        current_selector:on_focus()
+        view:update()
+    end
 
-        @param ctrl : controller which controls this Player
-        @param dog_number : defines dogs position on the table if needed otherwise
-            self:getPosition() checks for dog position based on the current position
-            of selected and subselection variables on the grid.
-        @param human : whether or not this dog is a human player. First player
-            selected by any means is always assumed to be human.
+    local function find_next_dog(dog_number)
+        while players[dog_number] do
+            dog_number = dog_number + 1
+        end
+        if dog_number > 6 then
+            dog_number = 1
+        end
+        while players[dog_number] do
+            dog_number = dog_number + 1
+        end
+        correct_selector(dog_number)
+    end
 
-        @return : false if dog_number or position already has been selected by a
-            Player. true otherwise (assumes success).
-    --]]
-    local function setCharacterSeat(ctrl, dog_number, human)
+    local function set_up_player(dog_number, human, controller)
+        if not dog_number then error("no dog_number", 2) end
+        if players[dog_number] then return false end
+        ctrl.number_of_players = ctrl.number_of_players + 1
 
-        --instantiate the player
-        local pos = dog_number or self:getPosition()
-        if(model.positions[pos]) then return false end
-
-        local isHuman = human or false
-        if(self.playerCounter == 0) then
-            isHuman = true
+        local is_human = human or false
+        if ctrl.number_of_players == 1 then
+            is_human = true
             mediaplayer:play_sound(FIRST_PLAYER_MP3)
         end
-        self.playerCounter = self.playerCounter + 1
 
         local args = {
-            isHuman = isHuman,
-            number = self.playerCounter,
-            table_position = pos,
-            position = model.default_player_locations[pos],
-            chipPosition = model.default_bet_locations[pos],
-            controller = ctrl,
-            endowment = INITIAL_ENDOWMENT -- redundant code, look at line 64
-                                          -- and GameState:initialize()
+            is_human = is_human,
+            player_number = ctrl.number_of_players,
+            dog_number = dog_number,
+            endowment = INITIAL_ENDOWMENT,
+            controller = controller,
+            dog_view = dog_selectors[dog_number].dog_view
         }
 
-        --[[
-            Insert dogs in order into the table model.players. Hence, if dogs
-            2, 5, and 1 are selected to play in the game, model.players[1] =
-            Player class instantiation that corresponds to dog 1, model.players[2]
-            = dog 2, and model.players[3] = dog 5. This makes it easy to discover
-            how many dogs are playing with #model.players and deal cards in the
-            correct order (i.e. dog 1, then dog 2, then dog 5).
-        --]]
-        local i = 1
-        while i <= #model.players do
-            if pos < model.players[i].table_position then
-                break
-            end
-            i = i+1
+        local player = Player(players, args)
+        if controller then controller.player = player end
+        players[dog_number] = player
+
+        if ctrl.number_of_players >= 2 then
+            ctrl:display_start_button()
         end
-        local player = Player(args)
-        if ctrl then ctrl.player = player end
-        table.insert(model.players, i, player)
-        model.positions[pos] = true
-        model.currentPlayer = self.playerCounter
-
-        if(self.playerCounter >= 2) then
-            view.items[2][3].opacity = 255
-        end
-        model:notify()
-        self:new_position()
-        view:update()
-
-        return true
-
-    end
-
-    local CharacterSelectionKeyTable = {
-        [keys.Up] = function(self) self:move_selector(Directions.UP) end,
-        [keys.Down] = function(self) self:move_selector(Directions.DOWN) end,
-        [keys.Left] = function(self) self:move_selector(Directions.LEFT) end,
-        [keys.Right] = function(self) self:move_selector(Directions.RIGHT) end,
-        [keys.Return] =
-            function(self)
-                mediaplayer:play_sound(ENTER_MP3)
-                if(CharacterSelectionCallbacks[selected][subselection]) then
-                    CharacterSelectionCallbacks[selected][subselection]()
-                else
-                    setCharacterSeat()
-                    if(self.playerCounter >= 6) then
-                        ctrlman:stop_accepting_ctrls()
-                        start_a_game()
-                    end
-                end
-            end
-    }
-    CharacterSelectionKeyTable[keys.OK] = CharacterSelectionKeyTable[keys.Return]
-
-    function self:on_key_down(k)
-        if CharacterSelectionKeyTable[k] then
-            CharacterSelectionKeyTable[k](self)
-        end
-    end
-
-    function self:get_selected_index()
-        return selected
-    end
-
-    function self:get_subselection_index()
-        return subselection
-    end
-
-    --[[
-    Corrects for positions not on the grid
-    --]]
-    local function check_for_valid(dir)
-        if (CharacterSelectionGroups.TOP == selected)
-        and (SubGroups.RIGHT == subselection) then
-            subselection = SubGroups.RIGHT_MIDDLE 
-            return false
-        elseif CharacterSelectionGroups.BOTTOM == selected then
-            if(0 ~= dir[2]) then
-                if(subselection >= SubGroups.MIDDLE) then
-                    subselection = subselection + 1
-                end
-            elseif (0 ~= dir[1]) and (self.playerCounter < 2) and
-                (subselection == SubGroups.MIDDLE) then
-                subselection = subselection + dir[1]
-            end
-        end
-        return true
-    end
-
-    function self:move_selector(dir)
-        screen:grab_key_focus()
-        if 0 ~= dir[1] then
-            local new_selected = subselection + dir[1]
-            if 1 <= new_selected and SubSize >= new_selected then
-                subselection = new_selected
-                if check_for_valid(dir) then
-                    mediaplayer:play_sound(ARROW_MP3)
-                else
-                    mediaplayer:play_sound(BONK_MP3)
-                end
-            else
-                mediaplayer:play_sound(BONK_MP3)
-            end
-        elseif 0 ~= dir[2] then
-            if dir[2] == -1 and selected == CharacterSelectionGroups.BOTTOM
-            and subselection == SubGroups.RIGHT_MIDDLE then
-                selected = CharacterSelectionGroups.TOP
-                subselection = SubGroups.MIDDLE
-                mediaplayer:play_sound(ARROW_MP3)
-            else
-                local new_selected = selected + dir[2]
-                if 1 <= new_selected and GroupSize >= new_selected then
-                    selected = new_selected
-                    check_for_valid(dir)
-                    mediaplayer:play_sound(ARROW_MP3)
-                else
-                    mediaplayer:play_sound(BONK_MP3)
-                end
-            end
-        end
-        model:notify()
-    end
-
-    function self:reset()
-        self.playerCounter = 0
-        selected = 2
-        subselection = 1
-        model.players = {}
-        for i=1,6 do
-            model.positions[i] = false
-        end
-
-        ctrlman:choose_dog()
-
-        view:reset()
-    end
-
-    function self:add_controller(ctrl)
-        ctrl:choose_dog()
-    end
-
-    -- moves the selector and subselector into a coordinates based on
-    -- dog position as input
-    local function correct_selector(pos)
-        -- move the selector to the dog
-        if pos == 1 then
-            selected = 2
-            subselection = 1
-        elseif pos > 1 and pos < 6 then
-            selected = 1
-            subselection = pos - 1
+        if ctrl.number_of_players >= 6 then
+            start_a_game()
         else
-            selected = 2
-            subselection = 5
+            find_next_dog(dog_number)
+        end
+        ctrlman:update_choose_dog(players)
+        ctrlman:update_waiting_room(players)
+
+        return true
+    end
+
+--------------- Here lies the model for the ui ------------------
+    
+    local help_button_selector = {
+        object = ButtonView("help_button", HELP_MENU_POSITION[1],
+                            HELP_MENU_POSITION[2])
+    }
+    local start_button_selector = {
+        object = ButtonView("start_button", START_MENU_POSITION[1],
+                            START_MENU_POSITION[2])
+    }
+    start_button_selector.object:hide()
+    local exit_button_selector = {
+        object = ButtonView("exit_button", EXIT_MENU_POSITION[1],
+                            EXIT_MENU_POSITION[2])
+    }
+    button_selectors = {
+        help_button_selector, start_button_selector, exit_button_selector
+    }
+    for i,selector in ipairs(button_selectors) do
+        view:add(selector.object.view)
+        selector.on_focus = function()
+            selector.object:on_focus()
+        end
+        selector.off_focus = function()
+            selector.object:off_focus()
         end
     end
 
+    help_button_selector.press = function()
+        router:set_active_component(Components.TUTORIAL)
+        router:notify()
+    end
+    start_button_selector.press = function()
+        start_a_game()
+    end
+    exit_button_selector.press = function()
+        exit()
+    end
 
-    function self:handle_click(ctrl, x, y)
-        assert(ctrl)
+    for i = 1,6 do
+        dog_selectors[i] = {}
+        dog_selectors[i].dog_view = DogView(i)
+        dog_selectors[i].seat_button_view = SeatButtonView(i)
+        dog_selectors[i].press = function()
+            dog_selectors[i].dog_view:pressed()
+            dog_selectors[i].seat_button_view:pressed()
+
+            set_up_player(i)
+        end
+        dog_selectors[i].on_focus = function()
+            dog_selectors[i].dog_view:on_focus()
+            dog_selectors[i].seat_button_view:on_focus()
+        end
+        dog_selectors[i].off_focus = function()
+            dog_selectors[i].dog_view:off_focus()
+            dog_selectors[i].seat_button_view:off_focus()
+        end
+        screen:add(dog_selectors[i].dog_view.view)
+        view:add(dog_selectors[i].seat_button_view.view)
+    end
+
+    dog_selectors[1][Directions.UP] = dog_selectors[2]
+    dog_selectors[1][Directions.RIGHT] = help_button_selector
+
+    dog_selectors[2][Directions.DOWN] = dog_selectors[1]
+    dog_selectors[2][Directions.RIGHT] = dog_selectors[3]
+    
+    dog_selectors[3][Directions.RIGHT] = dog_selectors[4]
+    dog_selectors[3][Directions.LEFT] = dog_selectors[2]
+    dog_selectors[3][Directions.DOWN] = help_button_selector
+
+    dog_selectors[4][Directions.LEFT] = dog_selectors[3]
+    dog_selectors[4][Directions.RIGHT] = dog_selectors[5]
+    dog_selectors[4][Directions.DOWN] = exit_button_selector
+
+    dog_selectors[5][Directions.LEFT] = dog_selectors[4]
+    dog_selectors[5][Directions.DOWN] = dog_selectors[6]
+
+    dog_selectors[6][Directions.UP] = dog_selectors[5]
+    dog_selectors[6][Directions.LEFT] = exit_button_selector
+
+    help_button_selector[Directions.LEFT] = dog_selectors[1]
+    help_button_selector[Directions.UP] = dog_selectors[3]
+    help_button_selector[Directions.RIGHT] = exit_button_selector
+
+    exit_button_selector[Directions.RIGHT] = dog_selectors[6]
+    exit_button_selector[Directions.UP] = dog_selectors[4]
+    exit_button_selector[Directions.LEFT] = help_button_selector
+
+    start_button_selector[Directions.RIGHT] = exit_button_selector
+    start_button_selector[Directions.UP] = dog_selectors[4]
+    start_button_selector[Directions.LEFT] = help_button_selector
+
+------------------- Here lies the controls -----------------
+
+    function ctrl:display_start_button()
+        help_button_selector[Directions.RIGHT] = start_button_selector
+        exit_button_selector[Directions.LEFT] = start_button_selector
+
+        start_button_selector.object:show()
+    end
+
+    function ctrl:hide_start_button()
+        help_button_selector[Directions.RIGHT] = exit_button_selector
+        exit_button_selector[Directions.LEFT] = help_button_selector
+
+        start_button_selector.object:hide()
+    end
+
+    current_selector = dog_selectors[1]
+    current_selector:on_focus()
+
+
+    function ctrl:move(dir)
+        if current_selector[dir] then
+            current_selector:off_focus()
+            current_selector = current_selector[dir]
+            current_selector:on_focus()
+            view:update()
+            mediaplayer:play_sound(ARROW_MP3)
+        else
+            mediaplayer:play_sound(BONK_MP3)
+        end
+    end
+
+    function ctrl:return_pressed()
+        mediaplayer:play_sound(ENTER_MP3)
+        current_selector.press()
+    end
+
+    -- Update all the views
+    function ctrl:notify(event)
+        if self:is_active_component() then
+            for i,selector in ipairs(button_selectors) do
+                if current_selector ~= selector then
+                    selector:off_focus()
+                else
+                    selector:on_focus()
+                end
+            end
+            for i,selector in ipairs(dog_selectors) do
+                if current_selector ~= selector then
+                    selector:off_focus()
+                else
+                    selector:on_focus()
+                end
+            end
+        end
+
+        view:update()
+    end
+
+    function ctrl:reset()
+        for k,player in pairs(players) do
+            player:dealloc()
+        end
+        players = {}
+        self:hide_start_button()
+        ctrl.number_of_players = 0
+        for i,dog_selector in ipairs(dog_selectors) do
+            dog_selector.dog_view:reset()
+            dog_selector.seat_button_view:reset()
+        end
+        current_selector = dog_selectors[1]
+
+        ctrlman:choose_dog(players)
+    end
+
+    function ctrl:add_controller(controller)
+        controller:choose_dog(players)
+    end
+
+    function ctrl:handle_click(controller, x, y)
+        assert(controller)
         assert(x)
         assert(y)
 
-        if ctrl.state == ControllerStates.CHOOSE_DOG then
+        if controller.state == ControllerStates.CHOOSE_DOG then
             -- based off of click position grab the correct dog position (pos)
             local pos
             local col = 1
             local row = 1
-            if x > ctrl.ui_size[1]/2 then
+            if x > controller.ui_size[1]/2 then
                 col = 2
             end
-            if y > (100+256)*ctrl.y_ratio then
+            if y > (100+256)*controller.y_ratio then
                 row = 2
-                if y > (100+256*2)*ctrl.y_ratio then
+                if y > (100+256*2)*controller.y_ratio then
                     row = 3
                 end
             end
@@ -363,31 +305,21 @@ CharacterSelectionController = Class(Controller,function(self, view, ...)
 
             correct_selector(pos)
 
-            -- select that dog
-            if not setCharacterSeat(ctrl, pos, true) then return end
-            if(self.playerCounter >= 6) then
-                ctrlman:stop_accepting_ctrls()
-                start_a_game()
-            end
-            ctrl:name_dog(pos)
-        elseif ctrl.state == ControllerStates.WAITING then
-            local pos = math.floor((y/ctrl.y_ratio-86)/115+1)
-            -- do selected
+            -- maybe being too redundant, but seems like the safest approach
+            current_selector.dog_view:pressed()
+            current_selector.seat_button_view:pressed()
+            if not set_up_player(pos, true, controller) then return end
+            controller:name_dog(pos)
+        elseif controller.state == ControllerStates.WAITING then
+            local pos = math.floor((y/controller.y_ratio-86)/115+1)
+            -- AI selected
             if pos > 0 and pos <= 6 then
                 correct_selector(pos)
-                setCharacterSeat(nil, pos, false) 
-                if(self.playerCounter >= 6) then
-                    ctrlman:stop_accepting_ctrls()
-                    start_a_game()
-                end
-                ctrlman:update_waiting_room()
+                self:return_pressed()
             -- check x range for "Start" button press
-            elseif pos > 6 and x/ctrl.x_ratio > 640/3 and x/ctrl.x_ratio < 2*640/3 then
-                selected = CharacterSelectionGroups.BOTTOM
-                subselection = SubGroups.MIDDLE
-                view:update()
-                if self.playerCounter >= 2 then
-                    ctrlman:stop_accepting_ctrls()
+            elseif pos > 6 and x/controller.x_ratio > 640/3
+            and x/controller.x_ratio < 2*640/3 then
+                if ctrl.number_of_players >= 2 then
                     start_a_game()
                 end
             end
