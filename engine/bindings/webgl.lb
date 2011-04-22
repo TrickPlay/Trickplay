@@ -8,6 +8,22 @@ module webgl;
 
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
+
+#include "util.h"
+
+GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
+{
+    if ( value < min )
+    {
+        return min;
+    }
+    if ( value > max )
+    {
+        return max;
+    }
+    return value;
+}
+
 ]]
 
 interface WebGLRenderingContext [[void*]]
@@ -434,6 +450,7 @@ interface WebGLRenderingContext [[void*]]
     typedef int             WebGLFramebuffer;
     typedef int             WebGLRenderbuffer;
     typedef int             WebGLTexture;
+    typedef int             WebGLUniformLocation;
 
     typedef table           WebGLActiveInfo;
 
@@ -506,6 +523,7 @@ interface WebGLRenderingContext [[void*]]
 
     bindBuffer( GLenum target , WebGLBuffer buffer )
         [[
+            // TODO: check tha
             glBindBuffer( target , buffer );
         ]];
 
@@ -551,11 +569,11 @@ interface WebGLRenderingContext [[void*]]
 
     void bufferData(GLenum target, GLsizeiptr size, GLenum usage )
         [[
-            // TODO: Spec says that it should be initialized to zero -
-            // does that mean we allocate an area of memory, fill it
-            // with zeros and pass it to glBufferData?
+            guint8 * buffer = g_new0( guint8 , size );
 
-            glBufferData( target , size , 0 , usage );
+            glBufferData( target , size , buffer , usage );
+
+            g_free( buffer );
         ]];
 /*
     void bufferData(GLenum target, ArrayBufferView data, GLenum usage )
@@ -591,7 +609,7 @@ interface WebGLRenderingContext [[void*]]
 
     clearDepth(GLclampf depth )
         [[
-            glClearDepth( depth );
+            glClearDepth( clamp( depth , 0 , 1 ) );
         ]];
 
     clearStencil(GLint s )
@@ -616,7 +634,7 @@ interface WebGLRenderingContext [[void*]]
             glCopyTexImage2D( target , level , internalformat , x , y , width , height , border );
         ]];
 
-    void copyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
+    copyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
                            GLint x, GLint y, GLsizei width, GLsizei height )
         [[
             glCopyTexSubImage2D( target , level , xoffset , yoffset , x , y , width , height );
@@ -714,7 +732,13 @@ interface WebGLRenderingContext [[void*]]
 
     depthRange(GLclampf zNear, GLclampf zFar )
         [[
-            glDepthRange( zNear , zFar );
+            zNear = clamp( zNear , 0 , 1 );
+            zFar = clamp( zFar , 0 , 1 );
+
+            if ( zNear <= zFar )
+            {
+                glDepthRange( zNear , zFar );
+            }
         ]];
 
     detachShader(WebGLProgram program, WebGLShader shader )
@@ -890,159 +914,794 @@ interface WebGLRenderingContext [[void*]]
 
 
     any getParameter(GLenum pname )
-    [[
-    ]];
+        [[
+            #define WEBGL_MAX_FRAGMENT_UNIFORM_VECTORS          0x8DFD
+            #define WEBGL_MAX_VARYING_VECTORS                   0x8DFC
+            #define WEBGL_MAX_VERTEX_UNIFORM_VECTORS            0x8DFB
+            #define WEBGL_UNPACK_COLORSPACE_CONVERSION_WEBGL    0x9243
+            #define WEBGL_UNPACK_FLIP_Y_WEBGL                   0x9240
+            #define WEBGL_UNPACK_PREMULTIPLY_ALPHA_WEBGL        0x9241
 
-    any getBufferParameter(GLenum target, GLenum pname )
-    [[
-    ]];
+
+            int n = lua_gettop( L );
+
+            switch( pname )
+            {
+                case GL_ALPHA_BITS:
+                case GL_BLUE_BITS:
+                case GL_DEPTH_BITS:
+                case GL_GREEN_BITS:
+                case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
+                case GL_MAX_CUBE_MAP_TEXTURE_SIZE:
+                case WEBGL_MAX_FRAGMENT_UNIFORM_VECTORS:
+                case GL_MAX_RENDERBUFFER_SIZE:
+                case GL_MAX_TEXTURE_IMAGE_UNITS:
+                case GL_MAX_TEXTURE_SIZE:
+                case WEBGL_MAX_VARYING_VECTORS:
+                case GL_MAX_VERTEX_ATTRIBS:
+                case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS:
+                case WEBGL_MAX_VERTEX_UNIFORM_VECTORS:
+                case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
+                case GL_PACK_ALIGNMENT:
+                case GL_RED_BITS:
+                case GL_SAMPLE_BUFFERS:
+                case GL_STENCIL_BACK_REF:
+                case GL_STENCIL_BITS:
+                case GL_STENCIL_CLEAR_VALUE:
+                case GL_STENCIL_REF:
+                case GL_SUBPIXEL_BITS:
+                case GL_SAMPLES:
+                case GL_ACTIVE_TEXTURE:
+                case GL_BLEND_DST_ALPHA:
+                case GL_BLEND_DST_RGB:
+                case GL_BLEND_EQUATION_ALPHA:
+                case GL_BLEND_EQUATION_RGB:
+                case GL_BLEND_SRC_ALPHA:
+                case GL_BLEND_SRC_RGB:
+                case GL_CULL_FACE_MODE:
+                case GL_DEPTH_FUNC:
+                case GL_FRONT_FACE:
+                case GL_GENERATE_MIPMAP_HINT:
+                case GL_STENCIL_BACK_FAIL:
+                case GL_STENCIL_BACK_FUNC:
+                case GL_STENCIL_BACK_PASS_DEPTH_FAIL:
+                case GL_STENCIL_BACK_PASS_DEPTH_PASS:
+                case GL_STENCIL_BACK_VALUE_MASK:
+                case GL_STENCIL_BACK_WRITEMASK:
+                case GL_STENCIL_FAIL:
+                case GL_STENCIL_FUNC:
+                case GL_STENCIL_PASS_DEPTH_FAIL:
+                case GL_STENCIL_PASS_DEPTH_PASS:
+                case GL_STENCIL_VALUE_MASK:
+                case GL_STENCIL_WRITEMASK:
+                case WEBGL_UNPACK_COLORSPACE_CONVERSION_WEBGL:
+                case GL_UNPACK_ALIGNMENT:
+                {
+                    GLint v = 0;
+                    glGetIntegerv( pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+
+                case GL_ARRAY_BUFFER_BINDING:
+                case GL_CURRENT_PROGRAM:
+                case GL_ELEMENT_ARRAY_BUFFER_BINDING:
+                case GL_FRAMEBUFFER_BINDING:
+                case GL_RENDERBUFFER_BINDING:
+                case GL_TEXTURE_BINDING_2D:
+                case GL_TEXTURE_BINDING_CUBE_MAP:
+                {
+                    GLint v = 0;
+                    glGetIntegerv( pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+
+                case GL_VENDOR:
+                case GL_VERSION:
+                case GL_SHADING_LANGUAGE_VERSION:
+                case GL_RENDERER:
+                {
+                    const char * v = ( const char * ) glGetString( pname );
+                    lua_pushstring( L , v ? v : "" );
+                    break;
+                }
+
+                case GL_BLEND:
+                case GL_CULL_FACE:
+                case GL_DEPTH_TEST:
+                case GL_DEPTH_WRITEMASK:
+                case GL_DITHER:
+                case GL_POLYGON_OFFSET_FILL:
+                case GL_SAMPLE_COVERAGE_INVERT:
+                case GL_SCISSOR_TEST:
+                case GL_STENCIL_TEST:
+                case WEBGL_UNPACK_FLIP_Y_WEBGL:
+                case WEBGL_UNPACK_PREMULTIPLY_ALPHA_WEBGL:
+                {
+                    GLboolean v = 0;
+                    glGetBooleanv( pname , & v );
+                    lua_pushboolean( L , v == GL_TRUE ? true : false );
+                    break;
+                }
+
+                case GL_DEPTH_CLEAR_VALUE:
+                case GL_LINE_WIDTH:
+                case GL_POLYGON_OFFSET_FACTOR:
+                case GL_POLYGON_OFFSET_UNITS:
+                case GL_SAMPLE_COVERAGE_VALUE:
+                {
+                    GLfloat v = 0;
+                    glGetFloatv( pname , & v );
+                    lua_pushnumber( L , v );
+                    break;
+                }
+
+                case GL_ALIASED_LINE_WIDTH_RANGE:
+                case GL_ALIASED_POINT_SIZE_RANGE:
+                case GL_DEPTH_RANGE:
+                {
+                    GLfloat v[2] = { 0 , 0 };
+                    glGetFloatv( pname , v );
+                    lua_newtable( L );
+                    lua_pushnumber( L , v[0] );
+                    lua_rawseti( L , -2 , 1 );
+                    lua_pushnumber( L , v[1] );
+                    lua_rawseti( L , -2 , 2 );
+                    break;
+                }
+
+                case GL_BLEND_COLOR:
+                case GL_COLOR_CLEAR_VALUE:
+                {
+                    GLfloat v[4] = { 0 , 0 , 0 , 0 };
+                    glGetFloatv( pname , v );
+                    lua_newtable( L );
+                    lua_pushnumber( L , v[0] );
+                    lua_rawseti( L , -2 , 1 );
+                    lua_pushnumber( L , v[1] );
+                    lua_rawseti( L , -2 , 2 );
+                    lua_pushnumber( L , v[2] );
+                    lua_rawseti( L , -2 , 3 );
+                    lua_pushnumber( L , v[3] );
+                    lua_rawseti( L , -2 , 4 );
+                    break;
+                }
+
+                case GL_COLOR_WRITEMASK:
+                {
+                    GLboolean v[4] = { GL_FALSE , GL_FALSE , GL_FALSE , GL_FALSE };
+                    glGetBooleanv( pname , v );
+                    lua_newtable( L );
+                    lua_pushboolean( L , v[0] == GL_TRUE ? true : false );
+                    lua_rawseti( L , -2 , 1 );
+                    lua_pushboolean( L , v[1] == GL_TRUE ? true : false );
+                    lua_rawseti( L , -2 , 2 );
+                    lua_pushboolean( L , v[2] == GL_TRUE ? true : false );
+                    lua_rawseti( L , -2 , 3 );
+                    lua_pushboolean( L , v[3] == GL_TRUE ? true : false );
+                    lua_rawseti( L , -2 , 4 );
+                    break;
+                }
+
+                case GL_MAX_VIEWPORT_DIMS:
+                {
+                    GLint v[2] = { 0 , 0 };
+                    glGetIntegerv( pname , v );
+                    lua_newtable( L );
+                    lua_pushinteger( L , v[0] );
+                    lua_rawseti( L , -2 , 1 );
+                    lua_pushinteger( L , v[1] );
+                    lua_rawseti( L , -2 , 2 );
+                    break;
+                }
+
+                case GL_SCISSOR_BOX:
+                case GL_VIEWPORT:
+                {
+                    GLint v[4] = { 0 , 0 , 0 , 0 };
+                    glGetIntegerv( pname , v );
+                    lua_newtable( L );
+                    lua_pushinteger( L , v[0] );
+                    lua_rawseti( L , -2 , 1 );
+                    lua_pushinteger( L , v[1] );
+                    lua_rawseti( L , -2 , 2 );
+                    lua_pushinteger( L , v[2] );
+                    lua_rawseti( L , -2 , 3 );
+                    lua_pushinteger( L , v[3] );
+                    lua_rawseti( L , -2 , 4 );
+                    break;
+                }
+            }
+
+            if ( lua_gettop( L ) == n )
+            {
+                lua_pushnil( L );
+            }
+        ]];
+
+    int getBufferParameter(GLenum target, GLenum pname )
+        [[
+            GLint v = 0;
+            glGetBufferParameteriv( target , pname , & v );
+            result = v;
+        ]];
 
     GLenum getError( )
-    [[
-    ]];
+        [[
+            result = glGetError();
+        ]];
 
-    any getFramebufferAttachmentParameter(GLenum target, GLenum attachment,
-                                          GLenum pname )
-    [[
-    ]];
+    any getFramebufferAttachmentParameter(GLenum target, GLenum attachment, GLenum pname )
+        [[
+            switch( pname )
+            {
+                case GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE:
+                case GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME:
+                case GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL:
+                case GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE:
+                {
+                    GLint v = 0;
+                    glGetFramebufferAttachmentParameteriv( target , attachment , pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+                default:
+                    lua_pushnil( L );
+                    break;
+            }
+        ]];
 
     any getProgramParameter(WebGLProgram program, GLenum pname )
-    [[
-    ]];
+        [[
+            switch( pname )
+            {
+                case GL_DELETE_STATUS:
+                case GL_LINK_STATUS:
+                case GL_VALIDATE_STATUS:
+                {
+                    GLint v = GL_FALSE;
+                    glGetProgramiv( program , pname , & v );
+                    lua_pushboolean( L , v == GL_TRUE ? true : false );
+                    break;
+                }
+
+                case GL_ATTACHED_SHADERS:
+                case GL_ACTIVE_ATTRIBUTES:
+                case GL_ACTIVE_UNIFORMS:
+                {
+                    GLint v = 0;
+                    glGetProgramiv( program , pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+
+                default:
+                    lua_pushnil( L );
+                    break;
+            }
+        ]];
 
     DOMString getProgramInfoLog(WebGLProgram program )
-    [[
-    ]];
+        [[
+            GLint length = 0;
+
+            glGetProgramiv( program , GL_INFO_LOG_LENGTH , & length );
+
+            if ( length <= 0 )
+            {
+                result = "";
+            }
+            else
+            {
+                gchar * log = g_new( gchar , length + 1 );
+
+                glGetProgramInfoLog( program , length + 1 , 0 , log );
+
+                FreeLater free_later( log );
+
+                result = log;
+            }
+        ]];
 
     any getRenderbufferParameter(GLenum target, GLenum pname )
-    [[
-    ]];
+        [[
+            switch( pname )
+            {
+                case GL_RENDERBUFFER_WIDTH:
+                case GL_RENDERBUFFER_HEIGHT:
+                case GL_RENDERBUFFER_INTERNAL_FORMAT:
+                case GL_RENDERBUFFER_RED_SIZE:
+                case GL_RENDERBUFFER_GREEN_SIZE:
+                case GL_RENDERBUFFER_BLUE_SIZE:
+                case GL_RENDERBUFFER_ALPHA_SIZE:
+                case GL_RENDERBUFFER_DEPTH_SIZE:
+                case GL_RENDERBUFFER_STENCIL_SIZE:
+                {
+                    GLint v = 0;
+                    glGetRenderbufferParameteriv( target , pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+                default:
+                    lua_pushnil( L );
+                    break;
+            }
+        ]];
 
     any getShaderParameter(WebGLShader shader, GLenum pname )
-    [[
-    ]];
+        [[
+            switch( pname )
+            {
+                case GL_SHADER_TYPE:
+                {
+                    GLint v = 0;
+                    glGetShaderiv( shader , pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+
+                case GL_DELETE_STATUS:
+                case GL_COMPILE_STATUS:
+                {
+                    GLint v = GL_FALSE;
+                    glGetShaderiv( shader , pname , & v );
+                    lua_pushboolean( L , v == GL_TRUE ? true : false );
+                    break;
+                }
+
+                default:
+                    lua_pushnil( L );
+                    break;
+            }
+        ]];
 
     DOMString getShaderInfoLog(WebGLShader shader )
-    [[
-    ]];
+        [[
+            GLint length = 0;
+
+            glGetShaderiv( shader , GL_INFO_LOG_LENGTH , & length );
+
+            if ( length <= 0 )
+            {
+              result = "";
+            }
+            else
+            {
+              gchar * log = g_new( gchar , length + 1 );
+
+              glGetShaderInfoLog( shader , length + 1 , 0 , log );
+
+              FreeLater free_later( log );
+
+              result = log;
+            }
+        ]];
 
     DOMString getShaderSource(WebGLShader shader )
-    [[
-    ]];
+        [[
+            GLint length = 0;
+
+            glGetShaderiv( shader , GL_SHADER_SOURCE_LENGTH , & length );
+
+            if ( length <= 0 )
+            {
+                result = "";
+            }
+            else
+            {
+                gchar * log = g_new( gchar , length + 1 );
+
+                glGetShaderSource( shader , length + 1 , 0 , log );
+
+                FreeLater free_later( log );
+
+                result = log;
+            }
+        ]];
 
     any getTexParameter(GLenum target, GLenum pname )
-    [[
-    ]];
+        [[
+            switch( pname )
+            {
+                case GL_TEXTURE_MAG_FILTER:
+                case GL_TEXTURE_MIN_FILTER:
+                case GL_TEXTURE_WRAP_S:
+                case GL_TEXTURE_WRAP_T:
+                {
+                    GLint v = 0;
+                    glGetTexParameteriv( target , pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+                default:
+                    lua_pushnil( L );
+                    break;
+            }
+        ]];
 
     any getUniform(WebGLProgram program, WebGLUniformLocation location )
-    [[
-    ]];
+        [[
+            // Copied a lot of this from Mozilla
 
-    WebGLUniformLocation getUniformLocation(WebGLProgram program, DOMString name )
-    [[
-    ]];
+            int top = lua_gettop( L );
+
+            GLint uniform_count = 0;
+            GLint max_name_length = 0;
+
+            glGetProgramiv( program , GL_ACTIVE_UNIFORMS , & uniform_count );
+            glGetProgramiv( program , GL_ACTIVE_UNIFORM_MAX_LENGTH , & max_name_length );
+
+            if ( uniform_count > 0 && max_name_length > 0 )
+            {
+                gchar * name = g_new( gchar , max_name_length * 2 );
+
+                FreeLater free_later( name );
+
+                GLint index = 0;
+
+                GLenum  uniform_type = 0;
+
+                for ( index = 0; index < uniform_count; ++index )
+                {
+                    GLsizei length = 0;
+                    GLint   size = 0;
+
+                    glGetActiveUniform( program , index , max_name_length * 2 , & length , & size , & uniform_type , name );
+
+                    if ( length )
+                    {
+                        if ( location == glGetUniformLocation( program , name ) )
+                        {
+                            break;
+                        }
+
+                        if ( size > 1 )
+                        {
+                            bool found_it = false;
+
+                            if ( name[ length - 1 ] == ']' )
+                            {
+                                length -= 3;
+                                name[ length ] = 0;
+                            }
+
+                            for ( GLint arrayIndex = 1; arrayIndex < size; arrayIndex++)
+                            {
+                                gchar * bracket_name = g_strdup_printf( "%s[%d]" , name , arrayIndex );
+
+                                FreeLater free_later( bracket_name );
+
+                                if ( location == glGetUniformLocation( program , bracket_name ) )
+                                {
+                                    found_it = true;
+                                    break;
+                                }
+                            }
+
+                            if ( found_it )
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if ( index < uniform_count )
+                {
+                    GLenum base_type = 0;
+                    GLint  size      = 0;
+
+                    switch( uniform_type )
+                    {
+                        case GL_FLOAT:
+                            base_type = GL_FLOAT;
+                            size      = 1;
+                            break;
+                        case GL_FLOAT_VEC2:
+                            base_type = GL_FLOAT;
+                            size      = 2;
+                            break;
+                        case GL_FLOAT_VEC3:
+                            base_type = GL_FLOAT;
+                            size      = 3;
+                            break;
+                        case GL_FLOAT_VEC4:
+                            base_type = GL_FLOAT;
+                            size      = 4;
+                            break;
+                        case GL_INT:
+                            base_type = GL_INT;
+                            size      = 1;
+                            break;
+                        case GL_INT_VEC2:
+                            base_type = GL_INT;
+                            size      = 2;
+                            break;
+                        case GL_INT_VEC3:
+                            base_type = GL_INT;
+                            size      = 3;
+                            break;
+                        case GL_INT_VEC4:
+                            base_type = GL_INT;
+                            size      = 4;
+                            break;
+                        case GL_BOOL:
+                            base_type = GL_BOOL;
+                            size      = 1;
+                            break;
+                        case GL_BOOL_VEC2:
+                            base_type = GL_BOOL;
+                            size      = 2;
+                            break;
+                        case GL_BOOL_VEC3:
+                            base_type = GL_BOOL;
+                            size      = 3;
+                            break;
+                        case GL_BOOL_VEC4:
+                            base_type = GL_BOOL;
+                            size      = 4;
+                            break;
+                        case GL_FLOAT_MAT2:
+                            base_type = GL_FLOAT;
+                            size      = 4;
+                            break;
+                        case GL_FLOAT_MAT3:
+                            base_type = GL_FLOAT;
+                            size      = 9;
+                            break;
+                        case GL_FLOAT_MAT4:
+                            base_type = GL_FLOAT;
+                            size      = 16;
+                            break;
+                    }
+
+                    if ( base_type && size <= 16 )
+                    {
+                        switch( base_type )
+                        {
+                            case GL_INT:
+                            {
+                                GLint v[16];
+                                glGetUniformiv( program , location , v );
+                                if ( size == 1 )
+                                {
+                                    lua_pushinteger( L , v[0] );
+                                }
+                                else
+                                {
+                                    lua_newtable( L );
+                                    for ( GLint i = 0; i < size; ++i )
+                                    {
+                                        lua_pushinteger( L , v[ i ] );
+                                        lua_rawseti( L , -2 , i + 1 );
+                                    }
+                                }
+                                break;
+                            }
+
+                            case GL_BOOL:
+                            {
+                                GLint v[16];
+                                glGetUniformiv( program , location , v );
+                                if ( size == 1 )
+                                {
+                                    lua_pushboolean( L , v[0] == GL_TRUE ? true : false );
+                                }
+                                else
+                                {
+                                    lua_newtable( L );
+                                    for ( GLint i = 0; i < size; ++i )
+                                    {
+                                        lua_pushboolean( L , v[ i ] == GL_TRUE ? true : false );
+                                        lua_rawseti( L , -2 , i + 1 );
+                                    }
+                                }
+                                break;
+                            }
+
+                            case GL_FLOAT:
+                            {
+                                GLfloat v[16];
+                                glGetUniformfv( program , location , v );
+                                if ( size == 1 )
+                                {
+                                    lua_pushnumber( L , v[0] );
+                                }
+                                else
+                                {
+                                    lua_newtable( L );
+                                    for ( GLint i = 0; i < size; ++i )
+                                    {
+                                        lua_pushnumber( L , v[ i ] );
+                                        lua_rawseti( L , -2 , i + 1 );
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ( lua_gettop( L ) == top )
+            {
+                lua_pushnil( L );
+            }
+        ]];
+
+    WebGLUniformLocation getUniformLocation( WebGLProgram program , DOMString name )
+        [[
+            result = glGetUniformLocation( program , name );
+
+        ]];
 
     any getVertexAttrib(GLuint index, GLenum pname )
-    [[
-    ]];
+        [[
+            switch( pname )
+            {
+                case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING:
+                case GL_VERTEX_ATTRIB_ARRAY_SIZE:
+                case GL_VERTEX_ATTRIB_ARRAY_STRIDE:
+                case GL_VERTEX_ATTRIB_ARRAY_TYPE:
+                {
+                    GLint v;
+                    glGetVertexAttribiv( index , pname , & v );
+                    lua_pushinteger( L , v );
+                    break;
+                }
+
+                case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:
+                {
+                    GLint v;
+                    glGetVertexAttribiv( index , pname , & v );
+                    lua_pushboolean( L , v == GL_TRUE ? true : false );
+                    break;
+                }
+
+                case GL_CURRENT_VERTEX_ATTRIB:
+                {
+                    GLfloat v[4];
+                    glGetVertexAttribfv( index , pname , v );
+                    lua_newtable( L );
+                    for ( int i = 0; i < 4; ++i )
+                    {
+                        lua_pushnumber( L , v[ i ] );
+                        lua_rawseti( L , -2 , i + 1 );
+                    }
+                    break;
+                }
+
+                default:
+                    lua_pushnil( L );
+                    break;
+            }
+        ]];
 
     GLsizeiptr getVertexAttribOffset(GLuint index, GLenum pname )
-    [[
-    ]];
+        [[
+            GLvoid * p = 0;
+            glGetVertexAttribPointerv( index , pname , & p );
+            result = GPOINTER_TO_INT( p );
+        ]];
 
-    void hint(GLenum target, GLenum mode )
-    [[
-    ]];
+    hint(GLenum target, GLenum mode )
+        [[
+            glHint( target , mode );
+        ]];
 
     GLboolean isBuffer(WebGLBuffer buffer )
-    [[
-    ]];
+        [[
+            result = glIsBuffer( buffer ) == GL_TRUE;
+        ]];
 
     GLboolean isEnabled(GLenum cap )
-    [[
-    ]];
+        [[
+            result = glIsEnabled( cap ) == GL_TRUE;
+        ]];
 
     GLboolean isFramebuffer(WebGLFramebuffer framebuffer )
-    [[
-    ]];
+        [[
+            result = glIsFramebuffer( framebuffer ) == GL_TRUE;
+        ]];
 
     GLboolean isProgram(WebGLProgram program )
-    [[
-    ]];
+        [[
+            result = glIsProgram( program ) == GL_TRUE;
+        ]];
 
     GLboolean isRenderbuffer(WebGLRenderbuffer renderbuffer )
-    [[
-    ]];
+        [[
+            result = glIsRenderbuffer( renderbuffer ) == GL_TRUE;
+        ]];
 
     GLboolean isShader(WebGLShader shader )
-    [[
-    ]];
+        [[
+            result = glIsShader( shader ) == GL_TRUE;
+        ]];
 
     GLboolean isTexture(WebGLTexture texture )
-    [[
-    ]];
+        [[
+            result = glIsTexture( texture ) == GL_TRUE;
+        ]];
 
-    void lineWidth(GLfloat width )
-    [[
-    ]];
+    lineWidth(GLfloat width )
+        [[
+            glLineWidth( width );
+        ]];
 
-    void linkProgram(WebGLProgram program )
-    [[
-    ]];
+    linkProgram(WebGLProgram program )
+        [[
+            glLinkProgram( program );
+        ]];
 
-    void pixelStorei(GLenum pname, GLint param )
-    [[
-    ]];
+    pixelStorei(GLenum pname, GLint param )
+        [[
+            glPixelStorei( pname , param );
+        ]];
 
-    void polygonOffset(GLfloat factor, GLfloat units )
-    [[
-    ]];
+    polygonOffset(GLfloat factor, GLfloat units )
+        [[
+            glPolygonOffset( factor , units );
+        ]];
 
     void readPixels(GLint x, GLint y, GLsizei width, GLsizei height,
                     GLenum format, GLenum type, ArrayBufferView pixels )
     [[
     ]];
 
-    void renderbufferStorage(GLenum target, GLenum internalformat,
+    renderbufferStorage(GLenum target, GLenum internalformat,
                              GLsizei width, GLsizei height )
-    [[
-    ]];
+        [[
+            glRenderbufferStorage( target , internalformat , width , height );
+        ]];
 
-    void sampleCoverage(GLclampf value, GLboolean invert )
-    [[
-    ]];
+    sampleCoverage(GLclampf value, GLboolean invert )
+        [[
+            glSampleCoverage( value , invert );
+        ]];
 
-    void scissor(GLint x, GLint y, GLsizei width, GLsizei height )
-    [[
-    ]];
+    scissor(GLint x, GLint y, GLsizei width, GLsizei height )
+        [[
+            glScissor( x , y , width , height );
+        ]];
 
-    void shaderSource(WebGLShader shader, DOMString source )
-    [[
-    ]];
+    shaderSource(WebGLShader shader, DOMString source )
+        [[
+            GLint length = strlen( source );
 
-    void stencilFunc(GLenum func, GLint ref, GLuint mask )
-    [[
-    ]];
+            glShaderSource( shader , 1 , & source , & length );
+        ]];
 
-    void stencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask )
-    [[
-    ]];
+    stencilFunc(GLenum func, GLint ref, GLuint mask )
+        [[
+            glStencilFunc( func , ref , mask );
+        ]];
 
-    void stencilMask(GLuint mask )
-    [[
-    ]];
+    stencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask )
+        [[
+            glStencilFuncSeparate( face , func , ref , mask );
+        ]];
 
-    void stencilMaskSeparate(GLenum face, GLuint mask )
-    [[
-    ]];
+    stencilMask(GLuint mask )
+        [[
+            glStencilMask( mask );
+        ]];
 
-    void stencilOp(GLenum fail, GLenum zfail, GLenum zpass )
-    [[
-    ]];
+    stencilMaskSeparate(GLenum face, GLuint mask )
+        [[
+            glStencilMaskSeparate( face , mask );
+        ]];
 
-    void stencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zpass )
-    [[
-    ]];
+    stencilOp(GLenum fail, GLenum zfail, GLenum zpass )
+        [[
+            glStencilOp( fail , zfail , zpass );
+        ]];
+
+    stencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zpass )
+        [[
+            glStencilOpSeparate( face , fail , zfail , zpass );
+        ]];
 
 
     void texImage2D(GLenum target, GLint level, GLenum internalformat,
@@ -1072,13 +1731,15 @@ interface WebGLRenderingContext [[void*]]
     [[
     ]];
 */
-    void texParameterf(GLenum target, GLenum pname, GLfloat param )
-    [[
-    ]];
+    texParameterf(GLenum target, GLenum pname, GLfloat param )
+        [[
+            glTexParameterf( target , pname , param );
+        ]];
 
-    void texParameteri(GLenum target, GLenum pname, GLint param )
-    [[
-    ]];
+    texParameteri(GLenum target, GLenum pname, GLint param )
+        [[
+            glTexParameteri( target , pname , param );
+        ]];
 
 
     void texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
@@ -1108,12 +1769,16 @@ interface WebGLRenderingContext [[void*]]
     ]];
 */
     void uniform1f(WebGLUniformLocation location, GLfloat x )
-    [[
-    ]];
+        [[
+            if ( location )
+            {
+                glUniform1f( location , x );
+            }
+        ]];
 
     void uniform1fv(WebGLUniformLocation location, Float32Array v )
-    [[
-    ]];
+        [[
+        ]];
 /*
     void uniform1fv(WebGLUniformLocation location, float[] v )
     [[
@@ -1301,4 +1966,12 @@ interface WebGLRenderingContext [[void*]]
     void viewport(GLint x, GLint y, GLsizei width, GLsizei height )
     [[
     ]];
+}
+
+global gl [[void*]] WebGLRenderingContext
+{
+    gl()
+        [[
+            lb_construct_empty();
+        ]];
 }
