@@ -50,13 +50,13 @@
 }
 
 - (void)sendImage:(UIImage *)image {
-    NSData *imageData = UIImagePNGRepresentation(image);
+    NSData *imageData = UIImageJPEGRepresentation(image, 0.7);
     
     NSURL *postURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", host, port, path]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:postURL];
     
     [request setHTTPMethod:@"POST"];
-    [request setValue:@"image/png" forHTTPHeaderField:@"Content-type"];
+    [request setValue:@"image/jpeg" forHTTPHeaderField:@"Content-type"];
     [request setValue:[NSString stringWithFormat:@"%d", [imageData length]] forHTTPHeaderField:@"Content-length"];
     [request setHTTPBody:imageData];
     
@@ -130,13 +130,15 @@
 #pragma mark Presenting and dissmissing the camera
 
 - (void)presentTheCamera {
+    NSLog(@"Presenting the Camera");
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
             [popOverController release];
         }
         popOverController = [[UIPopoverController alloc] initWithContentViewController:imagePickerController];
-        CGRect frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
+        CGRect frame = CGRectMake(self.view.frame.size.width/2.0, self.view.frame.size.height/2.0, 20.0, 20.0);
+
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     } else {
         [self presentModalViewController:imagePickerController animated:YES];
@@ -144,6 +146,7 @@
 }
 
 - (void)dismissTheCamera:(UIImagePickerController *)picker {
+    NSLog(@"Dismissing the Camera");
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
