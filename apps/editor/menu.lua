@@ -50,27 +50,6 @@ local menuButton_file = ui_element.menuButton
     		item_text_color = "#ffffff",
 	}
 
---[[
-local file_icon = Group{}
-local file_icon_text = Text{
-                        text  = 
-                        font  = "FreeSans Medium 20px",
-                        color = "#ffffff",
-
-                    }
-      file_icon:add(file_icon_text)
-
-local file_icon_text_shadow = Text{
-                        text  = ,
-                        font  = "FreeSans Medium 20px",
-                        color = "000000",
-                        opacity=255*.5,
-                        x     = 1,
-                        y     = 1,
-                    }
-      file_icon:add(file_icon_text_shadow)
-
-]]
 menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close,})
 menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_open})
 menuButton_file.insert_item(3,{type="item", string="Save ...\t\t\t     S", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true}) 
@@ -480,13 +459,7 @@ local menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,
 -- Menu Raise To Top
 ----------------------------------------------------------------------------
 function menu_raise_to_top() 
-	--[[
-	for i, j in pairs (menu_bar_t) do 
-		j:raise_to_top()
-	end
-	]]--
 	menuShow()
-	--screen:grab_key_focus()
 end 
 
 editor_use = false

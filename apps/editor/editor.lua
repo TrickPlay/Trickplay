@@ -293,26 +293,31 @@ end
 function editor.small_grid()
 clear_bg() BG_IMAGE_20.opacity = 255 input_mode = S_SELECT
 screen:find_child("menuButton_view").items[3]["icon"].opacity = 255
+screen:grab_key_focus()
 end 
 
 function editor.medium_grid()
 clear_bg() BG_IMAGE_40.opacity = 255 input_mode = S_SELECT
 screen:find_child("menuButton_view").items[4]["icon"].opacity = 255
+screen:grab_key_focus()
 end 
 
 function editor.large_grid()
 clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT
 screen:find_child("menuButton_view").items[5]["icon"].opacity = 255
+screen:grab_key_focus()
 end 
 
 function editor.white_bg()
 clear_bg() BG_IMAGE_white.opacity = 255 input_mode = S_SELECT
 screen:find_child("menuButton_view").items[6]["icon"].opacity = 255
+screen:grab_key_focus()
 end 
 
 function editor.black_bg()
 clear_bg() input_mode = S_SELECT
 screen:find_child("menuButton_view").items[7]["icon"].opacity = 255
+screen:grab_key_focus()
 end 
 
 
@@ -336,6 +341,7 @@ function editor.show_guides()
 			screen:find_child("v_guideline"..tostring(i)):hide() 
 		end 
 	end
+	screen:grab_key_focus()
 end 
 
 function editor.snap_guides()
@@ -344,6 +350,7 @@ function editor.snap_guides()
 	else 
 		 screen:find_child("menuButton_view").items[12]["icon"].opacity = 255 
 	end
+	screen:grab_key_focus()
 end 
 
 function editor.timeline() 
@@ -366,6 +373,7 @@ function editor.timeline()
 		screen:find_child("timeline"):hide()
 		screen:find_child("timeline").extra.show = false
 	end
+	screen:grab_key_focus()
 end 
 
 
@@ -418,6 +426,7 @@ function editor.v_guideline()
      }
      create_on_line_down_f(v_gl)
      screen:add(v_gl)
+     screen:grab_key_focus()
 end
 
 function editor.h_guideline()
@@ -442,6 +451,7 @@ function editor.h_guideline()
 
      create_on_line_down_f(h_gl)
      screen:add(h_gl)
+     screen:grab_key_focus()
 end
 
 
@@ -2307,6 +2317,7 @@ function editor.clone()
         end
 
 	input_mode = S_SELECT
+	screen:grab_key_focus()
 end
 	
 function editor.duplicate()
@@ -2489,6 +2500,7 @@ function editor.duplicate()
         end
 
 	input_mode = S_SELECT
+	screen:grab_key_focus()
 end
 
 function editor.delete()
@@ -2544,6 +2556,7 @@ function editor.delete()
 	    end 
 	end 
 	input_mode = S_SELECT
+	screen:grab_key_focus()
 end
 	
 

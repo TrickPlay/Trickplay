@@ -168,13 +168,15 @@ function inspector_apply (v, inspector)
                v.icon = "assets/images/"..tostring(item_group:find_child("icon"):find_child("file_name").text)
 	       end,
 	["source"] = function()
-               v.source = "assets/images/"..tostring(item_group:find_child("source"):find_child("file_name").text)
+               v.source = "assets/videos/"..tostring(item_group:find_child("source"):find_child("file_name").text)
 	       end,
 	["src"] = function()
-               v.src = "assets/images/"..tostring(item_group:find_child("src"):find_child("file_name").text)
+               v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
 	       end,
 	["name"] = function ()
-	       v.extra.prev_name = v.name  
+	       if v.extra then 
+	        	v.extra.prev_name = v.name  
+	       end 
 	       v.name = tostring(item_group:find_child("name"):find_child("input_text").text)
 	       end, 
 
