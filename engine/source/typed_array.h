@@ -16,6 +16,8 @@ public:
 
     static ArrayBuffer * from_lua( lua_State * L , int index );
 
+    void push( lua_State * L );
+
     inline guint8 * get_data()
     {
         return data;
@@ -154,9 +156,19 @@ public:
         return offset;
     }
 
+    inline ArrayBuffer * get_buffer() const
+    {
+        return buffer;
+    }
+
     inline bool is_bad() const
     {
         return bad;
+    }
+
+    inline gulong get_byte_length() const
+    {
+        return length * bpe;
     }
 
 private:

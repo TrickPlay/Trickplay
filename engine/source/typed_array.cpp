@@ -1,5 +1,6 @@
 
 #include "lb.h"
+#include "user_data.h"
 #include "typed_array.h"
 
 //=============================================================================
@@ -35,6 +36,41 @@ ArrayBuffer * ArrayBuffer::from_lua( lua_State * L , int index )
     }
 
     return 0;
+}
+
+//.............................................................................
+
+void ArrayBuffer::push( lua_State * L )
+{
+    if ( UserData * ud = UserData::get_from_client( this ) )
+    {
+        ud->push_proxy();
+
+        if ( ! lua_isnil( L , -1 ) )
+        {
+            return;
+        }
+
+        lua_pop( L , 1 );
+    }
+
+    UserData * ud = UserData::make( L , "ArrayBuffer" );
+
+    luaL_getmetatable( L , "ARRAYBUFFER_METATABLE" );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+        lua_pop( L , 1 );
+        lua_getglobal( L , "ArrayBuffer" );
+        lua_pop( L , 1 );
+        luaL_getmetatable( L , "ARRAYBUFFER_METATABLE" );
+    }
+
+    lua_setmetatable( L , -2 );
+
+    this->ref();
+
+    ud->initialize_with_client( this );
 }
 
 //=============================================================================
