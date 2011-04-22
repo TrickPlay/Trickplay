@@ -756,18 +756,10 @@ def emit( stuff , f ):
                     "int new_%s(lua_State*L)\n"
                     "{\n"
                     "%s"
-                    '  UserData * __ud__ = UserData::make( L , "%s" );\n'
-                    "  luaL_getmetatable(L,%s);\n"
-                    "  lua_setmetatable(L,-2);\n"
-		    "  %s self=0;\n"
-                    "\n"
                     %
-                    ( bind_name ,
-		     profiling_header("new_%s"%bind_name) ,
-		     bind_name,
-		     metatable_name, udata_type )
+                    ( bind_name , profiling_header("new_%s"%bind_name) ) 
                 )
-                
+                    
                 for index , param in enumerate( func[ "parameters" ] ):
                     
                     f.write(
@@ -776,15 +768,26 @@ def emit( stuff , f ):
                         ( declare_local( param , index + 1 )  , )
                     )
                     
+                f.write( 
+                    
+                    '  UserData * __ud__ = UserData::make( L , "%s" );\n'
+                    "  luaL_getmetatable(L,%s);\n"
+                    "  lua_setmetatable(L,-2);\n"
+		            "  %s self=0;\n"
+                    "\n"
+                    %
+                    ( bind_name , metatable_name, udata_type )
+                )
+                                                      
                 if func[ "code" ] is not None:
                     
                     flow_code( func[ "code" ] )
                     
                 else:
 		    
-		    f.write( "  lb_construct_empty();\n" )
+		            f.write( "  lb_construct_empty();\n" )
                     
-                
+
                 f.write("  lb_check_initialized();\n")
                 
                 if options.profiling:
@@ -793,7 +796,7 @@ def emit( stuff , f ):
                         '  PROFILER_CREATED("%s",self);\n'
                         %
                         bind_name );
-                
+                                
                 f.write(
                     "  return 1;\n" 
                 )
