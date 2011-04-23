@@ -11,17 +11,17 @@ local prev_end_marker = Rectangle{
     w=100, h=100, color = "ffff00", anchor_point = {50,50}
 }
 prev_end_marker:hide()
-local sky = Image{src="skyline.png",x=screen.w/2,y=-17}--Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="172e57"}
+local sky = Image{src="assets/world/skyline.png",x=screen.w/2,y=-17}--Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="172e57"}
 local sky_w = sky.w
 sky.anchor_point={sky.w/2,0}
 car = Image{name="THE CAR",src="assets/Lambo/00.png",position={screen.w/2,5*screen.h/6}}
-car.v_y = 70*pixels_per_mile
+car.v_y = 0
 car.v_x = 0
 car:hide()
 tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+63},opacity=0}
 car.anchor_point = {car.w/2,car.h/2}
 tail_lights.anchor_point = {tail_lights.w/2,tail_lights.h/2}
-local horizon_grad = Image{src="gradient.png",tile={true,false},w=screen_w,y=sky.h-17,scale={1,2}}
+local horizon_grad = Image{src="assets/world/gradient.png",tile={true,false},w=screen_w,y=sky.h-17,scale={1,2}}
 section_i = 1
 --active_sections = {}
 local ground_backing = Rectangle{w=screen_w,h=screen_h,color="362818"}
@@ -68,12 +68,12 @@ function world:reset()
     self.road.y_rotation   = {0,0,0}
     self.cars.y_rotation   = {0,0,0}
     section_i = 1
-    crashed = false
+    crashed   = false
     num_passing_cars = 0
-    car.v_y = 70*pixels_per_mile
+    car.v_y = 0
     car.v_x = 0
-    w_ap_x = 0
-    w_ap_y = 0
+    w_ap_x  = 0
+    w_ap_y  = 0
     other_cars = {}
     road={segments={}}
     end_point[1] = 0

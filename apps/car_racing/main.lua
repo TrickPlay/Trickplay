@@ -11,7 +11,8 @@ math.randomseed(os.time())
 --splash:add(splash_title)
 
 end_game = Group{x=screen_w/2,y=screen_h/2}
-end_game_text = Text{text="You Crashed\n\nRestarting in 3",font="Digital-7 80px",color="ffd652"}
+
+end_game_text = Text{text="You Crashed\n\nRestarting in 3",alignment="CENTER",font="Digital-7 80px",color="ffd652"}
 local end_game_backing=Rectangle{w=end_game_text.w+50,h=end_game_text.h+50,color="000000",opacity=255*.5}
 end_game_text.anchor_point={end_game_text.w/2,end_game_text.h/2}
 end_game_backing.anchor_point={end_game_backing.w/2,end_game_backing.h/2}
@@ -31,7 +32,7 @@ local speedo = Image{src="assets/speedo.png",x=screen_w,y=screen_h}
 speedo.anchor_point={speedo.w,speedo.h}
 hud:add(speedo)
 local mph_txt    = Text{text="000",font="Digital-7 60px",color="ffd652",x=1786,y=986}
-local points_txt = Text{text="000000",font="Digital-7 26px",color="ffa752",x=1653,y=1050}
+local points_txt = Text{text="0000000",font="Digital-7 26px",color="ffa752",x=1653,y=1050}
 local points = 0
 local dead_time = 0
 hud:add(mph_txt,points_txt)

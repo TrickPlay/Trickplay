@@ -14,7 +14,20 @@
 --left down is -1,0
 
 function controllers.on_controller_connected( controllers , controller )
-    dumptable(controller.ui_size)
+    
+    if controller.ui_size[1] == 435 then
+        controller:declare_resource("bg","assets/hand_held_controller/ipod.png")
+        controller:set_ui_background("bg","STRETCH")
+        print("Connected IPOD")
+    elseif controller.ui_size[1] == 640 then
+        controller:declare_resource("bg","assets/hand_held_controller/iphone.png")
+        controller:set_ui_background("bg","STRETCH")
+        print("Connected IPHONE")
+    else
+        controller:declare_resource("bg","assets/hand_held_controller/ipad.png")
+        controller:set_ui_background("bg","STRETCH")
+        print("Connected IPAD")
+    end
     if controller.has_accelerometer then
     
         controller:start_accelerometer( "L" , 20/1000 )
