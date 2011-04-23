@@ -2,14 +2,29 @@
 screen:show()
 screen_w = screen.w
 screen_h = screen.h
-crashed = false
-num_passing_cars = 0
-math.randomseed(os.time())
---local splash = Group{}
---local splash_title = Image{src="assets/logo.png",x=screen_w/2,y=screen_h/2}
---splash_title.anchor_point={splash_title.w/2,splash_title.h/2}
---splash:add(splash_title)
 
+math.randomseed(os.time())
+
+--Global Constants
+pixels_per_mile = 70
+lane_dist = 960*2/3
+
+--Game State
+paused       = true
+crashed      = false --car
+strafed_dist = 960--car
+local points = 0
+local dead_time = 0
+local curr_path = nil--path
+local dy_remaining_in_path = 0--path
+local dr_remaining_in_path = 0
+
+throttle_position = 0
+mph = 0
+turn_impulse = 0
+
+
+--End of Game Message
 end_game = Group{x=screen_w/2,y=screen_h/2}
 
 end_game_text = Text{text="You Crashed\n\nRestarting in 3",alignment="CENTER",font="Digital-7 80px",color="ffd652"}
@@ -18,23 +33,23 @@ end_game_text.anchor_point={end_game_text.w/2,end_game_text.h/2}
 end_game_backing.anchor_point={end_game_backing.w/2,end_game_backing.h/2}
 end_game:add(end_game_backing,end_game_text)
 screen:add(end_game)
-pixels_per_mile = 70
-paused = true
+
 local idle_loop
 
 clone_sources = Group{name="clone_sources"}
 screen:add(clone_sources)
 clone_sources:hide()
-strafed_dist = 960
+
 local STRAFE_CAP =1400
+
+
 local hud = Group{name="hud"}
 local speedo = Image{src="assets/speedo.png",x=screen_w,y=screen_h}
 speedo.anchor_point={speedo.w,speedo.h}
 hud:add(speedo)
 local mph_txt    = Text{text="000",font="Digital-7 60px",color="ffd652",x=1786,y=986}
 local points_txt = Text{text="0000000",font="Digital-7 26px",color="ffa752",x=1653,y=1050}
-local points = 0
-local dead_time = 0
+
 hud:add(mph_txt,points_txt)
 hud:hide()
 road={
@@ -48,18 +63,11 @@ dofile( "OtherCars.lua" )
 dofile(  "Sections.lua" )
 dofile(     "Level.lua" )
 screen:add(hud,splash)
-speed = 0
-throttle_position = 0
-mph = 0
-turn_impulse = 0
-curve_impulse = 0
-collision_strength = 0
-collision_angle = 0
-ccc = nil
+
+
+
 dofile("controller.lua")
-local curr_path = nil
-local dy_remaining_in_path = 0
-local dr_remaining_in_path = 0
+
 local keys = {
 	--[[
 	[keys.Up] = function()
@@ -231,7 +239,7 @@ idle_loop = function(_,seconds)
 	assert(road.curr_segment ~= nil)
 	
 	--distance covered this iteration
-	dy = (speed)*seconds
+	dy = car.v_y*seconds
 	dr = curr_path.rot*dy/curr_path.dist --relative to amount travelled
 	
 	
@@ -247,8 +255,7 @@ idle_loop = function(_,seconds)
 	elseif mph <   0 then mph = 0 end
 	
 	
-	speed = mph*pixels_per_mile
-	car.v_y = speed
+	car.v_y = mph*pixels_per_mile
 	mph_txt.text = string.format("%03d",mph)
 	points = points + dy/pixels_per_mile
 	points_txt.text = string.format("%07d",points)
@@ -257,7 +264,7 @@ idle_loop = function(_,seconds)
 	--[[if throttle_position > 0.05 then
 		throttle_position = throttle_position - 1*seconds
 	else]]if throttle_position < 2 then
-		throttle_position = throttle_position + 10*seconds
+		throttle_position = throttle_position + 20*seconds
 		tail_lights.opacity=255
 	else
 		throttle_position = 2
@@ -266,7 +273,7 @@ idle_loop = function(_,seconds)
 	
 	
 	--speed sideways
-	car.v_x = speed/5*turn_impulse + car.v_x
+	car.v_x = car.v_y/5*turn_impulse + car.v_x
 	
 	strafed_dist = strafed_dist + car.v_x*seconds--+collision_strength*math.sin(math.pi/180*collision_angle)
 	
