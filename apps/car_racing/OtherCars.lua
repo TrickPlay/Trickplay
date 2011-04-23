@@ -1,23 +1,42 @@
 local cars = {}
-cars.impreza = {
-    Image{ src="assets/impreza/00.png"  },
-    Image{ src="assets/impreza/01.png"  },
-    Image{ src="assets/impreza/02.png"  },
-    Image{ src="assets/impreza/03.png"  },
-    Image{ src="assets/impreza/04.png"  },
-    Image{ src="assets/impreza/05.png"  },
-    Image{ src="assets/impreza/06.png"  },
-    Image{ src="assets/impreza/07.png"  },
-    Image{ src="assets/impreza/08.png"  },
-    Image{ src="assets/impreza/09.png"  },
-    Image{ src="assets/impreza/10.png"  },
-    Image{ src="assets/impreza/11.png"  },
+cars.impreza_b = {
+    Image{ src="assets/impreza_b/00.png"  },
+    Image{ src="assets/impreza_b/01.png"  },
+    Image{ src="assets/impreza_b/02.png"  },
+    Image{ src="assets/impreza_b/03.png"  },
+    Image{ src="assets/impreza_b/04.png"  },
+    Image{ src="assets/impreza_b/05.png"  },
+    Image{ src="assets/impreza_b/06.png"  },
+    Image{ src="assets/impreza_b/07.png"  },
+    Image{ src="assets/impreza_b/08.png"  },
+    Image{ src="assets/impreza_b/09.png"  },
+    Image{ src="assets/impreza_b/10.png"  },
+    Image{ src="assets/impreza_b/11.png"  },
 }
 
-for _,v in pairs(cars.impreza) do
+for _,v in pairs(cars.impreza_b) do
     clone_sources:add(v)
 end
+--[[
+cars.impreza_w = {
+    Image{ src="assets/impreza_w/00.png"  },
+    Image{ src="assets/impreza_w/01.png"  },
+    Image{ src="assets/impreza_w/02.png"  },
+    Image{ src="assets/impreza_w/03.png"  },
+    Image{ src="assets/impreza_w/04.png"  },
+    Image{ src="assets/impreza_w/05.png"  },
+    Image{ src="assets/impreza_w/06.png"  },
+    Image{ src="assets/impreza_w/07.png"  },
+    Image{ src="assets/impreza_w/08.png"  },
+    Image{ src="assets/impreza_w/09.png"  },
+    Image{ src="assets/impreza_w/10.png"  },
+    Image{ src="assets/impreza_w/11.png"  },
+}
 
+for _,v in pairs(cars.impreza_w) do
+    clone_sources:add(v)
+end
+--]]
 cars.subaru = {
     Image{ src="assets/subaru/00.png"  },
     Image{ src="assets/subaru/01.png"  },
@@ -45,7 +64,7 @@ local t_pt = {x=0,y=0}
 
 local coll_x, coll_y
 
-car_options={cars.impreza,cars.subaru}
+car_options={cars.impreza_b,cars.subaru}
 make_car = function(last_section,start_pos, dist_from_center,debug)
         print("carr with atributes",last_section.path.dist,start_pos[1],start_pos[2],start_pos[3])
     local model = car_options[math.random(1,#car_options)]

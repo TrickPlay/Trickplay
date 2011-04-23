@@ -1,8 +1,8 @@
 local base = {
-    straight_road = Image{ src="road.png", tile={false,true}, h=6*200},
+    straight_road = Image{ src="assets/world/road.png", tile={false,true}, h=20*200},
     --single_straight_road = Image{ src="road.png",tile={false,true}, h=2*200 },
     --curve_road    = Image{ src="road-curvdde-2.png"   },
-    curve_piece   = Image{ src="road_curve.png"},
+    curve_piece   = Image{ src="assets/world/road_curve.png"},
     --straight_rail = Image{ src="guardrail.png",     tile={true,false}, w=50*250},
     --cactus        = Image{ src="cactus3.png"},
     --cactus2       = Image{ src="cactus2.png"},
