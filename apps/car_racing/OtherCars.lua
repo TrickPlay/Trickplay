@@ -46,8 +46,8 @@ local t_pt = {x=0,y=0}
 local coll_x, coll_y
 
 car_options={cars.impreza,cars.subaru}
-make_car = function(last_section,end_point, dist_from_center,debug)
-        print("carr with atributes",last_section.path.dist,end_point[1],end_point[2],end_point[3])
+make_car = function(last_section,start_pos, dist_from_center,debug)
+        print("carr with atributes",last_section.path.dist,start_pos[1],start_pos[2],start_pos[3])
     local model = car_options[math.random(1,#car_options)]
     local orientation = 1
     if dist_from_center < 0 then orientation = -1 end
@@ -65,8 +65,8 @@ make_car = function(last_section,end_point, dist_from_center,debug)
         scale={2.5,1},
         
         position = {
-            end_point[1]+dist_from_center*math.cos(math.pi/180*-end_point[3]),
-            end_point[2]+dist_from_center*math.sin(math.pi/180*-end_point[3])
+            start_pos[1]+dist_from_center*math.cos(math.pi/180*-start_pos[3]),
+            start_pos[2]+dist_from_center*math.sin(math.pi/180*-start_pos[3])
         },
         
         extra = {
@@ -85,14 +85,14 @@ make_car = function(last_section,end_point, dist_from_center,debug)
             
             perceived_angle = 0,
             
-            y_rot = 180-end_point[3],
+            y_rot = 180-start_pos[3],
             
             prev_pt = {x=0,y=0},
             
             move = function(self,seconds)
                 
-                if 255 > self.opacity + 255/2*seconds then
-                    self.opacity = self.opacity + 255/2*seconds
+                if self.y < end_point[2]+1000 then
+                    self.opacity = math.abs(self.y-end_point[2])/1000*255
                 else
                     self.opacity = 255
                 end
@@ -107,21 +107,21 @@ make_car = function(last_section,end_point, dist_from_center,debug)
                 coll_y = self.parent.anchor_point[2]- self.y
                 
                 --if the distances is less than the threshold, collision
-                if not self.hit and math.abs(coll_x) < 310 and coll_y < 1200 and coll_y > 0 then
+                if not self.hit and math.abs(coll_x) < 300 and coll_y < 1200 and coll_y > 0 then
                     self.hit = true
                     crashed  = true
                     end_game:raise_to_top()
-                    
-                    local new_coll_str_x = (310-math.abs(coll_x))*coll_x/math.abs(coll_x)
+                    print("Print",coll_x,coll_y)
+                    local new_coll_str_x = 300-math.abs(coll_x)--(330-math.abs(coll_x))*coll_x/math.abs(coll_x)
                     local new_coll_str_y = 1200-(coll_y)
                     
                     local new_angle = math.atan2(new_coll_str_y,new_coll_str_x)*180/math.pi
-                    
+                    print(new_coll_str_x,new_coll_str_y,new_angle)
                     local new_mag = (speed - self.speed)*.6
                     
                     new_coll_str_x = new_mag*math.sin(math.pi/180*new_angle)
                     new_coll_str_y = new_mag*math.cos(math.pi/180*new_angle)
-                    print(new_coll_str_y,new_coll_str_x)
+                    print(new_coll_str_y,new_coll_str_x,new_mag)
                     
                     new_coll_str_x = new_coll_str_x + car.v_x
                     new_coll_str_y = new_coll_str_y + car.v_y
