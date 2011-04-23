@@ -11,13 +11,13 @@ math.randomseed(os.time())
 --splash:add(splash_title)
 
 end_game = Group{x=screen_w/2,y=screen_h/2}
-end_game_text = Text{text="You Crashed\n\nRestarting in 5",font="Digital-7 80px",color="ffd652"}
+end_game_text = Text{text="You Crashed\n\nRestarting in 3",font="Digital-7 80px",color="ffd652"}
 local end_game_backing=Rectangle{w=end_game_text.w+50,h=end_game_text.h+50,color="000000",opacity=255*.5}
 end_game_text.anchor_point={end_game_text.w/2,end_game_text.h/2}
 end_game_backing.anchor_point={end_game_backing.w/2,end_game_backing.h/2}
 end_game:add(end_game_backing,end_game_text)
 screen:add(end_game)
-pixels_per_mile = 45
+pixels_per_mile = 70
 paused = true
 local idle_loop
 
@@ -60,11 +60,12 @@ local curr_path = nil
 local dy_remaining_in_path = 0
 local dr_remaining_in_path = 0
 local keys = {
+	--[[
 	[keys.Up] = function()
 		throttle_position = throttle_position + .2
 		if throttle_position > 2 then throttle_position = 2 end
 		
-	end,
+	end,--]]
 	[keys.Down] = function()
 		throttle_position = -10
 		
@@ -156,8 +157,8 @@ idle_loop = function(_,seconds)
 	--increment the dead timer
 	if crashed then
 		dead_time = dead_time + seconds
-		end_game_text.text = "You Crashed\n\nRestarting in "..math.ceil(5-dead_time)
-		if dead_time > 5 then
+		end_game_text.text = "You Crashed\n\nRestarting in "..math.ceil(3-dead_time)
+		if dead_time > 3 then
 			points = 0
 			dead_time = 0
 			world:reset()
@@ -252,13 +253,13 @@ idle_loop = function(_,seconds)
 	points_txt.text = string.format("%07d",points)
 	
 	tail_lights.opacity=0
-	if throttle_position > 0.05 then
+	--[[if throttle_position > 0.05 then
 		throttle_position = throttle_position - 1*seconds
-	elseif throttle_position < -0.05 then
+	else]]if throttle_position < 2 then
 		throttle_position = throttle_position + 10*seconds
 		tail_lights.opacity=255
 	else
-		throttle_position = 0
+		throttle_position = 2
 	end
 	
 	
@@ -269,7 +270,7 @@ idle_loop = function(_,seconds)
 	strafed_dist = strafed_dist + car.v_x*seconds--+collision_strength*math.sin(math.pi/180*collision_angle)
 	
 	if math.abs(strafed_dist) > 1300 then
-		car.v_y = car.v_y - 1500*seconds
+		car.v_y = car.v_y - 4000*seconds
 		if car.v_y < 800 then
 			car.v_y = 800
 		end
@@ -296,7 +297,7 @@ idle_loop = function(_,seconds)
 			--car.src = "assets/Lambo/00.png"
 			car.y_rotation={0,0,0}
 		end
-		turn_impulse = turn_impulse-.05
+		turn_impulse = turn_impulse-2*seconds
 	elseif turn_impulse < -0.005 then
 		if turn_impulse < -.5 then
 			--car.src = "assets/Lambo/01.png"
@@ -305,7 +306,7 @@ idle_loop = function(_,seconds)
 			--car.src = "assets/Lambo/00.png"
 			car.y_rotation={0,0,0}
 		end
-		turn_impulse = turn_impulse+.05
+		turn_impulse = turn_impulse+2*seconds
 	else
 		turn_impulse = 0
 		--car.src = "assets/Lambo/00.png"
