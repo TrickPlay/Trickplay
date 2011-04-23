@@ -136,7 +136,7 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
                     
                     local new_angle = math.atan2(new_coll_str_y,new_coll_str_x)*180/math.pi
                     print(new_coll_str_x,new_coll_str_y,new_angle)
-                    local new_mag = (speed - self.speed)*.6
+                    local new_mag = (car.v_y - self.speed)*.6
                     
                     new_coll_str_x = new_mag*math.sin(math.pi/180*new_angle)
                     new_coll_str_y = new_mag*math.cos(math.pi/180*new_angle)
