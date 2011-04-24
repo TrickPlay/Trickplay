@@ -14,12 +14,30 @@ prev_end_marker:hide()
 local sky = Image{src="assets/world/skyline.png",x=screen.w/2,y=-17}--Rectangle{name="THE SKY",w=screen.w,h=screen.h,color="172e57"}
 local sky_w = sky.w
 sky.anchor_point={sky.w/2,0}
-car = Image{name="THE CAR",src="assets/Lambo/00.png",position={screen.w/2,5*screen.h/6}}
-car.v_y = 0
-car.v_x = 0
+car = Image{
+    name="THE CAR",
+    src="assets/Lambo/00.png",
+    position={
+	screen.w/2,
+	5*screen.h/6
+    },
+    extra = {
+	v_x = 0,
+	v_y = 0,
+	crashed = false,
+	dx = 960,
+	setup = function(self)
+	    self.crashed = false
+	    self.v_x     = 0
+	    self.v_y     = 0
+	    self.dx      = 960
+	end
+    }
+}
+car.anchor_point = {car.w/2,car.h/2}
+
 car:hide()
 tail_lights = Image{name="brake lights",src="assets/Lambo/brake.png",position={screen.w/2,5*screen.h/6+63},opacity=0}
-car.anchor_point = {car.w/2,car.h/2}
 tail_lights.anchor_point = {tail_lights.w/2,tail_lights.h/2}
 local horizon_grad = Image{src="assets/world/gradient.png",tile={true,false},w=screen_w,y=sky.h-17,scale={1,2}}
 section_i = 1
@@ -68,7 +86,7 @@ function world:reset()
     self.road.y_rotation   = {0,0,0}
     self.cars.y_rotation   = {0,0,0}
     section_i = 1
-    crashed   = false
+    car.crashed   = false
     num_passing_cars = 0
     car.v_y = 0
     car.v_x = 0
@@ -82,7 +100,7 @@ function world:reset()
     dist_to_end_point[1] = 0
     dist_to_end_point[2] = 0
     end_game:lower_to_bottom()
-    strafed_dist = 1000
+    car.dx = 1000
     world:add_next_section()
     road.curr_segment   = road.newest_segment
 	road.oldest_segment = road.newest_segment
@@ -90,12 +108,12 @@ function world:reset()
 end
 function world:adjust_position()
     self.road.anchor_point = {
-        w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot),
-        w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot)
+        w_ap_x+car.dx*math.cos(math.pi/180*y_rot),
+        w_ap_y+car.dx*math.sin(math.pi/180*y_rot)
     }
     self.cars.anchor_point = {
-        (w_ap_x+strafed_dist*math.cos(math.pi/180*y_rot)),
-        (w_ap_y+strafed_dist*math.sin(math.pi/180*y_rot))
+        (w_ap_x+car.dx*math.cos(math.pi/180*y_rot)),
+        (w_ap_y+car.dx*math.sin(math.pi/180*y_rot))
     }
 end
 local pos = {-960,-960/3,960/3,960}
@@ -185,7 +203,7 @@ function world:remove_oldest_section()
     end_point[1] = end_point[1] - new_pos.x
     end_point[2] = end_point[2] - new_pos.y
     
-    --self.anchor_point = { dist_to_start_point[1]+strafed_dist, dist_to_start_point[2] }
+    --self.anchor_point = { dist_to_start_point[1]+car.dx, dist_to_start_point[2] }
     w_ap_x = w_ap_x - new_pos.x
     w_ap_y = w_ap_y - new_pos.y
     
@@ -219,7 +237,7 @@ function world:normalize_to(section)
     --dist_to_start_point[1] = w_ap_x
     --dist_to_start_point[2] = w_ap_y
     
-    --self.anchor_point = { w_ap_x+strafed_dist, w_ap_y }
+    --self.anchor_point = { w_ap_x+car.dx, w_ap_y }
     world:adjust_position()
 end
 
@@ -235,11 +253,11 @@ function world:move(dx,dr,radius)
 
     if dr ~= 0 then
         --curve_impulse = curve_impulse - dr
-        --radius = radius - strafed_dist
+        --radius = radius - car.dx
         cent_x = radius*math.cos(math.pi/180*y_rot)
         cent_y = radius*math.sin(math.pi/180*y_rot)
         
-        --strafed_dist = strafed_dist + 20*dr
+        --car.dx = car.dx + 20*dr
         
         y_rot = y_rot+dr
         --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
@@ -250,7 +268,7 @@ function world:move(dx,dr,radius)
         delta_x = radius*math.cos(math.pi/180*y_rot)-cent_x
         delta_y = -radius*math.sin(math.pi/180*y_rot)+cent_y
         
-        strafed_dist = strafed_dist - delta_x/2*dr/math.abs(dr)
+        car.dx = car.dx - delta_x/2*dr/math.abs(dr)
     else
         delta_x = dx*math.sin(math.pi/180*y_rot)
         delta_y = dx*math.cos(math.pi/180*y_rot)
@@ -260,7 +278,7 @@ function world:move(dx,dr,radius)
     w_ap_x = w_ap_x+delta_x
     w_ap_y = w_ap_y-delta_y
     
-    --self.anchor_point = { w_ap_x+strafed_dist, w_ap_y }
+    --self.anchor_point = { w_ap_x+car.dx, w_ap_y }
     world:adjust_position()
     
     dist_to_end_point[1]   = dist_to_end_point[1]   - delta_x
