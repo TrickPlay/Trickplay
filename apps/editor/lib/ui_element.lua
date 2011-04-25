@@ -1331,6 +1331,10 @@ function ui_element.button(table)
 		p.pressed()
 	    end 
 	end 
+	
+	if p.skin == "edit" then 
+		input_mode = S_MENU_M
+	end 
 
 	b_group:grab_key_focus(b_group)
     end
@@ -1362,7 +1366,7 @@ function ui_element.button(table)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin == "editor") then 
-		button= assets("menu-bar-focus.png")
+		button= assets("assets/invisible_pixel.png")
                 button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 		focus= assets("assets/menu-bar-focus.png")
                 focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
@@ -1405,8 +1409,9 @@ function ui_element.button(table)
 			end
 			b_group.extra.on_focus_in(keys.Return)
 		else 
-		     	current_focus.on_focus_in(keys.Return)
-		     	--current_focus.on_focus_out()
+		     	--current_focus.on_focus_in(keys.Return)
+		     	current_focus.on_focus_out()
+			screen:grab_key_focus()
 		end 
 		return true
 	     end 
@@ -1414,7 +1419,7 @@ function ui_element.button(table)
 
 	if p.skin == "editor"  then 
 	     function b_group:on_motion()
-		if input_mode == S_SELECT or input_mode == S_MENU_M then 
+		if input_mode == S_MENU_M then 
 		    if current_focus ~= b_group then 
 			if current_focus then 
 		     		current_focus.on_focus_out()
