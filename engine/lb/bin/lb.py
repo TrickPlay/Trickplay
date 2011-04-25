@@ -572,7 +572,7 @@ def emit( stuff , f ):
                     
                 func_type=transform_type(func[ "type" ])
                 
-                if func_type not in [ None , "table" , "udata" , "multi" ]:
+                if func_type not in [ None , "table" , "udata" , "multi" , "any" ]:
                     
                     f.write(
                         "  %s result;\n"
@@ -601,7 +601,7 @@ def emit( stuff , f ):
                                         
                     f.write( "  return 0;\n" )
                     
-                elif func_type in [ "table" , "udata" ]:
+                elif func_type in [ "table" , "udata" , "any" ]:
                     
                     f.write( "  return 1;\n" );
             
@@ -702,7 +702,7 @@ def emit( stuff , f ):
                     
                 func_type=transform_type(func[ "type" ])
                 
-                if func_type not in [ None , "table" , "udata" , "multi" ]:
+                if func_type not in [ None , "table" , "udata" , "multi" , "any" ]:
                     
                     f.write(
                         "  %s result;\n"
@@ -731,7 +731,7 @@ def emit( stuff , f ):
                     
                     f.write( "  return 0;\n" )
                     
-                elif func_type in [ "table" , "udata" ]:
+                elif func_type in [ "table" , "udata" , "any" ]:
                     
                     f.write( "  return 1;\n" );
             
