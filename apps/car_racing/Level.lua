@@ -56,9 +56,9 @@ screen:add(
     
     world.road,
     
-    
-    world.cars,
     horizon_grad,
+    world.cars,
+    
     car,
     tail_lights
 )
