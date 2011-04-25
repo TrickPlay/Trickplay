@@ -1025,6 +1025,24 @@ bool Controller::submit_audio_clip( )
                data ) == 0;
 }
 
+bool Controller::advanced_ui( int command , const String & payload )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_ADVANCED_UI ) || payload.empty() )
+    {
+        return false;
+    }
+
+    TPControllerAdvancedUI parameters;
+
+    parameters.command = command;
+    parameters.payload = payload.c_str();
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_ADVANCED_UI,
+               & parameters,
+               data ) == 0;
+}
 
 //==============================================================================
 
@@ -1033,8 +1051,9 @@ bool Controller::submit_audio_clip( )
 //-----------------------------------------------------------------------------
 
 ControllerList::ControllerList()
-    :
-    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) )
+:
+    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
+    stopped( 0 )
 {
     g_static_rec_mutex_init( &mutex );
 }
@@ -1053,6 +1072,13 @@ ControllerList::~ControllerList()
 }
 
 //.............................................................................
+
+void ControllerList::stop_events()
+{
+    g_atomic_int_set( & stopped , 1 );
+}
+
+//.............................................................................
 // Called in any thread. Adds event to queue and adds an idle source to pump
 // events.
 
@@ -1060,8 +1086,15 @@ void ControllerList::post_event( gpointer event )
 {
     g_assert( event );
 
-    g_async_queue_push( queue, event );
-    g_idle_add_full( TRICKPLAY_PRIORITY, process_events, this, NULL );
+    if ( g_atomic_int_get( & stopped ) )
+    {
+        Event::destroy( ( Event * ) event );
+    }
+    else
+    {
+        g_async_queue_push( queue, event );
+        g_idle_add_full( TRICKPLAY_PRIORITY, process_events, this, NULL );
+    }
 }
 
 //.............................................................................
