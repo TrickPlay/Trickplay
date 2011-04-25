@@ -76,7 +76,7 @@ do
 	}
 	end_game:add(end_game_backing,end_game_text)
 	end_game.update = function(self,time_left)
-		end_game_text.text = "You Crashed\n\nRestarting in "..time_left
+		end_game_text.text = "You Crashed\n\nRestarting in "..time_leftae7d
 	end
 end
 screen:add(end_game)
