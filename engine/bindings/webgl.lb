@@ -9,7 +9,7 @@ module webgl;
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
 
-#include "util.h"
+#include "typed_array.h"
 
 GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
 {
@@ -476,12 +476,12 @@ interface WebGLRenderingContext [[void*]]
             lua_pushnil( L );
         ]];
 
-    readonly int drawingBufferWidth
+    readonly GLsizei drawingBufferWidth
         [[
             drawingBufferWidth = 0;
         ]];
 
-    readonly int drawingBufferHeight
+    readonly GLsizei drawingBufferHeight
         [[
             drawingBufferHeight = 0;
         ]];
@@ -523,7 +523,6 @@ interface WebGLRenderingContext [[void*]]
 
     bindBuffer( GLenum target , WebGLBuffer buffer )
         [[
-            // TODO: check tha
             glBindBuffer( target , buffer );
         ]];
 
@@ -562,36 +561,50 @@ interface WebGLRenderingContext [[void*]]
             glBlendFunc( sfactor , dfactor );
         ]];
 
-    void blendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha )
+    blendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha )
         [[
             glBlendFuncSeparate( srcRGB , dstRGB , srcAlpha , dstAlpha );
         ]];
 
-    void bufferData(GLenum target, GLsizeiptr size, GLenum usage )
+    /* Second argument can be an integer size, an ArrayBuffer or a TypedArray */
+
+    bufferData(GLenum target, any size_or_array, GLenum usage )
         [[
-            guint8 * buffer = g_new0( guint8 , size );
+            if ( lua_isnumber( L , size_or_array ) )
+            {
+                int size = lua_tointeger( L , size_or_array );
 
-            glBufferData( target , size , buffer , usage );
+                if ( size >= 0 )
+                {
+                    guint8 * buffer = g_new0( guint8 , size );
 
-            g_free( buffer );
+                    glBufferData( target , size , buffer , usage );
+
+                    g_free( buffer );
+                }
+            }
+            else if ( ArrayBuffer * buffer = ArrayBuffer::from_lua( L , size_or_array ) )
+            {
+                glBufferData( target , buffer->get_length() , buffer->get_data() , usage );
+            }
+            else if ( TypedArray * array = TypedArray::from_lua( L , size_or_array ) )
+            {
+                glBufferData( target , array->get_byte_length() , array->get( 0 ) , usage );
+            }
         ]];
-/*
-    void bufferData(GLenum target, ArrayBufferView data, GLenum usage )
-    [[
-    ]];
 
-    void bufferData(GLenum target, ArrayBuffer data, GLenum usage )
-    [[
-    ]];
-*/
-    void bufferSubData(GLenum target, GLintptr offset, ArrayBufferView data )
-    [[
-    ]];
-/*
-    void bufferSubData(GLenum target, GLintptr offset, ArrayBuffer data )
-    [[
-    ]];
-*/
+    bufferSubData(GLenum target, GLintptr offset, any array_or_array_buffer )
+        [[
+            if ( ArrayBuffer * buffer = ArrayBuffer::from_lua( L , array_or_array_buffer ) )
+            {
+                glBufferSubData( target , offset , buffer->get_length() , buffer->get_data() );
+            }
+            else if ( TypedArray * array = TypedArray::from_lua( L , array_or_array_buffer ) )
+            {
+                glBufferSubData( target , offset , array->get_byte_length() , array->get( 0 ) );
+            }
+        ]];
+
     GLenum checkFramebufferStatus(GLenum target )
         [[
             result = glCheckFramebufferStatus( target );
@@ -763,13 +776,8 @@ interface WebGLRenderingContext [[void*]]
 
     drawElements(GLenum mode, GLsizei count, GLenum type, GLintptr offset )
         [[
-            // TODO:
-            // I don't understand this one. I'm not sure where the pointer to
-            // the indices should be coming from.
-
-          glDrawElements( mode , count , type , (GLvoid*) offset );
+            glDrawElements( mode , count , type , (GLvoid*) offset );
         ]];
-
 
     enable(GLenum cap )
         [[
@@ -1645,10 +1653,11 @@ interface WebGLRenderingContext [[void*]]
             glPolygonOffset( factor , units );
         ]];
 
-    void readPixels(GLint x, GLint y, GLsizei width, GLsizei height,
+    readPixels(GLint x, GLint y, GLsizei width, GLsizei height,
                     GLenum format, GLenum type, ArrayBufferView pixels )
-    [[
-    ]];
+        [[
+            luaL_error( L , "readPixels is not implemented yet." );
+        ]];
 
     renderbufferStorage(GLenum target, GLenum internalformat,
                              GLsizei width, GLsizei height )
@@ -1704,11 +1713,12 @@ interface WebGLRenderingContext [[void*]]
         ]];
 
 
-    void texImage2D(GLenum target, GLint level, GLenum internalformat,
+    texImage2D(GLenum target, GLint level, GLenum internalformat,
                     GLsizei width, GLsizei height, GLint border, GLenum format,
                     GLenum type, ArrayBufferView pixels )
-    [[
-    ]];
+        [[
+            luaL_error( L , "texImage2D is not implemented yet" );
+        ]];
 /*
     void texImage2D(GLenum target, GLint level, GLenum internalformat,
                     GLenum format, GLenum type, ImageData pixels )
@@ -1742,11 +1752,12 @@ interface WebGLRenderingContext [[void*]]
         ]];
 
 
-    void texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
+    texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
                        GLsizei width, GLsizei height,
                        GLenum format, GLenum type, ArrayBufferView pixels )
-    [[
-    ]];
+        [[
+            luaL_error( L , "texSubImage2D is not implemented yet" );
+        ]];
 /*
     void texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
                        GLenum format, GLenum type, ImageData pixels )
@@ -1889,10 +1900,16 @@ interface WebGLRenderingContext [[void*]]
     [[
     ]];
 */
-    void uniformMatrix4fv(WebGLUniformLocation location, GLboolean transpose,
-                          Float32Array value )
-    [[
-    ]];
+    uniformMatrix4fv(WebGLUniformLocation location, GLboolean transpose, any float32_array_or_matrix )
+        [[
+            if ( lb_check_udata_type( L , float32_array_or_matrix , "Matrix" , false ) )
+            {
+                if ( CoglMatrix * matrix = ( CoglMatrix * ) UserData::get_client( L , float32_array_or_matrix ) )
+                {
+                    glUniformMatrix4fv( location , 1 , transpose ? GL_TRUE : GL_FALSE , cogl_matrix_get_array( matrix ) );
+                }
+            }
+        ]];
 /*
     void uniformMatrix4fv(WebGLUniformLocation location, GLboolean transpose,
                           float[] value )
@@ -1900,13 +1917,15 @@ interface WebGLRenderingContext [[void*]]
     ]];
 
 */
-    void useProgram(WebGLProgram program )
-    [[
-    ]];
+    useProgram(WebGLProgram program )
+        [[
+            glUseProgram( program );
+        ]];
 
-    void validateProgram(WebGLProgram program )
-    [[
-    ]];
+    validateProgram(WebGLProgram program )
+        [[
+            glValidateProgram( program );
+        ]];
 
 
     void vertexAttrib1f(GLuint indx, GLfloat x )
@@ -1957,15 +1976,16 @@ interface WebGLRenderingContext [[void*]]
     [[
     ]];
 */
-    void vertexAttribPointer(GLuint indx, GLint size, GLenum type,
-                             GLboolean normalized, GLsizei stride, GLintptr offset )
-    [[
-    ]];
+    vertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLintptr offset )
+        [[
+            glVertexAttribPointer( indx , size , type , normalized ? GL_TRUE : GL_FALSE , stride , (GLvoid*) offset );
+        ]];
 
 
-    void viewport(GLint x, GLint y, GLsizei width, GLsizei height )
-    [[
-    ]];
+    viewport(GLint x, GLint y, GLsizei width, GLsizei height )
+        [[
+            glViewport( x , y , width , height );
+        ]];
 }
 
 global gl [[void*]] WebGLRenderingContext
@@ -1973,5 +1993,56 @@ global gl [[void*]] WebGLRenderingContext
     gl()
         [[
             lb_construct_empty();
+        ]];
+}
+
+
+
+
+class Matrix [[CoglMatrix*]]
+{
+    Matrix()
+        [[
+            self = lb_construct( CoglMatrix , g_slice_new0( CoglMatrix ) );
+        ]];
+
+    ~Matrix()
+        [[
+            g_slice_free( CoglMatrix , self );
+        ]];
+
+    identity()
+        [[
+            cogl_matrix_init_identity( self );
+        ]];
+
+    perspective( double fov_y , double aspect , double z_near , double z_far )
+        [[
+            cogl_matrix_perspective( self , fov_y , aspect , z_near , z_far );
+        ]];
+
+    rotate( double angle , double x , double y , double z )
+        [[
+            cogl_matrix_rotate( self , angle , x , y , z );
+        ]];
+
+    translate( double x , double y , double z )
+        [[
+            cogl_matrix_translate( self , x , y , z );
+        ]];
+
+    scale( double sx , double sy , double sz )
+        [[
+            cogl_matrix_scale( self , sx , sy , sz );
+        ]];
+
+    Matrix copy()
+        [[
+            UserData * ud = UserData::make( L , "Matrix" );
+            luaL_getmetatable( L , MATRIX_METATABLE );
+            lua_setmetatable( L , -2 );
+            CoglMatrix * m = g_slice_new0( CoglMatrix );
+            cogl_matrix_init_from_array( m , cogl_matrix_get_array( self ) );
+            ud->initialize_with_client( m );
         ]];
 }
