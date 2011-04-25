@@ -1435,7 +1435,12 @@ function printMsgWindow(txt, name)
 
      txt_sz = string.len(txt) 
      local n = table.getn(projects)
-
+  
+     if n == 0 then 
+     	txt = "New Project : "
+     	name = ""
+     end 
+ 
      if (name == "aleady_exists" ) then
 	txt_sz = txt_sz - 50
      elseif(name == "projectlist") then  
@@ -1666,7 +1671,7 @@ local function inputMsgWindow_savefile(cfn)
 
 		global_section_contents = "-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
 	        gen_stub_code(g)
-		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n-- END GLOBAL SECTION FOOTER \n"
+		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n\nui_element.screen_add(groups[\""..fileLower.."\"])\n\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n-- END GLOBAL SECTION FOOTER \n"
 
 		editor_lb:writefile("main.lua", global_section_contents, true)
 		editor_lb:writefile("main.lua", new_contents, false)
@@ -2173,8 +2178,8 @@ function inputMsgWindow_openimage(input_purpose, input_text)
 	  end 
 
           ui.image= Image { name="img"..tostring(item_num),
-          src = input_t.text, opacity = 255 , position = {200,200}, 
-          --src = "/assets/images/"..input_t.text, opacity = 255 , position = {200,200}, 
+          --src = input_t.text, opacity = 255 , position = {200,200}, 
+          src = "/assets/images/"..input_t.text, opacity = 255 , position = {200,200}, 
 	  extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
 	  ui.image.extra.lock = false

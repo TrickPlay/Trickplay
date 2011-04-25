@@ -171,7 +171,7 @@ function inspector_apply (v, inspector)
                v.source = "assets/videos/"..tostring(item_group:find_child("source"):find_child("file_name").text)
 	       end,
 	["src"] = function()
-               v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
+               v.src = "assets/images/"..tostring(item_group:find_child("src"):find_child("file_name").text)
 	       end,
 	["name"] = function ()
 	       if v.extra then 
