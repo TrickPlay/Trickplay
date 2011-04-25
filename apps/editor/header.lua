@@ -16,6 +16,7 @@ S_RECTANGLE       = 1
 S_POPUP        	  = 2
 S_MENU        	  = 3
 S_FOCUS        	  = 4
+S_MENU_M	  = 5
 
 ADD               = 1
 CHG               = 2

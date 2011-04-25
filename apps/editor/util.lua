@@ -1553,15 +1553,23 @@ local function inputMsgWindow_savefile(cfn)
      local main_dir = editor_lb:readdir(CURRENT_DIR)
      local enter_gen_stub_code = false
 
+
      if cfn == nil then 
      	for i, v in pairs(screen_dir) do
           if(input_t.text == v)then
+		--[[
                current_fn = "screens/"..input_t.text
 	       cleanMsgWindow()
                printMsgWindow("The file named "..current_fn..
                " already exists.\nDo you want to replace it? \n", "aleady_exists")
                inputMsgWindow("yn")
-               file_not_exists = false
+		]]
+		cleanMsgWindow()
+                print("ERR001 The file name "..current_fn.." already exists.\nDo you want to replace it? ")
+           	screen:grab_key_focus(screen) 
+                file_not_exists = false
+		menu_raise_to_top()
+		return 
           end
 	end
       end
@@ -2337,48 +2345,6 @@ end
 function inputMsgWindow(input_purpose, cfn)
 
 
-
---idle loop example
-
---[[
-screen:show()
-
-
-r1=Rectangle{w=100,h=200,color="ff0000"}
-r2=Rectangle{w=100,h=200,color="00ff00"}
-r3=Rectangle{w=100,h=200,y=500,color="00ff00"}
-r4=Rectangle{w=100,h=200,y=500,x=500,color="00ff00"}
-
-
-screen:add(r1,r2,r3,r4)
-
-local duration = 5--secs
-local elapsed  = 0
-local direction = 1
-idle.on_idle = function(self,seconds)
-    
-    elapsed = elapsed + direction*seconds
-    
-    
-    if direction == 1 and elapsed > duration then
-        direction = -1
-    elseif direction == -1 and elapsed < 0 then
-        direction = 1
-    end
-    
-    local p = elapsed/duration
-    --print(elapsed)
-    r1.opacity = p*255
-    r2.opacity = (1-p)*255
-    
-    r3.y = 500 + 1000*p
-    r4.z_rotation = {360*p,0,0}
-end
-
-
-
---]]
-
      local save_b, cancel_b, input_box, open_b, yes_b, no_b
      local save_t, cancel_t, input_box, open_t, yes_t, no_t
     
@@ -2492,7 +2458,6 @@ end
 
 
      elseif (input_purpose == "yn") then 
-
      	yes_b, yes_t  = factory.make_msgw_button_item( assets , "Yes")
         yes_b.position = {msgw_cur_x + 260, msgw_cur_y + 70}
 	yes_b.reactive = true

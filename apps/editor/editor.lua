@@ -1563,7 +1563,7 @@ function editor.view_code(v)
 
 end 
 
-function editor.save(save_current_f)
+function editor.save(save_current_f, save_backup_f)
 
      if save_current_f == nil then 
 	save_current_f = false
@@ -1629,7 +1629,11 @@ function editor.save(save_current_f)
         undo_list = {}
         redo_list = {}
 
-	editor_lb:writefile(current_fn, contents, true)	
+	if save_backup_f == nil then  
+		editor_lb:writefile(current_fn, contents, true)	
+	end 
+	local back_file = current_fn.."\.back"
+	editor_lb:writefile(back_file, contents, true)	
 
 	local main = readfile("main.lua")
 	if(current_fn ~= "" and main ) then 
