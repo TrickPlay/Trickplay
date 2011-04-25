@@ -572,7 +572,7 @@ function editor.close()
             mediaplayer.on_loaded = nil
 	end
 
-	BG_IMAGE_40.opacity = 255 
+	editor.medium_grid()
 
 	for i, j in pairs (g.children) do 
 	     if(j.extra.selected == true) then 
@@ -649,7 +649,7 @@ function editor.close()
 		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
 		end
 	end 
-	 screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+	screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
 end 
 
 function editor.open()
