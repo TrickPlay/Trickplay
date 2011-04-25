@@ -456,6 +456,9 @@ Player = Class(function(player, players, args, ...)
     function player:dealloc()
         player.controller = nil
         player.status:dealloc()
+        player.status = nil
+        if player.bet_chips then player.bet_chips:dealloc() end
+        player.bet_chips = nil
     end
 
 end)

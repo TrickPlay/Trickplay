@@ -11,6 +11,7 @@ GameState = Class(nil,function(state, ctrl)
     local endowment = nil
 
     local players = nil
+    local removed_players = nil
     -- index of dealer
     local dealer = nil
     -- who are the blinds? sb_p and bb_p are the indices into players
@@ -63,6 +64,7 @@ GameState = Class(nil,function(state, ctrl)
         for _,player in ipairs(players) do
             player.money = player.endowment + math.random(-randomness, randomness)
         end
+        removed_players = {}
 
         dealer = math.random(#players)
         print("Dealer randomly selected to be " .. tostring(dealer))
@@ -77,6 +79,22 @@ GameState = Class(nil,function(state, ctrl)
     function state:increase_blinds()
         sb_qty = sb_qty * 2
         bb_qty = bb_qty * 2
+    end
+
+    function state:remove_player(removed_player)
+        table.insert(removed_players, removed_player)
+    end
+
+    function state:reset()
+        for k,player in pairs(players) do
+            player:dealloc()
+            players[k] = nil
+        end
+
+        for k,player in pairs(removed_players) do
+            player:dealloc()
+        end
+        removed_players = nil
     end
 
 end)

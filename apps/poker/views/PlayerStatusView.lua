@@ -165,6 +165,7 @@ function(self, player, args, ...)
     end
 
     function self:hide()
+    if not self.group then error("asdefa", 2) end
         self.group:animate{opacity = 0, duration = 300}
         --self.show = 0
     end

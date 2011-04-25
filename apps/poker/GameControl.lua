@@ -83,7 +83,8 @@ function(ctrl, router, ...)
     function ctrl:reset()
         hand_ctrl:cleanup()
         hand_ctrl:reset()
-        pres:return_to_main_menu(ctrl:human_still_playing(), true)
+        state:reset()
+        pres:return_to_main_menu()
         enable_event_listener(KbdEvent())
         router:get_controller(Components.PLAYER_BETTING):reset()
         router:set_active_component(Components.CHARACTER_SELECTION)
@@ -105,6 +106,10 @@ function(ctrl, router, ...)
         for _,player in ipairs(players) do
             if player.is_human then return true end
         end
+    end
+
+    function ctrl:remove_player(removed_player)
+        state:remove_player(removed_player)
     end
 
     function ctrl:update(event)
@@ -130,7 +135,8 @@ function(ctrl, router, ...)
 
         if ctrl:game_won() then
             hand_ctrl:cleanup()
-            pres:return_to_main_menu(ctrl:human_still_playing())
+            --pres:return_to_main_menu(ctrl:human_still_playing())
+            pres:show_ending(ctrl:human_still_playing())
 
             disable_event_listeners()
             local disable_events_timer = Timer()
@@ -140,11 +146,7 @@ function(ctrl, router, ...)
                 disable_events_timer.on_timer = nil
                 disable_events_timer = nil
 
-                enable_event_listener(KbdEvent())
-
-                router:set_active_component(Components.CHARACTER_SELECTION)
-                router:get_active_controller():reset()
-                router:notify()
+                ctrl:reset()
             end
             disable_events_timer:start()
 

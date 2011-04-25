@@ -123,10 +123,30 @@ function(pres, ctrl)
     -- Load up the win/lose stuff for good measure
     assetman:load_image("assets/outcome_new/winner.png", "Win")
     assetman:load_image("assets/outcome_new/loser.png", "Lose")
+    function pres:show_ending(human_won)
+        local r = assetman:create_rect{
+            w = 1920, h = 1080,
+            opacity = 0, color = "000000"
+        }
+        screen:add(r)
+        local m
+        if human_won then
+            m = assetman:get_clone("Win")
+        else
+            m = assetman:get_clone("Lose")
+        end
+        m.anchor_point = {m.w/2, m.h/2}
+        m.position = {screen.w/2, screen.h/2}
+        screen:add(m)
+  
+        Popup:new{group = r, time = 5000}
+        Popup:new{group = m, time = 5000}
+    end
+
     -- called when either human player no longer detected, or one player left.
-    function pres:return_to_main_menu(human_won, reset)
+    function pres:return_to_main_menu()
         
-        for _,player in ipairs(ctrl:get_players()) do
+        for _,player in pairs(ctrl:get_players()) do
             if player.status then player.status:hide() end
             if player.bet_chips then
                 player.bet_chips:dealloc()
@@ -161,25 +181,6 @@ function(pres, ctrl)
         --]]
         -- hide the text that says where to lay down the cards
         table_text:hide()
-        if not reset then 
-            local r = assetman:create_rect{
-                w = 1920, h = 1080,
-                opacity = 0, color = "000000"
-            }
-            screen:add(r)
-            local m
-            if human_won then
-                m = assetman:get_clone("Win")
-            else
-                m = assetman:get_clone("Lose")
-            end
-            m.anchor_point = {m.w/2, m.h/2}
-            m.position = {screen.w/2, screen.h/2}
-            screen:add(m)
-      
-            Popup:new{group = r, time = 5000}
-            Popup:new{group = m, time = 5000}
-        end
     end
 
     -- called when sb_qty and bb_qty updated
