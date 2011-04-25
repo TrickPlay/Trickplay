@@ -43,10 +43,11 @@ Profiler::EntryMap Profiler::entries;
 
 Profiler::ObjectMap Profiler::objects;
 
-Profiler::Profiler( const char * _name )
+Profiler::Profiler( const char * _name , int _type )
 {
-
     name = _name;
+
+    type = _type;
 
     timer = g_timer_new();
 
@@ -87,27 +88,20 @@ Profiler::~Profiler()
 
     Entry & entry( entries[ name ] );
 
-    entry.first += 1;
-    entry.second += elapsed;
+    entry.count += 1;
+    entry.time += elapsed;
+    entry.type = type;
 
     lock( false );
 }
 
 bool Profiler::compare( std::pair< String, Entry > a, std::pair< String, Entry > b )
 {
-    return a.second.second > b.second.second;
+    return a.second.time > b.second.time;
 }
 
-void Profiler::dump()
+void Profiler::dump( EntryVector & v )
 {
-    lock( true );
-
-    // Creates a vector from the entries
-
-    std::vector< std::pair< String, Entry > > v( entries.begin(), entries.end() );
-
-    lock( false );
-
     // Sorts the vector in descending order by time taken
 
     std::sort( v.begin(), v.end(), compare );
@@ -120,20 +114,61 @@ void Profiler::dump()
 
     for( it = v.begin(); it != v.end(); ++it )
     {
-        time += it->second.second;
+        time += it->second.time;
     }
 
     for( it = v.begin(); it != v.end(); ++it )
     {
-        g_info( "%40s %6d %6.1f %6.1f %6.1f %%",
+        g_info( "%40s %8d %8.1f %6.1f %6.1f %%",
                 it->first.c_str(),
-                it->second.first,
-                it->second.second,
-                it->second.second / it->second.first,
-                time ? it->second.second / time * 100.0 : 0.0 );
+                it->second.count,
+                it->second.time,
+                it->second.time / it->second.count,
+                time ? it->second.time / time * 100.0 : 0.0 );
     }
 
-    g_info( "%40s        %6.1f", String( 40, '-' ).c_str(), time );
+    g_info( "%40s          %8.1f", String( 40, '-' ).c_str(), time );
+}
+
+void Profiler::dump()
+{
+    lock( true );
+
+    // Creates a vector from the entries
+
+    EntryVector v( entries.begin(), entries.end() );
+
+    lock( false );
+
+    typedef std::map< int , EntryVector > EntryTypeMap;
+
+    EntryTypeMap entries_by_type;
+
+    // Now separate them by type
+
+    for ( EntryVector::iterator it = v.begin(); it != v.end(); ++it )
+    {
+        entries_by_type[ it->second.type ].push_back( *it );
+    }
+
+    // Dump stats for each type
+
+    for ( EntryTypeMap::iterator it = entries_by_type.begin(); it != entries_by_type.end(); ++it )
+    {
+        const char * t = "OTHER";
+
+        switch( it->first )
+        {
+            case PROFILER_CALLS_FROM_LUA:   t = "CALLS FROM APP:"; break;
+            case PROFILER_CALLS_TO_LUA:     t = "CALLS TO APP (CALLBACKS):"; break;
+            case PROFILER_INTERNAL_CALLS:   t = "INTERNAL CALLS"; break;
+        }
+
+        g_info( "" );
+        g_info( "%s"  , t );
+
+        dump( it->second );
+    }
 }
 
 void Profiler::reset()

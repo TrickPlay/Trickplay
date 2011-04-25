@@ -572,6 +572,18 @@ int MediaPlayer::set_viewport_geometry( int left, int top, int width, int height
 
 //-----------------------------------------------------------------------------
 
+int MediaPlayer::reset_viewport_geometry( )
+{
+    gfloat width;
+    gfloat height;
+
+    clutter_actor_get_size( clutter_stage_get_default() , & width , & height );
+
+    return set_viewport_geometry( 0 , 0 , width , height );
+}
+
+//-----------------------------------------------------------------------------
+
 int MediaPlayer::get_media_type( int * type )
 {
     MPLOCK;
@@ -748,8 +760,6 @@ int MediaPlayer::play_sound( const char * uri )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- play_sound('%s')", mp, uri );
-
     if ( int result = mp->play_sound( mp, uri ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
@@ -821,7 +831,7 @@ void MediaPlayer::post_event( Event * event )
 {
     g_async_queue_push( queue, event );
 
-    g_idle_add_full( G_PRIORITY_HIGH_IDLE, process_events, this, NULL );
+    g_idle_add_full( TRICKPLAY_PRIORITY , process_events, this, NULL );
 }
 
 //-----------------------------------------------------------------------------
