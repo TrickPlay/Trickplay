@@ -211,6 +211,15 @@ dofile("editor.lua")
     end
 
     function screen:on_button_down(x,y,button,num_clicks)
+
+	  
+	  if(input_mode == S_MENU_M) then
+		if current_focus then 
+			current_focus.on_focus_out()
+			screen:grab_key_focus()
+
+		end 
+	  end 
 	  if(input_mode == S_MENU) then
 		if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
 			screen:find_child("menuButton_file").on_focus_out()

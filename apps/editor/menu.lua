@@ -462,4 +462,7 @@ function menu_raise_to_top()
 	menuShow()
 end 
 
+screen:add(g)
+menu_raise_to_top()
+
 editor_use = false
