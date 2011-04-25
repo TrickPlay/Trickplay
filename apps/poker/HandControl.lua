@@ -270,6 +270,7 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
 
     function ctrl:remove_player(removed_player)
         pres:remove_player(removed_player)
+        game_ctrl:remove_player(removed_player)
     end
 
     function ctrl:win_from_bets(only_player)
