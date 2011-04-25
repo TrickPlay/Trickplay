@@ -8,7 +8,6 @@
 #include "mediaplayers.h"
 #include "controller_list.h"
 #include "app.h"
-
 //-----------------------------------------------------------------------------
 // Internal notifications
 
@@ -60,6 +59,7 @@ class Image;
 class ControllerLIRC;
 class AppPushServer;
 class HttpServer;
+class HttpTrickplayApiSupport;
 
 //-----------------------------------------------------------------------------
 
@@ -328,6 +328,8 @@ private:
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
+
+    HttpTrickplayApiSupport * 	http_trickplay_api_support;
 
     TPLogHandler                external_log_handler;
     void *                      external_log_handler_data;

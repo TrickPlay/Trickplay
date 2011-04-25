@@ -8,7 +8,6 @@
 #include "curl/curl.h"
 #include "fontconfig.h"
 #include "sndfile.h"
-#include "json-glib/json-glib.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
@@ -28,6 +27,8 @@
 #include "controller_lirc.h"
 #include "app_push_server.h"
 #include "http_server.h"
+#include "http_trickplay_api_support.h"
+
 
 //-----------------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ TPContext::TPContext()
     current_app( NULL ),
     media_player_constructor( NULL ),
     media_player( NULL ),
+    http_trickplay_api_support( NULL ),
     external_log_handler( NULL ),
     external_log_handler_data( NULL ),
     user_data( NULL )
@@ -1050,7 +1052,9 @@ int TPContext::run()
 
     //.........................................................................
 
-    http_server = new HttpServer( 0 );
+    http_server = new HttpServer( get_int( TP_HTTP_PORT , 0 ) );
+
+    http_trickplay_api_support = new HttpTrickplayApiSupport( this );
 
     //.........................................................................
     // Create the controller server
@@ -1092,7 +1096,7 @@ int TPContext::run()
         controller_server = new ControllerServer( this, name, get_int( TP_CONTROLLERS_PORT, TP_CONTROLLERS_PORT_DEFAULT ) );
     }
 
-    //.........................................................................
+	//.........................................................................
     // LIRC controller
 
     controller_lirc = ControllerLIRC::make( this );
@@ -1269,6 +1273,11 @@ int TPContext::run()
     notify( this , TP_NOTIFICATION_EXITING );
 
     //.....................................................................
+    // Keep further events from being processed.
+
+    controller_list.stop_events();
+
+    //.....................................................................
 
     if ( app_push_server )
     {
@@ -1359,6 +1368,14 @@ int TPContext::run()
     {
         delete controller_server;
         controller_server = NULL;
+    }
+
+    //.........................................................................
+
+    if ( http_trickplay_api_support )
+    {
+        delete http_trickplay_api_support;
+        http_trickplay_api_support = NULL;
     }
 
     //.........................................................................
@@ -2026,7 +2043,6 @@ void TPContext::load_external_configuration()
         TP_LIRC_UDS,
         TP_LIRC_REPEAT,
         TP_APP_PUSH_ENABLED,
-        TP_APP_PUSH_PORT,
         TP_MEDIAPLAYER_ENABLED,
         TP_IMAGE_DECODER_ENABLED,
         TP_RANDOM_SEED,
@@ -2036,6 +2052,7 @@ void TPContext::load_external_configuration()
         TP_AUDIO_SAMPLER_MAX_BUFFER_KB,
         TP_TOAST_JSON_PATH,
         TP_FIRST_APP_EXITS,
+        TP_HTTP_PORT,
 
         NULL
     };

@@ -12,13 +12,12 @@
 #include "util.h"
 
 Debug_ON log( "HTTP-SERVER" );
+Debug_OFF log2( "HTTP-SERVER" );
 
 //=============================================================================
 
 HttpServer::HttpServer( guint16 port ) : server( NULL )
 {
-	g_assert( port >= 0 );
-
 	server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
 
 	log( "READY ON PORT %u" , soup_server_get_port( server ) );
@@ -59,6 +58,8 @@ void HttpServer::register_handler( const String & path , RequestHandler * handle
 			soup_server_callback,
 			new HandlerUserData( this , handler ),
 			( GDestroyNotify ) HandlerUserData::destroy );
+
+    log( "ADDED HANDLER FOR %s" , path.c_str() );
 }
 
 //-----------------------------------------------------------------------------
@@ -66,6 +67,8 @@ void HttpServer::register_handler( const String & path , RequestHandler * handle
 void HttpServer::unregister_handler( const String & path )
 {
     soup_server_remove_handler( server , path.c_str() );
+
+    log( "REMOVED HANDLER FOR %s" , path.c_str() );
 }
 
 //=============================================================================
@@ -349,7 +352,7 @@ public:
         wrote_chunk_handler = g_signal_connect( ctx.message , "wrote_chunk", G_CALLBACK( message_wrote_chunk ) , this );
         finished_handler = g_signal_connect( ctx.message , "finished", G_CALLBACK( message_finished ) , this );
 
-        log( "CREATED RESPONSE BODY %p" , this );
+        log2( "CREATED RESPONSE BODY %p" , this );
     }
 
     ~StreamBody()
@@ -370,7 +373,7 @@ public:
 
         delete stream_writer;
 
-        log( "DESTROYED RESPONSE BODY %p" , this );
+        log2( "DESTROYED RESPONSE BODY %p" , this );
     }
 
     void append( const char * data , gsize size )
@@ -378,14 +381,14 @@ public:
         g_assert( data );
         g_assert( size );
 
-        log( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
+        log2( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
 
         soup_message_body_append( ctx.message->response_body , SOUP_MEMORY_COPY , data , size );
     }
 
     void complete()
     {
-        log( "RESPONSE BODY %p COMPLETE" , this );
+        log2( "RESPONSE BODY %p COMPLETE" , this );
 
         soup_message_body_complete( ctx.message->response_body );
 
@@ -398,7 +401,7 @@ public:
 
     void cancel()
     {
-        log( "RESPONSE BODY %p CANCEL" , this );
+        log2( "RESPONSE BODY %p CANCEL" , this );
 
         soup_socket_disconnect( soup_client_context_get_socket( ctx.client ) );
     }
@@ -408,13 +411,13 @@ private:
 
     static void message_wrote_chunk( SoupMessage * msg , StreamBody * self )
     {
-        log( "RESPONSE BODY %p WROTE CHUNK" , self );
+        log2( "RESPONSE BODY %p WROTE CHUNK" , self );
 
         self->stream_writer->write( * self );
     }
     static void message_finished( SoupMessage * msg , StreamBody * self )
     {
-        log( "RESPONSE BODY %p FINISHED" , self );
+        log2( "RESPONSE BODY %p FINISHED" , self );
 
         delete self;
     }
@@ -501,7 +504,7 @@ public:
 		soup_message_headers_replace( message_context.message->response_headers, name.c_str(), value.c_str() );
 	}
 
-	virtual void set_response( const String & content_type , const char * data , gsize size )
+	void set_response( const String & content_type , const char * data , gsize size )
 	{
 	    if ( 0 == data || 0 == size )
 	    {
@@ -512,6 +515,12 @@ public:
 	        soup_message_set_response( message_context.message, content_type.c_str(), SOUP_MEMORY_COPY, data, size );
 	    }
 	}
+
+    void set_response( const String & content_type , const String & content )
+    {
+        set_response( content_type , content.data() , content.size() );
+    }
+
 
     void set_status( HttpServer::Status status , const String & msg = String() )
     {
@@ -600,6 +609,8 @@ void HttpServer::soup_server_callback(
         gpointer user_data
         )
 {
+    log( "%s [%s]" , msg->method , path );
+
     soup_message_set_status( msg , HttpServer::HTTP_STATUS_NOT_FOUND );
 
     HandlerUserData * ud = ( HandlerUserData * ) user_data;
@@ -629,4 +640,6 @@ void HttpServer::soup_server_callback(
     {
         ud->handler->handle_http_delete( request , response );
     }
+
+    log( ">> %u %s" , msg->status_code , msg->reason_phrase );
 }

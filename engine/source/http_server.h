@@ -139,6 +139,7 @@ public:
 
 		virtual void set_header( const String & name , const String & value ) = 0;
 	    virtual void set_response( const String & content_type , const char * data , gsize size ) = 0;
+        virtual void set_response( const String & content_type , const String & content ) = 0;
 	    virtual void set_status( Status status , const String & msg = String() ) = 0;
 	    virtual void set_content_type( const String & content_type ) = 0;
 	    virtual void set_content_length( goffset content_length ) = 0;
@@ -156,6 +157,8 @@ public:
 	class RequestHandler
     {
     public:
+	    virtual ~RequestHandler() {};
+
 	    virtual void handle_http_request( const Request & request , Response & response ) {}
 
         virtual void handle_http_get    ( const Request & request , Response & response ) { handle_http_request( request , response ); }

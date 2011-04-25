@@ -5,6 +5,7 @@
 #include "context.h"
 #include "app.h"
 #include "util.h"
+#include "json.h"
 
 //.............................................................................
 
@@ -102,6 +103,55 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
     //.........................................................................
     // Parse the body
 
+    String app_contents;
+
+    FileInfo::List file_list;
+
+#if 1
+
+    using namespace JSON;
+
+    Object root = Parser::parse( body.get_data() , body.get_length() ).as<Object>();
+
+    app_contents = root[ "app" ].as<String>();
+
+    if ( app_contents.empty() )
+    {
+        return;
+    }
+
+    Array files = root[ "files" ].as<Array>();
+
+    if ( files.empty() )
+    {
+        return;
+    }
+
+    for ( Array::Vector::iterator it = files.begin(); it != files.end(); ++it )
+    {
+        Array & parts = it->as<Array>();
+
+        if ( parts.size() < 3 )
+        {
+            return;
+        }
+
+        FileInfo info;
+
+        info.name = parts[ 0 ].as<String>();
+        info.md5 = parts[ 1 ].as<String>();
+        info.size = parts[ 2 ].as<long long>();
+
+        if ( info.name.empty() || info.md5.empty() )
+        {
+            return;
+        }
+
+        file_list.push_back( info );
+    }
+
+#else
+
     JsonParser * parser = json_parser_new();
 
     if ( ! parser )
@@ -154,9 +204,7 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
         return;
     }
 
-    String app_contents( json_node_get_string( app ) );
-
-    FileInfo::List file_list;
+    app_contents = json_node_get_string( app );
 
     JsonArray * files_array = json_node_get_array( files );
 
@@ -194,6 +242,13 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
                 }
             }
         }
+    }
+
+#endif
+
+    if ( file_list.empty() )
+    {
+        return;
     }
 
     //.........................................................................
@@ -255,47 +310,26 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
 
 void AppPushServer::set_response( HttpServer::Response & response , bool done , const String & msg , const String & file , const String & url )
 {
-    JsonObject * o = json_object_new();
+    using namespace JSON;
 
-    json_object_set_boolean_member( o , "done" , done );
-    json_object_set_string_member( o , "msg" , msg.c_str() );
+    Object object;
+
+    object[ "done" ] = done;
+    object[ "msg"  ] = msg;
 
     if ( ! file.empty() )
     {
-        json_object_set_string_member( o , "file" , file.c_str() );
+        object[ "file" ] = file;
     }
 
     if ( ! url.empty() )
     {
-        json_object_set_string_member( o , "url" , url.c_str() );
+        object[ "url" ] = url;
     }
 
-    JsonNode * node = json_node_new( JSON_NODE_OBJECT );
+    response.set_response( "application/json" , object.stringify() );
 
-    json_node_take_object( node , o );
-
-    JsonGenerator * g = json_generator_new();
-
-    json_generator_set_root( g , node );
-
-    json_node_free( node );
-
-    gsize length = 0;
-
-    gchar * json = json_generator_to_data( g , & length );
-
-    if ( json && length )
-    {
-        response.set_response( "application/json" , json , length );
-
-        response.set_status( HttpServer::HTTP_STATUS_OK );
-    }
-    else
-    {
-        g_free( json );
-    }
-
-    g_object_unref( g );
+    response.set_status( HttpServer::HTTP_STATUS_OK );
 }
 
 //.............................................................................
@@ -333,8 +367,15 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         throw String( "Failed to create destination directory" );
     }
 
+    bool has_main = false;
+
     for ( FileInfo::List::const_iterator it = source_files.begin(); it != source_files.end(); ++it )
     {
+        if ( ! has_main && it->name == "main.lua" )
+        {
+            has_main = true;
+        }
+
         FreeLater free_later;
 
         gchar * target_path = Util::rebase_path( app_path , it->name.c_str() , false );
@@ -383,7 +424,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
 
             g_object_unref( file_info );
 
-            if ( size == 0 || size != target_info.source.size )
+            if ( size != target_info.source.size )
             {
                 hash_it = false;
             }
@@ -452,6 +493,11 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         push_info.target_files.push_back( target_info );
     }
 
+    if ( ! has_main )
+    {
+        throw String( "Missing main.lua." );
+    }
+
     return push_info;
 }
 
@@ -496,7 +542,7 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
 
     const HttpServer::Request::Body & body( request.get_body() );
 
-    if ( 0 == body.get_length() || 0 == body.get_data() )
+    if ( 0 == body.get_data() )
     {
         return;
     }
@@ -576,7 +622,6 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
 void AppPushServer::write_file( const TargetInfo & target_info , const HttpServer::Request::Body & body )
 {
     g_assert( body.get_data() );
-    g_assert( body.get_length() );
 
     if ( ! g_file_test( target_info.path.c_str() , G_FILE_TEST_EXISTS ) )
     {
