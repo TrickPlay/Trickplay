@@ -2,10 +2,11 @@ module clutter_screen;
 
 [[
 #include "clutter/clutter.h"
-
 #include "context.h"
-#include "util.h"
 #include "clutter_util.h"
+#include "toast.h"
+#include "bitmap.h"
+
 ]]
 
 /*
@@ -38,6 +39,7 @@ global screen [[ClutterActor*]] actor , container
     
     ~screen()
 	[[
+	    Toast::hide(App::get(L)->get_context());
 		g_object_unref( self );
 	]];
 
@@ -190,6 +192,15 @@ global screen [[ClutterActor*]] actor , container
         clutter_stage_set_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
         lua_pop(L,4);
 	]];	
-	
+
+
+    bool toast( string title , string prompt , Bitmap bitmap = 0 )
+        [[
+            Image * image = bitmap ? Bitmap::get_image( L , bitmap ) : 0;
+
+            result = Toast::show( L , title , prompt , image );
+        ]];
+
+    callback on_toast;
 }
 

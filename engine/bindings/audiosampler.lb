@@ -80,7 +80,6 @@ global audiosampler [[void*]]
 {
 	audiosampler()
 	[[
-		g_info("RAND_MAX is 2^%.0f",log2(RAND_MAX));
 		lb_construct_empty();
 	]];
 
@@ -91,7 +90,7 @@ global audiosampler [[void*]]
 	[[
 		// Should really do some actual sampling, but just in case the user wants some white noise:
 		AudioSample *sample = new AudioSample(L, nsamples);
-		int trunc = exp2(resolution);
+		int trunc = exp(resolution * 0.693147180559945);
 		for(int i=0; i<nsamples; i++)
 		{
 			int rnd = rand();

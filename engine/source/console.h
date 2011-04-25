@@ -8,7 +8,8 @@ class Console : private Server::Delegate
 {
 public:
 
-    Console( TPContext * context, bool read_stdin, int port );
+    static Console * make( TPContext * context );
+
     ~Console();
 
     typedef int ( *CommandHandler )( const char * command, const char * parameters, void * data );
@@ -18,6 +19,8 @@ public:
     void attach_to_lua( lua_State * l );
 
 protected:
+
+    Console( TPContext * context, bool read_stdin, int port );
 
     gboolean read_data();
 
@@ -49,6 +52,7 @@ private:
     TPContext       *       context;
     lua_State       *       L;
     GIOChannel       *      channel;
+    guint                   watch;
     GString        *        stdin_buffer;
     CommandHandlerList      handlers;
     std::auto_ptr<Server>   server;

@@ -1,3 +1,4 @@
+#ifdef DO_AUDIO_STUFF
 #import "AudioStreamer.h"
 #ifdef TARGET_OS_IPHONE			
 #import <CFNetwork/CFNetwork.h>
@@ -1787,4 +1788,4 @@ cleanup:
 
 @end
 
-
+#endif //DO_AUDIO_STUFF
