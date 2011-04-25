@@ -1412,15 +1412,17 @@ function ui_element.button(table)
 	     end 
 	end 
 
-	if p.skin == "editor" then 
+	if p.skin == "editor"  then 
 	     function b_group:on_motion()
-		if current_focus ~= b_group then 
+		if input_mode == S_SELECT or input_mode == S_MENU_M then 
+		    if current_focus ~= b_group then 
 			if current_focus then 
 		     		current_focus.on_focus_out()
 			end
 			b_group.extra.on_focus_in(keys.Return)
-		else 
+		    else 
 		     	current_focus.on_focus_in(keys.Return)
+		    end 
 		end 
 		return true
              end
@@ -4045,7 +4047,7 @@ function ui_element.scrollPane(t)
             track_h = p.visible_h
         end
         
-if editor_lb == nil then
+if editor_lb == nil  then
             function screen:on_motion(x,y) 
 	  	if dragging then
 	        local actor = unpack(dragging)
@@ -4612,7 +4614,7 @@ button
                 end
                 curr_index = 0
 		umbrella:raise_to_top()
-		input_mode = S_MENU
+		input_mode = S_MENU_M
             end,
             fade_out = function()
                 dropDownMenu:complete_animation()

@@ -496,7 +496,7 @@ dofile("editor.lua")
     		--local p = elapsed/duration
 		if current_fn ~= "" and auto_save == false then 
 			--print("auto save !!!")
-			editor.save(true) 
+			editor.save(true, true) 
 			elapsed = 0 
 			auto_save = true
 		end 
