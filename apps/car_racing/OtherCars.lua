@@ -128,7 +128,7 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
                 --if the distances is less than the threshold, collision
                 if not self.hit and math.abs(coll_x) < 300 and coll_y < 1200 and coll_y > 0 then
                     self.hit = true
-                    crashed  = true
+                    car.crashed  = true
                     end_game:raise_to_top()
                     print("Print",coll_x,coll_y)
                     local new_coll_str_x = 300-math.abs(coll_x)--(330-math.abs(coll_x))*coll_x/math.abs(coll_x)
