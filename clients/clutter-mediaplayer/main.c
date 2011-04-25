@@ -7,6 +7,7 @@
 
 #include "trickplay/trickplay.h"
 #include "trickplay/mediaplayer.h"
+#include "trickplay/controller.h"
 
 //-----------------------------------------------------------------------------
 

@@ -493,13 +493,20 @@ namespace Util
     // NOTE: if path contains any .. elements, this will abort. The assumption
     // is that root is trusted and path came from Lua - and cannot be trusted
 
-    inline gchar * rebase_path( const gchar * root, const gchar * path )
+    inline gchar * rebase_path( const gchar * root, const gchar * path , bool abort = true )
     {
         FreeLater free_later;
 
         if ( strstr( path, ".." ) )
         {
-            g_error( "Invalid relative path '%s'", path );
+            if ( abort )
+            {
+                g_error( "Invalid relative path '%s'", path );
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         gchar * p = path_to_native_path( g_strdup( path ) );
