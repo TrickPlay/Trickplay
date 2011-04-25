@@ -57,7 +57,7 @@ struct Event
         ACCELEROMETER,
         POINTER_MOVE , POINTER_DOWN , POINTER_UP,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
-        UI
+        UI, SUBMIT_PICTURE, SUBMIT_AUDIO_CLIP
     };
 
 public:
@@ -92,9 +92,20 @@ public:
         g_assert( event );
         g_assert( event->controller );
 
-        if ( event->type == UI )
+        switch ( event->type )
         {
-            g_free( event->ui.parameters );
+			case UI:
+				g_free( event->ui.parameters );
+				break;
+
+			case SUBMIT_PICTURE:
+			case SUBMIT_AUDIO_CLIP:
+				g_free( event->data.data );
+				g_free( event->data.mime_type );
+				break;
+
+			default:
+				break;
         };
 
         event->controller->unref();
@@ -142,6 +153,17 @@ public:
 
         return event;
     }
+
+    inline static Event * make_data( Type type, Controller * controller, const void * data, unsigned int size, const char * mime_type )
+	{
+		Event * event = make( type, controller );
+
+		event->data.data = g_memdup(data, size);
+		event->data.size = size;
+		event->data.mime_type = g_strdup(mime_type);
+
+		return event;
+	}
 
     inline void process()
     {
@@ -200,6 +222,15 @@ public:
             case UI:
                 controller->ui_event( ui.parameters );
                 break;
+
+            case SUBMIT_PICTURE:
+                controller->submit_picture( data.data, data.size, data.mime_type );
+                break;
+
+            case SUBMIT_AUDIO_CLIP:
+            	controller->submit_audio_clip( data.data, data.size, data.mime_type );
+                break;
+
         }
     }
 
@@ -240,6 +271,12 @@ private:
         {
             char * parameters;
         }            ui;
+        struct
+        {
+        	void * data;
+        	unsigned int size;
+        	char * mime_type;
+        }	data;
     };
 };
 
@@ -594,6 +631,37 @@ void Controller::ui_event( const String & parameters )
 
 //.............................................................................
 
+void Controller::submit_picture( void * data, unsigned int size, const char * mime_type )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->submit_picture( data, size, mime_type );
+    }
+}
+
+//.............................................................................
+
+void Controller::submit_audio_clip( void * data, unsigned int size, const char * mime_type )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->submit_audio_clip( data, size, mime_type );
+    }
+}
+
+
+//.............................................................................
+
 void Controller::add_delegate( Delegate * delegate )
 {
     delegates.insert( delegate );
@@ -871,7 +939,7 @@ bool Controller::stop_sound()
               data ) == 0 );
 }
 
-bool Controller::declare_resource( const String & resource, const String & uri )
+bool Controller::declare_resource( const String & resource, const String & uri , const String & group )
 {
     if ( !connected || !( spec.capabilities&( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
     {
@@ -882,6 +950,7 @@ bool Controller::declare_resource( const String & resource, const String & uri )
 
     parameters.resource = resource.c_str();
     parameters.uri = uri.c_str();
+    parameters.group = group.c_str();
 
     return spec.execute_command(
                tp_controller,
@@ -889,6 +958,25 @@ bool Controller::declare_resource( const String & resource, const String & uri )
                &parameters,
                data ) == 0;
 }
+
+bool Controller::drop_resource_group( const String & group )
+{
+    if ( !connected || !( spec.capabilities&( TP_CONTROLLER_HAS_UI | TP_CONTROLLER_HAS_SOUND ) ) )
+    {
+        return false;
+    }
+
+    TPControllerDropResourceGroup parameters;
+
+    parameters.group = group.c_str();
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP,
+               &parameters,
+               data ) == 0;
+}
+
 
 bool Controller::enter_text( const String & label, const String & text )
 {
@@ -909,6 +997,53 @@ bool Controller::enter_text( const String & label, const String & text )
                data ) == 0;
 }
 
+bool Controller::submit_picture( )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_PICTURES ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_SUBMIT_PICTURE,
+               0,
+               data ) == 0;
+}
+
+bool Controller::submit_audio_clip( )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_AUDIO_CLIPS ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP,
+               0,
+               data ) == 0;
+}
+
+bool Controller::advanced_ui( int command , const String & payload )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_ADVANCED_UI ) || payload.empty() )
+    {
+        return false;
+    }
+
+    TPControllerAdvancedUI parameters;
+
+    parameters.command = command;
+    parameters.payload = payload.c_str();
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_ADVANCED_UI,
+               & parameters,
+               data ) == 0;
+}
+
 //==============================================================================
 
 #define LOCK Util::GSRMutexLock _lock(&mutex)
@@ -916,8 +1051,9 @@ bool Controller::enter_text( const String & label, const String & text )
 //-----------------------------------------------------------------------------
 
 ControllerList::ControllerList()
-    :
-    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) )
+:
+    queue( g_async_queue_new_full( ( GDestroyNotify )Event::destroy ) ),
+    stopped( 0 )
 {
     g_static_rec_mutex_init( &mutex );
 }
@@ -936,6 +1072,13 @@ ControllerList::~ControllerList()
 }
 
 //.............................................................................
+
+void ControllerList::stop_events()
+{
+    g_atomic_int_set( & stopped , 1 );
+}
+
+//.............................................................................
 // Called in any thread. Adds event to queue and adds an idle source to pump
 // events.
 
@@ -943,8 +1086,15 @@ void ControllerList::post_event( gpointer event )
 {
     g_assert( event );
 
-    g_async_queue_push( queue, event );
-    g_idle_add_full( TRICKPLAY_PRIORITY, process_events, this, NULL );
+    if ( g_atomic_int_get( & stopped ) )
+    {
+        Event::destroy( ( Event * ) event );
+    }
+    else
+    {
+        g_async_queue_push( queue, event );
+        g_idle_add_full( TRICKPLAY_PRIORITY, process_events, this, NULL );
+    }
 }
 
 //.............................................................................
@@ -1185,4 +1335,22 @@ int tp_controller_wants_touch_events( TPController * controller )
     TPController::check( controller );
 
     return controller->controller->wants_touch_events();
+}
+
+void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type )
+{
+	g_assert(data);
+	g_assert(size);
+
+	TPController::check( controller );
+	controller->list->post_event( Event::make_data( Event::SUBMIT_PICTURE, controller->controller, data, size, mime_type ) );
+}
+
+void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type )
+{
+	g_assert(data);
+	g_assert(size);
+
+	TPController::check( controller );
+	controller->list->post_event( Event::make_data( Event::SUBMIT_AUDIO_CLIP, controller->controller, data, size, mime_type ) );
 }
