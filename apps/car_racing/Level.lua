@@ -1,5 +1,3 @@
-local ADD_THRESH
-local DEL_THRESH
 local TILE_W=240*4
 local TILE_H=240*4
 
