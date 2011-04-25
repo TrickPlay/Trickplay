@@ -20,6 +20,7 @@ sudo apt-get install \
     libreadline6-dev \
     liburiparser-dev \
     libsndfile1-dev \
+    libsoup2.4-dev \
     cmake \
     git-core
 

@@ -8,7 +8,6 @@
 #include "curl/curl.h"
 #include "fontconfig.h"
 #include "sndfile.h"
-#include "json-glib/json-glib.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
@@ -27,6 +26,9 @@
 #include "versions.h"
 #include "controller_lirc.h"
 #include "app_push_server.h"
+#include "http_server.h"
+#include "http_trickplay_api_support.h"
+
 
 //-----------------------------------------------------------------------------
 
@@ -44,12 +46,14 @@ TPContext::TPContext()
     controller_server( NULL ),
     controller_lirc( NULL ),
     app_push_server( NULL ),
+    http_server( NULL ),
     console( NULL ),
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
     media_player_constructor( NULL ),
     media_player( NULL ),
+    http_trickplay_api_support( NULL ),
     external_log_handler( NULL ),
     external_log_handler_data( NULL ),
     user_data( NULL )
@@ -1047,6 +1051,12 @@ int TPContext::run()
     notify( this , TP_NOTIFICATION_PROFILE_CHANGED );
 
     //.........................................................................
+
+    http_server = new HttpServer( get_int( TP_HTTP_PORT , 0 ) );
+
+    http_trickplay_api_support = new HttpTrickplayApiSupport( this );
+
+    //.........................................................................
     // Create the controller server
 
     if ( get_bool( TP_CONTROLLERS_ENABLED, TP_CONTROLLERS_ENABLED_DEFAULT ) )
@@ -1086,7 +1096,7 @@ int TPContext::run()
         controller_server = new ControllerServer( this, name, get_int( TP_CONTROLLERS_PORT, TP_CONTROLLERS_PORT_DEFAULT ) );
     }
 
-    //.........................................................................
+	//.........................................................................
     // LIRC controller
 
     controller_lirc = ControllerLIRC::make( this );
@@ -1263,6 +1273,11 @@ int TPContext::run()
     notify( this , TP_NOTIFICATION_EXITING );
 
     //.....................................................................
+    // Keep further events from being processed.
+
+    controller_list.stop_events();
+
+    //.....................................................................
 
     if ( app_push_server )
     {
@@ -1353,6 +1368,22 @@ int TPContext::run()
     {
         delete controller_server;
         controller_server = NULL;
+    }
+
+    //.........................................................................
+
+    if ( http_trickplay_api_support )
+    {
+        delete http_trickplay_api_support;
+        http_trickplay_api_support = NULL;
+    }
+
+    //.........................................................................
+
+    if ( http_server )
+    {
+        delete http_server;
+        http_server = NULL;
     }
 
     //.........................................................................
@@ -1493,9 +1524,9 @@ int TPContext::load_app( App ** app )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch )
+int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path )
 {
-    String app_path = get_db()->get_app_path( app_id );
+    String app_path = id_is_path ? app_id : get_db()->get_app_path( app_id );
 
     if ( app_path.empty() )
     {
@@ -2012,7 +2043,6 @@ void TPContext::load_external_configuration()
         TP_LIRC_UDS,
         TP_LIRC_REPEAT,
         TP_APP_PUSH_ENABLED,
-        TP_APP_PUSH_PORT,
         TP_MEDIAPLAYER_ENABLED,
         TP_IMAGE_DECODER_ENABLED,
         TP_RANDOM_SEED,
@@ -2022,6 +2052,7 @@ void TPContext::load_external_configuration()
         TP_AUDIO_SAMPLER_MAX_BUFFER_KB,
         TP_TOAST_JSON_PATH,
         TP_FIRST_APP_EXITS,
+        TP_HTTP_PORT,
 
         NULL
     };
@@ -2357,6 +2388,14 @@ Installer * TPContext::get_installer() const
 {
     g_assert( installer );
     return installer;
+}
+
+//-----------------------------------------------------------------------------
+
+HttpServer * TPContext::get_http_server() const
+{
+    g_assert( http_server );
+    return http_server;
 }
 
 //-----------------------------------------------------------------------------
