@@ -298,6 +298,7 @@ function set_app_path()
     -- directories.
     local list = editor_lb:readdir( base )
     
+    if table.getn(projects) == 0 then 
     for i = 1 , # list do
     
         if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
@@ -307,6 +308,7 @@ function set_app_path()
         end
         
     end
+    end 
     
     input_mode = S_POPUP
 
@@ -2293,11 +2295,13 @@ local function copy_widget_imgs ()
 end 
 
 local function set_project_path ()
-	if(selected_prj == "" and input_t.text ~= "") then
-	     project = input_t.text 
-	elseif(selected_prj ~= "") then  
+	if(selected_prj ~= "") then  
+	     print (selected_prj)
+	     print (selected_prj)
+	     print (selected_prj)
 	     project = msgw:find_child(selected_prj).text
 	end 
+
         app_path = editor_lb:build_path( base , project )
         if not editor_lb:mkdir( app_path ) then
         -- Tell the user we were not able to create it
@@ -2366,7 +2370,7 @@ function inputMsgWindow(input_purpose, cfn)
               	elseif (button.name == "yes") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "no") then inputMsgWindow_yn(button.name)
               	elseif (button.name == "openfile") or (button.name == "reopenfile") then inputMsgWindow_openfile() 
-              	elseif (button.name == "projectlist") then set_project_path()
+              	elseif (button.name == "projectlist") then set_project_path() editor.close()
               	elseif (button.name == "open_videofile") or (button.name == "reopen_videofile")then inputMsgWindow_openvideo()
               	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  inputMsgWindow_openimage(input_purpose)
               	elseif (button.name == "cancel") then 	cleanMsgWindow() screen:grab_key_focus(screen)
@@ -2529,9 +2533,11 @@ function inputMsgWindow(input_purpose, cfn)
 
 		function open_b:on_button_down(x,y,button,num_clicks)
 			set_project_path()
+		        editor.close()
      		end 
 		function open_t:on_button_down(x,y,button,num_clicks)
 			set_project_path()
+		        editor.close()
      		end 
 
 	elseif (input_purpose == "open_imagefile") or  

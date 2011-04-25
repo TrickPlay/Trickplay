@@ -144,7 +144,10 @@ menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets
 menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end}) --editor.redo} )
 menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t     I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements})
 menuButton_edit.insert_item(4,{type="item", string="Timeline ...\t\t     J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline}) --icon=assets("assets/menu-checkmark.png")
-menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete})
+menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
+
+
+
 menuButton_edit.insert_item(6,{type="item", string="Duplicate\t\t\t     D", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate}) 
 menuButton_edit.insert_item(7,{type="item", string="Clone\t\t\t     C", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone}) 
 menuButton_edit.insert_item(8,{type="item", string="Group\t\t\t     G", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group}) 

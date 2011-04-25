@@ -4841,7 +4841,7 @@ button
                     if ui_ele.parent then ui_ele:unparent() end
                     ui_ele.anchor_point = {ui_ele.w,ui_ele.h/2}
                     ui_ele.position={
-                            p.menu_width, txt.y
+                            p.menu_width + 10, txt.y
                     }
                     dropDownMenu:add(ui_ele)
                 end

@@ -359,6 +359,8 @@ function editor.timeline()
 			input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
 			screen:find_child("timeline").extra.show = true 
 			screen:find_child("timeline"):raise_to_top()
+		else 
+			print("Err : There is no UI element to make animation.")
 		end
 	elseif table.getn(g.children) == 0 then 
 		screen:remove(screen:find_child("timeline"))
