@@ -2221,7 +2221,7 @@ end
 local input_purpose     = ""
 
 local function copy_widget_imgs ()
-	local source_files = editor_lb:readdir("assets/")
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
 	     source_file = "assets/"..j 
@@ -2231,7 +2231,7 @@ local function copy_widget_imgs ()
 	     end 
 	end 
 
-	local source_files = editor_lb:readdir("assets/default/")
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
 	     source_file = "assets/default/"..j 
@@ -2241,7 +2241,7 @@ local function copy_widget_imgs ()
 	     end 
 	end 
 
-	local source_files = editor_lb:readdir("assets/CarbonCandy/")
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
 	     source_file = "assets/CarbonCandy/"..j 
@@ -2251,7 +2251,7 @@ local function copy_widget_imgs ()
 	     end 
 	end 
 
-	local source_files = editor_lb:readdir("assets/OOBE")
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
 	     source_file = "assets/OOBE/"..j 
