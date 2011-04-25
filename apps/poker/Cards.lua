@@ -270,6 +270,7 @@ function(self, ...)
         cards = {}
         for _, card in ipairs(Cards) do
             table.insert(cards, card)
+            resetCardGroup(card.group)
         end
     end
    

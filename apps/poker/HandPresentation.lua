@@ -45,7 +45,6 @@ HandPresentation = Class(nil,function(pres, ctrl)
             pot_chips = nil
             create_pot_chips()
         end
-        blah = pot_chips
     end
    
     -- Create a burn card
@@ -429,12 +428,20 @@ HandPresentation = Class(nil,function(pres, ctrl)
         -- Put community cards on the deck
         local cards = ctrl:get_community_cards()
         for i = 5,1,-1 do
+            if not cards[i].group.parent then screen:add(cards[i].group) end
+            resetCardGroup(cards[i].group)
             cards[i].group.position = CARD_LOCATIONS.DECK
+            cards[i].group.z_rotation = {
+                -3 + math.random(5),
+                cards[i].group.w/2,
+                cards[i].group.h/2
+            }
         end
       
         -- Put hole cards on the deck
         for player,hole in pairs(ctrl:get_hole_cards()) do
             for _,card in pairs(hole) do
+                resetCardGroup(card.group)
                 card.group.position = CARD_LOCATIONS.DECK
                 table.insert(all_cards, card)
             end
@@ -467,6 +474,10 @@ HandPresentation = Class(nil,function(pres, ctrl)
             if not cards[i].group.parent then
                 screen:add(cards[i].group)
             end
+            cards[i].group:raise_to_top()
+            -- TODO: for some reason i have to put this everywhere
+            resetCardGroup(cards[i].group)
+            --
             cards[i].group:animate{
                 position = CARD_LOCATIONS[i], duration = TIME, mode = MODE,
                 z_rotation = -3 + math.random(5),
@@ -584,7 +595,11 @@ HandPresentation = Class(nil,function(pres, ctrl)
         -- clear cards
         for i,card in ipairs(all_cards) do
             resetCardGroup(card.group)
-            print(card.group.parent, screen, card.group.parent == screen)
+            --screen:remove(card.group)
+            card.group:unparent()
+        end
+        for i,card in pairs(ctrl:get_community_cards()) do
+            resetCardGroup(card.group)
             --screen:remove(card.group)
             card.group:unparent()
         end
