@@ -1325,6 +1325,10 @@ function ui_element.button(table)
              focus.opacity = 255
         end 
         b_group:find_child("text").color = p.focus_text_color
+
+	if b_group:find_child("shodow") then 
+		print ("SHODAW!!!!!!!")
+	end
 	
 	if key then 
 	    if p.pressed and key == keys.Return then
@@ -1366,10 +1370,10 @@ function ui_element.button(table)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 	if(p.skin == "editor") then 
-		button= assets("assets/invisible_pixel.png")
-                button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-		focus= assets("assets/menu-bar-focus.png")
-                focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+	    button= assets("assets/invisible_pixel.png")
+            button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+	    focus= assets("assets/menu-bar-focus.png")
+            focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 	elseif(p.skin ~= "custom") then 
             button = assets(skin_list[p.skin]["button"])
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
@@ -1384,12 +1388,12 @@ function ui_element.button(table)
 
 	if p.text_has_shadow then 
 	       s_txt = Text{
+		        name = "shadow",
                         text  = p.label, 
                         font  = p.text_font,
-                        color = "000000",
-                        opacity=255*.5,
-                        x     = (p.ui_width  -text.w)/2 - 2,
-                        y     = (p.ui_height - text.h)/2 - 2,
+                        color = {0,0,0,255/2},
+                        x     = (p.ui_width  -text.w)/2 - 1,
+                        y     = (p.ui_height - text.h)/2 - 1,
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
@@ -1852,23 +1856,23 @@ function ui_element.toastAlert(table)
  --default parameters
     local p = {
  	skin = "custom",  
-	ui_width = 600,
-	ui_height = 200,
+	ui_width = 770,
+	ui_height = 113,
 	label = "Toast Alert Title",
 	message = "Toast alert message",
-	title_font = "DejaVu Sans 32px", 
-	message_font = "DejaVu Sans 28px", 
+	title_font = "DejaVu Sans 26", 
+	message_font = "DejaVu Sans 20px", 
 	title_color = {255,255,255,255},  
 	message_color = {255,255,255,255}, 
-	border_width  = 3,
-	border_color  = {255,255,255,255}, --"FFFFFFC0", 
-	fill_color  = {25,25,25,100},
+	border_width  = 4,
+	border_color  = {255,255,255,80}, --"FFFFFFC0", 
+	fill_color  = {25,25,25,80},
 	padding_x = 0,
 	padding_y = 0,
 	border_corner_radius = 22,
 	fade_duration = 2000,
 	on_screen_duration = 5000,
-	icon = "lib/assets/voice-1.png"
+	icon = "lib/assets/toast-icon.png"
     }
 
 
@@ -1904,13 +1908,13 @@ function ui_element.toastAlert(table)
 	tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
 	icon = assets(p.icon)
-    	icon:set{size = {100, 100}, name = "icon", position  = {tb_group_cur_x, tb_group_cur_y}} --30,30
+    	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -30}} --30,30
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-    	title:set{name = "title", position = {(p.ui_width - title.w - tb_group_cur_x)/2 , tb_group_cur_y+20 }}  --,50
+    	title:set{name = "title", position = { icon.w , tb_group_cur_y }}  --,50
 
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
-    	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 + title.h }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
+    	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
 	if(p.skin ~= "custom") then 
     	     t_box_img = assets(skin_list[p.skin]["toast"])
@@ -2037,6 +2041,8 @@ function ui_element.buttonPicker(table)
 	focus_fill_color = {0,255,0,0},
 	rotate_func = nil, 
         selected_item = 1, 
+	direction = "horizontal", 
+	
     }
 
  --overwrite defaults
@@ -2100,10 +2106,22 @@ function ui_element.buttonPicker(table)
 	right_un.scale = {w_scale, h_scale}
 	right_sel.scale = {w_scale, h_scale}
 
-	left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-	left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
-	right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-	right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+	if p.direction == "horizontal" then 
+		left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
+		left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
+		right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
+		right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+	elseif p.direction == "vertical" then 
+            	left_un.anchor_point={left_un.w/2,left_un.h/2}
+            	left_un.z_rotation={90,0,0}
+		left_un:set{name = "left_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 }, opacity = 255, reactive = true} -- top
+		left_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 }, opacity = 0}
+
+            	right_un.anchor_point={right_un.w/2,right_un.h/2}
+            	right_un.z_rotation={90,0,0}
+		right_un:set{name = "right_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 }, opacity = 255, reactive = true} -- bottom
+		right_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2  },  opacity = 0}
+	end
 
      	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
 	focus:set{name = "focus",  position = {pos[1], pos[2]}, size = {p.ui_width, p.ui_height}, opacity = 0}
@@ -2329,9 +2347,118 @@ function ui_element.buttonPicker(table)
 	end
 
  	function bp_group.extra.press_up()
+	          local prev_i = index
+
+            local next_i = (index-2)%(#p.items)+1
+
+	    index = next_i
+
+	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local prev_old_x = p.ui_width/2 - j.width/2
+	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
+	    local next_old_y = p.ui_height/2 - j.height/2
+	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
+	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local next_new_x = p.ui_width/2 - j.width/2
+	    local next_new_y = p.ui_height/2 - j.height/2
+
+	    if t ~= nil then
+	       t:stop()
+	       t:on_completed()
+	    end
+	    t = Timeline
+	    {
+	       duration = 300,
+	       direction = "FORWARD",
+	       loop = false
+	    }
+
+	    function t.on_new_frame(t,msecs,p)
+			if msecs <= 100 then
+				left_sel.opacity = 255* msecs/100
+			elseif msecs <= 200 then
+				left_sel.opacity = 255
+			else 
+				left_sel.opacity = 255*(1- (msecs-200)/100)
+			end
+			items:find_child("item"..tostring(prev_i)).x = prev_old_x + p*(prev_new_x - prev_old_x)
+			items:find_child("item"..tostring(prev_i)).y = prev_old_y + p*(prev_new_y - prev_old_y)
+			items:find_child("item"..tostring(next_i)).x = next_old_x + p*(next_new_x - next_old_x)
+			items:find_child("item"..tostring(next_i)).y = next_old_y + p*(next_new_y - next_old_y)
+	    end
+	    function t.on_completed()
+			items:find_child("item"..tostring(prev_i)).x = prev_new_x
+			items:find_child("item"..tostring(prev_i)).y = prev_new_y
+			items:find_child("item"..tostring(next_i)).x = next_new_x
+			items:find_child("item"..tostring(next_i)).y = next_new_y
+			p.selected_item = next_i
+			if p.rotate_func then
+	       		     p.rotate_func(next_i)
+	    		end
+
+			t = nil
+	    end
+	   
+	    t:start()
+
+		
 	end
+
 	function bp_group.extra.press_down()
+	    local prev_i = index
+            local next_i = (index)%(#p.items)+1
+	    index = next_i
+
+	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local prev_old_x = p.ui_width/2 - j.width/2
+	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
+	    local next_old_y = p.ui_height/2 - j.height/2
+	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
+	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local next_new_x = p.ui_width/2 - j.width/2
+	    local next_new_y = p.ui_height/2 - j.height/2
+
+	    if t ~= nil then
+		t:stop()
+		t:on_completed()
+     	    end
+
+	    t = Timeline {
+	        duration = 300,
+		direction = "FORWARD",
+		loop = false
+	    }
+
+	    function t.on_new_frame(t,msecs,p)
+	        if msecs <= 100 then
+		     right_sel.opacity = 255* msecs/100
+		elseif msecs <= 200 then
+		     right_sel.opacity = 255
+		else 
+		     right_sel.opacity = 255*(1- (msecs-200)/100)
+		end
+
+		items:find_child("item"..tostring(prev_i)).x = prev_old_x + p*(prev_new_x - prev_old_x)
+		items:find_child("item"..tostring(prev_i)).y = prev_old_y + p*(prev_new_y - prev_old_y)
+		items:find_child("item"..tostring(next_i)).x = next_old_x + p*(next_new_x - next_old_x)
+		items:find_child("item"..tostring(next_i)).y = next_old_y + p*(next_new_y - next_old_y)
+	    end
+	    function t.on_completed()
+	        items:find_child("item"..tostring(prev_i)).x = prev_new_x
+		items:find_child("item"..tostring(prev_i)).y = prev_new_y
+		items:find_child("item"..tostring(next_i)).x = next_new_x
+		items:find_child("item"..tostring(next_i)).y = next_new_y
+		p.selected_item = next_i
+		if p.rotate_func then
+	       	     p.rotate_func(next_i)
+	    	end
+		t = nil
+	    end
+	    t:start()
 	end
+
 	function bp_group.extra.press_enter()
 	end
 
@@ -4717,10 +4844,11 @@ button
         curr_y = p.vert_offset
         
         --For each category
+	local prev_item 
         for i = 1, #p.items do
             local item=p.items[i]
             --focus_sel_items[cat] = {}
-            
+             
             if item.type == "seperator" then
                 dropDownMenu:add(
                     Rectangle{
@@ -4744,8 +4872,8 @@ button
                         font  = p.item_text_font,
                         color = "000000",
                         opacity=255*.5,
-                        x     = p.horz_padding+p.horz_spacing - 2,
-                        y     = curr_y - 2,
+                        x     = p.horz_padding+p.horz_spacing - 1,
+                        y     = curr_y - 1,
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
@@ -4766,9 +4894,15 @@ button
                     txt
                 )
                 if item.bg then
+
                     ui_ele = item.bg
-                    ui_ele.anchor_point = { 0, ui_ele.h/2 }
-                    ui_ele.position     = {  0, txt.y }
+		    if i == #p.items and prev_item ~= nil then 
+                    	ui_ele.anchor_point = { 0, prev_item.bg.h/2 }
+                    	ui_ele.position     = {  0, txt.y }
+		    else 
+                    	ui_ele.anchor_point = { 0, ui_ele.h/2 }
+                    	ui_ele.position     = {  0, txt.y }
+		    end 
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
@@ -4787,7 +4921,7 @@ button
                 elseif p.show_ring then
                     ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
-                    ui_ele.position     = {  0, txt.y }
+                    ui_ele.position     = { 0, 	   txt.y }
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
@@ -4829,8 +4963,15 @@ button
                 end
                 
                 ui_ele.name="focus"
-                ui_ele.anchor_point = { 0, ui_ele.h/2 }
-                ui_ele.position     = { 0, txt.y }
+		if i == #p.items and prev_item ~= nil and prev_item.focus ~= nil then 
+                    	ui_ele.anchor_point = { 0, prev_item.focus.h/2 }
+                    	ui_ele.position     = {  0, txt.y }
+		else 
+                    	ui_ele.anchor_point = { 0, ui_ele.h/2 }
+                    	ui_ele.position     = {  0, txt.y }
+		end 
+                --ui_ele.anchor_point = { 0, ui_ele.h/2 }
+                --ui_ele.position     = { 0, txt.y }
                 ui_ele.opacity      = 0
                 if ui_ele.parent then ui_ele:unparent() end
                 dropDownMenu:add(ui_ele)
@@ -4841,7 +4982,7 @@ button
                     if ui_ele.parent then ui_ele:unparent() end
                     ui_ele.anchor_point = {ui_ele.w,ui_ele.h/2}
                     ui_ele.position={
-                            p.menu_width + 10, txt.y
+                            p.menu_width + 10 , txt.y
                     }
                     dropDownMenu:add(ui_ele)
                 end
@@ -4862,8 +5003,8 @@ button
                         font  = p.label_text_font,
                         color = "000000",
                         opacity=255*.5,
-                        x     = p.horz_spacing-2,
-                        y     = curr_y-2,
+                        x     = p.horz_spacing-1,
+                        y     = curr_y-1,
                     }
                 s_txt.anchor_point={0,s_txt.h/2}
                 s_txt.y = s_txt.y+s_txt.h/2
@@ -4902,6 +5043,7 @@ button
             else
                 print("Invalid type in the item list. Type: ",item.type)
             end
+	    prev_item = item
         end
         
         if p.background_color[4] ~= 0 then
@@ -4954,7 +5096,7 @@ button
             dropDownMenu.y = dropDownMenu.y + button.h
         end
         
-        dropDownMenu.x = dropDownMenu.x + p.horz_offset
+        --dropDownMenu.x = dropDownMenu.x + p.horz_offset
     end
     
     
@@ -5245,7 +5387,6 @@ function ui_element.tabBar(t)
                 }
             end,
             fade_in = function()
-print("qqqqqqqqq")
                 dropDownMenu:complete_animation()
                 button_focus:complete_animation()
                 button_focus.opacity=0
@@ -5262,7 +5403,6 @@ print("qqqqqqqqq")
                 curr_index = 0
             end,
             fade_out = function()
-print("dfhalsdhf")
                 dropDownMenu:complete_animation()
                 button_focus:complete_animation()
                 button_focus.opacity=255

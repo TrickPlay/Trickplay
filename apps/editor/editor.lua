@@ -567,6 +567,8 @@ function editor.n_selected(obj, call_by_inspector)
 end  
 
 function editor.close()
+
+
 	clear_bg()
         if(g.extra.video ~= nil) then 
 	    g.extra.video = nil
@@ -2529,7 +2531,8 @@ function editor.delete()
 	   		     local fileUpper= string.upper(string.sub(current_fn, 1, -5))
 	   		     local fileLower= string.lower(string.sub(current_fn, 1, -5))
 			     local main = readfile("main.lua")
-			     if string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") ~= nil then  			
+			     if main then 
+			        if string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") ~= nil then  			
 			          local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") 
 				  local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(v.name).." SECTION\n\n")
 				  local main_first = string.sub(main, 1, q-1)
@@ -2537,8 +2540,8 @@ function editor.delete()
 				  main = ""
 				  main = main_first..main_last
 				  editor_lb:writefile("main.lua",main, true)
-				print("OOOOOOOOOOOOO")
-	       		     end 
+	       		        end 
+			     end 
 	       		end 
 	       	     end 
         	     g:remove(v)
