@@ -2010,7 +2010,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
 	elseif  v.extra.type == "ProgressSpinner" then
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"orbitting", "spinning"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
-	elseif v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+	elseif v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" or v.extra.type == "ButtonPicker" then 
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"vertical", "horizontal"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
 	else
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}

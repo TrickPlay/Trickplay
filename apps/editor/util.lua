@@ -904,7 +904,7 @@ function make_attr_t(v)
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
        ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
-       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","items","selected_item","reactive","focus"} end,
+       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","items","selected_item","reactive","focus"} end,
        ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","items", "reactive","focus",} end,
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_seperator_color","title_seperator_thickness",} end,
        ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","icon","label","message","opacity","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
@@ -2295,13 +2295,14 @@ local function copy_widget_imgs ()
 end 
 
 local function set_project_path ()
-	if(selected_prj ~= "") then  
-	     print (selected_prj)
-	     print (selected_prj)
-	     print (selected_prj)
-	     project = msgw:find_child(selected_prj).text
-	end 
 
+	if(selected_prj == "" and input_t.text ~= "") then
+               project = input_t.text                           
+        elseif(selected_prj ~= "") then                      
+               project = msgw:find_child(selected_prj).text   
+	       selected_prj = ""
+        end   
+	
         app_path = editor_lb:build_path( base , project )
         if not editor_lb:mkdir( app_path ) then
         -- Tell the user we were not able to create it
