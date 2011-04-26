@@ -223,7 +223,8 @@ def parse( source ):
                     inherits = inherits ,
                     properties = [] ,
                     functions = [] ,
-                    constants = [] )
+                    constants = [] ,
+                    typedefs = {} )
                 )
             
             tokens = []
@@ -235,6 +236,12 @@ def parse( source ):
             if ( len( tokens ) == 2 ) and ( tokens[ 0 ] == "module" ):
                 
                 output.append( dict( type = "module" , name = tokens[ 1 ] ) )
+                
+                tokens = []
+                
+            elif ( len( tokens ) == 3 ) and ( tokens[ 0 ] == "typedef" ):
+            
+                output[ -1 ][ "typedefs" ][ tokens[ 2 ] ] = tokens[ 1 ]
                 
                 tokens = []
             
@@ -391,6 +398,7 @@ def emit( stuff , f ):
             "table"     : "int",
             "function"  : "int",
             "udata"     : "int",
+            "any"       : "int"
         }
         
         lua_check = {
@@ -403,7 +411,8 @@ def emit( stuff , f ):
             "lstring"   : "luaL_checklstring",
             "table"     : "lb_checktable",
             "function"  : "lb_checkfunction",
-            "udata"     : "lb_checkudata"
+            "udata"     : "lb_checkudata",
+            "any"       : "lb_checkany"
         }
         
         lua_opt  = {
@@ -416,7 +425,8 @@ def emit( stuff , f ):
             "lstring"   : "lb_optlstring",
             "table"     : "lb_opttable",
             "function"  : "lb_optfunction",
-            "udata"     : "lb_optudata"
+            "udata"     : "lb_optudata",
+            "any"       : "lb_optany"
             
         }
 
@@ -430,7 +440,8 @@ def emit( stuff , f ):
             "lstring"   : "lua_pushlstring",
             "table"     : "lua_pushvalue",
             "function"  : "lua_pushvalue",
-            "udata"     : "lua_pushvalue"
+            "udata"     : "lua_pushvalue",
+            "any"       : "lua_pushvalue"
         }
         
         
@@ -446,16 +457,23 @@ def emit( stuff , f ):
             "function",
             "udata",
             "callback",
-            "multi"
+            "multi",
+            "any"
         ]
             
         def transform_type( type ):
             if type is None:
                 return None
+            elif type == "void":
+                return None
             elif type in base_types:
                 return type
             else:
-                return "udata"
+                rt = bind[ "typedefs" ].get( type )
+                if not rt is None:
+                    return rt
+                else:
+                    return "udata"
             
         def declare_local( param , index ):
             
@@ -554,7 +572,7 @@ def emit( stuff , f ):
                     
                 func_type=transform_type(func[ "type" ])
                 
-                if func_type not in [ None , "table" , "udata" , "multi" ]:
+                if func_type not in [ None , "table" , "udata" , "multi" , "any" ]:
                     
                     f.write(
                         "  %s result;\n"
@@ -583,7 +601,7 @@ def emit( stuff , f ):
                                         
                     f.write( "  return 0;\n" )
                     
-                elif func_type in [ "table" , "udata" ]:
+                elif func_type in [ "table" , "udata" , "any" ]:
                     
                     f.write( "  return 1;\n" );
             
@@ -684,7 +702,7 @@ def emit( stuff , f ):
                     
                 func_type=transform_type(func[ "type" ])
                 
-                if func_type not in [ None , "table" , "udata" , "multi" ]:
+                if func_type not in [ None , "table" , "udata" , "multi" , "any" ]:
                     
                     f.write(
                         "  %s result;\n"
@@ -713,7 +731,7 @@ def emit( stuff , f ):
                     
                     f.write( "  return 0;\n" )
                     
-                elif func_type in [ "table" , "udata" ]:
+                elif func_type in [ "table" , "udata" , "any" ]:
                     
                     f.write( "  return 1;\n" );
             
@@ -743,18 +761,10 @@ def emit( stuff , f ):
                     "int new_%s(lua_State*L)\n"
                     "{\n"
                     "%s"
-                    '  UserData * __ud__ = UserData::make( L , "%s" );\n'
-                    "  luaL_getmetatable(L,%s);\n"
-                    "  lua_setmetatable(L,-2);\n"
-		    "  %s self=0;\n"
-                    "\n"
                     %
-                    ( bind_name ,
-		     profiling_header("new_%s"%bind_name) ,
-		     bind_name,
-		     metatable_name, udata_type )
+                    ( bind_name , profiling_header("new_%s"%bind_name) ) 
                 )
-                
+                    
                 for index , param in enumerate( func[ "parameters" ] ):
                     
                     f.write(
@@ -763,15 +773,26 @@ def emit( stuff , f ):
                         ( declare_local( param , index + 1 )  , )
                     )
                     
+                f.write( 
+                    
+                    '  UserData * __ud__ = UserData::make( L , "%s" );\n'
+                    "  luaL_getmetatable(L,%s);\n"
+                    "  lua_setmetatable(L,-2);\n"
+		            "  %s self=0;\n"
+                    "\n"
+                    %
+                    ( bind_name , metatable_name, udata_type )
+                )
+                                                      
                 if func[ "code" ] is not None:
                     
                     flow_code( func[ "code" ] )
                     
                 else:
 		    
-		    f.write( "  lb_construct_empty();\n" )
+		            f.write( "  lb_construct_empty();\n" )
                     
-                
+
                 f.write("  lb_check_initialized();\n")
                 
                 if options.profiling:
@@ -780,7 +801,7 @@ def emit( stuff , f ):
                         '  PROFILER_CREATED("%s",self);\n'
                         %
                         bind_name );
-                
+                                
                 f.write(
                     "  return 1;\n" 
                 )
