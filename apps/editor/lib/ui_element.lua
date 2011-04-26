@@ -1325,10 +1325,6 @@ function ui_element.button(table)
              focus.opacity = 255
         end 
         b_group:find_child("text").color = p.focus_text_color
-
-	if b_group:find_child("shodow") then 
-		print ("SHODAW!!!!!!!")
-	end
 	
 	if key then 
 	    if p.pressed and key == keys.Return then
@@ -1385,7 +1381,8 @@ function ui_element.button(table)
 	end 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
         text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
-
+	
+	b_group:add(ring, focus_ring, button, focus)
 	if p.text_has_shadow then 
 	       s_txt = Text{
 		        name = "shadow",
@@ -1400,7 +1397,7 @@ function ui_element.button(table)
         	b_group:add(s_txt)
 	end 
 
-        b_group:add(ring, focus_ring, button, focus, text)
+        b_group:add(text)
 
         if (p.skin == "custom") then button.opacity = 0 
         else ring.opacity = 0 end 
@@ -1860,7 +1857,7 @@ function ui_element.toastAlert(table)
 	ui_height = 113,
 	label = "Toast Alert Title",
 	message = "Toast alert message",
-	title_font = "DejaVu Sans 26", 
+	title_font = "DejaVu Sans 22", 
 	message_font = "DejaVu Sans 20px", 
 	title_color = {255,255,255,255},  
 	message_color = {255,255,255,255}, 
@@ -1908,13 +1905,13 @@ function ui_element.toastAlert(table)
 	tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
 	icon = assets(p.icon)
-    	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -30}} --30,30
+    	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -50}} --30,30
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
     	title:set{name = "title", position = { icon.w , tb_group_cur_y }}  --,50
 
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
-    	message:set{name = "message", position = {icon.w + tb_group_cur_x, tb_group_cur_y*3 }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
+    	message:set{name = "message", position = {icon.w, title.h + tb_group_cur_y }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
 	if(p.skin ~= "custom") then 
     	     t_box_img = assets(skin_list[p.skin]["toast"])
