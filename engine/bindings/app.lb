@@ -3,8 +3,8 @@
 #include "context.h"
 #include "sysdb.h"
 
-void app_loaded_handler(const char *,void * l);
-void app_closing_handler(const char *,void * l);
+void app_loaded_handler(TPContext *,const char *,void * l);
+void app_closing_handler(TPContext *,const char *,void * l);
 ]]
 
 # Global: app
@@ -234,13 +234,13 @@ global app [[App*]]
 }
 
 [[
-void app_loaded_handler(const char *,void * l)
+void app_loaded_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
     invoke_app_on_loaded(L,App::get(L),0,0);
 }
 
-void app_closing_handler(const char *,void * l)
+void app_closing_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
     invoke_app_on_closing(L,App::get(L),0,0);

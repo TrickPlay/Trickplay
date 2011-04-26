@@ -23,7 +23,7 @@ Debugger::~Debugger()
     app->get_context()->remove_console_command_handler( "debug", command_handler, this );
 }
 
-void Debugger::command_handler( const char * command, const char * parameters, void * me )
+void Debugger::command_handler( TPContext * context , const char * command, const char * parameters, void * me )
 {
     ( ( Debugger * ) me )->handle_command( parameters );
 }
