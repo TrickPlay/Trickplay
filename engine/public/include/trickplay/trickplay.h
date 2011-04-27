@@ -32,9 +32,9 @@ extern "C" {
     TrickPlay version
 */
 
-#define TP_MAJOR_VERSION    0
-#define TP_MINOR_VERSION    0
-#define TP_PATCH_VERSION    13
+#define TP_MAJOR_VERSION    1
+#define TP_MINOR_VERSION    18
+#define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -59,17 +59,16 @@ typedef struct TPContext TPContext;
     Context configuration keys to be used with <tp_context_set> and <tp_context_get>.
     
     TP_APP_SOURCES -        List of paths to applications. This is a semicolon (";")
-                            delimited list of paths where applications can be sourced
-                            from.
+                            delimited list of paths where applications can be sourced.
                             Defaults to "apps" (in the current working directory).
                         
-    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "1" TrickPlay will scan the
+    TP_SCAN_APP_SOURCES -   Scan app sources. If set to "TRUE" TrickPlay will scan the
                             paths listed in app sources for apps. If you attempt to
                             launch an app using an id (instead of a path) and the
                             TrickPlay database does not have any apps, TrickPlay will
                             scan all of the app sources regardless of the value of
                             this variable.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_APP_ID -             Initial app id. The id of the first application to launch.
                             Instead of specifying the id, you can set <TP_APP_PATH> to
@@ -147,10 +146,10 @@ typedef struct TPContext TPContext;
                             production builds, the telnet console is always disabled.
                             Defaults to "7777".
                             
-    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "1" if you wish to enable
+    TP_CONTROLLERS_ENABLED - Controllers enabled. Set to "TRUE" if you wish to enable
                             support for remote controllers. This will create a
                             listener and establish an mDNS service for discovery.
-                            Defaults to "0".
+                            Defaults to "FALSE".
                             
     TP_CONTROLLERS_PORT -   Controllers port. Set to non-zero to run the controllers
                             listener on a fixed port.
@@ -161,6 +160,12 @@ typedef struct TPContext TPContext;
                             service.
                             Defaults to "TrickPlay".
                             
+    TP_CONTROLLERS_MDNS_ENABLED -   Whether controller discovery via mDNS is enabled.
+                                    Defaults to "TRUE".
+
+    TP_CONTROLLERS_UPNP_ENABLED -   Whether controller discovery via UPnP is enabled.
+                                    Defaults to "FALSE".
+
     TP_LOG_DEBUG -          Whether to log DEBUG messages. Set to "0" to prevent
                             DEBUG messages from being logged.
                             Defaults to "1".
@@ -168,8 +173,9 @@ typedef struct TPContext TPContext;
     TP_LOG_APP_ONLY -       Whether to log only MESSAGE messages (printed by apps).
                             Defaults to "0".
 
-    TP_FONTS_PATH -         A path to a directory containing fonts. If not set,
-                            TrickPlay will use the systems fonts.
+    TP_FONTS_PATH -         List of paths to directories containing fonts. If not set,
+                            TrickPlay will use the systems fonts.  This is a semicolon (";")
+                            delimited list of paths where fonts can be sourced.
                             Defaults to NULL.
 
     TP_DOWNLOADS_PATH -     Path to a directory that TrickPlay will use to download
@@ -193,9 +199,52 @@ typedef struct TPContext TPContext;
     TP_LIRC_UDS -           Path to the LIRC daemon Unix Doman Socket.
                             Defaults to "/var/run/lirc/lircd".
 
-    TP_LIRC_REPEAT -        Minimum number of milliseconds between button presses. Any
-                            presses that arrive within this time are ignored.
-                            Defaults to 150.
+    TP_LIRC_REPEAT -            Minimum number of milliseconds between button presses. Any
+                                presses that arrive within this time are ignored.
+                                Defaults to 150.
+
+    TP_MEDIAPLAYER_ENABLED -    Whether the media player is enabled. If set to false, apps
+                                will behave as if there is no media player.
+                                Defaults to "true".
+
+    TP_IMAGE_DECODER_ENABLED -  Whether the external image decoder is enabled. If set to false,
+                                only internal decoders will be used.
+                                Defaults to "true".
+
+    TP_RANDOM_SEED -            If set to a non-zero value, this will be the default random
+                                seed for all apps and the 'math.randomseed' function will
+                                become a no-op.
+                                Defaults to 0.
+
+    TP_PLUGINS_PATH -           Path to root directory of TrickPlay plugins.
+                                Defaults to "plugins" (in the current working directory).
+
+    TP_AUDIO_SAMPLER_ENABLED -  Whether TrickPlay's audio sampling machinery is enabled.
+                                When set to false, the audio sampler API can still be used,
+                                but it won't do anything.
+                                Defaults to "true".
+
+    TP_AUDIO_SAMPLER_MAX_INTERVAL - How many seconds' worth of audio should the sampler accumulate
+                                    before it passes the samples to audio detection plugins.
+                                    Default is 10.
+
+    TP_AUDIO_SAMPLER_MAX_BUFFER_KB - The maximum buffer (in KB) of audio samples that the
+                                     audio sampler keeps.
+                                     Defaults to 5000.
+
+    TP_TOAST_JSON_PATH -        Path to a file containing the JSON definition
+                                for the toast UI.
+                                Default is not set.
+
+    TP_FIRST_APP_EXITS -        If set to true, when you press the EXIT key within the
+                                first app launched by Trickplay, tp_context_run will return.
+                                Otherwise, the first app launched will remain running and the
+                                EXIT key will be passed to it.
+                                Defaults is true.
+
+    TP_HTTP_PORT -              The port for Trickplay's HTTP server.
+                                Defaults to "0".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -218,6 +267,8 @@ typedef struct TPContext TPContext;
 #define TP_CONTROLLERS_ENABLED          "controllers_enabled"
 #define TP_CONTROLLERS_PORT             "controllers_port"
 #define TP_CONTROLLERS_NAME             "controllers_name"
+#define TP_CONTROLLERS_UPNP_ENABLED     "controllers_upnp_enabled"
+#define TP_CONTROLLERS_MDNS_ENABLED     "controllers_mdns_enabled"
 #define TP_LOG_DEBUG                    "log_debug"
 #define TP_LOG_APP_ONLY                 "log_app_only"
 #define TP_FONTS_PATH                   "fonts_path"
@@ -228,6 +279,17 @@ typedef struct TPContext TPContext;
 #define TP_LIRC_ENABLED                 "lirc_enabled"
 #define TP_LIRC_UDS                     "lirc_uds"
 #define TP_LIRC_REPEAT                  "lirc_repeat"
+#define TP_APP_PUSH_ENABLED             "app_push_enabled"
+#define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
+#define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
+#define TP_RANDOM_SEED                  "random_seed"
+#define TP_PLUGINS_PATH                 "plugins_path"
+#define TP_AUDIO_SAMPLER_ENABLED        "audio_sampler_enabled"
+#define TP_AUDIO_SAMPLER_MAX_BUFFER_KB  "audio_sampler_max_buffer_kb"
+#define TP_AUDIO_SAMPLER_MAX_INTERVAL   "audio_sampler_max_interval"
+#define TP_TOAST_JSON_PATH              "toast_json_path"
+#define TP_FIRST_APP_EXITS              "first_app_exits"
+#define TP_HTTP_PORT                    "http_port"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -259,24 +321,16 @@ typedef struct TPContext TPContext;
     
     These subjects are used with <tp_context_add_notification_handler>.
 
-    TP_NOTIFICATION_APP_LOADING -                       An application is about to be loaded.
-    TP_NOTIFICATION_APP_LOAD_FAILED -                   An application failed to load.
-    TP_NOTIFICATION_APP_LOADED -                        An application finished loading.
-    TP_NOTIFICATION_APP_CLOSING -                       The current application is about to be closed.
-    TP_NOTIFICATION_APP_CLOSED -                        The current application is finished.
     TP_NOTIFICATION_PROFILE_CHANGING -                  The current profile is about to change.
     TP_NOTIFICATION_PROFILE_CHANGE -                    Internal notification to get things ready for a profile change.
     TP_NOTIFICATION_PROFILE_CHANGED -                   The current profile changed.
     TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD -            The app no longer needs to use the numeric keypad.
     TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS -    The app no longer needs the transport control keys.
     TP_NOTIFICATION_RELEASE_KEYBOARD -                  The app no longer needs the keyboard.
+    TP_NOTIFICATION_RUNNING -                           Trickplay is running and has entered its main loop.
+    TP_NOTIFICATION_EXITING -                           Trickplay has exited its main loop and <tp_context_run> will return soon.
 */
 
-#define TP_NOTIFICATION_APP_LOADING                     "app-loading"
-#define TP_NOTIFICATION_APP_LOAD_FAILED                 "app-load-failed"
-#define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
-#define TP_NOTIFICATION_APP_CLOSING                     "app-closing"
-#define TP_NOTIFICATION_APP_CLOSED                      "app-closed"
 #define TP_NOTIFICATION_PROFILE_CHANGING                "profile-changing"
 #define TP_NOTIFICATION_PROFILE_CHANGE                  "profile-change"
 #define TP_NOTIFICATION_PROFILE_CHANGED                 "profile-changed"
@@ -284,6 +338,9 @@ typedef struct TPContext TPContext;
 #define TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD          "release-numeric-keypad"
 #define TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS  "release-transport-control-keys"
 #define TP_NOTIFICATION_RELEASE_KEYBOARD                "release-keyboard"
+
+#define TP_NOTIFICATION_RUNNING                         "running"
+#define TP_NOTIFICATION_EXITING                         "exiting"
 
 
 /*-----------------------------------------------------------------------------
@@ -449,6 +506,45 @@ typedef struct TPContext TPContext;
         const char * key);
 
 /*-----------------------------------------------------------------------------
+    Function: tp_context_set_user_data
+
+    Associate an opaque pointer with the Trickplay context.
+
+    Arguments:
+
+        context -   A pointer to a TPContext.
+
+        user_data - The user data.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_context_set_user_data(
+
+        TPContext * context,
+        void * user_data);
+
+/*-----------------------------------------------------------------------------
+    Function: tp_context_get_user_data
+
+    Get user data associated with the Trickplay context with <tp_context_set_user_data>.
+
+    Arguments:
+
+        context -   A pointer to a TPContext.
+
+    Returns:
+
+        user_data - The user data.
+*/
+
+    TP_API_EXPORT
+    void *
+    tp_context_get_user_data(
+
+        TPContext * context);
+
+/*-----------------------------------------------------------------------------
     Function: TPRequestHandler
     
     Function prototype for calls to <tp_context_set_request_handler>. To handle
@@ -457,6 +553,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         subject -   A string describing the nature of the request.
 
         data -      User data passed to <tp_context_set_request_handler>.
@@ -472,6 +570,7 @@ typedef struct TPContext TPContext;
     int
     (*TPRequestHandler)(
     
+        TPContext * context,
         const char * subject,
         void * data);
 
@@ -513,6 +612,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         subject -   A string describing the specific notification.
 
         data -      Opaque user data passed to <tp_context_add_notification_handler>.
@@ -522,6 +623,7 @@ typedef struct TPContext TPContext;
     void
     (*TPNotificationHandler)(
                     
+        TPContext * context,
         const char * subject,
         void * data);
 
@@ -563,6 +665,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -       The Trickplay context.
+
         command -       A string describing the command. It does not include the initial
                         / and will never be NULL.
 
@@ -576,7 +680,8 @@ typedef struct TPContext TPContext;
     typedef
     void
     (*TPConsoleCommandHandler)(
-                    
+
+        TPContext * context,
         const char * command,
         const char * parameters,
         void * data);
@@ -618,6 +723,8 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
+        context -   The Trickplay context.
+
         level -     An integer describing the information level of the log message,
                     such as DEBUG, INFO, WARNING, etc.
 
@@ -632,6 +739,7 @@ typedef struct TPContext TPContext;
     void
     (*TPLogHandler)(
     
+        TPContext * context,
         unsigned int level,
         const char * domain,
         const char * message,
@@ -717,10 +825,11 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+*/
 
 #ifdef __cplusplus
 }
 #endif 
 
-#endif  // _TRICKPLAY_H
+#endif  /* _TRICKPLAY_H */

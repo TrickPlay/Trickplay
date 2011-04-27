@@ -2,11 +2,17 @@
 #define _TICKPLAY_CONTEXT_H
 
 //-----------------------------------------------------------------------------
+#include "trickplay/audio-sampler.h"
 #include "common.h"
 #include "notify.h"
 #include "mediaplayers.h"
 #include "controller_list.h"
 #include "app.h"
+//-----------------------------------------------------------------------------
+// Internal notifications
+
+#define TP_NOTIFICATION_APP_LOADED                      "app-loaded"
+#define TP_NOTIFICATION_APP_CLOSING                     "app-closing"
 
 //-----------------------------------------------------------------------------
 // Internal configuration keys
@@ -34,6 +40,8 @@
 #define TP_LIRC_ENABLED_DEFAULT         true
 #define TP_LIRC_UDS_DEFAULT             "/var/run/lirc/lircd"
 #define TP_LIRC_REPEAT_DEFAULT          150
+#define TP_APP_PUSH_ENABLED_DEFAULT     true
+#define TP_APP_PUSH_PORT_DEFAULT        8888
 
 // TODO: Don't like hard-coding this app id here
 
@@ -49,6 +57,9 @@ class Downloads;
 class Installer;
 class Image;
 class ControllerLIRC;
+class AppPushServer;
+class HttpServer;
+class HttpTrickplayApiSupport;
 
 //-----------------------------------------------------------------------------
 
@@ -111,7 +122,7 @@ public:
     //.........................................................................
     // Launches one app from another, and kills the first.
 
-    int launch_app( const char * app_id, const App::LaunchInfo & launch );
+    int launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path = false );
 
     //.........................................................................
     // Kills the current app and either goes back to the previous one, or
@@ -128,6 +139,13 @@ public:
 
     //.........................................................................
 
+    inline App * get_current_app()
+    {
+        return current_app;
+    }
+
+    //.........................................................................
+
     ControllerList * get_controller_list();
 
     //.........................................................................
@@ -140,7 +158,35 @@ public:
 
     //.........................................................................
 
+    HttpServer * get_http_server() const;
+
+    //.........................................................................
+
     Image * load_icon( const gchar * path );
+
+    //.........................................................................
+
+    StringMap get_config() const;
+
+    //.........................................................................
+
+    void add_internal( gpointer key , gpointer value , GDestroyNotify destroy );
+
+    gpointer get_internal( gpointer key );
+
+    //.........................................................................
+
+    void set_first_app_exits( bool value );
+
+    bool is_first_app() const;
+
+    //.........................................................................
+    // This one is thread-safe, it receives a snippet of JSON that came from
+    // an audio detection plugin. In the future, we could make it more generic,
+    // and just let the outside world give us contextual information. It could
+    // come via TCP/IP from a set-top box, for example.
+
+    void audio_detection_match( const gchar * json );
 
 private:
 
@@ -198,6 +244,8 @@ private:
     //.........................................................................
     // This launches a new app in an idle source
 
+    static void app_run_callback( App * app , int result );
+
     static gboolean launch_app_callback( gpointer new_app );
 
     //.........................................................................
@@ -223,6 +271,8 @@ private:
     friend void tp_context_set( TPContext * context, const char * key, const char * value );
     friend void tp_context_set_int( TPContext * context, const char * key, int value );
     friend const char * tp_context_get( TPContext * context, const char * key );
+    friend void tp_context_set_user_data( TPContext * context , void * user_data );
+    friend void * tp_context_get_user_data( TPContext * context );
     friend void tp_context_add_notification_handler( TPContext * context, const char * subject, TPNotificationHandler handler, void * data );
     friend void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data );
     friend void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data );
@@ -235,6 +285,16 @@ private:
 
     friend TPController * tp_context_add_controller( TPContext * context, const char * name, const TPControllerSpec * spec, void * data );
     friend void tp_context_remove_controller( TPContext * context, TPController * controller );
+
+    friend TPAudioSampler * tp_context_get_audio_sampler( TPContext * context );
+
+    static gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context );
+
+#ifndef TP_PRODUCTION
+
+    static gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context );
+
+#endif
 
 private:
 
@@ -252,6 +312,10 @@ private:
 
     ControllerLIRC *            controller_lirc;
 
+    AppPushServer *             app_push_server;
+
+    HttpServer *                http_server;
+
     Console *                   console;
 
     Downloads *                 downloads;
@@ -260,13 +324,17 @@ private:
 
     App *                       current_app;
 
-    bool                        is_first_app;
+    String                      first_app_id;
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
 
+    HttpTrickplayApiSupport * 	http_trickplay_api_support;
+
     TPLogHandler                external_log_handler;
     void *                      external_log_handler_data;
+
+    void *                      user_data;
 
     typedef std::pair<TPConsoleCommandHandler, void *>          ConsoleCommandHandlerClosure;
     typedef std::multimap<String, ConsoleCommandHandlerClosure> ConsoleCommandHandlerMultiMap;
@@ -286,6 +354,11 @@ private:
     typedef std::map<String,StringSet>                          AppAllowedMap;
 
     AppAllowedMap                                               app_allowed;
+
+    typedef std::pair<gpointer,GDestroyNotify>                  InternalPair;
+    typedef std::map<gpointer,InternalPair>                     InternalMap;
+
+    InternalMap                                                 internals;
 };
 
 
