@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+
+# TODO: The paths sent will be in this system's format. If you run this on
+# Windows, the server will receive windows paths.
+
+import os
+import json
+import sys
+import hashlib
+import socket
+import urllib2
+
+
+#------------------------------------------------------------------------------
+
+message = {}
+
+file_list = []
+
+for root , dirs , files in os.walk( os.getcwd() ):
+
+    for file in files:
+        
+        file_list.append( os.path.join( root , file ) )
+        
+        
+prefix = os.path.commonprefix( file_list )
+
+if len( prefix ) == 0:
+    sys.exit( "Invalid file list prefix" )
+
+try:    
+
+    app_index = file_list.index( os.path.join( prefix , "app" ) )
+    
+except:
+    
+    sys.exit( "Missing 'app' file" )
+
+app_file = open( file_list[ app_index ] )
+message[ "app" ] = app_file.read()
+app_file.close()
+
+message[ "files" ] = []
+
+file_map = {}
+
+for file in file_list:
+    
+    f = open( file )
+    contents = f.read()
+    f.close()
+    m = hashlib.md5()
+    m.update( contents )
+    m = m.hexdigest()
+    
+    short_name = file[ len( prefix ) : ]
+    
+    file_map[ short_name ] = file
+    
+    message[ "files" ].append( [ short_name , m , len( contents ) ] )
+
+#------------------------------------------------------------------------------
+
+response = {}
+
+try:
+    
+    print( "Connecting..." )
+    request = urllib2.Request( "http://localhost:8888/push" , json.dumps( message ) , { "Content-Type" : "application/json" } )
+    response = urllib2.urlopen( request )
+    response = json.load( response )
+   
+except:
+    
+    sys.exit( "Connection failed" )
+
+while not response[ "done" ]:
+    
+    try:
+        
+        file_name = file_map[ response[ "file" ] ]
+        print( "Sending %s" % response[ "file" ] )
+        f = open( file_name )
+        contents = f.read()
+        f.close()
+    
+        request = urllib2.Request( "http://localhost:8888" + response[ "url" ] , contents , { "Content-Type" : "application/octet-stream" } )
+        response = json.load( urllib2.urlopen( request ) )
+        
+    except:
+        
+        sys.exit( "Failed to send files" )
+    
+    
+print( response[ "msg" ] )
+
+        
+
+#------------------------------------------------------------------------------

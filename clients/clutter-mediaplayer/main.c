@@ -1,6 +1,4 @@
 
-#define G_LOG_DOMAIN "tp-cmp"
-
 #include "clutter-gst/clutter-gst.h"
 #include "gst/video/video.h"
 
@@ -9,6 +7,13 @@
 
 #include "trickplay/trickplay.h"
 #include "trickplay/mediaplayer.h"
+#include "trickplay/controller.h"
+
+//-----------------------------------------------------------------------------
+
+extern void * connect_audio_sampler( TPContext * context );
+
+extern void disconnect_audio_sampler( void * sampler );
 
 //-----------------------------------------------------------------------------
 
@@ -145,8 +150,6 @@ static void get_stream_information(TPMediaPlayer * mp)
     g_object_get(G_OBJECT(pipeline), "n-video", &n_video, NULL);
     g_object_get(G_OBJECT(pipeline), "n-audio", &n_audio, NULL);
 
-	g_debug("Identified %d audio and %d video streams",n_audio,n_video);
-
     if(n_video) ud->media_type|=TP_MEDIA_TYPE_VIDEO;
     if(n_audio) ud->media_type|=TP_MEDIA_TYPE_AUDIO;
 #endif
@@ -183,23 +186,23 @@ static void get_stream_information(TPMediaPlayer * mp)
         }
     }    
 
-	g_debug("About to do AUDIO stuff!");
-
 #if 1
-    if (ud->media_type&TP_MEDIA_TYPE_AUDIO)
+
+    if ( ud->media_type & TP_MEDIA_TYPE_AUDIO )
     {
         GstElement * audio_sink= gst_element_factory_make( "autoaudiosink", "TPAudioSink" );
         
         if(!audio_sink)
         {
         	g_debug("Failed to create autoaudiosink");
-        } else {
+        }
+        else
+        {
 			g_object_set(G_OBJECT(pipeline),"audio-sink",audio_sink,NULL);
-        	g_debug("autoaudiosink set");
 		}
-    }    
-#endif
+    }
 
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -550,6 +553,25 @@ static void * mp_get_viewport_texture(TPMediaPlayer * mp)
 
 //-----------------------------------------------------------------------------
 
+static void stage_allocation_notify( GObject * actor , GParamSpec * p , gpointer vt )
+{
+    ClutterActor * video_texture = CLUTTER_ACTOR( vt );
+
+    if ( vt )
+    {
+        ClutterActor * stage = clutter_stage_get_default();
+
+        gfloat width;
+        gfloat height;
+
+        clutter_actor_get_size( stage , & width , & height );
+
+        clutter_actor_set_size( video_texture , width , height );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 static int mp_constructor(TPMediaPlayer * mp)
 {
     static int init=0;
@@ -588,6 +610,8 @@ static int mp_constructor(TPMediaPlayer * mp)
     
     clutter_actor_lower_bottom(video_texture);
     
+    g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , video_texture );
+
     // Connect signals
     
     g_signal_connect(video_texture,"eos",G_CALLBACK(mp_end_of_stream),mp);
@@ -624,6 +648,22 @@ static int mp_constructor(TPMediaPlayer * mp)
     
     return 0;
 }
+//-----------------------------------------------------------------------------
+// We get notified when Trickplay is running - we start our audio sampler
+
+static void trickplay_running( TPContext * context , const char * subject , void * data )
+{
+    void * * sampler = ( void * * ) data;
+
+    * sampler = connect_audio_sampler( context );
+}
+
+static void trickplay_exiting( TPContext * context , const char * subject , void * data )
+{
+    void * * sampler = ( void * * ) data;
+
+    disconnect_audio_sampler( * sampler );
+}
 
 //-----------------------------------------------------------------------------
 
@@ -637,13 +677,27 @@ int main(int argc,char * argv[])
     {
         tp_context_set( context, "app_path", argv[ argc - 1  ] );
     }
+
+    // Media player constructor
     
     tp_context_set_media_player_constructor(context,mp_constructor);
+
+    // Populate a sampler info structure with the context
+    // and add a notification handler
     
+    void * sampler = 0;
+
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_RUNNING,trickplay_running,&sampler);
+    tp_context_add_notification_handler(context,TP_NOTIFICATION_EXITING,trickplay_exiting,&sampler);
+
+    // Run the context
+
     int result = tp_context_run(context);
     
     tp_context_free(context);
     
+    context = 0;
+
     return result;
 }
 

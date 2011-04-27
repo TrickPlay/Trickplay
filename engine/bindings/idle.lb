@@ -10,7 +10,8 @@ struct idle
     :
         source(0),
         lsp(App::get(L)->ref_lua_state_proxy()),
-        timer(g_timer_new())
+        timer(g_timer_new()),
+        limit(0.001)
     {
 
     }
@@ -25,9 +26,8 @@ struct idle
     void set()
     {
         clear();
-        source=clutter_threads_add_idle(on_idle,this);
+        source=g_idle_add_full( TRICKPLAY_PRIORITY , on_idle , this , 0 );
         g_timer_start(timer);
-        //source=clutter_threads_add_frame_source(60,on_idle,this);
     }
 
     void clear()
@@ -45,6 +45,7 @@ struct idle
     guint           source;
     LuaStateProxy * lsp;
     GTimer *        timer;
+    double          limit;
 };
 ]]
 
@@ -69,6 +70,21 @@ global idle [[idle*]]
 	[[
 	    delete self;
 	]];
+
+    /*
+        Property: limit
+
+        Throttles the number of <on_idle> calls to the given number of seconds between calls.
+        The smallest valid value is one millisecond (0.001).
+    */
+
+    double limit
+    [[
+        limit = self->limit;
+    ]]
+    [[
+        self->limit = std::max( limit , 0.001 );
+    ]];
 	
 	/*
 		Event: on_idle
@@ -113,22 +129,23 @@ global idle [[idle*]]
 [[
 gboolean idle::on_idle(gpointer data)
 {
-    idle * self=(idle*)data;
+    idle * self = ( idle * ) data;
 
-    if (self->lsp->is_valid())
+    if ( lua_State * L = self->lsp->get_lua_state() )
     {
-		double elapsed = g_timer_elapsed(self->timer,NULL);
+		double elapsed = g_timer_elapsed( self->timer , NULL );
 		     	
 		// If it is less than one ms, we bail
 		
-		if ( elapsed < 0.001 )
+		if ( elapsed < self->limit )
 		{
 			return TRUE;
 		}
+
+		g_timer_start( self->timer );
     
-        lua_pushnumber(self->lsp->get_lua_state(),elapsed);
-        g_timer_start(self->timer);
-        lb_invoke_callback(self->lsp->get_lua_state(),self,IDLE_METATABLE,"on_idle",1,0);
+        lua_pushnumber( L , elapsed );
+        lb_invoke_callback( L , self , IDLE_METATABLE , "on_idle" , 1 , 0 );
     }
     
     return TRUE;
