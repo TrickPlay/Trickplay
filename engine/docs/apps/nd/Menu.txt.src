@@ -63,8 +63,9 @@ Group: Reference  {
          }  # Group: Globals
 
       Group: Classes  {
-
-         File: Canvas  (bindings/clutter_canvas.lb)
+        
+         File: Bitmap   (bindings/bitmap.lb)
+         File: Canvas  (bindings/canvas.lb)
          File: Clone  (bindings/clutter_clone.lb)
          File: Group  (bindings/clutter_group.lb)
          File: Image  (bindings/clutter_image.lb)
@@ -76,6 +77,7 @@ Group: Reference  {
 
          File: Alpha  (bindings/clutter_alpha.lb)
          File: Interval  (bindings/clutter_interval.lb)
+         File: Path (bindings/clutter_path.lb)
          File: Timeline  (bindings/clutter_timeline.lb)
          }  # Group: Animation
 
