@@ -1,100 +1,49 @@
 module bitmap;
 
 [[
-#include "common.h"
-#include "images.h"
-#include "app.h"
-#include "network.h"
-
-static Debug_ON log( "BITMAP" );
-
-class Bitmap : public RefCounted
-{
-public:
-
-    Bitmap( lua_State * L , const char * _src , bool _async )
-    :
-        src( _src ),
-        image( 0 )
-    {
-        App * app = App::get( L );
-
-        g_assert( app );
-
-        if ( ! _async )
-        {
-            image = app->load_image( _src );
-        }
-        else
-        {
-            log( "LOADING ASYNC '%s'" , _src );
-
-            RefCounted::ref( this );
-
-            if ( ! app->load_image_async( _src , callback , this , destroy_notify ) )
-            {
-                RefCounted::unref( this );
-            }
-        }
-    }
-
-    guint width() const
-    {
-        return image ? image->width() : 0;
-    }
-
-    guint height() const
-    {
-        return image ? image->height() : 0;
-    }
-
-    bool loaded() const
-    {
-        return image ? true : false;
-    }
-
-protected:
-
-    virtual ~Bitmap()
-    {
-        log( "DESTROYING BITMAP %p" , this );
-
-        if ( image )
-        {
-            delete image;
-        }
-    }
-
-private:
-
-    static void callback( Image * image , gpointer me )
-    {
-        log( "  ASYNC DECODE COMPLETED FOR %p : %s" , me , image ? "SUCCESS" : "FAILED" );
-
-        Bitmap * self = ( Bitmap * ) me;
-
-        // Image will be null when it failed, otherwise, we take ownership of it
-
-        self->image = image;
-
-        // TODO: invoked the loaded callback
-    }
-
-    static void destroy_notify( gpointer me )
-    {
-        log( "  UNREF %p" , me );
-
-        RefCounted::unref( ( RefCounted * ) me );
-    }
-
-    String          src;
-    Image *         image;
-};
-
+#include "bitmap.h"
 ]]
+
+/*
+    Class: Bitmap
+
+    Bitmap lets you load images from your app bundle or a URL. Unlike <Image>,
+    you cannot add a Bitmap directly to the screen. Bitmap lets you load and
+    keep a bitmap in system memory until you need to display it.
+
+    To display a Bitmap, you use the <Bitmap.Image> function; which creates an
+    <Image> object. At that point, the Bitmap is no longer necessary and you can
+    choose to keep it or throw it away.
+
+    When you create an image, you can also choose to use only a region of the
+    whole bitmap.
+
+    Bitmaps can also be used as brushes for <Canvas>.
+
+*/
 
 class Bitmap [[ Bitmap * ]]
 {
+    /*
+        Constructor: Bitmap
+
+        You construct a bitmap by secifying a src, which can be a path to
+        your app bundle or a URI. By default, bitmaps are loaded synchronously
+        but if you pass true for async, they are loaded asynchronously.
+
+        You can check the <Bitmap.loaded> property to ensure the Bitmap was
+        loaded successfully.
+
+        Arguments:
+
+            src - Path or URI to a bitmap.
+            async - Whether to load it asynchronously.
+
+        Returns:
+
+            bitmap - A newly created bitmap.
+    */
+
     Bitmap( string src , bool async = false )
         [[
             self = lb_construct( Bitmap , new Bitmap( L , src , async ) );
@@ -102,31 +51,181 @@ class Bitmap [[ Bitmap * ]]
 
     ~Bitmap()
         [[
-            self->unref();
+            if ( self )
+            {
+                self->unref();
+            }
         ]];
+
+    /*
+        Property: width
+
+        The width of the bitmap in pixels.
+    */
 
     readonly int width
         [[
             width = self->width();
         ]];
 
+    /*
+        Property: w
+
+        The width of the bitmap in pixels.
+    */
+
     readonly int w
         [[
             w = self->width();
         ]];
+
+    /*
+        Property: height
+
+        The height of the bitmap in pixels.
+    */
 
     readonly int height
         [[
             height = self->height();
         ]];
 
+    /*
+        Property: h
+
+        The height of the bitmap in pixels.
+    */
+
     readonly int h
         [[
             h = self->height();
         ]];
 
+    /*
+        Property: loaded
+
+        Whether the bitmap has been loaded successfully. If you loaded the bitmap
+        synchronously, you can check the value of this property immediately after
+        you create the bitmap. If you loaded it asynchronously, this property
+        will be false until after the <Bitmap.on_loaded> event is fired. Then,
+        it will become true if the bitmap has been loaded or remain false if there
+        was a problem.
+    */
+
     readonly bool loaded
         [[
             loaded = self->loaded();
         ]];
+
+    /*
+        Function: Image
+
+        Creates an <Image> object from the bitmap or a part of the bitmap. You can
+        use this Image as you would any other <UIElement> and you do not need to
+        keep the source bitmap once the Image is created.
+
+        Arguments:
+
+            props - Optional table of properties that are passed to the Image constructor.
+
+            source_rectangle - If you only want the Image to use a portion of the original
+                               bitmap, you can pass a table with 4 integers designating the
+                               source rectangle to use for the new Image. The 4 integers are,
+                               in order: the left coordinate, the top coordinate, the width and
+                               the height.
+
+        Returns:
+
+            image - A newly created Image object.
+
+            nil - If the bitmap has not been loaded or the coordinates of the source_rectangle are invalid.
+
+        Example:
+
+        This creates a Bitmap and then an Image from it; using only an area of 100x100 pixels starting
+        at the top left corner of the bitmap. It also sets the Image's opacity to 128.
+
+        (code)
+            local bitmap = Bitmap( "image.png" )
+            local image = bitmap:Image( { opacity = 128 } , { 0 , 0 , 100 , 100 } )
+        (end)
+    */
+
+    Image Image( table props = 0 , table source_rectangle = 0 )
+        [[
+            Image * image = self->get_image();
+
+            if ( ! image )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                bool good = true;
+
+                guint x = 0;
+                guint y = 0;
+                guint w = 0;
+                guint h = 0;
+
+                if ( source_rectangle )
+                {
+                    lua_rawgeti( L , source_rectangle , 1 );
+                    lua_rawgeti( L , source_rectangle , 2 );
+                    lua_rawgeti( L , source_rectangle , 3 );
+                    lua_rawgeti( L , source_rectangle , 4 );
+
+                    x = lua_tointeger( L , -4 );
+                    y = lua_tointeger( L , -3 );
+                    w = lua_tointeger( L , -2 );
+                    h = lua_tointeger( L , -1 );
+
+                    lua_pop( L , 4 );
+
+                    if (// x < 0 ||
+                        // y < 0 || -- commented these out cos they're unsigned so this is always true
+                         w <= 0 ||
+                         h <= 0 ||
+                         guint( x + w ) > image->width() ||
+                         guint( y + h ) > image->height() )
+                    {
+                        good = false;
+                    }
+                }
+
+                if ( ! good )
+                {
+                    lua_pushnil( L );
+                }
+                else
+                {
+                    lua_getglobal( L , "Image" );
+
+                    if ( props )
+                    {
+                        lua_pushvalue( L , props );
+                    }
+
+                    lua_call( L , props ? 1 : 0 , 1 );
+
+                    ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+                    Images::load_texture( t , image , x , y , w , h );
+                }
+            }
+        ]];
+
+    /*
+        Event: on_loaded
+
+        If the bitmap is loaded asynchronously, this callback will be called when
+        the bitmap is finished loading or fails to load.
+
+        Arguments:
+
+            bitmap - The original bitmap
+            failed - True if it failed to load, false otherwise.
+    */
+
+    callback on_loaded( Bitmap bitmap , bool failed );
 }

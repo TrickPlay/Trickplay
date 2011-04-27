@@ -34,6 +34,8 @@ public:
         bool        redirect;
         String      user_agent;
 
+        void set_headers( const gchar * _headers );
+
     private:
 
         Request()
@@ -67,6 +69,8 @@ public:
 
     struct Settings
     {
+        Settings( TPContext * context );
+
         Settings( bool _debug = false, bool _ssl_verify_peer = true, const String & _ssl_cert_bundle = String() )
         :
             debug( _debug ),

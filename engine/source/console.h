@@ -52,6 +52,7 @@ private:
     TPContext       *       context;
     lua_State       *       L;
     GIOChannel       *      channel;
+    guint                   watch;
     GString        *        stdin_buffer;
     CommandHandlerList      handlers;
     std::auto_ptr<Server>   server;

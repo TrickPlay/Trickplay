@@ -28,7 +28,15 @@ if (NATURAL_DOCS)
 
         COMMAND ${NATURAL_DOCS}
             -r
-            -i ${PROJECT_SOURCE_DIR}/engine/public/include/trickplay
+            -i ${PROJECT_SOURCE_DIR}/engine            
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/apps
+            -xi ${PROJECT_SOURCE_DIR}/engine/bindings
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/editor
+            -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
+            -xi ${PROJECT_SOURCE_DIR}/engine/lb
+            -xi ${PROJECT_SOURCE_DIR}/engine/lua
+            -xi ${PROJECT_SOURCE_DIR}/engine/source
+            
             -o HTML ${PROJECT_BINARY_DIR}/docs/oem
             -p ${PROJECT_SOURCE_DIR}/engine/docs/oem/nd
             -s Default Trickplay
