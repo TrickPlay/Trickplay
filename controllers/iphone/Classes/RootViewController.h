@@ -1,24 +1,29 @@
 //
 //  RootViewController.h
-//  TrickplayRemote
+//  TrickplayController_v2
 //
-//  Created by Kenny Ham on 1/21/10.
-//  Copyright __MyCompanyName__ 2010. All rights reserved.
+//  Created by Rex Fenley on 2/14/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "GestureView.h"
+#import <UIKit/UIKit.h>
+#import "NetServiceManager.h"
+#import "GestureViewController.h"
+#import "AppBrowserViewController.h"
 
-@interface RootViewController : UITableViewController <UINavigationControllerDelegate>  {
-	NSNetServiceBrowser* netServiceBrowser;
-	NSNetService* currentResolve;
-	NSMutableArray* services;
-	GestureView *gestureViewController;
+@interface RootViewController : UITableViewController <UITableViewDelegate, 
+UITableViewDataSource, UINavigationControllerDelegate,
+NetServiceManagerDelegate> {
+    UIWindow *window;
+    //UINavigationController *navigationController;
+    NetServiceManager *netServiceManager;
+    GestureViewController *gestureViewController;
+    AppBrowserViewController *appBrowserViewController;
 }
-@property (nonatomic, retain) GestureView *gestureViewController;
-@property (nonatomic, retain, readwrite) NSMutableArray* services;
-@property (nonatomic, retain, readwrite) NSNetServiceBrowser* netServiceBrowser;
-@property (nonatomic, retain, readwrite) NSNetService* currentResolve;
 
-- (void)removeTheChildview;
+- (void)serviceResolved:(NSNetService *)service;
+- (void)reloadData;
+
+@property (nonatomic, retain) IBOutlet UIWindow *window;
 
 @end

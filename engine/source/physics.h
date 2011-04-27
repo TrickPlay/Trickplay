@@ -157,6 +157,8 @@ namespace Physics
 
         static gboolean on_idle( gpointer me );
 
+        void idle();
+
         //.........................................................................
 
         guint8          global_callbacks;

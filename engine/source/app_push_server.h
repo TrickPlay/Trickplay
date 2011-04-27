@@ -1,12 +1,11 @@
 #ifndef _TRICKPLAY_APP_PUSH_SERVER_H
 #define _TRICKPLAY_APP_PUSH_SERVER_H
 
-#include "gio/gio.h"
-
 #include "common.h"
 #include "app.h"
+#include "http_server.h"
 
-class AppPushServer
+class AppPushServer : public HttpServer::RequestHandler
 {
 public:
 
@@ -14,72 +13,52 @@ public:
 
     ~AppPushServer();
 
+    virtual void handle_http_post( const HttpServer::Request & request , HttpServer::Response & response );
+
 private:
 
-    typedef std::vector<StringPair> StringPairVector;
-    typedef std::vector<int>        IntVector;
-    typedef std::vector<String>     StringVector;
-
-    struct ConnectionState
+    struct FileInfo
     {
-        enum State { APP , FILE_LIST , FILE_SIZE , FILE_CONTENTS };
+        typedef std::list<FileInfo> List;
 
-        GSocketConnection * connection;
+        String  name;
+        String  md5;
+        gint64  size;
+    };
 
-        State               state;
-        String              app_file;
+    struct TargetInfo
+    {
+        typedef std::list<TargetInfo> List;
+
+        FileInfo    source;
+        String      path;
+    };
+
+    struct PushInfo
+    {
         App::Metadata       metadata;
-        int                 file_count;
-        int                 files_remaining;
-        StringPairVector    file_hashes;
-        IntVector           changed_files;
-        StringVector        target_file_names;
-        int                 next_file_index;
-        int                 next_file_size;
-        guchar              input_buffer[ 1024 ];
-
-        void reset()
-        {
-            state = APP;
-            app_file.clear();
-            file_count = 0;
-            files_remaining = 0;
-            file_hashes.clear();
-            changed_files.clear();
-            target_file_names.clear();
-            next_file_index = 0;
-            next_file_size = 0;
-        }
-
-        static void destroy( ConnectionState * me )
-        {
-            delete me;
-        }
+        TargetInfo::List    target_files;
     };
 
     AppPushServer() { g_assert( 0 ); }
 
-    AppPushServer( TPContext * context , guint16 port );
+    AppPushServer( TPContext * context );
 
-    static void accept_callback( GObject * source, GAsyncResult * result, gpointer data );
+    void handle_push_file( const HttpServer::Request & request , HttpServer::Response & response );
 
-    static void line_read( GObject * stream , GAsyncResult * result , gpointer me );
+    PushInfo compare_files( const String & app_contents , const FileInfo::List & source_files );
 
-    void line_read( GObject * stream , GAsyncResult * result );
+    void set_response( HttpServer::Response & response , bool done , const String & msg , const String & file = String() , const String & url = String() );
 
-    void close( ConnectionState * state );
+    void write_file( const TargetInfo & target_info , const HttpServer::Request::Body & body );
 
-    static void file_read( GObject * stream , GAsyncResult * result , gpointer me );
-
-    void file_read( GObject * stream , GAsyncResult * result );
-
-    void send_response( ConnectionState * state );
-
-    void launch_it( ConnectionState * state );
+    void launch_it();
 
     TPContext *         context;
 
-    GSocketListener  *  listener;
+    gchar *             current_push_path;
+
+    PushInfo            current_push_info;
 };
 
 
