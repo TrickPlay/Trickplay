@@ -7,8 +7,9 @@
 #include "common.h"
 #include "server.h"
 #include "context.h"
+#include "http_server.h"
 
-class ControllerServer : private Server::Delegate
+class ControllerServer : private Server::Delegate , public HttpServer::RequestHandler
 {
 public:
 
@@ -55,41 +56,9 @@ private:
 
     //..........................................................................
 
-    String serve_path( const String & group, const String & path );
-
-    void drop_web_server_group( const String & group );
-
     ControllerServer( const ControllerServer & ) {}
 
-    //..........................................................................
-
-    struct HTTPInfo
-    {
-        HTTPInfo()
-            :
-            is_http( false ),
-            headers_done( false )
-        {}
-
-        void reset()
-        {
-            is_http = false;
-            method.clear();
-            url.clear();
-            version.clear();
-            headers.clear();
-            headers_done = false;
-        }
-
-        bool        is_http;
-        String      method;
-        String      url;
-        String      version;
-        StringList  headers;
-        bool        headers_done;
-    };
-
-    //..........................................................................
+     //..........................................................................
     // Data for each connection
 
     struct ConnectionInfo
@@ -102,9 +71,8 @@ private:
         {}
 
         bool            disconnect;
-        String		address;
-        int		version;
-        HTTPInfo        http;
+        String		    address;
+        int		        version;
         TPController *	controller;
     };
 
@@ -152,16 +120,48 @@ private:
     void process_command( gpointer connection, ConnectionInfo & info, gchar ** parts );
 
     //..........................................................................
+    // The HTTP stuff.
 
-    void handle_http_get( gpointer connection, const gchar * line );
-    void handle_http_line( gpointer connection, ConnectionInfo & info, const gchar * line );
+    // Resource map
 
-    // The key is a hash we generate, the first string is the real path
-    // and the second string is the group.
+    // The key is the web path, such as /controllers/resource/<something>.
 
-    typedef std::map<String, StringPair> WebServerPathMap;
+    struct ResourceInfo
+    {
+        String      file_name;
+        String      group;
+        gpointer    connection;
+    };
 
-    WebServerPathMap    path_map;
+    typedef std::map< String , ResourceInfo > ResourceMap;
+
+    ResourceMap resources;
+
+    virtual void handle_http_get( const HttpServer::Request & request , HttpServer::Response & response );
+
+    String start_serving_resource( gpointer connection , const String & file_name , const String & group );
+
+    void drop_resource_group( gpointer connection , const String & group );
+
+    // Post for submitting pictures and audio clips
+
+    struct PostInfo
+    {
+        enum Type { PICTURES , AUDIO };
+
+        Type        type;
+        gpointer    connection;
+    };
+
+    typedef std::map< String , PostInfo > PostMap;
+
+    PostMap post_map;
+
+    String start_post_endpoint( gpointer connection , PostInfo::Type type );
+
+    void drop_post_endpoint( gpointer connection );
+
+    virtual void handle_http_post( const HttpServer::Request & request , HttpServer::Response & response );
 
     //..........................................................................
     // The map of connections

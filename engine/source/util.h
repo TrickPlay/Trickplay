@@ -7,6 +7,22 @@
 #include "common.h"
 //-----------------------------------------------------------------------------
 
+// Returns ms
+
+inline double timestamp()
+{
+    static GTimer * timer = 0;
+
+    if ( ! timer )
+    {
+        timer = g_timer_new();
+    }
+
+    return g_timer_elapsed( timer , 0 ) * 1000;
+}
+
+//-----------------------------------------------------------------------------
+
 inline void g_info( const gchar * format, ... )
 {
     va_list args;
@@ -109,12 +125,20 @@ public:
         return NULL;
     }
 
+    static void ref_counted_destroy( gpointer rc )
+    {
+        RefCounted::unref( ( RefCounted * ) rc );
+    }
+
 protected:
 
     virtual ~RefCounted()
     {}
 
 private:
+
+    RefCounted( const RefCounted & )
+    {}
 
     gint ref_count;
 };
@@ -173,23 +197,25 @@ public:
 
     _Debug_ON( const char * _prefix = 0 )
     {
-        prefix = _prefix ? g_strdup_printf( "[%s]" , _prefix ) : 0;
+        if ( _prefix )
+        {
+            prefix = _prefix;
+        }
     }
 
     ~_Debug_ON()
     {
-        g_free( prefix );
     }
 
     inline void operator()( const gchar * format, ...)
     {
-        if ( prefix )
+        if ( ! prefix.empty() )
         {
             va_list args;
             va_start( args, format );
             gchar * message = g_strdup_vprintf( format , args );
             va_end( args );
-            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "%s %s" , prefix , message );
+            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "[%s] %s" , prefix.c_str() , message );
             g_free( message );
         }
         else
@@ -208,7 +234,7 @@ public:
 
 private:
 
-    gchar * prefix;
+    String prefix;
 };
 
 class _Debug_OFF
@@ -298,23 +324,46 @@ class Action
 {
 public:
 
-    Action( int interval = -1 );
-
     virtual ~Action();
 
-    static void post( Action * action );
+    static void destroy( gpointer action );
+
+    // Posts this action to run as an idle, or a timeout if interval_ms > -1
+    // Returns the source tag.
+
+    static guint post( Action * action , int interval_ms = -1 );
+
+    // Pushes the action into the queue
+
+    static void push( GAsyncQueue * queue , Action * action );
+
+    // Tries to pop and run one from the queue, waiting if wait_ms > 0.
+    // Returns true if one ran.
+
+    static bool run_one( GAsyncQueue * queue , gulong wait_ms );
+
+    // Tries to run as many as it can pop from the queue, without
+    // waiting. Returns how many ran.
+
+    static int run_all( GAsyncQueue * queue );
+
+    // Posts an idle action that will call run_all from the given
+    // queue when it executes. Refs the queue and then unrefs it.
+
+    static void post_run_all( GAsyncQueue * queue );
 
 protected:
+
+    // You implement this. In the case of idle or timeout actions,
+    // returning true will let them run again. Returning false
+    // will take them out and destroy them. For queue actions,
+    // the return value is ignored.
 
     virtual bool run() = 0;
 
 private:
 
-    static void destroy( Action * action );
-
     static gboolean run_internal( Action * action );
-
-    int interval;
 };
 
 //-----------------------------------------------------------------------------
@@ -444,13 +493,20 @@ namespace Util
     // NOTE: if path contains any .. elements, this will abort. The assumption
     // is that root is trusted and path came from Lua - and cannot be trusted
 
-    inline gchar * rebase_path( const gchar * root, const gchar * path )
+    inline gchar * rebase_path( const gchar * root, const gchar * path , bool abort = true )
     {
         FreeLater free_later;
 
         if ( strstr( path, ".." ) )
         {
-            g_error( "Invalid relative path '%s'", path );
+            if ( abort )
+            {
+                g_error( "Invalid relative path '%s'", path );
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         gchar * p = path_to_native_path( g_strdup( path ) );

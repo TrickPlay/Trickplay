@@ -30,6 +30,10 @@ namespace ClutterUtil
 
     void to_clutter_color( lua_State * L, int index, ClutterColor * color );
 
+    // Converts a string to a color
+
+    ClutterColor string_to_color( const char * s );
+
     // Converts animation modes
 
     gulong to_clutter_animation_mode( const char * mode );
@@ -37,6 +41,10 @@ namespace ClutterUtil
     // Safely casts to an actor
 
     ClutterActor * user_data_to_actor( lua_State * L, int n );
+
+    // Safely casts to a timeline
+
+    ClutterTimeline * user_data_to_timeline( lua_State * L, int n );
 
     // Sets properties from a table
 

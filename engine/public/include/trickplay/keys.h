@@ -13,7 +13,7 @@
 #define TP_KEY_RIGHT            0xff53  
 #define TP_KEY_DOWN             0xff54  
 #define TP_KEY_RETURN           0xff0d
-#define TP_KEY_ESCAPE		0xff1b
+#define TP_KEY_ESCAPE		    0xff1b
 
 #define TP_KEY_0                0x0030  
 #define TP_KEY_1                0x0031  
@@ -65,23 +65,23 @@
  Navigation
 */
 
-#define TP_KEY_MENU             (XK_VENDOR+13)
-#define TP_KEY_GUIDE            (XK_VENDOR+14)
-#define TP_KEY_BACK             (XK_VENDOR+15)
-#define TP_KEY_EXIT             (XK_VENDOR+16)
-#define TP_KEY_INFO             (XK_VENDOR+17)
-#define TP_KEY_TOOLS            (XK_VENDOR+18)
+#define TP_KEY_MENU             (XK_VENDOR+18)
+#define TP_KEY_GUIDE            (XK_VENDOR+19)
+#define TP_KEY_BACK             (XK_VENDOR+20)
+#define TP_KEY_EXIT             (XK_VENDOR+21)
+#define TP_KEY_INFO             (XK_VENDOR+22)
+#define TP_KEY_TOOLS            (XK_VENDOR+23)
 
 /*
 ----------------------------------------------------------------------------
  Channels
 */
 
-#define TP_KEY_CHAN_UP          (XK_VENDOR+19)
-#define TP_KEY_CHAN_DOWN        (XK_VENDOR+20)
-#define TP_KEY_CHAN_LAST        (XK_VENDOR+21)
-#define TP_KEY_CHAN_LIST        (XK_VENDOR+22)
-#define TP_KEY_CHAN_FAV         (XK_VENDOR+23)
+#define TP_KEY_CHAN_UP          (XK_VENDOR+24)
+#define TP_KEY_CHAN_DOWN        (XK_VENDOR+25)
+#define TP_KEY_CHAN_LAST        (XK_VENDOR+26)
+#define TP_KEY_CHAN_LIST        (XK_VENDOR+27)
+#define TP_KEY_CHAN_FAV         (XK_VENDOR+28)
 
 /*
 ----------------------------------------------------------------------------

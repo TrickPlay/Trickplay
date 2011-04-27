@@ -61,6 +61,10 @@ public:
 
     void ui_event( const String & parameters );
 
+    void submit_picture( void * data, unsigned int size, const char * mime_type );
+
+    void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
+
     //.........................................................................
 
     class Delegate
@@ -77,6 +81,8 @@ public:
         virtual void touch_move( int finger , int x, int y ) = 0;
         virtual void touch_up( int finger , int x, int y ) = 0;
         virtual void ui_event( const String & parameters ) = 0;
+        virtual void submit_picture( void * data, unsigned int size, const char * mime_type ) = 0;
+        virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type ) = 0;
     };
 
     void add_delegate( Delegate * delegate );
@@ -115,23 +121,31 @@ public:
 
     bool stop_sound();
 
-    bool declare_resource( const String & resource, const String & uri );
+    bool declare_resource( const String & resource, const String & uri , const String & group );
+
+    bool drop_resource_group( const String & group );
 
     bool enter_text( const String & label, const String & text );
 
+    bool submit_picture( );
+
+    bool submit_audio_clip( );
+
+    bool advanced_ui( int command , const String & payload );
+
     inline bool wants_accelerometer_events() const
     {
-        return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && accelerometer_started;
+        return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && g_atomic_int_get( & ts_accelerometer_started );
     }
 
     inline bool wants_pointer_events() const
     {
-        return ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) && pointer_started;
+        return ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) && g_atomic_int_get( & ts_pointer_started );
     }
 
     inline bool wants_touch_events() const
     {
-        return ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) && touch_started;
+        return ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) && g_atomic_int_get( & ts_touch_started );
     }
 
 protected:
@@ -157,9 +171,9 @@ private:
 
     KeyMap              key_map;
 
-    bool                accelerometer_started;
-    bool                pointer_started;
-    bool                touch_started;
+    gint                ts_accelerometer_started;
+    gint                ts_pointer_started;
+    gint                ts_touch_started;
 };
 
 //-----------------------------------------------------------------------------
@@ -178,6 +192,8 @@ public:
 
     void controller_added( Controller * controller );
 
+    void controller_removed( Controller * controller );
+
     class Delegate
     {
     public:
@@ -194,10 +210,7 @@ public:
 
     void reset_all();
 
-    inline gdouble time()
-    {
-        return g_timer_elapsed( timer , 0 );
-    }
+    void stop_events();
 
 private:
 
@@ -213,6 +226,8 @@ private:
     friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y );
     friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y );
     friend void tp_controller_ui_event( TPController * controller, const char * parameters );
+    friend void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type );
+    friend void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type );
 
     //.........................................................................
 
@@ -238,9 +253,7 @@ private:
 
     DelegateSet     delegates;
 
-    //.........................................................................
-
-    GTimer *        timer;
+    gint            stopped;
 };
 
 #endif // _TRICKPLAY_CONTROLLER_LIST_H
