@@ -67,8 +67,10 @@
  * Object creation function.
  */
 
-- (void)createObject:(NSString *)JSON_String {
-    NSArray *JSON_Array = [JSON_String yajl_JSON];
+- (void)createObjects:(NSArray *)JSON_Array {
+    // Destroy any objects of the same name
+    [self destroyObjects:JSON_Array];
+    
     NSLog(@"Creating Objects from JSON: %@", JSON_Array);
     
     // Now that we have the JSON Array of objects, create all the objects
@@ -89,8 +91,7 @@
  * Object Destruction function.
  */
 
-- (void)destroyObject:(NSString *)JSON_String {
-    NSArray *JSON_Array = [JSON_String yajl_JSON];
+- (void)destroyObjects:(NSArray *)JSON_Array {
     NSLog(@"Destroying Objects from JSON: %@", JSON_Array);
     
     // Total destruction
@@ -98,11 +99,29 @@
         // remove from local repository
         NSLog(@"Destroying object %@", object);
         if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
-            [[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] removeFromSuperview];
+            [[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
             [rectangles removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
             [[images objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
             [images removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
+        }
+    }
+}
+
+
+/**
+ * Object Setter function.
+ */
+
+- (void)setValuesForObjects:(NSArray *)JSON_Array {
+    for (NSDictionary *object in JSON_Array) {
+        NSLog(@"Creating object %@", object);
+        
+        // Set values for class specific properties
+        if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
+            [(TrickplayUIElement *)[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
+            [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
         }
     }
 }

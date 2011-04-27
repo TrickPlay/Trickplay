@@ -14,8 +14,9 @@
 @protocol AdvancedUIDelegate <NSObject>
 
 @required
-- (void)createObject:(NSString *)JSON_String;
-- (void)destroyObject:(NSString *)JSON_String;
+- (void)createObjects:(NSArray *)JSON_Array;
+- (void)destroyObjects:(NSArray *)JSON_Array;
+- (void)setValuesForObjects:(NSArray *)JSON_Array;
 
 @end
 
