@@ -115,7 +115,7 @@
 
 - (void)setValuesForObjects:(NSArray *)JSON_Array {
     for (NSDictionary *object in JSON_Array) {
-        NSLog(@"Creating object %@", object);
+        NSLog(@"Setting object %@", object);
         
         // Set values for class specific properties
         if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
