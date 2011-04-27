@@ -18,6 +18,8 @@
         self.view = [resourceManager fetchImageViewUsingResource:[args objectForKey:@"src"] frame:frame];
         
         [self setValuesFromArgs:args];
+                
+        [self addSubview:view];
     }
         
     return self;

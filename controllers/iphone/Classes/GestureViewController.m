@@ -61,7 +61,7 @@
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
         hasPictures = @"\tPS";
     }
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
     
@@ -73,7 +73,7 @@
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
     
-    //[loadingIndicator stopAnimating];
+    [loadingIndicator stopAnimating];
     
     return YES;
 }
@@ -323,8 +323,6 @@
         height = [[args	objectAtIndex:4] floatValue];
         CGRect frame = CGRectMake(x, y, width, height);
         UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
-        newImageView.contentMode = UIViewContentModeScaleAspectFit;
-        newImageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
         
         // NOTE: Assumes backgroundView is only replaced in clearUI(),
         // hence, replace backgroundView.image, do not replace the entire View
@@ -449,10 +447,14 @@
 //-------------------- Super Advanced UI stuff -----------------
 
 - (void)do_UX:(NSArray *)args {
+    NSArray *JSON_Array = [[args objectAtIndex:1] yajl_JSON];
+    
     if ([(NSString *)[args objectAtIndex:0] compare:@"CREATE"] == NSOrderedSame) {
-        [advancedUIDelegate createObject:[args objectAtIndex:1]];
+        [advancedUIDelegate createObjects:JSON_Array];
     } else if ([(NSString *)[args objectAtIndex:0] compare:@"DESTROY"] == NSOrderedSame) {
-        [advancedUIDelegate destroyObject:[args objectAtIndex:1]];
+        [advancedUIDelegate destroyObjects:JSON_Array];
+    } else if ([(NSString *)[args objectAtIndex:0] compare:@"SET"] == NSOrderedSame) {
+        [advancedUIDelegate setValuesForObjects:JSON_Array];
     }
 }
 
