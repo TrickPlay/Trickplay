@@ -7,7 +7,7 @@
 extern "C" {
 #endif 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     File: Controller
     
@@ -32,15 +32,15 @@ extern "C" {
     it is not necessary to call <tp_context_remove_controller>, as TrickPlay will
     dispose of the controller when it exits.
 */
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPController TPController;
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Specification
 */
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Constants: Capabilities
     
@@ -53,8 +53,8 @@ typedef struct TPController TPController;
     TP_CONTROLLER_HAS_ACCELEROMETER   - The controller is capable of sending
                                         accelerometer events.
                                         
-    TP_CONTROLLER_HAS_CLICKS          - The controler can send clicks with x and
-                                        y coordinates.
+    TP_CONTROLLER_HAS_POINTER         - The controller has a pointer (mouse-like input).
+
                                         
     TP_CONTROLLER_HAS_TOUCHES         - The controller supports touches, or swipes
                                         and can send their x and y coordinates.
@@ -74,18 +74,29 @@ typedef struct TPController TPController;
     TP_CONTROLLER_HAS_TEXT_ENTRY      - The controller can let the user edit text
                                         sent by TrickPlay. This can be via an on
                                         screen keyboard.
+
+    TP_CONTROLLER_HAS_PICTURES        - The controller can can send pictures to Trickplay.
+
+    TP_CONTROLLER_HAS_AUDIO_CLIPS     - The controller can send audio clips to Trickplay.
+
+    TP_CONTROLLER_HAS_ADVANCED_UI     - The controller supports advanced UI operations.
+
 */
 
 #define TP_CONTROLLER_HAS_KEYS                      0x0001
 #define TP_CONTROLLER_HAS_ACCELEROMETER             0x0002
-#define TP_CONTROLLER_HAS_CLICKS                    0x0004
+#define TP_CONTROLLER_HAS_POINTER                   0x0004
 #define TP_CONTROLLER_HAS_TOUCHES                   0x0008
 #define TP_CONTROLLER_HAS_MULTIPLE_CHOICE           0x0010
 #define TP_CONTROLLER_HAS_SOUND                     0x0020
 #define TP_CONTROLLER_HAS_UI                        0x0040
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
+#define TP_CONTROLLER_HAS_PICTURES                	0x0100
+#define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
 
-//-----------------------------------------------------------------------------
+#define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
+
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerKeyMap TPControllerKeyMap;
 
@@ -118,7 +129,7 @@ struct TPControllerKeyMap
     unsigned int trickplay_key_code;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerSpec TPControllerSpec;
 
@@ -220,7 +231,7 @@ struct TPControllerSpec
         void * data);
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Commands
     
@@ -230,12 +241,12 @@ struct TPControllerSpec
     a structure. These parameters should be copied if you wish to retain them
     beyond the call to execute_command.
 */
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Constant: TP_CONTROLLER_COMMAND_RESET
     
     When this command is sent to a controller, it should stop the accelerometer, stop sending
-    clicks and touches, stop playing any sounds and clear the user interface, if any, removing
+    pointer events and touches, stop playing any sounds and clear the user interface, if any, removing
     backgrounds and images. The controller can continue to send key events.
     
     Parameters:
@@ -275,32 +286,32 @@ struct TPControllerSpec
 #define TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER    6
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_START_CLICKS
-    
-    The controller should start sending click events using <tp_controller_click>.
-    This command is only sent when the controller includes
-    TP_CONTROLLER_HAS_CLICKS in its capabilities.
-    
+    Constant: TP_CONTROLLER_COMMAND_START_POINTER
+
+    The controller should start sending pointer events. This command is only
+    sent when the controller includes TP_CONTROLLER_HAS_POINTER in its
+    capabilities.
+
     Parameters:
-    
+
         None
 */
 
-#define TP_CONTROLLER_COMMAND_START_CLICKS          7
+#define TP_CONTROLLER_COMMAND_START_POINTER         7
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_STOP_CLICKS
-    
-    The controller should stop sending click events.
-    This command is only sent when the controller includes
-    TP_CONTROLLER_HAS_CLICKS in its capabilities.
-    
+    Constant: TP_CONTROLLER_COMMAND_STOP_POINTER
+
+    The controller should stop sending pointer events. This command is only
+    sent when the controller includes TP_CONTROLLER_HAS_POINTER in its
+    capabilities.
+
     Parameters:
-    
+
         None
 */
 
-#define TP_CONTROLLER_COMMAND_STOP_CLICKS           8
+#define TP_CONTROLLER_COMMAND_STOP_POINTER          8
 
 /*
     Constant: TP_CONTROLLER_COMMAND_START_TOUCHES
@@ -402,8 +413,12 @@ struct TPControllerSpec
     refer to the resource as well as a URI to the resource. The URI could be
     local (file:) or remote (http:,https:).
     
+    The command also includes a 'group'; a string that groups related resources
+    together. This group is passed to the command <TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP>
+    to give the controller a chance to discard all resources for the group.
+
     The controller should attempt to fetch the resource asynchronously and retain
-    it along with a mapping to its name. In memory constrained environments, the
+    it along with a mapping to its name and group. In memory constrained environments, the
     controller may choose to retain only the name and the URI and fetch the
     resource later, when it is used.
     
@@ -416,6 +431,25 @@ struct TPControllerSpec
 */
 
 #define TP_CONTROLLER_COMMAND_DECLARE_RESOURCE      20
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP
+
+    This command lets the controller know that resources associated with a given
+    group are no longer needed and can be safely discarded.
+
+    If the controller has no knowledge of the group, it can just ignore the command;
+    this is not considered a failure.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_SOUND
+    or TP_CONTROLLER_HAS_UI in its capabilities.
+
+    Parameters:
+
+        A pointer to a <TPControllerDropResourceGroup> structure.
+*/
+
+#define TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP   21
 
 /*
     Constant: TP_CONTROLLER_COMMAND_SET_UI_BACKGROUND
@@ -479,7 +513,47 @@ struct TPControllerSpec
 
 #define TP_CONTROLLER_COMMAND_STOP_SOUND            41
 
-//-----------------------------------------------------------------------------
+/*
+    Constant: TP_CONTROLLER_COMMAND_SUBMIT_PICTURE
+
+    The controller should send a picture.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_PICTURES
+    in its capabilities.
+
+    Parameters:
+
+        None
+*/
+
+#define TP_CONTROLLER_COMMAND_SUBMIT_PICTURE        100
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP
+
+    The controller should send a picture.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_AUDIO_CLIPS
+    in its capabilities.
+
+    Parameters:
+
+        None
+*/
+
+#define TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP     101
+
+/*
+   Constant: TP_CONTROLLER_COMMAND_ADVANCED_UI
+
+   Parameters:
+
+         A pointer to a <TPControllerAdvancedUI> structure.
+*/
+
+#define TP_CONTROLLER_COMMAND_ADVANCED_UI           200
+
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerStartAccelerometer TPControllerStartAccelerometer;
 
@@ -523,7 +597,7 @@ struct TPControllerStartAccelerometer
 };
 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerMultipleChoice TPControllerMultipleChoice;
 
@@ -573,7 +647,7 @@ struct TPControllerMultipleChoice
     const char **   choices;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerEnterText TPControllerEnterText;
 
@@ -604,7 +678,7 @@ struct TPControllerEnterText
     const char *    text;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerDeclareResource TPControllerDeclareResource;
 
@@ -635,9 +709,41 @@ struct TPControllerDeclareResource
     */
     
     const char *    uri;
+
+    /*
+        Field: group
+
+        A NULL terminated string that assigns this resource to a group. Trickplay
+        may later tell the controller to drop all resources associated with this
+        group by calling execute_command with <TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP>.
+    */
+
+    const char *    group;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerDropResourceGroup TPControllerDropResourceGroup;
+
+/*
+    Struct: TPControllerDropResourceGroup
+
+    A pointer to a structure of this type is passed to execute_command when the
+    command is <TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP>.
+*/
+
+struct TPControllerDropResourceGroup
+{
+    /*
+        Field: group
+
+        A NULL terminated string containing the group to discard.
+    */
+
+    const char *    group;
+};
+
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerSetUIBackground TPControllerSetUIBackground;
 
@@ -687,7 +793,7 @@ struct TPControllerSetUIBackground
     unsigned int    mode;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerSetUIImage TPControllerSetUIImage;
 
@@ -742,7 +848,7 @@ struct TPControllerSetUIImage
     int             height;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 typedef struct TPControllerPlaySound TPControllerPlaySound;
 
@@ -776,7 +882,50 @@ struct TPControllerPlaySound
     unsigned int    loop;
 };
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
+
+#define TP_CONTROLLER_ADVANCED_UI_CREATE    1
+#define TP_CONTROLLER_ADVANCED_UI_DESTROY   2
+#define TP_CONTROLLER_ADVANCED_UI_GET       3
+#define TP_CONTROLLER_ADVANCED_UI_SET       4
+
+/*
+    Struct: TPControllerAdvancedUI
+
+    A pointer to this structure is passed to execute_command when the command
+    is <TP_CONTROLLER_COMMAND_ADVANCED_UI>.
+*/
+
+struct TPControllerAdvancedUI
+{
+    /*
+        Field: command
+
+        Values:
+
+            TP_CONTROLLER_ADVANCED_UI_CREATE    - Create UI elements.
+
+            TP_CONTROLLER_ADVANCED_UI_DESTROY   - Detsroy UI elements.
+
+            TP_CONTROLLER_ADVANCED_UI_GET       - Get UI element properties.
+
+            TP_CONTROLLER_ADVANCED_UI_SET       - Set UI element properties.
+    */
+
+    int             command;
+
+    /*
+        Field: payload
+
+        A JSON text describing the advanced UI command.
+    */
+
+    const char *    payload;
+};
+
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Events
     
@@ -851,22 +1000,68 @@ struct TPControllerPlaySound
         double z);
 
 /*
-    Callback: tp_controller_click
+    Callback: tp_controller_pointer_move
+
+    Report a pointer motion event.
+
+    Arguments:
+
+        controller -    The controller returned by <tp_context_add_controller>.
+
+        x,y -           The coordinates of the event, in pixels, relative to the display size.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_pointer_move(
+
+        TPController * controller,
+        int x,
+        int y);
+
+/*
+    Callback: tp_controller_pointer_button_down
+
+    Report a pointer button down event.
+
+    Arguments:
+
+        controller -    The controller returned by <tp_context_add_controller>.
+
+        button -        The button number, where 1 is the first button.
+
+        x,y -           The coordinates of the event, in pixels, relative to the display size.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_pointer_button_down(
+
+        TPController * controller,
+        int button,
+        int x,
+        int y);
+
+/*
+    Callback: tp_controller_pointer_button_up
     
-    Report a click event.
+    Report a pointer button up event.
     
     Arguments:
     
         controller -    The controller returned by <tp_context_add_controller>.
         
-        x,y -           The coordinates of the click, in pixels.    
+        button -        The button number, where 1 is the first button.
+
+        x,y -           The coordinates of the event, in pixels, relative to the display size.
 */
 
     TP_API_EXPORT
     void
-    tp_controller_click(
+    tp_controller_pointer_button_up(
                              
         TPController * controller,
+        int button,
         int x,
         int y);
     
@@ -879,6 +1074,8 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
+        finger -        The finger number, starting with 1.
+
         x,y -           The coordinates of the event, in pixels.    
 */
 
@@ -887,6 +1084,7 @@ struct TPControllerPlaySound
     tp_controller_touch_down(
                                   
         TPController * controller,
+        int finger,
         int x,
         int y);
 
@@ -899,6 +1097,8 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
+        finger -        The finger number, starting with 1.
+
         x,y -           The coordinates of the event, in pixels.
 */
 
@@ -907,6 +1107,7 @@ struct TPControllerPlaySound
     tp_controller_touch_move(
                                   
         TPController * controller,
+        int finger,
         int x,
         int y);
     
@@ -919,6 +1120,8 @@ struct TPControllerPlaySound
     
         controller -    The controller returned by <tp_context_add_controller>.
         
+        finger -        The finger number, starting with 1.
+
         x,y -           The coordinates of the event, in pixels.
 */
 
@@ -927,6 +1130,7 @@ struct TPControllerPlaySound
     tp_controller_touch_up(
                                 
         TPController * controller,
+        int finger,
         int x,
         int y);
     
@@ -952,7 +1156,136 @@ struct TPControllerPlaySound
         TPController * controller,
         const char * parameters);
 
-//-----------------------------------------------------------------------------
+
+/*
+	Callback: tp_controller_submit_picture
+
+	Send picture data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_PICTURE>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		data 		-   A pointer to the picture data.
+
+		size		- 	The size of the picture data.
+
+		mime_type	- 	The mime type of the picture data. This can be NULL.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_submit_picture(
+
+        TPController * controller,
+        const void * data,
+        unsigned int size,
+        const char * mime_type);
+
+/*
+	Callback: tp_controller_submit_audio_clip
+
+	Send audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		data 		-   A pointer to the audio clip data.
+
+		size		- 	The size of the audio clip data.
+
+		mime_type	- 	The mime type of the audio clip data. This can be NULL.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_submit_audio_clip(
+
+        TPController * controller,
+        const void * data,
+        unsigned int size,
+        const char * mime_type);
+
+/*-----------------------------------------------------------------------------*/
+/*
+    Section: Controller Event Queries
+
+    These functions let you know whether a controller wants certain types of events.
+    They are a convenience; so you don't have to keep track of the related start
+    and stop commands.
+
+    For example, a controller will want accelerometer events only if a) it has
+    TP_CONTROLLER_HAS_ACCELEROMETER in its capabilities and b) the result of
+    execute_command with TP_CONTROLLER_COMMAND_START_ACCELEROMETER was zero (success).
+
+    You don't have to check these functions when you invoke the related event
+    callbacks; they are checked automatically for you. For example, if you call
+    tp_controller_accelerometer, and the controller does not want accelerometer
+    events, the call is ignored.
+*/
+
+/*
+    Function: tp_controller_wants_accelerometer_events
+
+    Arguments:
+
+        controller - The controller returned by <tp_context_add_controller>.
+
+    Returns:
+
+        0 - The controller does not want these events.
+
+        other - The controller wants these events.
+*/
+
+    TP_API_EXPORT
+    int
+    tp_controller_wants_accelerometer_events(
+
+        TPController * controller);
+
+/*
+    Function: tp_controller_wants_pointer_events
+
+    Arguments:
+
+        controller - The controller returned by <tp_context_add_controller>.
+
+    Returns:
+
+        0 - The controller does not want these events.
+
+        other - The controller wants these events.
+*/
+
+    TP_API_EXPORT
+    int
+    tp_controller_wants_pointer_events(
+
+        TPController * controller);
+
+/*
+    Function: tp_controller_wants_touch_events
+
+    Arguments:
+
+        controller - The controller returned by <tp_context_add_controller>.
+
+    Returns:
+
+        0 - The controller does not want these events.
+
+        other - The controller wants these events.
+*/
+
+    TP_API_EXPORT
+    int
+    tp_controller_wants_touch_events(
+
+        TPController * controller);
+
+/*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Insertion and Removal
 */
@@ -1031,12 +1364,12 @@ struct TPControllerPlaySound
         TPController * controller);
 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }
 #endif 
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
-#endif // _TRICKPLAY_CONTROLLER_H
+#endif /* _TRICKPLAY_CONTROLLER_H */
