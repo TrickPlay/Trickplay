@@ -155,6 +155,8 @@
 
 /**
  * Anchor Point
+ *
+ * anchor point is a CGPoint{0.0 <= x <= 1.0, 0.0 <= y <= 1.0}
  */
 
 - (void)setAnchorPointFromArgs:(NSDictionary *)args {
@@ -192,19 +194,26 @@
 
 /**
  * Rotate the element
+ *
+ * rotates along anchor point, uses degrees
  */
 
 - (void)setRotationsFromArgs:(NSDictionary *)args {
+    NSLog(@"first");
     if ([args objectForKey:@"x_rotation"]) {
         NSNumber *x_rotation = [(NSArray *)[args objectForKey:@"x_rotation"] objectAtIndex:0];
-        [view.layer setValue:x_rotation forKeyPath:@"transform.roation.x"];
+        x_rotation = [NSNumber numberWithFloat:[x_rotation floatValue] * M_PI/180.0];
+        [view.layer setValue:x_rotation forKeyPath:@"transform.rotation.x"];
     }
     if ([args objectForKey:@"y_rotation"]) {
         NSNumber *y_rotation = [(NSArray *)[args objectForKey:@"y_rotation"] objectAtIndex:0];
+        y_rotation = [NSNumber numberWithFloat:[y_rotation floatValue] * M_PI/180.0];
         [view.layer setValue:y_rotation forKeyPath:@"transform.rotation.y"];
     }
     if ([args objectForKey:@"z_rotation"]) {
+        NSLog(@"second");
         NSNumber *z_rotation = [(NSArray *)[args objectForKey:@"z_rotation"] objectAtIndex:0];
+        z_rotation = [NSNumber numberWithFloat:[z_rotation floatValue] * M_PI/180.0];
         [view.layer setValue:z_rotation forKeyPath:@"transform.rotation.z"];
     }
 }
