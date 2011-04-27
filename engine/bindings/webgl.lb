@@ -6,8 +6,18 @@ module webgl;
 #error "GL IS ALREADY INCLUDED"
 #endif
 
+#ifndef TP_CLUTTER_BACKEND_EGL
+
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
+#include <GL/glx.h>
+
+#else
+
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
+#endif
 
 #include "typed_array.h"
 
@@ -622,7 +632,11 @@ interface WebGLRenderingContext [[void*]]
 
     clearDepth(GLclampf depth )
         [[
+#ifndef TP_CLUTTER_BACKEND_EGL
             glClearDepth( clamp( depth , 0 , 1 ) );
+#else
+            glClearDepthf( clamp( depth , 0 , 1 ) );
+#endif
         ]];
 
     clearStencil(GLint s )
@@ -750,7 +764,11 @@ interface WebGLRenderingContext [[void*]]
 
             if ( zNear <= zFar )
             {
+#ifndef TP_CLUTTER_BACKEND_EGL
                 glDepthRange( zNear , zFar );
+#else
+                glDepthRangef( zNear , zFar );
+#endif
             }
         ]];
 
@@ -1986,6 +2004,15 @@ interface WebGLRenderingContext [[void*]]
         [[
             glViewport( x , y , width , height );
         ]];
+
+    swap()
+        [[
+#ifndef TP_CLUTTER_BACKEND_EGL
+            glXSwapBuffers( glXGetCurrentDisplay() , glXGetCurrentDrawable() );
+#else
+            eglSwapBuffers(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_READ));
+#endif
+        ]];
 }
 
 global gl [[void*]] WebGLRenderingContext
@@ -1996,19 +2023,51 @@ global gl [[void*]] WebGLRenderingContext
         ]];
 }
 
-
-
-
 class Matrix [[CoglMatrix*]]
 {
     Matrix()
         [[
             self = lb_construct( CoglMatrix , g_slice_new0( CoglMatrix ) );
+            cogl_matrix_init_identity( self );
         ]];
 
     ~Matrix()
         [[
             g_slice_free( CoglMatrix , self );
+        ]];
+        
+    table table
+        [[
+            lua_newtable( L );
+            
+            const float * a = cogl_matrix_get_array( self );
+            
+            for ( int i = 0; i < 16; ++i , ++a )
+            {
+                lua_pushnumber( L , * a );
+                lua_rawseti( L , -2 , i + 1 );
+            }
+        ]]
+        [[
+            float m[16];
+            
+            lua_pushnil( L );
+            int i = 0;
+            while( lua_next( L , 2 ) )
+            {
+                if ( i == 16 )
+                {
+                    lua_pop( L , 2 );
+                    break;
+                }
+                if ( lua_isnumber( L , -1 ) )
+                {
+                    m[ i ] = lua_tonumber( L , -1 );
+                    ++i;
+                }
+                lua_pop( L , 1 );
+            }
+            cogl_matrix_init_from_array( self , m );
         ]];
 
     identity()
@@ -2016,9 +2075,32 @@ class Matrix [[CoglMatrix*]]
             cogl_matrix_init_identity( self );
         ]];
 
+    frustum( double left , double right , double bottom , double top , double z_near , double z_far )
+        [[
+            cogl_matrix_frustum( self , left , right , bottom , top , z_near , z_far );
+        ]];
+
+    ortho( double left , double right , double bottom , double top , double z_near , double z_far )
+        [[
+            cogl_matrix_ortho( self , left , right , bottom , top , z_near , z_far );
+        ]];
+
     perspective( double fov_y , double aspect , double z_near , double z_far )
         [[
             cogl_matrix_perspective( self , fov_y , aspect , z_near , z_far );
+        ]];
+
+    multiply( Matrix a , Matrix b )
+        [[
+            CoglMatrix * ma = ( CoglMatrix * ) UserData::get_client( L , a );
+            CoglMatrix * mb = ( CoglMatrix * ) UserData::get_client( L , b );
+
+            cogl_matrix_init_identity( self );
+
+            if ( ma && mb )
+            {
+                cogl_matrix_multiply( self , ma , mb );
+            }
         ]];
 
     rotate( double angle , double x , double y , double z )
@@ -2036,13 +2118,58 @@ class Matrix [[CoglMatrix*]]
             cogl_matrix_scale( self , sx , sy , sz );
         ]];
 
-    Matrix copy()
+    Matrix inverse()
         [[
+            CoglMatrix * m = g_slice_new( CoglMatrix );
+            cogl_matrix_get_inverse( self , m );
+
             UserData * ud = UserData::make( L , "Matrix" );
             luaL_getmetatable( L , MATRIX_METATABLE );
             lua_setmetatable( L , -2 );
-            CoglMatrix * m = g_slice_new0( CoglMatrix );
-            cogl_matrix_init_from_array( m , cogl_matrix_get_array( self ) );
             ud->initialize_with_client( m );
+        ]];
+
+    Matrix copy()
+        [[
+            CoglMatrix * m = g_slice_new( CoglMatrix );
+            cogl_matrix_init_from_array( m , cogl_matrix_get_array( self ) );
+
+            UserData * ud = UserData::make( L , "Matrix" );
+            luaL_getmetatable( L , MATRIX_METATABLE );
+            lua_setmetatable( L , -2 );
+            ud->initialize_with_client( m );
+        ]];
+        
+    table transform_point( table point )
+        [[
+            float p[4] = { 0 , 0 , 0 , 0 };
+
+            lua_pushnil( L );
+
+            int i = 0;
+
+            while ( lua_next( L , point ) )
+            {
+                if ( i == 4 )
+                {
+                    lua_pop( L , 2 );
+                    break;
+                }
+                if ( lua_isnumber( L , -1 ) )
+                {
+                    p[i] = lua_tonumber( L , -1 );
+                    ++i;
+                }
+                lua_pop( L , 1 );
+            }
+
+            cogl_matrix_transform_point( self , &p[0] , &p[1] , &p[2] , &p[3] );
+
+            lua_newtable( L );
+            for ( i = 0; i < 4; ++i )
+            {
+                lua_pushnumber( L , p[i] );
+                lua_rawseti( L , -2 , i + 1 );
+            }
         ]];
 }
