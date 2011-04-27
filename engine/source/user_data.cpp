@@ -595,7 +595,7 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
     lua_insert( L , - ( nargs + 2 ) );
 
     {
-        PROFILER(name);
+        PROFILER(name,PROFILER_CALLS_TO_LUA);
 
         // callback : proxy : nargs
 
@@ -658,6 +658,32 @@ int UserData::invoke_callback( gpointer client , const char * name , int nargs ,
     }
 
     return UserData::invoke_callback( G_OBJECT( master ) , name , nargs , nresults , L );
+}
+
+//.............................................................................
+
+int UserData::invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults )
+{
+    g_assert( L );
+    g_assert( global );
+
+    int result = 0;
+
+    lua_getglobal( L , global );
+
+    int top = lua_gettop( L );
+
+    if ( ! lua_isnil( L , top ) )
+    {
+        if ( UserData * ud = UserData::get( L , top ) )
+        {
+            result = ud->invoke_callback( name , nargs , nresults );
+        }
+    }
+
+    lua_remove( L , top );
+
+    return result;
 }
 
 //.............................................................................

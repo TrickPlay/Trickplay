@@ -87,7 +87,7 @@ void Server::close_connection( gpointer connection )
 
 //------------------------------------------------------------------------------
 
-bool Server::write( gpointer connection, const char * data )
+bool Server::write( gpointer connection, const char * data , gssize size )
 {
 #if GLIB_CHECK_VERSION(2,22,0)
 
@@ -98,7 +98,7 @@ bool Server::write( gpointer connection, const char * data )
 
     GError * error = NULL;
 
-    g_output_stream_write_all( output_stream, data, strlen( data ), NULL, NULL, &error );
+    g_output_stream_write_all( output_stream, data, size < 0 ? strlen( data ) : size , NULL, NULL, &error );
 
     if ( error )
     {
@@ -210,7 +210,7 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
         output_stream,
         G_INPUT_STREAM( input_stream ),
         G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE,
-        G_PRIORITY_DEFAULT,
+        TRICKPLAY_PRIORITY,
         NULL,
         splice_callback,
         NULL );
@@ -286,7 +286,7 @@ void Server::accept_callback( GObject * source, GAsyncResult * result, gpointer 
 
         // Start reading from the input stream
 
-        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, G_PRIORITY_DEFAULT, NULL, data_read_callback, connection );
+        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, TRICKPLAY_PRIORITY, NULL, data_read_callback, connection );
 
         // Hook up a weak ref callback so we know when the connection is destroyed
 
@@ -369,7 +369,7 @@ void Server::data_read_callback( GObject * source, GAsyncResult * result, gpoint
 
         // Read again
 
-        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, G_PRIORITY_DEFAULT, NULL, data_read_callback, data );
+        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, TRICKPLAY_PRIORITY, NULL, data_read_callback, data );
     }
 }
 
