@@ -286,7 +286,8 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: single_line
 		
-		Whether the text should remain as a single line and be clipped to its width.
+		Whether the text should remain as a single line.
+		This only takes effect if the text is <editable>.
 	*/
     bool single_line
 		[[single_line=clutter_text_get_single_line_mode(CLUTTER_TEXT(self));]]
@@ -391,6 +392,91 @@ class Text [[ClutterActor*]] actor
 		[[clutter_text_set_password_char(CLUTTER_TEXT(self),password_char);]];
 	
 
+    /*
+        Property: baseline
+
+        Returns the Y position of the baseline of the first line.
+    */
+
+    readonly int baseline
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                baseline = pango_layout_get_baseline( p ) / PANGO_SCALE;
+            }
+            else
+            {
+                baseline = 0;
+            }
+        ]];
+
+    /*
+        Property: line_spacing
+
+        Space (in pixels) between lines.
+    */
+
+    int line_spacing
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                line_spacing = pango_layout_get_spacing( p ) / PANGO_SCALE;
+            }
+            else
+            {
+                line_spacing = 0;
+            }
+        ]]
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                pango_layout_set_spacing( p , line_spacing * PANGO_SCALE );
+                clutter_actor_queue_redraw( self );
+            }
+        ]];
+
+    /*
+        Function: position_to_coordinates
+
+        Given a valid character position (or -1), this function returns a table that contains
+        the x, y and line height in pixels of that character position relative to the text element.
+
+        Arguments:
+
+          position - A character position or -1 for the end of the text.
+
+        Returns:
+
+          table - If the position is valid, returns a table with 3 elements, x , y and line height.
+
+          nil - If the position is not valid.
+    */
+
+    table position_to_coordinates( int position )
+        [[
+            gfloat x;
+            gfloat y;
+            gfloat lh;
+
+            if ( clutter_text_position_to_coords( CLUTTER_TEXT( self ) , position , & x , & y , &lh ) )
+            {
+                lua_newtable( L );
+
+                lua_pushnumber( L , x );
+                lua_rawseti( L , -2 , 1 );
+
+                lua_pushnumber( L , y );
+                lua_rawseti( L , -2 , 2 );
+
+                lua_pushnumber( L , lh );
+                lua_rawseti( L , -2 , 3 );
+            }
+            else
+            {
+                lua_pushnil( L );
+            }
+        ]];
+
     set_selection( int start_pos , int end_pos )
 	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
 	    
@@ -433,6 +519,7 @@ class Text [[ClutterActor*]] actor
 				G_CALLBACK(Text_on_text_changed),
 				L);	    
 		]];
+
 }
 
 [[

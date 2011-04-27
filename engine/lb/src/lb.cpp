@@ -287,6 +287,14 @@ int lb_index(lua_State*L)
     lua_pushliteral(L,"__getters__");// push "_getters_"
     lua_rawget(L,-2);               // get the getters table from the mt
     lua_remove(L,-2);              // replace mt with getters table
+
+    if (lua_type(L,-1)!=LUA_TTABLE)
+    {
+        lua_pop(L,1);
+        lua_pushnil(L);
+        return LSG_END(1);
+    }
+
     lua_pushvalue(L,2);             // push the key
     lua_rawget(L,-2);               // get the value for that key from the getters table
     lua_remove(L,-2);              // get rid of the getters table

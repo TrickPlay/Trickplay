@@ -19,6 +19,8 @@ sudo apt-get install \
     libossp-uuid-dev \
     libreadline6-dev \
     liburiparser-dev \
+    libsndfile1-dev \
+    libsoup2.4-dev \
     cmake \
     git-core
 
