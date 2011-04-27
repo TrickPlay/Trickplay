@@ -7,6 +7,7 @@
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig.h"
+#include "sndfile.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
@@ -24,11 +25,15 @@
 #include "installer.h"
 #include "versions.h"
 #include "controller_lirc.h"
+#include "app_push_server.h"
+#include "http_server.h"
+#include "http_trickplay_api_support.h"
+
 
 //-----------------------------------------------------------------------------
 
-static int * g_argc     = NULL;
-static char *** g_argv  = NULL;
+static int g_argc     = 0;
+static char ** g_argv = 0;
 
 //-----------------------------------------------------------------------------
 // Internal context
@@ -39,15 +44,19 @@ TPContext::TPContext()
     is_running( false ),
     sysdb( NULL ),
     controller_server( NULL ),
+    controller_lirc( NULL ),
+    app_push_server( NULL ),
+    http_server( NULL ),
     console( NULL ),
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
-    is_first_app( true ),
     media_player_constructor( NULL ),
     media_player( NULL ),
+    http_trickplay_api_support( NULL ),
     external_log_handler( NULL ),
-    external_log_handler_data( NULL )
+    external_log_handler_data( NULL ),
+    user_data( NULL )
 {
     g_log_set_default_handler( TPContext::log_handler, this );
 }
@@ -56,19 +65,39 @@ TPContext::TPContext()
 
 TPContext::~TPContext()
 {
+    // Free all the internals by calling their destroy notify
+
+    for( InternalMap::iterator it = internals.begin(); it != internals.end(); ++ it )
+    {
+        if ( it->second.second )
+        {
+            it->second.second( it->second.first );
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 void TPContext::set( const char * key, const char * value )
 {
-    set( key, String( value ) );
+    g_assert( key );
+
+    if ( ! value )
+    {
+        config.erase( String( key ) );
+    }
+    else
+    {
+        set( key, String( value ) );
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 void TPContext::set( const char * key, int value )
 {
+    g_assert( key );
+
     std::stringstream str;
     str << value;
     set( key, str.str() );
@@ -78,12 +107,16 @@ void TPContext::set( const char * key, int value )
 
 void TPContext::set( const char * key, const String & value )
 {
+    g_assert( key );
+
     config[String( key )] = value;
 }
 //-----------------------------------------------------------------------------
 
 const char * TPContext::get( const char * key, const char * def )
 {
+    g_assert( key );
+
     StringMap::const_iterator it = config.find( String( key ) );
 
     if ( it == config.end() )
@@ -261,12 +294,17 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
         extra = String( " : " ) + extra;
     }
 
+	if( !CLUTTER_ACTOR_IS_VISIBLE( actor ) )
+	{
+		details += " HIDDEN";
+	}
 
-    g_info( "%s%s%s:%s%u : (%d,%d %ux%u)%s%s",
+    g_info( "%s%s%s%s:%s%u : (%d,%d %ux%u)%s%s\033[0m",
+    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : "\33[37m",
             clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
             String( info->indent, ' ' ).c_str(),
             type,
-            name ? String( " " + String( name ) + " : " ).c_str()  : " ",
+            name ? String( " \033[33m" + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "\33[0m" : "\33[37m" ) + " : " ).c_str()  : " ",
             clutter_actor_get_gid( actor ),
             g.x,
             g.y,
@@ -284,6 +322,101 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
 }
 
 //-----------------------------------------------------------------------------
+
+class AudioFeeder : private Action
+{
+public:
+
+    static bool post( TPContext * context , const char * file_name , guint interval_s )
+    {
+        SF_INFO info;
+
+        memset( & info , 0 , sizeof( info ) );
+
+        SNDFILE * f = sf_open( file_name , SFM_READ , & info );
+
+        if ( ! f )
+        {
+            return false;
+        }
+
+        g_info( "FEEDING AUDIO FROM %s EVERY %u s" , file_name , interval_s );
+        g_info( "  frames      = %u"   , info.frames );
+        g_info( "  sample_rate = %d"   , info.samplerate );
+        g_info( "  channels    = %d"   , info.channels );
+        g_info( "  format      = 0x%x" , info.format );
+        g_info( "  duration    = %d s" , info.frames / info.samplerate );
+
+        TPAudioSampler * sampler = tp_context_get_audio_sampler( context );
+
+        tp_audio_sampler_source_changed( sampler );
+
+        Action::post( new AudioFeeder( sampler , f , info ) , interval_s * 1000 );
+
+        return true;
+    }
+
+private:
+
+    AudioFeeder( TPAudioSampler * _sampler , SNDFILE * _f , const SF_INFO & _info )
+    :
+        sampler( _sampler ),
+        f( _f ),
+        info( _info ),
+        timer( g_timer_new() )
+    {
+    }
+
+    virtual ~AudioFeeder()
+    {
+        sf_close( f );
+        g_timer_destroy( timer );
+        g_debug( "DESTROYED AUDIO FEEDER" );
+    }
+
+    virtual bool run()
+    {
+        sf_count_t frames = g_timer_elapsed( timer , 0 ) * info.samplerate;
+
+        g_timer_start( timer );
+
+        float * samples = g_new( float , frames * info.channels );
+
+        sf_count_t read = sf_readf_float( f , samples , frames );
+
+        if ( read == 0 )
+        {
+            g_free( samples );
+            return false;
+        }
+
+        TPAudioBuffer buffer;
+
+        memset( & buffer , 0 , sizeof( buffer ) );
+
+        buffer.format = TP_AUDIO_FORMAT_FLOAT;
+        buffer.channels = info.channels;
+        buffer.sample_rate = info.samplerate;
+        buffer.copy_samples = 1;
+        buffer.free_samples = 0;
+        buffer.samples = samples;
+        buffer.size = read * info.channels * sizeof( float );
+
+        tp_audio_sampler_submit_buffer( sampler , & buffer );
+
+        g_free( samples );
+
+        return true;
+    }
+
+    TPAudioSampler *    sampler;
+    SNDFILE *           f;
+    SF_INFO             info;
+    GTimer *            timer;
+};
+
+//-----------------------------------------------------------------------------
+
 
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
 {
@@ -407,13 +540,93 @@ int TPContext::console_command_handler( const char * command, const char * param
             }
         }
     }
+    else if ( ! strcmp( command , "ss" ) )
+    {
+        // Screenshot
+
+        const gchar * home = g_getenv( "HOME" );
+
+        if ( ! home )
+        {
+            home = g_get_home_dir();
+
+            if ( ! home )
+            {
+                home = g_get_tmp_dir();
+            }
+        }
+
+        if ( ! home )
+        {
+            g_warning( "FAILED TO FIND HOME OR TEMP DIR" );
+        }
+        else
+        {
+            Image * image = Image::screenshot();
+
+            if ( ! image )
+            {
+                g_warning( "FAILED TO TAKE SCREENSHOT" );
+            }
+            else
+            {
+                String checksum( image->checksum() );
+
+                GTimeVal t;
+
+                g_get_current_time( & t );
+
+                gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+
+                gchar * fn = g_build_filename( home , ts , NULL );
+
+                g_free( ts );
+
+                if ( ! image->write_to_png( fn ) )
+                {
+                    g_warning( "FAILED TO WRITE SCREENSHOT TO %s" , fn );
+                }
+                else
+                {
+                    g_info( "%s" , fn );
+                    g_info( "%s" , checksum.c_str() );
+                }
+
+                g_free( fn );
+
+                delete image;
+            }
+        }
+    }
+    else if ( ! strcmp( command , "as" ) )
+    {
+        if ( parameters )
+        {
+            if ( ! strcmp( parameters , "pause" ) )
+            {
+                tp_audio_sampler_pause( tp_context_get_audio_sampler( context ) );
+            }
+            else if ( ! strcmp( parameters , "resume" ) )
+            {
+                tp_audio_sampler_resume( tp_context_get_audio_sampler( context ) );
+            }
+            else if ( ! strcmp( parameters , "changed" ) )
+            {
+                tp_audio_sampler_source_changed( tp_context_get_audio_sampler( context ) );
+            }
+            else if ( ! AudioFeeder::post( context , parameters , 15 ) )
+            {
+                g_info( "FAILED TO OPEN '%s'" , parameters );
+            }
+        }
+    }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
 
     for ( ConsoleCommandHandlerMultiMap::const_iterator it = range.first; it != range.second; ++it )
     {
-        it->second.first( command, parameters, it->second.second );
+        it->second.first( context , command, parameters, it->second.second );
     }
 
     return range.first != range.second;
@@ -474,27 +687,45 @@ void TPContext::setup_fonts()
     {
         FcConfigAppFontClear( config );
 
-        g_info( "READING FONTS FROM '%s'", fonts_path );
+        g_debug( "FONT PATHS ARE '%s'", fonts_path );
 
         // This adds all the fonts in the directory to the cache...it can take
         // a long time the first time around. Once the cache exists, it will
         // be very quick.
 
-        if ( FcConfigAppFontAddDir( config, ( const FcChar8 * )fonts_path ) == FcFalse )
-        {
-            g_warning( "FAILED TO READ FONTS" );
-        }
-        else
-        {
-            // This transfers ownership of the config object over to FC, so we
-            // don't have to destroy it or unref it.
+		gchar ** paths = g_strsplit( fonts_path , ";" , 0 );
 
-            FcConfigSetCurrent( config );
+		int added = 0;
 
-            config = NULL;
+		for ( gchar ** p = paths; *p; ++p )
+		{
+			gchar * path = g_strstrip( *p );
 
-            g_info( "FONT CONFIGURATION COMPLETE" );
-        }
+			g_debug( "ADDING FONT PATH '%s'", path );
+
+			if ( FcConfigAppFontAddDir( config, ( const FcChar8 * ) path ) == FcFalse )
+			{
+				g_warning( "FAILED TO ADD FONT PATH '%s'" , path );
+			}
+			else
+			{
+			    ++added;
+			}
+		}
+
+        g_strfreev( paths );
+
+		if( added )
+		{
+			// This transfers ownership of the config object over to FC, so we
+			// don't have to destroy it or unref it.
+
+			FcConfigSetCurrent( config );
+
+			config = NULL;
+
+			g_debug( "FONT CONFIGURATION COMPLETE" );
+		}
     }
 
     // If something went wrong, we destroy the config
@@ -508,6 +739,20 @@ void TPContext::setup_fonts()
 //-----------------------------------------------------------------------------
 
 #ifndef TP_CLUTTER_BACKEND_EGL
+
+static int controller_execute_command( TPController * , unsigned int command , void * , void * )
+{
+    switch( command )
+    {
+        case TP_CONTROLLER_COMMAND_START_POINTER:
+            return 0;
+
+        case TP_CONTROLLER_COMMAND_STOP_POINTER:
+            return 0;
+    }
+
+    return 1;
+}
 
 static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode )
 {
@@ -535,12 +780,19 @@ static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode 
             * keyval = TP_KEY_BLUE;
             * unicode = 0;
             break;
+
+        case CLUTTER_F9:
+            * keyval = TP_KEY_BACK;
+            * unicode = 0;
+            break;
     }
 }
 
 // In desktop builds, we catch all key events that are not synthetic and pass
 // them through a keyboard controller. That will generate an event for the
 // controller and re-inject the event into clutter as a synthetic event.
+//
+// We also use this for mouse events.
 
 gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer controller )
 {
@@ -579,6 +831,43 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 break;
             }
 
+            case CLUTTER_MOTION:
+            {
+                if ( !(event->motion.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y );
+                    }
+                    return TRUE;
+                }
+                break;
+            }
+
+            case CLUTTER_BUTTON_PRESS:
+            {
+                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    }
+                    return TRUE;
+                }
+            }
+
+            case CLUTTER_BUTTON_RELEASE:
+            {
+                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
+                    {
+                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    }
+                    return TRUE;
+                }
+            }
+
             default:
             {
                 break;
@@ -590,26 +879,44 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
 #endif
 
-#ifndef TP_PRODUCTION
+//-----------------------------------------------------------------------------
+// This one deals with the ESCAPE and EXIT keys to exit the current app. If the current
+// app is the first one, this will also exit from the call to tp_context_run.
 
-// This one deals with escape to exit current app
-
-gboolean escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer context )
+gboolean TPContext::escape_handler( ClutterActor * actor, ClutterEvent * event, gpointer _context )
 {
-    if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_Escape )
+    if ( event && event->any.type == CLUTTER_KEY_PRESS && ( event->key.keyval == CLUTTER_Escape || event->key.keyval == TP_KEY_EXIT ) )
     {
-        ( ( TPContext * )context )->close_app();
+        // In production builds, the ESCAPE key is not used - it just passes through
 
-        return TRUE;
+#ifdef TP_PRODUCTION
+
+        if ( event->key.keyval == CLUTTER_Escape )
+        {
+            return FALSE;
+        }
+#endif
+
+        TPContext * context = ( TPContext * ) _context;
+
+        if ( ! context->is_first_app() || context->get_bool( TP_FIRST_APP_EXITS , true ) )
+        {
+            context->close_app();
+            return TRUE;
+        }
     }
 
     return FALSE;
 }
 
+//-----------------------------------------------------------------------------
+
+
+#ifndef TP_PRODUCTION
 
 // This one deals with tilde to reload current app
 
-gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
+gboolean TPContext::tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer context )
 {
     if ( event && event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == CLUTTER_asciitilde )
     {
@@ -622,6 +929,50 @@ gboolean tilde_handler ( ClutterActor * actor, ClutterEvent * event, gpointer co
 }
 
 #endif
+
+//-----------------------------------------------------------------------------
+// When profiling is enabled, these signal handlers let us know when painting
+// the stage begins and ends.
+
+#ifdef TP_PROFILING
+
+static gpointer paint_profiler = 0;
+
+static void before_paint( ClutterActor * actor , gpointer )
+{
+    paint_profiler = PROFILE_START( "PAINT" , PROFILER_INTERNAL_CALLS );
+}
+
+static void after_paint( ClutterActor * actor , gpointer )
+{
+    PROFILE_STOP( paint_profiler );
+}
+
+#endif
+
+
+//-----------------------------------------------------------------------------
+
+class RunningAction : public Action
+{
+public:
+
+    RunningAction( TPContext * _context )
+    :
+        context( _context )
+    {}
+
+private:
+
+    virtual bool run()
+    {
+        context->notify( context , TP_NOTIFICATION_RUNNING );
+
+        return false;
+    }
+
+    TPContext * context;
+};
 
 //-----------------------------------------------------------------------------
 
@@ -697,7 +1048,13 @@ int TPContext::run()
     //.........................................................................
     // Let the world know that the profile has changed
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGED );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGED );
+
+    //.........................................................................
+
+    http_server = new HttpServer( get_int( TP_HTTP_PORT , 0 ) );
+
+    http_trickplay_api_support = new HttpTrickplayApiSupport( this );
 
     //.........................................................................
     // Create the controller server
@@ -739,10 +1096,14 @@ int TPContext::run()
         controller_server = new ControllerServer( this, name, get_int( TP_CONTROLLERS_PORT, TP_CONTROLLERS_PORT_DEFAULT ) );
     }
 
-    //.........................................................................
+	//.........................................................................
     // LIRC controller
 
     controller_lirc = ControllerLIRC::make( this );
+
+    //.........................................................................
+
+    app_push_server = AppPushServer::make( this );
 
     //.........................................................................
     // Create the downloads
@@ -756,16 +1117,12 @@ int TPContext::run()
     //.........................................................................
     // Start the console
 
-#ifndef TP_PRODUCTION
+    console = Console::make( this );
 
-    g_info( "STARTING CONSOLE..." );
-
-    console = new Console( this,
-                           get_bool( TP_CONSOLE_ENABLED, TP_CONSOLE_ENABLED_DEFAULT ),
-                           get_int( TP_TELNET_CONSOLE_PORT, TP_TELNET_CONSOLE_PORT_DEFAULT ) );
-    console->add_command_handler( console_command_handler, this );
-
-#endif
+    if ( console )
+    {
+        console->add_command_handler( console_command_handler, this );
+    }
 
     //.........................................................................
     // Set default size and color for the stage
@@ -774,8 +1131,23 @@ int TPContext::run()
 
     ClutterActor * stage = clutter_stage_get_default();
 
-    clutter_actor_set_size( stage, get_int( TP_SCREEN_WIDTH ), get_int( TP_SCREEN_HEIGHT ) );
+    int display_width = get_int( TP_SCREEN_WIDTH );
+    int display_height = get_int( TP_SCREEN_HEIGHT );
+
+    if ( display_width <= 0 || display_height <= 0 )
+    {
+        clutter_stage_set_fullscreen( CLUTTER_STAGE( stage ) , TRUE );
+    }
+    else
+    {
+        clutter_actor_set_size( stage , display_width , display_height );
+    }
+
+#ifndef TP_CLUTTER_BACKEND_EGL
+
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
+
+#endif
 
     ClutterColor color;
     color.red = 0;
@@ -785,9 +1157,17 @@ int TPContext::run()
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
 
+#ifdef TP_PROFILING
+
+    g_signal_connect( stage , "paint" , ( GCallback ) before_paint , 0 );
+    g_signal_connect_after( stage , "paint" , ( GCallback ) after_paint , 0 );
+
+#endif
+
+    g_signal_connect( stage, "captured-event", ( GCallback ) escape_handler, this );
+
 #ifndef TP_PRODUCTION
 
-    g_signal_connect( stage, "captured-event", ( GCallback )escape_handler, this );
     g_signal_connect( stage, "captured-event", ( GCallback )tilde_handler, this );
 
 #endif
@@ -800,7 +1180,9 @@ int TPContext::run()
 
     memset( &spec, 0, sizeof( spec ) );
 
-    spec.capabilities = TP_CONTROLLER_HAS_KEYS;
+    spec.capabilities = TP_CONTROLLER_HAS_KEYS | TP_CONTROLLER_HAS_POINTER;
+
+    spec.execute_command = controller_execute_command;
 
     // This controller won't leak because the controller list will free it
 
@@ -810,89 +1192,98 @@ int TPContext::run()
 
 #endif
 
+    clutter_stage_set_throttle_motion_events( CLUTTER_STAGE( stage ) , FALSE );
+
     //.........................................................................
     // Create the default media player. This may come back NULL.
 
-    g_info( "CREATING MEDIA PLAYER..." );
+    if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
+    {
+        g_info( "CREATING MEDIA PLAYER..." );
 
-    media_player = MediaPlayer::make( media_player_constructor );
+        media_player = MediaPlayer::make( media_player_constructor );
+    }
+    else
+    {
+        g_info( "MEDIA PLAYER IS DISABLED..." );
+    }
 
     //.........................................................................
     // Load the app
 
     g_info( "LOADING APP..." );
 
-    notify( TP_NOTIFICATION_APP_LOADING );
+    App * app = 0;
 
-    result = load_app( &current_app );
+    result = load_app( & app );
 
-    if ( !current_app )
-    {
-        notify( TP_NOTIFICATION_APP_LOAD_FAILED );
-    }
-    else
+    if ( app )
     {
         //.....................................................................
         // Execute the app's script
 
-        result = current_app->run( app_allowed[ current_app->get_id() ] );
+        first_app_id = app->get_id();
+        app->run( app_allowed[ first_app_id ] , app_run_callback );
+        app->unref();
+        app = 0;
 
-        if ( result != TP_RUN_OK )
+        //.................................................................
+
+        Action::post( new RunningAction( this ) );
+
+        //.................................................................
+        // Dip into the loop
+
+        g_info( "ENTERING MAIN LOOP..." );
+
+        while ( true )
         {
-            notify( TP_NOTIFICATION_APP_LOAD_FAILED );
-        }
-        else
-        {
-            current_app->animate_in();
-
-            notify( TP_NOTIFICATION_APP_LOADED );
-
-            //.................................................................
-            // Attach the console to the app
-
-            if ( console )
+            try
             {
-                console->attach_to_lua( current_app->get_lua_state() );
+                clutter_main();
+
+                // This means the run loop ended nicely, so we break
+
+                break;
             }
-
-            //.................................................................
-            // Dip into the loop
-
-            g_info( "ENTERING MAIN LOOP..." );
-
-            while ( true )
+            catch ( ... )
             {
-                try
+                if ( is_first_app() )
                 {
-                    clutter_main();
+                    g_warning( "CAUGHT EXCEPTION IN RUN LOOP, EXITING" );
 
-                    // This means the run loop ended nicely, so we break
+                    result = TP_RUN_APP_ERROR;
 
                     break;
                 }
-                catch ( ... )
+                else
                 {
-                    if ( is_first_app )
-                    {
-                        g_warning( "CAUGHT EXCEPTION IN RUN LOOP, EXITING" );
+                    g_warning( "CAUGHT EXCEPTION IN RUN LOOP, CLOSING APP" );
 
-                        result = TP_RUN_APP_ERROR;
+                    close_current_app();
 
-                        break;
-                    }
-                    else
-                    {
-                        g_warning( "CAUGHT EXCEPTION IN RUN LOOP, CLOSING APP" );
-
-                        close_app();
-                    }
+                    reload_app();
                 }
             }
-
-            notify( TP_NOTIFICATION_APP_CLOSING );
-
-            notify( TP_NOTIFICATION_APP_CLOSED );
         }
+    }
+
+    //.....................................................................
+
+    notify( this , TP_NOTIFICATION_EXITING );
+
+    //.....................................................................
+    // Keep further events from being processed.
+
+    controller_list.stop_events();
+
+    //.....................................................................
+
+    if ( app_push_server )
+    {
+        delete app_push_server;
+
+        app_push_server = 0;
     }
 
     //.....................................................................
@@ -931,7 +1322,7 @@ int TPContext::run()
 
     if ( current_app )
     {
-        delete current_app;
+        current_app->unref();
         current_app = NULL;
     }
 
@@ -980,6 +1371,22 @@ int TPContext::run()
     }
 
     //.........................................................................
+
+    if ( http_trickplay_api_support )
+    {
+        delete http_trickplay_api_support;
+        http_trickplay_api_support = NULL;
+    }
+
+    //.........................................................................
+
+    if ( http_server )
+    {
+        delete http_server;
+        http_server = NULL;
+    }
+
+    //.........................................................................
     // Get rid of the system database
 
     delete sysdb;
@@ -1021,17 +1428,25 @@ String TPContext::make_fake_app()
 
             free_later( app );
 
-            g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1}", -1, NULL );
+            if ( ! g_file_test( app , G_FILE_TEST_EXISTS ) )
+            {
+                g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1}", -1, NULL );
+            }
 
             gchar * main = g_build_filename( app_path, "main.lua", NULL );
 
             free_later( main );
 
-            g_file_set_contents( main, "--Automatically Created", -1, NULL );
+            if ( ! g_file_test( main , G_FILE_TEST_EXISTS ) )
+            {
+                g_file_set_contents( main, "--Automatically Created", -1, NULL );
+            }
 
             result = app_path;
         }
     }
+
+    g_info( "CREATED EMPTY APP" );
 
 #endif
 
@@ -1042,7 +1457,7 @@ String TPContext::make_fake_app()
 
 int TPContext::load_app( App ** app )
 {
-    PROFILER( "TPContext::load_app" );
+    PROFILER( "TPContext::load_app" , PROFILER_INTERNAL_CALLS );
 
     String app_path;
 
@@ -1109,9 +1524,9 @@ int TPContext::load_app( App ** app )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch )
+int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path )
 {
-    String app_path = get_db()->get_app_path( app_id );
+    String app_path = id_is_path ? app_id : get_db()->get_app_path( app_id );
 
     if ( app_path.empty() )
     {
@@ -1132,52 +1547,47 @@ int TPContext::launch_app( const char * app_id, const App::LaunchInfo & launch )
         return TP_RUN_APP_PREPARE_FAILED;
     }
 
-    int result = new_app->run( app_allowed[ new_app->get_id() ] );
-
-    if ( result != TP_RUN_OK )
-    {
-        delete new_app;
-        return result;
-    }
-
-    g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
-
-    // TODO: Not right to set this before the idle source fires
-
-    is_first_app = false;
+    new_app->run( app_allowed[ new_app->get_id() ] , app_run_callback );
+    new_app->unref();
 
     return 0;
 }
 
 //-----------------------------------------------------------------------------
 
-gboolean TPContext::launch_app_callback( gpointer app )
+void TPContext::app_run_callback( App * app , int result )
 {
-    App * new_app = ( App * )app;
+    TPContext * context = app->get_context();
 
-    TPContext * context = new_app->get_context();
-
-    context->close_current_app();
-
-    if ( context->console )
+    if ( result != TP_RUN_OK )
     {
-        context->console->attach_to_lua( new_app->get_lua_state() );
+        if ( context->first_app_id == app->get_id() )
+        {
+            context->quit();
+        }
     }
+    else
+    {
+        context->close_current_app();
 
-    context->current_app = new_app;
+        if ( context->console )
+        {
+            context->console->attach_to_lua( app->get_lua_state() );
+        }
 
-    new_app->animate_in();
+        context->current_app = app;
 
-    context->notify( TP_NOTIFICATION_APP_LOADED );
+        context->current_app->ref();
 
-    return FALSE;
+        app->animate_in();
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 void TPContext::close_app()
 {
-    if ( is_first_app )
+    if ( is_first_app() )
     {
         quit();
     }
@@ -1189,18 +1599,8 @@ void TPContext::close_app()
 
         if ( new_app )
         {
-            if ( new_app->run( app_allowed[ new_app->get_id() ] ) == TP_RUN_OK )
-            {
-                g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
-
-                // TODO Not right to set here
-
-                is_first_app = true;
-            }
-            else
-            {
-                delete new_app;
-            }
+            new_app->run( app_allowed[ new_app->get_id() ] , app_run_callback );
+            new_app->unref();
         }
     }
 }
@@ -1218,9 +1618,7 @@ void TPContext::close_current_app()
     {
         current_app->animate_out();
 
-        notify( TP_NOTIFICATION_APP_CLOSING );
-
-        delete current_app;
+        current_app->unref();
 
         current_app = NULL;
     }
@@ -1240,14 +1638,8 @@ void TPContext::reload_app()
     }
     else
     {
-        if ( new_app->run( app_allowed[ new_app->get_id() ] ) == TP_RUN_OK )
-        {
-            g_idle_add_full( G_PRIORITY_HIGH, launch_app_callback, new_app, NULL );
-        }
-        else
-        {
-            delete new_app;
-        }
+        new_app->run( app_allowed[ new_app->get_id() ] , app_run_callback );
+        new_app->unref();
     }
 }
 
@@ -1306,6 +1698,62 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
+    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT } verbose = CHECK;
+
+    if ( verbose == CHECK )
+    {
+        verbose = NORMAL;
+
+        if ( const gchar * e = g_getenv( "TP_LOG" ) )
+        {
+            if ( ! strcmp( e , "engine" ) )
+            {
+                verbose = ENGINE;
+            }
+            else if ( ! strcmp( e , "app" ) )
+            {
+                verbose = APP;
+            }
+            else if ( ! strcmp( e , "raw" ) )
+            {
+                verbose = APP_RAW;
+            }
+            else if ( ! strcmp( e , "silent" ) )
+            {
+                verbose = SILENT;
+            }
+        }
+    }
+
+    switch( verbose )
+    {
+        case NORMAL:
+            break;
+
+        case SILENT:
+            return;
+
+        case ENGINE:
+            if ( log_level == G_LOG_LEVEL_MESSAGE )
+                return;
+            break;
+
+        case APP:
+            if ( log_level != G_LOG_LEVEL_MESSAGE )
+               return;
+            break;
+
+        case APP_RAW:
+            if ( log_level == G_LOG_LEVEL_MESSAGE )
+            {
+                fprintf( stdout, "%s\n", message );
+            }
+            return;
+
+        default:
+            break;
+    }
+
     gchar * line = NULL;
 
     // This is before a context is created, so we just print out the message
@@ -1339,7 +1787,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
         {
             if ( context->external_log_handler )
             {
-                context->external_log_handler( log_level, log_domain, message, context->external_log_handler_data );
+                context->external_log_handler( context , log_level, log_domain, message, context->external_log_handler_data );
             }
             else
             {
@@ -1403,7 +1851,7 @@ int TPContext::request( const char * subject )
 {
     RequestHandlerMap::const_iterator it = request_handlers.find( String( subject ) );
 
-    return it == request_handlers.end() ? 1 : it->second.first( subject, it->second.second );
+    return it == request_handlers.end() ? 1 : it->second.first( this , subject , it->second.second );
 }
 
 //-----------------------------------------------------------------------------
@@ -1519,12 +1967,26 @@ void TPContext::load_external_configuration()
 
     if ( g_argc && g_argv )
     {
-        for( int i = 1; i < * g_argc; ++i )
+        for( int i = 1; i < g_argc; ++i )
         {
-            lua_pushstring( L , ( * g_argv )[ i ] );
+            lua_pushstring( L , g_argv[ i ] );
             lua_rawseti( L , -2 , i );
         }
     }
+
+    gchar * d = g_path_get_dirname( file_name );
+
+    if ( ! strcmp( d , "." ) )
+    {
+        g_free( d );
+
+        d = g_get_current_dir();
+    }
+
+    lua_pushstring( L , d );
+    lua_rawseti( L , -2 , 0 );
+
+    g_free( d );
 
     lua_setglobal( L, "args" );
 
@@ -1568,6 +2030,8 @@ void TPContext::load_external_configuration()
         TP_CONTROLLERS_ENABLED,
         TP_CONTROLLERS_PORT,
         TP_CONTROLLERS_NAME,
+        TP_CONTROLLERS_MDNS_ENABLED,
+        TP_CONTROLLERS_UPNP_ENABLED,
         TP_LOG_DEBUG,
         TP_LOG_APP_ONLY,
         TP_FONTS_PATH,
@@ -1578,6 +2042,17 @@ void TPContext::load_external_configuration()
         TP_LIRC_ENABLED,
         TP_LIRC_UDS,
         TP_LIRC_REPEAT,
+        TP_APP_PUSH_ENABLED,
+        TP_MEDIAPLAYER_ENABLED,
+        TP_IMAGE_DECODER_ENABLED,
+        TP_RANDOM_SEED,
+        TP_PLUGINS_PATH,
+        TP_AUDIO_SAMPLER_ENABLED,
+        TP_AUDIO_SAMPLER_MAX_INTERVAL,
+        TP_AUDIO_SAMPLER_MAX_BUFFER_KB,
+        TP_TOAST_JSON_PATH,
+        TP_FIRST_APP_EXITS,
+        TP_HTTP_PORT,
 
         NULL
     };
@@ -1717,6 +2192,8 @@ void TPContext::validate_configuration()
 
     gchar * full_data_path = g_build_filename( data_path, "trickplay", NULL );
 
+	g_debug( "USING DATA PATH: '%s'", full_data_path );
+
     if ( g_mkdir_with_parents( full_data_path, 0700 ) != 0 )
     {
         g_error( "Data path '%s' does not exist and could not be created", full_data_path );
@@ -1746,6 +2223,21 @@ void TPContext::validate_configuration()
     if ( g_mkdir_with_parents( downloads_path, 0700 ) != 0 )
     {
         g_error( "DOWNLOADS PATH '%s' DOES NOT EXIST AND COULD NOT BE CREATED", downloads_path );
+    }
+
+    // PLUGINS PATH
+
+    const char * plugins_path = get( TP_PLUGINS_PATH );
+
+    if ( ! plugins_path )
+    {
+        gchar * path = g_build_filename( g_get_current_dir() , "plugins" , NULL );
+
+        g_warning( "DEFAULT:%s=%s", TP_PLUGINS_PATH, path );
+
+        set( TP_PLUGINS_PATH, path );
+
+        g_free( path );
     }
 
     // SCREEN WIDTH AND HEIGHT
@@ -1801,7 +2293,7 @@ void TPContext::validate_configuration()
 
 gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message )
 {
-    gulong ms = clutter_get_timestamp() / 1000;
+    gulong ms = timestamp();
 
     int sec = 0;
     int min = 0;
@@ -1827,34 +2319,51 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
 
     const char * level = "OTHER";
 
+    const char * color_start = "";
+    const char * color_end = "\033[0m";
+
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
+        color_start = "\033[31m";
         level = "ERROR";
     }
     else if ( log_level & G_LOG_LEVEL_CRITICAL )
     {
+        color_start = "\033[31m";
         level = "CRITICAL";
     }
     else if ( log_level & G_LOG_LEVEL_WARNING )
     {
+        color_start = "\033[33m";
         level = "WARNING";
     }
     else if ( log_level & G_LOG_LEVEL_MESSAGE )
     {
+        color_start = "\033[36m";
         level = "MESSAGE";
     }
     else if ( log_level & G_LOG_LEVEL_INFO )
     {
+        color_start = "\33[32m";
         level = "INFO";
     }
     else if ( log_level & G_LOG_LEVEL_DEBUG )
     {
+        color_start = "\33[37m";
         level = "DEBUG";
     }
 
-    return g_strdup_printf( "%p %2.2d:%2.2d:%2.2d:%3.3lu %s %s %s\n" ,
+#if 0 // Set to 1 to disable colors
+    color_start = "";
+    color_end = "";
+#endif
+
+    return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
+                            log_domain,
                             g_thread_self() ,
-                            hour , min , sec , ms , level , log_domain , message );
+                            hour , min , sec , ms ,
+                            color_start , level , color_end ,
+                            message );
 }
 
 //-----------------------------------------------------------------------------
@@ -1883,6 +2392,14 @@ Installer * TPContext::get_installer() const
 
 //-----------------------------------------------------------------------------
 
+HttpServer * TPContext::get_http_server() const
+{
+    g_assert( http_server );
+    return http_server;
+}
+
+//-----------------------------------------------------------------------------
+
 bool TPContext::profile_switch( int id )
 {
     SystemDatabase::Profile profile = get_db()->get_profile( id );
@@ -1892,15 +2409,15 @@ bool TPContext::profile_switch( int id )
         return false;
     }
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGING );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGING );
 
     get_db()->set( TP_DB_CURRENT_PROFILE_ID, id );
     set( PROFILE_ID, id );
     set( PROFILE_NAME, profile.name );
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGE );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGE );
 
-    notify( TP_NOTIFICATION_PROFILE_CHANGED );
+    notify( this , TP_NOTIFICATION_PROFILE_CHANGED );
 
     return true;
 }
@@ -1916,7 +2433,14 @@ MediaPlayer * TPContext::get_default_media_player()
 
 MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delegate )
 {
-    return MediaPlayer::make( media_player_constructor, delegate );
+    if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
+    {
+        return MediaPlayer::make( media_player_constructor, delegate );
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 
@@ -1931,7 +2455,7 @@ ControllerList * TPContext::get_controller_list()
 
 Image * TPContext::load_icon( const gchar * path )
 {
-    PROFILER( "TPContext::load_icon" );
+    PROFILER( "TPContext::load_icon" , PROFILER_INTERNAL_CALLS );
 
     FreeLater free_later;
 
@@ -2008,7 +2532,7 @@ Image * TPContext::load_icon( const gchar * path )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
-                PROFILER( "TPContext::load_icon(load raw)" );
+                PROFILER( "TPContext::load_icon(load raw)" , PROFILER_INTERNAL_CALLS );
 
                 gchar * raw_contents = NULL;
 
@@ -2042,7 +2566,7 @@ Image * TPContext::load_icon( const gchar * path )
         // raw icon file. Any failure below this point is simply a failure to cache,
         // and even though it will affect performance, it is not considered critical.
 
-        PROFILER( "TPContext::load_icon(cache)" );
+        PROFILER( "TPContext::load_icon(cache)" , PROFILER_INTERNAL_CALLS );
 
         // Make sure the icon cache directory exists
 
@@ -2065,6 +2589,127 @@ Image * TPContext::load_icon( const gchar * path )
     return image;
 }
 
+//-----------------------------------------------------------------------------
+
+StringMap TPContext::get_config() const
+{
+    return config;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::add_internal( gpointer key , gpointer value , GDestroyNotify destroy )
+{
+    g_assert( key );
+
+    InternalMap::iterator it( internals.find( key ) );
+
+    // If it already exists, call its destroy notify
+
+    if ( it != internals.end() )
+    {
+        // If it has a destroy notify, call it with the value
+
+        if ( it->second.second != 0 )
+        {
+            it->second.second( it->second.first );
+        }
+
+        it->second = InternalPair( value , destroy );
+    }
+    else
+    {
+        internals[ key ] = InternalPair( value , destroy );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+gpointer TPContext::get_internal( gpointer key )
+{
+    InternalMap::const_iterator it( internals.find( key ) );
+
+    // If it already exists, call its destroy notify
+
+    if ( it != internals.end() )
+    {
+        return it->second.first;
+    }
+
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::set_first_app_exits( bool value )
+{
+    set( TP_FIRST_APP_EXITS , value ? 1 : 0 );
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::is_first_app() const
+{
+    if ( ! current_app )
+    {
+        return true;
+    }
+
+    return current_app->get_id() == first_app_id;
+}
+
+//-----------------------------------------------------------------------------
+// Called by other threads...
+
+class AudioMatchAction : public Action
+{
+public:
+
+    AudioMatchAction( TPContext * _context , const gchar * _json )
+    :
+        context( _context ),
+        json( _json )
+    {}
+
+    virtual bool run()
+    {
+        if ( App * app = context->get_current_app() )
+        {
+            app->audio_match( json );
+        }
+
+        return false;
+    }
+
+private:
+
+    TPContext * context;
+    String      json;
+};
+
+void TPContext::audio_detection_match( const gchar * json )
+{
+    JsonParser * parser = json_parser_new();
+
+    GError * error = 0;
+
+    bool valid = json_parser_load_from_data( parser , json , -1 , & error );
+
+    g_object_unref( parser );
+
+    if ( ! valid )
+    {
+        g_warning( "INVALID JSON AUDIO DETECTION RESULT '%s' : %s" , json , error->message );
+
+        g_clear_error( & error );
+    }
+    else
+    {
+        g_info( "VALID JSON AUDIO DETECTION RESULT : '%s'" , json );
+
+        Action::post( new AudioMatchAction( this , json ) );
+    }
+}
 
 //=============================================================================
 // External-facing functions
@@ -2072,9 +2717,6 @@ Image * TPContext::load_icon( const gchar * path )
 
 void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version )
 {
-    g_argc = argc;
-    g_argv = argv;
-
     if ( !g_thread_supported() )
     {
         g_thread_init( NULL );
@@ -2106,7 +2748,13 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
 
     g_log_set_default_handler( TPContext::log_handler, NULL );
 
-    g_info( "%d.%d.%d", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
+    if ( argc && argv )
+    {
+        g_argc = * argc;
+        g_argv = * argv;
+    }
+
+    g_info( "%d.%d.%d [%s]", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION , TP_GIT_VERSION );
 }
 
 //-----------------------------------------------------------------------------
@@ -2151,6 +2799,24 @@ const char * tp_context_get( TPContext * context, const char * key )
     g_assert( context );
 
     return context->get( key );
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_user_data( TPContext * context , void * user_data )
+{
+    g_assert( context );
+
+    context->user_data = user_data;
+}
+
+//-----------------------------------------------------------------------------
+
+void * tp_context_get_user_data( TPContext * context )
+{
+    g_assert( context );
+
+    return context->user_data;
 }
 
 //-----------------------------------------------------------------------------
@@ -2242,12 +2908,12 @@ void tp_context_remove_controller( TPContext * context, TPController * controlle
 // Image Decoder
 //-----------------------------------------------------------------------------
 
-void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user)
+void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, void * user )
 {
     g_assert( context );
     g_assert( decoder );
 
-    Images::set_external_decoder( decoder, user );
+    Images::set_external_decoder( context , decoder, user );
 }
 
 //-----------------------------------------------------------------------------

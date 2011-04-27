@@ -158,7 +158,7 @@ void Socket::start_async_read()
 
     g_assert( input_buffer );
 
-    g_input_stream_read_async( input, input_buffer, INPUT_BUFFER_SIZE, G_PRIORITY_DEFAULT, NULL, read_async, this );
+    g_input_stream_read_async( input, input_buffer, INPUT_BUFFER_SIZE, TRICKPLAY_PRIORITY, NULL, read_async, this );
 }
 
 //.............................................................................
@@ -215,7 +215,7 @@ void Socket::start_async_write()
 
         g_object_set_data_full( G_OBJECT( output ), OUTPUT_BUFFER_KEY, output_buffer, ( GDestroyNotify) g_byte_array_unref );
 
-        g_output_stream_write_async( output, output_buffer->data, output_buffer->len, G_PRIORITY_DEFAULT, NULL, write_async, this );
+        g_output_stream_write_async( output, output_buffer->data, output_buffer->len, TRICKPLAY_PRIORITY, NULL, write_async, this );
 
         output_buffer = g_byte_array_new();
     }

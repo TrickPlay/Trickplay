@@ -47,7 +47,11 @@ interface URLResponse [[Network::Response*]]
     # Property: body
     # This is the body of the response; it is a string that may contain embedded
     # NULLs.
-    
+    #
+    # Note that if you call <URLRequest.stream>, the response body will only
+    # contain one chunk in calls to <URLRequest.on_response_chunk> and will be nil in the call
+    # to <URLRequest.on_complete>.
+
     readonly lstring body
         [[
 	    body = (const char*) self->body->data;
@@ -89,8 +93,36 @@ interface URLResponse [[Network::Response*]]
 }
 
 [[
-void URLRequest_response_callback(const Network::Response&response,gpointer info);
+void URLRequest_response_callback(const Network::Response & response , gpointer info );
+bool URLRequest_incremental_response_callback( const Network::Response & response, gpointer body, guint len, bool finished, gpointer _handle );
+
 ]]
+
+# Interface: URLRequestCancel
+# When you call <URLRequest.send> or <URLRequest.stream>, they return a URLRequestCancel
+# object that you can use later to cancel the request.
+
+interface URLRequestCancel [[guint*]]
+{
+    URLRequestCancel()
+        [[
+            self=lb_construct(guint,new guint);
+            *self=lua_tonumber(L,-2);
+        ]];
+
+    ~URLRequestCancel()
+        [[
+            delete self;
+        ]];
+
+    # Function: cancel
+    # Cancels the request. When you cancel a request, <URLRequest.on_complete> will not be called.
+
+    cancel()
+        [[
+            App::get( L )->get_network()->cancel_async_request( * self );
+        ]];
+}
 
 # Class: URLRequest
 
@@ -232,7 +264,7 @@ class URLRequest [[Network::Request*]]
     # For example:
     # > response = URLRequest( "http://www.trickplay.com" ):perform()
     
-    udata perform()
+    URLResponse perform()
         [[
 	    	App * app=App::get(L);
 
@@ -249,19 +281,56 @@ class URLRequest [[Network::Request*]]
     # To execute the request asynchronously (in the background), you call send.
     # Once the request is finished or fails, you will receive the response in
     # a call to the <on_complete> event handler.
+    # This function returns a <URLRequestCancel> object that you can keep and use
+    # to cancel the request before it finishes.
+    #
+    # Returns:
+    # cancel - A <URLRequestCancel> object.
     
-    send()
+    URLRequestCancel send()
         [[
 	    	App * app=App::get(L);
 
-            app->get_network()->perform_request_async(
+            guint id = app->get_network()->perform_request_async(
 				*self,
 				app->get_cookie_jar(),
 				URLRequest_response_callback,
 				UserData::Handle::make(L,1,self),
 				UserData::Handle::destroy);
+
+            lua_pushnumber( L , id );
+            new_URLRequestCancel( L );
+            lua_remove( L , -2 );
         ]];
         
+    # Function: stream
+    # This starts executing the request asynchronously. Unlike <send>, when you
+    # call stream, TrickPlay will not wait until the entire response is received.
+    # Instead, it will call the <on_response_chunk> event every time a piece of the
+    # response body is received. This lets you process the response in
+    # chunks rather than as a whole. If the request fails, or it finishes, <on_complete>
+    # will be called.
+    #
+    # Returns:
+    # cancel - A <URLRequestCancel> object.
+
+    URLRequestCancel stream()
+        [[
+          App * app=App::get(L);
+
+          guint id = app->get_network()->perform_request_async_incremental(
+              *self,
+              app->get_cookie_jar(),
+              URLRequest_incremental_response_callback,
+              UserData::Handle::make(L,1,self),
+              UserData::Handle::destroy,
+              true );
+
+          lua_pushnumber( L , id );
+          new_URLRequestCancel( L );
+          lua_remove( L , -2 );
+        ]];
+
     # Event: on_complete
     # This property holds a function that is called when a request is finished
     # or fails. The function receives as its parameters, the request as well as
@@ -283,8 +352,20 @@ class URLRequest [[Network::Request*]]
     # >   end
     # > end
     
+    callback on_complete( URLRequest request , URLResponse response );
+
+    # Event: on_response_chunk
+    #
+    # If you called <stream>, this function will get called every time a chunk of
+    # the response body is received. Note that during this call, response.body will
+    # only contain the newly received chunk - not the entire body of the response.
+    # If you want to keep the entire body, you are responsible for accumulating it.
+    #
+    # Arguments:
+    # request - The <URLRequest>
+    # response - A <URLResponse> object with the results
     
-    callback on_complete;    
+    callback on_response_chunk( URLRequest request , URLResponse response );
 }
 
 [[
@@ -302,6 +383,39 @@ void URLRequest_response_callback(const Network::Response&response,gpointer _han
     
     	invoke_URLRequest_on_complete(L,(Network::Request*)handle->get_user(),1,0);
     }    
+}
+
+bool URLRequest_incremental_response_callback( const Network::Response & response, gpointer body, guint len, bool finished, gpointer _handle )
+{
+    UserData::Handle * handle = UserData::Handle::get( _handle );
+
+    lua_State * L = handle->get_lua_state();
+
+    if ( ! L )
+    {
+        return false;
+    }
+
+    if ( ! finished )
+    {
+        // We got a chunk of data
+
+        lua_pushlightuserdata( L , new Network::Response( response ) );
+        new_URLResponse( L );
+        lua_remove( L , -2 );
+
+        invoke_URLRequest_on_response_chunk( L , ( Network::Request * ) handle->get_user() , 1 , 0 );
+    }
+    else
+    {
+        lua_pushlightuserdata( L , new Network::Response( response ) );
+        new_URLResponse( L );
+        lua_remove( L , -2 );
+
+        invoke_URLRequest_on_complete( L , ( Network::Request * ) handle->get_user() , 1 , 0 );
+    }
+
+    return true;
 }
 
 ]]

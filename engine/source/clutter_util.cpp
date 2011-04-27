@@ -34,28 +34,14 @@ void ClutterUtil::push_clutter_color( lua_State * L, ClutterColor * color )
 
 //.............................................................................
 
-void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
+ClutterColor ClutterUtil::string_to_color( const char * s )
 {
-    LSG;
+    ClutterColor result = { 0 , 0 , 0 , 0 };
 
-    if ( lua_istable( L, index ) )
-    {
-        lua_rawgeti( L, index, 1 );
-        lua_rawgeti( L, index, 2 );
-        lua_rawgeti( L, index, 3 );
-        lua_rawgeti( L, index, 4 );
-        color->red = luaL_optint( L, -4, 0 );
-        color->green = luaL_optint( L, -3, 0 );
-        color->blue = luaL_optint( L, -2, 0 );
-        color->alpha = luaL_optint( L, -1, 255 );
-        lua_pop( L, 4 );
-    }
-    else if ( lua_isstring( L, index ) )
+    if ( s )
     {
         int colors[4] = {0, 0, 0, 255};
         char buffer[3] = {0, 0, 0};
-
-        const char * s = lua_tostring( L, index );
 
         if ( *s == '#' )
         {
@@ -85,10 +71,36 @@ void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * col
             i++;
         }
 
-        color->red   = colors[0];
-        color->green = colors[1];
-        color->blue  = colors[2];
-        color->alpha = colors[3];
+        result.red   = colors[0];
+        result.green = colors[1];
+        result.blue  = colors[2];
+        result.alpha = colors[3];
+    }
+
+    return result;
+}
+
+//.............................................................................
+
+void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
+{
+    LSG;
+
+    if ( lua_istable( L, index ) )
+    {
+        lua_rawgeti( L, index, 1 );
+        lua_rawgeti( L, index, 2 );
+        lua_rawgeti( L, index, 3 );
+        lua_rawgeti( L, index, 4 );
+        color->red = luaL_optint( L, -4, 0 );
+        color->green = luaL_optint( L, -3, 0 );
+        color->blue = luaL_optint( L, -2, 0 );
+        color->alpha = luaL_optint( L, -1, 255 );
+        lua_pop( L, 4 );
+    }
+    else if ( lua_isstring( L, index ) )
+    {
+        * color = string_to_color( lua_tostring( L, index ) );
     }
     else
     {
@@ -150,6 +162,29 @@ ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
 
 //.............................................................................
 
+ClutterTimeline * ClutterUtil::user_data_to_timeline( lua_State * L, int n )
+{
+    if ( ! lb_check_udata_type( L , n , "Timeline" , false ) )
+    {
+        luaL_where( L , 1 );
+        lua_pop( L , 1 );
+        return NULL;
+    }
+
+    UserData * ud = UserData::get( L , n );
+
+    if ( ! ud )
+    {
+        return NULL;
+    }
+
+    GObject * obj = ud->get_master();
+
+    return CLUTTER_IS_TIMELINE( obj ) ? CLUTTER_TIMELINE( obj ) : NULL;
+}
+
+//.............................................................................
+
 void ClutterUtil::set_props_from_table( lua_State * L, int table )
 {
     LSG;
@@ -173,10 +208,55 @@ void ClutterUtil::set_props_from_table( lua_State * L, int table )
 
 //.............................................................................
 
+// We want all actors to have a listener on their opacity property.  When opacity goes to 0,
+// the object should automatically hide(); when opacity stops being 0, unless hide() has been called manually,
+// it should show() itself
+
+void ClutterUtil::actor_opacity_notify( GObject * , GParamSpec * , ClutterActor * self )
+{
+    unsigned opacity = clutter_actor_get_opacity(self);
+
+    if(opacity == 0)
+    {
+        if(CLUTTER_ACTOR_IS_VISIBLE(self))
+        {
+//            g_debug("Opacity is 0 so hiding %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_hide(self);
+        }
+    } else {
+        if(!CLUTTER_ACTOR_IS_VISIBLE(self))
+        {
+//            g_debug("Opacity is not 0 so showing %p (%s)", self, clutter_actor_get_name(self));
+            clutter_actor_show(self);
+        }
+    }
+}
+
+void ClutterUtil::actor_on_show(ClutterActor*actor,void*)
+{
+	if( clutter_actor_get_opacity( actor ) == 0 )
+	{
+//        g_debug("Opacity is 0 so reversing show of %p (%s)", actor, clutter_actor_get_name(actor));
+	    clutter_actor_hide( actor );
+	}
+}
+
+void ClutterUtil::actor_on_hide(ClutterActor*actor,void*)
+{
+}
+
+
 void ClutterUtil::initialize_actor( lua_State * L, ClutterActor * actor, const char * metatable )
 {
     // Metatables are static, so we don't need to free it
     g_object_set_data( G_OBJECT( actor ), "tp-metatable", ( gpointer )metatable );
+
+#if 0
+    g_signal_connect( G_OBJECT(actor), "notify::opacity", (GCallback)actor_opacity_notify, actor );
+    g_signal_connect( G_OBJECT(actor), "show", (GCallback)actor_on_show, actor );
+    g_signal_connect( G_OBJECT(actor), "hide", (GCallback)actor_on_hide, actor );
+#endif
+
 }
 
 //.............................................................................
@@ -233,7 +313,7 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_PRESS );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
@@ -249,7 +329,7 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
     // In the EGL backend, there is nothing pulling the events from
     // the event queue, so we force that by adding an idle source
 
-    g_idle_add_full( G_PRIORITY_HIGH_IDLE, event_pump, NULL, NULL );
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
 
 #endif
 }
@@ -260,7 +340,7 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
 
     ClutterEvent * event = clutter_event_new( CLUTTER_KEY_RELEASE );
     event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
-    event->any.time = clutter_get_timestamp();
+    event->any.time = timestamp();
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
@@ -276,7 +356,90 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
     // In the EGL backend, there is nothing pulling the events from
     // the event queue, so we force that by adding an idle source
 
-    g_idle_add_full( G_PRIORITY_HIGH_IDLE, event_pump, NULL, NULL );
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
+
+#endif
+}
+
+void ClutterUtil::inject_motion( gfloat x , gfloat y )
+{
+    clutter_threads_enter();
+
+    ClutterEvent * event = clutter_event_new( CLUTTER_MOTION );
+    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.time = timestamp();
+    event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->motion.x = x;
+    event->motion.y = y;
+
+    clutter_event_put( event );
+
+    clutter_event_free( event );
+
+    clutter_threads_leave();
+
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
+
+#endif
+}
+
+void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y )
+{
+    clutter_threads_enter();
+
+    ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_PRESS );
+    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.time = timestamp();
+    event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->button.button = button;
+    event->button.x = x;
+    event->button.y = y;
+
+    clutter_event_put( event );
+
+    clutter_event_free( event );
+
+    clutter_threads_leave();
+
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
+
+#endif
+}
+
+void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y )
+{
+    clutter_threads_enter();
+
+    ClutterEvent * event = clutter_event_new( CLUTTER_BUTTON_RELEASE );
+    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.time = timestamp();
+    event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->button.button = button;
+    event->button.x = x;
+    event->button.y = y;
+
+    clutter_event_put( event );
+
+    clutter_event_free( event );
+
+    clutter_threads_leave();
+
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
 
 #endif
 }
@@ -285,15 +448,15 @@ void ClutterUtil::stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *
 {
     ClutterContainer *stage = (ClutterContainer*)clutter_stage_get_default();
 
-    ClutterActor *screen = clutter_container_find_child_by_name(stage, "screen");
+    if ( ClutterActor * screen = clutter_container_find_child_by_name(stage, "screen") )
+    {
+        gdouble scale_x, scale_y;
 
-    g_assert(screen);
+        clutter_actor_get_scale(screen, &scale_x, &scale_y);
 
-    gdouble scale_x, scale_y;
-    clutter_actor_get_scale(screen, &scale_x, &scale_y);
-
-    *x = *x/scale_x;
-    *y = *y/scale_y;
+        *x /= scale_x;
+        *y /= scale_y;
+    }
 }
 
 

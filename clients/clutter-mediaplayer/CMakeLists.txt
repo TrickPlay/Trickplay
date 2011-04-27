@@ -9,6 +9,7 @@ TP_FIND_INCLUDE( pango-1.0 pango/pango.h		TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( cairo cairo.h				TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( libxml2 libxml/parser.h       		TPCMP_INCLUDE_DIRS )
 TP_FIND_INCLUDE( GL/gl.h                                TPCMP_INCLUDE_DIRS )
+TP_FIND_INCLUDE( atk-1.0 atk/atk.h 			            TPCMP_INCLUDE_DIRS )
 
 
 
@@ -22,7 +23,7 @@ include_directories(
     ${TPCMP_INCLUDE_DIRS}    
     )
 
-add_executable( tp-cmp main.c )
+add_executable( tp-cmp main.c audio.c )
 
 # This one must come before the clutter libraries - so we
 # get the json symbols from here
@@ -30,7 +31,8 @@ add_executable( tp-cmp main.c )
 TP_FIND_LIBRARY( json-glib-1.0      TPCMP_LIBRARIES )
 
 TP_FIND_LIBRARY( clutter-glx-1.0    TPCMP_LIBRARIES )
-TP_FIND_LIBRARY( clutter-gst-0.10   TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( clutter-gst-1.0   TPCMP_LIBRARIES )
+TP_FIND_LIBRARY( clutter-gst-0.10    TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstreamer-0.10     TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstvideo-0.10      TPCMP_LIBRARIES )
 TP_FIND_LIBRARY( gstbase-0.10       TPCMP_LIBRARIES )
@@ -51,3 +53,4 @@ set_target_properties( tp-cmp
 
 install(TARGETS tp-cmp RUNTIME DESTINATION bin)
 
+add_definitions( -DG_LOG_DOMAIN="tp-cmp" )
