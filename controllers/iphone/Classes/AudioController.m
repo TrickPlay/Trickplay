@@ -23,8 +23,8 @@
 }
 
 - (void)sendSoundStatusMessage:(NSString *)resource message:(NSString *)message {
-	//NSData *sentData = [[NSString stringWithFormat:@"SOUND\t%@\t%@\n", resource, message] dataUsingEncoding:NSUTF8StringEncoding];
-    //[socketManager sendData:[sentData bytes] numberOfBytes:[sentData length]];
+	NSData *sentData = [[NSString stringWithFormat:@"SOUND\t%@\t%@\n", resource, message] dataUsingEncoding:NSUTF8StringEncoding];
+    [socketManager sendData:[sentData bytes] numberOfBytes:[sentData length]];
 }
 
 - (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename {
@@ -33,13 +33,13 @@
 		//NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:filename ofType: @"mp3"];
 		//NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:soundFilePath];
 		//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
-        /**
+        //**
 		[self createAudioStreamer:filename];
         //*/
 	}
 	else
 	{
-        /**
+        //**
 		[self createAudioStreamer:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], filename]];
         //*/
 		//NSURL *fileURL = [NSURL URLWithString:];
@@ -57,7 +57,7 @@
 
 
 - (void)playbackStateChanged:(NSNotification *)aNotification {
-    /**
+    //**
 	if ([audioStreamer isWaiting]) // not sure why this is here
 	{
 		
@@ -94,7 +94,7 @@
 
 - (void)createAudioStreamer:(NSString *)audioURL
 {
-    /**
+    //**
 	if (audioStreamer)
 	{
         [self destroyAudioStreamer];
@@ -103,16 +103,18 @@
 	NSURL *url = [NSURL URLWithString:audioURL];
 	audioStreamer = [[AudioStreamer alloc] initWithURL:url];
 	
-	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playbackStateChanged:) name:ASStatusChangedNotification
-                                               object:audioStreamer];
+	[[NSNotificationCenter defaultCenter] 
+        addObserver:self
+           selector:@selector(playbackStateChanged:)
+               name:ASStatusChangedNotification
+             object:audioStreamer];
 	[audioStreamer start];
      //*/
 }
 
 - (void)destroyAudioStreamer
 {
-    /**
+    //**
 	if (audioStreamer) {
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:ASStatusChangedNotification object:audioStreamer];
 		
@@ -125,7 +127,7 @@
 
 - (void)dealloc {
     NSLog(@"AudioController dealloc");
-    //[self destroyAudioStreamer];
+    [self destroyAudioStreamer];
     if (resourceManager) {
         [resourceManager release];
     }
