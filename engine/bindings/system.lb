@@ -33,7 +33,7 @@ global system [[TPContext*]]
         
     release_numeric_keypad()
         [[
-            self->notify(TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD);    
+            self->notify(self,TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD);
         ]];
         
     # Function: acquire_transport_control_keys
@@ -56,7 +56,7 @@ global system [[TPContext*]]
     
     release_transport_control_keys()
         [[
-            self->notify(TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS);    
+            self->notify(self,TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS);
         ]];
     
     # Function: acquire_keyboard
@@ -80,7 +80,7 @@ global system [[TPContext*]]
     
     release_keyboard()
         [[
-            self->notify(TP_NOTIFICATION_RELEASE_KEYBOARD);    
+            self->notify(self,TP_NOTIFICATION_RELEASE_KEYBOARD);
         ]];
     
 }

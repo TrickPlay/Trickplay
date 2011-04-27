@@ -144,7 +144,7 @@ private:
 			ulog( "ACTION %d FINISHED WITH ERROR CODE %d" , a->id , action->ErrCode );
 			
     		g_idle_add_full( 
-    			G_PRIORITY_DEFAULT_IDLE , 
+    		    TRICKPLAY_PRIORITY ,
     			ActionResult::process, 
     			new ActionResult(  udata , action ),
     			ActionResult::destroy ); 
@@ -238,7 +238,7 @@ private:
 			g_assert( discovery );
 			
     		g_idle_add_full( 
-    			G_PRIORITY_DEFAULT_IDLE , 
+    		    TRICKPLAY_PRIORITY ,
     			SearchResult::process, 
     			new SearchResult(  udata , discovery ),
     			SearchResult::destroy ); 
@@ -246,7 +246,7 @@ private:
 		
 		static void finished( UserData::Handle * udata )
 		{
-	    	g_idle_add_full( G_PRIORITY_DEFAULT_IDLE , SearchResult::completed , udata , UserData::Handle::destroy );
+	    	g_idle_add_full( TRICKPLAY_PRIORITY , SearchResult::completed , udata , UserData::Handle::destroy );
 		}
 		
 	private:

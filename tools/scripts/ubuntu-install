@@ -1,0 +1,26 @@
+#!/bin/sh
+
+sudo apt-get install \
+    build-essential \
+    libglib2.0-dev \
+    libavahi-common-dev \
+    libavahi-core-dev \
+    libavahi-glib-dev \
+    libsqlite3-dev \
+    libcairo2-dev \
+    libclutter-1.0-dev \
+    libcurl4-openssl-dev \
+    libexpat1-dev \
+    libtiff4-dev \
+    libgif-dev \
+    libjson-glib-dev \
+    libclutter-gst-0.10-dev \
+    libupnp3-dev \
+    libossp-uuid-dev \
+    libreadline6-dev \
+    liburiparser-dev \
+    libsndfile1-dev \
+    libsoup2.4-dev \
+    cmake \
+    git-core
+

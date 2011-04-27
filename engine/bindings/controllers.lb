@@ -5,6 +5,9 @@ module controllers_module;
 #include "app.h"    
 #include "context.h"
 #include "controller_list.h"
+#include "images.h"
+#include "bitmap.h"
+#include "json.h"
 ]]
 
 #==============================================================================
@@ -37,17 +40,24 @@ public:
     virtual bool key_down(unsigned int key_code,unsigned long int unicode);
     virtual bool key_up(unsigned int key_code,unsigned long int unicode);
     virtual void accelerometer(double x,double y,double z);
-    virtual void click(int x,int y);
-    virtual void touch_down(int x,int y);
-    virtual void touch_move(int x,int y);  
-    virtual void touch_up(int x,int y);    
+    virtual bool pointer_move( int x, int y );
+    virtual bool pointer_button_down( int button , int x, int y );
+    virtual bool pointer_button_up( int button , int x, int y );
+    virtual void touch_down(int finger,int x,int y);
+    virtual void touch_move(int finger,int x,int y);
+    virtual void touch_up(int finger,int x,int y);
     virtual void ui_event(const String & parameters);
+    virtual void submit_picture( void * data, unsigned int size, const char * mime_type );
+    virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
     
+    bool declare_resource( const String & name , const String & uri );
+
 private:
     
     lua_State *                 L;
     Controller *                controller;
     ControllerListDelegate *    list;
+    String                      resource_group;
 };
 
 ]]
@@ -72,6 +82,8 @@ public:
     
     void proxy_disconnected(ControllerDelegate * proxy);
     
+    void start_pointer();
+
 private:
 
     lua_State *         L;
@@ -123,6 +135,18 @@ global controllers [[ControllerListDelegate*]]
             self->push_connected();
         ]];
     
+    /*
+       Function: start_pointer
+
+       A convenience function that tells all connected controllers to start
+       sending pointer events.
+    */
+
+    start_pointer()
+        [[
+            self->start_pointer();
+        ]];
+
     /*
     	Event: on_controller_connected
     	
@@ -206,15 +230,20 @@ interface controller [[ControllerDelegate*]]
             has_accelerometer=self->has_cap(TP_CONTROLLER_HAS_ACCELEROMETER);
         ]];
         
-    /*
-    	Property: has_clicks
-    	
-    	Whether the controller can send click events.
-    */
-    
     readonly bool has_clicks
         [[
-            has_clicks=self->has_cap(TP_CONTROLLER_HAS_CLICKS);
+            has_clicks=false;
+        ]];
+
+    /*
+        Property: has_pointer
+
+        Whether the controller can send pointer events.
+    */
+    
+    readonly bool has_pointer
+        [[
+            has_pointer=self->has_cap(TP_CONTROLLER_HAS_POINTER);
         ]];
     
     /*
@@ -272,6 +301,39 @@ interface controller [[ControllerDelegate*]]
             has_text_entry=self->has_cap(TP_CONTROLLER_HAS_TEXT_ENTRY);
         ]];
     
+    /*
+        Property: has_pictures
+        
+        Whether the controller supports pictures.
+    */
+           
+    readonly bool has_pictures
+        [[
+            has_pictures=self->has_cap(TP_CONTROLLER_HAS_PICTURES);
+        ]];
+    
+    /*
+        Property: has_audio_clips
+        
+        Whether the controller supports audio clips.
+    */
+           
+    readonly bool has_audio_clips
+        [[
+            has_audio_clips=self->has_cap(TP_CONTROLLER_HAS_AUDIO_CLIPS);
+        ]];
+    
+    /*
+        Property: has_advanced_ui
+
+        Whether the controller supports advanced UI functions.
+    */
+
+    readonly bool has_advanced_ui
+        [[
+            has_advanced_ui = self->has_cap( TP_CONTROLLER_HAS_ADVANCED_UI );
+        ]];
+
     /*
     	Property: ui_size
     	
@@ -389,39 +451,38 @@ interface controller [[ControllerDelegate*]]
         ]];
         
 
-	/*
-		Function: start_clicks
-		
-		Instructs the controller to start sending click events.
-		
-	    Returns:
-    	
-    		true - If it was successful.
-    		
-    		false - Otherwise.		
-	*/
-	
-    bool start_clicks()
+    /*
+        Function: start_pointer
+
+        Tells the controller to start sending pointer events.
+
+        Returns:
+
+            true - If it was successful.
+
+            false - Otherwise.
+    */
+
+    bool start_pointer()
         [[
-            result=self->get_controller()->start_clicks();
+            result=self->get_controller()->start_pointer();
         ]];
         
-	/*
-		Function: stop_clicks
-		
-		Tells the controller to stop sending click events.
-		
-    	
-    	Returns:
-    	
-    		true - If it was successful.
-    		
-    		false - Otherwise.
-	*/
-			        
-    bool stop_clicks()
+    /*
+        Function: stop_pointer
+
+        Tells the controller to stop sending pointer events.
+
+        Returns:
+
+            true - If it was successful.
+
+            false - Otherwise.
+    */
+
+    bool stop_pointer()
         [[
-            result=self->get_controller()->stop_clicks();
+            result=self->get_controller()->stop_pointer();
         ]];
     
     /*
@@ -675,7 +736,9 @@ interface controller [[ControllerDelegate*]]
             
             bool is_uri=false;
             
-            gchar * path=App::get(L)->normalize_path(url,&is_uri);
+            App * app = App::get(L);
+
+            gchar * path=app->normalize_path(url,&is_uri);
             
             if (path)
             {
@@ -687,7 +750,7 @@ interface controller [[ControllerDelegate*]]
                     final_uri="file://"+final_uri;
                 }
                 
-                result=self->get_controller()->declare_resource(resource,final_uri);
+                result=self->declare_resource(resource,final_uri);
             }
         ]];
         
@@ -716,7 +779,117 @@ interface controller [[ControllerDelegate*]]
             result=self->get_controller()->enter_text(label,text);    
         ]];
 
-	/*
+    /*
+        Function: submit_picture
+        
+        Tells the controller to send a picture. The app will receive the picture via <on_picture>.
+        
+        
+         
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+            
+    bool submit_picture( )
+        [[
+            result=self->get_controller()->submit_picture( );    
+        ]];
+
+    /*
+        Function: submit_audio_clip
+        
+        Tells the controller to send an audio clip. The app will receive the audio clip via <on_audio_clip>.
+        
+        
+         
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+            
+    bool submit_audio_clip( )
+        [[
+            result=self->get_controller()->submit_audio_clip( );    
+        ]];
+
+    /*
+        Function: advanced_ui_create
+    */
+      
+    bool advanced_ui_create( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_CREATE , value.stringify() );
+            }
+        ]];
+
+    /*
+        Function: advanced_ui_destroy
+    */
+
+    bool advanced_ui_destroy( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_DESTROY , value.stringify() );
+            }
+        ]];
+
+    /*
+        Function: advanced_ui_set
+    */
+
+    bool advanced_ui_set( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_SET , value.stringify() );
+            }
+        ]];
+
+    /*
+        Function: advanced_ui_get
+    */
+
+    bool advanced_ui_get( table payload )
+        [[
+            JSON::Value value = JSON::to_json( L , payload );
+
+            if ( ! value.is<JSON::Array>() )
+            {
+                result = false;
+            }
+            else
+            {
+                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_GET , value.stringify() );
+            }
+        ]];
+
+     /*
 		Event: on_disconnected
 		
 		This event is triggered when the controller is disconnected from
@@ -784,20 +957,64 @@ interface controller [[ControllerDelegate*]]
     callback on_accelerometer;
 
 	/*
-		Event: on_click
+		Event: on_pointer_move
 		
-		A click event.
+		A pointer move event.
 		
     	Arguments:
     	
     		controller - The controller that generated the event.
     		
     		x,y - The coordinates of the event.
+
+        Returns:
+
+            false - If you don't want the event to be propagated.
 	*/
 	    
-    callback on_click;
+    callback on_pointer_move;
 
-	/*
+    /*
+        Event: on_pointer_button_down
+
+        A pointer button was pressed.
+
+        Arguments:
+
+            controller - The controller that generated the event.
+
+            button - The button, starting at 0.
+
+            x,y - The coordinates of the event.
+
+        Returns:
+
+            false - If you don't want the event to be propagated.
+    */
+
+    callback on_pointer_button_down;
+
+    /*
+        Event: on_pointer_button_up
+
+        A pointer button was released.
+
+        Arguments:
+
+            controller - The controller that generated the event.
+
+            button - The button, starting at 0.
+
+            x,y - The coordinates of the event.
+
+        Returns:
+
+            false - If you don't want the event to be propagated.
+    */
+
+    callback on_pointer_button_up;
+
+    /*
 		Event: on_touch_down
 		
 		A touch down event.
@@ -806,6 +1023,8 @@ interface controller [[ControllerDelegate*]]
     	
     		controller - The controller that generated the event.
     		
+    		finger - The finger, starting at 0.
+
     		x,y - The coordinates of the event.
 	*/
 	    
@@ -820,6 +1039,8 @@ interface controller [[ControllerDelegate*]]
     	
     		controller - The controller that generated the event.
     		
+            finger - The finger, starting at 0.
+
     		x,y - The coordinates of the event.
 	*/
 
@@ -834,6 +1055,8 @@ interface controller [[ControllerDelegate*]]
     	
     		controller - The controller that generated the event.
     		
+            finger - The finger, starting at 0.
+
     		x,y - The coordinates of the event.
 	*/
 
@@ -854,6 +1077,21 @@ interface controller [[ControllerDelegate*]]
     */
     
     callback on_ui_event;
+
+
+    /*
+        Event: on_picture
+        
+        A picture event. This is sent when you use <submit_picture>.
+        
+        Arguments:
+            controller - The controller that generated the event.
+            
+            bitmap - The bitmap received from the controller.
+            
+    */
+    callback on_picture;
+    
 }
 
 #==============================================================================
@@ -876,6 +1114,11 @@ ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,C
 
 ControllerDelegate::~ControllerDelegate()
 {
+    if ( ! resource_group.empty() )
+    {
+        controller->drop_resource_group( resource_group );
+    }
+
     controller->remove_delegate(this);
     controller->unref();    
 }
@@ -939,38 +1182,134 @@ void ControllerDelegate::accelerometer(double x,double y,double z)
     invoke_controller_on_accelerometer(L,this,3,0);    
 }
 
-void ControllerDelegate::click(int x,int y)
+bool ControllerDelegate::pointer_move(int x,int y)
 {
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_click(L,this,2,0);        
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_move(L,this,2,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
 }
 
-void ControllerDelegate::touch_down(int x,int y)
+bool ControllerDelegate::pointer_button_down(int button,int x,int y)
+{
+    lua_pushnumber(L,button);
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_button_down(L,this,3,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
+}
+
+bool ControllerDelegate::pointer_button_up(int button,int x,int y)
+{
+    lua_pushnumber(L,button);
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_button_up(L,this,3,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
+}
+
+void ControllerDelegate::touch_down(int finger,int x,int y)
 {   
+    lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_down(L,this,2,0);        
+    invoke_controller_on_touch_down(L,this,3,0);
 }
 
-void ControllerDelegate::touch_move(int x,int y)
+void ControllerDelegate::touch_move(int finger, int x,int y)
 {
+    lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_move(L,this,2,0);            
+    invoke_controller_on_touch_move(L,this,3,0);
 }
 
-void ControllerDelegate::touch_up(int x,int y)
+void ControllerDelegate::touch_up(int finger, int x,int y)
 {
+    lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_up(L,this,2,0);            
+    invoke_controller_on_touch_up(L,this,3,0);
 }
 
 void ControllerDelegate::ui_event(const String & parameters)
 {
     lua_pushstring(L,parameters.c_str());
     invoke_controller_on_ui_event(L,this,1,0);
+}
+
+void ControllerDelegate::submit_picture( void * data, unsigned int size, const char * mime_type )
+{
+    Image * image = Image::decode(data, size, mime_type);
+    
+    if ( !image ) 
+    {
+        return;
+    }
+    
+    lua_getglobal( L , "Bitmap" );
+    lua_pushliteral( L , "" );
+    lua_call( L , 1 , 1 );
+
+    if ( Bitmap * bitmap = ( Bitmap * ) UserData::get_client( L , lua_gettop( L ) ) )
+    {
+        bitmap->set_image( image ); 
+        
+        invoke_controller_on_picture( L , this , 1 , 0 );
+    }
+    else
+    {
+        lua_pop( L , 1 );
+        
+        delete image;
+    }
+}
+
+void ControllerDelegate::submit_audio_clip( void * data, unsigned int size, const char * mime_type )
+{
+}
+
+bool ControllerDelegate::declare_resource( const String & name , const String & uri )
+{
+    if ( resource_group.empty() )
+    {
+        resource_group = App::get(L)->get_id();
+    }
+
+    return controller->declare_resource( name , uri , resource_group );
 }
 
 ]]
@@ -1089,6 +1428,17 @@ void ControllerListDelegate::push_connected()
         proxies[ d ] = UserData::Handle::make( L , -1 );
         
         lua_rawseti(L,-2,i++);
+    }
+}
+
+void ControllerListDelegate::start_pointer()
+{
+    ControllerList::ControllerSet controllers(list->get_controllers());
+
+    for(ControllerList::ControllerSet::iterator it=controllers.begin();
+        it!=controllers.end();++it)
+    {
+        (*it)->start_pointer();
     }
 }
 
