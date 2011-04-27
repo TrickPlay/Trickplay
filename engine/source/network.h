@@ -34,6 +34,8 @@ public:
         bool        redirect;
         String      user_agent;
 
+        void set_headers( const gchar * _headers );
+
     private:
 
         Request()
@@ -51,7 +53,9 @@ public:
         Response( const Response & other );
         const Response & operator =( const Response & other );
 
-        const char * get_header( const String & name );
+        const char * get_header( const String & name ) const;
+
+        void replace_body( gpointer data , gsize size );
 
         int             code;
         StringMultiMap  headers;
@@ -65,6 +69,8 @@ public:
 
     struct Settings
     {
+        Settings( TPContext * context );
+
         Settings( bool _debug = false, bool _ssl_verify_peer = true, const String & _ssl_cert_bundle = String() )
         :
             debug( _debug ),
@@ -110,7 +116,7 @@ public:
 
     typedef void ( *ResponseCallback )( const Response & response, gpointer user );
 
-    void perform_request_async( const Request & request, CookieJar * cookie_jar, ResponseCallback callback, gpointer user, GDestroyNotify notify );
+    guint perform_request_async( const Request & request, CookieJar * cookie_jar, ResponseCallback callback, gpointer user, GDestroyNotify notify );
 
     //.........................................................................
     // This performs the request asynchronously but invokes the callback every
@@ -124,7 +130,11 @@ public:
 
     typedef bool ( *IncrementalResponseCallback )( const Response & response, gpointer body, guint len, bool finished, gpointer user );
 
-    void perform_request_async_incremental( const Request & request, CookieJar * cookie_jar, IncrementalResponseCallback callback, gpointer user, GDestroyNotify notify );
+    guint perform_request_async_incremental( const Request & request, CookieJar * cookie_jar, IncrementalResponseCallback callback, gpointer user, GDestroyNotify notify , bool synchronized = false );
+
+    //.........................................................................
+
+    void cancel_async_request( guint id );
 
     //.........................................................................
     // Performs the request in the calling thread and returns the complete
@@ -135,6 +145,7 @@ public:
 private:
 
     class RequestClosure;
+    class IncrementalResponseClosure;
     class Event;
     class Thread;
 

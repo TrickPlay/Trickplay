@@ -1,10 +1,12 @@
 //
-//  TrickplayRemoteAppDelegate.h
-//  TrickplayRemote
+//  TrickplayController_v2AppDelegate.h
+//  TrickplayController_v2
 //
-//  Created by Kenny Ham on 1/21/10.
-//  Copyright __MyCompanyName__ 2010. All rights reserved.
+//  Created by Rex Fenley on 2/14/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
+
+#import <UIKit/UIKit.h>
 
 @interface AppDelegate : NSObject <UIApplicationDelegate> {
     
