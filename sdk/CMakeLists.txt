@@ -34,6 +34,7 @@ if (UNIX AND NOT APPLE)
 			"libreadline6"
 			"liburiparser1"
 			"libsndfile1"
+			"libsoup2.4-1"
 		)
 		
 		set( FIRST 1 )
