@@ -1,0 +1,202 @@
+[[
+#include <cstdlib>
+
+#include "util.h"
+#include "versions.h"
+#include "app.h"
+#include "context.h"
+#include "sysdb.h"
+]]
+
+/*
+    Global: trickplay
+
+    Provides information about the TrickPlay platform.
+*/
+
+global trickplay [[void*]]
+{
+    /*
+        Property: version
+
+        The version of the TrickPlay platform.
+    */
+
+    readonly string version
+        [[
+            String v( Util::format( "%d.%d.%d", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION ) );
+
+            version = v.c_str();
+        ]];
+
+    /*
+       Property: production
+
+       Whether this is a production release of the TrickPlay platform.
+    */
+
+    readonly bool production
+        [[
+#ifdef TP_PRODUCTION
+            production = true;
+#else
+            production = false;
+#endif
+        ]];
+
+    /*
+        Property: profiling
+
+        Whether this release was built with profiling enabled.
+    */
+
+    readonly bool profiling
+        [[
+#ifdef TP_PROFILING
+            profiling = true;
+#else
+            profiling = false;
+#endif
+        ]];
+
+    /*
+        Property: libraries
+
+        Returns a table containing the version strings of most libraries TrickPlay uses.
+    */
+
+    readonly table libraries
+        [[
+            lua_newtable( L );
+            int t = lua_gettop( L );
+
+            VersionMap v = get_versions();
+
+            for ( VersionMap::iterator it = v.begin(); it != v.end(); ++it )
+            {
+                lua_newtable( L );
+                int vt = lua_gettop( L );
+                int i = 1;
+
+                for ( StringVector::iterator vit = it->second.begin(); vit != it->second.end(); ++vit , ++i )
+                {
+                    lua_pushstring( L , vit->c_str() );
+                    lua_rawseti( L , vt , i );
+                }
+
+                lua_setfield( L , t , it->first.c_str() );
+            }
+        ]];
+
+    /*
+        Property: config
+
+        Returns a table containing the configuration parameters of TrickPlay.
+    */
+
+    readonly table config
+        [[
+            lua_newtable( L );
+
+            // In production, we return an empty table, since config is a bit
+            // private and could reveal paths to an app.
+
+#ifndef TP_PRODUCTION
+
+            StringMap config( App::get( L )->get_context()->get_config() );
+
+            for ( StringMap::const_iterator it = config.begin(); it != config.end(); ++it )
+            {
+                lua_pushstring( L , it->first.c_str() );
+                lua_pushstring( L , it->second.c_str() );
+                lua_rawset( L , -3 );
+            }
+
+#endif
+
+        ]];
+
+    /*
+       Property: system
+
+       Returns a table containing information about the system TrickPlay is running on,
+       such as its name, version, country and language.
+    */
+
+    readonly table system
+        [[
+            lua_newtable( L );
+
+            TPContext * ctx = App::get( L )->get_context();
+
+            lua_pushstring( L , "name" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_NAME , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "version" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_VERSION , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "country" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_COUNTRY , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "language" );
+            lua_pushstring( L , ctx->get( TP_SYSTEM_LANGUAGE , "" ) );
+            lua_rawset( L , -3 );
+
+            lua_pushstring( L , "uuid" );
+            lua_pushstring( L , ctx->get_db()->get_string( TP_DB_UUID , "" ).c_str() );
+            lua_rawset( L , -3 );
+        ]];
+
+    /*
+        Function: check_version
+
+        This functions lets you easily check whether the TrickPlay version is
+        higher or equal to one you pass in.
+
+        Arguments:
+
+            version - A string to check for, like "1.15.0".
+
+        Returns:
+
+            true - The TrickPlay version is equal to or higher than the one passed in.
+
+            false - The TrickPlay version is lower than the one passed in.
+    */
+
+    bool check_version( string version )
+        [[
+            int major = 0;
+            int minor = 0;
+            int micro = 0;
+
+            gchar * * parts = g_strsplit( version , "." , 3 );
+
+            guint count = g_strv_length( parts );
+
+            if ( count >= 1 )
+            {
+                major = atoi( parts[ 0 ] );
+
+                if ( count >= 2 )
+                {
+                    minor = atoi( parts[ 1 ] );
+
+                    if ( count >= 3 )
+                    {
+                        micro = atoi( parts[ 2 ] );
+                    }
+                }
+            }
+
+            g_strfreev( parts );
+
+            result = ( TP_MAJOR_VERSION > (major) ||
+             (TP_MAJOR_VERSION == (major) && TP_MINOR_VERSION > (minor)) ||
+             (TP_MAJOR_VERSION == (major) && TP_MINOR_VERSION == (minor) && TP_PATCH_VERSION >= (micro)));
+        ]];
+
+}

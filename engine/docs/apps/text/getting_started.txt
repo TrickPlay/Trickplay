@@ -173,10 +173,9 @@ Topic: Localized Stuff
 
 TrickPlay helps you localize resources. TrickPlay is aware of two pieces of information,
 a language code and a country code. The language code is a two letter, lower case
-ISO-639-1 code. See <http://www.loc.gov/standards/iso639-2/php/code_list.php> for the list.
+ISO-639-1 code. See <the complete list here at http://www.loc.gov/standards/iso639-2/php/code_list.php>.
 The country code is a two letter, upper case, ISO-3166-1-alpha-2 code.
-See <http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm>
-for the complete list.
+See <the full list here at http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm>.
 
 In your app bundle, you can have a special directory called "localized". There,
 you can have separate directories for each language and then subdirectories for each

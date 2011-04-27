@@ -198,7 +198,7 @@ public:
     
 private:
     
-    static void profile_change_handler(const char *,void * self)
+    static void profile_change_handler(TPContext *,const char *,void * self)
     {
 		// We just close the current database - so that a new one will be
 		// opened when needed using the new profile id
