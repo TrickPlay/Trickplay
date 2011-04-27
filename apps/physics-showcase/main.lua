@@ -25,7 +25,7 @@ lottery.extra.blur = dummy
 lottery.extra.unblur = dummy
 lottery.extra.saturate = dummy
 lottery.extra.desaturate = dummy
-balloon.extra.pageturn = dummy
+lottery.extra.pageturn = dummy
 
 screen:add( focus , lottery , balloon )
 lottery:pageturn(1.0)
