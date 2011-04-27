@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.tests.benchmark",
+    release     = "1",
+    version     = "1.0",
+    name        = "Benchmark",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc."
+}
+

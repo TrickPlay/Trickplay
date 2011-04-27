@@ -130,7 +130,7 @@ extern "C" {
 /*
     Section: Global Interface    
 */
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Constants: Media Player States
     
@@ -147,7 +147,7 @@ extern "C" {
 
 #define TP_MEDIAPLAYER_ANY_STATE    (TP_MEDIAPLAYER_IDLE|TP_MEDIAPLAYER_LOADING|TP_MEDIAPLAYER_PLAYING|TP_MEDIAPLAYER_PAUSED)
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Constants: Media Types
     
@@ -160,7 +160,7 @@ extern "C" {
 #define TP_MEDIA_TYPE_VIDEO         0x02
 #define TP_MEDIA_TYPE_AUDIO_VIDEO   (TP_MEDIA_TYPE_AUDIO|TP_MEDIA_TYPE_VIDEO)
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Constants: Basic Errors
     
@@ -184,12 +184,13 @@ extern "C" {
 #define TP_MEDIAPLAYER_ERROR_INVALID_URI        -5
 #define TP_MEDIAPLAYER_ERROR_NA                 -6
 
-//-----------------------------------------------------------------------------
-// Forward declarations
+/*-----------------------------------------------------------------------------
+   Forward declarations
+*/
 
 typedef struct TPMediaPlayer    TPMediaPlayer;
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 
 /*
     Function: TPMediaPlayerConstructor
@@ -340,7 +341,7 @@ typedef struct TPMediaPlayer    TPMediaPlayer;
         const char * name,
         const char * value);
 
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------*/
 /*
     Struct: TPMediaPlayer
 */    
@@ -986,4 +987,4 @@ struct TPMediaPlayer
 }
 #endif 
 
-#endif  // _TRICKPLAY_MEDIAPLAYER_H
+#endif  /* _TRICKPLAY_MEDIAPLAYER_H */
