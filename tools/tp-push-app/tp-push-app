@@ -8,6 +8,12 @@ import json
 import sys
 import hashlib
 import socket
+import urllib2
+
+
+#------------------------------------------------------------------------------
+
+message = {}
 
 file_list = []
 
@@ -32,91 +38,63 @@ except:
     sys.exit( "Missing 'app' file" )
 
 app_file = open( file_list[ app_index ] )
-app_data = app_file.read()
+message[ "app" ] = app_file.read()
 app_file.close()
 
-messages = []
+message[ "files" ] = []
 
-messages.append( "APP %d %s\n" % ( len( file_list ) , app_data.replace( "\n" , " " ).replace( "\r" , " " ) ) )
-
+file_map = {}
 
 for file in file_list:
     
     f = open( file )
-    m = hashlib.md5()
-    m.update( f.read() )
-    m = m.hexdigest()
+    contents = f.read()
     f.close()
+    m = hashlib.md5()
+    m.update( contents )
+    m = m.hexdigest()
     
-    messages.append( "%s %s\n" % ( m , file[ len( prefix ) : ] ) )
+    short_name = file[ len( prefix ) : ]
     
+    file_map[ short_name ] = file
     
-        
+    message[ "files" ].append( [ short_name , m , len( contents ) ] )
+
+#------------------------------------------------------------------------------
+
+response = {}
 
 try:
     
     print( "Connecting..." )
-    s = socket.create_connection( ( "localhost" , 8888 ) )
-    s.setblocking(1)
-    
+    request = urllib2.Request( "http://localhost:8888/push" , json.dumps( message ) , { "Content-Type" : "application/json" } )
+    response = urllib2.urlopen( request )
+    response = json.load( response )
+   
 except:
     
     sys.exit( "Connection failed" )
 
-
-try:
+while not response[ "done" ]:
     
-    print( "Sending file list..." )
-    s.sendall( "".join( messages ) )
-    
-except:
-    
-    sys.exit( "Failed to send file list" )
-    
-
-try:
-    
-    print( "Waiting for response..." )
-    server = s.makefile()
-    parts = server.readline().strip().split()
-    
-except:
-    
-    sys.exit( "Failed to read response" )
-
-
-if len(parts) == 0:
-    sys.exit( "Invalid response" )
-if parts[0] == "DONE":
-    print( "Nothing to update" )
-else:
-    to_send = []
-    if parts[0]=="SENDALL":
-        to_send = [i for i in range(0,len(file_list))]
-    else:
-        del parts[0:1]
-        to_send = [int(s) for s in parts]
+    try:
         
-    for i in to_send:
-        file = open( file_list[ i ] )
-        data = file.read()
-        file.close()
-        print( "Sending %s" % file_list[ i ][ len( prefix ) : ] )
-        server.write( "%d\n" % len( data ) )
-        server.write( data )
-        server.flush()
-
-        
-        
-
-
-
-
-
+        file_name = file_map[ response[ "file" ] ]
+        print( "Sending %s" % response[ "file" ] )
+        f = open( file_name )
+        contents = f.read()
+        f.close()
     
-
-
+        request = urllib2.Request( "http://localhost:8888" + response[ "url" ] , contents , { "Content-Type" : "application/octet-stream" } )
+        response = json.load( urllib2.urlopen( request ) )
+        
+    except:
+        
+        sys.exit( "Failed to send files" )
+    
+    
+print( response[ "msg" ] )
 
         
 
-
+#------------------------------------------------------------------------------

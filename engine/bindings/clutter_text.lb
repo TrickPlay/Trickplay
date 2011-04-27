@@ -286,7 +286,8 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: single_line
 		
-		Whether the text should remain as a single line and be clipped to its width.
+		Whether the text should remain as a single line.
+		This only takes effect if the text is <editable>.
 	*/
     bool single_line
 		[[single_line=clutter_text_get_single_line_mode(CLUTTER_TEXT(self));]]
