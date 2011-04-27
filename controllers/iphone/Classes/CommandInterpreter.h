@@ -30,6 +30,7 @@
 - (void)do_SA:(NSArray *)args;
 - (void)do_PA:(NSArray *)args;
 - (void)do_SS:(NSArray *)args;
+- (void)do_PS:(NSArray *)args;
 
 /** Advanced UI junk **/
 - (void)do_UX:(NSArray *)args;

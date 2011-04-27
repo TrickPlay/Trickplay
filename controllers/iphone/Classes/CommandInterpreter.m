@@ -157,6 +157,8 @@
         [delegate do_PA:args];
     } else if ([key compare:@"SS"] == NSOrderedSame) {
         [delegate do_SS:args];
+    } else if ([key compare:@"PS"] == NSOrderedSame) {
+        [delegate do_PS:args];
     } else if ([key compare:@"UX"] == NSOrderedSame) {
         [delegate do_UX:args];
     } else if ([key compare:@"WM"] == NSOrderedSame) {

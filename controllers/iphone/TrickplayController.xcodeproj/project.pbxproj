@@ -30,6 +30,10 @@
 		CD404C281353DCF10021D36C /* CameraViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD404C261353DCE50021D36C /* CameraViewController.xib */; };
 		CD404C2A1353E18E0021D36C /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD404C291353E18D0021D36C /* MobileCoreServices.framework */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
+		CD6BC36513678D6F00CF1973 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6BC36313678D6F00CF1973 /* AudioStreamer.m */; };
+		CD6BC36F136794CD00CF1973 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */; };
+		CD6BC371136794EA00CF1973 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC370136794EA00CF1973 /* MediaPlayer.framework */; };
+		CD6BC3731367950700CF1973 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC3721367950700CF1973 /* CFNetwork.framework */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
 		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
@@ -44,7 +48,6 @@
 		CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */; };
 		CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEBC130C734B00A14307 /* TouchController.m */; };
 		CDFEC0FC13147A6A00A14307 /* AudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */; };
-		CDFEC10013147E9A00A14307 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */; };
 		CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC1271314B98100A14307 /* ResourceManager.m */; };
 		CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC15B1315929800A14307 /* AsyncImageView.m */; };
 		CDFEC3F7131F1BB200A14307 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */; };
@@ -87,6 +90,11 @@
 		CD404C261353DCE50021D36C /* CameraViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CameraViewController.xib; sourceTree = "<group>"; };
 		CD404C291353E18D0021D36C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
+		CD6BC36313678D6F00CF1973 /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioStreamer.m; sourceTree = "<group>"; };
+		CD6BC36413678D6F00CF1973 /* AudioStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioStreamer.h; sourceTree = "<group>"; };
+		CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		CD6BC370136794EA00CF1973 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		CD6BC3721367950700CF1973 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
@@ -109,8 +117,6 @@
 		CDFEBEBC130C734B00A14307 /* TouchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TouchController.m; sourceTree = "<group>"; };
 		CDFEC0FA13147A6A00A14307 /* AudioController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioController.h; sourceTree = "<group>"; };
 		CDFEC0FB13147A6A00A14307 /* AudioController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioController.m; sourceTree = "<group>"; };
-		CDFEC0FE13147E9A00A14307 /* AudioStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioStreamer.h; sourceTree = "<group>"; };
-		CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioStreamer.m; sourceTree = "<group>"; };
 		CDFEC1261314B98100A14307 /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResourceManager.h; sourceTree = "<group>"; };
 		CDFEC1271314B98100A14307 /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ResourceManager.m; sourceTree = "<group>"; };
 		CDFEC15A1315929800A14307 /* AsyncImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncImageView.h; sourceTree = "<group>"; };
@@ -126,6 +132,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD6BC3731367950700CF1973 /* CFNetwork.framework in Frameworks */,
+				CD6BC371136794EA00CF1973 /* MediaPlayer.framework in Frameworks */,
+				CD6BC36F136794CD00CF1973 /* AudioToolbox.framework in Frameworks */,
 				CD404C2A1353E18E0021D36C /* MobileCoreServices.framework in Frameworks */,
 				CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
@@ -196,6 +205,9 @@
 			isa = PBXGroup;
 			children = (
 				CDFEC57E1320608F00A14307 /* Other */,
+				CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */,
+				CD6BC370136794EA00CF1973 /* MediaPlayer.framework */,
+				CD6BC3721367950700CF1973 /* CFNetwork.framework */,
 				CD404C291353E18D0021D36C /* MobileCoreServices.framework */,
 				CDF509C813469721009870EC /* QuartzCore.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
@@ -307,8 +319,8 @@
 		CDFEC0FD13147E6400A14307 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
-				CDFEC0FE13147E9A00A14307 /* AudioStreamer.h */,
-				CDFEC0FF13147E9A00A14307 /* AudioStreamer.m */,
+				CD6BC36313678D6F00CF1973 /* AudioStreamer.m */,
+				CD6BC36413678D6F00CF1973 /* AudioStreamer.h */,
 				CDFEC0FA13147A6A00A14307 /* AudioController.h */,
 				CDFEC0FB13147A6A00A14307 /* AudioController.m */,
 			);
@@ -410,7 +422,6 @@
 				CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */,
 				CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */,
 				CDFEC0FC13147A6A00A14307 /* AudioController.m in Sources */,
-				CDFEC10013147E9A00A14307 /* AudioStreamer.m in Sources */,
 				CDFEC1281314B98100A14307 /* ResourceManager.m in Sources */,
 				CDFEC15C1315929800A14307 /* AsyncImageView.m in Sources */,
 				CDFEC3F7131F1BB200A14307 /* AppBrowserViewController.m in Sources */,
@@ -420,6 +431,7 @@
 				CD404C18134BF51D0021D36C /* TrickplayImage.m in Sources */,
 				CD404C1B134FF6DE0021D36C /* TrickplayText.m in Sources */,
 				CD404C271353DCF00021D36C /* CameraViewController.m in Sources */,
+				CD6BC36513678D6F00CF1973 /* AudioStreamer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

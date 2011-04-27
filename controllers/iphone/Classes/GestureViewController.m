@@ -91,10 +91,15 @@
     return socketManager != nil;
 }
 
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in GestureView");
+- (void)handleDroppedConnection {
+    [audioController destroyAudioStreamer];
     [socketManager release];
     socketManager = nil;
+}
+
+- (void)socketErrorOccurred {
+    NSLog(@"Socket Error Occurred in GestureView");
+    [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
     if (self.navigationController.visibleViewController == self) {
         if (!viewDidAppear) {
@@ -109,8 +114,7 @@
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in GestureView");
-    [socketManager release];
-    socketManager = nil;
+    [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
     if (self.navigationController.visibleViewController == self) {
         if (!viewDidAppear) {
@@ -158,11 +162,16 @@
 
 - (void)do_SS:(NSArray *)args {
     NSMutableDictionary *audioInfo = [resourceManager getResourceInfo:[args objectAtIndex:0]];
+    NSLog(@"Playing audio %@", audioInfo);
     // Add the amount of times to loop this sound file to the info
     NSString *loopValue = [args objectAtIndex:1];
     [audioInfo setObject:loopValue forKey:@"loop"];
     
     [audioController playSoundFile:[audioInfo objectForKey:@"name"] filename:[audioInfo objectForKey:@"link"]];
+}
+
+- (void)do_PS:(NSArray *)args {
+    [audioController destroyAudioStreamer];
 }
 
 //--Multiple Choice junk
