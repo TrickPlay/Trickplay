@@ -87,7 +87,7 @@ void Server::close_connection( gpointer connection )
 
 //------------------------------------------------------------------------------
 
-bool Server::write( gpointer connection, const char * data )
+bool Server::write( gpointer connection, const char * data , gssize size )
 {
 #if GLIB_CHECK_VERSION(2,22,0)
 
@@ -98,7 +98,7 @@ bool Server::write( gpointer connection, const char * data )
 
     GError * error = NULL;
 
-    g_output_stream_write_all( output_stream, data, strlen( data ), NULL, NULL, &error );
+    g_output_stream_write_all( output_stream, data, size < 0 ? strlen( data ) : size , NULL, NULL, &error );
 
     if ( error )
     {

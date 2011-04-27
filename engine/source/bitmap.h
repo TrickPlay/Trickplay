@@ -20,6 +20,10 @@ public:
 
     static Image * get_image( lua_State * L , int index );
 
+    // Bitmap takes ownership of the image
+
+    void set_image( Image * image );
+
 protected:
 
     virtual ~Bitmap();

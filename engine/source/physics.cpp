@@ -125,22 +125,44 @@ void World::step( float32 time_step , int _velocity_iterations , int _position_i
 
 //.............................................................................
 
-gboolean World::on_idle( gpointer me )
+void World::idle()
 {
-    static float32 sixty = 1.0f / 60.0f;
+    static gdouble sixty = 1.0 / 60.0;
 
-    World * self = ( World * ) me;
-
-    float32 seconds = g_timer_elapsed( self->timer , NULL );
+    gdouble seconds = g_timer_elapsed( timer , NULL );
 
     if ( seconds < sixty )
     {
-        return TRUE;
+        return;
     }
 
-    g_timer_start( self->timer );
+    int iterations = seconds / sixty;
 
-    self->step( seconds , self->velocity_iterations , self->position_iterations );
+    seconds = seconds / ( seconds / sixty );
+
+    g_timer_start( timer );
+
+    UserData * ud = UserData::get_from_client( this );
+
+    for( int i = 0; i < iterations; ++i )
+    {
+        step( seconds , velocity_iterations , position_iterations );
+
+        if ( ud )
+        {
+            lua_pushnumber( L , seconds );
+            lua_pushinteger( L , i );
+
+            ud->invoke_callback( "on_step" , 2 , 0 );
+        }
+    }
+}
+
+//.............................................................................
+
+gboolean World::on_idle( gpointer me )
+{
+    ( ( World * ) me )->idle();
 
     return TRUE;
 }

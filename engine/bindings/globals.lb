@@ -889,7 +889,7 @@ globals
                     --nargs;
                 }
 
-                lb_checkfunction( L , f );
+                (void)lb_checkfunction( L , f );
 
                 --nargs;
 
@@ -978,6 +978,24 @@ globals
 	        g_get_current_time( & tv );
 
 	        result = tv.tv_sec + double( tv.tv_usec ) / G_USEC_PER_SEC;
+        ]];
+
+	/*
+	    Function: timestamp
+
+	    Returns the number of milliseconds elapsed since Trickplay was started.
+	*/
+
+	double timestamp()
+        [[
+            result = timestamp();
+        ]];
+
+	udata newudata( table metatable )
+        [[
+            lua_newuserdata( L , 4 );
+	        lua_pushvalue( L , metatable );
+	        lua_setmetatable( L , -2 );
         ]];
 
 	table split( string source , string delimiter , int max_tokens = 0 )
