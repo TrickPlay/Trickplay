@@ -92,6 +92,9 @@
 #import "CameraViewController.h"
 
 
+#define CAMERA_BUTTON_TITLE "Camera"
+#define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
+
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
 CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     BOOL viewDidAppear;
@@ -110,6 +113,8 @@ CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, U
     
     NSMutableArray *multipleChoiceArray;
     UIActionSheet *styleAlert;
+    
+    UIActionSheet *cameraActionSheet;
     
     ResourceManager *resourceManager;
     

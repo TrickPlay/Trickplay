@@ -31,14 +31,31 @@
         NSLog(@"anchorpoint after: %f, %f", view.layer.anchorPoint.x, view.layer.anchorPoint.y);
         */
         
-        [self setColorFromArgs:args];
-        [self setBorderColorFromArgs:args];
-        [self setBorderWidthFromArgs:args];
-        
         [self addSubview:view];
     }
     
     return self;
+}
+
+
+/**
+ * Getter function
+ */
+
+- (void)getValuesFromArgs:(NSDictionary *)args {
+    [super getValuesFromArgs:args];
+}
+
+/**
+ * Setter function
+ */
+
+- (void)setValuesFromArgs:(NSDictionary *)args {
+    [super setValuesFromArgs:args];
+    
+    [self setColorFromArgs:args];
+    [self setBorderColorFromArgs:args];
+    [self setBorderWidthFromArgs:args];
 }
 
 

@@ -30,6 +30,7 @@
 - (void)setRotationsFromArgs:(NSDictionary *)args;
 - (void)setOpacityFromArgs:(NSDictionary *)args;
 
+- (void)getValuesFromArgs:(NSDictionary *)args;
 - (void)setValuesFromArgs:(NSDictionary *)args;
 
 @end

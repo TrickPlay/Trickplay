@@ -181,12 +181,15 @@
     //multiple choice alertview
     //<id>,<text> pairs
     unsigned theindex = 1;
+    
     if (styleAlert != nil)
     {
         [styleAlert release];
         styleAlert = nil;
-        styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
     }
+    
+    styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+    
     styleAlert.title = windowtitle;
     [multipleChoiceArray removeAllObjects];
     while (theindex < [args count]) {
@@ -205,14 +208,23 @@
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	//AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    NSLog(@"Dismiss the alertview");
-	if (buttonIndex < 5)
-	{
-		NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
-		[socketManager sendData:[sentData UTF8String]
+	if (actionSheet == styleAlert) {
+        NSLog(@"Dismiss the alertview");
+        if (buttonIndex < 5) {
+            NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
+            [socketManager sendData:[sentData UTF8String]
                   numberOfBytes:[sentData length]];
-	}
+        }
+    } else if (actionSheet == cameraActionSheet) {
+        if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE]] == NSOrderedSame) {
+            
+            [camera startCamera];
+            
+        } else if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE]] == NSOrderedSame) {
+            
+            [camera openLibrary];
+        }
+    }
 }
 
 //--Text input stuff
@@ -424,12 +436,24 @@
 //-------------------- Camera stuff ----------------------------
 
 - (void)do_PI:(NSArray *)args {
-    if (!camera) {
-        camera = [[CameraViewController alloc] initWithNibName:@"CameraViewController" bundle:nil];
+    // Give the user the option to choose Camera or Photo Library
+    if (cameraActionSheet)
+    {
+        [cameraActionSheet release];
+        cameraActionSheet = nil;
     }
+    cameraActionSheet = [[UIActionSheet alloc] initWithTitle:@"Photo Options" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
+    
+    cameraActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+    [cameraActionSheet showInView:self.view];
+    
+    // Start the camera in the background
+    if (camera) {
+        [camera release];
+    }
+    camera = [[CameraViewController alloc] initWithView:self.view];
+    
     [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
-
-    [self.navigationController pushViewController:camera animated:YES];
 }
 
 - (void)finishedPickingImage {
@@ -525,9 +549,11 @@
     
     multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
     
-    UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc]
-								  initWithTitle:NSLocalizedString(@"Exit", @"")
-								  style:UIBarButtonItemStyleBordered
+    
+    
+    UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc] 
+                                  initWithTitle:NSLocalizedString(@"Exit", @"")
+                                  style:UIBarButtonItemStyleBordered
 								  target:self action:@selector(exitTrickplayApp:)] autorelease]; 
 	self.navigationItem.rightBarButtonItem = exitItem;
     
@@ -540,6 +566,13 @@
     }
     
     viewDidAppear = YES;
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    if (camera) {
+        [camera release];
+        camera = nil;
+    }
 }
 //*/
 
@@ -597,10 +630,17 @@
     if (styleAlert) {
         [styleAlert release];
     }
+    if (cameraActionSheet)
+    {
+        [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
+        [cameraActionSheet release];
+    }
     if (camera) {
         [camera release];
     }
-    [multipleChoiceArray release];
+    if (multipleChoiceArray) {
+        [multipleChoiceArray release];
+    }
     [loadingIndicator release];
     [theTextField release];
     [backgroundView release];

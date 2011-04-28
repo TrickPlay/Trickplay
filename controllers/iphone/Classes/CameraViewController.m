@@ -11,9 +11,18 @@
 
 @implementation CameraViewController
 
-@synthesize cameraButton;
-@synthesize imageLibraryButton;
 @synthesize delegate;
+
+- (id)initWithView:(UIView *)aView {
+    if ((self = [super init])) {
+        self.view = aView;
+        
+        imagePickerController = [[UIImagePickerController alloc] init];
+        imagePickerController.delegate = self;
+    }
+    
+    return self;
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -22,7 +31,6 @@
         // Custom initialization
         imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.delegate = self;
-        backgroundView = nil;
     }
     return self;
 }
@@ -105,27 +113,6 @@
 }
 
 
-#pragma mark - View lifecycle
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-}
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-
 #pragma mark -
 #pragma mark Presenting and dissmissing the camera
 
@@ -153,11 +140,11 @@
             [popOverController release];
             popOverController = nil;
         }
-    } else {
+    } else if (picker.parentViewController) {
         [[picker parentViewController] dismissModalViewControllerAnimated:NO];
     }
     
-    [self.navigationController popViewControllerAnimated:YES];
+    //[self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark -
@@ -168,7 +155,7 @@
     NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
     UIImage *originalImage, *editedImage, *imageToUse;
     
-    // Handle a still image picked form a photo album
+    // Handle a still image picked from a photo album
     if (CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
         editedImage = (UIImage *)[info objectForKey:UIImagePickerControllerEditedImage];
         originalImage = (UIImage *)[info objectForKey:UIImagePickerControllerOriginalImage];
@@ -179,12 +166,12 @@
             imageToUse = originalImage;
         }
         
+        /** for Testing
         if (backgroundView) {
             [backgroundView removeFromSuperview];
             [backgroundView release];
         }
-        
-        /**for Testing
+         
         CGFloat
         x = self.view.frame.origin.x,
         y = self.view.frame.origin.y,
@@ -216,7 +203,7 @@
 #pragma mark - Button press handlers
 #pragma mark --
 
-- (IBAction)startCamera:(id)sender {
+- (void)startCamera {
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO) {
         return;
     }
@@ -232,7 +219,7 @@
     [self presentTheCamera];
 }
 
-- (IBAction)openLibrary:(id)sender {
+- (void)openLibrary {
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary] == NO) {
         return;
     }
@@ -242,12 +229,11 @@
     // Displays saved pictures and movies, if both are available
     imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     
-    // Hids the controls for image manipulation for now
+    // Hides the controls for image manipulation for now
     imagePickerController.allowsEditing = NO;
     
     [self presentTheCamera];
 }
-
 
 
 - (void)dealloc {
@@ -257,12 +243,6 @@
     
     [imagePickerController release];
     imagePickerController = nil;
-    self.imageLibraryButton = nil;
-    self.cameraButton = nil;
-    if (backgroundView) {
-        [backgroundView release];
-    }
-    backgroundView = nil;
     
     if (host) {
         [host release];
@@ -278,10 +258,6 @@
             [connection cancel];
         }
         [connections release];
-    }
-    if (popOverController) {
-        [popOverController dismissPopoverAnimated:NO];
-        [popOverController release];
     }
     
     [super dealloc];

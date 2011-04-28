@@ -64,6 +64,20 @@
 
 
 /**
+ * Creates TextFields and stores them
+ */
+
+- (void)createText:(NSString *)textID withArgs:(NSDictionary *)args {
+    TrickplayText *text = [[[TrickplayText alloc] initWithID:textID args:args] autorelease];
+    
+    NSLog(@"Text created: %@", text);
+    [textFields setObject:text forKey:textID];
+    
+    [view addSubview:text];
+}
+
+
+/**
  * Object creation function.
  */
 
@@ -81,6 +95,9 @@
                          withArgs:object];
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
             [self createImage:(NSString *)[object objectForKey:@"id"]
+                     withArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
+            [self createText:(NSString *)[object objectForKey:@"id"]
                      withArgs:object];
         }
     }
@@ -104,6 +121,9 @@
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
             [[images objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
             [images removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
+            [[textFields objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
+            [textFields removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
         }
     }
 }
@@ -122,7 +142,27 @@
             [(TrickplayUIElement *)[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
             [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
+            [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
         }
+    }
+}
+
+
+/**
+ * Object Getter function.
+ */
+
+- (void)getValuesForObjects:(NSArray *)JSON_Array {
+    for (NSDictionary *object in JSON_Array) {
+        // Set values for class specific properties
+        if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
+            [(TrickplayUIElement *)[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
+            [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
+            [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
+        }    
     }
 }
 

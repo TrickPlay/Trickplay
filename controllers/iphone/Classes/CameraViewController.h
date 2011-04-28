@@ -19,12 +19,9 @@
 @end
 
 @interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
-    UIButton *cameraButton;
-    UIButton *imageLibraryButton;
     
     UIImagePickerController *imagePickerController;
     UIPopoverController *popOverController;
-    UIImageView *backgroundView;
     
     NSInteger port;
     NSString *host;
@@ -35,12 +32,12 @@
     id <CameraViewControllerDelegate> delegate;
 }
 
-@property (nonatomic, retain) IBOutlet UIButton *cameraButton;
-@property (nonatomic, retain) IBOutlet UIButton *imageLibraryButton;
 @property (assign) id <CameraViewControllerDelegate> delegate;
 
-- (IBAction)startCamera:(id)sender;
-- (IBAction)openLibrary:(id)sender;
+- (id)initWithView:(UIView *)aView;
+
+- (void)startCamera;
+- (void)openLibrary;
 
 - (void)setupService:(NSInteger)thePort host:(NSString *)theHost path:(NSString *)thePath delegate:theDelegate;
 
