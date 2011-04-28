@@ -457,6 +457,72 @@ function editor.h_guideline()
 end
 
 
+
+function editor.container_selected(obj, x, y)
+
+
+
+     if obj.extra.type ~= "LayoutManager" then 
+          obj_border = Rectangle{}
+          obj_border.name = obj.name.."border"
+          obj_border.color = {0,0,0,0}
+          obj_border.border_color = {0,255,0,255}
+          obj_border.border_width = 2
+          obj_border.position = obj.position
+          obj_border.anchor_point = obj.anchor_point
+          obj_border.x_rotation = obj.x_rotation
+          obj_border.y_rotation = obj.y_rotation
+          obj_border.z_rotation = obj.z_rotation
+          obj_border.size = obj.size
+          if(obj.scale ~= nil) then 
+               obj_border.scale = obj.scale
+          end 
+          if (screen:find_child(obj.name.."a_m") ~= nil) then 
+     	     screen:remove(screen:find_child(obj.name.."a_m"))
+          end
+          anchor_mark= ui.factory.draw_anchor_pointer()
+          if(obj.extra.is_in_group == true)then 
+               anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
+          else 
+               anchor_mark.position = {obj.x, obj.y, obj.z}
+          end
+          anchor_mark.name = obj.name.."a_m"
+          screen:add(anchor_mark)
+          screen:add(obj_border)
+          obj.extra.selected = true
+          table.insert(selected_objs, obj_border.name)
+     else -- Layout Manager Tile border
+	  local col , row=  obj:r_c_from_abs_position(x,y)
+	  local tile_x, tile_y
+
+	  if row and col then 
+		tile_x = obj.x + obj.cell_w * (col - 1) + obj.cell_spacing * (col - 1)    
+		tile_y = obj.y + obj.cell_h * (row - 1) + obj.cell_spacing * (row - 1)      
+	  end 
+
+	  obj_border = Rectangle{}
+          obj_border.name = obj.name.."border"
+          obj_border.color = {0,0,0,0}
+          obj_border.border_color = {0,255,0,255}
+          obj_border.border_width = 2
+          obj_border.position = {tile_x, tile_y, 0} 
+          obj_border.anchor_point = obj.anchor_point
+          obj_border.x_rotation = obj.x_rotation
+          obj_border.y_rotation = obj.y_rotation
+          obj_border.z_rotation = obj.z_rotation
+          obj_border.size = {obj.cell_w, obj.cell_h}
+	  obj_border.extra.r_c = {row, col}
+
+          if(obj.scale ~= nil) then 
+               obj_border.scale = obj.scale
+          end 
+          screen:add(obj_border)
+          obj.extra.selected = true
+          table.insert(selected_objs, obj_border.name)
+     end 
+end  
+
+
 function editor.selected(obj, call_by_inspector)
 
      if(obj.type ~= "Video") then 
@@ -585,7 +651,8 @@ function editor.close()
 	end 
 
 	if(screen:find_child("mouse_pointer") ~= nil) then 
-             screen:remove(mouse_pointer) 
+             --screen:remove(mouse_pointer) 
+             screen:remove(screen:find_child("mouse_pointer")) 
 	end 
 	
 	if(table.getn(g.children) ~= 0) then 
@@ -1150,6 +1217,10 @@ function editor.the_open()
     	end 
 
         screen:add(dialog)
+	if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+	end
+
 	
 end 
 
@@ -1404,6 +1475,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	        end 
 		return true
         end 
+
+
+	if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+	end
+
 
 end
 
@@ -1763,6 +1840,10 @@ function editor.save(save_current_f, save_backup_f)
      end 	
 
      g:add(screen_rect) 
+     if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+     end
+
 end  
 
 function editor.rectangle(x, y)
@@ -1799,6 +1880,8 @@ function editor.rectangle(x, y)
 end 
 
 function editor.rectangle_done(x,y)
+
+	if ui.rect == nil then return end 
         ui.rect.size = { abs(x-rect_init_x), abs(y-rect_init_y) }
         if(x-rect_init_x < 0) then
            ui.rect.x = x
@@ -3165,7 +3248,7 @@ function editor.hspace()
 	      b.x = f.x + f.w + space 
 	      if(b.x > 1920) then 
 		print("ERROR b.x is bigger than screen size") 
-		print("b.x",b.x,"f.x",f.x,"f.w",f.w,"space",space)
+		--print("b.x",b.x,"f.x",f.x,"f.w",f.w,"space",space)
 		b.x = 1920 - b.w 
 	      end 
 	      new_object = copy_obj(b)
@@ -3609,6 +3692,7 @@ function editor.ui_elements()
 	    end 
 	    cleanMsgWin(msgw)
        end 
+
     end 
 
     xbox.reactive = true
@@ -3621,6 +3705,11 @@ function editor.ui_elements()
     end 
 
     screen:add(msgw)
+
+    if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+    end
+
 end 
 
 

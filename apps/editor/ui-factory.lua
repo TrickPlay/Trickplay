@@ -1759,7 +1759,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	      local item_txt = item:find_child("textInput")
 	      item_txt.reactive = true
 	      function item_txt:on_button_down()
-		print("HAHAH")
 		current_focus.extra.on_focus_out()
 	        current_focus = group
 		item.on_focus_in()
@@ -2004,7 +2003,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	else  
 	    sel_item = 2
 	end 
-	--print("SEL ITEM : ", sel_item)	
 	editor_use = true
 	if v.extra.type == "LayoutManager" then 
              radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
@@ -2529,7 +2527,7 @@ garo = Rectangle
 
 anchor_point = Group
 	{
-		name="mouse_pointer",
+		--name="mouse_pointer",
 		size={30,30},
 		position = {0,0},
 		children = {sero, garo},

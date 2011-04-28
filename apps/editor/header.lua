@@ -65,6 +65,7 @@ v_guideline = 0
 focus_type = ""
 
 shift 		  = false
+shift_changed 	  = false
 control 	  = false
 
 undo_list 	  = {}
@@ -149,6 +150,17 @@ BG_IMAGE_20 = Image{src = "assets/transparency-grid-20.png", tile = {true, true}
 BG_IMAGE_40 = Image{src = "assets/transparency-grid-40.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
 BG_IMAGE_80 = Image{src = "assets/transparency-grid-80.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+
+
+
+--- Cursor Images
+
+CS_crosshair = Image{name = "mouse_pointer", src = "assets/crosshair.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height } }
+CS_move_into = Image{name = "mouse_pointer", src = "assets/move-into.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
+CS_move = Image{name = "mouse_pointer", src = "assets/move.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
+CS_pointer_plus = Image{name = "mouse_pointer", src = "assets/pointer-plus.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
+CS_pointer = Image{name = "mouse_pointer", src = "assets/pointer.png", opacity = 255, scale = { screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
+
 --BG_IMAGE_import = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_import = Image{src = "assets/white.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 

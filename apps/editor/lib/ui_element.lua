@@ -2829,8 +2829,8 @@ function ui_element.checkBoxGroup(t)
 	     	function box:on_button_down (x,y,b,n)
 			local box_num = tonumber(box.name:sub(4,-1))
 			dumptable(p.selected_items)
-			print(box.name)
-			print(box_num)
+			--print(box.name)
+			--print(box_num)
 			table.insert(p.selected_items, box_num)
 			cb_group:find_child("check"..tostring(box_num)).opacity = 255
 			cb_group:find_child("check"..tostring(box_num)).reactive = true
@@ -3352,9 +3352,6 @@ function ui_element.layoutManager(t)
         for i = 1, r-1 do y = y + (row_hs[i] or p.cell_h)/2 + (row_hs[i+1] or p.cell_h)/2 + p.cell_spacing end
         return x,y
 	end
-    
-    
-    
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
@@ -3362,7 +3359,7 @@ function ui_element.layoutManager(t)
         position = {200,100},
         reactive = true,
         extra    = {
-			type = "LayoutManager",
+	    type = "LayoutManager",
             reactive = true,
             replace = function(self,r,c,obj)
                 if p.tiles[r][c] ~= nil then
@@ -3512,8 +3509,8 @@ function ui_element.layoutManager(t)
                 x = x - self.transformed_position[1]/screen.scale[1]
                 y = y - self.transformed_position[2]/screen.scale[2]
                 if p.cell_size == "fixed" then
-                            print(math.floor(y/(p.cell_h+p.cell_spacing))+1,
-                           math.floor(x/(p.cell_w+p.cell_spacing))+1)
+                            --print(math.floor(y/(p.cell_h+p.cell_spacing))+1,
+                           --math.floor(x/(p.cell_w+p.cell_spacing))+1)
 	        	    return math.floor(x/(p.cell_w+p.cell_spacing))+1,
                            math.floor(y/(p.cell_h+p.cell_spacing))+1
                 end
@@ -3782,13 +3779,13 @@ function ui_element.scrollPane(t)
                 if p.virtual_h > p.visible_h then
                     if y > p.virtual_h - p.visible_h/2 then
                         new_y = -p.virtual_h + p.visible_h
-                        print(1)
+                        --print(1)
                     elseif y < p.visible_h/2 then
                         new_y = 0
-                        print(2)
+                        --print(2)
                     else
                         new_y = -y + p.visible_h/2
-                        print(3)
+                        --print(3)
                     end
                 else
                     new_y =0
@@ -4743,6 +4740,10 @@ button
                 end
                 curr_index = 0
 		umbrella:raise_to_top()
+		if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+		end
+
 		input_mode = S_MENU_M
             end,
             fade_out = function()
@@ -4874,9 +4875,7 @@ button
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
                     s_txt.y = s_txt.y+s_txt.h/2
-                dropDownMenu:add(
-                    s_txt
-                )
+                    dropDownMenu:add(s_txt)
                 end
                 txt = Text{
                         text  = item.string,
@@ -4887,9 +4886,13 @@ button
                     }
                     txt.anchor_point={0,txt.h/2}
                     txt.y = txt.y+txt.h/2
-                dropDownMenu:add(
-                    txt
-                )
+		    if item.mstring then 
+			txt.use_markup =true
+			txt.markup = item.mstring
+		    end 
+                    dropDownMenu:add(txt)
+
+		
                 if item.bg then
 
                     ui_ele = item.bg
@@ -5519,7 +5522,7 @@ function ui_element.tabBar(t)
             )
         else
             ui_ele = Clone{source=p.bg_clone_src}
-            print("this")
+            --print("this")
         end
         dropDownMenu:add(ui_ele)
         ui_ele:lower_to_bottom()
