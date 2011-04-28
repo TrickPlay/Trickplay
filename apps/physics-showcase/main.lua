@@ -36,14 +36,14 @@ local lottery_on_fn = function(_,_,progress) balloon:pageturn(progress,85,24) lo
 
 local function set_focus( s )
     if s == "balloon" then
-        focus.position = { balloon.x - 5 , balloon.y - 5 }
+        focus:animate({duration = 750, position = { balloon.x - 5 , balloon.y - 5 }})
         focus.extra.focus = s
         g_focus = s
         curl_timeline:rewind()
         curl_timeline.on_new_frame = balloon_on_fn
         curl_timeline:start()
     elseif s == "lottery" then
-        focus.position = { lottery.x - 5 , lottery.y - 5 }
+        focus:animate({duration = 750, position = { lottery.x - 5 , lottery.y - 5 }})
         focus.extra.focus = s
         g_focus = s
         curl_timeline:rewind()
