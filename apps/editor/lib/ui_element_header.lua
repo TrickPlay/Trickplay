@@ -36,15 +36,13 @@ skin_list = { ["default"] = {
 				   ["loadingdot"] = "lib/assets/spinner.png",
                    		   ["drop_down_color"]={255,0,0},
                    		   ["scroll_arrow"] = nil,
-				  },
-		    ["OOBE"] = { 
+				},
+		    ["OOBE"] =  { 
 				   ["button"] = "lib/assets/button-oobe.png",
 				   ["button_focus"] = "lib/assets/buttonfocus-oobe.png", 
 				},
 
 		  }
-
-
 	
 	-- used for timeline 
         attr_map = {
@@ -60,4 +58,17 @@ current_focus = nil  --- for user code main
 if g == nil then 
 	g= Group()
 end 
+
+--- Cursor Images
+user_mouse_pointer = Image{name = "user_mouse_pointer", src = "/lib/assets/pointer.png", opacity = 255, scale = { screen.width/screen.display_size[1], screen.height/screen.display_size[2]}}
+
+
+function screen:on_motion(x,y)
+	user_mouse_pointer.position = {x - 10 ,y - 10 ,0}
+	if(screen:find_child("user_mouse_pointer") == nil) then 
+		screen:add(user_mouse_pointer)
+		user_mouse_pointer:raise_to_top()
+	end			
+end 
+
 
