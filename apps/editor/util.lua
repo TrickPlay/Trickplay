@@ -2228,7 +2228,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
 
           ui.image= Image { name="img"..tostring(item_num),
           --src = input_t.text, opacity = 255 , position = {200,200}, 
-          src = "/assets/images/"..input_t.text, opacity = 255 , position = {200,200}, 
+          src = trickplay.config.app_path.."/assets/images/"..input_t.text, opacity = 255 , position = {200,200}, 
 	  extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
 	  ui.image.extra.lock = false
@@ -2286,7 +2286,7 @@ local function copy_widget_imgs ()
 	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
-	     source_file = "assets/"..j 
+	     source_file = trickplay.config.app_path.."/assets/"..j 
 	     dest_file = CURRENT_DIR.."/lib/assets/"..j 
 	     if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
@@ -2296,7 +2296,7 @@ local function copy_widget_imgs ()
 	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
-	     source_file = "assets/default/"..j 
+	     source_file = trickplay.config.app_path.."/assets/default/"..j 
 	     dest_file = CURRENT_DIR.."/lib/skins/default/"..j 
 	     if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
@@ -2306,7 +2306,7 @@ local function copy_widget_imgs ()
 	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
-	     source_file = "assets/CarbonCandy/"..j 
+	     source_file = trickplay.config.app_path.."/assets/CarbonCandy/"..j 
 	     dest_file = CURRENT_DIR.."/lib/skins/CarbonCandy/"..j 
 	     if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
@@ -2316,24 +2316,24 @@ local function copy_widget_imgs ()
 	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
 	local source_file, dest_file
 	for i, j in pairs(source_files) do 
-	     source_file = "assets/OOBE/"..j 
+	     source_file = trickplay.config.app_path.."/assets/OOBE/"..j 
 	     dest_file = CURRENT_DIR.."/lib/skins/OOBE/"..j 
 	     if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
 	     end 
 	end 
 
-	source_file = "lib/ui_element.lua" 
+	source_file = trickplay.config.app_path.."/lib/ui_element.lua" 
 	dest_file = CURRENT_DIR.."/lib/ui_element.lua" 
 	if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
 	end 
-	source_file = "lib/ui_element_header.lua" 
+	source_file = trickplay.config.app_path.."/lib/ui_element_header.lua" 
 	dest_file = CURRENT_DIR.."/lib/ui_element_header.lua" 
 	if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
 	end 
-	source_file = "localized/strings.lua" 
+	source_file = trickplay.config.app_path.."/localized/strings.lua" 
 	dest_file = CURRENT_DIR.."/lib/strings.lua" 
 	if not editor_lb:file_copy(source_file, dest_file) then 
 		--print("couldn't copy widget image"..dest_file) 
