@@ -327,9 +327,8 @@ dofile("editor.lua")
 			if selected_content.extra.is_in_group ~= true then 
 				local c, t = find_container(x,y) 
 				selected_container = c
-				if screen:find_child(c.name.."border") == nil 
-				--and c.extra.org_opacity == nil or c.opacity == c.extra.org_opacity
-				then 
+				if screen:find_child(c.name.."border") == nil then 
+				 --if c.extra.org_opacity == nil or c.opacity == c.extra.org_opacity then
 					editor.container_selected(c,x,y)	
 					if screen:find_child("mouse_pointer") then 
 					     screen:remove(screen:find_child("mouse_pointer"))
@@ -340,6 +339,7 @@ dofile("editor.lua")
 		     				     mouse_pointer.extra.type = "move_into"
 					     end 
 					end 
+				 --end 
 				elseif c.extra.type == "LayoutManager" then 
 				     if screen:find_child(c.name.."border") then 
 				     	local col , row=  c:r_c_from_abs_position(x,y)

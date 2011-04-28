@@ -155,11 +155,11 @@ BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position =
 
 --- Cursor Images
 
-CS_crosshair = Image{name = "mouse_pointer", src = "assets/crosshair.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height } }
-CS_move_into = Image{name = "mouse_pointer", src = "assets/move-into.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
-CS_move = Image{name = "mouse_pointer", src = "assets/move.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
-CS_pointer_plus = Image{name = "mouse_pointer", src = "assets/pointer-plus.png", opacity = 255, scale = {screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
-CS_pointer = Image{name = "mouse_pointer", src = "assets/pointer.png", opacity = 255, scale = { screen.display_size[1]/screen.width, screen.display_size[2]/screen.height }}
+CS_crosshair = Image{name = "mouse_pointer", src = "assets/crosshair.png", opacity = 255, scale = {screen.width/screen.display_size[1], screen.height /screen.display_size[2]} }
+CS_move_into = Image{name = "mouse_pointer", src = "assets/move-into.png", opacity = 255, scale = {screen.width/screen.display_size[1], screen.height /screen.display_size[2]}}
+CS_move = Image{name = "mouse_pointer", src = "assets/move.png", opacity = 255, scale = {screen.width/screen.display_size[1], screen.height/screen.display_size[2]}}
+CS_pointer_plus = Image{name = "mouse_pointer", src = "assets/pointer-plus.png", opacity = 255, scale = {screen.width/screen.display_size[1], screen.height / screen.display_size[2]}}
+CS_pointer = Image{name = "mouse_pointer", src = "assets/pointer.png", opacity = 255, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}}
 
 --BG_IMAGE_import = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_import = Image{src = "assets/white.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
