@@ -436,17 +436,6 @@
 //-------------------- Camera stuff ----------------------------
 
 - (void)do_PI:(NSArray *)args {
-    // Give the user the option to choose Camera or Photo Library
-    if (cameraActionSheet)
-    {
-        [cameraActionSheet release];
-        cameraActionSheet = nil;
-    }
-    cameraActionSheet = [[UIActionSheet alloc] initWithTitle:@"Photo Options" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
-    
-    cameraActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
-    [cameraActionSheet showInView:self.view];
-    
     // Start the camera in the background
     if (camera) {
         [camera release];
@@ -454,6 +443,23 @@
     camera = [[CameraViewController alloc] initWithView:self.view];
     
     [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
+    
+    // Use camera or photo library
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary] == NO) {
+        [camera startCamera];
+    } else if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO) {
+        [camera openLibrary];
+    } else {
+        // Give the user the option to choose Camera or Photo Library
+        if (cameraActionSheet) {
+            [cameraActionSheet release];
+            cameraActionSheet = nil;
+        }
+        cameraActionSheet = [[UIActionSheet alloc] initWithTitle:@"Photo Options" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
+    
+        cameraActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+        [cameraActionSheet showInView:self.view];
+    }
 }
 
 - (void)finishedPickingImage {
@@ -494,6 +500,11 @@
     NSLog(@"Clearing the UI");
     [theTextField resignFirstResponder];
 	theTextField.hidden = YES;
+    
+    if (camera) {
+        [camera release];
+        camera = nil;
+    }
     
     /*
     backgroundView.image = [UIImage imageNamed:@"background.png"];
@@ -630,8 +641,7 @@
     if (styleAlert) {
         [styleAlert release];
     }
-    if (cameraActionSheet)
-    {
+    if (cameraActionSheet) {
         [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
         [cameraActionSheet release];
     }

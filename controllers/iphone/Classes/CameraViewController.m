@@ -15,7 +15,8 @@
 
 - (id)initWithView:(UIView *)aView {
     if ((self = [super init])) {
-        self.view = aView;
+        self.view = [[[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 0.0, 0.0)] autorelease];
+        [aView addSubview:self.view];
         
         imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.delegate = self;
@@ -143,6 +144,8 @@
     } else if (picker.parentViewController) {
         [[picker parentViewController] dismissModalViewControllerAnimated:NO];
     }
+    
+    [self.view removeFromSuperview];
     
     //[self.navigationController popViewControllerAnimated:YES];
 }
