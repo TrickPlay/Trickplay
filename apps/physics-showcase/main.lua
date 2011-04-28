@@ -8,9 +8,9 @@ balloon.position = { ( screen.w / 4 ) * 3 - balloon.w / 2 , screen.h / 2 - ballo
 
 local focus = Rectangle
 {
-    color = "0000FF",
-    w = lottery.w + 40,
-    h = lottery.h + 40,
+    color = "0000FF40",
+    w = lottery.w + 10,
+    h = lottery.h + 10,
 }
 
 local function dummy() end
@@ -36,14 +36,14 @@ local lottery_on_fn = function(_,_,progress) balloon:pageturn(progress,85,24) lo
 
 local function set_focus( s )
     if s == "balloon" then
-        focus.position = { balloon.x - 20 , balloon.y - 20 }
+        focus.position = { balloon.x - 5 , balloon.y - 5 }
         focus.extra.focus = s
         g_focus = s
         curl_timeline:rewind()
         curl_timeline.on_new_frame = balloon_on_fn
         curl_timeline:start()
     elseif s == "lottery" then
-        focus.position = { lottery.x - 20 , lottery.y - 20 }
+        focus.position = { lottery.x - 5 , lottery.y - 5 }
         focus.extra.focus = s
         g_focus = s
         curl_timeline:rewind()
