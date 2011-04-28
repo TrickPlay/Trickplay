@@ -115,7 +115,8 @@ local remove_oldest_section = function()
         next_section.y = next_section.y - new_pos.y
     end
     
-    for _,car in ipairs(self.other_cars_ref) do
+    for car,_ in pairs(self.other_cars_ref.list) do
+    --for _,car in ipairs(self.other_cars_ref) do
         car.x = car.x - new_pos.x
         car.y = car.y - new_pos.y
     end
@@ -123,7 +124,7 @@ end
 
 function World:normalize_to(section)
     
-    print("normalized by:",w_ap_x-section.x,w_ap_y-section.y)
+    --print("normalized by:",w_ap_x-section.x,w_ap_y-section.y)
     w_ap_x = section.x
     w_ap_y = section.y
     
@@ -141,8 +142,8 @@ do
         if dr ~= 0 then
             --curve_impulse = curve_impulse - dr
             --radius = radius - car.dx
-            cent_x = radius*math.cos(math.pi/180*y_rot)
-            cent_y = radius*math.sin(math.pi/180*y_rot)
+            cent_x = radius*cos(y_rot)
+            cent_y = radius*sin(y_rot)
             
             --car.dx = car.dx + 20*dr
             
@@ -150,15 +151,15 @@ do
             --print(w_ap_x-cent_x.."\t"..w_ap_y-cent_y.."\t"..y_rot.."\t\t"..w_ap_x.."\t"..w_ap_y)
             self.road.y_rotation    = {y_rot,0,0}
             self.cars.y_rotation    = {y_rot,0,0}
-            sky.x = screen_w/2-sky_w/2*math.sin(math.pi/180*y_rot)
+            sky.x = screen_w/2-sky_w/2*sin(y_rot)
             
-            delta_x =  radius*math.cos(math.pi/180*y_rot)-cent_x
-            delta_y = -radius*math.sin(math.pi/180*y_rot)+cent_y
+            delta_x =  radius*cos(y_rot)-cent_x
+            delta_y = -radius*sin(y_rot)+cent_y
             
             --car.dx = car.dx - delta_x/2*dr/math.abs(dr)
         else
-            delta_x = dy*math.sin(math.pi/180*y_rot)
-            delta_y = dy*math.cos(math.pi/180*y_rot)
+            delta_x = dy*sin(y_rot)
+            delta_y = dy*cos(y_rot)
         end
         --print(delta_y)
         
@@ -197,6 +198,9 @@ end
 World.reset = function(self)
     self.road:clear()
     self.cars:clear()
+    --for i = 1, NUM_LANES do
+    --    world.lanes[i]:clear()
+    --end
     self.road.anchor_point = {0,0}
     self.cars.anchor_point = {0,0}
     self.road.y_rotation   = {0,0,0}

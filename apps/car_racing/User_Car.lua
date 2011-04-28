@@ -36,6 +36,7 @@ local user_car = Clone{
         crashed = false,
         dx      = 960,
         
+        
     }
 }
 local reset_car = function(old_state,new_state)
@@ -127,20 +128,14 @@ do
             end
         end
         
-        --stop moving if crashed
-        if self.crashed and math.abs(self.v_y) > 20 then
-            self.v_y = self.v_y/2
-        elseif self.crashed then
-            self.v_y = 0
-        end
         
         --decay
         if io.turn_impulse > 0 then
             if io.turn_impulse > .5 then
-                --self.src = "assets/Lambo/01.png"
+                self.source = images[2]
                 self.y_rotation={0,0,0}
             else
-                --self.src = "assets/Lambo/00.png"
+                self.source = images[1]
                 self.y_rotation={0,0,0}
             end
             io.turn_impulse = io.turn_impulse-2*msecs/1000
@@ -149,10 +144,10 @@ do
             end
         else
             if io.turn_impulse < -.5 then
-                --self.src = "assets/Lambo/01.png"
+                self.source = images[2]
                 self.y_rotation={180,0,0}
             else
-                --self.src = "assets/Lambo/00.png"
+                self.source = images[1]
                 self.y_rotation={0,0,0}
             end
             io.turn_impulse = io.turn_impulse+2*msecs/1000

@@ -118,12 +118,15 @@ end
 
 ]]
 
-function assets:Clone( props )
+function assets:source_from_src(src)
+    assert( type( src ) == "string" , "Assets:source_from_src missing src" )
+    return group:find_child( src )
+end
 
-    local src = props.src 
-    assert( type( src ) == "string" , "Assets:Clone missing src" )
-    local source = group:find_child( src )
-    assert( source ~= nil , string.format( "Assets:Clone could not find '%s'" , src ) )
+function assets:Clone( props )
+    
+    local source =  assets:source_from_src(props.src)
+    assert( source ~= nil , string.format( "Assets:Clone could not find '%s'" , props.src ) )
     local clone = Clone{ source = source }
     local real_props = {}
     -- Create a copy so we can remove the 'src' property without changing the
@@ -137,10 +140,7 @@ function assets:Clone( props )
 
 end
 
-function assets:source_from_src(src)
-    assert( type( src ) == "string" , "Assets:source_from_src missing src" )
-    return group:find_child( src )
-end
+
 --[[---------------------------------------------------------------------------
 
     clear_screen
