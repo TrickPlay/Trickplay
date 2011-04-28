@@ -43,7 +43,7 @@ screen:add(all_clouds)
 screen:show()
 
 local t = Timeline {
-                    duration = 1000,
+                    duration = 3000,
                     loop = true,
                     }
 function t:on_new_frame(elapsed, progress)
@@ -112,7 +112,7 @@ function controllers:on_controller_connected(controller)
             if(target_y < screen.h/4) then target_y = screen.h/4 end
 
             all_clouds:animate({
-                        duration=1000/4,
+                        duration=3000/4,
                         x=target_x,
                         y=target_y,
                     })
