@@ -60,10 +60,11 @@ end
 function t:on_completed()
     -- Move cloud from the front to the back of the array
     table.insert(cloud_track, table.remove(cloud_track,1))
-    cloud_track[NUM_CLOUDS]:lower_to_bottom()
+    cloud_track[NUM_CLOUDS+1]:lower_to_bottom()
+    cloud_track[NUM_CLOUDS+1].opacity = opacity_interval:get_value(1)
 
     -- and reshuffle them
-    cloud_track[NUM_CLOUDS]:foreach_child(
+    cloud_track[NUM_CLOUDS+1]:foreach_child(
                 function(cloud)
                     cloud.z_rotation = { math.random(0,360), 0, 0 }
                     local my_random=0
