@@ -26,7 +26,7 @@ local make_cloud_layer = function()
 end
 
 
-local all_clouds = Group {position = { 0, 4*screen.h/5 }}
+local all_clouds = Group {position = { 0, 3*screen.h/4 }}
 local cloud_track = {}
 for i=0,NUM_CLOUDS do
     local new_clouds = make_cloud_layer()
