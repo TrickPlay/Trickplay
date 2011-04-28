@@ -227,7 +227,7 @@ JPEG_V="8b"
 JPEG_URL="http://www.ijg.org/files/jpegsrc.v${JPEG_V}.tar.gz"
 JPEG_DIST="jpegsrc.v${JPEG_V}.tar.gz"
 JPEG_SOURCE="jpeg-${JPEG_V}"
-JPEG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
+JPEG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-ld-version-script && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # tiff
@@ -551,6 +551,7 @@ for THIS in ${ALL}; do
 done
 
 
+
 #------------------------------------------------------------------------------
 # Trickplay
 
@@ -646,6 +647,7 @@ then
 	    -lixml \
 	    -lthreadutil \
 	    -lGLESv2 \
+	    -lEGL \
 	    -lcairo-gobject \
 	    -luprof-0.3 \
 	    -lsndfile \

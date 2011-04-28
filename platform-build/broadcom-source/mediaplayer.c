@@ -153,8 +153,6 @@ static NMP * get_nmp( TPMediaPlayer * mp )
 
 static void nmp_end_of_stream_callback( void * context , int param )
 {
-    BSTD_UNUSED(param);
-    
     NMP * nmp = ( NMP * ) context;
     
     tp_media_player_end_of_stream( nmp->mp );    
@@ -162,8 +160,6 @@ static void nmp_end_of_stream_callback( void * context , int param )
 
 static void nmp_error_callback( void * context , int param )
 {
-    BSTD_UNUSED(param);
-    
     NMP * nmp = ( NMP * ) context;
     
     tp_media_player_error( nmp->mp , 1000 , "" );        
@@ -184,6 +180,10 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
 
     int result = 0;
     
+    const char * fake_argv[2];
+    
+    NEXUS_Error rc;
+    
     /* Only support file URIs so far */
     
     if ( strncmp( uri , "file://" , 7 ) )
@@ -191,7 +191,8 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
         return TP_MEDIAPLAYER_ERROR_NA;
     }
     
-    const char * fake_argv[] = { "" , uri + 7 };
+    fake_argv[0] = "";
+    fake_argv[1] = uri + 7;
     
     if ( cmdline_parse( 2 , fake_argv , & nmp->opts ) )
     {
@@ -232,8 +233,6 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
     nmp->stcSettings.mode = NEXUS_StcChannelMode_eAuto;
     nmp->stcSettings.modeSettings.Auto.behavior = nmp->opts.stcChannelMaster;
     nmp->stcChannel = NEXUS_StcChannel_Open(0, &nmp->stcSettings);
-    
-    NEXUS_Error rc;
     
     NEXUS_Playback_GetSettings(nmp->playback, &nmp->playbackSettings);
     nmp->playbackSettings.playpump = nmp->playpump;
@@ -373,6 +372,8 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
 static void nmp_reset( TPMediaPlayer * mp )
 {
     NMP * nmp = get_nmp( mp );
+
+    NEXUS_Rect vp;
     
     NEXUS_Playback_Stop( nmp->playback );
 
@@ -399,8 +400,6 @@ static void nmp_reset( TPMediaPlayer * mp )
     
     NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(nmp->audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
     NEXUS_AudioDecoder_Close(nmp->audioDecoder);
-    
-    NEXUS_Rect vp;
     
     vp = nmp->viewport;
     
@@ -546,7 +545,7 @@ static int nmp_set_viewport_geometry(
 #if 1    
     return 0;
 #else
-/*
+
     /*
     TODO: This doesn't seem to work right. The position appears to be relative
     to the bottom, left of the screen. When resized and repositioned, the

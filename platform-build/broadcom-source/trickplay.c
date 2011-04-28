@@ -92,9 +92,11 @@
 #include "nexus_composite_output.h"
 #include "nexus_component_output.h"
 #include "nexus_hdmi_input.h"
+#include "nexus_video_input.h"
 #include "nexus_audio_decoder.h"
 #include "nexus_audio_dac.h"
 #include "nexus_audio_output.h"
+#include "nexus_audio_input.h"
 #include "bstd.h"
 #include "bkni.h"
 
@@ -190,10 +192,14 @@ void disconnect_hdmi()
 
 void connect_hdmi()
 {
-   printf( "\n\n\tCONNECT HDMI\n\n" );
-
    NEXUS_VideoWindowSettings windowSettings;
+   NEXUS_AudioDecoderStartSettings audioProgram;
+   NEXUS_StcChannelSettings stcSettings;
+   NEXUS_HdmiInputSettings hdmiInputSettings;
+   NEXUS_TimebaseSettings timebaseSettings;
 
+   printf( "\n\n\tCONNECT HDMI\n\n" );
+   
    NEXUS_VideoWindow_GetSettings(video_window, &windowSettings);
    
    windowSettings.position.x = 0;
@@ -203,10 +209,6 @@ void connect_hdmi()
    NEXUS_VideoWindow_SetSettings(video_window, &windowSettings);
    
    
-   NEXUS_AudioDecoderStartSettings audioProgram;
-   NEXUS_StcChannelSettings stcSettings;
-   NEXUS_HdmiInputSettings hdmiInputSettings;
-   NEXUS_TimebaseSettings timebaseSettings;
    
    NEXUS_Timebase_GetSettings(NEXUS_Timebase_e0, &timebaseSettings);
    timebaseSettings.sourceType = NEXUS_TimebaseSourceType_eHdDviIn;
@@ -253,6 +255,8 @@ bool InitDisplay()
    NEXUS_PanelOutputSettings     panelOutputSettings;
 #endif
    NEXUS_Error                   err;
+
+   const char * hd = getenv( "TP_BRCM_1080P" );
 
    /* Initialise the Nexus platform */
    NEXUS_Platform_GetDefaultSettings(&platform_settings);
@@ -320,7 +324,6 @@ bool InitDisplay()
 
    NEXUS_Display_SetGraphicsSettings( nexus_display , & graphics_settings );
 
-   const char * hd = getenv( "TP_BRCM_1080P" );
 
    BRCM_GetDefaultNativeWindowSettings(&egl_window);
    egl_window.rect.x = 0;
@@ -363,10 +366,6 @@ static void install_controller( TPContext * ctx )
 {
 	TPControllerSpec remoteSpec;
 
-	memset(&remoteSpec, 0, sizeof(remoteSpec));
-
-	remoteSpec.capabilities	= TP_CONTROLLER_HAS_KEYS;
-	
 	TPControllerKeyMap map[] =
 	{
 	    { 0x40bf04fb , TP_KEY_UP },
@@ -399,6 +398,10 @@ static void install_controller( TPContext * ctx )
 	    {0,0}
 	};
 
+	memset(&remoteSpec, 0, sizeof(remoteSpec));
+
+	remoteSpec.capabilities	= TP_CONTROLLER_HAS_KEYS;
+	
     remoteSpec.key_map = map;
     
     controller = tp_context_add_controller( ctx, "Remote", &remoteSpec, NULL);    
@@ -437,12 +440,13 @@ int main(int argc, char** argv)
 
    if (nexus_display != 0)
    {
+      EGLDisplay   eglDisplay;
+
       disconnect_hdmi();
       
       NEXUS_VideoWindow_Close( video_window );
    
       /* Terminate EGL */
-      EGLDisplay   eglDisplay;
 
       eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
       eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
