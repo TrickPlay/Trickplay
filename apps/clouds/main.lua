@@ -1,4 +1,4 @@
-local NUM_CLOUDS = 15
+local NUM_CLOUDS = 8
 local CLOUD_SPACING = 400
 local opacity_interval = Interval(200,0)
 
@@ -8,12 +8,12 @@ cloud_img:hide()
 
 local make_cloud_layer = function()
     local cloud_group = Group{  }
-    local NUM_CLOUDS = 10*math.ceil(screen.w/cloud_img.w)
+    local NUM_CLOUDS = 6*math.ceil(screen.w/cloud_img.w)
     for i=1,NUM_CLOUDS do
         local cloud = Clone { source = cloud_img }
         cloud.anchor_point = { cloud.w/2, cloud.h/2 }
         cloud.z_rotation = { math.random(0,360), 0, 0 }
-        cloud.x = math.random(i*(screen.w*3)/NUM_CLOUDS - screen.w - cloud.w/2, i*(screen.w*3)/NUM_CLOUDS + - screen.w - cloud.w/2)
+        cloud.x = math.random(i*(screen.w*2)/NUM_CLOUDS - screen.w/2 - cloud.w/2, i*(screen.w*2)/NUM_CLOUDS + - screen.w/2 - cloud.w/2)
         local my_random=0
         while(my_random<=0) do my_random = math.random() end
         my_random = -math.log10(my_random)/math.log10(100)
@@ -47,7 +47,7 @@ local t = Timeline {
                     }
 function t:on_new_frame(elapsed, progress)
     for i=0, NUM_CLOUDS do
-        cloud_track[i+1].z = (2.5+progress-i) * CLOUD_SPACING
+        cloud_track[i+1].z = (2+progress-i) * CLOUD_SPACING
         if(0 == i) then
             cloud_track[i+1].opacity = opacity_interval:get_value(progress)
         else
@@ -86,8 +86,8 @@ local key_handler = function(self,key)
     elseif(keys.Right == key) then
         target_x = target_x-100
     end
-    if(target_x > screen.w) then target_x = screen.w end
-    if(target_x < -screen.w) then target_x = -screen.w end
+    if(target_x > screen.w/2) then target_x = screen.w/2 end
+    if(target_x < -screen.w/2) then target_x = -screen.w/2 end
     if(target_y > 3*screen.h/4) then target_y = 3*screen.h/4 end
     if(target_y < screen.h/4) then target_y = screen.h/4 end
     all_clouds:animate({
