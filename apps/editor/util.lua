@@ -20,12 +20,12 @@ function table_insert(t, val)
 end 
 
 function table_move_up(t, itemNum)
-	print("itemNum", itemNum)
+	--print("itemNum", itemNum)
 	local prev_i, prev_j 
 	for i,j in pairs (t) do 
 	     if i == itemNum then 
 		if prev_i then 
-		     print(prev_i, j, i, prev_j)
+		     --print(prev_i, j, i, prev_j)
 		     t[prev_i] = j 
 		     t[i] = prev_j 
 		     return
@@ -38,13 +38,13 @@ function table_move_up(t, itemNum)
 	end 
 end 
 function table_move_down(t, itemNum)
-	print("itemNum", itemNum)
+	--print("itemNum", itemNum)
 	local i, j, next_i, next_j 
 	for i,j in pairs (t) do 
 	     if i == itemNum then 
 	          next_i = i + 1 
 		  if t[next_i] then 
-	     		print(i,next_j, i, t[next_i])
+	     		--print(i,next_j, i, t[next_i])
 	     		next_j = t[next_i] 
 	     		t[i] = next_j
 	     		t[next_i] = j 
@@ -315,13 +315,57 @@ function set_app_path()
     printMsgWindow("Select Project : ", "projectlist")
     inputMsgWindow("projectlist")
 
+    if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+    end
+
 end 
 
+selected_container = nil
+selected_content = nil
+
+function is_in_container_group(x_pos, y_pos) 
+	for i, j in pairs (g.children) do 
+	if j.x < x_pos and x_pos < j.x + j.w and j.y < y_pos and y_pos < j.y + j.h then 
+		if j.extra then 
+		    if is_this_container(j) then
+		    --if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
+		        return true 
+		    end 
+		end 
+	end 
+  	end 
+  	return false 
+end 
+
+function find_container(x_pos, y_pos)
+	for i, j in pairs (g.children) do 
+		if j.x < x_pos and x_pos < j.x + j.w and j.y < y_pos and y_pos < j.y + j.h then 
+			if j.extra then 
+				if is_this_container(j) then
+					return j, j.extra.type 
+				end 
+			end 
+		end 
+	end 
+end 
 
 function create_on_button_down_f(v)
 	v.extra.selected = false
 	local org_object, new_object 
 	
+--[[
+ 	function v:on_motion(x, y)
+	     if control == true  then 
+	     	local c, t = find_container(x,y) 
+		if c.extra.org_opacity == nil or c.extra.org_opacity == c.opacity then 
+			current_container_select = v
+			editor.selected(v)
+		end 
+	     end 
+	     return true
+        end
+]]
         function v:on_button_down(x,y,button,num_clicks)
 
 	   if is_this_widget(v) == true then
@@ -335,8 +379,8 @@ function create_on_button_down_f(v)
 		    local p_obj = find_parent(v)
                     if(button == 3) then -- imsi : num_clicks is not correct ! 
                     --if(button == 3 or num_clicks >= 2) then
-		    print ("button", button)
-		    print ("num_clicks", num_clicks)
+		    --print ("button", button)
+		    --print ("num_clicks", num_clicks)
                          editor.inspector(p_obj)
                          return true
                     end 
@@ -354,8 +398,8 @@ function create_on_button_down_f(v)
 	      else 
                     if(button == 3) then-- imsi : num_clicks is not correct ! 
 		    --if(button == 3 or num_clicks >= 2) then
-		    print ("button", button)
-		    print ("num_clicks", num_clicks)
+		    --print ("button", button)
+		    --print ("num_clicks", num_clicks)
                          editor.inspector(v)
                          return true
                     end 
@@ -373,6 +417,19 @@ function create_on_button_down_f(v)
 -----[[ 	SHOW POSSIBLE CONTAINERS
 
 		    if control == true then 
+
+			if(screen:find_child("mouse_pointer") ~= nil) then 
+		     		screen:remove(screen:find_child("mouse_pointer"))
+			end 
+			mouse_pointer = CS_move
+			mouse_pointer.extra.type = "move"
+			mouse_pointer.position = {x - 10 ,y - 10 ,0}
+			if(screen:find_child("mouse_pointer") == nil) then 
+		     		screen:add(mouse_pointer)
+			end 
+
+			selected_content = v 
+	
 			local odr 
 			for i,j in pairs (g.children) do 
 				if j.name == v.name then 
@@ -383,9 +440,9 @@ function create_on_button_down_f(v)
 
 			if odr then 
 			for i,j in pairs (g.children) do 
-				print(j.name)
+				--print(j.name)
 				if is_this_container(j) == true then 
-				print(j.name, "container")
+				--print(j.name, "container")
 					if i > odr then 
 						j.extra.org_opacity = j.opacity
                        				j:set{opacity = 50}
@@ -444,6 +501,8 @@ function create_on_button_down_f(v)
            --return true .. 렉탱글 안에서 또 렉탱글 글릴때 안되아서.. 뺌
         end
 
+	
+
         function v:on_button_up(x,y,button,num_clicks)
 	   if (input_mode ~= S_RECTANGLE) then 
 	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
@@ -475,45 +534,13 @@ function create_on_button_down_f(v)
 		       new_object = copy_obj(v)
 	               new_object.position = {x-dx, y-dy}
 ---[[ Content Setting 
-		       local function is_in_container_group(x_pos, y_pos) 
-			   for i, j in pairs (g.children) do 
-				if j.x < x and x < j.x + j.w and j.y < y and y < j.y + j.h then 
-					if j.extra then 
-					    if is_this_container(j) then
-					    --if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
-					        return true 
-					    end 
-					end 
-				end 
-			   end 
-		           return false 
-		       end 
-
-		       local function find_container(x_pos, y_pos)
-			   for i, j in pairs (g.children) do 
-				if j.x < x and x < j.x + j.w and j.y < y and y < j.y + j.h then 
-					if j.extra then 
-					    --if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
-					    if is_this_container(j) then
-					        return j, j.extra.type 
-					    end 
-					end 
-				end 
-			   end 
-		       end 
-
-		       if control == true and is_in_container_group(x,y) then 
+		      
+		       if is_in_container_group(x,y) then 
 
 			     local c, t = find_container(x,y) 
 
-			     if c then 
-			          --print("Container : ",c.name)
-			     end 
-			          --print("Content Item : ",v.name)
-			
-			     --if (v.extra.type ~= "ScrollPane" and v.extra.type ~= "DialogBox" and v.extra.type ~= "LayoutManager") or c.name ~= v.name  then 
+			     if control == true then 
 			       if not is_this_container(v) or c.name ~= v.name then
-			     	--print ("Container Type : ", t) 
 			     	if c and t then 
 				   	
 				    if (v.extra.selected == true and c.x < v.x and c.y < v.y) then 
@@ -530,18 +557,39 @@ function create_on_button_down_f(v)
 			            				c.content:add(v) 
 			        		elseif t == "LayoutManager" then 
 				     		local col , row=  c:r_c_from_abs_position(x,y)
-				     		print (row, ":", col)
+				     		--print (row, ":", col)
 				     		c:replace(row,col,v) 
-						elseif t == "Group" then  ---qqq
+						elseif t == "Group" then 
 						c:add(v)
 			        		end 
 			     	       end 
 				    end 
 			       end 
 
-				
-		       end 
 
+
+		if(screen:find_child("mouse_pointer") ~= nil) then 
+		     screen:remove(screen:find_child("mouse_pointer"))
+		end 
+		mouse_pointer = CS_pointer
+		mouse_pointer.position = {x - 10 ,y - 10 ,0}
+		if(screen:find_child("mouse_pointer") == nil) then 
+		     screen:add(mouse_pointer)
+		     mouse_pointer.extra.type = "pointer"
+		end 
+
+			     end 
+
+			     if screen:find_child(c.name.."border") and selected_container then 
+					screen:remove(screen:find_child(c.name.."border"))
+					screen:remove(screen:find_child(c.name.."a_m"))
+					screen:remove(screen:find_child(v.name.."border"))
+					screen:remove(screen:find_child(v.name.."a_m"))
+					selected_content = nil
+					selected_container = nil
+			    end 
+		       end 
+	
 ---]] Content Setting 
 
 		       for i,j in pairs (g.children) do 
@@ -564,7 +612,9 @@ function create_on_button_down_f(v)
 				end
 		             else 
 	                     border.position = {x -dx, y -dy}
-	                     am.position = {x -dx, y -dy}
+			     if am then 
+	                     	am.position = {x -dx, y -dy}
+			     end
 		             end 
 	                end 
 			
@@ -777,7 +827,7 @@ function make_attr_t(v)
              	if color_t == nil then 
                  	color_t = {0,0,0,0}
 	     	end
-		print("***",j,"***")
+		--print("***",j,"***")
 	     	table.insert(attr_t, {j.."r", color_t[1], "R"})
              	table.insert(attr_t, {j.."g", color_t[2], "G"})
              	table.insert(attr_t, {j.."b", color_t[3], "B"})
@@ -970,7 +1020,7 @@ function make_attr_t(v)
   for i,j in pairs(obj_map[obj_type]()) do 
 		
 	if (j == "message") then 
-	print (j)
+	--print (j)
 	end 
        	if attr_map[j] then
              attr_map[j](j)
@@ -1666,7 +1716,7 @@ local function inputMsgWindow_savefile(cfn)
 		end 
 	   end 
 
-	   print(main_exist)
+	   --print(main_exist)
 
 	   if main_exist == false then 
 		-- main.lua 생성해서 
@@ -2023,7 +2073,6 @@ function inputMsgWindow_openfile(input_text)
 	  if(v.type == "Group") then 
 	       for j, c in pairs (v.children) do
 		    if is_in_list(v.extra.type, uiElements) == false then 
-			print(c.name) 
                         c.reactive = true
 		        c.extra.is_in_group = true
 	  		c.extra.lock = false
@@ -2032,7 +2081,6 @@ function inputMsgWindow_openfile(input_text)
 	       end 
 	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" then 
 		    for j, c in pairs(v.content.children) do -- Group { children = {button4,rect3,} },
-			print(c.name)
 			c.reactive = true
 		        c.extra.is_in_group = true
 	  		c.extra.lock = false
@@ -2044,7 +2092,6 @@ function inputMsgWindow_openfile(input_text)
      		      if type(c) == "table" then
 	 		   table.foreach(c, f)
      		      elseif not c.extra.is_in_group then 
-	 		   print(c.name) 
 			   c.reactive = true
 		           c.extra.is_in_group = true
 	  		   c.extra.lock = false

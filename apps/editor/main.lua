@@ -22,6 +22,7 @@ dofile("editor.lua")
         [ keys.n	] = function() editor.close() input_mode = S_SELECT end,
         [ keys.o	] = function() input_mode = S_SELECT editor.the_open()  end,
         [ keys.q	] = function() exit() end,
+        [ keys.p	] = function() set_app_path() end,
 	[ keys.r	] = function() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.s	] = function() input_mode = S_SELECT editor.save(true) end,
         [ keys.t	] = function() editor.text() input_mode = S_SELECT end,
@@ -151,7 +152,6 @@ dofile("editor.lua")
 	             		      end
 			         end
 			   elseif(current_inspector == nil) then 
-					print ("main.lua key.down")
 					if current_focus then 	
 					      if current_focus.parent then 
 						     --current_focus.parent.press_down() 
@@ -175,7 +175,6 @@ dofile("editor.lua")
 	             		      end
 			         end
 			   elseif(current_inspector == nil) then 
-					print ("main.lua key.up")
 					if current_focus then 	
 					      if current_focus.parent then 
 						     --current_focus.parent.press_up() 
@@ -190,9 +189,12 @@ dofile("editor.lua")
 	if(key == keys.Control_L ) then control = true end
 	if(key == keys.Control_R ) then control = true end
 
+	--[[ 0427
 	if(screen:find_child("mouse_pointer") ~= nil) then 
-             screen:remove(mouse_pointer) 
+             --screen:remove(mouse_pointer) 
+             screen:remove(screen:find_child("mouse_pointer")) 
         end 
+	]]
 	        
 	if(input_mode ~= S_POPUP) then 
           if key_map[key] then
@@ -204,9 +206,18 @@ dofile("editor.lua")
     function screen.on_key_up( screen , key )
     	if key == keys.Shift_L or key == keys.Shift_R then
              shift = false
+	     if(screen:find_child("mouse_pointer") ~= nil) then 
+		if screen:find_child("mouse_pointer").extra.type == "pointer_plus" then 
+			screen:remove(screen:find_child("mouse_pointer"))
+		end 
+	     end
 	end 
     	if key == keys.Control_L or key == keys.Control_R then
              control = false
+	     if(screen:find_child("mouse_pointer") ~= nil) then 
+			screen:remove(screen:find_child("mouse_pointer"))
+	     end
+
 	end 
     end
 
@@ -217,7 +228,6 @@ dofile("editor.lua")
 		if current_focus then 
 			current_focus.on_focus_out()
 			screen:grab_key_focus()
-
 		end 
 	  end 
 	  if(input_mode == S_MENU) then
@@ -291,9 +301,6 @@ dofile("editor.lua")
           if (mouse_state == BUTTON_DOWN) then
               if (input_mode == S_RECTANGLE) then 
 	           editor.rectangle_done(x, y) 
-	           if(screen:find_child("mouse_pointer") ~= nil) then 
-		        screen:remove(mouse_pointer) 
-		   end 
 	           input_mode = S_SELECT 
 	      end
 
@@ -302,19 +309,94 @@ dofile("editor.lua")
 			editor.multi_select_done(x,y)
 	      end 
 
+	      if(screen:find_child("mouse_pointer") ~= nil) then 
+		  if screen:find_child("mouse_pointer").extra.type ~= "pointer" then 
+		        screen:remove(screen:find_child("mouse_pointer"))
+		  end
+	      end 
               mouse_state = BUTTON_UP
           end
       end
 
       function screen:on_motion(x,y)
 
+	  local mouse_pointer
+
+	  if control == true then 
+		if is_in_container_group(x,y) == true and selected_content then 
+			if selected_content.extra.is_in_group ~= true then 
+				local c, t = find_container(x,y) 
+				selected_container = c
+				if screen:find_child(c.name.."border") == nil 
+				--and c.extra.org_opacity == nil or c.opacity == c.extra.org_opacity
+				then 
+					editor.container_selected(c,x,y)	
+					if screen:find_child("mouse_pointer") then 
+					     screen:remove(screen:find_child("mouse_pointer"))
+					     mouse_pointer = CS_move_into
+					     mouse_pointer.position = {x - 10 ,y - 10 ,0}
+					     if(screen:find_child("mouse_pointer") == nil) then 
+		     				     screen:add(mouse_pointer)
+		     				     mouse_pointer.extra.type = "move_into"
+					     end 
+					end 
+				elseif c.extra.type == "LayoutManager" then 
+				     if screen:find_child(c.name.."border") then 
+				     	local col , row=  c:r_c_from_abs_position(x,y)
+				     	if screen:find_child(c.name.."border").r_c[1] ~= row or
+		   				screen:find_child(c.name.."border").r_c[2] ~= col then  
+		    				editor.n_selected(c)
+				     	end 
+				     end
+				end 
+			end 
+		elseif  selected_container then 
+			editor.n_selected (selected_container)
+			screen:remove(screen:find_child("mouse_pointer"))
+			if control then 
+				mouse_pointer = CS_move
+				mouse_pointer.position = {x - 10 ,y - 10 ,0}
+				if(screen:find_child("mouse_pointer") == nil) then 
+		     			screen:add(mouse_pointer)
+		     			mouse_pointer.extra.type = "move"
+				end 
+			end 
+			selected_container = nil
+		end 
+	  end 
+
 	  if(input_mode == S_RECTANGLE) then 
-		if(rect_mouse_pointer == nil) then 
-		rect_mouse_pointer = ui.factory.draw_mouse_pointer()
-	        end 
-		rect_mouse_pointer.position = {x,y,0}
+		if(screen:find_child("mouse_pointer") ~= nil) then 
+		     screen:remove(screen:find_child("mouse_pointer"))
+		end 
+		--rect_mouse_pointer = ui.factory.draw_mouse_pointer()
+		mouse_pointer = CS_crosshair 
+		mouse_pointer.position = {x - 15 ,y - 15 ,0}
 		if(screen:find_child("mouse_pointer") == nil) then 
-		     screen:add(rect_mouse_pointer)
+		     screen:add(mouse_pointer)
+		     mouse_pointer.extra.type = "crosshair"
+		end 
+	  elseif shift == true then 
+		if(screen:find_child("mouse_pointer") ~= nil) then 
+		     screen:remove(screen:find_child("mouse_pointer"))
+		end 
+		mouse_pointer = CS_pointer_plus
+		mouse_pointer.position = {x - 10 ,y - 10 ,0}
+		if(screen:find_child("mouse_pointer") == nil) then 
+		     screen:add(mouse_pointer)
+		     mouse_pointer.extra.type = "pointer_plus"
+		end 
+	  elseif screen:find_child("mouse_pointer") ~= nil  then 
+		     screen:find_child("mouse_pointer").position = {x - 10 ,y - 10 ,0}
+	  elseif screen:find_child("mouse_pointer") == nil then
+		if(screen:find_child("mouse_pointer") ~= nil) then 
+		     screen:remove(screen:find_child("mouse_pointer"))
+		end 
+		mouse_pointer = CS_pointer
+		mouse_pointer.position = {x - 10 ,y - 10 ,0}
+		if(screen:find_child("mouse_pointer") == nil) then 
+		     screen:add(mouse_pointer)
+		     mouse_pointer.extra.type = "pointer"
 		end 
 	  end 
 
@@ -461,6 +543,8 @@ dofile("editor.lua")
 		  (screen:find_child("msgw") == nil) then 
 		    editor.multi_select_move(x, y) end
           end
+
+	  
       end
 
       local function screen_add_bg()
