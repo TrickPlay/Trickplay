@@ -39,10 +39,6 @@ local function set_focus( s )
         focus.position = { balloon.x - 20 , balloon.y - 20 }
         focus.extra.focus = s
         g_focus = s
-        balloon:unblur()
---        balloon:saturate()
-        lottery:blur()
---        lottery:desaturate(0.8)
         curl_timeline:rewind()
         curl_timeline.on_new_frame = balloon_on_fn
         curl_timeline:start()
@@ -50,10 +46,6 @@ local function set_focus( s )
         focus.position = { lottery.x - 20 , lottery.y - 20 }
         focus.extra.focus = s
         g_focus = s
-        balloon:blur()
---        balloon:desaturate(0.8)
-        lottery:unblur()
---        lottery:saturate()
         curl_timeline:rewind()
         curl_timeline.on_new_frame = lottery_on_fn
         curl_timeline:start()
