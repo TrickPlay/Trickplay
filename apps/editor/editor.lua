@@ -1871,7 +1871,7 @@ function editor.rectangle(x, y)
         table.insert(undo_list, {ui.rect.name, ADD, ui.rect})
         g:add(ui.rect)
 	if(screen:find_child("screen_objects") == nil) then 
-             screen:add(g)
+             --screen:add(g)
 	end
 	
 	ui.rect.extra.lock = false
@@ -2104,7 +2104,7 @@ function editor.text()
 	end 
 
 	if(screen:find_child("screen_objects") == nil) then 
-             screen:add(g)
+             --screen:add(g)
 	end
         ui.text.grab_key_focus(ui.text)
         local n = table.getn(g.children)
@@ -2397,7 +2397,7 @@ function editor.clone()
  
 		     
 	             if(screen:find_child("screen_objects") == nil) then 
-        	          screen:add(g)        
+        	          --screen:add(g)        
 		     end 
         	     ui.clone.reactive = true
 		     ui.clone.extra.lock = false
@@ -2580,7 +2580,7 @@ function editor.duplicate()
  
 		     
                         if(screen:find_child("screen_objects") == nil) then 
-                              screen:add(g)        
+                              --screen:add(g)        
                         end 
                         ui.dup.reactive = true
                         ui.dup.extra.lock = false
@@ -2710,7 +2710,7 @@ function editor.group()
 
         g:add(ui.group)
 	if(screen:find_child("screen_objects") == nil) then 
-             screen:add(g)
+             --screen:add(g)
 	end 
 	
 	local timeline = screen:find_child("timeline")
@@ -3635,7 +3635,7 @@ function editor.ui_elements()
 	           g:add(new_widget)
 		   new_widget.extra.lock = false
                    create_on_button_down_f(new_widget)
-	           screen:add(g)
+	           --screen:add(g)
 	           screen:grab_key_focus()
 	end 
 	cleanMsgWin(msgw)
@@ -3686,7 +3686,7 @@ function editor.ui_elements()
 	      	g:add(new_widget)
 		new_widget.extra.lock = false
               	create_on_button_down_f(new_widget)
-	      	screen:add(g)
+	      	--screen:add(g)
 	      	screen:grab_key_focus()
 
 	    end 
