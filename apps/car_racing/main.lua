@@ -80,6 +80,7 @@ local function main()
 	
 	
 	
+	dofile("Utils.lua")
 	
 	STATES, Game_State, Idle_Loop = dofile("App_Framework.lua")
 	

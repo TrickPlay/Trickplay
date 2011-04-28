@@ -1,13 +1,13 @@
 --file globals
 local car_scale = 2.5
-local angle = math.tan(screen.perspective[1]/2*math.pi/180)
+local angle = tan(screen.perspective[1]/2)
 local ratio = 16/9
 local spawn_on_coming_self_thresh = 1250
 local spawn_passing_self_thresh   = 1.5*spawn_on_coming_self_thresh
 
 
-local other_cars = {}
---Assets:Clones for the differen angles of the cars
+local other_cars = make_Linked_List()
+--Assets:Clones for the different angles of the cars
 local cars = {
     {   -- Blue Impreza
         --[[Assets:Clone{ src=]]"assets/impreza_b/00.png"  ,--},
@@ -68,7 +68,7 @@ local the_car
 --car constructor
 make_car = function(last_section,start_pos, dist_from_center,debug)
     
-    print("carr with atributes",last_section,last_section.path.dist,start_pos[1],start_pos[2],start_pos[3])
+    --print("carr with atributes",last_section,last_section.path.dist,start_pos[1],start_pos[2],start_pos[3])
     
     --local upvals
     local model = cars[math.random(1,#cars)]
@@ -76,7 +76,7 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
     if dist_from_center < 0 then orientation = -1 end
     local next_road = "next_segment"
     if orientation == -1 then next_road = "prev_segment" end
-    print(model)
+    --print(model)
     the_car = Assets:source_from_src(model[3])
     return Clone{
         
@@ -95,7 +95,8 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
         },
         
         extra = {
-            
+            dist_from_center = dist_from_center,
+            screen_y = 0,
             hit = false,
             
             curr_section = last_section,
@@ -114,6 +115,12 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
             
             prev_pt = {x=0,y=0},
             
+            remove = function(self)
+                other_cars:remove(self)
+                Idle_Loop:remove_function(self.move)
+                self:unparent()
+            end,
+            
             move = function(self,msecs)
                 --print("move",self)
                 if self.y < Game_State.end_point[2]+1000 then
@@ -122,9 +129,8 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
                     self.opacity = 255
                 end
                 if self.curr_section.parent == nil then
-                    self:unparent()
                     print("my road was deleted")
-                    Idle_Loop:remove_function(self.move)
+                    self:remove()
                     return
                 end
                 
@@ -132,9 +138,8 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
                 
                 --a positive y value means that the car is behind the user
                 if self.y > 0 then
-                    self:unparent()
                     print("behind you",self)
-                    Idle_Loop:remove_function(self.move)
+                    self:remove()
                     return
                 end
                 if self.hit then
@@ -169,9 +174,8 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
                                 return false
                             end
                         end
-                        self:unparent()
+                        self:remove()
                         print("no more road")
-                        Idle_Loop:remove_function(self.move)
                         return
                     end
                     --load the next path 
@@ -206,39 +210,47 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
                 
                 
                 --calculate current screen position
-                norm_x = screen_w/2+(self.x-self.parent.anchor_point[1])
-                norm_y = -(self.y-self.parent.anchor_point[2])
+                norm_x = screen_w/2+(self.x-world.cars.anchor_point[1])
+                norm_y = -(self.y-world.cars.anchor_point[2])
                 
-                x = norm_x*cos(self.parent.y_rotation[1]) - norm_y*sin(self.parent.y_rotation[1])
-                y = norm_x*sin(self.parent.y_rotation[1]) + norm_y*cos(self.parent.y_rotation[1])
+                x = norm_x*cos(world.cars.y_rotation[1]) - norm_y*sin(world.cars.y_rotation[1])
+                y = norm_x*sin(world.cars.y_rotation[1]) + norm_y*cos(world.cars.y_rotation[1])
                 
                 
                 curr_x = x
                 curr_y = y
                 t_pt.x, t_pt.y = perceived_x_y(x,y*10.8/16)
+                self.screen_y = t_pt.y
+                
+                if other_cars.list[self].next ~= nil and
+                    self.screen_y  < other_cars.list[self].next.screen_y then
+                    
+                    world.cars:lower_child(self,other_cars.list[self].next)
+                    other_cars:move_down(self)
+                    
+                end
                 
                 back_of_car_x = self.x + car_len*math.sin(math.pi/180*self.y_rot)
                 back_of_car_y = self.y + car_len*math.cos(math.pi/180*self.y_rot)
                 
                 --compare against previous screen position
-                norm_x = screen_w/2+(back_of_car_x-self.parent.anchor_point[1])
-                norm_y = -(back_of_car_y-self.parent.anchor_point[2])
+                norm_x = screen_w/2+(back_of_car_x-world.cars.anchor_point[1])
+                norm_y = -(back_of_car_y-world.cars.anchor_point[2])
                 
-                x = norm_x*cos(self.parent.y_rotation[1]) - norm_y*sin(self.parent.y_rotation[1])
-                y = norm_x*sin(self.parent.y_rotation[1]) + norm_y*cos(self.parent.y_rotation[1])
+                x = norm_x*cos(world.cars.y_rotation[1]) - norm_y*sin(world.cars.y_rotation[1])
+                y = norm_x*sin(world.cars.y_rotation[1]) + norm_y*cos(world.cars.y_rotation[1])
                 
                 self.prev_pt.x, self.prev_pt.y = perceived_x_y(x,y*10.8/16)
                 
                 
                 
                 --use screen positions to estimate the perceived angle of the car
-                self.perceived_dir =
-                    math.abs(
-                        math.atan(
-                            (self.prev_pt.x-t_pt.x)/
-                            (self.prev_pt.y-t_pt.y)
-                        ) * 180/math.pi
-                    )
+                self.perceived_dir = math.abs(
+                    math.atan(
+                        (self.prev_pt.x-t_pt.x)/
+                        (self.prev_pt.y-t_pt.y)
+                    ) * 180/math.pi
+                )
                 
                 
                 
@@ -263,7 +275,7 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
                     end
                     --self.z_rotation={180,0,0}
                 end
-                --self.z_rotation = {self.parent.y_rotation[1],0,0}
+                --self.z_rotation = {world.cars.y_rotation[1],0,0}
                 --if orientation == -1 then self.z_rotation={self.z_rotation[1]+180,0,0} end
                 old_source_i = self.source_i
                 --determine which car image to use to match the perceived angle
@@ -356,25 +368,31 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
         }
     }
 end
-local pos = {
-	-lane_dist*3/2,
+local lane_pos = {
+	-lane_dist * 3/2,
 	-lane_dist/2,
 	 lane_dist/2,
-	 lane_dist*3/2
+	 lane_dist * 3/2
 }
-local lane3,lane4, rand
+
+local lane3,lane4, rand, car, old_car, car_y
 --Car Spawner
 local passing_self_timer = Timer{
 	interval = spawn_passing_self_thresh,
 	on_timer = function()
 		lane3 = false
 		lane4 = false
-		for i = #other_cars,1,-1 do
-			if math.abs(other_cars[i].y -road.newest_segment.y) < 1200 then
-				if other_cars[i].x == pos[3] then
+        car_y = road.newest_segment.y + car_len
+        for car,_ in pairs(other_cars.list) do
+		--for i = #other_cars,1,-1 do
+            --if there is a car too close in that lane, then mark that lane
+            --print(other_cars[i].y, (road.newest_segment.y + car_len*10),road.newest_segment.y)
+			if car.y < car_y then
+                print("match")
+				if car.dist_from_center == lane_pos[3] then
 					lane3 = true
 					print(3)
-				elseif other_cars[i].x == pos[4] then
+				elseif car.dist_from_center == lane_pos[4] then
 					lane4 = true
 					print(4)
 				end
@@ -382,24 +400,33 @@ local passing_self_timer = Timer{
 		end
 		
 		if not(lane3 and lane4) then
-			if lane3 then rand = pos[4]
-			elseif lane4 then rand = pos[3]
-			else rand = pos[math.random(3,4)]
+			if lane3 then rand = 4
+			elseif lane4 then rand = 3
+			else rand = math.random(3,4)
 			end
-			table.insert(other_cars,
-				make_car(
-					road.newest_segment,
-					{
-						road.newest_segment.x,
-						road.newest_segment.y,
-						road.newest_segment.z_rotation[1]
-					},
-					rand
-				)
+            
+            old_car = other_cars.tail
+            car = make_car(
+				road.newest_segment,
+				{
+					road.newest_segment.x,
+					road.newest_segment.y,
+					road.newest_segment.z_rotation[1]
+				},
+				lane_pos[rand]
 			)
-			world.cars:add(other_cars[#other_cars])
-			other_cars[#other_cars]:lower_to_bottom()
-            Idle_Loop:add_function(other_cars[#other_cars].move,other_cars[#other_cars])
+			
+            world.cars:add(car)
+            car_y = car.y
+            while(old_car ~= nil and old_car.y < car_y) do
+                old_car = other_cars.list[old_car].prev
+            end
+            
+            other_cars:insert(car,old_car)
+            
+			world.cars:lower_child(car,old_car)
+			
+            Idle_Loop:add_function(car.move,car)
 		end
 	end
 }
@@ -407,10 +434,27 @@ passing_self_timer:stop()
 local on_coming_self_timer = Timer{
 	interval = spawn_passing_self_thresh,
 	on_timer = function()
-		table.insert(other_cars,make_car(road.newest_segment,Game_State.end_point,pos[math.random(1,2)]))
-		world.cars:add(other_cars[#other_cars])
-        other_cars[#other_cars]:lower_to_bottom()
-		Idle_Loop:add_function(other_cars[#other_cars].move,other_cars[#other_cars])
+        
+        rand = math.random(1,2)
+        old_car = other_cars.tail
+        car = make_car(
+			road.newest_segment,
+			Game_State.end_point,
+			lane_pos[rand]
+		)
+		
+        world.cars:add(car)
+        car_y = car.y
+        while(old_car ~= nil and old_car.y < car_y) do
+            old_car = other_cars.list[old_car].prev
+        end
+        
+        other_cars:insert(car,old_car)
+        
+		world.cars:lower_child(car,old_car)
+		
+        Idle_Loop:add_function(car.move,car)
+        
 	end
 }
 on_coming_self_timer:stop()
@@ -428,19 +472,20 @@ Game_State:add_state_change_function(
 )
 Game_State:add_state_change_function(
     function(old_state,new_state)
-        for i = #other_cars,1,-1 do
-            Idle_Loop:remove_function(other_cars[i].move)
-            other_cars[i]:unparent()
-            other_cars[i] = nil
+        for car,car_node in pairs(other_cars.list) do
+        --for i = #other_cars,1,-1 do
+            car:remove()
         end
+        other_cars:clear()
     end,
     STATES.CRASH,
     STATES.PLAYING
 )
 Game_State:add_state_change_function(
     function(old_state,new_state)
-        for i = #other_cars,1,-1 do
-            Idle_Loop:add_function(other_cars[i].move,other_cars[i])
+        for car,car_node in pairs(other_cars.list) do
+        --for i = #other_cars,1,-1 do
+            Idle_Loop:add_function(car.move,car)
         end
     end,
     STATES.PAUSED,
@@ -457,8 +502,9 @@ Game_State:add_state_change_function(
 )
 Game_State:add_state_change_function(
     function(old_state,new_state)
-        for i = #other_cars,1,-1 do
-            Idle_Loop:remove_function(other_cars[i].move)
+        for car,car_node in pairs(other_cars.list) do
+        --for i = #other_cars,1,-1 do
+            Idle_Loop:remove_function(car.move)
         end
     end,
     STATES.PLAYING,
