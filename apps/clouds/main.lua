@@ -13,6 +13,7 @@ local make_cloud_layer = function()
         local cloud = Clone { source = cloud_img }
         cloud.anchor_point = { cloud.w/2, cloud.h/2 }
         cloud.z_rotation = { math.random(0,360), 0, 0 }
+        cloud.y_rotation = { math.random(-30,30), 0, 0 }
         cloud.x = math.random(i*(screen.w*2)/NUM_CLOUDS - screen.w/2 - cloud.w/2, i*(screen.w*2)/NUM_CLOUDS + - screen.w/2 - cloud.w/2)
         local my_random=0
         while(my_random<=0) do my_random = math.random() end
