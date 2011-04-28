@@ -2660,7 +2660,7 @@ rect_up = Rectangle
 
 img_up = Image
 	{
-		src = "assets/left.png",
+		src = "/lib/assets/left.png",
 		scale = {l_scale,l_scale,0,0},
 		z_rotation = {90,0,0},
 		anchor_point = {0,0},
@@ -2703,7 +2703,7 @@ rect_down = Rectangle
 
 img_down = Image
 	{
-		src = "assets/left.png",
+		src = "lib/assets/left.png",
 		scale = {l_scale,l_scale,0,0},
 		z_rotation = {270,0,0},
 		anchor_point = {0,0},
