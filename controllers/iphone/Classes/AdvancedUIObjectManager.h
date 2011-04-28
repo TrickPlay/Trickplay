@@ -11,6 +11,7 @@
 #import "GestureViewController.h"
 #import "TrickplayImage.h"
 #import "TrickplayRectangle.h"
+#import "TrickplayText.h"
 
 @interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate> {
     NSMutableDictionary *rectangles;

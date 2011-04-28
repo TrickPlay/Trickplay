@@ -16,9 +16,30 @@
         self.view = [[[UITextField alloc] init] autorelease];
         
         [self setValuesFromArgs:args];
+        
+        [self addSubview:view];
     }
     
     return self;
+}
+
+/**
+ * Getter function
+ */
+
+- (void)getValuesFromArgs:(NSDictionary *)args {
+    [super getValuesFromArgs:args];
+}
+
+/**
+ * Setter function
+ */
+
+- (void)setValuesFromArgs:(NSDictionary *)args {
+    [super setValuesFromArgs:args];
+    
+    [self setTextFromArgs:args];
+    [self setTextColorFromArgs:args];
 }
 
 

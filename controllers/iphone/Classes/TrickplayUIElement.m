@@ -199,7 +199,6 @@
  */
 
 - (void)setRotationsFromArgs:(NSDictionary *)args {
-    NSLog(@"first");
     if ([args objectForKey:@"x_rotation"]) {
         NSNumber *x_rotation = [(NSArray *)[args objectForKey:@"x_rotation"] objectAtIndex:0];
         x_rotation = [NSNumber numberWithFloat:[x_rotation floatValue] * M_PI/180.0];
@@ -211,7 +210,6 @@
         [view.layer setValue:y_rotation forKeyPath:@"transform.rotation.y"];
     }
     if ([args objectForKey:@"z_rotation"]) {
-        NSLog(@"second");
         NSNumber *z_rotation = [(NSArray *)[args objectForKey:@"z_rotation"] objectAtIndex:0];
         z_rotation = [NSNumber numberWithFloat:[z_rotation floatValue] * M_PI/180.0];
         [view.layer setValue:z_rotation forKeyPath:@"transform.rotation.z"];
@@ -232,22 +230,50 @@
 
 /**
  * Set a clip.
+ *
+ * Clip creates a bounding box relative to this objects frame.origin
+ * ((0.0, 0.0) upper left hand corner of screen). Nothing from the objects
+ * view is drawn outside the bounding box and changing the view's position,
+ * size, and anchor point has no affect on the bounding box.
  */
 
 - (void)setClipFromArgs:(NSDictionary *)args {
     self.clip = [args objectForKey:@"clip"];
     
     if (clip) {
+        NSLog(@"view: %@", self);
         CGFloat
         clip_x = [(NSNumber *)[clip objectAtIndex:0] floatValue],
         clip_y = [(NSNumber *)[clip objectAtIndex:1] floatValue],
         clip_w = [(NSNumber *)[clip objectAtIndex:2] floatValue],
         clip_h = [(NSNumber *)[clip objectAtIndex:3] floatValue];
         // create the bounding box
-        self.layer.bounds = CGRectMake(clip_x, clip_y, clip_w, clip_h);
-        // adjust the view to the coordinate system of the bounding box
-        self.layer.masksToBounds = YES;
+        
+        /* for testing
+        NSLog(@"clip before: %f, %f, %f, %f", self.layer.bounds.origin.x, self.layer.bounds.origin.y, self.layer.bounds.size.width, self.layer.bounds.size.height);
+        NSLog(@"Frame before: %f, %f, %f, %f", self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
+        //*/
+        
+        self.bounds = CGRectMake(clip_x, clip_y, clip_w, clip_h);
+        self.layer.position = CGPointMake(clip_x + clip_w/2.0, clip_y + clip_h/2.0);
+        
+        /* for testing
+        NSLog(@"clip after: %f, %f, %f, %f", self.layer.bounds.origin.x, self.layer.bounds.origin.y, self.layer.bounds.size.width, self.layer.bounds.size.height);
+        NSLog(@"Frame after: %f, %f, %f, %f", self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
+        //*/
+        
+        // clip the view to the bounding box
+        self.clipsToBounds = YES;
     }
+}
+
+
+/**
+ * Getter function
+ */
+
+- (void)getValuesFromArgs:(NSDictionary *)args {
+    
 }
 
 
@@ -263,11 +289,13 @@
     [self setScaleFromArgs:args];
     [self setRotationsFromArgs:args];
     [self setOpacityFromArgs:args];
+    [self setClipFromArgs:args];
 }
 
 
 - (void)dealloc {
     self.view = nil;
+    self.clip = nil;
     
     [super dealloc];
 }
