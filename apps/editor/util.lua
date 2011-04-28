@@ -607,8 +607,8 @@ function create_on_button_down_f(v)
 		             if (v.extra.is_in_group == true) then
 			     group_pos = get_group_position(v)
 			     	if group_pos then 
-	                     		border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
-	                     		am.position = {am.x + group_pos[1], am.y + group_pos[2]}
+					if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
+	                     		if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
 				end
 		             else 
 	                     border.position = {x -dx, y -dy}
