@@ -5,10 +5,18 @@
 #include "common.h"
 #include "util.h"
 
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "DB"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
+//.............................................................................
+
 namespace SQLite
 {
-    Debug_ON db_debug;
-
     Error::Error()
         :
         db( NULL ),
@@ -59,7 +67,7 @@ namespace SQLite
 
         error = new_error;
         msg = sqlite3_errmsg( db );
-        g_warning( "SQLITE : %s", msg.c_str() );
+        tpwarn( "SQLITE : %s", msg.c_str() );
         return error;
     }
 
@@ -82,7 +90,7 @@ namespace SQLite
 
         error = other.error;
         msg = other.msg;
-        g_warning( "SQLITE : %s", msg.c_str() );
+        tpwarn( "SQLITE : %s", msg.c_str() );
         return error;
     }
 
@@ -185,7 +193,7 @@ namespace SQLite
             {
                 // They have the same schema hash, we are done
 
-                db_debug( "SCHEMA HASH MATCHES, NO MIGRATION NEEDED" );
+                tplog( "SCHEMA HASH MATCHES, NO MIGRATION NEEDED" );
 
                 return false;
             }
@@ -194,11 +202,11 @@ namespace SQLite
 
             if ( ! select_hash.ok() )
             {
-                db_debug( "UNABLE TO FETCH OLD SCHEMA VERSION, MIGRATING" );
+                tplog( "UNABLE TO FETCH OLD SCHEMA VERSION, MIGRATING" );
             }
             else
             {
-                db_debug( "SCHEMA VERSION DOES NOT MATCH, MIGRATING" );
+                tplog( "SCHEMA VERSION DOES NOT MATCH, MIGRATING" );
             }
 
             // OK, the schema hash is not the same, we need to migrate
@@ -232,7 +240,7 @@ namespace SQLite
             {
                 String table_name( *it );
 
-                db_debug( "MIGRATING TABLE '%s'", table_name.c_str() );
+                tplog( "MIGRATING TABLE '%s'", table_name.c_str() );
 
                 // Get the columns for this table in the source database
 
@@ -264,7 +272,7 @@ namespace SQLite
 
                 if ( dest_columns.empty() )
                 {
-                    db_debug( "  DOES NOT EXIST IN DESTINATION DB, SKIPPING" );
+                    tplog( "  DOES NOT EXIST IN DESTINATION DB, SKIPPING" );
 
                     continue;
                 }
@@ -283,7 +291,7 @@ namespace SQLite
 
                 if ( columns.empty() )
                 {
-                    db_debug( "  NO COLUMNS IN COMMON, SKIPPING" );
+                    tplog( "  NO COLUMNS IN COMMON, SKIPPING" );
 
                     continue;
                 }
@@ -339,7 +347,7 @@ namespace SQLite
                     ++rows;
                 }
 
-                db_debug( "  MIGRATED %d ROW(S)", rows );
+                tplog( "  MIGRATED %d ROW(S)", rows );
             }
 
             // Now create the schema version in the new database
@@ -366,7 +374,7 @@ namespace SQLite
         }
         catch( const String & e )
         {
-            g_warning( "DATABASE MIGRATION FAILED : %s", e.c_str() );
+            tpwarn( "DATABASE MIGRATION FAILED : %s", e.c_str() );
         }
 
         return false;

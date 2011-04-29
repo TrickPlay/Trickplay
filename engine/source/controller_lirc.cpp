@@ -8,7 +8,11 @@
 
 //.............................................................................
 
-static Debug_ON log( "LIRC" );
+#define TP_LOG_DOMAIN   "LIRC"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //.............................................................................
 
@@ -45,7 +49,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
 
     if ( ! socket_address )
     {
-        log( "FAILED TO CREATE SOCKET ADDRESS WITH '%d'" , uds );
+        tpwarn( "FAILED TO CREATE SOCKET ADDRESS WITH '%d'" , uds );
         return;
     }
 
@@ -62,7 +66,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
 
     if ( ! connection )
     {
-        log( "FAILED TO CONNECT TO LIRC SOCKET" );
+        tplog( "FAILED TO CONNECT TO LIRC SOCKET" );
         return;
     }
 
@@ -131,7 +135,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
 
     timer = g_timer_new();
 
-    log( "READY" );
+    tplog( "READY" );
 }
 
 //.............................................................................
@@ -174,7 +178,7 @@ void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result )
 
     if ( error )
     {
-        log( "READ ERROR : %s" , error->message );
+        tplog( "READ ERROR : %s" , error->message );
         g_clear_error( & error );
         g_object_unref( connection );
         connection = 0;

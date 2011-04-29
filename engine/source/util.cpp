@@ -6,6 +6,16 @@
 
 #include "util.h"
 
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "ACTION"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
+//.............................................................................
+
 static String make_uuid( unsigned int mode )
 {
     String result;
@@ -46,11 +56,9 @@ String Util::make_v4_uuid()
 
 //-----------------------------------------------------------------------------
 
-static Debug_OFF al( "ACTION" );
-
 Action::~Action()
 {
-    al( "DESTROYING ACTION %p" , this );
+    tplog( "DESTROYING ACTION %p" , this );
 }
 
 void Action::destroy( gpointer action )
@@ -66,12 +74,12 @@ guint Action::post( Action * action , int interval_ms )
 
     if ( interval_ms < 0 )
     {
-        al( "POSTING IDLE ACTION %p" , action );
+        tplog( "POSTING IDLE ACTION %p" , action );
 
         return g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , destroy );
     }
 
-    al( "POSTING TIMEOUT ACTION %p EVERY %d ms" , action , interval_ms );
+    tplog( "POSTING TIMEOUT ACTION %p EVERY %d ms" , action , interval_ms );
 
     return g_timeout_add_full( TRICKPLAY_PRIORITY , guint( interval_ms ) , ( GSourceFunc ) run_internal , action , destroy );
 }
@@ -81,7 +89,7 @@ void Action::push( GAsyncQueue * queue , Action * action )
     g_assert( queue );
     g_assert( action );
 
-    al( "QUEUEING ACTION %p IN QUEUE %p" , action , queue );
+    tplog( "QUEUEING ACTION %p IN QUEUE %p" , action , queue );
 
     g_async_queue_push( queue , action );
 }
@@ -170,7 +178,7 @@ void Action::post_run_all( GAsyncQueue * queue )
 
 gboolean Action::run_internal( Action * action )
 {
-    al( "RUNNING ACTION %p" , action );
+    tplog( "RUNNING ACTION %p" , action );
 
     return action->run() ? TRUE : FALSE;
 }

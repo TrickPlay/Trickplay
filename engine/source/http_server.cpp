@@ -9,10 +9,15 @@
 #include <iostream>
 #include <cstdlib>
 #include "http_server.h"
-#include "util.h"
 
-Debug_ON log( "HTTP-SERVER" );
-Debug_OFF log2( "HTTP-SERVER" );
+
+//=============================================================================
+
+#define TP_LOG_DOMAIN   "HTTP-SERVER"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //=============================================================================
 
@@ -20,7 +25,7 @@ HttpServer::HttpServer( guint16 port ) : server( NULL )
 {
 	server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
 
-	log( "READY ON PORT %u" , soup_server_get_port( server ) );
+	tplog( "READY ON PORT %u" , soup_server_get_port( server ) );
 
 	soup_server_run_async( server );
 }
@@ -35,7 +40,7 @@ HttpServer::~HttpServer()
 
 		g_object_unref( server );
 
-		log( "SHUTDOWN" );
+		tplog2( "SHUTDOWN" );
 	}
 }
 
@@ -59,7 +64,7 @@ void HttpServer::register_handler( const String & path , RequestHandler * handle
 			new HandlerUserData( this , handler ),
 			( GDestroyNotify ) HandlerUserData::destroy );
 
-    log( "ADDED HANDLER FOR %s" , path.c_str() );
+    tplog2( "ADDED HANDLER FOR %s" , path.c_str() );
 }
 
 //-----------------------------------------------------------------------------
@@ -68,7 +73,7 @@ void HttpServer::unregister_handler( const String & path )
 {
     soup_server_remove_handler( server , path.c_str() );
 
-    log( "REMOVED HANDLER FOR %s" , path.c_str() );
+    tplog2( "REMOVED HANDLER FOR %s" , path.c_str() );
 }
 
 //=============================================================================
@@ -352,7 +357,7 @@ public:
         wrote_chunk_handler = g_signal_connect( ctx.message , "wrote_chunk", G_CALLBACK( message_wrote_chunk ) , this );
         finished_handler = g_signal_connect( ctx.message , "finished", G_CALLBACK( message_finished ) , this );
 
-        log2( "CREATED RESPONSE BODY %p" , this );
+        tplog2( "CREATED RESPONSE BODY %p" , this );
     }
 
     ~StreamBody()
@@ -373,7 +378,7 @@ public:
 
         delete stream_writer;
 
-        log2( "DESTROYED RESPONSE BODY %p" , this );
+        tplog2( "DESTROYED RESPONSE BODY %p" , this );
     }
 
     void append( const char * data , gsize size )
@@ -381,14 +386,14 @@ public:
         g_assert( data );
         g_assert( size );
 
-        log2( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
+        tplog2( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
 
         soup_message_body_append( ctx.message->response_body , SOUP_MEMORY_COPY , data , size );
     }
 
     void complete()
     {
-        log2( "RESPONSE BODY %p COMPLETE" , this );
+        tplog2( "RESPONSE BODY %p COMPLETE" , this );
 
         soup_message_body_complete( ctx.message->response_body );
 
@@ -401,7 +406,7 @@ public:
 
     void cancel()
     {
-        log2( "RESPONSE BODY %p CANCEL" , this );
+        tplog2( "RESPONSE BODY %p CANCEL" , this );
 
         soup_socket_disconnect( soup_client_context_get_socket( ctx.client ) );
     }
@@ -411,13 +416,13 @@ private:
 
     static void message_wrote_chunk( SoupMessage * msg , StreamBody * self )
     {
-        log2( "RESPONSE BODY %p WROTE CHUNK" , self );
+        tplog2( "RESPONSE BODY %p WROTE CHUNK" , self );
 
         self->stream_writer->write( * self );
     }
     static void message_finished( SoupMessage * msg , StreamBody * self )
     {
-        log2( "RESPONSE BODY %p FINISHED" , self );
+        tplog2( "RESPONSE BODY %p FINISHED" , self );
 
         delete self;
     }
@@ -609,7 +614,7 @@ void HttpServer::soup_server_callback(
         gpointer user_data
         )
 {
-    log( "%s [%s]" , msg->method , path );
+    tplog( "%s [%s]" , msg->method , path );
 
     soup_message_set_status( msg , HttpServer::HTTP_STATUS_NOT_FOUND );
 
@@ -641,5 +646,5 @@ void HttpServer::soup_server_callback(
         ud->handler->handle_http_delete( request , response );
     }
 
-    log( ">> %u %s" , msg->status_code , msg->reason_phrase );
+    tplog( ">> %u %s" , msg->status_code , msg->reason_phrase );
 }
