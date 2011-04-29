@@ -65,7 +65,7 @@ if (UNIX AND NOT APPLE)
         
         set(CPACK_PACKAGE_NAME "trickplay-sdk")
         
-        set(CPACK_PACKAGE_VERSION "${TP_VERSION}")
+        set(CPACK_PACKAGE_VERSION "${GIT_CURRENT_TAG}")
         
         set(CPACK_STRIP_FILES 1)
         
