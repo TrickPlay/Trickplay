@@ -45,9 +45,9 @@ endif (NOT GIT_CURRENT_TAG)
 
 string(REPLACE "\n" ", " GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
 
-set(GIT_VERSION "${GIT_CURRENT_REVISION} (${GIT_CURRENT_TAG})")
+set(GIT_VERSION "${GIT_CURRENT_TAG}")
 
-message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION} - GIT REVISION ${GIT_VERSION}" )
+message( STATUS "TRICKPLAY VERSION IS ${GIT_VERSION}" )
 
 #------------------------------------------------------------------------------
 # When building with a toolchain, it is implied that we will only build
