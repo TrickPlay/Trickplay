@@ -25,19 +25,6 @@ set( TP_UPNP_CLIENT 1 )
 
 include(util.cmake)
 
-#------------------------------------------------------------------------------
-# Read our version from trickplay.h
-
-file(STRINGS engine/public/include/trickplay/trickplay.h TP_MAJOR_VERSION REGEX "^#define.*TP_MAJOR_VERSION.*")
-file(STRINGS engine/public/include/trickplay/trickplay.h TP_MINOR_VERSION REGEX "^#define.*TP_MINOR_VERSION.*")
-file(STRINGS engine/public/include/trickplay/trickplay.h TP_PATCH_VERSION REGEX "^#define.*TP_PATCH_VERSION.*")
-
-string(REGEX REPLACE "^#define.*TP_MAJOR_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_MAJOR_VERSION "${TP_MAJOR_VERSION}")
-string(REGEX REPLACE "^#define.*TP_MINOR_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_MINOR_VERSION "${TP_MINOR_VERSION}")
-string(REGEX REPLACE "^#define.*TP_PATCH_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_PATCH_VERSION "${TP_PATCH_VERSION}")
-
-set(TP_VERSION "${TP_MAJOR_VERSION}.${TP_MINOR_VERSION}.${TP_PATCH_VERSION}")
-
 execute_process(
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 	COMMAND git log -1 --pretty=format:%h
