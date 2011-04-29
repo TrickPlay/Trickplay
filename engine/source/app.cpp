@@ -9,7 +9,13 @@
 #include "json.h"
 #include "common.h"
 
-static Debug_OFF ai( "APP-IMAGE" );
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "APP"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //-----------------------------------------------------------------------------
 #define APP_TABLE_NAME          "app"
@@ -1614,7 +1620,7 @@ gboolean App::animate_out_callback( gpointer s )
 
 Image * App::load_image( const gchar * source )
 {
-    ai( "LOADING SYNC '%s'" , source );
+    tplog( "LOADING SYNC '%s'" , source );
 
     if ( ! source )
     {
@@ -1627,7 +1633,7 @@ Image * App::load_image( const gchar * source )
 
     if ( ! path )
     {
-        ai( "  INVALID PATH" );
+        tplog( "  INVALID PATH" );
         return 0;
     }
 
@@ -1637,7 +1643,7 @@ Image * App::load_image( const gchar * source )
 
     if ( is_uri )
     {
-        ai( "  STARTING REQUEST" );
+        tplog( "  STARTING REQUEST" );
 
         Network::Request request( get_user_agent(), path );
 
@@ -1645,24 +1651,24 @@ Image * App::load_image( const gchar * source )
 
         if ( ! response.failed && response.body->len > 0 )
         {
-            ai( "  DECODING" );
+            tplog( "  DECODING" );
 
             image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
         }
         else
         {
-            ai( "  REQUEST FAILED" );
+            tplog( "  REQUEST FAILED" );
         }
     }
     else
     {
-        ai( "  PATH IS '%s'" , path );
-        ai( "  DECODING" );
+        tplog( "  PATH IS '%s'" , path );
+        tplog( "  DECODING" );
 
         image = Image::decode( path );
     }
 
-    ai( "  %s" , image ? "SUCCEEDED" : "FAILED" );
+    tplog( "  %s" , image ? "SUCCEEDED" : "FAILED" );
 
     return image;
 }
@@ -1685,13 +1691,13 @@ public:
 
         if ( response.failed || response.body->len == 0 )
         {
-            ai( "  REQUEST FAILED" );
+            tplog( "  REQUEST FAILED" );
 
             self->callback( 0 , self->user );
         }
         else
         {
-            ai( "  STARTING DECODE FOM BUFFER" );
+            tplog( "  STARTING DECODE FOM BUFFER" );
 
             Image::decode_async( response.body ,
                     response.get_header( "Content-Type" ),
@@ -1725,7 +1731,7 @@ private:
 
 bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
-    ai( "LOADING ASYNC '%s'" , source );
+    tplog( "LOADING ASYNC '%s'" , source );
 
     if ( ! source )
     {
@@ -1738,7 +1744,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
 
     if ( ! path )
     {
-        ai( "  INVALID PATH" );
+        tplog( "  INVALID PATH" );
         return false;
     }
 
@@ -1746,7 +1752,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
 
     if ( is_uri )
     {
-        ai( "  STARTING NETWORK REQUEST" );
+        tplog( "  STARTING NETWORK REQUEST" );
 
         Network::Request request( get_user_agent(), path );
 
@@ -1759,8 +1765,8 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
     }
     else
     {
-        ai( "  PATH IS '%s'" , path );
-        ai( "  STARTING DECODE FROM FILE" );
+        tplog( "  PATH IS '%s'" , path );
+        tplog( "  STARTING DECODE FROM FILE" );
 
         Image::decode_async( path , callback , user , destroy_notify );
     }

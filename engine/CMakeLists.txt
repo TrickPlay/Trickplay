@@ -452,6 +452,7 @@ list( APPEND
     ${ENGINE_SRC}/source/toast.cpp
     ${ENGINE_SRC}/source/http_server.cpp
     ${ENGINE_SRC}/source/http_trickplay_api_support.cpp
+    ${ENGINE_SRC}/source/log.cpp
 )
 
 #------------------------------------------------------------------------------
