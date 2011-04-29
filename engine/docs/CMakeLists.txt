@@ -8,7 +8,7 @@ if (NATURAL_DOCS)
         COMMENT "Generating documentation"
 	VERBATIM
 
-	COMMAND sed -e "s/__REPLACE_ME_VERSION_TAG__/${GIT_VERSION})/"
+	COMMAND sed -e "s!__REPLACE_ME_VERSION_TAG__!${GIT_VERSION})!"
 			 ${PROJECT_SOURCE_DIR}/engine/docs/apps/nd/Menu.txt.src
 			 > ${PROJECT_SOURCE_DIR}/engine/docs/apps/nd/Menu.txt
 
