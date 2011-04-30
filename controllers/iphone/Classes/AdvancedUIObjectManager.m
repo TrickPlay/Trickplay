@@ -78,6 +78,20 @@
 
 
 /**
+ * Creates Groups and stores them
+ */
+
+- (void)createGroup:(NSString *)groupID withArgs:(NSDictionary *)args {
+    TrickplayGroup *group = [[[TrickplayGroup alloc] initWithID:groupID args:args resourceManager:resourceManager] autorelease];
+    
+    NSLog(@"Group created: %@", group);
+    [groups setObject:group forKey:groupID];
+    
+    [view addSubview:group];
+}
+
+
+/**
  * Object creation function.
  */
 
@@ -99,6 +113,9 @@
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
             [self createText:(NSString *)[object objectForKey:@"id"]
                      withArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
+            [self createGroup:(NSString *)[object objectForKey:@"id"]
+                    withArgs:object];
         }
     }
 }
@@ -124,6 +141,12 @@
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
             [[textFields objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
             [textFields removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
+            for (TrickplayGroup *group in groups) {
+                [group.manager destroyObjects:JSON_Array];
+            }
+            [[groups objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
+            [groups removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
         }
     }
 }
@@ -144,6 +167,11 @@
             [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
             [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
+            for (TrickplayGroup *group in groups) {
+                [group.manager setValuesForObjects:JSON_Array];
+            }
+            [(TrickplayUIElement *)[groups objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
         }
     }
 }
@@ -162,7 +190,9 @@
             [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
         } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
             [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
-        }    
+        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
+            [(TrickplayUIElement *)[groups objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
+        }
     }
 }
 

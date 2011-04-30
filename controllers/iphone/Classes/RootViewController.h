@@ -15,7 +15,7 @@
 UITableViewDataSource, UINavigationControllerDelegate,
 NetServiceManagerDelegate> {
     UIWindow *window;
-    //UINavigationController *navigationController;
+
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
     AppBrowserViewController *appBrowserViewController;

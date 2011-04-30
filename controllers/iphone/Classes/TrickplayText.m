@@ -82,4 +82,10 @@
     ((UITextField *)view).textColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
 }
 
+- (void)dealloc {
+    NSLog(@"TrickplayText dealloc");
+    
+    [super dealloc];
+}
+
 @end
