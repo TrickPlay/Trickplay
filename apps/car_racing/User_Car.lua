@@ -65,16 +65,44 @@ Game_State:add_state_change_function(
 
 --Function for updating velocities based on user input
 do
+    --[[
     local accel_rates = {
         30/1.71,
         60/4.13,
         100/9.02,
         200/24,
     }
+    --]]
     --current rate
-    local curr_accel_rate = accel_rates[1]
+    local curr_accel_rate = 0
     
     local acceleration_from_velocity = function(self)
+        
+        if     self.v_y > 200*PIXELS_PER_MILE then self.v_y        = 200*PIXELS_PER_MILE
+        elseif self.v_y <   0                 then self.v_y        = 0
+        end
+        
+        --Gallardo reaches 200 mph in 30 seconds
+        ----using sin to simulate reduction in acceleration at higher speeds
+        --
+        --v(t) = 200*sin(pi/2*t/30)
+        --a(t) = ddx v(t)
+        --a(t) = 10/3*pi*cos(pi*t/60)
+        --
+        --invert v(t)
+        --t = 60/pi*asin(v/200)
+        --
+        --plug into a(t):
+        --a = 10/3*pi*cos(pi*(60/pi*asin(v/200))/60)
+        
+        curr_accel_rate =
+            10/3*math.pi*math.cos(
+                math.pi*(60/math.pi*math.asin(
+                    self.v_y/(200*PIXELS_PER_MILE)
+                ))/60
+            )
+        --print(self.v_y,curr_accel_rate)
+        --[[
         if     self.v_y > 200*PIXELS_PER_MILE then self.v_y        = 200*PIXELS_PER_MILE
                                                    curr_accel_rate = accel_rates[4]
         elseif self.v_y > 100*PIXELS_PER_MILE then curr_accel_rate = accel_rates[4]
@@ -85,6 +113,7 @@ do
         elseif self.v_y <   0                 then self.v_y        = 0
                                                    curr_accel_rate = accel_rates[1]
         end
+        --]]
     end
     user_car.driver_io= function(self,msecs)
         --update y-velocity
@@ -95,18 +124,17 @@ do
         
         
         --turn on tail lights if braking, decay the io.throttle_position
-        if io.throttle_position < 2 then
+        if io.throttle_position < 1 then
             io.throttle_position = io.throttle_position + 20*msecs/1000
             tail_lights.opacity = 255
         else
-            io.throttle_position = 2
+            io.throttle_position = 1
             tail_lights.opacity = 0
         end
         
         --update x-velocity
         self.v_x = self.v_y/5*io.turn_impulse + self.v_x
-        --update distance from the center of the road
-        self.dx = self.dx + self.v_x*msecs/1000
+        
         --if on or beyond the shoulder,
         --then your car receives heavy resistance
         if math.abs(self.dx) > STRAFE_CAP then
@@ -169,6 +197,8 @@ do
     
     user_car.update_position_on_path=function(self,msecs)
         assert(road.curr_segment ~= nil)
+        --update distance from the center of the road
+        self.dx = self.dx + self.v_x*msecs/1000
         dy = self.v_y*msecs/1000
         dr = curr_path.rot*dy/curr_path.dist --relative to amount travelled
         
@@ -208,6 +238,37 @@ do
         dr_remaining_in_path = dr_remaining_in_path - dr
     end
     
+    user_car.post_collision = function(self,msecs)
+        self.dx = self.dx + self.v_x*msecs/1000
+        dy = self.v_y*msecs/1000
+        
+        world:move(dy,self.dx,0,0)
+        
+        if self.v_x > 0 then
+            self.v_x = self.v_x - 10 * msecs
+            if self.v_x < 1 then
+                self.v_x = 1
+            end
+        else
+            self.v_x = self.v_x + 10 * msecs
+            if self.v_x > -1 then
+                self.v_x = -1
+            end
+        end
+        
+        if self.v_y > 0 then
+            self.v_y = self.v_y - 10 * msecs
+            if self.v_y < 1 then
+                self.v_y =  1
+            end
+        else
+            self.v_y = self.v_y + 10 * msecs
+            if self.v_y > -1 then
+                self.v_y = -1
+            end
+        end
+    end
+    
     --method to initialize the upvals
     user_car.set_curr_path = function(self,curr_segment)
         curr_path = road.segments[curr_segment]
@@ -231,6 +292,20 @@ Game_State:add_state_change_function(
         Idle_Loop:remove_function(user_car.update_position_on_path)
     end,
     STATES.PLAYING,
+    nil
+)
+Game_State:add_state_change_function(
+    function(old_state,new_state)
+        Idle_Loop:add_function(user_car.post_collision,user_car)
+    end,
+    nil,
+    STATES.CRASH
+)
+Game_State:add_state_change_function(
+    function(old_state,new_state)
+        Idle_Loop:remove_function(user_car.post_collision)
+    end,
+    STATES.CRASH,
     nil
 )
 screen:add(user_car,tail_lights)

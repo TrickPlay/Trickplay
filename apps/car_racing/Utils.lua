@@ -55,7 +55,10 @@ local delete_data_element = function(self,old_object)
     
     assert(type(self)      == "table")
     assert(type(self.list) == "table")
-    assert(self.list[old_object] ~= nil)
+    if self.list[old_object] == nil then
+        print("Warning. trying to delete object when object is not present")
+        return
+    end
     
     if  self.head == old_object then
         self.head = self.list[old_object].next
