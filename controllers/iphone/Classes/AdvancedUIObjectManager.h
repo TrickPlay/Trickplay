@@ -12,6 +12,7 @@
 #import "TrickplayImage.h"
 #import "TrickplayRectangle.h"
 #import "TrickplayText.h"
+#import "TrickplayGroup.h"
 
 @interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate> {
     NSMutableDictionary *rectangles;

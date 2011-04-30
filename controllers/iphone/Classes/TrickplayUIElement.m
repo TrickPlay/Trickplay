@@ -297,6 +297,10 @@
     self.view = nil;
     self.clip = nil;
     
+    if ([self superview]) {
+        [self removeFromSuperview];
+    }
+    
     [super dealloc];
 }
 

@@ -12,7 +12,6 @@
 @implementation RootViewController
 
 @synthesize window;
-//@synthesize navigationController;
 
 
 #pragma mark -
