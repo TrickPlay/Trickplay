@@ -90,7 +90,10 @@ do
     
     
 	Game_State.change_state_to = function(self, new_state)
-		assert(current_state ~= new_state, "Attempting to assign a state change function for same state")
+		if current_state == new_state then
+			print("warning changing state to current state")
+			return
+		end
 		assert(states_r[new_state] ~= nil, tostring(new_state).." is not a State")
 		print("changing state")
 		for i,func in ipairs(state_change_functions[current_state][new_state]) do

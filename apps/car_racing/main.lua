@@ -115,6 +115,10 @@ local function main()
 	app.on_closing = function()
 		settings.highscore = highscore
 	end
+	
+	--remove any temporary variables,tables, or functions that were created in
+	--the setting up of this app
+	collectgarbage("collect")
 end
 -------------------------------------------------------------------------------
 
