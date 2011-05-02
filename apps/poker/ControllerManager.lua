@@ -206,7 +206,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:clear_and_set_background("bkg")
             controller:add_image("hdr_name_dog", 109, 30, 422, 50)
             controller:add_image("dog_"..pos, 192, 100, 256, 256)
-            if controller:enter_text("Name Your Dog", "Name Your Dog") then
+            if controller.has_text_entry
+            and controller:enter_text("Name Your Dog", "Name Your Dog") then
                 function controller:on_ui_event(text)
                     if text ~= "" and text ~= "Name Your Dog" then
                         controller.player.status:update_name(text)
@@ -217,6 +218,16 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             end
 
             controller.state = ControllerStates.NAME_DOG
+        end
+
+        function controller:photo_dog(pos)
+            print("giving dog a photo")
+            if controller.has_pictures
+            and controller:submit_picture() then
+                function controller:on_picture(bitmap)
+                    
+                end
+            end
         end
 
         function controller:waiting_room()
