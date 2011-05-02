@@ -1,4 +1,4 @@
---print = function() end
+print = function() end
 
 local splash_bg = Image{name="Splash BG", src = "splash.png" }
 
@@ -113,7 +113,7 @@ local function main()
 	
 	Idle_Loop:resume()
 	app.on_closing = function()
-		settings.highscore = highscore
+		settings.highscore = Game_State.highscore
 	end
 	
 	--remove any temporary variables,tables, or functions that were created in

@@ -121,15 +121,21 @@ function controllers.on_controller_connected( controllers , controller )
         print("Connected IPAD")
     end
 	
-	controller:set_ui_background("splash","STRETCH")
-	
-    Game_State:add_state_change_function(
-        function(old_state,new_state)
-			controller:set_ui_background("bg","STRETCH")
-		end,
-		STATES.SPLASH,
-		STATES.PLAYING
-    )
+	if Game_State.current_state() == STATES.LOADING or
+		Game_State.current_state() == STATES.SPLASH then
+		
+		controller:set_ui_background("splash","STRETCH")
+		
+		Game_State:add_state_change_function(
+			function(old_state,new_state)
+				controller:set_ui_background("bg","STRETCH")
+			end,
+			STATES.SPLASH,
+			STATES.PLAYING
+		)
+	else
+		controller:set_ui_background("bg","STRETCH")
+	end
     
     
     if controller.has_accelerometer then
