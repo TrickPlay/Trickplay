@@ -328,8 +328,14 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_SUBMIT_PICTURE	:
 		{
+		    TPControllerSubmitPicture * sp = ( TPControllerSubmitPicture * ) parameters;
 		    String path = start_post_endpoint( connection , PostInfo::PICTURES );
-			server->write_printf( connection, "PI\t%s\n" , path.c_str() + 1 );
+			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\n" ,
+			        path.c_str() + 1 ,
+			        sp->max_width ,
+			        sp->max_height ,
+			        sp->edit ? 1 : 0 ,
+			        sp->mask ? sp->mask : "" );
 			break;
 		}
 
@@ -487,7 +493,7 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts )
 {
-    static const char * PROTOCOL_VERSION = "32";
+    static const char * PROTOCOL_VERSION = "33";
 
     guint count = g_strv_length( parts );
 
