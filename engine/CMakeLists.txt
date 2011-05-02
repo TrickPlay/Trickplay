@@ -54,7 +54,7 @@ endif (TP_CONTROLLER_DISCOVERY_MDNS)
                     ${CAIRO_INCLUDE_DIRS}
                     ${PANGO_INCLUDE_DIRS}
                     ${CLUTTER_INCLUDE_DIRS}
-                    ${FONTCONFIG_INCLUDE_DIRS}/fontconfig
+                    ${FONTCONFIG_INCLUDE_DIRS}
                     ${FREETYPE2_INCLUDE_DIRS}
                     ${LIBPNG_INCLUDE_DIRS}
                     ${JSON_GLIB_INCLUDE_DIRS}
@@ -99,7 +99,7 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( cairo cairo.h						ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( pango-1.0 pango/pango.h			ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		ENGINE_INCLUDE_DIRS )
-    TP_FIND_INCLUDE( fontconfig fontconfig.h            ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( fontconfig fontconfig/fontconfig.h            ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( freetype2 freetype/freetype.h      ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( png.h								ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
