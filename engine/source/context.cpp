@@ -6,7 +6,7 @@
 #include "clutter/clutter.h"
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
-#include "fontconfig.h"
+#include "fontconfig/fontconfig.h"
 #include "sndfile.h"
 
 #include "trickplay/keys.h"
