@@ -2,7 +2,7 @@ include( FindPkgConfig )
 
 IF( PKG_CONFIG_FOUND )
     pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
-    pkg_check_modules(CLUTTER_GST REQUIRED clutter-gst-1.0)
+    pkg_search_modules(CLUTTER_GST REQUIRED clutter-gst-1.0 clutter-gst-0.10)
     pkg_check_modules(GSTREAMER REQUIRED gstreamer-0.10)
     pkg_check_modules(GSTVIDEO REQUIRED gstreamer-video-0.10)
     pkg_check_modules(GSTBASE REQUIRED gstreamer-base-0.10)
