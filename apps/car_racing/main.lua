@@ -1,4 +1,4 @@
-print = function() end
+--print = function() end
 
 local splash_bg = Image{name="Splash BG", src = "splash.png" }
 

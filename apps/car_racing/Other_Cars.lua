@@ -89,12 +89,12 @@ local post_collision = function(self,msecs)
     self.y = self.y + dx*sin(self.y_rot) + dy*cos(self.y_rot)
     
     if self.v_x > 0 then
-        self.v_x = self.v_x - 10 * msecs
+        self.v_x = self.v_x - 20 * msecs
         if self.v_x < 1 then
             self.v_x = self.orientation * 1
         end
     else
-        self.v_x = self.v_x + 10 * msecs
+        self.v_x = self.v_x + 20 * msecs
         if self.v_x > -1 then
             self.v_x = self.orientation * -1
         end
@@ -111,7 +111,7 @@ local post_collision = function(self,msecs)
             self.v_y = self.orientation * -1
         end
     end
-    print(self.v_y)
+    --print(self.v_y)
 end
 
 local remove_function = function(self)
@@ -313,10 +313,11 @@ local move_function = function(self,msecs)
         --user_car.crashed  = true
         end_game:raise_to_top()
         print("Print",coll_x,coll_y)
-        local new_coll_str_x = car_w/2-math.abs(coll_x)--(330-math.abs(coll_x))*coll_x/math.abs(coll_x)
-        local new_coll_str_y = car_len-(coll_y)
+        local new_coll_str_x = (screen_w/2-coll_x)--(330-math.abs(coll_x))*coll_x/math.abs(coll_x)
+        --new_coll_str_x = (car_w/2 - math.abs(new_coll_str_x)) * math.abs(new_coll_str_x) / new_coll_str_x
+        local new_coll_str_y = (car_len-coll_y)
         
-        local new_angle = math.atan2(new_coll_str_y,new_coll_str_x)*180/math.pi
+        local new_angle = -(math.atan2(new_coll_str_y,new_coll_str_x)*180/math.pi-90)
         print(new_coll_str_x,new_coll_str_y,new_angle)
         local new_mag = (user_car.v_y - self.v_y)*.6
         
@@ -324,32 +325,37 @@ local move_function = function(self,msecs)
         new_coll_str_y = new_mag*cos(new_angle)
         print(new_coll_str_y,new_coll_str_x,new_mag)
         
+        print("Old User",user_car.v_x,user_car.v_y,"Other",self.v_x,self.v_y)
+        user_car.v_x = user_car.v_x + new_coll_str_x
+        user_car.v_y = user_car.v_y - new_coll_str_y
+        
+        
         new_coll_str_x = new_coll_str_x + user_car.v_x
         new_coll_str_y = new_coll_str_y + user_car.v_y
         
         
         
-        collision_strength = -math.sqrt(
-            new_coll_str_x*new_coll_str_x +
-            new_coll_str_y*new_coll_str_y
-        )
-        collision_angle = math.atan2(new_coll_str_x,new_coll_str_y)*180/math.pi
+        --collision_strength = -math.sqrt(
+        --    new_coll_str_x*new_coll_str_x +
+        --    new_coll_str_y*new_coll_str_y
+        --)
+        --collision_angle = math.atan2(new_coll_str_x,new_coll_str_y)*180/math.pi
         
-        self.v_y = self.v_y + new_mag
+        --self.v_y = self.v_y + new_mag
         --[[
         self.curr_section = {path={dist=8000,rot=-20,radius=-100},parent="some bullshit to pass my check"}
             self.curr_path = self.curr_section.path
             self.dx_remaining_in_path = self.curr_path.dist
             self.dr_remaining_in_path = self.curr_path.rot
         --]]
-        user_car.v_y = user_car.v_y - new_coll_str_y
-        user_car.v_x = user_car.v_x - new_coll_str_x
+        --user_car.v_y = user_car.v_y - new_coll_str_y
+        --user_car.v_x = user_car.v_x - new_coll_str_x
         
         self.v_x = new_coll_str_x
         self.v_y = self.v_y + new_coll_str_y
         
-        print("Collision",collision_strength,collision_angle,"y",collision_strength*math.cos(math.pi/180*collision_angle),"x",collision_strength*math.sin(math.pi/180*collision_angle))
-        
+        --print("Collision",collision_strength,collision_angle,"y",collision_strength*math.cos(math.pi/180*collision_angle),"x",collision_strength*math.sin(math.pi/180*collision_angle))
+        print("New User",user_car.v_x,user_car.v_y,"Other",self.v_x,self.v_y)
         Game_State:change_state_to(STATES.CRASH)
         Idle_Loop:remove_function(self.move)
         Idle_Loop:add_function(self.post_collision,self)
