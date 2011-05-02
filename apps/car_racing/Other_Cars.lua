@@ -4,6 +4,10 @@ local angle = tan(screen.perspective[1]/2)
 local ratio = 16/9
 local spawn_on_coming_self_thresh = 1250
 local spawn_passing_self_thresh   = 1.5*spawn_on_coming_self_thresh
+local increase_cars_counter = 0
+local increase_cars_thresh  = 30*1000
+
+
 
 local old_cars = {}
 local other_cars = make_Linked_List()
@@ -28,32 +32,32 @@ local clone_upval = nil
 --Assets:Clones for the different angles of the cars
 local cars = {
     {   -- Blue Impreza
-        --[[Assets:Clone{ src=]]"assets/impreza_b/00.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/01.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/02.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/03.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/04.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/05.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/06.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/07.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/08.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/09.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/10.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/impreza_b/11.png"  ,--},
+        "assets/impreza_b/00.png",
+        "assets/impreza_b/01.png",
+        "assets/impreza_b/02.png",
+        "assets/impreza_b/03.png",
+        "assets/impreza_b/04.png",
+        "assets/impreza_b/05.png",
+        "assets/impreza_b/06.png",
+        "assets/impreza_b/07.png",
+        "assets/impreza_b/08.png",
+        "assets/impreza_b/09.png",
+        "assets/impreza_b/10.png",
+        "assets/impreza_b/11.png",
     },
     {   -- Red Subaru
-        --[[Assets:Clone{ src=]]"assets/subaru/00.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/01.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/02.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/03.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/04.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/05.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/06.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/07.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/08.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/09.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/10.png"  ,--},
-        --[[Assets:Clone{ src=]]"assets/subaru/11.png"  ,--},
+        "assets/subaru/00.png",
+        "assets/subaru/01.png",
+        "assets/subaru/02.png",
+        "assets/subaru/03.png",
+        "assets/subaru/04.png",
+        "assets/subaru/05.png",
+        "assets/subaru/06.png",
+        "assets/subaru/07.png",
+        "assets/subaru/08.png",
+        "assets/subaru/09.png",
+        "assets/subaru/10.png",
+        "assets/subaru/11.png",
     },
 }
 --function that calculates the screen pixel position of the car
@@ -316,8 +320,8 @@ local move_function = function(self,msecs)
         print(new_coll_str_x,new_coll_str_y,new_angle)
         local new_mag = (user_car.v_y - self.v_y)*.6
         
-        new_coll_str_x = new_mag*math.sin(math.pi/180*new_angle)
-        new_coll_str_y = new_mag*math.cos(math.pi/180*new_angle)
+        new_coll_str_x = new_mag*sin(new_angle)
+        new_coll_str_y = new_mag*cos(new_angle)
         print(new_coll_str_y,new_coll_str_x,new_mag)
         
         new_coll_str_x = new_coll_str_x + user_car.v_x
@@ -493,6 +497,7 @@ local passing_self_timer = Timer{
 	end
 }
 passing_self_timer:stop()
+
 local on_coming_self_timer = Timer{
 	interval = spawn_passing_self_thresh,
 	on_timer = function(self)
@@ -521,6 +526,25 @@ local on_coming_self_timer = Timer{
 }
 on_coming_self_timer:stop()
 
+local increase_cars = Timer{
+    interval = increase_cars_thresh,
+    on_timer = function(timer)
+        
+        spawn_on_coming_self_thresh = spawn_on_coming_self_thresh - 200
+        
+        print("bump up ".. spawn_on_coming_self_thresh)
+        if spawn_on_coming_self_thresh < 500 then
+            spawn_on_coming_self_thresh = 500
+            timer:stop()
+        end
+        
+        spawn_passing_self_thresh = 1.5*spawn_on_coming_self_thresh
+        
+        on_coming_self_timer.interval = spawn_on_coming_self_thresh
+        passing_self_timer.interval   = spawn_passing_self_thresh
+    end
+}
+increase_cars:stop()
 
 --Game State Change Behaviors
 ----
@@ -528,6 +552,7 @@ Game_State:add_state_change_function(
     function(old_state,new_state)
         passing_self_timer:start()
         on_coming_self_timer:start()
+        increase_cars:start()
     end,
     nil,
     STATES.PLAYING
@@ -539,6 +564,12 @@ Game_State:add_state_change_function(
             car:remove()
         end
         other_cars:clear()
+        
+        spawn_on_coming_self_thresh = 1250
+        spawn_passing_self_thresh   = 1.5*spawn_on_coming_self_thresh
+        
+        on_coming_self_timer.interval = spawn_on_coming_self_thresh
+        passing_self_timer.interval   = spawn_passing_self_thresh
     end,
     STATES.CRASH,
     STATES.PLAYING
@@ -558,6 +589,7 @@ Game_State:add_state_change_function(
     function(old_state,new_state)
         passing_self_timer:stop()
         on_coming_self_timer:stop()
+        increase_cars:stop()
     end,
     STATES.PLAYING,
     nil

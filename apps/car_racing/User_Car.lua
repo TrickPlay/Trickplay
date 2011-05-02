@@ -30,13 +30,10 @@ local user_car = Clone{
         images[1].h/2
     },
     extra = {
-        
         v_x     = 0,
         v_y     = 0,
         crashed = false,
         dx      = 960,
-        
-        
     }
 }
 local reset_car = function(old_state,new_state)
@@ -135,6 +132,8 @@ do
         --update x-velocity
         self.v_x = self.v_y/5*io.turn_impulse + self.v_x
         
+        self.dx = self.dx + self.v_x*msecs/1000
+        
         --if on or beyond the shoulder,
         --then your car receives heavy resistance
         if math.abs(self.dx) > STRAFE_CAP then
@@ -198,7 +197,7 @@ do
     user_car.update_position_on_path=function(self,msecs)
         assert(road.curr_segment ~= nil)
         --update distance from the center of the road
-        self.dx = self.dx + self.v_x*msecs/1000
+        
         dy = self.v_y*msecs/1000
         dr = curr_path.rot*dy/curr_path.dist --relative to amount travelled
         

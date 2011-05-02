@@ -27,12 +27,16 @@ do
     }
 	
 	hud.update = function(self,mph,points)
-		mph_txt.text = string.format("%03d",mph)
+		
+		mph_txt.text    = string.format("%03d",   mph)
 		points_txt.text = string.format("%07d",points)
-		points_txt.text = string.format("%07d",points)
+		
 		if Game_State.highscore < points then
+			
 			Game_State.highscore = points
+			
 			highscore_txt.text = string.format("%07d",Game_State.highscore)
+			
 		end
 		
 	end
