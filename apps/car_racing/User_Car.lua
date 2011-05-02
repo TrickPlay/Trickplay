@@ -144,12 +144,12 @@ do
         end
         --decay
         if self.v_x > 0 then
-            self.v_x = self.v_x/10--car.v_x - 4000*seconds -- 
+            self.v_x = self.v_x - 200*msecs -- 
             if self.v_x < 0 then
                 self.v_x = 0
             end
         else
-            self.v_x = self.v_x/10--car.v_x + 4000*seconds
+            self.v_x = self.v_x + 200*msecs
             if self.v_x > 0 then
                 self.v_x = 0
             end
@@ -244,12 +244,12 @@ do
         world:move(dy,self.dx,0,0)
         
         if self.v_x > 0 then
-            self.v_x = self.v_x - 10 * msecs
+            self.v_x = self.v_x - 20 * msecs
             if self.v_x < 1 then
                 self.v_x = 1
             end
         else
-            self.v_x = self.v_x + 10 * msecs
+            self.v_x = self.v_x + 20 * msecs
             if self.v_x > -1 then
                 self.v_x = -1
             end
