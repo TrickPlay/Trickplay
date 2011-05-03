@@ -1015,4 +1015,16 @@ globals
                 }
             }
         ]];
+
+	string random_string( int length )
+        [[
+            String rs( "" );
+
+            if ( length > 0 )
+            {
+                rs = Util::random_string( length );
+            }
+
+            result = rs.c_str();
+        ]];
 }
