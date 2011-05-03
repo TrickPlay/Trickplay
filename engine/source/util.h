@@ -85,6 +85,10 @@ inline StringVector split_string( const String & source , const gchar * delimite
 
 //-----------------------------------------------------------------------------
 
+#define lua_really_isstring(L,i) (lua_type(L,i)==LUA_TSTRING)
+
+//-----------------------------------------------------------------------------
+
 class RefCounted
 {
 public:

@@ -343,7 +343,7 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
 
             while ( lua_next( L, -2 ) )
             {
-                if ( lua_isstring( L, -2 ) && lua_type( L, -1 ) == LUA_TTABLE )
+                if ( lua_really_isstring( L, -2 ) && lua_type( L, -1 ) == LUA_TTABLE )
                 {
                     String action_name = lua_tostring( L, -2 );
                     String uri;

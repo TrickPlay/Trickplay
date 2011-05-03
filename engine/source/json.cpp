@@ -150,7 +150,7 @@ namespace JSON
 
                     while( lua_next( L, index ) )
                     {
-                        if ( lua_isstring( L, -2 ) )
+                        if ( lua_really_isstring( L, -2 ) )
                         {
                             size_t len = 0;
                             const char * key = lua_tolstring( L , -2 , & len );
