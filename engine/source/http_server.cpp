@@ -155,21 +155,21 @@ class HttpRequest : public HttpServer::Request
 {
 private:
 
-	HttpMessageContext & message_context;
+	HttpMessageContext * message_context;
 	SoupBufferBody       body;
 
 public:
 
-	HttpRequest( HttpMessageContext & ctx )
+	HttpRequest( HttpMessageContext * ctx )
 	:
 	    message_context( ctx ),
-	    body( ctx.message->request_body )
+	    body( ctx->message->request_body )
 	{
 	}
 
 	Method get_method( ) const
 	{
-	    const char * m( message_context.message->method );
+	    const char * m( message_context->message->method );
 
 	    if ( m == SOUP_METHOD_GET )
 	    {
@@ -196,24 +196,24 @@ public:
 
 	guint16 get_server_port( ) const
 	{
-		return soup_server_get_port( message_context.server );
+		return soup_server_get_port( message_context->server );
 	}
 
     String get_path( ) const
     {
-        return message_context.path;
+        return message_context->path;
     }
 
 	String get_request_uri( ) const
 	{
-		return soup_message_get_uri( message_context.message )->path;
+		return soup_message_get_uri( message_context->message )->path;
 	}
 
 	String get_header( const String & name ) const
 	{
 	    String result;
 
-	    if ( const char * h = soup_message_headers_get_one( message_context.message->request_headers, name.c_str() ) )
+	    if ( const char * h = soup_message_headers_get_one( message_context->message->request_headers, name.c_str() ) )
 	    {
 	        result = h;
 	    }
@@ -225,7 +225,7 @@ public:
 	{
 		StringMultiMap header_map;
 		SoupMessageHeadersIter iter;
-		soup_message_headers_iter_init ( & iter , message_context.message->request_headers );
+		soup_message_headers_iter_init ( & iter , message_context->message->request_headers );
 		const char * name;
 		const char * val;
 		while( soup_message_headers_iter_next( & iter , & name , & val ) )
@@ -239,7 +239,7 @@ public:
 	{
 		StringList header_names;
 		SoupMessageHeadersIter iter;
-		soup_message_headers_iter_init( & iter , message_context.message->request_headers );
+		soup_message_headers_iter_init( & iter , message_context->message->request_headers );
 		const char * name;
 		const char * val;
 		while ( soup_message_headers_iter_next( & iter , & name , & val ) )
@@ -255,14 +255,14 @@ public:
 	{
 		StringMap result;
 
-		if ( message_context.query )
+		if ( message_context->query )
 		{
 		    GHashTableIter it;
 
 		    gpointer key;
 		    gpointer value;
 
-		    g_hash_table_iter_init( & it , message_context.query );
+		    g_hash_table_iter_init( & it , message_context->query );
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
@@ -277,14 +277,14 @@ public:
 	{
 		StringList result;
 
-		if ( message_context.query )
+		if ( message_context->query )
         {
             GHashTableIter it;
 
             gpointer key;
             gpointer value;
 
-            g_hash_table_iter_init( & it , message_context.query );
+            g_hash_table_iter_init( & it , message_context->query );
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
@@ -299,9 +299,9 @@ public:
 	{
 	    String result;
 
-		if ( message_context.query )
+		if ( message_context->query )
 		{
-		    if ( gpointer value = g_hash_table_lookup( message_context.query, name.c_str() ) )
+		    if ( gpointer value = g_hash_table_lookup( message_context->query, name.c_str() ) )
 		    {
 		        result = ( const char * ) value;
 		    }
@@ -314,7 +314,7 @@ public:
 	{
 	    String result;
 
-	    if ( const char * value = soup_message_headers_get_content_type( message_context.message->request_headers , 0 ) )
+	    if ( const char * value = soup_message_headers_get_content_type( message_context->message->request_headers , 0 ) )
 	    {
 	        result = value;
 	    }
@@ -324,7 +324,7 @@ public:
 
 	goffset get_content_length( ) const
 	{
-		return soup_message_headers_get_content_length( message_context.message->request_headers );
+		return soup_message_headers_get_content_length( message_context->message->request_headers );
 	}
 
     const HttpServer::Request::Body & get_body() const
@@ -511,11 +511,11 @@ class HttpResponse : public HttpServer::Response
 {
 private:
 
-    HttpMessageContext & message_context;
+    HttpMessageContext * message_context;
 
 public:
 
-	HttpResponse( HttpMessageContext & ctx )
+	HttpResponse( HttpMessageContext * ctx )
 	:
 	    message_context( ctx )
 	{
@@ -523,7 +523,7 @@ public:
 
 	void set_header( const String& name, const String& value )
 	{
-		soup_message_headers_replace( message_context.message->response_headers, name.c_str(), value.c_str() );
+		soup_message_headers_replace( message_context->message->response_headers, name.c_str(), value.c_str() );
 	}
 
 	void set_response( const String & content_type , const char * data , gsize size )
@@ -534,7 +534,7 @@ public:
 	    }
 	    else
 	    {
-	        soup_message_set_response( message_context.message, content_type.c_str(), SOUP_MEMORY_COPY, data, size );
+	        soup_message_set_response( message_context->message, content_type.c_str(), SOUP_MEMORY_COPY, data, size );
 	    }
 	}
 
@@ -548,27 +548,27 @@ public:
     {
         if ( msg.empty() )
         {
-            soup_message_set_status ( message_context.message, int( status ) );
+            soup_message_set_status ( message_context->message, int( status ) );
         }
         else
         {
-            soup_message_set_status_full ( message_context.message , int( status ) , msg.c_str() );
+            soup_message_set_status_full ( message_context->message , int( status ) , msg.c_str() );
         }
     }
 
     void set_content_type( const String & content_type )
     {
-        soup_message_headers_set_content_type( message_context.message->response_headers , content_type.c_str() , 0 );
+        soup_message_headers_set_content_type( message_context->message->response_headers , content_type.c_str() , 0 );
     }
 
     void set_content_length( goffset content_length )
     {
-        soup_message_headers_set_content_length( message_context.message->response_headers , content_length );
+        soup_message_headers_set_content_length( message_context->message->response_headers , content_length );
     }
 
     void set_stream_writer( StreamWriter * stream_writer )
     {
-        new ::StreamBody( message_context , stream_writer );
+        new ::StreamBody( * message_context , stream_writer );
     }
 
     virtual bool respond_with_file_contents( const String & file_name , const String & content_type )
@@ -611,7 +611,7 @@ public:
 
         set_status( HttpServer::HTTP_STATUS_OK );
 
-        new ::StreamBody( message_context , new FileStreamWriter( file ) );
+        new ::StreamBody( * message_context , new FileStreamWriter( file ) );
 
         g_object_unref( file );
 
@@ -639,8 +639,8 @@ void HttpServer::soup_server_callback(
 
     HttpMessageContext message_context( server , msg , path , query , client );
 
-    HttpRequest request( message_context );
-    HttpResponse response( message_context );
+    HttpRequest request( & message_context );
+    HttpResponse response( & message_context );
 
     if ( msg->method == SOUP_METHOD_GET )
     {
