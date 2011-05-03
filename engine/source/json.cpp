@@ -113,7 +113,7 @@ namespace JSON
 
             case LUA_TBOOLEAN:
 
-                result = lua_toboolean( L, index );
+                result.as<bool>() = lua_toboolean( L, index );
 
                 break;
 
