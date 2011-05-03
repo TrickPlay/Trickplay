@@ -307,6 +307,8 @@ namespace Util
         return result;
     }
 
+    String random_string( guint length );
+
     //-----------------------------------------------------------------------------
 
     class GMutexLock
