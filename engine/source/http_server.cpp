@@ -25,9 +25,16 @@ HttpServer::HttpServer( guint16 port ) : server( NULL )
 {
 	server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
 
-	tplog( "READY ON PORT %u" , soup_server_get_port( server ) );
+	if ( ! server )
+	{
+	    tpwarn( "FAILED TO START" );
+	}
+	else
+	{
+	    tplog( "READY ON PORT %u" , soup_server_get_port( server ) );
 
-	soup_server_run_async( server );
+	    soup_server_run_async( server );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -48,13 +55,18 @@ HttpServer::~HttpServer()
 
 guint16 HttpServer::get_port( ) const
 {
-	return soup_server_get_port( server );
+	return server ? soup_server_get_port( server ) : 0;
 }
 
 //-----------------------------------------------------------------------------
 
 void HttpServer::register_handler( const String & path , RequestHandler * handler )
 {
+    if ( ! server )
+    {
+        return;
+    }
+
     g_assert( handler );
 
     soup_server_add_handler(
@@ -71,6 +83,11 @@ void HttpServer::register_handler( const String & path , RequestHandler * handle
 
 void HttpServer::unregister_handler( const String & path )
 {
+    if ( ! server )
+    {
+        return;
+    }
+
     soup_server_remove_handler( server , path.c_str() );
 
     tplog2( "REMOVED HANDLER FOR %s" , path.c_str() );
