@@ -4172,6 +4172,7 @@ function ui_element.scrollPane(t)
             track_h = p.visible_h
         end
         
+--[[
 if editor_lb == nil  then
             function screen:on_motion(x,y) 
 	  	if dragging then
@@ -4190,6 +4191,7 @@ if editor_lb == nil  then
 		end 
 	    end 
 end
+]]
         
         if p.horz_bar_visible and p.visible_w/p.virtual_w < 1 then
             hor_s_bar = make_hor_bar(
