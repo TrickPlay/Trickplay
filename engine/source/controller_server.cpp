@@ -881,20 +881,6 @@ void ControllerServer::handle_http_get( const HttpServer::Request & request , Ht
 
 //-----------------------------------------------------------------------------
 
-String random_string( guint length )
-{
-    static const char * pieces = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-    char buffer[ length ];
-
-    for ( guint i = 0; i < length ; ++i )
-    {
-        buffer[ i ] = pieces[ g_random_int_range( 0 , sizeof( pieces ) ) ];
-    }
-
-    return String( buffer , length );
-}
-
 String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Type type )
 {
     for ( PostMap::const_iterator it = post_map.begin(); it != post_map.end(); ++it )
@@ -913,7 +899,7 @@ String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Ty
     {
         path = "/controllers";
         path += type == PostInfo::AUDIO ? "/audio/" : "/picture/";
-        path += random_string( 20 );
+        path += Util::random_string( 20 );
     }
     while( post_map.find( path ) != post_map.end() );
 
