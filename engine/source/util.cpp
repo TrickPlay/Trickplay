@@ -54,6 +54,30 @@ String Util::make_v4_uuid()
     return make_uuid( UUID_MAKE_V4 );
 }
 
+
+String Util::random_string( guint length )
+{
+    String result;
+
+    if ( length > 0 )
+    {
+        static const char * pieces = "0123456789ABCDEF";
+
+        gint32 end = strlen( pieces );
+
+        char buffer[ length ];
+
+        for ( guint i = 0; i < length ; ++i )
+        {
+            buffer[ i ] = pieces[ g_random_int_range( 0 , end ) ];
+        }
+
+        result = String( buffer , length );
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------
 
 Action::~Action()
