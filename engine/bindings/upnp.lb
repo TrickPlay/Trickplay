@@ -92,7 +92,7 @@ public:
 		
 		while ( lua_next( L , arguments ) )
 		{
-			if ( lua_isstring( L , -2 ) )
+			if ( lua_really_isstring( L , -2 ) )
 			{
 				const char * k = lua_tostring( L , -2 );
 				const char * v = lua_tostring( L , -1 );
