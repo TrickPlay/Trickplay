@@ -209,6 +209,24 @@ public:
 		return soup_message_get_uri( message_context->message )->path;
 	}
 
+	HttpServer::URI get_uri() const
+	{
+	    HttpServer::URI result;
+
+	    SoupURI * u = soup_message_get_uri( message_context->message );
+
+	    result.scheme = u->scheme ? u->scheme : "";
+	    result.user = u->user ? u->user : "";
+	    result.password = u->password ? u->password : "";
+	    result.host = u->host ? u->host : "";
+	    result.port = u->port;
+	    result.path = u->path ? u->path : "";
+	    result.query = u->query ? u->query : "";
+	    result.fragment = u->fragment ? u->fragment : "";
+
+	    return result;
+	}
+
 	String get_header( const String & name ) const
 	{
 	    String result;
@@ -564,6 +582,18 @@ public:
     void set_content_length( goffset content_length )
     {
         soup_message_headers_set_content_length( message_context->message->response_headers , content_length );
+    }
+
+    String get_content_type( ) const
+    {
+        const char * ct = soup_message_headers_get_content_type( message_context->message->response_headers , 0 );
+
+        if ( ct )
+        {
+            return String( ct );
+        }
+
+        return String();
     }
 
     void set_stream_writer( StreamWriter * stream_writer )
