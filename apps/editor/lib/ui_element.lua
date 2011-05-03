@@ -78,6 +78,10 @@ function ui_element.populate_to (grp, tbl)
 
 end 
 
+function ui_element.set_cursor_pointer (src_file)
+	user_mouse_pointer.src = "/assets/images/"..src_file
+end 
+
 function ui_element.transit_to (prev_grp, next_grp, effect)
 
 	for i, j in pairs (g.children) do
