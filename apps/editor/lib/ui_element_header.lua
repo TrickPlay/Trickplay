@@ -62,7 +62,6 @@ end
 --- Cursor Images
 user_mouse_pointer = Image{name = "user_mouse_pointer", src = "/lib/assets/pointer.png", opacity = 255, scale = { screen.width/screen.display_size[1], screen.height/screen.display_size[2]}}
 
-
 --[[
 function screen:on_motion(x,y)
 	user_mouse_pointer.position = {x - 10 ,y - 10 ,0}
