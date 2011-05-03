@@ -1430,7 +1430,6 @@ function ui_element.button(table)
 		     	current_focus.on_focus_in(keys.Return)
 		    end 
 		end 
-		return true
              end
 	end 
 	
@@ -1857,7 +1856,7 @@ function ui_element.toastAlert(table)
 	ui_height = 113,
 	label = "Toast Alert Title",
 	message = "Toast alert message",
-	title_font = "DejaVu Sans 22", 
+	title_font = "DejaVu Sans 22px", 
 	message_font = "DejaVu Sans 20px", 
 	title_color = {255,255,255,255},  
 	message_color = {255,255,255,255}, 
@@ -1869,7 +1868,7 @@ function ui_element.toastAlert(table)
 	border_corner_radius = 22,
 	fade_duration = 2000,
 	on_screen_duration = 5000,
-	icon = "lib/assets/toast-icon.png"
+	icon = "lib/assets/toast-icon.jpg"
     }
 
 
@@ -1905,13 +1904,13 @@ function ui_element.toastAlert(table)
 	tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
 	icon = assets(p.icon)
-    	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -50}} --30,30
+    	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-    	title:set{name = "title", position = { icon.w , tb_group_cur_y }}  --,50
+    	title:set{name = "title", position = { icon.w + icon.x + 20 , tb_group_cur_y }}  --,50
 
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
-    	message:set{name = "message", position = {icon.w, title.h + tb_group_cur_y }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
+    	message:set{name = "message", position = {icon.w  + icon.x + 20 , title.h + tb_group_cur_y }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
 	if(p.skin ~= "custom") then 
     	     t_box_img = assets(skin_list[p.skin]["toast"])
