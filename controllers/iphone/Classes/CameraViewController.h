@@ -12,7 +12,7 @@
 @protocol CameraViewControllerDelegate <NSObject>
 
 @required
-- (void)finishedPickingImage;
+- (void)finishedPickingImage:(UIImage *)image;
 - (void)finishedSendingImage;
 - (void)canceledPickingImage;
 
@@ -22,6 +22,11 @@
     
     UIImagePickerController *imagePickerController;
     UIPopoverController *popOverController;
+    
+    UIImageView *mask;
+    CGFloat targetWidth;
+    CGFloat targetHeight;
+    BOOL editable;
     
     NSInteger port;
     NSString *host;
@@ -34,7 +39,9 @@
 
 @property (assign) id <CameraViewControllerDelegate> delegate;
 
-- (id)initWithView:(UIView *)aView;
+- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIImageView *)aMask;
+
+- (void)setMask:(UIImageView *)mask;
 
 - (void)startCamera;
 - (void)openLibrary;

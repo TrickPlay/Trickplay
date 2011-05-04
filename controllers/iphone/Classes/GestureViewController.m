@@ -336,43 +336,7 @@
         CGRect frame = CGRectMake(x, y, width, height);
         UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
-        // NOTE: Assumes backgroundView is only replaced in clearUI(),
-        // hence, replace backgroundView.image, do not replace the entire View
         [backgroundView addSubview:newImageView];
-        
-        /*
-        UIGraphicsBeginImageContext(CGSizeMake(backgroundView.bounds.size.width, backgroundView.bounds.size.height));		
-        // get context
-        //
-        CGContextRef context = UIGraphicsGetCurrentContext();		
-        
-        // push context to make it current 
-        // (need to do this manually because we are not drawing in a UIView)
-        //
-        UIGraphicsPushContext(context);								
-        
-        // drawing code comes here- look at CGContext reference
-        // for available operations
-        //
-        // this example draws the inputImage into the context
-        //
-        [backgroundView.image drawInRect:CGRectMake(0,0,backgroundView.bounds.size.width, backgroundView.bounds.size.height)];
-        [tempImage drawInRect:CGRectMake(x, y, width, height)];
-        
-        // pop context 
-        //
-        UIGraphicsPopContext();								
-        
-        // get a UIImage from the image context- enjoy!!!
-        //
-        UIImage *outputImage = UIGraphicsGetImageFromCurrentImageContext();
-        
-        // clean up drawing environment
-        //
-        UIGraphicsEndImageContext();
-        
-        backgroundView.image = outputImage;
-        //*/
     }
     
     [args release];
@@ -436,11 +400,25 @@
 //-------------------- Camera stuff ----------------------------
 
 - (void)do_PI:(NSArray *)args {
+    NSLog(@"Submit Picture, args:%@", args);
     // Start the camera in the background
     if (camera) {
         [camera release];
     }
-    camera = [[CameraViewController alloc] initWithView:self.view];
+    
+    UIImageView *mask = nil;
+    CGFloat width = 0.0, height = 0.0;
+    BOOL editable = NO;
+    if ([args count] == 5) {
+        width = [args objectAtIndex:1] ? [[args objectAtIndex:1] floatValue] : 0.0;
+        height = [args objectAtIndex:2] ? [[args objectAtIndex:2] floatValue] : 0.0;
+        editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
+        
+        if ([args objectAtIndex:4]) {
+            [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
+        }
+    }
+    camera = [[CameraViewController alloc] initWithView:self.view targetWidth:width targetHeight:height editable:editable mask:mask];
     
     [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
     
@@ -462,8 +440,12 @@
     }
 }
 
-- (void)finishedPickingImage {
+- (void)finishedPickingImage:(UIImage *)image {
     NSLog(@"Finished Picking Image");
+    
+    GestureImageView *gestureImage = [[GestureImageView alloc] initWithImage:image];
+    [self.view addSubview:gestureImage];
+    [gestureImage release];
 }
 
 - (void)finishedSendingImage {

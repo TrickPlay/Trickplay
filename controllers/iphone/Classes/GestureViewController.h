@@ -90,6 +90,7 @@
 #import "AudioController.h"
 #import "AdvancedUIObjectManager.h"
 #import "CameraViewController.h"
+#import "GestureImageView.h"
 
 
 #define CAMERA_BUTTON_TITLE "Camera"
