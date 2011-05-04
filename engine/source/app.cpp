@@ -70,6 +70,7 @@ extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
 extern int luaopen_canvas( lua_State * L );
+extern int luaopen_http_module( lua_State * L );
 
 #ifndef TP_PRODUCTION
 extern int luaopen_devtools( lua_State * L );
@@ -929,6 +930,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_trickplay( L );
     luaopen_bitmap( L );
     luaopen_canvas( L );
+    luaopen_http_module( L );
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
