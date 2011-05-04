@@ -34,6 +34,7 @@
 		CD6BC371136794EA00CF1973 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC370136794EA00CF1973 /* MediaPlayer.framework */; };
 		CD6BC3731367950700CF1973 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC3721367950700CF1973 /* CFNetwork.framework */; };
 		CD6BC3B8136A318100CF1973 /* TrickplayGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */; };
+		CD9A68581370C5BC00977730 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD9A68571370C5BB00977730 /* GestureImageView.m */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
 		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
@@ -96,6 +97,8 @@
 		CD6BC3721367950700CF1973 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		CD6BC3B6136A318100CF1973 /* TrickplayGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayGroup.h; sourceTree = "<group>"; };
 		CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayGroup.m; sourceTree = "<group>"; };
+		CD9A68561370C5BB00977730 /* GestureImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureImageView.h; sourceTree = "<group>"; };
+		CD9A68571370C5BB00977730 /* GestureImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureImageView.m; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
@@ -221,6 +224,8 @@
 		CD404C09134A74CD0021D36C /* UserInterface */ = {
 			isa = PBXGroup;
 			children = (
+				CD9A68561370C5BB00977730 /* GestureImageView.h */,
+				CD9A68571370C5BB00977730 /* GestureImageView.m */,
 				CDFEC15A1315929800A14307 /* AsyncImageView.h */,
 				CDFEC15B1315929800A14307 /* AsyncImageView.m */,
 				CD404C0D134A87CF0021D36C /* AdvancedUIObjectManager.h */,
@@ -434,6 +439,7 @@
 				CD404C271353DCF00021D36C /* CameraViewController.m in Sources */,
 				CD6BC36513678D6F00CF1973 /* AudioStreamer.m in Sources */,
 				CD6BC3B8136A318100CF1973 /* TrickplayGroup.m in Sources */,
+				CD9A68581370C5BC00977730 /* GestureImageView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

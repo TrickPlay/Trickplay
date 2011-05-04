@@ -13,13 +13,19 @@
 
 @synthesize delegate;
 
-- (id)initWithView:(UIView *)aView {
+- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIImageView *)aMask {
     if ((self = [super init])) {
         self.view = [[[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 0.0, 0.0)] autorelease];
         [aView addSubview:self.view];
         
         imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.delegate = self;
+        //imagePickerController.cameraOverlayView = mask;
+        
+        mask = aMask;
+        targetWidth = width;
+        targetHeight = height;
+        editable = is_editable;
     }
     
     return self;
@@ -194,7 +200,7 @@
     
     [self dismissTheCamera:picker];
     
-    [delegate finishedPickingImage];
+    [delegate finishedPickingImage:imageToUse];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
@@ -203,8 +209,8 @@
     [delegate canceledPickingImage];
 }
 
-#pragma mark - Button press handlers
-#pragma mark --
+#pragma mark -
+#pragma mark Button press handlers
 
 - (void)startCamera {
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO) {
@@ -212,12 +218,13 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+    imagePickerController.cameraOverlayView = mask;
     
-    //Displays camera
+    // Displays camera
     imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
     
-    //Hides the controls for image manipulation for now
-    imagePickerController.allowsEditing = NO;
+    // Controls for image manipulation for now
+    imagePickerController.allowsEditing = editable;
     
     [self presentTheCamera];
 }
@@ -228,16 +235,23 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    
+        
     // Displays saved pictures and movies, if both are available
     imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     
-    // Hides the controls for image manipulation for now
-    imagePickerController.allowsEditing = NO;
+    // Controls for image manipulation for now
+    imagePickerController.allowsEditing = editable;
     
     [self presentTheCamera];
 }
 
+#pragma mark -
+#pragma mark View controls
+
+- (void)setMask:(UIImageView *)aMask {
+    mask = aMask;
+    [self.view addSubview:mask];
+}
 
 - (void)dealloc {
     NSLog(@"CameraViewController dealloc");
