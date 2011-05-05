@@ -129,6 +129,11 @@ namespace JSON
 
                 // If it has a length, we treat it as an array
 
+                // Unfortunately, this means that a Lua empty table will be
+                // converted to an empty object. Should it be an empty array?
+                //
+                // If in Lua it is {} , should it be {} or [] in JSON?
+
                 if ( lua_objlen( L, index ) > 0 )
                 {
                     Array & array( result.as< Array >() );
