@@ -5,6 +5,14 @@
 #include "util.h"
 #include "db.h"
 
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "DB"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
 //-----------------------------------------------------------------------------
 
 static const char * schema_create =
@@ -102,7 +110,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
     if ( !g_file_test( filename, G_FILE_TEST_EXISTS ) )
     {
-        g_info( "SYSTEM DATABASE DOES NOT EXIST" );
+        tpinfo( "SYSTEM DATABASE DOES NOT EXIST" );
     }
 
     // Try to open the on-disk database in read-only mode
@@ -113,7 +121,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
         if ( !source.ok() )
         {
-            g_warning( "FAILED TO OPEN EXISTING SYSTEM DATABASE" );
+            tpwarn( "FAILED TO OPEN EXISTING SYSTEM DATABASE" );
         }
         else
         {
@@ -124,7 +132,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
             if ( !integrity.ok() || integrity.get_string( 0 ) != "ok" )
             {
-                g_warning( "FAILED INTEGRITY CHECK ON EXISTING SYSTEM DATABASE" );
+                tpwarn( "FAILED INTEGRITY CHECK ON EXISTING SYSTEM DATABASE" );
             }
             else
             {
@@ -132,19 +140,19 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
                 if ( !SQLite::Backup( db, source ).ok() )
                 {
-                    g_warning( "FAILED TO RESTORE EXISTING SYSTEM DATABASE" );
+                    tpwarn( "FAILED TO RESTORE EXISTING SYSTEM DATABASE" );
                 }
                 else
                 {
                     create = false;
 
-                    g_info( "SYSTEM DATABASE LOADED" );
+                    tpinfo( "SYSTEM DATABASE LOADED" );
 
                     migrated = db.migrate_schema( schema_create );
 
                     if ( migrated )
                     {
-                        g_info( "SYSTEM DATABASE MIGRATED" );
+                        tpinfo( "SYSTEM DATABASE MIGRATED" );
                     }
                 }
             }
@@ -160,11 +168,11 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
         if ( !db.ok() )
         {
-            g_warning( "FAILED TO CREATE INITIAL SYSTEM DATABASE SCHEMA" );
+            tpwarn( "FAILED TO CREATE INITIAL SYSTEM DATABASE SCHEMA" );
             return NULL;
         }
 
-        g_info( "SYSTEM DATABASE CREATED" );
+        tpinfo( "SYSTEM DATABASE CREATED" );
     }
 
     // Now, we create an instance of a system database - which will steal the
@@ -178,7 +186,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
     if ( !result->insert_initial_data() )
     {
-        g_warning( "FAILED TO POPULATE SYSTEM DATABASE" );
+        tpwarn( "FAILED TO POPULATE SYSTEM DATABASE" );
 
         // We reset dirty so that this bad database doesn't get flushed when
         // we delete it
@@ -238,7 +246,7 @@ bool SystemDatabase::flush()
 
     if ( fd == -1 )
     {
-        g_warning( "FAILED TO CREATE TEMPORARY FILE FOR SYSTEM DATABASE" );
+        tpwarn( "FAILED TO CREATE TEMPORARY FILE FOR SYSTEM DATABASE" );
         return false;
     }
 
@@ -248,14 +256,14 @@ bool SystemDatabase::flush()
 
     if ( !dest.ok() )
     {
-        g_warning( "FAILED TO OPEN TEMPORARY BACKUP FOR SYSTEM DATABASE" );
+        tpwarn( "FAILED TO OPEN TEMPORARY BACKUP FOR SYSTEM DATABASE" );
         g_unlink( backup_filename );
         return false;
     }
 
     if ( !SQLite::Backup( dest, db ).ok() )
     {
-        g_warning( "FAILED TO BACKUP SYSTEM DATABASE" );
+        tpwarn( "FAILED TO BACKUP SYSTEM DATABASE" );
         g_unlink( backup_filename );
         return false;
     }
@@ -267,12 +275,12 @@ bool SystemDatabase::flush()
 
     if ( g_rename( backup_filename, target_filename ) != 0 )
     {
-        g_warning( "FAILED TO MOVE BACKUP SYSTEM DATABASE" );
+        tpwarn( "FAILED TO MOVE BACKUP SYSTEM DATABASE" );
         g_unlink( backup_filename );
         return false;
     }
 
-    g_info( "SYSTEM DATABASE FLUSHED" );
+    tpinfo( "SYSTEM DATABASE FLUSHED" );
     dirt = 0;
     return true;
 }
@@ -626,7 +634,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 
         bool existed = existing_ids.erase( it->id );
 
-        g_info( "%s %s (%s/%d) @ %s",
+        tpinfo( "%s %s (%s/%d) @ %s",
                 existed ? "UPDATING" : "ADDING",
                 it->id.c_str(),
                 it->version.c_str(),
@@ -654,7 +662,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
             del.reset();
             del.clear();
 
-            g_info( "DELETING %s", it->c_str() );
+            tpinfo( "DELETING %s", it->c_str() );
         }
     }
 }
