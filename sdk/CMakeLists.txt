@@ -18,12 +18,12 @@ if (UNIX AND NOT APPLE)
 			"libpango1.0-0 (>= 1.20.0)"
 			"libcurl3 (>=7.19.0)"
 			"libavahi-common3 (>= 0.6.25)"
-			"libavahi-core6 (>= 0.6.25)"
+			"libavahi-core6 (>= 0.6.25) | libavahi-core7"
 			"libavahi-glib1(>= 0.6.25)"
 			"libclutter-1.0-0 (>= 1.0.6)"
 			"libexpat1"
 			"libsqlite3-0 (>= 3.6.0)"
-			"libclutter-gst-0.10-0"
+			"libclutter-gst-0.10-0 | libclutter-gst-1.0-0"
 			"libtiff4"
 			"libjson-glib-1.0-0 (>= 0.5.0)"
 			"libjpeg62"
@@ -65,7 +65,7 @@ if (UNIX AND NOT APPLE)
         
         set(CPACK_PACKAGE_NAME "trickplay-sdk")
         
-        set(CPACK_PACKAGE_VERSION "${TP_VERSION}")
+        set(CPACK_PACKAGE_VERSION "${GIT_CURRENT_TAG}")
         
         set(CPACK_STRIP_FILES 1)
         

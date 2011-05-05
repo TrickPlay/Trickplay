@@ -1305,7 +1305,7 @@ interface actor [[ClutterActor*]]
 	    {
 		GValue value={0};
 		
-		if (lua_isstring(L,-2)&&!lua_isnil(L,-2))
+		if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
 		{
 		    const char * k=lua_tostring(L,-2);
 		

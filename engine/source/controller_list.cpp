@@ -997,17 +997,24 @@ bool Controller::enter_text( const String & label, const String & text )
                data ) == 0;
 }
 
-bool Controller::submit_picture( )
+bool Controller::submit_picture( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_PICTURES ) )
     {
         return false;
     }
 
+    TPControllerSubmitPicture parameters;
+
+    parameters.max_width = max_width;
+    parameters.max_height = max_height;
+    parameters.edit = edit ? 1 : 0;
+    parameters.mask = mask_resource.empty() ? 0 : mask_resource.c_str();
+
     return spec.execute_command(
                tp_controller,
                TP_CONTROLLER_COMMAND_SUBMIT_PICTURE,
-               0,
+               & parameters,
                data ) == 0;
 }
 

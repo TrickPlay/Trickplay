@@ -6,7 +6,11 @@
 
 //=============================================================================
 
-Debug_ON actions_debug;
+#define TP_LOG_DOMAIN   "ACTIONS"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //=============================================================================
 
@@ -31,11 +35,11 @@ bool Actions::launch_action(
 
     g_assert( caller );
 
-    actions_debug( "LAUNCH ACTION WITH : app = '%s' : action = '%s' : uri = '%s' : type = '%s'", app_id, action_name, uri, type );
+    tplog( "LAUNCH ACTION WITH : app = '%s' : action = '%s' : uri = '%s' : type = '%s'", app_id, action_name, uri, type );
 
     if ( ! app_id && ! action_name && ! uri && ! type )
     {
-        actions_debug( "  ALL LAUNCH CRITERIA ARE NULL" );
+        tplog( "  ALL LAUNCH CRITERIA ARE NULL" );
 
         return false;
     }
@@ -69,12 +73,12 @@ bool Actions::launch_action(
 
         for ( App::Action::Map::const_iterator ait = app_actions.begin(); ait != app_actions.end(); ++ait )
         {
-#if 0
-            actions_debug( "    COMPARE TO : app = '%s' : action = '%s' : uri = '%s' : type = '%s'",
+
+            tplog2( "    COMPARE TO : app = '%s' : action = '%s' : uri = '%s' : type = '%s'",
                     it->first.c_str(),
                     ait->first.c_str(),
                     ait->second.uri.c_str(), ait->second.type.c_str() );
-#endif
+
             // If an action was given, and it does not match, skip other checks
 
             if ( action_name && String( action_name ) != ait->first )
@@ -91,7 +95,7 @@ bool Actions::launch_action(
 
             // We have a match
 
-            actions_debug( "  MATCHES : app = '%s' : action = '%s' : uri = '%s' : type = '%s'",
+            tplog( "  MATCHES : app = '%s' : action = '%s' : uri = '%s' : type = '%s'",
                     it->first.c_str(),
                     ait->first.c_str(),
                     ait->second.uri.c_str(), ait->second.type.c_str() );
@@ -109,7 +113,7 @@ bool Actions::launch_action(
     {
         // There are no matches
 
-        actions_debug( "  NO MATCHES" );
+        tplog( "  NO MATCHES" );
 
         return false;
     }
@@ -127,7 +131,7 @@ bool Actions::launch_action(
         // There are multiple matches. We return false and the list
         // of matches.
 
-        actions_debug( "  MULTIPLE MATCHES" );
+        tplog( "  MULTIPLE MATCHES" );
 
         return false;
     }
@@ -137,7 +141,7 @@ bool Actions::launch_action(
     g_assert( ! app_to_launch.empty() );
     g_assert( ! action_to_launch.empty() );
 
-    actions_debug( "  WILL LAUNCH : app = '%s' : action = '%s'", app_to_launch.c_str(), action_to_launch.c_str() );
+    tplog( "  WILL LAUNCH : app = '%s' : action = '%s'", app_to_launch.c_str(), action_to_launch.c_str() );
 
     App::LaunchInfo launch( caller, action_to_launch, uri, type, parameters );
 
