@@ -59,6 +59,8 @@
     UIGraphicsBeginImageContext(rect.size);
     
     CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(context, [[UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:1.0] CGColor]);
+    CGContextFillRect(context, rect);
     
     CGContextTranslateCTM(context, rect.size.width/2, rect.size.height/2);
     CGContextRotateCTM(context, imageViewToCrop.totalRotation);
