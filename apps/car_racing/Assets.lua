@@ -2,7 +2,11 @@
 local assets = {}
 local group = Group()
 local queue = {}
-local exceptions = {["assets/world/road.png"] = {tile={false,true}, h=20*200}}
+local exceptions = {
+    ["assets/world/road.png"] = {tile={false,true}, h=20*200},
+    ["assets/billboards/pole.png"] = {tile={false,true}, h=19*20},
+    ["assets/signs/sign-lg-frame-2.png"] = {tile={true,false}, w=4.5*60},
+}
 
 screen:add( group )
 group:hide()

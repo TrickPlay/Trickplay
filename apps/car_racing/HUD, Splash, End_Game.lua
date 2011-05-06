@@ -6,21 +6,21 @@ do
 	speedo.anchor_point={speedo.w,speedo.h}
 	local mph_txt    = Text{
         text=    "000",
-        font="Digital-7 60px",
+        font="Crystal 60px",
         color="ffd652",
         x=1785,
         y= 982
     }
 	local points_txt = Text{
         text="0000000",
-        font="Digital-7 26px",
+        font="Crystal 26px",
         color="ffa752",
         x=1648,
         y=1034
     }
 	local highscore_txt  = Text{
         text=string.format("%07d",Game_State.highscore),
-        font="Digital-7 20px",
+        font="Crystal 20px",
         color="78a1b6",
         x=1658,
         y=981
@@ -84,7 +84,7 @@ do
 	Splash.pressed = false
 	
 	Splash.timer = Timer{
-		interval = 1000,
+		interval = 3000,
 		on_timer = function(self)
 			self:stop()
 			Splash:unparent()
@@ -105,6 +105,7 @@ do
 				pulsate
 				
 			)
+			mediaplayer:play_sound("audio/startup.wav")
 		end
 	end
 	Game_State:add_state_change_function(
@@ -129,7 +130,7 @@ do
 	local end_game_text = Text{
 		text="You Crashed\n\nRestarting in 3",
 		alignment="CENTER",
-		font="Digital-7 80px",
+		font="Crystal 80px",
 		color="ffd652"
 	}
 	local end_game_backing=Rectangle{
@@ -148,7 +149,7 @@ do
 	}
 	end_game:add(end_game_backing,end_game_text)
 	local update = function(self,msecs,p)
-		end_game_text.text = "You Crashed\n\nRestarting in "..math.floor(total_dead_time-msecs/1000)
+		end_game_text.text = "YOU CRASHED\n\nRESTARTING IN "..math.floor(total_dead_time-msecs/1000)
 		if p == 1 then
 			print("change")
             Game_State:change_state_to(STATES.PLAYING)
@@ -165,7 +166,7 @@ do
 	)
 	Game_State:add_state_change_function(
 		function(old_state,new_state)
-			end_game_text.text = "You Crashed\n\nRestarting in "..total_dead_time
+			end_game_text.text = "YOU CRASHED\n\nRESTARTING IN "..total_dead_time
 			end_game:show()
 			Idle_Loop:add_function(update, end_game, total_dead_time*1000,false)
 		end,

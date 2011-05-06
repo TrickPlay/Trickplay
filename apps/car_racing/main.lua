@@ -4,6 +4,9 @@ local splash_bg = Image{name="Splash BG", src = "splash.png" }
 
 local function main()
 	
+	
+	mediaplayer.on_loaded = mediaplayer.play
+
 	math.randomseed(os.time())
 	
 	--CONSTANTS
@@ -18,7 +21,7 @@ local function main()
 	NUM_LANES = 4
 	screen_w = screen.w
 	screen_h = screen.h
-	
+	DRAW_THRESH = 50000
 	
 	--local braking_rate = 100/4.32
 	--local damping_effect = 1000
@@ -88,11 +91,15 @@ local function main()
 	
 	dofile("User_Input.lua")
 	
+	Doodads = dofile("Doodads.lua")
+
 	sections = dofile("Sections.lua")
 	
 	world, road = dofile("3D_World.lua")
 	
 	user_car = dofile("User_Car.lua")
+	
+	Doodads.user_car_ref = user_car
 	
 	world.other_cars_ref = dofile("Other_Cars.lua")
 	
