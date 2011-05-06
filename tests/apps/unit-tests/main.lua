@@ -1,88 +1,151 @@
--- Unit Test Framework
-dofile( "unit_test.lua" )
+-- GLOBAL SECTION
+ui_element = dofile("/lib/ui_element.lua") --Load widget helper library
+layout = {} --Table containing all the UIElements that make up each screen
+groups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed
+-- END GLOBAL SECTION
 
--- Unit Tests
---dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
+--  UI3 SECTION
+groups["ui3"] = Group() -- Create a Group for this screen
+layout["ui3"] = {}
+loadfile("/screens/ui3.lua")(groups["ui3"]) -- Load all the elements for this screen
+ui_element.populate_to(groups["ui3"],layout["ui3"]) -- Populate the elements into the Group
 
-
-dofile( "Alpha1.lua" ) 
-dofile( "xmlParser1.lua" ) 
-dofile( "xmlParser2.lua" )
-dofile( "timer1.lua")
-dofile( "urlRequest1.lua" )
-dofile( "UIElement1.lua" )
-dofile( "UIElement2.lua" )
-dofile( "UIElement3.lua" )
-dofile( "UIElement4.lua" )
-dofile( "UIElement6.lua" )
-dofile( "UIElement5.lua" )
-dofile( "UIElement7.lua" )
-dofile( "UIElement8.lua" )
-dofile( "UIElement9.lua" )
-dofile( "UIElement10.lua" )
-dofile( "Container1.lua" )
-dofile( "Container2.lua" )
-dofile( "Container3.lua" )
-dofile( "Container4.lua" )
-dofile( "screen1.lua" )
-dofile( "clone1.lua" )
-dofile( "image1.lua")
-dofile( "image2.lua")
-dofile( "Rectangle1.lua")
-dofile( "text1.lua" )
-dofile( "text2.lua" )
-dofile( "Timeline1.lua" )
-dofile( "Timeline2.lua" )
-dofile( "Timeline3.lua" )
-dofile( "Timeline4.lua" )
-dofile( "Timeline5.lua" )
-dofile( "Timeline6.lua" )
-dofile( "Interval1.lua" )
-dofile( "Path1.lua" )
-dofile( "Path2.lua" )
-dofile( "load_file1.lua" )
-dofile( "readfile1.lua" )
-dofile( "choose1.lua" )
-dofile( "serialize1.lua" )
-dofile( "encoding_encrypting1.lua" )
-dofile( "global_misc1.lua" )
-dofile( "json1.lua" ) 
-dofile( "trickplay1.lua" )
-dofile( "settings1.lua" )
-dofile( "system1.lua" )
-dofile( "uri1.lua" )
-dofile( "stopwatch1.lua" ) 
-dofile( "bitmap1.lua") 
-dofile( "canvas1.lua" ) 
-dofile( "profile1.lua" ) 
-dofile( "UIElement12.lua" )  
-dofile( "mediaplayer1.lua" )
-dofile( "UIElement13.lua" ) 
-dofile( "Alpha2.lua" )
-
-dofile( "app1.lua" )
-
--- Timer to give sometime for any tests to complete before calling unit_test
-local total = 0
-
-function idle.on_idle( idle , seconds )
-      total = total + seconds
-      if total >= 3 then
-
-	-- Enter any setup steps that need to be executed before the unit tests run here
-	if logo_image ~= nil then	
-	   logo_image:grab_key_focus()
-	   globe_image:grab_key_focus()
-	end
-
-	-- run unit test
-        local results = unit_test()  
-        idle.on_idle = nil
-	exit ()
-      end
+-- UI3.BUTTON0 SECTION
+layout["ui3"].button0.pressed = function() -- Handler for button0.pressed in this screen
+	dofile("packages/controller_unit_tests/controller_main.lua")
 end
+layout["ui3"].button0.released = function() -- Handler for button0.released in this screen
+end
+-- END UI3.BUTTON0 SECTION
 
+-- UI3.BUTTON1 SECTION
+layout["ui3"].button1.pressed = function() -- Handler for button1.pressed in this screen
+	ui_element.transit_to(groups["ui3"], groups["ui1"])
+	layout["ui1"].button0.on_focus_in()
+end
+layout["ui3"].button1.released = function() -- Handler for button1.released in this screen
+end
+-- END UI3.BUTTON1 SECTION
 
+-- UI3.BUTTON11 SECTION
+layout["ui3"].button11.pressed = function() -- Handler for button11.pressed in this screen
+	steps_txt.text = ""
+	col1_results_txt.text = ""
+	col2_results_txt.text = ""
+	col3_results_txt.text = ""
+end
+layout["ui3"].button11.released = function() -- Handler for button11.released in this screen
+end
+-- END UI3.BUTTON11 SECTION
 
+-- END UI3 SECTION
 
+--  UI2 SECTION
+groups["ui2"] = Group() -- Create a Group for this screen
+layout["ui2"] = {}
+loadfile("/screens/ui2.lua")(groups["ui2"]) -- Load all the elements for this screen
+ui_element.populate_to(groups["ui2"],layout["ui2"]) -- Populate the elements into the Group
 
+-- UI2.BUTTON0 SECTION
+
+layout["ui2"].button0.pressed = function() -- Handler for button0.pressed in this screen
+	dofile("packages/acceptance_unit_tests/acceptance_main.lua")
+end
+layout["ui2"].button0.released = function() -- Handler for button0.released in this screen
+end
+-- END UI2.BUTTON0 SECTION
+
+-- UI2.BUTTON1 SECTION
+
+layout["ui2"].button1.pressed = function() -- Handler for button1.pressed in this screen
+	ui_element.transit_to(groups["ui2"], groups["ui1"])
+	layout["ui1"].button0.on_focus_in()
+end
+layout["ui2"].button1.released = function() -- Handler for button1.released in this screen
+end
+-- END UI2.BUTTON1 SECTION
+
+-- UI2.BUTTON11 SECTION
+layout["ui2"].button11.pressed = function() -- Handler for button11.pressed in this screen
+	steps_txt.text = ""
+	results_col_1_txt.text = ""
+	results_col_2_txt.text = ""
+	results_col_3_txt.text = ""
+	results_col_4_txt.text = ""
+end
+layout["ui2"].button11.released = function() -- Handler for button11.released in this screen
+end
+-- END UI2.BUTTON11 SECTION
+
+-- END UI2 SECTION
+
+--  UI1 SECTION
+groups["ui1"] = Group() -- Create a Group for this screen
+layout["ui1"] = {}
+loadfile("/screens/ui1.lua")(groups["ui1"]) -- Load all the elements for this screen
+ui_element.populate_to(groups["ui1"],layout["ui1"]) -- Populate the elements into the Group
+
+-- UI1.BUTTON0 SECTION
+
+layout["ui1"].button0.pressed = function() -- Handler for button0.pressed in this screen
+	ui_element.transit_to(groups["ui1"], groups["ui2"])
+	layout["ui2"].button0.on_focus_in()
+end
+layout["ui1"].button0.released = function() -- Handler for button0.released in this screen
+end
+-- END UI1.BUTTON0 SECTION
+
+-- UI1.BUTTON1 SECTION
+
+layout["ui1"].button1.pressed = function() -- Handler for button1.pressed in this screen
+	ui_element.transit_to(groups["ui1"], groups["ui3"])
+	layout["ui3"].button0.on_focus_in()
+end
+layout["ui1"].button1.released = function() -- Handler for button1.released in this screen
+end
+-- END UI1.BUTTON1 SECTION
+
+-- END UI1 SECTION
+
+-- GLOBAL SECTION FOOTER 
+screen:grab_key_focus()
+screen:show()
+screen.reactive = true
+
+ui_element.screen_add(groups["ui1"])
+layout["ui1"].button0.on_focus_in()
+
+-- SCREEN ON_KEY_DOWN SECTION
+function screen:on_key_down(key)
+	screen:find_child("button0"):on_key_down(key)
+end
+-- END SCREEN ON_KEY_DOWN SECTION
+
+-- SCREEN ON_MONTION SECTION
+function screen:on_motion(x,y)
+	if(screen:find_child("user_mouse_pointer") == nil) then
+		screen:add(user_mouse_pointer)
+	end
+	user_mouse_pointer.position = {x-15 ,y-10 ,0}
+	user_mouse_pointer:raise_to_top()
+	if dragging then
+		local actor = unpack(dragging)
+		if (actor.name == "grip") then
+			local actor,s_on_motion = unpack(dragging)
+			s_on_motion(x, y)
+			return true
+		end
+		return true
+	end
+end
+-- END SCREEN ON_MONTION SECTION
+
+-- SCREEN ON_BUTTON_UP SECTION
+function screen:on_button_up()
+	if dragging then
+		dragging = nil
+	end
+end
+-- END SCREEN ON_BUTTON_UP SECTION
+
+-- END GLOBAL SECTION FOOTER 
