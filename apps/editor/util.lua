@@ -1647,6 +1647,7 @@ local function inputMsgWindow_savefile(cfn)
 	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
 
 			   if j.extra.type == "Button" then 
+	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
 			   elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
