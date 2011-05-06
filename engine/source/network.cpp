@@ -909,7 +909,10 @@ public:
                 cc( curl_easy_setopt( eh, CURLOPT_CUSTOMREQUEST, closure->request.method.c_str() ) );
             }
 
-            cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, closure->request.timeout_s * 1000 ) );
+            if ( closure->request.timeout_s > 0 )
+            {
+                cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, closure->request.timeout_s * 1000 ) );
+            }
 
             if ( closure->cookie_jar )
             {
