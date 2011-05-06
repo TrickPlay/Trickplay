@@ -2,7 +2,7 @@
 local car_scale = 2.5
 local angle = tan(screen.perspective[1]/2)
 local ratio = 16/9
-local spawn_on_coming_self_thresh = 1250
+local spawn_on_coming_self_thresh = 12500
 local spawn_passing_self_thresh   = 1.5*spawn_on_coming_self_thresh
 local increase_cars_counter = 0
 local increase_cars_thresh  = 30*1000
@@ -89,12 +89,12 @@ local post_collision = function(self,msecs)
     self.y = self.y + dx*sin(self.y_rot) + dy*cos(self.y_rot)
     
     if self.v_x > 0 then
-        self.v_x = self.v_x - 20 * msecs
+        self.v_x = self.v_x - 10 * msecs
         if self.v_x < 1 then
             self.v_x = self.orientation * 1
         end
     else
-        self.v_x = self.v_x + 20 * msecs
+        self.v_x = self.v_x + 10 * msecs
         if self.v_x > -1 then
             self.v_x = self.orientation * -1
         end
@@ -126,13 +126,25 @@ local remove_function = function(self)
 end
 local move_function = function(self,msecs)
     --print("move",self)
-    if self.y < Game_State.end_point[2]+1000 then
+    
+    if self.y < Game_State.end_point[2]-1 then-- '-1' is needed to stop oncoming from being deleted the moment they are added
+        self:remove()
+        return
+    elseif self.y < Game_State.end_point[2]+1000 then
         self.opacity = math.abs(self.y-Game_State.end_point[2])/1000*255
     else
         self.opacity = 255
     end
     if self.curr_section.parent == nil or self.y > 0 then
         --print("my road was deleted")
+        
+        if math.random(1,4) == 4 then
+            if self.dist_from_center < 2.5 then
+                mediaplayer:play_sound("audio/horngoby.wav")
+            else
+                mediaplayer:play_sound("audio/beepbeep.wav")
+            end
+        end
         self:remove()
         return
     end
@@ -156,13 +168,15 @@ local move_function = function(self,msecs)
         
         --move the car by the amount remaining
         self.position = {
-            (self.x + self.dx_remaining_in_path*math.sin(math.pi/180*self.y_rot)),
-            (self.y + self.dx_remaining_in_path*math.cos(math.pi/180*self.y_rot)),
+            (self.x + self.dx_remaining_in_path*sin(self.y_rot)),
+            (self.y + self.dx_remaining_in_path*cos(self.y_rot)),
         }
         self.y_rot = self.y_rot - self.dr_remaining_in_path 
         
         --if there is no more road segments left, then delete the car
-        if self.curr_section[self.next_road] == nil then
+        if self.curr_section[self.next_road] == nil or
+           self.curr_section[self.next_road] == self.curr_section then
+           
             --edge case for when the car was collided with
             --[[
             if self.hit then
@@ -306,8 +320,34 @@ local move_function = function(self,msecs)
     
     --if the distances is less than the threshold, collision
     if math.abs(screen_w/2-curr_x) < car_w/2 and curr_y < car_len and curr_y > 0 then
+        
+        print("the angle",
+            math.atan2(
+                self.y-self.anchor_point[2],
+                self.x-self.anchor_point[1]
+            )*180/math.pi-90,
+            self.parent.y_rotation[1]
+        )
+        
         coll_x = curr_x
         coll_y = curr_y
+        self.hit = true
+        self.v_x     = user_car.v_x*2/3
+        user_car.v_x = user_car.v_x  /3
+        
+        if self.orientation == -1 then
+            self.v_y = user_car.v_y/3
+            user_car.v_y = user_car.v_y/4
+        else
+            self.v_y = self.v_y + user_car.v_y*2/3
+            user_car.v_y =user_car.v_y  /3
+        end
+        --[=[
+        if math.abs(screen_w/2-curr_x) < car_w/2-50 then
+            print("hit bumpers")
+        else
+            print("hit side")
+        end
         
         self.hit = true
         --user_car.crashed  = true
@@ -321,7 +361,7 @@ local move_function = function(self,msecs)
         print(new_coll_str_x,new_coll_str_y,new_angle)
         local new_mag = (user_car.v_y - self.v_y)*.6
         
-        new_coll_str_x = new_mag*sin(new_angle)
+        new_coll_str_x = new_mag*sin(new_angle)/4
         new_coll_str_y = new_mag*cos(new_angle)
         print(new_coll_str_y,new_coll_str_x,new_mag)
         
@@ -353,7 +393,7 @@ local move_function = function(self,msecs)
         
         self.v_x = new_coll_str_x
         self.v_y = self.v_y + new_coll_str_y
-        
+        --]=]
         --print("Collision",collision_strength,collision_angle,"y",collision_strength*math.cos(math.pi/180*collision_angle),"x",collision_strength*math.sin(math.pi/180*collision_angle))
         print("New User",user_car.v_x,user_car.v_y,"Other",self.v_x,self.v_y)
         Game_State:change_state_to(STATES.CRASH)
@@ -388,17 +428,22 @@ end
 
 
 
+local lane_pos = {
+	-lane_dist * 3/2,
+	-lane_dist/2,
+	 lane_dist/2,
+	 lane_dist * 3/2
+}
 
 
-
-
+local dist_from_center
 --car constructor
-make_car = function(last_section,start_pos, dist_from_center,debug)
+make_car = function(last_section,draw_point, lane,debug)
     
+    dist_from_center = lane_pos[lane]+70*(2*(math.random()+1)-3)
     --print("carr with atributes",last_section,last_section.path.dist,start_pos[1],start_pos[2],start_pos[3])
     
     if  #old_cars > 0 then
-        print("using old")
         clone_upval = table.remove(old_cars)
     else
         clone_upval = Clone{}
@@ -412,44 +457,50 @@ make_car = function(last_section,start_pos, dist_from_center,debug)
     clone_upval.srcs = cars[math.random(1,#cars)]
     clone_upval.source = Assets:source_from_src(clone_upval.srcs[1])
     clone_upval.anchor_point = {clone_upval.source.w/2,clone_upval.source.h*2/3}
-    clone_upval.x = start_pos[1]+dist_from_center*math.cos(math.pi/180*-start_pos[3])
-    clone_upval.y = start_pos[2]+dist_from_center*math.sin(math.pi/180*-start_pos[3])
+    clone_upval.x = draw_point.x+dist_from_center*cos(draw_point.y_rot)
+    clone_upval.y = draw_point.y+dist_from_center*sin(draw_point.y_rot)
     clone_upval.source_i = 1
     clone_upval.opacity=0
-    clone_upval.dist_from_center = dist_from_center
+    clone_upval.dist_from_center = lane
     clone_upval.screen_y = 0
     clone_upval.curr_section = last_section
     clone_upval.curr_path = last_section.path
     clone_upval.v_x = 0
     clone_upval.hit=false
     
-    clone_upval.y_rot = 180-start_pos[3]
+    clone_upval.y_rot = 180+draw_point.y_rot
     if dist_from_center < 0 then
         clone_upval.orientation = -1
         clone_upval.next_road   = "prev_segment"
+        clone_upval.dx_remaining_in_path = -(last_section.path.dist-draw_point.dx_remaining_in_path)
+        
+        clone_upval.dr_remaining_in_path = -(last_section.path.rot-draw_point.dr_remaining_in_path)
+
     else
         clone_upval.next_road   = "next_segment"
         clone_upval.orientation = 1
+        clone_upval.dx_remaining_in_path = draw_point.dx_remaining_in_path
+        
+        clone_upval.dr_remaining_in_path = draw_point.dr_remaining_in_path
+
     end
     clone_upval.v_y = clone_upval.orientation*65*pixels_per_mile
-    clone_upval.dx_remaining_in_path = clone_upval.orientation*last_section.path.dist
     
-    clone_upval.dr_remaining_in_path = clone_upval.orientation*last_section.path.rot
-
     return clone_upval
 end
-local lane_pos = {
-	-lane_dist * 3/2,
-	-lane_dist/2,
-	 lane_dist/2,
-	 lane_dist * 3/2
-}
+
 
 local lane3,lane4, rand, car, old_car, car_y
 --Car Spawner
-local passing_self_timer = Timer{
+local passing_car_counter = 0
+local passing_car_func = --[[Timer{
 	interval = spawn_passing_self_thresh,
-	on_timer = function(self)
+	on_timer =--]] function(self,msecs)
+        passing_car_counter = passing_car_counter + msecs/1000*user_car.v_y
+        if passing_car_counter < spawn_passing_self_thresh then
+            return
+        end
+        passing_car_counter = 0
 		lane3 = false
 		lane4 = false
         car_y = road.newest_segment.y + car_len
@@ -458,13 +509,13 @@ local passing_self_timer = Timer{
             --if there is a car too close in that lane, then mark that lane
             --print(other_cars[i].y, (road.newest_segment.y + car_len*10),road.newest_segment.y)
 			if car.y < car_y then
-                print("match")
-				if car.dist_from_center == lane_pos[3] then
+                --print("match")
+				if car.dist_from_center == 3 then
 					lane3 = true
-					print(3)
-				elseif car.dist_from_center == lane_pos[4] then
+					--print(3)
+				elseif car.dist_from_center == 4 then
 					lane4 = true
-					print(4)
+					--print(4)
 				end
 			end
 		end
@@ -478,12 +529,15 @@ local passing_self_timer = Timer{
             old_car = other_cars.tail
             car = make_car(
 				road.newest_segment,
+                --[[
 				{
 					road.newest_segment.x,
 					road.newest_segment.y,
 					road.newest_segment.z_rotation[1]
-				},
-				lane_pos[rand]
+				},--]]
+                Game_State.draw_point,
+				rand
+                
 			)
 			
             world.cars:add(car)
@@ -495,25 +549,32 @@ local passing_self_timer = Timer{
             other_cars:insert(car,old_car)
             
 			world.cars:lower_child(car,old_car)
-			
             Idle_Loop:add_function(car.move,car)
 		end
         
-        self.interval = spawn_passing_self_thresh
+        --self.interval = spawn_passing_self_thresh
 	end
-}
-passing_self_timer:stop()
+--}
+--passing_self_timer:stop()
 
-local on_coming_self_timer = Timer{
+local on_coming_counter = 0
+local on_coming_func = --[[Timer{
 	interval = spawn_passing_self_thresh,
-	on_timer = function(self)
+	on_timer =--]] function(self,msecs)
+        
+        on_coming_counter = on_coming_counter + msecs/1000*user_car.v_y
+        if on_coming_counter < spawn_on_coming_self_thresh then
+            
+            return
+        end
+        on_coming_counter = 0
         
         rand = math.random(1,2)
         old_car = other_cars.tail
         car = make_car(
 			road.newest_segment,
-			Game_State.end_point,
-			lane_pos[rand]
+			Game_State.draw_point,
+			rand
 		)
 		
         world.cars:add(car)
@@ -525,29 +586,27 @@ local on_coming_self_timer = Timer{
         other_cars:insert(car,old_car)
         
 		world.cars:lower_child(car,old_car)
-		
         Idle_Loop:add_function(car.move,car)
-        
 	end
-}
-on_coming_self_timer:stop()
+--}
+--on_coming_self_timer:stop()
 
 local increase_cars = Timer{
     interval = increase_cars_thresh,
     on_timer = function(timer)
         
-        spawn_on_coming_self_thresh = spawn_on_coming_self_thresh - 200
+        spawn_on_coming_self_thresh = spawn_on_coming_self_thresh - 2000
         
         print("bump up ".. spawn_on_coming_self_thresh)
-        if spawn_on_coming_self_thresh < 500 then
-            spawn_on_coming_self_thresh = 500
+        if spawn_on_coming_self_thresh < 6000 then
+            spawn_on_coming_self_thresh = 6000
             timer:stop()
         end
         
         spawn_passing_self_thresh = 1.5*spawn_on_coming_self_thresh
         
-        on_coming_self_timer.interval = spawn_on_coming_self_thresh
-        passing_self_timer.interval   = spawn_passing_self_thresh
+        --on_coming_self_timer.interval = spawn_on_coming_self_thresh
+        --passing_self_timer.interval   = spawn_passing_self_thresh
     end
 }
 increase_cars:stop()
@@ -556,8 +615,10 @@ increase_cars:stop()
 ----
 Game_State:add_state_change_function(
     function(old_state,new_state)
-        passing_self_timer:start()
-        on_coming_self_timer:start()
+        --passing_self_timer:start()
+        --on_coming_self_timer:start()
+        Idle_Loop:add_function(on_coming_func)
+        Idle_Loop:add_function(passing_car_func)
         increase_cars:start()
     end,
     nil,
@@ -571,11 +632,11 @@ Game_State:add_state_change_function(
         end
         other_cars:clear()
         
-        spawn_on_coming_self_thresh = 1250
+        spawn_on_coming_self_thresh = 12500
         spawn_passing_self_thresh   = 1.5*spawn_on_coming_self_thresh
         
-        on_coming_self_timer.interval = spawn_on_coming_self_thresh
-        passing_self_timer.interval   = spawn_passing_self_thresh
+        --on_coming_self_timer.interval = spawn_on_coming_self_thresh
+        --passing_self_timer.interval   = spawn_passing_self_thresh
     end,
     STATES.CRASH,
     STATES.PLAYING
@@ -593,8 +654,10 @@ Game_State:add_state_change_function(
 ------------------------------------
 Game_State:add_state_change_function(
     function(old_state,new_state)
-        passing_self_timer:stop()
-        on_coming_self_timer:stop()
+        --passing_self_timer:stop()
+        --on_coming_self_timer:stop()
+        Idle_Loop:remove_function(on_coming_func)
+        Idle_Loop:remove_function(passing_car_func)
         increase_cars:stop()
     end,
     STATES.PLAYING,

@@ -22,7 +22,7 @@ setmetatable(
     STATES,
     {
         __newindex = function(t,k,v)
-            error("Error: Attempt to modify STATE. Received STATES[\""..k.."\"]=\""..v"\"")
+            error("Error: Attempt to modify STATE. Received STATES[\""..k.."\"]= \""..v"\"")
         end
     }
 )
@@ -123,6 +123,7 @@ do
     --from being removed while the idle loop is moving through the iterated list
     local to_be_deleted_r = {}
     local to_be_deleted   = {}
+    local to_be_added_r   = {}
     local to_be_added     = {}
     
     --flag, used to delay the addition/removal of func_table's to the animate_list
@@ -135,12 +136,36 @@ do
         
 		assert(type(new_function) == "function","Attempted to add object of type \""..
 			type(new_function).."\"to the idle loop. Need object of type \"function\"")
-        if  iterated_list[new_function] ~= nil or
-            to_be_added[new_function]   ~= nil or
-            to_be_deleted[new_function] ~= nil then
-            
-            error("function is already in a stage of the idle_loop")
-            
+        if to_be_deleted_r[new_function] ~= nil then
+			
+			--error("function is already being deleted from the idle_loop")
+			
+			for i = 1, #to_be_deleted do
+				if to_be_deleted[i] == new_function then
+					table.remove(to_be_deleted,i)
+					to_be_deleted_r[new_function] = nil
+					
+					parameters[new_function].duration = duration
+					parameters[new_function].loop     = loop or false
+					parameters[new_function].elapsed  = 0
+					parameters[new_function].object   = containing_object or {}
+					return
+				end
+			end
+			
+			error("was in to_be_deleted_r but not to_be_deleted?!?!?")
+		elseif to_be_added_r[new_function] ~= nil then
+			
+			parameters[new_function].duration = duration
+			parameters[new_function].loop     = loop or false
+			parameters[new_function].elapsed  = 0
+			parameters[new_function].object   = containing_object or {}
+			return
+			
+        elseif iterated_list[new_function] ~= nil then
+			
+			error("function is already iterating in the idle_loop")
+			
         else
             
             parameters[new_function] = {
@@ -162,6 +187,16 @@ do
         if in_idle_loop then
             table.insert(to_be_deleted,old_function)
 			to_be_deleted_r[old_function] = true
+		elseif to_be_added_r[new_function] ~= nil then
+			for i = 1, #to_be_added do
+				if to_be_added[i] == old_function then
+					table.remove(to_be_added,i)
+					to_be_added_r[old_function] = nil
+					parameters[old_function]    = nil
+					return
+				end
+			end
+			error("was in to_be_added_r but not to_be_added?!?!?")
         else
             iterated_list[old_function] = nil
             parameters[old_function]    = nil
@@ -224,6 +259,7 @@ do
 					)
 				end
 			end
+			
         end
         
         in_idle_loop = false

@@ -45,6 +45,10 @@ local insert_data_element = function(self, new_object, insert_after_this_object)
         end
         self.head = new_object
         
+        if self.tail == nil then
+            self.tail = new_object
+        end
+        
     end
     
     self.list[new_object] = node
@@ -63,6 +67,7 @@ local delete_data_element = function(self,old_object)
     if  self.head == old_object then
         self.head = self.list[old_object].next
     else
+        --else you have a previous element
         self.list[self.list[old_object].prev].next = self.list[old_object].next
     end
     
@@ -70,6 +75,7 @@ local delete_data_element = function(self,old_object)
     if  self.tail == old_object then
         self.tail = self.list[old_object].prev
     else
+        --else you have a next element
         self.list[self.list[old_object].next].prev = self.list[old_object].prev
     end
     

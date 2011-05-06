@@ -141,7 +141,7 @@ function controllers.on_controller_connected( controllers , controller )
     if controller.has_accelerometer then
         
         Game_State.states[STATES.PLAYING].on_accelerometer = function( controller , x , y , z )
-            io.turn_impulse = -y
+			io.turn_impulse = -y
         end
         
         Game_State:add_state_change_function(
@@ -161,7 +161,11 @@ function controllers.on_controller_connected( controllers , controller )
     if controller.has_touches then
         
         Game_State.states[STATES.PLAYING].on_touch_down = function( controller, finger, x, y )
-            io.throttle_position = -10
+            
+			if x > controller.ui_size[1]*2/3 then
+			else
+				io.throttle_position = -10
+			end
         end
         Game_State.states[STATES.PLAYING].on_touch_move = function( controller, finger, x, y )
             io.throttle_position = -10
