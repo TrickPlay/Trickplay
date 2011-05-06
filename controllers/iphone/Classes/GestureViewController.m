@@ -73,8 +73,6 @@
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
     
-    [loadingIndicator stopAnimating];
-    
     return YES;
 }
 
@@ -414,8 +412,8 @@
         height = [args objectAtIndex:2] ? [[args objectAtIndex:2] floatValue] : 0.0;
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
         
-        if ([args objectAtIndex:4]) {
-            [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
+        if ([args objectAtIndex:4] && [args objectAtIndex:4] != @"") {
+            mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
         }
     }
     camera = [[CameraViewController alloc] initWithView:self.view targetWidth:width targetHeight:height editable:editable mask:mask];
@@ -442,18 +440,17 @@
 
 - (void)finishedPickingImage:(UIImage *)image {
     NSLog(@"Finished Picking Image");
-    
-    GestureImageView *gestureImage = [[GestureImageView alloc] initWithImage:image];
-    [self.view addSubview:gestureImage];
-    [gestureImage release];
+    [self.view addSubview:[[[UIImageView alloc] initWithImage:image] autorelease]];
 }
 
 - (void)finishedSendingImage {
     NSLog(@"Finished Sending Image");
+    [camera.view removeFromSuperview];
 }
 
 - (void)canceledPickingImage {
     NSLog(@"Canceled Picking Image");
+    [camera.view removeFromSuperview];
 }
 
 //-------------------- Super Advanced UI stuff -----------------
@@ -549,6 +546,8 @@
                                   style:UIBarButtonItemStyleBordered
 								  target:self action:@selector(exitTrickplayApp:)] autorelease]; 
 	self.navigationItem.rightBarButtonItem = exitItem;
+    
+    [loadingIndicator stopAnimating];
     
     //[self startService];
 }

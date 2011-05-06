@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/UTCoreTypes.h>
+#import "ImageEditorViewController.h"
 
 @protocol CameraViewControllerDelegate <NSObject>
 
@@ -18,10 +19,11 @@
 
 @end
 
-@interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
+@interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageEditorDelegate> {
     
     UIImagePickerController *imagePickerController;
     UIPopoverController *popOverController;
+    ImageEditorViewController *imageEditor;
     
     UIImageView *mask;
     CGFloat targetWidth;
@@ -37,7 +39,10 @@
     id <CameraViewControllerDelegate> delegate;
 }
 
+@property (assign) BOOL editable;
+
 @property (assign) id <CameraViewControllerDelegate> delegate;
+
 
 - (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIImageView *)aMask;
 

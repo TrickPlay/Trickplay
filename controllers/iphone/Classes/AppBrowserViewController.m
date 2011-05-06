@@ -333,6 +333,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    if (theTableView) {
+        [theTableView release];
+        theTableView = nil;
+    }
 }
 
 
@@ -340,6 +344,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"AppBrowserViewController dealloc");
     if (theTableView) {
         [theTableView release];
+        theTableView = nil;
     }
     if (appsAvailable) {
         [appsAvailable release];

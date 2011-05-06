@@ -11,18 +11,19 @@
 
 @implementation CameraViewController
 
+@synthesize editable;
 @synthesize delegate;
 
 - (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIImageView *)aMask {
-    if ((self = [super init])) {
-        self.view = [[[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 0.0, 0.0)] autorelease];
+    if ((self = [super initWithNibName:nil bundle:nil])) {
+        self.view = [[[UIView alloc] initWithFrame:aView.frame] autorelease];
         [aView addSubview:self.view];
         
         imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.delegate = self;
         //imagePickerController.cameraOverlayView = mask;
         
-        mask = aMask;
+        mask = [aMask retain];
         targetWidth = width;
         targetHeight = height;
         editable = is_editable;
@@ -117,6 +118,8 @@
     [connection cancel];
     
     [connections removeObject:connection];
+    
+    [delegate finishedSendingImage];
 }
 
 
@@ -141,6 +144,16 @@
 
 - (void)dismissTheCamera:(UIImagePickerController *)picker {
     NSLog(@"Dismissing the Camera");
+    if (!picker) {
+        picker = imagePickerController;
+    }
+    
+    /*if (imageEditor) {
+        [imagePickerController dismissModalViewControllerAnimated:NO];
+        [imageEditor release];
+        imageEditor = nil;
+    }*/
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
@@ -148,12 +161,53 @@
             popOverController = nil;
         }
     } else if (picker.parentViewController) {
-        [[picker parentViewController] dismissModalViewControllerAnimated:NO];
+        [picker.parentViewController dismissModalViewControllerAnimated:NO];
     }
     
-    [self.view removeFromSuperview];
+    //[self.view removeFromSuperview];
+}
+
+- (void)dismissImageEditor {
+    if (imageEditor) {
+        [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
+        [imageEditor release];
+        imageEditor = nil;
+    }
+}
+
+#pragma mark -
+#pragma mark Image Editing
+
+- (void)doneEditing:(UIImage *)imageToUse {
+    [self dismissImageEditor];
+    [self sendImage:imageToUse];
+    //[delegate finishedPickingImage:imageToUse];
+
+    //[self dismissTheCamera:nil];
+}
+
+- (void)cancelEditing {
+    [self dismissImageEditor];
+    [self.delegate canceledPickingImage];
+    //[self dismissTheCamera:nil];
+}
+
+- (void)editImage:(UIImage *)image {
+    if (imageEditor) {
+        [imageEditor release];
+    }
+    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil];
+    imageEditor.imageEditorDelegate = self;
     
-    //[self.navigationController popViewControllerAnimated:YES];
+    imageEditor.imageToEdit = image;
+    imageEditor.targetWidth = targetWidth;
+    imageEditor.targetHeight = targetHeight;
+    imageEditor.mask = mask;
+    
+    UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
+    
+    [self presentModalViewController:cntrl animated:YES];
+    [cntrl release];
 }
 
 #pragma mark -
@@ -175,32 +229,18 @@
             imageToUse = originalImage;
         }
         
-        /** for Testing
-        if (backgroundView) {
-            [backgroundView removeFromSuperview];
-            [backgroundView release];
+        if (editable) {
+            [self dismissTheCamera:picker];
+            [self editImage:imageToUse];
+        } else {
+            [self sendImage:imageToUse];
+            [self dismissTheCamera:picker];
         }
-         
-        CGFloat
-        x = self.view.frame.origin.x,
-        y = self.view.frame.origin.y,
-        width = self.view.frame.size.width,
-        height = self.view.frame.size.height;
-        
-        backgroundView = [[UIImageView alloc] initWithImage:imageToUse];
-        backgroundView.frame = CGRectMake(x, y, width, height);
-        [self.view addSubview:backgroundView];
-        [self.view sendSubviewToBack:backgroundView];
-        //*/
-        
-        [self sendImage:imageToUse];
     } else if (CFStringCompare((CFStringRef) mediaType, kUTTypeMovie, 0) == kCFCompareEqualTo) {
         
     }
     
-    [self dismissTheCamera:picker];
-    
-    [delegate finishedPickingImage:imageToUse];
+    [delegate finishedPickingImage:nil];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
@@ -218,13 +258,14 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+    NSLog(@"mask: %@", mask);
     imagePickerController.cameraOverlayView = mask;
     
     // Displays camera
     imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
     
-    // Controls for image manipulation for now
-    imagePickerController.allowsEditing = editable;
+    // Controls iOS standard image manipulation
+    imagePickerController.allowsEditing = NO;
     
     [self presentTheCamera];
 }
@@ -239,8 +280,8 @@
     // Displays saved pictures and movies, if both are available
     imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     
-    // Controls for image manipulation for now
-    imagePickerController.allowsEditing = editable;
+    // Controls iOS standard image manipulation
+    imagePickerController.allowsEditing = NO;
     
     [self presentTheCamera];
 }
@@ -256,10 +297,15 @@
 - (void)dealloc {
     NSLog(@"CameraViewController dealloc");
     
+    [self dismissImageEditor];
     [self dismissTheCamera:imagePickerController];
     
     [imagePickerController release];
     imagePickerController = nil;
+    
+    if (mask) {
+        [mask release];
+    }
     
     if (host) {
         [host release];
