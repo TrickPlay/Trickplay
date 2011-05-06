@@ -1749,6 +1749,7 @@ function editor.save(save_current_f, save_backup_f)
 	                  		if string.find(main, "-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  			
 					     added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
 					     if j.extra.type == "Button" then 
+					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
 					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
 					     	   added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
 			   		     elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 

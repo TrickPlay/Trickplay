@@ -1293,6 +1293,7 @@ function ui_element.button(table)
     	fill_color = {255,255,255,0},
     	border_width = 1,
     	border_corner_radius = 12,
+	focussed=nil, 
 	pressed = nil, 
 	released = nil, 
 	button_image = nil,
@@ -1330,6 +1331,10 @@ function ui_element.button(table)
         end 
         b_group:find_child("text").color = p.focus_text_color
 	
+	    if p.focused ~= nil then 
+			p.focused()
+		end 
+
 	if key then 
 	    if p.pressed and key == keys.Return then
 		p.pressed()
