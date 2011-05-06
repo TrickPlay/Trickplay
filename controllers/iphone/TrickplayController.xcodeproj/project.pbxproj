@@ -35,6 +35,8 @@
 		CD6BC3731367950700CF1973 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC3721367950700CF1973 /* CFNetwork.framework */; };
 		CD6BC3B8136A318100CF1973 /* TrickplayGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */; };
 		CD9A68581370C5BC00977730 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD9A68571370C5BB00977730 /* GestureImageView.m */; };
+		CD9A68651371CB0E00977730 /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD9A68631371CB0E00977730 /* ImageEditorViewController.m */; };
+		CD9A68661371CB0E00977730 /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
 		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
@@ -99,6 +101,9 @@
 		CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayGroup.m; sourceTree = "<group>"; };
 		CD9A68561370C5BB00977730 /* GestureImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureImageView.h; sourceTree = "<group>"; };
 		CD9A68571370C5BB00977730 /* GestureImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureImageView.m; sourceTree = "<group>"; };
+		CD9A68621371CB0E00977730 /* ImageEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorViewController.h; sourceTree = "<group>"; };
+		CD9A68631371CB0E00977730 /* ImageEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageEditorViewController.m; sourceTree = "<group>"; };
+		CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ImageEditorViewController.xib; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
@@ -293,6 +298,9 @@
 				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
 				CD404C241353DCE10021D36C /* CameraViewController.h */,
 				CD404C251353DCE50021D36C /* CameraViewController.m */,
+				CD9A68621371CB0E00977730 /* ImageEditorViewController.h */,
+				CD9A68631371CB0E00977730 /* ImageEditorViewController.m */,
+				CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -407,6 +415,7 @@
 				44AE7A57133C20F0000D7EE2 /* Default@2x.png in Resources */,
 				44AE7A59133C210D000D7EE2 /* Default-Portrait~ipad.png in Resources */,
 				441321331355335600009206 /* Entitlements.plist in Resources */,
+				CD9A68661371CB0E00977730 /* ImageEditorViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -440,6 +449,7 @@
 				CD6BC36513678D6F00CF1973 /* AudioStreamer.m in Sources */,
 				CD6BC3B8136A318100CF1973 /* TrickplayGroup.m in Sources */,
 				CD9A68581370C5BC00977730 /* GestureImageView.m in Sources */,
+				CD9A68651371CB0E00977730 /* ImageEditorViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
