@@ -61,15 +61,28 @@
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSetFillColorWithColor(context, [[UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:1.0] CGColor]);
     CGContextFillRect(context, rect);
-    
+    //*
     CGContextTranslateCTM(context, rect.size.width/2, rect.size.height/2);
     CGContextRotateCTM(context, imageViewToCrop.totalRotation);
     CGContextScaleCTM(context, imageViewToCrop.totalScale, imageViewToCrop.totalScale);
     //CGContextConcatCTM(context, imageToCrop.transform);
     CGContextTranslateCTM(context, -rect.size.width/2, -rect.size.height/2);
-    CGContextTranslateCTM(context, imageViewToCrop.xTranslation * rect.size.width/imageViewToCrop.frame.size.width, imageViewToCrop.yTranslation * rect.size.height/imageViewToCrop.frame.size.height);
+    
+    CGFloat x = imageViewToCrop.xTranslation * rect.size.width/imageViewToCrop.frame.size.width;
+    CGFloat y = imageViewToCrop.yTranslation * rect.size.height/imageViewToCrop.frame.size.height;
+    if (x || y) {
+        CGFloat r = sqrtf(powf(x, 2.0) + powf(y, 2.0));
+        CGFloat theta = !x ? M_PI/2 * y/fabs(y) : atanf(y/x);
+        theta -= imageViewToCrop.totalRotation;
+        x = r * cos(theta) * x/fabs(x);
+        y = r * sin(theta) * y/fabs(y);
+    }
+    
+    CGContextTranslateCTM(context, x, y);
     
     [imageToCrop drawInRect:rect];
+     //*/
+    
     UIImage *retImage = UIGraphicsGetImageFromCurrentImageContext();
     
     UIGraphicsEndImageContext();
