@@ -318,6 +318,7 @@ function set_app_path()
     if screen:find_child("mouse_pointer") then 
 		 screen:find_child("mouse_pointer"):raise_to_top()
     end
+	print("KKKK")
 
 end 
 
@@ -1470,7 +1471,7 @@ local msgw_cur_x = 25
 local msgw_cur_y = 50
 
 function cleanMsgWindow()
-     msgw.children = {}
+	 msgw:clear() 
      msgw_cur_x = 25
      msgw_cur_y = 50
      screen:remove(msgw)
@@ -1647,6 +1648,7 @@ local function inputMsgWindow_savefile(cfn)
 	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
 
 			   if j.extra.type == "Button" then 
+	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
 			   elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
@@ -2400,7 +2402,7 @@ local function set_project_path ()
 
 	copy_widget_imgs()
 	cleanMsgWindow()
-        screen:grab_key_focus(screen)
+    screen:grab_key_focus(screen)
 end 
 
 function inputMsgWindow(input_purpose, cfn)
@@ -2584,11 +2586,11 @@ function inputMsgWindow(input_purpose, cfn)
         	cancel_b.position = {560, msgw_cur_y + 70}
 
 		function open_b:on_button_down(x,y,button,num_clicks)
-			set_project_path()
+				set_project_path()
 		        editor.close()
      		end 
 		function open_t:on_button_down(x,y,button,num_clicks)
-			set_project_path()
+				set_project_path()
 		        editor.close()
      		end 
 
@@ -2678,4 +2680,5 @@ function inputMsgWindow(input_purpose, cfn)
 	 msgw:find_child(msgw_focus).extra.on_focus_out()
 	 input_box.extra.on_focus_in()
     end 
+
 end
