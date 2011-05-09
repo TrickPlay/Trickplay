@@ -4829,7 +4829,7 @@ button
         selectable_items  = {}
         dropDownMenu:clear()
         dropDownMenu.opacity=0
-	dropDownMenu:hide()
+        dropDownMenu:hide()
         
         button.text_font=p.button_text_font
     	button.text_color=p.button_text_color
@@ -4842,12 +4842,12 @@ button
     	button.fill_color=p.button_color
     	button.border_width=p.border_width
     	button.border_corner_radius=p.border_corner_radius
-
+        
         umbrella.size = {button.ui_width,button.ui_height}
         curr_y = p.vert_offset
         
         --For each category
-	local prev_item 
+        local prev_item 
         for i = 1, #p.items do
             local item=p.items[i]
             --focus_sel_items[cat] = {}
@@ -4891,29 +4891,29 @@ button
                     }
                     txt.anchor_point={0,txt.h/2}
                     txt.y = txt.y+txt.h/2
-		    if item.mstring then 
-			txt.use_markup =true
-			txt.markup = item.mstring
-		    end 
-                    dropDownMenu:add(txt)
-
-		
+                if item.mstring then 
+                    txt.use_markup =true
+                    txt.markup = item.mstring
+                end 
+                dropDownMenu:add(txt)
+                
+                
                 if item.bg then
-
+                    
                     ui_ele = item.bg
-		    if i == #p.items and prev_item ~= nil then 
+                    if i == #p.items and prev_item ~= nil then 
                     	ui_ele.anchor_point = { 0, prev_item.bg.h/2 }
                     	ui_ele.position     = {  0, txt.y }
-		    else 
+                    else 
                     	ui_ele.anchor_point = { 0, ui_ele.h/2 }
                     	ui_ele.position     = {  0, txt.y }
-		    end 
+                    end 
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f(item.parameter) end
-			    button.on_focus_out() 
+                            button.on_focus_out() 
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do
@@ -4968,13 +4968,15 @@ button
                 end
                 
                 ui_ele.name="focus"
-		if i == #p.items and prev_item ~= nil and prev_item.focus ~= nil then 
-                    	ui_ele.anchor_point = { 0, prev_item.focus.h/2 }
-                    	ui_ele.position     = {  0, txt.y }
-		else 
-                    	ui_ele.anchor_point = { 0, ui_ele.h/2 }
-                    	ui_ele.position     = {  0, txt.y }
-		end 
+                if i == #p.items and prev_item ~= nil and
+                    prev_item.focus ~= nil then
+                    
+                    ui_ele.anchor_point = {  0, prev_item.focus.h/2 }
+                    ui_ele.position     = {  0, txt.y }
+                else 
+                    ui_ele.anchor_point = {  0, ui_ele.h/2 }
+                    ui_ele.position     = {  0, txt.y }
+                end 
                 --ui_ele.anchor_point = { 0, ui_ele.h/2 }
                 --ui_ele.position     = { 0, txt.y }
                 ui_ele.opacity      = 0
@@ -5290,6 +5292,9 @@ function ui_element.menuBar(t)
 
     return umbrella
 end
+--]]
+
+---[[
 
 
 
@@ -5299,22 +5304,27 @@ function ui_element.tabBar(t)
     local p = {
         name  = "Drop Down Bar",
         font  = "DejaVu Sans 26px",
-        tabs = {
-        --  item text, selectable, icon source
-            {"Item 1",      true,  nil },
-            {"Item 2",      true,  nil },
-            {"Item 3",      true,  nil },
+        tab_labels = {
+            "Item 1",
+            "Item 2",
+            "Item 3",
         },
-        tab_w_equal = false,
-        tab_w_padding = 30,
-        min_w = 500,
-        border_width=2,
-        border_color={255,255,255},
+        --tab_align          = "CENTER",
+        --label_align        = "CENTER",
+        label_padding = 10,
+        tab_position = "TOP",
         
-        bg_color = {0,0,0},
-        border_rad=12,
-        
+        display_width  = 400,
+        display_height = 500,
+        --space_between_tabs = 10,
+        slant_width  = 20,
+        border_width =  2,
+        border_color = {255,255,255,255},
+        fill_color   = {  0,  0,  0,255},
+        label_color  = {255,255,255,255},
+        unsel_color  = { 60, 60, 60,255},
     }
+    
     --overwrite defaults
     if t ~= nil then
         for k, v in pairs (t) do
@@ -5322,256 +5332,282 @@ function ui_element.tabBar(t)
         end
     end
     
-    local curr_index = 0
-    local selectable_items = {}
-    local focus_sel_items  = {}
+    local create
+    local current_index = 1
+    local tabs = {}
+    local tab_bg = {}
+    local tab_focus = {}
+	
+	
+	
+	local function make_horz_tab(txt_w,txt_h,slant_w,color,unsel)
+		
+		--define the canvas dimensions
+		local c = Canvas{
+			size = {
+				txt_w+p.border_width*2+slant_w,
+				txt_h+p.border_width*2
+			}
+		}
+		
+		c:begin_painting()
+		c:new_path()
+		
+		--top left corner
+		c:move_to( p.border_width / 2                  , p.border_width / 2       )
+		--top edge
+		c:line_to( p.border_width / 2 + txt_w          , p.border_width / 2       )
+		
+		if unsel == true then
+			--slant
+			c:line_to( p.border_width / 2 + txt_w + slant_w, -p.border_width / 2 + c.h )
+			--bottom edge
+			c:line_to( p.border_width / 2                  , -p.border_width / 2 + c.h )
+		else
+			--slant
+			c:line_to( p.border_width / 2 + txt_w + slant_w, p.border_width / 2 + c.h )
+			--unseen bottom edge
+			c:line_to( p.border_width / 2                  , p.border_width / 2 + c.h )
+		end
+		--left edge
+		c:line_to( p.border_width / 2                  , p.border_width / 2       )
+		
+		c:finish_painting()
+		
+		--set the fill
+		c:set_source_color( color )
+		c:fill(true)
+		
+		--set the stroke
+		c:set_source_color( p.border_color )
+		c:stroke( true )
+		
+		if c.Image then
+		c= c:Image()
+		end
+		
+		return c
+	end
+	
+	function make_vert_tab(txt_w,txt_h,color, unsel)
+		
+		--define the canvas dimensions
+		local c = Canvas{
+			size = {
+				txt_w+p.border_width*2,
+				txt_h+p.border_width*2
+			}
+		}
+		
+		c:begin_painting()
+		c:new_path()
+		
+		--top left corner
+		c:move_to( p.border_width / 2                  , p.border_width / 2       )
+		
+		if unsel == true then
+			--top edge
+			c:line_to( c.w - p.border_width / 2, p.border_width / 2       )
+			--unseen right edge
+			c:line_to( c.w - p.border_width / 2, -p.border_width / 2 + c.h )
+		else
+			--top edge
+			c:line_to( c.w + p.border_width / 2, p.border_width / 2       )
+			--right edge
+			c:line_to( c.w + p.border_width / 2, -p.border_width / 2 + c.h )
+		end
+		
+		--bottom edge
+		c:line_to( p.border_width / 2                  , -p.border_width / 2 + c.h )
+		--left edge
+		c:line_to( p.border_width / 2                  , p.border_width / 2       )
+		
+		c:finish_painting()
+		
+		--set the fill
+		c:set_source_color( color )
+		c:fill(true)
+		
+		--set the stroke
+		c:set_source_color( p.border_color )
+		c:stroke( true )
+		
+		if c.Image then
+		c= c:Image()
+		end
+		
+		return c
+	end
+	
+	
+	
+	
     
-    local dropDownMenu = Group{}
-    local button       = Group{}
-    local button_focus = nil
     local umbrella     = Group{
-        name="Drop down bar",
-        reactive = true,
-        children={button,dropDownMenu},
+        name="Tab Container",
         extra={
-            type="MenuBar",
-            focus_index = function(i)
-                if curr_index == i then
-                    print("Item on Drop Down Bar is already focused")
-                    return
-                end
-                if focus_sel_items[curr_index] ~= nil then
-                    focus_sel_items[curr_index]:complete_animation()
-                    focus_sel_items[curr_index].opacity=255
-                    focus_sel_items[curr_index]:animate{
-                        duration=300,
-                        opacity=0
-                    }
-                end
-                if focus_sel_items[i] ~= nil then
-                    focus_sel_items[i]:complete_animation()
-                    focus_sel_items[i].opacity=0
-                    focus_sel_items[i]:animate{
-                        duration=300,
-                        opacity=255
-                    }
-                    curr_index=i
-                end
+            type="TabBar",
+            insert_tab = function(self,index)
             end,
-            spin_in = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
-                dropDownMenu.y_rotation={90,0,0}
-                dropDownMenu.opacity=0
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=255,
-                    y_rotation=0
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                curr_index = 0
+            remove_tab = function(self,index)
             end,
-            spin_out = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
-                dropDownMenu.y_rotation={0,0,0}
-                dropDownMenu.opacity=255
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=0,
-                    y_rotation=-90
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
+            rename_tab = function(self,index)
             end,
-            fade_in = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
-                dropDownMenu.y_rotation={0,0,0}
-                dropDownMenu.opacity=0
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                curr_index = 0
+            
+            move_tab_up = function(self,index)
+                if index == 1 then return end
+                local temp  = p.tab_labels[i-1]
+                p.tab_labels[i-1] = p.tab_labels[i]
+                p.tab_labels[i]   = temp
+                
+                temp      = tabs[i-1]
+                tabs[i-1] = tabs[i]
+                tabs[i]   = temp
+                
+                create()
             end,
-            fade_out = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
-                dropDownMenu.y_rotation={0,0,0}
-                dropDownMenu.opacity=255
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=0,
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
-                button_focus:hide ()
-		dropDownMenu:hide()
+            move_tab_down = function(self,index)
+                if index == #p.tab_labels then return end
+                local temp  = p.tab_labels[i+1]
+                p.tab_labels[i+1] = p.tab_labels[i]
+                p.tab_labels[i]   = temp
+                
+                temp      = tabs[i+1]
+                tabs[i+1] = tabs[i]
+                tabs[i]   = temp
+                
+                create()
             end,
+            
+            --switching 'visible tab' functions
+            display_tab = function(self,index)
+                if index < 1 or index > #p.tab_labels then return end
+                tabs[current_index]:hide()
+				tab_bg[current_index]:show()
+				tab_focus[current_index]:hide()
+                current_index = index
+                tabs[current_index]:show()
+				tab_bg[current_index]:hide()
+				tab_focus[current_index]:show()
+            end,
+            previous_tab = function(self)
+                if current_index == 1 then return end
+                
+                self:display_tab(current_index-1)
+            end,
+            next_tab = function(self)
+                if current_index == #p.tab_labels then return end
+                
+                self:display_tab(current_index+1)
+            end,
+			
+			get_tab_group = function(self,index)
+				return tabs[index]
+			end,
         }
     }
-    local function make_ring(w,h,padding)
-        local ring = Canvas{ size = { w , h } }
-        ring:begin_painting()
-        ring:set_source_color( p.txt_color )
-        ring:round_rectangle(
-            padding + 2 / 2,
-            padding + 2 / 2,
-            w - 2 - padding * 2 ,
-            h - 2 - padding * 2 ,
-            12 )
-        ring:stroke()
-        ring:finish_painting()
-    	if ring.Image then
-       		ring= ring:Image()
-    	end
-        return ring
-    end
     
-    local function create()
+    create = function()
         
-        local ui_ele = nil
-        local curr_y = 0
+        local labels, txt_h, txt_w = {},0,0
         
-        local max_item_w = 0
-        local max_item_h = 0
+		current_index = 1
+		
+        umbrella:clear()
         
-        curr_index   = 0
-        selectable_items = {}
-        focus_sel_items  = {}
-        dropDownMenu:clear()
-        dropDownMenu.opacity=0
+        local bg = Rectangle{
+            color        = p.fill_color,
+            border_color = p.border_color,
+            border_width = p.border_width,
+            w = p.display_width,
+            h = p.display_height,
+        }
         
-        if p.bg_clone_src == nil then
-            curr_y = 45
-        else
-            curr_y = p.item_start_y
-        end
-        
-        for i = 1, #p.items do
+        umbrella:add(bg)
+        for i = 1, #p.tab_labels do
             
-            ui_ele = Text{
-                text  = p.items[i][1],
+            if tabs[i] == nil then tabs[i] = Group{} end
+            
+            labels[i] = Text{
                 font  = p.font,
-                color = p.txt_color,
-                x     = p.padding,
-                y     = curr_y,
+                text  = p.tab_labels[i],
+                color = p.label_color,
             }
             
-            curr_y = ui_ele.h+curr_y+p.item_spacing
+            if labels[i].w > txt_w then txt_w = labels[i].w end
             
-            if p.items[i][2] then
-                table.insert(selectable_items,ui_ele)
-                ui_ele.x = ui_ele.x + 20
-            end
+            txt_h = labels[i].h
             
-            if  max_item_w < ui_ele.w + ui_ele.x then
-                max_item_w = ui_ele.w + ui_ele.x
-            end
-            if  max_item_h < ui_ele.h then
-                max_item_h = ui_ele.h
-            end
-            
-            dropDownMenu:add(ui_ele)
-        end
-        max_item_w = max_item_w+p.right_margin+p.padding
-        
-        for i = 1, #selectable_items do
-            if p.item_focus_clone_src ~= nil then
-                ui_ele = Clone{source=p.item_focus_clone_src}
-            else
-                ui_ele = assets(skin_list[p.skin]["button_focus"])
-                ui_ele.size = {max_item_w,max_item_h+15}
-            end
-            
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            ui_ele.position     = {max_item_w/2,selectable_items[i].y+selectable_items[i].h/2}
-            ui_ele.opacity = 0
-            dropDownMenu:add(ui_ele)
-            ui_ele:lower_to_bottom()
-            table.insert(focus_sel_items,ui_ele)
-            if p.item_bg_clone_src ~= nil then
-                ui_ele = Clone{source=p.item_bg_clone_src}
+            if editor_lb == nil or editor_use then  
+                print(1)
+                labels[i].on_button_down = function()
+                    umbrella:display_tab(i)
+                end
                 
-            else
-                ui_ele = make_ring(max_item_w,max_item_h+15,7)
+                labels[i].reactive=true
             end
             
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            ui_ele.position     = {max_item_w/2,selectable_items[i].y+selectable_items[i].h/2}
-            dropDownMenu:add(ui_ele)
-            ui_ele:lower_to_bottom()
+            
         end
-        
-        if p.bg_clone_src == nil then
-            local color = p.bg_color or skin_list[p.skin]["drop_down_color"]
-            ui_ele = ui.factory.make_dropdown(
-                { max_item_w , curr_y } ,
-                color
-            )
-        else
-            ui_ele = Clone{source=p.bg_clone_src}
-            --print("this")
-        end
-        dropDownMenu:add(ui_ele)
-        ui_ele:lower_to_bottom()
-        
-        dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
-        
-        button:clear()
-        if p.top_img ~= nil then
-            if p.top_img.parent ~= nil then
-                p.top_img.unparent()
+        for i = 1, #p.tab_labels do
+            if p.tab_position == "TOP" then
+                tab_bg[i]    = make_horz_tab(
+                    txt_w + 2*p.label_padding,
+                    txt_h,
+                    p.slant_width,
+                    p.unsel_color,
+                    true
+                )
+                tab_focus[i] = make_horz_tab(
+                    txt_w + 2*p.label_padding,
+                    txt_h,
+					p.slant_width,
+                    p.fill_color,
+                    false
+                )
+                tab_bg[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
+                tab_focus[i].x = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
+                labels[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)+ p.label_padding
+                tabs[i].y = tab_bg[i].h
+            else
+                tab_bg[i] = make_vert_tab(
+                    txt_w + 2*p.label_padding,
+                    txt_h,
+                    p.unsel_color,
+                    true
+                )
+                tab_focus[i] = make_vert_tab(
+                    txt_w + 2*p.label_padding,
+                    txt_h,
+                    p.fill_color,
+                    false
+                )
+                tab_bg[i].y = txt_h*(i-1)+1
+                tab_focus[i].y = txt_h*(i-1)
+                labels[i].y = txt_h*(i-1)
+                labels[i].x =  p.label_padding
+				tabs[i].x = tab_bg[i].w
             end
-            p.top_img.anchor_point = {p.top_img.w/2,p.top_img.h/2}
-            button:add(p.top_img)
-        else
-            ui_ele = assets(skin_list[p.skin]["button"])
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            button:add(ui_ele)
+            tab_focus[i]:hide()
+            umbrella:add(tabs[i],tab_bg[i],tab_focus[i],labels[i])
         end
         
-        if p.top_focus_img ~= nil then
-            if p.top_focus_img.parent ~= nil then
-                p.top_focus_img.unparent()
-            end
-            p.top_focus_img.anchor_point = {p.top_focus_img.w/2,p.top_focus_img.h/2}
-            button:add(p.top_focus_img)
-            button_focus = p.top_focus_img
+        if p.tab_position == "TOP" then
+            bg.y = tab_bg[1].h-p.border_width
         else
-            button_focus = assets(skin_list[p.skin]["button_focus"])
-            button_focus.anchor_point = {button_focus.w/2,button_focus.h/2}
-            button:add(button_focus)
+            bg.x = tab_bg[1].w-p.border_width
         end
         
-        button_focus.opacity = 0
-        ui_ele = Text{text=p.name,font=p.font,color = p.txt_color}
-        ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        button:add(ui_ele)
-        
-        button.position = {button.w/2,button.h/2}
-        dropDownMenu.x = button.w/2
-        dropDownMenu.y = dropDownMenu.y + button.h+10
+        for i = #p.tab_labels+1, #tabs do
+            tabs[i]      = nil
+            tab_bg[i]    = nil
+            tab_focus[i] = nil
+        end
+		
+		umbrella:display_tab(current_index)
     end
     
-    
+    create()
     
     --set the meta table to overwrite the parameters
     mt = {}
