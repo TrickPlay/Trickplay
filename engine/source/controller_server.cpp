@@ -23,7 +23,11 @@
 #endif
 
 //-----------------------------------------------------------------------------
-static Debug_ON log( "CONTROLLER-SERVER" );
+#define TP_LOG_DOMAIN   "CONTROLLER-SERVER"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
@@ -45,14 +49,14 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
     if ( error )
     {
         delete new_server;
-        g_warning( "FAILED TO START CONTROLLER SERVER ON PORT %d : %s", port, error->message );
+        tpwarn( "FAILED TO START ON PORT %d : %s", port, error->message );
         g_clear_error( &error );
     }
     else
     {
         server.reset( new_server );
 
-        log( "READY ON PORT %d", server->get_port() );
+        tplog( "READY ON PORT %d", server->get_port() );
 
         context->get_http_server()->register_handler( "/controllers" , this );
 
@@ -64,7 +68,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
         }
         else
         {
-            log( "MDNS DISCOVERY IS DISABLED" );
+            tplog( "MDNS DISCOVERY IS DISABLED" );
         }
 
 #endif
@@ -77,7 +81,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
         }
         else
         {
-            log( "UPNP DISCOVERY IS DISABLED" );
+            tplog( "UPNP DISCOVERY IS DISABLED" );
         }
 #endif
 
@@ -324,8 +328,14 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_SUBMIT_PICTURE	:
 		{
+		    TPControllerSubmitPicture * sp = ( TPControllerSubmitPicture * ) parameters;
 		    String path = start_post_endpoint( connection , PostInfo::PICTURES );
-			server->write_printf( connection, "PI\t%s\n" , path.c_str() + 1 );
+			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\n" ,
+			        path.c_str() + 1 ,
+			        sp->max_width ,
+			        sp->max_height ,
+			        sp->edit ? 1 : 0 ,
+			        sp->mask ? sp->mask : "" );
 			break;
 		}
 
@@ -387,7 +397,7 @@ ControllerServer::ConnectionInfo * ControllerServer::find_connection( gpointer c
 
 void ControllerServer::connection_accepted( gpointer connection, const char * remote_address )
 {
-    log( "ACCEPTED CONNECTION %p FROM %s", connection, remote_address );
+    tplog( "ACCEPTED CONNECTION %p FROM %s", connection, remote_address );
 
     // This adds the connection to the map and sets its address at the same time
 
@@ -408,7 +418,7 @@ void ControllerServer::connection_accepted( gpointer connection, const char * re
 
 gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 {
-    log( "TIMED DISCONNECT" );
+    tplog( "TIMED DISCONNECT" );
 
     // Check to see that the controller has reported a version
 
@@ -418,7 +428,7 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 
     if ( ci && ci->disconnect && !ci->version )
     {
-        log( "DROPPING UNIDENTIFIED CONNECTION %p", tc->connection );
+        tplog( "DROPPING UNIDENTIFIED CONNECTION %p", tc->connection );
 
         if ( tc->self->server.get() )
         {
@@ -448,7 +458,7 @@ void ControllerServer::connection_closed( gpointer connection )
 
     connections.erase( connection );
 
-    log( "CONNECTION CLOSED %p", connection );
+    tplog( "CONNECTION CLOSED %p", connection );
 }
 
 //-----------------------------------------------------------------------------
@@ -483,7 +493,7 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts )
 {
-    static const char * PROTOCOL_VERSION = "32";
+    static const char * PROTOCOL_VERSION = "33";
 
     guint count = g_strv_length( parts );
 
@@ -825,7 +835,7 @@ String ControllerServer::start_serving_resource( gpointer connection , const Str
 
     path = String( "/controllers/resource/" ) + path;
 
-    log( "SERVING %s : %s" , path.c_str() , file_name.c_str() );
+    tplog( "SERVING %s : %s" , path.c_str() , file_name.c_str() );
 
     ResourceInfo & info( resources[ path ] );
 
@@ -844,7 +854,7 @@ void ControllerServer::drop_resource_group( gpointer connection , const String &
     {
         if ( it->second.connection == connection && ( group.empty() || it->second.group == group  ) )
         {
-            log( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.file_name.c_str() );
+            tplog( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.file_name.c_str() );
 
             resources.erase( it++ );
         }
@@ -871,20 +881,6 @@ void ControllerServer::handle_http_get( const HttpServer::Request & request , Ht
 
 //-----------------------------------------------------------------------------
 
-String random_string( guint length )
-{
-    static const char * pieces = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-    char buffer[ length ];
-
-    for ( guint i = 0; i < length ; ++i )
-    {
-        buffer[ i ] = pieces[ g_random_int_range( 0 , sizeof( pieces ) ) ];
-    }
-
-    return String( buffer , length );
-}
-
 String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Type type )
 {
     for ( PostMap::const_iterator it = post_map.begin(); it != post_map.end(); ++it )
@@ -903,11 +899,11 @@ String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Ty
     {
         path = "/controllers";
         path += type == PostInfo::AUDIO ? "/audio/" : "/picture/";
-        path += random_string( 20 );
+        path += Util::random_string( 20 );
     }
     while( post_map.find( path ) != post_map.end() );
 
-    log( "STARTED POST END POINT %s" , path.c_str() );
+    tplog( "STARTED POST END POINT %s" , path.c_str() );
 
     PostInfo & info( post_map[ path ] );
 
@@ -923,7 +919,7 @@ void ControllerServer::drop_post_endpoint( gpointer connection )
     {
         if ( it->second.connection == connection )
         {
-            log( "DROPPING POST END POINT %s", it->first.c_str() );
+            tplog( "DROPPING POST END POINT %s", it->first.c_str() );
 
             post_map.erase( it++ );
         }

@@ -9,10 +9,15 @@
 #include <iostream>
 #include <cstdlib>
 #include "http_server.h"
-#include "util.h"
 
-Debug_ON log( "HTTP-SERVER" );
-Debug_OFF log2( "HTTP-SERVER" );
+
+//=============================================================================
+
+#define TP_LOG_DOMAIN   "HTTP-SERVER"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //=============================================================================
 
@@ -20,9 +25,16 @@ HttpServer::HttpServer( guint16 port ) : server( NULL )
 {
 	server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
 
-	log( "READY ON PORT %u" , soup_server_get_port( server ) );
+	if ( ! server )
+	{
+	    tpwarn( "FAILED TO START" );
+	}
+	else
+	{
+	    tplog( "READY ON PORT %u" , soup_server_get_port( server ) );
 
-	soup_server_run_async( server );
+	    soup_server_run_async( server );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -35,7 +47,7 @@ HttpServer::~HttpServer()
 
 		g_object_unref( server );
 
-		log( "SHUTDOWN" );
+		tplog2( "SHUTDOWN" );
 	}
 }
 
@@ -43,13 +55,18 @@ HttpServer::~HttpServer()
 
 guint16 HttpServer::get_port( ) const
 {
-	return soup_server_get_port( server );
+	return server ? soup_server_get_port( server ) : 0;
 }
 
 //-----------------------------------------------------------------------------
 
 void HttpServer::register_handler( const String & path , RequestHandler * handler )
 {
+    if ( ! server )
+    {
+        return;
+    }
+
     g_assert( handler );
 
     soup_server_add_handler(
@@ -59,16 +76,21 @@ void HttpServer::register_handler( const String & path , RequestHandler * handle
 			new HandlerUserData( this , handler ),
 			( GDestroyNotify ) HandlerUserData::destroy );
 
-    log( "ADDED HANDLER FOR %s" , path.c_str() );
+    tplog2( "ADDED HANDLER FOR %s" , path.c_str() );
 }
 
 //-----------------------------------------------------------------------------
 
 void HttpServer::unregister_handler( const String & path )
 {
+    if ( ! server )
+    {
+        return;
+    }
+
     soup_server_remove_handler( server , path.c_str() );
 
-    log( "REMOVED HANDLER FOR %s" , path.c_str() );
+    tplog2( "REMOVED HANDLER FOR %s" , path.c_str() );
 }
 
 //=============================================================================
@@ -133,21 +155,21 @@ class HttpRequest : public HttpServer::Request
 {
 private:
 
-	HttpMessageContext & message_context;
+	HttpMessageContext * message_context;
 	SoupBufferBody       body;
 
 public:
 
-	HttpRequest( HttpMessageContext & ctx )
+	HttpRequest( HttpMessageContext * ctx )
 	:
 	    message_context( ctx ),
-	    body( ctx.message->request_body )
+	    body( ctx->message->request_body )
 	{
 	}
 
 	Method get_method( ) const
 	{
-	    const char * m( message_context.message->method );
+	    const char * m( message_context->message->method );
 
 	    if ( m == SOUP_METHOD_GET )
 	    {
@@ -174,24 +196,42 @@ public:
 
 	guint16 get_server_port( ) const
 	{
-		return soup_server_get_port( message_context.server );
+		return soup_server_get_port( message_context->server );
 	}
 
     String get_path( ) const
     {
-        return message_context.path;
+        return message_context->path;
     }
 
 	String get_request_uri( ) const
 	{
-		return soup_message_get_uri( message_context.message )->path;
+		return soup_message_get_uri( message_context->message )->path;
+	}
+
+	HttpServer::URI get_uri() const
+	{
+	    HttpServer::URI result;
+
+	    SoupURI * u = soup_message_get_uri( message_context->message );
+
+	    result.scheme = u->scheme ? u->scheme : "";
+	    result.user = u->user ? u->user : "";
+	    result.password = u->password ? u->password : "";
+	    result.host = u->host ? u->host : "";
+	    result.port = u->port;
+	    result.path = u->path ? u->path : "";
+	    result.query = u->query ? u->query : "";
+	    result.fragment = u->fragment ? u->fragment : "";
+
+	    return result;
 	}
 
 	String get_header( const String & name ) const
 	{
 	    String result;
 
-	    if ( const char * h = soup_message_headers_get_one( message_context.message->request_headers, name.c_str() ) )
+	    if ( const char * h = soup_message_headers_get_one( message_context->message->request_headers, name.c_str() ) )
 	    {
 	        result = h;
 	    }
@@ -203,7 +243,7 @@ public:
 	{
 		StringMultiMap header_map;
 		SoupMessageHeadersIter iter;
-		soup_message_headers_iter_init ( & iter , message_context.message->request_headers );
+		soup_message_headers_iter_init ( & iter , message_context->message->request_headers );
 		const char * name;
 		const char * val;
 		while( soup_message_headers_iter_next( & iter , & name , & val ) )
@@ -217,7 +257,7 @@ public:
 	{
 		StringList header_names;
 		SoupMessageHeadersIter iter;
-		soup_message_headers_iter_init( & iter , message_context.message->request_headers );
+		soup_message_headers_iter_init( & iter , message_context->message->request_headers );
 		const char * name;
 		const char * val;
 		while ( soup_message_headers_iter_next( & iter , & name , & val ) )
@@ -233,14 +273,14 @@ public:
 	{
 		StringMap result;
 
-		if ( message_context.query )
+		if ( message_context->query )
 		{
 		    GHashTableIter it;
 
 		    gpointer key;
 		    gpointer value;
 
-		    g_hash_table_iter_init( & it , message_context.query );
+		    g_hash_table_iter_init( & it , message_context->query );
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
@@ -255,14 +295,14 @@ public:
 	{
 		StringList result;
 
-		if ( message_context.query )
+		if ( message_context->query )
         {
             GHashTableIter it;
 
             gpointer key;
             gpointer value;
 
-            g_hash_table_iter_init( & it , message_context.query );
+            g_hash_table_iter_init( & it , message_context->query );
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
@@ -277,9 +317,9 @@ public:
 	{
 	    String result;
 
-		if ( message_context.query )
+		if ( message_context->query )
 		{
-		    if ( gpointer value = g_hash_table_lookup( message_context.query, name.c_str() ) )
+		    if ( gpointer value = g_hash_table_lookup( message_context->query, name.c_str() ) )
 		    {
 		        result = ( const char * ) value;
 		    }
@@ -292,7 +332,7 @@ public:
 	{
 	    String result;
 
-	    if ( const char * value = soup_message_headers_get_content_type( message_context.message->request_headers , 0 ) )
+	    if ( const char * value = soup_message_headers_get_content_type( message_context->message->request_headers , 0 ) )
 	    {
 	        result = value;
 	    }
@@ -302,7 +342,7 @@ public:
 
 	goffset get_content_length( ) const
 	{
-		return soup_message_headers_get_content_length( message_context.message->request_headers );
+		return soup_message_headers_get_content_length( message_context->message->request_headers );
 	}
 
     const HttpServer::Request::Body & get_body() const
@@ -352,7 +392,7 @@ public:
         wrote_chunk_handler = g_signal_connect( ctx.message , "wrote_chunk", G_CALLBACK( message_wrote_chunk ) , this );
         finished_handler = g_signal_connect( ctx.message , "finished", G_CALLBACK( message_finished ) , this );
 
-        log2( "CREATED RESPONSE BODY %p" , this );
+        tplog2( "CREATED RESPONSE BODY %p" , this );
     }
 
     ~StreamBody()
@@ -373,7 +413,7 @@ public:
 
         delete stream_writer;
 
-        log2( "DESTROYED RESPONSE BODY %p" , this );
+        tplog2( "DESTROYED RESPONSE BODY %p" , this );
     }
 
     void append( const char * data , gsize size )
@@ -381,14 +421,14 @@ public:
         g_assert( data );
         g_assert( size );
 
-        log2( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
+        tplog2( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
 
         soup_message_body_append( ctx.message->response_body , SOUP_MEMORY_COPY , data , size );
     }
 
     void complete()
     {
-        log2( "RESPONSE BODY %p COMPLETE" , this );
+        tplog2( "RESPONSE BODY %p COMPLETE" , this );
 
         soup_message_body_complete( ctx.message->response_body );
 
@@ -401,7 +441,7 @@ public:
 
     void cancel()
     {
-        log2( "RESPONSE BODY %p CANCEL" , this );
+        tplog2( "RESPONSE BODY %p CANCEL" , this );
 
         soup_socket_disconnect( soup_client_context_get_socket( ctx.client ) );
     }
@@ -411,13 +451,13 @@ private:
 
     static void message_wrote_chunk( SoupMessage * msg , StreamBody * self )
     {
-        log2( "RESPONSE BODY %p WROTE CHUNK" , self );
+        tplog2( "RESPONSE BODY %p WROTE CHUNK" , self );
 
         self->stream_writer->write( * self );
     }
     static void message_finished( SoupMessage * msg , StreamBody * self )
     {
-        log2( "RESPONSE BODY %p FINISHED" , self );
+        tplog2( "RESPONSE BODY %p FINISHED" , self );
 
         delete self;
     }
@@ -489,11 +529,11 @@ class HttpResponse : public HttpServer::Response
 {
 private:
 
-    HttpMessageContext & message_context;
+    HttpMessageContext * message_context;
 
 public:
 
-	HttpResponse( HttpMessageContext & ctx )
+	HttpResponse( HttpMessageContext * ctx )
 	:
 	    message_context( ctx )
 	{
@@ -501,7 +541,7 @@ public:
 
 	void set_header( const String& name, const String& value )
 	{
-		soup_message_headers_replace( message_context.message->response_headers, name.c_str(), value.c_str() );
+		soup_message_headers_replace( message_context->message->response_headers, name.c_str(), value.c_str() );
 	}
 
 	void set_response( const String & content_type , const char * data , gsize size )
@@ -512,7 +552,7 @@ public:
 	    }
 	    else
 	    {
-	        soup_message_set_response( message_context.message, content_type.c_str(), SOUP_MEMORY_COPY, data, size );
+	        soup_message_set_response( message_context->message, content_type.c_str(), SOUP_MEMORY_COPY, data, size );
 	    }
 	}
 
@@ -526,27 +566,39 @@ public:
     {
         if ( msg.empty() )
         {
-            soup_message_set_status ( message_context.message, int( status ) );
+            soup_message_set_status ( message_context->message, int( status ) );
         }
         else
         {
-            soup_message_set_status_full ( message_context.message , int( status ) , msg.c_str() );
+            soup_message_set_status_full ( message_context->message , int( status ) , msg.c_str() );
         }
     }
 
     void set_content_type( const String & content_type )
     {
-        soup_message_headers_set_content_type( message_context.message->response_headers , content_type.c_str() , 0 );
+        soup_message_headers_set_content_type( message_context->message->response_headers , content_type.c_str() , 0 );
     }
 
     void set_content_length( goffset content_length )
     {
-        soup_message_headers_set_content_length( message_context.message->response_headers , content_length );
+        soup_message_headers_set_content_length( message_context->message->response_headers , content_length );
+    }
+
+    String get_content_type( ) const
+    {
+        const char * ct = soup_message_headers_get_content_type( message_context->message->response_headers , 0 );
+
+        if ( ct )
+        {
+            return String( ct );
+        }
+
+        return String();
     }
 
     void set_stream_writer( StreamWriter * stream_writer )
     {
-        new ::StreamBody( message_context , stream_writer );
+        new ::StreamBody( * message_context , stream_writer );
     }
 
     virtual bool respond_with_file_contents( const String & file_name , const String & content_type )
@@ -589,7 +641,7 @@ public:
 
         set_status( HttpServer::HTTP_STATUS_OK );
 
-        new ::StreamBody( message_context , new FileStreamWriter( file ) );
+        new ::StreamBody( * message_context , new FileStreamWriter( file ) );
 
         g_object_unref( file );
 
@@ -609,7 +661,7 @@ void HttpServer::soup_server_callback(
         gpointer user_data
         )
 {
-    log( "%s [%s]" , msg->method , path );
+    tplog( "%s [%s]" , msg->method , path );
 
     soup_message_set_status( msg , HttpServer::HTTP_STATUS_NOT_FOUND );
 
@@ -617,8 +669,8 @@ void HttpServer::soup_server_callback(
 
     HttpMessageContext message_context( server , msg , path , query , client );
 
-    HttpRequest request( message_context );
-    HttpResponse response( message_context );
+    HttpRequest request( & message_context );
+    HttpResponse response( & message_context );
 
     if ( msg->method == SOUP_METHOD_GET )
     {
@@ -641,5 +693,5 @@ void HttpServer::soup_server_callback(
         ud->handler->handle_http_delete( request , response );
     }
 
-    log( ">> %u %s" , msg->status_code , msg->reason_phrase );
+    tplog( ">> %u %s" , msg->status_code , msg->reason_phrase );
 }

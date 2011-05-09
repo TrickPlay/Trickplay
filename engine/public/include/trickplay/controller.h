@@ -538,7 +538,7 @@ struct TPControllerSpec
 
     Parameters:
 
-        None
+        A pointer to a <TPControllerSubmitPicture> structure.
 */
 
 #define TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP     101
@@ -923,6 +923,61 @@ struct TPControllerAdvancedUI
     */
 
     const char *    payload;
+};
+
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerSubmitPicture TPControllerSubmitPicture;
+
+/*
+    Struct: TPControllerSubmitPicture
+
+    A pointer to a structure of this type is passed to execute_command when
+    the command is <TP_CONTROLLER_SUBMIT_PICTURE>.
+*/
+
+struct TPControllerSubmitPicture
+{
+    /*
+        Field: max_width
+
+        If max_width is greater than zero, the controller should scale the
+        picture preserving its aspect ratio so that the width is not more
+        than max_width.
+    */
+
+    unsigned int max_width;
+
+    /*
+        Field: max_height
+
+        If max_height is greater than zero, the controller should scale the
+        picture preserving its aspect ratio so that the height is not more
+        than max_height.
+    */
+
+    unsigned int max_height;
+
+    /*
+        Field: edit
+
+        If edit is not zero, the controller should give the user a chance to
+        edit the picture before it is sent to Trickplay.
+    */
+
+    int edit;
+
+    /*
+        Field: mask
+
+        If this field is not NULL, it will be the name of a resource declared
+        in a previous call to execute_command with <TP_CONTROLLER_COMMAND_DECLARE_RESOURCE>.
+
+        If present, the controller should retrieve the mask and composite it with
+        the picture before submitting the result to Trickplay.
+    */
+
+    const char * mask;
 };
 
 /*-----------------------------------------------------------------------------*/

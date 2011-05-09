@@ -3,7 +3,7 @@
 #include "zlib.h"
 #include "curl/curl.h"
 #include "expat.h"
-#include "fontconfig.h"
+#include "fontconfig/fontconfig.h"
 #include "cairo/cairo-version.h"
 #include "pango/pango.h"
 #include "json-glib/json-glib.h"
