@@ -360,6 +360,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_group.lb
     ${BINDINGS_SRC}/clutter_image.lb
     ${BINDINGS_SRC}/clutter_timeline.lb
+    ${BINDINGS_SRC}/clutter_animator.lb
 	${BINDINGS_SRC}/clutter_score.lb
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb    

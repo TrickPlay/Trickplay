@@ -1,0 +1,94 @@
+module clutter_animator;
+
+[[
+#include "clutter/clutter.h"
+#include "util.h"
+#include "clutter_util.h"
+]]
+
+/*
+    Class: Animator
+    
+    A animator is an object providing declarative animations for UIElements properties belonging to one or more UIElements 
+    to ClutterIntervals.  ClutterAnimator is used to build and describe complex animations in terms of "key frames". 
+*/
+
+class Animator [[ClutterAnimator*]]
+{
+    Animator(table props = 0)
+	[[
+		self=clutter_animator_new();
+		g_object_ref(self);
+		self=lb_construct_gobject(ClutterAnimator,self);
+
+
+		
+    	g_object_unref(self);
+	]];
+	
+    ~Animator()
+	[[
+	]];
+	
+	/*
+		Property: duration
+		The duration of the animator in milliseconds.
+	*/
+	
+    int duration
+	[[duration=clutter_animator_get_duration(self);]]
+	[[clutter_animator_set_duration(self,duration);]];
+	
+
+ 	/*
+		Property: timeline
+    */	
+/*	
+ 	[[ clutter_animator_set_timeline  (ClutterAnimator *animator, ClutterTimeline *timeline); ]]
+	[[ ClutterTimeline *     clutter_animator_get_timeline     (ClutterAnimator *animator); ]]
+*/
+
+/*
+
+ClutterAnimator *   clutter_animator_new              (void);
+ClutterAnimator *     clutter_animator_set_key          (ClutterAnimator *animator,
+                                                         GObject *object,
+                                                         const gchar *property_name,
+                                                         guint mode,
+                                                         gdouble progress,
+                                                         const GValue *value);
+ClutterTimeline *     clutter_animator_start            (ClutterAnimator *animator);
+
+void                clutter_animator_set_timeline       (ClutterAnimator *animator,
+                                                         ClutterTimeline *timeline);
+ClutterTimeline *     clutter_animator_get_timeline     (ClutterAnimator *animator);
+void                clutter_animator_set_duration       (ClutterAnimator *animator,
+                                                         guint duration);
+guint               clutter_animator_get_duration       (ClutterAnimator *animator);
+
+void                clutter_animator_property_set_ease_in
+                                                        (ClutterAnimator *animator,
+                                                         GObject *object,
+                                                         const gchar *property_name,
+                                                         gboolean ease_in);
+
+
+*/
+
+
+
+
+	/*
+		Function: start
+		
+		Starts the animator.
+	*/
+	
+    start()
+	[[
+	  clutter_animator_start(self);
+    ]];
+	
+		
+	}
+
