@@ -12,7 +12,7 @@ local globe1 = Image ()
 local path1 = Path()
 globe1.src = "packages/acceptance_unit_tests/assets/globe.png"
 globe1.scale = {0.1, 0.1}
-screen:add (globe1)
+test_group:add (globe1)
 path1:move_to (1100,610)
 
 
