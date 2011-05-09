@@ -14,8 +14,6 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
     delegate( del ),
     accumulate( acc )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
-
     GInetAddress * ia = g_inet_address_new_any( G_SOCKET_FAMILY_IPV4 );
 
     GSocketAddress * address = g_inet_socket_address_new( ia, p );
@@ -51,17 +49,12 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
     {
         g_object_unref( G_OBJECT( ea ) );
     }
-
-#else
-    g_set_error( error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, "WE NEED GLIB > 2.22 FOR THIS TO WORK" );
-#endif
 }
 
 //------------------------------------------------------------------------------
 
 Server::~Server()
 {
-#if GLIB_CHECK_VERSION(2,22,0)
     if ( listener )
     {
         g_socket_listener_close( listener );
@@ -72,25 +65,19 @@ Server::~Server()
     {
         g_io_stream_close( G_IO_STREAM( *it ), NULL, NULL );
     }
-
-#endif
 }
 
 //------------------------------------------------------------------------------
 
 void Server::close_connection( gpointer connection )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
     g_io_stream_close( G_IO_STREAM( connection ), NULL, NULL );
-#endif
 }
 
 //------------------------------------------------------------------------------
 
 bool Server::write( gpointer connection, const char * data , gssize size )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
-
     GOutputStream * output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
 
     // Try to write - if we fail, we close the stream, this should also cause
@@ -113,10 +100,6 @@ bool Server::write( gpointer connection, const char * data , gssize size )
     {
         return true;
     }
-
-#else
-    return false;
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -136,20 +119,16 @@ bool Server::write_printf( gpointer connection, const char * format, ... )
 
 void Server::write_to_all( const char * data )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
     for ( ConnectionSet::iterator it = connections.begin(); it != connections.end(); ++it )
     {
         write( *it, data );
     }
-#endif
 }
 
 //------------------------------------------------------------------------------
 
 bool Server::write_file( gpointer connection, const char * path, bool http_headers )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
-
     // Get the output stream for the connection
 
     GOutputStream * output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
@@ -219,10 +198,6 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
     g_object_unref( file );
 
     return true;
-#else
-    return false;
-#endif
-
 }
 
 //------------------------------------------------------------------------------
@@ -231,10 +206,6 @@ guint16 Server::get_port() const
 {
     return port;
 }
-
-//------------------------------------------------------------------------------
-
-#if GLIB_CHECK_VERSION(2,22,0)
 
 //------------------------------------------------------------------------------
 
@@ -400,9 +371,6 @@ void Server::splice_callback( GObject * source, GAsyncResult * result, gpointer 
 {
     g_output_stream_splice_finish( G_OUTPUT_STREAM( source ), result, NULL );
 }
-
-
-#endif
 
 //------------------------------------------------------------------------------
 
