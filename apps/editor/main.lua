@@ -582,9 +582,9 @@ dofile("editor.lua")
 
 	--local duration = 5--secs
 
-	local elapsed  = 0
-	local auto_save = false
-	idle.on_idle = function(self,seconds)
+		local elapsed  = 0
+		local auto_save = false
+		idle.on_idle = function(self,seconds)
     		elapsed = elapsed + seconds
     		--local p = elapsed/duration
 		if current_fn ~= "" and auto_save == false then 
