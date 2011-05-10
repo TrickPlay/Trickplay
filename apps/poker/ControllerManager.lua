@@ -73,6 +73,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 controller:declare_resource("player_"..i,
                     "assets/phone/waiting_screen/player"..i..".png")
             end
+            controller:declare_resource("frame", "assets/camera/frame-focus-off.png")
 
             controller:clear_and_set_background("splash")
         end
@@ -115,6 +116,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
             controller.set_hole_cards = nil
             controller.name_dog = nil
+            controller.photo_dog = nil
             controller.choose_dog = nil
             controller.state = nil
             controller.add_image = nil
@@ -203,6 +205,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         --]]
         function controller:name_dog(pos)
             print("naming dog")
+            controller.state = ControllerStates.NAME_DOG
+
             controller:clear_and_set_background("bkg")
             controller:add_image("hdr_name_dog", 109, 30, 422, 50)
             controller:add_image("dog_"..pos, 192, 100, 256, 256)
@@ -214,20 +218,30 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                     end
                     controller.on_ui_event = function() end
                     controller:waiting_room()
+                    controller:photo_dog(pos)
                 end
+                return
             end
-
-            controller.state = ControllerStates.NAME_DOG
+            
+            controller:photo_dog(pos)
         end
 
+        --[[
+            Returns true if photo functionality works.
+        --]]
         function controller:photo_dog(pos)
             print("giving dog a photo")
             if controller.has_pictures
-            and controller:submit_picture() then
+            and controller:submit_picture({0, 0}, true, "frame") then
                 function controller:on_picture(bitmap)
-                    
+                    controller.player.dog_view:reset_images()
+                    controller.player.dog_view:edit_images(bitmap:Image())
                 end
+
+                return true
             end
+
+            return false
         end
 
         function controller:waiting_room()

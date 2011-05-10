@@ -33,7 +33,75 @@ function(dog_view, dog_number, ...)
         children = {dog_glow_clone, dog_clone}
     })
 
+    local default_dog = dog_clone
+    local default_glow = dog_glow_clone
+
     local pressed = false
+
+    function dog_view:edit_images(image)
+        if dog_clone ~= default_dog or dog_glow_clone ~= default_glow then
+            error("Call reset_images first")
+        end
+
+        -- load in the frame assets
+        local image_name = "frame"
+        local glow_image_name = "frame_glow"
+        if not assetman:has_image_of_name(image_name) then
+            assetman:load_image("assets/camera/frame-focus-off.png",
+                image_name)
+        end
+        if not assetman:has_image_of_name(glow_image_name) then
+            assetman:load_image("assets/camera/frame-focus-on.png",
+                glow_image_name)
+        end
+    
+        image.x = 32
+        image.y = 33
+        image.clip = {0, 0, 222, 169}
+
+        -- remove the current dog assets from the screen
+        dog_clone:unparent()
+        dog_glow_clone:unparent()
+
+        -- add the new ones
+        dog_clone = assetman:get_clone(image_name)
+        dog_clone = assetman:create_group({
+            name = "dog_"..tostring(dog_number).."_frame",
+            children = {image, dog_clone}
+        })
+        dog_glow_clone = assetman:get_clone(glow_image_name)
+
+        dog_clone.opacity = default_dog.opacity
+        dog_glow_clone.opacity = default_glow.opacity
+
+        dog_view.view:add(dog_clone)
+        dog_view.view:add(dog_glow_clone)
+    end
+
+    function dog_view:reset_images()
+        if dog_clone == default_dog and  dog_glow_clone == default_glow then
+            return
+        end
+        if dog_clone == default_dog or dog_glow_clone == default_glow then
+            error("error changing images led to inconsistant DogView state")
+        end
+
+        -- get rid of the changed images
+        dog_clone.children[1]:unparent()
+        dog_clone:dealloc()
+        dog_glow_clone:dealloc()
+        
+        -- set the current state of the images to the default images
+        default_dog.opacity = dog_clone.opacity
+        default_glow.opacity = dog_glow_clone.opacity
+
+        -- reset to the default images
+        dog_clone = default_dog
+        dog_glow_clone = default_glow
+
+        dog_view.view:add(dog_glow_clone)
+        dog_view.view:add(dog_clone)
+    end
 
     function dog_view:off_focus()
         dog_glow_clone.opacity = 120
