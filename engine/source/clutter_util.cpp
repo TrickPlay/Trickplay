@@ -5,6 +5,8 @@
 #include "clutter_util.h"
 #include "lb.h"
 
+#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
+
 
 //.............................................................................
 
@@ -85,6 +87,8 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
 void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
 {
     LSG;
+
+	index = abs_index(L, index);
 
     if ( lua_istable( L, index ) )
     {
