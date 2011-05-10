@@ -28,10 +28,15 @@
 #define TP_LOG2_ON      false
 
 #include "log.h"
+
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
 #define DISCONNECT_TIMEOUT_SEC  30
+
+//-----------------------------------------------------------------------------
+
+gulong ControllerServer::ConnectionInfo::aui_next_id = 1;
 
 //-----------------------------------------------------------------------------
 
@@ -128,18 +133,21 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         return 1;
     }
 
-    gpointer connection = NULL;
+    ConnectionInfo * info = 0;
+
+    gpointer connection = 0;
 
     for ( ConnectionMap::iterator it = connections.begin(); it != connections.end(); ++it )
     {
         if ( it->second.controller == controller )
         {
+            info = & it->second;
             connection = it->first;
             break;
         }
     }
 
-    if ( !connection )
+    if ( ! connection || ! info )
     {
         return 2;
     }
@@ -348,28 +356,50 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_ADVANCED_UI:
         {
-            TPControllerAdvancedUI * aui = ( TPControllerAdvancedUI * ) parameters;
-            const char * cmd = 0;
-            switch( aui->command )
-            {
-                case TP_CONTROLLER_ADVANCED_UI_CREATE:
-                    cmd = "CREATE";
-                    break;
-                case TP_CONTROLLER_ADVANCED_UI_DESTROY:
-                    cmd = "DESTROY";
-                    break;
-                case TP_CONTROLLER_ADVANCED_UI_SET:
-                    cmd = "SET";
-                    break;
-                case TP_CONTROLLER_ADVANCED_UI_GET:
-                    cmd = "GET";
-                    break;
-            }
-            if ( ! cmd )
+            if ( ! info->aui_connection )
             {
                 return 4;
             }
-            server->write_printf( connection , "UX\t%s\t%s\n" , cmd , aui->payload );
+
+            TPControllerAdvancedUI * aui = ( TPControllerAdvancedUI * ) parameters;
+
+            if ( ! server->write_printf( info->aui_connection , "%s\n" , aui->payload ) )
+            {
+                return 5;
+            }
+
+            // Read the response synchronously
+
+            gssize bytes_read;
+
+            GString * response = g_string_new( "" );
+
+            gchar * new_line = 0;
+
+            char buffer[256];
+
+            while( new_line == 0 )
+            {
+                bytes_read = server->read( info->aui_connection , buffer , 256 );
+
+                if ( bytes_read <= 0 )
+                {
+                    g_string_free( response , TRUE );
+                    return 6;
+                }
+
+                g_string_append_len( response , buffer , bytes_read );
+
+                new_line = g_strstr_len( response->str , response->len , "\n" );
+            }
+
+            * new_line = 0;
+
+            aui->result = response->str;
+            aui->free_result = g_free;
+
+            g_string_free( response , FALSE );
+
             break;
         }
 
@@ -426,7 +456,7 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 
     ConnectionInfo * ci = tc->self->find_connection( tc->connection );
 
-    if ( ci && ci->disconnect && !ci->version )
+    if ( ci && !ci->version )
     {
         tplog( "DROPPING UNIDENTIFIED CONNECTION %p", tc->connection );
 
@@ -456,7 +486,14 @@ void ControllerServer::connection_closed( gpointer connection )
 
     drop_post_endpoint( connection );
 
+    gpointer aui_connection = info->aui_connection;
+
     connections.erase( connection );
+
+    if ( aui_connection )
+    {
+        server->close_connection( aui_connection );
+    }
 
     tplog( "CONNECTION CLOSED %p", connection );
 }
@@ -493,7 +530,7 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
-    static const char * PROTOCOL_VERSION = "33";
+    static const char * PROTOCOL_VERSION = "34";
 
     guint count = g_strv_length( parts );
 
@@ -513,6 +550,8 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
     {
         // Device id line
         // ID <version> <name> <cap>*
+
+        * read_again = false;
 
         // Not enough parts
 
@@ -637,11 +676,13 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             }
         }
 
+        * read_again = true;
+
         spec.execute_command = execute_command;
 
         info.controller = tp_context_add_controller( context, name, &spec, this );
 
-        server->write_printf( connection , "WM\t%s\t%u\n" , PROTOCOL_VERSION , context->get_http_server()->get_port() );
+        server->write_printf( connection , "WM\t%s\t%u\t%lu\n" , PROTOCOL_VERSION , context->get_http_server()->get_port() , info.aui_id );
     }
     else if ( cmp2( cmd, "KP" ) )
     {
@@ -814,6 +855,69 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         }
 
         tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+    }
+    else if ( cmp2( cmd , "UX" ) )
+    {
+        // Stop reading from this connection. We will only read
+        // synchronously after we write. If there is a problem with the UX message,
+        // we stop reading anyway - they only get one shot at it.
+
+        * read_again = false;
+
+        if ( count < 2 )
+        {
+            return;
+        }
+
+        gulong id = 0;
+
+        if ( sscanf( parts[1], "%lu", & id ) != 1 )
+        {
+            return;
+        }
+
+        // The ID is bad
+
+        if ( id == 0 )
+        {
+            return;
+        }
+
+        ConnectionInfo * parent_info = 0;
+
+        for ( ConnectionMap::iterator it = connections.begin(); it != connections.end(); ++it )
+        {
+            if ( it->second.aui_id == id )
+            {
+                parent_info = & it->second;
+                break;
+            }
+        }
+
+        // Could not find a connection for this ID
+
+        if ( ! parent_info )
+        {
+            return;
+        }
+
+        // The controller connection for this ID has not identified itself yet
+
+        if ( ! parent_info->version )
+        {
+            return;
+        }
+
+        // OK, everything is cool
+
+        // Set this connection's version, so it does not get booted.
+
+        info.version = parent_info->version;
+
+        // Tell the parent that this connection belongs to it
+
+        parent_info->aui_connection = connection;
+
     }
     else
     {

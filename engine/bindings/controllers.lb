@@ -843,74 +843,31 @@ interface controller [[ControllerDelegate*]]
         ]];
 
     /*
-        Function: advanced_ui_create
+        Function: advanced_ui
     */
       
-    bool advanced_ui_create( table payload )
+    table advanced_ui( table payload )
         [[
             JSON::Value value = JSON::to_json( L , payload );
 
             if ( ! value.is<JSON::Array>() )
             {
-                result = false;
+                lua_pushnil( L );
             }
             else
             {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_CREATE , value.stringify() );
-            }
-        ]];
+                String response;
 
-    /*
-        Function: advanced_ui_destroy
-    */
+                bool result = self->get_controller()->advanced_ui( value.stringify() , response );
 
-    bool advanced_ui_destroy( table payload )
-        [[
-            JSON::Value value = JSON::to_json( L , payload );
-
-            if ( ! value.is<JSON::Array>() )
-            {
-                result = false;
-            }
-            else
-            {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_DESTROY , value.stringify() );
-            }
-        ]];
-
-    /*
-        Function: advanced_ui_set
-    */
-
-    bool advanced_ui_set( table payload )
-        [[
-            JSON::Value value = JSON::to_json( L , payload );
-
-            if ( ! value.is<JSON::Array>() )
-            {
-                result = false;
-            }
-            else
-            {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_SET , value.stringify() );
-            }
-        ]];
-
-    /*
-        Function: advanced_ui_get
-    */
-
-    bool advanced_ui_get( table payload )
-        [[
-            JSON::Value value = JSON::to_json( L , payload );
-
-            if ( ! value.is<JSON::Array>() )
-            {
-                result = false;
-            }
-            else
-            {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_GET , value.stringify() );
+                if ( ! result )
+                {
+                    lua_pushnil( L );
+                }
+                else
+                {
+                    JSON::parse( L , response.c_str() );
+                }
             }
         ]];
 

@@ -131,7 +131,7 @@ public:
 
     bool submit_audio_clip( );
 
-    bool advanced_ui( int command , const String & payload );
+    bool advanced_ui( const String & payload , String & result );
 
     inline bool wants_accelerometer_events() const
     {

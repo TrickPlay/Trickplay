@@ -886,11 +886,6 @@ struct TPControllerPlaySound
 
 typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 
-#define TP_CONTROLLER_ADVANCED_UI_CREATE    1
-#define TP_CONTROLLER_ADVANCED_UI_DESTROY   2
-#define TP_CONTROLLER_ADVANCED_UI_GET       3
-#define TP_CONTROLLER_ADVANCED_UI_SET       4
-
 /*
     Struct: TPControllerAdvancedUI
 
@@ -901,28 +896,28 @@ typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 struct TPControllerAdvancedUI
 {
     /*
-        Field: command
-
-        Values:
-
-            TP_CONTROLLER_ADVANCED_UI_CREATE    - Create UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_DESTROY   - Detsroy UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_GET       - Get UI element properties.
-
-            TP_CONTROLLER_ADVANCED_UI_SET       - Set UI element properties.
-    */
-
-    int             command;
-
-    /*
         Field: payload
 
         A JSON text describing the advanced UI command.
     */
 
     const char *    payload;
+
+    /*
+        Field: result
+
+        A JSON text describing the result of the command.
+    */
+
+    char *          result;
+
+    /*
+        Field: free_result
+
+        A function that will be called to free the result.
+    */
+
+    void            (*free_result)( void * result);
 };
 
 /*-----------------------------------------------------------------------------*/
