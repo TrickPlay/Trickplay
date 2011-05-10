@@ -58,6 +58,10 @@ namespace ClutterUtil
 
     void wrap_concrete_actor( lua_State * L, ClutterActor * actor );
 
+    // Given a timeline, pushes a Lua object for it
+
+    void wrap_timeline( lua_State * L , ClutterTimeline * timeline );
+
     // Returns the metatable for an actor
 
     const char * get_actor_metatable( ClutterActor * actor );

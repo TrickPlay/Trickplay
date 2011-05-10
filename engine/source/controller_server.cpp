@@ -465,23 +465,23 @@ void ControllerServer::connection_closed( gpointer connection )
 
 void ControllerServer::connection_data_received( gpointer connection, const char * line , gsize bytes_read )
 {
+    if ( ! strlen( line ) )
+    {
+        return;
+    }
+
     ConnectionMap::iterator it = connections.find( connection );
 
     if ( it == connections.end() )
     {
         return;
     }
-    else {
-		if (!strlen( line )) {
-			return;
-		}
 
-		gchar ** parts = g_strsplit( line, "\t", 0 );
+    gchar ** parts = g_strsplit( line, "\t", 0 );
 
-		process_command( connection, it->second, parts );
+    process_command( connection, it->second, parts );
 
-		g_strfreev( parts );
-	}
+    g_strfreev( parts );
 }
 
 //-----------------------------------------------------------------------------

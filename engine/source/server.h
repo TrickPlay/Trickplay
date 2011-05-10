@@ -31,8 +31,6 @@ public:
 
 private:
 
-#if GLIB_CHECK_VERSION(2,22,0)
-
     static void accept_callback( GObject * source, GAsyncResult * result, gpointer data );
     static void data_read_callback( GObject * source, GAsyncResult * result, gpointer data );
     static void splice_callback( GObject * source, GAsyncResult * result, gpointer data );
@@ -46,9 +44,6 @@ private:
     Delegate      *     delegate;
     char                accumulate;
     ConnectionSet       connections;
-
-#endif
-
 };
 
 
