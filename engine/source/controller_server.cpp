@@ -463,7 +463,7 @@ void ControllerServer::connection_closed( gpointer connection )
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::connection_data_received( gpointer connection, const char * line , gsize bytes_read )
+void ControllerServer::connection_data_received( gpointer connection, const char * line , gsize bytes_read , bool * read_again )
 {
     if ( ! strlen( line ) )
     {
@@ -479,7 +479,7 @@ void ControllerServer::connection_data_received( gpointer connection, const char
 
     gchar ** parts = g_strsplit( line, "\t", 0 );
 
-    process_command( connection, it->second, parts );
+    process_command( connection, it->second, parts , read_again );
 
     g_strfreev( parts );
 }
@@ -491,7 +491,7 @@ static inline bool cmp2( const char * a, const char * b )
     return ( a[0] == b[0] ) && ( a[1] == b[1] );
 }
 
-void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts )
+void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
     static const char * PROTOCOL_VERSION = "33";
 
