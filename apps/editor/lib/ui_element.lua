@@ -5629,7 +5629,253 @@ function ui_element.tabBar(t)
 
     return umbrella
 end
+function ui_element.arrowPane(t)
 
+	-- reference: http://www.csdgn.org/db/179
+
+    --default parameters
+    local p = {
+        
+		visible_w =     600,
+        visible_h =     600,
+        content   = Group{},
+        virtual_h =    1000,
+		virtual_w =    1000,
+        arrow_sz  =      15,
+		
+        arrow_dist_to_frame = 5,
+        arrows_visible =   true,
+        box_color = {160,160,160,255},
+        box_width =    2,
+        skin = "default",
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+	
+	--Group that Clips the content
+	local window  = Group{name="window"}
+	--Group that contains all of the content
+	--local content = Group{}
+	--declarations for dependencies from scroll_group
+	local scroll, scroll_x, scroll_y
+	--flag to hold back key presses while animating content group
+	local animating = false
+
+	local border = Rectangle{ color = "00000000" }
+	
+	
+	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
+	
+	
+	local make_arrow = function()
+		
+		local c = Canvas{size={p.arrow_sz,p.arrow_sz}}
+		
+		c:move_to(    0,c.h)
+		c:line_to(c.w/2,  0)
+		c:line_to(  c.w,c.h)
+		c:line_to(    0,c.h)
+		
+		c:set_source_color( p.box_color )
+		c:fill(true)
+		
+		if c.Image then
+			c= c:Image()
+		end
+		
+		c.anchor_point={c.w/2,c.h}
+		
+		return c
+		
+	end
+	
+	
+    --the umbrella Group, containing the full slate of tiles
+    local umbrella = Group{ 
+        name     = "arrowPane",
+        position = {200,100},
+        reactive = true,
+        extra    = {
+			type = "ArrowPane",
+			--tries to place virtual coordinates 'x' and 'y' in the middle of the window
+			pan_to = function(self,x,y,top_left)
+				
+				print(x,y)
+				
+				if top_left == true then
+					x = x + p.visible_w/2
+					y = y + p.visible_h/2
+				end
+				
+				local new_x, new_y
+                
+				if x > p.virtual_w - p.visible_w/2 then
+                    new_x = -p.virtual_w + p.visible_w
+                elseif x < p.visible_w/2 then
+                    new_x = 0
+                else
+                    new_x = -x + p.visible_w/2
+                end
+				
+                
+                if y > p.virtual_h - p.visible_h/2 then
+                    new_y = -p.virtual_h + p.visible_h
+                elseif y < p.visible_h/2 then
+                    new_y = 0
+                else
+                    new_y = -y + p.visible_h/2
+                end
+				print(new_x,new_y)
+				if new_x ~= p.content.x or new_y ~= p.content.y then
+                    p.content:animate{
+                        duration = 200,
+                        x = new_x,
+                        y = new_y,
+                        on_completed = function()
+                            animating = false
+                        end
+                    }
+                    
+                end
+			end,
+        }
+    }
+	umbrella.pan_by = function(self,dx,dy)
+		
+		self:pan_to(
+			-p.content.x + dx,
+			-p.content.y + dy,
+			true
+		)
+		
+	end
+	
+	
+    
+	
+	
+	--this function creates the whole scroll bar box
+    local hold = false
+	local function create()
+		
+		umbrella:clear()
+		
+        window.position={ p.box_width, p.box_width }
+		window.clip = { 0,0, p.visible_w, p.visible_h }
+        border:set{
+            w = p.visible_w+2*p.box_width,
+            h = p.visible_h+2*p.box_width,
+            border_width =    p.box_width,
+            border_color =    p.box_color,
+        }
+		
+        
+        if p.arrows_visible then
+			
+			local arrow = make_arrow()
+			
+			arrow.x = border.w/2
+			arrow.y = -p.arrow_dist_to_frame
+			
+			umbrella:add(arrow)
+			
+			if editor_lb == nil or editor_use then  
+                arrow.on_button_down = function()
+                    umbrella.pan_by(0,-10)
+                end
+                
+                arrow.reactive=true
+            end
+			
+			arrow = Clone{source=arrow}
+			arrow.anchor_point={arrow.w/2,arrow.h}
+			
+			arrow.x = border.w+p.arrow_dist_to_frame
+			arrow.y = border.h/2
+			arrow.z_rotation = {90,0,0}
+			umbrella:add(arrow)
+			
+			if editor_lb == nil or editor_use then  
+                arrow.on_button_down = function()
+                    umbrella.pan_by(10,0)
+                end
+                
+                arrow.reactive=true
+            end
+			
+			arrow = Clone{source=arrow}
+			arrow.anchor_point={arrow.w/2,arrow.h}
+			arrow.x = border.w/2
+			arrow.y = border.h+p.arrow_dist_to_frame
+			arrow.z_rotation = {180,0,0}
+			umbrella:add(arrow)
+			
+			if editor_lb == nil or editor_use then  
+                arrow.on_button_down = function()
+                    umbrella.pan_by(0,10)
+                end
+                
+                arrow.reactive=true
+            end
+			
+			arrow = Clone{source=arrow}
+			arrow.anchor_point={arrow.w/2,arrow.h}
+			arrow.x = -p.arrow_dist_to_frame
+			arrow.y = border.h/2
+			arrow.z_rotation = {270,0,0}
+			umbrella:add(arrow)
+			
+			if editor_lb == nil or editor_use then  
+                arrow.on_button_down = function()
+                    umbrella.pan_by(-10,0)
+                end
+                
+                arrow.reactive=true
+            end
+		end
+		
+        
+		umbrella.size = {p.visible_w, p.visible_h}
+		umbrella:add(border,window)
+	end
+	
+    
+	
+    create()
+	window:add(p.content)
+	
+	
+	
+
+
+	--set the meta table to overwrite the parameters
+    mt = {}
+    mt.__newindex = function(t,k,v)
+		
+        if k == "content" then
+            p.content:unparent()
+            if v.parent ~= nil then
+                v:unparent()
+            end
+            v.position={0,0}
+            v.reactive = false
+            window:add(v)
+        end
+        p[k] = v
+        create()
+		
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(umbrella.extra, mt)
+
+    return umbrella
+end
 --]]
 
 
