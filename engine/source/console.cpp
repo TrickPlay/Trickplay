@@ -248,7 +248,7 @@ void Console::connection_accepted( gpointer connection, const char * remote_addr
     tplog( "ACCEPTED CONNECTION FROM %s", remote_address );
 }
 
-void Console::connection_data_received( gpointer connection, const char * data , gsize )
+void Console::connection_data_received( gpointer connection, const char * data , gsize , bool * )
 {
     gchar * line = g_strdup( data );
     process_line( line );

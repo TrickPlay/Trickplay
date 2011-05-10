@@ -76,6 +76,29 @@ void Server::close_connection( gpointer connection )
 
 //------------------------------------------------------------------------------
 
+gssize Server::read( gpointer connection , void * buffer , gsize count )
+{
+    GInputStream * input_stream = g_io_stream_get_input_stream( G_IO_STREAM( connection ) );
+
+    if ( ! input_stream )
+    {
+        return -1;
+    }
+
+    gssize read = g_input_stream_read( input_stream , buffer , count , 0 , 0 );
+
+    if ( read < 0 )
+    {
+        connections.erase( G_SOCKET_CONNECTION( connection ) );
+        g_debug( "CONNECTION WRITE ERROR %p", connection );
+        g_io_stream_close( G_IO_STREAM( connection ), NULL, NULL );
+    }
+
+    return read;
+}
+
+//------------------------------------------------------------------------------
+
 bool Server::write( gpointer connection, const char * data , gssize size )
 {
     GOutputStream * output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
@@ -292,52 +315,56 @@ void Server::data_read_callback( GObject * source, GAsyncResult * result, gpoint
 
         g_io_stream_close( G_IO_STREAM( connection ), NULL, NULL );
         g_object_unref( G_OBJECT( connection ) );
+        return;
     }
-    else
+
+    // We have some data - get the buffer from the input stream, append a
+    // NULL and process it
+
+    bool read_again = true;
+
+    gchar * buffer = ( gchar * )g_object_get_data( G_OBJECT( input_stream ), "tp-buffer" );
+
+    buffer[bytes_read>SERVER_BUFFER_SIZE-1?SERVER_BUFFER_SIZE-1:bytes_read] = 0;
+
+    if ( server->accumulate )
     {
-        // We have some data - get the buffer from the input stream, append a
-        // NULL and process it
+        GString * line = ( GString * )g_object_get_data( G_OBJECT( input_stream ), "tp-line" );
 
-        gchar * buffer = ( gchar * )g_object_get_data( G_OBJECT( input_stream ), "tp-buffer" );
+        g_string_append( line, buffer );
 
-        buffer[bytes_read>SERVER_BUFFER_SIZE-1?SERVER_BUFFER_SIZE-1:bytes_read] = 0;
+        gchar * s = line->str;
+        gchar * e = NULL;
 
-        if ( server->accumulate )
+        while ( ( *s ) && ( e = strchr( s, server->accumulate ) ) )
         {
-            GString * line = ( GString * )g_object_get_data( G_OBJECT( input_stream ), "tp-line" );
-
-            g_string_append( line, buffer );
-
-            gchar * s = line->str;
-            gchar * e = NULL;
-
-            while ( ( *s ) && ( e = strchr( s, server->accumulate ) ) )
-            {
-                *e = 0;
-                s = g_strstrip( s );
+            *e = 0;
+            s = g_strstrip( s );
 
 //                g_debug("GOT DATA %p [%s]",connection,s);
 
-                if ( server->delegate )
-                {
-                    server->delegate->connection_data_received( connection, s , strlen( s ) );
-                }
-
-                s = e + 1;
-            }
-
-            // Erase what we processed from the line buffer
-
-            if ( s != line->str )
+            if ( server->delegate )
             {
-                g_string_erase( line, 0, s - line->str );
+                server->delegate->connection_data_received( connection, s , strlen( s ) , & read_again );
             }
-        }
-        else if ( server->delegate )
-        {
-            server->delegate->connection_data_received( connection, buffer , bytes_read );
+
+            s = e + 1;
         }
 
+        // Erase what we processed from the line buffer
+
+        if ( s != line->str )
+        {
+            g_string_erase( line, 0, s - line->str );
+        }
+    }
+    else if ( server->delegate )
+    {
+        server->delegate->connection_data_received( connection, buffer , bytes_read , & read_again );
+    }
+
+    if ( read_again )
+    {
         // Read again
 
         g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, TRICKPLAY_PRIORITY, NULL, data_read_callback, data );
