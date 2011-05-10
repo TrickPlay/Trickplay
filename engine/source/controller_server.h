@@ -65,15 +65,20 @@ private:
     {
         ConnectionInfo()
             :
-            disconnect( true ),
             version( 0 ),
-            controller( NULL )
+            controller( 0 ),
+            aui_id( aui_next_id++ ),
+            aui_connection( 0 )
         {}
 
-        bool            disconnect;
         String		    address;
         int		        version;
         TPController *	controller;
+
+        gulong          aui_id;
+        gpointer        aui_connection;
+
+        static gulong   aui_next_id;
     };
 
     //..........................................................................

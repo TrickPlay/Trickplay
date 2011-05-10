@@ -1032,7 +1032,7 @@ bool Controller::submit_audio_clip( )
                data ) == 0;
 }
 
-bool Controller::advanced_ui( int command , const String & payload )
+bool Controller::advanced_ui( const String & payload , String & result )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_ADVANCED_UI ) || payload.empty() )
     {
@@ -1041,14 +1041,27 @@ bool Controller::advanced_ui( int command , const String & payload )
 
     TPControllerAdvancedUI parameters;
 
-    parameters.command = command;
     parameters.payload = payload.c_str();
+    parameters.result = 0;
+    parameters.free_result = 0;
 
-    return spec.execute_command(
+    bool r = spec.execute_command(
                tp_controller,
                TP_CONTROLLER_COMMAND_ADVANCED_UI,
                & parameters,
                data ) == 0;
+
+    if ( parameters.result )
+    {
+        result.assign( parameters.result );
+
+        if ( parameters.free_result )
+        {
+            parameters.free_result( parameters.result );
+        }
+    }
+
+    return r;
 }
 
 //==============================================================================
