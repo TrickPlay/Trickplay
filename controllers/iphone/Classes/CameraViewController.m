@@ -259,7 +259,7 @@
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
     NSLog(@"mask: %@", mask);
-    imagePickerController.cameraOverlayView = mask;
+    //imagePickerController.cameraOverlayView = mask;
     
     // Displays camera
     imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];

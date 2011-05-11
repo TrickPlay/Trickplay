@@ -103,7 +103,7 @@
 		CD9A68571370C5BB00977730 /* GestureImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureImageView.m; sourceTree = "<group>"; };
 		CD9A68621371CB0E00977730 /* ImageEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorViewController.h; sourceTree = "<group>"; };
 		CD9A68631371CB0E00977730 /* ImageEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageEditorViewController.m; sourceTree = "<group>"; };
-		CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ImageEditorViewController.xib; sourceTree = "<group>"; };
+		CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorViewController.xib; path = Classes/ImageEditorViewController.xib; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
@@ -181,9 +181,9 @@
 				441321321355335600009206 /* Entitlements.plist */,
 				CDFEBB6D130A498C00A14307 /* iPad */,
 				CDFEBB5E130A498600A14307 /* iPhone */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
-				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -205,6 +205,7 @@
 				28F335F01007B36200424DE2 /* RootViewController.xib */,
 				CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */,
 				CDFEBC51130A57FA00A14307 /* GestureViewController.xib */,
+				CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */,
 				8D1107310486CEB800E47090 /* TrickplayController-Info.plist */,
 			);
 			name = Resources;
@@ -300,7 +301,6 @@
 				CD404C251353DCE50021D36C /* CameraViewController.m */,
 				CD9A68621371CB0E00977730 /* ImageEditorViewController.h */,
 				CD9A68631371CB0E00977730 /* ImageEditorViewController.m */,
-				CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";

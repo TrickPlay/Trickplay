@@ -253,6 +253,11 @@
     touchEventsAllowed = NO;
 }
 
+- (void)reset {
+    [self stopTouches];
+    [self setMultipleTouch:NO];
+}
+
 - (void)dealloc {
     NSLog(@"TouchController dealloc");
     if (view) {

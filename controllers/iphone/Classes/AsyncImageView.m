@@ -62,7 +62,15 @@
     UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageWithData:data]] autorelease];
     // might need to change this to scale to fill
     //imageView.contentMode = UIViewContentModeScaleAspectFit;
-    //imageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+    imageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+    
+    // If the width and/or height of the AsyncImageView was unspecified then
+    // set as the natural width and/or height of the Image
+    CGFloat width = (self.frame.size.width == 0.0) ? imageView.frame.size.width : self.frame.size.width;
+    CGFloat height = (self.frame.size.height == 0.0) ? imageView.frame.size.height : self.frame.size.height;
+    if (self.frame.size.width == 0.0 || self.frame.size.height == 0.0) {
+        self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, width, height);
+    }
     
     [self addSubview:imageView];
     imageView.frame = self.bounds;

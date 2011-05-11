@@ -37,6 +37,25 @@
 }
 
 #pragma mark -
+#pragma mark Consume Touches
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+}
+
+#pragma mark -
 #pragma mark Image Editing
 
 - (void)editImage:(UIImage *)image {
@@ -48,6 +67,7 @@
     imageView.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - toolbar.frame.size.height);
     [self.view addSubview:imageView];
     if (mask) {
+        mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - toolbar.frame.size.height);
         [self.view addSubview:mask];
     }
     [toolbar.superview bringSubviewToFront:toolbar];
@@ -55,6 +75,8 @@
 }
 
 - (UIImage*)imageByCropping:(GestureImageView *)imageViewToCrop toRect:(CGRect)rect {
+    NSLog(@"targetwidth, width, targetheight, height: %f, %f, %f, %f", targetWidth, rect.size.width, targetHeight, rect.size.height);
+    
     UIImage *imageToCrop = imageViewToCrop.image;
     UIGraphicsBeginImageContext(rect.size);
     
@@ -105,10 +127,11 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    [self editImage:imageToEdit];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    [self editImage:imageToEdit];
+    //[self editImage:imageToEdit];
 }
 
 - (void)viewDidUnload

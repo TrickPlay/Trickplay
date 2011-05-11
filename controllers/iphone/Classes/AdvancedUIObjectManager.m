@@ -33,6 +33,31 @@
 }
 
 
+- (void)clean {
+    NSLog(@"AdvancedUI clean");
+    
+    for (UIView *rectangle in rectangles) {
+        [rectangle removeFromSuperview];
+    }
+    [rectangles removeAllObjects];
+    
+    for (UIView *image in images) {
+        [image removeFromSuperview];
+    }
+    [images removeAllObjects];
+    
+    for (UIView *textField in textFields) {
+        [textField removeFromSuperview];
+    }
+    [textFields removeAllObjects];
+    
+    for (UIView *group in groups) {
+        [group removeFromSuperview];
+    }
+    [groups removeAllObjects];
+}
+
+
 /**
  * Creates Images and stores them
  */
