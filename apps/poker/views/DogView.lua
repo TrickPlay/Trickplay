@@ -57,7 +57,7 @@ function(dog_view, dog_number, ...)
     
         image.x = 32
         image.y = 33
-        image.clip = {0, 0, 222, 169}
+        image.clip = {0, 0, 212, 169}
 
         -- remove the current dog assets from the screen
         dog_clone:unparent()
