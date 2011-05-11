@@ -232,10 +232,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:photo_dog(pos)
             print("giving dog a photo")
             if controller.has_pictures
-            and controller:submit_picture({0, 0}, true, "frame") then
+            and controller:submit_picture({212, 0}, true, "frame") then
                 function controller:on_picture(bitmap)
+                    local image = bitmap:Image()
+                    blah = image
                     controller.player.dog_view:reset_images()
-                    controller.player.dog_view:edit_images(bitmap:Image())
+                    controller.player.dog_view:edit_images(image)
                 end
 
                 return true
