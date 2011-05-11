@@ -43,6 +43,7 @@ extern int luaopen_clutter_image( lua_State * L );
 
 extern int luaopen_clutter_timeline( lua_State * L );
 extern int luaopen_clutter_animator( lua_State * L );
+extern int luaopen_clutter_state( lua_State * L );
 extern int luaopen_clutter_score( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
 extern int luaopen_clutter_interval( lua_State * L );
@@ -907,6 +908,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_clutter_image( L );
     luaopen_clutter_timeline( L );
     luaopen_clutter_animator( L );
+    luaopen_clutter_state( L );
     luaopen_clutter_score( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );

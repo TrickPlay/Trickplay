@@ -46,6 +46,11 @@ namespace ClutterUtil
 
     ClutterTimeline * user_data_to_timeline( lua_State * L, int n );
 
+	// Safely casts to a animator
+
+    ClutterAnimator * user_data_to_animator( lua_State * L, int n );
+
+
     // Sets properties from a table
 
     void set_props_from_table( lua_State * L, int table );
