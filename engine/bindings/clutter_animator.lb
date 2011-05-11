@@ -267,8 +267,6 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 		lua_pushnil(L); 
 		while(lua_next(L, kt) != 0) 
 		{
-			GValue gvalue={0};
-	
 			if (!lua_istable(L,-1))
 			{
 				return luaL_error(L, "incorrect argument, failed to set \'keys\' element : table expected");
@@ -277,7 +275,6 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 			// default parameter
     	    String mode = "LINEAR"; 
 			double progress;
-			double value;
 
 		 	lua_rawgeti(L,-1,1);
 		 	lua_rawgeti(L,-2,2);
