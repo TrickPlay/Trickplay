@@ -71,7 +71,10 @@
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
-    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
+    
+    advancedView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height)];
+    [self.view addSubview:advancedView];
+    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
     
     return YES;
 }
@@ -346,6 +349,8 @@
 // TODO: Reset all modules to the initial state
 - (void)do_RT:(NSArray *)args {
     [accelDelegate pauseAccelerometer];
+    [touchDelegate reset];
+    [advancedUIDelegate clean];
     [self clearUI];
 }
 
@@ -413,7 +418,7 @@
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
         
         if ([args objectAtIndex:4] && [args objectAtIndex:4] != @"") {
-            mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
+            mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, 0.0, 0.0)];
         }
     }
     camera = [[CameraViewController alloc] initWithView:self.view targetWidth:width targetHeight:height editable:editable mask:mask];
@@ -472,6 +477,7 @@
 
 - (void)clean {
     [self clearUI];
+    [advancedUIDelegate clean];
     [resourceManager clean];
 }
 
@@ -504,6 +510,7 @@
     [backgroundView removeFromSuperview];
     self.backgroundView = newImageView;
     [self.view addSubview:backgroundView];
+    [self.view sendSubviewToBack:backgroundView];
     [newImageView release];
     //*/
 }
@@ -631,6 +638,9 @@
     }
     if (multipleChoiceArray) {
         [multipleChoiceArray release];
+    }
+    if (advancedView) {
+        [advancedView release];
     }
     [loadingIndicator release];
     [theTextField release];

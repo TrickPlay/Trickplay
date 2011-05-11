@@ -14,6 +14,8 @@
 @protocol AdvancedUIDelegate <NSObject>
 
 @required
+- (void)clean;
+
 - (void)createObjects:(NSArray *)JSON_Array;
 - (void)destroyObjects:(NSArray *)JSON_Array;
 - (void)setValuesForObjects:(NSArray *)JSON_Array;
@@ -81,6 +83,8 @@
 - (void)startTouches;
 - (void)stopTouches;
 
+- (void)reset;
+
 @end
 
 
@@ -116,6 +120,8 @@ CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, U
     UIActionSheet *styleAlert;
     
     UIActionSheet *cameraActionSheet;
+    
+    UIView *advancedView;
     
     ResourceManager *resourceManager;
     
