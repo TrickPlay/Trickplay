@@ -318,7 +318,6 @@ function set_app_path()
     if screen:find_child("mouse_pointer") then 
 		 screen:find_child("mouse_pointer"):raise_to_top()
     end
-	print("KKKK")
 
 end 
 
@@ -554,7 +553,7 @@ function create_on_button_down_f(v)
 						if screen:find_child(v.name.."a_m") then 
 			             		screen:find_child(v.name.."a_m").position = v.position 
 			        		end 
-			        		if t == "ScrollPane" or t == "DialogBox" then 
+			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
 			            				c.content:add(v) 
 			        		elseif t == "LayoutManager" then 
 				     		local col , row=  c:r_c_from_abs_position(x,y)
@@ -965,6 +964,8 @@ function make_attr_t(v)
        ["ScrollPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
        ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","box_color","fill_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
        ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
+       ["ArrowPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "arrow_dist_to_frame", "arrows_visible", "box_color", "box_width"} end,  
+       ["TabBar"] = function() return {"lock", "skin","opacity", "font", "label_padding",  "tab_position", "display_width", "display_height", "slant_width", "border_width", "border_color", "fill_color", "label_color", "unsel_color"} end,  
    }
   
   if is_this_widget(v) == true  then
@@ -978,7 +979,7 @@ function make_attr_t(v)
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
       }
-       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) then 
+       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) and v.extra.type ~= "ArrowPane" and v.extra.type ~= "TabBar" then 
              table.insert(attr_t, {"ui_width", math.floor(v.ui_width), "W"})
              table.insert(attr_t, {"ui_height", math.floor(v.ui_height), "H"})
        end
@@ -1093,6 +1094,8 @@ function itemTostring(v, d_list, t_list)
 	["ProgressBar"] = function () return "ui_element.progressBar" end,
 	["LayoutManager"] = function () return "ui_element.layoutManager" end,
 	["ScrollPane"] = function () return "ui_element.scrollPane" end, 
+	["ArrowPane"] = function () return "ui_element.arrowPane" end, 
+	["TabBar"] = function () return "ui_element.tabBar" end, 
 	["MenuButton"] = function () return "ui_element.menuButton" end, 
    }
 
@@ -1471,10 +1474,10 @@ local msgw_cur_x = 25
 local msgw_cur_y = 50
 
 function cleanMsgWindow()
-	 msgw:clear() 
      msgw_cur_x = 25
      msgw_cur_y = 50
      screen:remove(msgw)
+	 msgw:clear() 
      input_mode = S_SELECT
 end 
 
@@ -1665,7 +1668,7 @@ local function inputMsgWindow_savefile(cfn)
 	                   new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
 		     else -- qqqq if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
 			   if is_this_container(j) == true then 
-				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" then 
+				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
 					gen_stub_code(j.content)
 			        elseif j.extra.type == "LayoutManager" then 
 					local content_num = 0 
@@ -2084,7 +2087,7 @@ function inputMsgWindow_openfile(input_text)
                         create_on_button_down_f(c)
 		    end 
 	       end 
-	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" then 
+	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" or v.extra.type == "ArrowPane" then 
 		    for j, c in pairs(v.content.children) do -- Group { children = {button4,rect3,} },
 			c.reactive = true
 		        c.extra.is_in_group = true
