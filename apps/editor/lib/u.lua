@@ -5307,7 +5307,7 @@ function ui_element.tabBar(t)
     
     --default parameters
     local p = {
-        name  = "Drop Down Bar", 			-- ??? 
+        name  = "Drop Down Bar",
         font  = "DejaVu Sans 26px",
         tab_labels = {
             "Item 1",
@@ -5449,8 +5449,7 @@ function ui_element.tabBar(t)
 	
     
     local umbrella     = Group{
-        name="TabContainer",
-		reactive = true,  
+        name="Tab Container",
         extra={
             type="TabBar",
             insert_tab = function(self,index)
@@ -5639,7 +5638,7 @@ function ui_element.arrowPane(t)
         
 		visible_w =     600,
         visible_h =     600,
-        content   = 	Group{},
+        content   = Group{},
         virtual_h =    1000,
 		virtual_w =    1000,
         arrow_sz  =      15,

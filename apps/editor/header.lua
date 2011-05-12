@@ -194,9 +194,9 @@ ui_element = dofile("/lib/ui_element.lua")
 uiElements_en = {"Rectangle", "Text", "Image", "Video"}
 
 uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", --"CheckBox",  "RadioButton",  "ArrowPane",
-           "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "LayoutManager", "ScrollPane",  }
+           "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane" }
 	   -- "TabBar", "OSK",}
-uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group"} 
+uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group", "ArrowPane", "TabBar"} 
 
 skins = {}
 for i, j in pairs(skin_list) do
