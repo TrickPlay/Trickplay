@@ -5314,6 +5314,7 @@ function ui_element.tabBar(t)
             "Item 2",
             "Item 3",
         },
+        tabs = {},
         --tab_align          = "CENTER",
         --label_align        = "CENTER",
         label_padding = 10,
@@ -5339,7 +5340,7 @@ function ui_element.tabBar(t)
     
     local create
     local current_index = 1
-    local tabs = {}
+    --local tabs = {}
     local tab_bg = {}
     local tab_focus = {}
 	
@@ -5453,10 +5454,30 @@ function ui_element.tabBar(t)
         extra={
             type="TabBar",
             insert_tab = function(self,index)
+                
+                if index == nil then index = #p.tab_labels + 1 end
+                
+                table.insert(p.tab_labels,index,"TAB")
+                
+                table.insert(p.tabs,index,Group{})
+                
+                create()
+                
             end,
             remove_tab = function(self,index)
+                if index == nil then index = #p.tab_labels + 1 end
+                
+                table.remove(p.tab_labels,index,"TAB")
+                
+                table.remove(p.tabs,index,Group{})
+                
+                create()
             end,
-            rename_tab = function(self,index)
+            rename_tab = function(self,index,name)
+                assert(index)
+                p.tab_labels[index] = name
+                
+                create()
             end,
             
             move_tab_up = function(self,index)
@@ -5465,9 +5486,9 @@ function ui_element.tabBar(t)
                 p.tab_labels[i-1] = p.tab_labels[i]
                 p.tab_labels[i]   = temp
                 
-                temp      = tabs[i-1]
-                tabs[i-1] = tabs[i]
-                tabs[i]   = temp
+                temp      = p.tabs[i-1]
+                p.tabs[i-1] = p.tabs[i]
+                p.tabs[i]   = temp
                 
                 create()
             end,
@@ -5477,9 +5498,9 @@ function ui_element.tabBar(t)
                 p.tab_labels[i+1] = p.tab_labels[i]
                 p.tab_labels[i]   = temp
                 
-                temp      = tabs[i+1]
-                tabs[i+1] = tabs[i]
-                tabs[i]   = temp
+                temp      = p.tabs[i+1]
+                p.tabs[i+1] = p.tabs[i]
+                p.tabs[i]   = temp
                 
                 create()
             end,
@@ -5487,11 +5508,11 @@ function ui_element.tabBar(t)
             --switching 'visible tab' functions
             display_tab = function(self,index)
                 if index < 1 or index > #p.tab_labels then return end
-                tabs[current_index]:hide()
+                p.tabs[current_index]:hide()
 				tab_bg[current_index]:show()
 				tab_focus[current_index]:hide()
                 current_index = index
-                tabs[current_index]:show()
+                p.tabs[current_index]:show()
 				tab_bg[current_index]:hide()
 				tab_focus[current_index]:show()
             end,
@@ -5507,7 +5528,7 @@ function ui_element.tabBar(t)
             end,
 			
 			get_tab_group = function(self,index)
-				return tabs[index]
+				return p.tabs[index]
 			end,
         }
     }
@@ -5519,6 +5540,8 @@ function ui_element.tabBar(t)
 		current_index = 1
 		
         umbrella:clear()
+        tab_bg = {}
+        tab_focus = {}
         
         local bg = Rectangle{
             color        = p.fill_color,
@@ -5531,7 +5554,7 @@ function ui_element.tabBar(t)
         umbrella:add(bg)
         for i = 1, #p.tab_labels do
             
-            if tabs[i] == nil then tabs[i] = Group{} end
+            if p.tabs[i] == nil then p.tabs[i] = Group{} end
             
             labels[i] = Text{
                 font  = p.font,
@@ -5573,7 +5596,7 @@ function ui_element.tabBar(t)
                 tab_bg[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
                 tab_focus[i].x = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
                 labels[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)+ p.label_padding
-                tabs[i].y = tab_bg[i].h
+                p.tabs[i].y = tab_bg[i].h
             else
                 tab_bg[i] = make_vert_tab(
                     txt_w + 2*p.label_padding,
@@ -5591,10 +5614,10 @@ function ui_element.tabBar(t)
                 tab_focus[i].y = txt_h*(i-1)
                 labels[i].y = txt_h*(i-1)
                 labels[i].x =  p.label_padding
-				tabs[i].x = tab_bg[i].w
+				p.tabs[i].x = tab_bg[i].w
             end
             tab_focus[i]:hide()
-            umbrella:add(tabs[i],tab_bg[i],tab_focus[i],labels[i])
+            umbrella:add(p.tabs[i],tab_bg[i],tab_focus[i],labels[i])
         end
         
         if p.tab_position == "TOP" then
@@ -5603,8 +5626,8 @@ function ui_element.tabBar(t)
             bg.x = tab_bg[1].w-p.border_width
         end
         
-        for i = #p.tab_labels+1, #tabs do
-            tabs[i]      = nil
+        for i = #p.tab_labels+1, #p.tabs do
+            p.tabs[i]      = nil
             tab_bg[i]    = nil
             tab_focus[i] = nil
         end
