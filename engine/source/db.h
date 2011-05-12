@@ -84,6 +84,8 @@ namespace SQLite
         // with a new in-memory database.
 
         bool migrate_schema( const char * schema );
+
+        bool set_schema_version( const char * schema , const char * hash = 0 );
     };
 
     //-------------------------------------------------------------------------

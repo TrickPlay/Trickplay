@@ -9,7 +9,7 @@
 
 #define TP_LOG_DOMAIN   "DB"
 #define TP_LOG_ON       true
-#define TP_LOG2_ON      false
+#define TP_LOG2_ON      true
 
 #include "log.h"
 
@@ -171,6 +171,8 @@ SystemDatabase * SystemDatabase::open( const char * path )
             tpwarn( "FAILED TO CREATE INITIAL SYSTEM DATABASE SCHEMA" );
             return NULL;
         }
+
+        db.set_schema_version( schema_create );
 
         tpinfo( "SYSTEM DATABASE CREATED" );
     }
