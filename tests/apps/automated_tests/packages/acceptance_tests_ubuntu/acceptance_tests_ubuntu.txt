@@ -1,0 +1,68 @@
+[
+{
+"name": "10001_rectangle_border_width.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10002_rectangle_border_color.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10003_canvas_line_width.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10004_canvas_translate.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10005_canvas_translate.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10006_canvas_rotate.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10007_canvas_rotate.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10008_canvas_arc.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10009_canvas_curve_to.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10010_canvas_round_rectangle.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10011_canvas_set_source_radial_pattern.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10012_canvas_set_source_linear_pattern.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+},
+{
+"name": "10013_canvas_arc_negative.lua",
+"checksum": "f4108435568c842e41798bb804a1fec8",
+"active": "true"
+}
+]
+
