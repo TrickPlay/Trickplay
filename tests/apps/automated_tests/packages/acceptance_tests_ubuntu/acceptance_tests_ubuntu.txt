@@ -1,67 +1,67 @@
 [
 {
 "name": "10001_rectangle_border_width.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "ef3c7489fffc7ae9bd65a8bf6ebdec98",
 "active": "true"
 },
 {
 "name": "10002_rectangle_border_color.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "1617fa019605d1be337f66cc24652a2e",
 "active": "true"
 },
 {
 "name": "10003_canvas_line_width.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "acb7d0c0b2d17d229b584bc123886bbf",
 "active": "true"
 },
 {
 "name": "10004_canvas_translate.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "265b4c0758238238a973d3399a25c617",
 "active": "true"
 },
 {
 "name": "10005_canvas_translate.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "b019dac6e375490d5cadf8e8e91a0a93",
 "active": "true"
 },
 {
 "name": "10006_canvas_rotate.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "743fec7600519e17e7941ee503dccc2d",
 "active": "true"
 },
 {
 "name": "10007_canvas_rotate.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "6f411d81899b435dd6884f4e92ab8307",
 "active": "true"
 },
 {
 "name": "10008_canvas_arc.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "70d33a63b8ac6d43e6f067b0543ced81",
 "active": "true"
 },
 {
 "name": "10009_canvas_curve_to.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "763ea68e420743cab04995c42a1081c0",
 "active": "true"
 },
 {
 "name": "10010_canvas_round_rectangle.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "4e3f6ce5d7c664272034adcb6d2619bb",
 "active": "true"
 },
 {
 "name": "10011_canvas_set_source_radial_pattern.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "55bbc7e54ce2cfa30f6d146218ee2875",
 "active": "true"
 },
 {
 "name": "10012_canvas_set_source_linear_pattern.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "f115e2a8cdf315ee4bc223b00f485b2b",
 "active": "true"
 },
 {
 "name": "10013_canvas_arc_negative.lua",
-"checksum": "f4108435568c842e41798bb804a1fec8",
+"checksum": "4a4f6b1582d9e2199ceff38e58da0234",
 "active": "true"
 }
 ]
