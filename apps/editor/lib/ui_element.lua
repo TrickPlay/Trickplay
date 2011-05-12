@@ -5668,7 +5668,8 @@ function ui_element.arrowPane(t)
 		
         arrow_dist_to_frame = 5,
         arrows_visible =   true,
-        box_color = {160,160,160,255},
+        arrow_color = {160,160,160,255},
+        box_color =   {160,160,160,255},
         box_width =    2,
         skin = "default",
     }
@@ -5703,7 +5704,7 @@ function ui_element.arrowPane(t)
 		c:line_to(  c.w,c.h)
 		c:line_to(    0,c.h)
 		
-		c:set_source_color( p.box_color )
+		c:set_source_color( p.arrow_color )
 		c:fill(true)
 		
 		if c.Image then
