@@ -1,4 +1,5 @@
 dofile("apply.lua")
+dofile("editor_lib.lua")
 
 editor = {}
 
@@ -3454,6 +3455,259 @@ function editor.bring_forward()
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
 end
+
+
+function editor.the_ui_elements()
+
+--qqq
+
+  	local WIDTH = 600
+    local L_PADDING = 20
+    local R_PADDING = 50
+    local BOTTOM_PADDING = 12
+
+
+    local TOP_PADDING = 30
+    local Y_PADDING = 22
+    local X_PADDING = 10
+    local STYLE = {font = "FreeSans Medium 18px" , color = {255,255,255,255}}
+    local WSTYLE = {font = "FreeSans Medium 15px" , color = {255,255,255,255}}
+    local SSTYLE = {font = "FreeSans Medium 18px" , color = "000000"}
+    local WSSTYLE = {font = "FreeSans Medium 15px" , color = "000000"}
+
+    local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "ui_elements_insert", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
+	local title = Text {name = "title", text = "UI Elements"}:set(STYLE)
+	local title_shadow = Text {name = "title", text = "UI Elements"}:set(SSTYLE)
+	local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
+	local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
+
+	local scroll = scrollPane{}
+
+	local msgw = Group {
+		name = "ui_element_insert", 
+		position ={650, 250},
+	 	anchor_point = {0,0},
+		reactive = true,
+        children = {
+        	msgw_bg,
+	  		xbox:set{position = {275, 0}},
+			title_shadow:set{position = {X_PADDING,0}, opacity=50}, 
+			title:set{position = {X_PADDING + 1, 1}}, 
+			scroll
+		}
+	}
+	
+
+	local function make_msgw_widget_item(caption) 
+		local text = Text{ text = caption }:set( WSTYLE )
+		local stext = Text{ text = caption }:set( WSSTYLE )
+		return text, stext
+	end 
+
+	cur_w= X_PADDING
+    cur_h= TOP_PADDING 
+
+    for i, v in pairs(uiElementLists) do 
+		local widget_t, widget_ts = make_msgw_widget_item(v)
+		widget_t.position =  {cur_w, cur_h}
+		widget_ts.position =  {cur_w-1, cur_h-1}
+    	widget_t.name = v
+    	widget_t.reactive = true
+		msgw:add(widget_ts)
+		msgw:add(widget_t)
+		cur_h = cur_h + Y_PADDING
+	end
+	
+--[[
+	local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
+    local text_g
+
+    cur_w= (WIDTH - widgets_list.w)/2
+    cur_h= TOP_PADDING/2 + Y_PADDING
+
+    widgets_list.position = {cur_w,cur_h}
+    msgw:add(widgets_list)
+
+            
+    cur_w = L_PADDING
+    cur_h = TOP_PADDING + widgets_list.h - 10
+
+    for i, v in pairs(uiElements_en) do 
+    	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
+	
+	 widget_b.position =  {cur_w, cur_h}
+    	 widget_b.name = v
+    	 widget_b.reactive = true
+
+	 cur_h = cur_h + widget_b.h 
+         msgw:add(widget_b)
+         
+         function widget_b:on_button_down(x,y,button,num_clicks)
+	      widget_f_map[v]() 
+	      cleanMsgWin(msgw)
+        end 
+
+        function widget_t:on_button_down(x,y,button,num_clicks)
+	      widget_f_map[v]() 
+	      cleanMsgWin(msgw)
+	end
+    end 
+
+
+    for i, v in pairs(uiElements) do
+         if (i == 6) then 
+              cur_w =  cur_w + 280 + Y_PADDING
+              cur_h =  TOP_PADDING + widgets_list.h -10
+	 end 
+	 
+	 local widget_label = widget_n_map[v]() 
+	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , widget_label)
+
+    	 widget_b.position =  {cur_w, cur_h}
+    	 widget_b.name = v
+    	 widget_b.reactive = true
+	 cur_h = cur_h + widget_b.h 
+         msgw:add(widget_b)
+         
+         function widget_b:on_button_down(x,y,button,num_clicks)
+	      local new_widget = widget_f_map[v]() 
+--imsi  : for debugging, will be deleted 
+	      if (new_widget.extra.type == "Button") then 
+		b=new_widget
+	      elseif (new_widget.extra.type == "TextInput") then 
+		t=new_widget
+	      elseif (new_widget.extra.type == "DialogBox") then 
+		db=new_widget
+	      elseif (new_widget.extra.type == "ToastAlert") then 
+		tb=new_widget
+	      elseif (new_widget.extra.type == "RadioButton") then 
+		rb=new_widget
+	      elseif (new_widget.extra.type == "CheckBox") then 
+		cb=new_widget
+	      elseif (new_widget.extra.type == "ButtonPicker") then 
+		bp=new_widget
+	      elseif (new_widget.extra.type == "ProgressSpinner") then 
+		ld=new_widget
+	      elseif (new_widget.extra.type == "ProgressBar") then 
+		lb=new_widget
+          elseif (new_widget.extra.type == "LayoutManager") then 
+		d=new_widget
+         elseif (new_widget.extra.type == "ScrollPane") then 
+		si=new_widget
+         elseif (new_widget.extra.type == "ArrowPane") then 
+		ai=new_widget
+         elseif (new_widget.extra.type == "MenuButton") then 
+		dd=new_widget
+         elseif (new_widget.extra.type == "MenuBar") then 
+		mb=new_widget
+         elseif (new_widget.extra.type == "TabBar") then 
+		tb=new_widget
+	end
+--imsi 
+	if new_widget.name:find("timeline") then 
+		    screen:add(new_widget)
+	else 
+	           while (is_available(new_widget.name..tostring(item_num)) == false) do  
+		     item_num = item_num + 1
+	           end 
+	           new_widget.name = new_widget.name..tostring(item_num)
+                   table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	           g:add(new_widget)
+		   new_widget.extra.lock = false
+                   create_on_button_down_f(new_widget)
+	           --screen:add(g)
+	           screen:grab_key_focus()
+	end 
+	cleanMsgWin(msgw)
+        end 
+        function widget_t:on_button_down(x,y,button,num_clicks)
+
+	      local new_widget = widget_f_map[v]() 
+--imsi  : for debugging, will be deleted 
+	      if (new_widget.extra.type == "Button") then 
+		b=new_widget
+	      elseif (new_widget.extra.type == "TextInput") then 
+		t=new_widget
+	      elseif (new_widget.extra.type == "DialogBox") then 
+		db=new_widget
+	      elseif (new_widget.extra.type == "ToastAlert") then 
+		tb=new_widget
+	      elseif (new_widget.extra.type == "RadioButton") then 
+		rb=new_widget
+	      elseif (new_widget.extra.type == "CheckBox") then 
+		cb=new_widget
+	      elseif (new_widget.extra.type == "ButtonPicker") then 
+		bp=new_widget
+	      elseif (new_widget.extra.type == "ProgressSpinner") then 
+		ld=new_widget
+	      elseif (new_widget.extra.type == "ProgressBar") then 
+		lb=new_widget
+              elseif (new_widget.extra.type == "LayoutManager") then 
+		d=new_widget
+              elseif (new_widget.extra.type == "ScrollPane") then 
+		si=new_widget
+              elseif (new_widget.extra.type == "ArrowPane") then 
+		ai=new_widget
+              elseif (new_widget.extra.type == "MenuButton") then 
+		dd=new_widget
+              elseif (new_widget.extra.type == "MenuBar") then 
+		mb=new_widget
+              elseif (new_widget.extra.type == "TabBar") then 
+		tb=new_widget
+	      end
+--imsi  : for debugging, will be deleted 
+	
+             if new_widget.name:find("timeline") then 
+		    screen:add(new_widget)
+	     else
+ 	     	while (is_available(new_widget.name..tostring(item_num)) == false) do  
+			item_num = item_num + 1
+	      	end 
+	      	new_widget.name = new_widget.name..tostring(item_num)
+              	table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	      	g:add(new_widget)
+		new_widget.extra.lock = false
+              	create_on_button_down_f(new_widget)
+	      	--screen:add(g)
+	      	screen:grab_key_focus()
+
+	    end 
+	    cleanMsgWin(msgw)
+       end 
+
+    end 
+
+    xbox.reactive = true
+    function xbox:on_button_down(x,y,button,num_clicks)
+	 	screen:remove(msgw)
+        msgw:clear()
+        screen.grab_key_focus(screen) 
+	  --input_mode = S_SELECT
+	 return true
+    end 
+--]]
+	
+    
+	msgw.extra.lock = false
+ 	screen:add(msgw)
+	create_on_button_down_f(msgw)	
+
+	function xbox:on_button_down(x,y,button,num_clicks)
+		screen:remove(msgw)
+		msgw:clear() 
+		current_inspector = nil
+			
+        screen.grab_key_focus(screen) 
+	    input_mode = S_SELECT
+		return true
+	end 
+
+    if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+    end
+	
+end 
 
 
 function editor.ui_elements()

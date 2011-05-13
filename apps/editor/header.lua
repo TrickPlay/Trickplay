@@ -191,6 +191,8 @@ attr_name_list = {"color", "border_color", "border_width", "color", "border_colo
 
 ui_element = dofile("/lib/ui_element.lua")
 
+uiElementLists = {"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane"}
+
 uiElements_en = {"Rectangle", "Text", "Image", "Video"}
 
 uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", --"CheckBox",  "RadioButton",  "ArrowPane",

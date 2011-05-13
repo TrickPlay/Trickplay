@@ -1641,32 +1641,33 @@ function ui_element.textInput(table)
      create_textInputField()
 
      function t_group.extra.on_focus_in()
-	if t_group:find_child("textInput").text ~= "--------------" then 
-	  current_focus = t_group
-          if (p.skin == "custom") then 
-	     box.opacity = 0
-	     focus_box.opacity = 255
-          else
-	     box_img.opacity = 0
-             focus_img.opacity = 255
-          end 
-	  text.editable = true
-	  text.cursor_visible = true
-	  text.reactive = true 
-          text:grab_key_focus(text)
-	end
+		if t_group:find_child("textInput").text ~= "--------------" then 
+	  		current_focus = t_group
+          	if (p.skin == "custom") then 
+	     		box.opacity = 0
+	     		focus_box.opacity = 255
+          	else
+	     		box_img.opacity = 0
+             	focus_img.opacity = 255
+          	end 
+	  		text.editable = true
+	  		text.cursor_visible = true
+	  		text.reactive = true 
+          	text:grab_key_focus(text)
+		end
      end
 
      function t_group.extra.on_focus_out()
           if (p.skin == "custom") then 
-	     box.opacity = 255
-	     focus_box.opacity = 0
+	     		box.opacity = 255
+	     		focus_box.opacity = 0
           else
-	     box_img.opacity = 255
-             focus_img.opacity = 0
+	     		box_img.opacity = 255
+             	focus_img.opacity = 0
           end 
-	  text.cursor_visible = false
-	  text.reactive = false 
+	  		text.cursor_visible = false
+	  		text.reactive = false 
+			t_group.text = text.text
      end
 
      mt = {}

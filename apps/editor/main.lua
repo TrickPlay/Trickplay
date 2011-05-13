@@ -12,7 +12,7 @@ dofile("editor.lua")
     local key_map =
     {
         [ keys.a	] = function() input_mode = S_SELECT editor.save(false) end,
-	[ keys.b	] = function() editor.undo_history() input_mode = S_SELECT end,
+		[ keys.b	] = function() editor.undo_history() input_mode = S_SELECT end,
         [ keys.c	] = function() editor.clone() input_mode = S_SELECT end,
         [ keys.d	] = function() editor.duplicate() input_mode = S_SELECT end,
         [ keys.e	] = function() editor.redo() input_mode = S_SELECT end,
@@ -23,7 +23,7 @@ dofile("editor.lua")
         [ keys.o	] = function() input_mode = S_SELECT editor.the_open()  end,
         [ keys.q	] = function() exit() end,
         [ keys.p	] = function() set_app_path() end,
-	[ keys.r	] = function() input_mode = S_RECTANGLE screen:grab_key_focus() end,
+		[ keys.r	] = function() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.s	] = function() input_mode = S_SELECT editor.save(true) end,
         [ keys.t	] = function() editor.text() input_mode = S_SELECT end,
         [ keys.z	] = function() editor.undo() input_mode = S_SELECT end,
@@ -49,6 +49,7 @@ dofile("editor.lua")
 		            end,
         --[ keys.x	] = function() editor.debug() input_mode = S_SELECT end,
         [ keys.x	] = function() editor.export() input_mode = S_SELECT end,
+        --[ keys.i	] = function() editor.the_ui_elements() input_mode = S_SELECT end,
         [ keys.i	] = function() editor.ui_elements() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
 					    menuShow()
@@ -86,10 +87,10 @@ dofile("editor.lua")
 			    end,
 	--[ keys.w	] = function() editor.the_open() input_mode = S_SELECT end,
         [ keys.BackSpace] = function() editor.delete() input_mode = S_SELECT end,
-	[ keys.Shift_L  ] = function() shift = true end,
-	[ keys.Shift_R  ] = function() shift = true end,
-	[ keys.Control_L  ] = function() control = true end,
-	[ keys.Control_R  ] = function() control = true end,
+		[ keys.Shift_L  ] = function() shift = true end,
+		[ keys.Shift_R  ] = function() shift = true end,
+		[ keys.Control_L  ] = function() control = true end,
+		[ keys.Control_R  ] = function() control = true end,
         [ keys.Return   ] = function() if(current_inspector == nil) then 
 				     for i, j in pairs (g.children) do 
 					if(j.extra.selected == true) then 

@@ -280,6 +280,148 @@ local project
 local base
 local projects = {}
 
+function new_printMsgWindow(t, msg)
+	--[[
+		 51 pixels in height.  Without tabs = 31 pixels
+		 The bottom bar is 40 pixels in height.
+	]]
+
+  	local WIDTH = 300
+  	local HEIGHT = 150
+
+    local PADDING = 13
+
+	local TOP_BAR = 30
+    local MSG_BAR = 80
+    local BOTTOM_BAR = 40
+
+    local ITSTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
+    local TSTYLE = {font = "FreeSans Medium 16px" , color = {255,255,255,255}}
+    local MSTYLE = {font = "FreeSans Medium 15px" , color = {255,255,255,255}}
+    local TSSTYLE = {font = "FreeSans Medium 16px" , color = "000000", opacity=50}
+    local MSSTYLE = {font = "FreeSans Medium 15px" , color = "000000", opacity=50}
+
+    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "ui_elements_insert", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
+	local title = Text {name = "title", text = t }:set(TSTYLE)
+	local title_shadow = Text {name = "title", text = t}:set(TSSTYLE)
+	local message = Text {text = msg}:set(MSTYLE)
+	local message_shadow = Text {text = msg}:set(MSSTYLE)
+	
+	editor_use = true
+	text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "aa" ,
+    	padding = 5 , border_width  = 1 , border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255},
+    	focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
+    	border_corner_radius = 0,}
+	editor_use = false
+
+
+--[[IMSI BUTTON]]
+	editor_use = true
+	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
+    					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, 
+    					  focus_fill_color = {27,145,27,0}, focus_text_color = {255,255,255,255}, border_color = {255,255,255,255}, 
+    					  fill_color = {255,255,255,0}, border_width = 1, border_corner_radius = 12, focussed=nil, pressed = nil, 
+						  released = nil, button_image = nil, focus_image  = nil, text_has_shadow = true, }
+	local button_ok = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
+    					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, 
+    					  focus_fill_color = {27,145,27,0}, focus_text_color = {255,255,255,255}, border_color = {255,255,255,255}, 
+    					  fill_color = {255,255,255,0}, border_width = 1, border_corner_radius = 12, focussed=nil, pressed = nil, 
+						  released = nil, button_image = nil, focus_image  = nil, text_has_shadow = true, }
+	editor_use = false
+--[[IMSI BUTTON]]
+
+
+	local msgw = Group {
+		name = "msgw",  --ui_element_insert
+		position ={650, 250},
+	 	anchor_point = {0,0},
+		reactive = true,
+        children = {
+        	msgw_bg,
+	  		xbox:set{position = {275, 0}},
+			title_shadow:set{position = {PADDING,0}, }, 
+			title:set{position = {PADDING+1, 1}}, 
+			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
+			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
+			text_input:set{position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
+			button_cancel:set{position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
+			button_ok:set{position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
+		}
+	}
+
+	msgw.extra.lock = false
+ 	screen:add(msgw)
+	create_on_button_down_f(msgw)	
+
+	function xbox:on_button_down()
+		screen:remove(msgw)
+		msgw:clear() 
+		current_inspector = nil
+			
+        screen.grab_key_focus(screen) 
+	    input_mode = S_SELECT
+		return true
+	end 
+
+	button_ok.pressed = function() print("new project : ", text_input.text) xbox:on_button_down() end 
+	button_cancel.pressed = function() print(" cancel ") xbox:on_button_down() end 
+
+	if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+    end
+
+end 
+
+function new_set_app_path()
+
+
+	new_printMsgWindow("New Project", "Project Name:");
+
+	
+--[[
+    -- Get the user's home directory and make sure it is valid
+    local home = editor_lb:get_home_dir()
+    
+    assert( home )
+    
+    -- The base directory where the editor will store its files, make sure
+    -- we are able to create it (or it already exists )
+    
+    base = editor_lb:build_path( home , "trickplay-editor"  )
+
+    assert( editor_lb:mkdir( base ) )
+    
+    -- The list of files and directories there. We go through it and look for
+    -- directories.
+    local list = editor_lb:readdir( base )
+    
+    if table.getn(projects) == 0 then 
+    for i = 1 , # list do
+    
+        if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+        
+            table.insert( projects , list[ i ] )
+            
+        end
+        
+    end
+    end 
+    
+    input_mode = S_POPUP
+
+    printMsgWindow("Select Project : ", "projectlist")
+    inputMsgWindow("projectlist")
+
+]]
+    if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+    end
+
+end 
+
+
+
 function set_app_path()
 
     -- Get the user's home directory and make sure it is valid
@@ -354,158 +496,132 @@ function create_on_button_down_f(v)
 	v.extra.selected = false
 	local org_object, new_object 
 	
---[[
- 	function v:on_motion(x, y)
-	     if control == true  then 
-	     	local c, t = find_container(x,y) 
-		if c.extra.org_opacity == nil or c.extra.org_opacity == c.opacity then 
-			current_container_select = v
-			editor.selected(v)
-		end 
-	     end 
-	     return true
-        end
-]]
-        function v:on_button_down(x,y,button,num_clicks)
-
+	function v:on_button_down(x,y,button,num_clicks)
 	   if is_this_widget(v) == true then
 	        --v.on_focus_in()
 	   end 
 
 	   if (input_mode ~= S_RECTANGLE) then 
-	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
-	     if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
-	       if (v.extra.is_in_group == true and control == false ) then 
-		    local p_obj = find_parent(v)
-                    if(button == 3) then -- imsi : num_clicks is not correct ! 
-                    --if(button == 3 or num_clicks >= 2) then
-		    --print ("button", button)
-		    --print ("num_clicks", num_clicks)
-                         editor.inspector(p_obj)
-                         return true
-                    end 
+	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
+	     		if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
+	       			if (v.extra.is_in_group == true and control == false ) then 
+		    			local p_obj = find_parent(v)
+                		if(button == 3) then -- imsi : num_clicks is not correct ! 
+                		--if(button == 3 or num_clicks >= 2) then
+                			editor.inspector(p_obj)
+                    		return true
+                		end 
 
-	            if(input_mode == S_SELECT and p_obj.extra.selected == false) then 
-		     	editor.selected(p_obj)
-	            elseif (p_obj.extra.selected == true) then 
-		     	editor.n_select(p_obj)
-		    end
-	            org_object = copy_obj(p_obj)
-		    if v.extra.lock == false then -- or  v.name =="inspector" then 
-           	    	dragging = {p_obj, x - p_obj.x, y - p_obj.y }
-		    end 
-           	    return true
-	      else 
-                    if(button == 3) then-- imsi : num_clicks is not correct ! 
-		    --if(button == 3 or num_clicks >= 2) then
-		    --print ("button", button)
-		    --print ("num_clicks", num_clicks)
-                         editor.inspector(v)
-                         return true
-                    end 
-	            if(input_mode == S_SELECT and v.extra.selected == false) then 
-		     	editor.selected(v) 
-		    elseif (v.extra.selected == true) then 
-			if(v.type == "Text") then 
-			      v:set{cursor_visible = true}
-			      v:set{editable= true}
-     			      v:grab_key_focus(v)
-			end 
-			editor.n_select(v) 
-	       	    end
-
+	            		if(input_mode == S_SELECT and p_obj.extra.selected == false) then 
+		     				editor.selected(p_obj)
+	            		elseif (p_obj.extra.selected == true) then 
+		     				editor.n_select(p_obj)
+		    			end
+	            		org_object = copy_obj(p_obj)
+		    			if v.extra.lock == false then -- or  v.name =="inspector" then 
+           	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
+		    			end 
+           	    		return true
+	      			else 
+                		if(button == 3) then-- imsi : num_clicks is not correct ! 
+		    		--if(button == 3 or num_clicks >= 2) then
+                 			editor.inspector(v)
+                    		return true
+                		end 
+	            		if(input_mode == S_SELECT and v.extra.selected == false) then 
+		     				editor.selected(v) 
+		    			elseif (v.extra.selected == true) then 
+								if(v.type == "Text") then 
+			      					v:set{cursor_visible = true}
+			      					v:set{editable= true}
+     			    				v:grab_key_focus(v)
+								end 
+								editor.n_select(v) 
+	       				end
+				
 -----[[ 	SHOW POSSIBLE CONTAINERS
 
-		    if control == true then 
+		    			if control == true then 
+							if(screen:find_child("mouse_pointer") ~= nil) then 
+		     					screen:remove(screen:find_child("mouse_pointer"))
+							end 
+							mouse_pointer = CS_move
+							mouse_pointer.extra.type = "move"
+							mouse_pointer.position = {x - 10 ,y - 10 ,0}
+							if(screen:find_child("mouse_pointer") == nil) then 
+		     					screen:add(mouse_pointer)
+							end 
 
-			if(screen:find_child("mouse_pointer") ~= nil) then 
-		     		screen:remove(screen:find_child("mouse_pointer"))
-			end 
-			mouse_pointer = CS_move
-			mouse_pointer.extra.type = "move"
-			mouse_pointer.position = {x - 10 ,y - 10 ,0}
-			if(screen:find_child("mouse_pointer") == nil) then 
-		     		screen:add(mouse_pointer)
-			end 
-
-			selected_content = v 
-	
-			local odr 
-			for i,j in pairs (g.children) do 
-				if j.name == v.name then 
-					odr = i
-				end 
-			end 
-
-
-			if odr then 
-			for i,j in pairs (g.children) do 
-				--print(j.name)
-				if is_this_container(j) == true then 
-				--print(j.name, "container")
-					if i > odr then 
-						j.extra.org_opacity = j.opacity
-                       				j:set{opacity = 50}
-					end 	
-				elseif i ~= odr then  
-					j.extra.org_opacity = j.opacity
-                       			j:set{opacity = 50}
-
-				end 
-			end 
-			end
-
+							selected_content = v 
 			
-		    end 
+							local odr 
+							for i,j in pairs (g.children) do 
+								if j.name == v.name then 
+									odr = i
+								end 
+							end 
+		
 
+							if odr then 
+								for i,j in pairs (g.children) do 
+							--print(j.name)
+									if is_this_container(j) == true then 
+									--print(j.name, "container")
+										if i > odr then 
+											j.extra.org_opacity = j.opacity
+                       						j:set{opacity = 50}
+										end 	
+									elseif i ~= odr then  
+									j.extra.org_opacity = j.opacity
+                       				j:set{opacity = 50}
+								end 
+							end 
+						end
+					end 
 -----]]]] 
 
 		    -- Debugging : 841 
 
-		    if v.type ~= "Text" then 
-			for i, j in pairs (g.children) do  
-	           	if j.type == "Text" then 
-	            	if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
-			  ui.text = j	
-			  if ui.text.on_key_down then 
-	                  	ui.text:on_key_down(keys.Return)
-			  end 
-		    	end
-	           	end 
-	        	end 
-	           end 
-
-	            org_object = copy_obj(v)
-		    if v.extra.lock == false then -- or v.name == "inspector" then 
-           	    	dragging = {v, x - v.x, y - v.y }
-		    end
-           	    return true
-	     end
+					if v.type ~= "Text" then 
+						for i, j in pairs (g.children) do  
+	           				if j.type == "Text" then 
+	            				if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
+									ui.text = j	
+			  						if ui.text.on_key_down then 
+	                  					ui.text:on_key_down(keys.Return)
+			  						end 
+		    					end
+	           				end 
+	        			end 
+	    			end 
+	    			org_object = copy_obj(v)
+					if v.extra.lock == false then -- or v.name == "inspector" then 
+        				dragging = {v, x - v.x, y - v.y }
+					end
+        			return true
+			end
 	    elseif (input_mode == S_FOCUS) then 
-			if (v.name ~= "inspector") then 
-		     		editor.selected(v)
-		     		screen:find_child("text"..focus_type).text = v.name 
+			if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
+		     	editor.selected(v)
+		     	screen:find_child("text"..focus_type).text = v.name 
 			end 
-			input_mode = S_FOCUS
+				input_mode = S_FOCUS
            		return true
-
             end
-	
 	   elseif( input_mode ~= S_RECTANGLE ) then 
-		if v.extra.lock == false then --or v.name == inspector  then  
-		dragging = {v, x - v.x, y - v.y }
-           	return true
-		end 
-           end
-	  end
-           --return true .. 렉탱글 안에서 또 렉탱글 글릴때 안되아서.. 뺌
-        end
+			if v.extra.lock == false then --or v.name == inspector  then  
+				dragging = {v, x - v.x, y - v.y }
+           		return true
+			end 
+    	end
+	end
+end
 
 	
 
         function v:on_button_up(x,y,button,num_clicks)
 	   if (input_mode ~= S_RECTANGLE) then 
-	   if(v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
+	   if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
 	     if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	        if (v.extra.is_in_group == true) then 
 		    local p_obj = find_parent(v)
@@ -1483,6 +1599,7 @@ end
 
 local projectlist_len 
 local selected_prj 	= ""
+
 
 function printMsgWindow(txt, name)
      if (name == nil) then
