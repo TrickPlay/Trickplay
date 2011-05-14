@@ -14,6 +14,10 @@
 @protocol AdvancedUIDelegate <NSObject>
 
 @required
+- (void)setupServiceWithPort:(NSInteger)p
+                    hostname:(NSString *)h;
+- (BOOL)startServiceWithID:(NSString *)ID;
+
 - (void)clean;
 
 - (void)createObjects:(NSArray *)JSON_Array;
@@ -101,7 +105,7 @@
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
+CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     BOOL viewDidAppear;
     
     SocketManager *socketManager;

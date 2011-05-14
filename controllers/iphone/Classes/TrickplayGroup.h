@@ -18,8 +18,8 @@
     AdvancedUIObjectManager *manager;
 }
 
-@property (nonatomic, retain) AdvancedUIObjectManager *manager;
+@property (nonatomic, assign) AdvancedUIObjectManager *manager;
 
-- (id)initWithID:(NSString *)groupID args:(NSDictionary *)args resourceManager:(ResourceManager *)resourceManager;
+- (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
 
 @end

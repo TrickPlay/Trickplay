@@ -64,22 +64,47 @@
  */
 
 - (void)setColorFromArgs:(NSDictionary *)args {
-    NSArray *colorArray = [args objectForKey:@"color"];
-    if (!colorArray || [colorArray count] < 3) {
-        return;
-    }
-    
     // ** Get the color and alpha values **
     CGFloat red, green, blue, alpha;
+    if ([[args objectForKey:@"color"] isKindOfClass:[NSArray class]]) {
+        NSArray *colorArray = [args objectForKey:@"color"];
+        if (!colorArray || [colorArray count] < 3) {
+            return;
+        }
     
-    red = [(NSNumber *)[colorArray objectAtIndex:0] floatValue]/255.0;
-    green = [(NSNumber *)[colorArray objectAtIndex:1] floatValue]/255.0;
-    blue = [(NSNumber *)[colorArray objectAtIndex:2] floatValue]/255.0;
+        red = [(NSNumber *)[colorArray objectAtIndex:0] floatValue]/255.0;
+        green = [(NSNumber *)[colorArray objectAtIndex:1] floatValue]/255.0;
+        blue = [(NSNumber *)[colorArray objectAtIndex:2] floatValue]/255.0;
     
-    if ([colorArray count] > 3) {
-        alpha = [(NSNumber *)[colorArray objectAtIndex:3] floatValue]/255.0;
+        if ([colorArray count] > 3) {
+            alpha = [(NSNumber *)[colorArray objectAtIndex:3] floatValue]/255.0;
+        } else {
+            alpha = view.alpha;
+        }
+    } else if ([[args objectForKey:@"color"] isKindOfClass:[NSString class]]) {
+        NSString *hexString = [args objectForKey:@"color"];
+        unsigned int value;
+        
+        if ([hexString characterAtIndex:0] == '#') {
+            hexString = [hexString substringFromIndex:1];
+        }
+        
+        [[NSScanner scannerWithString:hexString] scanHexInt:&value];
+        if ([hexString length] > 6) {
+            // alpha exists
+            red = ((value & 0xFF000000) >> 24)/255.0;
+            green = ((value & 0x00FF0000) >> 16)/255.0;
+            blue = ((value & 0x0000FF00) >> 8)/255.0;
+            alpha = (value & 0x000000FF)/255.0;
+        } else {
+            // just RGB
+            red = ((value & 0xFF0000) >> 16)/255.0;
+            green = ((value & 0x00FF00) >> 8)/255.0;
+            blue = (value & 0x0000FF)/255.0;
+            alpha = view.alpha;
+        }
     } else {
-        alpha = view.alpha;
+        return;
     }
     
     view.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
@@ -122,6 +147,13 @@
     if (borderWidth) {
         view.layer.borderWidth = borderWidth;
     }
+}
+
+#pragma mark -
+#pragma mark New Protocol
+
+- (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args {
+    return nil;
 }
 
 

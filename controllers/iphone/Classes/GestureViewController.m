@@ -40,9 +40,10 @@
     // Tell socket manager to create a socket and connect to the service selected
     socketManager = [[SocketManager alloc] initSocketStream:hostName
                                                        port:port
-                                                   delegate:self];
+                                                   delegate:self
+                                                   protocol:APP_PROTOCOL];
     
-    if (!socketManager) {
+    if (![socketManager isFunctional]) {
         // If null then error connecting, back up to selecting services view
         [self.navigationController popToRootViewControllerAnimated:YES];
         NSLog(@"Could Not Establish Connection");
@@ -61,7 +62,7 @@
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
         hasPictures = @"\tPS";
     }
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
     
@@ -86,10 +87,11 @@
     }
     http_port = [my_http_port retain];
     [socketManager setPort:[http_port integerValue]];
+    [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
 }
 
 - (BOOL)hasConnection {
-    return socketManager != nil;
+    return socketManager != nil && [socketManager isFunctional];
 }
 
 - (void)handleDroppedConnection {
@@ -157,6 +159,13 @@
 - (void)do_WM:(NSArray *)args {
     self.version = [args objectAtIndex:0];
     [self setHTTPPort:(NSString *)[args objectAtIndex:1]];
+    // if controller ID then open a new socket for advanced UI
+    if ([args count] > 2 && [args objectAtIndex:2]) {
+        if (![advancedUIDelegate startServiceWithID:(NSString *)[args objectAtIndex:2]]) {
+            [advancedUIDelegate release];
+            advancedUIDelegate = nil;
+        }
+    }
 }
 
 //--Audio junk

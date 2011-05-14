@@ -32,9 +32,25 @@
 
 -(id)initSocketStream:(NSString *)theHost
                  port:(NSInteger)thePort
-             delegate:(id <SocketManagerDelegate>)theDelegate{
+             delegate:(id <SocketManagerDelegate>)theDelegate
+             protocol:(CommandProtocol)protocol {
     if (self == [super init]) {
+        functional = YES;
         
+        // Defines the type of communications protocol that will be used
+        // for messages coming through this socket
+        if (protocol == ADVANCED_UI_PROTOCOL) {
+            commandInterpreter = [[CommandInterpreterAdvancedUI alloc] init:(id)theDelegate];
+        } else if (protocol == APP_PROTOCOL) {
+            commandInterpreter = [[CommandInterpreterApp alloc] 
+                                  init:(id)theDelegate];
+        } else {
+            NSLog(@"Error, protocol not defined");
+            functional = NO;
+            return self;
+        }
+        
+        // Create the socket
         NSInputStream *inputStream;
         NSOutputStream *outputStream;
     
@@ -52,8 +68,8 @@
                 [outputStream release];
             }
             
-            [super dealloc];
-            return nil;
+            functional = NO;
+            return self;
         }
         
         // Dot syntax properly releases and retains objects
@@ -68,9 +84,6 @@
 
         
         writeQueue = [[NSMutableArray alloc] initWithCapacity:20];
-        
-        commandInterpreter = [[CommandInterpreter alloc] 
-                              init:(id <CommandInterpreterDelegate>)theDelegate];
         
         delegate = theDelegate;
         
@@ -87,6 +100,9 @@
     return self;
 }
 
+- (BOOL)isFunctional {
+    return functional;
+}
 
 -(void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode {
     switch (eventCode) {
@@ -115,6 +131,8 @@
                     // occurred and would never reach this point.
                     [commandInterpreter addBytes:(const uint8_t *)buffer
                                            length:(NSUInteger)numbytes];
+                } else {
+                    NSLog(@"Zero bytes");
                 }
             }
             
@@ -130,14 +148,24 @@
         // Close up the streams cuz there aint nothin left.
         case NSStreamEventEndEncountered:
             NSLog(@"Stream end encountered");
-            [delegate streamEndEncountered];
+            if (delegate) {
+                [delegate streamEndEncountered];
+            }
             break;
         case NSStreamEventHasSpaceAvailable:
             NSLog(@"Stream has space available");
             [self sendPackets];
             break;
         case NSStreamEventErrorOccurred:
-            [[self delegate] socketErrorOccurred];
+            if (delegate) {
+                [delegate socketErrorOccurred];
+            }
+            break;
+        case NSStreamEventNone:
+            NSLog(@"Stream no event has occurred");
+            break;
+        case NSStreamEventOpenCompleted:
+            NSLog(@"Stream Open Completed");
             break;
         default:
             NSLog(@"Some other event code");
@@ -179,7 +207,7 @@
     
     WritePacket *packet = [writeQueue objectAtIndex:0];
     int numbytes = [output_stream write:[packet.data bytes]+packet.position
-                              maxLength:[packet.data length]-packet.position ];
+                              maxLength:[packet.data length]-packet.position];
     
     if (numbytes == -1) {
         NSLog(@"Error sending bytes");
@@ -200,7 +228,7 @@
 }
 
 
-//Getters/Setters not synthesized
+// Getters/Setters not synthesized
 - (NSInteger)port {
     return port;
 }
@@ -210,7 +238,8 @@
 }
 
 - (void)dealloc{
-    NSLog(@"Socket Manager dealloc");
+    NSLog(@"Socket Manager dealloc with delegate: %@", delegate);
+
     [host release];
     
     [input_stream close];
@@ -221,11 +250,16 @@
     [output_stream removeFromRunLoop:[NSRunLoop currentRunLoop] 
                              forMode:NSDefaultRunLoopMode];
     
+    [input_stream setDelegate:nil];
+    [output_stream setDelegate:nil];
+    
     [input_stream release];
     [output_stream release];
     
     [writeQueue release];
     [commandInterpreter release];
+    
+    self.delegate = nil;
     
     [super dealloc];
 }
