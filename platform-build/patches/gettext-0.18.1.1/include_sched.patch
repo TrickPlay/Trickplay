@@ -1,0 +1,24 @@
+Index: gettext-0.18.1.1/gettext-tools/gnulib-lib/pipe.c
+===================================================================
+--- gettext-0.18.1.1.orig/gettext-tools/gnulib-lib/pipe.c	2011-05-13 16:17:03.523908546 -0700
++++ gettext-0.18.1.1/gettext-tools/gnulib-lib/pipe.c	2011-05-13 16:17:20.060627134 -0700
+@@ -44,6 +44,7 @@
+ #else
+ 
+ /* Unix API.  */
++# include <sched.h>
+ # include <spawn.h>
+ 
+ #endif
+Index: gettext-0.18.1.1/gettext-tools/gnulib-lib/execute.c
+===================================================================
+--- gettext-0.18.1.1.orig/gettext-tools/gnulib-lib/execute.c	2011-05-13 16:18:08.003908217 -0700
++++ gettext-0.18.1.1/gettext-tools/gnulib-lib/execute.c	2011-05-13 16:18:22.090158516 -0700
+@@ -44,6 +44,7 @@
+ #else
+ 
+ /* Unix API.  */
++# include <sched.h>
+ # include <spawn.h>
+ 
+ #endif

@@ -35,8 +35,9 @@ include $(BSEAV)/lib/media/bmedia.inc
 CFLAGS += $(addprefix -I,$(BMEDIA_INCLUDES) $(BFILE_MEDIA_INCLUDES)) -I$(BSEAV)/lib/mpeg2_ts_parse -I$(BSEAV)/lib/tspsi
 CFLAGS += $(addprefix -D,$(BMEDIA_PROBE_DEFINES))
 
-CFLAGS += -lm
-CFLAGS += -I$(MAGNUM)/../rockford/middleware/$(V3DIP_REV)/khronos/include/
+CFLAGS += -lm -lrt
+CFLAGS += -I$(MAGNUM)/../rockford/middleware/v3d/interface/khronos/include/ \
+		  -I$(MAGNUM)/../rockford/middleware/platform/nexus
 
 APPS = $(THEAPPS)
 
@@ -50,18 +51,40 @@ all: $(APP)
 $(APP): api
 endif
 
-# For linux builds, link to the correct libraries
-ifneq ($(findstring linux,$(B_REFSW_OS)),)
-LDFLAGS := -lnexus -L${NEXUS_BIN_DIR} -lpthread
+DEBUG ?= y
+
+ifeq ($(DEBUG),y)
+V3D_LIB := lib_$(PLATFORM)_debug
+else
+V3D_LIB := lib_$(PLATFORM)_release
 endif
 
-# This builds the nexus api
+ifeq ($(NEXUS_MODE),)
+CFLAGS += -DSINGLE_PROCESS
+endif
+
+ifeq ($(NEXUS_MODE),client)
+CFLAGS += -DUSER_MODE_MULTIPROC_CLIENT
+endif
+
+# For linux builds, link to the correct libraries
+ifneq ($(findstring linux,$(B_REFSW_OS)),)
+LDFLAGS := -lnexus$(NEXUS_LIB_SUFFIX) -L${NEXUS_BIN_DIR} -lpthread \
+		-L$(NEXUS_TOP)/../rockford/middleware/v3d/$(V3D_LIB) -lv3ddriver \
+		-L$(NEXUS_TOP)/../rockford/middleware/platform/nexus/$(V3D_LIB) -lnxpl
+endif
+
+# This builds the nexus api, v3d driver & platform glue
 api:
-	$(MAKE) -C $(NEXUS_TOP)/build
+	$(MAKE) -C $(NEXUS_TOP)/build DEBUG=$(DEBUG)
+	$(MAKE) -C $(NEXUS_TOP)/../rockford/middleware/v3d -f V3DDriver.mk DEBUG=$(DEBUG)
+	$(MAKE) -C $(NEXUS_TOP)/../rockford/middleware/platform/nexus -f platform_nexus.mk DEBUG=$(DEBUG)
 
 # This cleans nexus and local apps
 clean:
-	$(MAKE) -C $(NEXUS_TOP)/build clean
+	$(MAKE) -C $(NEXUS_TOP)/build DEBUG=$(DEBUG) clean
+	$(MAKE) -C $(NEXUS_TOP)/../rockford/middleware/v3d -f V3DDriver.mk DEBUG=$(DEBUG) clean
+	$(MAKE) -C $(NEXUS_TOP)/../rockford/middleware/platform/nexus -f platform_nexus.mk DEBUG=$(DEBUG) clean
 	-$(RM) $(APPS) *.d *.o *.out;
 
 # This is the minimum needed to compile and link with Nexus
@@ -125,17 +148,15 @@ LDFLAGS += -L$(TRICKPLAY_LIB) \
 	-lthreadutil \
 	-lstdc++  \
 	-lintl \
-	-liconv \
 	-lcairo-gobject \
 	-luprof-0.3 \
 	-lsndfile \
 	-lsoup-2.4 \
 	-lxml2 \
-	-lGLESv2 \
-	-lEGL \
 	-Wl,--end-group 
 
-EXTRA_OBJS:=mediaplayer.c cmdline_args.c
+#EXTRA_OBJS:=mediaplayer.c cmdline_args.c init.c
+EXTRA_OBJS:=init.c
 
 # Implicit rule for building local apps
 %$(APPSUFFIX): %.c $(EXTRA_OBJS) $(VXOBJS)

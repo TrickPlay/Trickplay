@@ -75,6 +75,14 @@ else
 fi
 
 #------------------------------------------------------------------------------
+# gettext
+
+GET_TEXT_V="0.18.1.1"
+GET_TEXT_DIST="gettext-${GET_TEXT_V}.tar.gz"
+GET_TEXT_SOURCE="gettext-${GET_TEXT_V}"
+GET_TEXT_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
 # glib
 
 GLIB_MV="2.26"
@@ -360,7 +368,7 @@ SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 
 #------------------------------------------------------------------------------
 
-ALL="GLIB_HOST ZLIB EXPAT XML GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+ALL="GLIB_HOST GET_TEXT ZLIB EXPAT XML GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -398,8 +406,9 @@ then
         echo "== Building GLES2 stub..."
         echo "================================================================="
 
+        mkdir "${PREFIX}/lib"
 
-        ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o ${PREFIX}/lib/libGLESv2.so    
+        ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o "${PREFIX}/lib/libGLESv2.so"
         ln -s ${PREFIX}/lib/libGLESv2.so ${PREFIX}/lib/libGLES2.so   
         ln -s ${PREFIX}/lib/libGLESv2.so ${PREFIX}/lib/libEGL.so   
     fi
@@ -551,7 +560,6 @@ for THIS in ${ALL}; do
 done
 
 
-
 #------------------------------------------------------------------------------
 # Trickplay
 
@@ -636,7 +644,6 @@ then
 	    -lgobject-2.0 \
 	    -lglib-2.0 \
 	    -lgthread-2.0 \
-	    -liconv \
 	    -lintl \
 	    -lrt \
 	    -lresolv \
@@ -660,28 +667,6 @@ then
 fi
 
 #------------------------------------------------------------------------------
-# Build the LG addon
-
-if [[ -d "${THERE}/lg-source" ]]
-then
-
-    echo "================================================================="
-    echo "== Building LG addon..."
-    echo "================================================================="
-
-    make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean 
-    make -C ${THERE}/lg-source/tp_addon/src TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
-    if [[ ! -d "${HERE}/lg" ]]
-    then
-        mkdir "${HERE}/lg"
-    fi
-    
-    mv ${THERE}/lg-source/tp_addon/src/trickplay ${THERE}/lg-source/tp_addon/src/trickplay.sym ${HERE}/lg/
-    make -C ${THERE}/lg-source/tp_addon/src --no-print-directory clean
-
-fi
-
-#------------------------------------------------------------------------------
 # Build the Broadcom executable
 
 echo "================================================================="
@@ -695,7 +680,6 @@ then
     echo "NEXUS_TOP is not defined. Skipping."
     exit
 fi   
-
 
 TRICKPLAY_INCLUDE="$PREFIX/include"
 TRICKPLAY_LIB="$PREFIX/lib"
@@ -719,17 +703,16 @@ unset LDFLAGS
 unset LIBS 
 unset PKG_CONFIG_PATH
 
-export BCHP_VER=C0
-export PLATFORM=935230
+export BCHP_VER=A0
+export PLATFORM=935233
 export HSM_SOURCE_AVAILABLE=y
 export KEYLADDER_SUPPORT=n
-#export LINUX=/opt/brcm/linux/
+#export LINUX=/home/pablo/Documents/BROADCOM/refsw_935233.20110509_3P/2637.0_0066/ceglinux-2.6
 export V3DIP_REV=v3d_b0/interface
 
 rm -rf "$THERE/broadcom-source/*.o" "$THERE/broadcom-source/trickplay"
 
-make -C $THERE/broadcom-source trickplay TRICKPLAY_INCLUDE="$TRICKPLAY_INCLUDE" TRICKPLAY_LIB="$TRICKPLAY_LIB"  DEBUG=n
-
+make -C $THERE/broadcom-source trickplay TRICKPLAY_INCLUDE="$TRICKPLAY_INCLUDE" TRICKPLAY_LIB="$TRICKPLAY_LIB" 
 if [[ ! -d $HERE/broadcom ]]
 then
     mkdir $HERE/broadcom

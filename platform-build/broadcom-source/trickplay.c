@@ -85,9 +85,13 @@
 #define SIXTY_HZ
 
 #include "nexus_platform.h"
+#include "nexus_display.h"
+#include "default_nexus.h"
+
+#if 0
+
 #include "nexus_pid_channel.h"
 #include "nexus_stc_channel.h"
-#include "nexus_display.h"
 #include "nexus_video_window.h"
 #include "nexus_composite_output.h"
 #include "nexus_component_output.h"
@@ -100,7 +104,11 @@
 #include "bstd.h"
 #include "bkni.h"
 
+#endif
+
 #include "nexus_ir_input.h"
+
+#include "init.h"
 
 #include "trickplay/trickplay.h"
 #include "trickplay/controller.h"
@@ -112,19 +120,23 @@
 NEXUS_PlatformConfiguration   platform_config;
 NEXUS_DisplayHandle           nexus_display = 0;
 EGLNativeDisplayType          native_display = 0;
-EGL_NEXUS_WIN_T               egl_window;
+void *                        native_window = 0;
 NEXUS_IrInputHandle           mIRHandle = 0;
+NXPL_PlatformHandle           nxpl_handle = 0;
+
+
+TPController *                controller = 0;
+
+#if 0
 
 NEXUS_VideoWindowHandle       video_window = 0;
 
 NEXUS_HdmiInputHandle         hdmiInput = 0;
 NEXUS_AudioDecoderHandle      hdmiAudioDecoder = 0;
 
-
-TPController *          controller = 0;
-
 extern int nmp_constructor( TPMediaPlayer * );
 
+#endif
 
 static void irCallback(void *pParam, int iParam)
 {
@@ -151,6 +163,8 @@ static void irCallback(void *pParam, int iParam)
       }
    }
 }
+
+#if 0
 
 void disconnect_hdmi()
 {
@@ -244,6 +258,58 @@ void connect_hdmi()
 
    printf( "\n\n\tCONNECT HDMI DONE\n\n" );
 }
+
+#endif
+
+/*
+===============================================================================
+*/
+
+const unsigned int WIDTH             = 1920;
+const unsigned int HEIGHT            = 1080;
+const unsigned int FRAMES            = 0;
+const unsigned int BPP               = 32;
+
+
+bool InitDisplay( void )
+{
+   NXPL_NativeWindowInfo   win_info;
+   NEXUS_GraphicsSettings  graphics_settings;
+
+   if (InitPlatform())
+   {
+          /* We are the primary process, so open the display */
+       nexus_display = OpenDisplay(0, WIDTH, HEIGHT);
+       InitPanelOutput(nexus_display);
+       InitCompositeOutput(nexus_display, WIDTH, HEIGHT);
+       InitComponentOutput(nexus_display);
+       InitHDMIOutput(nexus_display);
+   }
+
+   /* Register this display for exclusive mode access */
+   NXPL_RegisterNexusDisplayPlatform(&nxpl_handle, nexus_display);
+
+   if (nexus_display != 0)
+   {
+        NEXUS_Display_GetGraphicsSettings(nexus_display, &graphics_settings);
+/*      *aspect = (float)graphics_settings.position.width / graphics_settings.position.height;*/
+   }
+   else
+   {
+/*      *aspect = (float)WIDTH / (float)HEIGHT;*/
+   }
+
+   win_info.x = 0; 
+   win_info.y = 0;
+   win_info.width = WIDTH;
+   win_info.height = HEIGHT;
+   win_info.stretch = true;
+   native_window = NXPL_CreateNativeWindow(&win_info);
+
+   return true;
+}
+
+#if 0
 
 bool InitDisplay()
 {
@@ -357,9 +423,11 @@ bool InitDisplay()
    return true;
 }
 
+#endif
+
 NativeWindowType tp_egl_get_native_window( void )
 {
-    return ( NativeWindowType ) & egl_window;
+    return ( NativeWindowType ) native_window;
 }
 
 static void install_controller( TPContext * ctx )
@@ -412,7 +480,6 @@ int main(int argc, char** argv)
    int                  result;
    TPContext *          ctx;
 
-   
    result = 0;
    ctx = 0;
    mIRHandle = 0;
@@ -428,43 +495,44 @@ int main(int argc, char** argv)
       
       install_controller( ctx );
       
-      tp_context_set_int( ctx , TP_SCREEN_WIDTH , egl_window.rect.width );
-      tp_context_set_int( ctx , TP_SCREEN_HEIGHT , egl_window.rect.height );
+      tp_context_set_int( ctx , TP_SCREEN_WIDTH , WIDTH );
+      tp_context_set_int( ctx , TP_SCREEN_HEIGHT , HEIGHT );
       
+#if 0
       tp_context_set_media_player_constructor( ctx , nmp_constructor );
+#endif      
       
       result = tp_context_run( ctx );
       
       tp_context_free( ctx );      
    }
 
-   if (nexus_display != 0)
-   {
-      EGLDisplay   eglDisplay;
+    EGLDisplay   eglDisplay;
+    /* Terminate EGL */
+    eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglTerminate(eglDisplay);
 
-      disconnect_hdmi();
-      
-      NEXUS_VideoWindow_Close( video_window );
-   
-      /* Terminate EGL */
+    NXPL_DestroyNativeWindow(native_window);
 
-      eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-      eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-      eglTerminate(eglDisplay);
+    NXPL_UnregisterNexusDisplayPlatform(nxpl_handle);
 
-      BRCM_UnregisterDisplay(native_display);
+    /* Close the Nexus display */
+    if (nexus_display != 0)
+    {
+        NEXUS_Display_Close(nexus_display);
+    }
 
-      /* Close the Nexus display */
-      NEXUS_Display_Close(nexus_display);
-   }
+    if (mIRHandle)
+    {
+        NEXUS_IrInput_Close(mIRHandle);
+    }
 
-   if (mIRHandle)
-   {
-      NEXUS_IrInput_Close(mIRHandle);
-   }
-   
-   /* Close the platform */
-   NEXUS_Platform_Uninit();
+/*
+    This is causing a segfault. (cube example does it too)
+*/
 
-   return result;
+    NEXUS_Platform_Uninit();
+
+    return result;
 }

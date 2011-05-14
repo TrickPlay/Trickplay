@@ -1,9 +1,10 @@
 
-TOOLCHAIN_ROOT=/opt/toolchains/crosstools_hf-linux-2.6.18.0_gcc-4.2-11ts_uclibc-nptl-0.9.29-20070423_20090508
+TOOLCHAIN_ROOT=/opt/toolchains/stbgcc-4.5.2-0.5
 
 ARCH="mpisel"
 GLES="2.0"
-GLIB_ICONV="--with-libiconv"
+#GLIB_ICONV="--with-libiconv"
+GLIB_ICONV=""
 
 PREFIX=${PWD}/output
 HOST=mipsel-linux
