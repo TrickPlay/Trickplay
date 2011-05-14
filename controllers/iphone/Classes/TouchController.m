@@ -120,7 +120,7 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     NSMutableArray *movedTouches = [NSMutableArray arrayWithArray:[touches allObjects]];
     int i;
-    BOOL stillActive;
+    BOOL stillActive = YES;
     for (i = 0; i < [movedTouches count]; i++) {
         UITouch *touch = [movedTouches objectAtIndex:i];
         [self sendTouch:touch withCommand:@"TM"];

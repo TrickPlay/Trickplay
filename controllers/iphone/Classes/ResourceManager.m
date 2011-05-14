@@ -31,6 +31,11 @@
     return [resourceNames objectForKey:name];
 }
 
+
+/**
+ * Synchronous method of getting resource
+ */
+
 - (NSData *)fetchResource:(NSString *)name {
     NSLog(@"Fetching resource %@", name);
     NSData *tempData;
@@ -43,27 +48,27 @@
         NSString *dataURLString = [[resourceNames objectForKey:name] objectForKey:@"link"];
         if ([dataURLString hasPrefix:@"http:"] || [dataURLString hasPrefix:@"https:"]) {
             tempData = [NSData dataWithContentsOfURL:[NSURL URLWithString:dataURLString]];
-            /** For testing
-            NSURL *dataurl = [NSURL URLWithString:@"http://www.google.com/logos/2011/womensday11-hp.jpg"];
-            tempData = [NSData dataWithContentsOfURL:dataurl];
-            //*/
         } else {
             //Use the hostname and port to construct the url
-            NSURL *dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString]];
-            /** For testing
-            dataurl = [NSURL URLWithString:@"http://www.google.com/logos/2011/womensday11-hp.jpg"];
-            //*/
+            dataURLString = [NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString];
+            NSURL *dataurl = [NSURL URLWithString:dataURLString];
+            
             tempData = [NSData dataWithContentsOfURL:dataurl];
         }
         if (tempData) {
             [resources setObject:tempData forKey:name];
         } else {
-            NSLog(@"Trouble pulling resource %@ from network! Will set as nil\n", [resourceNames objectForKey:name]);
+            NSLog(@"Trouble pulling resource %@ from network with url %@! Will set as nil\n", [resourceNames objectForKey:name], dataURLString);
         }
         
     }
     return tempData;
 }
+
+
+/**
+ * Asynchronous method of getting UIImageView with resource.
+ */
 
 - (UIImageView *)fetchImageViewUsingResource:(NSString *)name
                                        frame:(CGRect)frame {
@@ -85,9 +90,7 @@
             //Use the hostname and port to construct the url
             dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString]];
         }
-        /**For testing
-        dataurl = [NSURL URLWithString:@"http://www.google.com/logos/2011/womensday11-hp.jpg"];
-        //*/
+        
         imageView.dataCacheDelegate = self;
         [imageView loadImageFromURL:dataurl resourceKey:name];
     }
@@ -100,6 +103,20 @@
         [resources setObject:data forKey:(NSString *)resourceKey];
     } else {
         NSLog(@"Could not cache data, either no key is specified or the data never arrived over the network");
+    }
+}
+
+- (void)dropResourceGroup:(NSString *)groupName {
+    NSMutableArray *keys = [NSMutableArray arrayWithCapacity:40];
+    for (id key in resources) {
+        NSDictionary *resourceInfo = [resourceNames objectForKey:key];
+        if ([resourceInfo objectForKey:@"group"] && [(NSString *)[resourceInfo objectForKey:@"group"] compare:groupName] == NSOrderedSame) {
+            [keys addObject:key];
+        }
+    }
+    for (id key in keys) {
+        [resources removeObjectForKey:key];
+        [resourceNames removeObjectForKey:key];
     }
 }
 

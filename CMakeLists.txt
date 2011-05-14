@@ -35,19 +35,6 @@ set( TP_UPNP_CLIENT 1 )
 
 include(util.cmake)
 
-#------------------------------------------------------------------------------
-# Read our version from trickplay.h
-
-file(STRINGS engine/public/include/trickplay/trickplay.h TP_MAJOR_VERSION REGEX "^#define.*TP_MAJOR_VERSION.*")
-file(STRINGS engine/public/include/trickplay/trickplay.h TP_MINOR_VERSION REGEX "^#define.*TP_MINOR_VERSION.*")
-file(STRINGS engine/public/include/trickplay/trickplay.h TP_PATCH_VERSION REGEX "^#define.*TP_PATCH_VERSION.*")
-
-string(REGEX REPLACE "^#define.*TP_MAJOR_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_MAJOR_VERSION "${TP_MAJOR_VERSION}")
-string(REGEX REPLACE "^#define.*TP_MINOR_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_MINOR_VERSION "${TP_MINOR_VERSION}")
-string(REGEX REPLACE "^#define.*TP_PATCH_VERSION[^0-9]*([0-9]+)[^0-9]*" "\\1" TP_PATCH_VERSION "${TP_PATCH_VERSION}")
-
-set(TP_VERSION "${TP_MAJOR_VERSION}.${TP_MINOR_VERSION}.${TP_PATCH_VERSION}")
-
 execute_process(
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 	COMMAND git log -1 --pretty=format:%h
@@ -57,7 +44,7 @@ execute_process(
 
 execute_process(
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	COMMAND git tag --contains ${GIT_CURRENT_REVISION}
+	COMMAND git describe --tags ${GIT_CURRENT_REVISION}
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 	OUTPUT_VARIABLE GIT_CURRENT_TAG
 )
@@ -68,9 +55,9 @@ endif (NOT GIT_CURRENT_TAG)
 
 string(REPLACE "\n" ", " GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
 
-set(GIT_VERSION "${GIT_CURRENT_REVISION} (${GIT_CURRENT_TAG})")
+set(GIT_VERSION "${GIT_CURRENT_TAG}")
 
-message( STATUS "TRICKPLAY VERSION IS ${TP_VERSION} - GIT REVISION ${GIT_VERSION}" )
+message( STATUS "TRICKPLAY VERSION IS ${GIT_VERSION}" )
 
 #------------------------------------------------------------------------------
 # When building with a toolchain, it is implied that we will only build
