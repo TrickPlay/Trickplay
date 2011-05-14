@@ -83,6 +83,7 @@
     }
     
     [connections addObject:connection];
+    [connection release];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
@@ -322,6 +323,8 @@
         }
         [connections release];
     }
+    
+    self.delegate = nil;
     
     [super dealloc];
 }

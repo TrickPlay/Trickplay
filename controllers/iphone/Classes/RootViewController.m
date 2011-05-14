@@ -42,6 +42,10 @@
 
 - (void)pushAppBrowser:(NSNotification *)notification {
     NSLog(@"Pushing App Browser");
+    if (self.navigationController.visibleViewController != self) {
+        return;
+    }
+    
     if ([appBrowserViewController hasRunningApp]) {
         [self.navigationController pushViewController:appBrowserViewController animated:NO];
         [appBrowserViewController pushApp];

@@ -20,6 +20,9 @@
 @property (nonatomic, retain) NSArray *clip;
 @property (nonatomic, retain) UIView *view;
 
+// Some new protocol stuff
+- (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args;
+
 - (CGRect)getFrameFromArgs:(NSDictionary *)args;
 //** TODO refactor all this code to use method dispatching
 //** from a dictionary by mapping methods to property names

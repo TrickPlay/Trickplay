@@ -37,6 +37,8 @@
 		CD9A68581370C5BC00977730 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD9A68571370C5BB00977730 /* GestureImageView.m */; };
 		CD9A68651371CB0E00977730 /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD9A68631371CB0E00977730 /* ImageEditorViewController.m */; };
 		CD9A68661371CB0E00977730 /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */; };
+		CDEE44A8137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */; };
+		CDEE44AD137CC93200A4B5E2 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44AC137CC93100A4B5E2 /* CommandInterpreter.m */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
 		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
@@ -44,7 +46,7 @@
 		CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */; };
 		CDFEBBA8130A4BA900A14307 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA3130A4BA900A14307 /* SocketManager.m */; };
 		CDFEBBA9130A4BA900A14307 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */; };
-		CDFEBBAA130A4BA900A14307 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */; };
+		CDFEBBAA130A4BA900A14307 /* CommandInterpreterApp.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreterApp.m */; };
 		CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */; };
 		CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */; };
 		CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBC51130A57FA00A14307 /* GestureViewController.xib */; };
@@ -104,6 +106,10 @@
 		CD9A68621371CB0E00977730 /* ImageEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorViewController.h; sourceTree = "<group>"; };
 		CD9A68631371CB0E00977730 /* ImageEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageEditorViewController.m; sourceTree = "<group>"; };
 		CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorViewController.xib; path = Classes/ImageEditorViewController.xib; sourceTree = "<group>"; };
+		CDEE44A6137CBA2500A4B5E2 /* CommandInterpreterAdvancedUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreterAdvancedUI.h; sourceTree = "<group>"; };
+		CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreterAdvancedUI.m; sourceTree = "<group>"; };
+		CDEE44AB137CC93100A4B5E2 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; path = CommandInterpreter.h; sourceTree = "<group>"; };
+		CDEE44AC137CC93100A4B5E2 /* CommandInterpreter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreter.m; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
@@ -113,8 +119,8 @@
 		CDFEBBA3130A4BA900A14307 /* SocketManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocketManager.m; sourceTree = "<group>"; };
 		CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStreamAdditions.h; sourceTree = "<group>"; };
 		CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStreamAdditions.m; sourceTree = "<group>"; };
-		CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreter.h; sourceTree = "<group>"; };
-		CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreter.m; sourceTree = "<group>"; };
+		CDFEBBA6130A4BA900A14307 /* CommandInterpreterApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreterApp.h; sourceTree = "<group>"; };
+		CDFEBBA7130A4BA900A14307 /* CommandInterpreterApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreterApp.m; sourceTree = "<group>"; };
 		CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetServiceManager.h; sourceTree = "<group>"; };
 		CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetServiceManager.m; sourceTree = "<group>"; };
 		CDFEBC4F130A57FA00A14307 /* GestureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureViewController.h; sourceTree = "<group>"; };
@@ -227,13 +233,9 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		CD404C09134A74CD0021D36C /* UserInterface */ = {
+		CD279D0B137B122C00A707D7 /* AdvancedUI */ = {
 			isa = PBXGroup;
 			children = (
-				CD9A68561370C5BB00977730 /* GestureImageView.h */,
-				CD9A68571370C5BB00977730 /* GestureImageView.m */,
-				CDFEC15A1315929800A14307 /* AsyncImageView.h */,
-				CDFEC15B1315929800A14307 /* AsyncImageView.m */,
 				CD404C0D134A87CF0021D36C /* AdvancedUIObjectManager.h */,
 				CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */,
 				CD404C10134BF1C70021D36C /* TrickplayUIElement.h */,
@@ -247,7 +249,32 @@
 				CD6BC3B6136A318100CF1973 /* TrickplayGroup.h */,
 				CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */,
 			);
+			name = AdvancedUI;
+			sourceTree = "<group>";
+		};
+		CD404C09134A74CD0021D36C /* UserInterface */ = {
+			isa = PBXGroup;
+			children = (
+				CD279D0B137B122C00A707D7 /* AdvancedUI */,
+				CD9A68561370C5BB00977730 /* GestureImageView.h */,
+				CD9A68571370C5BB00977730 /* GestureImageView.m */,
+				CDFEC15A1315929800A14307 /* AsyncImageView.h */,
+				CDFEC15B1315929800A14307 /* AsyncImageView.m */,
+			);
 			name = UserInterface;
+			sourceTree = "<group>";
+		};
+		CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */ = {
+			isa = PBXGroup;
+			children = (
+				CDEE44AB137CC93100A4B5E2 /* CommandInterpreter.h */,
+				CDEE44AC137CC93100A4B5E2 /* CommandInterpreter.m */,
+				CDFEBBA6130A4BA900A14307 /* CommandInterpreterApp.h */,
+				CDFEBBA7130A4BA900A14307 /* CommandInterpreterApp.m */,
+				CDEE44A6137CBA2500A4B5E2 /* CommandInterpreterAdvancedUI.h */,
+				CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */,
+			);
+			name = CommandInterpreters;
 			sourceTree = "<group>";
 		};
 		CDFEBB5E130A498600A14307 /* iPhone */ = {
@@ -308,14 +335,13 @@
 		CDFEBEB9130C6F9A00A14307 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
+				CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */,
 				CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */,
 				CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */,
-				CDFEBBA2130A4BA000A14307 /* SocketManager.h */,
-				CDFEBBA3130A4BA900A14307 /* SocketManager.m */,
-				CDFEBBA6130A4BA900A14307 /* CommandInterpreter.h */,
-				CDFEBBA7130A4BA900A14307 /* CommandInterpreter.m */,
 				CDFEBBA4130A4BA900A14307 /* NSStreamAdditions.h */,
 				CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */,
+				CDFEBBA2130A4BA000A14307 /* SocketManager.h */,
+				CDFEBBA3130A4BA900A14307 /* SocketManager.m */,
 			);
 			name = Networking;
 			sourceTree = "<group>";
@@ -431,7 +457,7 @@
 				28C286E10D94DF7D0034E888 /* RootViewController.m in Sources */,
 				CDFEBBA8130A4BA900A14307 /* SocketManager.m in Sources */,
 				CDFEBBA9130A4BA900A14307 /* NSStreamAdditions.m in Sources */,
-				CDFEBBAA130A4BA900A14307 /* CommandInterpreter.m in Sources */,
+				CDFEBBAA130A4BA900A14307 /* CommandInterpreterApp.m in Sources */,
 				CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */,
 				CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */,
 				CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */,
@@ -450,6 +476,8 @@
 				CD6BC3B8136A318100CF1973 /* TrickplayGroup.m in Sources */,
 				CD9A68581370C5BC00977730 /* GestureImageView.m in Sources */,
 				CD9A68651371CB0E00977730 /* ImageEditorViewController.m in Sources */,
+				CDEE44A8137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m in Sources */,
+				CDEE44AD137CC93200A4B5E2 /* CommandInterpreter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

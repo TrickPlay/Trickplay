@@ -23,6 +23,7 @@
         self.images = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.textFields = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.groups = [[NSMutableDictionary alloc] initWithCapacity:20];
+        currentID = 0;
         
         self.resourceManager = aResourceManager;
         
@@ -32,6 +33,57 @@
     return self;
 }
 
+#pragma mark -
+#pragma mark Networking
+
+- (void)setupServiceWithPort:(NSInteger)p hostname:(NSString *)h {
+    
+    NSLog(@"AdvancedUI Service Setup: host: %@ port: %d", h, p);
+    
+    port = p;
+    if (hostName) {
+        [hostName release];
+    }
+    hostName = [h retain];
+}
+
+- (BOOL)startServiceWithID:(NSString *)ID {
+    // Tell socket manager to create a socket and connect to the service selected
+    socketManager = [[SocketManager alloc] initSocketStream:hostName
+                                                       port:port
+                                                   delegate:self
+                                                   protocol:ADVANCED_UI_PROTOCOL];
+    
+    if (!socketManager || ![socketManager isFunctional]) {
+        // If null then error connecting, back up to selecting services view
+        NSLog(@"AdvancedUI Could Not Establish Connection");
+        return NO;
+    }
+    NSLog(@"AdvancedUI Connection Established");
+    
+    // Made a connection, let the service know!
+	NSData *welcomeData = [[NSString stringWithFormat:@"UX\t%@\n", ID] dataUsingEncoding:NSUTF8StringEncoding];
+
+    [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+    
+    return YES;
+}
+
+#pragma mark -
+#pragma mark Network Handling
+
+- (void) socketErrorOccurred {
+    NSLog(@"AdvancedUI stream error");
+    // TODO: good error handling
+}
+
+- (void) streamEndEncountered {
+    NSLog(@"AdvancedUI stream end");
+    // TODO: good error handling
+}
+
+#pragma mark -
+#pragma mark UI
 
 - (void)clean {
     NSLog(@"AdvancedUI clean");
@@ -107,7 +159,7 @@
  */
 
 - (void)createGroup:(NSString *)groupID withArgs:(NSDictionary *)args {
-    TrickplayGroup *group = [[[TrickplayGroup alloc] initWithID:groupID args:args resourceManager:resourceManager] autorelease];
+    TrickplayGroup *group = [[[TrickplayGroup alloc] initWithID:groupID args:args objectManager:self] autorelease];
     
     NSLog(@"Group created: %@", group);
     [groups setObject:group forKey:groupID];
@@ -115,6 +167,93 @@
     [view addSubview:group];
 }
 
+#pragma mark -
+#pragma mark New Protocol
+
+- (void)reply:(NSString *)JSON_String {
+    JSON_String = [NSString stringWithFormat:@"%@\n", JSON_String];
+    NSData *data = [JSON_String dataUsingEncoding:NSUTF8StringEncoding];
+    [socketManager sendData:[data bytes] numberOfBytes:[data length]];
+}
+
+- (void)createObjectReply:(NSString *)ID {
+    if (!socketManager) {
+        return;
+    }
+    
+    NSDictionary *object = [NSDictionary dictionaryWithObject:ID forKey:@"id"];
+    NSString *JSON_String = [object yajl_JSONString];
+    [self reply:JSON_String];
+}
+
+- (void)createObject:(NSDictionary *)object {
+    NSLog(@"Creating object %@", object);
+    NSString *type = [object objectForKey:@"type"];
+    NSDictionary *args = [object objectForKey:@"properties"];
+    NSString *ID = [NSString stringWithFormat:@"%u", currentID];
+    currentID++;
+    
+    if ([type compare:@"Rectangle"] == NSOrderedSame) {
+        [self createRectangle:ID withArgs:args];
+    } else if ([type compare:@"Image"] == NSOrderedSame) {
+        [self createImage:ID withArgs:args];
+    } else if ([type compare:@"Text"] == NSOrderedSame) {
+        [self createText:ID withArgs:args];
+    } else if ([type compare:@"Group"] == NSOrderedSame) {
+        [self createGroup:ID withArgs:args];
+    }
+    
+    [self createObjectReply:ID];
+}
+
+- (void)setValuesForObject:(NSDictionary *)object {
+    NSDictionary *args = [object objectForKey:@"properties"];
+    
+    // Set values for class specific properties
+    if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
+        [(TrickplayUIElement *)[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
+    } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
+        [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
+    } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
+        [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
+    } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
+        [(TrickplayUIElement *)[groups objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
+    }
+}
+
+- (TrickplayUIElement *)findObjectForID:(NSString *)ID {
+    if ([rectangles objectForKey:ID]) {
+        return [rectangles objectForKey:ID];
+    } else if ([groups objectForKey:ID]) {
+        return [groups objectForKey:ID];
+    }
+    
+    return nil;
+}
+
+- (void)callMethodOnObject:(NSDictionary *)object {
+    NSString *ID = [object objectForKey:@"id"];
+    NSArray *args = [object objectForKey:@"args"];
+    NSString *method = [object objectForKey:@"call"];
+    
+    if (!ID || !args || !method) {
+        NSLog(@"ERROR: Call missing something; ID: %@; args: %@; method: %@", ID, args, method);
+        [self reply:nil];
+        return;
+    }
+    
+    NSString *result = nil;
+    if ([rectangles objectForKey:ID]) {
+        result = [[rectangles objectForKey:ID] callMethod:method withArgs:args];
+    } else if ([groups objectForKey:ID]) {
+        result = [[groups objectForKey:ID] callMethod:method withArgs:args];
+    }
+    
+    [self reply:result];
+}
+
+#pragma mark -
+#pragma mark Old Protocol
 
 /**
  * Object creation function.
@@ -224,6 +363,15 @@
 
 - (void)dealloc {
     NSLog(@"AdvancedUIObjectManager dealloc");
+    if (hostName) {
+        [hostName release];
+        hostName = nil;
+    }
+    
+    if (socketManager) {
+        [socketManager release];
+        socketManager = nil;
+    }
     
     self.rectangles = nil;
     self.images = nil;

@@ -292,6 +292,14 @@
     [self setClipFromArgs:args];
 }
 
+#pragma mark -
+#pragma mark New Protocol
+
+- (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args {
+    NSLog(@"This method should be overwritten");
+    return nil;
+}
+
 
 - (void)dealloc {
     self.view = nil;
