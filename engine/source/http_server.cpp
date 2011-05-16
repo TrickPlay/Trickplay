@@ -284,7 +284,10 @@ public:
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
-                result[ ( const char * ) key ] = ( const char * ) value;
+                const char * k = key ? ( const char * ) key : "";
+                const char * v = value ? ( const char * ) value : "";
+
+                result[ k ] = v;
             }
 		}
 		return result;
@@ -306,7 +309,10 @@ public:
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
-                result.push_back( ( const char * ) key );
+                if ( key )
+                {
+                    result.push_back( ( const char * ) key );
+                }
             }
         }
 		return result;
