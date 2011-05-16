@@ -2481,7 +2481,7 @@ function editor.duplicate()
 						   				end 
                                    elseif ui.dup[j] ~= v[j]  then  
 					           			ui.dup[j] = v[j] 
-					           			--print(j, v[j], ui.dup[j])
+					           			print(j, v[j], ui.dup[j])
                                    end 
                                  end 
                              end 

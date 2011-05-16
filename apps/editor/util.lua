@@ -309,7 +309,7 @@ function new_printMsgWindow(t, msg)
 	local message_shadow = Text {text = msg}:set(MSSTYLE)
 	
 	editor_use = true
-	text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "aa" ,
+	text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "" ,
     	padding = 5 , border_width  = 1 , border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255},
     	focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
     	border_corner_radius = 0,}
@@ -340,8 +340,8 @@ function new_printMsgWindow(t, msg)
         children = {
         	msgw_bg,
 	  		xbox:set{position = {275, 0}},
-			title_shadow:set{position = {PADDING,0}, }, 
-			title:set{position = {PADDING+1, 1}}, 
+			title_shadow:set{position = {PADDING,PADDING/3}, }, 
+			title:set{position = {PADDING+1, PADDING/3+1}}, 
 			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
 			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
 			text_input:set{position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
@@ -816,7 +816,7 @@ end
 	
 function set_obj (f, v)
       for i,j in pairs(attr_name_list) do 
-           if f[j] then f[j] = v[j] end 
+           if v[j] then f[j] = v[j] end 
       end 
 end 
 

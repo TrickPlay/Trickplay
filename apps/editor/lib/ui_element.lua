@@ -1549,63 +1549,79 @@ function ui_element.textInput(table)
     	focus_box = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
-	if(p.skin ~= "custom") then 
-    	     box_img = assets(skin_list[p.skin]["textinput"])
-    	     box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
-    	     focus_img = assets(skin_list[p.skin]["textinput_focus"])
-    	     focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
-	else 
-	     box_img = Image{}
-	     focus_img = Image{}
-	end 
+		if(p.skin ~= "custom") then 
+    		box_img = assets(skin_list[p.skin]["textinput"])
+    		box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
+    		focus_img = assets(skin_list[p.skin]["textinput_focus"])
+    		focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
+		else 
+	    	box_img = Image{}
+	    	focus_img = Image{}
+		end 
 
-    	text = Text{text=p.text, editable=true, cursor_visible=false, cursor_color = p.cursor_color, wants_enter = true, reactive = true, font = p.text_font, color = p.text_color}
-    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
-    	t_group:add(box, focus_box, box_img, focus_img, text)
+    		text = Text{text=p.text, editable=true, cursor_visible=false, cursor_color = p.cursor_color, wants_enter = true, 
+						reactive = true, font = p.text_font, color = p.text_color}
+    		text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
+    		t_group:add(box, focus_box, box_img, focus_img, text)
 
-	if editor_lb == nil or editor_use then 
-	   function t_group:on_button_down()
-		t_group.extra.on_focus_in()
-		text:grab_key_focus()
-		return true
-	   end 
+		local t_pos_min = t_group.x + t_group:find_child("textInput").x 
+		--print("t_pos_min", t_pos_min)
 
-	   local t_pos_max = p.ui_width - 2 * p.padding
+		if editor_lb == nil or editor_use then 
+	   	function t_group:on_button_down()
+				t_group.extra.on_focus_in()
+				text:grab_key_focus()
+				return true
+	   	end 
 
-	   function text:on_key_down(key)
-	        local c_x, prev_c_x
-		local t_w = t_group:find_child("textInput").w
+	   	local t_pos_max = p.ui_width - 2 * p.padding
+
+	   	function text:on_key_down(key)
+	    	local c_x, prev_c_x
+			local t_w = t_group:find_child("textInput").w
 	        local scroll_w = t_w - t_pos_max 
-		local c_pos = t_group:find_child("textInput").cursor_position
+			local c_pos = t_group:find_child("textInput").cursor_position
 	
-		if key == keys.Return and shift == false then 
-			screen:grab_key_focus()
-			t_group.extra.on_focus_out()
-			return true
-		elseif key == keys.Left then 
-			if t_group:find_child("textInput").position_to_coordinates then 
-				if t_group:find_child("textInput").clip then 
-		                     	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
+			if key == keys.Return and shift == false then 
+				screen:grab_key_focus()
+				t_group.extra.on_focus_out()
+				return true
+			elseif key == keys.Left then 
+				if t_group:find_child("textInput").position_to_coordinates then 
+					if t_group:find_child("textInput").clip then 
+		            	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
 				     	local x = c_x[1] 
+						print(c_pos)
+						----print(x)
+						--print(t_pos_min)
+		    			--print(t_pos_min - x) 
+--[[
+						if x <= t_pos_min then 
+		    				t_group:find_child("textInput").x = t_group:find_child("textInput").x + (t_pos_min - x) 
+		    				--t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+						end 
+							
 				     	local letter_sz 
-					if c_pos ~= -1 and c_pos ~= 0 then 
-		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
+						if c_pos ~= -1 and c_pos ~= 0 then 
+		                     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
 				     	     letter_sz =  x - prev_c_x[1] 
-					end 
+						end 
 	
 				     	if (t_group:find_child("textInput").clip[1] > x-p.padding ) and letter_sz then 
+						    print(letter_sz)
 		    			    t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz 
 		    			    t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - letter_sz ,  
-					    t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
-					    letter_sz = nil
-					    c_x = nil
-					    prev_c_x = nil
+					    	t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
+					    	letter_sz = nil
+					    	c_x = nil
+					    	prev_c_x = nil
 				     	end
+	]]						
 			        end
-			end 
-		elseif key == keys.Right then 
-			if t_group:find_child("textInput").position_to_coordinates then 
-				if t_group:find_child("textInput").clip then 
+				end 
+			elseif key == keys.Right then 
+				if t_group:find_child("textInput").position_to_coordinates then 
+					if t_group:find_child("textInput").clip then 
 			        	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
 				     	local x = c_x[1] 
 				     	local letter_sz 
@@ -1624,17 +1640,19 @@ function ui_element.textInput(table)
 					end 
 				end 
 			end 
-		elseif scroll_w > 0 then 
-		    t_group:find_child("textInput").x = scroll_w * -1
-		    t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+			elseif scroll_w > 0 then 
+		    	t_group:find_child("textInput").x = scroll_w * -1
+		    	t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
 	        end 
+	   	end 
+		end 
 
-	   end 
-	end 
-
-
-    	if (p.skin == "custom") then box_img.opacity = 0
-    	else box.opacity = 0 box_img.opacity = 255 end 
+    	if (p.skin == "custom") then 
+			box_img.opacity = 0
+    	else 
+			box.opacity = 0 
+			box_img.opacity = 255 
+		end 
 
      end 
 
@@ -1672,8 +1690,8 @@ function ui_element.textInput(table)
 
      mt = {}
      mt.__newindex = function (t, k, v)
-	if k == "bsize" then  
-	    p.ui_width = v[1] p.ui_height = v[2]  
+	 	if k == "bsize" then  
+	     	p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -1682,9 +1700,9 @@ function ui_element.textInput(table)
 
      mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.ui_width, p.ui_height}  
+	     	return {p.ui_width, p.ui_height}  
         else 
-	    return p[k]
+	     	return p[k]
         end 
      end 
   
