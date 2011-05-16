@@ -407,11 +407,6 @@ bool InitDisplay()
    }
    egl_window.stretchToDisplay = 1;
 
-   NEXUS_IrInput_GetDefaultSettings(&irSettings);
-   irSettings.repeatFilterTime = 80;
-   irSettings.dataReady.callback = irCallback;
-   irSettings.dataReady.context = &mIRHandle;
-   mIRHandle = NEXUS_IrInput_Open(0, &irSettings);
    
    
    video_window = NEXUS_VideoWindow_Open(nexus_display, 0);
@@ -432,46 +427,75 @@ NativeWindowType tp_egl_get_native_window( void )
 
 static void install_controller( TPContext * ctx )
 {
-	TPControllerSpec remoteSpec;
+    NEXUS_IrInputSettings irSettings;
 
-	TPControllerKeyMap map[] =
-	{
-	    { 0x40bf04fb , TP_KEY_UP },
-	    { 0x41be04fb , TP_KEY_DOWN },
-	    { 0x06f904fb , TP_KEY_RIGHT },
-	    { 0x07f804fb , TP_KEY_LEFT },
-	    { 0x44bb04fb , TP_KEY_RETURN },
-	    { 0x28d704fb , TP_KEY_BACK },
-	    { 0x5ba404fb , TP_KEY_EXIT },
-	    { 0x728d04fb , TP_KEY_RED },
-            { 0x718e04fb , TP_KEY_GREEN },
-            { 0x639c04fb , TP_KEY_YELLOW },
-            { 0x619e04fb , TP_KEY_BLUE },
-            
-            { 0x10ef04fb , TP_KEY_0 },
-            { 0x11ee04fb , TP_KEY_1 },
-            { 0x12ed04fb , TP_KEY_2 },
-            { 0x13ec04fb , TP_KEY_3 },
-            { 0x14eb04fb , TP_KEY_4 },
-            { 0x15ea04fb , TP_KEY_5 },
-            { 0x16e904fb , TP_KEY_6 },
-            { 0x17e804fb , TP_KEY_7 },
-            { 0x18e704fb , TP_KEY_8 },
-            { 0x19e604fb , TP_KEY_9 },
-            
-            /* RCA remote */
-            
-            { 0x1ae504fb , TP_KEY_BACK },
-            
-	    {0,0}
-	};
+    TPControllerSpec remoteSpec;
+
+    TPControllerKeyMap map[] =
+    {
+        { 0x40bf04fb , TP_KEY_UP },
+        { 0x41be04fb , TP_KEY_DOWN },
+        { 0x06f904fb , TP_KEY_RIGHT },
+        { 0x07f804fb , TP_KEY_LEFT },
+        { 0x44bb04fb , TP_KEY_RETURN },
+        { 0x28d704fb , TP_KEY_BACK },
+        { 0x5ba404fb , TP_KEY_EXIT },
+        { 0x728d04fb , TP_KEY_RED },
+        { 0x718e04fb , TP_KEY_GREEN },
+        { 0x639c04fb , TP_KEY_YELLOW },
+        { 0x619e04fb , TP_KEY_BLUE },
+
+        { 0x10ef04fb , TP_KEY_0 },
+        { 0x11ee04fb , TP_KEY_1 },
+        { 0x12ed04fb , TP_KEY_2 },
+        { 0x13ec04fb , TP_KEY_3 },
+        { 0x14eb04fb , TP_KEY_4 },
+        { 0x15ea04fb , TP_KEY_5 },
+        { 0x16e904fb , TP_KEY_6 },
+        { 0x17e804fb , TP_KEY_7 },
+        { 0x18e704fb , TP_KEY_8 },
+        { 0x19e604fb , TP_KEY_9 },
+
+        /* RCA remote */
+
+        { 0x1ae504fb , TP_KEY_BACK },
+        
+        /* Broadcom remote */
+        
+        { 0x4eb100ff , TP_KEY_UP },
+        { 0x0cf300ff , TP_KEY_DOWN },
+        { 0x49b600ff , TP_KEY_RIGHT },
+        { 0x0bf400ff , TP_KEY_LEFT },
+        { 0x08f700ff , TP_KEY_RETURN },
+        { 0x06f900ff , TP_KEY_BACK },
+        { 0x4db200ff , TP_KEY_EXIT },
+        { 0x50af00ff , TP_KEY_RED },
+        { 0x10ef00ff , TP_KEY_GREEN },
+        { 0x11ee00ff , TP_KEY_YELLOW },
+        { 0x51ae00ff , TP_KEY_BLUE },
+        { 0x52ad00ff , TP_KEY_0 },
+        { 0x1fe000ff , TP_KEY_1 },
+        { 0x5ea100ff , TP_KEY_2 },
+        { 0x5fa000ff , TP_KEY_3 },
+        { 0x1be400ff , TP_KEY_4 },
+        { 0x5aa500ff , TP_KEY_5 },
+        { 0x5ba400ff , TP_KEY_6 },
+        { 0x17e800ff , TP_KEY_7 },
+        { 0x56a900ff , TP_KEY_8 },
+        { 0x57a800ff , TP_KEY_9 },      
+
+        {0,0}
+    };
+
+    NEXUS_IrInput_GetDefaultSettings(&irSettings);
+    irSettings.repeatFilterTime = 80;
+    irSettings.dataReady.callback = irCallback;
+    irSettings.dataReady.context = &mIRHandle;
+    mIRHandle = NEXUS_IrInput_Open(0, &irSettings);
 
 	memset(&remoteSpec, 0, sizeof(remoteSpec));
-
 	remoteSpec.capabilities	= TP_CONTROLLER_HAS_KEYS;
-	
-    remoteSpec.key_map = map;
-    
+    remoteSpec.key_map = map;   
     controller = tp_context_add_controller( ctx, "Remote", &remoteSpec, NULL);    
 }
 
