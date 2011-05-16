@@ -431,10 +431,7 @@ int main(int argc, char** argv)
         tp_context_set_int( ctx , TP_SCREEN_WIDTH , WIDTH );
         tp_context_set_int( ctx , TP_SCREEN_HEIGHT , HEIGHT );
       
-
-/*
-         tp_context_set_media_player_constructor( ctx , nmp_constructor );
-*/
+        tp_context_set_media_player_constructor( ctx , nmp_constructor );
       
         result = tp_context_run( ctx );
       
