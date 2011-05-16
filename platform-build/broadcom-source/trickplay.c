@@ -88,8 +88,6 @@
 #include "nexus_display.h"
 #include "default_nexus.h"
 
-#if 0
-
 #include "nexus_pid_channel.h"
 #include "nexus_stc_channel.h"
 #include "nexus_video_window.h"
@@ -104,7 +102,6 @@
 #include "bstd.h"
 #include "bkni.h"
 
-#endif
 
 #include "nexus_ir_input.h"
 
@@ -127,16 +124,19 @@ NXPL_PlatformHandle           nxpl_handle = 0;
 
 TPController *                controller = 0;
 
-#if 0
-
 NEXUS_VideoWindowHandle       video_window = 0;
-
 NEXUS_HdmiInputHandle         hdmiInput = 0;
 NEXUS_AudioDecoderHandle      hdmiAudioDecoder = 0;
 
+/*
+===============================================================================
+*/
+
 extern int nmp_constructor( TPMediaPlayer * );
 
-#endif
+/*
+===============================================================================
+*/
 
 static void irCallback(void *pParam, int iParam)
 {
@@ -164,9 +164,11 @@ static void irCallback(void *pParam, int iParam)
    }
 }
 
-#if 0
+/*
+===============================================================================
+*/
 
-void disconnect_hdmi()
+void disconnect_hdmi( void )
 {
    printf( "\n\n\tDISCONNECT HDMI\n\n" );
    
@@ -174,20 +176,23 @@ void disconnect_hdmi()
 
    if ( hdmiInput )
    {
-      NEXUS_AudioDecoder_Stop( hdmiAudioDecoder );
-   
-      NEXUS_AudioOutput_RemoveInput(NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]),
-                NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
-   
-      NEXUS_AudioOutput_RemoveInput(NEXUS_SpdifOutput_GetConnector(platform_config.outputs.spdif[0]),
-                NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
-   
-      NEXUS_AudioOutput_RemoveAllInputs( NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]) );
-  
-      NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));         
-      NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eMultichannel ));
-      NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
-      NEXUS_AudioInput_Shutdown( NEXUS_HdmiInput_GetAudioConnector( hdmiInput ) ); 
+      if ( hdmiAudioDecoder )
+      {
+         NEXUS_AudioDecoder_Stop( hdmiAudioDecoder );
+      
+         NEXUS_AudioOutput_RemoveInput(NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]),
+         NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
+      
+         NEXUS_AudioOutput_RemoveInput(NEXUS_SpdifOutput_GetConnector(platform_config.outputs.spdif[0]),
+         NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
+      
+         NEXUS_AudioOutput_RemoveAllInputs( NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]) );
+     
+         NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));         
+         NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eMultichannel ));
+         NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
+         NEXUS_AudioInput_Shutdown( NEXUS_HdmiInput_GetAudioConnector( hdmiInput ) );
+      }
    
       NEXUS_VideoInput_Shutdown( NEXUS_HdmiInput_GetVideoConnector( hdmiInput ) );
       NEXUS_AudioDecoder_Close( hdmiAudioDecoder );
@@ -198,19 +203,23 @@ void disconnect_hdmi()
    hdmiInput = 0;
    hdmiAudioDecoder = 0;
 
-   usleep( 200000 );
-   
    printf( "\n\n\tDISCONNECT HDMI DONE\n\n" );
 }
 
+/*
+===============================================================================
+*/
 
-void connect_hdmi()
+void connect_hdmi( void )
 {
    NEXUS_VideoWindowSettings windowSettings;
-   NEXUS_AudioDecoderStartSettings audioProgram;
-   NEXUS_StcChannelSettings stcSettings;
    NEXUS_HdmiInputSettings hdmiInputSettings;
    NEXUS_TimebaseSettings timebaseSettings;
+   
+#if 0
+   NEXUS_AudioDecoderStartSettings audioProgram;
+   NEXUS_StcChannelSettings stcSettings;
+#endif   
 
    printf( "\n\n\tCONNECT HDMI\n\n" );
    
@@ -221,9 +230,7 @@ void connect_hdmi()
    windowSettings.position.width = 1920;
    windowSettings.position.height = 1080;
    NEXUS_VideoWindow_SetSettings(video_window, &windowSettings);
-   
-   
-   
+         
    NEXUS_Timebase_GetSettings(NEXUS_Timebase_e0, &timebaseSettings);
    timebaseSettings.sourceType = NEXUS_TimebaseSourceType_eHdDviIn;
    NEXUS_Timebase_SetSettings(NEXUS_Timebase_e0, &timebaseSettings);
@@ -239,7 +246,8 @@ void connect_hdmi()
    else
    {
       NEXUS_VideoWindow_AddInput(video_window, NEXUS_HdmiInput_GetVideoConnector(hdmiInput));
-   
+      
+#if 0   
       hdmiAudioDecoder = NEXUS_AudioDecoder_Open(0, NULL);
       NEXUS_AudioDecoder_GetDefaultStartSettings(&audioProgram);
       audioProgram.input = NEXUS_HdmiInput_GetAudioConnector(hdmiInput);
@@ -254,12 +262,13 @@ void connect_hdmi()
                                  NEXUS_AudioDecoder_GetConnector(hdmiAudioDecoder, NEXUS_AudioDecoderConnectorType_eCompressed));
 
       NEXUS_AudioDecoder_Start(hdmiAudioDecoder, &audioProgram);
+#endif
+
    }   
 
    printf( "\n\n\tCONNECT HDMI DONE\n\n" );
 }
 
-#endif
 
 /*
 ===============================================================================
@@ -278,12 +287,12 @@ bool InitDisplay( void )
 
    if (InitPlatform())
    {
-          /* We are the primary process, so open the display */
-       nexus_display = OpenDisplay(0, WIDTH, HEIGHT);
-       InitPanelOutput(nexus_display);
-       InitCompositeOutput(nexus_display, WIDTH, HEIGHT);
-       InitComponentOutput(nexus_display);
-       InitHDMIOutput(nexus_display);
+      /* We are the primary process, so open the display */
+      nexus_display = OpenDisplay(0, WIDTH, HEIGHT);
+      InitPanelOutput(nexus_display);
+      InitCompositeOutput(nexus_display, WIDTH, HEIGHT);
+      InitComponentOutput(nexus_display);
+      InitHDMIOutput(nexus_display);
    }
 
    /* Register this display for exclusive mode access */
@@ -291,12 +300,7 @@ bool InitDisplay( void )
 
    if (nexus_display != 0)
    {
-        NEXUS_Display_GetGraphicsSettings(nexus_display, &graphics_settings);
-/*      *aspect = (float)graphics_settings.position.width / graphics_settings.position.height;*/
-   }
-   else
-   {
-/*      *aspect = (float)WIDTH / (float)HEIGHT;*/
+      NEXUS_Display_GetGraphicsSettings(nexus_display, &graphics_settings);
    }
 
    win_info.x = 0; 
@@ -306,124 +310,25 @@ bool InitDisplay( void )
    win_info.stretch = true;
    native_window = NXPL_CreateNativeWindow(&win_info);
 
-   return true;
-}
-
-#if 0
-
-bool InitDisplay()
-{
-   NEXUS_PlatformSettings        platform_settings;
-   NEXUS_DisplaySettings         display_settings;
-   NEXUS_GraphicsSettings        graphics_settings;
-   NEXUS_IrInputSettings         irSettings;
-#ifdef SIXTY_HZ
-   NEXUS_PanelOutputSettings     panelOutputSettings;
-#endif
-   NEXUS_Error                   err;
-
-   const char * hd = getenv( "TP_BRCM_1080P" );
-
-   /* Initialise the Nexus platform */
-   NEXUS_Platform_GetDefaultSettings(&platform_settings);
-#ifdef SIXTY_HZ
-   platform_settings.displayModuleSettings.panel.dvoLinkMode = NEXUS_PanelOutputLinkMode_eDualChannel1;
-   platform_settings.displayModuleSettings.panel.lvdsColorMode = NEXUS_LvdsColorMode_e8Bit ;
-#endif
-   platform_settings.openOutputs = true;
-
-   err = NEXUS_Platform_Init(&platform_settings);
-   if (err)
-   {
-      printf("NEXUS_Platform_Init() failed\n");
-      return false;
-   }
-
-#if NEXUS_DTV_PLATFORM
-   /* Bring up display */
-   NEXUS_Display_GetDefaultSettings(&display_settings);
-   display_settings.format = NEXUS_VideoFormat_e1080p;
-   nexus_display = NEXUS_Display_Open(0, &display_settings);
-   if (!nexus_display)
-   {
-      printf("NEXUS_Display_Open() failed\n");
-      return false;
-   }
-   NEXUS_Platform_GetConfiguration(&platform_config);
-#ifdef SIXTY_HZ
-   NEXUS_PanelOutput_GetSettings(platform_config.outputs.panel[0], &panelOutputSettings);
-   panelOutputSettings.frameRateMultiplier = 1;
-   NEXUS_PanelOutput_SetSettings(platform_config.outputs.panel[0], &panelOutputSettings);
-#endif
-   NEXUS_Display_AddOutput(nexus_display, NEXUS_PanelOutput_GetConnector(platform_config.outputs.panel[0]));
-
-   /* Set filter modes for smooth resizing */
-   NEXUS_Display_GetGraphicsSettings(nexus_display, &graphics_settings);
-   graphics_settings.horizontalFilter = NEXUS_GraphicsFilterCoeffs_eBilinear;
-   graphics_settings.verticalFilter = NEXUS_GraphicsFilterCoeffs_eBilinear;
-   NEXUS_Display_SetGraphicsSettings(nexus_display, &graphics_settings);
-
-#else
-   /* Bring up display */
-   NEXUS_Display_GetDefaultSettings(&display_settings);
-   display_settings.format = NEXUS_VideoFormat_eNtsc;
-   nexus_display = NEXUS_Display_Open(0, &display_settings);
-#if NEXUS_NUM_COMPONENT_OUTPUTS
-   if (platform_config.outputs.component[0])
-   {
-      NEXUS_Display_AddOutput(nexus_display, NEXUS_ComponentOutput_GetConnector(platform_config.outputs.component[0]));
-   }
-#endif
-#if NEXUS_NUM_COMPOSITE_OUTPUTS
-   NEXUS_Display_AddOutput(nexus_display, NEXUS_CompositeOutput_GetConnector(platform_config.outputs.composite[0]));
-#endif
-#endif
-
-   /* Register this display for exclusive mode access */
-   native_display = BRCM_RegisterDisplay(nexus_display);
-
-   NEXUS_Display_GetGraphicsSettings(nexus_display, &graphics_settings);
-   
-   graphics_settings.enabled = true;
-   graphics_settings.sourceBlendFactor = NEXUS_CompositorBlendFactor_eSourceAlpha;
-   graphics_settings.destBlendFactor = NEXUS_CompositorBlendFactor_eInverseSourceAlpha;
-
-   NEXUS_Display_SetGraphicsSettings( nexus_display , & graphics_settings );
-
-
-   BRCM_GetDefaultNativeWindowSettings(&egl_window);
-   egl_window.rect.x = 0;
-   egl_window.rect.y = 0;
-   
-   if ( hd && atoi( hd ) )
-   {
-      egl_window.rect.width = 1920;
-      egl_window.rect.height = 1080;      
-   }
-   else
-   {
-      egl_window.rect.width = 960;
-      egl_window.rect.height = 540;
-   }
-   egl_window.stretchToDisplay = 1;
-
-   
-   
    video_window = NEXUS_VideoWindow_Open(nexus_display, 0);
 
-#if 1
    connect_hdmi();   
-#endif
 
    return true;
 }
 
-#endif
+/*
+===============================================================================
+*/
 
 NativeWindowType tp_egl_get_native_window( void )
 {
     return ( NativeWindowType ) native_window;
 }
+
+/*
+===============================================================================
+*/
 
 static void install_controller( TPContext * ctx )
 {
@@ -493,46 +398,44 @@ static void install_controller( TPContext * ctx )
     irSettings.dataReady.context = &mIRHandle;
     mIRHandle = NEXUS_IrInput_Open(0, &irSettings);
 
-	memset(&remoteSpec, 0, sizeof(remoteSpec));
-	remoteSpec.capabilities	= TP_CONTROLLER_HAS_KEYS;
+    memset(&remoteSpec, 0, sizeof(remoteSpec));
+    remoteSpec.capabilities	= TP_CONTROLLER_HAS_KEYS;
     remoteSpec.key_map = map;   
     controller = tp_context_add_controller( ctx, "Remote", &remoteSpec, NULL);    
 }
 
+/*
+===============================================================================
+*/
+
 int main(int argc, char** argv)
 {
-   int                  result;
-   TPContext *          ctx;
-
-   result = 0;
-   ctx = 0;
-   mIRHandle = 0;
-   
-   /* Setup the display and EGL */
-   if ( InitDisplay() )
-   {
-      printf( "\n\n\tTRICKPLAY\n\n" );
+    int         result = 0;
+    TPContext * ctx = 0;
+    EGLDisplay  eglDisplay;
+  
+    if ( InitDisplay() )
+    {
+        printf( "\n\n\tTRICKPLAY\n\n" );
       
-      tp_init( & argc , & argv );
+        tp_init( & argc , & argv );
       
-      ctx = tp_context_new();
+        ctx = tp_context_new();
       
-      install_controller( ctx );
+        install_controller( ctx );
       
-      tp_context_set_int( ctx , TP_SCREEN_WIDTH , WIDTH );
-      tp_context_set_int( ctx , TP_SCREEN_HEIGHT , HEIGHT );
+        tp_context_set_int( ctx , TP_SCREEN_WIDTH , WIDTH );
+        tp_context_set_int( ctx , TP_SCREEN_HEIGHT , HEIGHT );
       
 #if 0
-      tp_context_set_media_player_constructor( ctx , nmp_constructor );
+        tp_context_set_media_player_constructor( ctx , nmp_constructor );
 #endif      
       
-      result = tp_context_run( ctx );
+        result = tp_context_run( ctx );
       
-      tp_context_free( ctx );      
-   }
+        tp_context_free( ctx );      
+    }
 
-    EGLDisplay   eglDisplay;
-    /* Terminate EGL */
     eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglTerminate(eglDisplay);
@@ -541,7 +444,6 @@ int main(int argc, char** argv)
 
     NXPL_UnregisterNexusDisplayPlatform(nxpl_handle);
 
-    /* Close the Nexus display */
     if (nexus_display != 0)
     {
         NEXUS_Display_Close(nexus_display);

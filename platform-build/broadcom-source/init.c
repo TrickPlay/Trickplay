@@ -71,6 +71,7 @@
  *****************************************************************************/
 
 #include "init.h"
+#include "nexus_platform_boardcfg.h"
 
 #include <stdio.h>
 
