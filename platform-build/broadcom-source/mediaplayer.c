@@ -108,8 +108,8 @@ extern NEXUS_DisplayHandle           nexus_display;
 extern NEXUS_PlatformConfiguration   platform_config;
 extern NEXUS_VideoWindowHandle       video_window;
 
-extern void disconnect_hdmi();
-extern void connect_hdmi();
+extern void disconnect_hdmi( void );
+extern void connect_hdmi( void );
 
 struct nmp_t
 {
@@ -154,7 +154,7 @@ static NMP * get_nmp( TPMediaPlayer * mp )
 static void nmp_end_of_stream_callback( void * context , int param )
 {
     NMP * nmp = ( NMP * ) context;
-    
+
     tp_media_player_end_of_stream( nmp->mp );    
 }
 
@@ -271,10 +271,12 @@ static int nmp_load( TPMediaPlayer * mp , const char * uri , const char * extra 
         BDBG_ASSERT(!rc);
     }
     
+#if 0    
     rc = NEXUS_AudioOutput_AddInput(
         NEXUS_SpdifOutput_GetConnector(platform_config.outputs.spdif[0]),
         NEXUS_AudioDecoder_GetConnector(nmp->audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
     BDBG_ASSERT(!rc);
+#endif    
 
     
     NEXUS_VideoWindow_GetSettings(video_window, &nmp->windowSettings);
@@ -391,13 +393,16 @@ static void nmp_reset( TPMediaPlayer * mp )
     NEXUS_VideoInput_Shutdown(NEXUS_VideoDecoder_GetConnector(nmp->videoDecoder));
     NEXUS_VideoDecoder_Close(nmp->videoDecoder);
 
+#if 0
     NEXUS_AudioOutput_RemoveInput(
         NEXUS_AudioDac_GetConnector(platform_config.outputs.audioDacs[0]),
         NEXUS_AudioDecoder_GetConnector(nmp->audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
+    
     NEXUS_AudioOutput_RemoveInput(
         NEXUS_SpdifOutput_GetConnector(platform_config.outputs.spdif[0]),
         NEXUS_AudioDecoder_GetConnector(nmp->audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
-    
+#endif
+
     NEXUS_AudioInput_Shutdown(NEXUS_AudioDecoder_GetConnector(nmp->audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));
     NEXUS_AudioDecoder_Close(nmp->audioDecoder);
     

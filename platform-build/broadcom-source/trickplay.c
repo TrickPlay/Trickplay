@@ -195,7 +195,11 @@ void disconnect_hdmi( void )
       }
    
       NEXUS_VideoInput_Shutdown( NEXUS_HdmiInput_GetVideoConnector( hdmiInput ) );
-      NEXUS_AudioDecoder_Close( hdmiAudioDecoder );
+
+      if ( hdmiAudioDecoder )
+      {
+        NEXUS_AudioDecoder_Close( hdmiAudioDecoder );
+      }
 
       NEXUS_HdmiInput_Close( hdmiInput );
    }
@@ -427,9 +431,10 @@ int main(int argc, char** argv)
         tp_context_set_int( ctx , TP_SCREEN_WIDTH , WIDTH );
         tp_context_set_int( ctx , TP_SCREEN_HEIGHT , HEIGHT );
       
-#if 0
-        tp_context_set_media_player_constructor( ctx , nmp_constructor );
-#endif      
+
+/*
+         tp_context_set_media_player_constructor( ctx , nmp_constructor );
+*/
       
         result = tp_context_run( ctx );
       

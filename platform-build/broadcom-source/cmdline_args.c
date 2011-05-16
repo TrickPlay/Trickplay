@@ -328,7 +328,7 @@ static const namevalue_t g_videoCodecStrs[] = {
     {"avc", NEXUS_VideoCodec_eH264},
     {"h264", NEXUS_VideoCodec_eH264},
     {"svc", NEXUS_VideoCodec_eH264_Svc},
-    {"svc_bl", NEXUS_VideoCodec_eH264_SvcBase},
+/*    {"svc_bl", NEXUS_VideoCodec_eH264_SvcBase}, */
     {"mvc", NEXUS_VideoCodec_eH264_Mvc},
     {"h263", NEXUS_VideoCodec_eH263},
     {"h263", NEXUS_VideoCodec_eH263},

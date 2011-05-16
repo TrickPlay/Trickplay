@@ -37,7 +37,8 @@ CFLAGS += $(addprefix -D,$(BMEDIA_PROBE_DEFINES))
 
 CFLAGS += -lm -lrt
 CFLAGS += -I$(MAGNUM)/../rockford/middleware/v3d/interface/khronos/include/ \
-		  -I$(MAGNUM)/../rockford/middleware/platform/nexus
+	    -I$(MAGNUM)/../rockford/middleware/platform/nexus \
+	    -I$(BSEAV)/lib/utils
 
 APPS = $(THEAPPS)
 
@@ -91,7 +92,7 @@ clean:
 CFLAGS += $(NEXUS_CFLAGS) $(addprefix -I,$(NEXUS_APP_INCLUDE_PATHS)) $(addprefix -D,$(NEXUS_APP_DEFINES)) -I$(NEXUS_TOP)/../BSEAV/lib/netaccel/include
 
 # Always build with debug
-CFLAGS += -g
+CFLAGS += -g -Wno-unused-parameter
 
 ifndef TRICKPLAY_INCLUDE
 $(error TRICKPLAY_INCLUDE is not defined)
@@ -155,8 +156,8 @@ LDFLAGS += -L$(TRICKPLAY_LIB) \
 	-lxml2 \
 	-Wl,--end-group 
 
-#EXTRA_OBJS:=mediaplayer.c cmdline_args.c init.c
-EXTRA_OBJS:=init.c
+EXTRA_OBJS:=mediaplayer.c cmdline_args.c init.c
+#EXTRA_OBJS:=init.c
 
 # Implicit rule for building local apps
 %$(APPSUFFIX): %.c $(EXTRA_OBJS) $(VXOBJS)
