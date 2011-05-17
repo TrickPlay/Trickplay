@@ -3716,15 +3716,17 @@ function ui_element.scrollPane(t)
     --default parameters
     local p = {
         visible_w    =  600,
-	--color     =  {255,255,255,255},
+        --color     =  {255,255,255,255},
         visible_h    =  600,
         content   = Group{},
         virtual_h = 1000,
-	virtual_w = 1000,
-	--arrow_clone_source = nil,
-	
-	--arrows_in_box = false,
-	--arrows_centered = false,
+        virtual_w = 1000,
+        --arrow_clone_source = nil,
+        --arrow_sz = 15,
+        arrow_color = {255,255,255,255},
+        arrows_visible = true,
+        --arrows_in_box = false,
+        --arrows_centered = false,
         --hor_arrow_y     = nil,
         --vert_arrow_x    = nil,
         bar_color_inner     = {180,180,180,255},
@@ -3962,6 +3964,27 @@ function ui_element.scrollPane(t)
 			}
 		end
 	end
+    local make_arrow = function()
+		
+		local c = Canvas{size={p.bar_thickness,p.bar_thickness}}
+		
+		c:move_to(    0,c.h)
+		c:line_to(c.w/2,  0)
+		c:line_to(  c.w,c.h)
+		c:line_to(    0,c.h)
+		
+		c:set_source_color( p.arrow_color )
+		c:fill(true)
+		
+		if c.Image then
+			c= c:Image()
+		end
+		
+		c.anchor_point={c.w/2,c.h}
+		
+		return c
+		
+	end
     local function make_hor_bar(w,h,ratio)
         local bar = Group{}
         
@@ -4176,6 +4199,9 @@ function ui_element.scrollPane(t)
         if p.bar_offset < 0 then
             track_w = p.visible_w+p.bar_offset
             track_h = p.visible_h+p.bar_offset
+        elseif p.arrows_visible then
+            track_w = p.visible_w-p.bar_thickness*2-10
+            track_h = p.visible_h-p.bar_thickness*2-10
         else
             track_w = p.visible_w
             track_h = p.visible_h
@@ -4209,10 +4235,32 @@ end
                 track_w/p.virtual_w
             )
             hor_s_bar.name = "Horizontal Scroll Bar"
-            hor_s_bar.position={
-                p.box_width,
-                p.box_width*2+p.visible_h+p.bar_offset
-            }
+            if p.arrows_visible then
+                local l = make_arrow()
+                l.name="L"
+                l.x = p.box_width+p.bar_thickness
+                l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                scroll_group:add(l)
+                l.reactive=true
+                function l:on_button_down()
+                    scroll_x(1)
+                end
+                hor_s_bar.position={
+                    p.box_width+p.bar_thickness+5,
+                    p.box_width*2+p.visible_h+p.bar_offset
+                }
+                local r = make_arrow()
+                r.name="R"
+                r.x = p.box_width+p.bar_thickness+hor_s_bar.w+10
+                r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                scroll_group:add(r)
+                r.reactive=true
+            else
+                hor_s_bar.position={
+                    p.box_width,
+                    p.box_width*2+p.visible_h+p.bar_offset
+                }
+            end
             scroll_group:add(hor_s_bar)
             
             grip_hor = hor_s_bar:find_child("grip")
@@ -4243,7 +4291,7 @@ end
             function grip_hor:on_button_up(x,y,button,num_clicks)
                 hold = false
             end
--]] 
+--]] 
 
 
 
@@ -4290,10 +4338,36 @@ end
                 track_h/p.virtual_h
             )
             vert_s_bar.name = "Vertical Scroll Bar"
-            vert_s_bar.position={
-                p.box_width*2+p.visible_w+p.bar_offset,
-                p.box_width
-            }
+            if p.arrows_visible then
+                local up = make_arrow()
+                up.name="UP"
+                up.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                up.y = p.box_width+p.bar_thickness
+                scroll_group:add(up)
+                up.reactive=true
+                function up:on_button_down()
+                    scroll_y(1)
+                end
+                vert_s_bar.position={
+                    p.box_width*2+p.visible_w+p.bar_offset,
+                    p.box_width+p.bar_thickness+5
+                }
+                local dn = make_arrow()
+                dn.name="DN"
+                dn.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                dn.y = p.box_width+p.bar_thickness+vert_s_bar.h+10
+                dn.z_rotation = {180,0,0}
+                scroll_group:add(dn)
+                dn.reactive=true
+                function dn:on_button_down()
+                    scroll_y(-1)
+                end
+            else
+                vert_s_bar.position={
+                    p.box_width*2+p.visible_w+p.bar_offset,
+                    p.box_width
+                }
+            end
             --vert_s_bar.z_rotation={90,0,0}
             scroll_group:add(vert_s_bar)
             
@@ -4306,20 +4380,20 @@ end
 	   	        
                 dragging = {grip_vert,
 	   		        function(x,y)
-	   			
+                        
 	   			        grip_vert.y = y - dy
-	   			
+                        
 	   			        if  grip_vert.y < 0 then
 	   				        grip_vert.y = 0
 	   			        elseif grip_vert.y > track_h-grip_vert.h then
 	   				           grip_vert.y = track_h-grip_vert.h
 	   			        end
-	   			
+                        
 	   			        p.content.y = -(grip_vert.y) * p.virtual_h/track_h
-	   			
+                        
 	   		        end 
 	   	        }
-	   	
+                
                 return true
             end
 
