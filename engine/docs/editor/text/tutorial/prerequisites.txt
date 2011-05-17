@@ -1,0 +1,6 @@
+Topic: Prerequisites
+
+To walk through this tutorial, you should have completed the following steps-
+- Installed the Trickplay SDK
+- Know how to run the SDK Visual Editor
+
