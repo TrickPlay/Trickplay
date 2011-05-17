@@ -545,10 +545,11 @@ local color_map =
         [ "LayoutManager" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ScrollPane" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "ArrowPane" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
+        [ "ArrowPane" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "TabBar" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
         [ "OSK" ] = function()  size = {530, 680} color = {25,25,25,100}  return size, color end,
 
-        [ "widgets" ] = function() size = {600, 570} color = {25,25,25,100}  return size, color end,
+        [ "widgets" ] = function() size = {600, 620} color = {25,25,25,100}  return size, color end,
         --[ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
         [ "Code" ] = function(file_list_size) size = {800, 600} color =  {25, 25, 25, 100}  return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
