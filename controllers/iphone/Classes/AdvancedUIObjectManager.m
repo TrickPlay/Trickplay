@@ -171,6 +171,9 @@
 #pragma mark New Protocol
 
 - (void)reply:(NSString *)JSON_String {
+    if (!JSON_String) {
+        JSON_String = @"[null]";
+    }
     JSON_String = [NSString stringWithFormat:@"%@\n", JSON_String];
     NSData *data = [JSON_String dataUsingEncoding:NSUTF8StringEncoding];
     [socketManager sendData:[data bytes] numberOfBytes:[data length]];
@@ -206,19 +209,27 @@
     [self createObjectReply:ID];
 }
 
-- (void)setValuesForObject:(NSDictionary *)object {
-    NSDictionary *args = [object objectForKey:@"properties"];
+- (void)setValuesForObject:(NSDictionary *)JSON_object {
+    NSDictionary *args = [JSON_object objectForKey:@"properties"];
     
     // Set values for class specific properties
-    if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
-        [(TrickplayUIElement *)[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
-    } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
-        [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
-    } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
-        [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
-    } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
-        [(TrickplayUIElement *)[groups objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:args];
-    }
+    TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    [object setValuesFromArgs:args];
+    
+    [self reply:@"[true]"];
+}
+
+- (void)getValuesForObject:(NSDictionary *)JSON_object {
+    // Get a list of properties that need updating
+    NSDictionary *properties = [JSON_object objectForKey:@"properties"];
+    // Find the AdvancedUI Object to get properties from
+    TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    // Make a dictionary that will carry the returned values
+    NSMutableDictionary *JSON_dictionary = [NSMutableDictionary dictionaryWithDictionary:JSON_object];
+    // Set the properties to this dictionary
+    [JSON_dictionary setObject:[object getValuesFromArgs:properties] forKey:@"properties"];
+    // Convert dictionary to JSON string and send over the socket
+    [self reply:[JSON_dictionary yajl_JSONString]];
 }
 
 - (TrickplayUIElement *)findObjectForID:(NSString *)ID {

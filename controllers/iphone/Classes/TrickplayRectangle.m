@@ -42,8 +42,8 @@
  * Getter function
  */
 
-- (void)getValuesFromArgs:(NSDictionary *)args {
-    [super getValuesFromArgs:args];
+- (NSDictionary *)getValuesFromArgs:(NSDictionary *)args {
+    return [super getValuesFromArgs:args];
 }
 
 /**
@@ -153,7 +153,7 @@
 #pragma mark New Protocol
 
 - (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args {
-    return nil;
+    return [super callMethod:method withArgs:args];
 }
 
 

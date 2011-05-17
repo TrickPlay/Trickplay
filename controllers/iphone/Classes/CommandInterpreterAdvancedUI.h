@@ -16,6 +16,7 @@
 @required
 - (void)createObject:(NSDictionary *)object;
 - (void)setValuesForObject:(NSDictionary *)object;
+- (void)getValuesForObject:(NSDictionary *)object;
 - (void)callMethodOnObject:(NSDictionary *)object;
 
 @end

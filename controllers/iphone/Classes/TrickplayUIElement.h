@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <QuartzCore/CALayer.h>
 #import <QuartzCore/CATransform3D.h>
+#import <YAJLiOS/YAJL.h>
 
 @interface TrickplayUIElement : UIView {
     BOOL is_scaled;
@@ -33,7 +34,7 @@
 - (void)setRotationsFromArgs:(NSDictionary *)args;
 - (void)setOpacityFromArgs:(NSDictionary *)args;
 
-- (void)getValuesFromArgs:(NSDictionary *)args;
+- (NSDictionary *)getValuesFromArgs:(NSDictionary *)args;
 - (void)setValuesFromArgs:(NSDictionary *)args;
 
 @end
