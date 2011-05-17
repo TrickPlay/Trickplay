@@ -198,7 +198,7 @@
         styleAlert = nil;
     }
     
-    styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+    styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:nil];
     
     styleAlert.title = windowtitle;
     [multipleChoiceArray removeAllObjects];
@@ -360,6 +360,8 @@
     [accelDelegate pauseAccelerometer];
     [touchDelegate reset];
     [advancedUIDelegate clean];
+    [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     [self clearUI];
 }
 

@@ -40,6 +40,8 @@
         [delegate createObject:JSON_Object];
     } else if ([method compare:@"set"] == NSOrderedSame) {
         [delegate setValuesForObject:JSON_Object];
+    } else if ([method compare:@"get"] == NSOrderedSame) {
+        [delegate getValuesForObject:JSON_Object];
     } else if ([method compare:@"call"] == NSOrderedSame) {
         [delegate callMethodOnObject:JSON_Object];
     }

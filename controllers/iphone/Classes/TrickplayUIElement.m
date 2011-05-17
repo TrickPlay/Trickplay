@@ -26,6 +26,8 @@
 
 /**
  * Returns a frame built from the x, y, width, and height in the args.
+ *
+ * NOT A GETTER FUNCTION. Used to contruct frames for building AdvancedUI Objects.
  */
 
 - (CGRect)getFrameFromArgs:(NSDictionary *)args {
@@ -73,6 +75,9 @@
     return CGRectMake(x, y, width, height);
 }
 
+#pragma mark -
+#pragma mark Setters
+
 /**
  * Set Position
  */
@@ -80,22 +85,24 @@
 - (void)setPostionFromArgs:(NSDictionary *)args {
     NSArray *position = [args objectForKey:@"position"];
     NSNumber *x = nil, *y = nil, *z = nil;
-    
-    if ([args objectForKey:@"x"]) {
-        x = [args objectForKey:@"x"];
-    }
-    if ([args objectForKey:@"y"]) {
-        y = [args objectForKey:@"y"];
-    }
-    if ([args objectForKey:@"z"]) {
-        z = [args objectForKey:@"z"];
-    }
+
+    x = [args objectForKey:@"x"];
+    y = [args objectForKey:@"y"];
+    z = [args objectForKey:@"z"];
+
     if (position) {
         x = [position objectAtIndex:0];
         y = [position objectAtIndex:1];
         if ([position count] > 2) {
             z = [position objectAtIndex:2];
         }
+    }
+    if (z) {
+        // TODO: this isn't working
+        NSLog(@"z: %@", z);
+        view.layer.zPosition = [z floatValue];
+        //[view.layer setValue:z forKeyPath:@"transform.translation.z"];
+        //NSLog(@"z after: %@", [view.layer valueForKeyPath:@"transform.translation.z"]);
     }
     if (!x && !y) {
         return;
@@ -105,9 +112,6 @@
     }
     if (!y) {
         y = [NSNumber numberWithFloat:view.layer.position.y];
-    }
-    if (z) {
-        view.layer.zPosition = [z floatValue];
     }
     
     view.layer.position = CGPointMake([x floatValue], [y floatValue]);
@@ -269,15 +273,6 @@
 
 
 /**
- * Getter function
- */
-
-- (void)getValuesFromArgs:(NSDictionary *)args {
-    
-}
-
-
-/**
  * Since all these objects follow the UIElements Interface in Trickplay,
  * establish the values of all the UIElement properties for the object.
  */
@@ -293,11 +288,274 @@
 }
 
 #pragma mark -
+#pragma mark Getters
+
+/**
+ * Get Position
+ */
+
+- (void)getPositionIntoDictionary:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"position"]) {
+        NSArray *position = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.position.x], [NSNumber numberWithFloat:view.layer.position.y], [NSNumber numberWithFloat:view.layer.zPosition], nil];
+        
+        [dictionary setObject:position forKey:@"position"];
+    }
+    if ([dictionary objectForKey:@"x"]) {
+        [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.x] forKey:@"x"];
+    }
+    if ([dictionary objectForKey:@"y"]) {
+        [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.y] forKey:@"y"];
+    }
+    if ([dictionary objectForKey:@"z"]) {
+        [dictionary setObject:[NSNumber numberWithFloat:view.layer.zPosition] forKey:@"z"];
+    }
+}
+
+/**
+ * Get Size
+ */
+
+- (void)getSizeIntoDictionary:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"size"]) {
+        NSArray *size = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.bounds.size.width], [NSNumber numberWithFloat:view.layer.bounds.size.height], nil];
+        
+        [dictionary setObject:size forKey:@"size"];
+    }
+    if ([dictionary objectForKey:@"w"] || [dictionary objectForKey:@"width"]) {
+        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.width] forKey:@"w"];
+        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.width] forKey:@"width"];
+    }
+    if ([dictionary objectForKey:@"h"] || [dictionary objectForKey:@"height"]) {
+        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.height] forKey:@"h"];
+        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.height] forKey:@"height"];
+    }
+}
+
+/**
+ * Get Anchor Point
+ */
+
+- (void)getAnchorPointIntoDictionary:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"anchor_point"]) {
+        NSArray *anchor_point = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.anchorPoint.x], [NSNumber numberWithFloat:view.layer.anchorPoint.y], [NSNumber numberWithFloat:view.layer.anchorPointZ], nil];
+        
+        [dictionary setObject:anchor_point forKey:@"anchor_point"];
+    }
+}
+
+/**
+ * Get Scale
+ */
+
+- (void)getScaleIntoDictionary:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"scale"]) {
+        NSArray *scale = [NSArray arrayWithObjects:[view.layer valueForKeyPath:@"transform.scale.x"], [view.layer valueForKeyPath:@"transform.scale.y"], [view.layer valueForKeyPath:@"transform.scale.z"], nil];
+        
+        [dictionary setObject:scale forKey:@"scale"];
+    }
+}
+
+/**
+ * Get Rotation
+ */
+
+- (void)getRotationIntoDictionary:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"x_rotation"]) {
+        NSNumber *x_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
+        
+        [dictionary setObject:x_rotation forKey:@"x_rotation"];
+    }
+    if ([dictionary objectForKey:@"y_rotation"]) {
+        NSNumber *y_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
+        
+        [dictionary setObject:y_rotation forKey:@"y_rotation"];
+    }
+    if ([dictionary objectForKey:@"z_rotation"]) {
+        NSNumber *z_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
+        
+        [dictionary setObject:z_rotation forKey:@"z_rotation"];        
+    }
+}
+
+/**
+ * Get Opacity
+ */
+
+- (void)getOpacityIntoDictionary:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"opacity"]) {
+        NSNumber *opacity = [NSNumber numberWithFloat:(view.alpha * 255.0)];
+        
+        [dictionary setObject:opacity forKey:@"opacity"];
+    }
+}
+
+/**
+ * Get Clip
+ */
+
+- (void)getClipIntoDictionary:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"clip"]) {
+        CGFloat
+        clip_x = self.bounds.origin.x,
+        clip_y = self.bounds.origin.y,
+        clip_w = self.bounds.size.width,
+        clip_h = self.bounds.size.height;
+        
+        NSArray *clipBox = [NSArray arrayWithObjects:[NSNumber numberWithFloat:clip_x], [NSNumber numberWithFloat:clip_y], [NSNumber numberWithFloat:clip_w], [NSNumber numberWithFloat:clip_h], nil];
+        
+        [dictionary setObject:clipBox forKey:@"clip"];
+    }
+}
+
+/**
+ * Getter function
+ */
+
+- (NSDictionary *)getValuesFromArgs:(NSDictionary *)properties {
+    NSMutableDictionary *JSON_Dictionary = [NSMutableDictionary dictionaryWithDictionary:properties];
+    
+    [self getPositionIntoDictionary:JSON_Dictionary];
+    [self getSizeIntoDictionary:JSON_Dictionary];
+    [self getAnchorPointIntoDictionary:JSON_Dictionary];
+    [self getScaleIntoDictionary:JSON_Dictionary];
+    [self getRotationIntoDictionary:JSON_Dictionary];
+    [self getOpacityIntoDictionary:JSON_Dictionary];
+    [self getClipIntoDictionary:JSON_Dictionary];
+    
+    return JSON_Dictionary;
+}
+
+
+#pragma mark -
+#pragma mark Function handling
+
+- (NSString *)doHide {
+    self.hidden = YES;
+    return @"[true]";
+}
+
+- (NSString *)doHideAll {
+    self.hidden = YES;
+    for (UIView *child in [self.view subviews]) {
+        child.hidden = YES;
+    }
+    return @"[true]";
+}
+
+- (NSString *)doShow {
+    self.hidden = NO;
+    return @"[true]";
+}
+
+- (NSString *)doShowAll {
+    self.hidden = NO;
+    for (UIView *child in [self.view subviews]) {
+        child.hidden = NO;
+    }
+    return @"[true]";
+}
+
+- (NSString *)doMoveBy_dx:(CGFloat)dx dy:(CGFloat)dy {
+    CGFloat x = view.layer.position.x + dx;
+    CGFloat y = view.layer.position.y + dy;
+    
+    view.layer.position = CGPointMake(x, y);
+    return @"[true]";
+}
+
+- (NSString *)doUnparent {
+    [self removeFromSuperview];
+    return @"[true]";
+}
+
+- (NSString *)doRaise {
+    if (!self.superview) {
+        return @"[false]";
+    }
+    
+    BOOL raiseSelf = NO;
+    for (UIView *child in [self.superview subviews]) {
+        if (raiseSelf) {
+            [self.superview insertSubview:self aboveSubview:child];
+            break;
+        }
+        if (child == self) {
+            raiseSelf = YES;
+        }
+    }
+    
+    return @"[true]";
+}
+
+- (NSString *)doRaiseToTop {
+    if (!self.superview) {
+        return @"[false]";
+    }
+    
+    [self.superview bringSubviewToFront:self];
+    return @"[true]";
+}
+
+- (NSString *)doLower {
+    if (!self.superview) {
+        return @"[false]";
+    }
+    
+    UIView *previous = nil;
+    for (UIView *child in [self.superview subviews]) {
+        if (child == self) {
+            if (previous) {
+                [self.superview insertSubview:self belowSubview:previous];
+            }
+            break;
+        }
+        
+        previous = child;
+    }
+    return @"[true]";
+}
+
+- (NSString *)doLowerToBottom {
+    if (!self.superview) {
+        return @"[false]";
+    }
+    
+    [self.superview sendSubviewToBack:self];
+    return @"true";
+}
+
+- (void)doMoveAnchorPoint {
+    
+}
+
+#pragma mark -
 #pragma mark New Protocol
 
 - (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args {
-    NSLog(@"This method should be overwritten");
-    return nil;
+    NSString *result = nil;
+    if ([method compare:@"hide"] == NSOrderedSame) {
+        result = [self doHide];
+    } else if ([method compare:@"hide_all"] == NSOrderedSame) {
+        result = [self doHideAll];
+    } else if ([method compare:@"show"] == NSOrderedSame) {
+        result = [self doShow];
+    } else if ([method compare:@"show_all"] == NSOrderedSame) {
+        result = [self doShowAll];
+    } else if ([method compare:@"move_by"] == NSOrderedSame) {
+        result = [self doMoveBy_dx:[[args objectAtIndex:0] floatValue] dy:[[args objectAtIndex:1] floatValue]];
+    } else if ([method compare:@"unparent"] == NSOrderedSame) {
+        result = [self doUnparent];
+    } else if ([method compare:@"raise"] == NSOrderedSame) {
+        [self doRaise];
+    } else if ([method compare:@"raise_to_top"] == NSOrderedSame) {
+        [self doRaiseToTop];
+    } else if ([method compare:@"lower"] == NSOrderedSame) {
+        [self doLower];
+    } else if ([method compare:@"lower_to_bottom"] == NSOrderedSame) {
+        [self doLowerToBottom];
+    }
+    
+    return result;
 }
 
 

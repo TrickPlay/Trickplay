@@ -27,8 +27,8 @@
  * Getter function
  */
 
-- (void)getValuesFromArgs:(NSDictionary *)args {
-    [super getValuesFromArgs:args];
+- (NSDictionary *)getValuesFromArgs:(NSDictionary *)args {
+    return [super getValuesFromArgs:args];
 }
 
 /**

@@ -30,8 +30,8 @@
  * Getter function
  */
 
-- (void)getValuesFromArgs:(NSDictionary *)args {
-    [super getValuesFromArgs:args];
+- (NSDictionary *)getValuesFromArgs:(NSDictionary *)args {
+    return [super getValuesFromArgs:args];
 }
 
 /**
@@ -67,7 +67,7 @@
         return [self addChildren:[args objectAtIndex:0]];
     }
     
-    return nil;
+    return [super callMethod:method withArgs:args];
 }
 
 
