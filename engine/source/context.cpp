@@ -2428,6 +2428,13 @@ HttpServer * TPContext::get_http_server() const
 
 //-----------------------------------------------------------------------------
 
+Console * TPContext::get_console() const
+{
+    return console;
+}
+
+//-----------------------------------------------------------------------------
+
 bool TPContext::profile_switch( int id )
 {
     SystemDatabase::Profile profile = get_db()->get_profile( id );
