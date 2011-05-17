@@ -850,7 +850,7 @@ interface controller [[ControllerDelegate*]]
         [[
             JSON::Value value = JSON::to_json( L , payload );
 
-            if ( ! value.is<JSON::Array>() )
+            if ( ! value.is<JSON::Array>() && ! value.is<JSON::Object>() )
             {
                 lua_pushnil( L );
             }

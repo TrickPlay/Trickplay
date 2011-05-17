@@ -1580,9 +1580,11 @@ void TPContext::app_run_callback( App * app , int result )
 {
     TPContext * context = app->get_context();
 
+    String id( app->get_id() );
+
     if ( result != TP_RUN_OK )
     {
-        if ( context->first_app_id == app->get_id() )
+        if ( context->first_app_id == id )
         {
             context->quit();
         }
@@ -1599,6 +1601,11 @@ void TPContext::app_run_callback( App * app , int result )
         context->current_app = app;
 
         context->current_app->ref();
+
+        if ( context->first_app_id != id )
+        {
+            context->get_db()->app_launched( id );
+        }
 
         app->animate_in();
     }

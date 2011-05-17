@@ -31,6 +31,8 @@ static const char * schema_create =
 
     "create table profile_apps( profile_id INTEGER NOT NULL,"
     "                           app_id TEXT NOT NULL,"
+    "                           start_count INTEGER NOT NULL DEFAULT 0,"
+    "                           last_start INTEGER NOT NULL DEFAULT 0,"
     "                           PRIMARY KEY( profile_id, app_id) );"
 
     "create table app_actions( app_id TEXT NOT NULL,"
@@ -171,6 +173,8 @@ SystemDatabase * SystemDatabase::open( const char * path )
             tpwarn( "FAILED TO CREATE INITIAL SYSTEM DATABASE SCHEMA" );
             return NULL;
         }
+
+        db.set_schema_version( schema_create );
 
         tpinfo( "SYSTEM DATABASE CREATED" );
     }
@@ -726,7 +730,7 @@ bool SystemDatabase::add_app_to_current_profile( const String & app_id )
 
 //.............................................................................
 
-SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
+SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile( AppSort sort , bool reverse )
 {
     Profile profile = get_current_profile();
 
@@ -735,9 +739,28 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
         return AppInfo::List();
     }
 
-    SQLite::Statement select( db,
-            "select a.id,a.path,a.name,a.release,a.version,a.fingerprints"
-            " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id;" );
+    String s("select a.id,a.path,a.name,a.release,a.version,a.fingerprints"
+             " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id " );
+
+    switch ( sort )
+    {
+        case BY_NAME:
+            s += "order by a.name ";
+            s += reverse ? "desc" : "asc";
+            break;
+
+        case BY_DATE_USED:
+            s += "order by p.last_start ";
+            s += reverse ? "asc" : "desc";
+            break;
+
+        case BY_TIMES_USED:
+            s += "order by p.start_count ";
+            s += reverse ? "asc" : "desc";
+            break;
+    }
+
+    SQLite::Statement select( db , s );
 
     select.bind( 1, profile.id );
 
@@ -856,4 +879,34 @@ SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile
     }
 
     return result;
+}
+
+void SystemDatabase::app_launched( const String & app_id )
+{
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return;
+    }
+
+    SQLite::Statement update( db ,
+            "update or ignore profile_apps set start_count = start_count + 1 , last_start = ?1 "
+            "where profile_id = ?2 and app_id = ?3;" );
+
+    GTimeVal t;
+    g_get_current_time( & t );
+
+    update.bind( 1 , t.tv_sec );
+    update.bind( 2 , profile.id );
+    update.bind( 3 , app_id );
+
+    if ( update.step() )
+    {
+        if ( db.changes() > 0 )
+        {
+            make_dirty();
+            tplog2( "UPDATED APP STATS FOR '%s'" , app_id.c_str() );
+        }
+    }
 }
