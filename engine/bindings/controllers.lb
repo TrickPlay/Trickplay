@@ -784,7 +784,19 @@ interface controller [[ControllerDelegate*]]
         
         Tells the controller to send a picture. The app will receive the picture via <on_picture>.
         
+        Arguments:
         
+            max_dimensions - An optional table containing two integers. The first is the
+                             maximum desired width for the picture. The second is the maximum
+                             desired height for the picture. If they are both zero or not
+                             provided, the picture will be sent at its original dimensions.
+
+            edit -           If true, the controller may give the user a chance to edit
+                             the picture before it is submitted.
+
+            mask -           This should be the name of an image previously declared as a
+                             resource. When it is present, the controller will composite the
+                             mask with the picture and submit the result.
          
         Returns:
         
@@ -793,9 +805,22 @@ interface controller [[ControllerDelegate*]]
             false - Otherwise.      
     */
             
-    bool submit_picture( )
+    bool submit_picture( table max_dimensions = 0 , bool edit = false , string mask = "" )
         [[
-            result=self->get_controller()->submit_picture( );    
+            unsigned int max_width = 0;
+            unsigned int max_height = 0;
+
+            if ( max_dimensions )
+            {
+                lua_rawgeti( L , max_dimensions , 1 );
+                max_width = lua_tointeger( L , -1 );
+                lua_pop( L , 1 );
+                lua_rawgeti( L , max_dimensions , 2 );
+                max_height = lua_tointeger( L , -1 );
+                lua_pop( L , 1 );
+            }
+
+            result=self->get_controller()->submit_picture( max_width , max_height , edit , String( mask ) );
         ]];
 
     /*
@@ -818,74 +843,31 @@ interface controller [[ControllerDelegate*]]
         ]];
 
     /*
-        Function: advanced_ui_create
+        Function: advanced_ui
     */
       
-    bool advanced_ui_create( table payload )
+    table advanced_ui( table payload )
         [[
             JSON::Value value = JSON::to_json( L , payload );
 
-            if ( ! value.is<JSON::Array>() )
+            if ( ! value.is<JSON::Array>() && ! value.is<JSON::Object>() )
             {
-                result = false;
+                lua_pushnil( L );
             }
             else
             {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_CREATE , value.stringify() );
-            }
-        ]];
+                String response;
 
-    /*
-        Function: advanced_ui_destroy
-    */
+                bool result = self->get_controller()->advanced_ui( value.stringify() , response );
 
-    bool advanced_ui_destroy( table payload )
-        [[
-            JSON::Value value = JSON::to_json( L , payload );
-
-            if ( ! value.is<JSON::Array>() )
-            {
-                result = false;
-            }
-            else
-            {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_DESTROY , value.stringify() );
-            }
-        ]];
-
-    /*
-        Function: advanced_ui_set
-    */
-
-    bool advanced_ui_set( table payload )
-        [[
-            JSON::Value value = JSON::to_json( L , payload );
-
-            if ( ! value.is<JSON::Array>() )
-            {
-                result = false;
-            }
-            else
-            {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_SET , value.stringify() );
-            }
-        ]];
-
-    /*
-        Function: advanced_ui_get
-    */
-
-    bool advanced_ui_get( table payload )
-        [[
-            JSON::Value value = JSON::to_json( L , payload );
-
-            if ( ! value.is<JSON::Array>() )
-            {
-                result = false;
-            }
-            else
-            {
-                result = self->get_controller()->advanced_ui( TP_CONTROLLER_ADVANCED_UI_GET , value.stringify() );
+                if ( ! result )
+                {
+                    lua_pushnil( L );
+                }
+                else
+                {
+                    JSON::parse( L , response.c_str() );
+                }
             }
         ]];
 

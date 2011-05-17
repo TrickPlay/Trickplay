@@ -11,6 +11,24 @@
 #import "ResourceManager.h"
 #import "SocketManager.h"
 
+@protocol AdvancedUIDelegate <NSObject>
+
+@required
+- (void)createObject:(NSString *)JSON_String;
+- (void)destroyObject:(NSString *)JSON_String;
+
+@end
+
+
+/**
+ * The GestureViewControllerSocketDelegate recieves messages delegated
+ * originally from the SocketManager which inform of either a socket
+ * error or socket stream ending. The delegate is assumed to depend
+ * on the socket in some way and must respond to these messages.
+ *
+ * Currently, only the AppBrowserViewController applies this protocol.
+ */
+
 @protocol GestureViewControllerSocketDelegate <NSObject>
 
 @required
@@ -18,6 +36,14 @@
 - (void)streamEndEncountered;
 
 @end
+
+
+/**
+ * The ViewControllerAccelerometerDelegate handles commands from Trickplay
+ * to start or stop the devices accelerometer.
+ *
+ * Only the AccelerometerController class implements this protocol.
+ */
 
 @protocol ViewControllerAccelerometerDelegate
 
@@ -28,7 +54,17 @@
 @end
 
 
-// TODO: change this to a Category/Class Extension rather than Delegate
+// TODO: look into changing this to a Category/Class Extension rather than Delegate
+
+/**
+ * The ViewControllerTouchDelegate handles commands from Trickplay to
+ * enable/disable touch events. Likewise this delegate must inform
+ * the GestureViewController of iOS touch events so these events can be
+ * forwarded back to Trickplay.
+ *
+ * Only the TouchController class implements this protocol.
+ */
+
 @protocol ViewControllerTouchDelegate
 
 @required
@@ -51,18 +87,23 @@
 #import "TouchController.h"
 #import "AccelerometerController.h"
 #import "AudioController.h"
+#import "AdvancedUIObjectManager.h"
+#import "CameraViewController.h"
 
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
+CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     SocketManager *socketManager;
     NSString *hostName;
     NSInteger port;
+    NSString *http_port;
+    NSString *version;
     
     UIActivityIndicatorView *loadingIndicator;
     UITextField *theTextField;
     UIImageView *backgroundView;
-    //NSMutableArray *displayedImageViews;
+    NSInteger backgroundHeight;
+    NSInteger backgroundWidth;
     
     NSMutableArray *multipleChoiceArray;
     UIActionSheet *styleAlert;
@@ -71,10 +112,16 @@ CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
     
     AudioController *audioController;
     
+    CameraViewController *camera;
+    
     id <ViewControllerTouchDelegate> touchDelegate;
     id <ViewControllerAccelerometerDelegate> accelDelegate;
     id <GestureViewControllerSocketDelegate> socketDelegate;
+    id <AdvancedUIDelegate> advancedUIDelegate;
 }
+
+@property (nonatomic, retain) NSString *version;
+@property (nonatomic, assign) SocketManager *socketManager;
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 @property (nonatomic, retain) IBOutlet UITextField *theTextField;
@@ -83,6 +130,7 @@ CommandInterpreterDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
 @property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
 @property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
+@property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
 
 - (void)setupService:(NSInteger)port

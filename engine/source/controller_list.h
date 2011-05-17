@@ -127,11 +127,11 @@ public:
 
     bool enter_text( const String & label, const String & text );
 
-    bool submit_picture( );
+    bool submit_picture( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource );
 
     bool submit_audio_clip( );
 
-    bool advanced_ui( int command , const String & payload );
+    bool advanced_ui( const String & payload , String & result );
 
     inline bool wants_accelerometer_events() const
     {

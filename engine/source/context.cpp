@@ -6,7 +6,7 @@
 #include "clutter/clutter.h"
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
-#include "fontconfig.h"
+#include "fontconfig/fontconfig.h"
 #include "sndfile.h"
 
 #include "trickplay/keys.h"
@@ -952,6 +952,23 @@ static void after_paint( ClutterActor * actor , gpointer )
 
 
 //-----------------------------------------------------------------------------
+// When the context enters the stage, hide the OS and/or WM cursor
+
+#ifndef TP_CLUTTER_BACKEND_EGL
+
+static void hide_cursor( ClutterActor * actor, gpointer )
+{
+	clutter_stage_hide_cursor( CLUTTER_STAGE( actor ) );
+}
+
+static void show_cursor( ClutterActor * actor, gpointer )
+{
+	clutter_stage_show_cursor( CLUTTER_STAGE( actor ) );
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
 
 class RunningAction : public Action
 {
@@ -1146,6 +1163,7 @@ int TPContext::run()
 #ifndef TP_CLUTTER_BACKEND_EGL
 
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
+    clutter_stage_hide_cursor( (ClutterStage *)stage);
 
 #endif
 
@@ -1189,6 +1207,9 @@ int TPContext::run()
     TPController * keyboard = tp_context_add_controller( this, "Keyboard", &spec, NULL );
 
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
+    
+    g_signal_connect( stage, "enter-event", ( GCallback )hide_cursor, stage);
+    g_signal_connect( stage, "leave-event", ( GCallback )show_cursor, stage);
 
 #endif
 
@@ -1559,9 +1580,11 @@ void TPContext::app_run_callback( App * app , int result )
 {
     TPContext * context = app->get_context();
 
+    String id( app->get_id() );
+
     if ( result != TP_RUN_OK )
     {
-        if ( context->first_app_id == app->get_id() )
+        if ( context->first_app_id == id )
         {
             context->quit();
         }
@@ -1578,6 +1601,11 @@ void TPContext::app_run_callback( App * app , int result )
         context->current_app = app;
 
         context->current_app->ref();
+
+        if ( context->first_app_id != id )
+        {
+            context->get_db()->app_launched( id );
+        }
 
         app->animate_in();
     }

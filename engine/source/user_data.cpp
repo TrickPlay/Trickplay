@@ -4,10 +4,13 @@
 #include "util.h"
 #include "profiler.h"
 
-//.............................................................................
+//=============================================================================
 
-Debug_OFF udlog;
-Debug_OFF udlog2;
+#define TP_LOG_DOMAIN   "USERDATA"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //=============================================================================
 
@@ -17,7 +20,7 @@ UserData::Handle * UserData::Handle::make( UserData * user_data , gpointer user 
 
     Handle * result = g_slice_new( Handle );
 
-    udlog( "CREATING UD HANDLE %p : UD %p : MASTER : %p" , result , user_data , user_data->master );
+    tplog( "CREATING UD HANDLE %p : UD %p : MASTER : %p" , result , user_data , user_data->master );
 
     result->master = user_data->master;
 
@@ -28,7 +31,7 @@ UserData::Handle * UserData::Handle::make( UserData * user_data , gpointer user 
     result->user = user;
     result->user_destroy = user_destroy;
 
-    udlog2( "CREATED UD HANDLE" );
+    tplog2( "CREATED UD HANDLE" );
 
     return result;
 }
@@ -44,7 +47,7 @@ void UserData::Handle::destroy( gpointer _handle )
 
     Handle * handle = Handle::get( _handle );
 
-    udlog( "DESTROYING UD HANDLE %p : MASTER %p" , handle , handle->master );
+    tplog( "DESTROYING UD HANDLE %p : MASTER %p" , handle , handle->master );
 
     if ( handle->user_destroy )
     {
@@ -55,7 +58,7 @@ void UserData::Handle::destroy( gpointer _handle )
 
     g_slice_free( Handle , handle );
 
-    udlog2( "DESTROYED UD HANDLE" );
+    tplog2( "DESTROYED UD HANDLE" );
 }
 
 lua_State * UserData::Handle::get_lua_state()
@@ -108,7 +111,7 @@ UserData * UserData::make( lua_State * L , const gchar * type )
     g_assert( result->strong_ref != LUA_REFNIL && result->strong_ref != LUA_NOREF );
     g_assert( result->weak_ref != LUA_REFNIL && result->weak_ref != LUA_NOREF );
 
-    udlog( "CREATED '%s' USER DATA %p" , result->type , result );
+    tplog( "CREATED '%s' USER DATA %p" , result->type , result );
 
     LSG_CHECK( 1 );
 
@@ -154,7 +157,7 @@ gpointer UserData::initialize_with_master( gpointer _master )
 
 gpointer UserData::initialize_with_client( gpointer _client )
 {
-    udlog( "INITIALIZING '%s' UD %p : MASTER %p : CLIENT %p" , type , this , master , _client );
+    tplog( "INITIALIZING '%s' UD %p : MASTER %p : CLIENT %p" , type , this , master , _client );
 
     // Make sure it only gets called once
 
@@ -170,7 +173,7 @@ gpointer UserData::initialize_with_client( gpointer _client )
 
         g_assert( master );
 
-        udlog2( "  CREATED NEW MASTER %p" , master );
+        tplog2( "  CREATED NEW MASTER %p" , master );
     }
 
     client = _client;
@@ -179,7 +182,7 @@ gpointer UserData::initialize_with_client( gpointer _client )
     {
         client = master;
 
-        udlog2( "  USING MASTER AS CLIENT" );
+        tplog2( "  USING MASTER AS CLIENT" );
     }
 
     g_hash_table_insert( get_client_map() , client , master );
@@ -191,7 +194,7 @@ gpointer UserData::initialize_with_client( gpointer _client )
 
     // The object should have at least one strong ref. We add our toggle ref.
 
-    udlog2( "  ADDING MASTER TOGGLE REF" );
+    tplog2( "  ADDING MASTER TOGGLE REF" );
 
     g_object_add_toggle_ref( master , ( GToggleNotify ) toggle_notify , this );
 
@@ -200,11 +203,11 @@ gpointer UserData::initialize_with_client( gpointer _client )
     // If this makes the toggle ref the last one, we should end up with a
     // weak ref to the Lua proxy - which means it can be collected.
 
-    udlog2( "  REMOVING MASTER STRONG REF" );
+    tplog2( "  REMOVING MASTER STRONG REF" );
 
     g_object_unref( master );
 
-    udlog2( "INITIALIZED" );
+    tplog2( "INITIALIZED" );
 
     return client;
 }
@@ -228,7 +231,7 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
     g_assert( self );
     g_assert( self->master == master );
 
-    udlog( "TOGGLE PROXY REF FOR '%s' UD %p : MASTER %p : LAST = %s" , self->type , self , master , is_last_ref ? "TRUE" : "FALSE" );
+    tplog( "TOGGLE PROXY REF FOR '%s' UD %p : MASTER %p : LAST = %s" , self->type , self , master , is_last_ref ? "TRUE" : "FALSE" );
 
     if ( is_last_ref )
     {
@@ -236,7 +239,7 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
         if ( self->strong_ref == LUA_NOREF )
         {
-            udlog( "  >>>>>>>>>> STRONG REF IS NOT THERE" );
+            tplog( "  >>>>>>>>>> STRONG REF IS NOT THERE" );
             return;
         }
 
@@ -248,7 +251,7 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
         self->strong_ref = LUA_NOREF;
 
-        udlog2( "  SWITCHED TO WEAK PROXY REF" );
+        tplog2( "  SWITCHED TO WEAK PROXY REF" );
     }
     else
     {
@@ -262,7 +265,7 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
         if ( lua_isnil( self->L , -1 ) )
         {
-            udlog( "  >>>>>>>>>> WEAK REF IS GONE!" );
+            tplog( "  >>>>>>>>>> WEAK REF IS GONE!" );
             lua_pop(self->L,1);
             return;
         }
@@ -273,7 +276,7 @@ void UserData::toggle_notify( UserData * self , GObject * master , gboolean is_l
 
         g_assert( self->strong_ref != LUA_REFNIL && self->strong_ref != LUA_NOREF );
 
-        udlog2( "  SWITCHED TO STRONG PROXY REF" );
+        tplog2( "  SWITCHED TO STRONG PROXY REF" );
     }
 }
 
@@ -283,7 +286,7 @@ void UserData::finalize( lua_State * L , int index )
 {
     UserData * self = UserData::get( L , index );
 
-    udlog( "FINALIZING '%s' UD %p : MASTER %p : CLIENT %p" , self->type , self , self->master , self->client );
+    tplog( "FINALIZING '%s' UD %p : MASTER %p : CLIENT %p" , self->type , self , self->master , self->client );
 
     if ( self->master )
     {
@@ -298,7 +301,7 @@ void UserData::finalize( lua_State * L , int index )
         // Remove the toggle ref, which should then free the master object
         // (Unless someone else still has a ref to it)
 
-        udlog2( "  REMOVING TOGGLE REF" );
+        tplog2( "  REMOVING TOGGLE REF" );
 
         g_object_remove_toggle_ref( self->master , ( GToggleNotify ) toggle_notify , self );
     }
@@ -307,7 +310,7 @@ void UserData::finalize( lua_State * L , int index )
 
     if ( self->client )
     {
-        udlog2( "  REMOVING CLIENT %p" , self->client );
+        tplog2( "  REMOVING CLIENT %p" , self->client );
 
         g_hash_table_remove( get_client_map() , self->client );
     }
@@ -315,7 +318,7 @@ void UserData::finalize( lua_State * L , int index )
     // Unref the callback table. We don't care if it is LUA_NOREF, because
     // luaL_unref will deal with it gracefully.
 
-    udlog2( "  CLEARING CALLBACKS" );
+    tplog2( "  CLEARING CALLBACKS" );
 
     lb_strong_unref( L , self->callbacks_ref );
 
@@ -335,7 +338,7 @@ void UserData::finalize( lua_State * L , int index )
     self->strong_ref = LUA_NOREF;
     self->callbacks_ref = LUA_NOREF;
 
-    udlog2( "FINALIZED" );
+    tplog2( "FINALIZED" );
 }
 
 //.............................................................................

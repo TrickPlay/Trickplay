@@ -27,7 +27,13 @@ void Console::readline_handler( char * line )
 #endif
 
 
-static Debug_ON log( "CONSOLE" );
+//-----------------------------------------------------------------------------
+#define TP_LOG_DOMAIN   "CONSOLE"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+//-----------------------------------------------------------------------------
 
 Console * Console::make( TPContext * context )
 {
@@ -85,13 +91,13 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
         if ( error )
         {
             delete new_server;
-            log( "FAILED TO START ON PORT %d : %s", port, error->message );
+            tpwarn( "FAILED TO START ON PORT %d : %s", port, error->message );
             g_clear_error( &error );
         }
         else
         {
             server.reset( new_server );
-            log( "READY ON PORT %d", server->get_port() );
+            tplog( "READY ON PORT %d", server->get_port() );
         }
     }
 
@@ -239,10 +245,10 @@ gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gp
 void Console::connection_accepted( gpointer connection, const char * remote_address )
 {
     server->write_printf( connection, "WELCOME TO TrickPlay %d.%d.%d\n", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
-    log( "ACCEPTED CONNECTION FROM %s", remote_address );
+    tplog( "ACCEPTED CONNECTION FROM %s", remote_address );
 }
 
-void Console::connection_data_received( gpointer connection, const char * data , gsize )
+void Console::connection_data_received( gpointer connection, const char * data , gsize , bool * )
 {
     gchar * line = g_strdup( data );
     process_line( line );
