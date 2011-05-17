@@ -1549,79 +1549,63 @@ function ui_element.textInput(table)
     	focus_box = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
-		if(p.skin ~= "custom") then 
-    		box_img = assets(skin_list[p.skin]["textinput"])
-    		box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
-    		focus_img = assets(skin_list[p.skin]["textinput_focus"])
-    		focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
-		else 
-	    	box_img = Image{}
-	    	focus_img = Image{}
-		end 
+	if(p.skin ~= "custom") then 
+    	     box_img = assets(skin_list[p.skin]["textinput"])
+    	     box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
+    	     focus_img = assets(skin_list[p.skin]["textinput_focus"])
+    	     focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
+	else 
+	     box_img = Image{}
+	     focus_img = Image{}
+	end 
 
-    		text = Text{text=p.text, editable=true, cursor_visible=false, cursor_color = p.cursor_color, wants_enter = true, 
-						reactive = true, font = p.text_font, color = p.text_color}
-    		text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
-    		t_group:add(box, focus_box, box_img, focus_img, text)
+    	text = Text{text=p.text, editable=true, cursor_visible=false, cursor_color = p.cursor_color, wants_enter = true, reactive = true, font = p.text_font, color = p.text_color}
+    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
+    	t_group:add(box, focus_box, box_img, focus_img, text)
 
-		local t_pos_min = t_group.x + t_group:find_child("textInput").x 
-		--print("t_pos_min", t_pos_min)
+	if editor_lb == nil or editor_use then 
+	   function t_group:on_button_down()
+		t_group.extra.on_focus_in()
+		text:grab_key_focus()
+		return true
+	   end 
 
-		if editor_lb == nil or editor_use then 
-	   	function t_group:on_button_down()
-				t_group.extra.on_focus_in()
-				text:grab_key_focus()
-				return true
-	   	end 
+	   local t_pos_max = p.ui_width - 2 * p.padding
 
-	   	local t_pos_max = p.ui_width - 2 * p.padding
-
-	   	function text:on_key_down(key)
-	    	local c_x, prev_c_x
-			local t_w = t_group:find_child("textInput").w
+	   function text:on_key_down(key)
+	        local c_x, prev_c_x
+		local t_w = t_group:find_child("textInput").w
 	        local scroll_w = t_w - t_pos_max 
-			local c_pos = t_group:find_child("textInput").cursor_position
+		local c_pos = t_group:find_child("textInput").cursor_position
 	
-			if key == keys.Return and shift == false then 
-				screen:grab_key_focus()
-				t_group.extra.on_focus_out()
-				return true
-			elseif key == keys.Left then 
-				if t_group:find_child("textInput").position_to_coordinates then 
-					if t_group:find_child("textInput").clip then 
-		            	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
+		if key == keys.Return and shift == false then 
+			screen:grab_key_focus()
+			t_group.extra.on_focus_out()
+			return true
+		elseif key == keys.Left then 
+			if t_group:find_child("textInput").position_to_coordinates then 
+				if t_group:find_child("textInput").clip then 
+		                     	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
 				     	local x = c_x[1] 
-						print(c_pos)
-						----print(x)
-						--print(t_pos_min)
-		    			--print(t_pos_min - x) 
---[[
-						if x <= t_pos_min then 
-		    				t_group:find_child("textInput").x = t_group:find_child("textInput").x + (t_pos_min - x) 
-		    				--t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
-						end 
-							
 				     	local letter_sz 
-						if c_pos ~= -1 and c_pos ~= 0 then 
-		                     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
+					if c_pos ~= -1 and c_pos ~= 0 then 
+		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
 				     	     letter_sz =  x - prev_c_x[1] 
-						end 
+					end 
 	
 				     	if (t_group:find_child("textInput").clip[1] > x-p.padding ) and letter_sz then 
-						    print(letter_sz)
 		    			    t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz 
 		    			    t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - letter_sz ,  
-					    	t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
-					    	letter_sz = nil
-					    	c_x = nil
-					    	prev_c_x = nil
+					    t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
+					    letter_sz = nil
+					    c_x = nil
+					    prev_c_x = nil
 				     	end
-	]]						
 			        end
-				end 
-			elseif key == keys.Right then 
-				if t_group:find_child("textInput").position_to_coordinates then 
-					if t_group:find_child("textInput").clip then 
+			end 
+		elseif key == keys.Right then 
+			if t_group:find_child("textInput").position_to_coordinates then 
+				if t_group:find_child("textInput").clip then 
 			        	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
 				     	local x = c_x[1] 
 				     	local letter_sz 
@@ -1640,58 +1624,55 @@ function ui_element.textInput(table)
 					end 
 				end 
 			end 
-			elseif scroll_w > 0 then 
-		    	t_group:find_child("textInput").x = scroll_w * -1
-		    	t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+		elseif scroll_w > 0 then 
+		    t_group:find_child("textInput").x = scroll_w * -1
+		    t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
 	        end 
-	   	end 
-		end 
 
-    	if (p.skin == "custom") then 
-			box_img.opacity = 0
-    	else 
-			box.opacity = 0 
-			box_img.opacity = 255 
-		end 
+	   end 
+	end 
+
+
+    	if (p.skin == "custom") then box_img.opacity = 0
+    	else box.opacity = 0 box_img.opacity = 255 end 
 
      end 
 
      create_textInputField()
 
      function t_group.extra.on_focus_in()
-		if t_group:find_child("textInput").text ~= "--------------" then 
-	  		current_focus = t_group
-          	if (p.skin == "custom") then 
-	     		box.opacity = 0
-	     		focus_box.opacity = 255
-          	else
-	     		box_img.opacity = 0
-             	focus_img.opacity = 255
-          	end 
-	  		text.editable = true
-	  		text.cursor_visible = true
-	  		text.reactive = true 
-          	text:grab_key_focus(text)
-		end
+	if t_group:find_child("textInput").text ~= "--------------" then 
+	  current_focus = t_group
+          if (p.skin == "custom") then 
+	     box.opacity = 0
+	     focus_box.opacity = 255
+          else
+	     box_img.opacity = 0
+             focus_img.opacity = 255
+          end 
+	  text.editable = true
+	  text.cursor_visible = true
+	  text.reactive = true 
+          text:grab_key_focus(text)
+	end
      end
 
      function t_group.extra.on_focus_out()
           if (p.skin == "custom") then 
-	     		box.opacity = 255
-	     		focus_box.opacity = 0
+	     box.opacity = 255
+	     focus_box.opacity = 0
           else
-	     		box_img.opacity = 255
-             	focus_img.opacity = 0
+	     box_img.opacity = 255
+             focus_img.opacity = 0
           end 
-	  		text.cursor_visible = false
-	  		text.reactive = false 
-			t_group.text = text.text
+	  text.cursor_visible = false
+	  text.reactive = false 
      end
 
      mt = {}
      mt.__newindex = function (t, k, v)
-	 	if k == "bsize" then  
-	     	p.ui_width = v[1] p.ui_height = v[2]  
+	if k == "bsize" then  
+	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
@@ -1700,9 +1681,9 @@ function ui_element.textInput(table)
 
      mt.__index = function (t,k)
         if k == "bsize" then 
-	     	return {p.ui_width, p.ui_height}  
+	    return {p.ui_width, p.ui_height}  
         else 
-	     	return p[k]
+	    return p[k]
         end 
      end 
   
@@ -3735,17 +3716,15 @@ function ui_element.scrollPane(t)
     --default parameters
     local p = {
         visible_w    =  600,
-        --color     =  {255,255,255,255},
+	--color     =  {255,255,255,255},
         visible_h    =  600,
         content   = Group{},
         virtual_h = 1000,
-        virtual_w = 1000,
-        --arrow_clone_source = nil,
-        --arrow_sz = 15,
-        arrow_color = {255,255,255,255},
-        arrows_visible = true,
-        --arrows_in_box = false,
-        --arrows_centered = false,
+	virtual_w = 1000,
+	--arrow_clone_source = nil,
+	
+	--arrows_in_box = false,
+	--arrows_centered = false,
         --hor_arrow_y     = nil,
         --vert_arrow_x    = nil,
         bar_color_inner     = {180,180,180,255},
@@ -3983,27 +3962,6 @@ function ui_element.scrollPane(t)
 			}
 		end
 	end
-    local make_arrow = function()
-		
-		local c = Canvas{size={p.bar_thickness,p.bar_thickness}}
-		
-		c:move_to(    0,c.h)
-		c:line_to(c.w/2,  0)
-		c:line_to(  c.w,c.h)
-		c:line_to(    0,c.h)
-		
-		c:set_source_color( p.arrow_color )
-		c:fill(true)
-		
-		if c.Image then
-			c= c:Image()
-		end
-		
-		c.anchor_point={c.w/2,c.h}
-		
-		return c
-		
-	end
     local function make_hor_bar(w,h,ratio)
         local bar = Group{}
         
@@ -4218,9 +4176,6 @@ function ui_element.scrollPane(t)
         if p.bar_offset < 0 then
             track_w = p.visible_w+p.bar_offset
             track_h = p.visible_h+p.bar_offset
-        elseif p.arrows_visible then
-            track_w = p.visible_w-p.bar_thickness*2-10
-            track_h = p.visible_h-p.bar_thickness*2-10
         else
             track_w = p.visible_w
             track_h = p.visible_h
@@ -4254,32 +4209,10 @@ end
                 track_w/p.virtual_w
             )
             hor_s_bar.name = "Horizontal Scroll Bar"
-            if p.arrows_visible then
-                local l = make_arrow()
-                l.name="L"
-                l.x = p.box_width+p.bar_thickness
-                l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                scroll_group:add(l)
-                l.reactive=true
-                function l:on_button_down()
-                    scroll_x(1)
-                end
-                hor_s_bar.position={
-                    p.box_width+p.bar_thickness+5,
-                    p.box_width*2+p.visible_h+p.bar_offset
-                }
-                local r = make_arrow()
-                r.name="R"
-                r.x = p.box_width+p.bar_thickness+hor_s_bar.w+10
-                r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                scroll_group:add(r)
-                r.reactive=true
-            else
-                hor_s_bar.position={
-                    p.box_width,
-                    p.box_width*2+p.visible_h+p.bar_offset
-                }
-            end
+            hor_s_bar.position={
+                p.box_width,
+                p.box_width*2+p.visible_h+p.bar_offset
+            }
             scroll_group:add(hor_s_bar)
             
             grip_hor = hor_s_bar:find_child("grip")
@@ -4310,7 +4243,7 @@ end
             function grip_hor:on_button_up(x,y,button,num_clicks)
                 hold = false
             end
---]] 
+-]] 
 
 
 
@@ -4357,36 +4290,10 @@ end
                 track_h/p.virtual_h
             )
             vert_s_bar.name = "Vertical Scroll Bar"
-            if p.arrows_visible then
-                local up = make_arrow()
-                up.name="UP"
-                up.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                up.y = p.box_width+p.bar_thickness
-                scroll_group:add(up)
-                up.reactive=true
-                function up:on_button_down()
-                    scroll_y(1)
-                end
-                vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width+p.bar_thickness+5
-                }
-                local dn = make_arrow()
-                dn.name="DN"
-                dn.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                dn.y = p.box_width+p.bar_thickness+vert_s_bar.h+10
-                dn.z_rotation = {180,0,0}
-                scroll_group:add(dn)
-                dn.reactive=true
-                function dn:on_button_down()
-                    scroll_y(-1)
-                end
-            else
-                vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width
-                }
-            end
+            vert_s_bar.position={
+                p.box_width*2+p.visible_w+p.bar_offset,
+                p.box_width
+            }
             --vert_s_bar.z_rotation={90,0,0}
             scroll_group:add(vert_s_bar)
             
@@ -4399,20 +4306,20 @@ end
 	   	        
                 dragging = {grip_vert,
 	   		        function(x,y)
-                        
+	   			
 	   			        grip_vert.y = y - dy
-                        
+	   			
 	   			        if  grip_vert.y < 0 then
 	   				        grip_vert.y = 0
 	   			        elseif grip_vert.y > track_h-grip_vert.h then
 	   				           grip_vert.y = track_h-grip_vert.h
 	   			        end
-                        
+	   			
 	   			        p.content.y = -(grip_vert.y) * p.virtual_h/track_h
-                        
+	   			
 	   		        end 
 	   	        }
-                
+	   	
                 return true
             end
 
@@ -5400,14 +5307,13 @@ function ui_element.tabBar(t)
     
     --default parameters
     local p = {
-        name  = "Drop Down Bar", 			-- ??? 
+        name  = "Drop Down Bar",
         font  = "DejaVu Sans 26px",
         tab_labels = {
             "Item 1",
             "Item 2",
             "Item 3",
         },
-        tabs = {},
         --tab_align          = "CENTER",
         --label_align        = "CENTER",
         label_padding = 10,
@@ -5433,7 +5339,7 @@ function ui_element.tabBar(t)
     
     local create
     local current_index = 1
-    --local tabs = {}
+    local tabs = {}
     local tab_bg = {}
     local tab_focus = {}
 	
@@ -5543,35 +5449,14 @@ function ui_element.tabBar(t)
 	
     
     local umbrella     = Group{
-        name="TabContainer",
-		reactive = true,  
+        name="Tab Container",
         extra={
             type="TabBar",
             insert_tab = function(self,index)
-                
-                if index == nil then index = #p.tab_labels + 1 end
-                
-                table.insert(p.tab_labels,index,"TAB")
-                
-                table.insert(p.tabs,index,Group{})
-                
-                create()
-                
             end,
             remove_tab = function(self,index)
-                if index == nil then index = #p.tab_labels + 1 end
-                
-                table.remove(p.tab_labels,index,"TAB")
-                
-                table.remove(p.tabs,index,Group{})
-                
-                create()
             end,
-            rename_tab = function(self,index,name)
-                assert(index)
-                p.tab_labels[index] = name
-                
-                create()
+            rename_tab = function(self,index)
             end,
             
             move_tab_up = function(self,index)
@@ -5580,9 +5465,9 @@ function ui_element.tabBar(t)
                 p.tab_labels[i-1] = p.tab_labels[i]
                 p.tab_labels[i]   = temp
                 
-                temp      = p.tabs[i-1]
-                p.tabs[i-1] = p.tabs[i]
-                p.tabs[i]   = temp
+                temp      = tabs[i-1]
+                tabs[i-1] = tabs[i]
+                tabs[i]   = temp
                 
                 create()
             end,
@@ -5592,9 +5477,9 @@ function ui_element.tabBar(t)
                 p.tab_labels[i+1] = p.tab_labels[i]
                 p.tab_labels[i]   = temp
                 
-                temp      = p.tabs[i+1]
-                p.tabs[i+1] = p.tabs[i]
-                p.tabs[i]   = temp
+                temp      = tabs[i+1]
+                tabs[i+1] = tabs[i]
+                tabs[i]   = temp
                 
                 create()
             end,
@@ -5602,11 +5487,11 @@ function ui_element.tabBar(t)
             --switching 'visible tab' functions
             display_tab = function(self,index)
                 if index < 1 or index > #p.tab_labels then return end
-                p.tabs[current_index]:hide()
+                tabs[current_index]:hide()
 				tab_bg[current_index]:show()
 				tab_focus[current_index]:hide()
                 current_index = index
-                p.tabs[current_index]:show()
+                tabs[current_index]:show()
 				tab_bg[current_index]:hide()
 				tab_focus[current_index]:show()
             end,
@@ -5622,7 +5507,7 @@ function ui_element.tabBar(t)
             end,
 			
 			get_tab_group = function(self,index)
-				return p.tabs[index]
+				return tabs[index]
 			end,
         }
     }
@@ -5634,8 +5519,6 @@ function ui_element.tabBar(t)
 		current_index = 1
 		
         umbrella:clear()
-        tab_bg = {}
-        tab_focus = {}
         
         local bg = Rectangle{
             color        = p.fill_color,
@@ -5648,7 +5531,7 @@ function ui_element.tabBar(t)
         umbrella:add(bg)
         for i = 1, #p.tab_labels do
             
-            if p.tabs[i] == nil then p.tabs[i] = Group{} end
+            if tabs[i] == nil then tabs[i] = Group{} end
             
             labels[i] = Text{
                 font  = p.font,
@@ -5690,7 +5573,7 @@ function ui_element.tabBar(t)
                 tab_bg[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
                 tab_focus[i].x = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
                 labels[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)+ p.label_padding
-                p.tabs[i].y = tab_bg[i].h
+                tabs[i].y = tab_bg[i].h
             else
                 tab_bg[i] = make_vert_tab(
                     txt_w + 2*p.label_padding,
@@ -5708,10 +5591,10 @@ function ui_element.tabBar(t)
                 tab_focus[i].y = txt_h*(i-1)
                 labels[i].y = txt_h*(i-1)
                 labels[i].x =  p.label_padding
-				p.tabs[i].x = tab_bg[i].w
+				tabs[i].x = tab_bg[i].w
             end
             tab_focus[i]:hide()
-            umbrella:add(p.tabs[i],tab_bg[i],tab_focus[i],labels[i])
+            umbrella:add(tabs[i],tab_bg[i],tab_focus[i],labels[i])
         end
         
         if p.tab_position == "TOP" then
@@ -5720,8 +5603,8 @@ function ui_element.tabBar(t)
             bg.x = tab_bg[1].w-p.border_width
         end
         
-        for i = #p.tab_labels+1, #p.tabs do
-            p.tabs[i]      = nil
+        for i = #p.tab_labels+1, #tabs do
+            tabs[i]      = nil
             tab_bg[i]    = nil
             tab_focus[i] = nil
         end
@@ -5755,15 +5638,14 @@ function ui_element.arrowPane(t)
         
 		visible_w =     600,
         visible_h =     600,
-        content   = 	Group{},
+        content   = Group{},
         virtual_h =    1000,
 		virtual_w =    1000,
         arrow_sz  =      15,
 		
         arrow_dist_to_frame = 5,
         arrows_visible =   true,
-        arrow_color = {160,160,160,255},
-        box_color =   {160,160,160,255},
+        box_color = {160,160,160,255},
         box_width =    2,
         skin = "default",
     }
@@ -5798,7 +5680,7 @@ function ui_element.arrowPane(t)
 		c:line_to(  c.w,c.h)
 		c:line_to(    0,c.h)
 		
-		c:set_source_color( p.arrow_color )
+		c:set_source_color( p.box_color )
 		c:fill(true)
 		
 		if c.Image then
