@@ -10,24 +10,30 @@
 
 @implementation GestureViewController
 
+@synthesize version;
+@synthesize socketManager;
+
 @synthesize loadingIndicator;
 @synthesize theTextField;
 @synthesize backgroundView;
+
 @synthesize touchDelegate;
 @synthesize accelDelegate;
 @synthesize socketDelegate;
+@synthesize advancedUIDelegate;
 
 - (void)setupService:(NSInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n {
     
-    NSLog(@"Service Setup: %@ host: %@ port: %d", n, h, p);
+    NSLog(@"GestureView Service Setup: %@ host: %@ port: %d", n, h, p);
     
     port = p;
     if (hostName) {
         [hostName release];
     }
     hostName = [h retain];
+    http_port = nil;
 }
 
 - (BOOL)startService {
@@ -46,21 +52,37 @@
     // Made a connection, let the service know!
 	// Get the actual width and height of the available area
 	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
-	NSInteger height = mainframe.size.height;
-	height = height - 45;  //subtract the height of navbar
-	NSInteger width = mainframe.size.width;
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3\t%@\tKY\tAX\tCK\tTC\tMC\tSD\tUI\tTE\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, width, height, width, height ] dataUsingEncoding:NSUTF8StringEncoding];
+	backgroundHeight = mainframe.size.height;
+	backgroundHeight = backgroundHeight - 45;  //subtract the height of navbar
+	backgroundWidth = mainframe.size.width;
+    NSString *hasPictures = @"";
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+        hasPictures = @"\tPS";
+    }
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
+    
+    camera = nil;
 	
     audioController = [[AudioController alloc] initWithResourceManager:resourceManager socketManager:socketManager];
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
     
     //[loadingIndicator stopAnimating];
     
     return YES;
+}
+
+
+- (void)setHTTPPort:(NSString *)my_http_port {
+    if (http_port) {
+        [http_port release];
+    }
+    http_port = [my_http_port retain];
+    [socketManager setPort:[http_port integerValue]];
 }
 
 - (BOOL)hasConnection {
@@ -68,7 +90,7 @@
 }
 
 - (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred");
+    NSLog(@"Socket Error Occurred in GestureView");
     [socketManager release];
     socketManager = nil;
     // everything will get released from the navigation controller's delegate call
@@ -81,7 +103,7 @@
 }
 
 - (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered");
+    NSLog(@"Socket End Encountered in GestureView");
     [socketManager release];
     socketManager = nil;
     // everything will get released from the navigation controller's delegate call
@@ -116,6 +138,13 @@
 #pragma mark Handling Commands From Server
 
 //------------------- Handling Commands From Server ------------------
+
+//--Welcome message
+
+- (void)do_WM:(NSArray *)args {
+    self.version = [args objectAtIndex:0];
+    [self setHTTPPort:(NSString *)[args objectAtIndex:1]];
+}
 
 //--Audio junk
 
@@ -180,12 +209,16 @@
 - (void)do_ET:(NSArray *)args {
     theTextField.hidden = NO;
     [theTextField becomeFirstResponder];
+    
     // see if trickplay passed any text
     if ([args count] > 1) {
         theTextField.text = [args objectAtIndex:1];
     } else {
         theTextField.text = @"";
     }
+    [theTextField selectAll:theTextField];
+    [UIMenuController sharedMenuController].menuVisible = NO;
+    // start editing
     [self.view bringSubviewToFront:theTextField];
 }
 
@@ -199,7 +232,11 @@
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
-// UITextFieldDelegate method
+// UITextFieldDelegate methods
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    
+}
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [theTextField resignFirstResponder];
     theTextField.hidden = YES;
@@ -213,8 +250,15 @@
     NSLog(@"Declaring Resource");
     [args retain];
     
+    // version 3.1 and higher have groups
+    NSString *groupName = nil;
+    if ([args count] > 2) {
+        groupName = [args objectAtIndex:2];
+    }
+    
+    
     [resourceManager declareResourceWithObject:[
-                              NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", @"", @"scale", nil
+                              NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", groupName, @"group", nil
                               ]
                       forKey:[args objectAtIndex:0]
      ];
@@ -222,8 +266,12 @@
     [args release];
 }
 
+- (void)do_DG:(NSArray *)args {
+    [resourceManager dropResourceGroup:(NSString *)[args objectAtIndex:0]];
+}
+
 /**
- * Updating the bacground
+ * Updating the background
  */
 - (void)do_UB:(NSArray *)args {
     NSLog(@"Updating Background");
@@ -232,7 +280,6 @@
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
     if ([resourceManager getResourceInfo:key]) {
-        //**
         NSData *imageData = [resourceManager fetchResource:key];
         if (imageData) {
             UIImage *tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
@@ -242,14 +289,6 @@
             //**for testing
             //backgroundView.image = [UIImage imageNamed:@"background.png"];
         }
-        //*/
-        /**
-        UIImageView *newBackgroundView = [resourceManager fetchImageViewUsingResource:key frame:backgroundView.frame];
-        [backgroundView removeFromSuperview];
-        self.backgroundView = newBackgroundView;
-        [self.view addSubview:backgroundView];
-        [loadingIndicator stopAnimating];
-        //*/
     }
     
     [args release];
@@ -272,24 +311,9 @@
         height = [[args	objectAtIndex:4] floatValue];
         CGRect frame = CGRectMake(x, y, width, height);
         UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
-        /**
-        // Grab the image, make sure its there.
-        NSData *imageData = [resourceManager fetchResource:key];
-        if (!imageData) return;
-        UIImage *tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
-        // Now we have the image, we need to draw it
-        NSLog(@"Drawing resource");
-        CGFloat
-        x = [[args objectAtIndex:1] floatValue],
-        y = [[args objectAtIndex:2] floatValue],
-        width = [[args objectAtIndex:3] floatValue],
-        height = [[args	objectAtIndex:4] floatValue];
+        newImageView.contentMode = UIViewContentModeScaleAspectFit;
+        newImageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
         
-        UIImageView *newImageView = [[UIImageView alloc] initWithImage:tempImage];
-        newImageView.frame = CGRectMake(x, y, width, height);
-        //*/
-        
-        //[self.view addSubview:newImageView];
         // NOTE: Assumes backgroundView is only replaced in clearUI(),
         // hence, replace backgroundView.image, do not replace the entire View
         [backgroundView addSubview:newImageView];
@@ -386,6 +410,40 @@
     [touchDelegate touchesCancelled:touches withEvent:event];
 }
 
+
+//-------------------- Camera stuff ----------------------------
+
+- (void)do_PI:(NSArray *)args {
+    if (!camera) {
+        camera = [[CameraViewController alloc] initWithNibName:@"CameraViewController" bundle:nil];
+    }
+    [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
+    [self.navigationController pushViewController:camera animated:YES];
+}
+
+- (void)finishedPickingImage {
+    NSLog(@"Finished Picking Image");
+}
+
+- (void)finishedSendingImage {
+    NSLog(@"Finished Sending Image");
+}
+
+- (void)canceledPickingImage {
+    NSLog(@"Canceled Picking Image");
+}
+
+//-------------------- Super Advanced UI stuff -----------------
+
+- (void)do_UX:(NSArray *)args {
+    if ([(NSString *)[args objectAtIndex:0] compare:@"CREATE"] == NSOrderedSame) {
+        [advancedUIDelegate createObject:[args objectAtIndex:1]];
+    } else if ([(NSString *)[args objectAtIndex:0] compare:@"DESTROY"] == NSOrderedSame) {
+        [advancedUIDelegate destroyObject:[args objectAtIndex:1]];
+    }
+}
+
+
 //-------------------- Other View stuff ------------------------
 
 - (void)clean {
@@ -398,6 +456,14 @@
     [theTextField resignFirstResponder];
 	theTextField.hidden = YES;
     
+    /*
+    backgroundView.image = [UIImage imageNamed:@"background.png"];
+    for (UIView *subview in backgroundView.subviews) {
+        [subview removeFromSuperview];
+    }
+    //*/
+    
+    //*
     CGFloat
     x = self.view.frame.origin.x,
     y = self.view.frame.origin.y,
@@ -410,8 +476,8 @@
     self.backgroundView = newImageView;
     [self.view addSubview:backgroundView];
     [newImageView release];
+    //*/
 }
-
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*
@@ -478,11 +544,20 @@
 
 - (void)dealloc {
     NSLog(@"Gesture View Controller dealloc");
+    if (version) {
+        [version release];
+    }
     if (hostName) {
         [hostName release];
     }
+    if (http_port) {
+        [http_port release];
+    }
     if (audioController) {
         [audioController release];
+    }
+    if (advancedUIDelegate) {
+        [(AdvancedUIObjectManager *)advancedUIDelegate release];
     }
     if (resourceManager) {
         [resourceManager release];
@@ -498,6 +573,9 @@
     }
     if (styleAlert) {
         [styleAlert release];
+    }
+    if (camera) {
+        [camera release];
     }
     [multipleChoiceArray release];
     [loadingIndicator release];

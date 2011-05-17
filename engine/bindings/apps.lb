@@ -274,7 +274,7 @@ global apps [[Apps*]]
 
                 while ( lua_next( L, required_fingerprints ) )
                 {
-                    if ( lua_isstring( L, -1 ) )
+                    if ( lua_really_isstring( L, -1 ) )
                     {
                         const char * v = lua_tostring( L, -1 );
 
@@ -296,7 +296,7 @@ global apps [[Apps*]]
 
                 while ( lua_next( L, extra ) )
                 {
-                    if ( lua_isstring( L, -2 ) )
+                    if ( lua_really_isstring( L, -2 ) )
                     {
                         const char * k = lua_tostring( L, -2 );
                         const char * v = lua_tostring( L, -1 );

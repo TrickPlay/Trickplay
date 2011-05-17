@@ -16,169 +16,187 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 # Include directories
 #------------------------------------------------------------------------------
 
-TP_FIND_INCLUDE( expat.h 								ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( curl/curl.h 							ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( glib-2.0 glib.h 						ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( gio-unix-2.0 gio/gunixsocketaddress.h 	ENGINE_INCLUDE_DIRS )
-TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( cairo cairo.h							ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( pango-1.0 pango/pango.h				ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 			ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( fontconfig fontconfig.h                ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( freetype2 freetype/freetype.h          ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( png.h								    ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( jpeglib.h							    ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( png.h								    ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( tiffio.h 							    ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( ossp/uuid.h							ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( atk-1.0 atk/atk.h 			            ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( sndfile.h								ENGINE_INCLUDE_DIRS )
-TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
+include( FindPkgConfig )
 
-#------------------------------------------------------------------------------
-# Avahi for MDNS
+IF( PKG_CONFIG_FOUND )
+    pkg_check_modules(CURL REQUIRED libcurl)
+    pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+    pkg_check_modules(GIO_UNIX REQUIRED gio-unix-2.0)
+    pkg_check_modules(CAIRO REQUIRED cairo)
+    pkg_check_modules(PANGO REQUIRED pango)
+    pkg_check_modules(CLUTTER REQUIRED clutter-1.0)
+    pkg_check_modules(FONTCONFIG REQUIRED fontconfig)
+    pkg_check_modules(FREETYPE2 REQUIRED freetype2)
+    pkg_check_modules(LIBPNG REQUIRED libpng)
+    pkg_check_modules(JSON_GLIB REQUIRED json-glib-1.0)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    pkg_check_modules(UUID REQUIRED uuid)
+else(IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+    pkg_check_modules(UUID REQUIRED ossp-uuid)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    pkg_check_modules(ATK REQUIRED atk)
+    pkg_check_modules(SNDFILE REQUIRED sndfile)
+    pkg_check_modules(SOUP REQUIRED libsoup-2.4)
+    pkg_check_modules(SQLITE REQUIRED sqlite3)
+    pkg_check_modules(OPENSSL REQUIRED openssl)
+    # Next one not required, cos we really only care about curl
+    pkg_check_modules(CARES libcares)
 
 if (TP_CONTROLLER_DISCOVERY_MDNS)
-	
-	TP_FIND_INCLUDE( avahi-core core.h						ENGINE_INCLUDE_DIRS )
-	TP_FIND_INCLUDE( avahi-glib glib-watch.h				ENGINE_INCLUDE_DIRS )
-	TP_FIND_INCLUDE( avahi-common watch.h					ENGINE_INCLUDE_DIRS )
-	
-	list( APPEND ENGINE_LIBRARY_NAMES	avahi-core avahi-common avahi-glib )
-	
-	add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
-
-    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
-	
+    pkg_check_modules(AVAHI_CORE REQUIRED avahi-core)
+    pkg_check_modules(AVAHI_GLIB REQUIRED avahi-glib)
 endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
+    list(APPEND ENGINE_INCLUDE_DIRS
+                    ${CURL_INCLUDE_DIRS}
+                    ${GLIB2_INCLUDE_DIRS}
+                    ${GIO_UNIX_INCLUDE_DIRS}
+                    ${CAIRO_INCLUDE_DIRS}
+                    ${PANGO_INCLUDE_DIRS}
+                    ${CLUTTER_INCLUDE_DIRS}
+                    ${FONTCONFIG_INCLUDE_DIRS}
+                    ${FREETYPE2_INCLUDE_DIRS}
+                    ${LIBPNG_INCLUDE_DIRS}
+                    ${JSON_GLIB_INCLUDE_DIRS}
+                    ${UUID_INCLUDE_DIRS}
+                    ${ATK_INCLUDE_DIRS}
+                    ${SNDFILE_INCLUDE_DIRS}
+                    ${SOUP_INCLUDE_DIRS}
+                    ${SQLITE_INCLUDE_DIRS}
+                    ${OPENSSL_INCLUDE_DIRS}
+                    ${CARES_INCLUDE_DIRS}
+                    ${AVAHI_CORE_INCLUDE_DIRS}
+                    ${AVAHI_GLIB_INCLUDE_DIRS}
+        )
 
-#------------------------------------------------------------------------------
+    list(APPEND ENGINE_LIBRARY_NAMES
+                    ${CURL_LIBRARIES}
+                    ${GLIB2_LIBRARIES}
+                    ${GIO_UNIX_LIBRARIES}
+                    ${CAIRO_LIBRARIES}
+                    ${PANGO_LIBRARIES}
+                    ${CLUTTER_LIBRARIES}
+                    ${FONTCONFIG_LIBRARIES}
+                    ${FREETYPE2_LIBRARIES}
+                    ${LIBPNG_LIBRARIES}
+                    ${JSON_LIBRARIES}
+                    ${UUID_LIBRARIES}
+                    ${ATK_LIBRARIES}
+                    ${SNDFILE_LIBRARIES}
+                    ${SOUP_LIBRARIES}
+                    ${SQLITE_LIBRARIES}
+                    ${OPENSSL_LIBRARIES}
+                    ${CARES_LIBRARIES}
+                    ${AVAHI_CORE_LIBRARIES}
+                    ${AVAHI_GLIB_LIBRARIES}
+        )
 
-if (NOT TP_CLUTTER_BACKEND_EGL)
+ELSE ( PKG_CONFIG_FOUND )
+    TP_FIND_INCLUDE( curl/curl.h 						ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( glib-2.0 glib.h 			    	ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( gio-unix-2.0 gio/gunixsocketaddress.h 	ENGINE_INCLUDE_DIRS )
+    TP_FIND_LIB_INCLUDE( glib-2.0 glibconfig.h			ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( cairo cairo.h						ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( pango-1.0 pango/pango.h			ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h 		ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( fontconfig fontconfig/fontconfig.h            ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( freetype2 freetype/freetype.h      ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( png.h								ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( json-glib-1.0 json-glib/json-glib.h 	ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( ossp/uuid.h						ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( atk-1.0 atk/atk.h 			        ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( sndfile.h							ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h         ENGINE_INCLUDE_DIRS )
+    if (TP_CONTROLLER_DISCOVERY_MDNS)
+        TP_FIND_INCLUDE( avahi-core core.h						ENGINE_INCLUDE_DIRS )
+        TP_FIND_INCLUDE( avahi-glib glib-watch.h				ENGINE_INCLUDE_DIRS )
+        TP_FIND_INCLUDE( avahi-common watch.h					ENGINE_INCLUDE_DIRS )
+        list( APPEND ENGINE_LIBRARY_NAMES	avahi-core avahi-common avahi-glib )
+    endif (TP_CONTROLLER_DISCOVER_MDNS)
 
-	TP_FIND_INCLUDE( readline/readline.h ENGINE_INCLUDE_DIRS )
-	
-	list( APPEND ENGINE_LIBRARY_NAMES readline )
-	
-	add_definitions( -DTP_HAS_READLINE=1 ) 	
-
-endif (NOT TP_CLUTTER_BACKEND_EGL)
-
-#------------------------------------------------------------------------------
-
-TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
-
-include_directories(
-    
-    ${ENGINE_SRC}/public/include
-    ${ENGINE_SRC}/source
-    ${ENGINE_SRC}/lb/include
-    
-    ${ENGINE_INCLUDE_DIRS}    
-)
 
 #------------------------------------------------------------------------------
 # Libraries
 #------------------------------------------------------------------------------
 
-list( 
-	APPEND
-    
-    ENGINE_LIBRARY_NAMES
-    
-    #--------------
-    # libsoup
-    #--------------
-    
-    soup-2.4
-    
-    #--------------
-    # glib
-    #--------------
+    list( 
+        APPEND        ENGINE_LIBRARY_NAMES
 
-    gthread-2.0 gobject-2.0 gmodule-2.0 glib-2.0 gio-2.0
-    
-    #--------------
-    # expat
-    #--------------
-    
-    expat
-    
-    #--------------
-    # pango/cairo/fontconfig
-    #--------------
-    
-    cairo pango-1.0 pangocairo-1.0 fontconfig
+        soup-2.4
 
-    #--------------
-    # curl
-    #--------------
-    
-    ssl crypto cares curl
+        gthread-2.0 gobject-2.0 gmodule-2.0 glib-2.0 gio-2.0
 
-    #--------------
-    # sqlite
-    #--------------
+        cairo pango-1.0 pangocairo-1.0 fontconfig
+
+        ssl crypto cares curl
+
+        sqlite3
+
+        # Make sure this one comes before the clutter libraries, otherwise
+        # we will get json symbols from them - and those are outdated
+        json-glib-1.0
+
+        sndfile
+    )
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list(
+            APPEND ENGINE_LIBRARY_NAMES
+            uuid
+        )
+    else(IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+        list(
+            APPEND ENGINE_LIBRARY_NAMES
+            ossp-uuid
+        )
+    endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+    #------------------------------------------------------------------------------
+    # Use the right clutter libraries based on the backend used
     
-    sqlite3
+    if (TP_CLUTTER_BACKEND_EGL)
     
-    #--------------
-    # Image decoders
-    #--------------
+        list( APPEND ENGINE_LIBRARY_NAMES clutter-eglnative-1.0 )
+    
+    else (TP_CLUTTER_BACKEND_EGL)
+    
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         
-    jpeg
-    png
-    tiff
-    tiffxx
-    gif
+            list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 )
+            
+        else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        
+            list( APPEND ENGINE_LIBRARY_NAMES clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes )
+            
+        endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    
+    endif (TP_CLUTTER_BACKEND_EGL)
 
-    #--------------
-    # json-glib
-    #--------------
-    
-    # Make sure this one comes before the clutter libraries, otherwise
-    # we will get json symbols from them - and those are outdated
-    
-    json-glib-1.0
-    
-    uriparser           
-    
-    sndfile
-)
-
-#--------------
-# uuid
-#--------------
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	list(
-		APPEND ENGINE_LIBRARY_NAMES
-		uuid
-	)
-else(IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
-	list(
-		APPEND ENGINE_LIBRARY_NAMES
-		ossp-uuid
-	)
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+ENDIF ( PKG_CONFIG_FOUND )
 
 #------------------------------------------------------------------------------
 # UPnP - must come after uuid cos it export some uuid symbols badly
 
 if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 
-	TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
-	
-	list( APPEND ENGINE_LIBRARY_NAMES upnp )
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		list( APPEND ENGINE_LIBRARY_NAMES ixml )
-	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	
-	
+    IF( PKG_CONFIG_FOUND )
+        pkg_check_modules(UPNP libupnp)
+    
+        list(APPEND ENGINE_INCLUDE_DIRS
+                        ${UPNP_INCLUDE_DIRS}
+        )
+    
+        list(APPEND ENGINE_LIBRARY_NAMES
+                    ${UPNP_LIBRARIES}
+        )
+    ELSE( PKG_CONFIG_FOUND)
+        TP_FIND_INCLUDE( upnp/upnp.h							ENGINE_INCLUDE_DIRS )
+        list( APPEND ENGINE_LIBRARY_NAMES upnp )
+        if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+            list( APPEND ENGINE_LIBRARY_NAMES ixml )
+        endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    ENDIF( PKG_CONFIG_FOUND )
+
+
 	if ( TP_CONTROLLER_DISCOVERY_UPNP )
 		
 		add_definitions( -DTP_CONTROLLER_DISCOVERY_UPNP=1 )
@@ -198,27 +216,60 @@ if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 
 
+# -----------------------------------------------------------------------------
+# These packages aren't in pkg-config
+
+TP_FIND_INCLUDE( expat.h 								ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( jpeglib.h							    ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( tiffio.h 							    ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( tiffio.hxx							    ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( gif_lib.h							    ENGINE_INCLUDE_DIRS )
+TP_FIND_INCLUDE( uriparser/Uri.h						ENGINE_INCLUDE_DIRS )
+
+list( APPEND        ENGINE_LIBRARY_NAMES
+        expat
+        jpeg png tiff tiffxx gif
+        uriparser
+)
+
+
 
 #------------------------------------------------------------------------------
-# Use the right clutter libraries based on the backend used
+# Avahi for MDNS
 
-if (TP_CLUTTER_BACKEND_EGL)
+if (TP_CONTROLLER_DISCOVERY_MDNS)
+	add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
+    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
-    list( APPEND ENGINE_LIBRARY_NAMES clutter-eglnative-1.0 )
 
-else (TP_CLUTTER_BACKEND_EGL)
+#------------------------------------------------------------------------------
 
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (NOT TP_CLUTTER_BACKEND_EGL)
+
+	TP_FIND_INCLUDE( readline/readline.h ENGINE_INCLUDE_DIRS )
 	
-	    list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 )
-	    
-	else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	list( APPEND ENGINE_LIBRARY_NAMES readline )
 	
-	    list( APPEND ENGINE_LIBRARY_NAMES clutter-glx-1.0 GL X11 Xext Xdamage Xcomposite Xfixes )
-	    
-	endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	add_definitions( -DTP_HAS_READLINE=1 ) 	
 
-endif (TP_CLUTTER_BACKEND_EGL)
+endif (NOT TP_CLUTTER_BACKEND_EGL)
+
+#------------------------------------------------------------------------------
+
+TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
+
+list(REMOVE_DUPLICATES ENGINE_INCLUDE_DIRS)
+
+include_directories(
+    
+    ${ENGINE_SRC}/public/include
+    ${ENGINE_SRC}/source
+    ${ENGINE_SRC}/lb/include
+    
+    ${ENGINE_INCLUDE_DIRS}    
+)
+
 
 #------------------------------------------------------------------------------
 
@@ -322,6 +373,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/trickplay.lb
     ${BINDINGS_SRC}/bitmap.lb
     ${BINDINGS_SRC}/canvas.lb
+    ${BINDINGS_SRC}/http.lb
 )
 
 #------------------------------------------------------------------------------
@@ -452,6 +504,7 @@ list( APPEND
     ${ENGINE_SRC}/source/toast.cpp
     ${ENGINE_SRC}/source/http_server.cpp
     ${ENGINE_SRC}/source/http_trickplay_api_support.cpp
+    ${ENGINE_SRC}/source/log.cpp
 )
 
 #------------------------------------------------------------------------------
