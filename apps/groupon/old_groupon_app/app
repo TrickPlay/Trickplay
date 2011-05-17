@@ -2,8 +2,9 @@ app=
 {
     id          = "com.trickplay.groupon",
     release     = "1",
-    version     = ".1",
-    name        = "Racing",
-    author      = "Francesco Alex Indaco",
+    version     = "1.0",
+    name        = "Groupon",
+    author      = "Craig Hughes",
     copyright   = "© Trickplay Inc."
 }
+

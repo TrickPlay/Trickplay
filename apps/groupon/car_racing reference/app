@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.groupon",
+    id          = "com.trickplay.racing",
     release     = "1",
     version     = ".1",
     name        = "Racing",

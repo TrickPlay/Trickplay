@@ -1,82 +1,96 @@
-GROUPON = dofile("groupon.lua")
 
-local deals = GROUPON:get_deals()
 
-local tile_positions = {
-    { x=300,  y=30 + 2*screen.h/3 },
-    { x=1180, y=30   },
-    { x=1180, y=30 + 2*screen.h/3 },
-    { x=300,  y=30 +   screen.h/3 },
-    { x=300,  y=30   },
-    { x=1180, y=30 +   screen.h/3 },
+--I f*cking hate radians
+function sin(val) return math.sin(math.pi/180*val) end
+function cos(val) return math.cos(math.pi/180*val) end
+function tan(val) return math.tan(math.pi/180*val) end
+
+--upvals to stop calls to    screen:get_w() & screen:get_h()
+screen_w = screen.w
+screen_h = screen.h
+
+
+
+assets = {
+	bg          = Image{src="assets/card-bg.png"},
+	tag         = Image{src="assets/button-tag.png"},
+	btn_glow    = Image{src="assets/button-glow.png"},
+	check_green = Image{src="assets/check-green.png"},
+	check_red   = Image{src="assets/check-red.png"},
+	dot         = Image{src="assets/dot.png"},
+	expired     = Image{src="assets/expired.png"},
+	g           = Image{src="assets/g.png"},
+	message     = Image{src="assets/message-bg.png"},
+	red_message = Image{src="assets/first-location-bg.png"},
+	zip_entry   = Image{src="assets/change-location-bg.png"},
+	info_panel  = Image{src="assets/more-info-panel.png"},
+	sold_out    = Image{src="assets/sold-out.png"},
+	title_slice = Image{src="assets/title-bar-slice.png"},
+	title_top   = Image{src="assets/title-bar-top.png"},
 }
 
-local tile_position
-local make_tile = function (image, title)
-    local i = Image { src = image }
-    local t = Text { text = title, color = 'ffffff', font = 'Diavlo 36px' }
-    local r = Rectangle { size = { t.w, t.h }, color = "000000", opacity = 150 }
-    local g = Group { }
-    g:add(i)
-    g:add(r)
-    g:add(t)
-    t.y = i.h + 6
-    t.x = (i.w - t.w) / 2
-    r.x, r.y = t.x, t.y
 
-    repeat
-        tile_position = next(tile_positions,tile_position)
-    until tile_position
-    local the_tile = tile_positions[tile_position]
-    g.x, g.y = the_tile.x, the_tile.y
+local clone_srcs = Group{}
+screen:add(clone_srcs)
+clone_srcs:hide()
 
-    screen:add(g)
-    g.x_rotation = { -90, 0, 0 }
-    g:animate({
-                duration = 500,
-                x_rotation = 0,
-                mode = "EASE_OUT_BOUNCE",
-                on_completed = function ()
-                                    g:animate({
-                                                    duration = 10000,
-                                                    opacity = 0,
-                                                    mode = "EASE_IN_EXPO",
-                                                    on_completed = function ()
-                                                                        g:unparent()
-                                                                    end,
-                                                })
-                                end,
-            })
+for _,img in pairs(assets) do
+	clone_srcs:add(img)
 end
 
 
-print("We got ",#(deals.deals)," deals")
 
-local title = Image { src = "assets/powered_by_groupon.png", width = 400, keep_aspect_ratio=true }
-title.x = (screen.w-title.w)/2
-title.y = 450
-screen:add(Rectangle { size = {screen.w,screen.h}, color = "aaaaaa" })
-screen:add(title)
-screen:show()
+STATES, App_State, Idle_Loop = dofile("App_Framework.lua")
 
-local deal
-function main()
-    repeat
-        deal = next(deals.deals, deal)
+Groupon_Request       = dofile("Internet_Groupon.lua")
 
-        if(deal) then
-            local v = deals.deals[deal]
+Loading_G             = dofile("LoadingDots.lua")
 
-            local image = v.largeImageUrl or v.mediumImageUrl or v.smallImageUrl
+Zip                   = dofile("Modal.lua")
 
-            local title = v.announcementTitle
+Card_Constructor      = dofile("Card.lua")
 
-            make_tile(image, title)
+Rolodex_Constructor   = dofile("Rolodex.lua")
+
+dofile("User_Input.lua")
+
+
+App_State:add_state_change_function(
+    function(old_state,new_state)
+        
+        if App_State.zip then
+        else
+            Groupon_Request(
+                "all_deals",
+                Rolodex_Constructor
+            )
         end
-    until deal
-end
+        
+        screen:add(Loading_G)
+        
+        Loading_G.x = 450
+        
+        Loading_G.y = screen_h - 200
+        
+        Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
+        
+    end,
+    STATES.OFFLINE,
+    STATES.LOADING
+)
 
-local t = Timer(2200)
-t.on_timer = main
-t:start()
-dolater(main)
+
+
+
+assert(STATES         ~= nil,  "The STATES table no longer exists, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
+assert(STATES.LOADING ~= nil,"LOADING is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
+assert(STATES.ROLODEX ~= nil,"ROLODEX is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
+assert(STATES.ZIP     ~= nil,    "ZIP is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
+assert(STATES.PHONE   ~= nil,  "PHONE is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
+
+
+App_State:change_state_to(STATES.LOADING)
+
+Idle_Loop:resume()
+
+screen:show()
