@@ -13,6 +13,39 @@ local function throb(self,msecs,p)
 		
 	end
 end
+
+
+local dot = "•"
+local function gen_highlight(s)
+	local ret_val = ""
+	local i,j,k = 1,1,1
+	while i ~= nil do
+		i,j = string.find(s,"<li>",k)
+		if i == nil then
+			return ret_val
+		end
+		i,k = string.find(s,"</li>",j)
+		
+		ret_val = ret_val..dot..string.sub(s,j+1,i-1).."\n"
+	end
+	return ret_val
+end
+
+local function decode(s)
+	
+	s = string.gsub(s,"&apos;","'")
+    s = string.gsub(s,"&quot;","\"")
+    s = string.gsub(s,"&lt;","<")
+    s = string.gsub(s,"&gt;",">")
+    s = string.gsub(s,"&amp;","&")
+	s = string.gsub(s,"<[^<>]*>","")
+	
+	return s
+end
+
+
+
+
 local delta = {}
 local update_time = function(self,curr_time)
 	--curr=os.date('*t')
@@ -309,8 +342,8 @@ local make_card = function(input)
 		y = bg.y+bg.h-64,
 	}
 	
-	card.fine_print = input.fine_print
-	card.highlights = input.highlights
+	card.fine_print = decode(input.fine_print)
+	card.highlights = decode(gen_highlight(input.highlights))
 	card.id         = input.id
 	card.deal_url   = input.deal_url
 

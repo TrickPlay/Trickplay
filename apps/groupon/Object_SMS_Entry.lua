@@ -25,7 +25,7 @@ local fine_print_body = Text{
     color="#484747",
     x = 61,
 	wrap = true,
-	w = 320,
+	w = 340,
 	y = fine_print_title.y+fine_print_title.h,
 }
 
@@ -38,9 +38,11 @@ local highlights_title = Text{
 }
 local highlights_body = Text{
     text="",
-    font="DejaVu Sans Condensed 20px",
+    font="DejaVu Sans Condensed 16px",
     color="#484747",
     x = 440,
+	wrap = true,
+	w = 340,
 	y = highlights_title.y+highlights_title.h,
 }
 
@@ -70,6 +72,35 @@ for i = 1,phone_digit_max do
     entry[i].anchor_point={0,entry[i].h/2}
 end
 
+local submit_button = Clone{
+	source = assets.submit_btn,
+	x = 627,
+	y = 300
+}
+local submit_button_focus = Clone{
+	source = assets.submit_glow,
+	x = 627,
+	y = 300,
+	opacity = 0
+}
+local submit_button_shadow = Text{
+	text = "Send",
+	font = "DejaVu Condensed 18px",
+	color = "#000000",
+	opacity = 255*.5,
+	x = submit_button.x + submit_button.w/2 + 1,
+	y = submit_button.y + submit_button.h/2 + 1,
+}
+local submit_button_text = Text{
+	text = "Send",
+	font = "DejaVu Condensed 18px",
+	color = "#ffffff",
+	x = submit_button.x + submit_button.w/2,
+	y = submit_button.y + submit_button.h/2,
+}
+submit_button_shadow.anchor_point = {submit_button_shadow.w/2,submit_button_shadow.h/2}
+submit_button_text.anchor_point   = {submit_button_text.w/2,  submit_button_text.h/2}
+
 sms_entry:add(
 	sms_bg,
 	fine_print_title,
@@ -77,7 +108,11 @@ sms_entry:add(
 	highlights_title,
 	highlights_body,
 	entered,
-	cursor
+	cursor,
+	submit_button,
+	submit_button_focus,
+	submit_button_shadow,
+	submit_button_text
 )
 sms_entry:add(unpack(entry))
 
@@ -103,6 +138,8 @@ local reset_form = function()
     cursor.x = first_digit_x-6
     cursor.opacity=255
     cursor_index=1
+	
+	submit_button_focus.opacity = 0
 end
 
 local sms_callback = function(zip_info)
@@ -171,8 +208,9 @@ local add_number = function(num)
     cursor.x = first_digit_x-6+digit_spacing*(cursor_index-1)
     if cursor_index == phone_digit_max+1 then
         
-        
-        state:change_state_to("SENDING")
+        cursor.opacity = 0
+		submit_button_focus.opacity = 255
+        --state:change_state_to("SENDING")
     end
 end
 
@@ -322,7 +360,7 @@ local keys_ROLODEX = {
 	end,
 	--open
 	[keys.OK] = function()
-		--if App_State.rolodex.flipping then return end
+		if App_State.rolodex.flipping then return end
 		
 		if state:current_state() == "HIDDEN" then
 			state:change_state_to("ANIMATING_IN")
