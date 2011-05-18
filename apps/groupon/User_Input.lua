@@ -1,52 +1,51 @@
 App_State.states[STATES.OFFLINE].keys = {}
 App_State.states[STATES.LOADING].keys = {}
 
-local r
 App_State.states[STATES.ROLODEX ].keys = {
     --Flip Backward
 	[keys.Down] = function()
 		
-		r = screen:find_child("Rolodex")
-		
-        if not r.flipping then
+        if not App_State.rolodex.flipping then
             
-			r:pre_backward_flip()
+			App_State.rolodex:pre_backward_flip()
 			
             Idle_Loop:add_function(
-                r.flip_backward,
-                r,
+                App_State.rolodex.flip_backward,
+                App_State.rolodex,
                 1000
             )
 			
-            r.flipping = true
+            App_State.rolodex.flipping = true
         end
 		
-		if Zip.is_up then
+		if Zip.entry_is_up then
+			Zip:fade_out_entry()
+		elseif Zip.prompt_is_up then
 			Zip.timer:on_timer()
 		end
+		
         
-		--dumptable(r.visible_cards)
 	end,
 	
     --Flip Forward
 	[keys.Up] = function()
 		
-		r = screen:find_child("Rolodex")
-		
-        if not r.flipping then
+        if not App_State.rolodex.flipping then
             
-			r:pre_forward_flip()
+			App_State.rolodex:pre_forward_flip()
 			
 			Idle_Loop:add_function(
-                r.flip_forward,
-                r,
+                App_State.rolodex.flip_forward,
+                App_State.rolodex,
                 1000
             )
 			
-            r.flipping = true
+            App_State.rolodex.flipping = true
         end
 		
-		if Zip.is_up then
+		if Zip.entry_is_up then
+			Zip:fade_out_entry()
+		elseif Zip.prompt_is_up then
 			Zip.timer:on_timer()
 		end
         
@@ -54,29 +53,33 @@ App_State.states[STATES.ROLODEX ].keys = {
 	end,
 	
 	--Flip Forward
-	[keys.Red] = function()
+	[keys.RED] = function()
+		if App_State.rolodex.flipping then return end
 		
-		r = screen:find_child("Rolodex")
-		
-        if not r.flipping then
-            
-			r:pre_forward_flip()
-			
-			Idle_Loop:add_function(
-                r.flip_forward,
-                r,
-                1000
-            )
-			
-            r.flipping = true
-        end
-		
-		if Zip.is_up then
-			Zip.timer:on_timer()
+		if Zip.entry_is_up then
+			if Zip.cancel then Zip:cancel() end
+			Zip:fade_out_entry()
+		else
+			if Zip.prompt_is_up then
+				Zip.timer:on_timer()
+			end
+			Zip:fade_in_entry()
 		end
         
 		--dumptable(r.visible_cards)
 	end,
+	
+	[keys["0"]] = function() Zip:add_number(0) end,
+	[keys["1"]] = function() Zip:add_number(1) end,
+	[keys["2"]] = function() Zip:add_number(2) end,
+	[keys["3"]] = function() Zip:add_number(3) end,
+	[keys["4"]] = function() Zip:add_number(4) end,
+	[keys["5"]] = function() Zip:add_number(5) end,
+	[keys["6"]] = function() Zip:add_number(6) end,
+	[keys["7"]] = function() Zip:add_number(7) end,
+	[keys["8"]] = function() Zip:add_number(8) end,
+	[keys["9"]] = function() Zip:add_number(9) end,
+
 }
 App_State.states[STATES.ZIP  ].keys = {}
 App_State.states[STATES.PHONE].keys = {}
