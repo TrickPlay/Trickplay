@@ -687,6 +687,21 @@ void TPContext::setup_fonts()
     {
         FcConfigAppFontClear( config );
 
+        const char * ap = get( TP_APP_SOURCES );
+
+		g_debug( "ADDING APP PATH '%s' TO FONT PATH", ap );
+
+		int added = 0;
+
+		if ( FcConfigAppFontAddDir( config, ( const FcChar8 * ) ap ) == FcFalse )
+		{
+			g_warning( "FAILED TO ADD FONT PATH '%s'" , ap );
+		}
+		else
+		{
+			++added;
+		}
+
         g_debug( "FONT PATHS ARE '%s'", fonts_path );
 
         // This adds all the fonts in the directory to the cache...it can take
@@ -694,8 +709,6 @@ void TPContext::setup_fonts()
         // be very quick.
 
 		gchar ** paths = g_strsplit( fonts_path , ";" , 0 );
-
-		int added = 0;
 
 		for ( gchar ** p = paths; *p; ++p )
 		{
