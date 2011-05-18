@@ -12,7 +12,7 @@
 @implementation TrickplayText
 
 - (id)initWithID:(NSString *)textID args:(NSDictionary *)args {
-    if ((self = [super init])) {
+    if ((self = [super initWithID:textID])) {
         self.view = [[[UITextField alloc] init] autorelease];
         
         [self setValuesFromArgs:args];
