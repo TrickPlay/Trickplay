@@ -49,8 +49,8 @@ dofile("editor.lua")
 		            end,
         --[ keys.x	] = function() editor.debug() input_mode = S_SELECT end,
         [ keys.x	] = function() editor.export() input_mode = S_SELECT end,
-        --[ keys.i	] = function() editor.the_ui_elements() input_mode = S_SELECT end,
-        [ keys.i	] = function() editor.ui_elements() input_mode = S_SELECT end,
+        [ keys.i	] = function() editor.the_ui_elements() input_mode = S_SELECT end,
+        --[ keys.i	] = function() editor.ui_elements() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
 					    menuShow()
 					    if(screen:find_child("xscroll_bar") ~= nil) then 
@@ -287,37 +287,44 @@ dofile("editor.lua")
 	  end
      end
 
-     function screen:on_button_up(x,y,button,clicks_count)
-	   if dragging then
-	       local actor = unpack(dragging)
-	       if actor.parent then 	
-		   if actor.parent.name == "timeline" then 
-			local actor, dx , dy, pointer_up_f = unpack( dragging )
-			pointer_up_f(x,y,button,clicks_count) 
+	function screen:on_button_up(x,y,button,clicks_count)
+
+		if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
+			local temp_focus = current_focus 
+				current_focus.on_focus_out()
+				temp_focus.on_focus_in()
 			return true
-		   end 
-	       end 
-          end 	
-	  dragging = nil
-          if (mouse_state == BUTTON_DOWN) then
-              if (input_mode == S_RECTANGLE) then 
+		end 
+		if dragging then
+	    	local actor = unpack(dragging)
+	       	if actor.parent then 	
+		   		if actor.parent.name == "timeline" then 
+					local actor, dx , dy, pointer_up_f = unpack( dragging )
+					pointer_up_f(x,y,button,clicks_count) 
+					return true
+		   		end 
+	       	end 
+        end 	
+	  	dragging = nil
+        if (mouse_state == BUTTON_DOWN) then
+            if (input_mode == S_RECTANGLE) then 
 	           editor.rectangle_done(x, y) 
 	           input_mode = S_SELECT 
-	      end
+	    	end
 
-	      if(input_mode == S_SELECT) and 
-		    (screen:find_child("msgw") == nil) then
-			editor.multi_select_done(x,y)
-	      end 
+	      	if(input_mode == S_SELECT) and 
+		    	(screen:find_child("msgw") == nil) then
+				editor.multi_select_done(x,y)
+	      	end 
 
-	      if(screen:find_child("mouse_pointer") ~= nil) then 
-		  if screen:find_child("mouse_pointer").extra.type ~= "pointer" then 
-		        screen:remove(screen:find_child("mouse_pointer"))
-		  end
-	      end 
-              mouse_state = BUTTON_UP
-          end
-      end
+	      	if(screen:find_child("mouse_pointer") ~= nil) then 
+		  		if screen:find_child("mouse_pointer").extra.type ~= "pointer" then 
+		        	screen:remove(screen:find_child("mouse_pointer"))
+		  		end
+	      	end 
+            mouse_state = BUTTON_UP
+       end
+	end
 
       function screen:on_motion(x,y)
 

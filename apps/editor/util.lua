@@ -280,8 +280,115 @@ local project
 local base
 local projects = {}
 
+
+local function copy_widget_imgs ()
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
+	local source_file, dest_file
+	for i, j in pairs(source_files) do 
+	     source_file = trickplay.config.app_path.."/assets/"..j 
+	     dest_file = CURRENT_DIR.."/lib/assets/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
+	end 
+
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
+	local source_file, dest_file
+	for i, j in pairs(source_files) do 
+	     source_file = trickplay.config.app_path.."/assets/default/"..j 
+	     dest_file = CURRENT_DIR.."/lib/skins/default/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
+	end 
+
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
+	local source_file, dest_file
+	for i, j in pairs(source_files) do 
+	     source_file = trickplay.config.app_path.."/assets/CarbonCandy/"..j 
+	     dest_file = CURRENT_DIR.."/lib/skins/CarbonCandy/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
+	end 
+
+	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
+	local source_file, dest_file
+	for i, j in pairs(source_files) do 
+	     source_file = trickplay.config.app_path.."/assets/OOBE/"..j 
+	     dest_file = CURRENT_DIR.."/lib/skins/OOBE/"..j 
+	     if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	     end 
+	end 
+
+	source_file = trickplay.config.app_path.."/lib/ui_element.lua" 
+	dest_file = CURRENT_DIR.."/lib/ui_element.lua" 
+	if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	end 
+	source_file = trickplay.config.app_path.."/lib/ui_element_header.lua" 
+	dest_file = CURRENT_DIR.."/lib/ui_element_header.lua" 
+	if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	end 
+	source_file = trickplay.config.app_path.."/localized/strings.lua" 
+	dest_file = CURRENT_DIR.."/lib/strings.lua" 
+	if not editor_lb:file_copy(source_file, dest_file) then 
+		--print("couldn't copy widget image"..dest_file) 
+	end 
+
+end 
+
+local function set_new_project (pname)
+	if(pname~= "") then
+    	project = pname
+   	end   
+	
+   	app_path = editor_lb:build_path( base , project )
+    if not editor_lb:mkdir( app_path ) then
+        -- Tell the user we were not able to create it
+   	     print("couldn't create ",app_path)  
+    else
+    	editor_lb:change_app_path( app_path )
+	    CURRENT_DIR = app_path
+    end
+
+    local screens_path = editor_lb:build_path( app_path, "screens" )
+    editor_lb:mkdir( screens_path ) 
+    local asset_path = editor_lb:build_path( app_path, "assets" )
+    editor_lb:mkdir( asset_path ) 
+
+    local asset_images_path = editor_lb:build_path( asset_path, "images" )
+    editor_lb:mkdir( asset_images_path ) 
+    local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
+    editor_lb:mkdir( asset_sounds_path ) 
+    local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
+    editor_lb:mkdir( asset_videos_path ) 
+
+    local lib_path = editor_lb:build_path( app_path, "lib" )
+    editor_lb:mkdir( lib_path ) 
+    local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
+    editor_lb:mkdir( lib_assets_path ) 
+    local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
+    editor_lb:mkdir( lib_skins_path ) 
+    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
+    editor_lb:mkdir( lib_skins_default_path ) 
+    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
+    editor_lb:mkdir( lib_skins_default_path ) 
+    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "OOBE" )
+    editor_lb:mkdir( lib_skins_default_path ) 
+
+	screen:find_child("menu_text").text = project .. " "
+	screen:find_child("menu_text").extra.project = project .. " "
+
+	copy_widget_imgs()
+end 
+
+
+
 function new_printMsgWindow(t, msg)
-	--[[
+--[[
 		 51 pixels in height.  Without tabs = 31 pixels
 		 The bottom bar is 40 pixels in height.
 	]]
@@ -309,28 +416,23 @@ function new_printMsgWindow(t, msg)
 	local message_shadow = Text {text = msg}:set(MSSTYLE)
 	
 	editor_use = true
-	text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "" ,
-    	padding = 5 , border_width  = 1 , border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255},
-    	focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
-    	border_corner_radius = 0,}
+		local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "" ,
+    		padding = 5 , border_width  = 1 , border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255},
+    		focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
+    		border_corner_radius = 0,}
+    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
+    					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255},}
+		local button_ok = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
+    					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255},} 
+
+		button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = "text_input"}
+		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = "text_input"}
+		text_input.extra.focus = {[keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Down] = "button_cancel"}
+	
+		button_cancel.pressed = function() print("CANCEL") xbox:on_button_down() end 
+		button_ok.pressed = function()print("OK")  set_new_project(text_input.text) xbox:on_button_down() end
+
 	editor_use = false
-
-
---[[IMSI BUTTON]]
-	editor_use = true
-	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, 
-    					  focus_fill_color = {27,145,27,0}, focus_text_color = {255,255,255,255}, border_color = {255,255,255,255}, 
-    					  fill_color = {255,255,255,0}, border_width = 1, border_corner_radius = 12, focussed=nil, pressed = nil, 
-						  released = nil, button_image = nil, focus_image  = nil, text_has_shadow = true, }
-	local button_ok = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, 
-    					  focus_fill_color = {27,145,27,0}, focus_text_color = {255,255,255,255}, border_color = {255,255,255,255}, 
-    					  fill_color = {255,255,255,0}, border_width = 1, border_corner_radius = 12, focussed=nil, pressed = nil, 
-						  released = nil, button_image = nil, focus_image  = nil, text_has_shadow = true, }
-	editor_use = false
---[[IMSI BUTTON]]
-
 
 	local msgw = Group {
 		name = "msgw",  --ui_element_insert
@@ -344,15 +446,16 @@ function new_printMsgWindow(t, msg)
 			title:set{position = {PADDING+1, PADDING/3+1}}, 
 			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
 			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
-			text_input:set{position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
-			button_cancel:set{position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
-			button_ok:set{position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
+			text_input:set{name = "text_input", position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
+			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
+			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
 		}
 	}
 
 	msgw.extra.lock = false
  	screen:add(msgw)
 	create_on_button_down_f(msgw)	
+	button_ok.on_focus_in() 
 
 	function xbox:on_button_down()
 		screen:remove(msgw)
@@ -363,9 +466,54 @@ function new_printMsgWindow(t, msg)
 	    input_mode = S_SELECT
 		return true
 	end 
+	function text_input:on_key_down(key)
+	if text_input.focus[key] then
+		if type(text_input.focus[key]) == "function" then
+			text_input.focus[key]()
+		elseif screen:find_child(text_input.focus[key]) then
+			if text_input.on_focus_out then
+				text_input.on_focus_out()
+			end
+			screen:find_child(text_input.focus[key]):grab_key_focus()
+			if screen:find_child(text_input.focus[key]).on_focus_in then
+				screen:find_child(text_input.focus[key]).on_focus_in(key)
+			end
+		end
+	end
+	end
 
-	button_ok.pressed = function() print("new project : ", text_input.text) xbox:on_button_down() end 
-	button_cancel.pressed = function() print(" cancel ") xbox:on_button_down() end 
+	function button_cancel:on_key_down(key)
+	if button_cancel.focus[key] then
+		if type(button_cancel.focus[key]) == "function" then
+			button_cancel.focus[key]()
+		elseif screen:find_child(button_cancel.focus[key]) then
+			if button_cancel.on_focus_out then
+				button_cancel.on_focus_out()
+			end
+			screen:find_child(button_cancel.focus[key]):grab_key_focus()
+			if screen:find_child(button_cancel.focus[key]).on_focus_in then
+				screen:find_child(button_cancel.focus[key]).on_focus_in(key)
+			end
+		end
+	end
+	end
+	function button_ok:on_key_down(key)
+		if button_ok.focus[key] then
+			if type(button_ok.focus[key]) == "function" then
+				button_ok.focus[key]()
+			elseif screen:find_child(button_ok.focus[key]) then
+				if button_ok.on_focus_out then
+					button_ok.on_focus_out()
+				end
+				screen:find_child(button_ok.focus[key]):grab_key_focus()
+				if screen:find_child(button_ok.focus[key]).on_focus_in then
+					screen:find_child(button_ok.focus[key]).on_focus_in(key)
+				end
+			end
+		end	
+		return true
+	end
+
 
 	if screen:find_child("mouse_pointer") then 
 		 screen:find_child("mouse_pointer"):raise_to_top()
@@ -2408,67 +2556,7 @@ end
 
 local input_purpose     = ""
 
-local function copy_widget_imgs ()
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/"..j 
-	     dest_file = CURRENT_DIR.."/lib/assets/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/default/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/default/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/CarbonCandy/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/CarbonCandy/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/OOBE/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/OOBE/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	source_file = trickplay.config.app_path.."/lib/ui_element.lua" 
-	dest_file = CURRENT_DIR.."/lib/ui_element.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	end 
-	source_file = trickplay.config.app_path.."/lib/ui_element_header.lua" 
-	dest_file = CURRENT_DIR.."/lib/ui_element_header.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	end 
-	source_file = trickplay.config.app_path.."/localized/strings.lua" 
-	dest_file = CURRENT_DIR.."/lib/strings.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	end 
-
-end 
-
 local function set_project_path ()
-
 	if(selected_prj == "" and input_t.text ~= "") then
                project = input_t.text                           
         elseif(selected_prj ~= "") then                      

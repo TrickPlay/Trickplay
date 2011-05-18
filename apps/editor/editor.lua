@@ -3459,21 +3459,25 @@ end
 
 function editor.the_ui_elements()
 
---qqq
-
-  	local WIDTH = 600
+  	local WIDTH = 300
+  	local HEIGHT = 600
     local L_PADDING = 20
     local R_PADDING = 50
     local BOTTOM_PADDING = 12
 
 
-    local TOP_PADDING = 30
+	local PADDING = 13
+
+	local TOP_BAR = 30
+    local MSG_BAR = 530
+    local BOTTOM_BAR = 40
+
     local Y_PADDING = 22
     local X_PADDING = 10
     local STYLE = {font = "FreeSans Medium 18px" , color = {255,255,255,255}}
-    local WSTYLE = {font = "FreeSans Medium 15px" , color = {255,255,255,255}}
+    local WSTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
     local SSTYLE = {font = "FreeSans Medium 18px" , color = "000000"}
-    local WSSTYLE = {font = "FreeSans Medium 15px" , color = "000000"}
+    local WSSTYLE = {font = "FreeSans Medium 12px" , color = "000000"}
 
     local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "ui_elements_insert", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
@@ -3482,7 +3486,7 @@ function editor.the_ui_elements()
 	local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
 	local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
 
-	local scroll = scrollPane{}
+	--local scroll = scrollPane{}
 
 	local msgw = Group {
 		name = "ui_element_insert", 
@@ -3492,12 +3496,11 @@ function editor.the_ui_elements()
         children = {
         	msgw_bg,
 	  		xbox:set{position = {275, 0}},
-			title_shadow:set{position = {X_PADDING,0}, opacity=50}, 
-			title:set{position = {X_PADDING + 1, 1}}, 
+			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
+			title:set{position = {X_PADDING + 1, 6}}, 
 			scroll
 		}
 	}
-	
 
 	local function make_msgw_widget_item(caption) 
 		local text = Text{ text = caption }:set( WSTYLE )
@@ -3506,7 +3509,7 @@ function editor.the_ui_elements()
 	end 
 
 	cur_w= X_PADDING
-    cur_h= TOP_PADDING 
+    cur_h= TOP_BAR + PADDING 
 
     for i, v in pairs(uiElementLists) do 
 		local widget_t, widget_ts = make_msgw_widget_item(v)
