@@ -7,7 +7,7 @@
     The App Loop
 --]]
 
-
+--[[
 local STATES = {
 	OFFLINE = {},--"the app was not launched yet",
 	LOADING = {},--"The app is loading from groupon, user has no control",
@@ -31,7 +31,7 @@ local states_r = {}
 for state_name,state_value in pairs(STATES) do
 	states_r[state_value] = state_name
 end
-
+--]]
 
 --Game State Manager
 local App_State = {
@@ -41,9 +41,9 @@ local App_State = {
 	zip   = settings.zip,
 	rolodex = nil,
 	--needed
-	states = {}
+	state = ENUM({"OFFLINE","LOADING","ROLODEX","ZIP","PHONE"})
 }
-
+--[[
 do
 	--protected variables
 	local current_state = STATES.OFFLINE
@@ -113,7 +113,7 @@ do
 		return current_state
 	end
 end
-
+--]]
 
 local Idle_Loop = {}
 
@@ -303,6 +303,31 @@ do
     end
 end
 
+--[[
+delay = function(delay_amount, function_to_call, ...)
+	
+	assert(type(delay_amount)=="number",
+		"Received type\""..type(delay_amount)..
+		"\" for the delay amount, must be a number."
+	)
+	
+	assert(
+		type(function_to_call) == "function",
+		"Received type \""..type(function_to_call)..
+		"\" for the callback, can only delay the call to a function."
+	)
+	
+	Timer{
+		interval = delay_amount,
+		
+		on_timer = function(self)
+			self:stop()
+			
+			
+			function_to_call(...)
+		end
+	}:start()
+end
+--]]
 
-
-return STATES, App_State, Idle_Loop
+return App_State, Idle_Loop

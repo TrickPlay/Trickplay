@@ -15,6 +15,8 @@ assets = {
 	bg          = Image{src="assets/card-bg.png"},
 	tag         = Image{src="assets/button-tag.png"},
 	btn_glow    = Image{src="assets/button-glow.png"},
+	submit_btn  = Image{src="assets/button-small.png"},
+	submit_glow = Image{src="assets/button-small-focus.png"},
 	check_green = Image{src="assets/check-green.png"},
 	check_red   = Image{src="assets/check-red.png"},
 	dot         = Image{src="assets/dot.png"},
@@ -41,31 +43,41 @@ for _,img in pairs(assets) do
 end
 
 
+ENUM = dofile("Utils.lua")
 
-STATES, App_State, Idle_Loop = dofile("App_Framework.lua")
+App_State, Idle_Loop = dofile("App_Framework.lua")
+
+KEY_HANDLER = dofile("User_Input.lua")
+
+screen.on_key_down = KEY_HANDLER.on_key_down
+
+GET_DEALS, GET_LAT_LNG = dofile("Internet_Interfaces.lua")
 
 Groupon_Request       = dofile("Internet_Groupon.lua")
 
 Loading_G             = dofile("LoadingDots.lua")
 
-Zip                   = dofile("Modal.lua")
+--Zip                   = dofile("Modal.lua")
+
+ZIP_PROMPT = dofile("Object_Zip_Prompt.lua")
+
+ZIP_ENTRY  = dofile("Object_Zip_Entry.lua")
+
+SMS_ENTRY  = dofile("Object_SMS_Entry.lua")
 
 Card_Constructor      = dofile("Card.lua")
 
 Rolodex_Constructor   = dofile("Rolodex.lua")
 
-dofile("User_Input.lua")
 
 
-App_State:add_state_change_function(
+
+App_State.state:add_state_change_function(
     function(old_state,new_state)
         
         if App_State.zip then
         else
-            Groupon_Request(
-                "all_deals",
-                Rolodex_Constructor
-            )
+            GET_DEALS(Rolodex_Constructor)
         end
         
         screen:add(Loading_G)
@@ -77,21 +89,21 @@ App_State:add_state_change_function(
         Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
         
     end,
-    STATES.OFFLINE,
-    STATES.LOADING
+    "OFFLINE",
+    "LOADING"
 )
 
 
 
-
+--[[
 assert(STATES         ~= nil,  "The STATES table no longer exists, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
 assert(STATES.LOADING ~= nil,"LOADING is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
 assert(STATES.ROLODEX ~= nil,"ROLODEX is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
 assert(STATES.ZIP     ~= nil,    "ZIP is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
 assert(STATES.PHONE   ~= nil,  "PHONE is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
+--]]
 
-
-App_State:change_state_to(STATES.LOADING)
+App_State.state:change_state_to("LOADING")
 
 Idle_Loop:resume()
 

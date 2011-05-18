@@ -204,7 +204,7 @@ local make_card = function(input)
 	
 	local value = Text{
 		text="Value",
-		font=font.." 12px",
+		font=font.." 16px",
 		color = black_text,
 		x = 73,
 		y = bg.y+129,
@@ -214,7 +214,7 @@ local make_card = function(input)
 	
 	local value_amt = Text{
 		text=input.msrp,
-		font=font_b.." 18px",
+		font=font_b.." 20px",
 		color = black_text,
 		x = value.x,
 		y = value.y+value.h,
@@ -223,7 +223,7 @@ local make_card = function(input)
 	
 	local discount = Text{
 		text="Discount",
-		font=font.." 12px",
+		font=font.." 16px",
 		color = black_text,
 		x = value.x+72,
 		y = value.y,
@@ -232,7 +232,7 @@ local make_card = function(input)
 	
 	local discount_amt = Text{
 		text=input.percentage.."%",
-		font=font_b.." 18px",
+		font=font_b.." 20px",
 		color = black_text,
 		x = discount.x,
 		y = discount.y+discount.h,
@@ -241,7 +241,7 @@ local make_card = function(input)
 	
 	local savings = Text{
 		text="You Save",
-		font=font.." 12px",
+		font=font.." 16px",
 		color = black_text,
 		x = discount.x+72,
 		y = value.y,
@@ -250,7 +250,7 @@ local make_card = function(input)
 	
 	local savings_amt = Text{
 		text=input.saved,
-		font=font_b.." 18px",
+		font=font_b.." 20px",
 		color = black_text,
 		x = savings.x,
 		y = savings.y+savings.h,
@@ -259,7 +259,7 @@ local make_card = function(input)
 	
 	local tltb = Text{
 		text="Time Left To Buy",
-		font=font.." 12px",
+		font=font.." 16px",
 		color = black_text,
 		x = 122,
 		y = bg.y+197,
@@ -275,7 +275,7 @@ local make_card = function(input)
 	local tltb_rem = Text{
 		name="TIME",
 		text="Value",
-		font=font_b.." 18px",
+		font=font_b.." 20px",
 		color = black_text,
 		x = tltb.x,
 		y = tltb.y+tltb.h,
@@ -308,6 +308,12 @@ local make_card = function(input)
 		x = 303,
 		y = bg.y+bg.h-64,
 	}
+	
+	card.fine_print = input.fine_print
+	card.highlights = input.highlights
+	card.id         = input.id
+	card.deal_url   = input.deal_url
+
 	
 	card:add(
 		bg,

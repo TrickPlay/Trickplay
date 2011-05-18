@@ -1,7 +1,58 @@
-App_State.states[STATES.OFFLINE].keys = {}
-App_State.states[STATES.LOADING].keys = {}
 
-App_State.states[STATES.ROLODEX ].keys = {
+--object
+local key_handler = {}
+
+--attributes
+local key_callbacks = {}
+
+key_handler.add_keys = function(self,state,key_table)
+	
+	assert(App_State.state:has_state(state), "App_State does not have State "..state)
+	
+	if key_callbacks[state] == nil then
+		
+		key_callbacks[state] = {}
+		
+	end
+	
+	if key_callbacks[state][key_table] then
+		
+		error()
+		
+	else
+		
+		key_callbacks[state][key_table] = key_table
+		
+	end
+	
+end
+
+key_handler.on_key_down = function(self,k)
+	
+	if key_callbacks[App_State.state.current_state()] then
+		
+		for key_table,_ in pairs(key_callbacks[App_State.state.current_state()])do
+			
+			if key_table[k] then
+				
+				key_table[k]()
+				
+			end
+			
+		end
+		
+	end
+	
+end
+
+return key_handler
+--[[
+local all_keys={}
+
+all_keys["OFFLINE"] = {}
+all_keys["LOADING"] = {}
+
+all_keys["ROLODEX"] = {
     --Flip Backward
 	[keys.Down] = function()
 		
@@ -69,28 +120,28 @@ App_State.states[STATES.ROLODEX ].keys = {
 		--dumptable(r.visible_cards)
 	end,
 	
-	[keys["0"]] = function() Zip:add_number(0) end,
-	[keys["1"]] = function() Zip:add_number(1) end,
-	[keys["2"]] = function() Zip:add_number(2) end,
-	[keys["3"]] = function() Zip:add_number(3) end,
-	[keys["4"]] = function() Zip:add_number(4) end,
-	[keys["5"]] = function() Zip:add_number(5) end,
-	[keys["6"]] = function() Zip:add_number(6) end,
-	[keys["7"]] = function() Zip:add_number(7) end,
-	[keys["8"]] = function() Zip:add_number(8) end,
-	[keys["9"]] = function() Zip:add_number(9) end,
+	[keys["0"] ] = function() Zip:add_number(0) end,
+	[keys["1"] ] = function() Zip:add_number(1) end,
+	[keys["2"] ] = function() Zip:add_number(2) end,
+	[keys["3"] ] = function() Zip:add_number(3) end,
+	[keys["4"] ] = function() Zip:add_number(4) end,
+	[keys["5"] ] = function() Zip:add_number(5) end,
+	[keys["6"] ] = function() Zip:add_number(6) end,
+	[keys["7"] ] = function() Zip:add_number(7) end,
+	[keys["8"] ] = function() Zip:add_number(8) end,
+	[keys["9"] ] = function() Zip:add_number(9) end,
 
 }
-App_State.states[STATES.ZIP  ].keys = {}
-App_State.states[STATES.PHONE].keys = {}
+all_keys["ZIP"] = {}
+all_keys["PHONE"] = {}
 
 
 
 --make sure all states
-for state_name,state_value in pairs(STATES) do
+for _,state_name in pairs(App_State.state.states()) do
     assert(
         
-        App_State.states[state_value].keys ~= nil,
+        all_keys[state_name] ~= nil,
         
         "State "..state_name.." was not given a key table, update \"User_Input.lua\""
     )
@@ -100,11 +151,12 @@ end
 do 
     local keys
     
-    App_State:add_state_change_function(function(old_state,new_state)
-        keys = App_State.states[new_state].keys
+    App_State.state:add_state_change_function(function(old_state,new_state)
+        keys = all_keys[new_state]
     end)
     
     function screen:on_key_down(k)
         if keys[k] then keys[k]() end
     end
 end
+--]]
