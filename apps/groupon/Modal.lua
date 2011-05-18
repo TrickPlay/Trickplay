@@ -1,28 +1,34 @@
 --ZIP
 
+--This request to Google Maps geocodes a Zip code into a latitude and longitude
 function get_lat_lng_for_zip(zip, callback)
     
-    return URLRequest{ url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&address="..zip, on_complete = callback }:send()
+    return URLRequest{
+        
+        url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&"..
+            "address="..zip,
+        
+        on_complete = callback
+        
+    }:send()
 
 end
 
 
 
 local zip = Group{}
----------------
+--Pop-up that notifies the user of which Groupon Division they are in
 local zip_prompt = Group{}
 do
-    local zip_bg = Clone{
-        source = assets.red_message
-    }
+    local zip_bg = Clone{ source = assets.red_message }
     
     zip_bg.anchor_point = {zip_bg.w/2,0}
     
     local prompt = Text{
-        text="Change Location:",
-        font="DejaVu Sans Condensed 20px",
-        color="#000000",
-        y = zip_bg.h/2,
+        text  = "Change Location:",
+        font  = "DejaVu Sans Condensed 20px",
+        color = "#000000",
+        y     =  zip_bg.h/2,
     }
     prompt.anchor_point = {
         prompt.w+40,
@@ -44,21 +50,25 @@ do
     
     
     zip.list_locations = function(t)
-        location.text = ""
+        
+        local str = ""
+        local amt = 0
         for name,num in pairs(t) do
-            location.text = location.text.."   "..name.." "..num
+            if num > amt then
+                str = name
+            end
         end
+        
+        location.text = str
     end
     
     zip_prompt:add(zip_bg,prompt,location)
 end
-----------------
+--Pop-up for entering a new zip code
 local fade_out_entry, fade_in_entry
 local zip_entry = Group{opacity=0}
 do
-    local zip_bg = Clone{
-        source = assets.zip_entry
-    }
+    local zip_bg = Clone{ source = assets.zip_entry }
     
     zip_bg.anchor_point = {zip_bg.w/2,0}
     
@@ -203,7 +213,7 @@ do
                 
                 Idle_Loop:add_function(fade_out_entry,zip,500)
                 
-                App_State:change_state_to(STATES.LOADING)
+                App_State.state:change_state_to("LOADING")
                 
             end
             
@@ -316,5 +326,64 @@ zip.timer:stop()
 zip.prompt_is_up = false
 zip.entry_is_up = false
 zip.anchor_point = {0,assets.zip_entry.h-10}
+
+KEY_HANDLER:add_keys(
+    "ROLODEX",
+    {
+    --Flip Backward
+	[keys.Down] = function()
+		
+		
+		if zip.entry_is_up then
+			zip:fade_out_entry()
+		elseif zip.prompt_is_up then
+			zip.timer:on_timer()
+		end
+		
+        
+	end,
+	
+    --Flip Forward
+	[keys.Up] = function()
+		
+		
+		if zip.entry_is_up then
+			zip:fade_out_entry()
+		elseif zip.prompt_is_up then
+			zip.timer:on_timer()
+		end
+        
+		--dumptable(r.visible_cards)
+	end,
+	
+	--Flip Forward
+	[keys.RED] = function()
+		if App_State.rolodex.flipping then return end
+		
+		if Zip.entry_is_up then
+			if zip.cancel then zip:cancel() end
+			zip:fade_out_entry()
+		else
+			if zip.prompt_is_up then
+				zip.timer:on_timer()
+			end
+			zip:fade_in_entry()
+		end
+        
+		--dumptable(r.visible_cards)
+	end,
+	
+	[keys["0"] ] = function() Zip:add_number(0) end,
+	[keys["1"] ] = function() Zip:add_number(1) end,
+	[keys["2"] ] = function() Zip:add_number(2) end,
+	[keys["3"] ] = function() Zip:add_number(3) end,
+	[keys["4"] ] = function() Zip:add_number(4) end,
+	[keys["5"] ] = function() Zip:add_number(5) end,
+	[keys["6"] ] = function() Zip:add_number(6) end,
+	[keys["7"] ] = function() Zip:add_number(7) end,
+	[keys["8"] ] = function() Zip:add_number(8) end,
+	[keys["9"] ] = function() Zip:add_number(9) end,
+}
+)
 
 return zip

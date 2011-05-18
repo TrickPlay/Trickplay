@@ -140,6 +140,43 @@ return function(response_table)
         
         screen:add(App_State.rolodex)
         
+        KEY_HANDLER:add_keys("ROLODEX",{
+    --Flip Backward
+	[keys.Down] = function()
+		
+        if not App_State.rolodex.flipping then
+            
+			App_State.rolodex:pre_backward_flip()
+			
+            Idle_Loop:add_function(
+                App_State.rolodex.flip_backward,
+                App_State.rolodex,
+                1000
+            )
+			
+            App_State.rolodex.flipping = true
+        end
+        
+	end,
+	
+    --Flip Forward
+	[keys.Up] = function()
+		
+        if not App_State.rolodex.flipping then
+            
+			App_State.rolodex:pre_forward_flip()
+			
+			Idle_Loop:add_function(
+                App_State.rolodex.flip_forward,
+                App_State.rolodex,
+                1000
+            )
+			
+            App_State.rolodex.flipping = true
+        end
+        
+		--dumptable(r.visible_cards)
+	end,})
     --else, reset
     else
         
@@ -155,7 +192,7 @@ return function(response_table)
     
     App_State.rolodex.top_card = 1
     
-    --dumptable(response_table.deals)
+    dumptable(response_table.deals)
     App_State.rolodex.cards = {}
     App_State.rolodex.visible_cards = {}
     
@@ -178,6 +215,10 @@ return function(response_table)
             expiration    = d.endAt,
             amount_sold   = d.options[1].soldQuantity,
             picture_url   = d.largeImageUrl,
+            fine_print    = d.options[1].details[1].description,
+            highlights    = d.highlightsHtml,
+            id            = d.id,
+            deal_url      = d.dealUrl,
         }
         
         table.insert( App_State.rolodex.cards, c )
@@ -200,7 +241,7 @@ return function(response_table)
         
         c:lower_to_bottom()
     end
-    
+    --[[
     Zip.list_locations(divs)
     
     if Zip.parent then Zip:unparent() end
@@ -214,6 +255,20 @@ return function(response_table)
     Zip.y = -App_State.rolodex.cards[1].h
     
     Zip:lower_to_bottom()
+    --]]
+    
+    if ZIP_PROMPT.parent then ZIP_PROMPT:unparent() end
+    
+    if ZIP_ENTRY.parent  then ZIP_ENTRY:unparent()  end
+
+    if SMS_ENTRY.parent  then SMS_ENTRY:unparent()  end    
+    
+    
+    App_State.rolodex:add(SMS_ENTRY,ZIP_PROMPT,ZIP_ENTRY)
+    
+    ZIP_PROMPT:set_city(divs)
+    
+    ZIP_PROMPT:lower_to_bottom()
     
     --only the first card is visible
     App_State.rolodex.visible_cards[1] = true
@@ -246,6 +301,6 @@ return function(response_table)
     
     
     --ROLODEX is ready, change state
-    App_State:change_state_to(STATES.ROLODEX)
+    App_State.state:change_state_to("ROLODEX")
     
 end
