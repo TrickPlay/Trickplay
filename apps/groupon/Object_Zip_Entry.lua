@@ -259,7 +259,7 @@ local keys_ROLODEX = {
 	
 	--Toggle screen
 	[keys.RED] = function()
-		--if App_State.rolodex.flipping then return end
+		if App_State.rolodex.flipping then return end
 		
 		if state:current_state() == "ACTIVE" or
             state:current_state() == "ANIMATING_IN" then
