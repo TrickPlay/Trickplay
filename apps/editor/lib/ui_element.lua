@@ -5390,7 +5390,6 @@ function ui_element.tabBar(t)
     
     --default parameters
     local p = {
-        name  = "Drop Down Bar", 			-- ??? 
         font  = "DejaVu Sans 26px",
         tab_labels = {
             "Item 1",
@@ -5406,13 +5405,15 @@ function ui_element.tabBar(t)
         display_width  = 400,
         display_height = 500,
         --space_between_tabs = 10,
-        slant_width  = 20,
+        --slant_width  = 20,
         border_width =  2,
         border_color = {255,255,255,255},
         fill_color   = {  0,  0,  0,255},
         label_color  = {255,255,255,255},
         unsel_color  = { 60, 60, 60,255},
     }
+    
+    local buttons = {}
     
     --overwrite defaults
     if t ~= nil then
@@ -5593,12 +5594,14 @@ function ui_element.tabBar(t)
             display_tab = function(self,index)
                 if index < 1 or index > #p.tab_labels then return end
                 p.tabs[current_index]:hide()
-				tab_bg[current_index]:show()
-				tab_focus[current_index]:hide()
+				--tab_bg[current_index]:show()
+				--tab_focus[current_index]:hide()
+                buttons[current_index].on_focus_out()
                 current_index = index
                 p.tabs[current_index]:show()
-				tab_bg[current_index]:hide()
-				tab_focus[current_index]:show()
+                buttons[current_index].on_focus_in()
+				--tab_bg[current_index]:hide()
+				--tab_focus[current_index]:show()
             end,
             previous_tab = function(self)
                 if current_index == 1 then return end
@@ -5638,29 +5641,41 @@ function ui_element.tabBar(t)
         umbrella:add(bg)
         for i = 1, #p.tab_labels do
             
-            if p.tabs[i] == nil then p.tabs[i] = Group{} end
+            if p.tabs[i] == nil then
+                p.tabs[i] = Group{}
+                buttons[i] = ui_element.button()
+            end
             
-            labels[i] = Text{
-                font  = p.font,
-                text  = p.tab_labels[i],
-                color = p.label_color,
-            }
+            buttons[i].label      = p.tab_labels[i]
+            buttons[i].text_font  = p.font
+            buttons[i].text_color = p.label_color
+            buttons[i].fill_color = p.unsel_color
+            buttons[i].focus_fill_color = p.fill_color
             
-            if labels[i].w > txt_w then txt_w = labels[i].w end
+            buttons[i].on_focus_out()
             
-            txt_h = labels[i].h
+            if p.tab_position == "TOP" then
+                buttons[i].x = buttons[i].w*(i-1)
+                p.tabs[i].y  = buttons[i].h
+            else
+                p.tabs[i].x  = buttons[i].w
+                buttons[i].y = buttons[i].h*(i-1)
+            end
+            umbrella:add(p.tabs[i],buttons[i])
             
-            if editor_lb == nil or editor_use then  
+            if editor_lb == nil or editor_use then
+                --[[
                 print(1)
-                labels[i].on_button_down = function()
+                buttons[i].on_button_down = function()
                     umbrella:display_tab(i)
                 end
                 
-                labels[i].reactive=true
+                buttons[i].reactive=true
+                --]]
             end
             
-            
         end
+        --[[
         for i = 1, #p.tab_labels do
             if p.tab_position == "TOP" then
                 tab_bg[i]    = make_horz_tab(
@@ -5703,17 +5718,17 @@ function ui_element.tabBar(t)
             tab_focus[i]:hide()
             umbrella:add(p.tabs[i],tab_bg[i],tab_focus[i],labels[i])
         end
-        
+        --]]
         if p.tab_position == "TOP" then
-            bg.y = tab_bg[1].h-p.border_width
+            bg.y = buttons[1].h-p.border_width
         else
-            bg.x = tab_bg[1].w-p.border_width
+            bg.x = buttons[1].w-p.border_width
         end
         
         for i = #p.tab_labels+1, #p.tabs do
-            p.tabs[i]      = nil
-            tab_bg[i]    = nil
-            tab_focus[i] = nil
+            p.tabs[i]  = nil
+            --tab_bg[i]  = nil
+            buttons[i] = nil
         end
 		
 		umbrella:display_tab(current_index)
