@@ -13,12 +13,16 @@
 
 @synthesize clip;
 @synthesize view;
+@synthesize ID;
+@synthesize name;
 
-- (id)init {
+- (id)initWithID:(NSString *)theID {
     if ((self = [super init])) {
         is_scaled = NO;
         
         self.clip = nil;
+        self.ID = theID;
+        self.name = nil;
     }
     
     return self;
@@ -77,6 +81,16 @@
 
 #pragma mark -
 #pragma mark Setters
+
+/**
+ * Set the Name
+ */
+
+- (void)setNameFromArgs:(NSDictionary *)args {
+    if ([args objectForKey:@"name"] && [[args objectForKey:@"name"] isKindOfClass:[NSString class]]) {
+        self.name = [args objectForKey:@"name"];
+    }
+}
 
 /**
  * Set Position
@@ -278,6 +292,7 @@
  */
 
 - (void)setValuesFromArgs:(NSDictionary *)args {
+    [self setNameFromArgs:args];
     [self setPostionFromArgs:args];
     [self setSizeFromArgs:args];
     [self setAnchorPointFromArgs:args];
@@ -291,109 +306,118 @@
 #pragma mark Getters
 
 /**
+ * Get Name
+ */
+
+- (void)get_name:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:self.name forKey:@"name"];
+}
+
+/**
  * Get Position
  */
 
-- (void)getPositionIntoDictionary:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"position"]) {
-        NSArray *position = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.position.x], [NSNumber numberWithFloat:view.layer.position.y], [NSNumber numberWithFloat:view.layer.zPosition], nil];
+- (void)get_position:(NSMutableDictionary *)dictionary {
+    NSArray *position = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.position.x], [NSNumber numberWithFloat:view.layer.position.y], [NSNumber numberWithFloat:view.layer.zPosition], nil];
         
-        [dictionary setObject:position forKey:@"position"];
-    }
-    if ([dictionary objectForKey:@"x"]) {
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.x] forKey:@"x"];
-    }
-    if ([dictionary objectForKey:@"y"]) {
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.y] forKey:@"y"];
-    }
-    if ([dictionary objectForKey:@"z"]) {
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.zPosition] forKey:@"z"];
-    }
+    [dictionary setObject:position forKey:@"position"];
+}
+
+- (void)get_x:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.x] forKey:@"x"];
+}
+
+- (void)get_y:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.y] forKey:@"y"];
+}
+
+- (void)get_z:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.zPosition] forKey:@"z"];
 }
 
 /**
  * Get Size
  */
 
-- (void)getSizeIntoDictionary:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"size"]) {
-        NSArray *size = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.bounds.size.width], [NSNumber numberWithFloat:view.layer.bounds.size.height], nil];
+- (void)get_size:(NSMutableDictionary *)dictionary {
+    NSArray *size = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.bounds.size.width], [NSNumber numberWithFloat:view.layer.bounds.size.height], nil];
         
-        [dictionary setObject:size forKey:@"size"];
-    }
-    if ([dictionary objectForKey:@"w"] || [dictionary objectForKey:@"width"]) {
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.width] forKey:@"w"];
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.width] forKey:@"width"];
-    }
-    if ([dictionary objectForKey:@"h"] || [dictionary objectForKey:@"height"]) {
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.height] forKey:@"h"];
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.height] forKey:@"height"];
-    }
+    [dictionary setObject:size forKey:@"size"];
+}
+
+- (void)get_w:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.width] forKey:@"w"];
+}
+
+- (void)get_width:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.width] forKey:@"width"];
+}
+
+- (void)get_h:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.height] forKey:@"h"];
+}
+
+- (void)get_height:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.bounds.size.height] forKey:@"height"];
 }
 
 /**
  * Get Anchor Point
  */
 
-- (void)getAnchorPointIntoDictionary:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"anchor_point"]) {
-        NSArray *anchor_point = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.anchorPoint.x], [NSNumber numberWithFloat:view.layer.anchorPoint.y], [NSNumber numberWithFloat:view.layer.anchorPointZ], nil];
+- (void)get_anchor_point:(NSMutableDictionary *)dictionary {
+    NSArray *anchor_point = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.anchorPoint.x], [NSNumber numberWithFloat:view.layer.anchorPoint.y], [NSNumber numberWithFloat:view.layer.anchorPointZ], nil];
         
-        [dictionary setObject:anchor_point forKey:@"anchor_point"];
-    }
+    [dictionary setObject:anchor_point forKey:@"anchor_point"];
 }
 
 /**
  * Get Scale
  */
 
-- (void)getScaleIntoDictionary:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"scale"]) {
-        NSArray *scale = [NSArray arrayWithObjects:[view.layer valueForKeyPath:@"transform.scale.x"], [view.layer valueForKeyPath:@"transform.scale.y"], [view.layer valueForKeyPath:@"transform.scale.z"], nil];
+- (void)get_scale:(NSMutableDictionary *)dictionary {
+    NSArray *scale = [NSArray arrayWithObjects:[view.layer valueForKeyPath:@"transform.scale.x"], [view.layer valueForKeyPath:@"transform.scale.y"], [view.layer valueForKeyPath:@"transform.scale.z"], nil];
         
-        [dictionary setObject:scale forKey:@"scale"];
-    }
+    [dictionary setObject:scale forKey:@"scale"];
 }
 
 /**
  * Get Rotation
  */
 
-- (void)getRotationIntoDictionary:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"x_rotation"]) {
-        NSNumber *x_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
+- (void)get_x_rotation:(NSMutableDictionary *)dictionary {
+    NSNumber *x_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
         
-        [dictionary setObject:x_rotation forKey:@"x_rotation"];
-    }
-    if ([dictionary objectForKey:@"y_rotation"]) {
-        NSNumber *y_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
+    [dictionary setObject:x_rotation forKey:@"x_rotation"];
+}
+
+- (void)get_y_rotation:(NSMutableDictionary *)dictionary {
+    NSNumber *y_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
         
-        [dictionary setObject:y_rotation forKey:@"y_rotation"];
-    }
-    if ([dictionary objectForKey:@"z_rotation"]) {
-        NSNumber *z_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
+    [dictionary setObject:y_rotation forKey:@"y_rotation"];
+}
+
+- (void)get_z_rotation:(NSMutableDictionary *)dictionary {
+    NSNumber *z_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
         
-        [dictionary setObject:z_rotation forKey:@"z_rotation"];        
-    }
+    [dictionary setObject:z_rotation forKey:@"z_rotation"];
 }
 
 /**
  * Get Opacity
  */
 
-- (void)getOpacityIntoDictionary:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"opacity"]) {
-        NSNumber *opacity = [NSNumber numberWithFloat:(view.alpha * 255.0)];
+- (void)get_opacity:(NSMutableDictionary *)dictionary {
+    NSNumber *opacity = [NSNumber numberWithFloat:(view.alpha * 255.0)];
         
-        [dictionary setObject:opacity forKey:@"opacity"];
-    }
+    [dictionary setObject:opacity forKey:@"opacity"];
 }
 
 /**
  * Get Clip
  */
 
-- (void)getClipIntoDictionary:(NSMutableDictionary *)dictionary {
+- (void)get_clip:(NSMutableDictionary *)dictionary {
     if ([dictionary objectForKey:@"clip"]) {
         CGFloat
         clip_x = self.bounds.origin.x,
@@ -414,14 +438,16 @@
 - (NSDictionary *)getValuesFromArgs:(NSDictionary *)properties {
     NSMutableDictionary *JSON_Dictionary = [NSMutableDictionary dictionaryWithDictionary:properties];
     
-    [self getPositionIntoDictionary:JSON_Dictionary];
-    [self getSizeIntoDictionary:JSON_Dictionary];
-    [self getAnchorPointIntoDictionary:JSON_Dictionary];
-    [self getScaleIntoDictionary:JSON_Dictionary];
-    [self getRotationIntoDictionary:JSON_Dictionary];
-    [self getOpacityIntoDictionary:JSON_Dictionary];
-    [self getClipIntoDictionary:JSON_Dictionary];
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"get_%@:", property]);
     
+        if ([TrickplayUIElement instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:JSON_Dictionary];
+        } else {
+            [JSON_Dictionary removeObjectForKey:property];
+        }
+    }
+     
     return JSON_Dictionary;
 }
 
@@ -429,46 +455,46 @@
 #pragma mark -
 #pragma mark Function handling
 
-- (NSString *)doHide {
+- (id)do_hide:(NSArray *)args {
     self.hidden = YES;
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (NSString *)doHideAll {
+- (id)do_hide_all:(NSArray *)args {
     self.hidden = YES;
     for (UIView *child in [self.view subviews]) {
         child.hidden = YES;
     }
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (NSString *)doShow {
+- (id)do_show:(NSArray *)args {
     self.hidden = NO;
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (NSString *)doShowAll {
+- (id)do_show_all:(NSArray *)args {
     self.hidden = NO;
     for (UIView *child in [self.view subviews]) {
         child.hidden = NO;
     }
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];;
 }
 
-- (NSString *)doMoveBy_dx:(CGFloat)dx dy:(CGFloat)dy {
-    CGFloat x = view.layer.position.x + dx;
-    CGFloat y = view.layer.position.y + dy;
+- (id)do_move_by:(NSArray *)args {
+    CGFloat x = view.layer.position.x + [[args objectAtIndex:0] floatValue];
+    CGFloat y = view.layer.position.y + [[args objectAtIndex:1] floatValue];
     
     view.layer.position = CGPointMake(x, y);
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (NSString *)doUnparent {
+- (id)do_unparent:(NSArray *)args {
     [self removeFromSuperview];
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (NSString *)doRaise {
+- (id)do_raise:(NSArray *)args {
     if (!self.superview) {
         return @"[false]";
     }
@@ -484,21 +510,21 @@
         }
     }
     
-    return @"[true]";
+    return [NSNumber numberWithBool:raiseSelf];
 }
 
-- (NSString *)doRaiseToTop {
+- (id)do_raise_to_top:(NSArray *)args {
     if (!self.superview) {
-        return @"[false]";
+        return [NSNumber numberWithBool:NO];
     }
     
     [self.superview bringSubviewToFront:self];
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (NSString *)doLower {
+- (id)do_lower:(NSArray *)args {
     if (!self.superview) {
-        return @"[false]";
+        return [NSNumber numberWithBool:NO];
     }
     
     UIView *previous = nil;
@@ -512,47 +538,41 @@
         
         previous = child;
     }
-    return @"[true]";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (NSString *)doLowerToBottom {
+- (id)do_lower_to_bottom:(NSArray *)args {
     if (!self.superview) {
-        return @"[false]";
+        return [NSNumber numberWithBool:NO];
     }
     
     [self.superview sendSubviewToBack:self];
-    return @"true";
+    return [NSNumber numberWithBool:YES];
 }
 
-- (void)doMoveAnchorPoint {
+- (id)do_move_anchor_point:(NSArray *)args {
+    if (!([args count] >= 2)) {
+        return [NSNumber numberWithBool:NO];
+    }
     
+    CGFloat
+    x = [[args objectAtIndex:0] floatValue],
+    y = [[args objectAtIndex:1] floatValue];
+    
+    view.layer.anchorPoint = CGPointMake(x, y);
+    return [NSNumber numberWithBool:YES]; 
 }
 
 #pragma mark -
 #pragma mark New Protocol
 
-- (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args {
-    NSString *result = nil;
-    if ([method compare:@"hide"] == NSOrderedSame) {
-        result = [self doHide];
-    } else if ([method compare:@"hide_all"] == NSOrderedSame) {
-        result = [self doHideAll];
-    } else if ([method compare:@"show"] == NSOrderedSame) {
-        result = [self doShow];
-    } else if ([method compare:@"show_all"] == NSOrderedSame) {
-        result = [self doShowAll];
-    } else if ([method compare:@"move_by"] == NSOrderedSame) {
-        result = [self doMoveBy_dx:[[args objectAtIndex:0] floatValue] dy:[[args objectAtIndex:1] floatValue]];
-    } else if ([method compare:@"unparent"] == NSOrderedSame) {
-        result = [self doUnparent];
-    } else if ([method compare:@"raise"] == NSOrderedSame) {
-        [self doRaise];
-    } else if ([method compare:@"raise_to_top"] == NSOrderedSame) {
-        [self doRaiseToTop];
-    } else if ([method compare:@"lower"] == NSOrderedSame) {
-        [self doLower];
-    } else if ([method compare:@"lower_to_bottom"] == NSOrderedSame) {
-        [self doLowerToBottom];
+- (id)callMethod:(NSString *)method withArgs:(NSArray *)args {
+    id result = nil;
+        
+    SEL selector = NSSelectorFromString([NSString stringWithFormat:@"do_%@:", method]);
+        
+    if ([TrickplayUIElement instancesRespondToSelector:selector]) {
+        result = [self performSelector:selector withObject:args];
     }
     
     return result;
@@ -562,6 +582,8 @@
 - (void)dealloc {
     self.view = nil;
     self.clip = nil;
+    self.ID = nil;
+    self.name = nil;
     
     if ([self superview]) {
         [self removeFromSuperview];

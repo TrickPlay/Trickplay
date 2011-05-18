@@ -88,22 +88,22 @@
 - (void)clean {
     NSLog(@"AdvancedUI clean");
     
-    for (UIView *rectangle in rectangles) {
+    for (UIView *rectangle in [rectangles allValues]) {
         [rectangle removeFromSuperview];
     }
     [rectangles removeAllObjects];
     
-    for (UIView *image in images) {
+    for (UIView *image in [images allValues]) {
         [image removeFromSuperview];
     }
     [images removeAllObjects];
     
-    for (UIView *textField in textFields) {
+    for (UIView *textField in [textFields allValues]) {
         [textField removeFromSuperview];
     }
     [textFields removeAllObjects];
     
-    for (UIView *group in groups) {
+    for (UIView *group in [groups allValues]) {
         [group removeFromSuperview];
     }
     [groups removeAllObjects];
@@ -237,6 +237,10 @@
         return [rectangles objectForKey:ID];
     } else if ([groups objectForKey:ID]) {
         return [groups objectForKey:ID];
+    } else if ([textFields objectForKey:ID]) {
+        return [textFields objectForKey:ID];
+    } else if ([images objectForKey:ID]) {
+        return [images objectForKey:ID];
     }
     
     return nil;
@@ -253,14 +257,18 @@
         return;
     }
     
-    NSString *result = nil;
+    id result = nil;
     if ([rectangles objectForKey:ID]) {
         result = [[rectangles objectForKey:ID] callMethod:method withArgs:args];
     } else if ([groups objectForKey:ID]) {
         result = [[groups objectForKey:ID] callMethod:method withArgs:args];
     }
     
-    [self reply:result];
+    if (result) {
+        [self reply:[[NSDictionary dictionaryWithObject:result forKey:@"result"] yajl_JSONString]];
+    } else {
+        [self reply:nil];
+    }
 }
 
 #pragma mark -
@@ -383,6 +391,8 @@
         [socketManager release];
         socketManager = nil;
     }
+    
+    [self clean];
     
     self.rectangles = nil;
     self.images = nil;

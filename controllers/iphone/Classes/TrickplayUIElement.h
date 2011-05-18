@@ -15,14 +15,21 @@
     BOOL is_scaled;
     NSArray *clip;
     
+    NSString *ID;
+    NSString *name;
+    
     UIView *view;
 }
 
+@property (nonatomic, retain) NSString *ID;
+@property (nonatomic, retain) NSString *name;
 @property (nonatomic, retain) NSArray *clip;
 @property (nonatomic, retain) UIView *view;
 
+- (id)initWithID:(NSString *)theID;
+
 // Some new protocol stuff
-- (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args;
+- (id)callMethod:(NSString *)method withArgs:(NSArray *)args;
 
 - (CGRect)getFrameFromArgs:(NSDictionary *)args;
 //** TODO refactor all this code to use method dispatching
@@ -36,5 +43,9 @@
 
 - (NSDictionary *)getValuesFromArgs:(NSDictionary *)args;
 - (void)setValuesFromArgs:(NSDictionary *)args;
+
+// Exposed function calls
+- (id)do_raise_to_top:(NSArray *)args;
+- (id)do_lower_to_bottom:(NSArray *)args;
 
 @end

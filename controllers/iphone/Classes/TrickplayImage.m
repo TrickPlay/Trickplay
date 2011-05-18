@@ -12,7 +12,7 @@
 @implementation TrickplayImage
 
 - (id)initWithID:(NSString *)imageID args:(NSDictionary *)args resourceManager:(ResourceManager *)resourceManager {
-    if ((self = [super init])) {
+    if ((self = [super initWithID:imageID])) {
         CGRect frame = [self getFrameFromArgs:args];
         
         self.view = [resourceManager fetchImageViewUsingResource:[args objectForKey:@"src"] frame:frame];

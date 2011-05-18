@@ -12,7 +12,7 @@
 @implementation TrickplayRectangle
 
 - (id)initWithID:(NSString *)rectID args:(NSDictionary *)args {
-    if ((self = [super init])) {
+    if ((self = [super initWithID:rectID])) {
         self.view = [[[UIView alloc] init] autorelease];
         
         [self setValuesFromArgs:args];
@@ -32,6 +32,8 @@
         */
         
         [self addSubview:view];
+        
+        ID = [rectID retain];
     }
     
     return self;
@@ -152,7 +154,7 @@
 #pragma mark -
 #pragma mark New Protocol
 
-- (NSString *)callMethod:(NSString *)method withArgs:(NSArray *)args {
+- (id)callMethod:(NSString *)method withArgs:(NSArray *)args {
     return [super callMethod:method withArgs:args];
 }
 
