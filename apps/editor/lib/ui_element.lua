@@ -1293,12 +1293,12 @@ function ui_element.button(table)
     	fill_color = {255,255,255,0},
     	border_width = 1,
     	border_corner_radius = 12,
-	focussed=nil, 
-	pressed = nil, 
-	released = nil, 
-	button_image = nil,
-	focus_image  = nil,
-	text_has_shadow = true,
+		focussed=nil, 
+		pressed = nil, 
+		released = nil, 
+		button_image = nil,
+		focus_image  = nil,
+		text_has_shadow = true,
     }
 
  --overwrite defaults
@@ -1321,13 +1321,13 @@ function ui_element.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
-	current_focus = b_group
+		current_focus = b_group
         if (p.skin == "custom") then 
-	     ring.opacity = 0
-	     focus_ring.opacity = 255
+	     	ring.opacity = 0
+	     	focus_ring.opacity = 255
         else
-	     button.opacity = 0
-             focus.opacity = 255
+	     	button.opacity = 0
+            focus.opacity = 255
         end 
         b_group:find_child("text").color = p.focus_text_color
 	
@@ -1335,34 +1335,34 @@ function ui_element.button(table)
 			p.focused()
 		end 
 
-	if key then 
-	    if p.pressed and key == keys.Return then
-		p.pressed()
-	    end 
-	end 
-	
-	if p.skin == "edit" then 
-		input_mode = S_MENU_M
-	end 
+		if key then 
+	    	if p.pressed and key == keys.Return then
+				p.pressed()
+	    	end 
+		end 
+		
+		if p.skin == "edit" then 
+			input_mode = S_MENU_M
+		end 
 
-	b_group:grab_key_focus(b_group)
+		b_group:grab_key_focus(b_group)
     end
     
     function b_group.extra.on_focus_out(key) 
-	current_focus = nil 
+		current_focus = nil 
         if (p.skin == "custom") then 
-	     ring.opacity = 255
-	     focus_ring.opacity = 0
-             focus.opacity = 0
+	     	ring.opacity = 255
+	     	focus_ring.opacity = 0
+            focus.opacity = 0
         else
-	     button.opacity = 255
-             focus.opacity = 0
-	     focus_ring.opacity = 0
+	     	button.opacity = 255
+            focus.opacity = 0
+	     	focus_ring.opacity = 0
         end
         b_group:find_child("text").color = p.text_color
-	if p.released then 
-		p.released()
-	end 
+		if p.released then 
+			p.released()
+		end 
     end
 
     local create_button = function() 
@@ -1374,74 +1374,73 @@ function ui_element.button(table)
         focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
-	if(p.skin == "editor") then 
-	    button= assets("assets/invisible_pixel.png")
+		if(p.skin == "editor") then 
+	    	button= assets("assets/invisible_pixel.png")
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-	    focus= assets("assets/menu-bar-focus.png")
+	    	focus= assets("assets/menu-bar-focus.png")
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-	elseif(p.skin ~= "custom") then 
+		elseif(p.skin ~= "custom") then 
             button = assets(skin_list[p.skin]["button"])
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
             focus = assets(skin_list[p.skin]["button_focus"])
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-	else 
-	     button = Image{}
-	     focus = Image{}
-	end 
+		else 
+	     	button = Image{}
+	     	focus = Image{}
+		end 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
         text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
 	
-	b_group:add(ring, focus_ring, button, focus)
-	if p.text_has_shadow then 
-	       s_txt = Text{
-		        name = "shadow",
-                        text  = p.label, 
-                        font  = p.text_font,
-                        color = {0,0,0,255/2},
-                        x     = (p.ui_width  -text.w)/2 - 1,
-                        y     = (p.ui_height - text.h)/2 - 1,
-                    }
-                    s_txt.anchor_point={0,s_txt.h/2}
-                    s_txt.y = s_txt.y+s_txt.h/2
+		b_group:add(ring, focus_ring, button, focus)
+		if p.text_has_shadow then 
+	       	s_txt = Text{
+		    	name = "shadow",
+            	text  = p.label, 
+            	font  = p.text_font,
+            	color = {0,0,0,255/2},
+            	x     = (p.ui_width  -text.w)/2 - 1,
+            	y     = (p.ui_height - text.h)/2 - 1,
+            }
+            s_txt.anchor_point={0,s_txt.h/2}
+            s_txt.y = s_txt.y+s_txt.h/2
         	b_group:add(s_txt)
-	end 
+		end 
 
         b_group:add(text)
 
         if (p.skin == "custom") then button.opacity = 0 
         else ring.opacity = 0 end 
 
-	if editor_lb == nil or editor_use then 
-	     function b_group:on_button_down(x,y,b,n)
-		if current_focus ~= b_group then 
-			if current_focus then 
-		     		current_focus.on_focus_out()
-			end
-			b_group.extra.on_focus_in(keys.Return)
-		else 
+		if editor_lb == nil or editor_use then 
+	     	function b_group:on_button_down(x,y,b,n)
+				if current_focus ~= b_group then 
+					if current_focus then 
+		     			current_focus.on_focus_out()
+					end
+					b_group.extra.on_focus_in(keys.Return)
+				else 
 		     	--current_focus.on_focus_in(keys.Return)
-		     	current_focus.on_focus_out()
-			screen:grab_key_focus()
-		end 
-		return true
-	     end 
-	end 
-
-	if p.skin == "editor"  then 
-	     function b_group:on_motion()
-		if input_mode == S_MENU_M then 
-		    if current_focus ~= b_group then 
-			if current_focus then 
 		     		current_focus.on_focus_out()
-			end
-			b_group.extra.on_focus_in(keys.Return)
-		    else 
-		     	current_focus.on_focus_in(keys.Return)
-		    end 
+					screen:grab_key_focus()
+				end 
+				return true
+	     	end 
 		end 
+
+		if p.skin == "editor"  then 
+	     	function b_group:on_motion()
+				if input_mode == S_MENU_M then 
+		    		if current_focus ~= b_group then 
+						if current_focus then 
+		     				current_focus.on_focus_out()
+						end
+						b_group.extra.on_focus_in(keys.Return)
+		    		else 
+		     			current_focus.on_focus_in(keys.Return)
+		    		end 
+				end 
              end
-	end 
-	
+		end 
     end 
 
     create_button()
@@ -1559,8 +1558,9 @@ function ui_element.textInput(table)
 	    	focus_img = Image{}
 		end 
 
-    		text = Text{text=p.text, editable=true, cursor_visible=false, cursor_color = p.cursor_color, wants_enter = true, 
-						reactive = true, font = p.text_font, color = p.text_color}
+    		text = Text{text=p.text, editable=true, cursor_visible=false, single_line = true, 
+						cursor_color = p.cursor_color, wants_enter = true, 
+						reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
     		text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
     		t_group:add(box, focus_box, box_img, focus_img, text)
 
@@ -1575,9 +1575,8 @@ function ui_element.textInput(table)
 	   	end 
 
 	   	local t_pos_max = p.ui_width - 2 * p.padding
-
 	   	function text:on_key_down(key)
-	    	local c_x, prev_c_x
+	    	local c_x, n_x, cx, nx 
 			local t_w = t_group:find_child("textInput").w
 	        local scroll_w = t_w - t_pos_max 
 			local c_pos = t_group:find_child("textInput").cursor_position
@@ -1586,64 +1585,55 @@ function ui_element.textInput(table)
 				screen:grab_key_focus()
 				t_group.extra.on_focus_out()
 				return true
+			end 
+	--[[
 			elseif key == keys.Left then 
 				if t_group:find_child("textInput").position_to_coordinates then 
 					if t_group:find_child("textInput").clip then 
-		            	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
-				     	local x = c_x[1] 
-						print(c_pos)
-						----print(x)
-						--print(t_pos_min)
-		    			--print(t_pos_min - x) 
---[[
-						if x <= t_pos_min then 
-		    				t_group:find_child("textInput").x = t_group:find_child("textInput").x + (t_pos_min - x) 
-		    				--t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
-						end 
-							
-				     	local letter_sz 
 						if c_pos ~= -1 and c_pos ~= 0 then 
-		                     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
-				     	     letter_sz =  x - prev_c_x[1] 
-						end 
-	
-				     	if (t_group:find_child("textInput").clip[1] > x-p.padding ) and letter_sz then 
-						    print(letter_sz)
-		    			    t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz 
-		    			    t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - letter_sz ,  
-					    	t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
-					    	letter_sz = nil
-					    	c_x = nil
-					    	prev_c_x = nil
-				     	end
-	]]						
+		            	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) -- c_pos
+				     	cx = c_x[1] 
+
+		            	n_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) -- c_pos
+				     	nx = n_x[1] 
+					
+				     		if (t_group:find_child("textInput").clip[1] > nx) then 
+								print("letter - ", cx-nx)
+		    					t_group:find_child("textInput").x = t_group:find_child("textInput").x + (cx-nx)
+		    			    	t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - (cx-nx), t_group:find_child("textInput").clip[2], 
+																		t_group:find_child("textInput").clip[3] - (cx-nx), t_group:find_child("textInput").clip[4]}
+								print("new input field clip:")
+								dumptable(t_group:find_child("textInput").clip)
+								print("new input field length : ", t_group:find_child("textInput").w - scroll_w - p.padding) 
+							end 
+						end
 			        end
 				end 
 			elseif key == keys.Right then 
 				if t_group:find_child("textInput").position_to_coordinates then 
 					if t_group:find_child("textInput").clip then 
-			        	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
-				     	local x = c_x[1] 
-				     	local letter_sz 
-					if c_pos ~= -1 then
-		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
-				     	     letter_sz = x - prev_c_x[1]
+						if c_pos ~= -1 and c_pos ~= 0 then 
+		            		c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) -- c_pos
+				     		cx = c_x[1] 
 
-		             		    if (t_group:find_child("textInput").clip[3] < x+p.padding )then 
-		    			         t_group:find_child("textInput").x = t_group:find_child("textInput").x - letter_sz 
-		    			         t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] + letter_sz ,  
-					         t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] + letter_sz ,  t_group:find_child("textInput").clip[4]}
-					    	 letter_sz = nil
-					         c_x = nil
-					         prev_c_x = nil
-					    end
+		            		n_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) -- c_pos
+				     		nx = n_x[1] 
+		             		if (t_group:find_child("textInput").clip[3] < x+p.padding )then 
+		    			         t_group:find_child("textInput").x = t_group:find_child("textInput").x - (cx-nx) 
+		    			         t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] + (cx-nx), 
+								 t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] + (cx-nx),  
+								 t_group:find_child("textInput").clip[4]}
+					    	end
 					end 
 				end 
 			end 
 			elseif scroll_w > 0 then 
 		    	t_group:find_child("textInput").x = scroll_w * -1
 		    	t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
+				print( "input field length : ", t_group:find_child("textInput").w - scroll_w - p.padding) 
+				aa =  t_group:find_child("textInput").w - scroll_w - p.padding 
 	        end 
+			]]
 	   	end 
 		end 
 
