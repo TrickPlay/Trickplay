@@ -39,6 +39,7 @@ local App_State = {
 	cards = {},
 	phone = settings.phone,
 	zip   = settings.zip,
+	rolodex = nil,
 	--needed
 	states = {}
 }
@@ -188,8 +189,19 @@ do
         
     end
     
+	Idle_Loop.has_function = function(self,func)
+		if	to_be_deleted_r[func] or
+			iterated_list[func]   or
+			to_be_added_r[func]   then
+			
+			return true
+        else
+            return false
+        end
+	end
+	
     Idle_Loop.remove_function = function(self,old_function)
-        if in_idle_loop then
+        if in_idle_loop and iterated_list[old_function] then
             table.insert(to_be_deleted,old_function)
 			to_be_deleted_r[old_function] = true
 		elseif to_be_added_r[new_function] ~= nil then

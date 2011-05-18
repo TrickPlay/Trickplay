@@ -18,6 +18,8 @@ assets = {
 	check_green = Image{src="assets/check-green.png"},
 	check_red   = Image{src="assets/check-red.png"},
 	dot         = Image{src="assets/dot.png"},
+	cell_dark   = Image{src="assets/cell-dark-grey.png"},
+	cell_green  = Image{src="assets/cell-green.png"},
 	expired     = Image{src="assets/expired.png"},
 	g           = Image{src="assets/g.png"},
 	message     = Image{src="assets/message-bg.png"},
