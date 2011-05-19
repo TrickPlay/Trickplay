@@ -563,6 +563,11 @@
     return [NSNumber numberWithBool:YES]; 
 }
 
+- (id)do_transform_point:(NSArray *)args {
+    // TODO: do later
+    return [NSNumber numberWithBool:NO];
+}
+
 #pragma mark -
 #pragma mark New Protocol
 
