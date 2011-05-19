@@ -13,6 +13,7 @@ local function throb(self,msecs,p)
 		
 	end
 end
+local function empty() end
 
 
 local dot = "•"
@@ -196,7 +197,7 @@ local make_card = function(input)
 	
 	local tag_text = Text{
 		name="TAG_TEXT",
-		text="Link Sent",
+		text="More Info",
 		font=font_b.." 26px",
 		color = white_text,
 		x = 81,
@@ -346,7 +347,18 @@ local make_card = function(input)
 	card.highlights = decode(gen_highlight(input.highlights))
 	card.id         = input.id
 	card.deal_url   = input.deal_url
-
+	
+	card.sent = function(self)
+		
+		self.throb = empty
+		
+		tag_text.text = "Link Sent"
+		
+		glow.opacity = 0
+		
+		check.opacity = 255
+	end
+	
 	
 	card:add(
 		bg,

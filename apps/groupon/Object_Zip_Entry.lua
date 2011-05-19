@@ -92,6 +92,9 @@ local lat_lng_callback = function(zip_info)
             prompt.h/2
         }
         reset()
+		
+		state:change_state_to("ACTIVE")
+		--App_State.state:change_state_to("ROLODEX")
     elseif  zip_info.results[1].address_components[
                 #zip_info.results[1].address_components
             ].short_name ~= "US" then
@@ -102,7 +105,10 @@ local lat_lng_callback = function(zip_info)
             prompt.w,
             prompt.h/2
         }
-        reset()
+        reset_form()
+		
+		state:change_state_to("ACTIVE")
+		--App_State.state:change_state_to("ROLODEX")
     else
         local lat = zip_info.results[1].geometry.location.lat
         local lng = zip_info.results[1].geometry.location.lng
@@ -124,7 +130,7 @@ local lat_lng_callback = function(zip_info)
         Loading_G.y = screen_h - 200
         
         Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
-        
+        App_State.state:change_state_to("LOADING")
         state:change_state_to("ANIMATING_OUT")
         
         --App_State.state:change_state_to("LOADING")
@@ -133,7 +139,7 @@ local lat_lng_callback = function(zip_info)
 end
 
 local add_number = function(num)
-    
+    print(22)
     if state.current_state() ~= "ACTIVE" then return end
     
     assert(cursor_index>0 and cursor_index <= zip_digit_max)
@@ -176,7 +182,7 @@ App_State.state:add_state_change_function(
 state:add_state_change_function(
     function(prev_state,new_state)
         assert(App_State.state:current_state() == "ROLODEX")
-        App_State.state:change_state_to("LOADING")
+        
         
         cursor.opacity = 0
         prompt.text = "Geocoding"

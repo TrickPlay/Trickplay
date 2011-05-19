@@ -51,7 +51,7 @@ KEY_HANDLER = dofile("User_Input.lua")
 
 screen.on_key_down = KEY_HANDLER.on_key_down
 
-GET_DEALS, GET_LAT_LNG = dofile("Internet_Interfaces.lua")
+GET_DEALS, SEND_SMS, GET_LAT_LNG = dofile("Internet_Interfaces.lua")
 
 Groupon_Request       = dofile("Internet_Groupon.lua")
 
