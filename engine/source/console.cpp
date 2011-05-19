@@ -53,7 +53,8 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
     channel( NULL ),
     watch( 0 ),
     stdin_buffer( NULL ),
-    server( NULL )
+    server( NULL ),
+    enabled( true )
 {
     if ( read_stdin )
     {
@@ -227,9 +228,16 @@ void Console::process_line( gchar * line )
 
 gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gpointer data )
 {
+    Console * self = ( Console * ) data;
+
+    if ( ! self->enabled )
+    {
+        return TRUE;
+    }
+
 #ifdef TP_HAS_READLINE
 
-    readline_console = ( Console * ) data;
+    readline_console = self;
 
     rl_callback_read_char();
 
@@ -238,7 +246,7 @@ gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gp
     return TRUE;
 
 #else
-    return ( ( Console * )data )->read_data();
+    return self->read_data();
 #endif
 }
 
@@ -263,4 +271,22 @@ void Console::output_handler( const gchar * line, gpointer data )
     {
         console->server->write_to_all( line );
     }
+}
+
+void Console::enable()
+{
+#ifdef TP_HAS_READLINE
+    rl_callback_handler_install( "" , readline_handler );
+#endif
+
+    enabled = true;
+}
+
+void Console::disable()
+{
+#ifdef TP_HAS_READLINE
+    rl_callback_handler_remove();
+#endif
+
+    enabled = false;
 }
