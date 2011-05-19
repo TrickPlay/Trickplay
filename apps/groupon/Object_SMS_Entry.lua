@@ -9,6 +9,7 @@ local phone_digit_max = 3+3+4
 local cursor_base_x = 14
 local digit_spacing = 40
 local first_digit_x = 226
+local deal_url = "failed to set url"
 
 local sms_bg = Clone{ source = assets.info_panel }
 
@@ -57,6 +58,15 @@ local entered = Image{
 local cursor = Clone{
     source=assets.cell_green,
     x=first_digit_x-6,y=307
+}
+
+local prompt = Text{
+	text = "Unable to reach number.",
+	font = "DejaVu Sans Condensed 40px",
+	color = "#000000",
+	opacity=0,
+	y     = 270,
+    x     = first_digit_x
 }
 
 local entry = {}
@@ -109,6 +119,7 @@ sms_entry:add(
 	highlights_body,
 	entered,
 	cursor,
+	prompt,
 	submit_button,
 	submit_button_focus,
 	submit_button_shadow,
@@ -134,6 +145,7 @@ local reset_form = function()
         prompt.h/2
     }
 	--]]
+	prompt.opacity = 0
     entered.w = 0
     cursor.x = first_digit_x-6
     cursor.opacity=255
@@ -142,32 +154,26 @@ local reset_form = function()
 	submit_button_focus.opacity = 0
 end
 
-local sms_callback = function(zip_info)
+local sms_callback = function(sms_result)
 	
     cancel_object = nil
     
     --local zip_info = json:parse(response_object.body)
-    
-    if zip_info.status ~= "OK" then
-        print("not ok")
-        prompt.text="Entered Invalid ZIP"
-        prompt.anchor_point = {
-            prompt.w,
-            prompt.h/2
-        }
-        reset()
-    elseif  zip_info.results[1].address_components[
-                #zip_info.results[1].address_components
-            ].short_name ~= "US" then
+    --[[
+    if sms_result.session == nil then
+		error("unexpected response from tropo")
+	elseif sms_result.session.success ~= true then
         
-        print("not US")
-        prompt.text="Entered Invalid ZIP"
-        prompt.anchor_point = {
-            prompt.w,
-            prompt.h/2
-        }
-        reset()
+        print("failed")
+        
+        reset_form()
+		prompt.opacity = 255
     else
+	--]]
+	
+	
+	
+		--[[
         local lat = zip_info.results[1].geometry.location.lat
         local lng = zip_info.results[1].geometry.location.lng
         
@@ -188,19 +194,22 @@ local sms_callback = function(zip_info)
         Loading_G.y = screen_h - 200
         
         Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
-        
+        --]]
+		App_State.rolodex.cards[App_State.rolodex.top_card]:sent()
+		
         state:change_state_to("ANIMATING_OUT")
         
         --App_State.state:change_state_to("LOADING")
         
-    end
+    --end
 end
 
 local add_number = function(num)
     
     if state.current_state() ~= "ACTIVE" then return end
     
-    assert(cursor_index>0 and cursor_index <= phone_digit_max)
+    if cursor_index<1 or cursor_index > phone_digit_max then return end
+	
     entry[cursor_index].text = num
     cursor_index = cursor_index + 1
     
@@ -241,6 +250,15 @@ App_State.state:add_state_change_function(
 )
 state:add_state_change_function(
     function(prev_state,new_state)
+		
+		submit_button_focus.opacity = 0
+		
+		cancel_object = SEND_SMS(
+			sms_callback,
+			deal_url,
+			nil
+		)
+		
 		--[[
         assert(App_State.state:current_state() == "ROLODEX")
         App_State.state:change_state_to("LOADING")
@@ -273,6 +291,7 @@ state:add_state_change_function(
         sms_entry.y = -App_State.rolodex.cards[App_State.rolodex.top_card].h
 		fine_print_body.text = App_State.rolodex.cards[App_State.rolodex.top_card].fine_print
 		highlights_body.text = App_State.rolodex.cards[App_State.rolodex.top_card].highlights
+		deal_url             = App_State.rolodex.cards[App_State.rolodex.top_card].deal_url
         sms_entry:lower_to_bottom()
     end,
     nil,
@@ -363,7 +382,13 @@ local keys_ROLODEX = {
 		if App_State.rolodex.flipping then return end
 		
 		if state:current_state() == "HIDDEN" then
+			
 			state:change_state_to("ANIMATING_IN")
+			
+		elseif  state:current_state() == "ACTIVE" and
+			cursor_index == phone_digit_max + 1 then
+			
+			state:change_state_to("SENDING")
 		end
         
 	end,

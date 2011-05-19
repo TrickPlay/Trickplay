@@ -17,24 +17,35 @@ local response_check = function(request_object,response_object,callback)
 			
 		)
 		
+	elseif response_object.body == nil then
+		
+		error(
+			response_object.code.." - "..
+			
+			response_object.status
+		)
+		
 	else
 					
 		local json_response = json:parse(response_object.body)
 		
+		--[[
 		if json_response == nil or type(json_response) ~= "table" then
+			
+			print(response_object.body)
 			
 			error("Unable to parse ResponseObject.body, parse result = "..json_response)
 			
 		end
+		--]]
 		
 		callback(json_response)
 		
 	end
 end
 
-
+--------------------------------------------------------------------------------
 local groupon_api_key = "4e79a015b2222c3336099a080f7b3508cc62a6a0"
-local cj_publisher_id = "5287435"
 
 local groupon_get_deals = function(callback,lat,lng,radius)
     
@@ -57,7 +68,31 @@ local groupon_get_deals = function(callback,lat,lng,radius)
     
     return req:send()
 end
+--------------------------------------------------------------------------------
 
+
+local tropo_api_key = "016ed2530c3bcc47b397ead9357a41a777093018d4ab25f85220a86ac342f29bea28e88efc53f74872082eee"
+local cj_publisher_id = "5287435"
+
+local tropo_sms = function(callback,msg,to)
+    
+    assert(type(callback) == "function")
+    
+    local req = URLRequest{
+        
+        url = "https://api.tropo.com/1.0/sessions?action=create&token="..tropo_api_key.."&msg="..msg,
+        
+        on_complete = function(self,response_object)
+            
+            response_check(self,response_object,callback)
+            
+        end
+    }
+    
+    return req:send()
+end
+
+--------------------------------------------------------------------------------
 local google_maps_get_lat_lng_from_zip = function(zip, callback)
     
     assert(type(callback) == "function")
@@ -77,4 +112,4 @@ local google_maps_get_lat_lng_from_zip = function(zip, callback)
     return req:send()
 end
 
-return groupon_get_deals, google_maps_get_lat_lng_from_zip
+return groupon_get_deals, tropo_sms, google_maps_get_lat_lng_from_zip
