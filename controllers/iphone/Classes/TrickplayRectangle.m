@@ -100,21 +100,50 @@
  */
 
 - (void)setBorderColorFromArgs:(NSDictionary *)args {
-    NSArray *borderColorArray = [args objectForKey:@"border_color"];
-    if (!borderColorArray || [borderColorArray count] < 3) {
-        return;
-    }
-    
     CGFloat red, green, blue, alpha;
-    
-    red = [(NSNumber *)[borderColorArray objectAtIndex:0] floatValue]/255.0;
-    green = [(NSNumber *)[borderColorArray objectAtIndex:1] floatValue]/255.0;
-    blue = [(NSNumber *)[borderColorArray objectAtIndex:2] floatValue]/255.0;
-    
-    if ([borderColorArray count] > 3) {
-        alpha = [(NSNumber *)[borderColorArray objectAtIndex:3] floatValue]/255.0;
+    if ([[args objectForKey:@"border_color"] isKindOfClass:[NSArray class]]) {
+        NSArray *colorArray = [args objectForKey:@"border_color"];
+        if (!colorArray || [colorArray count] < 3) {
+            return;
+        }
+        
+        red = [(NSNumber *)[colorArray objectAtIndex:0] floatValue]/255.0;
+        green = [(NSNumber *)[colorArray objectAtIndex:1] floatValue]/255.0;
+        blue = [(NSNumber *)[colorArray objectAtIndex:2] floatValue]/255.0;
+        
+        if ([colorArray count] > 3) {
+            alpha = [(NSNumber *)[colorArray objectAtIndex:3] floatValue]/255.0;
+        } else {
+            alpha = CGColorGetAlpha(view.layer.borderColor);
+        }
+    } else if ([[args objectForKey:@"border_color"] isKindOfClass:[NSString class]]) {
+        NSString *hexString = [args objectForKey:@"border_color"];
+        if (!hexString || [hexString length] < 6) {
+            return;
+        }
+        
+        unsigned int value;
+        
+        if ([hexString characterAtIndex:0] == '#') {
+            hexString = [hexString substringFromIndex:1];
+        }
+        
+        [[NSScanner scannerWithString:hexString] scanHexInt:&value];
+        if ([hexString length] > 6) {
+            // alpha exists
+            red = ((value & 0xFF000000) >> 24)/255.0;
+            green = ((value & 0x00FF0000) >> 16)/255.0;
+            blue = ((value & 0x0000FF00) >> 8)/255.0;
+            alpha = (value & 0x000000FF)/255.0;
+        } else {
+            // just RGB
+            red = ((value & 0xFF0000) >> 16)/255.0;
+            green = ((value & 0x00FF00) >> 8)/255.0;
+            blue = (value & 0x0000FF)/255.0;
+            alpha = CGColorGetAlpha(view.layer.borderColor);
+        }
     } else {
-        alpha = CGColorGetAlpha(view.layer.borderColor);
+        return;
     }
     
     view.layer.borderColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha].CGColor;
