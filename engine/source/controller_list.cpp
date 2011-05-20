@@ -1,6 +1,11 @@
 
+#include <fstream>
+#include <sstream>
+
 #include "controller_list.h"
 #include "clutter_util.h"
+#include "context.h"
+#include "log.h"
 
 //=============================================================================
 // If defined, will time and report times for controller events.
@@ -283,13 +288,15 @@ private:
 //==============================================================================
 
 
-Controller::Controller( ControllerList * _list, const char * _name, const TPControllerSpec * _spec, void * _data )
+Controller::Controller( ControllerList * _list, TPContext * _context , const char * _name, const TPControllerSpec * _spec, void * _data )
     :
     tp_controller( new TPController( this, _list ) ),
     connected( true ),
     name( _name ),
     spec( *_spec ),
     data( _data ),
+    context( _context ),
+    loaded_external_map( false ),
     ts_accelerometer_started( 0 ),
     ts_pointer_started( 0 ),
     ts_touch_started( 0 )
@@ -376,10 +383,108 @@ bool Controller::is_connected() const
     return connected;
 }
 
+
+//.............................................................................
+
+String Controller::get_key_map_file_name() const
+{
+    gchar * name_hash = g_compute_checksum_for_string( G_CHECKSUM_MD5 , name.c_str() , -1 );
+
+    gchar * file_name = g_strdup_printf( "%s.map" , name_hash );
+
+    gchar * path = g_build_filename( context->get( TP_DATA_PATH ) , "controllers" , file_name , NULL );
+
+    String result( path );
+
+    g_free( name_hash );
+    g_free( file_name );
+    g_free( path );
+
+    return result;
+}
+
+//.............................................................................
+
+void Controller::load_external_map()
+{
+    if ( loaded_external_map )
+    {
+        return;
+    }
+
+    // We don't care whether we succeed or n
+    loaded_external_map = true;
+
+    String file_name = get_key_map_file_name();
+
+
+    tplog( "LOADING CONTROLLER MAP FROM '%s'" , file_name.c_str() );
+
+    std::ifstream stream;
+
+    stream.open( file_name.c_str() , std::ios_base::in );
+
+    String line;
+
+    unsigned int a;
+    unsigned int b;
+
+    while( std::getline( stream , line ) )
+    {
+        if ( std::istringstream( line ) >> a >> b )
+        {
+            key_map[ a ] = b;
+        }
+    }
+}
+
+//.............................................................................
+
+bool Controller::save_key_map( const KeyMap & km )
+{
+    FreeLater free_later;
+
+    String file_name = get_key_map_file_name();
+
+    gchar * path = g_path_get_dirname( file_name.c_str() );
+
+    free_later( path );
+
+    if ( 0 != g_mkdir_with_parents( path , 0700 ) )
+    {
+        return false;
+    }
+
+    std::ofstream stream;
+
+    stream.open( file_name.c_str() , std::ios_base::out | std::ios_base::trunc );
+
+    for( KeyMap::const_iterator it = km.begin(); it != km.end(); ++it )
+    {
+        stream << it->first << "\t" << it->second << "\n";
+
+        if ( ! stream )
+        {
+            return false;
+        }
+    }
+
+    stream.close();
+
+    key_map.insert( km.begin() , km.end() );
+
+    return true;
+}
+
 //.............................................................................
 
 unsigned int Controller::map_key_code( unsigned int key_code )
 {
+    if ( ! loaded_external_map )
+    {
+        load_external_map();
+    }
+
     if ( !key_map.empty() )
     {
         KeyMap::const_iterator it = key_map.find( key_code );
@@ -1139,12 +1244,12 @@ gboolean ControllerList::process_events( gpointer self )
 // Most likely called in a different thread.
 // Adds the controller to our list and posts an event.
 
-TPController * ControllerList::add_controller( const char * name, const TPControllerSpec * spec, void * data )
+TPController * ControllerList::add_controller( TPContext * context , const char * name, const TPControllerSpec * spec, void * data )
 {
     g_assert( name );
     g_assert( spec );
 
-    Controller * controller = new Controller( this, name, spec, data );
+    Controller * controller = new Controller( this , context , name , spec , data );
 
     TPController * result = controller->get_tp_controller();
 
