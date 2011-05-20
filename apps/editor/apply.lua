@@ -165,13 +165,16 @@ function inspector_apply (v, inspector)
 		end
 		end,
 	["icon"] = function()
-               v.icon = "assets/images/"..tostring(item_group:find_child("icon"):find_child("file_name").text)
+               --v.icon = "assets/images/"..tostring(item_group:find_child("icon"):find_child("file_name").text)
+               v.icon = tostring(item_group:find_child("icon"):find_child("file_name").text)
 	       end,
 	["source"] = function()
-               v.source = "assets/videos/"..tostring(item_group:find_child("source"):find_child("file_name").text)
+               --v.source = "assets/videos/"..tostring(item_group:find_child("source"):find_child("file_name").text)
+               v.source = tostring(item_group:find_child("source"):find_child("file_name").text)
 	       end,
 	["src"] = function()
-               v.src = "assets/images/"..tostring(item_group:find_child("src"):find_child("file_name").text)
+               --v.src = "assets/images/"..tostring(item_group:find_child("src"):find_child("file_name").text)
+               v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
 	       end,
 	["name"] = function ()
 	       if v.extra then 
@@ -207,6 +210,12 @@ function inspector_apply (v, inspector)
               if (attr_map[j.name]) then
                      attr_map[j.name]()
               elseif(v[j.name] ~= nil)then 
+					 if j.name == "w" or j.name == "h" then -- 0519
+						if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
+                            v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+						end 
+					 end 
+
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
                             v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
                      else 
@@ -285,20 +294,22 @@ function inspector_apply (v, inspector)
 		     local focus_match= {["U"] = keys.Down, ["D"] = keys.Up, ["L"] = keys.Right,["R"] = keys.Left,}
 		     for m,n in pairs (focus_t_list) do 
 		          if item_group:find_child("text"..n).text ~= "" then 
-				if item_group:find_child("text"..n).text == v.extra.prev_name then 
-					v.extra.focus[focus_map[n]] = v.name
-				else 
-					v.extra.focus[focus_map[n]] = item_group:find_child("text"..n).text
-				end 
-				if focus_match[n] then 
-					if g:find_child(item_group:find_child("text"..n).text).extra.focus then 
-					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
-					else
-					     g:find_child(item_group:find_child("text"..n).text).extra.focus = {} 
-					     g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
-					end
-				end 
-			  end 
+					if item_group:find_child("text"..n).text == v.extra.prev_name then 
+						v.extra.focus[focus_map[n]] = v.name
+					else 
+						v.extra.focus[focus_map[n]] = item_group:find_child("text"..n).text
+					end 
+					if focus_match[n] then 
+						if g:find_child(item_group:find_child("text"..n).text) then 
+						if g:find_child(item_group:find_child("text"..n).text).extra.focus then 
+					     	g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+						else
+					     	g:find_child(item_group:find_child("text"..n).text).extra.focus = {} 
+					     	g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+						end
+						end
+					end 
+			  	end 
 		     end 
 		elseif j.name == "left" or j.name == "top" or  j.name == "width" or j.name == "height" then 
 		     local viewport_t = {}
