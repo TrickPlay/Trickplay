@@ -18,6 +18,10 @@ public:
 
     void attach_to_lua( lua_State * l );
 
+    void enable();
+
+    void disable();
+
 protected:
 
     Console( TPContext * context, bool read_stdin, int port );
@@ -56,6 +60,7 @@ private:
     GString        *        stdin_buffer;
     CommandHandlerList      handlers;
     std::auto_ptr<Server>   server;
+    bool                    enabled;
 };
 
 

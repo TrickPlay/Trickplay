@@ -413,6 +413,11 @@ namespace SQLite
         return false;
     }
 
+    int DB::changes()
+    {
+        return ! ok() ? 0 : sqlite3_changes( get_db() );
+    }
+
     //-------------------------------------------------------------------------
 
     Statement::Statement( const DB & db, const char * sql )
