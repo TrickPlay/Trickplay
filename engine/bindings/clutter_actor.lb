@@ -839,6 +839,21 @@ interface actor [[ClutterActor*]]
         is_visible = CLUTTER_ACTOR_IS_VISIBLE(self);
     ]];
 
+    bool visible
+        [[
+            visible = CLUTTER_ACTOR_IS_VISIBLE(self);
+        ]]
+        [[
+            if ( visible )
+            {
+                clutter_actor_show( self );
+            }
+            else
+            {
+                clutter_actor_hide( self );
+            }
+        ]];
+
     /*
 	Function: set
 	
