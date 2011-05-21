@@ -12,6 +12,7 @@
 @implementation AsyncImageView
 
 @synthesize dataCacheDelegate;
+@synthesize otherDelegate;
 @synthesize resourceKey;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key {
@@ -80,6 +81,9 @@
     // send data to the delegate if it exists for cacheing
     if (dataCacheDelegate) {
         [dataCacheDelegate dataReceived:data resourcekey:resourceKey];
+    }
+    if (otherDelegate) {
+        [otherDelegate dataReceived:data resourcekey:resourceKey];
     }
 
     [data release];

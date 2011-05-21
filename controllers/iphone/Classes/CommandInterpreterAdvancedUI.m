@@ -44,6 +44,8 @@
         [delegate getValuesForObject:JSON_Object];
     } else if ([method compare:@"call"] == NSOrderedSame) {
         [delegate callMethodOnObject:JSON_Object];
+    } else if ([method compare:@"delete"] == NSOrderedSame) {
+        [delegate deleteValuesForObject:JSON_Object];
     }
 }
 

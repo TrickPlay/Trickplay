@@ -193,6 +193,12 @@
     NSLog(@"Creating object %@", object);
     NSString *type = [object objectForKey:@"type"];
     NSDictionary *args = [object objectForKey:@"properties"];
+    if (args) {
+        if (![args isKindOfClass:[NSDictionary class]]) {
+            [self reply:nil];
+            return;
+        }
+    }
     NSString *ID = [NSString stringWithFormat:@"%u", currentID];
     currentID++;
     
@@ -230,6 +236,11 @@
     [JSON_dictionary setObject:[object getValuesFromArgs:properties] forKey:@"properties"];
     // Convert dictionary to JSON string and send over the socket
     [self reply:[JSON_dictionary yajl_JSONString]];
+}
+
+- (void)deleteValuesForObject:(NSDictionary *)JSON_object {
+    // TODO: finish this
+    [self reply:@"[false]"];
 }
 
 - (TrickplayUIElement *)findObjectForID:(NSString *)ID {

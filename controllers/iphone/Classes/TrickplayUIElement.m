@@ -162,12 +162,16 @@
     }
     if (!width) {
         width = [NSNumber numberWithFloat:view.layer.bounds.size.width];
+        //width = [NSNumber numberWithFloat:view.bounds.size.width];
+
     }
     if (!height) {
         height = [NSNumber numberWithFloat:view.layer.bounds.size.height];
+        //height = [NSNumber numberWithFloat:view.bounds.size.height];
     }
     
     view.layer.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
+    //view.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
 }
 
 
@@ -218,17 +222,50 @@
 
 - (void)setRotationsFromArgs:(NSDictionary *)args {
     if ([args objectForKey:@"x_rotation"]) {
-        NSNumber *x_rotation = [(NSArray *)[args objectForKey:@"x_rotation"] objectAtIndex:0];
+        id arg = [args objectForKey:@"x_rotation"];
+        id x_rotation;
+        if ([arg isKindOfClass:[NSNumber class]]) {
+            x_rotation = arg;
+        } else if ([arg isKindOfClass:[NSArray class]]) {
+            x_rotation = [(NSArray *)arg objectAtIndex:0];
+        } else {
+            return;
+        }
+        if (![x_rotation isKindOfClass:[NSNumber class]]) {
+            return;
+        }
         x_rotation = [NSNumber numberWithFloat:[x_rotation floatValue] * M_PI/180.0];
         [view.layer setValue:x_rotation forKeyPath:@"transform.rotation.x"];
     }
     if ([args objectForKey:@"y_rotation"]) {
-        NSNumber *y_rotation = [(NSArray *)[args objectForKey:@"y_rotation"] objectAtIndex:0];
+        id arg = [args objectForKey:@"y_rotation"];
+        id y_rotation;
+        if ([arg isKindOfClass:[NSNumber class]]) {
+            y_rotation = arg;
+        } else if ([arg isKindOfClass:[NSArray class]]) {
+            y_rotation = [(NSArray *)arg objectAtIndex:0];
+        } else {
+            return;
+        }
+        if (![y_rotation isKindOfClass:[NSNumber class]]) {
+            return;
+        }
         y_rotation = [NSNumber numberWithFloat:[y_rotation floatValue] * M_PI/180.0];
         [view.layer setValue:y_rotation forKeyPath:@"transform.rotation.y"];
     }
     if ([args objectForKey:@"z_rotation"]) {
-        NSNumber *z_rotation = [(NSArray *)[args objectForKey:@"z_rotation"] objectAtIndex:0];
+        id arg = [args objectForKey:@"z_rotation"];
+        id z_rotation;
+        if ([arg isKindOfClass:[NSNumber class]]) {
+            z_rotation = arg;
+        } else if ([arg isKindOfClass:[NSArray class]]) {
+            z_rotation = [(NSArray *)arg objectAtIndex:0];
+        } else {
+            return;
+        }
+        if (![z_rotation isKindOfClass:[NSNumber class]]) {
+            return;
+        }
         z_rotation = [NSNumber numberWithFloat:[z_rotation floatValue] * M_PI/180.0];
         [view.layer setValue:z_rotation forKeyPath:@"transform.rotation.z"];
     }
@@ -240,7 +277,8 @@
  */
 
 - (void)setOpacityFromArgs:(NSDictionary *)args {
-    if ([args objectForKey:@"opacity"]) {
+    id theOpacity = [args objectForKey:@"opacity"];
+    if (theOpacity && [theOpacity isKindOfClass:[NSNumber class]]) {
         self.view.alpha = [(NSNumber *)[args objectForKey:@"opacity"] floatValue]/255.0;
     }
 }
@@ -482,6 +520,10 @@
 }
 
 - (id)do_move_by:(NSArray *)args {
+    if (!([args count] >= 2)) {
+        return [NSNumber numberWithBool:NO];
+    }
+    
     CGFloat x = view.layer.position.x + [[args objectAtIndex:0] floatValue];
     CGFloat y = view.layer.position.y + [[args objectAtIndex:1] floatValue];
     
