@@ -31,50 +31,53 @@ function ui_element.populate_to (grp, tbl)
 	end 	
 
 	for i, j in pairs (grp.children) do 
-	     local function there()
-		if j.extra then 
-			if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" then 
-				for k,l in pairs (j.content.children) do 
-					if is_this_container(l) == true then 
-						j = l 
-						there()
-					else 
-						tbl[l.name] = grp:find_child(l.name) 
-					end 
-				end 
-			elseif j.extra.type == "LayoutManager" then
-				for k,l in pairs (j.tiles) do 
-					for n,m in pairs (l) do 
-						if m then 
-						     if is_this_container(m) == true then 
-							j = m 
+		local function there()
+			if j.extra then 
+				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" then 
+					tbl[j.name] = grp:find_child(j.name) 
+					for k,l in pairs (j.content.children) do 
+						if is_this_container(l) == true then 
+							j = l 
 							there()
-						     else 
-							tbl[m.name] = grp:find_child(m.name) 
-						     end 
+						else 
+							tbl[l.name] = grp:find_child(l.name) 
 						end 
 					end 
-				end 
-			elseif j.extra.type == "Group" then 
-				for k,l in pairs (j.children) do 
-					if is_this_container(l) == true then 
-						j = l 
-						there()
-					else 
-						tbl[l.name] = grp:find_child(l.name) 
+				elseif j.extra.type == "LayoutManager" then
+					tbl[j.name] = grp:find_child(j.name) 
+					for k,l in pairs (j.tiles) do 
+						for n,m in pairs (l) do 
+							if m then 
+								if is_this_container(m) == true then 
+									j = m 
+									there()
+								else 
+									tbl[m.name] = grp:find_child(m.name) 
+								end 
+							end 
+						end 
 					end 
+				elseif j.type == "Group" and j.extra.type == nil then 
+					tbl[j.name] = grp:find_child(j.name) 
+					for k,l in pairs (j.children) do 
+						if is_this_container(l) == true then 
+							j = l 
+							there()
+						else 
+							tbl[l.name] = grp:find_child(l.name) 
+						end 
+					end 
+				else 
+					tbl[j.name] = j
 				end 
 			else 
 				tbl[j.name] = j
 			end 
-		else 
-			tbl[j.name] = j
 		end 
-	     end 
-	     there()
+		there()
 	end 
 	
-	return tbl
+return tbl
 
 end 
 
@@ -1527,7 +1530,6 @@ function ui_element.textInput(table)
 
  --the umbrella Group
     local box, focus_box, box_img, focus_img, text
-
     local t_group = Group
     {
        name = "t_group", 
@@ -1536,7 +1538,46 @@ function ui_element.textInput(table)
        reactive = true, 
        extra = {type = "TextInput"} 
     }
- 
+
+ 	function t_group.extra.on_focus_in()
+		print("t input on focus in")	
+
+--[[
+		if current_focus then 
+			print(current_focus.name)
+			if current_focus.on_focus_out then 
+				current_focus.on_focus_out()
+			end 
+		end 
+]]
+	  	current_focus = t_group
+
+        if (p.skin == "custom") then 
+	    	box.opacity = 0
+	     	focus_box.opacity = 255
+        else
+	    	box_img.opacity = 0
+            focus_img.opacity = 255
+        end 
+	  	text.editable = true
+	  	text.cursor_visible = true
+	  	text.reactive = true 
+        text:grab_key_focus(text)
+     end
+
+     function t_group.extra.on_focus_out()
+        if (p.skin == "custom") then 
+	    	box.opacity = 255
+	     	focus_box.opacity = 0
+        else
+	    	box_img.opacity = 255
+           	focus_img.opacity = 0
+        end 
+	  	text.cursor_visible = false
+	  	text.reactive = false 
+		t_group.text = text.text
+		--current_focus = nil
+     end 
 
     local create_textInputField= function()
     	t_group:clear()
@@ -1558,83 +1599,35 @@ function ui_element.textInput(table)
 	    	focus_img = Image{}
 		end 
 
-    		text = Text{text=p.text, editable=true, cursor_visible=false, single_line = true, 
-						cursor_color = p.cursor_color, wants_enter = true, 
-						reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
-    		text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
-    		t_group:add(box, focus_box, box_img, focus_img, text)
+    	text = Text{text=p.text, editable=true, cursor_visible=false, single_line = true, 
+					cursor_color = p.cursor_color, wants_enter = true, 
+					reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
+    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
+
+    	t_group:add(box, focus_box, box_img, focus_img, text)
 
 		local t_pos_min = t_group.x + t_group:find_child("textInput").x 
-		--print("t_pos_min", t_pos_min)
 
 		if editor_lb == nil or editor_use then 
-	   	function t_group:on_button_down()
+	   		function t_group:on_button_down()
+				print("t group on button down") 
 				t_group.extra.on_focus_in()
-				text:grab_key_focus()
 				return true
-	   	end 
+	   		end 
+	    end 
 
-	   	local t_pos_max = p.ui_width - 2 * p.padding
-	   	function text:on_key_down(key)
-	    	local c_x, n_x, cx, nx 
-			local t_w = t_group:find_child("textInput").w
-	        local scroll_w = t_w - t_pos_max 
-			local c_pos = t_group:find_child("textInput").cursor_position
-	
-			if key == keys.Return and shift == false then 
-				screen:grab_key_focus()
-				t_group.extra.on_focus_out()
-				return true
-			end 
-	--[[
-			elseif key == keys.Left then 
-				if t_group:find_child("textInput").position_to_coordinates then 
-					if t_group:find_child("textInput").clip then 
-						if c_pos ~= -1 and c_pos ~= 0 then 
-		            	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) -- c_pos
-				     	cx = c_x[1] 
-
-		            	n_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) -- c_pos
-				     	nx = n_x[1] 
-					
-				     		if (t_group:find_child("textInput").clip[1] > nx) then 
-								print("letter - ", cx-nx)
-		    					t_group:find_child("textInput").x = t_group:find_child("textInput").x + (cx-nx)
-		    			    	t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - (cx-nx), t_group:find_child("textInput").clip[2], 
-																		t_group:find_child("textInput").clip[3] - (cx-nx), t_group:find_child("textInput").clip[4]}
-								print("new input field clip:")
-								dumptable(t_group:find_child("textInput").clip)
-								print("new input field length : ", t_group:find_child("textInput").w - scroll_w - p.padding) 
-							end 
-						end
-			        end
+		function text:on_key_down(key)
+				print("text on key down") 
+				print("text on key down") 
+				print("text on key down") 
+				print("text on key down") 
+				if key == keys.Return then 
+					t_group:grab_key_focus()
+					t_group:on_key_down(key)
+				elseif key == keys.Tab then 
+					t_group:grab_key_focus()
+					t_group:on_key_down(key)
 				end 
-			elseif key == keys.Right then 
-				if t_group:find_child("textInput").position_to_coordinates then 
-					if t_group:find_child("textInput").clip then 
-						if c_pos ~= -1 and c_pos ~= 0 then 
-		            		c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) -- c_pos
-				     		cx = c_x[1] 
-
-		            		n_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) -- c_pos
-				     		nx = n_x[1] 
-		             		if (t_group:find_child("textInput").clip[3] < x+p.padding )then 
-		    			         t_group:find_child("textInput").x = t_group:find_child("textInput").x - (cx-nx) 
-		    			         t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] + (cx-nx), 
-								 t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] + (cx-nx),  
-								 t_group:find_child("textInput").clip[4]}
-					    	end
-					end 
-				end 
-			end 
-			elseif scroll_w > 0 then 
-		    	t_group:find_child("textInput").x = scroll_w * -1
-		    	t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
-				print( "input field length : ", t_group:find_child("textInput").w - scroll_w - p.padding) 
-				aa =  t_group:find_child("textInput").w - scroll_w - p.padding 
-	        end 
-			]]
-	   	end 
 		end 
 
     	if (p.skin == "custom") then 
@@ -1643,40 +1636,11 @@ function ui_element.textInput(table)
 			box.opacity = 0 
 			box_img.opacity = 255 
 		end 
-
      end 
 
      create_textInputField()
 
-     function t_group.extra.on_focus_in()
-		if t_group:find_child("textInput").text ~= "--------------" then 
-	  		current_focus = t_group
-          	if (p.skin == "custom") then 
-	     		box.opacity = 0
-	     		focus_box.opacity = 255
-          	else
-	     		box_img.opacity = 0
-             	focus_img.opacity = 255
-          	end 
-	  		text.editable = true
-	  		text.cursor_visible = true
-	  		text.reactive = true 
-          	text:grab_key_focus(text)
-		end
-     end
-
-     function t_group.extra.on_focus_out()
-          if (p.skin == "custom") then 
-	     		box.opacity = 255
-	     		focus_box.opacity = 0
-          else
-	     		box_img.opacity = 255
-             	focus_img.opacity = 0
-          end 
-	  		text.cursor_visible = false
-	  		text.reactive = false 
-			t_group.text = text.text
-     end
+    
 
      mt = {}
      mt.__newindex = function (t, k, v)
@@ -3733,7 +3697,7 @@ function ui_element.scrollPane(t)
         --arrow_clone_source = nil,
         --arrow_sz = 15,
         arrow_color = {255,255,255,255},
-        arrows_visible = true,
+        arrows_visible = false,
         --arrows_in_box = false,
         --arrows_centered = false,
         --hor_arrow_y     = nil,
@@ -4434,7 +4398,7 @@ end
 		
 
   ---[[
-          scroll_group.size = {p.visible_w, p.visible_h}
+          --scroll_group.size = {p.visible_w, p.visible_h}
  --]]
 	end
 	
