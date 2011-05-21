@@ -24,7 +24,7 @@
 
 - (void)declareResourceWithObject:(id)Object forKey:(id)key;
 - (NSData *)fetchResource:(NSString *)name;
-- (UIImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
+- (AsyncImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
 - (NSMutableDictionary *)getResourceInfo:(NSString *)name;
 
 - (void)dropResourceGroup:(NSString *)groupName;

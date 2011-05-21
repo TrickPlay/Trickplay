@@ -70,9 +70,13 @@
  * Asynchronous method of getting UIImageView with resource.
  */
 
-- (UIImageView *)fetchImageViewUsingResource:(NSString *)name
+- (AsyncImageView *)fetchImageViewUsingResource:(NSString *)name
                                        frame:(CGRect)frame {
     AsyncImageView *imageView = [[[AsyncImageView alloc] initWithFrame:frame] autorelease];
+    
+    if (!name) {
+        return imageView;
+    }
     
     NSData *tempData;
     if ((tempData = [resources objectForKey:name])) {
@@ -95,7 +99,7 @@
         [imageView loadImageFromURL:dataurl resourceKey:name];
     }
     
-    return (UIImageView *)imageView;
+    return imageView;
 }
 
 - (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey {
