@@ -388,25 +388,22 @@ end
 
 
 function new_printMsgWindow(t, msg)
---[[
+	--[[
 		 51 pixels in height.  Without tabs = 31 pixels
 		 The bottom bar is 40 pixels in height.
 	]]
 
   	local WIDTH = 300
   	local HEIGHT = 150
-
     local PADDING = 13
-
 	local TOP_BAR = 30
     local MSG_BAR = 80
     local BOTTOM_BAR = 40
 
-    local ITSTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
-    local TSTYLE = {font = "FreeSans Medium 16px" , color = {255,255,255,255}}
-    local MSTYLE = {font = "FreeSans Medium 15px" , color = {255,255,255,255}}
-    local TSSTYLE = {font = "FreeSans Medium 16px" , color = "000000", opacity=50}
-    local MSSTYLE = {font = "FreeSans Medium 15px" , color = "000000", opacity=50}
+    local TSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local MSTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
+    local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
+    local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
 
     local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "ui_elements_insert", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
@@ -414,25 +411,47 @@ function new_printMsgWindow(t, msg)
 	local title_shadow = Text {name = "title", text = t}:set(TSSTYLE)
 	local message = Text {text = msg}:set(MSTYLE)
 	local message_shadow = Text {text = msg}:set(MSSTYLE)
-	
+
+	-- Text Input Field 	
+	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
+		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
+		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
+    	  border_corner_radius = 0,}
+
 	editor_use = true
-		local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "" ,
-    		padding = 5 , border_width  = 1 , border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255},
-    		focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
-    		border_corner_radius = 0,}
-    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255},}
-		local button_ok = editor_ui.button{text_font = "FreeSans Medium 15px", text_color = {255,255,255,255},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255},} 
-
-		button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = "text_input"}
-		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = "text_input"}
-		text_input.extra.focus = {[keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Down] = "button_cancel"}
-	
-		button_cancel.pressed = function() print("CANCEL") xbox:on_button_down() end 
-		button_ok.pressed = function()print("OK")  set_new_project(text_input.text) xbox:on_button_down() end
-
+	-- Buttons 
+   	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+ 		  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255},}
+	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+    	  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true} 
 	editor_use = false
+
+	-- Button Event Handlers
+	button_cancel.pressed = function() print("CANCEL") xbox:on_button_down() end 
+	button_ok.pressed = function()print("OK")  set_new_project(text_input.text) xbox:on_button_down() end
+
+	local ti_func = function()
+		if current_focus then 
+			current_focus.on_focus_out()
+		end 
+		button_ok:find_child("active").opacity = 255
+		button_ok:find_child("dim").opacity = 0
+		text_input.on_focus_in()
+	end
+
+	local tab_func = function()
+		text_input.on_focus_out()
+		button_ok:find_child("active").opacity = 0
+		button_ok:find_child("dim").opacity = 255
+		button_cancel:grab_key_focus()
+		button_cancel.on_focus_in()
+	end
+
+	-- Focus Destination 
+	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
+	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+	text_input.extra.focus = {[keys.Tab] = tab_func, [keys.Return] = "button_ok",}
+
 
 	local msgw = Group {
 		name = "msgw",  --ui_element_insert
@@ -447,26 +466,36 @@ function new_printMsgWindow(t, msg)
 			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
 			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
 			text_input:set{name = "text_input", position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
-			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
-			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
+			button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}, 
+			button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
 		}
+		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
 	}
 
 	msgw.extra.lock = false
  	screen:add(msgw)
 	create_on_button_down_f(msgw)	
-	button_ok.on_focus_in() 
+	-- Focus 
+	ti_func()
+	--text_input.on_focus_in()
+	--button_ok:find_child("active").opacity = 255
+
 
 	function xbox:on_button_down()
 		screen:remove(msgw)
 		msgw:clear() 
 		current_inspector = nil
-			
+		current_focus = nil
         screen.grab_key_focus(screen) 
 	    input_mode = S_SELECT
 		return true
 	end 
+
 	function text_input:on_key_down(key)
+	print("text_input on_key down")
+	if key == keys.Tab then
+		print (key,"popopo")
+	end
 	if text_input.focus[key] then
 		if type(text_input.focus[key]) == "function" then
 			text_input.focus[key]()
@@ -482,39 +511,6 @@ function new_printMsgWindow(t, msg)
 	end
 	end
 
-	function button_cancel:on_key_down(key)
-	if button_cancel.focus[key] then
-		if type(button_cancel.focus[key]) == "function" then
-			button_cancel.focus[key]()
-		elseif screen:find_child(button_cancel.focus[key]) then
-			if button_cancel.on_focus_out then
-				button_cancel.on_focus_out()
-			end
-			screen:find_child(button_cancel.focus[key]):grab_key_focus()
-			if screen:find_child(button_cancel.focus[key]).on_focus_in then
-				screen:find_child(button_cancel.focus[key]).on_focus_in(key)
-			end
-		end
-	end
-	end
-	function button_ok:on_key_down(key)
-		if button_ok.focus[key] then
-			if type(button_ok.focus[key]) == "function" then
-				button_ok.focus[key]()
-			elseif screen:find_child(button_ok.focus[key]) then
-				if button_ok.on_focus_out then
-					button_ok.on_focus_out()
-				end
-				screen:find_child(button_ok.focus[key]):grab_key_focus()
-				if screen:find_child(button_ok.focus[key]).on_focus_in then
-					screen:find_child(button_ok.focus[key]).on_focus_in(key)
-				end
-			end
-		end	
-		return true
-	end
-
-
 	if screen:find_child("mouse_pointer") then 
 		 screen:find_child("mouse_pointer"):raise_to_top()
     end
@@ -522,50 +518,7 @@ function new_printMsgWindow(t, msg)
 end 
 
 function new_set_app_path()
-
-
 	new_printMsgWindow("New Project", "Project Name:");
-
-	
---[[
-    -- Get the user's home directory and make sure it is valid
-    local home = editor_lb:get_home_dir()
-    
-    assert( home )
-    
-    -- The base directory where the editor will store its files, make sure
-    -- we are able to create it (or it already exists )
-    
-    base = editor_lb:build_path( home , "trickplay-editor"  )
-
-    assert( editor_lb:mkdir( base ) )
-    
-    -- The list of files and directories there. We go through it and look for
-    -- directories.
-    local list = editor_lb:readdir( base )
-    
-    if table.getn(projects) == 0 then 
-    for i = 1 , # list do
-    
-        if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
-        
-            table.insert( projects , list[ i ] )
-            
-        end
-        
-    end
-    end 
-    
-    input_mode = S_POPUP
-
-    printMsgWindow("Select Project : ", "projectlist")
-    inputMsgWindow("projectlist")
-
-]]
-    if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
-
 end 
 
 
@@ -836,7 +789,7 @@ end
 		     screen:remove(screen:find_child("mouse_pointer"))
 		end 
 		mouse_pointer = CS_pointer
-		mouse_pointer.position = {x - 10 ,y - 10 ,0}
+		mouse_pointer.position = {x - 5 ,y - 5 ,0}
 		if(screen:find_child("mouse_pointer") == nil) then 
 		     screen:add(mouse_pointer)
 		     mouse_pointer.extra.type = "pointer"
@@ -2495,11 +2448,11 @@ function inputMsgWindow_openimage(input_purpose, input_text)
 	  input_mode = S_SELECT
      elseif(is_img_file(input_t.text) == true) then 
 	  
-	  while (is_available("img"..tostring(item_num)) == false) do  
+	  while (is_available("image"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	  end 
 
-          ui.image= Image { name="img"..tostring(item_num),
+          ui.image= Image { name="image"..tostring(item_num),
           --src = input_t.text, opacity = 255 , position = {200,200}, 
           --src = trickplay.config.app_path.."/assets/images/"..input_t.text, opacity = 255 , position = {200,200}, 
           src = "/assets/images/"..input_t.text, opacity = 255 , position = {200,200}, 

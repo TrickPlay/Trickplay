@@ -4395,11 +4395,7 @@ end
             track_vert=nil
         end
         
-		
-
-  ---[[
-          --scroll_group.size = {p.visible_w, p.visible_h}
- --]]
+        scroll_group.size = {p.visible_w, p.visible_h}
 	end
 	
     
