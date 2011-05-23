@@ -159,6 +159,48 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     return result;
 }
 
+gboolean actor_on_enter( ClutterActor *actor, ClutterCrossingEvent *event,lua_State*L)
+{
+    int result = FALSE;
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_enter" , 2 , 1 , L ))
+    {
+        if (lua_toboolean(L,-1))
+	{
+	 	result = TRUE;
+	}
+	lua_pop(L,1);
+    }
+
+    return result;	
+}
+
+gboolean actor_on_leave( ClutterActor *actor, ClutterCrossingEvent *event,lua_State*L)
+{
+    int result = FALSE;
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_leave" , 2 , 1 , L ))
+    {
+        if (lua_toboolean(L,-1))
+	{
+	 	result = TRUE;
+	}
+	lua_pop(L,1);
+    }
+
+    return result;	
+}
+
 static void animation_completed(ClutterAnimation * animation,lua_State * L)
 {
 	ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
@@ -1724,4 +1766,25 @@ interface actor [[ClutterActor*]]
 			G_CALLBACK(actor_on_hide),
 			L);	    	    
 	]];
+
+    callback on_enter
+	[[
+		UserData::get(L)->connect_signal_if( 
+			on_enter,
+			"on_enter",
+			"enter-event",
+			G_CALLBACK(actor_on_enter),
+			L);	    	    
+	]];
+
+    callback on_leave
+	[[
+		UserData::get(L)->connect_signal_if( 
+			on_leave,
+			"on_leave",
+			"leave-event",
+			G_CALLBACK(actor_on_leave),
+			L);	    	    
+	]];
+
 }
