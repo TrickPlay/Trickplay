@@ -210,25 +210,27 @@ function inspector_apply (v, inspector)
               if (attr_map[j.name]) then
                      attr_map[j.name]()
               elseif(v[j.name] ~= nil)then 
-					 if j.name == "w" or j.name == "h" then -- 0519
-						if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
-                            v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-						end 
-					 end 
-
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
-                            v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+					 --0521
+					 	if j.name == "w" or j.name == "h" then 
+							if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
+                            	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+							end 
+			    		else 
+                        	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+			    		end 
+					 --0521
+                     	--v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
                      else 
-			    if v[j.name] == true or v[j.name] == false then
-				v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
-			    else 
-
-				if j.name == "message" then 
-					--print (tostring(item_group:find_child(j.name):find_child("input_text").text)) 
-				end 
-                                v[j.name] = tostring(item_group:find_child(j.name):find_child("input_text").text)
-			    end 
-                     end
+			    		if v[j.name] == true or v[j.name] == false then
+								v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
+			    		else 
+							if j.name == "message" then 
+							--print (tostring(item_group:find_child(j.name):find_child("input_text").text)) 
+							end 
+                            v[j.name] = tostring(item_group:find_child(j.name):find_child("input_text").text)
+			    	end 
+             end
 	      elseif string.find(j.name,"color") then
 		     attr_map["color"](j.name)
 	      elseif(j.name =="x_scale" or j.name =="y_scale")then 

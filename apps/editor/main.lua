@@ -295,6 +295,7 @@ dofile("editor.lua")
 				temp_focus.on_focus_in()
 			return true
 		end 
+
 		if dragging then
 	    	local actor = unpack(dragging)
 	       	if actor.parent then 	
@@ -329,6 +330,19 @@ dofile("editor.lua")
       function screen:on_motion(x,y)
 
 	  local mouse_pointer
+
+--[[
+	  if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
+			if current_focus:find_child("red").opacity == 255 then 
+					if current_focus.active_button == true then 
+						current_focus.on_focus_out("active")
+					else 
+						current_focus.on_focus_out()
+					end 
+			end
+	  end 
+
+]]
 
 	  if control == true then 
 		if is_in_container_group(x,y) == true and selected_content then 
@@ -389,7 +403,7 @@ dofile("editor.lua")
 		     screen:remove(screen:find_child("mouse_pointer"))
 		end 
 		mouse_pointer = CS_pointer_plus
-		mouse_pointer.position = {x - 10 ,y - 10 ,0}
+		mouse_pointer.position = {x - 5 ,y - 5 ,0}
 		if(screen:find_child("mouse_pointer") == nil) then 
 		     screen:add(mouse_pointer)
 		     mouse_pointer.extra.type = "pointer_plus"
@@ -401,7 +415,7 @@ dofile("editor.lua")
 		     screen:remove(screen:find_child("mouse_pointer"))
 		end 
 		mouse_pointer = CS_pointer
-		mouse_pointer.position = {x - 10 ,y - 10 ,0}
+		mouse_pointer.position = {x - 5 ,y - 5 ,0}
 		if(screen:find_child("mouse_pointer") == nil) then 
 		     screen:add(mouse_pointer)
 		     mouse_pointer.extra.type = "pointer"
@@ -590,6 +604,7 @@ dofile("editor.lua")
 
 	--local duration = 5--secs
 
+--[[
 		local elapsed  = 0
 		local auto_save = false
 		idle.on_idle = function(self,seconds)
@@ -606,8 +621,7 @@ dofile("editor.lua")
 			elapsed = 0 
 			auto_save = false 
 		end 
-			
-	end
+	]]		
 
     end
 
