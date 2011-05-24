@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.mountain_dew",
+    release     = "1",
+    version     = ".1",
+    name        = "Mountain Dew",
+    author      = "Francesco Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}
