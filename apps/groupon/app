@@ -3,7 +3,7 @@ app=
     id          = "com.trickplay.groupon",
     release     = "1",
     version     = ".1",
-    name        = "Racing",
+    name        = "Groupon",
     author      = "Francesco Alex Indaco",
     copyright   = "© Trickplay Inc."
 }
