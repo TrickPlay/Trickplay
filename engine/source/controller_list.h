@@ -15,7 +15,7 @@ class Controller : public RefCounted
 {
 public:
 
-    Controller( ControllerList * list, const char * name, const TPControllerSpec * spec, void * data );
+    Controller( ControllerList * list, TPContext * context , const char * name, const TPControllerSpec * spec, void * data );
 
     TPController * get_tp_controller();
 
@@ -148,6 +148,10 @@ public:
         return ( spec.capabilities & TP_CONTROLLER_HAS_TOUCHES ) && g_atomic_int_get( & ts_touch_started );
     }
 
+    typedef std::map< unsigned int, unsigned int > KeyMap;
+
+    bool save_key_map( const KeyMap & km );
+
 protected:
 
     virtual ~Controller();
@@ -156,18 +160,22 @@ private:
 
     unsigned int map_key_code( unsigned int key_code );
 
+    String get_key_map_file_name() const;
+
+    void load_external_map();
+
     TPController    *   tp_controller;
 
     bool                connected;
     String              name;
     TPControllerSpec    spec;
     void        *       data;
+    TPContext *         context;
+    bool                loaded_external_map;
 
     typedef std::set<Delegate *> DelegateSet;
 
     DelegateSet         delegates;
-
-    typedef std::map<unsigned int, unsigned int> KeyMap;
 
     KeyMap              key_map;
 
@@ -186,7 +194,7 @@ public:
 
     virtual ~ControllerList();
 
-    TPController * add_controller( const char * name, const TPControllerSpec * spec, void * data );
+    TPController * add_controller( TPContext * context , const char * name, const TPControllerSpec * spec, void * data );
 
     void remove_controller( TPController * controller );
 
