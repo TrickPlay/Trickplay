@@ -1073,7 +1073,35 @@ interface controller [[ControllerDelegate*]]
             
     */
     callback on_picture;
+
+
+    /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
+
+    bool save_key_map( table map )
+        [[
+
+#ifndef TP_PRODUCTION
+
+            Controller::KeyMap km;
     
+            lua_pushnil( L );
+
+            while( lua_next( L , map ) )
+            {
+                if ( lua_isnumber( L , -2 ) && lua_isnumber( L , -1 ) )
+                {
+                    km.insert( std::make_pair( lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) ) );
+                }
+                lua_pop( L , 1 );
+            }
+
+            result = self->get_controller()->save_key_map( km );
+
+#else
+            result = false;
+#endif
+
+        ]];
 }
 
 #==============================================================================

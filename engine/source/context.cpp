@@ -2940,7 +2940,7 @@ TPController * tp_context_add_controller( TPContext * context, const char * name
 {
     g_assert( context );
 
-    return context->controller_list.add_controller( name, spec, data );
+    return context->controller_list.add_controller( context , name, spec, data );
 }
 
 //-----------------------------------------------------------------------------
