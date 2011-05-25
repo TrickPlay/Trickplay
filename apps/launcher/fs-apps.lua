@@ -43,10 +43,14 @@ function( ui , app_list , statistics )
         
         local LEFT_MARGIN   = 7
         
+        local COLS = 5
+        local ROWS = 3
+        
         local TILE_W
         local TILE_H
         
         local V_SPACE
+        local H_SPACE
         
         local tile_x
         local tile_y
@@ -70,7 +74,8 @@ function( ui , app_list , statistics )
             if i == 1 then
                 TILE_W = tile.w
                 TILE_H = tile.h
-                V_SPACE = ( group.h - ( TILE_H * 3 ) ) / 4
+                V_SPACE = ( group.h - ( TILE_H * ROWS ) ) / ( ROWS + 1 )
+                H_SPACE = ( group.w - ( TILE_W * COLS ) ) / COLS
                 tile_x = LEFT_MARGIN
                 tile_y = V_SPACE
             end
@@ -86,9 +91,9 @@ function( ui , app_list , statistics )
 
             row = row + 1
             
-            if row > 3 then
+            if row > ROWS then
             
-                tile_x = tile_x + TILE_W + V_SPACE
+                tile_x = tile_x + TILE_W + H_SPACE
                 tile_y = V_SPACE
                 row = 1
                 col = col + 1
