@@ -47,9 +47,9 @@ left_bar:add(BOTTLE_DOCK)
 
 local bottle_turn = function(self,msecs,p)
     
-	bottles.x = -bottle_bg_w*p*bottle_bg_scale - 20
+	bottles.x = -bottle_bg_w*p*bottle_bg_scale - 200
     
-    bottle_w = bottle_bg_w+p*bottle_bg_w
+    bottle_w = bottle_bg_w+p*bottle_bg_w+100
     
     for _,child in pairs(bottles.children) do
         
@@ -60,7 +60,7 @@ local bottle_turn = function(self,msecs,p)
 end
 
 local spinning_bottle = Timeline{
-	duration = 120000,
+	duration = 90000,
 	loop = true,
 	on_new_frame = bottle_turn,
 }
