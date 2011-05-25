@@ -85,6 +85,10 @@ inline StringVector split_string( const String & source , const gchar * delimite
 
 //-----------------------------------------------------------------------------
 
+#define lua_really_isstring(L,i) (lua_type(L,i)==LUA_TSTRING)
+
+//-----------------------------------------------------------------------------
+
 class RefCounted
 {
 public:
@@ -188,81 +192,6 @@ protected:
         }
     }
 };
-
-//-----------------------------------------------------------------------------
-
-class _Debug_ON
-{
-public:
-
-    _Debug_ON( const char * _prefix = 0 )
-    {
-        if ( _prefix )
-        {
-            prefix = _prefix;
-        }
-    }
-
-    ~_Debug_ON()
-    {
-    }
-
-    inline void operator()( const gchar * format, ...)
-    {
-        if ( ! prefix.empty() )
-        {
-            va_list args;
-            va_start( args, format );
-            gchar * message = g_strdup_vprintf( format , args );
-            va_end( args );
-            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "[%s] %s" , prefix.c_str() , message );
-            g_free( message );
-        }
-        else
-        {
-            va_list args;
-            va_start( args, format );
-            g_logv( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , format , args );
-            va_end( args );
-        }
-    }
-
-    inline operator bool()
-    {
-        return true;
-    }
-
-private:
-
-    String prefix;
-};
-
-class _Debug_OFF
-{
-public:
-
-    _Debug_OFF( const char * prefix = 0 )
-    {
-    }
-
-    inline void operator()( const gchar * format, ...)
-    {
-    }
-
-    inline operator bool()
-    {
-        return false;
-    }
-};
-
-#ifdef TP_PRODUCTION
-#define Debug_ON    _Debug_OFF
-#define Debug_OFF   _Debug_OFF
-#else
-#define Debug_ON    _Debug_ON
-#define Debug_OFF   _Debug_OFF
-#endif
-
 
 //-----------------------------------------------------------------------------
 // This class lets you push things to free into it - when this instance is
@@ -381,6 +310,8 @@ namespace Util
         g_free( s );
         return result;
     }
+
+    String random_string( guint length );
 
     //-----------------------------------------------------------------------------
 

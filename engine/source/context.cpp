@@ -6,7 +6,7 @@
 #include "clutter/clutter.h"
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
-#include "fontconfig.h"
+#include "fontconfig/fontconfig.h"
 #include "sndfile.h"
 
 #include "trickplay/keys.h"
@@ -687,6 +687,21 @@ void TPContext::setup_fonts()
     {
         FcConfigAppFontClear( config );
 
+        const char * ap = get( TP_APP_SOURCES );
+
+		g_debug( "ADDING APP PATH '%s' TO FONT PATH", ap );
+
+		int added = 0;
+
+		if ( FcConfigAppFontAddDir( config, ( const FcChar8 * ) ap ) == FcFalse )
+		{
+			g_warning( "FAILED TO ADD FONT PATH '%s'" , ap );
+		}
+		else
+		{
+			++added;
+		}
+
         g_debug( "FONT PATHS ARE '%s'", fonts_path );
 
         // This adds all the fonts in the directory to the cache...it can take
@@ -694,8 +709,6 @@ void TPContext::setup_fonts()
         // be very quick.
 
 		gchar ** paths = g_strsplit( fonts_path , ";" , 0 );
-
-		int added = 0;
 
 		for ( gchar ** p = paths; *p; ++p )
 		{
@@ -952,6 +965,23 @@ static void after_paint( ClutterActor * actor , gpointer )
 
 
 //-----------------------------------------------------------------------------
+// When the context enters the stage, hide the OS and/or WM cursor
+
+#ifndef TP_CLUTTER_BACKEND_EGL
+
+static void hide_cursor( ClutterActor * actor, gpointer )
+{
+	clutter_stage_hide_cursor( CLUTTER_STAGE( actor ) );
+}
+
+static void show_cursor( ClutterActor * actor, gpointer )
+{
+	clutter_stage_show_cursor( CLUTTER_STAGE( actor ) );
+}
+
+#endif
+
+//-----------------------------------------------------------------------------
 
 class RunningAction : public Action
 {
@@ -1146,6 +1176,7 @@ int TPContext::run()
 #ifndef TP_CLUTTER_BACKEND_EGL
 
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
+    clutter_stage_hide_cursor( (ClutterStage *)stage);
 
 #endif
 
@@ -1189,6 +1220,9 @@ int TPContext::run()
     TPController * keyboard = tp_context_add_controller( this, "Keyboard", &spec, NULL );
 
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
+    
+    g_signal_connect( stage, "enter-event", ( GCallback )hide_cursor, stage);
+    g_signal_connect( stage, "leave-event", ( GCallback )show_cursor, stage);
 
 #endif
 
@@ -1559,9 +1593,11 @@ void TPContext::app_run_callback( App * app , int result )
 {
     TPContext * context = app->get_context();
 
+    String id( app->get_id() );
+
     if ( result != TP_RUN_OK )
     {
-        if ( context->first_app_id == app->get_id() )
+        if ( context->first_app_id == id )
         {
             context->quit();
         }
@@ -1578,6 +1614,11 @@ void TPContext::app_run_callback( App * app , int result )
         context->current_app = app;
 
         context->current_app->ref();
+
+        if ( context->first_app_id != id )
+        {
+            context->get_db()->app_launched( id );
+        }
 
         app->animate_in();
     }
@@ -2399,6 +2440,13 @@ HttpServer * TPContext::get_http_server() const
 
 //-----------------------------------------------------------------------------
 
+Console * TPContext::get_console() const
+{
+    return console;
+}
+
+//-----------------------------------------------------------------------------
+
 bool TPContext::profile_switch( int id )
 {
     SystemDatabase::Profile profile = get_db()->get_profile( id );
@@ -2891,7 +2939,7 @@ TPController * tp_context_add_controller( TPContext * context, const char * name
 {
     g_assert( context );
 
-    return context->controller_list.add_controller( name, spec, data );
+    return context->controller_list.add_controller( context , name, spec, data );
 }
 
 //-----------------------------------------------------------------------------

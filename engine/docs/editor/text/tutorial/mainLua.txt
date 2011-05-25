@@ -1,0 +1,74 @@
+Topic: The main.lua File
+
+In the previous section, we defined the focus destinations for each of the button elements in our screen. But when the screen is first displayed, which element will have the focus? This initial focus is assigned outside of the SDK Visual Editor, in one of the source files that the Editor generates called main.lua.
+
+Note: The following discussion assumes a familiarity with the Lua programming language. Refer to a Lua language reference if you need information about this programming language.
+
+During part of the SDK Visual Editor's processing, it converts the UI elements on the screen to Lua source code. This source code is eventually executed by the Trickplay Engine when the application is run. It is possible for you to write the source code that the Editor generates yourself, but having the Editor generate it for you is a more convenient process.
+
+The Editor-generated source code is saved to various files. Recall that we previously saved our screen in the language.lua file. Another Editor-related file is called main.lua and it is generated automatically by the Editor. The main.lua file is created and updated every time you save your current screen. It is also updated automatically every 10 seconds by the SDK Visual Editor, so it is not necessary for you to save the main.lua file yourself.
+
+The main.lua file contains Lua source code that performs various screen maintenance and manipulation operations. Also, event handlers, such as code that is executed in response to user keyboard and mouse input, are defined in main.lua. You should never have to modify your screen Lua source files, but you will most likely need to insert your own code and event handlers to main.lua, so let's look at its contents now.
+
+If you open the main.lua file in a text editor, the first few lines will look something like this-
+
+>-- GLOBAL SECTION
+>ui_element = dofile("/lib/ui_element.lua") --Load widget helper library
+>layout = {} --Table containing all the UIElements that make up each screen
+>groups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed
+>-- END GLOBAL SECTION
+
+The first and last lines are simply comments and they perform no operation. The first line of executable code invokes the Lua dofile() function to load and execute the /lib/ui_element.lua library. This library implements most of the UI elements (also known as "widgets") supported by the SDK Visual Editor, such as the Button element we have been using. (The other elements we have used so far--the Rectangle, Image, and Text elements--are implemented in the core Trickplay Engine.) Loading and running this library enables all the Editor's widgets, making them available for use.
+
+The next two lines of code create two Lua tables called "groups" and "layout". The groups table is a Trickplay Engine <Group> object. The layout table is simply a Lua table. Each is initialized in subsequent lines in main.lua shown below.
+
+>--  LANGUAGE SECTION
+>groups["language"] = Group() -- Create a Group for this screen
+>layout["language"] = {}
+>loadfile("/screens/language.lua")(groups["language"]) -- Load all the elements for this screen
+>ui_element.populate_to(groups["language"],layout["language"]) -- Populate the elements into the Group
+
+In the first non-comment line above, a Trickplay Engine Group object is constructed and stored in the groups["language"] table element. Similarly, the layout["language"] table element is set to an empty table.
+
+The call to loadfile() loads all the UI elements from our saved language screen into the groups["language"] object. At this point, it is possible to access each of the screen's UI elements and their properties directly from the groups["language"] object. For example, the label displayed on a Button element is contained in its text property. To access the text property of our screen's ButtonEnglish button, you can use the following reference--
+
+>groups["language"].findchild("ButtonEnglish").text
+
+While accessing a screen's elements and properties in this manner is possible, it is not recommended because there is a relatively large overhead associated with having to search through the Group object's children via the findchild() method each time you wish to access a UI element. Instead, the layout["language"] table is provided to supply an alternative and more efficient access method. The layout["language"] element is filled with the screen's UI elements by the call to populate_to() shown above. The UI elements contained in the source groups["language"] object are copied to the destination layout["language"] element. (For advanced users: The layout["language"] element is actually a reference pointing to the UI elements stored in the groups["language"] object.) The layout["language"] element provides the same access to a screen's UI elements, but is more efficient than accessing them via the groups["language"] object.
+
+To access the same text property of the ButtonEnglish button that we referenced above, but using the layout["language"] element, you can use the following equivalent reference--
+
+>layout["language"].ButtonEnglish.text
+
+Also in the main.lua file, you will find empty event handlers defined for each of the Button elements on our screen, e.g., ButtonEnglish, ButtonSpanish, etc. These event handlers are shown below, but we will defer further discussion of them until later in this tutorial.
+
+>-- LANGUAGE.BUTTONENGLISH SECTION
+>layout["language"].ButtonEnglish.focused = function() -- Handler for ButtonEnglish.focused in this screen
+>end
+>layout["language"].ButtonEnglish.pressed = function() -- Handler for ButtonEnglish.pressed in this screen
+>end
+>layout["language"].ButtonEnglish.released = function() -- Handler for ButtonEnglish.released in this screen
+>end
+>-- END LANGUAGE.BUTTONENGLISH SECTION
+
+Near the end of the main.lua file are some method calls performed upon the Trickplay Engine's global screen object.
+
+>-- GLOBAL SECTION FOOTER 
+>screen:grab_key_focus()
+>screen:show()
+>screen.reactive = true
+>
+>ui_element.screen_add(groups["language"])
+
+These methods simply setup the screen object for user processing. The grab_key_focus() method sets keyboard and mouse focus to the screen object, show() makes the screen visible, and setting the reactive property to true enables the screen object to accept keyboard and mouse input.
+
+The ui_element.screen_add(groups["language"]) function copies the UI elements for our screen to the Engine's global screen object. This is similar to calling the screen object's add() method, for example: screen.add( groups["language"]). However, the screen_add() function performs some internal operations upon the ui_element table, so calling it, rather than simply calling screen.add(), is necessary as part of the screen initialization process.
+
+At the very beginning of this topic, we asked which element would have the input focus when a screen was first entered. After examining the main.lua file, we are finally prepared to answer that question.
+
+Button objects support a function called on_focus_in() that sets the screen's input focus to the Button upon entry to the screen. Calling this function is the same as accessing any of the object's properties, as was shown earlier when we accessed the ButtonEnglish's text property. Thus, the following code statement will set our screen's initial input focus to the ButtonEnglish.
+
+>layout["language"].ButtonEnglish.on_focus_in()
+
+To incorporate this operation into our tutorial application, you must add such a code statement to the main.lua file. Using a text editor of your choice, open the main.lua file stored in the ~/trickplay-editor/Tutorial directory. Near the end of the file and following the call to ui_element.screen_add(), insert a new code statement to set the initial input focus. Use the on_focus_in() statement shown above to set the focus to the ButtonEnglish. Save the modified main.lua file. Now when the Trickplay Engine runs our Tutorial application and displays the Language screen, the ButtonEnglish button will have the initial focus.
+

@@ -44,23 +44,15 @@
             hostname:(NSString *)h
             thetitle:(NSString *)n {
     
-    NSLog(@"Service Setup: %@ host: %@ port: %d", n, h, p);
+    NSLog(@"AppBrowser Service Setup: %@ host: %@ port: %d", n, h, p);
     
-    port = p;
-    if (hostName) {
-        [hostName release];
-    }
-    hostName = [h retain];
-    
-    
-    [self createGestureView];
+    [self createGestureViewWithPort:p hostName:h];
 }
 
 - (void)pushApp {
     pushingViewController = YES;
-    NSLog(@"\n\nFIRST\n\n");
+
     if (self.navigationController.visibleViewController != self) {
-        NSLog(@"\n\nSECOND\n\n");
         [self.navigationController pushViewController:self animated:NO];
     }
     
@@ -71,8 +63,9 @@
     [self.navigationController pushViewController:gestureViewController animated:YES];
 }
 
+
 /**
- *  Returns true if app is running and pushes that app to the view.
+ *  Returns true if app is running.
  */
 - (BOOL)hasRunningApp {
     if (![gestureViewController hasConnection]) {
@@ -93,7 +86,7 @@
  */
 - (NSDictionary *)getCurrentAppInfo {
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", hostName, port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
     NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
     //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
@@ -103,12 +96,12 @@
 
 
 - (BOOL)fetchApps {
-    if (!port || !hostName || ![gestureViewController hasConnection]) {
+    if (![gestureViewController hasConnection]) {
         return NO;
     }
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", hostName, port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
     NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
     //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
@@ -127,7 +120,7 @@
 
 - (void)launchApp:(NSDictionary *)appInfo {
     NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
-    NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", hostName, port, appID];
+    NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", gestureViewController.socketManager.host, gestureViewController.socketManager.port, appID];
     NSLog(@"Launching app via url '%@'", launchString);
     NSURL *launchURL = [NSURL URLWithString:launchString];
     NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
@@ -136,7 +129,7 @@
     self.currentAppName = (NSString *)[appInfo objectForKey:@"name"];
 }
 
-- (void)createGestureView {
+- (void)createGestureViewWithPort:(NSInteger)port hostName:(NSString *)hostName {
     gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
     
     gestureViewController.socketDelegate = self;
@@ -162,11 +155,6 @@
     
     [theTableView setDelegate:self];
     pushingViewController = NO;
-    //NSLog(@"theTableView %@", theTableView);
-    //NSLog(@"appShopButton %@", appShopButton);
-    //NSLog(@"showcaseButton %@", showcaseButton);
-    //NSLog(@"toolBar %@", toolBar);
-    //NSLog(@"has view %@", self.view);
 }
 //*/
 
@@ -298,12 +286,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         return;
     }
     
-    
-    NSLog(@"gestureViewController %@\n", gestureViewController);
-    if (!gestureViewController) {
-        [self createGestureView];
-    }
-    
     if (!currentAppName || [(NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:currentAppName] !=  NSOrderedSame) {
         [gestureViewController clean];
         [self launchApp:(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row]];
@@ -349,9 +331,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     }
     if (currentAppName) {
         [currentAppName release];
-    }
-    if (hostName) {
-        [hostName release];
     }
     
     [super dealloc];

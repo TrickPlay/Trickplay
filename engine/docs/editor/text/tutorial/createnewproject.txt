@@ -1,0 +1,11 @@
+Topic: Create a New Project
+
+Run the SDK Visual Editor. The New Project window displays.
+
+(see images/EdNewProject.png)
+
+In the New Project field, enter Tutorial, then click the Open button. A new project is created and an empty Editor workspace is displayed.
+
+When a new project is created, the Editor creates a new subdirectory using the project's name. This project directory is created in the ~/trickplay-editor directory. For example, the project directory for our new Tutorial project is ~/trickplay-editor/Tutorial. All subsequent files associated with this project will be stored in this project directory.
+
+The Editor informs us of the project we are working on by displaying the project's name in the upper-right area of the Editor's menu. Later, after we save the screen that we will soon develop, this menu area will specify both the project name and the screen name.

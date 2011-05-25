@@ -12,9 +12,6 @@
 
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
 UITableViewDataSource, GestureViewControllerSocketDelegate> {
-    NSString *hostName;
-    NSInteger port;
-    
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;
@@ -41,7 +38,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;
-- (void)createGestureView;
+- (void)createGestureViewWithPort:(NSInteger)p hostName:(NSString *)h;
 - (NSDictionary *)getCurrentAppInfo;
 - (BOOL)fetchApps;
 - (void)setupService:(NSInteger)p

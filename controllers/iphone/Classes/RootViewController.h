@@ -21,6 +21,8 @@ NetServiceManagerDelegate> {
     AppBrowserViewController *appBrowserViewController;
 }
 
+- (void)pushAppBrowser:(NSNotification *)notification;
+
 - (void)serviceResolved:(NSNetService *)service;
 - (void)reloadData;
 
