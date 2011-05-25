@@ -1,0 +1,63 @@
+Topic: SDK Visual Editor Menus
+
+At the top of the SDK Visual Editor window is the Editor menu bar.
+
+(see images/EdMenus.png)
+
+The display of the menu bar can be toggled between <Show> and <Hide> by pressing the <M> key.
+
+Each of the menus and menu items are described briefly below. Additional details will be provided as we progress through the tutorial.
+
+File:
+New - Open a new, empty screen
+Open... - Open an existing screen
+Save... - Save current screen
+Save As... - Save current screen to a specified file name
+New Project... - Open a new, empty project
+Open Project... - Open an existing project
+Quit - Exit the SDK Visual Editor
+
+Edit:
+Undo - Undo the last operation
+Redo - Reapply the last operation that was undone
+Insert UI Element... - Add a new user interface element to the screen
+Timeline... - Add a timeline to the screen
+Delete - Delete the selected UI element(s)
+Duplicate - Create a new object based upon the selected object
+Clone - Create a new object linked to the selected object
+Group - Group the selected objects
+Ungroup - Remove any group associated with the selected objects
+
+Arrange:
+Align - Header for list of alignment menu items
+. Left - Align the selected objects along the left-most object's left edge
+. Right - Align the selected objects along the right-most object's right edge
+. Top - Align the selected objects along the top-most object's top edge
+. Bottom - Align the selected objects along the bottom-most object's bottom edge
+. Horizontal Center - Align the selected objects along the screen's horizontal center
+. Vertical Center - Align the selected objects along the screen's vertical center
+
+Distribute - Header for list of UI element distribution menu items
+. Horizontally - Equally distribute the selected objects along the screen's horizontal axis
+. Vertically - Equally distribute the selected objects along the screen's vertical axis
+
+Arrange - Header for list of menu items that control the screen's Z-order
+. Bring to Front - Move the selected object to the front of the screen's Z-order
+. Bring Forward - Advance the selected object one entry toward the front of the screen's Z-order
+. Send to Back - Move the selected object to the end of the screen's Z-order
+. Send Backward - Move the selected object one entry toward the rear of the screen's Z-order
+
+View:
+Background - Header for list of supported background elements
+. Image... - Select a background image to display on the Editor's screen
+. Small Grid - Display a small grid on the Editor's screen
+. Medium Grid - Display a medium grid on the Editor's screen
+. Large Grid - Display a large grid on the Editor's screen
+. White - Display a white background on the Editor's screen
+. Black - Display a black background on the Editor's screen
+Guides - Header for list of supported guideline behaviors
+. Add Horizontal Guide - Display a horizontal guideline through the screen's center
+. Add Vertical Guide - Display a vertical guideline through the screen's center
+. Show Guides - Toggle the display of any horizontal and/or vertical guidelines
+. Snap to Guides - Toggle whether or not UI elements will snap to the screen's guides and grid edges when manually positioning elements
+

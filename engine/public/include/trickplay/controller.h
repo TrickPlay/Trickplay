@@ -538,7 +538,7 @@ struct TPControllerSpec
 
     Parameters:
 
-        None
+        A pointer to a <TPControllerSubmitPicture> structure.
 */
 
 #define TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP     101
@@ -886,11 +886,6 @@ struct TPControllerPlaySound
 
 typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 
-#define TP_CONTROLLER_ADVANCED_UI_CREATE    1
-#define TP_CONTROLLER_ADVANCED_UI_DESTROY   2
-#define TP_CONTROLLER_ADVANCED_UI_GET       3
-#define TP_CONTROLLER_ADVANCED_UI_SET       4
-
 /*
     Struct: TPControllerAdvancedUI
 
@@ -901,28 +896,83 @@ typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 struct TPControllerAdvancedUI
 {
     /*
-        Field: command
-
-        Values:
-
-            TP_CONTROLLER_ADVANCED_UI_CREATE    - Create UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_DESTROY   - Detsroy UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_GET       - Get UI element properties.
-
-            TP_CONTROLLER_ADVANCED_UI_SET       - Set UI element properties.
-    */
-
-    int             command;
-
-    /*
         Field: payload
 
         A JSON text describing the advanced UI command.
     */
 
     const char *    payload;
+
+    /*
+        Field: result
+
+        A JSON text describing the result of the command.
+    */
+
+    char *          result;
+
+    /*
+        Field: free_result
+
+        A function that will be called to free the result.
+    */
+
+    void            (*free_result)( void * result);
+};
+
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerSubmitPicture TPControllerSubmitPicture;
+
+/*
+    Struct: TPControllerSubmitPicture
+
+    A pointer to a structure of this type is passed to execute_command when
+    the command is <TP_CONTROLLER_SUBMIT_PICTURE>.
+*/
+
+struct TPControllerSubmitPicture
+{
+    /*
+        Field: max_width
+
+        If max_width is greater than zero, the controller should scale the
+        picture preserving its aspect ratio so that the width is not more
+        than max_width.
+    */
+
+    unsigned int max_width;
+
+    /*
+        Field: max_height
+
+        If max_height is greater than zero, the controller should scale the
+        picture preserving its aspect ratio so that the height is not more
+        than max_height.
+    */
+
+    unsigned int max_height;
+
+    /*
+        Field: edit
+
+        If edit is not zero, the controller should give the user a chance to
+        edit the picture before it is sent to Trickplay.
+    */
+
+    int edit;
+
+    /*
+        Field: mask
+
+        If this field is not NULL, it will be the name of a resource declared
+        in a previous call to execute_command with <TP_CONTROLLER_COMMAND_DECLARE_RESOURCE>.
+
+        If present, the controller should retrieve the mask and composite it with
+        the picture before submitting the result to Trickplay.
+    */
+
+    const char * mask;
 };
 
 /*-----------------------------------------------------------------------------*/

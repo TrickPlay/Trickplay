@@ -1,0 +1,8 @@
+Topic: Introduction
+
+This tutorial will walk through the creation of a non-trivial application using the Trickplay SDK Visual Editor. The application will enable the user to configure an imaginary television set. The user will be able to specfy a display language, select an operation mode, and assign other typical settings. Over the course of creating this application, many of the SDK Editor's capabilities will be demonstrated.
+
+Prerequisites:
+
+To walk through this tutorial, you should have completed the following steps.
+- Installed the Trickplay SDK

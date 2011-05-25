@@ -159,6 +159,49 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     return result;
 }
 
+gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    if( UserData::invoke_callback( G_OBJECT( actor ) , "on_enter" , 2 , 1 , L ))
+    {
+        if (lua_toboolean(L,-1))
+        {
+            result = TRUE;
+        }
+        lua_pop(L,1);
+    }
+
+    return result;
+}
+
+gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    if( UserData::invoke_callback( G_OBJECT( actor ) , "on_leave" , 2 , 1 , L ))
+    {
+        if (lua_toboolean(L,-1))
+        {
+            result = TRUE;
+        }
+        lua_pop(L,1);
+    }
+
+    return result;
+}
+
+
 static void animation_completed(ClutterAnimation * animation,lua_State * L)
 {
 	ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
@@ -796,6 +839,21 @@ interface actor [[ClutterActor*]]
         is_visible = CLUTTER_ACTOR_IS_VISIBLE(self);
     ]];
 
+    bool visible
+        [[
+            visible = CLUTTER_ACTOR_IS_VISIBLE(self);
+        ]]
+        [[
+            if ( visible )
+            {
+                clutter_actor_show( self );
+            }
+            else
+            {
+                clutter_actor_hide( self );
+            }
+        ]];
+
     /*
 	Function: set
 	
@@ -1053,6 +1111,8 @@ interface actor [[ClutterActor*]]
     [[
 #if CLUTTER_CHECK_VERSION(1,4,0)
         clutter_actor_remove_effect_by_name(self, "blur_effect");
+        // Need to force a redraw or it sometimes doesn't update
+        clutter_actor_queue_redraw(self);
         result = true;
 #else
         result = false;
@@ -1303,7 +1363,7 @@ interface actor [[ClutterActor*]]
 	    {
 		GValue value={0};
 		
-		if (lua_isstring(L,-2)&&!lua_isnil(L,-2))
+		if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
 		{
 		    const char * k=lua_tostring(L,-2);
 		
@@ -1682,6 +1742,27 @@ interface actor [[ClutterActor*]]
 			G_CALLBACK(actor_on_motion),
 			L);	    
 	]];
+
+    callback on_enter
+    [[
+        UserData::get(L)->connect_signal_if(
+            on_enter,
+            "on_enter",
+            "enter-event",
+            G_CALLBACK(actor_on_enter),
+            L);
+    ]];
+
+    callback on_leave
+    [[
+        UserData::get(L)->connect_signal_if(
+            on_leave,
+            "on_leave",
+            "leave-event",
+            G_CALLBACK(actor_on_leave),
+            L);
+    ]];
+
 
     /*
 	Event: on_show

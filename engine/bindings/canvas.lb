@@ -234,6 +234,32 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Property: path_extents
+
+        A table of coordinates for a bounding box around the current path.
+    */
+
+    readonly table path_extents
+        [[
+            double x1;
+            double y1;
+            double x2;
+            double y2;
+
+            cairo_path_extents( self , & x1 , & y1 , & x2 , & y2 );
+
+            lua_newtable( L );
+            lua_pushnumber( L , x1 );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushnumber( L , y1 );
+            lua_rawseti( L , -2 , 2 );
+            lua_pushnumber( L , x2 );
+            lua_rawseti( L , -2 , 3 );
+            lua_pushnumber( L , y2 );
+            lua_rawseti( L , -2 , 4 );
+        ]];
+
+    /*
         Property: antialias
 
         Lets you get or set the antialiasing mode used by the Canvas.
@@ -1014,6 +1040,33 @@ class Canvas [[ cairo_t * ]]
             pango_cairo_layout_path( self , layout );
 
             g_object_unref( G_OBJECT( layout ) );
+        ]];
+
+    /*
+        Function: add_string_path
+
+        This function lets you use an SVG-like syntax to add segments to the current path.
+
+        M - Tells the path to move to the coordinates, expects 1 set of coordinates.
+        L - Adds a line to the path. Expects 1 set of coordinates.
+        C - Adds a curve to the path. Expects 3 sets of coordinates.
+        z - Closes the path. Expects no coordinates.
+
+        You can also use lower case for M, L and C; which implies the coordinates are
+        relative.
+
+    */
+
+    add_string_path( string path_text )
+        [[
+            ClutterPath * clutter_path = clutter_path_new();
+
+            clutter_path_add_string( clutter_path , path_text );
+
+            clutter_path_to_cairo_path( clutter_path , self );
+
+            g_object_unref( G_OBJECT( clutter_path ) );
+
         ]];
 
     /*

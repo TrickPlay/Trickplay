@@ -65,15 +65,20 @@ private:
     {
         ConnectionInfo()
             :
-            disconnect( true ),
             version( 0 ),
-            controller( NULL )
+            controller( 0 ),
+            aui_id( aui_next_id++ ),
+            aui_connection( 0 )
         {}
 
-        bool            disconnect;
         String		    address;
         int		        version;
         TPController *	controller;
+
+        gulong          aui_id;
+        gpointer        aui_connection;
+
+        static gulong   aui_next_id;
     };
 
     //..........................................................................
@@ -91,7 +96,7 @@ private:
     // Server delegate methods
 
     virtual void connection_accepted( gpointer connection, const char * remote_address );
-    virtual void connection_data_received( gpointer connection, const char * data , gsize size );
+    virtual void connection_data_received( gpointer connection, const char * data , gsize size , bool * read_again );
     virtual void connection_closed( gpointer connection );
 
     //..........................................................................
@@ -117,7 +122,7 @@ private:
     //..........................................................................
     // Process a command sent in by a controller
 
-    void process_command( gpointer connection, ConnectionInfo & info, gchar ** parts );
+    void process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again );
 
     //..........................................................................
     // The HTTP stuff.
