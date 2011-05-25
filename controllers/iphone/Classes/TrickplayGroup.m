@@ -7,17 +7,17 @@
 //
 
 #import "TrickplayGroup.h"
+#import "TrickplayRectangle.h"
+#import "TrickplayText.h"
+#import "TrickplayImage.h"
 
 @implementation TrickplayGroup
 
-@synthesize manager;
-
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
-    if ((self = [super initWithID:groupID])) {
+    if ((self = [super initWithID:groupID objectManager:objectManager])) {
         self.view = [[[UIView alloc] init] autorelease];
         
         //manager = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
-        self.manager = objectManager;
         [self setValuesFromArgs:args];
         
         [self addSubview:view];
@@ -26,19 +26,23 @@
     return self;
 }
 
+#pragma mark -
+#pragma mark Setters
 
 /**
  * Setter function
  */
 
-- (void)setValuesFromArgs:(NSDictionary *)args {
-    [super setValuesFromArgs:args];
+- (void)setValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"set_%@:", property]);
+        
+        if ([TrickplayGroup instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
 }
 
-- (void)setChildrenFromArgs:(NSDictionary *)args {
-    NSArray *children = [args objectForKey:@"children"];
-    [manager createObjects:children];
-}
 
 #pragma mark -
 #pragma mark Getters

@@ -7,21 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "TrickplayUIElement.h"
 #import "ResourceManager.h"
 #import "EditableTextView.h"
+#import "TrickplayUIElement.h"
 
 @interface TrickplayText : TrickplayUIElement <UITextViewDelegate> {
     NSUInteger maxLength;
 }
 
-- (id)initWithID:(NSString *)textID args:(NSDictionary *)args;
-
-- (void)setTextColorFromArgs:(NSDictionary *)args;
-- (void)setFontFromArgs:(NSDictionary *)args;
-- (void)setEditableFromArgs:(NSDictionary *)args;
-- (void)setTextFromArgs:(NSDictionary *)args;
-- (void)setTextAlignmentFromArgs:(NSDictionary *)args;
-- (void)setMaxLengthFromArgs:(NSDictionary *)args;
+- (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
 
 @end

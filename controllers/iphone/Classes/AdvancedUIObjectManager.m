@@ -7,7 +7,10 @@
 //
 
 #import "AdvancedUIObjectManager.h"
-
+#import "TrickplayImage.h"
+#import "TrickplayRectangle.h"
+#import "TrickplayText.h"
+#import "TrickplayGroup.h"
 
 @implementation AdvancedUIObjectManager
 
@@ -117,7 +120,7 @@
 - (void)createImage:(NSString *)imageID withArgs:(NSDictionary *)args {
     
     
-    TrickplayImage *image = [[[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager] autorelease];
+    TrickplayImage *image = [[[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager objectManager:self] autorelease];
     
     NSLog(@"Image created: %@", image);
     [images setObject:image forKey:imageID];
@@ -131,7 +134,7 @@
  */
 
 - (void)createRectangle:(NSString *)rectID withArgs:(NSDictionary *)args {
-    TrickplayRectangle *rect = [[[TrickplayRectangle alloc] initWithID:rectID args:args] autorelease];
+    TrickplayRectangle *rect = [[[TrickplayRectangle alloc] initWithID:rectID args:args objectManager:self] autorelease];
     
     NSLog(@"Rectangle created: %@", rect);
     [rectangles setObject:rect forKey:rectID];
@@ -145,7 +148,7 @@
  */
 
 - (void)createText:(NSString *)textID withArgs:(NSDictionary *)args {
-    TrickplayText *text = [[[TrickplayText alloc] initWithID:textID args:args] autorelease];
+    TrickplayText *text = [[[TrickplayText alloc] initWithID:textID args:args objectManager:self] autorelease];
     
     NSLog(@"Text created: %@", text);
     [textFields setObject:text forKey:textID];

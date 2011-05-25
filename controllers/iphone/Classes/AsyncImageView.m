@@ -60,22 +60,27 @@
     if ([[self subviews] count] > 0) {
         [[[self subviews] objectAtIndex:0] removeFromSuperview];
     }
+    UIImage *image = [UIImage imageWithData:data];
+    /*
     UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageWithData:data]] autorelease];
     // might need to change this to scale to fill
-    //imageView.contentMode = UIViewContentModeScaleAspectFit;
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
     imageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+     */
     
     // If the width and/or height of the AsyncImageView was unspecified then
     // set as the natural width and/or height of the Image
-    CGFloat width = (self.frame.size.width == 0.0) ? imageView.frame.size.width : self.frame.size.width;
-    CGFloat height = (self.frame.size.height == 0.0) ? imageView.frame.size.height : self.frame.size.height;
+    CGFloat width = (self.frame.size.width == 0.0) ? image.size.width : self.frame.size.width;
+    CGFloat height = (self.frame.size.height == 0.0) ? image.size.height : self.frame.size.height;
     if (self.frame.size.width == 0.0 || self.frame.size.height == 0.0) {
         self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, width, height);
     }
-    
+    /*
     [self addSubview:imageView];
     imageView.frame = self.bounds;
     [imageView setNeedsLayout];
+     //*/
+    self.image = image;
     [self setNeedsLayout];
     
     // send data to the delegate if it exists for cacheing
@@ -97,9 +102,26 @@
 }
 
 - (UIImageView *)imageView {
-    return [[self subviews] objectAtIndex:0];
+    return self;
 }
 
+//*
+- (void)drawRect:(CGRect)rect {
+    NSLog(@"\n\n here \n\n");
+    //Since we are retaining the image, we append with ret_ref.  this reminds us to release at a later date.
+    CGImageRef image_to_tile_ret_ref = CGImageRetain(self.image.CGImage); 
+    
+    CGRect image_rect;
+    image_rect.size = CGSizeMake(50, 50);  //This sets the tile to the native size of the image.  Change this value to adjust the size of an individual "tile."
+    
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextDrawTiledImage(context, image_rect, image_to_tile_ret_ref);
+    
+    CGImageRelease(image_to_tile_ret_ref);
+}
+//*/
+ 
 - (void)dealloc {
     NSLog(@"AsyncImageView dealloc");
     if (connection) {
