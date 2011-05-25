@@ -31,6 +31,21 @@ assets = {
 	sold_out    = Image{src="assets/sold-out.png"},
 	title_slice = Image{src="assets/title-bar-slice.png"},
 	title_top   = Image{src="assets/title-bar-top.png"},
+	red_dot     = Image{src="assets/dot-red.png"},
+	hourglass   = {
+		Image{src="assets/hourglass/hourglass000.gif"},
+		Image{src="assets/hourglass/hourglass001.gif"},
+		Image{src="assets/hourglass/hourglass002.gif"},
+		Image{src="assets/hourglass/hourglass003.gif"},
+		Image{src="assets/hourglass/hourglass004.gif"},
+		Image{src="assets/hourglass/hourglass005.gif"},
+		Image{src="assets/hourglass/hourglass006.gif"},
+		Image{src="assets/hourglass/hourglass007.gif"},
+		Image{src="assets/hourglass/hourglass008.gif"},
+		Image{src="assets/hourglass/hourglass009.gif"},
+		Image{src="assets/hourglass/hourglass010.gif"},
+		Image{src="assets/hourglass/hourglassfinal.gif"},
+	},
 }
 
 
@@ -39,8 +54,17 @@ screen:add(clone_srcs)
 clone_srcs:hide()
 
 for _,img in pairs(assets) do
-	clone_srcs:add(img)
+	if type(img) == "table" then
+		for _,img2 in ipairs(img) do
+			clone_srcs:add(img2)
+		end
+	else
+		clone_srcs:add(img)
+	end
 end
+
+
+
 
 
 ENUM                                        = dofile("Utils.lua")

@@ -72,6 +72,7 @@ local animate_out = function(self,msecs,p)
     end
 end
 
+--[[
 --state changes
 App_State.state:add_state_change_function(
     function(prev_state,new_state)
@@ -81,6 +82,7 @@ App_State.state:add_state_change_function(
     "LOADING",
     nil
 )
+--]]
 state:add_state_change_function(
     function(prev_state,new_state)
         Idle_Loop:add_function(animate_in,zip_prompt,500)

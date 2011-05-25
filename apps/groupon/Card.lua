@@ -101,7 +101,7 @@ local update_time = function(self,curr_time)
 			":"..string.format("%02d",delta.sec)
 		
 		self:find_child("TIME").text = str
-		self:find_child("TIME").anchor_point = {self:find_child("TIME").w/2,0}
+		--self:find_child("TIME").anchor_point = {self:find_child("TIME").w/2,0}
 	end
 end
 
@@ -134,6 +134,74 @@ local make_card = function(input)
 		wrap=true,
 	}
 	
+	title_text.w   = assets.title_top.w-title_text.x*2
+	title_shadow.w = assets.title_top.w-title_text.x*2
+	
+	
+	local slice_h = title_text.y+title_text.h+title_padding-assets.title_top.h
+	
+	local bg_y = assets.title_top.h+slice_h
+	
+	local c = Canvas(assets.bg.w,bg_y+assets.bg.h)
+	
+	--top
+	c:new_path()
+    c:move_to(0,0)
+	c:line_to(c.w,0)
+	c:line_to(c.w,assets.title_top.h)
+	c:line_to(0,assets.title_top.h)
+	c:line_to(0,0)
+	local b = Bitmap(assets.title_top.src,false)
+	c:set_source_bitmap(b,0,0)
+	c:fill(true)
+	
+	--top slice
+	c:new_path()
+    c:move_to(0,assets.title_top.h)
+	c:line_to(c.w,assets.title_top.h)
+	c:line_to(c.w,bg_y)
+	c:line_to(0,bg_y)
+	c:line_to(0,assets.title_top.h)
+	b = Bitmap(assets.title_slice.src,false)
+	for i = assets.title_top.h, bg_y, assets.title_slice.h do
+		c:set_source_bitmap(b,0,i)
+		c:fill(true)
+	end
+	
+	
+	--main bg
+	c:new_path()
+    c:move_to(0,bg_y)
+	c:line_to(c.w,bg_y)
+	c:line_to(c.w,c.h)
+	c:line_to(0,c.h)
+	c:line_to(0,bg_y)
+	b = Bitmap(assets.bg.src,false)
+	c:set_source_bitmap(b,0,bg_y)
+	c:fill(true)
+	
+	--[[
+	--Value
+	c:new_path()
+    c:move_to(73,bg_y+126)
+    c:text_path(font.." 16px","Value")
+    c:set_source_color(black_text)
+    c:fill(true)
+	
+	--Value Amount
+	c:new_path()
+    c:move_to(73,bg_y+126)
+    c:text_path(font.." 16px","Value")
+    c:set_source_color(black_text)
+    c:fill(true)
+	--]]
+	
+	
+	c:begin_painting()
+	c:finish_painting()
+    c = c:Image{name="card blit"}
+	
+	--[[
 	local title_bg_top   = Clone{
 		
 		source=assets.title_top
@@ -150,19 +218,19 @@ local make_card = function(input)
 	}
 	
 	title_bg_slice.h = title_text.y+title_text.h+title_padding-title_bg_slice.y
-	
+	--]]
 	
 	card:add(
+		c,
+		--title_bg_top,
 		
-		title_bg_top,
-		
-		title_bg_slice,
+		--title_bg_slice,
 		
 		title_shadow,
 		
 		title_text
 	)
-	
+	--[[
 	--Body portion of the card
 	local bg = Clone{
 		
@@ -171,7 +239,7 @@ local make_card = function(input)
 		y=title_bg_slice.y+title_bg_slice.h
 		
 	}
-	
+	--]]
 	
 	local tag = Clone{
 		
@@ -179,7 +247,7 @@ local make_card = function(input)
 		
 		x=48,
 		
-		y=bg.y+24,
+		y=bg_y+24,
 		
 	}
 	
@@ -219,7 +287,7 @@ local make_card = function(input)
 		name = "CHECK",
 		source = assets.check_red,
 		x = 40,
-		y = bg.y+16,
+		y = bg_y+16,
 		opacity = 0,
 	}
 	
@@ -227,7 +295,7 @@ local make_card = function(input)
 		src=input.picture_url,
 		async = true,
 		x = 301,
-		y = bg.y+47,
+		y = bg_y+47,
 		on_loaded = function(self,failed)
 			if failed then
 				print("THE IMAGE ",self.src," FAILED TO LOAD")
@@ -241,7 +309,7 @@ local make_card = function(input)
 		font=font.." 16px",
 		color = black_text,
 		x = 73,
-		y = bg.y+129,
+		y = bg_y+126,
 	}
 	value.x=value.x+value.w/2
 	value.anchor_point = {value.w/2,0}
@@ -259,9 +327,10 @@ local make_card = function(input)
 		text="Discount",
 		font=font.." 16px",
 		color = black_text,
-		x = value.x+72,
+		x = value.x+value.w/2+25,
 		y = value.y,
 	}
+	discount.x = discount.x + discount.w/2
 	discount.anchor_point = {discount.w/2,0}
 	
 	local discount_amt = Text{
@@ -277,9 +346,10 @@ local make_card = function(input)
 		text="You Save",
 		font=font.." 16px",
 		color = black_text,
-		x = discount.x+72,
+		x = discount.x+discount.w/2+15,
 		y = value.y,
 	}
+	savings.x = savings.x + savings.w/2
 	savings.anchor_point = {savings.w/2,0}
 	
 	local savings_amt = Text{
@@ -291,15 +361,18 @@ local make_card = function(input)
 	}
 	savings_amt.anchor_point = {savings_amt.w/2,0}
 	
+	local hourglass = Clone{name = "hourglass",source = assets.hourglass[1],x=117,y = bg_y+190}
+	hourglass.x = hourglass.x - hourglass.w - 20
+	
 	local tltb = Text{
 		text="Time Left To Buy",
 		font=font.." 16px",
 		color = black_text,
-		x = 122,
-		y = bg.y+197,
+		x = 117,
+		y = bg_y+190,
 	}
-	tltb.x=tltb.x+tltb.w/2
-	tltb.anchor_point = {tltb.w/2,0}
+	--tltb.x=tltb.x+tltb.w/2
+	--tltb.anchor_point = {tltb.w/2,0}
 	
 	
 	card.exp = {}
@@ -314,14 +387,14 @@ local make_card = function(input)
 		x = tltb.x,
 		y = tltb.y+tltb.h,
 	}
-	tltb_rem.anchor_point = {tltb_rem.w/2,0}
+	--tltb_rem.anchor_point = {tltb_rem.w/2,0}
 	
 	local bought = Text{
 		text=input.amount_sold.." bought",
 		font=font_b.." 18px",
 		color = black_text,
-		x = 110,
-		y = bg.y+265,
+		x = 122,
+		y = bg_y+262,
 	}
 	bought.x=bought.x+bought.w/2
 	bought.anchor_point = {bought.w/2,0}
@@ -335,13 +408,26 @@ local make_card = function(input)
 	}
 	lim_quantity.anchor_point = {lim_quantity.w/2,0}
 	
-	local merchant = Text{
-		text=input.merchant_name,
+	local division = Text{
+		text=input.division,
 		font=font.." 18px",
 		color = black_text,
 		x = 303,
-		y = bg.y+bg.h-64,
+		w = 582 - 303-15,
+		ellipsize = "END",
+		y = bg_y+assets.bg.h-64,
 	}
+	
+	local change_loc = Text{
+		text="Change Location",
+		font=font.." 18px",
+		color = "515b4c",
+		x = 739,
+		y = bg_y+assets.bg.h-64,
+	}
+	change_loc.anchor_point = {change_loc.w,0}
+	
+	local red_dot = Clone{source=assets.red_dot,x=582,y=bg_y+325}
 	
 	card.fine_print = decode(input.fine_print)
 	card.highlights = decode(gen_highlight(input.highlights))
@@ -361,7 +447,6 @@ local make_card = function(input)
 	
 	
 	card:add(
-		bg,
 		deal_img,
 		tag,
 		glow,
@@ -374,11 +459,14 @@ local make_card = function(input)
 		discount_amt,
 		savings,
 		savings_amt,
+		hourglass,
 		tltb,
 		tltb_rem,
 		bought,
 		lim_quantity,
-		merchant
+		division,
+		change_loc,
+		red_dot
 	)
 	
 	--table.insert(cards,card)

@@ -157,6 +157,8 @@ local tropo_sms = function(callback,deal_url,to)
     
     assert(type(callback) == "function")
     
+	print(cj_link(deal_url))
+	
     local req = URLRequest{
         
         url = "https://api.tropo.com/1.0/sessions?action=create&token="..tropo_api_key.."&msg="..cj_link(deal_url).."&to="..to,
