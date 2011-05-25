@@ -165,16 +165,31 @@ function inspector_apply (v, inspector)
 		end
 		end,
 	["icon"] = function()
-               --v.icon = "assets/images/"..tostring(item_group:find_child("icon"):find_child("file_name").text)
-               v.icon = tostring(item_group:find_child("icon"):find_child("file_name").text)
+			   local img_tmp = tostring(item_group:find_child("icon"):find_child("file_name").text)
+			   local a, b = string.find(img_tmp,"assets/images/")
+			   if a then 
+               		v.icon = tostring(item_group:find_child("icon"):find_child("file_name").text)
+			   else 
+               		v.icon = "assets/images/"..tostring(item_group:find_child("icon"):find_child("file_name").text)
+			   end 
 	       end,
 	["source"] = function()
-               --v.source = "assets/videos/"..tostring(item_group:find_child("source"):find_child("file_name").text)
-               v.source = tostring(item_group:find_child("source"):find_child("file_name").text)
+               local img_tmp = tostring(item_group:find_child("source"):find_child("file_name").text)
+			   local a, b = string.find(img_tmp, "assets/videos/")
+			   if a then
+               		v.source = tostring(item_group:find_child("source"):find_child("file_name").text)
+			   else 
+               		v.source = "assets/videos/"..tostring(item_group:find_child("source"):find_child("file_name").text)
+			   end 
 	       end,
 	["src"] = function()
-               --v.src = "assets/images/"..tostring(item_group:find_child("src"):find_child("file_name").text)
-               v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
+               local img_tmp = tostring(item_group:find_child("src"):find_child("file_name").text)
+			   local a, b = string.find(img_tmp, "assets/images/")
+			   if a then
+               		v.src = tostring(item_group:find_child("src"):find_child("file_name").text)
+			   else 
+               		v.src = "assets/images/"..tostring(item_group:find_child("src"):find_child("file_name").text)
+			   end 
 	       end,
 	["name"] = function ()
 	       if v.extra then 
