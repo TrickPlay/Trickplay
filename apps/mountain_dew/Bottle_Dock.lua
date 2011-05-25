@@ -1,8 +1,8 @@
 local spacing = 65
 local first_x = 20
 
-local focus_scale = .75
-local unsel_scale = .6
+local focus_scale = 1.2
+local unsel_scale = 1
 
 local bottles = {
     Image{src="assets/left/bottles/1.png"},
@@ -16,10 +16,10 @@ local bottles = {
 }
 
 local selector_old = Image{src = "assets/left/bottle-focus.png",x=first_x + bottles[1].w/2}
-selector_old.anchor_point = {selector_old.w/2,selector_old.h-19}
+selector_old.anchor_point = {selector_old.w/2,selector_old.h-14}
 
 local selector_new = Clone{source = selector_old,opacity = 0}
-selector_new.anchor_point = {selector_new.w/2,selector_new.h-19}
+selector_new.anchor_point = {selector_new.w/2,selector_new.h-14}
 
 
 local dock = Group{name="BOTTLE DOCK"}
@@ -33,7 +33,7 @@ for i,img in pairs(bottles) do
     img.scale = {unsel_scale,unsel_scale}
 end
 bottles[1].scale = {focus_scale,focus_scale}
-dock.y = bottles[1].h-30
+dock.y = bottles[1].h+40
 
 
 
@@ -53,7 +53,7 @@ dock.focus_out = function(self,index,duration)
     
     selector_old:complete_animation()
     
-    selector_old.scale = {1,1}
+    selector_old.scale = {focus_scale,focus_scale}
     
     selector_old.opacity = 255
     
@@ -61,7 +61,7 @@ dock.focus_out = function(self,index,duration)
     
     selector_old:animate{
         duration = duration,
-        scale = {.8,.8},
+        scale = {unsel_scale,unsel_scale},
         mode     = "EASE_OUT_CIRC",
         opacity  = 0
     }
@@ -84,13 +84,13 @@ dock.focus_in = function(self,index,duration)
     
     selector_new:complete_animation()
     
-    selector_new.scale = {.8,.8}
+    selector_new.scale = {unsel_scale,unsel_scale}
     
     
     
     selector_new:animate{
         duration = duration,
-        scale = {1,1},
+        scale = {focus_scale,focus_scale},
         mode     = "EASE_OUT_CIRC",
         opacity  = 255,
         on_completed = KEY_HANDLER.release
