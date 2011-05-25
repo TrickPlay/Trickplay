@@ -53,11 +53,11 @@ local menuButton_file = ui_element.menuButton
 --menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close,})
 menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, mstring="New\t\t\t\t     <span foreground=\"#a6a6a6\">N</span>"})
 
-menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_open, mstring="Open ...\t\t\t     <span foreground=\"#a6a6a6\">O</span>"})
+menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, mstring="Open ...\t\t\t     <span foreground=\"#a6a6a6\">O</span>"})
 menuButton_file.insert_item(3,{type="item", string="Save ...\t\t\t     S", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true, mstring="Save ...\t\t\t     <span foreground=\"#a6a6a6\">S</span>"}) 
 menuButton_file.insert_item(4,{type="item", string="Save As ...\t\t     A", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=false, mstring="Save As ...\t\t     <span foreground=\"#a6a6a6\">A</span>" })
-menuButton_file.insert_item(5,{type="item", string="New Project ...\t\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=new_set_app_path, parameter=false, mstring="New Project ...\t\t     <span foreground=\"#a6a6a6\">P</span>"})
-menuButton_file.insert_item(6,{type="item", string="Open Project ...\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=set_app_path, parameter=false, mstring="Open Project ...\t     <span foreground=\"#a6a6a6\">P</span>"})
+menuButton_file.insert_item(5,{type="item", string="New Project ...\t\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=new_project, parameter=false, mstring="New Project ...\t\t     <span foreground=\"#a6a6a6\">P</span>"})
+menuButton_file.insert_item(6,{type="item", string="Open Project ...\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=open_project, parameter=false, mstring="Open Project ...\t     <span foreground=\"#a6a6a6\">P</span>"})
 
 menuButton_file.insert_item(7,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=exit, mstring="Quit\t\t\t\t     <span foreground=\"#a6a6a6\">Q</span>"}) 
 
@@ -145,7 +145,7 @@ local menuButton_edit = ui_element.menuButton
 
 menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end, mstring="Undo\t\t\t     <span foreground=\"#a6a6a6\">Z</span>"}) --editor.undo} )
 menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end, mstring="Redo\t\t\t     <span foreground=\"#a6a6a6\">E</span>"}) --editor.redo} )
-menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t     I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements, mstring="Insert UI Element\t     <span foreground=\"#a6a6a6\">I</span>"})
+menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t     I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_ui_elements, mstring="Insert UI Element\t     <span foreground=\"#a6a6a6\">I</span>"})
 menuButton_edit.insert_item(4,{type="item", string="Timeline ...\t\t     J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline, mstring="Timeline ...\t\t     <span foreground=\"#a6a6a6\">J</span>"}) --icon=assets("assets/menu-checkmark.png")
 menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
 

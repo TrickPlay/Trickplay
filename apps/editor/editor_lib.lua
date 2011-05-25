@@ -19,7 +19,8 @@ function editor_ui.button(table)
 
 		button_image = nil,
 		focus_image  = nil,
-		active_button = false
+		active_button = false,
+		focus_object = nil,
     }
 
  --overwrite defaults
@@ -43,10 +44,10 @@ function editor_ui.button(table)
     
     function b_group.extra.on_focus_in(key) 
 
-		print("b_group focus in", key)
+		--print("b_group focus in", key)
 
 		if current_focus ~= nil then 
-			print(current_focus.name)
+			--print(current_focus.name)
 			if current_focus.on_focus_out then 
 				current_focus.on_focus_out()
 			end 
@@ -78,7 +79,7 @@ function editor_ui.button(table)
     end
     
     function b_group.extra.on_focus_out(key) 
-		print("b_group focus out")
+		--print("b_group focus out")
 		if key == "active" then 
         	active.opacity = 255
 	    	button.opacity = 0
@@ -156,6 +157,12 @@ function editor_ui.button(table)
 				return true
 	     end 
 	     function b_group:on_enter()
+		 		if current_focus ~= b_group then 
+					if current_focus then 
+		     			current_focus.on_focus_out()
+					end
+				end 
+	
 				b_group.extra.on_focus_in("focus")
 		 end 
 
@@ -164,6 +171,10 @@ function editor_ui.button(table)
 				b_group.on_focus_out("active")
 			else 
 				b_group.on_focus_out()
+			end 
+
+			if p.focus_object ~= nil then 
+				p.focus_object.on_focus_in()
 			end 
 		 end 
 		
@@ -193,8 +204,8 @@ function editor_ui.button(table)
         else 
            p[k] = v
         end
-		print(k,v)
-		print("create_button()called")
+		--print(k,v)
+		--print("create_button()called")
         create_button()
     end 
 
@@ -342,7 +353,7 @@ function editor_ui.scrollPane(t)
 
 	 function scroll_group.extra.on_focus_in(key) 
 
-		print("scroll_group focus in", key)
+		--print("scroll_group focus in", key)
 
 --[[
 		if current_focus ~= nil then 
@@ -365,7 +376,7 @@ function editor_ui.scrollPane(t)
     end
     
     function scroll_group.extra.on_focus_out(key) 
-		print("scroll_group focus out")
+		--print("scroll_group focus out")
     end
 
     scroll_group.extra.seek_to = function(x,y)
@@ -513,7 +524,7 @@ function editor_ui.scrollPane(t)
     local function make_hor_bar(w,h,ratio)
     end
     local function make_vert_bar(w,h,ratio)
-		print(w,h)
+		--print(w,h)
 		local bar = Group()
         local fill = Group{name="grip",reactive = true, }
         local shell = Group{name="track",reactive = true, }
