@@ -143,7 +143,7 @@ local make_card = function(input)
 	local bg_y = assets.title_top.h+slice_h
 	
 	local c = Canvas(assets.bg.w,bg_y+assets.bg.h)
-	
+	card.w = c.w
 	--top
 	c:new_path()
     c:move_to(0,0)
@@ -419,6 +419,7 @@ local make_card = function(input)
 	}
 	
 	local change_loc = Text{
+		name="change location",
 		text="Change Location",
 		font=font.." 18px",
 		color = "515b4c",
