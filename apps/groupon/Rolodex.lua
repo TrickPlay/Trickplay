@@ -19,6 +19,8 @@ local function flip_forward(self,msecs,p)
 	
 	if p == 1 then
 		
+        App_State.rolodex.cards[App_State.rolodex.top_card]:find_child("change location").text = "Change location"
+        
         self.visible_cards[self.top_card] = nil
         
 		self.top_card = self.top_card - 1
@@ -67,6 +69,8 @@ local function flip_backward(self,msecs,p)
 	
     if p == 1 then
 		
+        App_State.rolodex.cards[App_State.rolodex.top_card]:find_child("change location").text = "Change location"
+        
         self.visible_cards[self.top_card] = nil
         
 		self.top_card = self.top_card + 1

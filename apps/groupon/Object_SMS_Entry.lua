@@ -320,10 +320,10 @@ state:add_state_change_function(
     function(prev_state,new_state)
         Idle_Loop:add_function(animate_in,sms_entry,500)
         reset_form()
-        sms_entry.y = -App_State.rolodex.cards[App_State.rolodex.top_card].h
-		fine_print_body.text = App_State.rolodex.cards[App_State.rolodex.top_card].fine_print
-		highlights_body.text = App_State.rolodex.cards[App_State.rolodex.top_card].highlights
-		deal_url             = App_State.rolodex.cards[App_State.rolodex.top_card].deal_url
+        sms_entry.y          = -App_State.rolodex.cards[App_State.rolodex.top_card].h
+		fine_print_body.text =  App_State.rolodex.cards[App_State.rolodex.top_card].fine_print
+		highlights_body.text =  App_State.rolodex.cards[App_State.rolodex.top_card].highlights
+		deal_url             =  App_State.rolodex.cards[App_State.rolodex.top_card].deal_url
         sms_entry:lower_to_bottom()
     end,
     nil,

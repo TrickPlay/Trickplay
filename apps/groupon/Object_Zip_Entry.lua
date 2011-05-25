@@ -1,41 +1,42 @@
 --object
-local zip_entry = Group{opacity=0}
+local zip_entry = Group{opacity=0, x = 185, y =  - 42}
 
 local state = ENUM({"HIDDEN","ANIMATING_IN","ACTIVE","SENDING","ANIMATING_OUT"})
 
 local cancel_object = nil
 local cursor_index  = 1
 local zip_digit_max = 5
-local cursor_base_x = 14
-local digit_spacing = 40
+local cursor_base_x = 0
+local digit_spacing = 35
 
-local zip_bg = Clone{ source = assets.zip_entry }
+local zip_bg = Clone{ source = assets.zip_cells }
 
-zip_bg.anchor_point = {zip_bg.w/2,0}
-
+--zip_bg.anchor_point = {zip_bg.w/2,0}
+---[[
 local prompt = Text{
     text="Enter a zip code:",
-    font="DejaVu Sans Condensed 20px",
-    color="#000000",
-    y = zip_bg.h/2,
+    font="DejaVu Sans Condensed 18px",
+    color="#515b4c",
+    y = -25,
+	x=17
 }
-
+--[[
 prompt.anchor_point = {
-    prompt.w+40,
+    prompt.w+10,
     prompt.h/2
 }
-
+--]]
 local entered = Image{
-    src = "assets/cell-dark-grey.png",
+    src = "assets/cell-dark-grey-small.png",
     x=cursor_base_x,
-    y=10,
+    --y=10,
     tile={true,false},
     w=0
 }
 
 local cursor = Clone{
-    source=assets.cell_green,
-    x=cursor_base_x,y=10
+    source=assets.cell_green_s,
+    x=cursor_base_x--,y=10
 }
 
 local entry = {}
@@ -43,10 +44,10 @@ local entry = {}
 for i = 1,5 do
     entry[i] = Text{
         text  = "",
-        font  = "DejaVu Sans Condensed Bold 40px",
+        font  = "DejaVu Sans Condensed Bold 30px",
         color = "#f4fce9",
         y     = zip_bg.h/2,
-        x     = digit_spacing*i-20
+        x     = digit_spacing*i-28
     }
     entry[i].anchor_point={0,entry[i].h/2}
 end
@@ -54,7 +55,7 @@ end
 zip_entry:add(zip_bg,prompt,entered,cursor)
 zip_entry:add(unpack(entry))
 
-zip_entry.anchor_point = {0,zip_bg.h-10}
+--zip_entry.anchor_point = {0,zip_bg.h-10}
 
 
 local reset_form = function()
@@ -87,11 +88,8 @@ local lat_lng_callback = function(zip_info)
     if zip_info.status ~= "OK" then
         print("not ok")
         prompt.text="Entered Invalid ZIP"
-        prompt.anchor_point = {
-            prompt.w,
-            prompt.h/2
-        }
-        reset()
+        
+        reset_form()
 		
 		state:change_state_to("ACTIVE")
 		--App_State.state:change_state_to("ROLODEX")
@@ -101,10 +99,7 @@ local lat_lng_callback = function(zip_info)
         
         print("not US")
         prompt.text="Entered Invalid ZIP"
-        prompt.anchor_point = {
-            prompt.w,
-            prompt.h/2
-        }
+        
         reset_form()
 		
 		state:change_state_to("ACTIVE")
@@ -144,14 +139,18 @@ local add_number = function(num)
     
     assert(cursor_index>0 and cursor_index <= zip_digit_max)
     entry[cursor_index].text = num
+	entered.w = assets.cell_dark_s.w*(cursor_index)
     cursor_index = cursor_index + 1
     
-    entered.w = assets.cell_dark.w*(cursor_index-1)
-    cursor.x = cursor_base_x+digit_spacing*(cursor_index-1)
+    
+    
     if cursor_index == zip_digit_max+1 then
         
         
         state:change_state_to("SENDING")
+	else
+		
+		cursor.x = cursor_base_x+digit_spacing*(cursor_index-1)
     end
 end
 
@@ -187,10 +186,7 @@ state:add_state_change_function(
         cursor.opacity = 0
         prompt.text = "Geocoding"
         
-        prompt.anchor_point = {
-            prompt.w+40,
-            prompt.h/2
-        }
+        
         
         cancel_object = GET_LAT_LNG(
             entry[1].text..
@@ -209,8 +205,10 @@ state:add_state_change_function(
     function(prev_state,new_state)
         Idle_Loop:add_function(animate_in,zip_entry,500)
         reset_form()
-        zip_entry.y = -App_State.rolodex.cards[App_State.rolodex.top_card].h
-        zip_entry:lower_to_bottom()
+		prompt.text = "Enter a zip code:"
+        --zip_entry.y =  -App_State.rolodex.cards[App_State.rolodex.top_card].h
+		App_State.rolodex.cards[App_State.rolodex.top_card]:find_child("change location").text = ""
+        zip_entry:raise_to_top()--lower_to_bottom()
     end,
     nil,
     "ANIMATING_IN"
@@ -253,8 +251,7 @@ local keys_ROLODEX = {
             
 		elseif state:current_state() == "SENDING" then
 			
-			cancel()
-			
+			cancel()			
 		end
         
 	end,
