@@ -904,6 +904,12 @@ function create_on_button_down_f(v)
                 		end 
 	            		if(input_mode == S_SELECT and v.extra.selected == false) then 
 		     				editor.selected(v) 
+							if(v.type == "Text") then 
+			      				v:set{cursor_visible = true}
+			      				v:set{editable= true}
+     			    			v:grab_key_focus(v)
+							end 
+
 		    			elseif (v.extra.selected == true) then 
 								if(v.type == "Text") then 
 			      					v:set{cursor_visible = true}
@@ -1566,7 +1572,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", }
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
@@ -2222,12 +2228,12 @@ function inputMsgWindow_savefile(input_text, cfn)
 	   if main_exist == false then 
 		-- main.lua 생성해서 
 
-		global_section_contents = "-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
+		global_section_contents = "function main()\n-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
 	        gen_stub_code(g)
 
 		local screen_mouse_code = "\n-- SCREEN ON_MONTION SECTION\nfunction screen:on_motion(x,y)\n\tif(screen:find_child(\"user_mouse_pointer\") == nil) then\n\t\tscreen:add(user_mouse_pointer)\n\tend\n\tuser_mouse_pointer.position = {x-15 ,y-10 ,0}\n\tuser_mouse_pointer:raise_to_top()\n\tif dragging then\n\t\tlocal actor = unpack(dragging)\n\t\tif (actor.name == \"grip\") then\n\t\t\tlocal actor,s_on_motion = unpack(dragging)\n\t\t\ts_on_motion(x, y)\n\t\t\treturn true\n\t\tend\n\t\treturn true\n\tend\nend\n-- END SCREEN ON_MONTION SECTION\n\n-- SCREEN ON_BUTTON_UP SECTION\nfunction screen:on_button_up()\n\tif dragging then\n\t\tdragging = nil\n\tend\nend\n-- END SCREEN ON_BUTTON_UP SECTION\n"
 
-		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n\nui_element.screen_add(groups[\""..fileLower.."\"])\n\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n"..screen_mouse_code.."\n-- END GLOBAL SECTION FOOTER \n"
+		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n\nui_element.screen_add(groups[\""..fileLower.."\"])\n\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n"..screen_mouse_code.."\n-- END GLOBAL SECTION FOOTER \nend\n\ndolater( main )\n"
 
 		editor_lb:writefile("main.lua", global_section_contents, true)
 		editor_lb:writefile("main.lua", new_contents, false)
@@ -2513,6 +2519,159 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 end
 
 function inputMsgWindow_openfile(input_text)
+	local file_not_exists = true
+    local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+
+    if(input_text == nil) then
+		print ("input_text is nil") 
+		return 
+    end 
+
+    for i, v in pairs(dir) do
+          if(input_text == v)then
+     	       current_fn = "screens/"..input_text
+               file_not_exists = false
+          end
+    end
+
+    if (file_not_exists) then
+		  -- need error handling 
+          return 
+    end
+    if(is_lua_file(input_text) == true) then 
+        editor.close()
+        current_fn = "screens/"..input_text
+        local f = loadfile(current_fn)
+        f(g) 
+
+	   	if screen:find_child("timeline") then 
+	      	for i,j in pairs (screen:find_child("timeline").children) do
+	         	if j.name:find("pointer") then 
+		    		j.extra.set = true
+	         	end      
+	      	end      
+	   	end 
+	   	screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
+     else 
+		  -- need error handling 
+          --printMsgWindow("The file is not a lua file.\nFile Name : ","err_msg")
+          --inputMsgWindow("reopenfile")
+          return 
+     end 
+
+     if(g.extra.video ~= nil) then clear_bg() end 
+     item_num = table.getn(g.children)
+
+     local x_scroll_from=0
+     local x_scroll_to=0
+
+     local y_scroll_from=0
+     local y_scroll_to=0
+
+     for i, v in pairs(g.children) do
+        v.reactive = true
+	  	if(v.type == "Text") then
+			v.cursor_visible = false
+			function v:on_key_down(key)
+             		if key == keys.Return then
+						v:set{cursor_visible = false}
+						return true
+	     			end 
+			end 
+	  	end 
+	  	v.extra.lock = false
+        create_on_button_down_f(v)
+	  
+	  	if(v.type == "Group") then 
+	       for j, c in pairs (v.children) do
+		    	if is_in_list(v.extra.type, uiElements) == false then 
+                	c.reactive = true
+		        	c.extra.is_in_group = true
+	  				c.extra.lock = false
+                    create_on_button_down_f(c)
+		    	end 
+	       end 
+	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" or v.extra.type == "ArrowPane" then 
+		    	for j, c in pairs(v.content.children) do -- Group { children = {button4,rect3,} },
+					c.reactive = true
+		        	c.extra.is_in_group = true
+	  				c.extra.lock = false
+                    create_on_button_down_f(c)
+		    	end 
+	       elseif v.extra.type == "LayoutManager" then 
+		   		local f 
+		   		f = function (k, c) 
+     		    	if type(c) == "table" then
+	 		   			table.foreach(c, f)
+     		    	elseif not c.extra.is_in_group then 
+			   			c.reactive = true
+		           		c.extra.is_in_group = true
+	  		   			c.extra.lock = false
+                    	create_on_button_down_f(c)
+     		    	end 
+		   		end 
+		   		table.foreach(v.tiles, f)
+	       end 
+	  end 
+
+      if(v.x < 0) then 
+			if( v.x < x_scroll_from )then 
+		     	x_scroll_from = v.x 
+			end
+      end 
+	  
+      if(v.y < 0) then 
+			if( v.y < y_scroll_from ) then 
+		     	y_scroll_from = v.y 
+			end
+      end 
+
+      if(v.x > screen.w) then 
+			if( x_scroll_to < v.x + v.w)then 
+		     	x_scroll_to = v.x + v.w
+			end
+      end 
+	  
+      if(v.y > screen.h) then 
+			if(y_scroll_to < v.y + v.h) then 
+		     	y_scroll_to = v.y + v.h 
+			end
+      end 
+
+     end 
+
+     if (x_scroll_to ~= 0 or x_scroll_from ~= 0 or y_scroll_to ~=0 or y_scroll_from ~= 0) then 
+          --make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
+     end 
+
+     if(screen:find_child("screen_objects") == nil) then
+	  	for i,j in pairs(g.children) do 
+			if(y_scroll_from < 0) then
+				j.y = j.y - y_scroll_from
+			end 
+			if(x_scroll_from < 0) then
+				j.x = j.x - x_scroll_from
+			end 
+	  	end 
+        screen:add(g)
+     end
+
+     menu_raise_to_top()
+end
+
+function inputMsgWindow_yn(txt)
+     cleanMsgWindow()
+     if(txt == "no") then
+          editor.save(false)
+     elseif(txt =="yes") then 
+          editor_lb:writefile(current_fn, contents, true)
+          contents = ""
+     end
+     screen:grab_key_focus(screen) 
+end
+
+--[[
+function inputMsgWindow_openfile(input_text)
      local file_not_exists = true
      local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
      if(input_text == nil) then
@@ -2653,7 +2812,7 @@ function inputMsgWindow_openfile(input_text)
      menu_raise_to_top()
      screen:grab_key_focus(screen) 
 end
-
+]]
 function inputMsgWindow_yn(txt)
      cleanMsgWindow()
      if(txt == "no") then
