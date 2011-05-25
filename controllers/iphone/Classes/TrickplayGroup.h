@@ -10,15 +10,10 @@
 #import <YAJLiOS/YAJL.h>
 #import "ResourceManager.h"
 #import "TrickplayUIElement.h"
-#import "AdvancedUIObjectManager.h"
-
-@class AdvancedUIObjectManager;
 
 @interface TrickplayGroup : TrickplayUIElement {
-    AdvancedUIObjectManager *manager;
+    
 }
-
-@property (nonatomic, assign) AdvancedUIObjectManager *manager;
 
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
 

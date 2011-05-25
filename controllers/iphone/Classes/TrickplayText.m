@@ -11,15 +11,17 @@
 
 @implementation TrickplayText
 
-- (id)initWithID:(NSString *)textID args:(NSDictionary *)args {
-    if ((self = [super initWithID:textID])) {
+- (id)initWithID:(NSString *)textID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
+    if ((self = [super initWithID:textID objectManager:objectManager])) {
         self.frame = [[UIScreen mainScreen] applicationFrame];
         self.view = [[[EditableTextView alloc] initWithFrame:CGRectMake(100, 100, 150, 150)] autorelease];
         
         view.userInteractionEnabled = YES;
         //((UITextView *)view).delegate = (EditableTextView *)view;
-        NSRange range = NSMakeRange(((UITextView *)view).text.length - 1, 1);
-        [((UITextView *)view) scrollRangeToVisible:range];
+        if (((UITextView *)view).text.length > 0) {
+            NSRange range = NSMakeRange(((UITextView *)view).text.length - 1, 1);
+            [((UITextView *)view) scrollRangeToVisible:range];
+        }
         //((UITextView *)view).selectedRange = NSMakeRange(((UITextView *)view).text.length - 1, 0);
         
         ((UITextView *)view).delegate = self;
@@ -34,16 +36,17 @@
     return self;
 }
 
+#pragma mark -
+#pragma mark UITextViewDelegate
+
 - (void)textViewDidChange:(UITextView *)textView {
     NSLog(@"selected range");//: %@", [textView selectedRange]);
     NSLog(@"content size: %f, %f", ((UITextView *)view).contentSize.width, ((UITextView *)view).contentSize.height);
-    ((UITextView *)view).contentSize = CGSizeMake(view.layer.bounds.size.width, view.layer.bounds.size.height);
+    //((UITextView *)view).contentSize = CGSizeMake(view.layer.bounds.size.width, view.layer.bounds.size.height);
     NSLog(@"size: %f, %f", view.layer.bounds.size.width, view.layer.bounds.size.height);
     NSLog(@"content size after: %f, %f", ((UITextView *)view).contentSize.width, ((UITextView *)view).contentSize.height);
-    //((UITextView *)view).selectedRange = NSMakeRange(((UITextView *)view).text.length - 1, 0);
-    //NSRange range = NSMakeRange(((UITextView *)view).text.length - 1, 1);
-    [((UITextView *)view) scrollRangeToVisible:textView.selectedRange];
     
+    [((UITextView *)view) scrollRangeToVisible:textView.selectedRange];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
@@ -78,27 +81,29 @@
  * Setter function
  */
 
-- (void)setValuesFromArgs:(NSDictionary *)args {
-    [super setValuesFromArgs:args];
-    
-    [self setTextFromArgs:args];
-    [self setFontFromArgs:args];
-    [self setEditableFromArgs:args];
-    [self setTextColorFromArgs:args];
-    [self setTextAlignmentFromArgs:args];
-    [self setMaxLengthFromArgs:args];
-    NSLog(@"text view: %@, layer: %@", view, view.layer);
-    //NSLog(@"frames; self: %@; view: %@", self.frame, view.frame);
+- (void)setValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"set_%@:", property]);
+        
+        if ([TrickplayText instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
 }
 
 /**
  * Set max length
  */
 
-- (void)setMaxLengthFromArgs:(NSDictionary *)args {
+- (void)set_max_length:(NSDictionary *)args {
     NSNumber *max = [args objectForKey:@"max_length"];
     if (max) {
-        maxLength = [max intValue];
+        maxLength = [max unsignedIntValue];
+        
+        if (maxLength > 0 && [((UITextView *)view).text length] > maxLength ) {
+            NSString *text = [((UITextView *)view).text substringToIndex:maxLength];
+            ((UITextView *)view).text = text;
+        }
     }
 }
 
@@ -106,7 +111,7 @@
  * Set alignment
  */
 
-- (void)setTextAlignmentFromArgs:(NSDictionary *)args {
+- (void)set_alignment:(NSDictionary *)args {
     NSString *alignment = [args objectForKey:@"alignment"];
     if (alignment) {
         if ([alignment compare:@"LEFT"] == NSOrderedSame) {
@@ -123,7 +128,7 @@
  * Set editable to true if you like editing text
  */
 
-- (void)setEditableFromArgs:(NSDictionary *)args {
+- (void)set_editable:(NSDictionary *)args {
     if ([args objectForKey:@"editable"]) {
         ((UITextView *)view).editable = [[args objectForKey:@"editable"] boolValue];
     }
@@ -133,7 +138,7 @@
  * Set the font, this parses it to match iOS implementation
  */
 
-- (void)setFontFromArgs:(NSDictionary *)args {
+- (void)set_font:(NSDictionary *)args {
     NSString *fontAndSize = [args objectForKey:@"font"];
     if (fontAndSize) {
         NSMutableArray *components = [NSMutableArray arrayWithCapacity:5];
@@ -173,7 +178,7 @@
  * Set the string of text that is displayed.
  */
 
-- (void)setTextFromArgs:(NSDictionary *)args {
+- (void)set_text:(NSDictionary *)args {
     NSString *text = [args objectForKey:@"text"];
     
     if (text) {
@@ -186,7 +191,7 @@
  * Set the color of the Text.
  */
 
-- (void)setTextColorFromArgs:(NSDictionary *)args {
+- (void)set_color:(NSDictionary *)args {
     // ** Get the color and alpha values **
     CGFloat red, green, blue, alpha;
     if ([[args objectForKey:@"color"] isKindOfClass:[NSArray class]]) {
@@ -235,6 +240,14 @@
     }
     
     ((UITextView *)view).textColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
+}
+
+- (void)set_cursor_position:(NSDictionary *)args {
+    NSNumber *position = [args objectForKey:@"cursor_position"];
+    if (position && [view isFirstResponder]) {
+        NSRange range = NSMakeRange([position unsignedIntValue], 0);
+        ((UITextView *)view).selectedRange = range;
+    }
 }
 
 #pragma mark -
@@ -329,6 +342,45 @@
 - (void)get_max_length:(NSMutableDictionary *)dictionary {
     if ([dictionary objectForKey:@"max_length"]) {
         [dictionary setObject:[NSNumber numberWithUnsignedInt:maxLength] forKey:@"max_length"];
+    }
+}
+
+/**
+ * Get selected text
+ */
+
+- (void)get_selected_text:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"selected_text"]) {
+        NSRange range = ((UITextView *)view).selectedRange;
+        NSString *selection = [((UITextView *)view).text substringWithRange:range];
+        [dictionary setObject:selection forKey:@"selected_text"];
+    }
+}
+
+/**
+ * Get selection end
+ */
+
+- (void)get_selection_end:(NSMutableDictionary *)dictionary {
+    NSRange range = ((UITextView *)view).selectedRange;
+    if (range.length > 0) {
+        [dictionary setObject:[NSNumber numberWithUnsignedInteger:(range.location + range.length - 1)] forKey:@"selection_end"];
+    } else {
+        [dictionary setObject:[NSNumber numberWithInt:0] forKey:@"selection_end"];
+    }
+}
+
+/**
+ * Cursor is always visible if first responder.
+ */
+
+- (void)get_cursor_visible:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"cursor_visible"]) {
+        if ([((UITextView *)view) isFirstResponder]) {
+            [dictionary setObject:[NSNumber numberWithBool:YES] forKey:@"cursor_visible"];
+        } else {
+            [dictionary setObject:[NSNumber numberWithBool:NO] forKey:@"cursor_visible"];
+        }
     }
 }
 

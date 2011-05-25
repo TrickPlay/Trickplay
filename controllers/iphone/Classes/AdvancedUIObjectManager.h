@@ -9,10 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
 #import "GestureViewController.h"
-#import "TrickplayImage.h"
-#import "TrickplayRectangle.h"
-#import "TrickplayText.h"
-#import "TrickplayGroup.h"
+
+@class TrickplayUIElement;
 
 @interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate, SocketManagerDelegate, CommandInterpreterAdvancedUIDelegate> {
     NSMutableDictionary *rectangles;

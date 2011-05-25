@@ -11,9 +11,11 @@
 
 @implementation TrickplayRectangle
 
-- (id)initWithID:(NSString *)rectID args:(NSDictionary *)args {
-    if ((self = [super initWithID:rectID])) {
+- (id)initWithID:(NSString *)rectID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
+    if ((self = [super initWithID:rectID objectManager:objectManager])) {
         self.view = [[[UIView alloc] init] autorelease];
+        
+        view.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0];
         
         [self setValuesFromArgs:args];
         
@@ -25,25 +27,28 @@
     return self;
 }
 
+#pragma mark -
+#pragma mark Setters
 
 /**
  * Setter function
  */
 
-- (void)setValuesFromArgs:(NSDictionary *)args {
-    [super setValuesFromArgs:args];
-    
-    [self setColorFromArgs:args];
-    [self setBorderColorFromArgs:args];
-    [self setBorderWidthFromArgs:args];
+- (void)setValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"set_%@:", property]);
+        
+        if ([TrickplayRectangle instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
 }
-
 
 /**
  * Set the color of the rectangle
  */
 
-- (void)setColorFromArgs:(NSDictionary *)args {
+- (void)set_color:(NSDictionary *)args {
     // ** Get the color and alpha values **
     CGFloat red, green, blue, alpha;
     if ([[args objectForKey:@"color"] isKindOfClass:[NSArray class]]) {
@@ -99,7 +104,7 @@
  * Set border color
  */
 
-- (void)setBorderColorFromArgs:(NSDictionary *)args {
+- (void)set_border_color:(NSDictionary *)args {
     CGFloat red, green, blue, alpha;
     if ([[args objectForKey:@"border_color"] isKindOfClass:[NSArray class]]) {
         NSArray *colorArray = [args objectForKey:@"border_color"];
@@ -154,7 +159,7 @@
  * Set border width
  */
 
-- (void)setBorderWidthFromArgs:(NSDictionary *)args {
+- (void)set_border_width:(NSDictionary *)args {
     CGFloat borderWidth = [(NSNumber *)[args objectForKey:@"border_width"] floatValue];
     
     if (borderWidth) {
