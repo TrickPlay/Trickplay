@@ -18,11 +18,11 @@ dofile("editor.lua")
         [ keys.e	] = function() editor.redo() input_mode = S_SELECT end,
         [ keys.g	] = function() editor.group() input_mode = S_SELECT end,
         [ keys.u	] = function() editor.ugroup() input_mode = S_SELECT end,
-        [ keys.w	] = function() input_mode = S_SELECT  editor.the_image() end,
+        [ keys.w	] = function() input_mode = S_SELECT  editor.image() end,
         [ keys.n	] = function() editor.close() input_mode = S_SELECT end,
-        [ keys.o	] = function() input_mode = S_SELECT editor.the_open()  end,
+        [ keys.o	] = function() input_mode = S_SELECT editor.open()  end,
         [ keys.q	] = function() exit() end,
-        [ keys.p	] = function() set_app_path() end,
+        [ keys.p	] = function() open_project() end,
 		[ keys.r	] = function() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.s	] = function() input_mode = S_SELECT editor.save(true) end,
         [ keys.t	] = function() editor.text() input_mode = S_SELECT end,
@@ -33,6 +33,9 @@ dofile("editor.lua")
 					    if table.getn(g.children) > 0 then
 						input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
 						screen:find_child("timeline").extra.show = true 
+						if screen:find_child("mouse_pointer") then 
+		 					screen:find_child("mouse_pointer"):raise_to_top()
+    					end
 					    end
 				       elseif table.getn(g.children) == 0 then 
 		      			    screen:remove(screen:find_child("timeline"))
@@ -42,6 +45,10 @@ dofile("editor.lua")
 				      elseif screen:find_child("timeline").extra.show ~= true  then 
 					    screen:find_child("timeline"):show()
 					    screen:find_child("timeline").extra.show = true
+						if screen:find_child("mouse_pointer") then 
+		 					screen:find_child("mouse_pointer"):raise_to_top()
+    					end
+
 				      else 
 					    screen:find_child("timeline"):hide()
 					    screen:find_child("timeline").extra.show = false
@@ -403,7 +410,7 @@ dofile("editor.lua")
 		     screen:remove(screen:find_child("mouse_pointer"))
 		end 
 		mouse_pointer = CS_pointer_plus
-		mouse_pointer.position = {x - 5 ,y - 5 ,0}
+		mouse_pointer.position = {x  ,y  ,0}
 		if(screen:find_child("mouse_pointer") == nil) then 
 		     screen:add(mouse_pointer)
 		     mouse_pointer.extra.type = "pointer_plus"
@@ -415,7 +422,7 @@ dofile("editor.lua")
 		     screen:remove(screen:find_child("mouse_pointer"))
 		end 
 		mouse_pointer = CS_pointer
-		mouse_pointer.position = {x - 5 ,y - 5 ,0}
+		mouse_pointer.position = {x  ,y  ,0}
 		if(screen:find_child("mouse_pointer") == nil) then 
 		     screen:add(mouse_pointer)
 		     mouse_pointer.extra.type = "pointer"
@@ -599,7 +606,8 @@ dofile("editor.lua")
     	screen.reactive=true
     
     	dofile("menu.lua")
-    	set_app_path()
+		open_project()
+    	--set_app_path()
 	
 
 	--local duration = 5--secs

@@ -46,6 +46,7 @@ BUTTON_TEXT_STYLE = { font = "DejaVu Sans 30px" , color = "FFFFFFFF" }
 CURRENT_DIR 	  = ""
 dragging          = nil
 current_inspector = nil 
+--current_project   =""
 current_fn  	  = ""
 current_focus 	  = nil
 selected_objs	  = {}

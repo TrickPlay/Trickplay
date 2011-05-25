@@ -381,11 +381,7 @@ function editor.timeline()
 			screen:find_child("timeline"):hide()
 			screen:find_child("timeline").extra.show = false
 		end
-		if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    	end
 		screen:grab_key_focus()
-
 end 
 
 
@@ -727,6 +723,28 @@ function editor.close()
 	screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
 end 
 
+--[[
+function editor.open()
+
+	local timeline = screen:find_child("timeline")
+    if timeline then 
+		timeline:clear()
+		screen:remove(timeline)
+		if screen:find_child("tline") then
+	    	screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		end 
+   	end 
+    -- editor.close()
+    if(CURRENT_DIR == "") then 
+		set_app_path()
+    else 
+        input_mode = S_POPUP
+        printMsgWindow("File Name : ")
+        inputMsgWindow("openfile")
+    end   
+end 
+]]
+
 local function cleanMsgWin(msgw)	
      msgw.children = {}
      screen:remove(msgw)
@@ -937,7 +955,7 @@ function editor.the_image(bg_image)
 	local text_g
 	local input_text
 
-	local function print_file_list() 
+	function print_file_list() 
 	     cur_w = L_PADDING
          cur_h = TOP_PADDING + dir_text.h + Y_PADDING
 	     text_g = Group{position = {cur_w, cur_h,0}}
@@ -1166,8 +1184,8 @@ local function open_files(input_purpose, bg_image)
 	}
 
 	local function make_msgw_item(caption) 
-		local text = Text{ text = caption, reactive = true,  ellipsize = "MIDDLE", w=270}:set( WSTYLE )
-		local stext = Text{ text = caption, reactive = true,  ellipsize = "MIDDLE", w=270}:set( WSSTYLE )
+		local text = Text{ text = caption, reactive = true}:set( WSTYLE )
+		local stext = Text{ text = caption, reactive = true}:set( WSSTYLE )
 		return text, stext
 	end 
 
@@ -1367,8 +1385,10 @@ function editor.the_open()
 	     cur_h = 0 
      	 for i, v in pairs(dir) do
 	     	if (is_lua_file(v) == true) then 
+			--print(v)
 	        	text = Text {name = tostring(i), text = v}:set(STYLE)
                 text.position = {cur_w, cur_h}
+			--dumptable(text.position)
 		       	text.reactive = true
     	        text_g:add(text)
 		       	if(cur_w == 0) then
@@ -1861,205 +1881,57 @@ bg("Code", "Widget")
 	    input_mode = S_SELECT
 		return true
     end 
+end 
 
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
+
+local function set_new_project (pname)
+	if(pname~= "") then
+    	project = pname
+   	end   
+	
+   	app_path = editor_lb:build_path( base , project )
+    if not editor_lb:mkdir( app_path ) then
+        -- Tell the user we were not able to create it
+   	     print("couldn't create ",app_path)  
+    else
+    	editor_lb:change_app_path( app_path )
+	    CURRENT_DIR = app_path
     end
 
+    local screens_path = editor_lb:build_path( app_path, "screens" )
+    editor_lb:mkdir( screens_path ) 
+    local asset_path = editor_lb:build_path( app_path, "assets" )
+    editor_lb:mkdir( asset_path ) 
+
+    local asset_images_path = editor_lb:build_path( asset_path, "images" )
+    editor_lb:mkdir( asset_images_path ) 
+    local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
+    editor_lb:mkdir( asset_sounds_path ) 
+    local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
+    editor_lb:mkdir( asset_videos_path ) 
+
+    local lib_path = editor_lb:build_path( app_path, "lib" )
+    editor_lb:mkdir( lib_path ) 
+    local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
+    editor_lb:mkdir( lib_assets_path ) 
+    local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
+    editor_lb:mkdir( lib_skins_path ) 
+    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
+    editor_lb:mkdir( lib_skins_default_path ) 
+    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
+    editor_lb:mkdir( lib_skins_default_path ) 
+    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "OOBE" )
+    editor_lb:mkdir( lib_skins_default_path ) 
+
+	screen:find_child("menu_text").text = project .. " "
+	screen:find_child("menu_text").extra.project = project .. " "
+
+	copy_widget_imgs()
 end 
 
-
-local function save_new_file (fname, save_current_f, save_backup_f)
-
-	print( "fname :" , fname)
-	print( "current_fn :" , current_fn)
-
-
-	if current_fn == "" then 
-		if fname == "" then
-			return
-   		end   
-		current_fn = "screens\/"..fname
-	end 
-
-    if (save_current_f == true) then 
-		contents = ""
-        local obj_names = getObjnames()
-        local n = table.getn(g.children)
-
-		for i, v in pairs(g.children) do
-	     	local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
-	     	if result2  ~= nil then 
-            	contents=result2..contents
-	     	end  
-	     	if result ~= nil then 
-                contents=contents..result
-	     	end 
-	     	done_list = d_list
-	     	todo_list = t_list
-        end
-
-		if(g.extra.video ~= nil) then
-	    	contents = contents..itemTostring(g.extra.video)
-		end 
-
-        local timeline = screen:find_child("timeline")
-		if timeline then
-	    	contents = contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
-	      	for m,n in orderedPairs (timeline.points) do 
-		    	contents = contents.."["..tostring(m).."] = {"
-		    	for q,r in pairs (n) do
-		        	if q == 1 then 
-			      		contents = contents.."\""..tostring(r).."\","
-		         	else 
-			      		contents = contents..tostring(r)..","
-		         	end
-		    	end 
-		    	contents = contents.."},"
-	      	end 
-	      	contents = contents.."},\n\t" 
-            contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\0n" 
-            contents = contents.."screen:add(timeline)\n\n"
-	      	contents = contents.."if editor_lb == nil then\n\tscreen:find_child(\"timeline\"):hide()\nend\n\n"
-		end 
-
-		contents = contents.."\ng:add("..obj_names..")"
-        contents = "local g = ... \n\n"..contents
-
-        undo_list = {}
-        redo_list = {}
-
-		if save_backup_f == nil then  
-			editor_lb:writefile(current_fn, contents, true)	
-		end 
-		local back_file = current_fn.."\.back"
-		editor_lb:writefile(back_file, contents, true)	
-
-		local main = readfile("main.lua")
-		if(current_fn ~= "" and main ) then 
-			local j,k = string.find(current_fn, "/")
- 	        local fileUpper= string.upper(string.sub(current_fn, k+1, -5))
-	   		local fileLower= string.lower(string.sub(current_fn, k+1, -5))
-			local added_stub_code = ""
-			
-			if string.find(main, "-- "..fileUpper.." SECTION") ~= nil then 
-			-- input_t.text-새로 저장할 루아 파일에 대한 정보가 메인에 있는지를 확인하고 
-			-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
-			-- 그리고 저장 끝 	
-				for i, j in pairs (g.children) do 
-		   			if need_stub_code(j) == true then 
-						if j.extra.prev_name then 
-							if string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") ~= nil then  			
-			          			local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") 
-				  				local e, r = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
-				  				local main_first = string.sub(main, 1, q-1)
-				  				local main_temp = string.sub(main, q,r)
-				  				local main_last = string.sub(main, r+1, -1)
-				  				main_temp = string.gsub(main_temp,string.upper(j.extra.prev_name),string.upper(j.name))
-				  				main_temp = string.gsub(main_temp,j.extra.prev_name,tostring(j.name))
-				  				main = ""
-				  				main = main_first..main_temp..main_last
-				  				editor_lb:writefile("main.lua",main, true)
-	       		     		end 
-						end 
-
-	                 	if string.find(main, "-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  			
-					 		added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
-					    	if j.extra.type == "Button" then 
-					     		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
-					     	   	added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-					     	   	added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
-			   		     	elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   		     	elseif j.extra.type == "CheckBoxGroup" then 
-	                   			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   		     	elseif j.extra.type == "MenuButton" then 
-			   					for k,l in pairs (j.items) do 
-			   	     		     	if l["type"] == "item" then 
-	                   			    	added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
-			   	     		     	end 
-			   					end 
-			   		     	end 
-	                   		added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
-						end
-					end 
-				end --for
-
-				local q,w 
-				q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
-				local main_first = string.sub(main, 1, q-1)
-				local main_last = string.sub(main, q, -1)
-				if added_stub_code ~= "" then 
-					main = ""
-					main = main_first..added_stub_code..main_last
-					editor_lb:writefile("main.lua",main, true)
-				end 
-	   
-     	else 
-				 inputMsgWindow_savefile(fname, current_fn)
-				
-	       	end	
-		elseif (current_fn ~= "" and main == nil) then 
-				 inputMsgWindow_savefile(fname, current_fn)
-		else
-			editor.save(false)
-			return
-		end 
-     else 
-		if(CURRENT_DIR == "") then 
-	     	open_project()
-        else 
-        	input_mode = S_POPUP
-	    	contents = ""
-        	local obj_names = getObjnames()
-
-			for i, v in pairs(g.children) do
-		   		local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
-		   		if result2  ~= nil then 
-            		contents=result2..contents
-		   		end  
-		   		if result ~= nil then 
-            		contents=contents..result
-		   		end 
-		   		done_list = d_list
-		   		todo_list = t_list
-            end
-	
-	     	if (g.extra.video ~= nil) then
-	        	contents = contents..itemTostring(g.extra.video)
-	     	end 
-
-	     	local timeline = screen:find_child("timeline")
-	     	if timeline then
-	        	contents = contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
-	          	for m,n in orderedPairs(timeline.points) do 
-		        	contents = contents.."["..tostring(m).."] = {"
-			    	for q,r in pairs (n) do
-				    	if q == 1 then 
-				       		contents = contents.."\""..tostring(r).."\","
-				    	else 
-				       		contents = contents..tostring(r)..","
-				    	end
-			    	end 
-		        	contents = contents.."},"
-	         	end 
-	         	contents = contents.."},\n\t" 
-                contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
-                contents = contents.."screen:add(timeline)\n\n"
-	        	contents = contents.."if editor_lb == nil then\n\tscreen:find_child(\"timeline\"):hide()\nend\n\n"
-	     	end 
-	     	contents = contents.."\ng:add("..obj_names..")"
-            contents = "local g = ... \n\n"..contents
-            undo_list = {}
-            redo_list = {}
-			
-			inputMsgWindow_savefile(fname, current_fn)
-
-     	end 
-     end 	
-end 
 
 function editor.save(save_current_f, save_backup_f)
+
   	local WIDTH = 300
   	local HEIGHT = 150
     local PADDING = 13
@@ -2075,46 +1947,27 @@ function editor.save(save_current_f, save_backup_f)
     local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Save File" }:set(TSTYLE)
-	local title_shadow = Text {name = "title", text = "Save File"}:set(TSSTYLE)
-	local message = Text {text = "File Name:"}:set(MSTYLE)
-	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
-
-	if save_current_f == nil then 
-		save_current_f = false
-    end 
-
-    if current_time_focus then 
-		current_time_focus.on_focus_out()
-		current_time_focus = nil
-    end 
-	
-	local screen_rect = g:find_child("screen_rect")
-  
-    if(g:find_child("screen_rect") ~= nil) then 
-          g:remove(g:find_child("screen_rect"))
-    end 
-
-	if save_current_f == true and current_fn ~= "" then  
-		save_new_file(current_fn, save_current_f, save_backup_f) 
-		screen:grab_key_focus()
-		return 
-	end 
+	local title_shadow = Text {name = "title", text = "New Project"}:set(TSSTYLE)
+	local message = Text {text = "Project Name:"}:set(MSTYLE)
+	local message_shadow = Text {text = "Project Name:"}:set(MSSTYLE)
 
 	-- Text Input Field 	
 	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
 		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
-    	  border_corner_radius = 0, readonly="screen/" }
+    	  border_corner_radius = 0,}
 
+	--editor_use = true
 	--Buttons 
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
  		  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = text_input}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     	  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true, focus_object = text_input} 
+	--editor_use = false
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() print("CANCEL") xbox:on_button_down() end 
-	button_ok.pressed = function()print("OK", text_input.text ) save_new_file(text_input.text, save_current_f, save_backup_f) xbox:on_button_down() end
+	button_ok.pressed = function()print("OK") set_new_project(text_input.text) xbox:on_button_down() end
 
 	local ti_func = function()
 		if current_focus then 
@@ -2122,7 +1975,6 @@ function editor.save(save_current_f, save_backup_f)
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
-
 		text_input.on_focus_in()
 	end
 
@@ -2164,7 +2016,8 @@ function editor.save(save_current_f, save_backup_f)
 	create_on_button_down_f(msgw)	
 	-- Focus 
 	ti_func()
-	print(current_focus.name)
+	--text_input.on_focus_in()
+	--button_ok:find_child("active").opacity = 255
 
 
 	function xbox:on_button_down()
@@ -2178,6 +2031,10 @@ function editor.save(save_current_f, save_backup_f)
 	end 
 
 	function text_input:on_key_down(key)
+		print("text_input on_key down")
+		if key == keys.Tab then
+			print (key,"popopo")
+		end
 		if text_input.focus[key] then
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
@@ -2198,7 +2055,7 @@ function editor.save(save_current_f, save_backup_f)
     end
 end 
 
---[[
+----[[
 
 function editor.save(save_current_f, save_backup_f)
      if save_current_f == nil then 
@@ -2397,7 +2254,7 @@ function editor.save(save_current_f, save_backup_f)
      end
 end  
 
---]]
+]]
 function editor.rectangle(x, y)
     rect_init_x = x 
     rect_init_y = y 
@@ -2611,11 +2468,10 @@ function editor.text()
 	text = strings[""], font= "DejaVu Sans 30px",
 	-- 0111 text = "", font= "DejaVu Sans 40px",
     color = DEFAULT_COLOR, 
-	position ={200, 200, 0}, 
-	editable = true , reactive = true, ellipsize = "END", 
-	--wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
-	wants_enter = true, wrap=true, wrap_mode="CHAR", 
-	extra = {org_x = 200, org_y = 200}
+	position ={700, 500, 0}, 
+	editable = true , reactive = true, 
+	wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
+	extra = {org_x = 700, org_y = 500}
 	} 
     table.insert(undo_list, {ui.text.name, ADD, ui.text})
     g:add(ui.text)
@@ -2674,6 +2530,27 @@ function editor.text()
 	create_on_button_down_f(ui.text)
 end
 	
+	--[[
+function editor.image()
+	if(CURRENT_DIR == "") then 
+		set_app_path()
+    else 
+    	input_mode = S_POPUP
+        printMsgWindow("Image File : ")
+        inputMsgWindow("open_imagefile")
+	end 
+end
+	
+function editor.video()
+	if(CURRENT_DIR == "") then 
+		set_app_path()
+    else 
+        input_mode = S_POPUP
+        printMsgWindow("Video File : ")
+        inputMsgWindow("open_videofile")
+	end
+end
+	]]
 function editor.the_video()
 	local WIDTH = 700
 	local L_PADDING = 50
@@ -4149,8 +4026,8 @@ function editor.the_ui_elements()
 	}
 
 	local function make_msgw_widget_item(caption) 
-		local text = Text{ text = caption, reactive = true,  ellipsize = "END", w=270}:set( WSTYLE )
-		local stext = Text{ text = caption, reactive = true,  ellipsize = "END", w=270}:set( WSSTYLE )
+		local text = Text{ text = caption, reactive = true}:set( WSTYLE )
+		local stext = Text{ text = caption, reactive = true}:set( WSSTYLE )
 		return text, stext
 	end 
 

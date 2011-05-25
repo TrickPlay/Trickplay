@@ -68,10 +68,14 @@ function ui_element.populate_to (grp, tbl)
 						end 
 					end 
 				else 
-					tbl[j.name] = j
+					if j.name then 
+						tbl[j.name] = j
+					end 
 				end 
 			else 
-				tbl[j.name] = j
+				if j.name then 
+					tbl[j.name] = j
+				end 
 			end 
 		end 
 		there()
@@ -1508,7 +1512,7 @@ function ui_element.textInput(table)
     	skin = "custom", 
     	ui_width = 200 ,
     	ui_height = 60 ,
-    	text = "" ,
+    	text = "",
     	padding = 20 ,
     	border_width  = 4 ,
     	border_color  = {255,255,255,255}, 
@@ -1519,6 +1523,7 @@ function ui_element.textInput(table)
     	text_font = "DejaVu Sans 30px"  , 
     	text_color =  {255,255,255,255},
     	border_corner_radius = 12 ,
+		readonly = "",
 
     }
  --overwrite defaults
@@ -1529,7 +1534,7 @@ function ui_element.textInput(table)
     end
 
  --the umbrella Group
-    local box, focus_box, box_img, focus_img, text
+    local box, focus_box, box_img, focus_img, readonly, text
     local t_group = Group
     {
        name = "t_group", 
@@ -1540,16 +1545,6 @@ function ui_element.textInput(table)
     }
 
  	function t_group.extra.on_focus_in()
-		print("t input on focus in")	
-
---[[
-		if current_focus then 
-			print(current_focus.name)
-			if current_focus.on_focus_out then 
-				current_focus.on_focus_out()
-			end 
-		end 
-]]
 	  	current_focus = t_group
 
         if (p.skin == "custom") then 
@@ -1599,28 +1594,36 @@ function ui_element.textInput(table)
 	    	focus_img = Image{}
 		end 
 
-    	text = Text{text=p.text, editable=true, cursor_visible=false, single_line = true, 
-					cursor_color = p.cursor_color, wants_enter = true, 
-					reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
-    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
+		if p.readonly ~= "" then 
+			readonly = Text{text= p.readonly, editable=false, cursor_visible=false, font = p.text_font, color = p.text_color, }
 
-    	t_group:add(box, focus_box, box_img, focus_img, text)
+    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = true, 
+						cursor_color = p.cursor_color, wants_enter = true, 
+						reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding - readonly.w}
+
+    		readonly:set{name = "readonlyText", position = {p.padding, (p.ui_height - text.h)/2},}
+    		text:set{name = "textInput", position = {readonly.x+readonly.w, (p.ui_height - text.h)/2},}
+
+    		t_group:add(box, focus_box, box_img, focus_img, readonly, text)
+		else 
+    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = true, 
+						cursor_color = p.cursor_color, wants_enter = true, 
+						reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
+    		text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
+    		t_group:add(box, focus_box, box_img, focus_img, text)
+		end
+
 
 		local t_pos_min = t_group.x + t_group:find_child("textInput").x 
 
 		if editor_lb == nil or editor_use then 
 	   		function t_group:on_button_down()
-				print("t group on button down") 
 				t_group.extra.on_focus_in()
 				return true
 	   		end 
 	    end 
 
 		function text:on_key_down(key)
-				print("text on key down") 
-				print("text on key down") 
-				print("text on key down") 
-				print("text on key down") 
 				if key == keys.Return then 
 					t_group:grab_key_focus()
 					t_group:on_key_down(key)
@@ -2810,8 +2813,6 @@ function ui_element.checkBoxGroup(t)
 	     	function box:on_button_down (x,y,b,n)
 			local box_num = tonumber(box.name:sub(4,-1))
 			dumptable(p.selected_items)
-			--print(box.name)
-			--print(box_num)
 			table.insert(p.selected_items, box_num)
 			cb_group:find_child("check"..tostring(box_num)).opacity = 255
 			cb_group:find_child("check"..tostring(box_num)).reactive = true
@@ -3490,8 +3491,6 @@ function ui_element.layoutManager(t)
                 x = x - self.transformed_position[1]/screen.scale[1]
                 y = y - self.transformed_position[2]/screen.scale[2]
                 if p.cell_size == "fixed" then
-                            --print(math.floor(y/(p.cell_h+p.cell_spacing))+1,
-                           --math.floor(x/(p.cell_w+p.cell_spacing))+1)
 	        	    return math.floor(x/(p.cell_w+p.cell_spacing))+1,
                            math.floor(y/(p.cell_h+p.cell_spacing))+1
                 end
@@ -3762,13 +3761,10 @@ function ui_element.scrollPane(t)
                 if p.virtual_h > p.visible_h then
                     if y > p.virtual_h - p.visible_h/2 then
                         new_y = -p.virtual_h + p.visible_h
-                        --print(1)
                     elseif y < p.visible_h/2 then
                         new_y = 0
-                        --print(2)
                     else
                         new_y = -y + p.visible_h/2
-                        --print(3)
                     end
                 else
                     new_y =0
