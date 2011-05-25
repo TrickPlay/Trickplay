@@ -192,7 +192,7 @@ state:add_state_change_function(
             prompt.h/2
         }
         
-        GET_LAT_LNG(
+        cancel_object = GET_LAT_LNG(
             entry[1].text..
             entry[2].text..
             entry[3].text..
@@ -229,9 +229,12 @@ state:add_state_change_function(
 --keys
 local cancel = function()
     assert(cancel_object ~= nil)
+	--print("pre_cancel")
+	TRY_AGAIN:stop()
     cancel_object:cancel()
+	--print("post_cancel")
     state:change_state_to("ANIMATING_OUT")
-    App_State.state:change_state_to("ACTIVE")
+    App_State.state:change_state_to("ROLODEX")
 end
 local keys_LOADING = {
     [keys.Down] = cancel,
@@ -248,6 +251,10 @@ local keys_ROLODEX = {
             
 			state:change_state_to("ANIMATING_OUT")
             
+		elseif state:current_state() == "SENDING" then
+			
+			cancel()
+			
 		end
         
 	end,
@@ -259,6 +266,11 @@ local keys_ROLODEX = {
             state:current_state() == "ANIMATING_IN" then
             
 			state:change_state_to("ANIMATING_OUT")
+			
+		elseif state:current_state() == "SENDING" then
+			
+			cancel()
+			
 		end
         
 	end,
@@ -273,6 +285,8 @@ local keys_ROLODEX = {
 			state:change_state_to("ANIMATING_OUT")
         elseif state:current_state() == "HIDDEN" then
 			state:change_state_to("ANIMATING_IN")
+		elseif state:current_state() == "SENDING" then
+			cancel()
 		end
         
 	end,

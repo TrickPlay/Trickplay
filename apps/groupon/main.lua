@@ -43,29 +43,29 @@ for _,img in pairs(assets) do
 end
 
 
-ENUM = dofile("Utils.lua")
+ENUM                                        = dofile("Utils.lua")
 
-App_State, Idle_Loop = dofile("App_Framework.lua")
+App_State, Idle_Loop                        = dofile("App_Framework.lua")
 
-KEY_HANDLER = dofile("User_Input.lua")
+Xml_Parse                                   = dofile("XML_to_lua_table.lua")
 
-screen.on_key_down = KEY_HANDLER.on_key_down
+KEY_HANDLER                                 = dofile("User_Input.lua")
 
-GET_DEALS, SEND_SMS, GET_LAT_LNG = dofile("Internet_Interfaces.lua")
+screen.on_key_down                          = KEY_HANDLER.on_key_down
 
-Loading_G             = dofile("LoadingDots.lua")
+GET_DEALS, SEND_SMS, GET_LAT_LNG, TRY_AGAIN = dofile("Internet_Interfaces.lua")
 
---Zip                   = dofile("Modal.lua")
+Loading_G                                   = dofile("LoadingDots.lua")
 
-ZIP_PROMPT = dofile("Object_Zip_Prompt.lua")
+ZIP_PROMPT                                  = dofile("Object_Zip_Prompt.lua")
 
-ZIP_ENTRY  = dofile("Object_Zip_Entry.lua")
+ZIP_ENTRY                                   = dofile("Object_Zip_Entry.lua")
 
-SMS_ENTRY  = dofile("Object_SMS_Entry.lua")
+SMS_ENTRY                                   = dofile("Object_SMS_Entry.lua")
 
-Card_Constructor      = dofile("Card.lua")
+Card_Constructor                            = dofile("Card.lua")
 
-Rolodex_Constructor   = dofile("Rolodex.lua")
+Rolodex_Constructor                         = dofile("Rolodex.lua")
 
 
 

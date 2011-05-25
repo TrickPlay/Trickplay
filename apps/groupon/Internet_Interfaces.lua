@@ -1,9 +1,53 @@
+local attempts = {}
+
+local last_req = nil
+
+local try_again = Timer{
+	
+	interval = 10*1000,
+	
+	on_timer = function(self)
+		
+		self:stop()
+		
+		last_req:send()
+		
+	end
+}
+
+try_again:stop()
+
 local response_check = function(request_object,response_object,callback)
-    if response_object.failed then
+    if response_object.failed or response_object.code ~= 200 then
 		
-		print("URLRequest failed. Trying Again")
+		print(
+			
+			"URLRequest received a reponse code: "..
+			
+			response_object.code.." - "..
+			
+			response_object.status
+			
+		)
+		if attempts[request_object] == nil then
+			
+			attempts[request_object] = 1
+			
+		elseif attempts[request_object] > 3 then
+			
+			
+			
+		else
+			
+			attempts[request_object] = attempts[request_object] + 1
+			
+		end
 		
-		self:send()
+		--request_object:send()
+		
+		last_req = request_object
+		
+		try_again:start()
 		
 	elseif response_object.code ~= 200 then
 		
@@ -29,6 +73,11 @@ local response_check = function(request_object,response_object,callback)
 					
 		local json_response = json:parse(response_object.body)
 		
+		
+		if json_response == nil then
+		
+			json_response = Xml_Parse(response_object.body)
+		end
 		--[[
 		if json_response == nil or type(json_response) ~= "table" then
 			
@@ -80,7 +129,7 @@ local tropo_sms = function(callback,msg,to)
     
     local req = URLRequest{
         
-        url = "https://api.tropo.com/1.0/sessions?action=create&token="..tropo_api_key.."&msg="..msg,
+        url = "https://api.tropo.com/1.0/sessions?action=create&token="..tropo_api_key.."&msg="..msg.."&to="..to,
         
         on_complete = function(self,response_object)
             
@@ -112,4 +161,4 @@ local google_maps_get_lat_lng_from_zip = function(zip, callback)
     return req:send()
 end
 
-return groupon_get_deals, tropo_sms, google_maps_get_lat_lng_from_zip
+return groupon_get_deals, tropo_sms, google_maps_get_lat_lng_from_zip, try_again
