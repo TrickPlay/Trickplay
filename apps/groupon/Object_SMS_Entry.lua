@@ -61,8 +61,8 @@ local cursor = Clone{
 }
 
 local prompt = Text{
-	text = "Unable to reach number.",
-	font = "DejaVu Sans Condensed 40px",
+	text = "Unable to send.",
+	font = "DejaVu Sans Condensed 30px",
 	color = "#000000",
 	opacity=0,
 	y     = 270,
@@ -157,17 +157,23 @@ end
 local sms_callback = function(sms_result)
 	
     cancel_object = nil
+	
+	
+	dumptable(sms_result)
     
     --local zip_info = json:parse(response_object.body)
-    --[[
+    ---[[
     if sms_result.session == nil then
 		error("unexpected response from tropo")
-	elseif sms_result.session.success ~= true then
+	elseif sms_result.session.success ~= "true" then
         
         print("failed")
         
         reset_form()
 		prompt.opacity = 255
+		
+		state:change_state_to("ACTIVE")
+		
     else
 	--]]
 	
@@ -201,7 +207,7 @@ local sms_callback = function(sms_result)
         
         --App_State.state:change_state_to("LOADING")
         
-    --end
+    end
 end
 
 local add_number = function(num)
@@ -256,8 +262,27 @@ state:add_state_change_function(
 		cancel_object = SEND_SMS(
 			sms_callback,
 			deal_url,
-			nil
+			entry[1].text..
+            entry[2].text..
+            entry[3].text..
+            entry[4].text..
+			entry[5].text..
+            entry[6].text..
+            entry[7].text..
+            entry[8].text..
+            entry[9].text..
+            entry[10].text
 		)
+		
+		
+		Loading_G.opacity=255
+        
+        Loading_G:raise_to_top()
+        
+        
+        Loading_G.y = 350
+        
+        Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
 		
 		--[[
         assert(App_State.state:current_state() == "ROLODEX")
@@ -286,6 +311,13 @@ state:add_state_change_function(
 )
 state:add_state_change_function(
     function(prev_state,new_state)
+        Idle_Loop:add_function(Loading_G.fade_out,Loading_G,500)
+    end,
+    "SENDING",
+    nil
+)
+state:add_state_change_function(
+    function(prev_state,new_state)
         Idle_Loop:add_function(animate_in,sms_entry,500)
         reset_form()
         sms_entry.y = -App_State.rolodex.cards[App_State.rolodex.top_card].h
@@ -311,16 +343,20 @@ state:add_state_change_function(
 --keys
 local cancel = function()
     assert(cancel_object ~= nil)
+    --print("pre_cancel")
+	TRY_AGAIN:stop()
     cancel_object:cancel()
+	--print("post_cancel")
     state:change_state_to("ANIMATING_OUT")
-    App_State.state:change_state_to("ACTIVE")
+    App_State.state:change_state_to("ROLODEX")
 end
+--[[
 local keys_LOADING = {
     [keys.Down] = cancel,
     [keys.Up]   = cancel,
     [keys.RED]  = cancel,
 }
-
+--]]
 local keys_ROLODEX = {
     --Flip Backward closes menu
 	[keys.Down] = function()
@@ -330,6 +366,10 @@ local keys_ROLODEX = {
             
 			state:change_state_to("ANIMATING_OUT")
             
+		elseif state:current_state() == "SENDING" then
+			
+			cancel()
+			
 		end
         
 	end,
@@ -341,6 +381,11 @@ local keys_ROLODEX = {
             state:current_state() == "ANIMATING_IN" then
             
 			state:change_state_to("ANIMATING_OUT")
+			
+		elseif state:current_state() == "SENDING" then
+			
+			cancel()
+			
 		end
         
 	end,
@@ -363,6 +408,11 @@ local keys_ROLODEX = {
             state:current_state() == "ANIMATING_IN" then
             
 			state:change_state_to("ANIMATING_OUT")
+			
+		elseif state:current_state() == "SENDING" then
+			
+			cancel()
+			
 		end
         
 	end,
@@ -374,6 +424,11 @@ local keys_ROLODEX = {
             state:current_state() == "ANIMATING_IN" then
             
 			state:change_state_to("ANIMATING_OUT")
+			
+		elseif state:current_state() == "SENDING" then
+			
+			cancel()
+			
 		end
         
 	end,
@@ -405,7 +460,7 @@ local keys_ROLODEX = {
 	[ keys["9"] ] = function() add_number(9) end,
 }
 
-KEY_HANDLER:add_keys("LOADING",keys_LOADING)
+--KEY_HANDLER:add_keys("LOADING",keys_LOADING)
 KEY_HANDLER:add_keys("ROLODEX",keys_ROLODEX)
 
 return sms_entry
