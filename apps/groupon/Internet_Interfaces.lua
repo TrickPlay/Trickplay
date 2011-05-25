@@ -122,14 +122,44 @@ end
 
 local tropo_api_key = "016ed2530c3bcc47b397ead9357a41a777093018d4ab25f85220a86ac342f29bea28e88efc53f74872082eee"
 local cj_publisher_id = "5287435"
+local groupon_s_AID = "10804307"
 
-local tropo_sms = function(callback,msg,to)
+local function urlencode(str)
+   if (str) then
+	print("fff")
+	--[[
+       str = string.gsub (str, "\n", "\r\n")
+       str = string.gsub (str, "([^%w ])",
+                function (c) 
+                    return string.format ("%%%02X", string.byte(c))
+                 end
+             )
+       str = string.gsub (str, " ", "+")
+	--]]
+		return str:gsub(
+			'[^-._~a-zA-Z0-9]',
+			function(c)
+				return string.format("%%%02x", c:byte()):upper()
+			end
+		)
+   end
+   print("aaa",str)
+   return str        
+end
+
+local function cj_link(deal_url)
+	return "http://www.anrdoezrs.net/click-"..
+			cj_publisher_id.."-"..groupon_s_AID..
+			"?url"..urlencode(deal_url)
+end
+
+local tropo_sms = function(callback,deal_url,to)
     
     assert(type(callback) == "function")
     
     local req = URLRequest{
         
-        url = "https://api.tropo.com/1.0/sessions?action=create&token="..tropo_api_key.."&msg="..msg.."&to="..to,
+        url = "https://api.tropo.com/1.0/sessions?action=create&token="..tropo_api_key.."&msg="..cj_link(deal_url).."&to="..to,
         
         on_complete = function(self,response_object)
             
