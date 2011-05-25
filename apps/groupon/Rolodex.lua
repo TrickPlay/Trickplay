@@ -192,7 +192,7 @@ return function(response_table)
     
     App_State.rolodex.top_card = 1
     
-    dumptable(response_table.deals)
+    --dumptable(response_table.deals)
     App_State.rolodex.cards = {}
     App_State.rolodex.visible_cards = {}
     
@@ -207,7 +207,7 @@ return function(response_table)
         --pass the card constructor all of the important aspects of the deal information
         c = Card_Constructor{
             title         = d.title,
-            merchant_name = d.merchant.name,
+            division      = d.division.name,
             price         = "$"..d.options[1].price.amount/100,
             msrp          = "$"..d.options[1].value.amount/100,
             percentage    = d.options[1].discountPercent,
@@ -294,7 +294,7 @@ return function(response_table)
     
     App_State.rolodex.time:start()
     
-    Idle_Loop:add_function(App_State.rolodex.throb_cards,App_State.rolodex,1000,true)
+    Idle_Loop:add_function(App_State.rolodex.throb_cards,App_State.rolodex,3000,true)
     
     --fade out the loading animation
     Idle_Loop:add_function(Loading_G.fade_out,Loading_G,500)
