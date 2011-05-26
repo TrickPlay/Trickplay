@@ -21,6 +21,23 @@ function( section )
     
     profile_apps[ app.id ] = nil
     
+    do
+        local to_ignore = {}
+        
+        for id , ai in pairs( profile_apps ) do
+            if type( ai.attributes ) == "table" then
+                if ai.attributes.nolauncher then
+                    table.insert( to_ignore , id )
+                end
+            end
+        end
+        
+        for i = 1 , # to_ignore do
+            print( "IGNORING" , to_ignore[ i ] )
+            profile_apps[ to_ignore[ i ] ] = nil
+        end
+    end
+    
     -- The list of focusable items in the dropdown        
         
     local section_items = {}
