@@ -5383,6 +5383,23 @@ function ui_element.tabBar(t)
     --default parameters
     local p = {
         font  = "DejaVu Sans 26px",
+        
+        
+        button_text_font = nil,
+    	button_text_color = nil,
+    	button_text_focus_color = nil,
+        
+    	skin = "default", 
+    	ui_width = 150,
+    	ui_height = 60, 
+        
+    	focus_color = {27,145,27,255}, 	  --"1b911b", 
+    	focus_fill_color = {27,145,27,255}, --"1b911b", 
+    	focus_text_color = {255,255,255,255}, --"1b911b", 
+    	button_border_color = {255,255,255,255}, --"FFFFFF"
+    	button_border_width = 1,
+    	button_border_corner_radius = 12,
+        
         tab_labels = {
             "Item 1",
             "Item 2",
@@ -5394,9 +5411,9 @@ function ui_element.tabBar(t)
         label_padding = 10,
         tab_position = "TOP",
         
-        display_width  = 400,
+        display_width  = 600,
         display_height = 500,
-        --space_between_tabs = 10,
+        tab_spacing = 10,
         --slant_width  = 20,
         border_width =  2,
         border_color = {255,255,255,255},
@@ -5638,20 +5655,31 @@ function ui_element.tabBar(t)
                 buttons[i] = ui_element.button()
             end
             
+            buttons[i].position = {0,0}
+            buttons[i].skin=p.skin
+            buttons[i].ui_width=p.ui_width
+            buttons[i].ui_height=p.ui_height
+            
+            buttons[i].focus_color=p.focus_color
+            buttons[i].border_width=p.button_border_width
+            buttons[i].border_corner_radius=p.button_border_corner_radius
+            
+            
             buttons[i].label      = p.tab_labels[i]
             buttons[i].text_font  = p.font
             buttons[i].text_color = p.label_color
             buttons[i].fill_color = p.unsel_color
             buttons[i].focus_fill_color = p.fill_color
+            buttons[i].focus_text_color = p.focus_text_color
             
             buttons[i].on_focus_out()
             
             if p.tab_position == "TOP" then
-                buttons[i].x = buttons[i].w*(i-1)
+                buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
             else
                 p.tabs[i].x  = buttons[i].w
-                buttons[i].y = buttons[i].h*(i-1)
+                buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
             end
             umbrella:add(p.tabs[i],buttons[i])
             
