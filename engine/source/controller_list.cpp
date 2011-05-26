@@ -417,9 +417,6 @@ void Controller::load_external_map()
 
     String file_name = get_key_map_file_name();
 
-
-    tplog( "LOADING CONTROLLER MAP FROM '%s'" , file_name.c_str() );
-
     std::ifstream stream;
 
     stream.open( file_name.c_str() , std::ios_base::in );
