@@ -2094,6 +2094,7 @@ void TPContext::load_external_configuration()
         TP_TOAST_JSON_PATH,
         TP_FIRST_APP_EXITS,
         TP_HTTP_PORT,
+        TP_RESOURCES_PATH,
 
         NULL
     };
@@ -2291,6 +2292,16 @@ void TPContext::validate_configuration()
     if ( !get( TP_SCREEN_HEIGHT ) )
     {
         set( TP_SCREEN_HEIGHT, TP_SCREEN_HEIGHT_DEFAULT );
+    }
+
+    const char * resources_path = get( TP_RESOURCES_PATH );
+
+    if ( ! resources_path )
+    {
+        gchar * s = g_build_filename( g_get_current_dir(), "resources", NULL );
+        set( TP_RESOURCES_PATH , s );
+        g_warning( "DEFAULT:%s=%s", TP_RESOURCES_PATH, s );
+        g_free( s );
     }
 
     // Allowed secure objects
