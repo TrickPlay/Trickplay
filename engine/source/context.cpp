@@ -1464,7 +1464,7 @@ String TPContext::make_fake_app()
 
             if ( ! g_file_test( app , G_FILE_TEST_EXISTS ) )
             {
-                g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1}", -1, NULL );
+                g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1,attributes={'nolauncher'}}", -1, NULL );
             }
 
             gchar * main = g_build_filename( app_path, "main.lua", NULL );

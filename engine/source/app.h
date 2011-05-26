@@ -87,6 +87,7 @@ public:
         String      description;
         String      author;
         String      copyright;
+        StringSet   attributes;
 
         Action::Map actions;
     };
