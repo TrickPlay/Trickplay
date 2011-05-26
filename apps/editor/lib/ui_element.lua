@@ -5394,7 +5394,7 @@ function ui_element.tabBar(t)
         label_padding = 10,
         tab_position = "TOP",
         
-        display_width  = 400,
+        display_width  = 600,
         display_height = 500,
         --space_between_tabs = 10,
         --slant_width  = 20,
@@ -5614,7 +5614,7 @@ function ui_element.tabBar(t)
     
     create = function()
         
-        local labels, txt_h, txt_w = {},0,0
+        local labels, txt_h, txt_w 
         
 		current_index = 1
 		
@@ -5643,6 +5643,7 @@ function ui_element.tabBar(t)
             buttons[i].text_color = p.label_color
             buttons[i].fill_color = p.unsel_color
             buttons[i].focus_fill_color = p.fill_color
+            buttons[i].position = {0,0}
             
             buttons[i].on_focus_out()
             
