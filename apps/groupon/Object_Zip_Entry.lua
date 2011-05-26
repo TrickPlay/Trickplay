@@ -1,5 +1,5 @@
 --object
-local zip_entry = Group{opacity=0, x = 185, y =  - 42}
+local zip_entry = Group{opacity=0, x = 185, y =  - 52}
 
 local state = ENUM({"HIDDEN","ANIMATING_IN","ACTIVE","SENDING","ANIMATING_OUT"})
 

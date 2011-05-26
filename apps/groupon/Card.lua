@@ -247,7 +247,7 @@ local make_card = function(input)
 		
 		x=48,
 		
-		y=bg_y+24,
+		y=bg_y+14,
 		
 	}
 	
@@ -287,7 +287,7 @@ local make_card = function(input)
 		name = "CHECK",
 		source = assets.check_red,
 		x = 40,
-		y = bg_y+16,
+		y = bg_y+6,
 		opacity = 0,
 	}
 	
@@ -295,7 +295,7 @@ local make_card = function(input)
 		src=input.picture_url,
 		async = true,
 		x = 301,
-		y = bg_y+47,
+		y = bg_y+37,
 		on_loaded = function(self,failed)
 			if failed then
 				print("THE IMAGE ",self.src," FAILED TO LOAD")
@@ -309,7 +309,7 @@ local make_card = function(input)
 		font=font.." 16px",
 		color = black_text,
 		x = 73,
-		y = bg_y+126,
+		y = bg_y+116,
 	}
 	value.x=value.x+value.w/2
 	value.anchor_point = {value.w/2,0}
@@ -369,7 +369,7 @@ local make_card = function(input)
 		font=font.." 16px",
 		color = black_text,
 		x = 117,
-		y = bg_y+190,
+		y = bg_y+170,
 	}
 	--tltb.x=tltb.x+tltb.w/2
 	--tltb.anchor_point = {tltb.w/2,0}
@@ -394,7 +394,7 @@ local make_card = function(input)
 		font=font_b.." 18px",
 		color = black_text,
 		x = 122,
-		y = bg_y+262,
+		y = bg_y+252,
 	}
 	bought.x=bought.x+bought.w/2
 	bought.anchor_point = {bought.w/2,0}
@@ -415,7 +415,7 @@ local make_card = function(input)
 		x = 303,
 		w = 582 - 303-15,
 		ellipsize = "END",
-		y = bg_y+assets.bg.h-64,
+		y = bg_y+assets.bg.h-74,
 	}
 	
 	local change_loc = Text{
@@ -424,11 +424,11 @@ local make_card = function(input)
 		font=font.." 18px",
 		color = "515b4c",
 		x = 739,
-		y = bg_y+assets.bg.h-64,
+		y = bg_y+assets.bg.h-74,
 	}
 	change_loc.anchor_point = {change_loc.w,0}
 	
-	local red_dot = Clone{source=assets.red_dot,x=582,y=bg_y+325}
+	local red_dot = Clone{source=assets.red_dot,x=582,y=bg_y+315}
 	
 	card.fine_print = decode(input.fine_print)
 	card.highlights = decode(gen_highlight(input.highlights))
