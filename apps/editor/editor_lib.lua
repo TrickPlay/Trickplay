@@ -223,13 +223,12 @@ function editor_ui.button(table)
 end
 
 function editor_ui.scrollPane(t)
-
     --default parameters
     local p = {
         visible_w    =  285,
         visible_h    =  330,
         content   	 = Group{},
-        virtual_h 	 = 1000,
+        virtual_h 	 = 242,--1000,
         virtual_w 	 = 285,
         arrow_color  = {255,255,255,255},
         arrows_visible = true,
@@ -248,6 +247,8 @@ function editor_ui.scrollPane(t)
         box_width = 0,
         skin="default",
     }
+
+	
     --overwrite defaults
     if t ~= nil then
         for k, v in pairs (t) do
@@ -782,6 +783,14 @@ function editor_ui.scrollPane(t)
        return p[k]
     end
     setmetatable(scroll_group.extra, mt)
+
+--[[
+	if scroll.virtual_h <= scroll.visible_h then
+            scroll_group:find_child("vert_s_bar")
+            scroll_group:find_child("dn")
+	end 
+]]
+
 
     return scroll_group
 end

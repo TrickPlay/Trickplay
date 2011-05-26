@@ -80,7 +80,12 @@ function ui_element.populate_to (grp, tbl)
 		end 
 		there()
 	end 
-	
+	if grp.extra then 	
+		if grp.extra.video then 
+			tbl[grp.extra.video.name] = grp.extra.video
+		end
+	end
+
 return tbl
 
 end 
@@ -1306,6 +1311,7 @@ function ui_element.button(table)
 		button_image = nil,
 		focus_image  = nil,
 		text_has_shadow = true,
+		single_button = false,
     }
 
  --overwrite defaults
@@ -1432,6 +1438,36 @@ function ui_element.button(table)
 				end 
 				return true
 	     	end 
+
+			function b_group:on_button_up(x,y,b,n)
+				if input_mode ~= S_MENU_M then 
+				if b_group.single_button == true then 
+	     			button.opacity = 255
+            		focus.opacity = 0
+	     			focus_ring.opacity = 0
+				end 
+				end
+				return true
+	     	end 
+
+			--[[
+			function b_group:on_enter()
+				if input_mode ~= S_MENU_M then 
+		    	if current_focus ~= b_group then 
+					if current_focus then 
+		     			current_focus.on_focus_out()
+					end
+					b_group.extra.on_focus_in()
+		    	else 
+		     		current_focus.on_focus_in()
+		    	end 
+				end
+				return true
+            end
+			function b_group:on_leave()
+				b_group.extra.on_focus_out()
+			end
+			]]
 		end 
 
 		if p.skin == "editor"  then 
@@ -1624,13 +1660,13 @@ function ui_element.textInput(table)
 	    end 
 
 		function text:on_key_down(key)
-				if key == keys.Return then 
-					t_group:grab_key_focus()
-					t_group:on_key_down(key)
-				elseif key == keys.Tab then 
-					t_group:grab_key_focus()
-					t_group:on_key_down(key)
-				end 
+			if key == keys.Return then 
+				t_group:grab_key_focus()
+				t_group:on_key_down(key)
+			elseif key == keys.Tab then 
+				t_group:grab_key_focus()
+				t_group:on_key_down(key)
+			end 
 		end 
 
     	if (p.skin == "custom") then 
@@ -3275,14 +3311,14 @@ Function: Layout Manager
 Creates a 2D grid of items, that animate in with a flipping animation
 
 Arguments:
-    num_rows    - number of rows
-    num_cols    - number of columns
+    rows    - number of rows
+    columns    - number of columns
     item_w      - width of an item
     item_h      - height of an item
     grid_gap    - the number of pixels in between the grid items
     duration_per_tile - how long a particular tile flips for
     cascade_delay     - how long a tile waits to start flipping after its neighbor began flipping
-    tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'num_cols' elements in a 2 dimensional table 
+    tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'columns' elements in a 2 dimensional table 
 
 Return:
     Group - Group containing the grid
@@ -3453,8 +3489,8 @@ function ui_element.layoutManager(t)
 					duration =p.cell_timing_offset*(p.rows+p.columns-2)+ p.cell_timing
 				}
 				function tl:on_started()
-					for r = 1, p.num_rows  do
-						for c = 1, p.num_cols do
+					for r = 1, p.rows  do
+						for c = 1, p.columns do
 							p.tiles[r][c].y_rotation={90,0,0}
 							p.tiles[r][c].opacity = 0
 						end
@@ -3463,8 +3499,8 @@ function ui_element.layoutManager(t)
 				function tl:on_new_frame(msecs,prog)
 					msecs = tl.elapsed
 					local item
-					for r = 1, p.num_rows  do
-						for c = 1, p.num_cols do
+					for r = 1, p.rows  do
+						for c = 1, p.columns do
 							item = p.tiles[r][c] 
 							if msecs > item.delay and msecs < (item.delay+p.cell_timing) then
 								prog = (msecs-item.delay) / p.cell_timing
