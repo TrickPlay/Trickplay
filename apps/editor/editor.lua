@@ -422,10 +422,9 @@ function editor.v_guideline()
 
      local v_gl = Rectangle {
 		name="v_guideline"..tostring(v_guideline),
-		border_color= DEFAULT_COLOR, --{255,255,255,255},
-		border_color= DEFAULT_COLOR, -- {255,255,255,255},
-		color={100,255,25,255},
-		size = {4, screen.h},
+		border_color= DEFAULT_COLOR, 
+		color={255,25,25,255},
+		size = {2, screen.h},
 		anchor_point = {0,0},
 		x_rotation={0,0,0},
 		y_rotation={0,0,0},
@@ -445,10 +444,9 @@ function editor.h_guideline()
 
      local h_gl = Rectangle {
 		name="h_guideline"..tostring(h_guideline),
-		border_color= DEFAULT_COLOR, --{255,255,255,255},
-		border_color= DEFAULT_COLOR, --{255,255,255,255},
-		color={100,255,25,255},
-		size = {screen.w, 4},
+		border_color= DEFAULT_COLOR, 
+		color={255,25,25,255},
+		size = {screen.w, 2},
 		anchor_point = {0,0},
 		x_rotation={0,0,0},
 		y_rotation={0,0,0},
@@ -461,7 +459,6 @@ function editor.h_guideline()
      screen:add(h_gl)
      screen:grab_key_focus()
 end
-
 
 
 function editor.container_selected(obj, x, y)
@@ -548,7 +545,7 @@ function editor.selected(obj, call_by_inspector)
    	obj_border = Rectangle{}
    	obj_border.name = obj.name.."border"
    	obj_border.color = {0,0,0,0}
-   	obj_border.border_color = {0,255,0,255}
+   	obj_border.border_color = {255,0,0,255}
    	obj_border.border_width = 2
    	local group_pos
    	if(obj.extra.is_in_group == true)then 
@@ -1448,6 +1445,265 @@ function editor.the_open()
 	end
 end 
 
+--[[
+function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
+	local save_items 
+
+	if not scroll_y_pos then 
+	     save_items = true 
+	else 
+	     save_items = false 
+	end 
+
+	local WIDTH = 450 -- width for inspector's contents
+
+	local INSPECTOR_OFFSET = 30 
+    local TOP_PADDING = 12
+    local BOTTOM_PADDING = 12
+	local xbox_xpos = 460
+
+	if(current_inspector ~= nil) then 
+		return 
+    end 
+ 	
+	for i, c in pairs(g.children) do
+	     editor.n_selected(c)
+	end
+	
+	local inspector_items = {}
+	local inspector_bg
+
+	-- make inspector background image 
+	if v.extra then 
+	   if is_this_widget(v) == true  then
+	   		inspector_bg = factory.make_popup_bg(v.extra.type, 0)
+	   else -- rect, img, text 
+	     	inspector_bg = factory.make_popup_bg(v.type, 0)
+	   end 
+	else -- video  
+	   xbox_xpos = 465
+	   inspector_bg = factory.make_popup_bg(v.type, 0)
+	end 
+
+	local inspector_xbox = factory.make_xbox()
+
+	-- inspector group 
+	local inspector = Group {
+	     name = "inspector",
+	     position ={0, 0},
+	     anchor_point = {0,0},
+         children =
+         {
+         	inspector_bg, 
+	       	inspector_xbox:set{position = {xbox_xpos, 40}}
+         }
+	}
+
+	local function inspector_position() 
+	     local x_space, y_space
+	     if(v.type == "Video") then return end 
+
+	     if (v.x > screen.w - v.x - v.w) then 
+	        x_space = v.x 
+        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
+				inspector.x = x_space - inspector.w - INSPECTOR_OFFSET
+		  	else 
+				inspector.x = (v.x + v.w - inspector.w)/2
+        	end 
+	     else 
+		  	x_space = screen.w - v.x - v.w
+        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
+				inspector.x = v.x + v.w + INSPECTOR_OFFSET
+		  	else 
+				inspector.x = (v.x + v.w - inspector.w)/2
+        	end 
+	    end  
+
+	    if (v.y > screen.h - v.y - v.h) then 
+			y_space = v.y 
+        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
+				inspector.y = v.y - inspector.h - INSPECTOR_OFFSET
+				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+			    	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
+				end	
+			else 
+            	inspector.y = (v.y + v.h - inspector.h) /2
+				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+					inspector.y = screen:find_child("menu_bar").h + INSPECTOR_OFFSET	
+				end	
+        	end 
+	    else 
+			y_space = screen.h - v.y - v.h
+        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
+				inspector.y = v.y + v.h + INSPECTOR_OFFSET
+			else 
+				inspector.y = (v.y + v.h - inspector.h)/2
+				if (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h) then 
+					inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
+				elseif (inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+			     	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
+				end
+        	end 
+	    end 
+	end 
+
+	-- set the inspector location 
+	if(v.type ~= "Video") then
+	   if(x_pos ~= nil and y_pos ~= nil) then 
+	     inspector.x = x_pos	
+	     inspector.y = y_pos	
+	   else
+	     inspector_position() 
+	   end 
+	else 
+	     inspector.x = screen.w/8
+	     inspector.y = screen.h/8
+	end 
+
+	-- make the inspector contents 
+	local attr_t = make_attr_t(v)
+	local attr_n, attr_v, attr_s
+    local items_height = 0
+    local prev_item_h = 0
+	local prev_y = 0 
+	local space = WIDTH
+	local used = 0
+
+	local item_group = Group{name = "item_group"}
+	local H_SPACE = 5 --30
+	local X_INDENT = 15
+	local TOP_PADDING = 30
+	
+	for i=1, #attr_t do 
+        if (attr_t[i] == nil) then break end 
+
+	    attr_n = attr_t[i][1] 
+	    attr_v = attr_t[i][2] 
+	    attr_s = attr_t[i][3] 
+        attr_v = tostring(attr_v)
+
+	    if(attr_s == nil) then attr_s = "" end 
+	     
+	    local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items) 
+	    if(item.w <= space) then 
+		 	if (item.h > prev_item_h) then 
+             	items_height = items_height + (item.h - prev_item_h) 
+		     	prev_item_h = item.h
+	     	end 
+         	item.x = used + H_SPACE 
+		 	item.y = prev_y
+		 	space = space - item.w
+	    else 
+		 	if (attr_n == "ui_width" or attr_n == "w") then 
+				items_height = items_height - 12 -- imsi !! 
+ 		 	end 
+		 	item.y = items_height 
+         	item.x = X_INDENT 
+		 	prev_y = item.y 
+		 	items_height = items_height + item.h 
+		 	space = WIDTH - item.w
+        end 
+	    used = item.x + item.w 
+
+	    if (xbox_xpos == 465) then  
+			if (attr_n == "title") then 
+		    	item.y = item.y + TOP_PADDING 
+		    	prev_y = item.y 
+		    	items_height = items_height + TOP_PADDING *3/2
+	            inspector:add(item)
+			elseif(attr_n == "button") then 
+	            inspector:add(item)
+	    	else 
+	            item_group:add(item)
+	    	end 
+	    else 
+	        if (attr_n == "title") then 
+		    	item.y = item.y + TOP_PADDING 
+	            inspector:add(item)
+	    	elseif(attr_n == "button") then 
+		    	if(attr_v == "view code") then 
+		        	item.y = 570
+		    	else 
+		        	item.y = 620
+		        	space = space + 100
+	            end 
+	            inspector:add(item)
+	        else 
+		    	item.y = item.y - TOP_PADDING
+	            item_group:add(item)
+	        end 
+	    end
+        end 
+
+	-- inspector scroll function 
+	if v.extra then 
+			if v.type == "Rectangle" or v.type == "Text" or v.type == "Clone" or v.type == "Image" or v.type == "Group" and v.extra.type == nil then 
+	       		si = ui_element.scrollPane{visible_w = item_group.w -5 , virtual_w = item_group.w - 5, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
+			else 
+	       		si = ui_element.scrollPane{visible_w = item_group.w + 5, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
+			end 
+
+	       si.content = item_group
+	       si.position = {0,82,0}
+	       si.name ="si"
+	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
+	       inspector:add(si)
+	else -- video  
+	   inspector:add(item_group) 
+	end 
+	screen:add(inspector)
+
+	if scroll_y_pos then 
+	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+	end 
+
+	if v.extra then 
+		if v.extra.type == "MenuButton" then 
+        	v.spin_in()
+		end 
+	end 
+
+	input_mode = S_POPUP
+	inspector:find_child("name").extra.on_focus_in()
+	
+	current_inspector = inspector
+    inspector.reactive = true
+	inspector.extra.lock = false
+	create_on_button_down_f(inspector)
+    inspector_xbox.reactive = true
+
+	function inspector_xbox:on_button_down(x,y,button,num_clicks)
+		editor.n_selected(v, true)
+		screen:remove(inspector)
+		inspector:clear() 
+		current_inspector = nil
+			
+       	for i, c in pairs(g.children) do
+		    if(c.type == "Text") then 
+				c.reactive = true
+		    end 
+        end
+
+		for i, c in pairs(g.children) do
+	     		editor.n_selected(c)
+		end
+
+        screen.grab_key_focus(screen) 
+	    input_mode = S_SELECT
+		if v.extra then 
+			if v.extra.type == "MenuButton" then 
+            	v.spin_out()
+	    	end 
+	    end 
+		return true
+	end 
+
+	if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+	end
+end
+]]
+
 function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local save_items 
 
@@ -1985,14 +2241,16 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 					end 
 				end --for
 
-				local q,w 
-				q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
-				local main_first = string.sub(main, 1, q-1)
-				local main_last = string.sub(main, q, -1)
-				if added_stub_code ~= "" then 
-					main = ""
-					main = main_first..added_stub_code..main_last
-					editor_lb:writefile("main.lua",main, true)
+				local q,w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+				local main_first, main_last
+				if q then 
+					main_first = string.sub(main, 1, q-1)
+					main_last = string.sub(main, q, -1)
+					if added_stub_code ~= "" then 
+						main = ""
+						main = main_first..added_stub_code..main_last
+						editor_lb:writefile("main.lua",main, true)
+					end 
 				end 
 	   
      	else 
@@ -2748,6 +3006,8 @@ function editor.clone()
 end
 	
 function editor.duplicate()
+	local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+
 	local next_position 
     if(table.getn(selected_objs) == 0 )then 
 		print("there are no selected objects") 
@@ -2787,18 +3047,91 @@ function editor.duplicate()
                         			while(is_available(string.lower(j.type)..tostring(item_num))== false) do
                         				item_num = item_num + 1
                         			end 
-                        			ui.dup_c = copy_obj(j) 
-                        			ui.dup_c.name=string.lower(j.type)..tostring(item_num)
-                        			ui.dup:add(ui.dup_c)
-                        			ui.dup_c.extra.lock = false
-                        			create_on_button_down_f(ui.dup_c)
-                        			item_num = item_num + 1
+									if is_this_widget(j) == false then 
+                        				ui.dup_c = copy_obj(j) 
+                        				ui.dup_c.name=string.lower(j.type)..tostring(item_num)
+                        				ui.dup:add(ui.dup_c)
+                        				ui.dup_c.extra.lock = false
+                        				create_on_button_down_f(ui.dup_c)
+                        				item_num = item_num + 1
+									else 
+										 for a,b in pairs(w_attr_list) do 
+                        				 	if j[b] ~= nil then 
+                            					if b ~= "name" and b ~= "position" then  
+                                 					if b == "content" then  
+														print("1 : content")
+														local temp_g = copy_obj(j[b])
+														for m,n in pairs(j.content.children) do 
+			     	   		     								if n.name then 
+																	while(is_available(string.lower(n.type)..tostring(item_num))== false) do
+		         														item_num = item_num + 1
+	             													end 
+						        									temp_g_c = copy_obj(n) 
+																	temp_g_c.name=string.lower(n.type)..tostring(item_num)
+																	temp_g_c.extra.is_in_group = true
+																	temp_g_c.reactive = true
+						
+																	if screen:find_child(temp_g_c.name.."border") then 
+			             												screen:find_child(temp_g_c.name.."border").position = temp_g_c.position
+						        									end
+																	if screen:find_child(temp_g_c.name.."a_m") then 
+			             												screen:find_child(temp_g_c.name.."a_m").position = temp_g_c.position 
+			        												end 
+
+        	     	        										temp_g:add(temp_g_c)
+		     														temp_g_c.extra.lock = false
+		     														create_on_button_down_f(temp_g_c)
+		     														item_num = item_num + 1
+			     	   	   	     								end 
+			     	   	   								end 
+														ui.dup_c[b] = temp_g
+                                    				elseif b == "tiles" then 
+														print("2 : tiles")
+						   								for k,l in pairs (j[b]) do 
+															if type(l) == "table" then 
+							     								for o,p in pairs(l) do 
+								  									while(is_available(string.lower(p.type)..tostring(item_num))== false) do
+		         														item_num = item_num + 1
+	             						  							end 
+								  									t_obj = copy_obj(p)
+								  									t_obj.name = string.lower(p.type)..tostring(item_num)
+								  									t_obj.extra.is_in_group = true
+								  									t_obj.reactive = true
+				     			          							ui.dup_c:replace(k,o,t_obj) 
+		     						  								t_obj.extra.lock = false
+		     						  								create_on_button_down_f(t_obj)
+							     								end  
+															end 
+						   								end
+                                    				elseif type(j[b]) == "table" then  
+														print("3 : table", b)
+														dumptable(j[b])
+						   								local temp_t = {}
+						   								for k,l in pairs (j[b]) do 
+															temp_t[k] = l
+															--ui.dup[b][k] = l
+						   								end
+					           							ui.dup_c[b] = temp_t
+						   								if b == "items" then 
+					           								ui.dup_c[b] = temp_t
+						   								end 
+                                   					elseif ui.dup_c[b] ~= j[b]  then  
+														print("-->", b, ":", j[b])
+					           							ui.dup_c[b] = j[b] 
+                                   					end 
+                                 				end 
+                             				end 
+                        					ui.dup:add(ui.dup_c)
+                        					ui.dup_c.extra.lock = false
+                        					create_on_button_down_f(ui.dup_c)
+                        					item_num = item_num + 1
+                          					end --for
+										end 
+                        			end 
                         		end 
                         	end 
-                        end 
-                   else 
-                   		local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
-
+                   	else --is_this_widget == true
+                   	
                        	ui.dup = widget_f_map[v.extra.type]() 
 
                         while(is_available(ui.dup.name..tostring(item_num))== false) do
@@ -2818,6 +3151,7 @@ function editor.duplicate()
                         	if v[j] ~= nil then 
                             	if j ~= "name" and j ~= "position" then  
                                  	if j == "content" then  
+												print("1 : content")
 										local temp_g = copy_obj(v[j])
 										for m,n in pairs(v.content.children) do 
 			     	   		     			if n.name then 
@@ -2844,6 +3178,7 @@ function editor.duplicate()
 			     	   	   				end 
 										ui.dup[j] = temp_g
                                     elseif j == "tiles" then 
+										print("2 : tiles")
 						   				for k,l in pairs (v[j]) do 
 											if type(l) == "table" then 
 							     				for o,p in pairs(l) do 
@@ -2861,18 +3196,20 @@ function editor.duplicate()
 											end 
 						   				end
                                     elseif type(v[j]) == "table" then  
+										print("3 : table", j)
+										dumptable(v[j])
 						   				local temp_t = {}
 						   				for k,l in pairs (v[j]) do 
 											temp_t[k] = l
-											ui.dup[j][k] = l
+											--ui.dup[j][k] = l
 						   				end
-						   				
+					           			ui.dup[j] = temp_t
 						   				if j == "items" then 
 					           					ui.dup[j] = temp_t
 						   				end 
                                    elseif ui.dup[j] ~= v[j]  then  
+										print("-->", j, ":", v[j])
 					           			ui.dup[j] = v[j] 
-					           			--print(j, v[j], ui.dup[j])
                                    end 
                                  end 
                              end 

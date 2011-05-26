@@ -410,19 +410,19 @@ function new_project()
 	local message = Text {text = "Project Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "Project Name:"}:set(MSSTYLE)
 
+	editor_use = true
 	-- Text Input Field 	
 	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
 		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
 
-	--editor_use = true
 	-- Buttons 
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
  		  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = text_input}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     	  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true, focus_object = text_input} 
-	--editor_use = false
+	editor_use = false
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() print("CANCEL") xbox:on_button_down() end 
@@ -767,8 +767,8 @@ function open_project(t, msg)
 	if scroll.virtual_h <= scroll.visible_h then 
 			scroll.visible_w = 300
 	end 
-	scroll.extra.focus = {[keys.Tab] = "button_cancel"}
 
+	scroll.extra.focus = {[keys.Tab] = "button_cancel"}
 	msgw.extra.lock = false
  	screen:add(msgw)
 	create_on_button_down_f(msgw)	
@@ -2132,9 +2132,7 @@ function inputMsgWindow_savefile(input_text, cfn)
 
 	   local a, b = string.find(input_text,"screens") 
 	   if a then 
-	    	print("KKK should no screens directory :::" , input_text)
 			input_text = string.sub(input_text, 9, -1)
-	    	print("KKK not it is ok ??  :::" , input_text)
 	   end 
 
 	   local fileUpper= string.upper(string.sub(input_text, 1, -5))
