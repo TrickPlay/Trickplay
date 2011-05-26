@@ -27,6 +27,7 @@
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
 #define APP_FIELD_ACTIONS       "actions"
+#define APP_FIELD_ATTRIBUTES    "attributes"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -334,6 +335,23 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
             md.copyright = lua_tostring( L, -1 );
         }
         lua_pop( L, 1 );
+
+        // Look for attributes
+
+        lua_getfield( L , -1 , APP_FIELD_ATTRIBUTES );
+        if ( lua_istable( L , -1 ) )
+        {
+            lua_pushnil( L );
+            while( lua_next( L , -2 ) )
+            {
+                if ( lua_type( L , -1 ) == LUA_TSTRING )
+                {
+                    md.attributes.insert( lua_tostring( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+            }
+        }
+        lua_pop( L , 1 );
 
         // Look for actions
 
