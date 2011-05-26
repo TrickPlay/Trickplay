@@ -4,6 +4,7 @@ app=
     release     = "4",
     version     = "1.0",
     name        = "Visual Editor",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    attributes  = { "nolauncher" }
 }
 
