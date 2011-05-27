@@ -48,6 +48,7 @@ end
 
 
 local delta = {}
+local src = assets.hourglass[11]
 local update_time = function(self,curr_time)
 	--curr=os.date('*t')
 	
@@ -56,32 +57,63 @@ local update_time = function(self,curr_time)
 	delta.year  = self.exp.year  - curr_time.year
 	delta.month = self.exp.month - curr_time.month
 	delta.day   = self.exp.day   - curr_time.day
-	delta.hour  = self.exp.hour  - curr_time.hour
+	delta.hour  = self.exp.hour  - curr_time.hour --+ self.tz
 	delta.min   = self.exp.min   - curr_time.min
 	delta.sec   = self.exp.sec   - curr_time.sec
 	
 	if delta.sec < 0 then
 		delta.sec = delta.sec + 60
 		delta.min = delta.min - 1
+		
 	end
 	if delta.min < 0 then
 		delta.min  = delta.min + 60
 		delta.hour = delta.hour - 1
+		if delta.min < 1 then
+			src = assets.hourglass[11]
+		elseif delta.min < 31 then
+			src = assets.hourglass[10]
+		else
+			src = assets.hourglass[9]
+		end
 	end
 	if delta.hour < 0 then
 		delta.hour = delta.hour + 24
 		delta.day  = delta.day - 1
+		if delta.hour < 1 then
+			src = assets.hourglass[9]
+		elseif delta.hour < 7 then
+			src = assets.hourglass[8]
+		elseif delta.hour < 13 then
+			src = assets.hourglass[7]
+		elseif delta.hour < 20 then
+			src = assets.hourglass[6]
+		else
+			src = assets.hourglass[5]
+		end
 	end
 	if delta.day < 0 then
 		delta.day   = delta.day + 30
 		delta.month = delta.month - 1
+		if delta.day < 1 then
+			src = assets.hourglass[5]
+		elseif delta.day < 2 then
+			src = assets.hourglass[4]
+		elseif delta.day < 3 then
+			src = assets.hourglass[3]
+		elseif delta.day < 4 then
+			src = assets.hourglass[2]
+		else
+			src = assets.hourglass[1]
+		end
 	end
 	if delta.month < 0 then
-		delta.month   = delta.month + 12
-		delta.year = delta.year - 1
+		delta.month = delta.month + 12
+		delta.year  = delta.year - 1
 	end
 	if delta.year < 0 then
 		self:find_child("TIME").text="EXPIRED"
+		src = assets.hourglass[12]
 	else
 		
 		local day = (30*delta.month+delta.day)
@@ -96,13 +128,15 @@ local update_time = function(self,curr_time)
 			error("IMPOSSSIBLE!?!?!?!?!?!?!?!")
 		end
 		
-		str = str..string.format("%02d",delta.hour)..
+		str = str..string.format("%d",delta.hour)..
 			":"..string.format("%02d",delta.min)..
 			":"..string.format("%02d",delta.sec)
 		
 		self:find_child("TIME").text = str
 		--self:find_child("TIME").anchor_point = {self:find_child("TIME").w/2,0}
 	end
+	
+	self.hourlglass.source = src
 end
 
 local make_card = function(input)
@@ -263,6 +297,20 @@ local make_card = function(input)
 		
 	}
 	
+	local na = Clone{
+		
+		name = "N/A",
+		
+		source=assets.n_a,
+		
+		opacity = 0,
+		
+		x=tag.x+15,
+		
+		y=tag.y+15,
+		
+	}
+	
 	local tag_text = Text{
 		name="TAG_TEXT",
 		text="More Info",
@@ -361,15 +409,17 @@ local make_card = function(input)
 	}
 	savings_amt.anchor_point = {savings_amt.w/2,0}
 	
-	local hourglass = Clone{name = "hourglass",source = assets.hourglass[1],x=117,y = bg_y+190}
+	local hourglass = Clone{name = "hourglass",source = assets.hourglass[1],x=117,y = bg_y+180}
 	hourglass.x = hourglass.x - hourglass.w - 20
+	
+	card.hourlglass = hourglass
 	
 	local tltb = Text{
 		text="Time Left To Buy",
 		font=font.." 16px",
 		color = black_text,
 		x = 117,
-		y = bg_y+170,
+		y = bg_y+180,
 	}
 	--tltb.x=tltb.x+tltb.w/2
 	--tltb.anchor_point = {tltb.w/2,0}
@@ -379,6 +429,8 @@ local make_card = function(input)
 	card.exp.year,card.exp.month,card.exp.day,card.exp.hour,card.exp.min,card.exp.sec =
 		string.match(input.expiration,"(%d*)-(%d*)-(%d*)T(%d*):(%d*):(%d*)")
 	
+	
+	card.tz = input.tz/60/60
 	local tltb_rem = Text{
 		name="TIME",
 		text="Value",
@@ -391,23 +443,34 @@ local make_card = function(input)
 	
 	local bought = Text{
 		text=input.amount_sold.." bought",
-		font=font_b.." 18px",
+		font=font_b.." 20px",
 		color = black_text,
 		x = 122,
-		y = bg_y+252,
+		y = bg_y+247,
 	}
 	bought.x=bought.x+bought.w/2
 	bought.anchor_point = {bought.w/2,0}
-	
+	---[[
+	local str
+	if type(input.remaining) == "userdata" then
+		str = "No Limit"
+	elseif input.remaining <= 0 then
+		str = "SOLD OUT"
+		na.opacity = 255
+		card.throb = empty
+		glow.opacity = 0
+	else
+		str = input.remaining.." remaning"
+	end
 	local lim_quantity = Text{
-		text="Limited quantity available",
-		font=font.." 12px",
+		text=str,
+		font=font.." 20px",
 		color = black_text,
 		x = bought.x,
 		y = bought.y+bought.h,
 	}
 	lim_quantity.anchor_point = {lim_quantity.w/2,0}
-	
+	--]]
 	local division = Text{
 		text=input.division,
 		font=font.." 18px",
@@ -428,7 +491,7 @@ local make_card = function(input)
 	}
 	change_loc.anchor_point = {change_loc.w,0}
 	
-	local red_dot = Clone{source=assets.red_dot,x=582,y=bg_y+315}
+	local red_dot = Clone{source=assets.red_dot,x=572,y=bg_y+315}
 	
 	card.fine_print = decode(input.fine_print)
 	card.highlights = decode(gen_highlight(input.highlights))
@@ -452,6 +515,7 @@ local make_card = function(input)
 		tag,
 		glow,
 		tag_text,
+		na,
 		tag_price,
 		check,
 		value,

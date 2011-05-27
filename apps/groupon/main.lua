@@ -35,6 +35,7 @@ assets = {
 	title_top    = Image{src="assets/title-bar-top.png"},
 	red_dot      = Image{src="assets/dot-red.png"},
 	zip_cells    = Image{src="assets/zip-cells-5-grey.png"},
+	n_a          = Image{src="assets/no-longer-available.png"},
 	hourglass    = {
 		Image{src="assets/hourglass/hourglass000.gif"},
 		Image{src="assets/hourglass/hourglass001.gif"},
