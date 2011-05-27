@@ -27,6 +27,23 @@
 }
 
 #pragma mark -
+#pragma mark Deleter
+
+/**
+ * Deleter function
+ */
+
+- (void)deleteValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"delete_%@", property]);
+        
+        if ([TrickplayGroup instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
+}
+
+#pragma mark -
 #pragma mark Setters
 
 /**
@@ -105,32 +122,12 @@
     return [self do_add:args];
 }
 
-
-/////// not a function from Trickplay, just a helper method
-- (NSMutableDictionary *)createChildJSONFromChild:(TrickplayUIElement *)child {
-    NSMutableDictionary *childDictionary = [NSMutableDictionary dictionaryWithCapacity:2];
-    [childDictionary setObject:child.ID forKey:@"id"];
-    if ([child isKindOfClass:[TrickplayRectangle class]]) {
-        [childDictionary setObject:@"Rectangle" forKey:@"type"];
-    } else if ([child isKindOfClass:[TrickplayImage class]]) {
-        [childDictionary setObject:@"Image" forKey:@"type"];
-    } else if ([child isKindOfClass:[TrickplayText class]]) {
-        [childDictionary setObject:@"Text" forKey:@"type"];
-    } else if ([child isKindOfClass:[TrickplayGroup class]]) {
-        [childDictionary setObject:@"Group" forKey:@"type"];
-    }
-    
-    return childDictionary;
-}
-///////////////////////////
-
-
 - (NSArray *)do_get_children:(NSArray *)args {
     NSMutableArray *children = [NSMutableArray arrayWithCapacity:20];
     for (id child in [self.view subviews]) {
         NSLog(@"this is a child: %@", child);
         if ([child isKindOfClass:[TrickplayUIElement class]]) {
-            [children addObject:[self createChildJSONFromChild:(TrickplayUIElement *)child]];
+            [children addObject:[self createObjectJSONFromObject:(TrickplayUIElement *)child]];
         }
     }
     
@@ -143,7 +140,7 @@
         NSDictionary *JSON_reply = nil;
         for (TrickplayUIElement *child in self.view.subviews) {
             if ([child.name compare:nameQuery] == NSOrderedSame) {
-                return [self createChildJSONFromChild:child];
+                return [self createObjectJSONFromObject:child];
             }
             if ([child isKindOfClass:[TrickplayGroup class]]) {
                 JSON_reply = [((TrickplayGroup *)child) do_find_child:args];

@@ -14,6 +14,43 @@
 @synthesize dataCacheDelegate;
 @synthesize otherDelegate;
 @synthesize resourceKey;
+@synthesize image;
+@synthesize loaded;
+
+- (void)setup {
+    [self setBackgroundColor:[UIColor clearColor]];
+    tileWidth = NO;
+    tileHeight = NO;
+    loaded = NO;
+    self.image = nil;
+}
+
+- (id)init {
+    if ((self = [super init])) {
+        [self setup];
+    }
+    
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    if ((self = [super initWithCoder:aDecoder])) {
+        [self setup];
+    }
+    
+    return self;
+}
+
+- (id)initWithFrame:(CGRect)frame {
+    if ((self = [super initWithFrame:frame])) {
+        [self setup];
+    }
+    
+    return self;
+}
+
+#pragma mark -
+#pragma mark Networking
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key {
     if (connection) {
@@ -34,6 +71,7 @@
         // make a broken link symbol in image
         return;
     }
+    
     //spinny thing
     loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
     loadingIndicator.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
@@ -60,7 +98,7 @@
     if ([[self subviews] count] > 0) {
         [[[self subviews] objectAtIndex:0] removeFromSuperview];
     }
-    UIImage *image = [UIImage imageWithData:data];
+    self.image = [UIImage imageWithData:data];
     /*
     UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageWithData:data]] autorelease];
     // might need to change this to scale to fill
@@ -80,8 +118,8 @@
     imageView.frame = self.bounds;
     [imageView setNeedsLayout];
      //*/
-    self.image = image;
     [self setNeedsLayout];
+    [self setNeedsDisplay];
     
     // send data to the delegate if it exists for cacheing
     if (dataCacheDelegate) {
@@ -95,30 +133,61 @@
     data = nil;
     [loadingIndicator stopAnimating];
     [loadingIndicator removeFromSuperview];
+    
+    loaded = YES;
 }
 
 - (void)connection:(NSURLConnection *)theConnection didFailWithError:(NSError *)error {
     NSLog(@"Image did fail with error: %@", error);
 }
 
+/*
 - (UIImageView *)imageView {
     return self;
+}
+ */
+
+#pragma mark -
+#pragma mark Graphics
+
+- (void)setTileWidth:(BOOL)toTileWidth height:(BOOL)toTileHeight {
+    tileWidth = toTileWidth;
+    tileHeight = toTileHeight;
+    
+    if (tileWidth || tileHeight) {
+        self.layer.needsDisplayOnBoundsChange = YES;
+    } else {
+        self.layer.needsDisplayOnBoundsChange = NO;
+    }
+    
+    [self setNeedsDisplay];
 }
 
 //*
 - (void)drawRect:(CGRect)rect {
-    NSLog(@"\n\n here \n\n");
+    if (!self.image) {
+        return;
+    }
+    
     //Since we are retaining the image, we append with ret_ref.  this reminds us to release at a later date.
-    CGImageRef image_to_tile_ret_ref = CGImageRetain(self.image.CGImage); 
+    CGImageRef image_ref = CGImageRetain(self.image.CGImage); 
     
     CGRect image_rect;
-    image_rect.size = CGSizeMake(50, 50);  //This sets the tile to the native size of the image.  Change this value to adjust the size of an individual "tile."
+    image_rect.size = CGSizeMake(self.image.size.width, self.image.size.height);  //This sets the tile to the native size of the image.  Change this value to adjust the size of an individual "tile."
     
     CGContextRef context = UIGraphicsGetCurrentContext();
     
-    CGContextDrawTiledImage(context, image_rect, image_to_tile_ret_ref);
+    if (tileHeight || tileWidth) {
+        CGContextClearRect(context, rect);
+        CGContextTranslateCTM(context, 0, image.size.height);
+        CGContextScaleCTM(context, 1.0, -1.0);
     
-    CGImageRelease(image_to_tile_ret_ref);
+        CGContextDrawTiledImage(context, image_rect, image_ref);
+    } else {
+        [image drawInRect:rect];
+    }
+    
+    CGImageRelease(image_ref);
 }
 //*/
  
@@ -138,6 +207,8 @@
         [(NSObject *)dataCacheDelegate release];
         dataCacheDelegate = nil;
     }
+    
+    self.image = nil;
     
     [super dealloc];
 }

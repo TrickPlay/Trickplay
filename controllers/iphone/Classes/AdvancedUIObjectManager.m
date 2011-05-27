@@ -242,7 +242,11 @@
 }
 
 - (void)deleteValuesForObject:(NSDictionary *)JSON_object {
-    // TODO: finish this
+    NSDictionary *args = [JSON_object objectForKey:@"properties"];
+    
+    // Set values for class specific properties
+    TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    [object deleteValuesFromArgs:args];    // TODO: finish this
     [self reply:@"[false]"];
 }
 
@@ -272,10 +276,9 @@
     }
     
     id result = nil;
-    if ([rectangles objectForKey:ID]) {
-        result = [[rectangles objectForKey:ID] callMethod:method withArgs:args];
-    } else if ([groups objectForKey:ID]) {
-        result = [[groups objectForKey:ID] callMethod:method withArgs:args];
+    TrickplayUIElement *uiObject = [self findObjectForID:ID];
+    if (uiObject) {
+        result = [uiObject callMethod:method withArgs:args];
     }
     
     if (result) {
