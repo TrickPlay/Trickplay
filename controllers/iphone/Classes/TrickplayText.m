@@ -14,7 +14,7 @@
 - (id)initWithID:(NSString *)textID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:textID objectManager:objectManager])) {
         self.frame = [[UIScreen mainScreen] applicationFrame];
-        self.view = [[[EditableTextView alloc] initWithFrame:CGRectMake(100, 100, 150, 150)] autorelease];
+        self.view = [[[EditableTextView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
         
         view.userInteractionEnabled = YES;
         //((UITextView *)view).delegate = (EditableTextView *)view;
@@ -25,6 +25,8 @@
         //((UITextView *)view).selectedRange = NSMakeRange(((UITextView *)view).text.length - 1, 0);
         
         ((UITextView *)view).delegate = self;
+        
+        self.view.backgroundColor = [UIColor clearColor];
         
         maxLength = 0;
         
@@ -259,6 +261,61 @@
     ((UITextView *)view).textColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
 }
 
+/**
+ * Set the background color of the Text.
+ */
+
+- (void)set_background_color:(NSDictionary *)args {
+    // ** Get the color and alpha values **
+    CGFloat red, green, blue, alpha;
+    if ([[args objectForKey:@"background_color"] isKindOfClass:[NSArray class]]) {
+        NSArray *colorArray = [args objectForKey:@"background_color"];
+        if (!colorArray || [colorArray count] < 3) {
+            return;
+        }
+        
+        red = [(NSNumber *)[colorArray objectAtIndex:0] floatValue]/255.0;
+        green = [(NSNumber *)[colorArray objectAtIndex:1] floatValue]/255.0;
+        blue = [(NSNumber *)[colorArray objectAtIndex:2] floatValue]/255.0;
+        
+        if ([colorArray count] > 3) {
+            alpha = [(NSNumber *)[colorArray objectAtIndex:3] floatValue]/255.0;
+        } else {
+            alpha = CGColorGetAlpha(((UITextView *)view).textColor.CGColor);
+        }
+    } else if ([[args objectForKey:@"background_color"] isKindOfClass:[NSString class]]) {
+        NSString *hexString = [args objectForKey:@"background_color"];
+        if (!hexString || [hexString length] < 6) {
+            return;
+        }
+        
+        unsigned int value;
+        
+        if ([hexString characterAtIndex:0] == '#') {
+            hexString = [hexString substringFromIndex:1];
+        }
+        
+        [[NSScanner scannerWithString:hexString] scanHexInt:&value];
+        if ([hexString length] > 6) {
+            // alpha exists
+            red = ((value & 0xFF000000) >> 24)/255.0;
+            green = ((value & 0x00FF0000) >> 16)/255.0;
+            blue = ((value & 0x0000FF00) >> 8)/255.0;
+            alpha = (value & 0x000000FF)/255.0;
+        } else {
+            // just RGB
+            red = ((value & 0xFF0000) >> 16)/255.0;
+            green = ((value & 0x00FF00) >> 8)/255.0;
+            blue = (value & 0x0000FF)/255.0;
+            alpha = CGColorGetAlpha(((UITextView *)view).textColor.CGColor);
+        }
+    } else {
+        return;
+    }
+    
+    ((UITextView *)view).backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
+}
+
 - (void)set_cursor_position:(NSDictionary *)args {
     NSNumber *position = [args objectForKey:@"cursor_position"];
     if (position && [view isFirstResponder]) {
@@ -286,6 +343,25 @@
         
         NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
         [dictionary setObject:colorArray forKey:@"color"];
+    }
+}
+
+/**
+ * Get background color
+ */
+
+- (void)get_background_color:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"background_color"]) {
+        NSNumber *red, *green, *blue, *alpha;
+        
+        const CGFloat *components = CGColorGetComponents(((UITextView *)view).textColor.CGColor);
+        red = [NSNumber numberWithFloat:components[0] * 255.0];
+        green = [NSNumber numberWithFloat:components[1] * 255.0];
+        blue = [NSNumber numberWithFloat:components[2] * 255.0];
+        alpha = [NSNumber numberWithFloat:CGColorGetAlpha(((UITextView *)view).textColor.CGColor) * 255.0];
+        
+        NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
+        [dictionary setObject:colorArray forKey:@"background_color"];
     }
 }
 
