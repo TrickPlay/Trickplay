@@ -1,6 +1,15 @@
+@import url("http://fonts.googleapis.com/css?family=Inconsolata");
+@import url("http://fonts.googleapis.com/css?family=Josefin+Sans");
+
 body
 {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Josefin Sans',Arial, Helvetica, sans-serif;
+    font-size: 18pt;
+}
+
+.CTopic
+{
+    font-size: 13pt;
 }
 
 p 
@@ -12,7 +21,8 @@ p
 
 .CBody .prettyprint
 {
-    font: "Courier New", Courier, monospace;
+    font-family: Inconsolata, 'Courier New', Courier, monospace;
+    font-size: 10pt;
     border-width: 1px 1px 1px 1em;
     border-style: dashed dashed dashed solid;
     border-color: #CBCBCB;
@@ -28,13 +38,26 @@ p
 
 .CBody pre
 {
-    font: "Courier New", Courier, monospace;
+    font-family: Inconsolata, 'Courier New', Courier, monospace;
+    font-size: 10pt;
     border-width: 1px 1px 1px 1px;
     border-style: dashed dashed dashed dashed;
     border-color: #CBCBCB;
     background: #F8F8F8F8;
     padding: 0.5em 1em 0.5em 1em;
     margin: 1em 5% 0 5%;
+}
+
+.Prototype td
+{
+    font-size: 10pt;
+}
+
+.SProperty .SEntry, .SFunction, .SEvent a
+{
+    font-family: Inconsolata, "Courier New", "Courier", monospace;
+    font-variant: normal;
+    font-size: 10pt;
 }
 
 .CDescriptionList
@@ -48,7 +71,13 @@ p
 
 .CDescriptionList .CDLEntry
 {
+    font-family: Inconsolata, "Courier New", "Courier", monospace;
     width: 15%;
+}
+
+.CDLDescription
+{
+    font-size: 12pt;
 }
 
 .SDescription
@@ -58,7 +87,18 @@ p
 
 .Summary
 {
-   margin-right: 40em;
+   margin-right: 30em;
+   margin-left: 1em;
+}
+
+.STable
+{
+    font-size: 14pt;
+}
+
+.SMain td
+{
+    font-size: 16pt;
 }
 
 .SGroup .SEntry a
@@ -66,22 +106,21 @@ p
     color: #941300;
 }
 
-.SProperty .SEntry,.SFunction,.SEvent a
-{
-    font-variant: normal;
-    font-family: "Courier New", Courier, monospace;
-}
-
-
 #MainTopic .CTitle
 {
     background-color: #941300;
     border-color: #4a0900;
 }
 
+.CGroup .CTitle
+{
+    font-size: 24pt;
+}
+
 .Summary,.CTitle,.CHeading,.IEntry
 {
     font-variant: small-caps;
+    font-size: 18pt;
 }
 
 .SBorder
@@ -96,7 +135,9 @@ p
 
 .STitle
 {
-    font-size: 18px;
+    text-indent: 0;
+    margin-left: 0;
+    font-size: 24pt;
 }
 
 .MGroup
@@ -107,7 +148,18 @@ p
     padding: 0.5em 0 0 0.5em;
 }
 
-.CGroup + * .CHeading + p
+.CConstant + * .CHeading + p, .CGroup + * .CHeading + p
 {
     text-indent: 2em;
+}
+
+.MSubTitle
+{
+    font-style: italic;
+    font-variant: small-caps;
+}
+
+.CTopic
+{
+    margin-bottom: 1.5em;
 }
