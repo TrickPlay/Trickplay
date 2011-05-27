@@ -244,13 +244,15 @@ local function GroupClass()
     return get , set , call , event
 end
 
-class_table =
+local class_table =
 {
     Rectangle = RectangleClass,
     Image = ImageClass,
     Text = TextClass,
     Group     = GroupClass
 }
+
+return class_table
 
 
 --=============================================================================
