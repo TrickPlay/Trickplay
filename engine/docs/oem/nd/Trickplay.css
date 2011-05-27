@@ -1,3 +1,8 @@
+body
+{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 p 
 {
    text-indent: 0;
@@ -5,13 +10,29 @@ p
    margin-top: 1em;
 }
 
-.CBody pre
+.CBody .prettyprint
 {
-    font: 10pt "Courier New", Courier, monospace;
-    border: 1px dashed #CBCBCB;
+    font: "Courier New", Courier, monospace;
+    border-width: 1px 1px 1px 6px;
+    border-style: dashed dashed dashed solid;
+    border-color: #CBCBCB;
     background: #F8F8F8F8;
-    padding: 8px 8px;
-    margin: 1em 0;
+    padding: 18px 8px 18px 18px;
+    margin: 1em 5% 0 5%;
+}
+
+.CDescriptionList
+{
+    width: 90%;
+    background-color: #F8F8F8F8;
+    border: 1px dashed #CBCBCB;
+    padding: 8px 8px 8px 18px;
+    margin: 1em 5% 0 5%;
+}
+
+.CDescriptionList .CDLEntry
+{
+    width: 25%;
 }
 
 .SDescription
@@ -29,4 +50,42 @@ p
    margin-left: 0;
    margin-top: 0.5em;
    margin-bottom: 0.5em;
+}
+
+.SGroup .SEntry a
+{
+    color: #941300;
+}
+
+.SProperty .SEntry,.SFunction,.SEvent a
+{
+    font-variant: normal;
+    font-family: "Courier New", Courier, monospace;
+}
+
+
+#MainTopic .CTitle
+{
+    background-color: #941300;
+    border-color: #4a0900;
+}
+
+.Summary,.CTitle,.CHeading,.IEntry
+{
+    font-variant: small-caps;
+}
+
+.SBorder
+{
+    background-color: #F4F4FF;
+}
+
+.SMarked
+{
+    background-color: #E8E8FF;
+}
+
+.STitle
+{
+    font-size: 18px;
 }
