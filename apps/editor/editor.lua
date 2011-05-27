@@ -545,7 +545,7 @@ function editor.selected(obj, call_by_inspector)
    	obj_border = Rectangle{}
    	obj_border.name = obj.name.."border"
    	obj_border.color = {0,0,0,0}
-   	obj_border.border_color = {255,0,0,255}
+   	obj_border.border_color = {0,255,0,255}
    	obj_border.border_width = 2
    	local group_pos
    	if(obj.extra.is_in_group == true)then 
