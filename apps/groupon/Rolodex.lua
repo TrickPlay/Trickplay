@@ -112,7 +112,7 @@ local t
 
 local function update_times(self)
     
-    t = os.date('*t')
+    t = os.date('!*t')
     
     for i,_ in pairs(App_State.rolodex.visible_cards) do
         
@@ -196,7 +196,7 @@ return function(response_table)
     
     App_State.rolodex.top_card = 1
     
-    --dumptable(response_table.deals)
+    dumptable(response_table.deals)
     App_State.rolodex.cards = {}
     App_State.rolodex.visible_cards = {}
     
@@ -223,6 +223,8 @@ return function(response_table)
             highlights    = d.highlightsHtml,
             id            = d.id,
             deal_url      = d.dealUrl,
+            tz            = d.division.timezoneOffsetInSeconds,
+            remaining     = d.options[1].remainingQuantity,
         }
         
         table.insert( App_State.rolodex.cards, c )

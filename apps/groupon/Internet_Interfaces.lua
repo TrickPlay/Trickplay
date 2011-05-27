@@ -150,7 +150,7 @@ end
 local function cj_link(deal_url)
 	return "http://www.anrdoezrs.net/click-"..
 			cj_publisher_id.."-"..groupon_s_AID..
-			"?url"..urlencode(deal_url)
+			"?url="..urlencode(deal_url)
 end
 
 local tropo_sms = function(callback,deal_url,to)

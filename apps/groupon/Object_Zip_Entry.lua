@@ -1,5 +1,5 @@
 --object
-local zip_entry = Group{opacity=0, x = 185, y =  - 52}
+local zip_entry = Group{opacity=0, x = 168, y =  - 52}
 
 local state = ENUM({"HIDDEN","ANIMATING_IN","ACTIVE","SENDING","ANIMATING_OUT"})
 
@@ -18,7 +18,7 @@ local prompt = Text{
     font="DejaVu Sans Condensed 18px",
     color="#515b4c",
     y = -25,
-	x=17
+	x=37
 }
 --[[
 prompt.anchor_point = {
@@ -164,6 +164,7 @@ end
 local animate_out = function(self,msecs,p)
     self.opacity = 255*(1-p)
     if p == 1 then
+		App_State.rolodex.cards[App_State.rolodex.top_card]:find_child("change location").text = "Change location"
         state:change_state_to("HIDDEN")
     end
 end
