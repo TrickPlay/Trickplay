@@ -25,7 +25,7 @@
     UIPopoverController *popOverController;
     ImageEditorViewController *imageEditor;
     
-    UIImageView *mask;
+    UIView *mask;
     CGFloat targetWidth;
     CGFloat targetHeight;
     BOOL editable;
@@ -44,7 +44,7 @@
 @property (assign) id <CameraViewControllerDelegate> delegate;
 
 
-- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIImageView *)aMask;
+- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIView *)aMask;
 
 - (void)setMask:(UIImageView *)mask;
 

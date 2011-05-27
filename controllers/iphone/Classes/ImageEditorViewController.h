@@ -21,7 +21,7 @@
     UIImage *imageToEdit;
     CGFloat targetWidth;
     CGFloat targetHeight;
-    UIImageView *mask;
+    UIView *mask;
     
     GestureImageView *imageView;
     UIToolbar *toolbar;
@@ -33,7 +33,7 @@
 @property (retain) UIImage *imageToEdit;
 @property (assign) CGFloat targetWidth;
 @property (assign) CGFloat targetHeight;
-@property (retain) UIImageView *mask;
+@property (retain) UIView *mask;
 
 @property (retain) IBOutlet UIToolbar *toolbar;
 @property (retain) IBOutlet UILabel *label;

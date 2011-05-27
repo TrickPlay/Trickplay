@@ -344,7 +344,7 @@
         width = [[args objectAtIndex:3] floatValue],
         height = [[args	objectAtIndex:4] floatValue];
         CGRect frame = CGRectMake(x, y, width, height);
-        UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
+        UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
         [backgroundView addSubview:newImageView];
     }
@@ -420,7 +420,7 @@
         [camera release];
     }
     
-    UIImageView *mask = nil;
+    UIView *mask = nil;
     CGFloat width = 0.0, height = 0.0;
     BOOL editable = NO;
     if ([args count] == 5) {
@@ -567,6 +567,11 @@
     
     [loadingIndicator stopAnimating];
     
+    /*
+    CATransform3D transform = CATransform3DIdentity;
+    transform.m34 = 1.0/-2000;
+    self.view.layer.transform = transform;
+    */
     //[self startService];
 }
 

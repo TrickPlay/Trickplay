@@ -15,7 +15,6 @@
 
 - (id)initWithID:(NSString *)imageID args:(NSDictionary *)args resourceManager:(ResourceManager *)resourceManager objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:imageID objectManager:objectManager])) {
-        loaded = NO;
         self.src = nil;
         id source = [args objectForKey:@"src"];
         if (source && [source isKindOfClass:[NSString class]]) {
@@ -36,7 +35,24 @@
 }
 
 - (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey {
-    loaded = YES;
+    
+}
+
+#pragma mark -
+#pragma mark Deleter
+
+/**
+ * Deleter function
+ */
+
+- (void)deleteValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"delete_%@", property]);
+        
+        if ([TrickplayImage instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
 }
 
 #pragma mark -
@@ -47,24 +63,13 @@
  */
 
 - (void)set_tile:(NSDictionary *)args {
-    if (![[args objectForKey:@"tile"] isKindOfClass:[NSArray class]] || !loaded) {
+    id tile = [args objectForKey:@"tile"];
+    if (![tile isKindOfClass:[NSArray class]]) {
         return;
     }
-    /*
-    NSArray *to_tile = [args objectForKey:@"tile"];
-    
-    CGSize imageViewSize = view.layer.bounds.size;
-    NSLog(@"layer w: %f, h: %f", view.layer.bounds.size.width, view.layer.bounds.size.height);
-    CGImageRef tileImage = ((UIImageView *)view).image.CGImage;
-    NSLog(@"image w: %f, h: %f", ((UIImageView *)view).image.size.width, ((UIImageView *)view).image.size.height);
-    UIGraphicsBeginImageContext(imageViewSize);
-    CGContextRef imageContext = UIGraphicsGetCurrentContext();
-    CGContextDrawTiledImage(imageContext, (CGRect){ CGPointZero, imageViewSize }, tileImage);
-    UIImage *finishedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    ((UIImageView *)view).image = finishedImage;
-    //*/
+    BOOL toTileWidth = [[(NSArray *)tile objectAtIndex:0] boolValue];
+    BOOL toTileHeight = [[(NSArray *)tile objectAtIndex:1] boolValue];
+    [((AsyncImageView *)view) setTileWidth:toTileWidth height:toTileHeight];
 }
 
 /**
@@ -100,7 +105,7 @@
 
 - (void)get_loaded:(NSMutableDictionary *)dictionary {
     if ([dictionary objectForKey:@"loaded"]) {
-        [dictionary setObject:[NSNumber numberWithBool:loaded] forKey:@"loaded"];
+        [dictionary setObject:[NSNumber numberWithBool:((AsyncImageView *)view).loaded] forKey:@"loaded"];
     }
 }
 
@@ -109,7 +114,7 @@
  */
 
 - (void)get_base_size:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"base_size"] && loaded) {
+    if ([dictionary objectForKey:@"base_size"] && ((AsyncImageView *)view).loaded) {
         NSNumber *width = [NSNumber numberWithFloat:((UIImageView *)view).image.size.width];
         NSNumber *height = [NSNumber numberWithFloat:((UIImageView *)view).image.size.height];
         NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
@@ -137,6 +142,12 @@
     return JSON_Dictionary;
 }
 
+#pragma mark -
+#pragma mark New Protocol
+
+- (id)callMethod:(NSString *)method withArgs:(NSArray *)args {
+    return [super callMethod:method withArgs:args];
+}
 
 - (void)dealloc {
     NSLog(@"TrickplayImage dealloc");

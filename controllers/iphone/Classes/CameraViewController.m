@@ -14,7 +14,7 @@
 @synthesize editable;
 @synthesize delegate;
 
-- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIImageView *)aMask {
+- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIView *)aMask {
     if ((self = [super initWithNibName:nil bundle:nil])) {
         self.view = [[[UIView alloc] initWithFrame:aView.frame] autorelease];
         [aView addSubview:self.view];
@@ -290,7 +290,7 @@
 #pragma mark -
 #pragma mark View controls
 
-- (void)setMask:(UIImageView *)aMask {
+- (void)setMask:(UIView *)aMask {
     mask = aMask;
     [self.view addSubview:mask];
 }

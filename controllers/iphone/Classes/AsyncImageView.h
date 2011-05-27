@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <QuartzCore/QuartzCore.h>
 
 
 @protocol AsyncImageViewDelegate
@@ -19,10 +20,16 @@
 //#import "ResourceManager.h"
 @class ResourceManager;
 
-@interface AsyncImageView : UIImageView {
+@interface AsyncImageView : UIView {
     NSURLConnection *connection;
     NSMutableData *data;
+    BOOL loaded;
     id resourceKey;
+    
+    BOOL tileWidth;
+    BOOL tileHeight;
+    
+    UIImage *image;
     
     UIActivityIndicatorView *loadingIndicator;
     
@@ -30,11 +37,14 @@
     id <AsyncImageViewDelegate> otherDelegate;
 }
 
-@property (nonatomic, retain) id resourceKey;
-@property (nonatomic, retain) id <AsyncImageViewDelegate> otherDelegate;
-@property (nonatomic, retain) id <AsyncImageViewDelegate> dataCacheDelegate;
+@property (assign) BOOL loaded;
+@property (retain) UIImage *image;
+@property (retain) id resourceKey;
+@property (retain) id <AsyncImageViewDelegate> otherDelegate;
+@property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key;
-- (UIImageView *)imageView;
+- (void)setTileWidth:(BOOL)toTileWidth height:(BOOL)toTileHeight;
+//- (UIImageView *)imageView;
 
 @end

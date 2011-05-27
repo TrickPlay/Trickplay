@@ -15,7 +15,22 @@
 @class AdvancedUIObjectManager;
 
 @interface TrickplayUIElement : UIView {
-    BOOL is_scaled;
+    /*
+     NSNumber *x_scale;
+     NSNumber *y_scale;
+     NSNumber *z_scale;
+     NSNumber *x_rotation;
+     NSNumber *y_rotation;
+     NSNumber *z_rotation;
+    */
+    
+    CGFloat x_scale;
+    CGFloat y_scale;
+    CGFloat z_scale;
+    CGFloat x_rotation;
+    CGFloat y_rotation;
+    CGFloat z_rotation;
+    
     NSArray *clip;
     
     NSString *ID;
@@ -26,13 +41,24 @@
     UIView *view;
 }
 
+/*
+@property (retain) NSNumber *x_scale;
+@property (retain) NSNumber *y_scale;
+@property (retain) NSNumber *z_scale;
+@property (retain) NSNumber *x_rotation;
+@property (retain) NSNumber *y_rotation;
+@property (retain) NSNumber *z_rotation;
+*/
+ 
 @property (nonatomic, assign) AdvancedUIObjectManager *manager;
-@property (nonatomic, retain) NSString *ID;
-@property (nonatomic, retain) NSString *name;
-@property (nonatomic, retain) NSArray *clip;
-@property (nonatomic, retain) UIView *view;
+@property (retain) NSString *ID;
+@property (retain) NSString *name;
+@property (retain) NSArray *clip;
+@property (retain) UIView *view;
 
 - (id)initWithID:(NSString *)theID objectManager:(AdvancedUIObjectManager *)objectManager;
+
+- (NSMutableDictionary *)createObjectJSONFromObject:(TrickplayUIElement *)object;
 
 // Some new protocol stuff
 - (id)callMethod:(NSString *)method withArgs:(NSArray *)args;
@@ -41,6 +67,7 @@
 
 - (NSDictionary *)getValuesFromArgs:(NSDictionary *)args;
 - (void)setValuesFromArgs:(NSDictionary *)args;
+- (void)deleteValuesFromArgs:(NSDictionary *)args;
 
 // Exposed function calls
 - (id)do_raise_to_top:(NSArray *)args;

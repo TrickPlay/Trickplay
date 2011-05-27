@@ -7,9 +7,21 @@
 //
 
 #import "TrickplayUIElement.h"
-
+#import "TrickplayRectangle.h"
+#import "TrickplayText.h"
+#import "TrickplayImage.h"
+#import "TrickplayGroup.h"
 
 @implementation TrickplayUIElement
+
+/*
+@synthesize x_scale;
+@synthesize y_scale;
+@synthesize z_scale;
+@synthesize x_rotation;
+@synthesize y_rotation;
+@synthesize z_rotation;
+ */
 
 @synthesize clip;
 @synthesize view;
@@ -19,7 +31,20 @@
 
 - (id)initWithID:(NSString *)theID objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super init])) {
-        is_scaled = NO;
+        /*
+        self.x_scale = [NSNumber numberWithFloat:1.0];
+        self.y_scale = [NSNumber numberWithFloat:1.0];
+        self.z_scale = [NSNumber numberWithFloat:1.0];
+        self.x_rotation = [NSNumber numberWithFloat:0.0];
+        self.y_rotation = [NSNumber numberWithFloat:0.0];
+        self.z_rotation = [NSNumber numberWithFloat:0.0];
+         */
+        x_scale = 1.0;
+        y_scale = 1.0;
+        z_scale = 1.0;
+        x_rotation = 0.0;
+        y_rotation = 0.0;
+        z_rotation = 0.0;
         
         self.manager = objectManager;
         
@@ -38,21 +63,9 @@
  */
 
 - (CGRect)getFrameFromArgs:(NSDictionary *)args {
-    //NSArray *position = [args objectForKey:@"position"];
     NSArray *size = [args objectForKey:@"size"];
     CGFloat x = 0.0, y = 0.0, width = 0.0, height = 0.0;
-    /*
-    if ([args objectForKey:@"x"]) {
-        x = [(NSNumber *)[args objectForKey:@"x"] floatValue];
-    }
-    if ([args objectForKey:@"y"]) {
-        y = [(NSNumber *)[args objectForKey:@"y"] floatValue];
-    }
-    if (position) {
-        x = [(NSNumber *)[position objectAtIndex:0] floatValue];
-        y = [(NSNumber *)[position objectAtIndex:1] floatValue];
-    }
-     */
+    
     if ([args objectForKey:@"width"]) {
         width = [(NSNumber *)[args objectForKey:@"width"] floatValue];
     }
@@ -69,18 +82,27 @@
         width = [(NSNumber *)[size objectAtIndex:0] floatValue];
         height = [(NSNumber *)[size objectAtIndex:1] floatValue];
     }
-    /*
-    // Could instead manipulate the transformation matrix, but this works for now
-    if ([args objectForKey:@"scale"]) {
-        self.scale = [args objectForKey:@"scale"];
-        width *= [(NSNumber *)[scale objectAtIndex:0] floatValue];
-        height *= [(NSNumber *)[scale objectAtIndex:1] floatValue];
-        is_scaled = !([[scale objectAtIndex:0] floatValue] == 1.0 && [[scale objectAtIndex:1] floatValue] == 1.0);
-    }
-    */
     
     return CGRectMake(x, y, width, height);
 }
+
+/////// not a function from Trickplay, just a helper method
+- (NSMutableDictionary *)createObjectJSONFromObject:(TrickplayUIElement *)object {
+    NSMutableDictionary *objectDictionary = [NSMutableDictionary dictionaryWithCapacity:2];
+    [objectDictionary setObject:object.ID forKey:@"id"];
+    if ([object isKindOfClass:[TrickplayRectangle class]]) {
+        [objectDictionary setObject:@"Rectangle" forKey:@"type"];
+    } else if ([object isKindOfClass:[TrickplayImage class]]) {
+        [objectDictionary setObject:@"Image" forKey:@"type"];
+    } else if ([object isKindOfClass:[TrickplayText class]]) {
+        [objectDictionary setObject:@"Text" forKey:@"type"];
+    } else if ([object isKindOfClass:[TrickplayGroup class]]) {
+        [objectDictionary setObject:@"Group" forKey:@"type"];
+    }
+    
+    return objectDictionary;
+}
+///////////////////////////
 
 #pragma mark -
 #pragma mark Setters
@@ -261,12 +283,24 @@
         return;
     }
     
-    [view.layer setValue:(NSNumber *)[layer_scale objectAtIndex:0] forKeyPath:@"transform.scale.x"];
-    [view.layer setValue:(NSNumber *)[layer_scale objectAtIndex:1] forKeyPath:@"transform.scale.y"];
+    /*
+    self.x_scale = [layer_scale objectAtIndex:0];
+    self.y_scale = [layer_scale objectAtIndex:1];
+    
+    [view.layer setValue:x_scale forKeyPath:@"transform.scale.x"];
+    [view.layer setValue:y_scale forKeyPath:@"transform.scale.y"];
     
     if ([layer_scale count] > 2) {
-        [view.layer setValue:(NSNumber *)[layer_scale objectAtIndex:2] forKeyPath:@"transform.scale.z"];
+        self.z_scale = [layer_scale objectAtIndex:2];
+        [view.layer setValue:z_scale forKeyPath:@"transform.scale.z"];
     }
+     */
+    
+    x_scale = [[layer_scale objectAtIndex:0] floatValue];
+    y_scale = [[layer_scale objectAtIndex:1] floatValue];
+    
+    [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
+    [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
 }
 
 
@@ -279,57 +313,60 @@
 - (void)set_x_rotation:(NSDictionary *)args {
     if ([args objectForKey:@"x_rotation"]) {
         id arg = [args objectForKey:@"x_rotation"];
-        id x_rotation;
+        id x_rot = nil;
         if ([arg isKindOfClass:[NSNumber class]]) {
-            x_rotation = arg;
+            x_rot = arg;
         } else if ([arg isKindOfClass:[NSArray class]]) {
-            x_rotation = [(NSArray *)arg objectAtIndex:0];
+            x_rot = [(NSArray *)arg objectAtIndex:0];
         } else {
             return;
         }
-        if (![x_rotation isKindOfClass:[NSNumber class]]) {
+        if (![x_rot isKindOfClass:[NSNumber class]]) {
             return;
         }
-        x_rotation = [NSNumber numberWithFloat:[x_rotation floatValue] * M_PI/180.0];
-        [view.layer setValue:x_rotation forKeyPath:@"transform.rotation.x"];
+        x_rot = [NSNumber numberWithFloat:[x_rot floatValue] * M_PI/180.0];
+        [view.layer setValue:x_rot forKeyPath:@"transform.rotation.x"];
+        x_rotation = [x_rot floatValue];
     }
 }
 
 - (void)set_y_rotation:(NSDictionary *)args {
     if ([args objectForKey:@"y_rotation"]) {
         id arg = [args objectForKey:@"y_rotation"];
-        id y_rotation;
+        id y_rot = nil;
         if ([arg isKindOfClass:[NSNumber class]]) {
-            y_rotation = arg;
+            y_rot = arg;
         } else if ([arg isKindOfClass:[NSArray class]]) {
-            y_rotation = [(NSArray *)arg objectAtIndex:0];
+            y_rot = [(NSArray *)arg objectAtIndex:0];
         } else {
             return;
         }
-        if (![y_rotation isKindOfClass:[NSNumber class]]) {
+        if (![y_rot isKindOfClass:[NSNumber class]]) {
             return;
         }
-        y_rotation = [NSNumber numberWithFloat:[y_rotation floatValue] * M_PI/180.0];
-        [view.layer setValue:y_rotation forKeyPath:@"transform.rotation.y"];
+        y_rot = [NSNumber numberWithFloat:[y_rot floatValue] * M_PI/180.0];
+        [view.layer setValue:y_rot forKeyPath:@"transform.rotation.y"];
+        y_rotation = [y_rot floatValue];
     }
 }
 
 - (void)set_z_rotation:(NSDictionary *)args {
     if ([args objectForKey:@"z_rotation"]) {
         id arg = [args objectForKey:@"z_rotation"];
-        id z_rotation;
+        id z_rot = nil;
         if ([arg isKindOfClass:[NSNumber class]]) {
-            z_rotation = arg;
+            z_rot = arg;
         } else if ([arg isKindOfClass:[NSArray class]]) {
-            z_rotation = [(NSArray *)arg objectAtIndex:0];
+            z_rot = [(NSArray *)arg objectAtIndex:0];
         } else {
             return;
         }
-        if (![z_rotation isKindOfClass:[NSNumber class]]) {
+        if (![z_rot isKindOfClass:[NSNumber class]]) {
             return;
         }
-        z_rotation = [NSNumber numberWithFloat:[z_rotation floatValue] * M_PI/180.0];
-        [view.layer setValue:z_rotation forKeyPath:@"transform.rotation.z"];
+        z_rot = [NSNumber numberWithFloat:[z_rot floatValue] * M_PI/180.0];
+        [view.layer setValue:z_rot forKeyPath:@"transform.rotation.z"];
+        z_rotation = [z_rot floatValue];
     }
 }
 
@@ -396,7 +433,30 @@
 }
 
 #pragma mark -
+#pragma mark Deleter
+
+/**
+ * Delete Clip
+ */
+
+- (void)delete_clip:(NSDictionary *)args {
+    self.clipsToBounds = NO;
+}
+
+- (void)deleteValuesFromArgs:(NSDictionary *)args {
+    NSLog(@"ERROR: method deleteValuesFromArgs:(NSDictionary *) must be overwritten");
+}
+
+#pragma mark -
 #pragma mark Getters
+
+/**
+ * Get GID
+ */
+
+- (void)get_gid:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithLong:[ID longLongValue]] forKey:@"gid"];
+}
 
 /**
  * Get Name
@@ -479,21 +539,41 @@
  */
 
 - (void)get_x_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *x_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
+    NSNumber *x_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
         
-    [dictionary setObject:x_rotation forKey:@"x_rotation"];
+    [dictionary setObject:x_rot forKey:@"x_rotation"];
 }
 
 - (void)get_y_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *y_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
+    NSNumber *y_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
         
-    [dictionary setObject:y_rotation forKey:@"y_rotation"];
+    [dictionary setObject:y_rot forKey:@"y_rotation"];
 }
 
 - (void)get_z_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *z_rotation = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
+    NSNumber *z_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
         
-    [dictionary setObject:z_rotation forKey:@"z_rotation"];
+    [dictionary setObject:z_rot forKey:@"z_rotation"];
+}
+
+/**
+ * is Scaled
+ */
+
+- (void)get_is_scaled:(NSMutableDictionary *)dictionary {
+    BOOL truf = !( (x_scale == 1.0) && (y_scale == 1.0) && (z_scale == 1.0) );
+    
+    [dictionary setObject:[NSNumber numberWithBool:truf] forKey:@"is_scaled"];
+}
+
+/**
+ * is Rotated
+ */
+
+- (void)get_is_rotated:(NSMutableDictionary *)dictionary {
+    BOOL truf = !( (x_rotation == 0.0) && (y_rotation == 0.0) && (z_rotation == 0.0) );
+    
+    [dictionary setObject:[NSNumber numberWithBool:truf] forKey:@"is_rotated"];
 }
 
 /**
@@ -535,28 +615,20 @@
 }
 
 /**
- * Get parent
- */
-
-- (void)get_parent:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"parent"]) {
-        if ([self.superview isKindOfClass:[TrickplayUIElement class]]) {
-            [dictionary setObject:((TrickplayUIElement *)self.superview).ID forKey:@"parent"];
-        } else if ([self.superview.superview isKindOfClass:[TrickplayUIElement class]]) {
-            [dictionary setObject:((TrickplayUIElement *)self.superview.superview).ID forKey:@"parent"];
-        } else {
-            [dictionary removeObjectForKey:@"parent"];
-        }
-    }
-}
-
-/**
  * Get center
  */
 
 - (void)get_center:(NSMutableDictionary *)dictionary {
     NSArray *coords = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.center.x], [NSNumber numberWithFloat:view.center.y], nil];
     [dictionary setObject:coords forKey:@"center"];
+}
+
+/**
+ * Check visibility, only changes with do_show: do_hide: methods
+ */
+
+- (void)get_is_visible:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithBool:!self.hidden] forKey:@"is_visible"];
 }
 
 /**
@@ -575,6 +647,7 @@
 
 - (id)do_set:(NSArray *)args {
     id properties = [args objectAtIndex:0];
+    NSLog(@"properties for set: %@", properties);
     if ([properties isKindOfClass:[NSDictionary class]]) {
         [self setValuesFromArgs:properties];
         return [NSNumber numberWithBool:YES];
@@ -619,6 +692,24 @@
     
     view.layer.position = CGPointMake(x, y);
     return [NSNumber numberWithBool:YES];
+}
+
+/**
+ * Get parent
+ */
+
+- (id)do_get_parent:(NSArray *)args {
+    TrickplayUIElement *parent = nil;
+    if ([self.superview isKindOfClass:[TrickplayUIElement class]]) {
+        parent = (TrickplayUIElement *)self.superview;
+    } else if ([self.superview.superview isKindOfClass:[TrickplayUIElement class]]) {
+        parent = (TrickplayUIElement *)self.superview.superview;
+    } else {
+        return nil;
+    }
+    
+    NSDictionary *parentDictionary = [self createObjectJSONFromObject:parent];
+    return parentDictionary;
 }
 
 - (id)do_unparent:(NSArray *)args {
@@ -711,9 +802,10 @@
     id result = nil;
         
     SEL selector = NSSelectorFromString([NSString stringWithFormat:@"do_%@:", method]);
-        
+    
     if ([TrickplayUIElement instancesRespondToSelector:selector]) {
         result = [self performSelector:selector withObject:args];
+        NSLog(@"result: %@", result);
     }
     
     return result;
@@ -721,6 +813,15 @@
 
 
 - (void)dealloc {
+    /*
+    self.x_scale = nil;
+    self.y_scale = nil;
+    self.z_scale = nil;
+    self.x_rotation = nil;
+    self.y_rotation = nil;
+    self.z_rotation = nil;
+     */
+    
     self.view = nil;
     self.clip = nil;
     self.ID = nil;

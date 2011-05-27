@@ -74,6 +74,23 @@
 }
 
 #pragma mark -
+#pragma mark Deleter
+
+/**
+ * Deleter function
+ */
+
+- (void)deleteValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"delete_%@", property]);
+        
+        if ([TrickplayText instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
+}
+
+#pragma mark -
 #pragma mark Setters
 
 
