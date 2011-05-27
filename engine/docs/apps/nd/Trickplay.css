@@ -13,11 +13,27 @@ p
 .CBody .prettyprint
 {
     font: "Courier New", Courier, monospace;
-    border-width: 1px 1px 1px 6px;
+    border-width: 1px 1px 1px 1em;
     border-style: dashed dashed dashed solid;
     border-color: #CBCBCB;
     background: #F8F8F8F8;
-    padding: 18px 8px 18px 18px;
+    padding: 0.5em 1em 0.5em 1em;
+    margin: 1em 5% 0 5%;
+}
+
+.CBody .Prototype
+{
+   margin: 0.5em 0.5em 0.5em 0.5em;
+}
+
+.CBody pre
+{
+    font: "Courier New", Courier, monospace;
+    border-width: 1px 1px 1px 1px;
+    border-style: dashed dashed dashed dashed;
+    border-color: #CBCBCB;
+    background: #F8F8F8F8;
+    padding: 0.5em 1em 0.5em 1em;
     margin: 1em 5% 0 5%;
 }
 
@@ -26,13 +42,13 @@ p
     width: 90%;
     background-color: #F8F8F8F8;
     border: 1px dashed #CBCBCB;
-    padding: 8px 8px 8px 18px;
+    padding: 0.5em 1em 0.5em 1em;
     margin: 1em 5% 0 5%;
 }
 
 .CDescriptionList .CDLEntry
 {
-    width: 25%;
+    width: 15%;
 }
 
 .SDescription
@@ -43,13 +59,6 @@ p
 .Summary
 {
    margin-right: 40em;
-}
-
-.Prototype
-{
-   margin-left: 0;
-   margin-top: 0.5em;
-   margin-bottom: 0.5em;
 }
 
 .SGroup .SEntry a
@@ -88,4 +97,17 @@ p
 .STitle
 {
     font-size: 18px;
+}
+
+.MGroup
+{
+    border-style:  dashed  none  none dashed;
+    border-color: black;
+    border-width: 1px;
+    padding: 0.5em 0 0 0.5em;
+}
+
+.CGroup + * .CHeading + p
+{
+    text-indent: 2em;
 }
