@@ -1,5 +1,5 @@
 @import url("http://fonts.googleapis.com/css?family=Inconsolata");
-@import url("http://fonts.googleapis.com/css?family=Josefin+Sans");
+@import url("http://fonts.googleapis.com/css?family=Josefin Sans");
 
 body
 {
@@ -93,7 +93,7 @@ p
 
 .STable
 {
-    font-size: 14pt;
+    font-size: 12pt;
 }
 
 .SMain td
@@ -147,6 +147,7 @@ p
     border-width: 1px;
     padding: 0.5em 0 0 0.5em;
 }
+
 
 .CConstant + * .CHeading + p, .CGroup + * .CHeading + p
 {
