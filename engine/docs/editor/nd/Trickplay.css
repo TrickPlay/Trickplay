@@ -53,7 +53,7 @@ p
     font-size: 10pt;
 }
 
-.SProperty .SEntry, .SFunction, .SEvent a
+.SProperty .SEntry, .SFunction, .SEvent, .SVariable, .SType a
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
     font-variant: normal;
@@ -93,12 +93,16 @@ p
 
 .STable
 {
-    font-size: 12pt;
+    font-size: 10pt;
+}
+
+.SClass td, .SDatabase td, .SDatabaseTable td, .SSection td{
+    font-size: 14pt;
 }
 
 .SMain td
 {
-    font-size: 16pt;
+    display:none;
 }
 
 .SGroup .SEntry a
