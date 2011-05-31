@@ -85,7 +85,7 @@ GET_DEALS, SEND_SMS, GET_LAT_LNG, TRY_AGAIN = dofile("Internet_Interfaces.lua")
 
 Loading_G                                   = dofile("LoadingDots.lua")
 
-ZIP_PROMPT                                  = dofile("Object_Zip_Prompt.lua")
+--ZIP_PROMPT                                  = dofile("Object_Zip_Prompt.lua")
 
 ZIP_ENTRY                                   = dofile("Object_Zip_Entry.lua")
 

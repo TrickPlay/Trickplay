@@ -196,7 +196,7 @@ return function(response_table)
     
     App_State.rolodex.top_card = 1
     
-    dumptable(response_table.deals)
+    --dumptable(response_table.deals)
     App_State.rolodex.cards = {}
     App_State.rolodex.visible_cards = {}
     
@@ -263,18 +263,18 @@ return function(response_table)
     Zip:lower_to_bottom()
     --]]
     
-    if ZIP_PROMPT.parent then ZIP_PROMPT:unparent() end
+    --if ZIP_PROMPT.parent then ZIP_PROMPT:unparent() end
     
     if ZIP_ENTRY.parent  then ZIP_ENTRY:unparent()  end
 
     if SMS_ENTRY.parent  then SMS_ENTRY:unparent()  end    
     
     
-    App_State.rolodex:add(SMS_ENTRY,ZIP_PROMPT,ZIP_ENTRY)
+    App_State.rolodex:add(SMS_ENTRY,--[[ZIP_PROMPT,]]ZIP_ENTRY)
     
-    ZIP_PROMPT:set_city(divs)
+    --ZIP_PROMPT:set_city(divs)
     
-    ZIP_PROMPT:lower_to_bottom()
+    --ZIP_PROMPT:lower_to_bottom()
     
     --only the first card is visible
     App_State.rolodex.visible_cards[1] = true
