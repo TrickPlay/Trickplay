@@ -50,6 +50,7 @@ assets = {
 		Image{src="assets/hourglass/hourglass010.gif"},
 		Image{src="assets/hourglass/hourglassfinal.gif"},
 	},
+	hourglass_soldout = Image{src="assets/hourglass/hourglasssoldout.gif"},
 }
 
 

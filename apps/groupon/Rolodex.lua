@@ -113,7 +113,18 @@ local t
 local function update_times(self)
     
     t = os.date('!*t')
-    
+    --[[
+    if os.date('*t').isdst then
+        
+        t.hour = t.hour + 1
+        
+        t = os.date('*t',os.time(t))
+        
+    end
+    --]]
+    t.hour = t.hour - 1
+    --print("\n\n")
+    --dumptable(t)
     for i,_ in pairs(App_State.rolodex.visible_cards) do
         
         App_State.rolodex.cards[i]:update_time(t)

@@ -44,23 +44,50 @@ local function decode(s)
 	return s
 end
 
-
-
+local days, hours, mins
+local convert_seconds_up = function(s)
+	--print(s)
+	days = math.floor(s/(60*60*24))
+	
+	s = s%(60*60*24)
+	
+	hours = math.floor(s/(60*60))
+	
+	s = s%(60*60)
+	
+	mins = math.floor(s/60)
+	
+	return days,hours,mins,s%60
+	
+end
 
 local delta = {}
 local src = assets.hourglass[11]
 local update_time = function(self,curr_time)
-	--curr=os.date('*t')
+	
+	--os.date("!*t") 
+	
+	delta.day, delta.hour, delta.min, delta.sec =
+	convert_seconds_up(
+		os.difftime(
+			self.exp_secs,
+			os.time(curr_time)
+		)
+	)
+	--dumptable(self.exp)
+	--dumptable(delta)
+	
+	--print(diff)
 	
 	--for _,c in ipairs(cards) do
 		
-	delta.year  = self.exp.year  - curr_time.year
-	delta.month = self.exp.month - curr_time.month
-	delta.day   = self.exp.day   - curr_time.day
-	delta.hour  = self.exp.hour  - curr_time.hour --+ self.tz
-	delta.min   = self.exp.min   - curr_time.min
-	delta.sec   = self.exp.sec   - curr_time.sec
-	
+	--delta.year  = self.exp.year  - curr_time.year
+	--delta.month = self.exp.month - curr_time.month
+	--delta.day   = self.exp.day   - curr_time.day
+	--delta.hour  = self.exp.hour  - curr_time.hour --+ self.tz
+	--delta.min   = self.exp.min   - curr_time.min
+	--delta.sec   = self.exp.sec   - curr_time.sec
+	--[[
 	if delta.sec < 0 then
 		delta.sec = delta.sec + 60
 		delta.min = delta.min - 1
@@ -111,20 +138,49 @@ local update_time = function(self,curr_time)
 		delta.month = delta.month + 12
 		delta.year  = delta.year - 1
 	end
-	if delta.year < 0 then
+	--]]
+	if delta.day < 1 then
+		if delta.hour < 1 then
+			if delta.min < 1 then
+				src = assets.hourglass[11]
+			elseif delta.min < 31 then
+				src = assets.hourglass[10]
+			else
+				src = assets.hourglass[9]
+			end
+		elseif delta.hour < 7 then
+			src = assets.hourglass[8]
+		elseif delta.hour < 13 then
+			src = assets.hourglass[7]
+		elseif delta.hour < 20 then
+			src = assets.hourglass[6]
+		else
+			src = assets.hourglass[5]
+		end
+	elseif delta.day < 2 then
+		src = assets.hourglass[4]
+	elseif delta.day < 3 then
+		src = assets.hourglass[3]
+	elseif delta.day < 4 then
+		src = assets.hourglass[2]
+	else
+		src = assets.hourglass[1]
+	end
+	
+	if delta.day < 0 then
 		self:find_child("TIME").text="EXPIRED"
 		src = assets.hourglass[12]
 	else
 		
-		local day = (30*delta.month+delta.day)
+		--local day = (30*delta.month+delta.day)
 		
 		local str = ""
 		
-		if day > 1 then
-			str = str..day.." days "
-		elseif day == 1 then
-			str = str..day.." day "
-		elseif day ~= 0 then
+		if delta.day > 1 then
+			str = str..delta.day.." days "
+		elseif delta.day == 1 then
+			str = str..delta.day.." day "
+		elseif delta.day ~= 0 then
 			dumptable(self.exp)
 			dumptable(curr_time)
 			dumptable(delta)
@@ -155,28 +211,27 @@ local img_on_loaded = function(b,failed)
 	local c = b.targ_canvas
 	local g = b.group
 	
-	
-	c:new_path()
-    c:move_to(301,    b.bg_y+37)
-	c:line_to(301+b.w,b.bg_y+37)
-	c:line_to(301+b.w,b.bg_y+37+b.h)
-	c:line_to(301,    b.bg_y+37+b.h)
-	c:line_to(301,    b.bg_y+37)
+	--c:new_path()
+    --c:move_to(301,    b.bg_y+37)
+	--c:line_to(301+b.w,b.bg_y+37)
+	--c:line_to(301+b.w,b.bg_y+37+b.h)
+	--c:line_to(301,    b.bg_y+37+b.h)
+	--c:line_to(301,    b.bg_y+37)
 	c:set_source_bitmap(b,301,b.bg_y+37)
-	c:fill(true)
-	
+	--c:fill(true)
+	c:paint(255)
 	local old = g:find_child("tag")
 	
-	c:new_path()
-    c:move_to(old.x,      old.y)
-	c:line_to(old.x+old.w,old.y)
-	c:line_to(old.x+old.w,old.y+old.h)
-	c:line_to(old.x,      old.y+old.h)
-	c:line_to(old.x,      old.y)
+	--c:new_path()
+    --c:move_to(old.x,      old.y)
+	--c:line_to(old.x+old.w,old.y)
+	--c:line_to(old.x+old.w,old.y+old.h)
+	--c:line_to(old.x,      old.y+old.h)
+	--c:line_to(old.x,      old.y)
 	c:set_source_bitmap(Bitmap(old.source.src,false),old.x,old.y)
-	c:fill(true)
+	c:paint(255)--fill(true)
 	old:unparent()
-	
+	--[[
 	old = g:find_child("tag text")
 	
 	c:new_path()
@@ -185,7 +240,7 @@ local img_on_loaded = function(b,failed)
 	c:set_source_color(old.color)
 	c:fill(true)
 	old:unparent()
-	
+	--]]
 	old = g:find_child("tag price")
 	
 	c:new_path()
@@ -206,7 +261,9 @@ local img_on_loaded = function(b,failed)
 	--print("done")
 end
 
+--Card Constructor
 local make_card = function(input)
+	
 	
 	local card = Group{}
 	
@@ -246,28 +303,51 @@ local make_card = function(input)
 	local c = Canvas(assets.bg.w,bg_y+assets.bg.h)
 	card.w = c.w
 	--top
-	c:new_path()
-    c:move_to(0,0)
-	c:line_to(c.w,0)
-	c:line_to(c.w,assets.title_top.h)
-	c:line_to(0,assets.title_top.h)
-	c:line_to(0,0)
+	--c:new_path()
+    --c:move_to(0,0)
+	--c:line_to(c.w,0)
+	--c:line_to(c.w,assets.title_top.h)
+	--c:line_to(0,assets.title_top.h)
+	--c:line_to(0,0)
 	local b = Bitmap(assets.title_top.src,false)
 	c:set_source_bitmap(b,0,0)
-	c:fill(true)
+	c:paint(255)
 	
 	--top slice
-	c:new_path()
-    c:move_to(0,assets.title_top.h)
-	c:line_to(c.w,assets.title_top.h)
-	c:line_to(c.w,bg_y)
-	c:line_to(0,bg_y)
-	c:line_to(0,assets.title_top.h)
+	--c:new_path()
+    --
+	--c:move_to(0,assets.title_top.h)
+	--
+	--c:line_to(c.w,assets.title_top.h)
+	--c:line_to(c.w,bg_y)
+	--c:line_to(0,bg_y)
+	--c:line_to(0,assets.title_top.h)
+	
 	b = Bitmap(assets.title_slice.src,false)
+	
+	--c:set_source_bitmap(b,0,assets.title_top.h)
+	--c:set_source_color("ff0000")
+	
+	--c:fill(true)
+	--[[
+	c:save()
+	
+	c:scale(1,b.h/(bg_y - assets.title_top.h))
+	
+	print(b.h/(bg_y - assets.title_top.h))
+	
+	c:set_source_bitmap(b,0,assets.title_top.h)
+	
+	c:fill(true)
+	
+	c:restore()
+	--]]
+	---[[
 	for i = assets.title_top.h, bg_y, assets.title_slice.h do
 		c:set_source_bitmap(b,0,i)
-		c:fill(true)
+		c:paint(255)--fill(true)
 	end
+	--]]
 	
 	local t = title_shadow
 	c:new_path()
@@ -295,9 +375,48 @@ local make_card = function(input)
 	c:set_source_bitmap(b,0,bg_y)
 	c:fill(true)
 	
+	local tag = Clone{
+		
+		name = "tag",
+		
+		source=assets.tag,
+		
+		x=48,
+		
+		y=bg_y+14,
+		
+	}
 	
+	local glow = Clone{
+		
+		name = "GLOW",
+		
+		source=assets.btn_glow,
+		
+		x=tag.x+5,
+		
+		y=tag.y+6,
+		
+	}
 	
+	local na = Clone{
+		
+		name = "N/A",
+		
+		source=assets.n_a,
+		
+		opacity = 0,
+		
+		x=tag.x+15,
+		
+		y=tag.y+15,
+		
+	}
 	
+	local hourglass = Clone{name = "hourglass",source = assets.hourglass[1],x=117,y = bg_y+180}
+	hourglass.x = hourglass.x - hourglass.w - 20
+	
+	card.hourglass = hourglass
 	local value = Text{
 		text="Value",
 		font=font.." 16px",
@@ -405,6 +524,15 @@ local make_card = function(input)
 	c:set_source_color(t.color)
 	c:fill(true)
 	
+	local tltb_rem = Text{
+		name="TIME",
+		text="",
+		font=font_b.." 20px",
+		color = black_text,
+		x = tltb.x,
+		y = tltb.y+tltb.h,
+	}
+	
 	local bought = Text{
 		text=input.amount_sold.." bought",
 		font=font_b.." 20px",
@@ -428,7 +556,10 @@ local make_card = function(input)
 		str = "SOLD OUT"
 		na.opacity = 255
 		card.throb = empty
+		card.update_time = empty
 		glow.opacity = 0
+		hourglass.source = assets.hourglass_soldout
+		tltb_rem.text = "SOLD OUT"
 	else
 		str = input.remaining.." remaning"
 	end
@@ -508,43 +639,7 @@ local make_card = function(input)
 	}
 	--]]
 	
-	local tag = Clone{
-		
-		name = "tag",
-		
-		source=assets.tag,
-		
-		x=48,
-		
-		y=bg_y+14,
-		
-	}
 	
-	local glow = Clone{
-		
-		name = "GLOW",
-		
-		source=assets.btn_glow,
-		
-		x=tag.x+5,
-		
-		y=tag.y+6,
-		
-	}
-	
-	local na = Clone{
-		
-		name = "N/A",
-		
-		source=assets.n_a,
-		
-		opacity = 0,
-		
-		x=tag.x+15,
-		
-		y=tag.y+15,
-		
-	}
 	
 	local tag_text = Text{
 		name="tag text",
@@ -654,10 +749,7 @@ local make_card = function(input)
 	}
 	savings_amt.anchor_point = {savings_amt.w/2,0}
 	--]]
-	local hourglass = Clone{name = "hourglass",source = assets.hourglass[1],x=117,y = bg_y+180}
-	hourglass.x = hourglass.x - hourglass.w - 20
 	
-	card.hourglass = hourglass
 	
 	
 	--tltb.x=tltb.x+tltb.w/2
@@ -667,17 +759,15 @@ local make_card = function(input)
 	card.exp = {}
 	card.exp.year,card.exp.month,card.exp.day,card.exp.hour,card.exp.min,card.exp.sec =
 		string.match(input.expiration,"(%d*)-(%d*)-(%d*)T(%d*):(%d*):(%d*)")
+	card.exp.isdst = "false"
+	--delta.hour  = card.exp.hour  - curr_time.hour --+ self.tz
+
 	
+	card.exp_secs = os.time(card.exp)
+	--print(card.exp_secs)
 	
 	card.tz = input.tz/60/60
-	local tltb_rem = Text{
-		name="TIME",
-		text="",
-		font=font_b.." 20px",
-		color = black_text,
-		x = tltb.x,
-		y = tltb.y+tltb.h,
-	}
+	
 	--tltb_rem.anchor_point = {tltb_rem.w/2,0}
 	
 	
