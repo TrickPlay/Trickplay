@@ -1,0 +1,27 @@
+
+[[
+#include "keyboard.h"
+]]
+
+global keyboard [[ void * ]]
+{
+    keyboard()
+        [[
+            lb_construct_empty();
+        ]];
+
+    bool show( table form )
+        [[
+            result = Keyboard::show( L , form );
+        ]];
+/*
+    hide()
+        [[
+            Keyboard::hide( L );
+        ]];
+*/
+
+    callback on_cancel;
+
+    callback on_submit;
+}
