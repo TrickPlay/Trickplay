@@ -1,0 +1,144 @@
+[
+    {
+        'type'      :   'ClutterGroup',
+        'id'        :   'keyboard',
+        'name'      :   'keyboard',
+        'children'  :
+        [
+            {
+                'type'      : 'ClutterTexture',
+                'id'        : 'background-panel',
+                'name'      : 'background-panel'
+            },
+            
+            {
+                'type'                  : 'ClutterGroup',
+                'name'                  : 'field-list-clip',
+                'height'                : 430,
+                'clip-to-allocation'    : true,
+                'children'              :
+                [
+                    {
+                        'type'      : 'ClutterGroup',
+                        'id'        : 'field-list-container',
+                        'name'      : 'field-list-container'
+                    }
+                ]
+            },
+            
+            {
+                'type'      : 'ClutterTexture',
+                'id'        : 'keyboard-panel',
+                'name'      : 'keyboard-panel',
+                'y'         : 450
+            },
+            
+            {
+                'type'      : 'ClutterGroup',
+                'id'        : 'bottom-container',
+                'name'      : 'bottom-container',
+                'x'         : 44,
+                'y'         : 474,
+                'children'  :
+                [
+                    {
+                        'type'      : 'ClutterGroup',
+                        'id'        : 'typing-container',
+                        'name'      : 'typing-container',
+                        'children'  :
+                        [
+                            {
+                                'type'      : 'ClutterTexture',
+                                'id'        : 'typing-background',
+                                'name'      : 'typing-background'
+                            },
+                            
+                            {
+                                'type'      : 'ClutterGroup',
+                                'id'        : 'typing-focus',
+                                'name'      : 'typing-focus'
+                            },
+                            
+                            {
+                                'type'      : 'ClutterGroup',
+                                'id'        : 'typing-layout',
+                                'name'      : 'typing-layout',
+                                'y'         : 144
+                            }
+                        ]
+                    },
+                    
+                    {
+                        'type'      : 'ClutterGroup',
+                        'id'        : 'list-container',
+                        'name'      : 'list-container',
+                        'children'  :
+                        [
+                            {
+                                'type'      : 'ClutterTexture',
+                                'id'        : 'list-background',
+                                'name'      : 'list-background'
+                            },
+                            
+                            {
+                                'type'      : 'ClutterGroup',
+                                'id'        : 'list-focus',
+                                'name'      : 'list-focus'
+                            }
+                        ]
+                    },
+                    
+                    {
+                        'type'                  : 'ClutterText',
+                        'id'                    : 'current-field-caption',
+                        'name'                  : 'current-field-caption',
+                        'color'                 : '#ffffff',
+                        'font-name'             : 'FreeSans 26px',
+                        'width'                 : 410,
+                        'clip-to-allocation'    : true,
+                        'ellipsize'             :   'PANGO_ELLIPSIZE_END',                        
+                        'x'                     : 8,
+                        'y'                     : 48
+                    },
+                    
+                    {
+                        'type'                  : 'ClutterText',
+                        'id'                    : 'current-field-value',
+                        'name'                  : 'current-field-value',
+                        'color'                 : '#ffffff',
+                        'font-name'             : 'FreeSans 24px',
+                        'width'                 : 400,
+                        'editable'              : true,
+                        'selection-color'       : '#00000000',
+                        /*'reactive'              : true,*/
+                        'single-line-mode'      : true,
+                        'x'                     : 14,
+                        'y'                     : 91
+                    },
+
+                    {
+                        'type'      : 'ClutterText',
+                        'id'        : 'cancel-caption',
+                        'name'      : 'cancel-caption',
+                        'color'     : '#ffffff',
+                        'x'         : 62,
+                        'y'         : 514,
+                        'font-name' : 'FreeSans 30px',
+                        'text'      : 'Cancel'
+                    },
+                    
+                    {
+                        'type'      : 'ClutterText',
+                        'id'        : 'submit-caption',
+                        'name'      : 'submit-caption',
+                        'color'     : '#ffffff',
+                        'x'         : 280,
+                        'y'         : 514,
+                        'font-name' : 'FreeSans 30px',
+                        'text'      : 'Submit'
+                    }
+                ]
+            }
+        ]
+    }
+]

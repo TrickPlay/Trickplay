@@ -8,6 +8,7 @@
 #include "profiler.h"
 #include "json.h"
 #include "common.h"
+#include "keyboard.h"
 
 //.............................................................................
 
@@ -71,6 +72,7 @@ extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
 extern int luaopen_canvas( lua_State * L );
+extern int luaopen_keyboard( lua_State * L );
 extern int luaopen_http_module( lua_State * L );
 
 #ifndef TP_PRODUCTION
@@ -949,6 +951,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_bitmap( L );
     luaopen_canvas( L );
     luaopen_http_module( L );
+    luaopen_keyboard( L );
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
@@ -1019,6 +1022,10 @@ App::~App()
     debugger.uninstall();
 
 #endif
+
+    // Get rid of the keyboard
+
+    Keyboard::hide( L , true );
 
     notify( context , TP_NOTIFICATION_APP_CLOSING );
 
