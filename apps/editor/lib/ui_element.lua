@@ -153,8 +153,7 @@ end
 
 --[[
 Function: change_all_skin
-
-Changes all ui elements' skins to 'skin_name' item:find_child("textInput").text
+	Changes all ui elements' skins to 'skin_name' item:find_child("textInput").text
 
 Arguments:
 	skin_name - name of skin  
@@ -4581,9 +4580,9 @@ function ui_element.menuButton(t)
 --[[
 button 
 --]]
-        button_text_font = nil,
-    	button_text_color = nil,
-    	button_text_focus_color = nil,
+        text_font = nil,
+    	text_color = nil,
+    	text_focus_color = nil,
         label_text_font = nil,
     	label_text_color = nil,
     	label_text_focus_color = nil,
@@ -4642,9 +4641,9 @@ button
     local curr_index = 0
     local selectable_items  = {}
 
-    local t_f = {"button_text_font", "label_text_font", "item_text_font"}
-    local t_c = {"button_text_color", "label_text_color", "item_text_color",}
-    local f_c = {"button_text_focus_color", "label_text_focus_color", "item_text_focus_color"}
+    local t_f = {"text_font", "label_text_font", "item_text_font"}
+    local t_c = {"text_color", "label_text_color", "item_text_color",}
+    local f_c = {"text_focus_color", "label_text_focus_color", "item_text_focus_color"}
     
     for k, v in pairs (t_f) do
 	if p[v] == nil then 
@@ -4674,9 +4673,9 @@ button
     local dropDownMenu = Group{}
     local button       = ui_element.button{
 	name = "button",
-        text_font=p.button_text_font,
-    	text_color=p.button_text_color,
-    	focus_text_color=p.button_text_focus_color,
+        text_font=p.text_font,
+    	text_color=p.text_color,
+    	focus_text_color=p.text_focus_color,
     	skin=p.skin,
     	ui_width=p.ui_width,
     	ui_height=p.ui_height, 
@@ -4911,8 +4910,8 @@ button
         dropDownMenu.opacity=0
         dropDownMenu:hide()
         
-        button.text_font=p.button_text_font
-    	button.text_color=p.button_text_color
+        button.text_font=p.text_font
+    	button.text_color=p.text_color
     	button.skin=p.skin
     	button.ui_width=p.ui_width
     	button.ui_height=p.ui_height
@@ -5385,9 +5384,9 @@ function ui_element.tabBar(t)
         font  = "DejaVu Sans 26px",
         
         
-        button_text_font = nil,
-    	button_text_color = nil,
-    	button_text_focus_color = nil,
+        text_font = "DejaVu Sans 26px",
+    	text_color = {255,255,255,255}, 
+    	text_focus_color = {27,145,27,255}, 	  --"1b911b",
         
     	skin = "default", 
     	ui_width = 150,
@@ -5396,9 +5395,9 @@ function ui_element.tabBar(t)
     	focus_color = {27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,255}, --"1b911b", 
     	focus_text_color = {255,255,255,255}, --"1b911b", 
-    	button_border_color = {255,255,255,255}, --"FFFFFF"
-    	button_border_width = 1,
-    	button_border_corner_radius = 12,
+    	border_color = {255,255,255,255}, --"FFFFFF"
+    	border_width = 1,
+    	border_corner_radius = 12,
         
         tab_labels = {
             "Item 1",
@@ -5422,6 +5421,7 @@ function ui_element.tabBar(t)
         unsel_color  = { 60, 60, 60,255},
     }
     
+	local offset = {}
     local buttons = {}
     
     --overwrite defaults
@@ -5437,111 +5437,6 @@ function ui_element.tabBar(t)
     local tab_bg = {}
     local tab_focus = {}
 	
-	
-	
-	local function make_horz_tab(txt_w,txt_h,slant_w,color,unsel)
-		
-		--define the canvas dimensions
-		local c = Canvas{
-			size = {
-				txt_w+p.border_width*2+slant_w,
-				txt_h+p.border_width*2
-			}
-		}
-		
-		c:begin_painting()
-		c:new_path()
-		
-		--top left corner
-		c:move_to( p.border_width / 2                  , p.border_width / 2       )
-		--top edge
-		c:line_to( p.border_width / 2 + txt_w          , p.border_width / 2       )
-		
-		if unsel == true then
-			--slant
-			c:line_to( p.border_width / 2 + txt_w + slant_w, -p.border_width / 2 + c.h )
-			--bottom edge
-			c:line_to( p.border_width / 2                  , -p.border_width / 2 + c.h )
-		else
-			--slant
-			c:line_to( p.border_width / 2 + txt_w + slant_w, p.border_width / 2 + c.h )
-			--unseen bottom edge
-			c:line_to( p.border_width / 2                  , p.border_width / 2 + c.h )
-		end
-		--left edge
-		c:line_to( p.border_width / 2                  , p.border_width / 2       )
-		
-		c:finish_painting()
-		
-		--set the fill
-		c:set_source_color( color )
-		c:fill(true)
-		
-		--set the stroke
-		c:set_source_color( p.border_color )
-		c:stroke( true )
-		
-		if c.Image then
-		c= c:Image()
-		end
-		
-		return c
-	end
-	
-	function make_vert_tab(txt_w,txt_h,color, unsel)
-		
-		--define the canvas dimensions
-		local c = Canvas{
-			size = {
-				txt_w+p.border_width*2,
-				txt_h+p.border_width*2
-			}
-		}
-		
-		c:begin_painting()
-		c:new_path()
-		
-		--top left corner
-		c:move_to( p.border_width / 2                  , p.border_width / 2       )
-		
-		if unsel == true then
-			--top edge
-			c:line_to( c.w - p.border_width / 2, p.border_width / 2       )
-			--unseen right edge
-			c:line_to( c.w - p.border_width / 2, -p.border_width / 2 + c.h )
-		else
-			--top edge
-			c:line_to( c.w + p.border_width / 2, p.border_width / 2       )
-			--right edge
-			c:line_to( c.w + p.border_width / 2, -p.border_width / 2 + c.h )
-		end
-		
-		--bottom edge
-		c:line_to( p.border_width / 2                  , -p.border_width / 2 + c.h )
-		--left edge
-		c:line_to( p.border_width / 2                  , p.border_width / 2       )
-		
-		c:finish_painting()
-		
-		--set the fill
-		c:set_source_color( color )
-		c:fill(true)
-		
-		--set the stroke
-		c:set_source_color( p.border_color )
-		c:stroke( true )
-		
-		if c.Image then
-		c= c:Image()
-		end
-		
-		return c
-	end
-	
-	
-	
-	
-    
     local umbrella     = Group{
         name="TabContainer",
 		reactive = true,  
@@ -5626,7 +5521,14 @@ function ui_element.tabBar(t)
 			get_tab_group = function(self,index)
 				return p.tabs[index]
 			end,
+			get_index = function(self)
+				return current_index
+			end,
+			get_offset = function(self)
+				return self.x+offset.x, self.y+offset.y
+			end
         }
+
     }
     
     create = function()
@@ -5650,10 +5552,12 @@ function ui_element.tabBar(t)
         umbrella:add(bg)
         for i = 1, #p.tab_labels do
             
+			editor_use = true
             if p.tabs[i] == nil then
                 p.tabs[i] = Group{}
-                buttons[i] = ui_element.button()
             end
+            buttons[i] = ui_element.button()
+			p.tabs[i]:hide()
             
             buttons[i].position = {0,0}
             buttons[i].skin=p.skin
@@ -5661,8 +5565,8 @@ function ui_element.tabBar(t)
             buttons[i].ui_height=p.ui_height
             
             buttons[i].focus_color=p.focus_color
-            buttons[i].border_width=p.button_border_width
-            buttons[i].border_corner_radius=p.button_border_corner_radius
+            buttons[i].border_width=p.border_width
+            buttons[i].border_corner_radius=p.border_corner_radius
             
             
             buttons[i].label      = p.tab_labels[i]
@@ -5672,7 +5576,7 @@ function ui_element.tabBar(t)
             buttons[i].focus_fill_color = p.fill_color
             buttons[i].position = {0,0}
             buttons[i].focus_text_color = p.focus_text_color
-            
+           	buttons[i].pressed = function () umbrella:display_tab(i) end  
             buttons[i].on_focus_out()
             
             if p.tab_position == "TOP" then
@@ -5683,63 +5587,10 @@ function ui_element.tabBar(t)
                 buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
             end
             umbrella:add(p.tabs[i],buttons[i])
-            
-            if editor_lb == nil or editor_use then
-                --[[
-                print(1)
-                buttons[i].on_button_down = function()
-                    umbrella:display_tab(i)
-                end
-                
-                buttons[i].reactive=true
-                --]]
-            end
-            
+			offset.x = p.tabs[i].x
+			offset.y = p.tabs[i].y
+			editor_use = false
         end
-        --[[
-        for i = 1, #p.tab_labels do
-            if p.tab_position == "TOP" then
-                tab_bg[i]    = make_horz_tab(
-                    txt_w + 2*p.label_padding,
-                    txt_h,
-                    p.slant_width,
-                    p.unsel_color,
-                    true
-                )
-                tab_focus[i] = make_horz_tab(
-                    txt_w + 2*p.label_padding,
-                    txt_h,
-					p.slant_width,
-                    p.fill_color,
-                    false
-                )
-                tab_bg[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
-                tab_focus[i].x = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)
-                labels[i].x    = (txt_w + 2*p.label_padding+p.slant_width)*(i-1)+ p.label_padding
-                p.tabs[i].y = tab_bg[i].h
-            else
-                tab_bg[i] = make_vert_tab(
-                    txt_w + 2*p.label_padding,
-                    txt_h,
-                    p.unsel_color,
-                    true
-                )
-                tab_focus[i] = make_vert_tab(
-                    txt_w + 2*p.label_padding,
-                    txt_h,
-                    p.fill_color,
-                    false
-                )
-                tab_bg[i].y = txt_h*(i-1)+1
-                tab_focus[i].y = txt_h*(i-1)
-                labels[i].y = txt_h*(i-1)
-                labels[i].x =  p.label_padding
-				p.tabs[i].x = tab_bg[i].w
-            end
-            tab_focus[i]:hide()
-            umbrella:add(p.tabs[i],tab_bg[i],tab_focus[i],labels[i])
-        end
-        --]]
         if p.tab_position == "TOP" then
             bg.y = buttons[1].h-p.border_width
         else
@@ -5760,10 +5611,10 @@ function ui_element.tabBar(t)
     --set the meta table to overwrite the parameters
     mt = {}
     mt.__newindex = function(t,k,v)
-		
         p[k] = v
-        create()
-		
+		if k ~= "selected" then 
+        	create()
+		end 
     end
     mt.__index = function(t,k)       
        return p[k]
@@ -5929,7 +5780,7 @@ function ui_element.arrowPane(t)
 			
 			if editor_lb == nil or editor_use then  
                 arrow.on_button_down = function()
-                    umbrella.pan_by(0,-10)
+                    umbrella:pan_by(0,-10)
                 end
                 
                 arrow.reactive=true
@@ -5945,7 +5796,7 @@ function ui_element.arrowPane(t)
 			
 			if editor_lb == nil or editor_use then  
                 arrow.on_button_down = function()
-                    umbrella.pan_by(10,0)
+                    umbrella:pan_by(10,0)
                 end
                 
                 arrow.reactive=true
@@ -5960,7 +5811,7 @@ function ui_element.arrowPane(t)
 			
 			if editor_lb == nil or editor_use then  
                 arrow.on_button_down = function()
-                    umbrella.pan_by(0,10)
+                    umbrella:pan_by(0,10)
                 end
                 
                 arrow.reactive=true
@@ -5975,7 +5826,7 @@ function ui_element.arrowPane(t)
 			
 			if editor_lb == nil or editor_use then  
                 arrow.on_button_down = function()
-                    umbrella.pan_by(-10,0)
+                    umbrella:pan_by(-10,0)
                 end
                 
                 arrow.reactive=true

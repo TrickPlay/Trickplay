@@ -845,7 +845,6 @@ function is_in_container_group(x_pos, y_pos)
 	if j.x < x_pos and x_pos < j.x + j.w and j.y < y_pos and y_pos < j.y + j.h then 
 		if j.extra then 
 		    if is_this_container(j) then
-		    --if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "LayoutManager" then 
 		        return true 
 		    end 
 		end 
@@ -871,10 +870,6 @@ function create_on_button_down_f(v)
 	local org_object, new_object 
 	
 	function v:on_button_down(x,y,button,num_clicks)
-	   if is_this_widget(v) == true then
-	        --v.on_focus_in()
-	   end 
-
 	   if (input_mode ~= S_RECTANGLE) then 
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
 	     		if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
@@ -918,9 +913,7 @@ function create_on_button_down_f(v)
 								end 
 								editor.n_select(v) 
 	       				end
-				
 -----[[ 	SHOW POSSIBLE CONTAINERS
-
 		    			if control == true then 
 							if(screen:find_child("mouse_pointer") ~= nil) then 
 		     					screen:remove(screen:find_child("mouse_pointer"))
@@ -979,12 +972,12 @@ function create_on_button_down_f(v)
         				dragging = {v, x - v.x, y - v.y }
 					end
         			return true
-			end
-	    elseif (input_mode == S_FOCUS) then 
-			if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
-		     	editor.selected(v)
-		     	screen:find_child("text"..focus_type).text = v.name 
-			end 
+				end
+	    	elseif (input_mode == S_FOCUS) then 
+				if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
+		     		editor.selected(v)
+		     		screen:find_child("text"..focus_type).text = v.name 
+				end 
 				input_mode = S_FOCUS
            		return true
             end
@@ -998,188 +991,181 @@ function create_on_button_down_f(v)
 end
 
 	
-
-        function v:on_button_up(x,y,button,num_clicks)
-	   if (input_mode ~= S_RECTANGLE) then 
-	   if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
-	     if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
-	        if (v.extra.is_in_group == true) then 
-		    local p_obj = find_parent(v)
-		    new_object = copy_obj(p_obj)
-		    if(dragging ~= nil) then 
-	            	local actor , dx , dy = unpack( dragging )
-	            	new_object.position = {x-dx, y-dy}
-			if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			editor.n_select(v, false, dragging) 
-			editor.n_select(new_object, false, dragging) 
-			editor.n_select(org_object, false, dragging) 
-                    	table.insert(undo_list, {p_obj.name, CHG, org_object, new_object})
-			end 
-	            	dragging = nil
-	            end 
-		    return true 
-		elseif( input_mode ~= S_RECTANGLE) then  
-	      	    if(dragging ~= nil) then 
-
-	       	       local actor = unpack(dragging) 
-		       if (actor.name == "grip") then  -- scroll_window -> grip
-				dragging = nil 
-				return true 
-		       end 
-	               local actor , dx , dy = unpack( dragging )
-		       new_object = copy_obj(v)
-	               new_object.position = {x-dx, y-dy}
+	function v:on_button_up(x,y,button,num_clicks)
+		if (input_mode ~= S_RECTANGLE) then 
+	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
+	    		if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
+	    			if (v.extra.is_in_group == true) then 
+						local p_obj = find_parent(v)
+						new_object = copy_obj(p_obj)
+					    if(dragging ~= nil) then 
+	            			local actor , dx , dy = unpack( dragging )
+	            			new_object.position = {x-dx, y-dy}
+							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+								editor.n_select(v, false, dragging) 
+								editor.n_select(new_object, false, dragging) 
+								editor.n_select(org_object, false, dragging) 
+                    			table.insert(undo_list, {p_obj.name, CHG, org_object, new_object})
+							end 
+	            			dragging = nil
+	            		end 
+		    		return true 
+				elseif( input_mode ~= S_RECTANGLE) then  
+	      	    	if(dragging ~= nil) then 
+	       	       		local actor = unpack(dragging) 
+		       			if (actor.name == "grip") then  -- scroll_window -> grip
+							dragging = nil 
+							return true 
+		       			end 
+	               		local actor , dx , dy = unpack( dragging )
+		       			new_object = copy_obj(v)
+	               		new_object.position = {x-dx, y-dy}
 ---[[ Content Setting 
-		      
-		       if is_in_container_group(x,y) then 
+		       			if is_in_container_group(x,y) then 
+			     			local c, t = find_container(x,y) 
+			     			if control == true then 
+			       				if not is_this_container(v) or c.name ~= v.name then
+			     					if c and t then 
+				    					if (v.extra.selected == true and c.x < v.x and c.y < v.y) then 
+			        						v:unparent()
+											if t ~= "TabBar" then
+			        							v.position = {v.x - c.x, v.y - c.y,0}
+											end 
+			        						v.extra.is_in_group = true
+											if screen:find_child(v.name.."border") then 
+			             						screen:find_child(v.name.."border").position = v.position
+											end
+											if screen:find_child(v.name.."a_m") then 
+			             						screen:find_child(v.name.."a_m").position = v.position 
+			        						end 
+			        						if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
+			            						c.content:add(v) 
+			        						elseif t == "LayoutManager" then 
+				     							local col , row=  c:r_c_from_abs_position(x,y)
+				     							c:replace(row,col,v) 
+			        						elseif t == "TabBar" then 
+												local x_off, y_off = c:get_offset()
+												local t_index = c:get_index()
 
-			     local c, t = find_container(x,y) 
-
-			     if control == true then 
-			       if not is_this_container(v) or c.name ~= v.name then
-			     	if c and t then 
-				   	
-				    if (v.extra.selected == true and c.x < v.x and c.y < v.y) then 
-			        	v:unparent()
-			        	v.position = {v.x - c.x, v.y - c.y,0}
-			        	v.extra.is_in_group = true
-					if screen:find_child(v.name.."border") then 
-			             		screen:find_child(v.name.."border").position = v.position
-						end
-						if screen:find_child(v.name.."a_m") then 
-			             		screen:find_child(v.name.."a_m").position = v.position 
-			        		end 
-			        		if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
-			            				c.content:add(v) 
-			        		elseif t == "LayoutManager" then 
-				     		local col , row=  c:r_c_from_abs_position(x,y)
-				     		--print (row, ":", col)
-				     		c:replace(row,col,v) 
-						elseif t == "Group" then 
-						c:add(v)
-			        		end 
-			     	       end 
-				    end 
-			       end 
-
-
-
-		if(screen:find_child("mouse_pointer") ~= nil) then 
-		     screen:remove(screen:find_child("mouse_pointer"))
-		end 
-		mouse_pointer = CS_pointer
-		mouse_pointer.position = {x ,y  ,0}
-		if(screen:find_child("mouse_pointer") == nil) then 
-		     screen:add(mouse_pointer)
-		     mouse_pointer.extra.type = "pointer"
-		end 
-
-			     end 
-
-			     if screen:find_child(c.name.."border") and selected_container then 
-					screen:remove(screen:find_child(c.name.."border"))
-					screen:remove(screen:find_child(c.name.."a_m"))
-					screen:remove(screen:find_child(v.name.."border"))
-					screen:remove(screen:find_child(v.name.."a_m"))
-					selected_content = nil
-					selected_container = nil
-			    end 
-		       end 
-	
+												if t_index then 
+													v.x = v.x - x_off	
+													v.y = v.y - y_off	
+			            							c.tabs[t_index]:add(v) 
+												end 
+											elseif t == "Group" then 
+												c:add(v)
+			        						end 
+			     	       				end 
+				    				end 
+			       				end 
+								if(screen:find_child("mouse_pointer") ~= nil) then 
+		     						screen:remove(screen:find_child("mouse_pointer"))
+								end 
+								mouse_pointer = CS_pointer
+								mouse_pointer.position = {x ,y  ,0}
+								if(screen:find_child("mouse_pointer") == nil) then 
+		     						screen:add(mouse_pointer)
+		     						mouse_pointer.extra.type = "pointer"
+								end 
+			     			end 
+			     			if screen:find_child(c.name.."border") and selected_container then 
+								screen:remove(screen:find_child(c.name.."border"))
+								screen:remove(screen:find_child(c.name.."a_m"))
+								screen:remove(screen:find_child(v.name.."border"))
+								screen:remove(screen:find_child(v.name.."a_m"))
+								selected_content = nil
+								selected_container = nil
+			    			end 
+		       			end 
 ---]] Content Setting 
-
-		       for i,j in pairs (g.children) do 
-			     if j.extra then 
-				   if j.extra.org_opacity then 
-					j.opacity = j.extra.org_opacity
-				   end 
-			     end 
-		       end 
-
-		       local border = screen:find_child(v.name.."border")
-		       local am = screen:find_child(v.name.."a_m") 
-		       local group_pos
-	       	       if(border ~= nil) then 
-		             if (v.extra.is_in_group == true) then
-			     group_pos = get_group_position(v)
-			     	if group_pos then 
-					if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
-	                     		if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
-				end
-		             else 
-	                     border.position = {x -dx, y -dy}
-			     if am then 
-	                     	am.position = {x -dx, y -dy}
-			     end
-		             end 
-	                end 
+		       			for i,j in pairs (g.children) do 
+			     			if j.extra then 
+				   				if j.extra.org_opacity then 
+									j.opacity = j.extra.org_opacity
+				   				end 
+			     			end 
+		       			end 
+	
+		       			local border = screen:find_child(v.name.."border")
+		       			local am = screen:find_child(v.name.."a_m") 
+		       			local group_pos
+	       	       		if(border ~= nil) then 
+		             		if (v.extra.is_in_group == true) then
+			     				group_pos = get_group_position(v)
+			     				if group_pos then 
+									if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
+	                     				if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end
+								end
+		             		else 
+	                     		border.position = {x -dx, y -dy}
+			     				if am then 
+	                     			am.position = {x -dx, y -dy}
+			     				end
+		             		end 
+	                	end 
 			
-			if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then  
-			for i=1, v_guideline,1 do 
-			   if(screen:find_child("v_guideline"..i) ~= nil) then 
-			     local gx = screen:find_child("v_guideline"..i).x 
-			     if(15 >= math.abs(gx - x + dx)) then  
-				new_object.x = gx
-				v.x = gx + screen:find_child("v_guideline"..i).w 
-				if (am ~= nil) then 
-			     	     am.x = am.x - (x-dx-gx)
-				end
-			     elseif(15>= math.abs(gx - x + dx - new_object.w)) then
-				new_object.x = gx - new_object.w  
-				v.x = gx - new_object.w 
-				if (am ~= nil) then 
-			     	     am.x = am.x - (x-dx+new_object.w - gx)
-				end
-			     end 
-			   end 
-		        end 
-    
-			for i=1, h_guideline,1 do 
-			   if(screen:find_child("h_guideline"..i) ~= nil) then 
-			      local gy =  screen:find_child("h_guideline"..i).y 
-			      if(15 >= math.abs(gy - y + dy)) then 
-				new_object.y = gy
-				v.y =gy + screen:find_child("h_guideline"..i).h 
-				if (am ~= nil) then 
-			     	     am.y = am.y - (y-dy - gy) 
-				end
-			      elseif(15>= math.abs(gy - y + dy - new_object.h)) then
-				new_object.y = gy - new_object.h
-				v.y =  gy - new_object.h 
-				if (am ~= nil) then 
-			     	     am.y = am.y - (y-dy + new_object.h - gy)  
-				end
-			      end 
-			   end
-			end
-
-			end 
-
-		        if(border ~= nil )then 
-			     border.position = v.position
-			end 
-
-			if(org_object ~= nil) then  
-		           if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			     editor.n_select(v, false, dragging) 
-			     editor.n_select(new_object, false, dragging) 
-			     editor.n_select(org_object, false, dragging) 
-			     v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
-			     v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
-                    	     table.insert(undo_list, {v.name, CHG, org_object, new_object})
-			   end
-			end 
-	            	dragging = nil
-              	  end
-              	  return true
-	      end 
-             end
-	   else 
-	      dragging = nil
-              return true
-           end
-          end
-        end
+						if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then  
+						    for i=1, v_guideline,1 do 
+			   					if(screen:find_child("v_guideline"..i) ~= nil) then 
+			     					local gx = screen:find_child("v_guideline"..i).x 
+			     					if(15 >= math.abs(gx - x + dx)) then  
+									    new_object.x = gx
+										v.x = gx + screen:find_child("v_guideline"..i).w 
+										if (am ~= nil) then 
+			     	     						am.x = am.x - (x-dx-gx)
+										end
+			     					elseif(15>= math.abs(gx - x + dx - new_object.w)) then
+										new_object.x = gx - new_object.w  
+										v.x = gx - new_object.w 
+										if (am ~= nil) then 
+			     	     						am.x = am.x - (x-dx+new_object.w - gx)
+										end
+			     					end 
+			   					end 
+		        			end 
+							for i=1, h_guideline,1 do 
+			   					if(screen:find_child("h_guideline"..i) ~= nil) then 
+			      					local gy =  screen:find_child("h_guideline"..i).y 
+			      					if(15 >= math.abs(gy - y + dy)) then 
+									    new_object.y = gy
+										v.y =gy + screen:find_child("h_guideline"..i).h 
+										if (am ~= nil) then 
+			     	     						am.y = am.y - (y-dy - gy) 
+										end
+			      						elseif(15>= math.abs(gy - y + dy - new_object.h)) then
+											new_object.y = gy - new_object.h
+											v.y =  gy - new_object.h 
+											if (am ~= nil) then 
+			     	     						am.y = am.y - (y-dy + new_object.h - gy)  
+											end
+			      						end 
+			   						end
+								end
+							end 
+		        			if(border ~= nil )then 
+			     				border.position = v.position
+							end 
+							if(org_object ~= nil) then  
+		           				if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
+			     					editor.n_select(v, false, dragging) 
+			     					editor.n_select(new_object, false, dragging) 
+			     					editor.n_select(org_object, false, dragging) 
+			     					v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
+			     					v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
+                    	     		table.insert(undo_list, {v.name, CHG, org_object, new_object})
+			   					end
+							end 
+	            			dragging = nil
+              	  		end
+              	  		return true
+	      			end 
+             	end
+	   		else 
+	      		dragging = nil
+          		return true
+       		end
+		end
+	end
 end
 
 function get_group_position(child_obj)
@@ -1266,6 +1252,13 @@ function make_attr_t(v)
   end 
 
   local attr_map = {
+	["tab_labels"] = function ()
+		if v.extra.type == "TabBar" then 
+		    table.insert(attr_t, {"tab_labels", v.tab_labels, "Tab Labels"})
+            table.insert(attr_t, {"line", "", "hide"})
+            table.insert(attr_t, {"line", "", "hide"})
+		end
+		end, 
 	["items"] = function ()
 		if v.extra.type == "ButtonPicker" then 
 		    table.insert(attr_t, {"items", v.items, "Items"})
@@ -1460,8 +1453,8 @@ function make_attr_t(v)
        ["ScrollPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
        ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","box_color","fill_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
        ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
-       ["ArrowPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "arrow_dist_to_frame", "arrows_visible", "box_color", "box_width"} end,  
-       ["TabBar"] = function() return {"lock", "skin","opacity", "font", "label_padding",  "tab_position", "display_width", "display_height", "slant_width", "border_width", "border_color", "fill_color", "label_color", "unsel_color"} end,  
+       ["ArrowPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","box_color", "box_width"} end,  
+       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height", "border_width", "border_color", "fill_color", "label_color", "unsel_color", "tab_labels"} end,  
    }
   
   if is_this_widget(v) == true  then
@@ -1475,7 +1468,7 @@ function make_attr_t(v)
              {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
              {"z", math.floor(v.z), "Z"},
       }
-       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) and v.extra.type ~= "ArrowPane" and v.extra.type ~= "TabBar" then 
+       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) and v.extra.type ~= "ArrowPane" then 
              table.insert(attr_t, {"ui_width", math.floor(v.ui_width), "W"})
              table.insert(attr_t, {"ui_height", math.floor(v.ui_height), "H"})
        end
@@ -1572,7 +1565,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize"}
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible arrow_color", "tab_labels", "tabs"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
@@ -1615,6 +1608,12 @@ function itemTostring(v, d_list, t_list)
 		      end 
                   end 
 		  item_string = item_string..head.."children = {"..children.."}"..tail
+	      elseif j == "tab_labels" then 
+		  	  local items = ""
+		  	  for i,j in pairs(v.tab_labels) do 
+				   items = items.."\""..j.."\", "
+		  	  end
+    		  item_string = item_string..head.."tab_labels = {"..items.."}"..tail
 	      elseif j == "items" then 
 		  local items = ""
 		  if v.extra.type == "MenuButton" then 
@@ -1649,30 +1648,40 @@ function itemTostring(v, d_list, t_list)
 	               item_string = item_string..head..j.." = "..tostring(v[j])..tail 
 		  end 
 	      elseif type(v[j]) == "table" then 
-		  if(type(v[j][1]) == "table") then  
-			local tiles_name_table = {} 
-			for m=1, v.rows, 1 do -- rows
-				local tile_name_table = {}
-				for i= 1,v.columns,1 do  --cols 
-				   local element = v.tiles[m][i]
-				   if element then 
-				     table.insert(tile_name_table, element.name)
-				   else 
-				     table.insert(tile_name_table, "nil")
-				   end 
-				end 
-		        	if table.getn(tile_name_table) ~= 0 then 
-					table.insert(tiles_name_table, tile_name_table)
-				end
-			end 
-	          	item_string = item_string..head..j.." = {"
-			for m,n in pairs(tiles_name_table) do 
-	          	     item_string = item_string.." {"..table.concat(n,",").."},"
-			end 
-			item_string = item_string.."}"..tail
-		  else 
-	          	item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
-		  end 
+		  		if v.extra.type == "TabBar" and j == "tabs" then 
+					item_string = item_string..head..j.."= {"
+					for q,w in pairs (v[j]) do
+						item_string = item_string.." Group{ children = {"
+						for m,n in pairs (w.children) do
+							item_string = item_string .. n.name..","
+						end 
+						item_string = item_string.."}},"
+					end 
+					item_string = item_string.."}"..tail
+		  		elseif(type(v[j][1]) == "table") then  
+					local tiles_name_table = {} 
+					for m=1, v.rows, 1 do -- rows
+						local tile_name_table = {}
+						for i= 1,v.columns,1 do  --cols 
+				   			local element = v.tiles[m][i]
+				   			if element then 
+				     			table.insert(tile_name_table, element.name)
+				   			else 
+				     			table.insert(tile_name_table, "nil")
+				   			end 
+						end 
+		        		if table.getn(tile_name_table) ~= 0 then 
+							table.insert(tiles_name_table, tile_name_table)
+						end
+					end 
+	          		item_string = item_string..head..j.." = {"
+					for m,n in pairs(tiles_name_table) do 
+	          			item_string = item_string.." {"..table.concat(n,",").."},"
+					end 
+					item_string = item_string.."}"..tail
+		  		else
+	          		item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
+		  		end 
 	      elseif v[j].type == "Group" then 
 		        item_string = item_string..head..j.."= Group { children = {"
 			for m,n in pairs (v[j].children) do
@@ -1691,41 +1700,40 @@ function itemTostring(v, d_list, t_list)
   
  
     if (v.type == "Text") then
-	v.cursor_visible = false
+		v.cursor_visible = false
     elseif (v.type == "Image") then
-	--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
+		--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
-	 src = v.source 
-	 if is_in_list(src.name, d_list) == false then  --> need debugging this line :(
-							--  LUA PANIC : /Users/hjkim/code/trickplay/apps/editor/./util.lua:698: attempt to index global 'src' (a nil value)
-	     if(t_list == nil) then 
-		t_list = {src.name}
-	     else 
-		table.insert(t_list, src.name) 
-	     end
+	 	src = v.source 
+	 	if is_in_list(src.name, d_list) == false then  --> need debugging this line :(
+			--  LUA PANIC : /Users/hjkim/code/trickplay/apps/editor/./util.lua:698: attempt to index global 'src' (a nil value)
+	     	if(t_list == nil) then 
+				t_list = {src.name}
+	     	else 
+				table.insert(t_list, src.name) 
+	     	end
          end 
-
     elseif (v.type == "Group") and is_this_widget(v) == false then 
-	 local org_d_list = {}
+	 	local org_d_list = {}
 
-	 if(d_list ~= nil) then 
-	     for i,j in pairs (d_list) do 
-		 org_d_list[i] = j 
-	     end      
-	 end 
+	 	if(d_list ~= nil) then 
+	     	for i,j in pairs (d_list) do 
+		 		org_d_list[i] = j 
+	     	end      
+	 	end 
 
-         for e in values(v.children) do
-	     result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
-	     if(result ~= nil) then 
-		 itm_str = itm_str..result
-	     end
-	     if(result2 ~= nil) then 
-		 itm_str2 = result2..itm_str2
-	     end 
-		
-	     d_list = done_list
-	     t_list = todo_list
-	 end
+        for e in values(v.children) do
+	     	result, done_list, todo_list, result2 = itemTostring(e, d_list, t_list)
+	     	if(result ~= nil) then 
+		 		itm_str = itm_str..result
+	     	end
+	     	if(result2 ~= nil) then 
+		 		itm_str2 = result2..itm_str2
+	     	end 
+			
+	     	d_list = done_list
+	     	t_list = todo_list
+	 	end
     end
 
     if (v.type == "Video") then
@@ -1749,29 +1757,37 @@ function itemTostring(v, d_list, t_list)
 	 itm_str = itm_str.."g.extra.video = "..v.name.."\n\n"
 
     elseif is_this_widget(v) == true then 	 
-	 if v.content then 
-	    for m,n in pairs (v.content.children) do
-		itm_str= itemTostring(n) .. itm_str
-	    end 
-	 end 
-	 if v.tiles then 
-	    for m,n in pairs(v.tiles) do 
-	          for q,r in pairs(n) do 
-			if r.name ~= "nil" then
-		            itm_str= itemTostring(r)..itm_str
-			end 
-	          end 
-	     end 
-	 end 
-         itm_str = itm_str.."\nlocal "..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
-	 itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
-	 itm_str = itm_str:sub(1,-2)
-         itm_str = itm_str.."}\n\n"
-	 itm_str = itm_str..add_attr(group_list, v.name..".", "\n")
+	 	if v.content then 
+	    	for m,n in pairs (v.content.children) do
+				itm_str= itemTostring(n) .. itm_str
+	    	end 
+	 	end 
+	 	if v.tiles then 
+	    	for m,n in pairs(v.tiles) do 
+	          	for q,r in pairs(n) do 
+					if r.name ~= "nil" then
+		            	itm_str= itemTostring(r)..itm_str
+					end 
+	          	end 
+	     	end 
+	 	end 
+	 	if v.tabs then 
+	    	for q,w in pairs (v.tabs) do
+	    		for m,n in pairs (w.children) do
+					itm_str= itemTostring(n) .. itm_str
+	    		end 
+	    	end 
+	 	end 
+		
+        itm_str = itm_str.."\nlocal "..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
+	 	itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
+	 	itm_str = itm_str:sub(1,-2)
+        itm_str = itm_str.."}\n\n"
+	 	itm_str = itm_str..add_attr(group_list, v.name..".", "\n")
     else 
          itm_str = itm_str.."\nlocal "..v.name.." = "..v.type..b_indent.."{"..indent
-	 itm_str = itm_str..add_attr(nw_attr_list, "", ","..indent)
-	 itm_str = itm_str:sub(1,-2)
+	 	 itm_str = itm_str..add_attr(nw_attr_list, "", ","..indent)
+	 	 itm_str = itm_str:sub(1,-2)
          itm_str = itm_str.."}\n\n"
     end
 
@@ -2166,9 +2182,13 @@ function inputMsgWindow_savefile(input_text, cfn)
 	                   new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
 		     else -- qqqq if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
 			   if is_this_container(j) == true then 
-				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
+				if j.extra.type == "TabBar" then 
+					for q,w in pairs (j.tabs) do
+						gen_stub_code(w)
+					end
+				elseif j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
 					gen_stub_code(j.content)
-			        elseif j.extra.type == "LayoutManager" then 
+			    elseif j.extra.type == "LayoutManager" then 
 					local content_num = 0 
 			        	for k,l in pairs (j.tiles) do 
 						for n,m in pairs (l) do 
@@ -2595,6 +2615,15 @@ function inputMsgWindow_openfile(input_text)
 		        	c.extra.is_in_group = true
 	  				c.extra.lock = false
                     create_on_button_down_f(c)
+		    	end 
+	       elseif v.extra.type == "TabBar" then 
+		    	for j, c in pairs(v.tabs) do 
+					for k, d in pairs (c.children) do -- Group { children = {button4,rect3,} },
+						d.reactive = true
+		        		d.extra.is_in_group = true
+	  					d.extra.lock = false
+                    	create_on_button_down_f(d)
+					end 
 		    	end 
 	       elseif v.extra.type == "LayoutManager" then 
 		   		local f 

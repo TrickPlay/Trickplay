@@ -20,29 +20,30 @@ function inspector_apply (v, inspector)
 
       local attr_map = {
       ["itemsList"] = function(j)
-                 local items, item
+         local items, item
 		 if item_group:find_child("itemsList") then 
 		    if item_group:find_child("itemsList"):find_child("items_list") then 
 		        items = item_group:find_child("itemsList"):find_child("items_list")
 		    end 
-                 end 
+         end 
 		 if items then 
-                     local next = 1
-                     for next, _ in pairs(items.tiles) do 
-		       item = items.tiles[next][1]
-
-		       if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
-		            v.items[next] = item:find_child("textInput").text
-	 	       elseif item:find_child("textInput").text == "--------------" then 
-			    v.items[next] = {type="seperator"}
-		       elseif item:find_child("textInput").extra.item_type == "label" then 
-			    v.items[next] = {type="label", string=item:find_child("textInput").text}
-		       elseif item:find_child("textInput").extra.item_type == "item" then 
-			    v.items[next] = {type="label", string=item:find_child("textInput").text, f=nil}
-		       end 
-                     end 
+               local next = 1
+               for next, _ in pairs(items.tiles) do 
+		       		item = items.tiles[next][1]
+		       		if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
+		            	v.items[next] = item:find_child("textInput").text
+		       		elseif v.extra.type == "TabBar" then 
+		            	v.tab_labels[next] = item:find_child("textInput").text
+	 	       		elseif item:find_child("textInput").text == "--------------" then 
+			    		v.items[next] = {type="seperator"}
+		       		elseif item:find_child("textInput").extra.item_type == "label" then 
+			    		v.items[next] = {type="label", string=item:find_child("textInput").text}
+		       		elseif item:find_child("textInput").extra.item_type == "item" then 
+			    		v.items[next] = {type="label", string=item:find_child("textInput").text, f=nil}
+		       		end 
+               end 
 		 end
-              end,
+         end,
        ["skin"] = function()
               v["skin"] = skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
               end,

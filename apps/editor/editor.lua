@@ -1917,7 +1917,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	if v.extra then 
 		if v.extra.type == "MenuButton" then 
-        	v.spin_in()
+        	v.fade_in()
+		elseif v.extra.type == "TabBar" then 
+			v:display_tab(2)
 		end 
 	end 
 
@@ -2126,10 +2128,6 @@ end
 
 
 local function save_new_file (fname, save_current_f, save_backup_f)
-
-	print( "fname :" , fname)
-	print( "current_fn :" , current_fn)
-
 
 	if current_fn == "" then 
 		if fname == "" then

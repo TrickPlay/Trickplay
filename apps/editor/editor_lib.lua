@@ -510,15 +510,13 @@ function editor_ui.scrollPane(t)
 	end
     local make_arrow = function(dir)
 		local arrow
-		--[[
 		if dir == "up" then 
 			arrow = Image{src="lib/assets/scrollbar-btn-up.png"}
+			arrow.anchor_point={arrow.w/2,arrow.h}
 		else 
-			arrow = Image{src="lib/assets/scrollbar-btn-up-12.png"}
+			arrow = Image{src="lib/assets/scrollbar-btn-down.png"}
+			arrow.anchor_point={arrow.w/2,0}
 		end 
-		]]
-		arrow = Image{src="lib/assets/scrollbar-btn-up.png"}
-		arrow.anchor_point={arrow.w/2,arrow.h}
 		return arrow
 		
 	end
@@ -694,7 +692,7 @@ function editor_ui.scrollPane(t)
                 dn.name="DN"
                 dn.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
                 dn.y = p.box_width+p.bar_thickness+vert_s_bar.h
-                dn.z_rotation = {180,0,0}
+                --dn.z_rotation = {180,0,0}
                 scroll_group:add(dn)
                 dn.reactive=true
                 function dn:on_button_down()
