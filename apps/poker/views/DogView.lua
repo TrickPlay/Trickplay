@@ -55,9 +55,7 @@ function(dog_view, dog_number, ...)
                 glow_image_name)
         end
     
-        image.x = 32
-        image.y = 33
-        image.clip = {0, 0, 212, 169}
+        image.anchor_point = {image.w/2, image.h/2}
 
         -- remove the current dog assets from the screen
         dog_clone:unparent()
@@ -65,6 +63,15 @@ function(dog_view, dog_number, ...)
 
         -- add the new ones
         dog_clone = assetman:get_clone(image_name)
+        image.x = dog_clone.w/2
+        image.y = dog_clone.h/2
+        image.clip = {
+            image.w/2 - (dog_clone.w/2-32),
+            image.h/2 - (dog_clone.h/2-33),
+            212,
+            169
+        }
+        blah = image
         dog_clone = assetman:create_group({
             name = "dog_"..tostring(dog_number).."_frame",
             children = {image, dog_clone}
@@ -124,6 +131,7 @@ function(dog_view, dog_number, ...)
         dog_view.view:complete_animation()
         dog_clone:complete_animation()
         dog_glow_clone:complete_animation()
+        self:reset_images()
 
         pressed = false
         dog_view:off_focus()
