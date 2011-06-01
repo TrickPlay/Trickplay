@@ -672,6 +672,24 @@ namespace JSON
         return type;
     }
 
+    double Value::as_number() const
+    {
+        switch( type )
+        {
+            case T_DOUBLE:
+                return value.double_value;
+
+            case T_INT:
+                return value.int_value;
+
+            case T_BOOL:
+                return value.boolean_value ? 1 : 0;
+
+            default:
+                return 0;
+        }
+    }
+
     std::ostream & operator << ( std::ostream & os , const Value & value )
     {
         switch( value.get_type() )
