@@ -73,7 +73,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 controller:declare_resource("player_"..i,
                     "assets/phone/waiting_screen/player"..i..".png")
             end
-            controller:declare_resource("frame", "assets/camera/frame-focus-off.png")
+            controller:declare_resource("frame", "assets/camera/frame-overlay.png")
 
             controller:clear_and_set_background("splash")
         end
@@ -231,8 +231,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         --]]
         function controller:photo_dog(pos)
             print("giving dog a photo")
+            -- .4 is the constant of proportionality between the frame overlay
+            -- on the camera and the frame for the poker dawgz replacement image
             if controller.has_pictures
-            and controller:submit_picture({212, 0}, true, "frame") then
+            and controller:submit_picture({640*.4, 960*.4}, true, "frame") then
                 function controller:on_picture(bitmap)
                     local image = bitmap:Image()
                     blah = image
