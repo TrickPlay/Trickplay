@@ -332,40 +332,40 @@ class Image [[ClutterActor*]] actor
 		before the first load. Therefore, your code should not contain any
 		assumptions about the order in which images finish loading.
 		
-		To load the image asynchronously, the async property and on_loaded() 
-		event handlers must be initialized prior to beginning the load 
-		operation. The load operation is then started by setting the src 
-		property. The example code below demonstrates the required 
+		To load the image asynchronously, the async property must be initialized
+		prior to beginning the load operation. The load operation is then started
+		by setting the src property. The example code below demonstrates the required
 		operations.
 		
-		*Default Setting:* nil, i.e., images are loaded synchronously
+		*Default Setting:* false, i.e., images are loaded synchronously
 		
 		*Example:* Load an image asynchronously
 		
-		>-- Create an Image object
-		>local myImage = Image()
-		>myImage.async = true;		-- will load image asynchronously
-		>
-		>-- Define event handler
-		>function on_loadedHandler( Image loadedImage, boolean failed )
-		>  -- Best practice is to unhook the handler after it has served its purpose
-		>  loadedImage.on_loaded = nil
-		>
-		>  if failed then
-		>    -- Image did not load; insert handling code here
-		>  else
-		>    -- Image is loaded; insert any applicable operations here
-		>	end
-		>end
-		>
-		>-- Hook our event handler to the Image object
-		>myImage.on_loaded = on_loadedHandler;
-		>
-		>-- Start loading the image asynchronously
-		>myImage.src = "images/SplashScreen.png";
+		(code)
+		-- Create an Image object
+		local myImage = Image()
+		myImage.async = true		-- will load image asynchronously
+
+		-- Define event handler
+		function on_loadedHandler( loadedImage, failed )
+		  -- Best practice is to unhook the handler after it has served its purpose
+		  loadedImage.on_loaded = nil
+
+		  if failed then
+		    -- Image did not load; insert handling code here
+		  else
+		    -- Image is loaded; insert any applicable operations here
+			end
+		end
+
+		-- Hook our event handler to the Image object
+		myImage.on_loaded = on_loadedHandler
+
+		-- Start loading the image asynchronously
+		myImage.src = "images/SplashScreen.png"
+		(end)
 		
 		*See Also:* the <on_loaded> event handler, the <src> property
-		
 	*/
 	
     bool async
@@ -506,28 +506,35 @@ class Image [[ClutterActor*]] actor
 		*Default Setting:* nil
 		
 		*Example:*
-		>-- Create an Image object
-		>local myImage = Image()
-		>
-		>-- Define event handler
-		>function on_changeHandler( Image changedImage, integer newWidth, integer newHeight )
-		>  -- Perform any desired operations here
-		>  -- Example: Will new size fit horizontally in display area?
-		>  if( newWidth < changedImage.width )then
-		>    -- No, image is too small, so tile the image horizontally
-		>    changedImage.tile[ 1 ] = true
-		>  end
-		>
-		>  -- Will image fit vertically?
-		>  if( newHeight < changedImage.height )then
-		>    -- No, so tile the image vertically
-		>    changedImage.tile[ 2 ] = true
-		>  end
-		>end
-		>
-		>-- Hook our event handler into the Image object
-		>myImage.on_size_changed = on_changeHandler;
 
+		(code)
+		-- Create an Image object
+		local myImage = Image()
+
+		-- Define event handler
+		function on_changeHandler( changedImage, newWidth, newHeight )
+		  -- Perform any desired operations here
+		  -- Example: Will new size fit horizontally in display area?
+
+		  local tile = changedImage.tile
+
+		  if( newWidth < changedImage.width )then
+		    -- No, image is too small, so tile the image horizontally
+		    tile[ 1 ] = true
+		  end
+
+		  -- Will image fit vertically?
+		  if( newHeight < changedImage.height )then
+		    -- No, so tile the image vertically
+		    tile[ 2 ] = true
+		  end
+
+		  changedImage.tile = tile
+		end
+
+		-- Hook our event handler into the Image object
+		myImage.on_size_changed = on_changeHandler
+        (end)
 	*/
 	
     callback on_size_changed
