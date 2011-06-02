@@ -22,8 +22,12 @@
         imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.delegate = self;
         //imagePickerController.cameraOverlayView = mask;
-        
-        mask = [aMask retain];
+
+        if (aMask) {
+            mask = [aMask retain];
+        } else {
+            mask = nil;
+        }
         targetWidth = width;
         targetHeight = height;
         editable = is_editable;
@@ -207,7 +211,7 @@
     
     UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
     
-    [self presentModalViewController:cntrl animated:YES];
+    [self presentModalViewController:cntrl animated:NO];
     [cntrl release];
 }
 

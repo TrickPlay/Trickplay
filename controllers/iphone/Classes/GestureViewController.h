@@ -100,6 +100,7 @@
 #import "CameraViewController.h"
 #import "GestureImageView.h"
 
+@class TrickplayGroup;
 
 #define CAMERA_BUTTON_TITLE "Camera"
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
@@ -125,7 +126,7 @@ CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate
     
     UIActionSheet *cameraActionSheet;
     
-    UIView *advancedView;
+    TrickplayGroup *advancedView;
     
     ResourceManager *resourceManager;
     

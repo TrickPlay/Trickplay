@@ -20,13 +20,13 @@
 @synthesize groups;
 @synthesize resourceManager;
 
-- (id)initWithView:(UIView *)aView resourceManager:(ResourceManager *)aResourceManager {
+- (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager {
     if ((self = [super init])) {
         self.rectangles = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.images = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.textFields = [[NSMutableDictionary alloc] initWithCapacity:20];
         self.groups = [[NSMutableDictionary alloc] initWithCapacity:20];
-        currentID = 0;
+        currentID = 1;
         
         self.resourceManager = aResourceManager;
         
@@ -125,7 +125,7 @@
     NSLog(@"Image created: %@", image);
     [images setObject:image forKey:imageID];
     
-    [view addSubview:image];
+    //[view addSubview:image];
 }
 
 
@@ -139,7 +139,7 @@
     NSLog(@"Rectangle created: %@", rect);
     [rectangles setObject:rect forKey:rectID];
     
-    [view addSubview:rect];
+    //[view addSubview:rect];
 }
 
 
@@ -153,7 +153,7 @@
     NSLog(@"Text created: %@", text);
     [textFields setObject:text forKey:textID];
     
-    [view addSubview:text];
+    //[view addSubview:text];
 }
 
 
@@ -167,7 +167,7 @@
     NSLog(@"Group created: %@", group);
     [groups setObject:group forKey:groupID];
     
-    [view addSubview:group];
+    //[view addSubview:group];
 }
 
 #pragma mark -
@@ -204,6 +204,9 @@
     }
     NSString *ID = [NSString stringWithFormat:@"%u", currentID];
     currentID++;
+    if (currentID == 0) {
+        currentID++;
+    }
     
     if ([type compare:@"Rectangle"] == NSOrderedSame) {
         [self createRectangle:ID withArgs:args];
@@ -251,7 +254,9 @@
 }
 
 - (TrickplayUIElement *)findObjectForID:(NSString *)ID {
-    if ([rectangles objectForKey:ID]) {
+    if ([ID intValue] == 0) {
+        return view;
+    } else if ([rectangles objectForKey:ID]) {
         return [rectangles objectForKey:ID];
     } else if ([groups objectForKey:ID]) {
         return [groups objectForKey:ID];

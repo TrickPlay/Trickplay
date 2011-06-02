@@ -787,11 +787,14 @@
 }
 
 - (id)do_transform_point:(NSArray *)args {
-    TrickplayUIElement *ancestor = [manager findObjectForID:[args objectAtIndex:0]];
-    if (ancestor) {
-        //CGPoint 
+    TrickplayUIElement *ancestor = [manager findObjectForID:[(NSDictionary *)[args objectAtIndex:0] objectForKey:@"id"]];
+    NSLog(@"ancester: %@", ancestor);
+    if (ancestor && ([args count] > 2)) {
+        CGPoint point = CGPointMake([[args objectAtIndex:1] floatValue], [[args objectAtIndex:2] floatValue]);
+        CGPoint transformedPoint = [view.layer convertPoint:point toLayer:ancestor.view.layer];
+        return [NSArray arrayWithObjects:[NSNumber numberWithFloat:transformedPoint.x], [NSNumber numberWithFloat:transformedPoint.y], nil];
     }
-    // TODO: do later
+    
     return [NSNumber numberWithBool:NO];
 }
 

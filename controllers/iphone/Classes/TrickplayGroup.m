@@ -18,7 +18,9 @@
         self.view = [[[UIView alloc] init] autorelease];
         
         //manager = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
-        [self setValuesFromArgs:args];
+        if (args) {
+            [self setValuesFromArgs:args];
+        }
         
         [self addSubview:view];
     }

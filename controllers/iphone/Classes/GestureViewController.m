@@ -7,6 +7,7 @@
 //
 
 #import "GestureViewController.h"
+#import "TrickplayGroup.h"
 
 @implementation GestureViewController
 
@@ -58,24 +59,34 @@
 	backgroundHeight = mainframe.size.height;
 	backgroundHeight = backgroundHeight - 45;  //subtract the height of navbar
 	backgroundWidth = mainframe.size.width;
+    // Figure out if the device can use pcitures
     NSString *hasPictures = @"";
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
         hasPictures = @"\tPS";
     }
+    // Tell the service what this device is capable of
 	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
-	
+	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+    
+    // Manages resources created with declare_resource
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
     
     camera = nil;
 	
+    // For audio playback
     audioController = [[AudioController alloc] initWithResourceManager:resourceManager socketManager:socketManager];
+    // Controls touches
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
+    // Controls Acceleration
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
-    [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
-    advancedView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height)];
+    // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
+    // from Trickplay
+    advancedView = [[TrickplayGroup alloc] initWithID:@"0" args:nil objectManager:nil];
+    advancedView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height);
     [self.view addSubview:advancedView];
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
+    advancedView.manager = advancedUIDelegate;
     
     return YES;
 }

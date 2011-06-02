@@ -11,6 +11,7 @@
 #import "GestureViewController.h"
 
 @class TrickplayUIElement;
+@class TrickplayGroup;
 
 @interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate, SocketManagerDelegate, CommandInterpreterAdvancedUIDelegate> {
     NSMutableDictionary *rectangles;
@@ -25,7 +26,7 @@
     NSString *hostName;
     NSInteger port;
     
-    UIView *view;
+    TrickplayGroup *view;
 }
 
 @property (nonatomic, retain) NSMutableDictionary *rectangles;
@@ -35,7 +36,7 @@
 
 @property (nonatomic, retain) ResourceManager *resourceManager;
 
-- (id)initWithView:(UIView *)aView resourceManager:(ResourceManager *)aResourceManager;
+- (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager;
 
 - (void)setupServiceWithPort:(NSInteger)p
                     hostname:(NSString *)h;

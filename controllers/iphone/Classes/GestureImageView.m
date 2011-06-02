@@ -84,7 +84,7 @@
     [rotationGesture release];
     [pinchGesture release];
     [panGesture release];
-    [longPressGesture release];
+    //[longPressGesture release];
     
     [super dealloc];
 }
