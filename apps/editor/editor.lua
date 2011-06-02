@@ -2327,7 +2327,23 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	        	contents = contents.."if editor_lb == nil then\n\tscreen:find_child(\"timeline\"):hide()\nend\n\n"
 	     	end 
 	     	contents = contents.."\ng:add("..obj_names..")"
-            contents = "local g = ... \n\n"..contents
+			local local_ui_elements = ""
+			for i, v in pairs(g.children) do
+				if v.extra then 
+					if v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
+						if local_ui_elements ~= "" then 
+    						local_ui_elements = local_ui_elements..","
+						end 
+    					local_ui_elements = local_ui_elements..v.name
+					end 
+				end 
+    		end
+			print("OOOOOOOOOOOOO", local_ui_elements)
+			if local_ui_elements ~= "" then 
+            	contents = "local g = ... \n\nlocal "..local_ui_elements.."\n\n"..contents
+			else 
+            	contents = "local g = ... \n\n"..contents
+			end 
             undo_list = {}
             redo_list = {}
 			
