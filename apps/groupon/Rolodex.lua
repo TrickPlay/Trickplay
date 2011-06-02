@@ -122,7 +122,9 @@ local function update_times(self)
         
     end
     --]]
-    t.hour = t.hour - 1
+    --t.min = t.min + 41
+    --t.day = t.day 
+    --t.hour = t.hour - 1+13
     --print("\n\n")
     --dumptable(t)
     for i,_ in pairs(App_State.rolodex.visible_cards) do
@@ -220,24 +222,33 @@ return function(response_table)
         d = response_table.deals[i]
         
         --pass the card constructor all of the important aspects of the deal information
+        print(i,"start")
         c = Card_Constructor{
+            --Card Data
             title         = d.title,
             division      = d.division.name,
+            --Pricing
             price         = "$"..d.options[1].price.amount/100,
             msrp          = "$"..d.options[1].value.amount/100,
             percentage    = d.options[1].discountPercent,
             saved         = "$"..d.options[1].discount.amount/100,
+            --Timer
             expiration    = d.endAt,
+            tz            = d.division.timezoneOffsetInSeconds,
+            --Amount Sold
             amount_sold   = d.options[1].soldQuantity,
+            remaining     = d.options[1].remainingQuantity,
+            
             picture_url   = d.largeImageUrl,
+            id            = d.id,
+            
+            --SMS Menu needs these
             fine_print    = d.options[1].details[1].description,
             highlights    = d.highlightsHtml,
-            id            = d.id,
+            merchant      = d.merchant.name,
             deal_url      = d.dealUrl,
-            tz            = d.division.timezoneOffsetInSeconds,
-            remaining     = d.options[1].remainingQuantity,
         }
-        
+        print(i,"end")
         table.insert( App_State.rolodex.cards, c )
         
         if divs[d.division.name] then
@@ -278,10 +289,10 @@ return function(response_table)
     
     if ZIP_ENTRY.parent  then ZIP_ENTRY:unparent()  end
 
-    if SMS_ENTRY.parent  then SMS_ENTRY:unparent()  end    
+    --if SMS_ENTRY.parent  then SMS_ENTRY:unparent()  end    
     
     
-    App_State.rolodex:add(SMS_ENTRY,--[[ZIP_PROMPT,]]ZIP_ENTRY)
+    App_State.rolodex:add(--[[ZIP_PROMPT,]]ZIP_ENTRY)
     
     --ZIP_PROMPT:set_city(divs)
     

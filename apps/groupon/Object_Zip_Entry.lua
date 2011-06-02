@@ -1,5 +1,5 @@
 --object
-local zip_entry = Group{opacity=0, x = 168, y =  - 52}
+local zip_entry = Group{opacity=0, x = 168, y =  - 49}
 
 local state = ENUM({"HIDDEN","ANIMATING_IN","ACTIVE","SENDING","ANIMATING_OUT"})
 
@@ -15,10 +15,10 @@ local zip_bg = Clone{ source = assets.zip_cells }
 ---[[
 local prompt = Text{
     text="Enter a zip code:",
-    font="DejaVu Sans Condensed 18px",
+    font="DejaVu Sans Condensed Bold 18px",
     color="#515b4c",
     y = -25,
-	x=37
+	x=20
 }
 --[[
 prompt.anchor_point = {

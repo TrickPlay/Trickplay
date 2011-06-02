@@ -10,9 +10,10 @@ local cursor_base_x = 14
 local digit_spacing = 40
 local first_digit_x = 226
 local deal_url = "failed to set url"
+local merchant_name = "failed to set merchant"
 
 local sms_bg = Clone{ source = assets.info_panel }
-
+sms_entry.h = sms_bg.h
 local fine_print_title = Text{
     text="The Fine Print",
     font="DejaVu Sans Condensed Bold 20px",
@@ -95,7 +96,7 @@ local submit_button_focus = Clone{
 }
 local submit_button_shadow = Text{
 	text = "Send",
-	font = "DejaVu Condensed 18px",
+	font = "DejaVu Condensed Bold 22px",
 	color = "#000000",
 	opacity = 255*.5,
 	x = submit_button.x + submit_button.w/2 + 1,
@@ -103,7 +104,7 @@ local submit_button_shadow = Text{
 }
 local submit_button_text = Text{
 	text = "Send",
-	font = "DejaVu Condensed 18px",
+	font = "DejaVu Condensed Bold 22px",
 	color = "#ffffff",
 	x = submit_button.x + submit_button.w/2,
 	y = submit_button.y + submit_button.h/2,
@@ -127,8 +128,7 @@ sms_entry:add(
 )
 sms_entry:add(unpack(entry))
 
-sms_entry.anchor_point = {sms_bg.w/2,sms_bg.h-10}
-
+sms_entry.anchor_point = {sms_bg.w/2,0}
 
 local reset_form = function()
     for i = 1,phone_digit_max do
@@ -230,17 +230,19 @@ local add_number = function(num)
 end
 
 --terminal animations
+local start_y
 local animate_in = function(self,msecs,p)
-    self.opacity = 255*(p)
+    self.y = start_y-self.h*p
     if p == 1 then
         state:change_state_to("ACTIVE")
     end
 end
 local animate_out = function(self,msecs,p)
-    self.opacity = 255*(1-p)
+    --self.opacity = 255*(1-p)
+	self.y = start_y-self.h*(1-p)
     if p == 1 then
         state:change_state_to("HIDDEN")
-		
+		sms_entry:unparent()
     end
 end
 
@@ -261,6 +263,7 @@ state:add_state_change_function(
 		
 		cancel_object = SEND_SMS(
 			sms_callback,
+			merchant_name,
 			deal_url,
 			entry[1].text..
             entry[2].text..
@@ -316,15 +319,24 @@ state:add_state_change_function(
     "SENDING",
     nil
 )
+local card = nil
 state:add_state_change_function(
     function(prev_state,new_state)
+		card = App_State.rolodex.cards[App_State.rolodex.top_card]
+		sms_entry.x = card.w/2
+		start_y = card.title_h
+		sms_entry.y = start_y
+		sms_entry.opacity=255
         Idle_Loop:add_function(animate_in,sms_entry,500)
+        Idle_Loop:add_function(card.animate_in_sms,card,500)
         reset_form()
-        sms_entry.y          = -App_State.rolodex.cards[App_State.rolodex.top_card].h
-		fine_print_body.text =  App_State.rolodex.cards[App_State.rolodex.top_card].fine_print
-		highlights_body.text =  App_State.rolodex.cards[App_State.rolodex.top_card].highlights
-		deal_url             =  App_State.rolodex.cards[App_State.rolodex.top_card].deal_url
-        sms_entry:lower_to_bottom()
+        sms_entry.y          = -card.h
+		fine_print_body.text =  card.fine_print
+		highlights_body.text =  card.highlights
+		deal_url             =  card.deal_url
+		merchant_name        =  card.merchant
+        card:add(sms_entry)
+		sms_entry:lower_to_bottom()
     end,
     nil,
     "ANIMATING_IN"
@@ -333,8 +345,10 @@ state:add_state_change_function(
     function(prev_state,new_state)
         if prev_state == "ANIMATING_IN" then
             Idle_Loop:remove_function(animate_in)
+			Idle_Loop:remove_function(animate_in_sms)
         end
         Idle_Loop:add_function(animate_out,sms_entry,500)
+        Idle_Loop:add_function(card.animate_out_sms,card,500)
     end,
     nil,
     "ANIMATING_OUT"
@@ -438,7 +452,11 @@ local keys_ROLODEX = {
 		
 		if state:current_state() == "HIDDEN" then
 			
-			state:change_state_to("ANIMATING_IN")
+			if App_State.rolodex.cards[App_State.rolodex.top_card]:find_child("N/A").opacity == 0 then
+				
+				state:change_state_to("ANIMATING_IN")
+				
+			end
 			
 		elseif  state:current_state() == "ACTIVE" and
 			cursor_index == phone_digit_max + 1 then

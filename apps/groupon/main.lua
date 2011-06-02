@@ -1,4 +1,4 @@
-
+--GLOBALS
 
 --I f*cking hate radians
 function sin(val) return math.sin(math.pi/180*val) end
@@ -9,10 +9,9 @@ function tan(val) return math.tan(math.pi/180*val) end
 screen_w = screen.w
 screen_h = screen.h
 
-
-
+--Images
 assets = {
-	bg           = Image{src="assets/card-bg.png"},
+	
 	tag          = Image{src="assets/button-tag.png"},
 	btn_glow     = Image{src="assets/button-glow.png"},
 	submit_btn   = Image{src="assets/button-small.png"},
@@ -24,16 +23,13 @@ assets = {
 	cell_green   = Image{src="assets/cell-green.png"},
 	cell_dark_s  = Image{src="assets/cell-dark-grey-small.png"},
 	cell_green_s = Image{src="assets/cell-green-small.png"},
-	expired      = Image{src="assets/expired.png"},
 	g            = Image{src="assets/g.png"},
-	message      = Image{src="assets/message-bg.png"},
-	red_message  = Image{src="assets/first-location-bg.png"},
-	zip_entry    = Image{src="assets/change-location-bg.png"},
+	--message      = Image{src="assets/message-bg.png"},
+	--red_message  = Image{src="assets/first-location-bg.png"},
+	--zip_entry    = Image{src="assets/change-location-bg.png"},
 	info_panel   = Image{src="assets/more-info-panel.png"},
-	sold_out     = Image{src="assets/sold-out.png"},
-	title_slice  = Image{src="assets/title-bar-slice.png"},
-	title_top    = Image{src="assets/title-bar-top.png"},
-	red_dot      = Image{src="assets/dot-red.png"},
+	
+	
 	zip_cells    = Image{src="assets/zip-cells-5-grey.png"},
 	n_a          = Image{src="assets/no-longer-available.png"},
 	hourglass    = {
@@ -52,13 +48,22 @@ assets = {
 	},
 	hourglass_soldout = Image{src="assets/hourglass/hourglasssoldout.gif"},
 }
+--assets that are only used in Canvas's
+bmp = {
+	card_bg      = Bitmap("assets/card-bg.png",false),
+	title_slice  = Bitmap("assets/title-bar-slice.png",false),
+	title_top    = Bitmap("assets/title-bar-top.png",false),
+	red_dot      = Bitmap("assets/dot-red.png",false),
+}
 
-
+--Images are add to a hidden group
 local clone_srcs = Group{}
 screen:add(clone_srcs)
 clone_srcs:hide()
 
+--add each image
 for _,img in pairs(assets) do
+	--go through nested tables
 	if type(img) == "table" then
 		for _,img2 in ipairs(img) do
 			clone_srcs:add(img2)
@@ -68,9 +73,17 @@ for _,img in pairs(assets) do
 	end
 end
 
+--load saved data
+links_sent = settings.sent_links or {}
+--save that same data on closing
+app.on_closing = function()
+	
+	settings.sent_links = links_sent
+	
+end
 
-
-
+--------------------------------------------------------------------------------
+--GLOBALS from files
 
 ENUM                                        = dofile("Utils.lua")
 
@@ -120,15 +133,6 @@ App_State.state:add_state_change_function(
     "LOADING"
 )
 
-
-
---[[
-assert(STATES         ~= nil,  "The STATES table no longer exists, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
-assert(STATES.LOADING ~= nil,"LOADING is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
-assert(STATES.ROLODEX ~= nil,"ROLODEX is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
-assert(STATES.ZIP     ~= nil,    "ZIP is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
-assert(STATES.PHONE   ~= nil,  "PHONE is no longer a STATES table, possibly renamed. The file \"User_Input.lua\" needs to be updated.")
---]]
 
 App_State.state:change_state_to("LOADING")
 
