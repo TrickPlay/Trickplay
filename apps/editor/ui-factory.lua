@@ -1633,7 +1633,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	      function minus:on_button_down(x,y)
 		     v.tab_labels = table_removekey(v.tab_labels, tonumber(string.sub(minus.name, 11,-1)))
-		     dumptable(v.tab_labels)
+		     --dumptable(v.tab_labels)
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
 		     current_inspector = nil
@@ -1935,7 +1935,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
 	      function minus:on_button_down(x,y)
 		     v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
-		     dumptable(v.items)
+		     --dumptable(v.items)
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
 		     current_inspector = nil

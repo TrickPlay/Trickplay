@@ -896,7 +896,7 @@ function create_on_button_down_f(v)
                     		return true
                 		end 
 	            		if(input_mode == S_SELECT and v.extra.selected == false) then 
-							print ("popopopopoop") 
+								----kkkk
 		     				editor.selected(v) 
 							if(v.type == "Text") then 
 			      				v:set{cursor_visible = true}
