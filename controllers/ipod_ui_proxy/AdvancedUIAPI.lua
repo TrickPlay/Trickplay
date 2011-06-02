@@ -1,9 +1,10 @@
 local log = print
+-- Load the AdvancedUI Classes into a class table
+local class_table = dofile("AdvancedUIClasses.lua")
+local controller , CACHE_LOCAL_PROPERTIES = ...
 
-local controller , class_table , CACHE_LOCAL_PROPERTIES = ...
-
-print(...)
-print(controller, class_table)
+assert(controller)
+assert(class_table)
 
 ---------------------------------------------------------------------------
 -- CACHE_LOCAL_PROPERTIES
@@ -356,6 +357,9 @@ mt.__index = mt
 -- on the remote end. Then, creates and returns a local proxy for it.
 
 function mt:create_remote( T , properties )
+    if T == "Controller" then
+        return nil
+    end
 
     local proxy = proxy_metatables[ T ]
 
@@ -417,4 +421,22 @@ end
 
 ---------------------------------------------------------------------------
 
-return setmetatable( factory , mt )
+---------------------------------------------------------------------------
+-- List every proxy !
+
+function mt:list()
+    dumptable(proxies)
+end
+
+---------------------------------------------------------------------------
+
+setmetatable( factory , mt )
+
+---------------------------------------------------------------------------
+-- Give the controller Container like abilities
+
+controller.screen = factory:create_local(0, "Controller") 
+
+---------------------------------------------------------------------------
+
+return factory

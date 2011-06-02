@@ -64,9 +64,7 @@ local function UIElement()
     end
 
     function call:transform_point(ancestor, x, y, z)
-        --TODO: implement later
-        --self("transform_point", ancestor, x, y, z)
-        return false
+        self("transform_point", ancestor, x, y, z)
     end
 
     return get , set , call , event
@@ -249,7 +247,8 @@ local class_table =
     Rectangle = RectangleClass,
     Image = ImageClass,
     Text = TextClass,
-    Group     = GroupClass
+    Group     = GroupClass,
+    Controller = GroupClass
 }
 
 return class_table
