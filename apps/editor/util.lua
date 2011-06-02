@@ -898,6 +898,7 @@ function create_on_button_down_f(v)
                     		return true
                 		end 
 	            		if(input_mode == S_SELECT and v.extra.selected == false) then 
+							print ("popopopopoop") 
 		     				editor.selected(v) 
 							if(v.type == "Text") then 
 			      				v:set{cursor_visible = true}
@@ -933,20 +934,19 @@ function create_on_button_down_f(v)
 									odr = i
 								end 
 							end 
-		
 
 							if odr then 
 								for i,j in pairs (g.children) do 
-							--print(j.name)
+									--print(j.name)
 									if is_this_container(j) == true then 
-									--print(j.name, "container")
+										--print(j.name, "container")
 										if i > odr then 
 											j.extra.org_opacity = j.opacity
                        						j:set{opacity = 50}
 										end 	
 									elseif i ~= odr then  
-									j.extra.org_opacity = j.opacity
-                       				j:set{opacity = 50}
+										j.extra.org_opacity = j.opacity
+                       					j:set{opacity = 50}
 								end 
 							end 
 						end
@@ -1000,7 +1000,11 @@ end
 						new_object = copy_obj(p_obj)
 					    if(dragging ~= nil) then 
 	            			local actor , dx , dy = unpack( dragging )
-	            			new_object.position = {x-dx, y-dy}
+							if type(dx) == "number" then 
+	            				new_object.position = {x-dx, y-dy}
+							else 
+								print("dx is function") 
+							end 
 							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
 								editor.n_select(v, false, dragging) 
 								editor.n_select(new_object, false, dragging) 
@@ -1906,13 +1910,13 @@ local function create_small_input_box(txt)
      	local box = factory.draw_small_ring()
      	local box_focus = factory.draw_small_focus_ring()
 
-	box_g.name = "input_b"
+		box_g.name = "input_b"
         box.position  = {0,0}
         box.reactive = true
         box.opacity = 255
-	box_g:add(box)
-	box_focus.opacity = 0 
-	box_g:add(box_focus)
+		box_g:add(box)
+		box_focus.opacity = 0 
+		box_g:add(box_focus)
     	box_g:add(txt)
 
         function box_g.extra.on_focus_in()

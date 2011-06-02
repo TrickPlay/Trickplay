@@ -1540,11 +1540,11 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		end 	
 	end
 
-	if v.extra.type == "Button" or v.extra.type == "TextInput" or v.extra.type == "MenuButton" then
+	if v.extra.type == "Button" or v.extra.type == "MenuButton" then
 		focus_changer:find_child("textE").text = v.name 
 		focus_changer:find_child("gE").opacity = 150 
 		focus_changer:find_child("gE").reactive = false 
-	elseif v.extra.type == "ButtonPicker" then 
+	elseif v.extra.type == "TextInput" or  v.extra.type == "ButtonPicker" then 
 		focus_changer:find_child("textE").text = v.name 
 		focus_changer:find_child("gE").opacity = 150 
 		focus_changer:find_child("gE").reactive = false 
@@ -1557,9 +1557,8 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	end 	
 
 	local space = WIDTH - PADDING_X  
-        focus_changer.position  = {WIDTH - space , 5}
-
-        group:add(focus_changer)
+    focus_changer.position  = {WIDTH - space , 5}
+    group:add(focus_changer)
 	return group
     elseif(item_n == "tab_labels") then 
 	if save_items == true then 
