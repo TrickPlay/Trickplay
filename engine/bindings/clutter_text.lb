@@ -70,7 +70,9 @@ class Text [[ClutterActor*]] actor
     	
     	*Example:* Create a new Text object and set its text property
     	
-    	>title = Text{ str = "Welcome to My World!" }
+    	(code)
+    	title = Text{ text = "Welcome to My World!" }
+    	(end)
     	
     	*See Also:* the <markup> property, the <on_text_changed> event handler
     */
@@ -100,7 +102,9 @@ class Text [[ClutterActor*]] actor
     	
     	*Example:*
     	
-    	>"This is <span underline="single">soooo <b>cool!</b></span>"
+    	(code)
+    	cool = Text{ markup = 'This is <span underline="single">soooo <b>cool!</b></span>' }
+    	(end)
     	
     	*See Also:* the <text> property, the <use_markup> property
     	
@@ -198,9 +202,11 @@ class Text [[ClutterActor*]] actor
 		
 		*Examples:* The following are some sample font strings.
 		
-		>"Sans 38px"
-		>"Century_Schoolbook,Garamond,Serif 72px"
-		>"Sans Italic Bold 30"
+		(code)
+		"Sans 38px"
+		"'Century Schoolbook',Garamond,Serif 72px"
+		"Sans Italic Bold 30"
+		(end)
 		
 		*See Also:* the <markup> property
 
@@ -257,7 +263,8 @@ class Text [[ClutterActor*]] actor
 		
 		For wrapping to occur, the object's <wrap> property must be set to true.
 		
-		Supported wrap_mode Settings:
+		*Supported wrap_mode Settings:*
+		
 		WORD - text is wrapped at word boundaries
 		CHAR - text is wrapped at character boundaries
 		WORD_CHAR - text is wrapped at word boundaries, unless there is not
@@ -319,9 +326,11 @@ class Text [[ClutterActor*]] actor
     	*Example:* Create a string with formatting tags and assign it to the
     	text property
     	
-    	>local myText = Text()
-    	>myText.use_markup = true
-    	>myText.text = "This string contains <big>large words</big> and <small>tiny words</small>."
+    	(code)
+    	local myText = Text()
+    	myText.use_markup = true
+    	myText.text = "This string contains <big>large words</big> and <small>tiny words</small>."
+    	(end)
     	
     	*See Also:* the <markup> property, the <text> property
     	
@@ -360,7 +369,9 @@ class Text [[ClutterActor*]] actor
 		
 		*Example:*
 		
-		>myText.ellipsize = "END"
+		(code)
+		myText.ellipsize = "END"
+		(end)
 		
 	*/
 	
@@ -507,11 +518,13 @@ class Text [[ClutterActor*]] actor
 		
 		*Example:* Select part of a string
 		
-		>myText = { text = "The dog ate the bone." }
-		>-- Select the word "dog"
-		>myText.cursor_position = 4
-		>myText.selection_end = 6
-		>print( 'Selection: "' .. myText.selected_text .. '"' )	-- prints Selection: "dog"
+		(code)
+		myText = { text = "The dog ate the bone." }
+		-- Select the word "dog"
+		myText.cursor_position = 4
+		myText.selection_end = 6
+		print( 'Selection: "' .. myText.selected_text .. '"' )	-- prints Selection: "dog"
+		(end)
 		
 		*See Also:* the <cursor_position> property, the <selection_color>
 		property, the <selected_text> property
@@ -830,7 +843,10 @@ class Text [[ClutterActor*]] actor
 		*Return Values:* If the specified position was invalid, returns nil. 
 		Otherwise, returns a table containing three integers. The table 
 		contents are shown below.
-		>{ X coordinate, Y coordinate, line height in pixels }
+		
+		(code)
+		{ X coordinate, Y coordinate, line height in pixels }
+		(end)
 		
 */
 
@@ -889,7 +905,10 @@ class Text [[ClutterActor*]] actor
 		text string is modified.
 		
 		*Prototype:*
-		>on_text_changed( Text text )
+		
+		(code)
+		on_text_changed( Text text )
+		(end)
 		
 		*Arguments:*
 		

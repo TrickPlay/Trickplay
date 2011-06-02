@@ -47,15 +47,19 @@ class Rectangle [[ClutterActor*]] actor
 		
 		*Example:* Set rectangle's color using a table
 		
-		>r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
-		>r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
+		(code)
+		r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
+		r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
+		(end)
 		
 		*Example:* Set rectangle's color using a string
 		
-		>r.color = "FF00FF"		-- RGB values with default 0xFF/opaque alpha
-		>r.color = "FF00FF40"	-- RGB values with explicit alpha
-		>r.color = "#FF00FF"	-- RGB values, default alpha, ignored "#" prefix
-
+		(code)
+		r.color = "FF00FF"      -- RGB values with default 0xFF/opaque alpha
+		r.color = "FF00FF40"    -- RGB values with explicit alpha
+		r.color = "#FF00FF"     -- RGB values, default alpha, ignored "#" prefix
+		(end)
+		
     */
     
     table color
@@ -149,14 +153,18 @@ Section: RGB/Alpha Color Formats
 		
 		*Example:* Set a Rectangle object's color property using a table
 		
-		>r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
-		>r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
+		(code)
+		r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
+		r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
+		(end)
 		
 		*Example:* Set a Rectangle object's color using a string
 		
-		>r.color = "FF00FF"		-- RGB values with default 0xFF/opaque alpha
-		>r.color = "FF00FF40"	-- RGB values with explicit alpha
-		>r.color = "#FF00FF"	-- RGB values, default alpha, ignored "#" prefix
-
+		(code)
+		r.color = "FF00FF"      -- RGB values with default 0xFF/opaque alpha
+		r.color = "FF00FF40"    -- RGB values with explicit alpha
+		r.color = "#FF00FF"     -- RGB values, default alpha, ignored "#" prefix
+		(end)
+		
 */
 

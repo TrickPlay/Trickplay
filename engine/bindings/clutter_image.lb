@@ -190,18 +190,22 @@ class Image [[ClutterActor*]] actor
     	
     	*Examples:* Create an Image object and load its associated image synchronously
     	
-    	>local myImage = Image()
-    	>myImage.src = "assets/foo.png"		-- load image synchronously
-    	>if myImage.loaded == false then
-    	>  -- Image not loaded; insert error-handling code here
-    	>end
+    	(code)
+    	local myImage = Image()
+    	myImage.src = "assets/foo.png"		-- load image synchronously
+    	if myImage.loaded == false then
+    	  -- Image not loaded; insert error-handling code here
+    	end
+    	(end)
     	
-    	>-- Same as above, but combining object creation and
-    	>-- the setting of the src property in a single statement
-    	>local myImage = Image{ src = "assets/foo.png" }
-    	>if myImage.loaded == false then
-    	>  -- Insert error-handling code here
-    	>end
+    	(code)
+    	-- Same as above, but combining object creation and
+    	-- the setting of the src property in a single statement
+    	local myImage = Image{ src = "assets/foo.png" }
+    	if myImage.loaded == false then
+    	  -- Insert error-handling code here
+    	end
+    	(end)
     	
     	*See Also:* the <loaded> property, the <async> property
     	    
@@ -278,7 +282,9 @@ class Image [[ClutterActor*]] actor
 		
 		*Example:* Activate horizontal tiling
 		
-		>mImage.tile = { true, false }	-- horizontal tiling active, vertical tiling inactive
+		(code)
+		mImage.tile = { true, false }	-- horizontal tiling active, vertical tiling inactive
+		(end)
 		
 		*See Also:* the <UIElement.width> and <UIElement.height> properties
 		
@@ -355,7 +361,7 @@ class Image [[ClutterActor*]] actor
 		    -- Image did not load; insert handling code here
 		  else
 		    -- Image is loaded; insert any applicable operations here
-			end
+		  end
 		end
 
 		-- Hook our event handler to the Image object
@@ -453,7 +459,9 @@ class Image [[ClutterActor*]] actor
 		
 		*Prototype:*
 		
-		>void on_loaded( Image loadedImage, boolean failed )
+		(code)
+		void on_loaded( Image loadedImage, boolean failed )
+		(end)
 		
 		*Arguments:*
 		
@@ -493,7 +501,9 @@ class Image [[ClutterActor*]] actor
 		
 		*Prototype:*
 		
-		>void on_size_changed( Image changedImage, int newWidth, int newHeight )
+		(code)
+		void on_size_changed( Image changedImage, int newWidth, int newHeight )
+		(end)
 		
 		*Arguments:*
 		
@@ -513,11 +523,12 @@ class Image [[ClutterActor*]] actor
 
 		-- Define event handler
 		function on_changeHandler( changedImage, newWidth, newHeight )
-		  -- Perform any desired operations here
-		  -- Example: Will new size fit horizontally in display area?
+		  -- Perform any desired operations here. For example...
 
+		  -- Get current tile settings
 		  local tile = changedImage.tile
 
+		  -- Will new size fit horizontally in display area?
 		  if( newWidth < changedImage.width )then
 		    -- No, image is too small, so tile the image horizontally
 		    tile[ 1 ] = true
@@ -529,6 +540,7 @@ class Image [[ClutterActor*]] actor
 		    tile[ 2 ] = true
 		  end
 
+		  -- Apply any changed tile settings
 		  changedImage.tile = tile
 		end
 
