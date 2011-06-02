@@ -10,8 +10,7 @@ function controllers:on_controller_connected(controller)
         print("DISCONNECTED", controller.name)
         screen.on_key_down = nil
     end
-    dumptable(class_table)
-    factory = loadfile("AdvancedUIAPI.lua")( controller , class_table )
+    factory = loadfile("AdvancedUIAPI.lua")( controller )
 
     local key_handler = {}
     function screen:on_key_down(key)
