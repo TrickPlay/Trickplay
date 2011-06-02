@@ -860,7 +860,9 @@ interface actor [[ClutterActor*]]
 	This allows you to set any properties on a UI element using a table, the
 	same way that you construct a UI element. For example:
 	
-	> element:set{size={100,100},position={10,15}}
+	(code)
+	element:set{size={100,100},position={10,15}}
+	(end)
 	
 	Arguments:
 	
