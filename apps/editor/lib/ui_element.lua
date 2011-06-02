@@ -2855,7 +2855,7 @@ function ui_element.checkBoxGroup(t)
              if editor_lb == nil or editor_use then  
 	     	function box:on_button_down (x,y,b,n)
 			local box_num = tonumber(box.name:sub(4,-1))
-			dumptable(p.selected_items)
+			--dumptable(p.selected_items)
 			table.insert(p.selected_items, box_num)
 			cb_group:find_child("check"..tostring(box_num)).opacity = 255
 			cb_group:find_child("check"..tostring(box_num)).reactive = true

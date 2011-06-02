@@ -3719,10 +3719,10 @@ function editor.top()
      local org_object, new_object 
 
      if(table.getn(selected_objs) == 0 )then 
-	print("there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = S_SELECT
-	return 
+		print("there are no selected objects") 
+        screen:grab_key_focus()
+		input_mode = S_SELECT
+		return 
      end 
 
      org_cord()
@@ -3744,6 +3744,21 @@ function editor.top()
           end
     end
 
+--[[
+	for i, v in pairs (screen.children) do 
+ 		if v.extra then 
+	        if(v.extra.selected == true and v.name ~= basis_obj_name ) then
+		     	if(v.y ~= basis_obj.y) then
+	                org_object = copy_obj(v)
+					v.y = basis_obj.y 
+					new_object = copy_obj(v)
+                    table.insert(undo_list, {v.name, CHG, org_object, new_object})
+		     	end 
+			end 
+        end
+	end 
+--]]
+	
     ang_cord()
     screen.grab_key_focus(screen)
     input_mode = S_SELECT
