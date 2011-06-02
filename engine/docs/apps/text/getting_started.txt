@@ -191,7 +191,7 @@ local strings=dofile("localized:strings.lua")
 TrickPlay will look for the file "strings.lua" in the following directories,
 in order:
 
-(code)
+(table)
 <app>/localized/<language>/<country>/strings.lua
 <app>/localized/<language>/strings.lua
 <app>/localized/strings.lua
@@ -205,7 +205,7 @@ language and country as translations are added.
 You could have a structure
 like this:
 
-(code)
+(diagram)
     <app>
       +--- app
       +--- main.lua
