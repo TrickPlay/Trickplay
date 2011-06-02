@@ -6,9 +6,9 @@ To add a background image to the application's screen, perform the following ste
 (see images/EdUiElementsDialog.png)
 From this dialog, you can add various user interface components, including buttons, text labels, and images.
 
-2. To add a background image, click the Image button. A File Selection dialog will display.
+2. To add a background image, click the Image button. An Open File dialog will display.
 (see images/EdImageSelection.png)
-From here, you can select the desired background image. A sample background image to use in this tutorial has been provided in the file background.jpg. Select the file by clicking on it and then pressing the Open button.
+From here, you can select the desired background image. A sample background image to use in this tutorial has been provided in the file background.jpg. Select the file by clicking on it and then pressing the OK button.
 
 3. The selected image will display within the Editor workspace. If necessary, click on the image to select it. When a UI element is selected, it is highlighted within a bounding yellow box. Right-click the selected image to display the image's Inspector dialog.
 
