@@ -16,6 +16,7 @@ end
 local function empty() end
 
 
+--turns list tags into an outline
 local dot = "•"
 local function gen_highlight(s)
 	local ret_val = ""
@@ -170,6 +171,8 @@ local update_time = function(self,curr_time)
 	if delta.day < 0 then
 		self:find_child("TIME").text="EXPIRED"
 		src = assets.hourglass[12]
+		
+		self:not_available()
 	else
 		
 		--local day = (30*delta.month+delta.day)
@@ -199,6 +202,10 @@ local update_time = function(self,curr_time)
 end
 
 local img_on_loaded = function(b,failed)
+	print("Bitmap",b)
+	
+	
+	b.on_loaded = nil
 	
 	if failed then
 		
@@ -208,18 +215,21 @@ local img_on_loaded = function(b,failed)
 		
 	end
 	
+	
 	local c = b.targ_canvas
 	local g = b.group
 	
-	--c:new_path()
-    --c:move_to(301,    b.bg_y+37)
-	--c:line_to(301+b.w,b.bg_y+37)
-	--c:line_to(301+b.w,b.bg_y+37+b.h)
-	--c:line_to(301,    b.bg_y+37+b.h)
-	--c:line_to(301,    b.bg_y+37)
-	c:set_source_bitmap(b,301,b.bg_y+37)
-	--c:fill(true)
-	c:paint(255)
+	g.deal_img = nil
+	
+	c:new_path()
+    c:move_to(301,    37)
+	c:line_to(301+439,37)
+	c:line_to(301+439,37+266)
+	c:line_to(301,    37+266)
+	c:line_to(301,    37)
+	c:set_source_bitmap(b,301,37)
+	c:fill(true)
+	--c:paint(255)
 	local old = g:find_child("tag")
 	
 	--c:new_path()
@@ -231,29 +241,22 @@ local img_on_loaded = function(b,failed)
 	c:set_source_bitmap(Bitmap(old.source.src,false),old.x,old.y)
 	c:paint(255)--fill(true)
 	old:unparent()
-	--[[
-	old = g:find_child("tag text")
 	
-	c:new_path()
-	c:move_to(old.x - old.anchor_point[1],old.y - old.anchor_point[2])
-	c:text_element_path(old)
-	c:set_source_color(old.color)
-	c:fill(true)
-	old:unparent()
-	--]]
 	old = g:find_child("tag price")
-	
 	c:new_path()
-	c:move_to(old.x - old.anchor_point[1],old.y - old.anchor_point[2])
+	c:move_to(
+		old.x - old.anchor_point[1],
+		old.y - old.anchor_point[2]
+	)
 	c:text_element_path(old)
 	c:set_source_color(old.color)
 	c:fill(true)
 	old:unparent()
 	
 	--out with the old, in with the new
-	g:find_child("card blit"):unparent()
+	g:find_child("Card BG Blit"):unparent()
 	
-	local img = c:Image{name="card blit"}
+	local img = c:Image{name="Card BG Blit",y=g:find_child("Card Title Blit").h}
 	
 	g:add(img)
 	
@@ -261,12 +264,24 @@ local img_on_loaded = function(b,failed)
 	--print("done")
 end
 
+local txt_to_canvas = function(c,t)
+	c:new_path()
+	c:move_to(
+		t.x - t.anchor_point[1],
+		t.y - t.anchor_point[2]
+	)
+	c:text_element_path(t)
+	c:set_source_color(t.color)
+	c:fill(true)
+end
+
 --Card Constructor
 local make_card = function(input)
 	
+	--the returned group
+	local card = Group{w = bmp.card_bg.w}
 	
-	local card = Group{}
-	
+	--the group's two animate functions
 	card.update_time = update_time
 	card.throb       = throb
 	
@@ -280,100 +295,46 @@ local make_card = function(input)
 		wrap=true,
 	}
 	
-    card.title_h = title_text.h
-    
 	local title_shadow = Text{
 		text = input.title,
 		font = font_b.." 30px",
-		color = {0,0,0,255*.5},--"000000",
-		--opacity = 255*.5,
+		color = {0,0,0,255*.5},
 		x=title_text.x+4,
 		y=title_text.y+4,
 		wrap=true,
 	}
 	
-	title_text.w   = assets.title_top.w-title_text.x*2
-	title_shadow.w = assets.title_top.w-title_text.x*2
+	title_text.w   = bmp.title_top.w-title_text.x*2
+	title_shadow.w = title_text.w
 	
 	
-	local slice_h = title_text.y+title_text.h+title_padding-assets.title_top.h
+	local slice_h = title_text.y+title_text.h+title_padding-bmp.title_top.h
 	
-	local bg_y = assets.title_top.h+slice_h
+	local title_h = bmp.title_top.h+slice_h
 	
-	local c = Canvas(assets.bg.w,bg_y+assets.bg.h)
-	card.w = c.w
-	--top
-	--c:new_path()
-    --c:move_to(0,0)
-	--c:line_to(c.w,0)
-	--c:line_to(c.w,assets.title_top.h)
-	--c:line_to(0,assets.title_top.h)
-	--c:line_to(0,0)
-	local b = Bitmap(assets.title_top.src,false)
-	c:set_source_bitmap(b,0,0)
-	c:paint(255)
+	--The Title Canvas
+	local title = Canvas(bmp.card_bg.w,title_h)
 	
-	--top slice
-	--c:new_path()
-    --
-	--c:move_to(0,assets.title_top.h)
-	--
-	--c:line_to(c.w,assets.title_top.h)
-	--c:line_to(c.w,bg_y)
-	--c:line_to(0,bg_y)
-	--c:line_to(0,assets.title_top.h)
+	--add the background pieces to the title Canvas
+	title:set_source_bitmap(bmp.title_top,0,0)
+	title:paint(255)
 	
-	b = Bitmap(assets.title_slice.src,false)
-	
-	--c:set_source_bitmap(b,0,assets.title_top.h)
-	--c:set_source_color("ff0000")
-	
-	--c:fill(true)
-	--[[
-	c:save()
-	
-	c:scale(1,b.h/(bg_y - assets.title_top.h))
-	
-	print(b.h/(bg_y - assets.title_top.h))
-	
-	c:set_source_bitmap(b,0,assets.title_top.h)
-	
-	c:fill(true)
-	
-	c:restore()
-	--]]
-	---[[
-	for i = assets.title_top.h, bg_y, assets.title_slice.h do
-		c:set_source_bitmap(b,0,i)
-		c:paint(255)--fill(true)
+	--tiling...
+	for i = bmp.title_top.h, title_h, bmp.title_slice.h do
+		title:set_source_bitmap(bmp.title_slice,0,i)
+		title:paint(255)
 	end
-	--]]
 	
-	local t = title_shadow
-	c:new_path()
-	c:move_to(t.x,t.y)
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(title,title_shadow)
+	txt_to_canvas(title,title_text)
 	
-	t = title_text
-	c:new_path()
-	c:move_to(t.x,t.y)
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
-	
+	----------------------------------------------------------------------------
+	--the background Canvas
+	local bg    = Canvas(bmp.card_bg.w,bmp.card_bg.h)
 	
 	--main bg
-	c:new_path()
-    c:move_to(0,bg_y)
-	c:line_to(c.w,bg_y)
-	c:line_to(c.w,c.h)
-	c:line_to(0,c.h)
-	c:line_to(0,bg_y)
-	b = Bitmap(assets.bg.src,false)
-	c:set_source_bitmap(b,0,bg_y)
-	c:fill(true)
+	bg:set_source_bitmap(bmp.card_bg,0,0)
+	bg:paint(255)
 	
 	local tag = Clone{
 		
@@ -383,7 +344,7 @@ local make_card = function(input)
 		
 		x=48,
 		
-		y=bg_y+14,
+		y=14,
 		
 	}
 	
@@ -395,7 +356,7 @@ local make_card = function(input)
 		
 		x=tag.x+5,
 		
-		y=tag.y+6,
+		y=title_h+tag.y+6,
 		
 	}
 	
@@ -409,29 +370,28 @@ local make_card = function(input)
 		
 		x=tag.x+15,
 		
-		y=tag.y+15,
+		y=title_h+tag.y+15,
 		
 	}
 	
-	local hourglass = Clone{name = "hourglass",source = assets.hourglass[1],x=117,y = bg_y+180}
-	hourglass.x = hourglass.x - hourglass.w - 20
+	card.hourglass = Clone{
+		name = "hourglass",
+		source = assets.hourglass[1],
+		x=117,
+		y = title_h+180
+	}
+	card.hourglass.x = card.hourglass.x - card.hourglass.w - 20
 	
-	card.hourglass = hourglass
 	local value = Text{
 		text="Value",
 		font=font.." 16px",
 		color = black_text,
 		x = 73,
-		y = bg_y+116,
+		y = 116,
 	}
 	value.x=value.x+value.w/2
 	value.anchor_point = {value.w/2,0}
-	t = value
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,value)
 	
 	local value_amt = Text{
 		text=input.msrp,
@@ -441,12 +401,7 @@ local make_card = function(input)
 		y = value.y+value.h,
 	}
 	value_amt.anchor_point = {value_amt.w/2,0}
-	t = value_amt
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,value_amt)
 	
 	local discount = Text{
 		text="Discount",
@@ -457,12 +412,7 @@ local make_card = function(input)
 	}
 	discount.x = discount.x + discount.w/2
 	discount.anchor_point = {discount.w/2,0}
-	t = discount
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,discount)
 	
 	local discount_amt = Text{
 		text=input.percentage.."%",
@@ -472,12 +422,7 @@ local make_card = function(input)
 		y = discount.y+discount.h,
 	}
 	discount_amt.anchor_point = {discount_amt.w/2,0}
-	t = discount_amt
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,discount_amt)
 	
 	local savings = Text{
 		text="You Save",
@@ -488,12 +433,7 @@ local make_card = function(input)
 	}
 	savings.x = savings.x + savings.w/2
 	savings.anchor_point = {savings.w/2,0}
-	t = savings
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,savings)
 	
 	local savings_amt = Text{
 		text=input.saved,
@@ -503,26 +443,16 @@ local make_card = function(input)
 		y = savings.y+savings.h,
 	}
 	savings_amt.anchor_point = {savings_amt.w/2,0}
-	t = savings_amt
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,savings_amt)
 	
 	local tltb = Text{
 		text="Time Left To Buy",
 		font=font.." 16px",
 		color = black_text,
 		x = 117,
-		y = bg_y+180,
+		y = 180,
 	}
-	t = tltb
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,tltb)
 	
 	local tltb_rem = Text{
 		name="TIME",
@@ -530,7 +460,7 @@ local make_card = function(input)
 		font=font_b.." 20px",
 		color = black_text,
 		x = tltb.x,
-		y = tltb.y+tltb.h,
+		y = title_h+tltb.y+tltb.h,
 	}
 	
 	local bought = Text{
@@ -538,16 +468,11 @@ local make_card = function(input)
 		font=font_b.." 20px",
 		color = black_text,
 		x = 122,
-		y = bg_y+247,
+		y = 247,
 	}
 	bought.x=bought.x+bought.w/2
 	bought.anchor_point = {bought.w/2,0}
-	t = bought
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,bought)
 	
 	local str
 	if type(input.remaining) == "userdata" then
@@ -558,7 +483,7 @@ local make_card = function(input)
 		card.throb = empty
 		card.update_time = empty
 		glow.opacity = 0
-		hourglass.source = assets.hourglass_soldout
+		card.hourglass.source = assets.hourglass_soldout
 		tltb_rem.text = "SOLD OUT"
 	else
 		str = input.remaining.." remaning"
@@ -571,73 +496,22 @@ local make_card = function(input)
 		y = bought.y+bought.h,
 	}
 	lim_quantity.anchor_point = {lim_quantity.w/2,0}
-	t = lim_quantity
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
+	txt_to_canvas(bg,lim_quantity)
 	
 	local division = Text{
 		text=input.division,
-		font=font.." 18px",
+		font=font_b.." 18px",
 		color = black_text,
 		x = 303,
 		w = 582 - 303-15,
 		ellipsize = "END",
-		y = bg_y+assets.bg.h-74,
+		y = bg.h-74,
 	}
-	t = division
-	c:new_path()
-	c:move_to(t.x - t.anchor_point[1],t.y - t.anchor_point[2])
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
-	
-	c:new_path()
-    c:move_to(572,bg_y+315)
-	c:line_to(672,bg_y+315)
-	c:line_to(672,bg_y+415)
-	c:line_to(572,bg_y+415)
-	c:line_to(572,bg_y+315)
-	b = Bitmap(assets.red_dot.src,false)
-	c:set_source_bitmap(b,572,bg_y+315)
-	c:fill(true)
+	txt_to_canvas(bg,division)
 	
 	
-	c:finish_painting()
-    local img = c:Image{name="card blit"}
-	
-	
-	--[[
-	local title_bg_top   = Clone{
-		
-		source=assets.title_top
-		
-	}
-	title_text.w=title_bg_top.w-title_text.x*2
-	title_shadow.w=title_bg_top.w-title_text.x*2
-	local title_bg_slice = Clone{
-		
-		source=assets.title_slice,
-		
-		y=title_bg_top.y+title_bg_top.h,
-		
-	}
-	
-	title_bg_slice.h = title_text.y+title_text.h+title_padding-title_bg_slice.y
-	--]]
-	
-	--[[
-	--Body portion of the card
-	local bg = Clone{
-		
-		source=assets.bg,
-		
-		y=title_bg_slice.y+title_bg_slice.h
-		
-	}
-	--]]
+	bg:set_source_bitmap(bmp.red_dot,562,315)
+	bg:paint(255)
 	
 	
 	
@@ -647,7 +521,7 @@ local make_card = function(input)
 		font=font_b.." 26px",
 		color = white_text,
 		x = 81,
-		y = tag.y+tag.h/2-1,
+		y = title_h+tag.y+tag.h/2-1,
 	}
 	--tag_text.x = tag_text.x + tag_text.w/2
 	tag_text.anchor_point = {0,tag_text.h/2}
@@ -658,7 +532,7 @@ local make_card = function(input)
 		font=font_b.." 26px",
 		color = white_text,
 		x = 301,
-		y = tag_text.y,
+		y = tag_text.y-title_h,
 	}
 	tag_price.anchor_point = {tag_price.w,tag_price.h/2}
 	
@@ -666,102 +540,25 @@ local make_card = function(input)
 		name = "CHECK",
 		source = assets.check_red,
 		x = 40,
-		y = bg_y+6,
+		y = title_h+6,
 		opacity = 0,
 	}
 	
+	print("before",input.picture_url)
 	local deal_img       = Bitmap(input.picture_url,true)
+	
 	deal_img.on_loaded   = img_on_loaded
-	deal_img.targ_canvas = c
+	deal_img.targ_canvas = bg
 	deal_img.group       = card
-	deal_img.bg_y        = bg_y
 	
-	--[[
-	deal_img
-		src=input.picture_url,
-		async = true,
-		x = 301,
-		y = bg_y+37,
-		on_loaded = function(self,failed)
-			if failed then
-				print("THE IMAGE ",self.src," FAILED TO LOAD")
-			end
-			
-			
-		end
-	--]]
-	
-	--[[
-	local value = Text{
-		text="Value",
-		font=font.." 16px",
-		color = black_text,
-		x = 73,
-		y = bg_y+116,
-	}
-	value.x=value.x+value.w/2
-	value.anchor_point = {value.w/2,0}
-	
-	local value_amt = Text{
-		text=input.msrp,
-		font=font_b.." 20px",
-		color = black_text,
-		x = value.x,
-		y = value.y+value.h,
-	}
-	value_amt.anchor_point = {value_amt.w/2,0}
-	
-	local discount = Text{
-		text="Discount",
-		font=font.." 16px",
-		color = black_text,
-		x = value.x+value.w/2+25,
-		y = value.y,
-	}
-	discount.x = discount.x + discount.w/2
-	discount.anchor_point = {discount.w/2,0}
-	
-	local discount_amt = Text{
-		text=input.percentage.."%",
-		font=font_b.." 20px",
-		color = black_text,
-		x = discount.x,
-		y = discount.y+discount.h,
-	}
-	discount_amt.anchor_point = {discount_amt.w/2,0}
-	
-	local savings = Text{
-		text="You Save",
-		font=font.." 16px",
-		color = black_text,
-		x = discount.x+discount.w/2+15,
-		y = value.y,
-	}
-	savings.x = savings.x + savings.w/2
-	savings.anchor_point = {savings.w/2,0}
-	
-	local savings_amt = Text{
-		text=input.saved,
-		font=font_b.." 20px",
-		color = black_text,
-		x = savings.x,
-		y = savings.y+savings.h,
-	}
-	savings_amt.anchor_point = {savings_amt.w/2,0}
-	--]]
+	card.deal_img = deal_img
+	print("after",deal_img,deal_img.loaded )
 	
 	
 	
-	--tltb.x=tltb.x+tltb.w/2
-	--tltb.anchor_point = {tltb.w/2,0}
-	
-	
-	card.exp = {}
+	card.exp = {isdst = "false"}
 	card.exp.year,card.exp.month,card.exp.day,card.exp.hour,card.exp.min,card.exp.sec =
 		string.match(input.expiration,"(%d*)-(%d*)-(%d*)T(%d*):(%d*):(%d*)")
-	card.exp.isdst = "false"
-	--delta.hour  = card.exp.hour  - curr_time.hour --+ self.tz
-
 	
 	card.exp_secs = os.time(card.exp)
 	--print(card.exp_secs)
@@ -779,19 +576,18 @@ local make_card = function(input)
 	local change_loc = Text{
 		name="change location",
 		text="Change Location",
-		font=font.." 18px",
+		font=font_b.." 18px",
 		color = "515b4c",
 		x = 739,
-		y = bg_y+assets.bg.h-74,
+		y = title_h+bg.h-74,
 	}
 	change_loc.anchor_point = {change_loc.w,0}
-	
-	local red_dot = Clone{source=assets.red_dot,x=572,y=bg_y+315}
-	
+		
+	--Values for the SMS Entry Object to pull
 	card.fine_print = decode(input.fine_print)
 	card.highlights = decode(gen_highlight(input.highlights))
-	card.id         = input.id
 	card.deal_url   = input.deal_url
+	card.merchant   = input.merchant
 	
 	card.sent = function(self)
 		
@@ -802,11 +598,37 @@ local make_card = function(input)
 		glow.opacity = 0
 		
 		check.opacity = 255
+		
+		links_sent[input.id] = true
+		
 	end
 	
+	card.not_available = function(self)
+		check.opacity = 0
+		glow.opacity = 0
+		self.throb = empty
+		self.update_time = empty
+		
+		na.opacity = 255
+		
+		--SMS_ENTRY
+	end
+	local title_img = title:Image{name="Card Title Blit"}
+	card.animate_in_sms = function(self,msecs,p)
+		title_img.y = -SMS_ENTRY.h*p
+	end
 	
+	card.animate_out_sms = function(self,msecs,p)
+		title_img.y = -SMS_ENTRY.h*(1-p)
+	end
+	
+	if links_sent[input.id] then
+		card:sent()
+	end
+	card.title_h = title_h
 	card:add(
-		img,
+		bg:Image{name="Card BG Blit",y=title_h},
+		title_img,
 		--deal_img,
 		tag,
 		glow,
@@ -820,7 +642,7 @@ local make_card = function(input)
 		--discount_amt,
 		--savings,
 		--savings_amt,
-		hourglass,
+		card.hourglass,
 		--tltb,
 		tltb_rem,
 		--bought,

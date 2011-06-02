@@ -94,6 +94,9 @@ local response_check = function(request_object,response_object,callback)
 end
 
 --------------------------------------------------------------------------------
+--GROUPON
+--------------------------------------------------------------------------------
+
 local groupon_api_key = "4e79a015b2222c3336099a080f7b3508cc62a6a0"
 
 local groupon_get_deals = function(callback,lat,lng,radius)
@@ -118,50 +121,18 @@ local groupon_get_deals = function(callback,lat,lng,radius)
     return req:send()
 end
 --------------------------------------------------------------------------------
+-- BITLY
+--------------------------------------------------------------------------------
+local login = 'trickplayaffiliate'
+local bitly_api_key = 'R_b7a6a475fa6baf58fea332a1718779ed'
 
-
-local tropo_api_key = "016ed2530c3bcc47b397ead9357a41a777093018d4ab25f85220a86ac342f29bea28e88efc53f74872082eee"
-local cj_publisher_id = "5287435"
-local groupon_s_AID = "10804307"
-
-local function urlencode(str)
-   if (str) then
-	print("fff")
-	--[[
-       str = string.gsub (str, "\n", "\r\n")
-       str = string.gsub (str, "([^%w ])",
-                function (c) 
-                    return string.format ("%%%02X", string.byte(c))
-                 end
-             )
-       str = string.gsub (str, " ", "+")
-	--]]
-		return str:gsub(
-			'[^-._~a-zA-Z0-9]',
-			function(c)
-				return string.format("%%%02x", c:byte()):upper()
-			end
-		)
-   end
-   print("aaa",str)
-   return str        
-end
-
-local function cj_link(deal_url)
-	return "http://www.anrdoezrs.net/click-"..
-			cj_publisher_id.."-"..groupon_s_AID..
-			"?url="..urlencode(deal_url)
-end
-
-local tropo_sms = function(callback,deal_url,to)
-    
-    assert(type(callback) == "function")
-    
-	print(cj_link(deal_url))
+local shorten_url = function(url,callback)
 	
+	assert(type(callback) == "function")
+    	
     local req = URLRequest{
         
-        url = "https://api.tropo.com/1.0/sessions?action=create&token="..tropo_api_key.."&msg="..cj_link(deal_url).."&to="..to,
+        url = "http://api.bitly.com/v3/shorten?login="..login.."&apiKey="..bitly_api_key.."&longUrl="..uri:escape(url),
         
         on_complete = function(self,response_object)
             
@@ -171,9 +142,60 @@ local tropo_sms = function(callback,deal_url,to)
     }
     
     return req:send()
+	
+end
+
+
+--------------------------------------------------------------------------------
+-- TROPO
+--------------------------------------------------------------------------------
+
+
+local tropo_api_key = "016ed2530c3bcc47b397ead9357a41a777093018d4ab25f85220a86ac342f29bea28e88efc53f74872082eee"
+local cj_publisher_id = "5287435"
+local groupon_s_AID = "10804307"
+
+local function cj_link(deal_url)
+	return "http://www.anrdoezrs.net/click-"..
+			cj_publisher_id.."-"..groupon_s_AID..
+			"?url="..uri:escape(deal_url)
+end
+
+local tropo_sms = function(callback,merchant_name,deal_url,to)
+    
+	
+	assert(type(callback) == "function")
+    	
+	shorten_url(
+		
+		cj_link(deal_url),
+		
+		function(response)
+			dumptable(response)
+			local req = URLRequest{
+				
+				url = "https://api.tropo.com/1.0/sessions?action=create&token="..
+					tropo_api_key.."&msg="..uri:escape("Here's your "..'"'..merchant_name..'"'.." Groupon offer: "..response.data.url).."&to="..to,
+				
+				on_complete = function(self,response_object)
+					
+					response_check(self,response_object,callback)
+					
+				end
+			}
+			
+			req:send()
+			
+		end
+	)
+    
+	print("sent")
 end
 
 --------------------------------------------------------------------------------
+-- GOOGLE MAPS
+--------------------------------------------------------------------------------
+
 local google_maps_get_lat_lng_from_zip = function(zip, callback)
     
     assert(type(callback) == "function")
