@@ -9,7 +9,9 @@ The ui_elements.lua library provides another useful method called transit_to() t
 
 The transit_to() method takes two mandatory arguments and one optional argument. Its syntax is shown below.
 
->transit_to( currentScreen, nextScreen, [effect] )
+(code)
+transit_to( currentScreen, nextScreen, [effect] )
+(end)
 
 where
 
@@ -21,23 +23,29 @@ Using transit_to() we can transition between our Mode and Language screens. When
 
 Load the Tutorial project's main.lua file into a text editor and locate the Mode screen's ButtonPrevious event handlers and, specifically, the pressed() event handler. Add a call to the ui_element object's transit_to() method to transition from the current Mode screen back to our Language screen. The modified event handler should look like this.
 
->layout["mode"].ButtonPrevious.pressed = function() -- Handler for ButtonPrevious.pressed in this screen
->	-- Transition to Language screen
->	ui_element.transit_to( groups["mode"], groups["language"] )
->end
+(code)
+layout["mode"].ButtonPrevious.pressed = function() -- Handler for ButtonPrevious.pressed in this screen
+	-- Transition to Language screen
+	ui_element.transit_to( groups["mode"], groups["language"] )
+end
+(end)
 
 In the same main.lua file, locate the Continue button's event handlers for the Language screen. In the pressed() handler, add another call to transit_to(), but this time transition from the Language screen to the Mode screen. You can optionally add a third argument of "fade" if you wish to see this visual effect in action. The updated handler is shown below.
 
->layout["language"].ButtonContinue.pressed = function() -- Handler for ButtonContinue.pressed in this screen
->   -- Transition to Mode screen
->   ui_element.transit_to( groups["language"], groups["mode"], "fade" )
->end
+(code)
+layout["language"].ButtonContinue.pressed = function() -- Handler for ButtonContinue.pressed in this screen
+   -- Transition to Mode screen
+   ui_element.transit_to( groups["language"], groups["mode"], "fade" )
+end
+(end)
 
 Save the modified main.lua file.
 
 Run the updated Tutorial application in the Trickplay Engine by going to the ~/trickplay-editor/Tutorial directory and running the Engine from the command line as shown below.
 
->~/trickplay-editor/Tutorial$ trickplay .
+(code)
+~/trickplay-editor/Tutorial$ trickplay .
+(end)
 
 By clicking the appropriate screen buttons, you can transition back and forth between the Language and Mode screens.
 

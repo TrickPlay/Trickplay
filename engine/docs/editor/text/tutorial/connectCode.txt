@@ -5,14 +5,16 @@ In <The main.lua File>, it was mentioned that empty event handlers are defined f
 
 By default, the SDK Visual Editor defines three empty event handlers for each Button element created in a screen. The three handlers--focused(), pressed(), and released()--are shown below for the ButtonEnglish button. Similar empty handlers are defined for each of the other buttons on our screen.
 
->-- LANGUAGE.BUTTONENGLISH SECTION
->layout["language"].ButtonEnglish.focused = function() -- Handler for ButtonEnglish.focused in this screen
->end
->layout["language"].ButtonEnglish.pressed = function() -- Handler for ButtonEnglish.pressed in this screen
->end
->layout["language"].ButtonEnglish.released = function() -- Handler for ButtonEnglish.released in this screen
->end
->-- END LANGUAGE.BUTTONENGLISH SECTION
+(code)
+-- LANGUAGE.BUTTONENGLISH SECTION
+layout["language"].ButtonEnglish.focused = function() -- Handler for ButtonEnglish.focused in this screen
+end
+layout["language"].ButtonEnglish.pressed = function() -- Handler for ButtonEnglish.pressed in this screen
+end
+layout["language"].ButtonEnglish.released = function() -- Handler for ButtonEnglish.released in this screen
+end
+-- END LANGUAGE.BUTTONENGLISH SECTION
+(end)
 
 Each of these handlers is "fired" or called when the following events occur.
 
@@ -24,31 +26,37 @@ By default, each handler is empty, so if the application is run and the event ha
 
 Open main.lua in a text editor. To the ButtonEnglish.pressed() handler, add the following Lua code statements to create and display the string.
 
->layout["language"].ButtonEnglish.pressed = function() -- Handler for ButtonEnglish.pressed in this screen
->  -- Create a Text element with our desired string
->  testStr = Text{ text="English button pressed() event handler!", position={800,100}, font="DejaVu Sans 50px", color={255,255,255,255}}
->  -- Display the string
->  screen.add( testStr )
->end
+(code)
+layout["language"].ButtonEnglish.pressed = function() -- Handler for ButtonEnglish.pressed in this screen
+  -- Create a Text element with our desired string
+  testStr = Text{ text="English button pressed() event handler!", position={800,100}, font="DejaVu Sans 50px", color={255,255,255,255}}
+  -- Display the string
+  screen.add( testStr )
+end
+(end
 
 *NOTE:* The above code doesn't display the string. Why not???
 
 To the ButtonSpanish.pressed() handler, add code to erase and destroy the string.
 
->layout["language"].ButtonSpanish.pressed = function() -- Handler for ButtonSpanish.pressed in this screen
->  if testStr ~= nil then
->    -- Erase the string from the display
->    screen.remove( testStr )
->    -- Destroy the string
->    testStr = nil
->  end
->end
+(code)
+layout["language"].ButtonSpanish.pressed = function() -- Handler for ButtonSpanish.pressed in this screen
+  if testStr ~= nil then
+    -- Erase the string from the display
+    screen.remove( testStr )
+    -- Destroy the string
+    testStr = nil
+  end
+end
+(end)
 
 Save the modified main.lua file.
 
 To run our application and test the event handler code, go to the Tutorial project's directory at ~/trickplay-editor/Tutorial. Run the Trickplay Engine with the following command line. The Engine will automatically run our Tutorial application.
 
->~/trickplay-engine/Tutorial$ trickplay .
+(code)
+~/trickplay-engine/Tutorial$ trickplay .
+(end)
 
 Press the English and Spanish buttons to verify that the appropriate event handlers are being fired.
 
