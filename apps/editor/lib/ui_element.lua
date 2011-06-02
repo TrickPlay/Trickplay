@@ -3,7 +3,7 @@ local ui_element = {}
 dofile("/lib/ui_element_header.lua")     
 function ui_element.populate_to (grp, tbl)
 
-	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group"} 
+	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
 	 
 	local function is_in_list(item, list)
     		if list == nil then 
@@ -95,43 +95,41 @@ function ui_element.set_cursor_pointer (src_file)
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
-
 	for i, j in pairs (g.children) do
 		if j.on_focus_out then 
 				j.on_focus_out()
 		end
 	end 
 	if effect == "fade" then 
-		
 		screen:add(next_grp)
-    		local fade_timeline = Timeline ()
+    	local fade_timeline = Timeline ()
 
-    		fade_timeline.duration = 1000 -- progress duration 
-    		fade_timeline.direction = "FORWARD"
-    		fade_timeline.loop = false
+    	fade_timeline.duration = 1000 -- progress duration 
+    	fade_timeline.direction = "FORWARD"
+    	fade_timeline.loop = false
 
-     		function fade_timeline.on_new_frame(t, m, p)
+     	function fade_timeline.on_new_frame(t, m, p)
 			next_grp.opacity = p * 255
 			prev_grp.opacity = (1-p) * 255 
-     		end  
+     	end  
 
-     		function fade_timeline.on_completed()
+     	function fade_timeline.on_completed()
 			screen:remove(prev_grp)
+			--g:clear()
 			g = next_grp
 			screen:add(g)
 			screen:grab_key_focus()
-     		end 
-
+			prev_grp.opacity = 255
+     	end 
 		fade_timeline:start()
 	else 
 		if prev_grp then 
 			screen:remove(prev_grp)
 		end 
+		--g:clear()
 		g = next_grp
 		screen:add(g)
 		screen:grab_key_focus()
-
-
 	end 
 end 
 
@@ -1490,11 +1488,13 @@ function ui_element.button(table)
     mt = {}
     mt.__newindex = function (t, k, v)
         if k == "bsize" then  
-	    p.ui_width = v[1] p.ui_height = v[2]  
+	    	p.ui_width = v[1] p.ui_height = v[2]  
         else 
-           p[k] = v
+           	p[k] = v
         end
-        create_button()
+		if k ~= "selected" then 
+        	create_button()
+		end
     end 
 
     mt.__index = function (t,k)
@@ -1687,7 +1687,9 @@ function ui_element.textInput(table)
         else 
            p[k] = v
         end
-        create_textInputField()
+		if k ~= "selected" then 
+        	create_textInputField()
+		end
      end 
 
      mt.__index = function (t,k)
@@ -1810,13 +1812,15 @@ function ui_element.dialogBox(table)
 
      mt = {}
      mt.__newindex = function (t, k, v)
-	 if k == "bsize" then  
-	    p.ui_width = v[1] 
-	    p.ui_height = v[2]  
+	 	if k == "bsize" then  
+	    	p.ui_width = v[1] 
+	    	p.ui_height = v[2]  
         else 
            p[k] = v
         end
-        create_dialogBox()
+		if k ~= "selected" then 
+        	create_dialogBox()
+		end
      end 
 
      mt.__index = function (t,k)
@@ -1988,7 +1992,9 @@ function ui_element.toastAlert(table)
         else 
            p[k] = v
         end
-        create_toastBox()
+		if k ~= "selected" then 
+        	create_toastBox()
+		end
      end 
 
      mt.__index = function (t,k)
@@ -2685,12 +2691,14 @@ function ui_element.radioButtonGroup(table)
 
      mt = {}
      mt.__newindex = function (t, k, v)
-	if k == "bsize" then  
+		if k == "bsize" then  
 	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
-        create_radioButton()
+		if k ~= "selected" then 
+        	create_radioButton()
+		end
      end 
 
      mt.__index = function (t,k)
@@ -2887,7 +2895,9 @@ function ui_element.checkBoxGroup(t)
         else 
            p[k] = v
         end
-        create_checkBox()
+		if k ~= "selected" then 
+        	create_checkBox()
+		end
     end 
 
     mt.__index = function (t,k)
@@ -3098,7 +3108,9 @@ function ui_element.progressSpinner(t)
     local mt = {}
     mt.__newindex = function(t,k,v)
        p[k] = v
-       create_dots()
+	   if k ~= "selected" then 
+       		create_dots()
+	   end
     end
     mt.__index = function(t,k)       
        return p[k]
@@ -3292,7 +3304,9 @@ function ui_element.progressBar(t)
         if k == "progress" then
             c_fill.scale = {(p.ui_width-4)*(v),1}
         else
-            create_loading_bar()
+	   		if k ~= "selected" then 
+            	create_loading_bar()
+	   		end
         end
     end
     
@@ -3681,7 +3695,9 @@ function ui_element.layoutManager(t)
     mt.__newindex = function(t,k,v)
 		
        p[k] = v
-       make_grid()
+	   if k ~= "selected" then 
+       		make_grid()
+	   end
 		
     end
     mt.__index = function(t,k)       
@@ -4450,10 +4466,13 @@ end
             v.position={0,0}
             v.reactive = false
             window:add(v)
-        end
-        p[k] = v
-        create()
-		
+        	p[k] = v
+        elseif k =="selected" then 
+        	p[k] = v
+		else
+        	p[k] = v
+        	create()
+		end
     end
     mt.__index = function(t,k)       
        return p[k]
@@ -5192,7 +5211,9 @@ button
     mt.__newindex = function(t,k,v)
 		
         p[k] = v
-        create()
+	    if k ~= "selected" then 
+        	create()
+	    end
 		
     end
     mt.__index = function(t,k)       
@@ -5859,10 +5880,13 @@ function ui_element.arrowPane(t)
             v.position={0,0}
             v.reactive = false
             window:add(v)
+        	p[k] = v
+		elseif k == "selected" then 
+        	p[k] = v
+		else
+        	p[k] = v
+        	create()
         end
-        p[k] = v
-        create()
-		
     end
     mt.__index = function(t,k)       
        return p[k]

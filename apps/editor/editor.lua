@@ -473,6 +473,12 @@ function editor.container_selected(obj, x, y)
           obj_border.x_rotation = obj.x_rotation
           obj_border.y_rotation = obj.y_rotation
           obj_border.z_rotation = obj.z_rotation
+		  --[[
+		  if obj.extra.type == "ScrollPane" or obj.extra.type == "ArrowPane" then 
+              obj_border.size = {obj.virtual_w, obj.virtual_h}
+		  else 
+              obj_border.size = obj.size
+		  end ]]
           obj_border.size = obj.size
           if(obj.scale ~= nil) then 
                obj_border.scale = obj.scale
@@ -588,7 +594,6 @@ function editor.n_select(obj, call_by_inspector, drag)
      if(obj.name == nil)then 
 		return 
 	 end 
-
      if(obj.type ~= "Video") then 
      	if(shift == false)then 
 			while(table.getn(selected_objs) ~= 0) do
@@ -721,7 +726,9 @@ function editor.close()
 		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
 		end
 	end 
-	screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+	if screen:find_child("menu_text").extra.project then 
+		screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+	end 
 end 
 
 local function cleanMsgWin(msgw)	
@@ -1807,7 +1814,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- set the inspector location 
 	if(v.type ~= "Video") then
-	   if(x_pos ~= nil and y_pos ~= nil) then 
+	   if(x_pos ~= nil and y_pos ~= nil) and type(x_pos) == "number" then 
 	     inspector.x = x_pos	
 	     inspector.y = y_pos	
 	   else
@@ -1909,7 +1916,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	else -- video  
 	   inspector:add(item_group) 
 	end 
-	screen:add(inspector)
+
 
 	if scroll_y_pos then 
 	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
@@ -1918,8 +1925,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	if v.extra then 
 		if v.extra.type == "MenuButton" then 
         	v.fade_in()
-		elseif v.extra.type == "TabBar" then 
-			v:display_tab(2)
 		end 
 	end 
 
@@ -1956,6 +1961,18 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    	end 
 	    end 
 		return true
+	end 
+
+
+	if x_pos ~= nil then 
+		if x_pos ~= "touch" then 
+			screen:add(inspector)
+		else 
+			inspector_apply (v, inspector)
+			inspector_xbox:on_button_down()
+		end 
+	else 
+		screen:add(inspector)
 	end 
 
 	if screen:find_child("mouse_pointer") then 
@@ -2142,6 +2159,11 @@ local function save_new_file (fname, save_current_f, save_backup_f)
         local n = table.getn(g.children)
 
 		for i, v in pairs(g.children) do
+			if v.extra then 
+				if v.extra.focus == nil then 
+					editor.inspector(v, "touch")
+				end 
+			end
 	     	local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
 	     	if result2  ~= nil then 
             	contents=result2..contents
