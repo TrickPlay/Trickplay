@@ -40,19 +40,15 @@
 #pragma mark Consume Touches
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-    
 }
 
 #pragma mark -
@@ -69,6 +65,7 @@
     if (mask) {
         mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - toolbar.frame.size.height);
         [self.view addSubview:mask];
+        mask.userInteractionEnabled = NO;
     }
     [toolbar.superview bringSubviewToFront:toolbar];
     [label.superview bringSubviewToFront:label];

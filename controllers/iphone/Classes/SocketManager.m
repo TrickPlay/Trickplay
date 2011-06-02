@@ -237,8 +237,8 @@
     port = value;
 }
 
-- (void)dealloc{
-    NSLog(@"Socket Manager dealloc with delegate: %@", delegate);
+- (void)dealloc {
+    NSLog(@"Socket Manager dealloc with CommandInterpreter: %@", commandInterpreter);
 
     [host release];
     

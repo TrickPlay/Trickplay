@@ -265,7 +265,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"services %@\n", services);
     NSLog(@"number of services %d\n", [services count]);
     
-    if ([services count] == 0) return;
+    if ([services count] == 0) { [self reloadData]; return; }
     
     // Good time to load all this crap while its looking for a connection
     if (appBrowserViewController == nil) {
