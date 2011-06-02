@@ -3557,7 +3557,34 @@ function ui_element.layoutManager(t)
                     c = c + 1
                 end
                 return  r,c
-	        end
+	        end,
+            cell_x_y_w_h = function(self,r,c)
+                if p.cell_size == "fixed" then
+                    
+                    return  (p.cell_w+p.cell_spacing)*(c-1),
+                            (p.cell_h+p.cell_spacing)*(r-1),
+                            p.cell_w,
+                            p.cell_h
+                    
+                else
+                    
+                    local x, y = 0, 0
+                    
+                    for i = 1,c-1 do
+                        
+                        x = x + (col_ws[i] or p.cell_w) + p.cell_spacing
+                        
+                    end
+                    
+                    for i = 1,r-1 do
+                        
+                        y = y + (row_hs[i] or p.cell_h) + p.cell_spacing
+                        
+                    end
+                    
+                    return x, y, (col_ws[c] or p.cell_w), (row_hs[r] or p.cell_h)
+                end
+            end,
         }
     }
 
@@ -3613,21 +3640,37 @@ function ui_element.layoutManager(t)
         else
             focus.opacity=0
         end
+        
         if p.cell_size == "variable" then
+            
             for r = 1, p.rows  do
-			    for c = 1, p.columns do
+			    
+                for c = 1, p.columns do
+                    
                     if p.tiles[r]    == nil then break end
+                    
                     if p.tiles[r][c] ~= nil and p.tiles[r][c].name ~= "placeholder" then 
-                    if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
-                        row_hs[r] = p.tiles[r][c].h
+                        
+                        if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
+                            
+                            row_hs[r] = p.tiles[r][c].h
+                            
+                        end
+                        
+                        if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
+                            
+                            col_ws[c] = p.tiles[r][c].w
+                            
+                        end
+                        
                     end
-                    if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
-                        col_ws[c] = p.tiles[r][c].w
-                    end
-                    end
+                    
                 end
+                
             end
+            
         end
+        
 		for r = 1, p.rows  do
             if p.tiles[r] == nil then
                 p.tiles[r]   = {}
@@ -3653,6 +3696,12 @@ function ui_element.layoutManager(t)
 			end
 		end
         
+        slate.w, slate.h = x_y_from_index(p.rows,p.columns)
+        
+        slate.w = slate.w + (col_ws[p.columns] or p.cell_w)/2
+        
+        slate.h = slate.h + (row_hs[p.rows]    or p.cell_h)/2
+        
         if p.rows < #p.tiles then
             for r = p.rows + 1, #p.tiles do
                 for c = 1, #p.tiles[r] do
@@ -3663,28 +3712,28 @@ function ui_element.layoutManager(t)
                 functions[r] = nil
             end
         end
-	
-	if p.tiles[1] then 
-        if p.columns < #p.tiles[1] then
-            for c = p.columns + 1, #p.tiles[r] do
-                for r = 1, #p.tiles do
-                    p.tiles[r][c]:unparent()
-                    p.tiles[r][c]   = nil
-                    functions[r][c] = nil
+        
+        if p.tiles[1] then 
+            if p.columns < #p.tiles[1] then
+                for c = p.columns + 1, #p.tiles[r] do
+                    for r = 1, #p.tiles do
+                        p.tiles[r][c]:unparent()
+                        p.tiles[r][c]   = nil
+                        functions[r][c] = nil
+                    end
                 end
             end
-        end
-        if p.cell_size == "variable" then
-            if p.tiles[focus_i[1]][focus_i[2]] == nil then
-                focus.w = col_ws[focus_i[2]] or p.cell_w
-                focus.h = row_hs[focus_i[1]] or p.cell_h
-            else
-                focus.w = p.tiles[focus_i[1]][focus_i[2]].w
-                focus.h = p.tiles[focus_i[1]][focus_i[2]].h
+            if p.cell_size == "variable" then
+                if p.tiles[focus_i[1]][focus_i[2]] == nil then
+                    focus.w = col_ws[focus_i[2]] or p.cell_w
+                    focus.h = row_hs[focus_i[1]] or p.cell_h
+                else
+                    focus.w = p.tiles[focus_i[1]][focus_i[2]].w
+                    focus.h = p.tiles[focus_i[1]][focus_i[2]].h
+                end
+                focus.anchor_point = { (focus.w)/2, (focus.h)/2}
             end
-            focus.anchor_point = { (focus.w)/2, (focus.h)/2}
         end
-	end
 	end
 	make_grid()
 
@@ -3858,12 +3907,16 @@ function ui_element.scrollPane(t)
                     end
                     end
                 end
-            end
+            end,
             --[[
 			get_content_group = function()
 				return content
 			end
             --]]
+            screen_pos_of_child = function(self,child)
+                return  child.x + child.parent.x + self.x + p.box_width,
+                        child.y + child.parent.y + self.y + p.box_width
+            end,
         }
     }
     scroll_group.extra.seek_to = function(x,y)
