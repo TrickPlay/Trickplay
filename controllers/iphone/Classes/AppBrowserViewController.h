@@ -24,6 +24,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     GestureViewController *gestureViewController;
     
     NSString *currentAppName;
+    UIImageView *currentAppIndicator;
     
     BOOL pushingViewController;
 }
