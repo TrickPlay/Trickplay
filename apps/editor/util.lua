@@ -254,13 +254,11 @@ function abs(a) if(a>0) then return a else return -a end end
 
 function getObjnames()
     local obj_names = ""
-    local n = table.getn(g.children)
     for i, v in pairs(g.children) do
-        if (i ~= n) then
-             obj_names = obj_names..v.name..","
-        else
-             obj_names = obj_names..v.name
-        end
+		if obj_names ~= "" then 
+			obj_names = obj_names..","
+		end 
+    	obj_names = obj_names..v.name
     end
     return obj_names
 end
@@ -1597,7 +1595,7 @@ function itemTostring(v, d_list, t_list)
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
 	      --if j == "src" and v.type == "Image" then 
-	--	item_string = item_string..head..j.." = \"assets\/images\/"..v[j].."\""..tail
+		  --item_string = item_string..head..j.." = \"assets\/images\/"..v[j].."\""..tail
 	      if j == "position" then 
 		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
 	      elseif j == "children" then 
@@ -1783,7 +1781,11 @@ function itemTostring(v, d_list, t_list)
 	    	end 
 	 	end 
 		
-        itm_str = itm_str.."\nlocal "..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
+		if v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
+        	itm_str = itm_str.."\n"..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
+		else 
+        	itm_str = itm_str.."\nlocal "..v.name.." = "..widget_map[v.extra.type]()..b_indent.."{"..indent
+		end 
 	 	itm_str = itm_str..add_attr(w_attr_list, "", ","..indent)
 	 	itm_str = itm_str:sub(1,-2)
         itm_str = itm_str.."}\n\n"
@@ -1797,27 +1799,45 @@ function itemTostring(v, d_list, t_list)
 
     if v.extra then 
     if v.extra.focus then 
-	itm_str = itm_str..v.name.."\.extra\.focus = {" 
-	for m,n in pairs (v.extra.focus) do 
-		if type(n) ~= "function" then 
-		     itm_str = itm_str.."["..m.."] = \""..n.."\", " 
-		end 
-	end 
-	itm_str = itm_str.."}\n\n"
+		
+		local scroll_seek_to_line = ""
+		for i, c in pairs(g.children) do
+			if v.name == c.name then 
+				break
+			else 
+				if c.extra then 
+					if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
+						for k, e in pairs (c.content.children) do 
+							if e.name == v.name then 
+								scroll_seek_to_line = "\t"..c.name..".seek_to_middle(0,screen:find_child("..v.name..".focus[key]).y)\n\t\t\t" 
+							end 
+						end 
+					end 
+				end
+			end
+    	end
 
-	itm_str = itm_str.."function "..v.name..":on_key_down(key)\n\t"
-	.."if "..v.name..".focus[key] then\n\t\t" 
-	.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
-	..v.name..".focus[key]()\n\t\t"
-	.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
-	.."if "..v.name..".on_focus_out then\n\t\t\t\t"
-	..v.name..".on_focus_out()\n\t\t\t".."end\n\t\t\t"
-	.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
-	.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
-        .."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t".."end\n\t\t\t"
-	.."end\n\t"
-	.."end\n\t"
-	.."return true\n"
+		itm_str = itm_str..v.name.."\.extra\.focus = {" 
+		for m,n in pairs (v.extra.focus) do 
+			if type(n) ~= "function" then 
+		     	itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+			end 
+		end 
+		itm_str = itm_str.."}\n\n"
+
+		itm_str = itm_str.."function "..v.name..":on_key_down(key)\n\t"
+		.."if "..v.name..".focus[key] then\n\t\t" 
+		.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
+		..v.name..".focus[key]()\n\t\t"
+		.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
+		.."if "..v.name..".on_focus_out then\n\t\t\t\t"
+		..v.name..".on_focus_out()\n\t\t\t".."end\n\t\t\t"
+		.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
+		.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
+        .."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t\t"
+		.."end\n\t"
+		.."end\n\t"
+		.."return true\n"
         .."end\n\n"
     end 
 
