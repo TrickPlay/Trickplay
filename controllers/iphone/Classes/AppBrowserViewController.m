@@ -154,7 +154,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSLog(@"AppBrowserView Loaded!");
-    
+    if (!currentAppIndicator) {
+        currentAppIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
+        currentAppIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+        currentAppIndicator.layer.borderWidth = 3.0;
+        currentAppIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+        currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
+    }
     [theTableView setDelegate:self];
     pushingViewController = NO;
 }
@@ -243,7 +249,11 @@
     
     cell.textLabel.text = (NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
     cell.textLabel.textColor = [UIColor blackColor];
-	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    if ([cell.textLabel.text compare:currentAppName] == NSOrderedSame) {
+        [cell addSubview:currentAppIndicator];
+        cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    }
+    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     
 	return cell;
 }
