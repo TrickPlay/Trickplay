@@ -32,8 +32,7 @@
 
 
 - (void)interpretCommand:(NSString *)command {
-    //fprintf(stderr, "Command recieved: %s\n", [command UTF8String]);
-    NSLog(@"Received command: %@", command);
+    //NSLog(@"Received command: %@", command);
     
     NSArray *components = [[command componentsSeparatedByString:@"\t"] retain];
     NSMutableArray *args = [[[NSMutableArray alloc] initWithCapacity:20] autorelease];
@@ -53,6 +52,7 @@
     if (!delegate) {
         return;
     }
+    //NSLog(@"CommandInterpreterApp delegate: %@", delegate);
     /*
     SEL method = (SEL)[commandDictionary objectForKey:key];
     if (method) {

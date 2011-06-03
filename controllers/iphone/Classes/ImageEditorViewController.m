@@ -16,7 +16,6 @@
 @synthesize targetHeight;
 @synthesize mask;
 @synthesize toolbar;
-@synthesize label;
 @synthesize imageEditorDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -60,15 +59,31 @@
     }
 
     imageView = [[GestureImageView alloc] initWithImage:image];
-    imageView.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - toolbar.frame.size.height);
-    [self.view addSubview:imageView];
-    if (mask) {
-        mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - toolbar.frame.size.height);
-        [self.view addSubview:mask];
-        mask.userInteractionEnabled = NO;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        imageView.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - toolbar.frame.size.height - 24.0);
+        [self.view addSubview:imageView];
+        if (mask) {
+            mask.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height);
+            [self.view addSubview:mask];
+            mask.userInteractionEnabled = NO;
+        }
+    } else {
+        [self.view addSubview:imageView];
+        
+        [imageView sizeToFit];
+        // This is a real hacked way of correctly sizing the photo
+        // but after trying it about 50 different ways this is all
+        // i can figure out that actually works !
+        imageView.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height - 2.0*toolbar.frame.size.height + 4.0);
+        
+        if (mask) {
+            mask.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height);
+            [self.view addSubview:mask];
+            
+            mask.userInteractionEnabled = NO;
+        }
     }
     [toolbar.superview bringSubviewToFront:toolbar];
-    [label.superview bringSubviewToFront:label];
 }
 
 - (UIImage*)imageByCropping:(GestureImageView *)imageViewToCrop toRect:(CGRect)rect {
@@ -89,6 +104,9 @@
     
     CGFloat x = imageViewToCrop.xTranslation * rect.size.width/imageViewToCrop.frame.size.width;
     CGFloat y = imageViewToCrop.yTranslation * rect.size.height/imageViewToCrop.frame.size.height;
+    NSLog(@"x Translation: %f", imageViewToCrop.xTranslation);
+    NSLog(@"y Translation: %f", imageViewToCrop.yTranslation);
+    NSLog(@"translation before: %f, %f", x, y);
     if (x || y) {
         CGFloat r = sqrtf(powf(x, 2.0) + powf(y, 2.0));
         CGFloat theta = !x ? M_PI/2 * y/fabs(y) : atanf(y/x);
@@ -96,6 +114,7 @@
         x = r * cos(theta) * x/fabs(x);
         y = r * sin(theta) * y/fabs(y);
     }
+    NSLog(@"translation after: %f, %f", x, y);
     
     CGContextTranslateCTM(context, x, y);
     
@@ -140,10 +159,6 @@
         [toolbar release];
         toolbar = nil;
     }
-    if (label) {
-        [label release];
-        label = nil;
-    }
     self.mask = nil;
 }
 
@@ -157,10 +172,6 @@
     if (toolbar) {
         [toolbar release];
         toolbar = nil;
-    }
-    if (label) {
-        [label release];
-        label = nil;
     }
     self.mask = nil;
     if (imageToEdit) {

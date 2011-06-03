@@ -208,11 +208,23 @@
     imageEditor.targetWidth = targetWidth;
     imageEditor.targetHeight = targetHeight;
     imageEditor.mask = mask;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
     
-    UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
-    
-    [self presentModalViewController:cntrl animated:NO];
-    [cntrl release];
+        [self presentModalViewController:cntrl animated:NO];
+        [cntrl release];
+    //*
+    } else if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
+        
+        //imageEditor.modalPresentationStyle = UIModalPresentationPageSheet;
+        [self presentModalViewController:cntrl animated:NO];
+        cntrl.view.frame = CGRectMake(0.0, -45.0, cntrl.view.frame.size.width, cntrl.view.frame.size.height + 45);
+        [cntrl release];
+    } else {
+        NSLog(@"This User Interface Idiom does not exist");
+    }
+    //*/
 }
 
 #pragma mark -
