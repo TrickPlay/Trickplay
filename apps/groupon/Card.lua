@@ -1,20 +1,20 @@
+--Card Object Class
 local font   = "DejaVu Condensed"
 local font_b = "DejaVu Condensed Bold"
 local title_padding = 23
 local white_text = "f4fce9"
 local black_text = "333333"
-local title_h = Text{text = "Hy",font = font_b.." 30px"}.h
+
+
+local function empty() end
 
 local function throb(self,msecs,p)
 	if self:find_child("GLOW") then
 		
-		self:find_child("GLOW").opacity=255*
-			(.5+.5*math.cos(math.pi/180*360*p))
+		self:find_child("GLOW").opacity=255* (.5+.5*cos(360*p))
 		
 	end
 end
-local function empty() end
-
 
 --turns list tags into an outline
 local dot = "•"
@@ -200,7 +200,16 @@ local update_time = function(self,curr_time)
 	
 	self.hourglass.source = src
 end
-
+local txt_to_canvas = function(c,t)
+	c:new_path()
+	c:move_to(
+		t.x - t.anchor_point[1],
+		t.y - t.anchor_point[2]
+	)
+	c:text_element_path(t)
+	c:set_source_color(t.color)
+	c:fill(true)
+end
 local img_on_loaded = function(b,failed)
 	print("Bitmap",b)
 	
@@ -222,15 +231,15 @@ local img_on_loaded = function(b,failed)
 	g.deal_img = nil
 	
 	c:new_path()
-    c:move_to(301,    37)
-	c:line_to(301+439,37)
-	c:line_to(301+439,37+266)
-	c:line_to(301,    37+266)
-	c:line_to(301,    37)
-	c:set_source_bitmap(b,301,37)
+    c:move_to(301,    56)
+	c:line_to(301+439,56)
+	c:line_to(301+439,56+266)
+	c:line_to(301,    56+266)
+	c:line_to(301,    56)
+	c:set_source_bitmap(b,301,56)
 	c:fill(true)
 	--c:paint(255)
-	local old = g:find_child("tag")
+	--local old = g:find_child("tag")
 	
 	--c:new_path()
     --c:move_to(old.x,      old.y)
@@ -238,25 +247,21 @@ local img_on_loaded = function(b,failed)
 	--c:line_to(old.x+old.w,old.y+old.h)
 	--c:line_to(old.x,      old.y+old.h)
 	--c:line_to(old.x,      old.y)
-	c:set_source_bitmap(Bitmap(old.source.src,false),old.x,old.y)
-	c:paint(255)--fill(true)
-	old:unparent()
 	
-	old = g:find_child("tag price")
-	c:new_path()
-	c:move_to(
-		old.x - old.anchor_point[1],
-		old.y - old.anchor_point[2]
-	)
-	c:text_element_path(old)
-	c:set_source_color(old.color)
-	c:fill(true)
+	--c:set_source_bitmap(Bitmap(old.source.src,false),old.x,old.y)
+	--c:paint(255)--fill(true)
+	c:set_source_bitmap(bmp.tag,48 ,bmp.shadow.h+14)
+	c:paint(255)
+	--old:unparent()
+	
+	local old = g:find_child("tag price")
+	txt_to_canvas(c,old)
 	old:unparent()
 	
 	--out with the old, in with the new
 	g:find_child("Card BG Blit"):unparent()
 	
-	local img = c:Image{name="Card BG Blit",y=g:find_child("Card Title Blit").h}
+	local img = c:Image{name="Card BG Blit",y=g.title_h-19}
 	
 	g:add(img)
 	
@@ -264,16 +269,7 @@ local img_on_loaded = function(b,failed)
 	--print("done")
 end
 
-local txt_to_canvas = function(c,t)
-	c:new_path()
-	c:move_to(
-		t.x - t.anchor_point[1],
-		t.y - t.anchor_point[2]
-	)
-	c:text_element_path(t)
-	c:set_source_color(t.color)
-	c:fill(true)
-end
+
 
 --Card Constructor
 local make_card = function(input)
@@ -313,7 +309,7 @@ local make_card = function(input)
 	local title_h = bmp.title_top.h+slice_h
 	
 	--The Title Canvas
-	local title = Canvas(bmp.card_bg.w,title_h)
+	local title = Canvas(bmp.card_bg.w,title_h+bmp.shadow.h)
 	
 	--add the background pieces to the title Canvas
 	title:set_source_bitmap(bmp.title_top,0,0)
@@ -325,17 +321,27 @@ local make_card = function(input)
 		title:paint(255)
 	end
 	
+	title:set_source_bitmap(bmp.shadow,(bmp.card_bg.w - bmp.shadow.w)/2 ,title_h)
+	title:paint(255*.5)
+	
 	txt_to_canvas(title,title_shadow)
 	txt_to_canvas(title,title_text)
 	
 	----------------------------------------------------------------------------
 	--the background Canvas
-	local bg    = Canvas(bmp.card_bg.w,bmp.card_bg.h)
+	local bg    = Canvas(bmp.card_bg.w,bmp.card_bg.h+bmp.shadow.h)
 	
 	--main bg
-	bg:set_source_bitmap(bmp.card_bg,0,0)
+	bg:set_source_bitmap(bmp.card_bg,0,bmp.shadow.h)
 	bg:paint(255)
 	
+	bg:save()
+	bg:translate(bg.w,bmp.shadow.h)
+	bg:rotate(180)
+	bg:set_source_bitmap(bmp.shadow,(bmp.card_bg.w - bmp.shadow.w)/2 ,0)
+	bg:paint(255*.5)
+	bg:restore()
+	---[[
 	local tag = Clone{
 		
 		name = "tag",
@@ -344,19 +350,21 @@ local make_card = function(input)
 		
 		x=48,
 		
-		y=14,
+		y=bmp.shadow.h+title_h+14,
 		
-	}
+	}--]]
+	bg:set_source_bitmap(bmp.tag,48 ,bmp.shadow.h+14)
+	bg:paint(255)
 	
-	local glow = Clone{
+	card.glow = Clone{
 		
 		name = "GLOW",
 		
 		source=assets.btn_glow,
 		
-		x=tag.x+5,
+		x=tag.x+7,
 		
-		y=title_h+tag.y+6,
+		y=tag.y+7-bmp.shadow.h,
 		
 	}
 	
@@ -387,7 +395,7 @@ local make_card = function(input)
 		font=font.." 16px",
 		color = black_text,
 		x = 73,
-		y = 116,
+		y = bmp.shadow.h+116,
 	}
 	value.x=value.x+value.w/2
 	value.anchor_point = {value.w/2,0}
@@ -440,7 +448,7 @@ local make_card = function(input)
 		font=font_b.." 20px",
 		color = black_text,
 		x = savings.x,
-		y = savings.y+savings.h,
+		y =savings.y+savings.h,
 	}
 	savings_amt.anchor_point = {savings_amt.w/2,0}
 	txt_to_canvas(bg,savings_amt)
@@ -450,7 +458,7 @@ local make_card = function(input)
 		font=font.." 16px",
 		color = black_text,
 		x = 117,
-		y = 180,
+		y = bmp.shadow.h+180,
 	}
 	txt_to_canvas(bg,tltb)
 	
@@ -460,7 +468,7 @@ local make_card = function(input)
 		font=font_b.." 20px",
 		color = black_text,
 		x = tltb.x,
-		y = title_h+tltb.y+tltb.h,
+		y = title_h+tltb.y+tltb.h-bmp.shadow.h,
 	}
 	
 	local bought = Text{
@@ -468,7 +476,7 @@ local make_card = function(input)
 		font=font_b.." 20px",
 		color = black_text,
 		x = 122,
-		y = 247,
+		y = bmp.shadow.h+247,
 	}
 	bought.x=bought.x+bought.w/2
 	bought.anchor_point = {bought.w/2,0}
@@ -482,7 +490,7 @@ local make_card = function(input)
 		na.opacity = 255
 		card.throb = empty
 		card.update_time = empty
-		glow.opacity = 0
+		card.glow.opacity = 0
 		card.hourglass.source = assets.hourglass_soldout
 		tltb_rem.text = "SOLD OUT"
 	else
@@ -510,7 +518,7 @@ local make_card = function(input)
 	txt_to_canvas(bg,division)
 	
 	
-	bg:set_source_bitmap(bmp.red_dot,562,315)
+	bg:set_source_bitmap(bmp.red_dot,562,bmp.shadow.h+315)
 	bg:paint(255)
 	
 	
@@ -521,7 +529,7 @@ local make_card = function(input)
 		font=font_b.." 26px",
 		color = white_text,
 		x = 81,
-		y = title_h+tag.y+tag.h/2-1,
+		y = tag.y+tag.h/2-1-bmp.shadow.h,
 	}
 	--tag_text.x = tag_text.x + tag_text.w/2
 	tag_text.anchor_point = {0,tag_text.h/2}
@@ -532,7 +540,7 @@ local make_card = function(input)
 		font=font_b.." 26px",
 		color = white_text,
 		x = 301,
-		y = tag_text.y-title_h,
+		y = bmp.shadow.h+tag_text.y-title_h,
 	}
 	tag_price.anchor_point = {tag_price.w,tag_price.h/2}
 	
@@ -544,7 +552,6 @@ local make_card = function(input)
 		opacity = 0,
 	}
 	
-	print("before",input.picture_url)
 	local deal_img       = Bitmap(input.picture_url,true)
 	
 	deal_img.on_loaded   = img_on_loaded
@@ -552,7 +559,6 @@ local make_card = function(input)
 	deal_img.group       = card
 	
 	card.deal_img = deal_img
-	print("after",deal_img,deal_img.loaded )
 	
 	
 	
@@ -579,7 +585,7 @@ local make_card = function(input)
 		font=font_b.." 18px",
 		color = "515b4c",
 		x = 739,
-		y = title_h+bg.h-74,
+		y = title_h+bg.h-74-bmp.shadow.h,
 	}
 	change_loc.anchor_point = {change_loc.w,0}
 		
@@ -595,7 +601,7 @@ local make_card = function(input)
 		
 		tag_text.text = "Link Sent"
 		
-		glow.opacity = 0
+		self.glow.opacity = 0
 		
 		check.opacity = 255
 		
@@ -605,7 +611,7 @@ local make_card = function(input)
 	
 	card.not_available = function(self)
 		check.opacity = 0
-		glow.opacity = 0
+		self.glow.opacity = 0
 		self.throb = empty
 		self.update_time = empty
 		
@@ -626,12 +632,13 @@ local make_card = function(input)
 		card:sent()
 	end
 	card.title_h = title_h
+	card.h = bg.h+(title_h-bmp.shadow.h)
 	card:add(
-		bg:Image{name="Card BG Blit",y=title_h},
+		bg:Image{name="Card BG Blit",y=title_h-bmp.shadow.h},
 		title_img,
 		--deal_img,
-		tag,
-		glow,
+		--tag,
+		card.glow,
 		tag_text,
 		na,
 		tag_price,
