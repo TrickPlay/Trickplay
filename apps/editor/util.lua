@@ -1041,7 +1041,9 @@ end
 			             						screen:find_child(v.name.."a_m").position = v.position 
 			        						end 
 			        						if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
-			            						c.content:add(v) 
+			            						c.content:add(v) --------------------->>> kkk
+												v.x = v.x - c.content.x
+												v.y = v.y - c.content.y
 			        						elseif t == "LayoutManager" then 
 				     							local col , row=  c:r_c_from_abs_position(x,y)
 				     							c:replace(row,col,v) 
