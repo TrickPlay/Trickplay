@@ -268,7 +268,7 @@ private:
 
             typedef enum { TEXT , LIST , PASSWORD } Type;
 
-            Field() : type( TEXT ) , required( false ) , multiple( false ) , password_char( "*" ) {}
+            Field() : type( TEXT ) , required( false ) , multiple( false ) , password_char( 0x00B7 ) {}
 
             Type        type;
             String      id;
@@ -284,7 +284,7 @@ private:
 
             // For password fields
 
-            String      password_char;
+            gunichar    password_char;
         };
 
         Form() : current_field( 0 ) {}
