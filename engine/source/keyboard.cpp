@@ -164,10 +164,16 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
                     }
 
                     case Field::PASSWORD:
+                    {
                         lua_getfield( L , t , "password_char" );
-                        field.password_char = lb_optstring( L , -1 , "*" );
+                        gunichar pc = g_utf8_get_char_validated( lb_optstring( L , -1 , "\302\267" ) , -1 );
+                        if ( pc != ( gunichar ) -1 && pc != ( gunichar ) -2 )
+                        {
+                            field.password_char = pc;
+                        }
                         lua_pop( L , 1 );
                         break;
+                    }
                 }
             }
 
@@ -1080,12 +1086,6 @@ bool Keyboard::build_field_list()
                     return false;
                 }
 
-                if ( ! clutter_container_find_child_by_name( CLUTTER_CONTAINER( group ) , "placeholder" ) )
-                {
-                    tpwarn( "FAILED TO FIND 'placeholder' IN FIELD LIST UI DEFINITION" );
-                    return false;
-                }
-
                 if ( ! clutter_container_find_child_by_name( CLUTTER_CONTAINER( group ) , "value" ) )
                 {
                     tpwarn( "FAILED TO FIND 'value' IN FIELD LIST UI DEFINITION" );
@@ -1130,16 +1130,6 @@ bool Keyboard::build_field_list()
 
         clutter_text_set_text( CLUTTER_TEXT( caption ) , ff.caption.c_str() );
 
-
-        //.....................................................................
-        // Set the field placeholder
-
-        ClutterActor * placeholder = clutter_container_find_child_by_name( CLUTTER_CONTAINER( field ) , "placeholder" );
-
-        g_assert( placeholder );
-
-        clutter_text_set_text( CLUTTER_TEXT( placeholder ) , ff.placeholder.c_str() );
-
         //.....................................................................
         // Set the value
 
@@ -1150,18 +1140,6 @@ bool Keyboard::build_field_list()
         clutter_text_set_text( CLUTTER_TEXT( value ) , ff.value.c_str() );
 
         //.....................................................................
-        // If there is a value, hide the placeholder
-
-        if ( ff.value.empty() )
-        {
-            clutter_actor_show( placeholder );
-        }
-        else
-        {
-            clutter_actor_hide( placeholder );
-        }
-
-        //.....................................................................
         // The password character
 
         if ( ff.type != Form::Field::PASSWORD )
@@ -1170,7 +1148,7 @@ bool Keyboard::build_field_list()
         }
         else
         {
-            clutter_text_set_password_char( CLUTTER_TEXT( value ) , ff.password_char[ 0 ] );
+            clutter_text_set_password_char( CLUTTER_TEXT( value ) , ff.password_char );
         }
 
         //.....................................................................
@@ -1265,17 +1243,22 @@ void Keyboard::switch_to_field( size_t field_index )
 
     clutter_text_set_text( CLUTTER_TEXT( current_field_caption ) , field.caption.c_str() );
 
-    clutter_text_set_text( CLUTTER_TEXT( current_field_value ) , field.value.c_str() );
-
     if ( field.type == Form::Field::PASSWORD )
     {
-        clutter_text_set_password_char( CLUTTER_TEXT( current_field_value ) , field.password_char[ 0 ] );
+        clutter_text_set_password_char( CLUTTER_TEXT( current_field_value ) , field.password_char );
     }
     else
     {
         clutter_text_set_password_char( CLUTTER_TEXT( current_field_value ) , 0 );
     }
 
+    if ( ClutterActor * field_count = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "field-count" ) )
+    {
+        String count( Util::format( "%u/%u" , field_index + 1 , form.fields.size() ) );
+        clutter_text_set_text( CLUTTER_TEXT( field_count ) , count.c_str() );
+    }
+
+    update_field_value();
 
     //-------------------------------------------------------------------------
     // Now, prepare the keyboard for this field
@@ -1529,14 +1512,19 @@ void Keyboard::update_field_value()
 
     clutter_text_set_text( CLUTTER_TEXT( clutter_container_find_child_by_name( CLUTTER_CONTAINER( ff ) , "value" ) ) , field.value.c_str() );
 
-    if ( field.value.empty() )
+    if ( ClutterActor * placeholder = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "current-field-placeholder" ) )
     {
-        clutter_actor_show( clutter_container_find_child_by_name( CLUTTER_CONTAINER( ff ) , "placeholder" ) );
+        if ( field.value.empty() && ! field.placeholder.empty() )
+        {
+            clutter_text_set_text( CLUTTER_TEXT( placeholder ) , field.placeholder.c_str() );
+            clutter_actor_show( placeholder );
+        }
+        else
+        {
+            clutter_actor_hide( placeholder );
+        }
     }
-    else
-    {
-        clutter_actor_hide( clutter_container_find_child_by_name( CLUTTER_CONTAINER( ff ) , "placeholder" ) );
-    }
+
 
     clutter_text_set_text( CLUTTER_TEXT( current_field_value ) , form.get_field().value.c_str() );
 }
