@@ -499,12 +499,12 @@ function editor.container_selected(obj, x, y)
           table.insert(selected_objs, obj_border.name)
      else -- Layout Manager Tile border
 	  	local col , row=  obj:r_c_from_abs_position(x,y)
-	  	local tile_x, tile_y
-
+		local tile_x, tile_y, tile_w, tile_h 
 	  	if row and col then 
-			tile_x = obj.x + obj.cell_w * (col - 1) + obj.cell_spacing * (col - 1)    
-			tile_y = obj.y + obj.cell_h * (row - 1) + obj.cell_spacing * (row - 1)      
-	  	end 
+			tile_x, tile_y, tile_w, tile_h = obj:cell_x_y_w_h(row,col)
+			tile_x = obj.x + tile_x
+			tile_y = obj.y + tile_y
+		end
 
 	  	obj_border = Rectangle{}
         obj_border.name = obj.name.."border"
@@ -516,7 +516,7 @@ function editor.container_selected(obj, x, y)
         obj_border.x_rotation = obj.x_rotation
         obj_border.y_rotation = obj.y_rotation
         obj_border.z_rotation = obj.z_rotation
-        obj_border.size = {obj.cell_w, obj.cell_h}
+        obj_border.size = {tile_w, tile_h}
 	  	obj_border.extra.r_c = {row, col}
 
         if(obj.scale ~= nil) then 
@@ -554,10 +554,32 @@ function editor.selected(obj, call_by_inspector)
    	obj_border.border_color = {0,255,0,255}
    	obj_border.border_width = 2
    	local group_pos
+	local bumo	
+
    	if(obj.extra.is_in_group == true)then 
+		for i, c in pairs(g.children) do
+			if obj.name == c.name then 
+				break
+			else 
+				if c.extra then 
+					if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
+						for k, e in pairs (c.content.children) do 
+							if e.name == obj.name then 
+								bumo = c	
+							end 
+						end 
+					end 
+				end
+			end
+    	end
+
 		group_pos = get_group_position(obj)
-     	obj_border.x = obj.x + group_pos[1]
-     	obj_border.y = obj.y + group_pos[2]
+		if bumo then 
+		   obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
+		else 
+     	   obj_border.x = obj.x + group_pos[1]
+     	   obj_border.y = obj.y + group_pos[2]
+		end
 		obj_border.extra.group_postion = obj.extra.group_position
    	else 
      	obj_border.position = obj.position
@@ -578,7 +600,11 @@ function editor.selected(obj, call_by_inspector)
 
     anchor_mark= ui.factory.draw_anchor_pointer()
     if(obj.extra.is_in_group == true)then 
-    	anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
+		if bumo then 
+    		anchor_mark.position = {obj_border.x, obj_border.y, obj_border.z}
+		else
+    		anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
+		end
     else 
         anchor_mark.position = {obj.x, obj.y, obj.z}
     end
@@ -2338,7 +2364,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 					end 
 				end 
     		end
-			print("OOOOOOOOOOOOO", local_ui_elements)
+--			print("OOOOOOOOOOOOO", local_ui_elements)
 			if local_ui_elements ~= "" then 
             	contents = "local g = ... \n\nlocal "..local_ui_elements.."\n\n"..contents
 			else 

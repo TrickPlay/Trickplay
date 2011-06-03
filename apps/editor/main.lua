@@ -470,13 +470,35 @@ dofile("editor.lua")
 	            return true
 	       end 
 
+		   local bumo 
 	       local border = screen:find_child(actor.name.."border")
 	       if(border ~= nil) then 
-		    if (actor.extra.is_in_group == true) then
-			 local group_pos = get_group_position(actor)
-	                 border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+		   if (actor.extra.is_in_group == true) then
+				 for i, c in pairs(g.children) do
+					if actor.name == c.name then 
+						break
+					else 
+						if c.extra then 
+							if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
+								for k, e in pairs (c.content.children) do 
+									if e.name == actor.name then 
+										bumo = c	
+									end 
+								end 
+							end 
+						end
+					end
+    			 end
+
+				 if bumo then 
+					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
+	             	border.position = {cur_x, cur_y}
+				 else 
+				 	local group_pos = get_group_position(actor)
+	             	border.position = {x - dx + group_pos[1], y - dy + group_pos[2]}
+				 end 
 		    else 
-	                 border.position = {x -dx, y -dy}
+	             border.position = {x -dx, y -dy}
 		    end 
 	       end 
 	      
@@ -559,8 +581,13 @@ dofile("editor.lua")
 		     anchor_mark.position = {actor.x, actor.y, actor.z}
 
 		     if (actor.extra.is_in_group == true) then
-			 local group_pos = get_group_position(actor)
-	                  anchor_mark.position = {actor.x + group_pos[1], actor.y + group_pos[2]}
+				if bumo then 
+					local cur_x, cur_y = bumo:screen_pos_of_child(actor) 
+	                anchor_mark.position = {cur_x, cur_y}
+				else 
+			 		local group_pos = get_group_position(actor)
+	                anchor_mark.position = {actor.x + group_pos[1], actor.y + group_pos[2]}
+				end 
 		     end 
 
                end
