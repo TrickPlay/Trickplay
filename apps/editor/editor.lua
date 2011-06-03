@@ -1945,7 +1945,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 
 	if scroll_y_pos then 
-	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+		 if screen:find_child("si") then 
+	         if screen:find_child("si").seek_to then 
+	     		--screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+	     		screen:find_child("si").seek_to(0, math.floor(math.abs(scroll_y_pos)))
+			 end 
+	     end
 	end 
 
 	if v.extra then 
@@ -3087,6 +3092,92 @@ function editor.duplicate()
 			  		end 
 		     	end 
 		     
+			 	local function copy_widget(org)
+					local cpy = widget_f_map[org.extra.type]() 
+        			while(is_available(cpy.name..tostring(item_num))== false) do
+    					item_num = item_num + 1
+        			end 
+        			cpy.name = cpy.name..tostring(item_num)
+					if next_position then 
+                    	cpy.extra.position = {v.x, v.y}
+                        cpy.position = next_position
+                    else 
+                        cpy.extra.position = {v.x, v.y}
+                        cpy.position = {v.x + 50, v.y +50}
+                    end 
+
+					for i,j in pairs(w_attr_list) do 
+        				if org[j] ~= nil then 
+                			if j == "content" then  
+								local temp_g = copy_obj(org[j])
+								for m,n in pairs(org.content.children) do 
+			     					if n.name then 
+										local temp_g_c
+										while(is_available(string.lower(n.type)..tostring(item_num))== false) do
+		         							item_num = item_num + 1
+	             						end 
+										if is_this_widget(n) == true then 
+											temp_g_c.name=string.lower(n.extra.type)..tostring(item_num)
+						    				temp_g_c = copy_widget(n) 
+										else 
+											temp_g_c.name=string.lower(n.type)..tostring(item_num)
+						    				temp_g_c = copy_obj(n) 
+										end
+										temp_g_c.extra.is_in_group = true
+										temp_g_c.extra.lock = false
+										temp_g_c.reactive = true
+		     							create_on_button_down_f(temp_g_c)
+						
+										if screen:find_child(temp_g_c.name.."border") then 
+			             					screen:find_child(temp_g_c.name.."border").position = temp_g_c.position
+						    			end
+										if screen:find_child(temp_g_c.name.."a_m") then 
+			             					screen:find_child(temp_g_c.name.."a_m").position = temp_g_c.position 
+			        					end 
+
+        	     	        			temp_g:add(temp_g_c)
+		     							item_num = item_num + 1
+			     	   	 			end 
+			   					end 
+								cpy[j] = temp_g
+                			elseif j == "tiles" then 
+								for k,l in pairs (org[j]) do 
+									if type(l) == "table" then 
+										for o,p in pairs(l) do 
+											local t_obj
+											while(is_available(string.lower(p.type)..tostring(item_num))== false) do
+		         								item_num = item_num + 1
+	             							end 
+											if is_this_widget(p) == true then 
+												t_obj.name=string.lower(p.extra.type)..tostring(item_num)
+						    					t_obj = copy_widget(p) 
+											else 
+												t_obj = copy_obj(p)
+												t_obj.name = string.lower(p.type)..tostring(item_num)
+											end 
+											t_obj.extra.is_in_group = true
+											t_obj.reactive = true
+		     								t_obj.extra.lock = false
+		     								create_on_button_down_f(t_obj)
+				    						cpy:replace(k,o,t_obj) 
+		     								item_num = item_num + 1
+										end  
+									end 
+								end
+                 			elseif type(org[j]) == "table" then  
+								local temp_t = {}
+								for k,l in pairs (org[j]) do 
+									temp_t[k] = l
+								end
+								cpy[j] = temp_t
+                			else
+								cpy[j] = org[j] 
+        					end 
+    					end 
+					end --for
+					return cpy
+				end
+			
                 function dup_function ()
 		        	if is_this_widget(v) == false  then	
                     	while(is_available(string.lower(v.type)..tostring(item_num))== false) do
@@ -3112,17 +3203,31 @@ function editor.duplicate()
 									if is_this_widget(j) == false then 
                         				ui.dup_c = copy_obj(j) 
                         				ui.dup_c.name=string.lower(j.type)..tostring(item_num)
+                        				ui.dup_c.extra.lock = false
+                        				create_on_button_down_f(ui.dup_c)
                         				ui.dup:add(ui.dup_c)
+                        				item_num = item_num + 1
+									else 
+											--[[
+										ui.dup_c = copy_widget(j)
+										ui.dup:add(ui.dup_c)
                         				ui.dup_c.extra.lock = false
                         				create_on_button_down_f(ui.dup_c)
                         				item_num = item_num + 1
-									else 
+										]]
+										-- group's child is widget 
+									---[[	
 										 for a,b in pairs(w_attr_list) do 
                         				 	if j[b] ~= nil then 
                             					if b ~= "name" and b ~= "position" then  
                                  					if b == "content" then  
 														print("1 : content")
-														local temp_g = copy_obj(j[b])
+														local temp_g
+														if is_this_widget(j) == false then 
+															temp_g = copy_obj(j[b])
+														else 
+															temp_g = copy_wiget_obj(j[b])
+														end 
 														for m,n in pairs(j.content.children) do 
 			     	   		     								if n.name then 
 																	while(is_available(string.lower(n.type)..tostring(item_num))== false) do
@@ -3167,7 +3272,7 @@ function editor.duplicate()
 						   								end
                                     				elseif type(j[b]) == "table" then  
 														print("3 : table", b)
-														dumptable(j[b])
+														--dumptable(j[b])
 						   								local temp_t = {}
 						   								for k,l in pairs (j[b]) do 
 															temp_t[k] = l
@@ -3177,7 +3282,7 @@ function editor.duplicate()
 						   								if b == "items" then 
 					           								ui.dup_c[b] = temp_t
 						   								end 
-                                   					elseif ui.dup_c[b] ~= j[b]  then  
+                                   					else --elseif ui.dup_c[b] ~= j[b]  then  
 														print("-->", b, ":", j[b])
 					           							ui.dup_c[b] = j[b] 
                                    					end 
@@ -3187,13 +3292,17 @@ function editor.duplicate()
                         					ui.dup_c.extra.lock = false
                         					create_on_button_down_f(ui.dup_c)
                         					item_num = item_num + 1
-                          					end --for
+                          					end 
+										--	]]
 										end 
                         			end 
                         		end 
                         	end 
                    	else --is_this_widget == true
-                   	
+                   			
+					--	ui.dup = copy_widget(v)
+
+						----[[
                        	ui.dup = widget_f_map[v.extra.type]() 
 
                         while(is_available(ui.dup.name..tostring(item_num))== false) do
@@ -3259,65 +3368,61 @@ function editor.duplicate()
 						   				end
                                     elseif type(v[j]) == "table" then  
 										print("3 : table", j)
-										dumptable(v[j])
 						   				local temp_t = {}
 						   				for k,l in pairs (v[j]) do 
 											temp_t[k] = l
-											--ui.dup[j][k] = l
 						   				end
 					           			ui.dup[j] = temp_t
-						   				if j == "items" then 
-					           					ui.dup[j] = temp_t
-						   				end 
-                                   elseif ui.dup[j] ~= v[j]  then  
+                                   else--elseif ui.dup[j] ~= v[j]  then  
 										print("-->", j, ":", v[j])
 					           			ui.dup[j] = v[j] 
                                    end 
-                                 end 
+                                 end -- not position, name 
                              end 
                           end --for
+						-- ]]
 					end
 				end 
 
                 dup_function()
 
-                table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
-                g:add(ui.dup)
-                local timeline = screen:find_child("timeline")
-                if timeline then 
-                	ui.dup.extra.timeline = {}
-                    ui.dup.extra.timeline[0] = {}
-                    local prev_point = 0
-                    local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-                    for l,k in pairs (attr_map["Clone"]()) do 
-                    	ui.dup.extra.timeline[0][k] = ui.dup[k]
-                    end
-                    if cur_focus_n ~= 0 then 
-                    	ui.dup.extra.timeline[0]["hide"] = true  
-                    end 
-                    for i, j in orderedPairs(timeline.points) do 
-                    	if not ui.dup.extra.timeline[i] then 
-                        	ui.dup.extra.timeline[i] = {} 
-                            for l,k in pairs (attr_map["Clone"]()) do 
-                            	ui.dup.extra.timeline[i][k] = ui.dup.extra.timeline[prev_point][k] 
-                            end 
-                            prev_point = i 
-                        end 
-                        if i < cur_focus_n  then 
-                        	ui.dup.extra.timeline[i]["hide"] = true  
-                        end 
-                    end 
-                 end 
-                 if(screen:find_child("screen_objects") == nil) then 
-                 	--screen:add(g)        
-                 end 
-                 ui.dup.reactive = true
-                 ui.dup.extra.lock = false
-                 create_on_button_down_f(ui.dup)
-                 item_num = item_num + 1
-				end 
-            end
-        end
+				if ui.dup then 
+                	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
+                	g:add(ui.dup)
+                	local timeline = screen:find_child("timeline")
+                	if timeline then 
+                		ui.dup.extra.timeline = {}
+                    	ui.dup.extra.timeline[0] = {}
+                    	local prev_point = 0
+                    	local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+                    	for l,k in pairs (attr_map["Clone"]()) do 
+                    		ui.dup.extra.timeline[0][k] = ui.dup[k]
+                    	end
+                    	if cur_focus_n ~= 0 then 
+                    		ui.dup.extra.timeline[0]["hide"] = true  
+                    	end 
+                    	for i, j in orderedPairs(timeline.points) do 
+                    		if not ui.dup.extra.timeline[i] then 
+                        		ui.dup.extra.timeline[i] = {} 
+                            	for l,k in pairs (attr_map["Clone"]()) do 
+                            		ui.dup.extra.timeline[i][k] = ui.dup.extra.timeline[prev_point][k] 
+                            	end 
+                            	prev_point = i 
+                        	end 
+                        	if i < cur_focus_n  then 
+                        		ui.dup.extra.timeline[i]["hide"] = true  
+                        	end 
+                    	end 
+                 	end 
+                 	ui.dup.reactive = true
+                 	ui.dup.extra.lock = false
+                 	create_on_button_down_f(ui.dup)
+                 	item_num = item_num + 1
+				end --ui.dup
+			end --if selected == true
+    	end -- if  
+    end -- for 
+
 	input_mode = S_SELECT
 	screen:grab_key_focus()
 end

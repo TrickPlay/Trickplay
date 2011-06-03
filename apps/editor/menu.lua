@@ -1,21 +1,14 @@
-
 editor_use = true
 local menu_bar = Image
 	{
 		src = "assets/menu-bar.png",
 		clip = {0,0,1920,60},
 		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "menu_bar",
 		position = {0,0,0},
 		size = {1920,60},
-		opacity = 255,
 		reactive = true,
 	}
-
 local menuButton_file = ui_element.menuButton
 	{
 		ui_width = 142,
@@ -25,14 +18,13 @@ local menuButton_file = ui_element.menuButton
 		focus_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Medium 28px",
-		focus_text_color = "#cccccc", --{255,255,255,255},
+		focus_text_color = "#cccccc", 
 		border_width = 1,
 		border_corner_radius = 12,
 		reactive = true,
 		border_color = {255,255,255,255},
 		fill_color = {255,255,255,0},
-		items = {
-		},
+		items = {},
 		menu_width = 250,
 		horz_padding = 24,
 		vert_spacing = 0,
@@ -42,15 +34,12 @@ local menuButton_file = ui_element.menuButton
 		seperator_thickness = 0,
 		expansion_location = "below",
 		focus_fill_color = {27,145,27,0},
-
-
 		label_text_font ="FreeSans Bold 20px", 
-    		label_text_color = "#808080",
-        	item_text_font = "FreeSans Medium 20px",
-    		item_text_color = "#ffffff",
+    	label_text_color = "#808080",
+        item_text_font = "FreeSans Medium 20px",
+    	item_text_color = "#ffffff",
 	}
 
---menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close,})
 menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, mstring="New\t\t\t\t     <span foreground=\"#a6a6a6\">N</span>"})
 
 menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, mstring="Open ...\t\t\t     <span foreground=\"#a6a6a6\">O</span>"})
@@ -116,8 +105,6 @@ local menuButton_edit = ui_element.menuButton
 		skin = "editor",
 		label = "Edit",
 		focus_color = {27,145,27,255},
-		--text_color = {255,255,255,255},
-		--text_font = "DejaVu Sans 30px",
 		text_color = "#cccccc",
 		text_font = "FreeSans Medium 28px",
 		border_width = 1,
@@ -138,9 +125,9 @@ local menuButton_edit = ui_element.menuButton
 		focus_fill_color = {27,145,27,0},
 		focus_text_color = "#cccccc", --{255,255,255,255},
 		label_text_font ="FreeSans Bold 20px", 
-    		label_text_color = "#808080",
-        	item_text_font = "FreeSans Medium 20px",
-    		item_text_color = "#ffffff",
+    	label_text_color = "#808080",
+        item_text_font = "FreeSans Medium 20px",
+    	item_text_color = "#ffffff",
 	}
 
 menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end, mstring="Undo\t\t\t     <span foreground=\"#a6a6a6\">Z</span>"}) --editor.undo} )
@@ -182,9 +169,8 @@ function menuButton_edit:on_key_down(key)
 			else 
 				if menuButton_edit.get_index() ~= 0 then 
 				    menuButton_edit.press_enter()
-			        end
+			    end
 				menuButton_edit.on_focus_out()
-				--screen:grab_key_focus()
 			end 
 		end
 	end
@@ -201,8 +187,6 @@ local menuButton_arrange = ui_element.menuButton
 		skin = "editor",
 		label = "Arrange",
 		focus_color = {27,145,27,255},
-		--text_color = {255,255,255,255},
-		--text_font = "DejaVu Sans 30px",
 		text_color = "#cccccc",
 		text_font = "FreeSans Medium 28px",
 		border_width = 1,
@@ -221,11 +205,11 @@ local menuButton_arrange = ui_element.menuButton
 		seperator_thickness = 0,
 		expansion_location = "below",
 		focus_fill_color = {27,145,27,0},
-		focus_text_color = "#cccccc", --{255,255,255,255},
+		focus_text_color = "#cccccc", 
 		label_text_font ="FreeSans Bold 20px", 
-    		label_text_color = "#808080",
-        	item_text_font = "FreeSans Medium 20px",
-    		item_text_color = "#ffffff",
+    	label_text_color = "#808080",
+        item_text_font = "FreeSans Medium 20px",
+    	item_text_color = "#ffffff",
 	}
 
 menuButton_arrange.insert_item(1,{type="label", string="  Align:", bg=assets("assets/menu-item-label.png")} )
@@ -289,8 +273,6 @@ local menuButton_view = ui_element.menuButton
 		skin = "editor",
 		label = "View",
 		focus_color = {27,145,27,255},
-		--text_color = {255,255,255,255},
-		--text_font = "DejaVu Sans 30px",
 		text_color = "#cccccc",
 		text_font = "FreeSans Medium 28px",
 		border_width = 1,
@@ -311,9 +293,9 @@ local menuButton_view = ui_element.menuButton
 		focus_fill_color = {27,145,27,0},
 		focus_text_color = "#cccccc", --{255,255,255,255},
 		label_text_font ="FreeSans Bold 20px", 
-    		label_text_color = "#808080",
-        	item_text_font = "FreeSans Medium 20px",
-    		item_text_color = "#ffffff",
+    	label_text_color = "#808080",
+        item_text_font = "FreeSans Medium 20px",
+    	item_text_color = "#ffffff",
 	}
 
 
@@ -421,10 +403,8 @@ local menu_text_shadow = Text
 		alignment ="RIGHT",
 	}
 
-
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
 local menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow}
-
 
 ----------------------------------------------------------------------------
 -- Hides Menu 
