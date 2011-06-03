@@ -16,7 +16,7 @@ assets = {
 	btn_glow     = Image{src="assets/button-glow.png"},
 	submit_btn   = Image{src="assets/button-small.png"},
 	submit_glow  = Image{src="assets/button-small-focus.png"},
-	check_green  = Image{src="assets/check-green.png"},
+	--check_green  = Image{src="assets/check-green.png"},
 	check_red    = Image{src="assets/check-red.png"},
 	dot          = Image{src="assets/dot.png"},
 	cell_dark    = Image{src="assets/cell-dark-grey.png"},
@@ -28,7 +28,7 @@ assets = {
 	--red_message  = Image{src="assets/first-location-bg.png"},
 	--zip_entry    = Image{src="assets/change-location-bg.png"},
 	info_panel   = Image{src="assets/more-info-panel.png"},
-	
+	controller   = Image{src="assets/controller.png"},
 	
 	zip_cells    = Image{src="assets/zip-cells-5-grey.png"},
 	n_a          = Image{src="assets/no-longer-available.png"},
@@ -60,7 +60,7 @@ bmp = {
 
 --Images are add to a hidden group
 local clone_srcs = Group{}
-screen:add(clone_srcs)
+screen:add(clone_srcs,Image{src="6.jpg"})
 clone_srcs:hide()
 
 --add each image
@@ -101,7 +101,7 @@ GET_DEALS, SEND_SMS, GET_LAT_LNG, TRY_AGAIN = dofile("Internet_Interfaces.lua")
 
 Loading_G                                   = dofile("LoadingDots.lua")
 
---ZIP_PROMPT                                  = dofile("Object_Zip_Prompt.lua")
+CONTOLLER_PROMPT                            = dofile("Controller_Notification_Menu.lua")
 
 ZIP_ENTRY                                   = dofile("Object_Zip_Entry.lua")
 

@@ -34,7 +34,7 @@ local fine_print_body = Text{
 	w = 370,
 	--y = fine_print_title.y+fine_print_title.h,
 }
-local clip = Group{
+local fp_clip = Group{
 	name = "Clip for Fine Print",
 	x = fine_print_title.x,
 	y = fine_print_title.y+fine_print_title.h,
@@ -45,7 +45,7 @@ local clip = Group{
 		155
 	}
 }
-clip:add(fine_print_body)
+fp_clip:add(fine_print_body)
 
 local highlights_title = Text{
     text="Highlights",
@@ -58,11 +58,23 @@ local highlights_body = Text{
     text="",
     font="DejaVu Sans Condensed 16px",
     color="#484747",
-    x = 440,
+    --x = 440,
 	wrap = true,
-	w = 340,
-	y = highlights_title.y+highlights_title.h,
+	w = 300,
+	--y = highlights_title.y+highlights_title.h,
 }
+local hl_clip = Group{
+	name = "Clip for Highlights",
+	x = highlights_title.x,
+	y = highlights_title.y+highlights_title.h,
+	clip = {
+		0,
+		0,
+		highlights_body.w,
+		fp_clip.clip[4]
+	}
+}
+hl_clip:add(highlights_body)
 
 local entered = Image{
     src = "assets/cell-dark-grey.png",
@@ -131,9 +143,9 @@ submit_button_text.anchor_point   = {submit_button_text.w/2,  submit_button_text
 sms_entry:add(
 	sms_bg,
 	fine_print_title,
-	clip,
+	fp_clip,
 	highlights_title,
-	highlights_body,
+	hl_clip,
 	entered,
 	cursor,
 	prompt,
@@ -264,32 +276,59 @@ local animate_out = function(self,msecs,p)
 end
 
 local fine_print_h
-local clip_h = clip.clip[4]
+local clip_h = fp_clip.clip[4]
 local speed = 5
-local elapsed = 0
+local hl_elapsed, fp_elapsed = 0, 0
 
-sms_entry.scroll_down = function(self,msecs,p)
-	elapsed = elapsed + msecs
+sms_entry.fp_scroll_down = function(self,msecs,p)
+	fp_elapsed = fp_elapsed + msecs
 	--print(1)
-	if elapsed < 5000 then return end
+	if fp_elapsed < 5000 then return end
 	--print(2)
 	fine_print_body.y = fine_print_body.y - speed*msecs/1000
 	if fine_print_body.y < (clip_h - fine_print_h) then
 		fine_print_body.y = (clip_h - fine_print_h)
-		elapsed = 0
-		Idle_Loop:remove_function(sms_entry.scroll_down)
-		Idle_Loop:add_function(sms_entry.scroll_up,sms_entry)
+		fp_elapsed = 0
+		Idle_Loop:remove_function(sms_entry.fp_scroll_down)
+		Idle_Loop:add_function(sms_entry.fp_scroll_up,sms_entry)
 	end
 end
-sms_entry.scroll_up = function(self,msecs,p)
-	elapsed = elapsed + msecs 
-	if elapsed < 10000 then return end
+sms_entry.fp_scroll_up = function(self,msecs,p)
+	fp_elapsed = fp_elapsed + msecs 
+	if fp_elapsed < 10000 then return end
 	fine_print_body.y = fine_print_body.y + 10*speed*msecs/1000
 	if fine_print_body.y > 0 then
 		fine_print_body.y = 0
-		elapsed = 0
-		Idle_Loop:remove_function(sms_entry.scroll_up)
-		Idle_Loop:add_function(sms_entry.scroll_down,sms_entry)
+		fp_elapsed = 0
+		Idle_Loop:remove_function(sms_entry.fp_scroll_up)
+		Idle_Loop:add_function(sms_entry.fp_scroll_down,sms_entry)
+	end
+end
+
+local highlights_h
+
+sms_entry.hl_scroll_down = function(self,msecs,p)
+	hl_elapsed = hl_elapsed + msecs
+	--print(1)
+	if hl_elapsed < 5000 then return end
+	--print(2)
+	highlights_body.y = highlights_body.y - speed*msecs/1000
+	if highlights_body.y < (clip_h - highlights_h) then
+		highlights_body.y = (clip_h - highlights_h)
+		hl_elapsed = 0
+		Idle_Loop:remove_function(sms_entry.hl_scroll_down)
+		Idle_Loop:add_function(sms_entry.hl_scroll_up,sms_entry)
+	end
+end
+sms_entry.hl_scroll_up = function(self,msecs,p)
+	hl_elapsed = hl_elapsed + msecs 
+	if hl_elapsed < 10000 then return end
+	highlights_body.y = highlights_body.y + 10*speed*msecs/1000
+	if highlights_body.y > 0 then
+		highlights_body.y = 0
+		hl_elapsed = 0
+		Idle_Loop:remove_function(sms_entry.hl_scroll_up)
+		Idle_Loop:add_function(sms_entry.hl_scroll_down,sms_entry)
 	end
 end
 --state changes
@@ -379,18 +418,24 @@ state:add_state_change_function(
         
 		reset_form()
 		
-		fine_print_body.text =  card.fine_print --test_f_p--
-		highlights_body.text =  card.highlights
-		deal_url             =  card.deal_url
-		merchant_name        =  card.merchant
+		fine_print_body.text = card.fine_print --test_f_p--
+		highlights_body.text = card.highlights
+		deal_url             = card.deal_url
+		merchant_name        = card.merchant
         card:add(sms_entry)
 		sms_entry:lower_to_bottom()
 		
-		elapsed = 0
+		fp_elapsed = 0
+		hl_elapsed = 0
 		fine_print_h = fine_print_body.h
+		highlights_h = highlights_body.h
 		fine_print_body.y = 0
+		highlights_body.y = 0
 		if clip_h < fine_print_h then
-			Idle_Loop:add_function(sms_entry.scroll_down,sms_entry)
+			Idle_Loop:add_function(sms_entry.fp_scroll_down,sms_entry)
+		end
+		if clip_h < highlights_h then
+			Idle_Loop:add_function(sms_entry.hl_scroll_down,sms_entry)
 		end
     end,
     nil,
@@ -404,8 +449,10 @@ state:add_state_change_function(
         end
         Idle_Loop:add_function(animate_out,sms_entry,500)
         Idle_Loop:add_function(card.animate_out_sms,card,500)
-		Idle_Loop:remove_function(sms_entry.scroll_up)
-		Idle_Loop:remove_function(sms_entry.scroll_down)
+		Idle_Loop:remove_function(sms_entry.fp_scroll_up)
+		Idle_Loop:remove_function(sms_entry.fp_scroll_down)
+		Idle_Loop:remove_function(sms_entry.hl_scroll_up)
+		Idle_Loop:remove_function(sms_entry.hl_scroll_down)
     end,
     nil,
     "ANIMATING_OUT"
