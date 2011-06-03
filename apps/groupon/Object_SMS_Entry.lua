@@ -8,9 +8,13 @@ local cursor_index  = 1
 local phone_digit_max = 3+3+4
 local cursor_base_x = 14
 local digit_spacing = 40
-local first_digit_x = 226
+local first_digit_x = 219
 local deal_url = "failed to set url"
 local merchant_name = "failed to set merchant"
+
+local test_f_p = 'At a time when intelligence tells us that terrorists remain interested in attacking transportation, this amendment would cut TSA’s screening workforce by more than 10 percent,” about 5,000 people, said Kristin Lee, an agency spokeswoman.'..
+'In a letter to House members before the vote on Rep. John L. Mica’s (R-Fla.) amendment, Colleen M. Kelley, president of the National Treasury Employees Union, said the budget cut would “damage the traveling safety of the public and hurt Transportation Security Officers’ ability to do their jobs."'..
+'In February, TSA Administrator John Pistole said he would allow strictly limited collective bargaining for about 44,000 officers, who screen passengers and baggage at the nation’s airports.'
 
 local sms_bg = Clone{ source = assets.info_panel }
 sms_entry.h = sms_bg.h
@@ -18,25 +22,37 @@ local fine_print_title = Text{
     text="The Fine Print",
     font="DejaVu Sans Condensed Bold 20px",
     color="#484747",
-    x = 61,
-	y = 38,
+    x = 40,
+	y = 20,
 }
 local fine_print_body = Text{
     text="The Fine Print",
     font="DejaVu Sans Condensed 16px",
     color="#484747",
-    x = 61,
+    --x = fine_print_title.x,
 	wrap = true,
-	w = 340,
-	y = fine_print_title.y+fine_print_title.h,
+	w = 370,
+	--y = fine_print_title.y+fine_print_title.h,
 }
+local clip = Group{
+	name = "Clip for Fine Print",
+	x = fine_print_title.x,
+	y = fine_print_title.y+fine_print_title.h,
+	clip = {
+		0,
+		0,
+		fine_print_body.w,
+		155
+	}
+}
+clip:add(fine_print_body)
 
 local highlights_title = Text{
     text="Highlights",
     font="DejaVu Sans Condensed Bold 20px",
     color="#484747",
     x = 440,
-	y = 38,
+	y = fine_print_title.y,
 }
 local highlights_body = Text{
     text="",
@@ -51,14 +67,14 @@ local highlights_body = Text{
 local entered = Image{
     src = "assets/cell-dark-grey.png",
     x=first_digit_x-6,
-    y=307,
+    y=345,
     tile={true,false},
     w=0
 }
 
 local cursor = Clone{
     source=assets.cell_green,
-    x=first_digit_x-6,y=307
+    x=first_digit_x-6,y=345
 }
 
 local prompt = Text{
@@ -77,7 +93,7 @@ for i = 1,phone_digit_max do
         text  = "",
         font  = "DejaVu Sans Condensed Bold 40px",
         color = "#f4fce9",
-        y     = 331,
+        y     = 369,
         x     = first_digit_x+digit_spacing*(i-1)
     }
     entry[i].anchor_point={0,entry[i].h/2}
@@ -86,12 +102,12 @@ end
 local submit_button = Clone{
 	source = assets.submit_btn,
 	x = 627,
-	y = 300
+	y = 335
 }
 local submit_button_focus = Clone{
 	source = assets.submit_glow,
 	x = 627,
-	y = 300,
+	y = 335,
 	opacity = 0
 }
 local submit_button_shadow = Text{
@@ -115,7 +131,7 @@ submit_button_text.anchor_point   = {submit_button_text.w/2,  submit_button_text
 sms_entry:add(
 	sms_bg,
 	fine_print_title,
-	fine_print_body,
+	clip,
 	highlights_title,
 	highlights_body,
 	entered,
@@ -232,6 +248,7 @@ end
 --terminal animations
 local start_y
 local animate_in = function(self,msecs,p)
+	
     self.y = start_y-self.h*p
     if p == 1 then
         state:change_state_to("ACTIVE")
@@ -246,6 +263,35 @@ local animate_out = function(self,msecs,p)
     end
 end
 
+local fine_print_h
+local clip_h = clip.clip[4]
+local speed = 5
+local elapsed = 0
+
+sms_entry.scroll_down = function(self,msecs,p)
+	elapsed = elapsed + msecs
+	--print(1)
+	if elapsed < 5000 then return end
+	--print(2)
+	fine_print_body.y = fine_print_body.y - speed*msecs/1000
+	if fine_print_body.y < (clip_h - fine_print_h) then
+		fine_print_body.y = (clip_h - fine_print_h)
+		elapsed = 0
+		Idle_Loop:remove_function(sms_entry.scroll_down)
+		Idle_Loop:add_function(sms_entry.scroll_up,sms_entry)
+	end
+end
+sms_entry.scroll_up = function(self,msecs,p)
+	elapsed = elapsed + msecs 
+	if elapsed < 10000 then return end
+	fine_print_body.y = fine_print_body.y + 10*speed*msecs/1000
+	if fine_print_body.y > 0 then
+		fine_print_body.y = 0
+		elapsed = 0
+		Idle_Loop:remove_function(sms_entry.scroll_up)
+		Idle_Loop:add_function(sms_entry.scroll_down,sms_entry)
+	end
+end
 --state changes
 App_State.state:add_state_change_function(
     function(prev_state,new_state)
@@ -322,21 +368,30 @@ state:add_state_change_function(
 local card = nil
 state:add_state_change_function(
     function(prev_state,new_state)
-		card = App_State.rolodex.cards[App_State.rolodex.top_card]
-		sms_entry.x = card.w/2
-		start_y = card.title_h
-		sms_entry.y = start_y
-		sms_entry.opacity=255
-        Idle_Loop:add_function(animate_in,sms_entry,500)
+		card              = App_State.rolodex.cards[App_State.rolodex.top_card]
+		sms_entry.x       = card.w/2
+		start_y           = card.title_h
+		sms_entry.y       = start_y
+		sms_entry.opacity = 255
+        
+		Idle_Loop:add_function(animate_in,sms_entry,500)
         Idle_Loop:add_function(card.animate_in_sms,card,500)
-        reset_form()
-        sms_entry.y          = -card.h
-		fine_print_body.text =  card.fine_print
+        
+		reset_form()
+		
+		fine_print_body.text =  card.fine_print --test_f_p--
 		highlights_body.text =  card.highlights
 		deal_url             =  card.deal_url
 		merchant_name        =  card.merchant
         card:add(sms_entry)
 		sms_entry:lower_to_bottom()
+		
+		elapsed = 0
+		fine_print_h = fine_print_body.h
+		fine_print_body.y = 0
+		if clip_h < fine_print_h then
+			Idle_Loop:add_function(sms_entry.scroll_down,sms_entry)
+		end
     end,
     nil,
     "ANIMATING_IN"
@@ -349,6 +404,8 @@ state:add_state_change_function(
         end
         Idle_Loop:add_function(animate_out,sms_entry,500)
         Idle_Loop:add_function(card.animate_out_sms,card,500)
+		Idle_Loop:remove_function(sms_entry.scroll_up)
+		Idle_Loop:remove_function(sms_entry.scroll_down)
     end,
     nil,
     "ANIMATING_OUT"

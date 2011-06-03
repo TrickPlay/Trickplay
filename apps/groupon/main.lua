@@ -50,10 +50,12 @@ assets = {
 }
 --assets that are only used in Canvas's
 bmp = {
-	card_bg      = Bitmap("assets/card-bg.png",false),
-	title_slice  = Bitmap("assets/title-bar-slice.png",false),
-	title_top    = Bitmap("assets/title-bar-top.png",false),
-	red_dot      = Bitmap("assets/dot-red.png",false),
+	card_bg      = Bitmap("assets/card-bg.png",         false),
+	title_slice  = Bitmap("assets/title-bar-slice.png", false),
+	title_top    = Bitmap("assets/title-bar-top.png",   false),
+	red_dot      = Bitmap("assets/dot-red.png",         false),
+	shadow       = Bitmap("assets/shadow.png",          false),
+	tag          = Bitmap("assets/button-tag.png",      false),
 }
 
 --Images are add to a hidden group

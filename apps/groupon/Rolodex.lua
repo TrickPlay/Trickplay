@@ -222,7 +222,6 @@ return function(response_table)
         d = response_table.deals[i]
         
         --pass the card constructor all of the important aspects of the deal information
-        print(i,"start")
         c = Card_Constructor{
             --Card Data
             title         = d.title,
@@ -248,7 +247,6 @@ return function(response_table)
             merchant      = d.merchant.name,
             deal_url      = d.dealUrl,
         }
-        print(i,"end")
         table.insert( App_State.rolodex.cards, c )
         
         if divs[d.division.name] then

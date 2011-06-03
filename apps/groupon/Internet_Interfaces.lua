@@ -127,7 +127,7 @@ local login = 'trickplayaffiliate'
 local bitly_api_key = 'R_b7a6a475fa6baf58fea332a1718779ed'
 
 local shorten_url = function(url,callback)
-	
+	print(url)
 	assert(type(callback) == "function")
     	
     local req = URLRequest{
