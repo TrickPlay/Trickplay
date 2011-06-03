@@ -15,7 +15,7 @@
                 'type'                  : 'ClutterGroup',
                 'name'                  : 'field-list-clip',
                 'height'                : 430,
-                'clip-to-allocation'    : true,
+                /*'clip-to-allocation'    : true,*/
                 'children'              :
                 [
                     {
@@ -87,20 +87,43 @@
                             }
                         ]
                     },
+                    {
+                        'type'                  : 'ClutterText',
+                        'id'                    : 'field-count',
+                        'name'                  : 'field-count',
+                        'color'                 : '#505050',
+                        'font-name'             : 'FreeSans bold 24px',
+                        'anchor-gravity'        : 'CLUTTER_GRAVITY_CENTER',
+                        'x'                     : 214,
+                        'y'                     : 26
+                    },
                     
                     {
                         'type'                  : 'ClutterText',
                         'id'                    : 'current-field-caption',
                         'name'                  : 'current-field-caption',
                         'color'                 : '#ffffff',
-                        'font-name'             : 'FreeSans 26px',
+                        'font-name'             : 'FreeSans bold 24px',
                         'width'                 : 410,
                         'clip-to-allocation'    : true,
                         'ellipsize'             :   'PANGO_ELLIPSIZE_END',                        
                         'x'                     : 8,
-                        'y'                     : 48
+                        'y'                     : 52
                     },
                     
+                    {
+                        'type'                  : 'ClutterText',
+                        'name'                  : 'current-field-placeholder',
+                        'color'                 : '#505050',
+                        'font-name'             : 'FreeSans italic 24px',
+                        'x'                     : 24,
+                        'y'                     : 91,
+                        'width'                 : 400,
+                        'clip-to-allocation'    : true,
+                        'line-wrap'             : false,
+                        'ellipsize'             : 'PANGO_ELLIPSIZE_END'
+                    },
+
                     {
                         'type'                  : 'ClutterText',
                         'id'                    : 'current-field-value',

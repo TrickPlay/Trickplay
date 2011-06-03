@@ -22,19 +22,6 @@
             
             {
                 'type'                  :   'ClutterText',
-                'name'                  :   'placeholder',
-                'color'                 :   '#000000AA',
-                'font-name'             :   'FreeSans italic 22px',
-                'y'                     :   44,
-                'x'                     :   10,
-                'width'                 :   420,
-                'clip-to-allocation'    :   true,
-                'line-wrap'             :   false,
-                'ellipsize'             :   'PANGO_ELLIPSIZE_END'
-            },
-
-            {
-                'type'                  :   'ClutterText',
                 'name'                  :   'value',
                 'color'                 :   '#ffffff',
                 'font-name'             :   'FreeSans 26px',
