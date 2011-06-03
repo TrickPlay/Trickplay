@@ -13,7 +13,6 @@ local DY            = 51
 local DX            = 43
 local HX            = 21
 
-
 return
 {
     {
