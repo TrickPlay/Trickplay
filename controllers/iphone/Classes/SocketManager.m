@@ -42,8 +42,7 @@
         if (protocol == ADVANCED_UI_PROTOCOL) {
             commandInterpreter = [[CommandInterpreterAdvancedUI alloc] init:(id)theDelegate];
         } else if (protocol == APP_PROTOCOL) {
-            commandInterpreter = [[CommandInterpreterApp alloc] 
-                                  init:(id)theDelegate];
+            commandInterpreter = [[CommandInterpreterApp alloc] init:(id)theDelegate];
         } else {
             NSLog(@"Error, protocol not defined");
             functional = NO;

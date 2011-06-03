@@ -25,7 +25,6 @@
     
     GestureImageView *imageView;
     UIToolbar *toolbar;
-    UILabel *label;
     
     id <ImageEditorDelegate> imageEditorDelegate;
 }
@@ -36,7 +35,6 @@
 @property (retain) UIView *mask;
 
 @property (retain) IBOutlet UIToolbar *toolbar;
-@property (retain) IBOutlet UILabel *label;
 
 @property (assign) id <ImageEditorDelegate> imageEditorDelegate;
 

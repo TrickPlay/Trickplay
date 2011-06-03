@@ -172,8 +172,8 @@
     //Since we are retaining the image, we append with ret_ref.  this reminds us to release at a later date.
     CGImageRef image_ref = CGImageRetain(self.image.CGImage); 
     
-    CGRect image_rect;
-    image_rect.size = CGSizeMake(self.image.size.width, self.image.size.height);  //This sets the tile to the native size of the image.  Change this value to adjust the size of an individual "tile."
+    //This sets the tile to the native size of the image.  Change this value to adjust the size of an individual "tile."
+    CGRect image_rect = CGRectMake(0.0, 0.0, self.image.size.width, self.image.size.height);
     
     CGContextRef context = UIGraphicsGetCurrentContext();
     
@@ -206,6 +206,10 @@
     if (dataCacheDelegate) {
         [(NSObject *)dataCacheDelegate release];
         dataCacheDelegate = nil;
+    }
+    if (otherDelegate) {
+        [(NSObject *)otherDelegate release];
+        otherDelegate = nil;
     }
     
     self.image = nil;

@@ -85,6 +85,7 @@
     advancedView = [[TrickplayGroup alloc] initWithID:@"0" args:nil objectManager:nil];
     advancedView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height);
     [self.view addSubview:advancedView];
+    
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
     advancedView.manager = advancedUIDelegate;
     
@@ -668,6 +669,7 @@
     }
     if (advancedView) {
         [advancedView release];
+        NSLog(@"\n\nretain count: %u", [advancedView retainCount]);
     }
     [loadingIndicator release];
     [theTextField release];

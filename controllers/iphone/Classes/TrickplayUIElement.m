@@ -829,6 +829,7 @@
     self.clip = nil;
     self.ID = nil;
     self.name = nil;
+    self.manager = nil;
     
     if ([self superview]) {
         [self removeFromSuperview];

@@ -365,6 +365,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentAppName) {
         [currentAppName release];
     }
+    if (currentAppIndicator) {
+        [currentAppIndicator release];
+    }
     
     [super dealloc];
 }
