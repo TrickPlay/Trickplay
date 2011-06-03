@@ -529,7 +529,7 @@ function open_project(t, msg)
 
 	local STYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
     local WSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
-    local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
+    local SSTYLE = {font = "FreeSans Medium 14px" , color = {0,0,0,255}}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
     local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
@@ -659,7 +659,7 @@ function open_project(t, msg)
         children = {
         	msgw_bg,
 	  		xbox:set{position = {275, 0}},
-			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
+			title_shadow:set{position = {X_PADDING, 5}, opacity=255/2}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
 			scroll:set{name = "scroll", position = {0, TOP_BAR+1}, reactive=true},
 			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
@@ -1041,7 +1041,7 @@ end
 			             						screen:find_child(v.name.."a_m").position = v.position 
 			        						end 
 			        						if t == "ScrollPane" or t == "DialogBox" or  t == "ArrowPane" then 
-			            						c.content:add(v) --------------------->>> kkk
+			            						c.content:add(v) 
 												v.x = v.x - c.content.x
 												v.y = v.y - c.content.y
 			        						elseif t == "LayoutManager" then 

@@ -21,6 +21,7 @@ function editor_ui.button(table)
 		focus_image  = nil,
 		active_button = false,
 		focus_object = nil,
+		text_has_shadow = true
     }
 
  --overwrite defaults
@@ -43,16 +44,11 @@ function editor_ui.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
-
-		--print("b_group focus in", key)
-
 		if current_focus ~= nil then 
-			--print(current_focus.name)
 			if current_focus.on_focus_out then 
 				current_focus.on_focus_out()
 			end 
 		end 
-
 		current_focus = b_group
 
 		if key == "focus" then 
@@ -62,6 +58,7 @@ function editor_ui.button(table)
         	active.opacity = 255
         	focus.opacity = 0
 		end 
+
         button.opacity = 0
         b_group:find_child("text").color = p.focus_text_color
 	
@@ -79,7 +76,6 @@ function editor_ui.button(table)
     end
     
     function b_group.extra.on_focus_out(key) 
-		--print("b_group focus out")
 		if key == "active" then 
         	active.opacity = 255
 	    	button.opacity = 0
@@ -124,15 +120,15 @@ function editor_ui.button(table)
 
 		if p.text_has_shadow then 
 	       s_txt = Text{
-		        name = "shadow",
-                        text  = p.label, 
-                        font  = p.text_font,
-                        color = {0,0,0,255/2},
-                        x     = (p.ui_width  -text.w)/2 - 1,
-                        y     = (p.ui_height - text.h)/2 - 1,
+		        	name = "shadow",
+                    text  = p.label, 
+                    font  = p.text_font,
+                    color = {0,0,0,255/2},
+                    x= (p.ui_width  -text.w)/2 - 1,
+                    y= (p.ui_height - text.h)/2 - 1,
                     }
-                    s_txt.anchor_point={0,s_txt.h/2}
-                    s_txt.y = s_txt.y+s_txt.h/2
+            s_txt.anchor_point={0,s_txt.h/2}
+            s_txt.y = s_txt.y+s_txt.h/2
         	b_group:add(s_txt)
 		end 
 
