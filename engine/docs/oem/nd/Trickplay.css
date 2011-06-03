@@ -4,12 +4,6 @@
 body
 {
     font-family: 'Nobile',Arial, Helvetica, sans-serif;
-    font-size: 18pt;
-}
-
-.CTopic
-{
-    font-size: 13pt;
 }
 
 p 
@@ -19,7 +13,7 @@ p
    margin-top: 1em;
 }
 
-.CBody .prettyprint
+.CBody pre.prettyprint
 {
     font-family: Inconsolata, 'Courier New', Courier, monospace;
     font-size: 10pt;
@@ -29,11 +23,6 @@ p
     background: #F8F8F8F8;
     padding: 0.5em 1em 0.5em 1em;
     margin: 1em 5% 0 5%;
-}
-
-.CBody .Prototype
-{
-   margin: 0.5em 0.5em 0.5em 0.5em;
 }
 
 .CBody pre
@@ -48,16 +37,15 @@ p
     margin: 1em 5% 0 5%;
 }
 
-.Prototype td
+.CBody .Prototype
 {
-    font-size: 10pt;
+   margin: 0.5em 0.5em 0.5em 0.5em;
 }
 
 .SProperty .SEntry, .SFunction, .SEvent, .SVariable, .SType a
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
     font-variant: normal;
-    font-size: 10pt;
 }
 
 .CDescriptionList
@@ -72,12 +60,13 @@ p
 .CDescriptionList .CDLEntry
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
+    vertical-align: text-bottom;
     width: 15%;
 }
 
 .CDLDescription
 {
-    font-size: 12pt;
+    vertical-align: text-bottom;
 }
 
 .SDescription
@@ -121,15 +110,29 @@ p
     font-size: 36pt;
 }
 
+.CClass .CTitle, .CInterface .CTitle, .CDatabase .CTitle, .CDatabaseTable .CTitle, .CSection .CTitle
+{
+    background-color: #941300;
+    border-color: #4a0900;
+    font-size: 36pt;
+}
+
 .CGroup .CTitle
 {
     font-size: 24pt;
 }
 
-.Summary,.CTitle,.CHeading,.IEntry
+.CHeading
 {
     font-variant: small-caps;
-    font-size: 18pt;
+    font-size: 14pt;
+}
+
+.CTitle
+{
+    font-variant: small-caps;
+    background: c0c0c0;
+    font-size: 16pt;
 }
 
 .SBorder
