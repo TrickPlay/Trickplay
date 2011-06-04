@@ -27,6 +27,819 @@
 #define KB_FIELD_SCROLL_DURATION    250
 
 //=============================================================================
+// The Layout structure
+
+struct Layout
+{
+    struct Button
+    {
+        gfloat  x;
+        gfloat  y;
+        gfloat  w;
+        gfloat  h;
+        String  focus_ring;
+        String  action;
+        String  shortcut;
+    };
+
+    typedef std::vector< Button > ButtonVector;
+
+    struct Mode
+    {
+        Mode() : image( 0 ) {}
+
+        const Button * get_button_for_shortcut( const char * shortcut ) const
+        {
+            for ( ButtonVector::const_iterator it = buttons.begin(); it != buttons.end(); ++it )
+            {
+                if ( it->shortcut == shortcut )
+                {
+                    return & * it;
+                }
+            }
+            return 0;
+        }
+
+        const Button * get_button_for_action( const String & action ) const
+        {
+            for ( ButtonVector::const_iterator it = buttons.begin(); it != buttons.end(); ++it )
+            {
+                if ( it->action == action )
+                {
+                    return & * it;
+                }
+            }
+            return 0;
+        }
+
+        const Button * get_first_focus() const
+        {
+            return get_button_for_action( first_focus );
+        }
+
+        const Button * get_button_at( gfloat x , gfloat y ) const
+        {
+            for ( ButtonVector::const_iterator it = buttons.begin(); it != buttons.end(); ++it )
+            {
+                if ( it->x == x && it->y == y )
+                {
+                    return & * it;
+                }
+            }
+            return 0;
+        }
+
+        ClutterActor *  image;
+        String          first_focus;
+        ButtonVector    buttons;
+    };
+
+    Layout() : current_mode( 0 ) {}
+
+    const Mode & get_mode() const
+    {
+        return modes[ current_mode ];
+    }
+
+    const Mode & toggle_mode()
+    {
+        current_mode = current_mode == 1 ? 0 : 1;
+        return get_mode();
+    }
+
+    const Mode & reset_mode()
+    {
+        current_mode = 0;
+        return get_mode();
+    }
+
+    bool load( const char * path , const char * assets_path , ClutterActor * container )
+    {
+        g_assert( path );
+        g_assert( assets_path );
+        g_assert( container );
+
+        try
+        {
+            name.clear();
+            modes[0] = Mode();
+            modes[1] = Mode();
+            current_mode = 0;
+
+            using namespace JSON;
+
+            lua_State * L = lua_open();
+
+            try
+            {
+                if ( luaL_dofile( L , path ) )
+                {
+                    throw Util::format( "FAILED TO PARSE LAYOUTS : %s" , lua_tostring( L , -1 ) );
+                }
+
+                Value root = to_json( L , 1 );
+
+                failif( ! root.is<Object>() , "INVALID LAYOUT, EXPECTING AN OBJECT" );
+
+                Object & o( root.as<Object>() );
+
+                failif( ! o[ "name" ].is<String>() , "MISISNG LAYOUT NAME" );
+
+                name = o[ "name" ].as<String>();
+
+                failif( ! o[ "default" ].is<Object>() , "INVALID DEFAULT LAYOUT" );
+
+                load_mode( modes[0] , o[ "default" ].as<Object>() , assets_path , container );
+
+                if ( o.has( "shift" ) )
+                {
+                    failif( ! o[ "shift" ].is<Object>() , "INVALID SHIFT LAYOUT" );
+
+                    load_mode( modes[1] , o[ "shift" ].as<Object>() , assets_path , container );
+                }
+                else
+                {
+                    modes[ 1 ] = modes[ 0 ];
+                }
+            }
+            catch( ... )
+            {
+                lua_close( L );
+                throw;
+            }
+
+            lua_close( L );
+
+            return true;
+        }
+        catch( const String & e )
+        {
+            tpwarn( "%s" , e.c_str() );
+            return false;
+        }
+    }
+
+    String  name;
+    Mode    modes[2];
+    int     current_mode;
+
+private:
+
+    void load_mode( Mode & mode , JSON::Object & root , const char * assets_path , ClutterActor * container ) throw (String)
+    {
+        using namespace JSON;
+
+        //.........................................................................
+        // Get all the button entries for this mode
+
+        failif( ! root[ "layout" ].is<Array>() , "INVALID LAYOUT" );
+
+        Array & a( root[ "layout" ].as<Array>() );
+
+        for ( Array::Vector::iterator it = a.begin(); it != a.end(); ++it )
+        {
+            failif( ! it->is<Array>() , "LAYOUT MODE ENTRY IS NOT AN ARRAY" );
+
+            Array & e( it->as<Array>() );
+
+            failif( e.size() < 6 , "LAYOUT MODE ENTRY HAS LESS THAN 6 ELEMENTS" );
+
+            mode.buttons.push_back( Layout::Button() );
+
+            Layout::Button & button( mode.buttons.back() );
+
+            button.x = e[ 0 ].as_number();
+            button.y = e[ 1 ].as_number();
+            button.w = e[ 2 ].as_number();
+            button.h = e[ 3 ].as_number();
+            button.focus_ring = e[ 4 ].as<String>();
+            button.action = e[ 5 ].as<String>();
+
+            if ( e.size() > 6 )
+            {
+                button.shortcut = e[ 6 ].as<String>();
+            }
+        }
+
+        //.........................................................................
+        // Get the first focus
+
+        mode.first_focus = root[ "first" ].as<String>();
+
+        failif( mode.first_focus.empty() , "INVALID FIRST FOCUS" );
+
+        //.........................................................................
+        // Get the image for this mode
+
+        FreeLater free_later;
+
+        String image_file_name = root[ "image" ].as<String>();
+
+        failif( image_file_name.empty() , "INVALID IMAGE LAYOUT IMAGE" );
+
+        gchar * file_name = g_build_filename( assets_path , image_file_name.c_str() , NULL );
+        free_later( file_name );
+
+        ClutterActor * image = clutter_texture_new();
+
+        g_object_ref_sink( image );
+        free_later( image , g_object_unref );
+
+        failif( ! Images::load_texture( CLUTTER_TEXTURE( image ) , file_name ) , "FAILED TO LOAD LAYOUT IMAGE '%s'" , file_name );
+
+        clutter_container_add_actor( CLUTTER_CONTAINER( container ) , image );
+
+        mode.image = image;
+    }
+};
+
+//=============================================================================
+// Navigation
+
+struct Rect
+{
+    Rect()
+    :
+        x1( 0 ),
+        y1( 0 ),
+        x2( 0 ),
+        y2( 0 )
+    {}
+
+    Rect( gfloat cx , gfloat cy , gfloat w , gfloat h )
+    :
+        x1( cx - w / 2 ),
+        y1( cy - h / 2 ),
+        x2( cx + w / 2 ),
+        y2( cy + h / 2 )
+    {}
+
+    inline void set( gfloat _x1 , gfloat _y1 , gfloat _x2 , gfloat _y2 )
+    {
+        x1 = _x1;
+        y1 = _y1;
+        x2 = _x2;
+        y2 = _y2;
+    }
+
+    inline bool intersect( const Rect & b )
+    {
+        return ! ( b.x1 > x2 || b.x2 < x1 || b.y1 > y2 || b.y2 < y1 );
+    }
+
+    inline bool contains( gfloat x , gfloat y )
+    {
+        return ( x >= x1 && x <= x2 && y >= y1 && y <= y2 );
+    }
+
+    gfloat x1;
+    gfloat y1;
+    gfloat x2;
+    gfloat y2;
+};
+
+//=============================================================================
+
+class KeyboardHandler
+{
+public:
+
+    KeyboardHandler( Keyboard * keyboard )
+    :
+        kb( keyboard )
+    {}
+
+    virtual ~KeyboardHandler()
+    {}
+
+    virtual bool ok() const = 0;
+
+    virtual void hide()
+    {
+        clutter_actor_hide_all( get_container() );
+    }
+
+    virtual void show_for_field( const Keyboard::Form::Field & field ) = 0;
+
+    virtual void ensure_focus() = 0;
+
+    virtual bool on_event( ClutterEvent * event ) = 0;
+
+protected:
+
+    virtual ClutterActor * get_container() = 0;
+
+    void ensure_focus( const Layout::Mode & mode , ClutterActor * focus_container )
+    {
+        const Layout::Button * button = 0;
+
+        // If something was already focused, see if there is a button in this layout
+        // that lies in the same position - so we can focus this thing.
+
+        if ( kb->focus )
+        {
+            gfloat fx;
+            gfloat fy;
+
+            clutter_actor_get_position( kb->focus , & fx , & fy );
+
+            button = mode.get_button_at( fx , fy );
+        }
+
+        if ( ! button )
+        {
+            button = mode.get_first_focus();
+        }
+
+        if ( ! button )
+        {
+            tpwarn( "DON'T HAVE ANYTHING TO FOCUS!" );
+
+            button = & mode.buttons.front();
+        }
+
+        kb->show_focus_ring( focus_container , button->focus_ring.c_str() , button->x , button->y );
+    }
+
+    bool do_event_shortcut( ClutterEvent * event , const Layout::Mode & mode , Layout::Button const * * button )
+    {
+        if ( event->any.type == CLUTTER_KEY_PRESS )
+        {
+            switch( event->key.keyval )
+            {
+                case TP_KEY_RED:
+                    * button = mode.get_button_for_shortcut( "R" );
+                    break;
+                case TP_KEY_GREEN:
+                    * button = mode.get_button_for_shortcut( "G" );
+                    break;
+                case TP_KEY_YELLOW:
+                    * button = mode.get_button_for_shortcut( "Y" );
+                    break;
+                case TP_KEY_BLUE:
+                    * button = mode.get_button_for_shortcut( "B" );
+                    break;
+                case TP_KEY_OK:
+                {
+                    if ( kb->focus )
+                    {
+                        gfloat x;
+                        gfloat y;
+
+                        clutter_actor_get_position( kb->focus , & x , & y );
+
+                        * button = mode.get_button_at( x , y );
+                    }
+                    break;
+                }
+            }
+
+            if ( * button )
+            {
+                const String & action( ( * button )->action );
+
+                if ( action == "OSK_PREVIOUS" )
+                {
+                    kb->move_to_previous_field();
+                    return true;
+                }
+
+                if ( action == "OSK_NEXT" )
+                {
+                    kb->move_to_next_field();
+                    return true;
+                }
+
+                if ( action == "OSK_CANCEL" )
+                {
+                    kb->cancel();
+                    return true;
+                }
+
+                if ( action == "OSK_SUBMIT" )
+                {
+                    kb->submit();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    //-----------------------------------------------------------------------------
+
+    static inline gfloat rough_distance( gfloat x1 , gfloat y1 , gfloat x2 , gfloat y2 )
+    {
+        return ( ( x2 - x1 ) * ( x2 - x1 ) ) + ( ( y2 - y1 ) * ( y2 - y1 ) );
+    }
+
+    //-----------------------------------------------------------------------------
+
+    const Layout::Button * get_spatial_navigation_target( ClutterEvent * event , const Layout::Mode & mode )
+    {
+        if ( ! kb->focus )
+        {
+            return 0;
+        }
+
+        unsigned int dir = 0;
+
+        if ( event->any.type == CLUTTER_KEY_PRESS )
+        {
+            switch( event->key.keyval )
+            {
+                case TP_KEY_UP:
+                case TP_KEY_DOWN:
+                case TP_KEY_LEFT:
+                case TP_KEY_RIGHT:
+                    dir = event->key.keyval;
+                    break;
+            }
+        }
+
+        if ( ! dir )
+        {
+            return 0;
+        }
+
+        // Get the center of the current focus ring
+
+        gfloat fx;
+        gfloat fy;
+
+        clutter_actor_get_position( kb->focus , & fx , & fy );
+
+        // Get its size
+
+        gfloat fw;
+        gfloat fh;
+
+        clutter_actor_get_size( kb->focus , & fw , &fh );
+
+        // Now, make a rectangle for it
+
+        Rect fr( fx , fy , fw , fh );
+        Rect fr2;
+
+        // Expand the rectangle in the given direction
+
+        switch( dir )
+        {
+            case TP_KEY_UP:
+                fr2.set( 0 , 0 , 1920 , fr.y1 );
+                fr.y1 = 0;
+                break;
+
+            case TP_KEY_DOWN:
+                fr2.set( 0 , fr.y2 , 1920 , 1080 );
+                fr.y2 = 1080;
+                break;
+
+            case TP_KEY_LEFT:
+                fr2.set( 0 , 0 , fr.x1 , 1080 );
+                fr.x1 = 0;
+                break;
+
+            case TP_KEY_RIGHT:
+                fr2.set( fr.x2 , 0 , 1920 , 1080 );
+                fr.x2 = 1920;
+                break;
+
+            default : g_assert( false );
+        }
+
+        // To save the closest one
+
+        const Layout::Button * closest_button_by_dir = 0;
+        gfloat closest_button_by_dir_distance = -1;
+
+        const Layout::Button * closest_button = 0;
+        gfloat closest_button_distance = -1;
+
+        // Iterate over all the buttons in the layout
+
+        for ( Layout::ButtonVector::const_iterator it = mode.buttons.begin(); it != mode.buttons.end(); ++it )
+        {
+            // Skip the currently focused one
+
+            if ( it->x == fx && it->y == fy )
+            {
+                continue;
+            }
+
+            // Rough distance from my center to this button's center
+
+            gfloat d = rough_distance( it->x , it->y , fx , fy );
+
+            // See if this button intersects my direction rectangle
+
+            if ( fr.intersect( Rect( it->x , it->y , it->w , it->h ) ) )
+            {
+                if ( closest_button_by_dir_distance < 0 || d < closest_button_by_dir_distance )
+                {
+                    closest_button_by_dir = & *it;
+                    closest_button_by_dir_distance = d;
+                }
+            }
+            else if ( fr2.contains( it->x , it->y ) )
+            {
+                if ( closest_button_distance < 0 || d < closest_button_distance )
+                {
+                    closest_button = & * it;
+                    closest_button_distance = d;
+                }
+            }
+        }
+
+        return closest_button_by_dir ? closest_button_by_dir : closest_button;
+    }
+
+    Keyboard * kb;
+};
+
+//=============================================================================
+
+class TypingHandler : public KeyboardHandler
+{
+public:
+
+    TypingHandler( Keyboard * keyboard )
+    :
+        KeyboardHandler( keyboard )
+    {
+        gchar * path = g_build_filename( kb->keyboard_path.c_str() , "layouts" , "keyboard-default.lua" , NULL );
+
+        layouts.push_back( Layout() );
+
+        if ( ! layouts.back().load( path , kb->assets_path.c_str() , kb->typing_layout ) )
+        {
+            layouts.clear();
+        }
+
+        g_free( path );
+    }
+
+    virtual bool ok() const
+    {
+        return ! layouts.empty();
+    }
+
+    virtual void show_for_field( const Keyboard::Form::Field & field )
+    {
+        g_assert( ok() );
+
+        clutter_actor_show_all( kb->typing_container );
+        clutter_actor_hide_all( kb->typing_focus );
+        clutter_actor_hide_all( kb->typing_layout );
+
+        clutter_actor_show( kb->typing_focus );
+        clutter_actor_show( kb->typing_layout );
+        layouts.front().reset_mode();
+        clutter_actor_show( layouts.front().get_mode().image );
+
+        clutter_actor_show( kb->current_field_value );
+    }
+
+    virtual void ensure_focus()
+    {
+        KeyboardHandler::ensure_focus( layouts.front().get_mode() , kb->typing_focus );
+    }
+
+    virtual bool on_event( ClutterEvent * event )
+    {
+        const Layout::Button * button = 0;
+
+        if ( KeyboardHandler::do_event_shortcut( event , layouts.front().get_mode() , & button ) )
+        {
+            return true;
+        }
+
+        if ( button )
+        {
+            if ( button->action == "OSK_SHIFT" )
+            {
+                toggle_shift();
+                return true;
+            }
+
+            Keyboard::Form::Field & field( kb->form.get_field() );
+
+            if ( button->action == "OSK_BACKSPACE" )
+            {
+                if ( ! field.value.empty() )
+                {
+                    gchar * s = g_strdup( field.value.c_str() );
+
+                    gchar * p = g_utf8_find_prev_char( s , s + strlen( s ) );
+
+                    if ( p )
+                    {
+                        * p = 0;
+                        field.value = s;
+                        kb->update_field_value();
+                    }
+
+                    g_free( s );
+                }
+
+                unshift();
+
+                return true;
+            }
+
+            field.value += button->action;
+
+            kb->update_field_value();
+
+            unshift();
+
+            return true;
+        }
+        else
+        {
+            button = KeyboardHandler::get_spatial_navigation_target( event , layouts.front().get_mode() );
+
+            if ( button )
+            {
+                kb->show_focus_ring( kb->typing_focus , button->focus_ring.c_str() , button->x , button->y );
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+protected:
+
+    virtual ClutterActor * get_container()
+    {
+        return kb->typing_container;
+    }
+
+private:
+
+    void toggle_shift()
+    {
+        clutter_actor_hide( layouts.front().get_mode().image );
+        layouts.front().toggle_mode();
+        clutter_actor_show( layouts.front().get_mode().image );
+    }
+
+    void unshift()
+    {
+        clutter_actor_hide( layouts.front().get_mode().image );
+        layouts.front().reset_mode();
+        clutter_actor_show( layouts.front().get_mode().image );
+    }
+
+    typedef std::list< Layout > LayoutList;
+
+    LayoutList  layouts;
+};
+
+//=============================================================================
+
+class ListHandler : public KeyboardHandler
+{
+public:
+
+    ListHandler( Keyboard * keyboard )
+    :
+        KeyboardHandler( keyboard )
+    {
+        gchar * path = g_build_filename( kb->keyboard_path.c_str() , "layouts" , "list.lua" , NULL );
+
+        loaded = layout.load( path , kb->assets_path.c_str() , kb->list_layout );
+
+        g_free( path );
+
+        if ( loaded )
+        {
+            item_container = clutter_container_find_child_by_name( CLUTTER_CONTAINER( kb->keyboard ) , "list-item-container" );
+
+            if ( ! item_container )
+            {
+                tpwarn( "UI DEFINITION IS MISSING 'list-item-container'" );
+                loaded = false;
+            }
+        }
+    }
+
+    virtual bool ok() const
+    {
+        return loaded;
+    }
+
+    virtual void show_for_field( const Keyboard::Form::Field & field )
+    {
+        g_assert( ok() );
+
+        clutter_actor_show_all( kb->list_container );
+        clutter_actor_hide_all( kb->list_focus );
+        clutter_actor_hide_all( kb->list_layout );
+
+        clutter_actor_show( kb->list_focus );
+        clutter_actor_show( kb->list_layout );
+        clutter_actor_show( layout.get_mode().image );
+
+        clutter_actor_hide( kb->current_field_value );
+
+        clutter_actor_hide_all( item_container );
+
+        clutter_actor_set_y( item_container , 0 );
+
+        // TODO: This is a bad idea, if there are a lot of choices. It will
+        // take a long time to build the list. We should build it a few items
+        // at a time. Maybe even write them all to canvas chunks.
+
+        // TODO: We could also cache the pieces we build
+
+        gfloat height = clutter_actor_get_height( kb->current_field_value );
+
+        int existing = clutter_group_get_n_children( CLUTTER_GROUP( item_container ) );
+
+        int i = 0;
+
+        for ( StringPairList::const_iterator it = field.choices.begin(); it != field.choices.end(); ++it , ++i )
+        {
+            ClutterActor * item = 0;
+
+            if ( i < existing )
+            {
+                item = clutter_group_get_nth_child( CLUTTER_GROUP( item_container ) , i );
+            }
+            else
+            {
+                item = clutter_text_new();
+
+                clutter_text_set_font_name( CLUTTER_TEXT( item ) , clutter_text_get_font_name( CLUTTER_TEXT( kb->current_field_value ) ) );
+
+                ClutterColor color;
+
+                clutter_text_get_color( CLUTTER_TEXT( kb->current_field_value ) , & color );
+
+                clutter_text_set_color( CLUTTER_TEXT( item ) , & color );
+
+                clutter_actor_set_y( item , height * i );
+
+                clutter_group_add( CLUTTER_GROUP( item_container ) , item );
+            }
+
+            clutter_text_set_text( CLUTTER_TEXT( item ) , it->second.c_str() );
+
+            clutter_actor_show( item );
+        }
+
+        clutter_actor_show( item_container );
+
+        // TODO: If the field has a value, we need to figure out which one it
+        // is and scroll it into view. Default focus should go to that one.
+    }
+
+    virtual void ensure_focus()
+    {
+        KeyboardHandler::ensure_focus( layout.get_mode() , kb->list_focus );
+    }
+
+    virtual bool on_event( ClutterEvent * event )
+    {
+        const Layout::Button * button = 0;
+
+        if ( KeyboardHandler::do_event_shortcut( event , layout.get_mode() , & button ) )
+        {
+            return true;
+        }
+
+        button = KeyboardHandler::get_spatial_navigation_target( event , layout.get_mode() );
+
+        if ( button )
+        {
+            kb->show_focus_ring( kb->list_focus , button->focus_ring.c_str() , button->x , button->y );
+
+            return true;
+        }
+
+        return false;
+    }
+
+protected:
+
+    virtual ClutterActor * get_container()
+    {
+        return kb->list_container;
+    }
+
+private:
+
+    bool            loaded;
+    Layout          layout;
+    ClutterActor *  item_container;
+};
+
+//=============================================================================
+
+//=============================================================================
 
 bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 {
@@ -135,12 +948,29 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 
                         lua_getfield( L , t , "choices" );
                         failif( ! lua_istable( L , -1 ) , "'choices' MUST BE A TABLE" );
+                        String value;
                         lua_pushnil( L );
                         while( lua_next( L , -2 ) )
                         {
-                            if ( lua_really_isstring( L , -2 ) && lua_isstring( L , -1 ) )
+                            if ( lua_istable( L , -1 ) )
                             {
-                                field.choices[ lua_tostring( L , -2 ) ] = lua_tostring( L , -1 );
+                                lua_rawgeti( L , -1 , 1 );
+                                lua_rawgeti( L , -2 , 2 );
+
+                                const char * k = lua_tostring( L , -2 );
+                                const char * v = lua_tostring( L , -1 );
+
+                                if ( k && v )
+                                {
+                                    field.choices.push_back( StringPair( k , v ) );
+
+                                    if ( field.value == k )
+                                    {
+                                        value = v;
+                                    }
+                                }
+
+                                lua_pop( L , 2 );
                             }
                             lua_pop( L , 1 );
                         }
@@ -149,16 +979,7 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 
                         // Make sure that the initial value provided is one of the choices
 
-                        StringMap::const_iterator choice = field.choices.find( field.value );
-
-                        if ( choice  == field.choices.end() )
-                        {
-                            field.value = "";
-                        }
-                        else
-                        {
-                            field.value = choice->second;
-                        }
+                        field.value = value;
 
                         break;
                     }
@@ -199,6 +1020,9 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 
     return ! fields.empty();
 }
+
+
+//=============================================================================
 
 
 //=============================================================================
@@ -424,14 +1248,15 @@ Keyboard::Keyboard( TPContext * context )
     typing_focus( 0 ),
     typing_layout( 0 ),
     list_container( 0 ),
+    list_layout( 0 ),
     list_focus( 0 ),
     current_field_caption( 0 ),
     current_field_value( 0 ),
 
+    focus_rings( 0 ),
+
     x_out( 0 ),
     x_in( 0 ),
-
-    current_typing_layout( 0 ),
 
     event_handler( 0 ),
     focus( 0 ),
@@ -448,13 +1273,14 @@ Keyboard::Keyboard( TPContext * context )
 
     // Get the keyboard directory inside there
 
-    gchar * keyboard_path = g_build_filename( resources_path , "keyboard" , NULL );
-    free_later( keyboard_path );
+    gchar * kp = g_build_filename( resources_path , "keyboard" , NULL );
+    keyboard_path = kp;
+    g_free( kp );
 
     // Get the filename for the field list UI definition, and load the contents
     // of the file.
 
-    gchar * fp = g_build_filename( keyboard_path , "field.json" , NULL );
+    gchar * fp = g_build_filename( keyboard_path.c_str() , "field.json" , NULL );
     free_later( fp );
     gchar * contents = 0;
     {
@@ -473,7 +1299,7 @@ Keyboard::Keyboard( TPContext * context )
 
     // Get the filename for the keyboard UI definition
 
-    gchar * keyboard_json_path = g_build_filename( keyboard_path , "keyboard.json" , NULL );
+    gchar * keyboard_json_path = g_build_filename( keyboard_path.c_str() , "keyboard.json" , NULL );
     free_later( keyboard_json_path );
 
     // If it doesn't exist, not much we can do.
@@ -512,6 +1338,7 @@ Keyboard::Keyboard( TPContext * context )
             find_actor( script , "typing-focus" , CLUTTER_TYPE_GROUP , & typing_focus ) &&
             find_actor( script , "typing-layout" , CLUTTER_TYPE_GROUP , & typing_layout ) &&
             find_actor( script , "list-container" , CLUTTER_TYPE_GROUP , & list_container ) &&
+            find_actor( script , "list-layout" , CLUTTER_TYPE_GROUP , & list_layout ) &&
             find_actor( script , "list-focus" , CLUTTER_TYPE_GROUP , & list_focus ) &&
             find_actor( script , "current-field-caption" , CLUTTER_TYPE_TEXT , & current_field_caption ) &&
             find_actor( script , "current-field-value" , CLUTTER_TYPE_TEXT , & current_field_value );
@@ -544,7 +1371,7 @@ Keyboard::Keyboard( TPContext * context )
 
     // Load all the static images
 
-    gchar * keyboard_assets_path = g_build_filename( keyboard_path , "assets" , NULL );
+    gchar * keyboard_assets_path = g_build_filename( keyboard_path.c_str() , "assets" , NULL );
     free_later( keyboard_assets_path );
 
     assets_path = keyboard_assets_path;
@@ -566,17 +1393,31 @@ Keyboard::Keyboard( TPContext * context )
 
     clutter_actor_set_x( keyboard , x_out );
 
+    // Create a group to hold focus rings
 
-    // Get the filename for the layouts file and load the layouts
+    focus_rings = clutter_group_new();
 
-    gchar * layouts_path = g_build_filename( keyboard_path , "layouts.lua" , NULL );
-    free_later( layouts_path );
+    clutter_actor_set_name( focus_rings , "focus-rings" );
 
-    if ( ! load_layouts( layouts_path ) )
+    clutter_container_add_actor( CLUTTER_CONTAINER( keyboard ) , focus_rings );
+
+    clutter_actor_hide( focus_rings );
+
+    // Load the handlers
+
+    typing_handler.reset( new TypingHandler( this ) );
+    list_handler.reset( new ListHandler( this ) );
+
+    if ( ! typing_handler->ok() || ! list_handler->ok() )
     {
+        typing_handler.reset();
+        list_handler.reset();
         keyboard = 0;
         return;
     }
+
+    typing_handler->hide();
+    list_handler->hide();
 
     g_object_ref( keyboard );
 
@@ -608,101 +1449,7 @@ Keyboard::~Keyboard()
 
 void Keyboard::reset()
 {
-    clutter_actor_hide_all( field_list_container );
-
-    clutter_actor_hide_all( typing_container );
-
-    clutter_actor_hide_all( list_container );
-
-    clutter_text_set_text( CLUTTER_TEXT( current_field_caption ) , "" );
-
-    clutter_text_set_text( CLUTTER_TEXT( current_field_value ) , "" );
-
     focus = 0;
-}
-
-//-----------------------------------------------------------------------------
-
-void Keyboard::switch_to_typing_layout( size_t layout_index , int mode )
-{
-    g_assert( mode == 0 || mode == 1 );
-
-    if ( layout_index >= layouts.size() )
-    {
-        tpwarn( "LAYOUT '%d' NOT FOUND" , layout_index );
-        return;
-    }
-
-    Layout & layout( layouts[ layout_index ] );
-
-    clutter_actor_hide_all( list_container );
-
-    clutter_actor_show_all( typing_container );
-    clutter_actor_hide_all( typing_focus );
-    clutter_actor_hide_all( typing_layout );
-
-    clutter_actor_show( typing_focus );
-    clutter_actor_show( typing_layout );
-    clutter_actor_show( layout.modes[mode].image );
-
-    layout.current_mode = mode;
-
-    current_typing_layout = layout_index;
-
-    Layout::Mode & lm( layout.modes[ mode ] );
-
-    const Layout::Button * button = 0;
-
-    // If something was already focused, see if there is a button in this layout
-    // that lies in the same position - so we can focus this thing.
-
-    if ( focus )
-    {
-        gfloat fx;
-        gfloat fy;
-
-        clutter_actor_get_position( focus , & fx , & fy );
-
-        for ( Layout::ButtonVector::const_iterator it = lm.buttons.begin(); it != lm.buttons.end(); ++it )
-        {
-            if ( it->x == fx && it->y == fy )
-            {
-                button = & *it;
-                break;
-            }
-        }
-    }
-
-    if ( ! button )
-    {
-        for ( Layout::ButtonVector::const_iterator it = lm.buttons.begin(); it != lm.buttons.end(); ++it )
-        {
-            if ( it->action == lm.first_focus )
-            {
-                button = & * it;
-                break;
-            }
-        }
-    }
-
-    if ( ! button )
-    {
-        tpwarn( "DON'T HAVE ANYTHING TO FOCUS!" );
-        button = & lm.buttons.front();
-    }
-
-    show_focus_ring( typing_focus , button->focus_ring.c_str() , button->x , button->y );
-}
-
-//-----------------------------------------------------------------------------
-
-void Keyboard::toggle_layout_shift()
-{
-    Layout & layout( layouts[ current_typing_layout ] );
-
-    int mode = layout.current_mode == 0 ? 1 : 0;
-
-    switch_to_typing_layout( current_typing_layout , mode );
 }
 
 //-----------------------------------------------------------------------------
@@ -713,175 +1460,47 @@ void Keyboard::show_focus_ring( ClutterActor * container , const char * name , g
 
     if ( ! ring )
     {
-        ring = clutter_texture_new();
+        ClutterActor * source = clutter_container_find_child_by_name( CLUTTER_CONTAINER( focus_rings ) , name );
 
-        gchar * path = g_build_filename( assets_path.c_str() , name , NULL );
+        if ( ! source )
+        {
+            source = clutter_texture_new();
 
-        Images::load_texture( CLUTTER_TEXTURE( ring ) , path );
+            gchar * path = g_build_filename( assets_path.c_str() , name , NULL );
 
-        g_free( path );
+            Images::load_texture( CLUTTER_TEXTURE( source ) , path );
 
-        clutter_actor_set_name( ring , name );
+            g_free( path );
+
+            clutter_actor_set_name( source , name );
+
+            clutter_container_add_actor( CLUTTER_CONTAINER( focus_rings ) , source );
+        }
+
+        ring = clutter_clone_new( source );
 
         gfloat w;
         gfloat h;
 
-        clutter_actor_get_size( ring , & w , & h );
+        clutter_actor_get_size( source , & w , & h );
 
         clutter_actor_set_anchor_point( ring , w / 2 , h / 2 );
+
+        clutter_actor_set_name( ring , name );
 
         clutter_container_add_actor( CLUTTER_CONTAINER( container ) , ring );
     }
 
     clutter_actor_set_position( ring , x , y );
 
+    if ( focus && focus != ring )
+    {
+        clutter_actor_hide( focus );
+    }
+
     clutter_actor_show( ring );
 
     focus = ring;
-}
-
-//-----------------------------------------------------------------------------
-
-void Keyboard::load_layout_mode( Layout::Mode & mode , const char * name , JSON::Object & root ) throw (String)
-{
-    using namespace JSON;
-
-    failif( ! root[ name ].is<Object>() , "INVALID OR MISSING MODE '%s'" , name );
-
-    Object & o( root[ name ].as<Object>() );
-
-    //.........................................................................
-    // Get all the button entries for this mode
-
-    failif( ! o[ "layout" ].is<Array>() , "INVALID LAYOUT FOR MODE '%s'" , name );
-
-    Array & a( o[ "layout" ].as<Array>() );
-
-    for ( Array::Vector::iterator it = a.begin(); it != a.end(); ++it )
-    {
-        failif( ! it->is<Array>() , "LAYOUT MODE ENTRY IS NOT AN ARRAY" );
-
-        Array & e( it->as<Array>() );
-
-        failif( e.size() < 6 , "LAYOUT MODE ENTRY HAS LESS THAN 6 ELEMENTS" );
-
-        mode.buttons.push_back( Layout::Button() );
-
-        Layout::Button & button( mode.buttons.back() );
-
-        button.x = e[ 0 ].as_number();
-        button.y = e[ 1 ].as_number();
-        button.w = e[ 2 ].as_number();
-        button.h = e[ 3 ].as_number();
-        button.focus_ring = e[ 4 ].as<String>();
-        button.action = e[ 5 ].as<String>();
-
-        if ( e.size() > 6 )
-        {
-            button.shortcut = e[ 6 ].as<String>();
-        }
-    }
-
-    //.........................................................................
-    // Get the first focus
-
-    mode.first_focus = o[ "first" ].as<String>();
-
-    failif( mode.first_focus.empty() , "INVALID FIRST FOCUS FOR MODE '%s'" );
-
-    //.........................................................................
-    // Get the image for this mode
-
-    FreeLater free_later;
-
-    String image_file_name = o[ "image" ].as<String>();
-
-    failif( image_file_name.empty() , "INVALID IMAGE FOR MODE '%s'" , name );
-
-    gchar * file_name = g_build_filename( assets_path.c_str() , image_file_name.c_str() , NULL );
-    free_later( file_name );
-
-    ClutterActor * image = clutter_texture_new();
-
-    g_object_ref_sink( image );
-    free_later( image , g_object_unref );
-
-    failif( ! Images::load_texture( CLUTTER_TEXTURE( image ) , file_name ) , "FAILED TO LOAD LAYOUT IMAGE '%s'" , file_name );
-
-    clutter_container_add_actor( CLUTTER_CONTAINER( typing_layout ) , image );
-
-    mode.image = image;
-
-}
-
-//-----------------------------------------------------------------------------
-
-void Keyboard::load_layout( JSON::Object & root ) throw (String)
-{
-    using namespace JSON;
-
-    layouts.push_back( Layout() );
-
-    Layout & layout( layouts.back() );
-
-    failif( ! root[ "name" ].is<String>() , "MISISNG LAYOUT NAME" );
-
-    layout.name = root[ "name" ].as<String>();
-
-    load_layout_mode( layout.modes[0] , "default" , root );
-
-    load_layout_mode( layout.modes[1] , "shift" , root );
-}
-
-
-//-----------------------------------------------------------------------------
-
-bool Keyboard::load_layouts( const char * path )
-{
-    try
-    {
-        using namespace JSON;
-
-        lua_State * L = lua_open();
-
-        try
-        {
-            if ( luaL_dofile( L , path ) )
-            {
-                throw Util::format( "FAILED TO PARSE LAYOUTS : %s" , lua_tostring( L , -1 ) );
-            }
-
-            Value root = to_json( L , 1 );
-
-            failif( ! root.is<Array>() , "INVALID LAYOUT, EXPECTING AN ARRAY OF LAYOUTS" );
-
-            Array & a( root.as<Array>() );
-
-            failif( a.empty() , "MISSING INITIAL LAYOUT" );
-
-            failif( ! a[0].is<Object>() , "INVALID INITIAL LAYOUT, EXPECTING AN OBJECT" );
-
-            load_layout( a[0].as<Object>() );
-        }
-        catch( ... )
-        {
-            lua_close( L );
-            throw;
-        }
-
-        lua_close( L );
-
-        return true;
-    }
-    catch( const String & e )
-    {
-        layouts.clear();
-
-        clutter_group_remove_all( CLUTTER_GROUP( typing_layout ) );
-
-        tpwarn( "%s" , e.c_str() );
-        return false;
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -924,94 +1543,8 @@ gboolean Keyboard::on_event( ClutterActor * actor , ClutterEvent * event )
 {
     if ( event->any.flags & CLUTTER_EVENT_FLAG_SYNTHETIC )
     {
-        if ( event->any.type == CLUTTER_KEY_PRESS )
+        if ( form.get_field().handler->on_event( event ) )
         {
-            const Layout::Button * button = 0;
-
-            switch ( event->key.keyval )
-            {
-                case TP_KEY_RED:
-
-                    if ( form.get_field().type == Form::Field::LIST )
-                    {
-
-                    }
-                    else
-                    {
-                        button = layouts[ current_typing_layout ].get_mode().get_button_for_shortcut( "R" );
-                    }
-                    break;
-
-                case TP_KEY_GREEN:
-
-                    if ( form.get_field().type == Form::Field::LIST )
-                    {
-
-                    }
-                    else
-                    {
-                        button = layouts[ current_typing_layout ].get_mode().get_button_for_shortcut( "G" );
-                    }
-                    break;
-
-                case TP_KEY_YELLOW:
-
-                    if ( form.get_field().type == Form::Field::LIST )
-                    {
-
-                    }
-                    else
-                    {
-                        button = layouts[ current_typing_layout ].get_mode().get_button_for_shortcut( "Y" );
-                    }
-                    break;
-
-                case TP_KEY_BLUE:
-
-                    if ( form.get_field().type == Form::Field::LIST )
-                    {
-
-                    }
-                    else
-                    {
-                        button = layouts[ current_typing_layout ].get_mode().get_button_for_shortcut( "B" );
-                    }
-                    break;
-
-                case TP_KEY_UP:
-                case TP_KEY_DOWN:
-                case TP_KEY_LEFT:
-                case TP_KEY_RIGHT:
-
-                    if ( form.get_field().type == Form::Field::LIST )
-                    {
-
-                    }
-                    else
-                    {
-                        typing_spatial_navigation( event->key.keyval );
-                    }
-                    break;
-
-
-                case TP_KEY_OK:
-
-                    if ( form.get_field().type == Form::Field::LIST )
-                    {
-
-                    }
-                    else
-                    {
-                        button = get_focused_button();
-                    }
-                    break;
-            }
-
-            if ( button )
-            {
-                typing_action( button );
-            }
-
             return TRUE;
         }
     }
@@ -1115,7 +1648,16 @@ bool Keyboard::build_field_list()
 
     for ( int i = 0; i < form_fields; ++i )
     {
-        const Form::Field & ff( form.fields[ i ] );
+        Form::Field & ff( form.fields[ i ] );
+
+        if ( ff.type == Form::Field::LIST )
+        {
+            ff.handler = list_handler.get();
+        }
+        else
+        {
+            ff.handler = typing_handler.get();
+        }
 
         ClutterActor * field = clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , i );
 
@@ -1195,6 +1737,8 @@ void Keyboard::switch_to_field( size_t field_index )
 
     g_assert( nfields > 0 );
 
+    const Form::Field & old_field( form.get_field() );
+
     // Make sure the container has the right number of fields
 
     g_assert( clutter_group_get_n_children( CLUTTER_GROUP( field_list_container ) ) >= int( nfields ) );
@@ -1263,16 +1807,11 @@ void Keyboard::switch_to_field( size_t field_index )
     //-------------------------------------------------------------------------
     // Now, prepare the keyboard for this field
 
+    old_field.handler->hide();
 
+    field.handler->show_for_field( field );
 
-    if ( field.type == Form::Field::LIST )
-    {
-
-    }
-    else
-    {
-        switch_to_typing_layout( 0 );
-    }
+    field.handler->ensure_focus();
 }
 
 //-----------------------------------------------------------------------------
@@ -1297,211 +1836,6 @@ void Keyboard::move_to_next_field()
 
 //-----------------------------------------------------------------------------
 
-static inline gfloat rough_distance( gfloat x1 , gfloat y1 , gfloat x2 , gfloat y2 )
-{
-    return ( ( x2 - x1 ) * ( x2 - x1 ) ) + ( ( y2 - y1 ) * ( y2 - y1 ) );
-}
-
-//-----------------------------------------------------------------------------
-
-void Keyboard::typing_spatial_navigation( unsigned int dir )
-{
-    if ( ! focus )
-    {
-        return;
-    }
-
-    // Get the center of the current focus ring
-
-    gfloat fx;
-    gfloat fy;
-
-    clutter_actor_get_position( focus , & fx , & fy );
-
-    // Get its size
-
-    gfloat fw;
-    gfloat fh;
-
-    clutter_actor_get_size( focus , & fw , &fh );
-
-    // Now, make a rectangle for it
-
-    Rect fr( fx , fy , fw , fh );
-    Rect fr2;
-
-    // Expand the rectangle in the given direction
-
-    switch( dir )
-    {
-        case TP_KEY_UP:
-            fr2.set( 0 , 0 , 1920 , fr.y1 );
-            fr.y1 = 0;
-            break;
-
-        case TP_KEY_DOWN:
-            fr2.set( 0 , fr.y2 , 1920 , 1080 );
-            fr.y2 = 1080;
-            break;
-
-        case TP_KEY_LEFT:
-            fr2.set( 0 , 0 , fr.x1 , 1080 );
-            fr.x1 = 0;
-            break;
-
-        case TP_KEY_RIGHT:
-            fr2.set( fr.x2 , 0 , 1920 , 1080 );
-            fr.x2 = 1920;
-            break;
-
-        default : g_assert( false );
-    }
-
-    // Get the current layout mode
-
-    const Layout::Mode & mode( layouts[ current_typing_layout ].get_mode() );
-
-    // To save the closest one
-
-    const Layout::Button * closest_button_by_dir = 0;
-    gfloat closest_button_by_dir_distance = -1;
-
-    const Layout::Button * closest_button = 0;
-    gfloat closest_button_distance = -1;
-
-    // Iterate over all the buttons in the layout
-
-    for ( Layout::ButtonVector::const_iterator it = mode.buttons.begin(); it != mode.buttons.end(); ++it )
-    {
-        // Skip the currently focused one
-
-        if ( it->x == fx && it->y == fy )
-        {
-            continue;
-        }
-
-        // Rough distance from my center to this button's center
-
-        gfloat d = rough_distance( it->x , it->y , fx , fy );
-
-        // See if this button intersects my direction rectangle
-
-        if ( fr.intersect( Rect( it->x , it->y , it->w , it->h ) ) )
-        {
-            if ( closest_button_by_dir_distance < 0 || d < closest_button_by_dir_distance )
-            {
-                closest_button_by_dir = & *it;
-                closest_button_by_dir_distance = d;
-            }
-        }
-        else if ( fr2.contains( it->x , it->y ) )
-        {
-            if ( closest_button_distance < 0 || d < closest_button_distance )
-            {
-                closest_button = & * it;
-                closest_button_distance = d;
-            }
-        }
-    }
-
-    const Layout::Button * button = closest_button_by_dir ? closest_button_by_dir : closest_button;
-
-    if ( button )
-    {
-        clutter_actor_hide( focus );
-        show_focus_ring( typing_focus , button->focus_ring.c_str() , button->x , button->y );
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-void Keyboard::typing_action( const Layout::Button * button )
-{
-    g_assert( button );
-
-    if ( button->action == "OSK_PREVIOUS" )
-    {
-        move_to_previous_field();
-    }
-    else if ( button->action == "OSK_NEXT" )
-    {
-        move_to_next_field();
-    }
-    else if ( button->action == "OSK_SHIFT" )
-    {
-        toggle_layout_shift();
-    }
-    else if ( button->action == "OSK_BACKSPACE" )
-    {
-        Form::Field & field( form.get_field() );
-
-        if ( ! field.value.empty() )
-        {
-            gchar * s = g_strdup( field.value.c_str() );
-
-            gchar * p = g_utf8_find_prev_char( s , s + strlen( s ) );
-
-            if ( p )
-            {
-                * p = 0;
-                field.value = s;
-                update_field_value();
-            }
-
-            g_free( s );
-        }
-    }
-    else if ( button->action == "OSK_CANCEL" )
-    {
-        if ( lsp )
-        {
-            if ( lua_State * L = lsp->get_lua_state() )
-            {
-                UserData::invoke_global_callback( L , "keyboard" , "on_cancel" , 0 , 0 );
-            }
-        }
-
-        hide_internal( false );
-    }
-    else if ( button->action == "OSK_SUBMIT" )
-    {
-        // TODO: validate required fields
-
-        if ( lsp )
-        {
-            if ( lua_State * L = lsp->get_lua_state() )
-            {
-                lua_newtable( L );
-
-                for ( Form::FieldVector::const_iterator it = form.fields.begin(); it != form.fields.end(); ++it )
-                {
-                    lua_pushstring( L , it->id.c_str() );
-                    lua_pushstring( L , it->value.c_str() );
-                    lua_rawset( L , -3 );
-                }
-
-                UserData::invoke_global_callback( L , "keyboard" , "on_submit" , 1 , 0 );
-            }
-        }
-
-        hide_internal( false );
-    }
-    else
-    {
-        Form::Field & field( form.get_field() );
-
-        field.value += button->action;
-
-        update_field_value();
-
-        // To unshift
-
-        switch_to_typing_layout( current_typing_layout );
-    }
-}
-
-//-----------------------------------------------------------------------------
-
 void Keyboard::update_field_value()
 {
     const Form::Field & field( form.get_field() );
@@ -1514,7 +1848,7 @@ void Keyboard::update_field_value()
 
     if ( ClutterActor * placeholder = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "current-field-placeholder" ) )
     {
-        if ( field.value.empty() && ! field.placeholder.empty() )
+        if ( field.value.empty() && ! field.placeholder.empty() && field.type != Form::Field::LIST )
         {
             clutter_text_set_text( CLUTTER_TEXT( placeholder ) , field.placeholder.c_str() );
             clutter_actor_show( placeholder );
@@ -1525,28 +1859,49 @@ void Keyboard::update_field_value()
         }
     }
 
-
     clutter_text_set_text( CLUTTER_TEXT( current_field_value ) , form.get_field().value.c_str() );
 }
 
 //-----------------------------------------------------------------------------
 
-const Keyboard::Layout::Button * Keyboard::get_focused_button()
+void Keyboard::cancel()
 {
-    if ( ! focus )
+    if ( lsp )
     {
-        return 0;
+        if ( lua_State * L = lsp->get_lua_state() )
+        {
+            UserData::invoke_global_callback( L , "keyboard" , "on_cancel" , 0 , 0 );
+        }
     }
 
-    if ( form.get_field().type == Form::Field::LIST )
-    {
-        return 0;
-    }
-
-    gfloat x;
-    gfloat y;
-
-    clutter_actor_get_position( focus , & x , & y );
-
-    return layouts[ current_typing_layout ].get_mode().get_button_at( x , y );
+    hide_internal( false );
 }
+
+//-----------------------------------------------------------------------------
+
+void Keyboard::submit()
+{
+    // TODO: validate required fields
+
+    if ( lsp )
+    {
+        if ( lua_State * L = lsp->get_lua_state() )
+        {
+            lua_newtable( L );
+
+            for ( Form::FieldVector::const_iterator it = form.fields.begin(); it != form.fields.end(); ++it )
+            {
+                lua_pushstring( L , it->id.c_str() );
+                lua_pushstring( L , it->value.c_str() );
+                lua_rawset( L , -3 );
+            }
+
+            UserData::invoke_global_callback( L , "keyboard" , "on_submit" , 1 , 0 );
+        }
+    }
+
+    hide_internal( false );
+}
+
+//-----------------------------------------------------------------------------
+

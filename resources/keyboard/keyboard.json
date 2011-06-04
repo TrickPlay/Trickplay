@@ -15,7 +15,7 @@
                 'type'                  : 'ClutterGroup',
                 'name'                  : 'field-list-clip',
                 'height'                : 430,
-                /*'clip-to-allocation'    : true,*/
+                'clip'                  : { 'x' : 0 , 'y' : 0 , 'width' : 506 , 'height' : 460 },
                 'children'              :
                 [
                     {
@@ -28,9 +28,8 @@
             
             {
                 'type'      : 'ClutterTexture',
-                'id'        : 'keyboard-panel',
-                'name'      : 'keyboard-panel',
-                'y'         : 450
+                'name'      : 'top-shadow',
+                'y'         : 445
             },
             
             {
@@ -75,15 +74,33 @@
                         'children'  :
                         [
                             {
-                                'type'      : 'ClutterTexture',
-                                'id'        : 'list-background',
-                                'name'      : 'list-background'
+                                'type'      : 'ClutterGroup',
+                                'id'        : 'list-layout',
+                                'name'      : 'list-layout'
                             },
                             
                             {
                                 'type'      : 'ClutterGroup',
                                 'id'        : 'list-focus',
                                 'name'      : 'list-focus'
+                            },
+                            
+                            {
+                                'type'      : 'ClutterGroup',
+                                'name'      : 'list-item-clip',
+                                'x'         : 12,
+                                'y'         : 91,
+                                'width'     : 410,
+                                'height'    : 391,
+                                'clip-to-allocation' : true,
+                                'children'  :
+                                [
+                                    {
+                                        'type'  : 'ClutterGroup',
+                                        'id'    : 'list-item-container',
+                                        'name'  : 'list-item-container'
+                                    }
+                                ]
                             }
                         ]
                     },
