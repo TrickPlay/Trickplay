@@ -104,17 +104,41 @@
     
     CGFloat x = imageViewToCrop.xTranslation * rect.size.width/imageViewToCrop.frame.size.width;
     CGFloat y = imageViewToCrop.yTranslation * rect.size.height/imageViewToCrop.frame.size.height;
-    NSLog(@"x Translation: %f", imageViewToCrop.xTranslation);
-    NSLog(@"y Translation: %f", imageViewToCrop.yTranslation);
-    NSLog(@"translation before: %f, %f", x, y);
+    //NSLog(@"x Translation: %f", imageViewToCrop.xTranslation);
+    //NSLog(@"y Translation: %f", imageViewToCrop.yTranslation);
+    //NSLog(@"translation before: %f, %f", x, y);
+    //*
+    // Correct for change of basis caused by a rotation if translating
     if (x || y) {
         CGFloat r = sqrtf(powf(x, 2.0) + powf(y, 2.0));
         CGFloat theta = !x ? M_PI/2 * y/fabs(y) : atanf(y/x);
         theta -= imageViewToCrop.totalRotation;
-        x = r * cos(theta) * x/fabs(x);
-        y = r * sin(theta) * y/fabs(y);
+        CGFloat x_multiplier = 1.0;
+        CGFloat y_multiplier = 1.0;
+        // Correct for quadrant with consideration of inversed y-axis
+        // 1st quadrant
+        if (x > 0.0 && y > 0.0) {
+            // no change
+        // 2nd quadrant
+        } else if (x < 0.0 && y > 0.0) {
+            x_multiplier = -1.0;
+            y_multiplier = -1.0;
+        // 3rd
+        } else if (x < 0.0 && y < 0.0) {
+            x_multiplier = -1.0;
+            y_multiplier = -1.0;
+        // 4th
+        } else if (x > 0.0 && y < 0.0) {
+            // no change
+        }
+        x = r * cos(theta);// * x_multiplier;
+        y = r * sin(theta);// * y_multiplier;
+        //NSLog(@"translation mid: %f, %f", x, y);
+        x *= x_multiplier;
+        y *= y_multiplier;
     }
-    NSLog(@"translation after: %f, %f", x, y);
+    //*/
+    //NSLog(@"translation after: %f, %f", x, y);
     
     CGContextTranslateCTM(context, x, y);
     
