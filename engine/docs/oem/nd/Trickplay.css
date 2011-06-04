@@ -4,12 +4,6 @@
 body
 {
     font-family: 'Nobile',Arial, Helvetica, sans-serif;
-    font-size: 18pt;
-}
-
-.CTopic
-{
-    font-size: 13pt;
 }
 
 p 
@@ -19,7 +13,7 @@ p
    margin-top: 1em;
 }
 
-.CBody .prettyprint
+.CBody pre.prettyprint
 {
     font-family: Inconsolata, 'Courier New', Courier, monospace;
     font-size: 10pt;
@@ -29,11 +23,6 @@ p
     background: #F8F8F8F8;
     padding: 0.5em 1em 0.5em 1em;
     margin: 1em 5% 0 5%;
-}
-
-.CBody .Prototype
-{
-   margin: 0.5em 0.5em 0.5em 0.5em;
 }
 
 .CBody pre
@@ -48,16 +37,15 @@ p
     margin: 1em 5% 0 5%;
 }
 
-.Prototype td
+.CBody .Prototype
 {
-    font-size: 10pt;
+   margin: 0.5em 0.5em 0.5em 0.5em;
 }
 
 .SProperty .SEntry, .SFunction, .SEvent, .SVariable, .SType a
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
     font-variant: normal;
-    font-size: 10pt;
 }
 
 .CDescriptionList
@@ -72,12 +60,13 @@ p
 .CDescriptionList .CDLEntry
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
+    vertical-align: text-bottom;
     width: 15%;
 }
 
 .CDLDescription
 {
-    font-size: 12pt;
+    vertical-align: text-bottom;
 }
 
 .SDescription
@@ -114,6 +103,18 @@ p
 {
     background-color: #941300;
     border-color: #4a0900;
+    /* Use a Data URL for trickplay logo: http://trickplay.com/images/logo-flat.png reduced and optimized */
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJEAAAA8CAMAAABRhKghAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABVQTFRF/vz8khMAVRAH0a+viWditRIbzV5kGDq1+wAAAnpJREFUeNrs2tuWqzAIANA0EP7/k4+XEALCqFWrax156LTW6m5CiKmTPk+L9IqcKC1yvldUFpEHUnqE5C5RWY1ficrmuFpUdsdlovJtnC4qR+NMUTklThSVV/SKXtErekX/pQh0mDOht5E3o2zojkA0HJrm51+JTIzX3v3CYArMRkR2Z3UMoFJ3uFBkSDifORANkiMiRAT+bkNHmHPDdyI6IhoOl4HbZwybM97WhWg+AhXwRTQl146xJiKojTU9dm00JnNtSFSi2q0soqUI+INjnvN+QyR5uhS1HMq68THzX1S5JqL6DXIoItWZVTTa3H5dFUHWskZqIn4/FIUZL7YtImjfvZ4RlUREoNtqKTKvSfoKnE6LReiLWpuwCFtxWBFJ1rSmSZeIWhNtF5EWlXNFSernTlES2QUikNLPA92KoNWplj+7RQg4VfANoqmgQ1SzaQyQ4c8iN7H/EuVaq62obl4RQV9tCPqCxK0G7izzt6ifadWsYUSwEFFZ1B15pyj5cRFO8TGZzSKY+qj0FZmnEBHBuSJvrKVurLWpNRpral6hq0QYi0DnVTfFuhcrR0VtsEuF3CKCsNOOi3KyM+3tIu69XSIK02i3iC/MFlcj3H+RqPXvvEOYRjtE2Vw2STVItty4Y03vAFGnOaJPJMqgSiKaD4Si4oloXTTXvdHBT1jUvZ5XjeNqpduvfXZY0UAvmheTspakfkUZpZFaZbcVh116yOvcIto+b1hdccRLp/N/Yd8GCzvtut/8O5hzWgg77fL7Ij4szuuf3TsysBQ30Y/vrzELp3IJj7jjp1rsUXdF49y/UeTDPveLLOzuu+sO7JH/E/FPgAEAYcxFp4AZXHUAAAAASUVORK5CYII=);
+    background-repeat:no-repeat;
+    background-position:right center;
+    font-size: 36pt;
+}
+
+.CClass .CTitle, .CInterface .CTitle, .CDatabase .CTitle, .CDatabaseTable .CTitle, .CSection .CTitle
+{
+    background-color: #941300;
+    border-color: #4a0900;
+    font-size: 36pt;
 }
 
 .CGroup .CTitle
@@ -121,10 +122,17 @@ p
     font-size: 24pt;
 }
 
-.Summary,.CTitle,.CHeading,.IEntry
+.CHeading
 {
     font-variant: small-caps;
-    font-size: 18pt;
+    font-size: 14pt;
+}
+
+.CTitle
+{
+    font-variant: small-caps;
+    background: c0c0c0;
+    font-size: 16pt;
 }
 
 .SBorder
