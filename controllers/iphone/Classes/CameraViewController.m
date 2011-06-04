@@ -166,7 +166,7 @@
             popOverController = nil;
         }
     } else if (picker.parentViewController) {
-        [picker.parentViewController dismissModalViewControllerAnimated:NO];
+        [self dismissModalViewControllerAnimated:NO];
     }
     
     //[self.view removeFromSuperview];
@@ -174,7 +174,9 @@
 
 - (void)dismissImageEditor {
     if (imageEditor) {
-        [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
+        if (self.modalViewController) {
+            [self dismissModalViewControllerAnimated:NO];
+        }
         [imageEditor release];
         imageEditor = nil;
     }
@@ -279,7 +281,8 @@
     imagePickerController.cameraOverlayView = mask;
     
     // Displays camera
-    imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
+    // Allows for video, audio, and image capture
+    // imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
     
     // Controls iOS standard image manipulation
     imagePickerController.allowsEditing = NO;
@@ -295,7 +298,7 @@
     imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         
     // Displays saved pictures and movies, if both are available
-    imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
+    //imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     
     // Controls iOS standard image manipulation
     imagePickerController.allowsEditing = NO;
