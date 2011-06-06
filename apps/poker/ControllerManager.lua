@@ -66,7 +66,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:declare_resource("ready_label",
                 "assets/phone/waiting_screen/label-ready.png")
             controller:declare_resource("start_button",
-                "assets/phone/waiting_screen/button-start.png")
+                "assets/phone/waiting_screen/button-startplaying.png")
             controller:declare_resource("waiting_text",
                 "assets/phone/waiting_screen/text-waiting.png")
             for i = 1,6 do
@@ -74,6 +74,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                     "assets/phone/waiting_screen/player"..i..".png")
             end
             controller:declare_resource("frame", "assets/camera/frame-overlay.png")
+            controller:declare_resource("wooden_bar",
+                "assets/camera/help/lower-menu-bar.png")
 
             controller:clear_and_set_background("splash")
         end
@@ -253,7 +255,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             for i = 1,6 do
                 controller:add_image("player_"..i, 0, (i-1)*115+86, 640, 115)
             end
-            controller:add_image("start_button", 0, 6*115+86, 640, 95)
+            controller:add_image("wooden_bar", 0, 6*115+86, 640, 95)
+            controller:add_image("start_button", 320-206/2, 6*115+106, 206, 62)
             controller:update_waiting_room(
                 router:get_controller(Components.CHARACTER_SELECTION):get_players()
             )
