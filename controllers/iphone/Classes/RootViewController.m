@@ -31,6 +31,14 @@
     
     // Initialize the NSNetServiceBrowser stuff
     netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
+    
+    if (!currentTVIndicator) {
+        currentTVIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
+        currentTVIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+        currentTVIndicator.layer.borderWidth = 3.0;
+        currentTVIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+        currentTVIndicator.layer.cornerRadius = currentTVIndicator.frame.size.height/2.0;
+    }
         
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
@@ -64,6 +72,7 @@
     NSLog(@"RootViewController serviceResolved");
     [netServiceManager stop];
     [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+    currentTVName = [[service name] retain];
     // add mask and spinner
 }
 
@@ -130,6 +139,7 @@
 
     // if popping back to self, release everything else
     if (viewController.view.tag == self.view.tag) {
+        /*
         if (gestureViewController) {
             [gestureViewController release];
             gestureViewController = nil;
@@ -138,6 +148,7 @@
             [appBrowserViewController release];
             appBrowserViewController = nil;
         }
+        //*/
         [netServiceManager start];
     }
     // if popping back to app browser
@@ -205,7 +216,11 @@
 	NSNetService* service = [services objectAtIndex:indexPath.row];
 	cell.textLabel.text = [service name];
 	cell.textLabel.textColor = [UIColor blackColor];
-	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator ;
+    if ([cell.textLabel.text compare:currentTVName] == NSOrderedSame) {
+        [cell addSubview:currentTVIndicator];
+        cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    }
+	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 	return cell;
 }
@@ -268,15 +283,27 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if ([services count] == 0) { [self reloadData]; [netServiceManager start]; return; }
     
-    // Good time to load all this crap while its looking for a connection
-    if (appBrowserViewController == nil) {
+    if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
+        if (gestureViewController) {
+            [gestureViewController release];
+            gestureViewController = nil;
+        }
+        if (appBrowserViewController) {
+            [appBrowserViewController release];
+        }
         appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
+        if (currentTVName) {
+            [currentTVName release];
+            currentTVName = nil;
+        }
+        
+        netServiceManager.currentService = [services objectAtIndex:indexPath.row];
+        [netServiceManager.currentService setDelegate:netServiceManager];
+    
+        [netServiceManager.currentService resolveWithTimeout:0.0];
+    } else {
+        [self pushAppBrowser:nil];
     }
-    
-	netServiceManager.currentService = [services objectAtIndex:indexPath.row];
-	[netServiceManager.currentService setDelegate:netServiceManager];
-    
-	[netServiceManager.currentService resolveWithTimeout:0.0];
     
 	
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
@@ -301,6 +328,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 - (void)viewDidUnload {
     // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
     // For example: self.myOutlet = nil;
+    if (currentTVIndicator) {
+        [currentTVIndicator release];
+        currentTVIndicator = nil;
+    }
 }
 
 
@@ -312,6 +343,14 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     }
     if (appBrowserViewController) {
         [appBrowserViewController release];
+    }
+    if (currentTVIndicator) {
+        [currentTVIndicator release];
+        currentTVIndicator = nil;
+    }
+    if (currentTVName) {
+        [currentTVName release];
+        currentTVName = nil;
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
