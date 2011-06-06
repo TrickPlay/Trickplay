@@ -353,38 +353,38 @@ function(self, router, ...)
     end
 
     -- constants define coordinate space of button presses
-    local FOLD_X_1 = 110
-    local FOLD_X_2 = 246
+    local FOLD_X_1 = 65
+    local FOLD_X_2 = 220
     local FOLD_Y_1 = 600
-    local FOLD_Y_2 = 640
+    local FOLD_Y_2 = 670
 
     local CALL_X_1 = 260
     local CALL_X_2 = 406
     local CALL_Y_1 = 600
-    local CALL_Y_2 = 640
+    local CALL_Y_2 = 670
 
-    local BET_X_1 = 420
-    local BET_X_2 = 528
+    local BET_X_1 = 440
+    local BET_X_2 = 565
     local BET_Y_1 = 600
-    local BET_Y_2 = 645
+    local BET_Y_2 = 670
 
-    local UP_X_1 = 420
-    local UP_X_2 = 528
-    local UP_Y_1 = 534
-    local UP_Y_2 = 576
+    local UP_X_1 = 440
+    local UP_X_2 = 565
+    local UP_Y_1 = 525
+    local UP_Y_2 = 575
 
-    local DOWN_X_1 = 420
-    local DOWN_X_2 = 528
-    local DOWN_Y_1 = 678
-    local DOWN_Y_2 = 717
+    local DOWN_X_1 = 440
+    local DOWN_X_2 = 550
+    local DOWN_Y_1 = 700
+    local DOWN_Y_2 = 750
 
     local DEAL_X_1 = 66
-    local DEAL_X_2 = 252
+    local DEAL_X_2 = 240
     local DEAL_Y_1 = 780
     local DEAL_Y_2 = 837
 
     local HELP_X_1 = 273
-    local HELP_X_2 = 411
+    local HELP_X_2 = 400
     local HELP_Y_1 = 780
     local HELP_Y_2 = 837
 
