@@ -16,6 +16,9 @@ UITableViewDataSource, UINavigationControllerDelegate,
 NetServiceManagerDelegate> {
     UIWindow *window;
 
+    NSString *currentTVName;
+    UIView *currentTVIndicator;
+    
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
     AppBrowserViewController *appBrowserViewController;
