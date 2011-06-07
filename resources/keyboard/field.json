@@ -11,7 +11,11 @@
                 'name'      :   'caption',
                 'color'     :   '#ffffff',
                 'font-name' :   'FreeSans 26px',
-                'text'      :   'Field caption'
+                'text'      :   'Field caption',
+                'width'                 :   420,
+                'clip-to-allocation'    :   true,
+                'line-wrap'             :   false,
+                'ellipsize'             :   'PANGO_ELLIPSIZE_END'
             },
             
             {
