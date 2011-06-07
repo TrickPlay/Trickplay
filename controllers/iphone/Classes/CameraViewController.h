@@ -19,7 +19,7 @@
 
 @end
 
-@interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageEditorDelegate> {
+@interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageEditorDelegate, UIPopoverControllerDelegate> {
     
     UIImagePickerController *imagePickerController;
     UIPopoverController *popOverController;

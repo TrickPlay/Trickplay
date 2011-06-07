@@ -139,6 +139,7 @@
             [popOverController release];
         }
         popOverController = [[UIPopoverController alloc] initWithContentViewController:imagePickerController];
+        popOverController.delegate = self;
         CGRect frame = CGRectMake(self.view.frame.size.width/2.0, self.view.frame.size.height/2.0, 20.0, 20.0);
 
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
@@ -153,12 +154,6 @@
         picker = imagePickerController;
     }
     
-    /*if (imageEditor) {
-        [imagePickerController dismissModalViewControllerAnimated:NO];
-        [imageEditor release];
-        imageEditor = nil;
-    }*/
-    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
@@ -168,8 +163,6 @@
     } else if (picker.parentViewController) {
         [self dismissModalViewControllerAnimated:NO];
     }
-    
-    //[self.view removeFromSuperview];
 }
 
 - (void)dismissImageEditor {
@@ -215,7 +208,6 @@
     
         [self presentModalViewController:cntrl animated:NO];
         [cntrl release];
-    //*
     } else if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
         
@@ -226,7 +218,6 @@
     } else {
         NSLog(@"This User Interface Idiom does not exist");
     }
-    //*/
 }
 
 #pragma mark -
@@ -304,6 +295,14 @@
     imagePickerController.allowsEditing = NO;
     
     [self presentTheCamera];
+}
+
+#pragma mark -
+#pragma mark UIPopOverControllerDelegate
+
+- (BOOL)popoverControllerShouldDismissPopover:(UIPopoverController *)popoverController {
+    [delegate canceledPickingImage];
+    return YES;
 }
 
 #pragma mark -
