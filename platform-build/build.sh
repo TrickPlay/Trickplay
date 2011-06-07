@@ -644,7 +644,6 @@ then
 	    -lgobject-2.0 \
 	    -lglib-2.0 \
 	    -lgthread-2.0 \
-	    -lintl \
 	    -lrt \
 	    -lresolv \
 	    -ldl \

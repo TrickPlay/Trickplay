@@ -1,13 +1,13 @@
 
-TOOLCHAIN_ROOT=/opt/toolchains/stbgcc-4.5.2-0.5
+TOOLCHAIN_ROOT=/opt/toolchains/arm-2009q3
 
-ARCH="mpisel"
+ARCH="arm"
 GLES="2.0"
 #GLIB_ICONV="--with-libiconv"
 GLIB_ICONV=""
 
 PREFIX=${PWD}/output
-HOST=mipsel-linux
+HOST=arm-none-linux-gnueabi
 BUILD=i686-pc-linux-gnu
 
 CC=${HOST}-gcc
