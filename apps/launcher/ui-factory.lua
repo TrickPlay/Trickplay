@@ -409,6 +409,8 @@ function factory.make_app_tile( assets , caption , app_id )
         local icon = Image()
         if icon:load_app_icon( app_id , "launcher-icon.png" ) then
             return icon
+        elseif icon:load_app_icon( app_id, "launcher-icon.jpg" ) then
+            return icon
         end
         return "assets/generic-app-icon.jpg"
     end
