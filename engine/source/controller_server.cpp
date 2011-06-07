@@ -535,7 +535,7 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
-    static const char * PROTOCOL_VERSION = "34";
+    static const char * PROTOCOL_VERSION = "40";
 
     guint count = g_strv_length( parts );
 
@@ -590,6 +590,13 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         if ( info.version < 3 )
         {
             g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 3" );
+            info.version = 0;
+            return;
+        }
+
+        if ( info.version < 4 )
+        {
+            g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 4" );
             info.version = 0;
             return;
         }
@@ -780,14 +787,32 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
     else if ( cmp2( cmd, "UI" ) )
     {
         // UI
-        // UI <txt>
+        // UI <type> <txt>
 
-        if ( count < 2 || !info.controller )
+        if ( count < 2 || !info.controller || strlen(parts[1]) != 2)
         {
             return;
         }
 
-        tp_controller_ui_event( info.controller, parts[1] );
+        // Enter text or multiple-choice
+        if(cmp2( parts[1], "ET") || cmp2( parts[1], "MC"))
+        {
+            if(count < 3)
+            {
+                return;
+            }
+            tp_controller_ui_event( info.controller, parts[2] );
+        }
+        // Cancel image
+        else if(cmp2( parts[1], "CI"))
+        {
+            tp_controller_cancel_image( info.controller );
+        }
+        // Cancel audio
+        else if(cmp2( parts[1], "CA"))
+        {
+            tp_controller_cancel_audio_clip( info.controller );
+        }
     }
     else if ( cmp2( cmd, "PD" ) )
     {
