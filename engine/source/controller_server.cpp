@@ -334,23 +334,28 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_SUBMIT_PICTURE	:
+        case TP_CONTROLLER_COMMAND_REQUEST_IMAGE	:
 		{
-		    TPControllerSubmitPicture * sp = ( TPControllerSubmitPicture * ) parameters;
-		    String path = start_post_endpoint( connection , PostInfo::PICTURES );
-			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\n" ,
+		    TPControllerRequestImage * ri = ( TPControllerRequestImage * ) parameters;
+		    String path = start_post_endpoint( connection , PostInfo::IMAGE );
+			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\t%s\t%s\n" ,
 			        path.c_str() + 1 ,
-			        sp->max_width ,
-			        sp->max_height ,
-			        sp->edit ? 1 : 0 ,
-			        sp->mask ? sp->mask : "" );
+			        ri->max_width ,
+			        ri->max_height ,
+			        ri->edit ? 1 : 0 ,
+			        ri->mask ? ri->mask : "",
+			        ri->dialog_label ? ri->dialog_label : "",
+			        ri->cancel_label ? ri->cancel_label : "");
 			break;
 		}
 
-        case TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP	:
+        case TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP	:
 		{
+		    TPControllerRequestAudioClip * ra = ( TPControllerRequestAudioClip * ) parameters;
             String path = start_post_endpoint( connection , PostInfo::AUDIO);
-			server->write_printf( connection, "AC\t%s\n" , path.c_str() + 1 );
+			server->write_printf( connection, "AC\t%s\t%s\t%s\n" , path.c_str() + 1,
+			        ra->dialog_label ? ra->dialog_label : "",
+			        ra->cancel_label ? ra->cancel_label : "");
 			break;
 		}
 
@@ -530,7 +535,7 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
-    static const char * PROTOCOL_VERSION = "34";
+    static const char * PROTOCOL_VERSION = "40";
 
     guint count = g_strv_length( parts );
 
@@ -585,6 +590,13 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         if ( info.version < 3 )
         {
             g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 3" );
+            info.version = 0;
+            return;
+        }
+
+        if ( info.version < 4 )
+        {
+            g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 4" );
             info.version = 0;
             return;
         }
@@ -644,7 +656,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 }
                 else if ( cmp2( cap, "PS" ) )
 				{
-					spec.capabilities |= TP_CONTROLLER_HAS_PICTURES;
+					spec.capabilities |= TP_CONTROLLER_HAS_IMAGES;
 				}
                 else if ( cmp2( cap, "AC" ) )
 				{
@@ -775,14 +787,32 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
     else if ( cmp2( cmd, "UI" ) )
     {
         // UI
-        // UI <txt>
+        // UI <type> <txt>
 
-        if ( count < 2 || !info.controller )
+        if ( count < 2 || !info.controller || strlen(parts[1]) != 2)
         {
             return;
         }
 
-        tp_controller_ui_event( info.controller, parts[1] );
+        // Enter text or multiple-choice
+        if(cmp2( parts[1], "ET") || cmp2( parts[1], "MC"))
+        {
+            if(count < 3)
+            {
+                return;
+            }
+            tp_controller_ui_event( info.controller, parts[2] );
+        }
+        // Cancel image
+        else if(cmp2( parts[1], "CI"))
+        {
+            tp_controller_cancel_image( info.controller );
+        }
+        // Cancel audio
+        else if(cmp2( parts[1], "CA"))
+        {
+            tp_controller_cancel_audio_clip( info.controller );
+        }
     }
     else if ( cmp2( cmd, "PD" ) )
     {
@@ -1002,7 +1032,22 @@ String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Ty
     do
     {
         path = "/controllers";
-        path += type == PostInfo::AUDIO ? "/audio/" : "/picture/";
+        switch(type)
+        {
+            case PostInfo::AUDIO:
+                path += "/audio/";
+                break;
+            case PostInfo::IMAGE:
+                path += "/image/";
+                break;
+            case PostInfo::CANCEL_AUDIO_CLIP:
+                path += "/cancel_audio/";
+                break;
+            case PostInfo::CANCEL_IMAGE:
+                path += "/cancel_image/";
+                break;
+        }
+
         path += Util::random_string( 20 );
     }
     while( post_map.find( path ) != post_map.end() );
@@ -1052,30 +1097,35 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
         return;
     }
 
-    const HttpServer::Request::Body & body( request.get_body() );
-
-    if ( ! body.get_data() || ! body.get_length() )
+    if(it->second.type == PostInfo::CANCEL_IMAGE || it->second.type == PostInfo::CANCEL_AUDIO_CLIP)
     {
-        response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
+        if(it->second.type == PostInfo::CANCEL_IMAGE)
+        {
+            tp_controller_cancel_image( info->controller );
+        } else {
+            tp_controller_cancel_audio_clip( info->controller );
+        }
+    } else {
 
-        return;
-    }
-
-    String ct( request.get_content_type() );
-
-    const char * content_type = ct.empty() ? 0 : ct.c_str();
-
-    switch( it->second.type )
-    {
-        case PostInfo::AUDIO:
-
+        const HttpServer::Request::Body & body( request.get_body() );
+    
+        if ( ! body.get_data() || ! body.get_length() )
+        {
+            response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
+    
+            return;
+        }
+    
+        String ct( request.get_content_type() );
+    
+        const char * content_type = ct.empty() ? 0 : ct.c_str();
+    
+        if(it->second.type == PostInfo::AUDIO)
+        {
             tp_controller_submit_audio_clip( info->controller , body.get_data() , body.get_length() , content_type );
-            break;
-
-        case PostInfo::PICTURES:
-
-            tp_controller_submit_picture( info->controller , body.get_data() , body.get_length() , content_type );
-            break;
+        } else {
+            tp_controller_submit_image( info->controller , body.get_data() , body.get_length() , content_type );
+        }
     }
 
     response.set_status( HttpServer::HTTP_STATUS_OK );

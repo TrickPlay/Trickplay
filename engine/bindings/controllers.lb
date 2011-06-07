@@ -30,7 +30,7 @@ public:
     
     inline bool has_cap(unsigned int cap)
     {
-        return controller->get_capabilities()&cap;        
+        return controller->get_capabilities()&cap;
     }
     
     //.........................................................................
@@ -47,8 +47,11 @@ public:
     virtual void touch_move(int finger,int x,int y);
     virtual void touch_up(int finger,int x,int y);
     virtual void ui_event(const String & parameters);
-    virtual void submit_picture( void * data, unsigned int size, const char * mime_type );
+    virtual void submit_image( void * data, unsigned int size, const char * mime_type );
     virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
+    virtual void cancel_image( void );
+    virtual void cancel_audio_clip( void );
+
     
     bool declare_resource( const String & name , const String & uri );
 
@@ -302,20 +305,20 @@ interface controller [[ControllerDelegate*]]
         ]];
     
     /*
-        Property: has_pictures
+        Property: has_images
         
-        Whether the controller supports pictures.
+        Whether the controller supports sending images.
     */
            
-    readonly bool has_pictures
+    readonly bool has_images
         [[
-            has_pictures=self->has_cap(TP_CONTROLLER_HAS_PICTURES);
+            has_images=self->has_cap(TP_CONTROLLER_HAS_IMAGES);
         ]];
     
     /*
         Property: has_audio_clips
         
-        Whether the controller supports audio clips.
+        Whether the controller supports sending audio clips.
     */
            
     readonly bool has_audio_clips
@@ -780,23 +783,34 @@ interface controller [[ControllerDelegate*]]
         ]];
 
     /*
-        Function: submit_picture
+        Function: request_image
         
-        Tells the controller to send a picture. The app will receive the picture via <on_picture>.
+        Tells the controller to send an image. The app will receive the image via <on_image>.
+        If the user cancels the image selection, the app will receive <on_image_cancelled>.
         
         Arguments:
         
             max_dimensions - An optional table containing two integers. The first is the
-                             maximum desired width for the picture. The second is the maximum
-                             desired height for the picture. If they are both zero or not
-                             provided, the picture will be sent at its original dimensions.
+                             maximum desired width for the image. The second is the maximum
+                             desired height for the image. If they are both zero or not
+                             provided, the image will be sent at its original dimensions.
 
             edit -           If true, the controller may give the user a chance to edit
-                             the picture before it is submitted.
+                             the image before it is submitted.  Default is false
 
             mask -           This should be the name of an image previously declared as a
                              resource. When it is present, the controller will composite the
-                             mask with the picture and submit the result.
+                             mask with the image and submit the result.  Pass "" for no mask.
+
+			dialog_label -   This should be a text label to place on the controller's screen
+							 as a prompt for the user to select an image or capture a new one.
+							 Default value is "Send image to TV".
+
+			cancel_label -   This should be a text label for the "cancel" button.  Default is
+							 "Cancel", but you may wish to relabel this depending on how your app
+							 will respond to such a cancellation -- "Use default" might be more
+							 appropriate if user cancelling will result in a default image being
+							 used instead, for example.
          
         Returns:
         
@@ -805,7 +819,7 @@ interface controller [[ControllerDelegate*]]
             false - Otherwise.      
     */
             
-    bool submit_picture( table max_dimensions = 0 , bool edit = false , string mask = "" )
+    bool request_image( table max_dimensions = 0 , bool edit = false , string mask = "", string dialog_label = "SendImageToTV", string cancel_label = "Cancel" )
         [[
             unsigned int max_width = 0;
             unsigned int max_height = 0;
@@ -820,16 +834,27 @@ interface controller [[ControllerDelegate*]]
                 lua_pop( L , 1 );
             }
 
-            result=self->get_controller()->submit_picture( max_width , max_height , edit , String( mask ) );
+            result=self->get_controller()->request_image( max_width , max_height , edit , String( mask ), String( dialog_label ), String( cancel_label ) );
         ]];
 
     /*
-        Function: submit_audio_clip
+        Function: request_audio_clip
         
         Tells the controller to send an audio clip. The app will receive the audio clip via <on_audio_clip>.
-        
-        
-         
+        If the user cancels the audio selection, the app will receive <on_audio_clip_cancelled>.
+
+		Arguments:
+
+			dialog_label -   This should be a text label to place on the controller's screen
+							 as a prompt for the user to select an image or capture a new one.
+							 Default value is "Send audio to TV".
+
+			cancel_label -   This should be a text label for the "cancel" button.  Default is
+							 "Cancel", but you may wish to relabel this depending on how your app
+							 will respond to such a cancellation -- "Use default" might be more
+							 appropriate if user cancelling will result in a default image being
+							 used instead, for example.
+
         Returns:
         
             true - If it was successful.
@@ -837,9 +862,9 @@ interface controller [[ControllerDelegate*]]
             false - Otherwise.      
     */
             
-    bool submit_audio_clip( )
+    bool request_audio_clip( string dialog_label = "SendAudioToTV", string cancel_label = "Cancel" )
         [[
-            result=self->get_controller()->submit_audio_clip( );    
+            result=self->get_controller()->request_audio_clip( String( dialog_label ), String( cancel_label ) );
         ]];
 
     /*
@@ -1062,9 +1087,10 @@ interface controller [[ControllerDelegate*]]
 
 
     /*
-        Event: on_picture
+        Event: on_image
         
-        A picture event. This is sent when you use <submit_picture>.
+        An image event. This is sent when you use <request_image> and the user sends and image from
+        the controller.
         
         Arguments:
             controller - The controller that generated the event.
@@ -1072,7 +1098,27 @@ interface controller [[ControllerDelegate*]]
             bitmap - The bitmap received from the controller.
             
     */
-    callback on_picture;
+    callback on_image;
+
+	/*
+		Event: on_image_cancelled
+		
+		This is sent when the user cancels sending an image after you use <request_image>
+		
+		Arguments:
+			controller - The controller that generated the event
+	*/
+	callback on_image_cancelled;
+
+	/*
+		Event: on_audio_clip_cancelled
+		
+		This is sent when the user cancels sending an audio clip after you use <request_audio_clip>
+		
+		Arguments:
+			controller - The controller that generated the event
+	*/
+	callback on_audio_clip_cancelled;
 
 
     /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
@@ -1281,7 +1327,7 @@ void ControllerDelegate::ui_event(const String & parameters)
     invoke_controller_on_ui_event(L,this,1,0);
 }
 
-void ControllerDelegate::submit_picture( void * data, unsigned int size, const char * mime_type )
+void ControllerDelegate::submit_image( void * data, unsigned int size, const char * mime_type )
 {
     Image * image = Image::decode(data, size, mime_type);
     
@@ -1298,7 +1344,7 @@ void ControllerDelegate::submit_picture( void * data, unsigned int size, const c
     {
         bitmap->set_image( image ); 
         
-        invoke_controller_on_picture( L , this , 1 , 0 );
+        invoke_controller_on_image( L , this , 1 , 0 );
     }
     else
     {
@@ -1306,6 +1352,16 @@ void ControllerDelegate::submit_picture( void * data, unsigned int size, const c
         
         delete image;
     }
+}
+
+void ControllerDelegate::cancel_image( void )
+{
+	invoke_controller_on_image_cancelled( L, this, 0, 0 );
+}
+
+void ControllerDelegate::cancel_audio_clip( void )
+{
+	invoke_controller_on_audio_clip_cancelled( L, this, 0, 0 );
 }
 
 void ControllerDelegate::submit_audio_clip( void * data, unsigned int size, const char * mime_type )
