@@ -66,7 +66,11 @@ private:
 
     void move_to_next_field();
 
-    void show_focus_ring( ClutterActor * container , const char * name , gfloat x , gfloat y );
+    ClutterActor * show_focus_ring( ClutterActor * container , const char * name , gfloat x , gfloat y , bool set_it = true );
+
+    void flash_focus();
+
+    void flash_button( const char * name , gfloat x , gfloat y );
 
     // Event handlers
 
@@ -154,6 +158,41 @@ private:
                 password_char( 0x00B7 )
             {}
 
+            String get_display_value() const
+            {
+                if ( type != LIST )
+                {
+                    return value;
+                }
+
+                for ( StringPairVector::const_iterator it = choices.begin(); it != choices.end(); ++it )
+                {
+                    if ( it->first == value )
+                    {
+                        return it->second;
+                    }
+                }
+
+                return String();
+            }
+
+            int get_choice_index() const
+            {
+                if ( type == LIST && ! value.empty() )
+                {
+                    int i = 0;
+
+                    for ( StringPairVector::const_iterator it = choices.begin(); it != choices.end(); ++it , ++i )
+                    {
+                        if ( it->first == value )
+                        {
+                            return i;
+                        }
+                    }
+                }
+                return -1;
+            }
+
             Type                type;
             KeyboardHandler *   handler;
             String              id;
@@ -164,7 +203,7 @@ private:
 
             // For list fields
 
-            StringPairList      choices;
+            StringPairVector    choices;
             bool                multiple;
 
             // For password fields

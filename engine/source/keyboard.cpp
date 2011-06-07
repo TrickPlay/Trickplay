@@ -25,6 +25,7 @@
 
 #define KB_UNFOCUSED_OPACITY        100
 #define KB_FIELD_SCROLL_DURATION    250
+#define KB_LIST_SCROLL_DURATION     250
 
 //=============================================================================
 // The Layout structure
@@ -40,6 +41,7 @@ struct Layout
         String  focus_ring;
         String  action;
         String  shortcut;
+        String  flasher;
     };
 
     typedef std::vector< Button > ButtonVector;
@@ -87,6 +89,21 @@ struct Layout
                 }
             }
             return 0;
+        }
+
+        const Button * get_button_at( ClutterActor * focus ) const
+        {
+            if ( ! focus )
+            {
+                return 0;
+            }
+
+            gfloat x;
+            gfloat y;
+
+            clutter_actor_get_position( focus , & x , & y );
+
+            return get_button_at( x , y );
         }
 
         ClutterActor *  image;
@@ -218,6 +235,11 @@ private:
             if ( e.size() > 6 )
             {
                 button.shortcut = e[ 6 ].as<String>();
+
+                if ( e.size() > 7 )
+                {
+                    button.flasher = e[ 7 ].as<String>();
+                }
             }
         }
 
@@ -336,15 +358,7 @@ protected:
         // If something was already focused, see if there is a button in this layout
         // that lies in the same position - so we can focus this thing.
 
-        if ( kb->focus )
-        {
-            gfloat fx;
-            gfloat fy;
-
-            clutter_actor_get_position( kb->focus , & fx , & fy );
-
-            button = mode.get_button_at( fx , fy );
-        }
+        button = mode.get_button_at( kb->focus );
 
         if ( ! button )
         {
@@ -365,6 +379,8 @@ protected:
     {
         if ( event->any.type == CLUTTER_KEY_PRESS )
         {
+            bool direct_press = false;
+
             switch( event->key.keyval )
             {
                 case TP_KEY_RED:
@@ -380,18 +396,9 @@ protected:
                     * button = mode.get_button_for_shortcut( "B" );
                     break;
                 case TP_KEY_OK:
-                {
-                    if ( kb->focus )
-                    {
-                        gfloat x;
-                        gfloat y;
-
-                        clutter_actor_get_position( kb->focus , & x , & y );
-
-                        * button = mode.get_button_at( x , y );
-                    }
+                    * button = mode.get_button_at( kb->focus );
+                    direct_press = true;
                     break;
-                }
             }
 
             if ( * button )
@@ -401,29 +408,65 @@ protected:
                 if ( action == "OSK_PREVIOUS" )
                 {
                     kb->move_to_previous_field();
+                    if ( direct_press )
+                    {
+                        kb->flash_focus();
+                    }
+                    else
+                    {
+                        kb->flash_button( (*button)->flasher.c_str() , (*button)->x , (*button)->y );
+                    }
                     return true;
                 }
 
                 if ( action == "OSK_NEXT" )
                 {
                     kb->move_to_next_field();
+                    if ( direct_press )
+                    {
+                        kb->flash_focus();
+                    }
+                    else
+                    {
+                        kb->flash_button( (*button)->flasher.c_str() , (*button)->x , (*button)->y );
+                    }
                     return true;
                 }
 
                 if ( action == "OSK_CANCEL" )
                 {
                     kb->cancel();
+                    if ( direct_press )
+                    {
+                        kb->flash_focus();
+                    }
                     return true;
                 }
 
                 if ( action == "OSK_SUBMIT" )
                 {
                     kb->submit();
+                    if ( direct_press )
+                    {
+                        kb->flash_focus();
+                    }
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    //-----------------------------------------------------------------------------
+
+    void show_focus_ring( ClutterActor * focus_container , const Layout::Button * button )
+    {
+        g_assert( focus_container );
+
+        if ( button )
+        {
+            kb->show_focus_ring( focus_container , button->focus_ring.c_str() , button->x , button->y );
+        }
     }
 
     //-----------------------------------------------------------------------------
@@ -616,9 +659,19 @@ public:
 
         if ( button )
         {
+            bool direct_press = button == layouts.front().get_mode().get_button_at( kb->focus );
+
             if ( button->action == "OSK_SHIFT" )
             {
                 toggle_shift();
+                if ( direct_press )
+                {
+                    kb->flash_focus();
+                }
+                else
+                {
+                    kb->flash_button( button->flasher.c_str() , button->x , button->y );
+                }
                 return true;
             }
 
@@ -644,6 +697,15 @@ public:
 
                 unshift();
 
+                if ( direct_press )
+                {
+                    kb->flash_focus();
+                }
+                else
+                {
+                    kb->flash_button( button->flasher.c_str() , button->x , button->y );
+                }
+
                 return true;
             }
 
@@ -652,6 +714,8 @@ public:
             kb->update_field_value();
 
             unshift();
+
+            kb->flash_focus();
 
             return true;
         }
@@ -723,6 +787,19 @@ public:
                 tpwarn( "UI DEFINITION IS MISSING 'list-item-container'" );
                 loaded = false;
             }
+
+            if ( loaded )
+            {
+                // Make an array of the buttons that represent the visible list items
+
+                for ( Layout::ButtonVector::const_iterator it = layout.get_mode().buttons.begin(); it != layout.get_mode().buttons.end(); ++it )
+                {
+                    if ( it->action == "item" )
+                    {
+                        item_buttons.push_back( & * it );
+                    }
+                }
+            }
         }
     }
 
@@ -731,9 +808,11 @@ public:
         return loaded;
     }
 
-    virtual void show_for_field( const Keyboard::Form::Field & field )
+    virtual void show_for_field( const Keyboard::Form::Field & _field )
     {
         g_assert( ok() );
+
+        field = & _field;
 
         clutter_actor_show_all( kb->list_container );
         clutter_actor_hide_all( kb->list_focus );
@@ -755,13 +834,15 @@ public:
 
         // TODO: We could also cache the pieces we build
 
-        gfloat height = clutter_actor_get_height( kb->current_field_value );
+        item_height = clutter_actor_get_height( kb->current_field_value );
+
+        gfloat item_width = clutter_actor_get_width( item_container );
 
         int existing = clutter_group_get_n_children( CLUTTER_GROUP( item_container ) );
 
         int i = 0;
 
-        for ( StringPairList::const_iterator it = field.choices.begin(); it != field.choices.end(); ++it , ++i )
+        for ( StringPairVector::const_iterator it = field->choices.begin(); it != field->choices.end(); ++it , ++i )
         {
             ClutterActor * item = 0;
 
@@ -781,7 +862,13 @@ public:
 
                 clutter_text_set_color( CLUTTER_TEXT( item ) , & color );
 
-                clutter_actor_set_y( item , height * i );
+                clutter_actor_set_y( item , item_height * i );
+
+                clutter_actor_set_x( item , 10 );
+
+                clutter_actor_set_width( item , item_width - 20 );
+
+                clutter_text_set_ellipsize( CLUTTER_TEXT( item ) , PANGO_ELLIPSIZE_END );
 
                 clutter_group_add( CLUTTER_GROUP( item_container ) , item );
             }
@@ -793,13 +880,44 @@ public:
 
         clutter_actor_show( item_container );
 
-        // TODO: If the field has a value, we need to figure out which one it
-        // is and scroll it into view. Default focus should go to that one.
+        // Get the current value for the field and make sure the right item is selected
+        // This could mean scrolling the list.
+
+        top_item = 0;
+        focused_item = 0;
+
+        int choice_index = field->get_choice_index();
+
+        if ( choice_index >= 0 )
+        {
+            focused_item = choice_index;
+
+            if ( size_t( focused_item ) >= item_buttons.size() )
+            {
+                if ( focused_item + item_buttons.size() >= field->choices.size() )
+                {
+                    top_item = std::max( field->choices.size() - item_buttons.size() , size_t( 0 ) );
+                }
+                else
+                {
+                    top_item = focused_item;
+                }
+
+                clutter_actor_set_y( item_container , ( - item_height ) * ( top_item ) );
+            }
+        }
     }
 
     virtual void ensure_focus()
     {
-        KeyboardHandler::ensure_focus( layout.get_mode() , kb->list_focus );
+        const Layout::Button * button = layout.get_mode().get_button_at( kb->focus );
+
+        if ( ! button || ( button && button->action == "item" ) )
+        {
+            button = item_buttons[ focused_item - top_item ];
+        }
+
+        KeyboardHandler::show_focus_ring( kb->list_focus , button );
     }
 
     virtual bool on_event( ClutterEvent * event )
@@ -811,13 +929,177 @@ public:
             return true;
         }
 
-        button = KeyboardHandler::get_spatial_navigation_target( event , layout.get_mode() );
+        // Get the focused button
 
-        if ( button )
+        button = layout.get_mode().get_button_at( kb->focus );
+
+        if ( ! button )
         {
-            kb->show_focus_ring( kb->list_focus , button->focus_ring.c_str() , button->x , button->y );
+            return false;
+        }
+
+        if ( event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == TP_KEY_OK && button->action == "item" )
+        {
+            kb->form.get_field().value = field->choices[ focused_item ].first;
+
+            kb->update_field_value();
+
+            const Layout::Button * target = 0;
+
+            if ( kb->form.current_field == kb->form.fields.size() - 1 )
+            {
+                target = layout.get_mode().get_button_for_action( "OSK_SUBMIT" );
+            }
+            else
+            {
+                target = layout.get_mode().get_button_for_action( "OSK_NEXT" );
+            }
+
+            if ( target )
+            {
+                KeyboardHandler::show_focus_ring( kb->list_focus , target );
+            }
 
             return true;
+        }
+
+
+        const Layout::Button * target = KeyboardHandler::get_spatial_navigation_target( event , layout.get_mode() );
+
+        if ( ! target )
+        {
+            return false;
+        }
+
+        // If we are not moving into the list, out of the list or within the list,
+        // we can just focus the target and bail.
+
+        if ( button->action != "item" && target->action != "item" )
+        {
+            KeyboardHandler::show_focus_ring( kb->list_focus , target );
+            return true;
+        }
+
+        // If we are moving into the list, we just focus whatever was focused last
+
+        if ( button->action != "item" && target->action == "item" )
+        {
+            KeyboardHandler::show_focus_ring( kb->list_focus , item_buttons[ focused_item - top_item ] );
+            return true;
+        }
+
+        // OK, now we know that we are either moving within the list or
+        // out of it.
+
+        if ( event->any.type == CLUTTER_KEY_PRESS )
+        {
+            switch( event->key.keyval )
+            {
+                // Pressing left or right on a list item does nothing
+
+                case TP_KEY_LEFT:
+                case TP_KEY_RIGHT:
+                    return true;
+                    break;
+
+                // This will either focus the next item above it, scroll
+                // the list up or jump out of the list to the buttons
+                // above it.
+
+                case TP_KEY_UP:
+                {
+                    // We are moving up to another list item
+
+                    if ( target->action == "item" )
+                    {
+                        --focused_item;
+                        KeyboardHandler::show_focus_ring( kb->list_focus , target );
+                        return true;
+                    }
+
+                    // We are moving up and we are at the top of the list,
+                    // so we focus whatever is above the list - the target.
+
+                    if ( top_item == 0 )
+                    {
+                        KeyboardHandler::show_focus_ring( kb->list_focus , target );
+                        return true;
+                    }
+
+                    // Otherwise, we need to scroll the list down and keep the focus
+                    // where it is.
+
+                    --top_item;
+                    --focused_item;
+
+                    if ( ClutterAnimation * an = clutter_actor_get_animation( item_container ) )
+                    {
+                        clutter_animation_completed( an );
+                    }
+
+                    gfloat y = clutter_actor_get_y( item_container ) + item_height;
+
+                    clutter_actor_animate( item_container , CLUTTER_EASE_OUT_QUAD , KB_LIST_SCROLL_DURATION , "y" , y , NULL );
+
+                    return true;
+
+                    break;
+                }
+
+                case TP_KEY_DOWN:
+                {
+                    // Moving down to another item, but that item may be empty
+
+                    if ( target->action == "item" )
+                    {
+                        if ( size_t( focused_item ) < field->choices.size() - 1 )
+                        {
+                            ++focused_item;
+                            KeyboardHandler::show_focus_ring( kb->list_focus , target );
+                            return true;
+                        }
+
+                        // That item is empty, we need to jump out
+
+                        KeyboardHandler::show_focus_ring( kb->list_focus , item_buttons.back() );
+                        target = KeyboardHandler::get_spatial_navigation_target( event , layout.get_mode() );
+                        if ( target )
+                        {
+                            KeyboardHandler::show_focus_ring( kb->list_focus , target );
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    // The target is below the list.
+
+                    // If we are already showing the last item, jump out of the list
+
+                    if ( size_t( focused_item + 1 ) >= field->choices.size() )
+                    {
+                        KeyboardHandler::show_focus_ring( kb->list_focus , target );
+                        return true;
+                    }
+
+                    // OK, scroll
+
+                    ++top_item;
+                    ++focused_item;
+
+                    if ( ClutterAnimation * an = clutter_actor_get_animation( item_container ) )
+                    {
+                        clutter_animation_completed( an );
+                    }
+
+                    gfloat y = clutter_actor_get_y( item_container ) - item_height;
+
+                    clutter_actor_animate( item_container , CLUTTER_EASE_OUT_QUAD , KB_LIST_SCROLL_DURATION , "y" , y , NULL );
+
+                    return true;
+
+                    break;
+                }
+            }
         }
 
         return false;
@@ -832,9 +1114,17 @@ protected:
 
 private:
 
-    bool            loaded;
-    Layout          layout;
-    ClutterActor *  item_container;
+    bool                loaded;
+    Layout              layout;
+    ClutterActor *      item_container;
+
+    typedef std::vector< const Layout::Button * > Buttons;
+
+    Buttons                         item_buttons;
+    const Keyboard::Form::Field *   field;
+    int                             top_item;
+    int                             focused_item;
+    gfloat                          item_height;
 };
 
 //=============================================================================
@@ -979,7 +1269,10 @@ bool Keyboard::Form::load_from_lua( lua_State * L , int n )
 
                         // Make sure that the initial value provided is one of the choices
 
-                        field.value = value;
+                        if ( value.empty() )
+                        {
+                            field.value.clear();
+                        }
 
                         break;
                     }
@@ -1454,7 +1747,7 @@ void Keyboard::reset()
 
 //-----------------------------------------------------------------------------
 
-void Keyboard::show_focus_ring( ClutterActor * container , const char * name , gfloat x , gfloat y )
+ClutterActor * Keyboard::show_focus_ring( ClutterActor * container , const char * name , gfloat x , gfloat y , bool set_it )
 {
     ClutterActor * ring = clutter_container_find_child_by_name( CLUTTER_CONTAINER( container ) , name );
 
@@ -1493,14 +1786,88 @@ void Keyboard::show_focus_ring( ClutterActor * container , const char * name , g
 
     clutter_actor_set_position( ring , x , y );
 
-    if ( focus && focus != ring )
+    if ( focus && focus != ring && set_it )
     {
         clutter_actor_hide( focus );
     }
 
+    if ( set_it )
+    {
+        focus = ring;
+    }
+
     clutter_actor_show( ring );
 
-    focus = ring;
+    return ring;
+}
+
+//-----------------------------------------------------------------------------
+
+void Keyboard::flash_focus()
+{
+    if ( focus )
+    {
+        if ( ClutterAnimation * an = clutter_actor_get_animation( focus ) )
+        {
+            clutter_animation_completed( an );
+        }
+
+        //clutter_actor_set_scale( focus , 0.95 , 0.95 );
+        clutter_actor_set_opacity( focus , 128 );
+
+        clutter_actor_animate( focus , CLUTTER_EASE_OUT_QUINT , 250 ,
+                "scale-x" , 1.0 ,
+                "scale-y" , 1.0 ,
+                "opacity" , 255 ,
+                NULL );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+static void hide_on_completed( ClutterAnimation * animation , ClutterActor * actor )
+{
+    clutter_actor_hide( actor );
+}
+
+//-----------------------------------------------------------------------------
+
+void Keyboard::flash_button( const char * name , gfloat x , gfloat y )
+{
+    if ( ! focus || ! name )
+    {
+        return;
+    }
+
+    gfloat fx;
+    gfloat fy;
+
+    clutter_actor_get_position( focus , & fx , & fy );
+
+    if ( fx == x && fy == y )
+    {
+        flash_focus();
+        return;
+    }
+
+    if ( ! strlen( name ) )
+    {
+        return;
+    }
+
+    ClutterActor * flasher = show_focus_ring( clutter_actor_get_parent( focus ) , name , x , y , false );
+
+    if ( flasher )
+    {
+        clutter_actor_set_scale( flasher , 1.0 , 1.0 );
+
+        clutter_actor_animate( flasher , CLUTTER_EASE_OUT_QUINT , 250 ,
+                "scale-x" , 1.0 ,
+                "scale-y" , 1.0 ,
+                "signal::completed" , hide_on_completed , flasher ,
+                NULL );
+    }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1679,7 +2046,7 @@ bool Keyboard::build_field_list()
 
         g_assert( value );
 
-        clutter_text_set_text( CLUTTER_TEXT( value ) , ff.value.c_str() );
+        clutter_text_set_text( CLUTTER_TEXT( value ) , ff.get_display_value().c_str() );
 
         //.....................................................................
         // The password character
@@ -1785,7 +2152,29 @@ void Keyboard::switch_to_field( size_t field_index )
 
     Form::Field & field( form.get_field() );
 
+    //.........................................................................
+    // We center the field caption manually
+
+    gfloat mw = clutter_actor_get_width( clutter_actor_get_parent( current_field_caption ) );
+
+    clutter_actor_set_size( current_field_caption , -1 , -1 );
+
     clutter_text_set_text( CLUTTER_TEXT( current_field_caption ) , field.caption.c_str() );
+
+    gfloat w = clutter_actor_get_width( current_field_caption );
+
+    if ( w > mw )
+    {
+        w = mw;
+
+        clutter_actor_set_width( current_field_caption , w );
+    }
+
+    gfloat x = ( mw / 2.0 ) - ( w / 2.0 );
+
+    clutter_actor_set_x( current_field_caption , x );
+
+    //.........................................................................
 
     if ( field.type == Form::Field::PASSWORD )
     {
@@ -1798,7 +2187,7 @@ void Keyboard::switch_to_field( size_t field_index )
 
     if ( ClutterActor * field_count = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "field-count" ) )
     {
-        String count( Util::format( "%u/%u" , field_index + 1 , form.fields.size() ) );
+        String count( Util::format( "%u / %u" , field_index + 1 , form.fields.size() ) );
         clutter_text_set_text( CLUTTER_TEXT( field_count ) , count.c_str() );
     }
 
@@ -1844,7 +2233,7 @@ void Keyboard::update_field_value()
 
     g_assert( ff );
 
-    clutter_text_set_text( CLUTTER_TEXT( clutter_container_find_child_by_name( CLUTTER_CONTAINER( ff ) , "value" ) ) , field.value.c_str() );
+    clutter_text_set_text( CLUTTER_TEXT( clutter_container_find_child_by_name( CLUTTER_CONTAINER( ff ) , "value" ) ) , field.get_display_value().c_str() );
 
     if ( ClutterActor * placeholder = clutter_container_find_child_by_name( CLUTTER_CONTAINER( keyboard ) , "current-field-placeholder" ) )
     {
@@ -1859,7 +2248,7 @@ void Keyboard::update_field_value()
         }
     }
 
-    clutter_text_set_text( CLUTTER_TEXT( current_field_value ) , form.get_field().value.c_str() );
+    clutter_text_set_text( CLUTTER_TEXT( current_field_value ) , field.get_display_value().c_str() );
 }
 
 //-----------------------------------------------------------------------------

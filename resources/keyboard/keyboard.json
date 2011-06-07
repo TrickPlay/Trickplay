@@ -15,7 +15,7 @@
                 'type'                  : 'ClutterGroup',
                 'name'                  : 'field-list-clip',
                 'height'                : 430,
-                'clip'                  : { 'x' : 0 , 'y' : 0 , 'width' : 506 , 'height' : 460 },
+                'clip'                  : { 'x' : 0 , 'y' : 0 , 'width' : 506 , 'height' : 465 },
                 'children'              :
                 [
                     {
@@ -98,7 +98,8 @@
                                     {
                                         'type'  : 'ClutterGroup',
                                         'id'    : 'list-item-container',
-                                        'name'  : 'list-item-container'
+                                        'name'  : 'list-item-container',
+                                        'width' : 410
                                     }
                                 ]
                             }
@@ -108,7 +109,8 @@
                         'type'                  : 'ClutterText',
                         'id'                    : 'field-count',
                         'name'                  : 'field-count',
-                        'color'                 : '#505050',
+                        'color'                 : '#ffffff',
+                        'opacity'               : 128,
                         'font-name'             : 'FreeSans bold 24px',
                         'anchor-gravity'        : 'CLUTTER_GRAVITY_CENTER',
                         'x'                     : 214,
@@ -116,16 +118,22 @@
                     },
                     
                     {
-                        'type'                  : 'ClutterText',
-                        'id'                    : 'current-field-caption',
-                        'name'                  : 'current-field-caption',
-                        'color'                 : '#ffffff',
-                        'font-name'             : 'FreeSans bold 24px',
-                        'width'                 : 410,
-                        'clip-to-allocation'    : true,
-                        'ellipsize'             :   'PANGO_ELLIPSIZE_END',                        
+                        'type'                  : 'ClutterGroup',
+                        'name'                  : 'caption-container',
+                        'width'                 : 418,
                         'x'                     : 8,
-                        'y'                     : 52
+                        'y'                     : 52,
+                        'children'              :
+                        [
+                            {
+                                'type'                  : 'ClutterText',
+                                'id'                    : 'current-field-caption',
+                                'name'                  : 'current-field-caption',
+                                'color'                 : '#ffffff',
+                                'font-name'             : 'FreeSans bold 24px',
+                                'ellipsize'             : 'PANGO_ELLIPSIZE_END'
+                            }
+                        ]
                     },
                     
                     {
@@ -150,7 +158,6 @@
                         'width'                 : 400,
                         'editable'              : true,
                         'selection-color'       : '#00000000',
-                        /*'reactive'              : true,*/
                         'single-line-mode'      : true,
                         'x'                     : 14,
                         'y'                     : 91

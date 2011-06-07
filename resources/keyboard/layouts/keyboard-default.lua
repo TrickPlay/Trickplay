@@ -7,6 +7,10 @@ local FOCUS_NEXT        = "focus-next.png"
 local FOCUS_SHIFT       = "focus-shift.png"
 local FOCUS_BACKSPACE   = "focus-backspace.png"
 
+local FLASH_PREV        = "button-previous-r-pressed.png"
+local FLASH_NEXT        = "button-next-g-pressed.png"
+local FLASH_SHIFT       = "button-shift-b-pressed.png"
+local FLASH_BACKSPACE   = "button-delete-y-pressed.png"
 local RX            = 24
 local RY            = 158
 local DY            = 51
@@ -22,10 +26,10 @@ return
         first = "q",
         layout =
         {
-            {  53 ,  25 ,  90 , 38 , FOCUS_PREV        , "OSK_PREVIOUS"     , "R" },
-            { 381 ,  25 ,  90 , 38 , FOCUS_NEXT        , "OSK_NEXT"         , "G" },
-            {  53 , 412 ,  90 , 38 , FOCUS_SHIFT       , "OSK_SHIFT"        , "B" },
-            { 381 , 412 ,  90 , 38 , FOCUS_BACKSPACE   , "OSK_BACKSPACE"    , "Y" },
+            {  53 ,  25 ,  90 , 38 , FOCUS_PREV        , "OSK_PREVIOUS"     , "R" , FLASH_PREV },
+            { 381 ,  25 ,  90 , 38 , FOCUS_NEXT        , "OSK_NEXT"         , "G" , FLASH_NEXT },
+            {  53 , 412 ,  90 , 38 , FOCUS_SHIFT       , "OSK_SHIFT"        , "B" , FLASH_SHIFT },
+            { 381 , 412 ,  90 , 38 , FOCUS_BACKSPACE   , "OSK_BACKSPACE"    , "Y" , FLASH_BACKSPACE },
             { 112 , 536 , 200 , 64 , FOCUS_LARGE       , "OSK_CANCEL"       },
             { 324 , 536 , 200 , 64 , FOCUS_LARGE       , "OSK_SUBMIT"       },
             
@@ -96,10 +100,10 @@ return
         first = "Q",
         layout =
         {
-            {  53 ,  25 ,  90 , 38 , FOCUS_PREV        , "OSK_PREVIOUS"     , "R" },
-            { 381 ,  25 ,  90 , 38 , FOCUS_NEXT        , "OSK_NEXT"         , "G" },
-            {  53 , 412 ,  90 , 38 , FOCUS_SHIFT       , "OSK_SHIFT"        , "B" },
-            { 381 , 412 ,  90 , 38 , FOCUS_BACKSPACE   , "OSK_BACKSPACE"    , "Y" },
+            {  53 ,  25 ,  90 , 38 , FOCUS_PREV        , "OSK_PREVIOUS"     , "R" , FLASH_PREV },
+            { 381 ,  25 ,  90 , 38 , FOCUS_NEXT        , "OSK_NEXT"         , "G" , FLASH_NEXT },
+            {  53 , 412 ,  90 , 38 , FOCUS_SHIFT       , "OSK_SHIFT"        , "B" , FLASH_SHIFT },
+            { 381 , 412 ,  90 , 38 , FOCUS_BACKSPACE   , "OSK_BACKSPACE"    , "Y" , FLASH_BACKSPACE },
             { 112 , 536 , 200 , 64 , FOCUS_LARGE       , "OSK_CANCEL"       },
             { 324 , 536 , 200 , 64 , FOCUS_LARGE       , "OSK_SUBMIT"       },
             
