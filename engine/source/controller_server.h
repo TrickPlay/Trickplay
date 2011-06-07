@@ -152,7 +152,7 @@ private:
 
     struct PostInfo
     {
-        enum Type { PICTURES , AUDIO };
+        enum Type { IMAGE , AUDIO, CANCEL_IMAGE, CANCEL_AUDIO_CLIP };
 
         Type        type;
         gpointer    connection;
