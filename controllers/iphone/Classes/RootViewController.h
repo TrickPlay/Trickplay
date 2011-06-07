@@ -30,5 +30,6 @@ NetServiceManagerDelegate> {
 - (void)reloadData;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
+@property (retain) NSString *currentTVName;
 
 @end

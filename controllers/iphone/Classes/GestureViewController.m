@@ -65,7 +65,7 @@
         hasPictures = @"\tPS";
     }
     // Tell the service what this device is capable of
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.0\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     // Manages resources created with declare_resource
@@ -194,6 +194,9 @@
 
 - (void)do_PS:(NSArray *)args {
     [audioController destroyAudioStreamer];
+    NSString *sentData = [NSString stringWithFormat:@"UI\tCA"];
+    [socketManager sendData:[sentData UTF8String] 
+              numberOfBytes:[sentData length]];
 }
 
 //--Multiple Choice junk
@@ -245,11 +248,13 @@
         } else if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE]] == NSOrderedSame) {
             
             [camera openLibrary];
+        } else if ([cameraActionSheet cancelButtonIndex] == buttonIndex) {
+            [self canceledPickingImage];
         }
     }
 }
 
-//--Text input stuff
+//-------------------Text input stuff---------------------
 
 /**
  * Brings up the text field, sets the text field as the focus, and the
@@ -277,7 +282,7 @@
  */
 - (IBAction)hideTextBox:(id)sender {
     NSLog(@"textbox hidden");
-    NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", theTextField.text];
+    NSString *sentData = [NSString stringWithFormat:@"UI\tET\t%@\n", theTextField.text];
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
@@ -290,7 +295,7 @@
 }
 
 
-//--Image related
+//----------------------Graphics related----------------------
 
 - (void)do_DR:(NSArray *)args {
     NSLog(@"Declaring Resource");
@@ -365,7 +370,7 @@
 }
 
 
-//--Resetting stuff
+//--------------------Resetting stuff-------------------
 
 // TODO: Reset all modules to the initial state
 - (void)do_RT:(NSArray *)args {
@@ -427,6 +432,10 @@
 
 - (void)do_PI:(NSArray *)args {
     NSLog(@"Submit Picture, args:%@", args);
+    if ([self.navigationController visibleViewController] != self) {
+        [self canceledPickingImage];
+        return;
+    }
     // Start the camera in the background
     if (camera) {
         [camera release];
@@ -435,7 +444,7 @@
     UIView *mask = nil;
     CGFloat width = 0.0, height = 0.0;
     BOOL editable = NO;
-    if ([args count] == 5) {
+    if ([args count] >= 3) {
         width = [args objectAtIndex:1] ? [[args objectAtIndex:1] floatValue] : 0.0;
         height = [args objectAtIndex:2] ? [[args objectAtIndex:2] floatValue] : 0.0;
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
@@ -474,11 +483,18 @@
 - (void)finishedSendingImage {
     NSLog(@"Finished Sending Image");
     [camera.view removeFromSuperview];
+    [camera release];
+    camera = nil;
 }
 
 - (void)canceledPickingImage {
     NSLog(@"Canceled Picking Image");
     [camera.view removeFromSuperview];
+    NSString *sentData = [NSString stringWithFormat:@"UI\tCI\n"];
+    [socketManager sendData:[sentData UTF8String] 
+              numberOfBytes:[sentData length]];
+    [camera release];
+    camera = nil;
 }
 
 //-------------------- Super Advanced UI stuff -----------------
@@ -597,8 +613,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     if (camera) {
-        [camera release];
-        camera = nil;
+        [self canceledPickingImage];
     }
 }
 //*/

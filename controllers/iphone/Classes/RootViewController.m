@@ -12,7 +12,7 @@
 @implementation RootViewController
 
 @synthesize window;
-
+@synthesize currentTVName;
 
 #pragma mark -
 #pragma mark View lifecycle
@@ -137,18 +137,20 @@
                     animated:(BOOL)animated {
     NSLog(@"navigation controller tag = %d", viewController.view.tag);
 
-    // if popping back to self, release everything else
+    // if popping back to self
     if (viewController.view.tag == self.view.tag) {
-        /*
-        if (gestureViewController) {
-            [gestureViewController release];
-            gestureViewController = nil;
-        }
-        if (appBrowserViewController) {
+        if (appBrowserViewController && ![appBrowserViewController hasRunningApp]) {
+            if (gestureViewController) {
+                [gestureViewController release];
+                gestureViewController = nil;
+            }
             [appBrowserViewController release];
             appBrowserViewController = nil;
+            [currentTVName release];
+            currentTVName = nil;
+            [currentTVIndicator removeFromSuperview];
         }
-        //*/
+        
         [netServiceManager start];
     }
     // if popping back to app browser
@@ -203,6 +205,11 @@
     NSLog(@"number of services = %d", count);
 	if (count == 0) {
         // If there are no services and searchingForServicesString is set, show one row explaining that to the user.
+        [currentTVIndicator removeFromSuperview];
+        if ([self.navigationController visibleViewController] == self) {
+            [currentTVName release];
+            currentTVName = nil;
+        }
         cell.textLabel.text = @"Searching for services...";
 		cell.accessoryType = UITableViewCellAccessoryNone;
 		// Make sure to get rid of the activity indicator that may be showing if we were resolving cell zero but

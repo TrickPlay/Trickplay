@@ -335,11 +335,11 @@
     if ([dictionary objectForKey:@"color"]) {
         NSNumber *red, *green, *blue, *alpha;
         
-        const CGFloat *components = CGColorGetComponents(((UITextView *)view).textColor.CGColor);
+        const CGFloat *components = CGColorGetComponents(view.layer.backgroundColor);
         red = [NSNumber numberWithFloat:components[0] * 255.0];
         green = [NSNumber numberWithFloat:components[1] * 255.0];
         blue = [NSNumber numberWithFloat:components[2] * 255.0];
-        alpha = [NSNumber numberWithFloat:CGColorGetAlpha(((UITextView *)view).textColor.CGColor) * 255.0];
+        alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.backgroundColor) * 255.0];
         
         NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
         [dictionary setObject:colorArray forKey:@"color"];
