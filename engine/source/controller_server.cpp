@@ -1040,12 +1040,6 @@ String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Ty
             case PostInfo::IMAGE:
                 path += "/image/";
                 break;
-            case PostInfo::CANCEL_AUDIO_CLIP:
-                path += "/cancel_audio/";
-                break;
-            case PostInfo::CANCEL_IMAGE:
-                path += "/cancel_image/";
-                break;
         }
 
         path += Util::random_string( 20 );
@@ -1097,35 +1091,28 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
         return;
     }
 
-    if(it->second.type == PostInfo::CANCEL_IMAGE || it->second.type == PostInfo::CANCEL_AUDIO_CLIP)
-    {
-        if(it->second.type == PostInfo::CANCEL_IMAGE)
-        {
-            tp_controller_cancel_image( info->controller );
-        } else {
-            tp_controller_cancel_audio_clip( info->controller );
-        }
-    } else {
+    const HttpServer::Request::Body & body( request.get_body() );
 
-        const HttpServer::Request::Body & body( request.get_body() );
-    
-        if ( ! body.get_data() || ! body.get_length() )
-        {
-            response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
-    
-            return;
-        }
-    
-        String ct( request.get_content_type() );
-    
-        const char * content_type = ct.empty() ? 0 : ct.c_str();
-    
-        if(it->second.type == PostInfo::AUDIO)
-        {
+    if ( ! body.get_data() || ! body.get_length() )
+    {
+        response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
+
+        return;
+    }
+
+    String ct( request.get_content_type() );
+
+    const char * content_type = ct.empty() ? 0 : ct.c_str();
+
+    switch ( it->second.type )
+    {
+        case PostInfo::AUDIO:
             tp_controller_submit_audio_clip( info->controller , body.get_data() , body.get_length() , content_type );
-        } else {
+            break;
+
+        case PostInfo::IMAGE:
             tp_controller_submit_image( info->controller , body.get_data() , body.get_length() , content_type );
-        }
+            break;
     }
 
     response.set_status( HttpServer::HTTP_STATUS_OK );
