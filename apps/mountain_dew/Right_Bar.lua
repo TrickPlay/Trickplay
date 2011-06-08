@@ -2,7 +2,6 @@ local right_bar = Group{name = "RIGHT BAR"}
 
 local bg = Image{src = "assets/right/all.png"}
 
-
 local selector_old = Image{src = "assets/right/focus.png",x=bg.w/2+24}
 selector_old.anchor_point = {selector_old.w/2,selector_old.h}
 selector_old.opacity = 0
@@ -11,8 +10,8 @@ local selector_new = Clone{source = selector_old,opacity = 0,x=bg.w/2+24}
 selector_new.anchor_point = {selector_new.w/2,selector_new.h}
 
 local buttons = {
-    950,
-    1026
+    989,
+    --1026
 }
 
 local curr_focus = 1
@@ -53,15 +52,20 @@ right_bar.focus_in = function(self,index,duration)
     }
     
 end
+
 right_bar.prev_state = "NIL"
+
 GLOBAL_STATE:add_state_change_function(
 	function(prev_state,new_state)
-		right_bar.prev_state = prev_state
+		if prev_state ~= "MODAL_MENU" then 
+			right_bar.prev_state = prev_state
+		end
         right_bar:focus_in(curr_focus,TRANS_DUR)
 	end,
 	nil,
 	"RIGHT_BUTTONS"
 )
+
 GLOBAL_STATE:add_state_change_function(
 	function(prev_state,new_state)
         right_bar:focus_out(curr_focus,TRANS_DUR)
@@ -69,7 +73,39 @@ GLOBAL_STATE:add_state_change_function(
 	"RIGHT_BUTTONS",
     nil
 )
+
+local keyboard_form = {
+	{ id = "First_Name", caption = "First Name"},
+	{ id = "Last_Name",  caption = "Last Name"},
+	{ id = "street",     caption = "Street Address"},
+	{ id = "city",       caption = "City"},
+	{ id = "state",      caption = "State"},
+	{ id = "zip",        caption = "Zip"},
+	{ id = "email",      caption = "Email"},
+	{ id = "phone",      caption = "Phone Number"},
+}
+
+function keyboard:on_submit(response)
+	
+	KEY_HANDLER.hold()
+	
+	Registered = true
+	
+	MODAL_MENU:set_fields{
+		title     = "Thank you for Registering.",
+		message   = "You can now vote for your favorite bottle.",
+	}
+	
+	GLOBAL_STATE:change_state_to("MODAL_MENU")
+	
+end
+
 local keys = {
+    [keys.OK] = function()
+		if curr_focus == 1 then
+			keyboard:show(keyboard_form)
+		end
+	end,
     [keys.Up] = function()
         if curr_focus > 1 then
             

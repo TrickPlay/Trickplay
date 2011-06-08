@@ -1,5 +1,5 @@
 local spacing = 65
-local first_x = 20
+local first_x = 37
 
 local focus_scale = 1.2
 local unsel_scale = 1
@@ -33,7 +33,7 @@ for i,img in pairs(bottles) do
     img.scale = {unsel_scale,unsel_scale}
 end
 bottles[1].scale = {focus_scale,focus_scale}
-dock.y = bottles[1].h+40
+dock.y = bottles[1].h+100
 
 
 
