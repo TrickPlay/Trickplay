@@ -948,6 +948,9 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         parent_info->aui_connection = connection;
 
+        // Now, generate the event that it is ready
+
+        tp_controller_advanced_ui_ready( parent_info->controller );
     }
     else
     {

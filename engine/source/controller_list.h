@@ -69,6 +69,8 @@ public:
     
     void cancel_audio_clip ( void );
 
+    void advanced_ui_ready( void );
+
     //.........................................................................
 
     class Delegate
@@ -89,6 +91,7 @@ public:
         virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type ) = 0;
         virtual void cancel_image( void ) = 0;
         virtual void cancel_audio_clip( void ) = 0;
+        virtual void advanced_ui_ready( void ) = 0;
     };
 
     void add_delegate( Delegate * delegate );
@@ -246,7 +249,7 @@ private:
     friend void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type );
     friend void tp_controller_cancel_image( TPController * controller );
     friend void tp_controller_cancel_audio_clip( TPController * controller );
-
+    friend void tp_controller_advanced_ui_ready( TPController * controller );
 
     //.........................................................................
 
