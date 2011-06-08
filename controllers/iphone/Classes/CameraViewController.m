@@ -11,6 +11,9 @@
 
 @implementation CameraViewController
 
+@synthesize navController;
+@synthesize titleLabel;
+@synthesize cancelLabel;
 @synthesize editable;
 @synthesize delegate;
 
@@ -31,6 +34,9 @@
         targetWidth = width;
         targetHeight = height;
         editable = is_editable;
+        
+        self.titleLabel = nil;
+        self.cancelLabel = nil;
     }
     
     return self;
@@ -106,7 +112,7 @@
     }
     
     [(NSMutableData *)[connections objectForKey:connection] appendData:incrementalData];
-     //*/ 
+     //*/
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
@@ -144,7 +150,7 @@
 
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     } else {
-        [self presentModalViewController:imagePickerController animated:YES];
+        [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
     }
 }
 
@@ -161,7 +167,7 @@
             popOverController = nil;
         }
     } else if (picker.parentViewController) {
-        [self dismissModalViewControllerAnimated:NO];
+        [picker.parentViewController dismissModalViewControllerAnimated:NO];
     }
 }
 
@@ -196,7 +202,8 @@
     if (imageEditor) {
         [imageEditor release];
     }
-    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil];
+    
+    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil title:self.titleLabel cancelLabel:self.cancelLabel];
     imageEditor.imageEditorDelegate = self;
     
     imageEditor.imageToEdit = image;
@@ -319,6 +326,8 @@
     [self dismissImageEditor];
     [self dismissTheCamera:imagePickerController];
     
+    self.navController = nil;
+    
     [imagePickerController release];
     imagePickerController = nil;
     
@@ -341,6 +350,9 @@
         }
         [connections release];
     }
+    
+    self.titleLabel = nil;
+    self.cancelLabel = nil;
     
     self.delegate = nil;
     

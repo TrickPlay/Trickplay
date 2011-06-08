@@ -16,13 +16,16 @@
 @synthesize targetHeight;
 @synthesize mask;
 @synthesize toolbar;
+@synthesize cancelButton;
 @synthesize imageEditorDelegate;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil title:(NSString *)title cancelLabel:(NSString *)cancelLabel
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        cancelButton.title = cancelLabel;
+        cancelButtonTitle = [cancelLabel retain];
     }
     return self;
 }
@@ -166,6 +169,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    cancelButton.title = cancelButtonTitle;
     // Do any additional setup after loading the view from its nib.
     [self editImage:imageToEdit];
 }
@@ -183,6 +187,10 @@
         [toolbar release];
         toolbar = nil;
     }
+    if (cancelButton) {
+        [cancelButton release];
+        cancelButton = nil;
+    }
     self.mask = nil;
 }
 
@@ -197,12 +205,20 @@
         [toolbar release];
         toolbar = nil;
     }
+    if (cancelButton) {
+        [cancelButton release];
+        cancelButton = nil;
+    }
     self.mask = nil;
     if (imageToEdit) {
         [imageToEdit release];
     }
     if (imageView) {
         [imageView release];
+    }
+    if (cancelButtonTitle) {
+        [cancelButtonTitle release];
+        cancelButtonTitle = nil;
     }
     
     [super dealloc];

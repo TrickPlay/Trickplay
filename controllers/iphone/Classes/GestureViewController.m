@@ -439,23 +439,40 @@
     // Start the camera in the background
     if (camera) {
         [camera release];
+        camera = nil;
     }
     
     UIView *mask = nil;
     CGFloat width = 0.0, height = 0.0;
     BOOL editable = NO;
+    NSString *cameraLabel = nil;
+    NSString *cameraCancelLabel = nil;
     if ([args count] >= 3) {
         width = [args objectAtIndex:1] ? [[args objectAtIndex:1] floatValue] : 0.0;
         height = [args objectAtIndex:2] ? [[args objectAtIndex:2] floatValue] : 0.0;
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
         
-        if ([args objectAtIndex:4] && [args objectAtIndex:4] != @"") {
+        if ([args objectAtIndex:4] && ([args objectAtIndex:4] != @"")) {
             mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, 0.0, 0.0)];
+        }
+        
+        if ([args objectAtIndex:5] && ([args objectAtIndex:5] != @"")) {
+            cameraLabel = [args objectAtIndex:5];
+        } else {
+            cameraLabel = @"Send Image to TV";
+        }
+        if ([args objectAtIndex:6] && ([args objectAtIndex:6] != @"")) {
+            cameraCancelLabel = [args objectAtIndex:6];
+        } else {
+            cameraCancelLabel = @"Cancel";
         }
     }
     camera = [[CameraViewController alloc] initWithView:self.view targetWidth:width targetHeight:height editable:editable mask:mask];
     
     [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
+    camera.titleLabel = cameraLabel;
+    camera.cancelLabel = cameraCancelLabel;
+    camera.navController = self.navigationController;
     
     // Use camera or photo library
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary] == NO) {
@@ -468,7 +485,7 @@
             [cameraActionSheet release];
             cameraActionSheet = nil;
         }
-        cameraActionSheet = [[UIActionSheet alloc] initWithTitle:@"Photo Options" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
+        cameraActionSheet = [[UIActionSheet alloc] initWithTitle:camera.titleLabel delegate:self cancelButtonTitle:camera.cancelLabel destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
     
         cameraActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
         [cameraActionSheet showInView:self.view];
@@ -489,12 +506,16 @@
 
 - (void)canceledPickingImage {
     NSLog(@"Canceled Picking Image");
-    [camera.view removeFromSuperview];
     NSString *sentData = [NSString stringWithFormat:@"UI\tCI\n"];
     [socketManager sendData:[sentData UTF8String] 
               numberOfBytes:[sentData length]];
-    [camera release];
-    camera = nil;
+    if (camera) {
+        if (camera.view.superview) {
+            [camera.view removeFromSuperview];
+        }
+        [camera release];
+        camera = nil;
+    }
 }
 
 //-------------------- Super Advanced UI stuff -----------------
@@ -612,9 +633,7 @@
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-    if (camera) {
-        [self canceledPickingImage];
-    }
+    
 }
 //*/
 
@@ -637,6 +656,9 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    if (camera) {
+        [self canceledPickingImage];
+    }
 }
 
 
