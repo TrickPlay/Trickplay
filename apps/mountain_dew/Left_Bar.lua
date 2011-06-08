@@ -89,7 +89,7 @@ for i,v in ipairs(vert_buttons) do
 	
 	v.x = 160
 	
-	v.y = 210*(i-1) + 350
+	v.y = 210*(i-1) + 420
 	
 end
 
@@ -303,9 +303,45 @@ local keys_BUTTONS = {
 	end,
 	[keys.OK] = function()
         if vert_i == 1 then
+			
 			VIDEO:load(curr_focus)
 			
 			GLOBAL_STATE:change_state_to("VIDEO")
+			
+		elseif vert_i == 2 then
+			
+			KEY_HANDLER.hold()
+			
+			if Voted then
+				
+				MODAL_MENU:set_fields{
+					title     = "Sorry, only 1 vote per day.",
+					message   = "Please check back tomorrow.",
+				}
+				
+			elseif not Registered then
+				
+				MODAL_MENU:set_fields{
+					title     = "You must register first.",
+					message   = "",
+				}
+				
+			else
+				
+				MODAL_MENU:set_fields{
+					title     = "Thank you for your vote.",
+					message   = "Only 1 vote per day.",
+				}
+				
+				Voted = true
+				
+			end
+			GLOBAL_STATE:change_state_to("MODAL_MENU")
+			
+		else
+			
+			error("vert_i does not have an expected value")
+			
 		end
     end
 }
