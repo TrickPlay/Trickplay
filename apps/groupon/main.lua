@@ -60,7 +60,7 @@ bmp = {
 
 --Images are add to a hidden group
 local clone_srcs = Group{}
-screen:add(clone_srcs,Image{src="6.jpg"})
+screen:add(clone_srcs)
 clone_srcs:hide()
 
 --add each image
