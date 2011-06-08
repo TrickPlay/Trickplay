@@ -378,7 +378,7 @@ local make_card = function(input)
 		
 		x=tag.x+15,
 		
-		y=title_h+tag.y+15,
+		y=tag.y-4,
 		
 	}
 	
