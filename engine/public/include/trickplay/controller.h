@@ -1338,6 +1338,24 @@ struct TPControllerRequestAudioClip
     tp_controller_cancel_audio_clip(
 
         TPController * controller);
+
+
+/*
+    Callback: tp_controller_advanced_ui_ready
+
+    Report that advanced UI features are ready for use.
+
+    Arguments:
+
+        controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+        TP_API_EXPORT
+        void
+        tp_controller_advanced_ui_ready(
+
+            TPController * controller);
+
 /*-----------------------------------------------------------------------------*/
 /*
     Section: Controller Event Queries

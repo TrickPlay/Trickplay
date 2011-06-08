@@ -51,7 +51,7 @@ public:
     virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
     virtual void cancel_image( void );
     virtual void cancel_audio_clip( void );
-
+    virtual void advanced_ui_ready( void );
     
     bool declare_resource( const String & name , const String & uri );
 
@@ -1098,6 +1098,7 @@ interface controller [[ControllerDelegate*]]
             bitmap - The bitmap received from the controller.
             
     */
+
     callback on_image;
 
 	/*
@@ -1108,7 +1109,8 @@ interface controller [[ControllerDelegate*]]
 		Arguments:
 			controller - The controller that generated the event
 	*/
-	callback on_image_cancelled;
+
+    callback on_image_cancelled;
 
 	/*
 		Event: on_audio_clip_cancelled
@@ -1118,8 +1120,17 @@ interface controller [[ControllerDelegate*]]
 		Arguments:
 			controller - The controller that generated the event
 	*/
-	callback on_audio_clip_cancelled;
 
+    callback on_audio_clip_cancelled;
+
+    /*
+        Event: on_advanced_ui_ready
+
+        This event lets you know that the controller's advanced UI capabilities
+        are ready for use.
+    */
+
+    callback on_advanced_ui_ready;
 
     /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
 
@@ -1376,6 +1387,11 @@ bool ControllerDelegate::declare_resource( const String & name , const String & 
     }
 
     return controller->declare_resource( name , uri , resource_group );
+}
+
+void ControllerDelegate::advanced_ui_ready( void )
+{
+    invoke_controller_on_advanced_ui_ready( L, this, 0, 0 );
 }
 
 ]]

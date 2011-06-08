@@ -62,7 +62,8 @@ struct Event
         ACCELEROMETER,
         POINTER_MOVE , POINTER_DOWN , POINTER_UP,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
-        UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP
+        UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
+        ADVANCED_UI_READY
     };
 
 public:
@@ -242,6 +243,10 @@ public:
 
             case CANCEL_AUDIO_CLIP:
                 controller->cancel_audio_clip();
+                break;
+
+            case ADVANCED_UI_READY:
+                controller->advanced_ui_ready();
                 break;
         }
     }
@@ -798,6 +803,20 @@ void Controller::cancel_audio_clip( void )
     }
 }
 
+//.............................................................................
+
+void Controller::advanced_ui_ready( void )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->advanced_ui_ready( );
+    }
+}
 
 //.............................................................................
 
@@ -1531,4 +1550,10 @@ void tp_controller_cancel_audio_clip( TPController * controller )
 {
     TPController::check(controller);
     controller->list->post_event( Event::make( Event::CANCEL_AUDIO_CLIP, controller->controller ) );
+}
+
+void tp_controller_advanced_ui_ready( TPController * controller )
+{
+    TPController::check(controller);
+    controller->list->post_event( Event::make( Event::ADVANCED_UI_READY, controller->controller ) );
 }
