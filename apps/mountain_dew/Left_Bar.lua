@@ -66,6 +66,7 @@ local spinning_bottle = Timeline{
 }
 spinning_bottle:start()
 
+--[[
 local vert_focus_old = Image{src="assets/left/btn-round-focus.png"}
 
 vert_focus_old.anchor_point = {vert_focus_old.w/2,vert_focus_old.h/2}
@@ -77,11 +78,14 @@ local vert_focus_new = Clone{source = vert_focus_old}
 vert_focus_new.anchor_point = {vert_focus_new.w/2,vert_focus_new.h/2}
 
 vert_focus_new.opacity = 0
+--]]
 
 local vert_buttons = {
 	Image{src="assets/left/btn-video.png"},
 	Image{src="assets/left/btn-vote.png"}
 }
+
+local vert_focus = {Image{src="assets/left/btn-round-focus.png"}}
 
 for i,v in ipairs(vert_buttons) do
 	
@@ -91,21 +95,50 @@ for i,v in ipairs(vert_buttons) do
 	
 	v.y = 210*(i-1) + 420
 	
+	if i ~= 1 then
+		vert_focus[i] = Clone{source = vert_focus[1]}
+	end
+	
+	vert_focus[i].anchor_point = {vert_focus[i].w/2,vert_focus[i].h/2}
+	
+	vert_focus[i].opacity = 0
+	
+	vert_focus[i].x = v.x
+	
+	vert_focus[i].y = v.y
+	
 end
+--vert_focus_old.x = 160
 
-vert_focus_old.x = 160
+--vert_focus_new.x = 160
 
-vert_focus_new.x = 160
-
-left_bar:add(vert_focus_new,vert_focus_old)
+left_bar:add(unpack(vert_focus))--vert_focus_new,vert_focus_old)
 
 left_bar:add(unpack(vert_buttons))
 
 local vert_i = 1
 
-local function buttons_focus_out(index)
+local prev_opacity = 0
+
+local function buttons_focus_out(i)
 	
-	assert(index > 0 and index <= #vert_buttons)
+	assert(i > 0 and i <= #vert_buttons)
+	
+	prev_opacity = vert_focus[i].opacity
+	
+	vert_focus[i]:complete_animation()
+	
+	vert_focus[i].opacity = prev_opacity
+	
+	vert_focus[i]:animate{
+		
+		duration = TRANS_DUR/2,
+		
+		opacity  = 0,
+		
+	}
+	
+	--[[
 	
 	vert_focus_old:complete_animation()
 	
@@ -116,12 +149,36 @@ local function buttons_focus_out(index)
 	vert_focus_new.opacity = 0
 	
 	vert_focus_old:animate{
+		
 		duration = TRANS_DUR,
+		
 		opacity  = 0,
+		
 	}
+	
+	--]]
+	
 end
 
-local function buttons_focus_in(index)
+local function buttons_focus_in(i)
+	
+	assert(i > 0 and i <= #vert_buttons)
+	
+	prev_opacity = vert_focus[i].opacity
+	
+	vert_focus[i]:complete_animation()
+	
+	vert_focus[i].opacity = prev_opacity
+	
+	vert_focus[i]:animate{
+		
+		duration = TRANS_DUR/2,
+		
+		opacity  = 255,
+		
+	}
+	
+	--[[
 	
 	assert(index > 0 and index <= #vert_buttons)
 	
@@ -134,6 +191,8 @@ local function buttons_focus_in(index)
 		opacity  = 255,
 		on_completed = KEY_HANDLER.release
 	}
+	
+	--]]
 	
 end
 
@@ -217,7 +276,7 @@ local keys_BOTTLES = {
 		
 		if curr_focus==1 then return end	
 		
-		KEY_HANDLER.hold()
+		--KEY_HANDLER.hold()
 		
 		bottles_focus_out(curr_focus)
 		
@@ -228,13 +287,15 @@ local keys_BOTTLES = {
 	end,
 	[keys.Right] = function()
 		
-		KEY_HANDLER.hold()
+		
 		
 		if curr_focus == #masks then
 			
 			GLOBAL_STATE:change_state_to("RIGHT_BUTTONS")
 			
 		else
+			
+			--KEY_HANDLER.hold()
 			
 			bottles_focus_out(curr_focus)
 			
@@ -246,7 +307,7 @@ local keys_BOTTLES = {
 	end,
 	[keys.Down] = function()
 		
-		KEY_HANDLER.hold()
+		--KEY_HANDLER.hold()
 		
 		GLOBAL_STATE:change_state_to("LEFT_BUTTONS")
 		
@@ -264,11 +325,13 @@ local keys_BUTTONS = {
 		end
 		--]]
 		
-		KEY_HANDLER.hold()
+		
 		
 		buttons_focus_out(vert_i)
 		
 		if vert_i == 1 then
+			
+			--KEY_HANDLER.hold()
 			
 			GLOBAL_STATE:change_state_to("BOTTLES")
 			
@@ -285,7 +348,7 @@ local keys_BUTTONS = {
 		
 		if vert_i == #vert_buttons then return end
 		
-		KEY_HANDLER.hold()
+		--KEY_HANDLER.hold()
 		
 		buttons_focus_out(vert_i)
 		
@@ -296,7 +359,7 @@ local keys_BUTTONS = {
 	end,
 	[keys.Right] = function()
 		
-		KEY_HANDLER.hold()
+		--KEY_HANDLER.hold()
 		
 		GLOBAL_STATE:change_state_to("RIGHT_BUTTONS")
 		
