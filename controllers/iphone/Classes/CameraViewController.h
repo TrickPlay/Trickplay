@@ -21,6 +21,9 @@
 
 @interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageEditorDelegate, UIPopoverControllerDelegate> {
     
+    NSString *titleLabel;
+    NSString *cancelLabel;
+    
     UIImagePickerController *imagePickerController;
     UIPopoverController *popOverController;
     ImageEditorViewController *imageEditor;
@@ -36,8 +39,15 @@
     
     NSMutableArray *connections;
     
+    UINavigationController *navController;
+    
     id <CameraViewControllerDelegate> delegate;
 }
+
+@property (retain) NSString *titleLabel;
+@property (retain) NSString *cancelLabel;
+
+@property (retain) UINavigationController *navController;
 
 @property (assign) BOOL editable;
 

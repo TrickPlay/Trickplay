@@ -25,6 +25,8 @@
     
     GestureImageView *imageView;
     UIToolbar *toolbar;
+    UIBarButtonItem *cancelButton;
+    NSString *cancelButtonTitle;
     
     id <ImageEditorDelegate> imageEditorDelegate;
 }
@@ -35,9 +37,12 @@
 @property (retain) UIView *mask;
 
 @property (retain) IBOutlet UIToolbar *toolbar;
+@property (retain) IBOutlet UIBarButtonItem *cancelButton;
 
 @property (assign) id <ImageEditorDelegate> imageEditorDelegate;
 
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil title:(NSString *)title cancelLabel:(NSString *)cancelLabel;
 
 - (void)editImage:(UIImage *)image;
 

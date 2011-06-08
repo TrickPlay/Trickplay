@@ -106,7 +106,7 @@
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
+CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate, UINavigationControllerDelegate> {
     BOOL viewDidAppear;
     
     SocketManager *socketManager;
