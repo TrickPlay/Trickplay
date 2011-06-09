@@ -107,6 +107,13 @@ function mt.__newindex(t,k,v)
     end
     --print(tot,iterated_tot)
 end
+function mt.__index(t,k)
+    if iterated_list[k] ~= nil or to_be_added[k] ~= nil or to_be_deleted[k] ~= nil then
+        return true
+    else
+        return false
+    end
+end
 setmetatable(animate_list, mt)
 
 local first_exec = true

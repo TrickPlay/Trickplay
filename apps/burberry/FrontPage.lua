@@ -55,7 +55,7 @@ end
 
 local title = Assets:Clone{src="assets/main-txt-2011.png",x=TITLE_X,y=TITLE_Y}
 local right_focus = Group{x=RIGHT_PANE_X,opacity=0}
-local bottom_buttons_base = Assets:Clone{src="assets/btn-playvideo-off.png",opacity=0,x = VIEW_COL_X, y = VIEW_COL_Y,}
+local bottom_buttons_base = Assets:Clone{src="assets/btn-playvideo-off.png",opacity=255,x = VIEW_COL_X, y = VIEW_COL_Y,}
 local bottom_buttons_foci = Assets:Clone{src="assets/btn-playvideo-on.png",x = VIEW_COL_X, y = VIEW_COL_Y,}
 
 local overlay = Rectangle{
@@ -121,8 +121,8 @@ do
     right_focus:add(tl_corner,top,tr_corner,left,right,btm,bl_corner,br_corner)
 end
 umbrella:add(left_panes,title_s,title,sub_title)
-umbrella:add(unpack(right_tiles))
 umbrella:add(unpack(right_blurs))
+umbrella:add(unpack(right_tiles))
 umbrella:add(unpack(right_text))
 umbrella:add(bottom_buttons_base,bottom_buttons_foci,right_focus,overlay,title)
 
@@ -167,10 +167,9 @@ umbrella.func_tbls = {
         focus_out_button = {
             index = 1,
             duration = 300,
+            focus = Interval(255,0),
             func = function(this_obj,this_func_tbl,secs,p)
-                
-                --bottom_buttons_base.opacity=255*(.4+.6*(1-p))
-                bottom_buttons_foci.opacity=255*(1-p)
+                bottom_buttons_foci.opacity=this_func_tbl.focus:get_value(p)
             end
         },
         focus_in_button = {
@@ -180,23 +179,46 @@ umbrella.func_tbls = {
             focus = Interval(0,255),
             func = function(this_obj,this_func_tbl,secs,p)
                -- bottom_buttons_base.opacity=255*(.4+.6*(p))
-                bottom_buttons_foci.opacity=255*(p)
+                bottom_buttons_foci.opacity=this_func_tbl.focus:get_value(p)
                 if p == 1 then
                     restore_keys()
                 end
             end,
-            setup = function(this_obj,f_t)
-                f_t.start = bottom_buttons_foci.opacity
+        },
+        
+        focus_out_tile = {
+            index = 1,
+            duration = 300,
+            focus = Interval(255,0),
+            func = function(this_obj,this_func_tbl,secs,p)
+                bottom_buttons_foci.opacity=this_func_tbl.focus:get_value(p)
             end
         },
+        
+        focus_in_tile = {
+            index = 1,
+            duration = 300,
+            --base  = Interval(255,255*.4),
+            focus = Interval(0,255),
+            func = function(this_obj,this_func_tbl,secs,p)
+               -- bottom_buttons_base.opacity=255*(.4+.6*(p))
+                bottom_buttons_foci.opacity=this_func_tbl.focus:get_value(p)
+                if p == 1 then
+                    restore_keys()
+                end
+            end,
+        },
+        
+        
         move_to_tile  = {
             curr_tile = 1,
             duration  = 300,
+            focus = Interval(0,255),
             func = function(this_obj,this_func_tbl,secs,p)
-                right_tiles[this_func_tbl.curr_tile].opacity=255*p
-                right_focus.opacity=255*(1-p)
+                right_tiles[this_func_tbl.curr_tile].opacity=this_func_tbl.focus:get_value(p)
+                right_focus.opacity=255-this_func_tbl.focus:get_value(p)
                 if not right_is_playing then
-                    right_blurs[this_func_tbl.curr_tile].opacity=255*(1-p)
+                    right_blurs[this_func_tbl.curr_tile].opacity=255-this_func_tbl.focus:get_value(p)
                 end
                 if p == 1 then
                     right_focus.y = TILE_H*(this_func_tbl.next_tile-1)
@@ -204,16 +226,19 @@ umbrella.func_tbls = {
                     mediaplayer:play()
                     right_is_playing = true
                     
+                    this_obj.func_tbls.play_next_tile.next_tile = this_func_tbl.next_tile
+                    animate_list[this_obj.func_tbls.play_next_tile] = this_obj
                 end
             end
         },
         play_next_tile = {
             next_tile = 2,
             duration  = 300,
-            delay = 350,
+            --delay = 350,
+            focus = Interval(0,255),
             func = function(this_obj,this_func_tbl,secs,p)
-                right_tiles[this_func_tbl.next_tile].opacity=255*(1-p)
-                right_focus.opacity=255*p
+                right_tiles[this_func_tbl.next_tile].opacity=255-this_func_tbl.focus:get_value(p)
+                right_focus.opacity=this_func_tbl.focus:get_value(p)
                 if p == 1 then
                     restore_keys()
                 end
@@ -229,6 +254,7 @@ umbrella.func_tbls = {
         focus_tile_from_buttons = {
             index = 1,
             duration  = 300,
+            int = Interval(0,255),
             func = function(this_obj,this_func_tbl,secs,p)
                 --bottom_buttons_base[3].opacity=255*(.4+.6*(1-p))
                 --bottom_buttons_foci[3].opacity=255*(1-p)
@@ -250,6 +276,7 @@ umbrella.func_tbls = {
         },
         fade_buttons_from_tile = {
             duration = 300,
+            int = Interval(0,255),
             func = function(this_obj,this_func_tbl,secs,p)
                 right_tiles[right_i].opacity=255*p
                 --bottom_buttons_base[3].opacity=255*(.3+.7*(p))
@@ -265,6 +292,23 @@ umbrella.func_tbls = {
                     restore_keys()
                     
                 end
+            end
+        },
+        fade_out_overlay= {
+            duration = 300,
+            int = Interval(255*.5,0),
+            func = function(this_obj,f_t,secs,p)
+                overlay.opacity=f_t.int:get_value(p)
+            end
+        },
+        fade_in_overlay= {
+            duration = 300,
+            ovly = Interval(0,255*.5),
+            tile = Interval(0,255),
+            func = function(this_obj,f_t,secs,p)
+                overlay.opacity=f_t.ovly:get_value(p)
+                right_tiles[right_i].opacity=f_t.tile:get_value(p)
+                right_focus.opacity = 255-f_t.tile:get_value(p)
             end
         },
         slide_main_pane_right = {
@@ -323,10 +367,11 @@ umbrella.keys = {
             if bottom_i ~= 2 or right_i == 1 then return end
             --if bottom_i ~= 4 or right_i == 1 then return end
             lose_keys()
-            self.func_tbls.move_to_tile.curr_tile = right_i
-            self.func_tbls.play_next_tile.next_tile = right_i - 1
-            animate_list[self.func_tbls.move_to_tile] = self
-            animate_list[self.func_tbls.play_next_tile] = self
+            self.func_tbls.move_to_tile.curr_tile         = right_i
+            self.func_tbls.move_to_tile.next_tile         = right_i - 1
+            self.func_tbls.play_next_tile.next_tile       = right_i - 1
+            animate_list[ self.func_tbls.move_to_tile   ] = self
+            animate_list[ self.func_tbls.play_next_tile ] = self
             right_i = right_i - 1
             
         end,
@@ -334,10 +379,11 @@ umbrella.keys = {
             if bottom_i ~= 2 or right_i == 4 then return end
             --if bottom_i ~= 4 or right_i == 4 then return end
             lose_keys()
-            self.func_tbls.move_to_tile.curr_tile = right_i
-            self.func_tbls.play_next_tile.next_tile = right_i + 1
-            animate_list[self.func_tbls.move_to_tile] = self
-            animate_list[self.func_tbls.play_next_tile] = self
+            self.func_tbls.move_to_tile.curr_tile         = right_i
+            self.func_tbls.move_to_tile.next_tile         = right_i + 1
+            self.func_tbls.play_next_tile.next_tile       = right_i + 1
+            animate_list[ self.func_tbls.move_to_tile   ] = self
+            animate_list[ self.func_tbls.play_next_tile ] = self
             
             right_i = right_i + 1
         end,
@@ -359,7 +405,9 @@ umbrella.keys = {
             --if bottom_i == 3 then
                 
             self.func_tbls.focus_tile_from_buttons.index = right_i
+            self.func_tbls.play_next_tile.next_tile = right_i
             animate_list[self.func_tbls.focus_tile_from_buttons] = self
+            animate_list[self.func_tbls.play_next_tile] = self
             bottom_i = bottom_i + 1
         end,
         [keys.OK] = function(self)
@@ -381,33 +429,68 @@ umbrella.keys = {
             end
         end,
     }
+    
+left_panes.reactive = true
+function left_panes:on_enter()
+    
+    animate_list[umbrella.func_tbls.fade_out_overlay] = nil
+    
+    umbrella.func_tbls.fade_in_overlay.ovly.from       = overlay.opacity
+    
+    umbrella.func_tbls.fade_in_overlay.tile.from       = right_tiles[right_i].opacity
+    
+    animate_list[umbrella.func_tbls.fade_in_overlay]  = umbrella
+    
+end
+function left_panes:on_leave()
+    
+    animate_list[umbrella.func_tbls.fade_in_overlay]  = nil
+    
+    umbrella.func_tbls.fade_out_overlay.int.from      = overlay.opacity
+    
+    animate_list[umbrella.func_tbls.fade_out_overlay] = umbrella
+    
+end
 
-local function tile_on_enter(self,i)
+local function tile_on_enter(i)
     
     if get_curr_page() ~= "front_page" then return end
     
-    lose_keys()
+    bottom_i = 2
     
-    mediaplayer:seek(0)
+    --if the animation is not still in the fading out phase
+    if not animate_list[umbrella.func_tbls.move_to_tile] then
+        
+        --if the animation is in the fading in phase, then cancel it
+        if animate_list[umbrella.func_tbls.play_next_tile] then
+            
+            animate_list[umbrella.func_tbls.play_next_tile] = nil
+            
+        end
+        
+        --fade out the tile currently being faded in (or that was last faded in)
+        umbrella.func_tbls.move_to_tile.curr_tile = umbrella.func_tbls.play_next_tile.next_tile
+        
+        --fade out from its current opacity
+        umbrella.func_tbls.move_to_tile.focus.from = right_tiles[right_i].opacity
+        
+        --begin fade out
+        animate_list[umbrella.func_tbls.move_to_tile] = umbrella
+        
+    end
     
-    mediaplayer:play()
+    --update the next tile to be itself
+    umbrella.func_tbls.play_next_tile.next_tile = i
     
-    right_is_playing = true
-    
-    self.func_tbls.play_next_tile.next_tile = i
+    umbrella.func_tbls.move_to_tile.next_tile   = i
     
     right_i = i
     
-    animate_list[self.func_tbls.play_next_tile] = self
-    
 end
-local function tile_on_leave(self,i)
+local function tile_on_leave(i)
     
     if get_curr_page() ~= "front_page" then return end
     
-    self.func_tbls.move_to_tile.curr_tile = right_i
-    
-    animate_list[self.func_tbls.move_to_tile] = self
     
 end
 for i,t in ipairs(right_tiles) do
@@ -415,44 +498,41 @@ for i,t in ipairs(right_tiles) do
     t.reactive = true
     print(i,t)
     function t:on_enter()
-        print("ffff")
+        
         if get_curr_page() ~= "front_page" then return end
         
-        if mouse_manager.busy then
-            
-            mouse_manager.on_enters[tile_on_enter] = i
-            
-        else
-            
-            tile_on_enter(i)
-            
-        end
+        tile_on_enter(i)
         
     end
     
     function t:on_leave()
-        print("dddd")
+        
         if get_curr_page() ~= "front_page" then return end
         
-        if mouse_manager.busy then
-            
-            mouse_manager.on_enters[tile_on_leave] = i
-            
-        else
-            
-            tile_on_leave(i)
-            
-        end
+        tile_on_leave(i)
         
     end
     
+    function t:on_button_down()
+        
+        if get_curr_page() ~= "front_page" then return end
+        
+        assert( bottom_i == 2 )
+        
+        umbrella.keys[keys.OK](umbrella)
+        
+    end
 end
 
 bottom_buttons_base.reactive = true
 
 function bottom_buttons_base:on_enter()
     
+    bottom_i = 1
+    
     animate_list[umbrella.func_tbls.focus_out_button] = nil
+    
+    umbrella.func_tbls.focus_in_button.focus.from = bottom_buttons_foci.opacity
     
     animate_list[umbrella.func_tbls.focus_in_button] = umbrella
     
@@ -460,21 +540,36 @@ end
 
 function bottom_buttons_base:on_leave()
     
-    animate_list[umbrella.func_tbls.focus_in_button] = umbrella
+    bottom_i = 0
     
-    animate_list[umbrella.func_tbls.focus_out_button] = nil
+    animate_list[umbrella.func_tbls.focus_in_button] = nil
+    
+    umbrella.func_tbls.focus_out_button.focus.from = bottom_buttons_foci.opacity
+    
+    animate_list[umbrella.func_tbls.focus_out_button] = umbrella
 
+end
+
+function bottom_buttons_base:on_button_down()
+    
+    assert( bottom_i == 1 )
+    
+    umbrella.keys[keys.OK](umbrella)
+    
 end
 
 mediaplayer.on_end_of_stream = function()
     if left_is_playing then
+        print("l")
         left_is_playing = false
         animate_list[front_page.func_tbls.fade_in_left_pane] = front_page
     elseif right_is_playing and bottom_i == 2 then
+        print("r")
         front_page.func_tbls.fade_in_blur.next_tile=right_i
         animate_list[front_page.func_tbls.fade_in_blur] = front_page
         right_is_playing=false
     end
+    print("end")
 end
 mediaplayer:load("videos/Burberry 1080p.mp4")
 
