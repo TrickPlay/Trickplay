@@ -24,20 +24,7 @@ local umbrella = Group{opacity=0}
 local left_img = Assets:Clone{src="assets/category-bg.jpg",size={screen_w,screen_h}}
 local tile_group = Group{}
 local shadow_group = Group{}
---[[
-local tiles = {
-    Image{src="assets/tile-category-eye-definer.png"},
-    Image{src="assets/tile-category-eye-mascara.png"},
-    Image{src="assets/tile-category-eye-sheer-shadow.png"},
-    Image{src="assets/tile-category-glow-brush.png"},
-    Image{src="assets/tile-category-glow-light.png"},
-    Image{src="assets/tile-category-glow-warm.png"},
-    Image{src="assets/tile-category-lip-cover.png"},
-    Image{src="assets/tile-category-lip-glow.png"},
-    Image{src="assets/tile-category-skin-brush.png"},
-    Image{src="assets/tile-category-skin-compact.png"},
-    Image{src="assets/tile-category-skin-foundation.png"},
-}--]]
+
 local tiles = {
     Assets:Clone{src="assets/img-burberry-bty-brush.png"},
     Assets:Clone{src="assets/img-burberry-bty-brush2.png"},
@@ -60,6 +47,17 @@ local primary_focus = Group{}
 local top_button=Assets:Clone{src="assets/btn-back-off.png",x = 200,y = 50,}
 local top_focus=Assets:Clone{src="assets/btn-back-on.png",opacity=0,x = 200,y = 50,}
 
+top_button.reactive = true
+function top_button:on_enter()
+    print("e")
+end
+function top_button:on_leave()
+    print("l")
+end
+function top_button:on_button_down()
+    print("fafaf")
+end
+
 local shine=Assets:Clone{src="assets/highlight-alone.png"}
 shine.anchor_point={shine.w/2,shine.h/2}
 shine.x=TILE_W/2
@@ -75,30 +73,41 @@ idled.on_timer = function()--]]
 --end
 local left_i = 1
 local right_i = 9
+local function rel_i(i)   return (left_i+i-2)%#tiles+1 end
+
 function set_tile_attrib(this_tile,this_shadow,i)
     this_tile.scale   = {1-.1*math.abs(5-i),1-.1*math.abs(5-i)}
     this_tile.opacity = 255*(1-.1*math.abs(5-i))
     this_shadow.scale = {1-.1*math.abs(5-i),(1-.1*math.abs(5-i))*2}
+    
+    
+    
     if i <= 4 then
         this_tile.x=screen_w/2/5*(i-1)
         --tiles[i].y=screen_h/2-5*(5-i)+10
         --tiles[i].opacity=255*(1-.1*(5-i))
         --tiles[i].scale={1-.1*(5-i),1-.1*(5-i)}
         this_tile.y            =screen_h/2-70*math.abs(5-i)+50
+        
+        this_tile.func_tbls.diana.center = 15
         --this_tile.y_rotation={15,0,0}
         this_tile:raise_to_top()
     elseif i < 6 then
         --tiles[i].position={screen_w/2,screen_h/2+10}
         this_tile.x=screen_w/2+screen_w/5*(i-5)
         this_tile.y            =screen_h/2-70*math.abs(5-4)+50+75*(1-math.abs(i-5))
+        
+        this_tile.func_tbls.diana.center = -15*(i-5)
+        
         --this_tile.y_rotation={-15*(i-5),0,0}
         this_tile:raise_to_top()
-    elseif i < 10 then
+    else--if i < 10 then
         this_tile.x=screen_w/2/5*(i)+screen_w/2/5
         --tiles[i].y=screen_h/2-5*(i-5)+10
         --tiles[i].opacity=255*(1-.1*(i-5))
         --tiles[i].scale={1-.1*(i-5),1-.1*(i-5)}
         this_tile.y            =screen_h/2-70*math.abs(5-i)+50
+        this_tile.func_tbls.diana.center = -15
         --this_tile.y_rotation={-15,0,0}
         this_tile:lower_to_bottom()
     end
@@ -108,6 +117,7 @@ function set_tile_attrib(this_tile,this_shadow,i)
     }
     this_shadow.y_rotation={this_tile.y_rotation[1],0,0}
 end
+
 do
     
     local tl_corner = Assets:Clone{src=imgs.box_foc_corner}
@@ -156,7 +166,8 @@ do
         x=TILE_W
     }
     primary_focus:add(shine)--glare_clip)
-    primary_focus:add(tl_corner,top,tr_corner,left,right,btm,bl_corner,br_corner)
+    primary_focus:add(
+        tl_corner,top,tr_corner,left,right,btm,bl_corner,br_corner)
     --glare_clip.clip={0,0,TILE_W,TILE_H}
     --glare_clip:add(shine)
     --glare_clip.y=3
@@ -197,7 +208,6 @@ do
         shadow_group:add(shadows[i])
         
         tiles[i].anchor_point={c.w,c.h}
-        set_tile_attrib(tiles[i],shadows[i],i)
         tiles[i].func_tbls = {
             diana_left = {
                 duration=5000,
@@ -224,11 +234,11 @@ do
                 end
             },
             diana = {
-                duration=5000,
-                loop=true,
-                center = 0,
-                phase=(i-1)/#tiles,
-                func=function(this_obj,this_func_tbl,secs,p)
+                duration = 5000,
+                loop     = true,
+                center   = 0,
+                phase    = (i-1)/#tiles,
+                func     = function( this_obj, this_func_tbl, secs, p)
                     tiles[i].y_rotation={
                         this_func_tbl.center+10*math.sin(
                             math.pi*2*(p+this_func_tbl.phase)
@@ -282,6 +292,7 @@ do
             tiles[i].opacity=0
         end
         --]]
+        set_tile_attrib(tiles[i],shadows[i],i)
         if i >= 10 then
             tiles[i].scale={0,0}
             shadows[i].scale={0,0}
@@ -319,7 +330,7 @@ end
 local start_dianas = function()
     local index
     for i=1,9 do
-        index = (left_i+i-2)%#tiles+1
+        index = rel_i(i)
         if i < 5 then
             tiles[index].func_tbls.diana.center=15
         elseif i == 5 then
@@ -339,9 +350,9 @@ end
 local stop_dianas = function()
     local index
     for i=1,9 do
-        index = (left_i+i-2)%#tiles+1
+        --index = (left_i+i-2)%#tiles+1
         
-        animate_list[tiles[index].func_tbls.diana] = nil
+        animate_list[tiles[rel_i(i)].func_tbls.diana] = nil
     end
     animate_list[primary_focus.func_tbls.diana] = nil
 end
@@ -376,7 +387,7 @@ category_page = {
                 func = function(this_obj,this_func_tbl,secs,p)
                     if this_func_tbl.first then
                         start_dianas()
-                        print("lala")
+                        --print("lala")
                         this_func_tbl.first = false
                     end
                     --this_obj.group.opacity=255*p
@@ -443,8 +454,8 @@ category_page = {
                 primary_focus.opacity=255*(1-p)
                 if p == 1 then
                     animate_list[this_obj.func_tbls.cycle_left]=this_obj
-                    animate_list[tiles[(left_i+6-2)%#tiles+1].func_tbls.recenter] = tiles[(left_i+6-2)%#tiles+1]
-                    animate_list[tiles[(left_i+5-2)%#tiles+1].func_tbls.recenter] = tiles[(left_i+5-2)%#tiles+1]
+                    animate_list[tiles[rel_i(6)].func_tbls.recenter] = tiles[rel_i(6)]
+                    animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
                     animate_list[primary_focus.func_tbls.rephase] = primary_focus
                 end
             end
@@ -482,29 +493,45 @@ category_page = {
                         if p < .2 then
                             --tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-5),1-.1*math.abs(5-5)}
                             --tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*((i-p*2)-5)
-                            tiles[(left_i+i-2)%#tiles+1]:raise_to_top()
+                            tiles[rel_i(i)]:raise_to_top()
                         else
-                            set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i-(p-.2)/.8)
+                            set_tile_attrib(
+                                tiles[rel_i(i)],
+                                shadows[rel_i(i)],
+                                i-(p-.2)/.8
+                            )
                             
                         end--]]
                     elseif i == 5 then
                         if p < .8 then
-                            set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i-p/.8)
-                            tiles[(left_i+i-2)%#tiles+1]:raise_to_top()
+                            set_tile_attrib(
+                                tiles[rel_i(i)],
+                                shadows[rel_i(i)],
+                                i-p/.8
+                            )
+                            tiles[rel_i(i)]:raise_to_top()
                         else
                             --tiles[(left_i+i-2)%#tiles+1].y_rotation={-15,0,0}
-                            set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i-1)
+                            set_tile_attrib(
+                                tiles[rel_i(i)],
+                                shadows[rel_i(i)],
+                                i-1
+                            )
                         end
                     else
-                        set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i-p)
+                        set_tile_attrib(
+                            tiles[rel_i(i)],
+                            shadows[rel_i(i)],
+                            i-p
+                        )
                     end
                     
                 end
-                tiles[(left_i+10-2)%#tiles+1]:lower_to_bottom()
+                tiles[rel_i(10)]:lower_to_bottom()
                 tiles[left_i].x=TILE_W*-.6*(p)
                 shadows[left_i].x=TILE_W*-.6*(p)
-                tiles[(left_i+10-2)%#tiles+1].x=screen_w+TILE_W*.6*(1-p)
-                shadows[(left_i+10-2)%#tiles+1].x=screen_w+TILE_W*.6*(1-p)
+                tiles[rel_i(10)].x=screen_w+TILE_W*.6*(1-p)
+                shadows[rel_i(10)].x=screen_w+TILE_W*.6*(1-p)
                 if p == 1 then
                     
                     animate_list[this_obj.func_tbls.end_left]=this_obj
@@ -528,8 +555,8 @@ category_page = {
                 primary_focus.opacity=255*(1-p)
                 if p == 1 then
                     animate_list[this_obj.func_tbls.cycle_right]=this_obj
-                    animate_list[tiles[(left_i+4-2)%#tiles+1].func_tbls.recenter] = tiles[(left_i+4-2)%#tiles+1]
-                    animate_list[tiles[(left_i+5-2)%#tiles+1].func_tbls.recenter] = tiles[(left_i+5-2)%#tiles+1]
+                    animate_list[tiles[rel_i(4)].func_tbls.recenter] = tiles[rel_i(4)]
+                    animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
                     animate_list[primary_focus.func_tbls.rephase] = primary_focus
                 end
             end
@@ -556,30 +583,46 @@ category_page = {
                         if p < .2 then
                             --tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-5),1-.1*math.abs(5-5)}
                             --tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*((i-p*2)-5)
-                            tiles[(left_i+i-2)%#tiles+1]:raise_to_top()
+                            tiles[rel_i(i)]:raise_to_top()
                         else
-                            set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i+(p-.2)/.8)
+                            set_tile_attrib(
+                                tiles[rel_i(i)],
+                                shadows[rel_i(i)],
+                                i+(p-.2)/.8
+                            )
                             
                         end--]]
                     elseif i == 5 then
                         if p < .8 then
-                            set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i+p/.8)
-                            tiles[(left_i+i-2)%#tiles+1]:raise_to_top()
+                            set_tile_attrib(
+                                tiles[rel_i(i)],
+                                shadows[rel_i(i)],
+                                i+p/.8
+                            )
+                            tiles[rel_i(i)]:raise_to_top()
                         else
                             --tiles[(left_i+i-2)%#tiles+1].y_rotation={-15,0,0}
-                            set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i+1)
+                            set_tile_attrib(
+                                tiles[  rel_i(i)],
+                                shadows[rel_i(i)],
+                                i+1
+                            )
                         end
                     else
-                        set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i+p)
+                        set_tile_attrib(
+                            tiles[rel_i(i)],
+                            shadows[rel_i(i)],
+                            i+p
+                        )
                     end
                 end
-                shadows[(left_i-2)%#tiles+1].x=TILE_W*-.6*(1-p)
-                shadows[(left_i+9-2)%#tiles+1].x=screen_w+TILE_W*.6*(p)
-                tiles[(left_i-2)%#tiles+1].x=TILE_W*-.6*(1-p)
-                tiles[(left_i+9-2)%#tiles+1].x=screen_w+TILE_W*.6*(p)
+                shadows[rel_i(0)].x= -.6*TILE_W*(1-p)
+                shadows[rel_i(9)].x=  .6*TILE_W*(p)+screen_w
+                tiles[  rel_i(0)].x= -.6*TILE_W*(1-p)
+                tiles[  rel_i(9)].x=  .6*TILE_W*(p)+screen_w
                 if p == 1 then
-                    animate_list[tiles[(left_i+9-2)%#tiles+1].func_tbls.diana]=nil
-                    left_i = (left_i-2)%#tiles+1
+                    animate_list[tiles[rel_i(9)].func_tbls.diana]=nil
+                    left_i = rel_i(0)
                     animate_list[this_obj.func_tbls.end_right]=this_obj
                 end
             end
@@ -591,6 +634,127 @@ category_page = {
                 if p == 1 then
                     restore_keys()
                 end
+            end
+        },
+        high_speed_spin = {
+            duration = 500,
+            x        = 0,
+            vx       = 1500,--Interval(0,1)
+            dir      = 1,
+            func     = function(this_obj,f_t,secs,p)
+                
+                f_t.x = f_t.x + f_t.dir*f_t.vx*secs
+                
+                this_obj:on_motion(f_t.x)
+                
+                if p == 1 then
+                    
+                    this_obj.func_tbls.low_speed_spin.x   = f_t.x
+                    this_obj.func_tbls.low_speed_spin.dir = f_t.dir
+                    
+                    animate_list[this_obj.func_tbls.low_speed_spin] = this_obj
+                    
+                end
+            end
+        },
+        low_speed_spin = {
+            duration = 500,
+            x        = 0,
+            vx       = 1000,--Interval(0,1)
+            dir      = 1,
+            func     = function(this_obj,f_t,secs,p)
+                
+                f_t.x = f_t.x + f_t.dir*f_t.vx*secs
+                
+                this_obj:on_motion(f_t.x)
+                
+                if p == 1 then
+                    
+                    this_obj.func_tbls.glide_to_next.curr_pos, p = this_obj:translate_x_to_i(f_t.x)
+                    
+                    this_obj.func_tbls.glide_to_next.p_range.from   = p - this_obj.p_offset
+                    
+                    if f_t.dir == 1 then
+                        if this_obj.func_tbls.glide_to_next.p_range.from < .8 then
+                            this_obj.func_tbls.glide_to_next.p_range.to = 1
+                        else
+                            this_obj.func_tbls.glide_to_next.p_range.to = 2
+                        end
+                    else
+                        if this_obj.func_tbls.glide_to_next.p_range.from < .2 then
+                            this_obj.func_tbls.glide_to_next.p_range.to = -1
+                        else
+                            this_obj.func_tbls.glide_to_next.p_range.to = 0
+                        end
+                    end
+                    
+                    print("going to glide", this_obj.func_tbls.glide_to_next.p_range.from- this_obj.func_tbls.glide_to_next.p_range.to)
+                    
+                    this_obj.func_tbls.glide_to_next.duration = math.abs(500*
+                        (this_obj.func_tbls.glide_to_next.p_range.to -
+                         this_obj.func_tbls.glide_to_next.p_range.from))
+                    
+                    animate_list[this_obj.func_tbls.glide_to_next] = this_obj
+                    
+                end
+            end
+        },
+        glide_to_next = {
+            duration = 500,
+            p_range  = Interval(0,1),
+            curr_pos = 1,
+            func     = function(this_obj,this_func_tbl,secs,p)
+                --print("p",p)
+                this_obj:on_motion_p(
+                    this_func_tbl.curr_pos,
+                    this_func_tbl.p_range:get_value(p)
+                )
+                
+            end
+        },
+        release = {
+            --duration=200,
+            vx = 0,
+            x  = 0,
+            --vy = 0,
+            func=function(this_obj,this_func_tbl,secs,p)
+                
+                --print("a",this_func_tbl.vx)
+                
+                if this_func_tbl.vx < 0 then
+                    
+                    this_func_tbl.vx = this_func_tbl.vx + 20000*secs
+                    
+                    if this_func_tbl.vx > 0 then
+                        
+                        animate_list[this_func_tbl] = nil
+                        
+                    else
+                        
+                        this_func_tbl.x = this_func_tbl.x + this_func_tbl.vx*secs/4
+                        
+                        this_obj:on_motion(this_func_tbl.x)
+                        
+                    end
+                    
+                else
+                    
+                    this_func_tbl.vx = this_func_tbl.vx - 20000*secs
+                    
+                    if this_func_tbl.vx < 0 then
+                        
+                        animate_list[this_func_tbl] = nil
+                        
+                    else
+                        
+                        this_func_tbl.x = this_func_tbl.x + this_func_tbl.vx*secs/4
+                        
+                        this_obj:on_motion(this_func_tbl.x)
+                        
+                    end
+                    
+                end
+                
             end
         },
     },
@@ -615,63 +779,68 @@ category_page = {
             --idled:start()
             if back_sel then return end
             lose_keys()
-            set_tile_attrib(tiles[(left_i+10-2)%#tiles+1],shadows[(left_i+10-2)%#tiles+1],9)
+            set_tile_attrib(
+                tiles[rel_i(10)],
+                shadows[rel_i(10)],
+                9
+            )
             
             animate_list[self.func_tbls.end_right] = nil
             animate_list[self.func_tbls.end_left] = nil
             
-            tiles[(left_i+10-2)%#tiles+1].func_tbls.diana.delay =
-                -tiles[(left_i+9-2)%#tiles+1].func_tbls.diana.elapsed
-            tiles[(left_i+10-2)%#tiles+1].func_tbls.diana.center=-15
-            animate_list[tiles[(left_i+10-2)%#tiles+1].func_tbls.diana] = tiles[(left_i-2)%#tiles+1]
+            tiles[rel_i(10)].func_tbls.diana.delay =
+                -tiles[rel_i( 9)].func_tbls.diana.elapsed
+            tiles[rel_i(10)].func_tbls.diana.center=-15
+            animate_list[tiles[rel_i(10)].func_tbls.diana] = tiles[rel_i(10)]
             
-            tiles[(left_i+6-2)%#tiles+1].func_tbls.recenter.start=-15
-            tiles[(left_i+6-2)%#tiles+1].func_tbls.recenter.targ = 0
+            tiles[rel_i(6)].func_tbls.recenter.start=-15
+            tiles[rel_i(6)].func_tbls.recenter.targ = 0
             
-            tiles[(left_i+5-2)%#tiles+1].func_tbls.recenter.start= 0
-            tiles[(left_i+5-2)%#tiles+1].func_tbls.recenter.targ =15
-            
-            
-            primary_focus.func_tbls.rephase.start = tiles[(left_i+5-2)%#tiles+1].func_tbls.diana.phase
-            primary_focus.func_tbls.rephase.targ  = tiles[(left_i+6-2)%#tiles+1].func_tbls.diana.phase
+            tiles[rel_i(5)].func_tbls.recenter.start= 0
+            tiles[rel_i(5)].func_tbls.recenter.targ =15
             
             
+            primary_focus.func_tbls.rephase.start = tiles[rel_i(5)].func_tbls.diana.phase
+            primary_focus.func_tbls.rephase.targ  = tiles[rel_i(6)].func_tbls.diana.phase
             
-            tiles[(left_i+10-2)%#tiles+1].x=screen_w+TILE_W*.6
-            shadows[(left_i+10-2)%#tiles+1].x=screen_w+TILE_W*.6
-            tiles[(left_i+10-2)%#tiles+1]:lower_to_bottom()
+            
+            
+            tiles[rel_i(10)].x=screen_w+TILE_W*.6
+            shadows[rel_i(10)].x=screen_w+TILE_W*.6
+            tiles[rel_i(10)]:lower_to_bottom()
             animate_list[self.func_tbls.shift_left]=self
         end,
         [keys.Left] = function(self)
             --idled:start()
             if back_sel then return end
             lose_keys()
-            set_tile_attrib(tiles[(left_i-2)%#tiles+1],shadows[(left_i-2)%#tiles+1],1)
+            set_tile_attrib(
+                tiles[rel_i(0)],
+                shadows[rel_i(0)],1)
             
             animate_list[self.func_tbls.end_right] = nil
             animate_list[self.func_tbls.end_left] = nil
             
-            tiles[(left_i-2)%#tiles+1].func_tbls.diana.delay =
-                -tiles[(left_i+1-2)%#tiles+1].func_tbls.diana.elapsed
-            tiles[(left_i-2)%#tiles+1].func_tbls.diana.center=15
-            animate_list[tiles[(left_i-2)%#tiles+1].func_tbls.diana] = tiles[(left_i-2)%#tiles+1]
+            tiles[rel_i(0)].func_tbls.diana.delay =
+                -tiles[rel_i(1)].func_tbls.diana.elapsed
+            tiles[rel_i(0)].func_tbls.diana.center=15
+            animate_list[tiles[rel_i(0)].func_tbls.diana] = tiles[rel_i(0)]
             
-            tiles[(left_i+4-2)%#tiles+1].func_tbls.recenter.start=15
-            tiles[(left_i+4-2)%#tiles+1].func_tbls.recenter.targ = 0
-            
-            tiles[(left_i+5-2)%#tiles+1].func_tbls.recenter.start= 0
-            tiles[(left_i+5-2)%#tiles+1].func_tbls.recenter.targ =-15
-            
-            
-            
-            primary_focus.func_tbls.rephase.start = tiles[(left_i+5-2)%#tiles+1].func_tbls.diana.phase
-            primary_focus.func_tbls.rephase.targ  = tiles[(left_i+4-2)%#tiles+1].func_tbls.diana.phase
+            tiles[rel_i(4)].func_tbls.recenter.start=15
+            tiles[rel_i(4)].func_tbls.recenter.targ = 0
+            tiles[rel_i(5)].func_tbls.recenter.start= 0
+            tiles[rel_i(5)].func_tbls.recenter.targ =-15
             
             
             
-            tiles[(left_i-2)%#tiles+1].x=TILE_W*-.6
-            shadows[(left_i-2)%#tiles+1].x=TILE_W*-.6
-            tiles[(left_i-2)%#tiles+1]:lower_to_bottom()
+            primary_focus.func_tbls.rephase.start = tiles[rel_i(5)].func_tbls.diana.phase
+            primary_focus.func_tbls.rephase.targ  = tiles[rel_i(4)].func_tbls.diana.phase
+            
+            
+            
+            tiles[rel_i(0)].x=TILE_W*-.6
+            shadows[rel_i(0)].x=TILE_W*-.6
+            tiles[rel_i(0)]:lower_to_bottom()
             animate_list[self.func_tbls.shift_right]=self
         end,
         [keys.OK] = function(self)
@@ -687,6 +856,176 @@ category_page = {
             lose_keys()
             change_page_to("front_page")
         end
-    }
-}
+    },
     
+    translate_x_to_i = function(self,x)
+        if x < screen_w/2-screen_w/5 then
+            return math.floor(x/(screen_w/2/5)+1), x%(screen_w/2/5)/(screen_w/2/5)
+        elseif x >screen_w/2+screen_w/5 then
+            return math.floor(x/(screen_w/2/5)-1), x%(screen_w/2/5)/(screen_w/2/5)
+        else
+            return  math.floor((x - screen_w/2)/(screen_w/5) + 5),
+                    (x - screen_w/2)%(screen_w/5)/(screen_w/5)
+        end
+    end,
+    drag_to = function(self,p)
+        
+        for i = 0,10 do
+            set_tile_attrib(
+                tiles[  rel_i(i)],
+                shadows[rel_i(i)],
+                i+p
+            )
+        end
+        
+        --shadows[ rel_i(9) ].x=  .6*TILE_W*(p)+screen_w        
+        --shadows[ rel_i(0) ].x= -.6*TILE_W*(1-p)
+        --tiles[   rel_i(0) ].x= -.6*TILE_W*(1-p)
+        --tiles[   rel_i(9) ].x=  .6*TILE_W*(p)+screen_w
+        
+    end,
+    on_motion_p = function(self,curr_pos,p)
+        if curr_pos < self.curr_pos then
+            
+            animate_list[tiles[left_i].func_tbls.diana]=nil
+            tiles[rel_i(10)].func_tbls.diana.delay =
+                -tiles[rel_i( 9)].func_tbls.diana.elapsed
+            --tiles[rel_i(10)].func_tbls.diana.center=-15
+            animate_list[tiles[rel_i(10)].func_tbls.diana] = tiles[rel_i(10)]
+            --[[
+            animate_list[tiles[rel_i(6)].func_tbls.recenter] = nil
+            animate_list[tiles[rel_i(5)].func_tbls.recenter] = nil
+            
+            tiles[rel_i(6)].func_tbls.recenter.start=-15
+            tiles[rel_i(6)].func_tbls.recenter.targ = 0
+            
+            tiles[rel_i(5)].func_tbls.recenter.start= 0
+            tiles[rel_i(5)].func_tbls.recenter.targ =15
+            
+            animate_list[tiles[rel_i(6)].func_tbls.recenter] = tiles[rel_i(6)]
+            animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
+            --]]
+            left_i = rel_i(2)
+            
+            self.curr_pos = curr_pos
+            
+        elseif curr_pos > self.curr_pos then
+            
+            animate_list[tiles[rel_i(9)].func_tbls.diana]=nil
+            tiles[rel_i(0)].func_tbls.diana.delay =
+                -tiles[rel_i(1)].func_tbls.diana.elapsed
+            --tiles[rel_i(0)].func_tbls.diana.center=15
+            animate_list[tiles[rel_i(0)].func_tbls.diana] = tiles[rel_i(0)]
+            --[[
+            animate_list[tiles[rel_i(4)].func_tbls.recenter] = nil
+            animate_list[tiles[rel_i(5)].func_tbls.recenter] = nil
+            
+            tiles[rel_i(4)].func_tbls.recenter.start=  15
+            tiles[rel_i(4)].func_tbls.recenter.targ =   0
+            tiles[rel_i(5)].func_tbls.recenter.start=   0
+            tiles[rel_i(5)].func_tbls.recenter.targ = -15
+            
+            animate_list[tiles[rel_i(4)].func_tbls.recenter] = tiles[rel_i(4)]
+            animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
+            --]]
+            left_i = rel_i(0)
+            
+            self.curr_pos = curr_pos
+            
+        end
+        
+        self:drag_to(p)
+    end,
+    on_motion = function(self,x,y)
+        --print("gah",x,y)
+        local c_p,p = self:translate_x_to_i(x)
+        self:on_motion_p( c_p, p - self.p_offset )
+    end,
+    hold = function(self,x,y)
+        
+        animate_list[self.func_tbls.high_speed_spin] = nil
+        animate_list[self.func_tbls.low_speed_spin]  = nil
+        animate_list[self.func_tbls.glide_to_next]   = nil
+        
+        self.curr_pos, self.p_offset = self:translate_x_to_i(x)
+        --self.curr_pos = self.curr_pos - 1
+        print(self.curr_pos, self.p_offset)
+    end,
+    release = function(self,x,avx)
+        print(avx)
+        if math.abs(avx) > 24000 then
+            print("high")
+            --high speed
+            self.func_tbls.high_speed_spin.x = x
+            
+            if avx > 0 then
+                
+                self.func_tbls.high_speed_spin.dir =  1
+                
+            else
+                
+                self.func_tbls.high_speed_spin.dir = -1
+                
+            end
+            
+            animate_list[self.func_tbls.high_speed_spin] = self
+            
+        elseif math.abs(avx) > 8000 then
+            print("low")
+            --low speed
+            self.func_tbls.low_speed_spin.x = x
+            
+            if avx > 0 then
+                
+                self.func_tbls.low_speed_spin.dir =  1
+                
+            else
+                
+                self.func_tbls.low_speed_spin.dir = -1
+                
+            end
+            
+            animate_list[self.func_tbls.low_speed_spin] = self
+            
+        else--if avx >800 then
+            print("glide")
+            --glide to next card
+            self.func_tbls.glide_to_next.curr_pos,
+            self.func_tbls.glide_to_next.p_range.from = self:translate_x_to_i(x)
+            
+            self.func_tbls.glide_to_next.p_range.from = self.func_tbls.glide_to_next.p_range.from - self.p_offset
+            
+            if --[[p > .5 then--]]avx > 0 then
+                
+                if self.func_tbls.glide_to_next.p_range.from < 0 then
+                    self.func_tbls.glide_to_next.p_range.to = 0
+                else
+                    self.func_tbls.glide_to_next.p_range.to = 1
+                end
+                
+            else
+                
+                self.func_tbls.glide_to_next.p_range.to = 0
+                
+            end
+            
+            self.func_tbls.glide_to_next.duration = math.abs(500*
+                        (self.func_tbls.glide_to_next.p_range.to -
+                         self.func_tbls.glide_to_next.p_range.from))
+            
+            animate_list[self.func_tbls.glide_to_next] = self
+            
+        --else
+            
+        end
+        
+        --self.func_tbls.release.duration = 
+        
+        --self.func_tbls.release.vx = avx
+        --self.func_tbls.release.x  = x
+        --print("release", x,avx)
+        --animate_list[self.func_tbls.release] = self
+        
+    end,
+    
+}
