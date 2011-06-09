@@ -128,7 +128,7 @@ Section: General Data Structures
 
 Section: RGB/Alpha Color Formats
 
-		Color in the Trickplay Engine is commonly specified as a series of 
+		Color in the TrickPlay Engine is commonly specified as a series of 
 		three numeric RGB (Red/Green/Blue) values, plus an alpha (transparency) 
 		value. Each value can range from 0 to 255.
 		
