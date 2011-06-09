@@ -5,5 +5,6 @@ app=
     version     = ".1",
     name        = "Mountain Dew",
     author      = "Francesco Alex Indaco",
-    copyright   = "© Trickplay Inc."
+    copyright   = "© Trickplay Inc.",
+    attributes  = { "nolauncher" }
 }
