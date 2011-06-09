@@ -123,14 +123,14 @@ class Text [[ClutterActor*]] actor
 		The font property specifies the font to use when rendering the <text> 
 		string.
 		
-		The Trickplay Engine uses the Pango open-source framework to implement 
+		The TrickPlay Engine uses the Pango open-source framework to implement 
 		the layout and rendering of internationalized text on the display. This 
 		section will describe the information necessary to enable you to 
 		specify a desired font; additional information about Pango will 
 		not be required. In case you would like more details about Pango, go 
 		to <the Pango website at 
 		http://developer.gnome.org/platform-overview/stable/pango>. 
-		Information about the Pango API function that the Trickplay Engine 
+		Information about the Pango API function that the TrickPlay Engine 
 		calls to specify a font can be found <here at 
 		http://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string>.
 		
@@ -313,7 +313,7 @@ class Text [[ClutterActor*]] actor
     	to true, formatting tags in the string will be appropriately processed.
     	
     	If you simply set the object's <markup> property to a text string, 
-    	the Trickplay Engine automatically sets the use_markup property to 
+    	the TrickPlay Engine automatically sets the use_markup property to 
     	true. Alternatively, you may set the use_markup property yourself and
     	then assign a text string containing formatting tags to the object's
     	text property. Depending upon the structure of your application, this 
