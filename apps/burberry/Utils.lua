@@ -3,11 +3,12 @@
 imgs = {
 	box_foc_corner = "assets/focus-corner.png",
 	box_foc_side = "assets/focus-edge.png",
+	cursor = "assets/cursor.png",
 	fp={
 		foc_end = "assets/btn-end.png",
 		foc_mid = "assets/btn-mid.png",
 		arrow   = "assets/arrow.png"
-		--[[
+		--[=[
 		tiles = {
 			"assets/tile-main-womes1.png",
 			"assets/tile-main-mens1.png",
@@ -15,7 +16,7 @@ imgs = {
 			"assets/tile-main-biker1a.png",
 		},
 		left_pane = "assets/main-bg-frame.jpg"
-		--]]
+		--]=]
 	}
 }
 --[[
