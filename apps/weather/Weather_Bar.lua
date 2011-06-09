@@ -603,7 +603,10 @@ function Make_Bar(loc,index, master)
                         blurb_txt.opacity = 255
                         blurb_txt:show()
                     end
-                    
+                    if view_5_day then
+                        view_5_day = false
+                        blurb_txt:show()
+                    end
                     
                     
                     animate_list[bar.func_tbls.blurb] = nil
@@ -884,8 +887,10 @@ function Make_Bar(loc,index, master)
             bar_i = next_i
         end,
         [keys.Right]  = function()
+        print("gah")
             if #bars == 1 then return end
             if zip_entry.opacity~=0 then
+                print("fgfgdgfdg")
                 if zip_focus <= 5 then
                     zip_backing[zip_focus].color={255,255,255}
                 end
@@ -1066,6 +1071,7 @@ function Make_Bar(loc,index, master)
     }
     
     bar.on_key_down = function(self,key)
+        print(self,key)
         if zip_entry.opacity~=0 and key >= keys["0"] and key <= keys["9"] and zip_focus < 6 then
             local num = key - keys["0"]
             digits[zip_focus].text = num
@@ -1128,6 +1134,13 @@ function Make_Bar(loc,index, master)
                             right_faux_bar.x = bar_dist
                             next_i = #bars
                             bar_i  = #bars
+                            
+                            
+                            zip_entry.opacity = 0
+                            zip_entry:hide()
+                            blurb_txt.opacity = 255
+                            blurb_txt:show()
+                            
                             animate_list[bar.func_tbls.full_move_right] = bar
                             print("adding bar "..zip)
                         else
