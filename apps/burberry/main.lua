@@ -47,29 +47,16 @@ function main()
 	end
 	
 	
-	mouse_manager = {
-		busy = false,
-		on_enters = {}
-	}
 	
 	function restore_keys()
 		
 		screen.on_key_down = key_handler
 		
-		mouse_manager.busy = false
-		
-		for on_e,p in ipairs(mouse_manager.on_enters) do
-			
-			on_e(p)
-			
-		end
 	end
 	
 	function lose_keys()
 		
 		screen.on_key_down = nil
-		
-		mouse_manager.busy = true
 		
 	end
 	
@@ -90,7 +77,8 @@ function main()
 	
 	function screen:on_motion(x,y)
 		
-		
+		if using_keys then
+		end
 		
 		cursor.x = x
 		cursor.y = y

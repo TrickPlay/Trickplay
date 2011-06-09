@@ -367,11 +367,12 @@ umbrella.keys = {
             if bottom_i ~= 2 or right_i == 1 then return end
             --if bottom_i ~= 4 or right_i == 1 then return end
             lose_keys()
+            self.func_tbls.move_to_tile.focus.from        = right_tiles[right_i].opacity
             self.func_tbls.move_to_tile.curr_tile         = right_i
             self.func_tbls.move_to_tile.next_tile         = right_i - 1
             self.func_tbls.play_next_tile.next_tile       = right_i - 1
             animate_list[ self.func_tbls.move_to_tile   ] = self
-            animate_list[ self.func_tbls.play_next_tile ] = self
+            --animate_list[ self.func_tbls.play_next_tile ] = self
             right_i = right_i - 1
             
         end,
@@ -379,11 +380,12 @@ umbrella.keys = {
             if bottom_i ~= 2 or right_i == 4 then return end
             --if bottom_i ~= 4 or right_i == 4 then return end
             lose_keys()
+            self.func_tbls.move_to_tile.focus.from        = right_tiles[right_i].opacity
             self.func_tbls.move_to_tile.curr_tile         = right_i
             self.func_tbls.move_to_tile.next_tile         = right_i + 1
             self.func_tbls.play_next_tile.next_tile       = right_i + 1
             animate_list[ self.func_tbls.move_to_tile   ] = self
-            animate_list[ self.func_tbls.play_next_tile ] = self
+            --animate_list[ self.func_tbls.play_next_tile ] = self
             
             right_i = right_i + 1
         end,
@@ -431,30 +433,47 @@ umbrella.keys = {
     }
     
 left_panes.reactive = true
-function left_panes:on_enter()
+function left_panes:on_enter(x,y)
     
-    animate_list[umbrella.func_tbls.fade_out_overlay] = nil
+    --if x ~= RIGHT_PANE_X then return end
     
-    umbrella.func_tbls.fade_in_overlay.ovly.from       = overlay.opacity
+    if overlay.opacity ~= 255*.5 then
+        
+        animate_list[umbrella.func_tbls.fade_out_overlay] = nil
+        animate_list[umbrella.func_tbls.move_to_tile]     = nil
+        animate_list[umbrella.func_tbls.play_next_tile]   = nil
+        
+        umbrella.func_tbls.fade_in_overlay.ovly.from      = overlay.opacity
+        
+        umbrella.func_tbls.fade_in_overlay.tile.from      = right_tiles[right_i].opacity
+        
+        animate_list[umbrella.func_tbls.fade_in_overlay]  = umbrella
+        
+    end
+end
+--[[
+function left_panes:on_leave(x,y)
     
-    umbrella.func_tbls.fade_in_overlay.tile.from       = right_tiles[right_i].opacity
+    --if x ~= RIGHT_PANE_X then return end
     
-    animate_list[umbrella.func_tbls.fade_in_overlay]  = umbrella
+    
     
 end
-function left_panes:on_leave()
-    
-    animate_list[umbrella.func_tbls.fade_in_overlay]  = nil
-    
-    umbrella.func_tbls.fade_out_overlay.int.from      = overlay.opacity
-    
-    animate_list[umbrella.func_tbls.fade_out_overlay] = umbrella
-    
-end
-
+--]]
 local function tile_on_enter(i)
     
     if get_curr_page() ~= "front_page" then return end
+    
+    if overlay.opacity ~= 0 then
+        animate_list[umbrella.func_tbls.fade_in_overlay]  = nil
+        
+        umbrella.func_tbls.fade_out_overlay.int.from      = overlay.opacity
+        
+        animate_list[umbrella.func_tbls.fade_out_overlay] = umbrella
+    end
+    
+    
+    
     
     bottom_i = 2
     
@@ -504,7 +523,7 @@ for i,t in ipairs(right_tiles) do
         tile_on_enter(i)
         
     end
-    
+    --[[
     function t:on_leave()
         
         if get_curr_page() ~= "front_page" then return end
@@ -512,7 +531,7 @@ for i,t in ipairs(right_tiles) do
         tile_on_leave(i)
         
     end
-    
+    --]]
     function t:on_button_down()
         
         if get_curr_page() ~= "front_page" then return end

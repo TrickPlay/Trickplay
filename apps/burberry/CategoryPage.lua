@@ -47,16 +47,6 @@ local primary_focus = Group{}
 local top_button=Assets:Clone{src="assets/btn-back-off.png",x = 200,y = 50,}
 local top_focus=Assets:Clone{src="assets/btn-back-on.png",opacity=0,x = 200,y = 50,}
 
-top_button.reactive = true
-function top_button:on_enter()
-    print("e")
-end
-function top_button:on_leave()
-    print("l")
-end
-function top_button:on_button_down()
-    print("fafaf")
-end
 
 local shine=Assets:Clone{src="assets/highlight-alone.png"}
 shine.anchor_point={shine.w/2,shine.h/2}
@@ -428,10 +418,11 @@ category_page = {
         },
         fade_out_back_button = {
             duration = 300,
+            focus = Interval(255,0),
             func = function(this_obj,this_func_tbl,secs,p)
-                top_button.opacity=255*p
-                top_focus.opacity=255*(1-p)
-                primary_focus.opacity=255*(p)
+                --top_button.opacity=255*p
+                top_focus.opacity=this_func_tbl.focus:get_value(p)
+                primary_focus.opacity=255-this_func_tbl.focus:get_value(p)
                 if p == 1 then
                     restore_keys()
                 end
@@ -439,10 +430,11 @@ category_page = {
         },
         fade_in_back_button = {
             duration = 300,
+            focus = Interval(0,255),
             func = function(this_obj,this_func_tbl,secs,p)
-                top_button.opacity=255*(1-p)
-                top_focus.opacity=255*(p)
-                primary_focus.opacity=255*(1-p)
+                --top_button.opacity=255*(1-p)
+                top_focus.opacity=this_func_tbl.focus:get_value(p)
+                primary_focus.opacity=255-this_func_tbl.focus:get_value(p)
                 if p == 1 then
                     restore_keys()
                 end
@@ -1029,3 +1021,38 @@ category_page = {
     end,
     
 }
+
+
+top_button.reactive = true
+
+function top_button:on_enter()
+    
+    bottom_i = 1
+    
+    animate_list[category_page.func_tbls.fade_out_back_button] = nil
+    
+    category_page.func_tbls.fade_in_back_button.focus.from = top_focus.opacity
+    
+    animate_list[category_page.func_tbls.fade_in_back_button] = category_page
+    
+end
+
+function top_button:on_leave()
+    
+    bottom_i = 0
+    
+    animate_list[category_page.func_tbls.fade_in_back_button] = nil
+    
+    category_page.func_tbls.fade_out_back_button.focus.from = top_focus.opacity
+    
+    animate_list[category_page.func_tbls.fade_out_back_button] = category_page
+
+end
+
+function top_button:on_button_down()
+    
+    assert( bottom_i == 1 )
+    
+    category_page.keys[keys.OK](category_page)
+    
+end
