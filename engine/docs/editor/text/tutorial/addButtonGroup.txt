@@ -87,16 +87,32 @@ Next, let's align the buttons along our left anchor, the English button.  When s
 (see images/EdButtonGroupAligned.png)
 
 Multiple Selection Using Click-and-Drag:
-In the previous section, you selected multiple elements by <Shift>-Clicking each item. It's also possible to select multiple items by clicking and dragging the mouse to create a selection region. When you select multiple items by clicking and dragging, the entire element must be contained within the dragged selection region; if any part of an item is not within the selection area, it will not be selected.
+In the previous section, you selected multiple elements by <Shift>-Clicking each item. It's also possible to select multiple items by clicking and dragging the mouse to create a selection region. When you select multiple items by clicking and dragging, the entire element must be contained within the dragged selection region; if any part of an item is not within the selection area, the item will not be selected.
 
-You can try to select the four language buttons by clicking and dragging, but you will immediately encounter a problem. If you click on the rectangle that defines the button area, it becomes selected, and any subsequent dragging moves it. Similarly, if you click-and-drag on an area outside the button rectangle, you end up selecting and moving the background image which covers the entire display area. There seems to be no place on the screen to click-and-drag that doesn't select some element. If this is the case, how can click-and-drag be used to select multiple items?
+You can try now to select the four language buttons by clicking and dragging, but you will immediately encounter a problem. If you click on the rectangle that defines the button area, it becomes selected, and any subsequent dragging moves it. Similarly, if you click-and-drag on an area outside the button rectangle, you end up selecting and moving the background image which covers the entire display area. There seems to be no place on the screen to click-and-drag that doesn't select some element. If this is the case, how can click-and-drag be used to select multiple items?
 
-The solution lies in making space available on the screen by removing the background image. But this causes other problems because the rectangles we created to layout the different sections of the display are semi-transparent and depend upon the color of the background image to be able to see their visual effect. Thus, the real solution lies not in removing the background image, but in replacing it with a temporary, working version that cannot be selected by mouse clicks.
+The solution lies in making space available on the screen by removing the background image. But this causes another problem because the rectangles we created to lay out the different sections of the display are semi-transparent and depend upon the color of the background image to be able to see their true visual effect. Thus, the complete solution lies not just in removing the background image, but also in replacing it with a temporary, working version that cannot be selected by mouse clicks.
 
-Before we make any further changes, save the current version of the screen by selecting File->Save. The modifications we will make here will be for demonstration purposes only, so we'll save the current screen, make some changes to learn the process, and when we're finished, we'll back out of our changes by restoring the saved screen.
+Before we make any further changes, save the current version of the screen by selecting File->Save. The modifications we will perform here will be for demonstration purposes only, so we'll save the current screen, make some changes to walk through the process, and when we're finished, we'll back out of our changes by restoring the saved screen.
 
-The current background image can be easily deleted by clicking on it to select it and then pressing the <Backspace> key or selecting the Edit->Delete menu item.
+The current background image can be deleted by first clicking on it to select it, and then either pressing the <Backspace> key or selecting the Edit->Delete menu item. Then we can place the same background image back on the display, but as a temporary, working version that will not be selectable when it is clicked on. This can be achieved by selecting the View->Background:Image... menu item. An Open File dialog is displayed and the original background.jpg file can be selected. The background image is displayed, and the screen should appear the same now as it did before we removed the background image. The difference is that we are now able to click-and-drag to select multiple items. Verify this by clicking and dragging to select all the language buttons and the Continue button. Remember that the entire button must be contained within the selection region for it to be selected.
 
+The temporary, working background image is active while working in the SDK Visual Editor only; it is not stored as part of the screen, so if the application is run in the TrickPlay Engine, the application will not have a background image. Thus, we'll have to restore our original background image (via the Edit->Insert UI Element... menu item) before the screen can be considered finished.
+
+When elements are selected by clicking and dragging a selection region, the Editor determines the anchor element in a different manner than when elements are selected by <Shift>-Clicking. Recall that when multiple elements are selected by <Shift>-Clicking, the first selected element is the anchor. When multiple selection occurs by the click-and-drag method, the type of alignment operation performed determines the anchor element. For example, if you left-align the elements, the anchor will be the element with the left-most edge; all other elements will align with it. This is why it was important when positioning the language buttons that the anchoring English button be the left-most button. Although we ended up using <Shift>-Click to select multiple buttons, we had arranged the buttons so that we could have successfully used the click-and-drag method, as well.
+
+The anchor element that the Editor uses for each of the supported alignment operations are listed below.
+
+_Alignment_Anchors_
+
+Left alignment - anchor is the element with the left-most edge
+Right alignment - anchor is the element with the right-most edge
+Top alignment - anchor is the element with the top-most edge
+Bottom alignment - anchor is the element with the bottom-most edge
+Horizontal-Center alignment - anchor is ???
+Vertical-Center alignment - anchor is ???
+
+Now that we understand the Editor's two methods for selecting multiple elements, let's restore our screen to its last saved position by selecting the File->Open menu item and reloading the saved language.lua screen.
 
 Define Input Focus Navigation:
 As the user travels through a screen's UI elements, the input focus, i.e., the element that will receive user input, migrates from one element to another. The order in which elements receive focus can be defined within the SDK Visual Editor. Each element can explicitly specify the next element that will receive focus depending upon the key or button the user presses. This focus navigation can be defined in an element's Inspector dialog.

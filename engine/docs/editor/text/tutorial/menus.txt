@@ -30,12 +30,12 @@ Ungroup - Remove any group associated with the selected objects
 
 Arrange:
 Align - Header for list of alignment menu items
-. Left - Align selected objects along the left edge of the object that was selected first
-. Right - Align selected objects along the right edge of the object that was selected first
-. Top - Align selected objects along the top edge of the object that was selected first
-. Bottom - Align selected objects along the bottom edge of the object that was selected first
-. Horizontal Center - Align selected objects along the horizontal center of the object that was selected first
-. Vertical Center - Align selected objects along the vertical center of the object that was selected first
+. Left - Align selected objects along the left edge of the anchor element
+. Right - Align selected objects along the right edge of the anchor element
+. Top - Align selected objects along the top edge of the anchor element
+. Bottom - Align selected objects along the bottom edge of the anchor element
+. Horizontal Center - Align selected objects along the horizontal center of the anchor element
+. Vertical Center - Align selected objects along the vertical center of the anchor element
 
 Distribute - Header for list of UI element distribution menu items
 . Horizontally - Equally distribute the selected objects along the screen's horizontal axis
@@ -48,7 +48,7 @@ Arrange - Header for list of menu items that control the screen's Z-order
 . Send Backward - Move selected object one entry toward the rear of the screen's Z-order
 
 View:
-Background - Header for list of supported background elements. All of these items are displayed only within the SDK Visual Editor and will not be displayed when the application is run with the TrickPlay Engine.
+Background - Header for list of supported background elements. All of these items are displayed within the SDK Visual Editor only and will not be displayed when the application is run with the TrickPlay Engine.
 . Image... - Select a background image to display on the Editor's screen
 . Small Grid - Display a small grid on the Editor's screen
 . Medium Grid - Display a medium grid on the Editor's screen
