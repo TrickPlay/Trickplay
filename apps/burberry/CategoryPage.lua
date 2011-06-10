@@ -21,6 +21,10 @@ local back_sel = false
 
 local umbrella = Group{opacity=0}
 
+local sw = Stopwatch()
+sw:start()
+local hold = false
+
 local left_img = Assets:Clone{src="assets/category-bg.jpg",size={screen_w,screen_h}}
 local tile_group = Group{}
 local shadow_group = Group{}
@@ -197,6 +201,8 @@ do
         shadows[i].anchor_point={60+TILE_W/2,0}
         shadow_group:add(shadows[i])
         
+        
+        
         tiles[i].anchor_point={c.w,c.h}
         tiles[i].func_tbls = {
             diana_left = {
@@ -368,6 +374,7 @@ category_page = {
                     if p == 1 then
                         restore_keys()
                         this_func_tbl.first = true
+                        hold = false
                     end
                 end
             },
@@ -384,6 +391,7 @@ category_page = {
                     if p == 1 then
                         restore_keys()
                         this_func_tbl.first = true
+                        hold = false
                     end
                 end
             }
@@ -898,6 +906,7 @@ category_page = {
             animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
             --]]
             left_i = rel_i(2)
+            primary_focus.func_tbls.diana.phase = tiles[rel_i(6)].func_tbls.diana.phase
             
             self.curr_pos = curr_pos
             
@@ -921,10 +930,12 @@ category_page = {
             animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
             --]]
             left_i = rel_i(0)
+            primary_focus.func_tbls.diana.phase = tiles[rel_i(4)].func_tbls.diana.phase
             
             self.curr_pos = curr_pos
             
         end
+        
         
         self:drag_to(p)
     end,
@@ -935,15 +946,28 @@ category_page = {
     end,
     hold = function(self,x,y)
         
+        --if get_curr_page() ~= "category_page" then return end
+        
         animate_list[self.func_tbls.high_speed_spin] = nil
         animate_list[self.func_tbls.low_speed_spin]  = nil
         animate_list[self.func_tbls.glide_to_next]   = nil
         
         self.curr_pos, self.p_offset = self:translate_x_to_i(x)
+        
+        self.hold_time = sw.elapsed
         --self.curr_pos = self.curr_pos - 1
-        print(self.curr_pos, self.p_offset)
+        --print(self.curr_pos, self.p_offset)
     end,
     release = function(self,x,avx)
+        
+        if sw.elapsed -self.hold_time < 100 then
+            
+            dolater(change_page_to,"product_page")
+            
+        end
+        
+        --if get_curr_page() ~= "category_page" then return end
+        
         print(avx)
         if math.abs(avx) > 24000 then
             print("high")
@@ -1023,11 +1047,79 @@ category_page = {
 }
 
 
-top_button.reactive = true
+local prev_on_motion = {x=nil,y=nil,t=nil}
+
+local vxs = {}
+local avx = 0
+
+
+local t = nil
+
+function umbrella:on_motion(x,y)
+    
+    if hold then
+        
+        category_page:on_motion(x,y)
+        
+        t = sw.elapsed
+        
+        if prev_on_motion.t ~= nil then
+            
+            table.insert(vxs,(x - prev_on_motion.x)/((t-prev_on_motion.t)/1000))
+            
+            if #vxs > 5 then table.remove(vxs,1) end
+            
+        end
+        
+        prev_on_motion.x = x
+        prev_on_motion.y = y
+        prev_on_motion.t = t
+        
+    end
+    
+end
+function umbrella:on_button_down(x,y)
+    
+    hold = true
+    
+    vxs = {}
+    
+    category_page:hold(x,y)
+    
+end
+
+function umbrella:on_button_up(x,y)
+    
+    hold = false
+    
+    avx = 0
+    
+    for _,v in ipairs(vxs) do avx = avx+v; print(avx) end
+    
+    if #vxs ~= 0 then avx = avx/#vxs end
+    
+    category_page:release(x,avx)
+    
+end
+    
+function umbrella:on_leave(x,y)
+    
+    if hold then umbrella:on_button_up(x,y) end
+    
+end
+
+
+
+category_page.reactive_list = {}
+
+table.insert( category_page.reactive_list, umbrella  )
+table.insert( category_page.reactive_list, top_button)
 
 function top_button:on_enter()
     
-    bottom_i = 1
+    if get_curr_page() ~= "category_page" then return end
+    
+    back_sel = true
     
     animate_list[category_page.func_tbls.fade_out_back_button] = nil
     
@@ -1039,7 +1131,9 @@ end
 
 function top_button:on_leave()
     
-    bottom_i = 0
+    if get_curr_page() ~= "category_page" then return end
+    
+    back_sel = false
     
     animate_list[category_page.func_tbls.fade_in_back_button] = nil
     
@@ -1049,10 +1143,12 @@ function top_button:on_leave()
 
 end
 
-function top_button:on_button_down()
+function top_button:on_button_up()
     
-    assert( bottom_i == 1 )
+    if get_curr_page() ~= "category_page" then return end
     
-    category_page.keys[keys.OK](category_page)
+    assert( back_sel == true )
     
+    dolater(change_page_to,"front_page")
+    return true
 end

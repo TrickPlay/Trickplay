@@ -23,10 +23,10 @@ local umbrella = Group{opacity=0}
 local bg = Image{src="assets/beauty-frames-for-video.png"}
 local left_img = Image{src="assets/beauty-main-image.png",x=75,y=75}
 local right_tiles = {
-    Image{src="assets/tile-260x236-eyes.png" , x=RIGHT_PANE_X,y=31},
-    Image{src="assets/tile-260x236-glow.png"  , x=RIGHT_PANE_X,y=290},
-    Image{src="assets/tile-260x236-lips.png", x=RIGHT_PANE_X,y=550},
-    Image{src="assets/tile-260x236-skin.png", x=RIGHT_PANE_X,y=810},
+    Image{src="assets/tile-260x236-eyes.png", x=RIGHT_PANE_X, y= 31},
+    Image{src="assets/tile-260x236-glow.png", x=RIGHT_PANE_X, y=290},
+    Image{src="assets/tile-260x236-lips.png", x=RIGHT_PANE_X, y=550},
+    Image{src="assets/tile-260x236-skin.png", x=RIGHT_PANE_X, y=810},
 }
 local right_focus = Group{x=RIGHT_PANE_X,y=30,opacity=0}
 local top_buttons_base = {
