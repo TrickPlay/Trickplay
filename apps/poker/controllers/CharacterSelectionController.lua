@@ -103,7 +103,7 @@ function(ctrl, router, ...)
             find_next_dog(dog_number)
         end
         --ctrlman:update_choose_dog(players)
-        --ctrlman:update_waiting_room(players)
+        ctrlman:update_waiting_room(players)
 
         return true
     end
@@ -329,6 +329,7 @@ function(ctrl, router, ...)
             and x/controller.x_ratio < 2*640/3 then
                 if ctrl.number_of_players >= 2 then
                     start_a_game()
+                    return
                 end
             end
         end

@@ -3,6 +3,8 @@ local log = print
 local class_table = dofile("advanced_ui/AdvancedUIClasses.lua")
 local controller , CACHE_LOCAL_PROPERTIES = ...
 
+local foo = 0
+
 assert(controller)
 assert(class_table)
 
@@ -48,18 +50,17 @@ local function send_request( end_point , payload )
     payload = payload or {}
 
     payload.method = end_point
-    --[[
-    print("send_request payload:", payload)
-    if type(payload) == "table" then
-        dumptable(payload)
-    end
+    ---[[
+    print("send_request payload:", payload.method)
     --]]
     result = controller:advanced_ui( payload )
+    foo = foo + 1
+    if foo%30 == 0 then
+        print("\t\tcalls = ", foo)
+    end
+    print("just a string")
     --[[
     print("send_request result:", result)
-    if type(result) == "table" then
-        dumptable(result)
-    end
     --]]
     return result
 end
