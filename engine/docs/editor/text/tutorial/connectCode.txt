@@ -52,7 +52,7 @@ end
 
 Save the modified main.lua file.
 
-To run our application and test the event handler code, go to the Tutorial project's directory at ~/trickplay-editor/Tutorial. Run the Trickplay Engine with the following command line. The Engine will automatically run our Tutorial application.
+To run our application and test the event handler code, go to the Tutorial project's directory at ~/trickplay-editor/Tutorial. Run the TrickPlay Engine with the following command line. The Engine will automatically run our Tutorial application.
 
 (code)
 ~/trickplay-engine/Tutorial$ trickplay .
