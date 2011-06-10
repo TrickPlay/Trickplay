@@ -23,7 +23,7 @@ local left_is_playing = false
 local right_is_playing = false
 local umbrella = Group{}
 
-
+umbrella.reactive_list = {}
 
 -- Initiating and place visual elements
 local left_panes = Assets:Clone{src="assets/main-2011-image.jpg",  scale={2,2},}
@@ -432,7 +432,7 @@ umbrella.keys = {
         end,
     }
     
-left_panes.reactive = true
+table.insert(umbrella.reactive_list,left_panes)
 function left_panes:on_enter(x,y)
     
     --if x ~= RIGHT_PANE_X then return end
@@ -514,7 +514,7 @@ local function tile_on_leave(i)
 end
 for i,t in ipairs(right_tiles) do
     
-    t.reactive = true
+    table.insert(umbrella.reactive_list,t)
     print(i,t)
     function t:on_enter()
         
@@ -532,20 +532,22 @@ for i,t in ipairs(right_tiles) do
         
     end
     --]]
-    function t:on_button_down()
+    function t:on_button_up()
         
         if get_curr_page() ~= "front_page" then return end
         
         assert( bottom_i == 2 )
         
-        umbrella.keys[keys.OK](umbrella)
+        dolater(change_page_to,"category_page")
         
     end
 end
 
-bottom_buttons_base.reactive = true
+table.insert(umbrella.reactive_list,bottom_buttons_base)
 
 function bottom_buttons_base:on_enter()
+    
+    if get_curr_page() ~= "front_page" then return end
     
     bottom_i = 1
     
@@ -559,7 +561,9 @@ end
 
 function bottom_buttons_base:on_leave()
     
-    bottom_i = 0
+    if get_curr_page() ~= "front_page" then return end
+    
+    --bottom_i = 0
     
     animate_list[umbrella.func_tbls.focus_in_button] = nil
     
@@ -569,7 +573,9 @@ function bottom_buttons_base:on_leave()
 
 end
 
-function bottom_buttons_base:on_button_down()
+function bottom_buttons_base:on_button_up()
+    
+    if get_curr_page() ~= "front_page" then return end
     
     assert( bottom_i == 1 )
     
