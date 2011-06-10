@@ -1,10 +1,8 @@
 [Desktop Entry]
+Type=Link
 Encoding=UTF-8
-Name=Trickplay
-GenericName=Emulator
-Type=Application
-Exec=trickplay
-DocPath=file:///usr/share/doc/trickplay-sdk/html/index.html
+Name=Trickplay Documentation
+URL=file:///usr/share/doc/trickplay-sdk/html/index.html
 Icon=trickplay
 Categories=Development;Application;
-Comment=Trickplay Emulator
+Comment=Trickplay Documentation
