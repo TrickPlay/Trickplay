@@ -17,7 +17,10 @@ function(ctrl, router, controller, ...)
         dog_buttons[i] = RemoteButton(controller, "dog_"..i, "chip_touch",
             position, size)
         view:add(dog_buttons[i].group)
-        dog_buttons[i].focus.y = -10
+        dog_buttons[i].focus.position = {
+            dog_buttons[i].focus.x+(2*x_ratio),   
+            dog_buttons[i].focus.y-(11*y_ratio)
+        }
     end
     view:add(controller.factory:Image{
         src = "hdr_choose_dog",

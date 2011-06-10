@@ -69,13 +69,14 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
 ---------------Advanced UI Junk----------------
         
+        local advanced_ui_ready = false
         local character_selection
         local waiting_room
         local function create_advanced_ui_objects()
             controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller)
             character_selection = RemoteCharacterSelectionController(router, controller)
-            waiting_room = RemoteWaitingRoomController(router, controller)
             controller.router:notify()
+            advanced_ui_ready = true
         end
 
 ---------------General UI Junk----------------
@@ -236,6 +237,9 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:clear_and_set_background("bkg")
             controller.router:set_active_component(RemoteComponents.CHOOSE_DOG)
             controller.router:notify()
+            if advanced_ui_ready then
+                controller.router:get_active_controller():reset()
+            end
 
             controller.state = ControllerStates.CHOOSE_DOG
         end
@@ -282,7 +286,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             -- .4 is the constant of proportionality between the frame overlay
             -- on the camera and the frame for the poker dawgz replacement image
             if controller.has_images
-            and controller:request_image({640*.4, 783*.4}, true, "frame") then
+            and controller:request_image({640*.4, 783*.4}, true, "frame",
+            "Select Avatar Image", "Default dog") then
                 function controller:on_image(bitmap)
                     local image = bitmap:Image()
                     controller.player.dog_view:reset_images()
@@ -301,6 +306,9 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
 
         function controller:waiting_room()
+            if not waiting_room then
+                waiting_room = RemoteWaitingRoomController(router, controller)
+            end
             controller:clear_and_set_background("bkg")
             controller.router:set_active_component(RemoteComponents.WAITING)
             controller.router:notify()

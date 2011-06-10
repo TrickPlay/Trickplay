@@ -66,8 +66,9 @@ function(ctrl, router, controller, ...)
         local playing = {}
         for i,player in pairs(players) do
             local pos = player.dog_number
+            click_labels[pos]:hide()
             ready_labels[pos]:show()
-            if player.i_human then
+            if player.is_human then
                 human_labels[pos]:show()
                 comp_labels[pos]:hide()
             else
