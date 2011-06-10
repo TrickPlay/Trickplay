@@ -16,7 +16,7 @@
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:groupID objectManager:objectManager])) {
         self.view = [[[UIView alloc] init] autorelease];
-        
+        view.layer.anchorPoint = CGPointMake(0.0, 0.0);
         //manager = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
         if (args) {
             [self setValuesFromArgs:args];

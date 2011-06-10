@@ -25,6 +25,7 @@
         
         self.view = [resourceManager fetchImageViewUsingResource:src frame:frame];
         ((AsyncImageView *)self.view).otherDelegate = self;
+        view.layer.anchorPoint = CGPointMake(0.0, 0.0);
         
         [self setValuesFromArgs:args];
                 

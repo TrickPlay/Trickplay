@@ -13,7 +13,7 @@
 
 @interface RootViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate,
-NetServiceManagerDelegate> {
+GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
     UIWindow *window;
 
     NSString *currentTVName;
