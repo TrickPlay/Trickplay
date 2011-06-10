@@ -57,6 +57,21 @@ function(event,args,...)
     end
 end)
 
+--[[
+    Signifies a controller touch event.
+--]]
+TouchEvent = Class(Event,
+function(event,args,...)
+    if args then
+        assert(type(args) == "table", "Event constructor uses named parameters. e.g. pass in a table.")
+        event.x = args.x
+        event.y = args.y
+        event.controller = args.controller
+        event.cb = args.cb
+        event.pos = args.pos
+    end
+end)
+
 NetEvent = Class(Event,
 function(even,args,...)
     if args then

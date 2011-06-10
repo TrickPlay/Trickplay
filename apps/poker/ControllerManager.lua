@@ -1,9 +1,22 @@
+-- Load up the controller specific classes
+dofile("phone/RemoteButton.lua")
+dofile("phone/controllers/RemoteCharacterSelectionController.lua")
+dofile("phone/controllers/RemoteWaitingRoomController.lua")
+
 ControllerStates = {
     SPLASH = 1,
     CHOOSE_DOG = 2,
     NAME_DOG = 3,
     WAITING = 4,
-    PLAY_HAND = 5
+    BETTING = 5
+}
+
+RemoteComponents = {
+    SPLASH = 1,
+    CHOOSE_DOG = 2,
+    NAME_DOG = 3,
+    WAITING = 4,
+    BETTING = 5
 }
 
 ControllerManager = Class(nil,
@@ -15,6 +28,19 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
     local number_of_ctrls = 0
     local active_ctrls = {}
+
+    function ctrlman:delegate(event)
+        for _,controller in pairs(active_ctrls) do
+            controller.router:delegate(event)
+        end
+    end
+
+    function ctrlman:set_active_component(comp)
+        for _,controller in pairs(active_ctrls) do
+            controller.router:set_active_component(comp)
+            controller.router:notify()
+        end
+    end
 
     function ctrlman:declare_resource(asset_name, asset)
         if not asset_name or not asset then
@@ -33,6 +59,26 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         print("on_controller_connected controller.name = "..controller.name)
 
         controller.state = ControllerStates.SPLASH
+        controller.router = Router()
+
+        local x_ratio = controller.ui_size[1]/640
+        local y_ratio = controller.ui_size[2]/870
+        controller.x_ratio = x_ratio
+        controller.y_ratio = y_ratio
+
+
+---------------Advanced UI Junk----------------
+        
+        local character_selection
+        local waiting_room
+        local function create_advanced_ui_objects()
+            controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller)
+            character_selection = RemoteCharacterSelectionController(router, controller)
+            waiting_room = RemoteWaitingRoomController(router, controller)
+            controller.router:notify()
+        end
+
+---------------General UI Junk----------------
 
         local function declare_necessary_resources()
             --[[
@@ -76,12 +122,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:declare_resource("frame", "assets/camera/frame-overlay.png")
             controller:declare_resource("wooden_bar",
                 "assets/camera/help/lower-menu-bar.png")
+            controller:declare_resource("chip_touch",
+                "assets/phone/chip-touch.png")
 
             controller:clear_and_set_background("splash")
         end
 
-        local x_ratio = controller.ui_size[1]/640
-        local y_ratio = controller.ui_size[2]/870
         function controller:add_image(image_name, x, y, width, height)
             if not image_name then error("no image name", 2) end
             
@@ -91,13 +137,18 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                     math.floor(height*y_ratio))
         end
 
-        function controller:clear_and_set_background(image_name)
-            controller:clear_ui()
-            controller:set_ui_background(image_name)
+        function controller:correct_for_resolution(x, y, w, h)
+            return x*x_ratio, y*y_ratio, w*x_ratio, h*y_ratio
         end
 
-        controller.x_ratio = x_ratio
-        controller.y_ratio = y_ratio
+        local current_bkg = nil
+        function controller:clear_and_set_background(image_name)
+            --if current_bkg ~= image_name then
+                controller:clear_ui()
+                controller:set_ui_background(image_name)
+                current_bkg = image_name
+            --end
+        end
 
         function controller:on_key_down(key)
             print("controller keypress:", key)
@@ -183,20 +234,11 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             print("controller", controller.name, "choosing dog")
 
             controller:clear_and_set_background("bkg")
-            controller:add_image("hdr_choose_dog", 95, 30, 450, 50)
-            for i = 1,6 do
-                if not players[i] then
-                    if not controller:add_image("dog_"..i, ((i-1)%2)*(256+8)+60,
-                    math.floor((i-1)/2)*256+100, 256, 256) then
-                        -- TODO: figure out some good error handling
-                        print("error setting dog image")
-                    end
-                end
-            end
+            controller.router:set_active_component(RemoteComponents.CHOOSE_DOG)
+            controller.router:notify()
 
             controller.state = ControllerStates.CHOOSE_DOG
         end
-
 
         --[[
             Brings up the name your dog screen on the iphone. Player may enter a name
@@ -205,8 +247,13 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             @parameter pos : the dogs number/position (1-6). Determines which dog icon
                 to show on the iphone.
         --]]
+        function controller:on_ui_event(text)
+            print("ui_event!")
+        end
         function controller:name_dog(pos)
             print("naming dog")
+            controller.router:set_active_component(RemoteComponents.NAME_DOG)
+            controller.router:notify()
             controller.state = ControllerStates.NAME_DOG
 
             controller:clear_and_set_background("bkg")
@@ -219,7 +266,6 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                         controller.player.status:update_name(text)
                     end
                     controller.on_ui_event = function() end
-                    controller:waiting_room()
                     controller:photo_dog(pos)
                 end
                 return
@@ -235,58 +281,41 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             print("giving dog a photo")
             -- .4 is the constant of proportionality between the frame overlay
             -- on the camera and the frame for the poker dawgz replacement image
-            if controller.has_pictures
-            and controller:submit_picture({640*.4, 783*.4}, true, "frame") then
-                function controller:on_picture(bitmap)
+            if controller.has_images
+            and controller:request_image({640*.4, 783*.4}, true, "frame") then
+                function controller:on_image(bitmap)
                     local image = bitmap:Image()
                     controller.player.dog_view:reset_images()
                     controller.player.dog_view:edit_images(image)
+                    controller:waiting_room()
+                end
+                function controller:on_image_cancelled()
+                    controller:waiting_room()
                 end
 
                 return true
             end
+            controller:waiting_room()
 
             return false
         end
 
         function controller:waiting_room()
             controller:clear_and_set_background("bkg")
-            controller:add_image("waiting_text", 0, 0, 640, 86)
-            for i = 1,6 do
-                controller:add_image("player_"..i, 0, (i-1)*115+86, 640, 115)
-            end
-            controller:add_image("wooden_bar", 0, 6*115+86, 640, 95)
-            controller:add_image("start_button", 320-206/2, 6*115+106, 206, 62)
-            controller:update_waiting_room(
-                router:get_controller(Components.CHARACTER_SELECTION):get_players()
-            )
+            controller.router:set_active_component(RemoteComponents.WAITING)
+            controller.router:notify()
 
             controller.state = ControllerStates.WAITING
-        end
-
-        function controller:update_waiting_room(players)
-            local playing = {}
-            for i,player in pairs(players) do
-                local pos = player.dog_number
-                controller:add_image("ready_label", 167, (pos-1)*115+86+60, 122, 34)
-                if player.is_human then
-                    controller:add_image("human_label", 330, (pos-1)*115+86+20, 122, 34)
-                else
-                    controller:add_image("comp_label", 330, (pos-1)*115+86+20, 196, 34)
-                end
-                playing[pos] = true
-            end
-            for i = 1,6 do
-                if not playing[i] then
-                    controller:add_image("click_label", 167, (i-1)*115+86+60, 212, 33)
-                end
-            end
         end
 
         function controller:set_hole_cards(hole)
             assert(hole[1])
             assert(hole[2])
             controller:clear_and_set_background("bkg")
+            controller.router:set_active_component(RemoteComponents.BETTING)
+            controller.router:notify()
+
+            controller.state = ControllerStates.BETTING
             controller:add_image("buttons", 0, 535, 640, 313)
 
             controller:declare_resource("card1",
@@ -298,7 +327,6 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:add_image("card2", 280, 90, 100*3, 130*3)
         end
 
-        
 ---------------On Connected Junk---------------
 
 
@@ -312,6 +340,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             end
         end
         declare_necessary_resources()
+        function controller:on_advanced_ui_ready()
+            print("AdvancedUI Ready")
+            create_advanced_ui_objects()
+        end
         router:get_active_controller():add_controller(controller)
     end
 
