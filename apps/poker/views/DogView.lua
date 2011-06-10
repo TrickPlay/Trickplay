@@ -71,7 +71,6 @@ function(dog_view, dog_number, ...)
             212,
             169
         }
-        blah = image
         dog_clone = assetman:create_group({
             name = "dog_"..tostring(dog_number).."_frame",
             children = {image, dog_clone}

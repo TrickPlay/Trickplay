@@ -163,6 +163,8 @@ Controller = Class(Observer, function(ctrl, router, id)
         assert(event:is_a(Event))
         if event:is_a(KbdEvent) then
             ctrl:on_key_down(event.key)
+        elseif event:is_a(TouchEvent) then
+            ctrl:on_touch(event)
         elseif event:is_a(NotifyEvent) then
             ctrl:notify(event)
         elseif event:is_a(ResetEvent) then

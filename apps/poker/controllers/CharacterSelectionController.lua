@@ -102,8 +102,8 @@ function(ctrl, router, ...)
         elseif not dont_find_next then
             find_next_dog(dog_number)
         end
-        ctrlman:update_choose_dog(players)
-        ctrlman:update_waiting_room(players)
+        --ctrlman:update_choose_dog(players)
+        --ctrlman:update_waiting_room(players)
 
         return true
     end
@@ -285,7 +285,7 @@ function(ctrl, router, ...)
         assert(x)
         assert(y)
 
-        if controller.state == ControllerStates.CHOOSE_DOG then
+        if controller.router:get_active_component() == RemoteComponents.CHOOSE_DOG then
             -- based off of click position grab the correct dog position (pos)
             local pos
             local col = 1
@@ -309,8 +309,14 @@ function(ctrl, router, ...)
             current_selector.dog_view:pressed()
             current_selector.seat_button_view:pressed()
             if not set_up_player(pos, true, controller, true) then return end
-            controller:name_dog(pos)
-        elseif controller.state == ControllerStates.WAITING then
+            ctrlman:delegate(TouchEvent{
+                cb = function() controller:name_dog(pos) end,
+                x = x,
+                y = y,
+                controller = controller,
+                pos = pos
+            })
+        elseif controller.router:get_active_component() == RemoteComponents.WAITING then
             local pos = math.floor((y/controller.y_ratio-86)/115+1)
             -- AI selected
             if pos > 0 and pos <= 6 then
