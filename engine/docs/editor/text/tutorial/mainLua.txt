@@ -4,7 +4,7 @@ In the previous section, we defined the focus destinations for each of the butto
 
 Note: The following discussion assumes a familiarity with the Lua programming language. Refer to a Lua language reference if you need information about this programming language.
 
-During part of the SDK Visual Editor's processing, it converts the UI elements on the screen to Lua source code. This source code is eventually executed by the Trickplay Engine when the application is run. It is possible for you to write the source code that the Editor generates yourself, but having the Editor generate it for you is a more convenient process.
+During part of the SDK Visual Editor's processing, it converts the UI elements on the screen to Lua source code. This source code is eventually executed by the TrickPlay Engine when the application is run. It is possible for you to write the source code that the Editor generates yourself, but having the Editor generate it for you is a more convenient process.
 
 The Editor-generated source code is saved to various files. Recall that we previously saved our screen in the language.lua file. Another Editor-related file is called main.lua and it is generated automatically by the Editor. The main.lua file is created and updated every time you save your current screen. It is also updated automatically every 10 seconds by the SDK Visual Editor, so it is not necessary for you to save the main.lua file yourself.
 
@@ -20,9 +20,9 @@ groups = {} --Table of groups of the UIElements of each screen, each of which ca
 -- END GLOBAL SECTION
 (end)
 
-The first and last lines are simply comments and they perform no operation. The first line of executable code invokes the Lua dofile() function to load and execute the /lib/ui_element.lua library. This library implements most of the UI elements (also known as "widgets") supported by the SDK Visual Editor, such as the Button element we have been using. (The other elements we have used so far--the Rectangle, Image, and Text elements--are implemented in the core Trickplay Engine.) Loading and running this library enables all the Editor's widgets, making them available for use.
+The first and last lines are simply comments and they perform no operation. The first line of executable code invokes the Lua dofile() function to load and execute the /lib/ui_element.lua library. This library implements most of the UI elements (also known as "widgets") supported by the SDK Visual Editor, such as the Button element we have been using. (The other elements we have used so far--the Rectangle, Image, and Text elements--are implemented in the core TrickPlay Engine.) Loading and running this library enables all the Editor's widgets, making them available for use.
 
-The next two lines of code create two Lua tables called "groups" and "layout". The groups table is a Trickplay Engine <Group> object. The layout table is simply a Lua table. Each is initialized in subsequent lines in main.lua shown below.
+The next two lines of code create two Lua tables called "groups" and "layout". The groups table is a TrickPlay Engine <Group> object. The layout table is simply a Lua table. Each is initialized in subsequent lines in main.lua shown below.
 
 (code)
 --  LANGUAGE SECTION
@@ -32,7 +32,7 @@ loadfile("/screens/language.lua")(groups["language"]) -- Load all the elements f
 ui_element.populate_to(groups["language"],layout["language"]) -- Populate the elements into the Group
 (end)
 
-In the first non-comment line above, a Trickplay Engine Group object is constructed and stored in the groups["language"] table element. Similarly, the layout["language"] table element is set to an empty table.
+In the first non-comment line above, a TrickPlay Engine Group object is constructed and stored in the groups["language"] table element. Similarly, the layout["language"] table element is set to an empty table.
 
 The call to loadfile() loads all the UI elements from our saved language screen into the groups["language"] object. At this point, it is possible to access each of the screen's UI elements and their properties directly from the groups["language"] object. For example, the label displayed on a Button element is contained in its text property. To access the text property of our screen's ButtonEnglish button, you can use the following reference--
 
@@ -61,7 +61,7 @@ end
 -- END LANGUAGE.BUTTONENGLISH SECTION
 (end)
 
-Near the end of the main.lua file are some method calls performed upon the Trickplay Engine's global screen object.
+Near the end of the main.lua file are some method calls performed upon the TrickPlay Engine's global screen object.
 
 (code)
 -- GLOBAL SECTION FOOTER 
@@ -84,5 +84,5 @@ Button objects support a function called on_focus_in() that sets the screen's in
 layout["language"].ButtonEnglish.on_focus_in()
 (end)
 
-To incorporate this operation into our tutorial application, you must add such a code statement to the main.lua file. Using a text editor of your choice, open the main.lua file stored in the ~/trickplay-editor/Tutorial directory. Near the end of the file and following the call to ui_element.screen_add(), insert a new code statement to set the initial input focus. Use the on_focus_in() statement shown above to set the focus to the ButtonEnglish. Save the modified main.lua file. Now when the Trickplay Engine runs our Tutorial application and displays the Language screen, the ButtonEnglish button will have the initial focus.
+To incorporate this operation into our tutorial application, you must add such a code statement to the main.lua file. Using a text editor of your choice, open the main.lua file stored in the ~/trickplay-editor/Tutorial directory. Near the end of the file and following the call to ui_element.screen_add(), insert a new code statement to set the initial input focus. Use the on_focus_in() statement shown above to set the focus to the ButtonEnglish. Save the modified main.lua file. Now when the TrickPlay Engine runs our Tutorial application and displays the Language screen, the ButtonEnglish button will have the initial focus.
 

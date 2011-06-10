@@ -42,7 +42,7 @@ Timestamp: mm.d.yyyy
 # --------------------------------------------------------------------------
 
 
-Group: Trickplay Editor  {
+Group: TrickPlay Editor  {
 
    File: Reference  (editor.txt)
 
@@ -62,7 +62,7 @@ Group: Trickplay Editor  {
       File: Transition to Another Screen  (no auto-title, tutorial/screenTransition.txt)
       }  # Group: Tutorial
 
-   }  # Group: Trickplay Editor
+   }  # Group: TrickPlay Editor
 
 Group: Index  {
 
