@@ -15,6 +15,7 @@
 @synthesize appsAvailable;
 @synthesize currentAppName;
 @synthesize pushingViewController;
+@synthesize socketDelegate;
 
 /*
 @synthesize appShopButton;
@@ -187,24 +188,34 @@
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in AppBrowser");
-    if (!viewDidAppear) {
-        return;
-    }
+
+    // everything will get released from the navigation controller's delegate call (hopefully)
+    if (self.navigationController.visibleViewController == self) {
+        if (!viewDidAppear) {
+            return;
+        }
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
     
-    // everything will get released from the navigation controller's delegate call
-    [self.navigationController.view.layer removeAllAnimations];
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    } else {
+        [socketDelegate socketErrorOccurred];
+    }
 }
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in AppBrowser");
-    if (!viewDidAppear) {
-        return;
-    }
     
-    // everything will get released from the navigation controller's delegate call
-    [self.navigationController.view.layer removeAllAnimations];
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    // everything will get released from the navigation controller's delegate call (hopefully)
+    if (self.navigationController.visibleViewController == self) {
+        if (!viewDidAppear) {
+            return;
+        }
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+    } else {
+        [socketDelegate socketErrorOccurred];
+    }
 }
 
 
@@ -368,6 +379,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentAppIndicator) {
         [currentAppIndicator release];
     }
+    socketDelegate = nil;
     
     [super dealloc];
 }

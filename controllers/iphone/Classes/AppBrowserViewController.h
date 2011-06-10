@@ -27,6 +27,8 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     UIImageView *currentAppIndicator;
     
     BOOL pushingViewController;
+    
+    id <GestureViewControllerSocketDelegate> socketDelegate;
 }
 /*
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *appShopButton;
@@ -37,6 +39,9 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 @property (retain) NSArray *appsAvailable;
 @property (nonatomic, retain) NSString *currentAppName;
 @property (nonatomic, assign) BOOL pushingViewController;
+
+@property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
+
 
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;

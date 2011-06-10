@@ -14,6 +14,7 @@
 - (id)initWithID:(NSString *)rectID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:rectID objectManager:objectManager])) {
         self.view = [[[UIView alloc] init] autorelease];
+        view.layer.anchorPoint = CGPointMake(0.0, 0.0);
         
         view.backgroundColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0];
         

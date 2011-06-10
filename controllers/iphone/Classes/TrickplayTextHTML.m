@@ -15,6 +15,7 @@
     if ((self = [super initWithID:textID objectManager:objectManager])) {
         self.frame = [[UIScreen mainScreen] applicationFrame];
         self.view = [[[UIWebView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
+        view.layer.anchorPoint = CGPointMake(0.0, 0.0);
         
         view.userInteractionEnabled = YES;
         

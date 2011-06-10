@@ -166,6 +166,45 @@
     [self reloadData];
 }
 
+#pragma mark -
+#pragma mark AppBrowserViewControllerSocketDelegate stuff
+
+- (void)socketErrorOccurred {
+    NSLog(@"Socket Error Occurred in Root");
+        
+    if (appBrowserViewController && ![appBrowserViewController hasRunningApp]) {
+        if (gestureViewController) {
+            [gestureViewController release];
+            gestureViewController = nil;
+        }
+        [appBrowserViewController release];
+        appBrowserViewController = nil;
+        [currentTVName release];
+        currentTVName = nil;
+        [currentTVIndicator removeFromSuperview];
+    }
+    
+    [netServiceManager start];
+}
+
+- (void)streamEndEncountered {
+    NSLog(@"Socket End Encountered in Root");
+    
+    if (appBrowserViewController && ![appBrowserViewController hasRunningApp]) {
+        if (gestureViewController) {
+            [gestureViewController release];
+            gestureViewController = nil;
+        }
+        [appBrowserViewController release];
+        appBrowserViewController = nil;
+        [currentTVName release];
+        currentTVName = nil;
+        [currentTVIndicator removeFromSuperview];
+    }
+    
+    [netServiceManager start];;
+}
+
 
 #pragma mark -
 #pragma mark Table view data source
@@ -299,6 +338,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
             [appBrowserViewController release];
         }
         appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
+        appBrowserViewController.socketDelegate = self;
         if (currentTVName) {
             [currentTVName release];
             currentTVName = nil;
