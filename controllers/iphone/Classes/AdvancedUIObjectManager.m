@@ -198,6 +198,7 @@
 
 - (void)createObject:(NSDictionary *)object {
     NSLog(@"Creating object %@", object);
+    
     NSString *type = [object objectForKey:@"type"];
     NSDictionary *args = [object objectForKey:@"properties"];
     if (args) {
@@ -221,7 +222,7 @@
     } else if ([type compare:@"Group"] == NSOrderedSame) {
         [self createGroup:ID withArgs:args];
     }
-    
+
     [self createObjectReply:ID];
 }
 
