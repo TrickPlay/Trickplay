@@ -19,7 +19,7 @@ local bottom_i = 1
 local right_i  = 1
 local back_sel = false
 
-local umbrella = Group{opacity=0}
+local umbrella = Group{opacity=0,name="Category Page"}
 
 local sw = Stopwatch()
 sw:start()
@@ -837,7 +837,9 @@ category_page = {
             lose_keys()
             set_tile_attrib(
                 tiles[rel_i(0)],
-                shadows[rel_i(0)],1)
+                shadows[rel_i(0)],
+                1
+            )
             
             animate_list[self.func_tbls.end_right] = nil
             animate_list[self.func_tbls.end_left] = nil
@@ -1125,6 +1127,7 @@ end
     
 function umbrella:on_leave(x,y)
     
+    print("meeeee")
     if hold then umbrella:on_button_up(x,y) end
     
 end
@@ -1148,9 +1151,10 @@ function top_button:on_enter()
     
     animate_list[category_page.func_tbls.fade_in_back_button] = category_page
     
+    return true
 end
-
-function top_button:on_leave()
+local tb_hold = false
+function top_button:on_leave(x,y)
     
     if get_curr_page() ~= "category_page" then return end
     
@@ -1161,9 +1165,25 @@ function top_button:on_leave()
     category_page.func_tbls.fade_out_back_button.focus.from = top_focus.opacity
     
     animate_list[category_page.func_tbls.fade_out_back_button] = category_page
-
+    
+    if tb_hold then
+        
+        tb_hold = false
+        
+        umbrella:on_button_down(x,y)
+        
+    end
+    
+    return true
 end
 
+function top_button:on_button_down()
+    
+    tb_hold = true
+    
+    return true
+    
+end
 function top_button:on_button_up()
     
     if get_curr_page() ~= "category_page" then return end
@@ -1171,7 +1191,11 @@ function top_button:on_button_up()
     assert( back_sel == true )
     
     dolater(change_page_to,"front_page")
+    
+    tb_hold = false
+    
     return true
+    
 end
 
 
