@@ -433,10 +433,12 @@ umbrella.keys = {
     }
     
 table.insert(umbrella.reactive_list,left_panes)
+local mouse_pos = {bottom=0,right=0}
 function left_panes:on_enter(x,y)
     
     --if x ~= RIGHT_PANE_X then return end
-    
+    mouse_pos.bottom = 0
+    mouse_pos.right  = 0
     if overlay.opacity ~= 255*.5 then
         
         animate_list[umbrella.func_tbls.fade_out_overlay] = nil
@@ -451,11 +453,11 @@ function left_panes:on_enter(x,y)
         
     end
 end
---[[
+---[[
 function left_panes:on_leave(x,y)
     
     --if x ~= RIGHT_PANE_X then return end
-    
+    mouse_on_nothing = false
     
     
 end
@@ -504,6 +506,9 @@ local function tile_on_enter(i)
     umbrella.func_tbls.move_to_tile.next_tile   = i
     
     right_i = i
+    
+    mouse_pos.bottom = bottom_i
+    mouse_pos.right  = right_i
     
 end
 local function tile_on_leave(i)
@@ -557,6 +562,8 @@ function bottom_buttons_base:on_enter()
     
     animate_list[umbrella.func_tbls.focus_in_button] = umbrella
     
+    mouse_pos.bottom = bottom_i
+    mouse_pos.right  = right_i
 end
 
 function bottom_buttons_base:on_leave()
@@ -580,6 +587,36 @@ function bottom_buttons_base:on_button_up()
     assert( bottom_i == 1 )
     
     umbrella.keys[keys.OK](umbrella)
+    
+end
+
+
+function umbrella:to_keys()
+    
+    --if mouse_pos ~= nil then
+    --    
+    --    bottom_buttons_base[mouse_pos]:launch_fade_out()
+    --    
+    --end
+    
+    --bottom_buttons_base[bottom_i]:launch_fade_in()
+    
+end
+
+function umbrella:to_mouse()
+    
+    if mouse_pos.bottom == 0 then
+        print(bottom_i)
+        bottom_buttons_base:on_leave()
+        left_panes:on_enter()
+    elseif mouse_pos.bottom == 1 then
+        left_panes:on_enter()
+        bottom_buttons_base:on_enter()
+    else
+        bottom_buttons_base:on_leave()
+        tile_on_enter(mouse_pos.right)
+    end
+    
     
 end
 

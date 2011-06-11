@@ -86,7 +86,8 @@ function set_tile_attrib(this_tile,this_shadow,i)
         this_tile.func_tbls.diana.center = 15
         --this_tile.y_rotation={15,0,0}
         this_tile:raise_to_top()
-    elseif i < 6 then
+    elseif i < 4.2 then
+        i=4
         --tiles[i].position={screen_w/2,screen_h/2+10}
         this_tile.x=screen_w/2+screen_w/5*(i-5)
         this_tile.y            =screen_h/2-70*math.abs(5-4)+50+75*(1-math.abs(i-5))
@@ -95,6 +96,26 @@ function set_tile_attrib(this_tile,this_shadow,i)
         
         --this_tile.y_rotation={-15*(i-5),0,0}
         this_tile:raise_to_top()
+    elseif i < 5.8 then
+        i = (i-5)/.8+5
+        --tiles[i].position={screen_w/2,screen_h/2+10}
+        this_tile.x=screen_w/2+screen_w/5*(i-5)
+        this_tile.y            =screen_h/2-70*math.abs(5-4)+50+75*(1-math.abs(i-5))
+        
+        this_tile.func_tbls.diana.center = -15*(i-5)
+        
+        --this_tile.y_rotation={-15*(i-5),0,0}
+        this_tile:raise_to_top()
+    elseif i < 6 then
+        i=6
+        --tiles[i].position={screen_w/2,screen_h/2+10}
+        this_tile.x=screen_w/2+screen_w/5*(i-5)
+        this_tile.y            =screen_h/2-70*math.abs(5-4)+50+75*(1-math.abs(i-5))
+        
+        this_tile.func_tbls.diana.center = -15*(i-5)
+        
+        --this_tile.y_rotation={-15*(i-5),0,0}
+        this_tile:lower_to_bottom()
     else--if i < 10 then
         this_tile.x=screen_w/2/5*(i)+screen_w/2/5
         --tiles[i].y=screen_h/2-5*(i-5)+10
@@ -405,7 +426,7 @@ category_page = {
                         back_sel=false
                         primary_focus.opacity=255
                         top_focus.opacity=0
-                        top_button.opacity=255
+                        --top_button.opacity=255
                         stop_dianas()
                     end
                 end
@@ -490,34 +511,34 @@ category_page = {
                     
                     
                     if i ==6 then---[[
-                        if p < .2 then
+                        --if p < .2 then
                             --tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-5),1-.1*math.abs(5-5)}
                             --tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*((i-p*2)-5)
-                            tiles[rel_i(i)]:raise_to_top()
-                        else
+                            --tiles[rel_i(i)]:raise_to_top()
+                       -- else
                             set_tile_attrib(
                                 tiles[rel_i(i)],
                                 shadows[rel_i(i)],
-                                i-(p-.2)/.8
+                                i-p
                             )
                             
-                        end--]]
+                        --end--]]
                     elseif i == 5 then
-                        if p < .8 then
+                        --if p < .8 then
                             set_tile_attrib(
                                 tiles[rel_i(i)],
                                 shadows[rel_i(i)],
-                                i-p/.8
+                                i-p
                             )
-                            tiles[rel_i(i)]:raise_to_top()
-                        else
+                            --tiles[rel_i(i)]:raise_to_top()
+                        --else
                             --tiles[(left_i+i-2)%#tiles+1].y_rotation={-15,0,0}
-                            set_tile_attrib(
-                                tiles[rel_i(i)],
-                                shadows[rel_i(i)],
-                                i-1
-                            )
-                        end
+                            --set_tile_attrib(
+                           --     tiles[rel_i(i)],
+                         --       shadows[rel_i(i)],
+                         --       i-1
+                        --    )
+                        --end
                     else
                         set_tile_attrib(
                             tiles[rel_i(i)],
@@ -1151,4 +1172,27 @@ function top_button:on_button_up()
     
     dolater(change_page_to,"front_page")
     return true
+end
+
+
+
+
+function category_page:to_keys()
+    
+    --if mouse_pos ~= nil then
+    --    
+    --    bottom_buttons_base[mouse_pos]:launch_fade_out()
+    --    
+    --end
+    
+    --bottom_buttons_base[bottom_i]:launch_fade_in()
+    
+end
+
+function category_page:to_mouse()
+    
+    if back_sel then
+        top_button:on_leave()
+    end
+    
 end
