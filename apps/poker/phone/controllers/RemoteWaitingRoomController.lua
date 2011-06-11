@@ -61,7 +61,7 @@ function(ctrl, router, controller, ...)
         view:add(ready_labels[i], human_labels[i], comp_labels[i], click_labels[i])
     end
 
-    function ctrl:update_waiting_room(players)
+    function ctrl:initialize_waiting_room(players)
         if not players then error("no players", 2) end
         local playing = {}
         for i,player in pairs(players) do
@@ -87,13 +87,23 @@ function(ctrl, router, controller, ...)
         end
     end
 
+    function ctrl:update_waiting_room(player)
+        local pos = player.dog_number
+        click_labels[pos]:hide()
+        ready_labels[pos]:show()
+        if player.is_human then
+            human_labels[pos]:show()
+        else
+            comp_labels[pos]:show()
+        end
+    end
+
     function ctrl:on_touch(event)
-        ctrl:notify()
     end
 
     function ctrl:notify(event)
         if ctrl:is_active_component() then
-            ctrl:update_waiting_room(
+            ctrl:initialize_waiting_room(
                 router:get_controller(Components.CHARACTER_SELECTION):get_players()
             )
             view:show()

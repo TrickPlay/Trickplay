@@ -103,7 +103,7 @@ function(ctrl, router, ...)
             find_next_dog(dog_number)
         end
         --ctrlman:update_choose_dog(players)
-        ctrlman:update_waiting_room(players)
+        ctrlman:update_waiting_room(player)
 
         return true
     end

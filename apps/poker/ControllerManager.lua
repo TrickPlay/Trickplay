@@ -316,6 +316,12 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller.state = ControllerStates.WAITING
         end
 
+        function controller:update_waiting_room(player)
+            if controller.router:get_active_component() == RemoteComponents.WAITING then
+                controller.router:get_active_controller():update_waiting_room(player)
+            end
+        end
+
         function controller:set_hole_cards(hole)
             assert(hole[1])
             assert(hole[2])
@@ -396,7 +402,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         print("updating waiting room")
         for i,controller in ipairs(active_ctrls) do
             if controller.state == ControllerStates.WAITING then
-                controller:waiting_room(players)
+                controller:update_waiting_room(players)
             end
         end
     end
