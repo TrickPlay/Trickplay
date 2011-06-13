@@ -254,6 +254,7 @@ do
                 duration = 5000,
                 loop     = true,
                 center   = 0,
+                delay    = 0,
                 phase    = (i-1)/#tiles,
                 func     = function( this_obj, this_func_tbl, secs, p)
                     tiles[i].y_rotation={
@@ -345,32 +346,36 @@ do
 end
 
 local start_dianas = function()
-    local index
-    for i=1,9 do
-        index = rel_i(i)
+    local tile
+    for i=0,10 do
+        tile = tiles[rel_i(i)]
         if i < 5 then
-            tiles[index].func_tbls.diana.center=15
+            tile.func_tbls.diana.center=15
         elseif i == 5 then
-            tiles[index].func_tbls.diana.center=0
-            primary_focus.func_tbls.diana.phase = tiles[index].func_tbls.diana.phase
+            tile.func_tbls.diana.center=0
+            primary_focus.func_tbls.diana.phase = tile.func_tbls.diana.phase
+            primary_focus.delay   = 0
+            primary_focus.elapsed = 0
             animate_list[primary_focus.func_tbls.diana] = primary_focus
         elseif i > 5 then
-            tiles[index].func_tbls.diana.center=-15
+            tile.func_tbls.diana.center=-15
         end
-        --tiles[index].func_tbls.diana.delay = 800*(index-1)
-        animate_list[tiles[index].func_tbls.diana] = tiles[index]
-        tiles[index].func_tbls.diana.delay=0
-        tiles[index].func_tbls.diana.elapsed=0
         
+        
+        tile.func_tbls.diana.delay   = 0--tile.func_tbls.diana.delay+tile.func_tbls.diana.elapsed
+        tile.func_tbls.diana.elapsed = 0
+        
+        animate_list[tile.func_tbls.diana] = tile
     end
 end
 local stop_dianas = function()
-    local index
-    for i=1,9 do
-        --index = (left_i+i-2)%#tiles+1
+    
+    for i = 1, 9 do
         
         animate_list[tiles[rel_i(i)].func_tbls.diana] = nil
+        
     end
+    
     animate_list[primary_focus.func_tbls.diana] = nil
 end
 category_page = {
@@ -388,7 +393,9 @@ category_page = {
                 first = true,
                 func = function(this_obj,this_func_tbl,secs,p)
                     if this_func_tbl.first then
+                        print("old phase",primary_focus.func_tbls.diana.phase)
                         start_dianas()
+                        print("new phase",primary_focus.func_tbls.diana.phase)
                         this_func_tbl.first = false
                     end
                     this_obj.group.opacity=255*p
@@ -404,7 +411,9 @@ category_page = {
                 first=true,
                 func = function(this_obj,this_func_tbl,secs,p)
                     if this_func_tbl.first then
+                        print("old phase",primary_focus.func_tbls.diana.phase)
                         start_dianas()
+                        print("new phase",primary_focus.func_tbls.diana.phase)
                         --print("lala")
                         this_func_tbl.first = false
                     end
@@ -731,6 +740,12 @@ category_page = {
                     this_func_tbl.p_range:get_value(p)
                 )
                 
+                if p == 1 then
+                    this_obj:on_motion_p(
+                        this_func_tbl.curr_pos+this_func_tbl.p_range.to,
+                        0
+                    )
+                end
             end
         },
         release = {
@@ -891,7 +906,38 @@ category_page = {
                     (x - screen_w/2)%(screen_w/5)/(screen_w/5)
         end
     end,
-    drag_to = function(self,p)
+    on_motion_p = function(self,curr_pos,p)
+        if curr_pos < self.curr_pos then
+            
+            animate_list[tiles[left_i].func_tbls.diana]=nil
+            
+            tiles[rel_i(10)].func_tbls.diana.delay =
+                -tiles[rel_i( 9)].func_tbls.diana.elapsed
+            
+            animate_list[tiles[rel_i(10)].func_tbls.diana] = tiles[rel_i(10)]
+            
+            left_i = rel_i(2)
+            print("old phase",primary_focus.func_tbls.diana.phase)
+            primary_focus.func_tbls.diana.phase = tiles[rel_i(5)].func_tbls.diana.phase
+            print("new phase",primary_focus.func_tbls.diana.phase)
+            self.curr_pos = curr_pos
+            
+        elseif curr_pos > self.curr_pos then
+            
+            animate_list[tiles[rel_i(9)].func_tbls.diana]=nil
+            
+            tiles[rel_i(0)].func_tbls.diana.delay =
+                -tiles[rel_i(1)].func_tbls.diana.elapsed
+            
+            animate_list[tiles[rel_i(0)].func_tbls.diana] = tiles[rel_i(0)]
+            
+            left_i = rel_i(0)
+            print("old phase",primary_focus.func_tbls.diana.phase)
+            primary_focus.func_tbls.diana.phase = tiles[rel_i(5)].func_tbls.diana.phase
+            print("new phase",primary_focus.func_tbls.diana.phase)
+            self.curr_pos = curr_pos
+            
+        end
         
         for i = 0,10 do
             set_tile_attrib(
@@ -901,66 +947,6 @@ category_page = {
             )
         end
         
-        --shadows[ rel_i(9) ].x=  .6*TILE_W*(p)+screen_w        
-        --shadows[ rel_i(0) ].x= -.6*TILE_W*(1-p)
-        --tiles[   rel_i(0) ].x= -.6*TILE_W*(1-p)
-        --tiles[   rel_i(9) ].x=  .6*TILE_W*(p)+screen_w
-        
-    end,
-    on_motion_p = function(self,curr_pos,p)
-        if curr_pos < self.curr_pos then
-            
-            animate_list[tiles[left_i].func_tbls.diana]=nil
-            tiles[rel_i(10)].func_tbls.diana.delay =
-                -tiles[rel_i( 9)].func_tbls.diana.elapsed
-            --tiles[rel_i(10)].func_tbls.diana.center=-15
-            animate_list[tiles[rel_i(10)].func_tbls.diana] = tiles[rel_i(10)]
-            --[[
-            animate_list[tiles[rel_i(6)].func_tbls.recenter] = nil
-            animate_list[tiles[rel_i(5)].func_tbls.recenter] = nil
-            
-            tiles[rel_i(6)].func_tbls.recenter.start=-15
-            tiles[rel_i(6)].func_tbls.recenter.targ = 0
-            
-            tiles[rel_i(5)].func_tbls.recenter.start= 0
-            tiles[rel_i(5)].func_tbls.recenter.targ =15
-            
-            animate_list[tiles[rel_i(6)].func_tbls.recenter] = tiles[rel_i(6)]
-            animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
-            --]]
-            left_i = rel_i(2)
-            primary_focus.func_tbls.diana.phase = tiles[rel_i(6)].func_tbls.diana.phase
-            
-            self.curr_pos = curr_pos
-            
-        elseif curr_pos > self.curr_pos then
-            
-            animate_list[tiles[rel_i(9)].func_tbls.diana]=nil
-            tiles[rel_i(0)].func_tbls.diana.delay =
-                -tiles[rel_i(1)].func_tbls.diana.elapsed
-            --tiles[rel_i(0)].func_tbls.diana.center=15
-            animate_list[tiles[rel_i(0)].func_tbls.diana] = tiles[rel_i(0)]
-            --[[
-            animate_list[tiles[rel_i(4)].func_tbls.recenter] = nil
-            animate_list[tiles[rel_i(5)].func_tbls.recenter] = nil
-            
-            tiles[rel_i(4)].func_tbls.recenter.start=  15
-            tiles[rel_i(4)].func_tbls.recenter.targ =   0
-            tiles[rel_i(5)].func_tbls.recenter.start=   0
-            tiles[rel_i(5)].func_tbls.recenter.targ = -15
-            
-            animate_list[tiles[rel_i(4)].func_tbls.recenter] = tiles[rel_i(4)]
-            animate_list[tiles[rel_i(5)].func_tbls.recenter] = tiles[rel_i(5)]
-            --]]
-            left_i = rel_i(0)
-            primary_focus.func_tbls.diana.phase = tiles[rel_i(4)].func_tbls.diana.phase
-            
-            self.curr_pos = curr_pos
-            
-        end
-        
-        
-        self:drag_to(p)
     end,
     on_motion = function(self,x,y)
         --print("gah",x,y)
