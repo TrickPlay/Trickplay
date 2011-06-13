@@ -65,48 +65,77 @@ local iterated_tot = 0
 function mt.__newindex(t,k,v)
     assert(#animate_list == 0, "User added something to the animate list that"..
                                 " wasn't caught by the meta table")
-    --assert(type(k) == "table")
+    
     --if an item is being deleted
     if v == nil then
+        
         --if there was no entry of that key, then ignore
         if iterated_list[k] ~= nil then
+            
             if in_idle_loop then
+                
                 table.insert(to_be_deleted,k)
+                
             else
+                
                 iterated_list[k]=nil
+                
             end
+            
             tot = tot-1
+            
         end
         
     --if an item is being added
     else
+        
         if iterated_list[k] ~= nil then
+            
             if iterating then
+                
                 table.insert(to_be_deleted,k)
+                
             else
+                
                 iterated_list[k]=nil
+                
             end
+            
         end
+        
         assert(type(k)=="table")
+        
         if k.func ==nil then
+            
             dumptable(k)
+            
             error("no 'func' field")
+            
         end
+        
         --assert(type(v)=="table" )
         
         --if v.setup ~= nil   then v:setup()     end
         if k.duration ~= nil then
+            
             k.elapsed = 0
+            
             if k.delay then
+                
                 k.elapsed = -k.delay
+                
             end
+            
         end
         
         to_be_added[k] = v
+        
         tot = tot+1
+        
     end
-    --print(tot,iterated_tot)
+    
 end
+
 function mt.__index(t,k)
     if iterated_list[k] ~= nil or to_be_added[k] ~= nil or to_be_deleted[k] ~= nil then
         return true
