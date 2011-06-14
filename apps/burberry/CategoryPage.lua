@@ -495,78 +495,21 @@ category_page = {
             func = function(this_obj,this_func_tbl,secs,p)
                 --for i = left_i+1,right_i do
                
-                for i = 2,9 do
-                    --[[
-                    set_tile_attrib(tiles[(left_i+i-2)%#tiles+1],shadows[(left_i+i-2)%#tiles+1],i-p)
+                for i = 1,10 do
                     
-                    if i ==5 then
-                        if p < .5 then
-                            tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-5),1-.1*math.abs(5-5)}
-                            tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*((i-p*2)-5)
-                        else
-                            tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-(i-(p*2-1))),1-.1*math.abs(5-(i-(p*2-1)))}
-                            tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*(4-5)
-                        end
-                    elseif i == 6 then
-                        if p < .5 then
-                            tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-(i-p*2)),1-.1*math.abs(5-(i-p*2))}
-                            tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*(6-5)
-                        else
-                            tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-5),1-.1*math.abs(5-5)}
-                            tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*((i-(p*2-1))-5)
-                        end
-                    end
-                    --]]
-                    
-                    
-                    if i ==6 then---[[
-                        --if p < .2 then
-                            --tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-5),1-.1*math.abs(5-5)}
-                            --tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*((i-p*2)-5)
-                            --tiles[rel_i(i)]:raise_to_top()
-                       -- else
-                            set_tile_attrib(
-                                tiles[rel_i(i)],
-                                shadows[rel_i(i)],
-                                i-p
-                            )
-                            
-                        --end--]]
-                    elseif i == 5 then
-                        --if p < .8 then
-                            set_tile_attrib(
-                                tiles[rel_i(i)],
-                                shadows[rel_i(i)],
-                                i-p
-                            )
-                            --tiles[rel_i(i)]:raise_to_top()
-                        --else
-                            --tiles[(left_i+i-2)%#tiles+1].y_rotation={-15,0,0}
-                            --set_tile_attrib(
-                           --     tiles[rel_i(i)],
-                         --       shadows[rel_i(i)],
-                         --       i-1
-                        --    )
-                        --end
-                    else
-                        set_tile_attrib(
-                            tiles[rel_i(i)],
-                            shadows[rel_i(i)],
-                            i-p
-                        )
-                    end
+                    set_tile_attrib(
+                        tiles[rel_i(i)],
+                        shadows[rel_i(i)],
+                        i-p
+                    )
                     
                 end
-                tiles[rel_i(10)]:lower_to_bottom()
-                tiles[left_i].x=TILE_W*-.6*(p)
-                shadows[left_i].x=TILE_W*-.6*(p)
-                tiles[rel_i(10)].x=screen_w+TILE_W*.6*(1-p)
-                shadows[rel_i(10)].x=screen_w+TILE_W*.6*(1-p)
+                
                 if p == 1 then
                     
                     animate_list[this_obj.func_tbls.end_left]=this_obj
                     animate_list[tiles[left_i].func_tbls.diana]=nil
-                    left_i = (left_i)%#tiles+1
+                    left_i = rel_i(2)
                 end
             end
         },
@@ -594,62 +537,17 @@ category_page = {
         cycle_right = {
             duration=1000,
             func = function(this_obj,this_func_tbl,secs,p)
-                --[[
-                if p < 200/1400 then
-                    primary_focus.opacity=255*(200/1400-p)
-                    return
-                elseif p > 1200/1400 then
-                    primary_focus.opacity=255*(p-1200/1400)
-                    return
-                end
-                p = (p-200/1400)*(1400/1200)
-                print(p)
-                --]]
-                --for i = left_i+1,right_i do
-                for i = 1,8 do
+                
+                for i = 0,9 do
                     
+                    set_tile_attrib(
+                        tiles[rel_i(i)],
+                        shadows[rel_i(i)],
+                        i+p
+                    )
                     
-                    if i ==4 then---[[
-                        if p < .2 then
-                            --tiles[(left_i+i-2)%#tiles+1].scale={1-.1*math.abs(5-5),1-.1*math.abs(5-5)}
-                            --tiles[(left_i+i-2)%#tiles+1].x=screen_w/2+screen_w/5*((i-p*2)-5)
-                            tiles[rel_i(i)]:raise_to_top()
-                        else
-                            set_tile_attrib(
-                                tiles[rel_i(i)],
-                                shadows[rel_i(i)],
-                                i+(p-.2)/.8
-                            )
-                            
-                        end--]]
-                    elseif i == 5 then
-                        if p < .8 then
-                            set_tile_attrib(
-                                tiles[rel_i(i)],
-                                shadows[rel_i(i)],
-                                i+p/.8
-                            )
-                            tiles[rel_i(i)]:raise_to_top()
-                        else
-                            --tiles[(left_i+i-2)%#tiles+1].y_rotation={-15,0,0}
-                            set_tile_attrib(
-                                tiles[  rel_i(i)],
-                                shadows[rel_i(i)],
-                                i+1
-                            )
-                        end
-                    else
-                        set_tile_attrib(
-                            tiles[rel_i(i)],
-                            shadows[rel_i(i)],
-                            i+p
-                        )
-                    end
                 end
-                shadows[rel_i(0)].x= -.6*TILE_W*(1-p)
-                shadows[rel_i(9)].x=  .6*TILE_W*(p)+screen_w
-                tiles[  rel_i(0)].x= -.6*TILE_W*(1-p)
-                tiles[  rel_i(9)].x=  .6*TILE_W*(p)+screen_w
+                
                 if p == 1 then
                     animate_list[tiles[rel_i(9)].func_tbls.diana]=nil
                     left_i = rel_i(0)
@@ -669,7 +567,7 @@ category_page = {
         high_speed_spin = {
             duration = 500,
             x        = 0,
-            vx       = 1500,--Interval(0,1)
+            vx       = 1500,
             dir      = 1,
             func     = function(this_obj,f_t,secs,p)
                 
@@ -700,31 +598,31 @@ category_page = {
                 
                 if p == 1 then
                     
+                    local glide_range = this_obj.func_tbls.glide_to_next.p_range
+                    
                     this_obj.func_tbls.glide_to_next.curr_pos, p = this_obj:translate_x_to_i(f_t.x)
                     
-                    this_obj.func_tbls.glide_to_next.p_range.from   = p - this_obj.p_offset
+                    glide_range.from   = p - this_obj.p_offset
                     
                     if f_t.dir == 1 then
-                        if this_obj.func_tbls.glide_to_next.p_range.from < .8 then
-                            this_obj.func_tbls.glide_to_next.p_range.to = 1
+                        if glide_range.from < .8 then
+                            glide_range.to = 1
                         else
-                            this_obj.func_tbls.glide_to_next.p_range.to = 2
+                            glide_range.to = 2
                         end
                     else
-                        if this_obj.func_tbls.glide_to_next.p_range.from < .2 then
-                            this_obj.func_tbls.glide_to_next.p_range.to = -1
+                        if glide_range.from < .2 then
+                            glide_range.to = -1
                         else
-                            this_obj.func_tbls.glide_to_next.p_range.to = 0
+                            glide_range.to = 0
                         end
                     end
                     
-                    print("going to glide", this_obj.func_tbls.glide_to_next.p_range.from- this_obj.func_tbls.glide_to_next.p_range.to)
+                    this_obj.func_tbls.glide_to_next.duration = math.abs(
+                        500 * ( glide_range.to - glide_range.from )
+                    )
                     
-                    this_obj.func_tbls.glide_to_next.duration = math.abs(500*
-                        (this_obj.func_tbls.glide_to_next.p_range.to -
-                         this_obj.func_tbls.glide_to_next.p_range.from))
-                    
-                    animate_list[this_obj.func_tbls.glide_to_next] = this_obj
+                    animate_list[ this_obj.func_tbls.glide_to_next ] = this_obj
                     
                 end
             end
@@ -755,11 +653,9 @@ category_page = {
             --vy = 0,
             func=function(this_obj,this_func_tbl,secs,p)
                 
-                --print("a",this_func_tbl.vx)
-                
                 if this_func_tbl.vx < 0 then
                     
-                    this_func_tbl.vx = this_func_tbl.vx + 20000*secs
+                    this_func_tbl.vx = this_func_tbl.vx + 20000 * secs
                     
                     if this_func_tbl.vx > 0 then
                         
@@ -775,7 +671,7 @@ category_page = {
                     
                 else
                     
-                    this_func_tbl.vx = this_func_tbl.vx - 20000*secs
+                    this_func_tbl.vx = this_func_tbl.vx - 20000 * secs
                     
                     if this_func_tbl.vx < 0 then
                         
@@ -835,11 +731,8 @@ category_page = {
             tiles[rel_i(5)].func_tbls.recenter.start= 0
             tiles[rel_i(5)].func_tbls.recenter.targ =15
             
-            
             primary_focus.func_tbls.rephase.start = tiles[rel_i(5)].func_tbls.diana.phase
             primary_focus.func_tbls.rephase.targ  = tiles[rel_i(6)].func_tbls.diana.phase
-            
-            
             
             tiles[rel_i(10)].x=screen_w+TILE_W*.6
             shadows[rel_i(10)].x=screen_w+TILE_W*.6
@@ -906,6 +799,7 @@ category_page = {
                     (x - screen_w/2)%(screen_w/5)/(screen_w/5)
         end
     end,
+    
     on_motion_p = function(self,curr_pos,p)
         if curr_pos < self.curr_pos then
             
@@ -917,9 +811,9 @@ category_page = {
             animate_list[tiles[rel_i(10)].func_tbls.diana] = tiles[rel_i(10)]
             
             left_i = rel_i(2)
-            print("old phase",primary_focus.func_tbls.diana.phase)
+            --print("old phase",primary_focus.func_tbls.diana.phase)
             primary_focus.func_tbls.diana.phase = tiles[rel_i(5)].func_tbls.diana.phase
-            print("new phase",primary_focus.func_tbls.diana.phase)
+            --print("new phase",primary_focus.func_tbls.diana.phase)
             self.curr_pos = curr_pos
             
         elseif curr_pos > self.curr_pos then
@@ -932,14 +826,14 @@ category_page = {
             animate_list[tiles[rel_i(0)].func_tbls.diana] = tiles[rel_i(0)]
             
             left_i = rel_i(0)
-            print("old phase",primary_focus.func_tbls.diana.phase)
+            --print("old phase",primary_focus.func_tbls.diana.phase)
             primary_focus.func_tbls.diana.phase = tiles[rel_i(5)].func_tbls.diana.phase
-            print("new phase",primary_focus.func_tbls.diana.phase)
+            --print("new phase",primary_focus.func_tbls.diana.phase)
             self.curr_pos = curr_pos
             
         end
         
-        for i = 0,10 do
+        for i = 0, 10 do
             set_tile_attrib(
                 tiles[  rel_i(i)],
                 shadows[rel_i(i)],
@@ -948,11 +842,13 @@ category_page = {
         end
         
     end,
+    
     on_motion = function(self,x,y)
         --print("gah",x,y)
         local c_p,p = self:translate_x_to_i(x)
         self:on_motion_p( c_p, p - self.p_offset )
     end,
+    
     hold = function(self,x,y)
         
         --if get_curr_page() ~= "category_page" then return end
@@ -967,6 +863,7 @@ category_page = {
         --self.curr_pos = self.curr_pos - 1
         --print(self.curr_pos, self.p_offset)
     end,
+    
     release = function(self,x,avx)
         
         if sw.elapsed -self.hold_time < 100 then
@@ -1044,15 +941,7 @@ category_page = {
             
         end
         
-        --self.func_tbls.release.duration = 
-        
-        --self.func_tbls.release.vx = avx
-        --self.func_tbls.release.x  = x
-        --print("release", x,avx)
-        --animate_list[self.func_tbls.release] = self
-        
     end,
-    
 }
 
 
