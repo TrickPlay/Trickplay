@@ -84,6 +84,8 @@ private:
 
     // Update the current field's value
 
+    void field_value_changed();
+
     void update_field_value();
 
     // Duh!

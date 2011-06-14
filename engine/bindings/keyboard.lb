@@ -132,9 +132,30 @@ global keyboard [[ void * ]]
         ]];
 
     /*
+        Event: on_field_changed
+
+        As the user edits a field, this event lets you know its current value.
+
+        *Arguments:*
+
+            keyboard - The keyboard.
+
+            id - The id of the field that has changed.
+
+            value - The new value of the field. If it is a list field, this will be the id of
+                    one of the choices.
+    */
+
+    callback on_field_changed( Keyboard keyboard , string id , string value );
+
+    /*
         Event: on_cancel
 
         This event lets you know that the user canceled the keyboard, and it will be hidden soon.
+
+        *Arguments:*
+
+            keyboard - The keyboard.
     */
 
     callback on_cancel( Keyboard keyboard );
@@ -149,9 +170,10 @@ global keyboard [[ void * ]]
         keyboard - The keyboard.
 
         results - A table of results. This table will contain a key-value pair for
-                  each field in the form. The key will be field's id and the its value
+                  each field in the form. The key will be field's id and its value
                   will be the value entered by the user. For list fields, the value
-                  will be the id of one of the choices.
+                  will be the id of one of the choices. If a field is blank, this table
+                  will contain an entry for it, and the value will be an empty string.
     */
 
     callback on_submit( Keyboard keyboard , table results );
