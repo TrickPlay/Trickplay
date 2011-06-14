@@ -15,9 +15,12 @@
 #include "app.h"
 
 //=============================================================================
-// Set to OFF to stop image debug log
 
-Debug_OFF images_debug;
+#define TP_LOG_DOMAIN   "IMAGES"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //=============================================================================
 
@@ -74,26 +77,26 @@ public:
     {
         if ( ! enabled() )
         {
-            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+            tplog( "  EXTERNAL IMAGE DECODER IS DISABLED" );
 
             return TP_IMAGE_UNSUPPORTED_FORMAT;
         }
 
-        images_debug( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
+        tplog( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
 
         int result = decoder( data, size, image, decoder_data );
 
-        images_debug( "    EXTERNAL DECODER RETURNED %d", result );
+        tplog( "    EXTERNAL DECODER RETURNED %d", result );
 
         if ( result == TP_IMAGE_DECODE_OK )
         {
-            images_debug( "      pixels      : %p", image->pixels );
-            images_debug( "      width       : %u", image->width );
-            images_debug( "      height      : %u", image->height );
-            images_debug( "      pitch       : %u", image->pitch );
-            images_debug( "      depth       : %u", image->depth );
-            images_debug( "      bgr         : %u", image->bgr );
-            images_debug( "      free_pixels : %p", image->free_pixels );
+            tplog( "      pixels      : %p", image->pixels );
+            tplog( "      width       : %u", image->width );
+            tplog( "      height      : %u", image->height );
+            tplog( "      pitch       : %u", image->pitch );
+            tplog( "      depth       : %u", image->depth );
+            tplog( "      bgr         : %u", image->bgr );
+            tplog( "      free_pixels : %p", image->free_pixels );
 
             g_assert( image->pixels != NULL );
             g_assert( image->pitch >= image->width * image->depth );
@@ -117,7 +120,7 @@ public:
     {
         if ( ! enabled() )
         {
-            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+            tplog( "  EXTERNAL IMAGE DECODER IS DISABLED" );
 
             return TP_IMAGE_UNSUPPORTED_FORMAT;
         }
@@ -145,11 +148,11 @@ public:
 
         stream.read( header, header_size );
 
-        images_debug( "  INVOKING EXTERNAL DECODER TO DETECT IMAGE FORMAT WITH %d BYTES", stream.gcount() );
+        tplog( "  INVOKING EXTERNAL DECODER TO DETECT IMAGE FORMAT WITH %d BYTES", stream.gcount() );
 
         int r = decoder( header, stream.gcount(), NULL, decoder_data );
 
-        images_debug( "    EXTERNAL DECODER RETURNED %d", r );
+        tplog( "    EXTERNAL DECODER RETURNED %d", r );
 
         if ( r != TP_IMAGE_SUPPORTED_FORMAT )
         {
@@ -785,23 +788,23 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
 
     for ( DecoderList::const_iterator it = decoders.begin(); it != decoders.end(); ++it )
     {
-        images_debug( "TRYING TO DECODE '%s' USING %s", content_type ? content_type : "<unknown>", ( * it )->name() );
+        tplog( "TRYING TO DECODE '%s' USING %s", content_type ? content_type : "<unknown>", ( * it )->name() );
 
         int r = ( * it )->decode( ( gpointer ) data, size, &image );
 
         if ( r == TP_IMAGE_UNSUPPORTED_FORMAT )
         {
-            images_debug( "  UNSUPPORTED" );
+            tplog( "  UNSUPPORTED" );
             continue;
         }
 
         if ( r == TP_IMAGE_DECODE_FAILED )
         {
-            images_debug( "  FAILED" );
+            tplog( "  FAILED" );
             break;
         }
 
-        images_debug( "  DECODED" );
+        tplog( "  DECODED" );
 
         // It was decoded
 
@@ -813,7 +816,7 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
         return g_slice_dup( TPImage, &image );
     }
 
-    g_warning( "FAILED TO DECODE IMAGE FROM MEMORY" );
+    tpwarn( "FAILED TO DECODE IMAGE FROM MEMORY" );
 
     return NULL;
 }
@@ -826,7 +829,7 @@ TPImage * Images::decode_image( const char * filename )
 
     if ( ! g_file_test( filename, G_FILE_TEST_IS_REGULAR ) )
     {
-        g_warning( "IMAGE DOES NOT EXIST %s", filename );
+        tpwarn( "IMAGE DOES NOT EXIST %s", filename );
         return NULL;
     }
 
@@ -837,23 +840,23 @@ TPImage * Images::decode_image( const char * filename )
 
     for ( DecoderList::const_iterator it = decoders.begin(); it != decoders.end(); ++it )
     {
-        images_debug( "TRYING TO DECODE '%s' USING %s", filename, ( * it )->name() );
+        tplog( "TRYING TO DECODE '%s' USING %s", filename, ( * it )->name() );
 
         int r = ( * it )->decode( filename, &image );
 
         if ( r == TP_IMAGE_UNSUPPORTED_FORMAT )
         {
-            images_debug( "  UNSUPPORTED" );
+            tplog( "  UNSUPPORTED" );
             continue;
         }
 
         if ( r == TP_IMAGE_DECODE_FAILED )
         {
-            images_debug( "  FAILED" );
+            tplog( "  FAILED" );
             break;
         }
 
-        images_debug( "  DECODED" );
+        tplog( "  DECODED" );
 
         // It was decoded
 
@@ -865,7 +868,7 @@ TPImage * Images::decode_image( const char * filename )
         return g_slice_dup( TPImage, &image );
     }
 
-    g_warning( "FAILED TO DECODE %s", filename );
+    tpwarn( "FAILED TO DECODE %s", filename );
 
     return NULL;
 }
@@ -1189,11 +1192,11 @@ void Images::prune_cache()
 
     std::sort( prune.begin(), prune.end(), prune_sort );
 
-    images_debug( "PRUNE LIST:" );
+    tplog( "PRUNE LIST:" );
 
     for( PruneVector::const_iterator it = prune.begin(); it != prune.end(); ++it )
     {
-        images_debug( "%d : %u : %s", it->second.second, TPImageSize( it->second.first ) , it->first.c_str() );
+        tplog( "%d : %u : %s", it->second.second, TPImageSize( it->second.first ) , it->first.c_str() );
     }
 
     guint target_limit = cache_limit * 0.85;
@@ -1204,12 +1207,12 @@ void Images::prune_cache()
 
         cache_size -= TPImageSize( it->second.first );
 
-        images_debug( "DROPPING %s : %u", it->first.c_str(), TPImageSize( it->second.first ) );
+        tplog( "DROPPING %s : %u", it->first.c_str(), TPImageSize( it->second.first ) );
 
         destroy_image( it->second.first );
     }
 
-    images_debug( "CACHE SIZE IS NOW %u", cache_size );
+    tplog( "CACHE SIZE IS NOW %u", cache_size );
 }
 
 #endif

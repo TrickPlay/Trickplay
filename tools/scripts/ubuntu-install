@@ -21,6 +21,7 @@ sudo apt-get install \
     liburiparser-dev \
     libsndfile1-dev \
     libsoup2.4-dev \
+    libc-ares-dev \
     cmake \
     git-core
 

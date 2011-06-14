@@ -9,9 +9,11 @@ module clutter_rectangle;
 
 /*
     Class: Rectangle
+
+	The Rectangle object is a simple four-cornered rectangle. It implements 
+	all the <UIElement> methods and properties. Additionally, a Rectangle
+	object is able to specify a color and a border.
     
-    This is a simple rectangle that can have color and a border. It has 
-    all the methods and properties of <UIElement>.  
 */
 
 class Rectangle [[ClutterActor*]] actor
@@ -35,27 +37,29 @@ class Rectangle [[ClutterActor*]] actor
     /*
     	Property: color
     	
-    	The color of the rectangle. This can be set as either a string or a table
-    	with 3 or 4 numbers. It is always returned as a table with 4 numbers.
-    	
-    	When setting it as a string, you should use hex values for red, green, blue
-    	and alpha. You can omit alpha, which will default to fully opaque. You can
-    	also include a "#" as the first character, which will be ignored.
-    	
-    	(code)
-    		r.color = "#FF0000"
-    		r.color = "FF0000"
-    		r.color = "FF0000FF"
-    	(end)
-    	
-    	When setting it as a table, you pass a table with 3 or 4 integers, up to 255 each
-    	for red, green blue and alpha. If you pass only 3, alpha is assumed to be 
-    	255 (fully opaque).
-    	
-    	(code)
-    		r.color = { 255, 0 , 0 }
-    		r.color = { 255, 0 , 0, 255 }
-    	(end)
+		The color property is a series of numeric RGB (Red/Green/Blue) and 
+		alpha (transparency) values that define the fill color of the object's
+		rectangle. The format of the RGB and alpha settings is specified in 
+		<RGB/Alpha Color Formats>.
+
+		*Default Setting:* RGB( 255, 255, 255 )/white with an alpha of 
+		255/opaque
+		
+		*Example:* Set rectangle's color using a table
+		
+		(code)
+		r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
+		r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
+		(end)
+		
+		*Example:* Set rectangle's color using a string
+		
+		(code)
+		r.color = "FF00FF"      -- RGB values with default 0xFF/opaque alpha
+		r.color = "FF00FF40"    -- RGB values with explicit alpha
+		r.color = "#FF00FF"     -- RGB values, default alpha, ignored "#" prefix
+		(end)
+		
     */
     
     table color
@@ -73,7 +77,12 @@ class Rectangle [[ClutterActor*]] actor
     /*
     	Property: border_width
     	
-    	The width of the rectangle's border.
+    	The border_width property specifies the Rectangle's border in pixels.
+    	
+    	*Default Setting:* A border width of 0 pixels, i.e., no border.
+    	
+    	*See Also:* the <border_color> property
+    	
     */    
     
     int border_width
@@ -83,7 +92,21 @@ class Rectangle [[ClutterActor*]] actor
     /*
     	Property: border_color
     	
-    	The color of the rectangle's border.
+    	The border_color property specifies the Rectangle's border. The border 
+    	color is specified as a series of three numeric RGB (Red/Green/Blue) 
+    	values, plus a numeric alpha/transparency value. For information about 
+    	the supported formats of the color settings, refer to 
+    	<RGB/Alpha Color Formats>.
+    	
+    	For the border_color property to have an effect, the Rectangle's 
+    	border_width property must be greater than 0, i.e., the Rectangle must 
+    	have a border.
+    	
+    	*Default Setting:* RGB( 255, 255, 255 )/white with an alpha of 
+    	255/opaque
+    	
+    	*See Also:* the <border_width> property
+    	
     */
     
     table border_color
@@ -98,4 +121,50 @@ class Rectangle [[ClutterActor*]] actor
             clutter_rectangle_set_border_color(CLUTTER_RECTANGLE(self),&color);
         ]];
 }
+
+/*
+
+Section: General Data Structures
+
+Section: RGB/Alpha Color Formats
+
+		Color in the TrickPlay Engine is commonly specified as a series of 
+		three numeric RGB (Red/Green/Blue) values, plus an alpha (transparency) 
+		value. Each value can range from 0 to 255.
+		
+		The alpha setting can range from 0/transparent to 255/opaque. Values 
+		within this range specify percentages of transparency or opaqueness, 
+		e.g., a value of 25 is approximately 10% transparent.
+		
+		The settings are specified in either a table or a string. When setting 
+		a color property, either data format can be used, unless described 
+		otherwise. When retrieving a color setting, the values are always 
+		returned in a table.
+		
+		When setting a color, the three RGB values must always be specified. 
+		The alpha value is optional and defaults to 255/opaque if not specified.
+
+		If the color values are contained in a string, they must be concatenated
+	    in a series of hexadecimal values. The string may be prefixed with a "#"
+	    character, which will be ignored.
+		
+		*Default Setting:* Unless described otherwise, the common default 
+		setting is RGB( 255, 255, 255 )/white with an alpha of 255/opaque.
+		
+		*Example:* Set a Rectangle object's color property using a table
+		
+		(code)
+		r.color = { 255, 0, 255 }		-- RGB values with default/opaque alpha
+		r.color = { 255, 0, 255, 100 }	-- RGB with explicit alpha
+		(end)
+		
+		*Example:* Set a Rectangle object's color using a string
+		
+		(code)
+		r.color = "FF00FF"      -- RGB values with default 0xFF/opaque alpha
+		r.color = "FF00FF40"    -- RGB values with explicit alpha
+		r.color = "#FF00FF"     -- RGB values, default alpha, ignored "#" prefix
+		(end)
+		
+*/
 

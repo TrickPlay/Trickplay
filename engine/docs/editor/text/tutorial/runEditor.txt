@@ -1,0 +1,10 @@
+
+Topic: Run the SDK Visual Editor
+
+To run the Editor, ...
+
+ToDo:
+What is the official method for a customer to run the editor? Is a TrickPlay PATH defined during installation? Or should the user go to a specific directory? ???
+
+The first time the SDK Visual Editor is run, it creates a subdirectory in your home directory called trickplay-editor. The ~/trickplay-editor directory stores all the project files, screen files, and other files created during the running of the Editor.
+
