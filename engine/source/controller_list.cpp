@@ -62,7 +62,8 @@ struct Event
         ACCELEROMETER,
         POINTER_MOVE , POINTER_DOWN , POINTER_UP,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
-        UI, SUBMIT_PICTURE, SUBMIT_AUDIO_CLIP
+        UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
+        ADVANCED_UI_READY
     };
 
 public:
@@ -103,7 +104,7 @@ public:
 				g_free( event->ui.parameters );
 				break;
 
-			case SUBMIT_PICTURE:
+			case SUBMIT_IMAGE:
 			case SUBMIT_AUDIO_CLIP:
 				g_free( event->data.data );
 				g_free( event->data.mime_type );
@@ -228,14 +229,25 @@ public:
                 controller->ui_event( ui.parameters );
                 break;
 
-            case SUBMIT_PICTURE:
-                controller->submit_picture( data.data, data.size, data.mime_type );
+            case SUBMIT_IMAGE:
+                controller->submit_image( data.data, data.size, data.mime_type );
                 break;
 
             case SUBMIT_AUDIO_CLIP:
             	controller->submit_audio_clip( data.data, data.size, data.mime_type );
                 break;
 
+            case CANCEL_IMAGE:
+                controller->cancel_image();
+                break;
+
+            case CANCEL_AUDIO_CLIP:
+                controller->cancel_audio_clip();
+                break;
+
+            case ADVANCED_UI_READY:
+                controller->advanced_ui_ready();
+                break;
         }
     }
 
@@ -416,9 +428,6 @@ void Controller::load_external_map()
     loaded_external_map = true;
 
     String file_name = get_key_map_file_name();
-
-
-    tplog( "LOADING CONTROLLER MAP FROM '%s'" , file_name.c_str() );
 
     std::ifstream stream;
 
@@ -736,7 +745,7 @@ void Controller::ui_event( const String & parameters )
 
 //.............................................................................
 
-void Controller::submit_picture( void * data, unsigned int size, const char * mime_type )
+void Controller::submit_image( void * data, unsigned int size, const char * mime_type )
 {
     if ( !connected )
     {
@@ -745,7 +754,22 @@ void Controller::submit_picture( void * data, unsigned int size, const char * mi
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->submit_picture( data, size, mime_type );
+        ( *it )->submit_image( data, size, mime_type );
+    }
+}
+
+//.............................................................................
+
+void Controller::cancel_image( void )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->cancel_image( );
     }
 }
 
@@ -764,6 +788,35 @@ void Controller::submit_audio_clip( void * data, unsigned int size, const char *
     }
 }
 
+//.............................................................................
+
+void Controller::cancel_audio_clip( void )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->cancel_audio_clip( );
+    }
+}
+
+//.............................................................................
+
+void Controller::advanced_ui_ready( void )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->advanced_ui_ready( );
+    }
+}
 
 //.............................................................................
 
@@ -1102,38 +1155,45 @@ bool Controller::enter_text( const String & label, const String & text )
                data ) == 0;
 }
 
-bool Controller::submit_picture( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource )
+bool Controller::request_image( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource, const String & dialog_label, const String & cancel_label )
 {
-    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_PICTURES ) )
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_IMAGES ) )
     {
         return false;
     }
 
-    TPControllerSubmitPicture parameters;
+    TPControllerRequestImage parameters;
 
     parameters.max_width = max_width;
     parameters.max_height = max_height;
     parameters.edit = edit ? 1 : 0;
     parameters.mask = mask_resource.empty() ? 0 : mask_resource.c_str();
+    parameters.dialog_label = dialog_label.empty() ? 0 : dialog_label.c_str();
+    parameters.cancel_label = cancel_label.empty() ? 0 : cancel_label.c_str();
 
     return spec.execute_command(
                tp_controller,
-               TP_CONTROLLER_COMMAND_SUBMIT_PICTURE,
+               TP_CONTROLLER_COMMAND_REQUEST_IMAGE,
                & parameters,
                data ) == 0;
 }
 
-bool Controller::submit_audio_clip( )
+bool Controller::request_audio_clip( const String & dialog_label, const String & cancel_label )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_AUDIO_CLIPS ) )
     {
         return false;
     }
 
+    TPControllerRequestAudioClip parameters;
+
+    parameters.dialog_label = dialog_label.empty() ? 0 : dialog_label.c_str();
+    parameters.cancel_label = cancel_label.empty() ? 0 : cancel_label.c_str();
+
     return spec.execute_command(
                tp_controller,
-               TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP,
-               0,
+               TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP,
+               & parameters,
                data ) == 0;
 }
 
@@ -1462,13 +1522,13 @@ int tp_controller_wants_touch_events( TPController * controller )
     return controller->controller->wants_touch_events();
 }
 
-void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type )
+void tp_controller_submit_image( TPController * controller, const void * data, unsigned int size, const char * mime_type )
 {
 	g_assert(data);
 	g_assert(size);
 
 	TPController::check( controller );
-	controller->list->post_event( Event::make_data( Event::SUBMIT_PICTURE, controller->controller, data, size, mime_type ) );
+	controller->list->post_event( Event::make_data( Event::SUBMIT_IMAGE, controller->controller, data, size, mime_type ) );
 }
 
 void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type )
@@ -1478,4 +1538,22 @@ void tp_controller_submit_audio_clip( TPController * controller, const void * da
 
 	TPController::check( controller );
 	controller->list->post_event( Event::make_data( Event::SUBMIT_AUDIO_CLIP, controller->controller, data, size, mime_type ) );
+}
+
+void tp_controller_cancel_image( TPController * controller )
+{
+    TPController::check(controller);
+    controller->list->post_event( Event::make( Event::CANCEL_IMAGE, controller->controller ) );
+}
+
+void tp_controller_cancel_audio_clip( TPController * controller )
+{
+    TPController::check(controller);
+    controller->list->post_event( Event::make( Event::CANCEL_AUDIO_CLIP, controller->controller ) );
+}
+
+void tp_controller_advanced_ui_ready( TPController * controller )
+{
+    TPController::check(controller);
+    controller->list->post_event( Event::make( Event::ADVANCED_UI_READY, controller->controller ) );
 }

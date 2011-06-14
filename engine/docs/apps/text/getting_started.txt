@@ -12,6 +12,7 @@ There are only two strict requirements for an app bundle::
 - It must have a metadata file called "app"
 - It must have its main source code in a file called "main.lua"
 
+You may optionally also include an icon file called "launcher-icon.png" or "launcher-icon.jpg", which should be sized as 480x270 pixels.  This icon, if present, will be used by the application launcher.  If you do not provide such an icon, then a generic icon will be used instead.
 
 Topic: Metadata
 
@@ -191,7 +192,7 @@ local strings=dofile("localized:strings.lua")
 TrickPlay will look for the file "strings.lua" in the following directories,
 in order:
 
-(code)
+(table)
 <app>/localized/<language>/<country>/strings.lua
 <app>/localized/<language>/strings.lua
 <app>/localized/strings.lua
@@ -205,7 +206,7 @@ language and country as translations are added.
 You could have a structure
 like this:
 
-(code)
+(diagram)
     <app>
       +--- app
       +--- main.lua

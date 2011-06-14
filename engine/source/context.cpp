@@ -29,7 +29,10 @@
 #include "http_server.h"
 #include "http_trickplay_api_support.h"
 
-
+//-----------------------------------------------------------------------------
+#ifndef TP_DEFAULT_RESOURCES_PATH
+#define TP_DEFAULT_RESOURCES_PATH   "/usr/share/trickplay/resources"
+#endif
 //-----------------------------------------------------------------------------
 
 static int g_argc     = 0;
@@ -640,12 +643,27 @@ void TPContext::setup_fonts()
 
     // Get the a directory where fonts live
 
-    const char * fonts_path = get( TP_FONTS_PATH );
+    String fonts_path;
 
-    if ( !fonts_path )
+    if ( const char * fp = get( TP_FONTS_PATH ) )
     {
-        g_warning( "USING SYSTEM FONTS" );
-        return;
+        fonts_path = fp;
+    }
+    else
+    {
+        gchar * s = g_build_filename( get( TP_RESOURCES_PATH ) , "fonts" , NULL );
+
+        if ( g_file_test( s , G_FILE_TEST_EXISTS ) )
+        {
+            fonts_path = s;
+            g_free( s );
+        }
+        else
+        {
+            g_free( s );
+            g_warning( "USING SYSTEM FONTS" );
+            return;
+        }
     }
 
     // We create a directory called "fonts" in our data directory. There,
@@ -702,13 +720,13 @@ void TPContext::setup_fonts()
 			++added;
 		}
 
-        g_debug( "FONT PATHS ARE '%s'", fonts_path );
+        g_debug( "FONT PATHS ARE '%s'", fonts_path.c_str() );
 
         // This adds all the fonts in the directory to the cache...it can take
         // a long time the first time around. Once the cache exists, it will
         // be very quick.
 
-		gchar ** paths = g_strsplit( fonts_path , ";" , 0 );
+		gchar ** paths = g_strsplit( fonts_path.c_str() , ";" , 0 );
 
 		for ( gchar ** p = paths; *p; ++p )
 		{
@@ -1468,7 +1486,7 @@ String TPContext::make_fake_app()
 
             if ( ! g_file_test( app , G_FILE_TEST_EXISTS ) )
             {
-                g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1}", -1, NULL );
+                g_file_set_contents( app, "app={id='com.trickplay.empty',name='Empty',version='1.0',release=1,attributes={'nolauncher'}}", -1, NULL );
             }
 
             gchar * main = g_build_filename( app_path, "main.lua", NULL );
@@ -2098,6 +2116,7 @@ void TPContext::load_external_configuration()
         TP_TOAST_JSON_PATH,
         TP_FIRST_APP_EXITS,
         TP_HTTP_PORT,
+        TP_RESOURCES_PATH,
 
         NULL
     };
@@ -2295,6 +2314,24 @@ void TPContext::validate_configuration()
     if ( !get( TP_SCREEN_HEIGHT ) )
     {
         set( TP_SCREEN_HEIGHT, TP_SCREEN_HEIGHT_DEFAULT );
+    }
+
+    const char * resources_path = get( TP_RESOURCES_PATH );
+
+    if ( ! resources_path )
+    {
+        if ( g_file_test( TP_DEFAULT_RESOURCES_PATH , G_FILE_TEST_IS_DIR ) )
+        {
+            set( TP_RESOURCES_PATH , TP_DEFAULT_RESOURCES_PATH );
+            g_info( "DEFAULT:%s=%s", TP_RESOURCES_PATH , TP_DEFAULT_RESOURCES_PATH );
+        }
+        else
+        {
+            gchar * s = g_build_filename( g_get_current_dir(), "resources", NULL );
+            set( TP_RESOURCES_PATH , s );
+            g_warning( "DEFAULT:%s=%s", TP_RESOURCES_PATH, s );
+            g_free( s );
+        }
     }
 
     // Allowed secure objects

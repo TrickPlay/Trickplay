@@ -8,6 +8,7 @@
 #include "profiler.h"
 #include "json.h"
 #include "common.h"
+#include "keyboard.h"
 
 //.............................................................................
 
@@ -27,6 +28,7 @@
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
 #define APP_FIELD_ACTIONS       "actions"
+#define APP_FIELD_ATTRIBUTES    "attributes"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -70,6 +72,7 @@ extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
 extern int luaopen_canvas( lua_State * L );
+extern int luaopen_keyboard( lua_State * L );
 extern int luaopen_http_module( lua_State * L );
 
 #ifndef TP_PRODUCTION
@@ -334,6 +337,23 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
             md.copyright = lua_tostring( L, -1 );
         }
         lua_pop( L, 1 );
+
+        // Look for attributes
+
+        lua_getfield( L , -1 , APP_FIELD_ATTRIBUTES );
+        if ( lua_istable( L , -1 ) )
+        {
+            lua_pushnil( L );
+            while( lua_next( L , -2 ) )
+            {
+                if ( lua_type( L , -1 ) == LUA_TSTRING )
+                {
+                    md.attributes.insert( lua_tostring( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+            }
+        }
+        lua_pop( L , 1 );
 
         // Look for actions
 
@@ -931,6 +951,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_bitmap( L );
     luaopen_canvas( L );
     luaopen_http_module( L );
+    luaopen_keyboard( L );
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
@@ -1001,6 +1022,10 @@ App::~App()
     debugger.uninstall();
 
 #endif
+
+    // Get rid of the keyboard
+
+    Keyboard::hide( L , true );
 
     notify( context , TP_NOTIFICATION_APP_CLOSING );
 

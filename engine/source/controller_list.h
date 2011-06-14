@@ -61,9 +61,15 @@ public:
 
     void ui_event( const String & parameters );
 
-    void submit_picture( void * data, unsigned int size, const char * mime_type );
+    void submit_image( void * data, unsigned int size, const char * mime_type );
 
     void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
+
+    void cancel_image ( void );
+    
+    void cancel_audio_clip ( void );
+
+    void advanced_ui_ready( void );
 
     //.........................................................................
 
@@ -81,8 +87,11 @@ public:
         virtual void touch_move( int finger , int x, int y ) = 0;
         virtual void touch_up( int finger , int x, int y ) = 0;
         virtual void ui_event( const String & parameters ) = 0;
-        virtual void submit_picture( void * data, unsigned int size, const char * mime_type ) = 0;
+        virtual void submit_image( void * data, unsigned int size, const char * mime_type ) = 0;
         virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type ) = 0;
+        virtual void cancel_image( void ) = 0;
+        virtual void cancel_audio_clip( void ) = 0;
+        virtual void advanced_ui_ready( void ) = 0;
     };
 
     void add_delegate( Delegate * delegate );
@@ -127,9 +136,11 @@ public:
 
     bool enter_text( const String & label, const String & text );
 
-    bool submit_picture( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource );
+    bool request_image( unsigned int max_width , unsigned int max_height , bool edit ,
+                            const String & mask_resource, const String & dialog_label,
+                            const String & cancel_label );
 
-    bool submit_audio_clip( );
+    bool request_audio_clip( const String & dialog_label, const String & cancel_label );
 
     bool advanced_ui( const String & payload , String & result );
 
@@ -234,8 +245,11 @@ private:
     friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y );
     friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y );
     friend void tp_controller_ui_event( TPController * controller, const char * parameters );
-    friend void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type );
+    friend void tp_controller_submit_image( TPController * controller, const void * data, unsigned int size, const char * mime_type );
     friend void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type );
+    friend void tp_controller_cancel_image( TPController * controller );
+    friend void tp_controller_cancel_audio_clip( TPController * controller );
+    friend void tp_controller_advanced_ui_ready( TPController * controller );
 
     //.........................................................................
 

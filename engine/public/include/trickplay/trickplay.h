@@ -34,7 +34,7 @@ extern "C" {
 
 #define TP_MAJOR_VERSION    1
 #define TP_MINOR_VERSION    19
-#define TP_PATCH_VERSION    0
+#define TP_PATCH_VERSION    1
 
 /*-----------------------------------------------------------------------------
     File: TrickPlay Context
@@ -245,6 +245,9 @@ typedef struct TPContext TPContext;
     TP_HTTP_PORT -              The port for Trickplay's HTTP server.
                                 Defaults to "0".
 
+    TP_RESOURCES_PATH -         The path to various Trickplay resources.
+                                Defaults to "resources" (in the current working directory).
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -290,6 +293,7 @@ typedef struct TPContext TPContext;
 #define TP_TOAST_JSON_PATH              "toast_json_path"
 #define TP_FIRST_APP_EXITS              "first_app_exits"
 #define TP_HTTP_PORT                    "http_port"
+#define TP_RESOURCES_PATH               "resources_path"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
