@@ -234,6 +234,32 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Property: path_extents
+
+        A table of coordinates for a bounding box around the current path.
+    */
+
+    readonly table path_extents
+        [[
+            double x1;
+            double y1;
+            double x2;
+            double y2;
+
+            cairo_path_extents( self , & x1 , & y1 , & x2 , & y2 );
+
+            lua_newtable( L );
+            lua_pushnumber( L , x1 );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushnumber( L , y1 );
+            lua_rawseti( L , -2 , 2 );
+            lua_pushnumber( L , x2 );
+            lua_rawseti( L , -2 , 3 );
+            lua_pushnumber( L , y2 );
+            lua_rawseti( L , -2 , 4 );
+        ]];
+
+    /*
         Property: antialias
 
         Lets you get or set the antialiasing mode used by the Canvas.
@@ -373,6 +399,53 @@ class Canvas [[ cairo_t * ]]
             else
             {
                 luaL_error( L , "Invalid filter '%s'" , filter );
+            }
+        ]];
+
+    /*
+        Property: extend
+
+        Get or set how patterns extend beyond their natural area.
+
+        Values:
+
+            NONE - Pixels outside the pattern's area are fully transparent.
+            REPEAT - The pattern is tiled by repeating.
+            REFLECT - The pattern is tiled by reflecting.
+            PAD - Pixels outside the pattern copy the nearest pixel.
+    */
+
+    string extend
+
+        [[
+            switch( cairo_pattern_get_extend( cairo_get_source( self  ) ) )
+            {
+              case CAIRO_EXTEND_REPEAT: extend = "REPEAT"; break;
+              case CAIRO_EXTEND_REFLECT: extend = "REFLECT"; break;
+              case CAIRO_EXTEND_PAD: extend = "PAD"; break;
+              default: extend = "NONE"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( extend , "NONE" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_NONE );
+            }
+            else if ( ! strcmp( extend , "REPEAT" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_REPEAT );
+            }
+            else if ( ! strcmp( extend , "REFLECT" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_REFLECT );
+            }
+            else if ( ! strcmp( extend , "PAD" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_PAD );
+            }
+            else
+            {
+              luaL_error( L , "Invalid extend '%s'" , extend );
             }
         ]];
 
@@ -1014,6 +1087,114 @@ class Canvas [[ cairo_t * ]]
             pango_cairo_layout_path( self , layout );
 
             g_object_unref( G_OBJECT( layout ) );
+        ]];
+
+    /*
+        Function: text_element_path
+
+        This function lets you use a Text element as the source for a path.
+
+        Arguments:
+
+            text - A Text UI Element.
+    */
+
+    text_element_path( Text text )
+        [[
+            if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , text ) )
+            {
+                if ( CLUTTER_IS_TEXT( actor ) )
+                {
+                    if ( PangoLayout * layout = clutter_text_get_layout( CLUTTER_TEXT( actor ) ) )
+                    {
+                        layout = pango_layout_copy( layout );
+
+                        pango_cairo_update_layout( self , layout );
+
+                        pango_cairo_layout_path( self , layout );
+
+                        g_object_unref( G_OBJECT( layout ) );
+                    }
+                }
+            }
+        ]];
+
+    /*
+        Function: text_element_fill
+
+        This function lets you use a Text element as the source for a path. The path is filled
+        with the text element's color, unless you pass 'use_text_color' as false.
+
+        Arguments:
+
+            text - A Text UI Element.
+
+            use_text_color - If true, the color specified in the Text element will be used as the
+                             default color for the text. If false, the current source of the Canvas
+                             will be used to fill the text path.
+    */
+
+    text_element_fill( Text text , bool use_text_color = true )
+        [[
+          if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , text ) )
+          {
+              if ( CLUTTER_IS_TEXT( actor ) )
+              {
+                  if ( PangoLayout * layout = clutter_text_get_layout( CLUTTER_TEXT( actor ) ) )
+                  {
+                      layout = pango_layout_copy( layout );
+
+                      pango_cairo_update_layout( self , layout );
+
+                      if ( use_text_color )
+                      {
+                          cairo_save( self );
+
+                          ClutterColor color;
+
+                          clutter_text_get_color( CLUTTER_TEXT( actor ) , & color );
+
+                          cairo_set_source_rgba( self , color.red / 255.0 , color.green / 255.0 , color.blue / 255.0 , color.alpha / 255.0 );
+                      }
+
+                      pango_cairo_show_layout( self , layout );
+
+                      g_object_unref( G_OBJECT( layout ) );
+
+                      if ( use_text_color )
+                      {
+                          cairo_restore( self );
+                      }
+                  }
+              }
+          }
+        ]];
+
+    /*
+        Function: add_string_path
+
+        This function lets you use an SVG-like syntax to add segments to the current path.
+
+        M - Tells the path to move to the coordinates, expects 1 set of coordinates.
+        L - Adds a line to the path. Expects 1 set of coordinates.
+        C - Adds a curve to the path. Expects 3 sets of coordinates.
+        z - Closes the path. Expects no coordinates.
+
+        You can also use lower case for M, L and C; which implies the coordinates are
+        relative.
+
+    */
+
+    add_string_path( string path_text )
+        [[
+            ClutterPath * clutter_path = clutter_path_new();
+
+            clutter_path_add_string( clutter_path , path_text );
+
+            clutter_path_to_cairo_path( clutter_path , self );
+
+            g_object_unref( G_OBJECT( clutter_path ) );
+
         ]];
 
     /*

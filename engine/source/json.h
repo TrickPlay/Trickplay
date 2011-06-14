@@ -101,6 +101,8 @@ namespace JSON
 
         String stringify() const;
 
+        double as_number() const;
+
     private:
 
         Type    type;
