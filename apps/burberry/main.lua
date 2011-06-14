@@ -1,14 +1,35 @@
---screen:show()
 screen_w = screen.w
 screen_h = screen.h
+
 function main()
+    
+    --Images
+    imgs = {
+	box_foc_corner = "assets/focus-corner.png",
+	box_foc_side = "assets/focus-edge.png",
+	cursor = "assets/cursor.png",
+	fp = {
+	    foc_end = "assets/btn-end.png",
+	    foc_mid = "assets/btn-mid.png",
+	    arrow   = "assets/arrow.png"
+	}
+    }
+    
+    local cursor = Assets:Clone{src=imgs.cursor}
+    
+    
+    ----------------------------------------------------------------------------
+    -- App State - a.k.a. the current active page
+    ----------------------------------------------------------------------------
     
     local curr_page = "front_page"
     
     function change_page_to(next_page)
 	    
 	    assert(_G[next_page] ~= nil,"Next page \""..next_page.."\" does not exist")
-	    print(curr_page,"to",next_page)
+	    
+	    print(curr_page,"  to  ",next_page)
+	    
 	    animate_list[_G[curr_page].func_tbls.fade_out_to[next_page]]  = _G[curr_page]
 	    animate_list[_G[next_page].func_tbls.fade_in_from[curr_page]] = _G[next_page]
 	    
@@ -29,32 +50,33 @@ function main()
     end
     
     function get_curr_page()
-	    
-	    return curr_page
-	    
+	
+	return curr_page
+	
     end
     
-    dofile("App_Loop.lua")
-    dofile("Utils.lua")
-    front_page = dofile("FrontPage.lua") -- global: front_page
-    --dofile("CollectionPage.lua")
-    dofile("CategoryPage.lua")
-    product_page = dofile("ProductPage.lua")
     
+    ----------------------------------------------------------------------------
+    -- add all of the screens
+    ----------------------------------------------------------------------------
+    
+    animate_list  = dofile("App_Loop.lua")
+    
+    front_page    = dofile("FrontPage.lua")
+    category_page = dofile("CategoryPage.lua")
+    product_page  = dofile("ProductPage.lua")
+    
+    --make the first page reactive
     for _,v in ipairs(_G[curr_page].reactive_list) do
 	
 	v.reactive = true
 	
     end
     
-    local cursor = Assets:Clone{src=imgs.cursor}
     
-    screen:add(
-	    front_page,
-	    category_page.group,
-	    product_page,
-	    cursor
-    )
+    ----------------------------------------------------------------------------
+    -- Key Events
+    ----------------------------------------------------------------------------
     
     using_keys = true
     
@@ -75,39 +97,50 @@ function main()
 	    end
     end
     
-    
-    
+    --functions for removing and restoring key handling (during animations)
     function restore_keys() screen.on_key_down = key_handler end
     
     function lose_keys()    screen.on_key_down = nil         end
+    
+    restore_keys()
+    
+    
+    ----------------------------------------------------------------------------
+    -- Mouse Events
+    ----------------------------------------------------------------------------
     
     if controllers.start_pointer then controllers:start_pointer() end
     
     screen.reactive = true
     
-    cursor:hide()
-    
     function screen:on_motion(x,y)
+	
+	if using_keys then
 	    
-	    if using_keys then
-		using_keys = false
-		cursor:show()
+	    using_keys = false
+	    
+	    cursor:show()
+	    
+	    if _G[curr_page].to_mouse then
 		
-		if _G[curr_page].to_mouse then
-		    
-		    _G[curr_page].to_mouse()
-		    
-		end
+		_G[curr_page].to_mouse()
+		
 	    end
 	    
-	    cursor.x = x
-	    cursor.y = y
-	    
+	end
+	
+	cursor.x = x
+	
+	cursor.y = y
+	
     end
     
     function screen:on_button_down()
+	
 	if using_keys then
+	    
 	    using_keys = false
+	    
 	    cursor:show()
 	    
 	    if _G[curr_page].to_mouse then
@@ -117,11 +150,27 @@ function main()
 	    end
 	    
 	end
+	
     end
     
-    restore_keys()
+    cursor:hide()
+    
+    
+    
+    --add it all to screen
+    screen:add(
+	front_page,
+	category_page,
+	product_page,
+	cursor
+    )
     
 end
+
+
+--------------------------------------------------------------------------------
+-- Pablo's Zoom Screen Loading Bar Trick
+--------------------------------------------------------------------------------
 
 Assets = dofile( "Assets.lua" )
 
