@@ -55,8 +55,8 @@ end
 
 local title = Assets:Clone{src="assets/main-txt-2011.png",x=TITLE_X,y=TITLE_Y}
 local right_focus = Group{x=RIGHT_PANE_X,opacity=0}
-local bottom_buttons_base = Assets:Clone{src="assets/btn-playvideo-off.png",opacity=255,x = VIEW_COL_X, y = VIEW_COL_Y,}
-local bottom_buttons_foci = Assets:Clone{src="assets/btn-playvideo-on.png",x = VIEW_COL_X, y = VIEW_COL_Y,}
+local bottom_buttons_base = Assets:Clone{src="assets/btn-playvideo-off.png",x = VIEW_COL_X, y = VIEW_COL_Y,}
+local bottom_buttons_foci = Assets:Clone{src="assets/btn-playvideo-on.png", x = VIEW_COL_X, y = VIEW_COL_Y,}
 
 local overlay = Rectangle{
     w=screen_w-RIGHT_PANE_X,
@@ -227,6 +227,7 @@ umbrella.func_tbls = {
                     right_is_playing = true
                     
                     this_obj.func_tbls.play_next_tile.next_tile = this_func_tbl.next_tile
+                    right_blurs[this_func_tbl.next_tile].opacity=0
                     animate_list[this_obj.func_tbls.play_next_tile] = this_obj
                 end
             end
@@ -258,7 +259,7 @@ umbrella.func_tbls = {
             func = function(this_obj,this_func_tbl,secs,p)
                 --bottom_buttons_base[3].opacity=255*(.4+.6*(1-p))
                 --bottom_buttons_foci[3].opacity=255*(1-p)
-                bottom_buttons_base.opacity = 255 *    p--255*(.4+.6*(1-p))
+                --bottom_buttons_base.opacity = 255 *    p--255*(.4+.6*(1-p))
                 bottom_buttons_foci.opacity = 255 * (1-p)--255*(1-p)
                 if left_is_playing then
                     left_panes.opacity=255*p
@@ -281,7 +282,7 @@ umbrella.func_tbls = {
                 right_tiles[right_i].opacity=255*p
                 --bottom_buttons_base[3].opacity=255*(.3+.7*(p))
                 --bottom_buttons_foci[3].opacity=255*(p)
-                bottom_buttons_base.opacity=255*(1-p)--255*(.3+.7*(p))
+                --bottom_buttons_base.opacity=255*(1-p)--255*(.3+.7*(p))
                 bottom_buttons_foci.opacity=255*p--255*(p)
                 
                 right_focus.opacity=255*(1-p)
@@ -467,11 +468,13 @@ local function tile_on_enter(i)
     if get_curr_page() ~= "front_page" then return end
     
     if overlay.opacity ~= 0 then
+        
         animate_list[umbrella.func_tbls.fade_in_overlay]  = nil
         
         umbrella.func_tbls.fade_out_overlay.int.from      = overlay.opacity
         
         animate_list[umbrella.func_tbls.fade_out_overlay] = umbrella
+        
     end
     
     
@@ -563,7 +566,9 @@ function bottom_buttons_base:on_enter()
     animate_list[umbrella.func_tbls.focus_in_button] = umbrella
     
     mouse_pos.bottom = bottom_i
+    
     mouse_pos.right  = right_i
+    
 end
 
 function bottom_buttons_base:on_leave()
