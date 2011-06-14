@@ -42,7 +42,7 @@
             contains the function_table. Passing it to the function allows
             access to other variable.
 --]]
-animate_list = {}
+local animate_list = {}
 
 --flag, used to delay the addition/removal of func_table's to the animate_list
 --while it is being iterated across
@@ -227,3 +227,5 @@ local idle_loop = function(self, seconds)
 end
 
 idle.on_idle = idle_loop
+
+return animate_list

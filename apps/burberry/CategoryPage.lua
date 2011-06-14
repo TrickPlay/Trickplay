@@ -378,14 +378,13 @@ local stop_dianas = function()
     
     animate_list[primary_focus.func_tbls.diana] = nil
 end
-category_page = {
-    group = umbrella,
+umbrella.extra = {
     func_tbls = {
         fade_in_from = {
             ["collection_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
-                    this_obj.group.opacity=255*p
+                    this_obj.opacity=255*p
                 end
             },
             ["front_page"] = {
@@ -398,7 +397,7 @@ category_page = {
                         print("new phase",primary_focus.func_tbls.diana.phase)
                         this_func_tbl.first = false
                     end
-                    this_obj.group.opacity=255*p
+                    this_obj.opacity=255*p
                     if p == 1 then
                         restore_keys()
                         this_func_tbl.first = true
@@ -417,7 +416,7 @@ category_page = {
                         --print("lala")
                         this_func_tbl.first = false
                     end
-                    --this_obj.group.opacity=255*p
+                    --this_obj.opacity=255*p
                     if p == 1 then
                         restore_keys()
                         this_func_tbl.first = true
@@ -430,7 +429,7 @@ category_page = {
             ["front_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
-                    this_obj.group.opacity=255*(1-p)
+                    this_obj.opacity=255*(1-p)
                     if p == 1 then
                         back_sel=false
                         primary_focus.opacity=255
@@ -443,7 +442,7 @@ category_page = {
             ["product_page"] = {
                 duration = 300,
                 func = function(this_obj,this_func_tbl,secs,p)
-                    --this_obj.group.opacity=255*(1-p)
+                    --this_obj.opacity=255*(1-p)
                     if p == 1 then
                         back_sel=false
                         primary_focus.opacity=255
@@ -573,7 +572,7 @@ category_page = {
                 
                 f_t.x = f_t.x + f_t.dir*f_t.vx*secs
                 
-                this_obj:on_motion(f_t.x)
+                this_obj:on_motion_x(f_t.x)
                 
                 if p == 1 then
                     
@@ -594,7 +593,7 @@ category_page = {
                 
                 f_t.x = f_t.x + f_t.dir*f_t.vx*secs
                 
-                this_obj:on_motion(f_t.x)
+                this_obj:on_motion_x(f_t.x)
                 
                 if p == 1 then
                     
@@ -665,7 +664,7 @@ category_page = {
                         
                         this_func_tbl.x = this_func_tbl.x + this_func_tbl.vx*secs/4
                         
-                        this_obj:on_motion(this_func_tbl.x)
+                        this_obj:on_motion_x(this_func_tbl.x)
                         
                     end
                     
@@ -681,7 +680,7 @@ category_page = {
                         
                         this_func_tbl.x = this_func_tbl.x + this_func_tbl.vx*secs/4
                         
-                        this_obj:on_motion(this_func_tbl.x)
+                        this_obj:on_motion_x(this_func_tbl.x)
                         
                     end
                     
@@ -843,7 +842,7 @@ category_page = {
         
     end,
     
-    on_motion = function(self,x,y)
+    on_motion_x = function(self,x,y)
         --print("gah",x,y)
         local c_p,p = self:translate_x_to_i(x)
         self:on_motion_p( c_p, p - self.p_offset )
@@ -957,7 +956,7 @@ function umbrella:on_motion(x,y)
     
     if hold then
         
-        category_page:on_motion(x,y)
+        umbrella:on_motion_x(x,y)
         
         t = sw.elapsed
         
@@ -982,7 +981,7 @@ function umbrella:on_button_down(x,y)
     
     vxs = {}
     
-    category_page:hold(x,y)
+    umbrella:hold(x,y)
     
 end
 
@@ -996,7 +995,7 @@ function umbrella:on_button_up(x,y)
     
     if #vxs ~= 0 then avx = avx/#vxs end
     
-    category_page:release(x,avx)
+    umbrella:release(x,avx)
     
 end
     
@@ -1009,10 +1008,10 @@ end
 
 
 
-category_page.reactive_list = {}
+umbrella.reactive_list = {}
 
-table.insert( category_page.reactive_list, umbrella  )
-table.insert( category_page.reactive_list, top_button)
+table.insert( umbrella.reactive_list, umbrella  )
+table.insert( umbrella.reactive_list, top_button)
 
 function top_button:on_enter()
     
@@ -1020,11 +1019,11 @@ function top_button:on_enter()
     
     back_sel = true
     
-    animate_list[category_page.func_tbls.fade_out_back_button] = nil
+    animate_list[umbrella.func_tbls.fade_out_back_button] = nil
     
-    category_page.func_tbls.fade_in_back_button.focus.from = top_focus.opacity
+    umbrella.func_tbls.fade_in_back_button.focus.from = top_focus.opacity
     
-    animate_list[category_page.func_tbls.fade_in_back_button] = category_page
+    animate_list[umbrella.func_tbls.fade_in_back_button] = umbrella
     
     return true
 end
@@ -1035,11 +1034,11 @@ function top_button:on_leave(x,y)
     
     back_sel = false
     
-    animate_list[category_page.func_tbls.fade_in_back_button] = nil
+    animate_list[umbrella.func_tbls.fade_in_back_button] = nil
     
-    category_page.func_tbls.fade_out_back_button.focus.from = top_focus.opacity
+    umbrella.func_tbls.fade_out_back_button.focus.from = top_focus.opacity
     
-    animate_list[category_page.func_tbls.fade_out_back_button] = category_page
+    animate_list[umbrella.func_tbls.fade_out_back_button] = umbrella
     
     if tb_hold then
         
@@ -1076,7 +1075,7 @@ end
 
 
 
-function category_page:to_keys()
+function umbrella:to_keys()
     
     --if mouse_pos ~= nil then
     --    
@@ -1088,10 +1087,12 @@ function category_page:to_keys()
     
 end
 
-function category_page:to_mouse()
+function umbrella:to_mouse()
     
     if back_sel then
         top_button:on_leave()
     end
     
 end
+
+return umbrella
