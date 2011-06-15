@@ -44,7 +44,15 @@ Timestamp: mm.d.yyyy
 
 Group: TrickPlay Editor  {
 
-   File: Reference  (editor.txt)
+   Group: Reference  {
+
+      Group: UI Elements  {
+
+         File: Button  (no auto-title, reference/button.txt)
+         File: ButtonPicker  (no auto-title, reference/buttonPicker.txt)
+         }  # Group: UI Elements
+
+      }  # Group: Reference
 
    Group: Tutorial  {
 
@@ -64,8 +72,14 @@ Group: TrickPlay Editor  {
 
    }  # Group: TrickPlay Editor
 
+File: Reference  (editor.txt)
+
 Group: Index  {
 
    Index: Everything
+   Class Index: Classes
+   Function Index: Functions
+   Property Index: Properties
+   Event Index: Events
    }  # Group: Index
 

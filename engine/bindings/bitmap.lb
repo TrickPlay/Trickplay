@@ -8,10 +8,10 @@ module bitmap;
     Class: Bitmap
 
 	The Bitmap object is typically used as a brush when drawing on a 
-	vector-graphics-based <Canvas> object. A Bitmap object can also be 
-	displayed on the screen, but it must first be converted to an Image object 
-	by calling its <Bitmap.Image> function; the resulting Image object can 
-	then be added to the screen for display.
+	vector-graphics-based <Canvas at file:canvas-lb.html#Canvas> object. A 
+	Bitmap object can also be displayed on the screen, but it must first be 
+	converted to an Image object by calling its <Bitmap.Image> function; the 
+	resulting Image object can then be added to the screen for display.
 	
 	Like the Image object, a Bitmap object can be loaded synchronously or 
 	asynchronously from either the application bundle or from a URI.
