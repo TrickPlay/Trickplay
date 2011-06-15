@@ -104,6 +104,7 @@
 }
 
 -(void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode {
+    CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
     switch (eventCode) {
         /**
          * Unload all the data from the socket stream and send it to the command
@@ -112,7 +113,7 @@
         case NSStreamEventHasBytesAvailable:
             if (stream != input_stream) return;
             
-            NSLog(@"Has bytes available");
+            //NSLog(@"\n\nHas bytes available. delegate: %@\n\n", delegate);
             
             NSInteger numbytes = 1;
             
@@ -131,7 +132,7 @@
                     [commandInterpreter addBytes:(const uint8_t *)buffer
                                            length:(NSUInteger)numbytes];
                 } else {
-                    NSLog(@"Zero bytes");
+                    NSLog(@"Zero bytes. delegate: %@", delegate);
                 }
             }
             
@@ -143,6 +144,10 @@
             buffer[numbytes] = '\0';
             fprintf(stderr, "received: '%s' length: %d\n", buffer, numbytes);
             */
+            //NSLog(@"\n\nBytes done reading. delegate %@\n\n", delegate);
+            CFAbsoluteTime then = CFAbsoluteTimeGetCurrent();
+            fprintf(stderr, "read time = %lf\n", (then-start)*1000.0);
+            //NSLog(@"read time = %lf \t. delegate %@", (then - now)*1000.0, delegate);
             break;
         // Close up the streams cuz there aint nothin left.
         case NSStreamEventEndEncountered:
@@ -152,8 +157,13 @@
             }
             break;
         case NSStreamEventHasSpaceAvailable:
-            NSLog(@"Stream has space available");
+            //NSLog(@"\n\nStream has space available. delegate: %@\n\n", delegate);
             [self sendPackets];
+
+            CFAbsoluteTime bytessenttime = CFAbsoluteTimeGetCurrent();
+            fprintf(stderr, "write time = %lf\n", (bytessenttime-start)*1000.0);
+            //NSLog(@"write time = %lf\t. delegate %@", (bytessenttime - start)*1000.0, delegate);
+            //NSLog(@"\n\nBytes done sending. delegate: %@\n\n", delegate);
             break;
         case NSStreamEventErrorOccurred:
             if (delegate) {
@@ -199,7 +209,7 @@
 
 
 - (BOOL)sendPacket {
-    NSLog(@"Sending Data");
+    //NSLog(@"Sending Data");
     if (![output_stream hasSpaceAvailable]) {
         return NO;
     }

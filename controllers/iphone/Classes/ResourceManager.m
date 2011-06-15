@@ -16,6 +16,7 @@
         socketManager = [sockman retain];
         resourceNames = [[NSMutableDictionary alloc] initWithCapacity:40];
         resources = [[NSMutableDictionary alloc] initWithCapacity:40];
+        loadingResources = [[NSMutableDictionary alloc] initWithCapacity:40];
     }
     return self;
 }
@@ -82,6 +83,10 @@
     if ((tempData = [resources objectForKey:name])) {
         // image data already cached, set it to the view
         imageView.image = [UIImage imageWithData:tempData];
+    } else if ([loadingResources objectForKey:name]) {
+        NSMutableArray *dependentImages = [loadingResources objectForKey:name];
+        [dependentImages addObject:imageView];
+        [imageView animateSpinner];
     } else {
         // asynchronously pull the image
         NSLog(@" from network");
@@ -95,6 +100,8 @@
             dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString]];
         }
         
+        [loadingResources setObject:[NSMutableArray arrayWithCapacity:20] forKey:name];
+        
         imageView.dataCacheDelegate = self;
         [imageView loadImageFromURL:dataurl resourceKey:name];
     }
@@ -105,9 +112,15 @@
 - (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey {
     if (data && resourceKey) {
         [resources setObject:data forKey:(NSString *)resourceKey];
+        NSMutableArray *dependentImages = [loadingResources objectForKey:resourceKey];
+        for (AsyncImageView *imageView in dependentImages) {
+            [imageView loadImageFromData:data];
+        }
     } else {
         NSLog(@"Could not cache data, either no key is specified or the data never arrived over the network");
     }
+    
+    [loadingResources removeObjectForKey:resourceKey];
 }
 
 - (void)dropResourceGroup:(NSString *)groupName {
@@ -121,12 +134,14 @@
     for (id key in keys) {
         [resources removeObjectForKey:key];
         [resourceNames removeObjectForKey:key];
+        [loadingResources removeObjectForKey:key];
     }
 }
 
 - (void)clean {
     [resourceNames removeAllObjects];
     [resources removeAllObjects];
+    [loadingResources removeAllObjects];
 }
 
 - (void)dealloc {
@@ -140,6 +155,9 @@
     }
     if (resources) {
         [resources release];
+    }
+    if (loadingResources) {
+        [loadingResources release];
     }
     
     [super dealloc];

@@ -122,7 +122,7 @@
     
     TrickplayImage *image = [[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager objectManager:self];
     
-    NSLog(@"Image created: %@", image);
+    //NSLog(@"Image created: %@", image);
     [images setObject:image forKey:imageID];
     
     //[view addSubview:image];
@@ -137,7 +137,7 @@
 - (void)createRectangle:(NSString *)rectID withArgs:(NSDictionary *)args {
     TrickplayRectangle *rect = [[TrickplayRectangle alloc] initWithID:rectID args:args objectManager:self];
     
-    NSLog(@"Rectangle created: %@", rect);
+    //NSLog(@"Rectangle created: %@", rect);
     [rectangles setObject:rect forKey:rectID];
     
     //[view addSubview:rect];
@@ -152,7 +152,7 @@
 - (void)createText:(NSString *)textID withArgs:(NSDictionary *)args {
     TrickplayText *text = [[TrickplayText alloc] initWithID:textID args:args objectManager:self];
     
-    NSLog(@"Text created: %@", text);
+    //NSLog(@"Text created: %@", text);
     [textFields setObject:text forKey:textID];
     
     //[view addSubview:text];
@@ -167,7 +167,7 @@
 - (void)createGroup:(NSString *)groupID withArgs:(NSDictionary *)args {
     TrickplayGroup *group = [[TrickplayGroup alloc] initWithID:groupID args:args objectManager:self];
     
-    NSLog(@"Group created: %@", group);
+    //NSLog(@"Group created: %@", group);
     [groups setObject:group forKey:groupID];
     
     //[view addSubview:group];
@@ -197,7 +197,9 @@
 }
 
 - (void)createObject:(NSDictionary *)object {
-    NSLog(@"Creating object %@", object);
+    //NSLog(@"Creating object %@", object);
+    
+    //CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
     
     NSString *type = [object objectForKey:@"type"];
     NSDictionary *args = [object objectForKey:@"properties"];
@@ -222,8 +224,12 @@
     } else if ([type compare:@"Group"] == NSOrderedSame) {
         [self createGroup:ID withArgs:args];
     }
+    
+    
 
     [self createObjectReply:ID];
+    //CFAbsoluteTime stop = CFAbsoluteTimeGetCurrent();
+    //NSLog(@"Create Object Time = %lf", (stop - start)*1000.0);
 }
 
 - (void)setValuesForObject:(NSDictionary *)JSON_object {
@@ -309,11 +315,11 @@
     // Destroy any objects of the same name
     [self destroyObjects:JSON_Array];
     
-    NSLog(@"Creating Objects from JSON: %@", JSON_Array);
+    //NSLog(@"Creating Objects from JSON: %@", JSON_Array);
     
     // Now that we have the JSON Array of objects, create all the objects
     for (NSDictionary *object in JSON_Array) {
-        NSLog(@"Creating object %@", object);
+        //NSLog(@"Creating object %@", object);
         if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
             [self createRectangle:(NSString *)[object objectForKey:@"id"]
                          withArgs:object];
@@ -368,7 +374,7 @@
 
 - (void)setValuesForObjects:(NSArray *)JSON_Array {
     for (NSDictionary *object in JSON_Array) {
-        NSLog(@"Setting object %@", object);
+        //NSLog(@"Setting object %@", object);
         
         // Set values for class specific properties
         if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
@@ -404,6 +410,13 @@
             [(TrickplayUIElement *)[groups objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
         }
     }
+}
+
+#pragma mark -
+#pragma mark Test method
+
+- (void)respondInstantly {
+    [self reply:nil];
 }
 
 

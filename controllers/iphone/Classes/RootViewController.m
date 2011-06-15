@@ -57,10 +57,12 @@
     if ([appBrowserViewController hasRunningApp]) {
         [self.navigationController pushViewController:appBrowserViewController animated:NO];
         [appBrowserViewController pushApp];
+        [netServiceManager stop];
     } else {
         [self.navigationController pushViewController:appBrowserViewController animated:YES];
         if ([appBrowserViewController fetchApps]) {
             [appBrowserViewController.theTableView reloadData];
+            [netServiceManager stop];
         } else {
             [self.navigationController.view.layer removeAllAnimations];
             [self.navigationController popToRootViewControllerAnimated:YES];

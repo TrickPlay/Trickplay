@@ -13,6 +13,9 @@
 
 @protocol CommandInterpreterAdvancedUIDelegate <NSObject>
 
+@optional
+- (void)respondInstantly;
+
 @required
 - (void)createObject:(NSDictionary *)object;
 - (void)setValuesForObject:(NSDictionary *)object;

@@ -29,15 +29,36 @@
     if (!delegate) {
         return;
     }
-    
-    NSLog(@"AdvancedUI Command received: %@", command);
+    /* for testing socket speed
+    [delegate respondInstantly];
+    if (YES) {
+        return;
+    }
+    //*/
+    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
+
+    //NSLog(@"AdvancedUI Command received: %@", command);
     NSDictionary *JSON_Object = [command yajl_JSON];
-    NSLog(@"object: %@", JSON_Object);
+    //NSLog(@"object: %@", JSON_Object);
+    
+    CFAbsoluteTime beforecalltime = CFAbsoluteTimeGetCurrent();
+    
+    //NSLog(@"JSON parsing time = %lf", (beforecalltime - now)*1000.0);
+    fprintf(stderr, "JSON parsing time = %lf\n", (beforecalltime - now)*1000.0);
     
     NSString *method = [JSON_Object objectForKey:@"method"];
-    NSLog(@"method: %@", method);
+    //NSLog(@"method: %@", method);
     if ([method compare:@"create"] == NSOrderedSame) {
+        //CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
+
         [delegate createObject:JSON_Object];
+        
+        //CFAbsoluteTime stop = CFAbsoluteTimeGetCurrent();
+        //CFAbsoluteTime start2 = CFAbsoluteTimeGetCurrent();
+
+        //NSLog(@"Create Object Time = %lf", (stop - start)*1000.0);
+        //CFAbsoluteTime stop2 = CFAbsoluteTimeGetCurrent();
+        //NSLog(@"Create Object Time = %lf", (stop2 - start2)*1000.0);
     } else if ([method compare:@"set"] == NSOrderedSame) {
         [delegate setValuesForObject:JSON_Object];
     } else if ([method compare:@"get"] == NSOrderedSame) {
@@ -49,6 +70,12 @@
     } else {
         NSLog(@"AdvancedUI Command not recognized");
     }
+    
+    CFAbsoluteTime aftercalltime = CFAbsoluteTimeGetCurrent();
+    fprintf(stderr, "Call time = %lf\n", (aftercalltime - beforecalltime)*1000.0);
+    
+    //NSLog(@"Call time = %lf", (aftercalltime - beforecalltime)*1000.0);
+    //NSLog(@"Total command interpreting time = %lf", (aftercalltime - now)*1000.0);
 }
 
 - (void)executeCommand:(NSString *)command args:(NSArray *)args {

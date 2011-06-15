@@ -115,6 +115,9 @@ CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate
     NSString *http_port;
     NSString *version;
     
+    NSTimer *socketTimer;
+    SocketManager *arbitrarySocket;
+    
     UIActivityIndicatorView *loadingIndicator;
     UITextField *theTextField;
     UIImageView *backgroundView;
