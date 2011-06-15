@@ -689,7 +689,7 @@ public:
                     {
                         * p = 0;
                         field.value = s;
-                        kb->update_field_value();
+                        kb->field_value_changed();
                     }
 
                     g_free( s );
@@ -711,7 +711,7 @@ public:
 
             field.value += button->action;
 
-            kb->update_field_value();
+            kb->field_value_changed();
 
             unshift();
 
@@ -940,9 +940,14 @@ public:
 
         if ( event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == TP_KEY_OK && button->action == "item" )
         {
+            String old_value = kb->form.get_field().value;
+
             kb->form.get_field().value = field->choices[ focused_item ].first;
 
-            kb->update_field_value();
+            if ( kb->form.get_field().value != old_value )
+            {
+                kb->field_value_changed();
+            }
 
             const Layout::Button * target = 0;
 
@@ -2220,6 +2225,24 @@ void Keyboard::move_to_next_field()
     if ( form.current_field < form.fields.size() - 1 )
     {
         switch_to_field( form.current_field + 1 );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void Keyboard::field_value_changed()
+{
+    update_field_value();
+
+    if ( lsp )
+    {
+        if ( lua_State * L = lsp->get_lua_state() )
+        {
+            lua_pushstring( L , form.get_field().id.c_str() );
+            lua_pushstring( L , form.get_field().value.c_str() );
+
+            UserData::invoke_global_callback( L , "keyboard" , "on_field_changed" , 2 , 0 );
+        }
     }
 }
 
