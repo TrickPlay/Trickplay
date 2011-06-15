@@ -72,13 +72,7 @@
         return;
     }
     
-    //spinny thing
-    loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-    loadingIndicator.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
-    [self addSubview:loadingIndicator];
-    [loadingIndicator release];
-    loadingIndicator.hidesWhenStopped = YES;
-    [loadingIndicator startAnimating];
+    [self animateSpinner];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
@@ -95,46 +89,10 @@
     [connection release];
     connection = nil;
 
-    if ([[self subviews] count] > 0) {
-        [[[self subviews] objectAtIndex:0] removeFromSuperview];
-    }
-    self.image = [UIImage imageWithData:data];
-    /*
-    UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageWithData:data]] autorelease];
-    // might need to change this to scale to fill
-    imageView.contentMode = UIViewContentModeScaleAspectFit;
-    imageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
-     */
+    [self loadImageFromData:data];
     
-    // If the width and/or height of the AsyncImageView was unspecified then
-    // set as the natural width and/or height of the Image
-    CGFloat width = (self.frame.size.width == 0.0) ? image.size.width : self.frame.size.width;
-    CGFloat height = (self.frame.size.height == 0.0) ? image.size.height : self.frame.size.height;
-    if (self.frame.size.width == 0.0 || self.frame.size.height == 0.0) {
-        self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, width, height);
-    }
-    /*
-    [self addSubview:imageView];
-    imageView.frame = self.bounds;
-    [imageView setNeedsLayout];
-     //*/
-    [self setNeedsLayout];
-    [self setNeedsDisplay];
-    
-    // send data to the delegate if it exists for cacheing
-    if (dataCacheDelegate) {
-        [dataCacheDelegate dataReceived:data resourcekey:resourceKey];
-    }
-    if (otherDelegate) {
-        [otherDelegate dataReceived:data resourcekey:resourceKey];
-    }
-
     [data release];
     data = nil;
-    [loadingIndicator stopAnimating];
-    [loadingIndicator removeFromSuperview];
-    
-    loaded = YES;
 }
 
 - (void)connection:(NSURLConnection *)theConnection didFailWithError:(NSError *)error {
@@ -146,6 +104,60 @@
     return self;
 }
  */
+
+#pragma mark -
+#pragma mark ViewControl
+
+- (void)animateSpinner {
+    //spinny thing
+    loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    loadingIndicator.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
+    [self addSubview:loadingIndicator];
+    [loadingIndicator release];
+    loadingIndicator.hidesWhenStopped = YES;
+    [loadingIndicator startAnimating];
+}
+
+- (void)loadImageFromData:(NSData *)theData {
+    if ([[self subviews] count] > 0) {
+        [[[self subviews] objectAtIndex:0] removeFromSuperview];
+    }
+    self.image = [UIImage imageWithData:theData];
+    /*
+     UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageWithData:data]] autorelease];
+     // might need to change this to scale to fill
+     imageView.contentMode = UIViewContentModeScaleAspectFit;
+     imageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+     */
+    
+    // If the width and/or height of the AsyncImageView was unspecified then
+    // set as the natural width and/or height of the Image
+    CGFloat width = (self.frame.size.width == 0.0) ? image.size.width : self.frame.size.width;
+    CGFloat height = (self.frame.size.height == 0.0) ? image.size.height : self.frame.size.height;
+    if (self.frame.size.width == 0.0 || self.frame.size.height == 0.0) {
+        self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, width, height);
+    }
+    /*
+     [self addSubview:imageView];
+     imageView.frame = self.bounds;
+     [imageView setNeedsLayout];
+     //*/
+    [self setNeedsLayout];
+    [self setNeedsDisplay];
+    
+    // send data to the delegate if it exists for caching
+    if (dataCacheDelegate) {
+        [dataCacheDelegate dataReceived:theData resourcekey:resourceKey];
+    }
+    if (otherDelegate) {
+        [otherDelegate dataReceived:theData resourcekey:resourceKey];
+    }
+    
+    [loadingIndicator stopAnimating];
+    [loadingIndicator removeFromSuperview];
+    
+    loaded = YES;
+}
 
 #pragma mark -
 #pragma mark Graphics

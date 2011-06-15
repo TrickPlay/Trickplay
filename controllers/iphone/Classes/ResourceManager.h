@@ -18,6 +18,7 @@
     NSMutableDictionary *resourceNames;
     NSMutableDictionary *resources;
     
+    NSMutableDictionary *loadingResources;
 }
 
 - (id)initWithSocketManager:(SocketManager *)sockman;

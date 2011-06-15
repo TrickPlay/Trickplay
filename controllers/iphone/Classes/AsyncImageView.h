@@ -44,7 +44,9 @@
 @property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key;
+- (void)loadImageFromData:(NSData *)data;
 - (void)setTileWidth:(BOOL)toTileWidth height:(BOOL)toTileHeight;
+- (void)animateSpinner;
 //- (UIImageView *)imageView;
 
 @end

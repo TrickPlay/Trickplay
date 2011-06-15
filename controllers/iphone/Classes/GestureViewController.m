@@ -37,6 +37,17 @@
     http_port = nil;
 }
 
+- (void)timerFireMethod:(NSTimer *)timer {
+    //fprintf(stderr, "here\n");
+    [socketManager sendData:"\n" numberOfBytes:1];
+}
+
+- (void)createTimer {
+    socketTimer = [NSTimer timerWithTimeInterval:(NSTimeInterval).1 target:self selector:@selector(timerFireMethod:) userInfo:nil repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
+    [socketTimer retain];
+}
+
 - (BOOL)startService {
     // Tell socket manager to create a socket and connect to the service selected
     socketManager = [[SocketManager alloc] initSocketStream:hostName
@@ -50,6 +61,10 @@
         NSLog(@"Could Not Establish Connection");
         return NO;
     }
+    
+    socketTimer = nil;
+    
+    //arbitrarySocket = [[SocketManager alloc] initSocketStream:<#(NSString *)#> port:<#(NSInteger)#> delegate:<#(id<SocketManagerDelegate>)#> protocol:<#(CommandProtocol)#>
     
     viewDidAppear = NO;
     
@@ -518,7 +533,7 @@
     }
 }
 
-//-------------------- Super Advanced UI stuff -----------------
+//-------------------- Super Advanced UI stuff (depricated) -----------------
 
 - (void)do_UX:(NSArray *)args {
     NSArray *JSON_Array = [[args objectAtIndex:1] yajl_JSON];
@@ -630,10 +645,15 @@
     }
     
     viewDidAppear = YES;
+    [self performSelectorOnMainThread:@selector(createTimer) withObject:nil waitUntilDone:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-    
+    if (socketTimer) {
+        [socketTimer invalidate];
+        [socketTimer release];
+        socketTimer = nil;
+    }
 }
 //*/
 
@@ -707,6 +727,11 @@
     if (advancedView) {
         [advancedView release];
         NSLog(@"\n\nretain count: %u", [advancedView retainCount]);
+    }
+    if (socketTimer) {
+        [socketTimer invalidate];
+        [socketTimer release];
+        socketTimer = nil;
     }
     [loadingIndicator release];
     [theTextField release];
