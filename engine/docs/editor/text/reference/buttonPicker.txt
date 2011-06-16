@@ -305,7 +305,9 @@ The press_left() function causes the ButtonPicker's scrollable list to scroll to
 
 The press_up() function can be called to perform the same operation; the two functions are identical.
 
-The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
 
 *Prototype:* press_left()
 
@@ -321,7 +323,9 @@ The press_right() function causes the ButtonPicker's scrollable list to scroll t
 
 The press_down() function can be called to perform the same operation; the two functions are identical.
 
-The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
 
 *Prototype:* press_right()
 
@@ -337,7 +341,9 @@ The press_up() function causes the ButtonPicker's scrollable list to scroll to t
 
 The press_left() function can be called to perform the same operation; the two functions are identical.
 
-The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
 
 *Prototype:* press_up()
 
@@ -353,7 +359,9 @@ The press_down() function causes the ButtonPicker's scrollable list to scroll to
 
 The press_right() function can be called to perform the same operation; the two functions are identical.
 
-The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
 
 *Prototype:* press_down()
 
