@@ -21,6 +21,11 @@ Timestamp: mm.d.yyyy
 #   yyyy  - Four digit year.  2006 is "2006"
 #   year  - Four digit year.  2006 is "2006"
 
+# These are indexes you deleted, so Natural Docs will not add them again
+# unless you remove them from this line.
+
+Don't Index: Functions, Classes, Events, Properties
+
 
 # --------------------------------------------------------------------------
 # 
@@ -44,6 +49,7 @@ Timestamp: mm.d.yyyy
 
 Group: TrickPlay Editor  {
 
+   File: ButtonPicker  (reference/buttonPicker.txt)
    File: Reference  (editor.txt)
 
    Group: Tutorial  {
