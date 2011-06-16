@@ -76,7 +76,7 @@ Property: text_color
 
 The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
-*Default Setting:* {255, 255, 255, 255} (black and completely opaque)
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
 *See Also:* the <label> and <text_font> properties
 
@@ -94,7 +94,7 @@ Property: fill_color
 
 The fill_color property is a table of integer RGB and alpha settings specifying the button's fill color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
-*Default Setting:* {255, 255, 255, 0} (black and transparent)
+*Default Setting:* {255, 255, 255, 0} (white and transparent)
 
 *See Also:* the <focus_fill_color> property
 
@@ -124,7 +124,7 @@ Property: border_color
 
 The border_color property is a table of integer RGB and alpha settings specifying the button border's color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
-*Default Setting:* {255, 255, 255, 255} (black and opaque)
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
 
 *See Also:* the <border_width> and <border_corner_radius> properties
 
@@ -156,7 +156,7 @@ Property: focus_text_color
 
 The focus_text_color property is a table of integer RGB and alpha settings specifying the button's text color when it has input focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
-*Default Setting:* {255, 255, 255, 255} (black and completely opaque)
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
 *See Also:* the <focus_color> and <focus_fill_color> properties
 
