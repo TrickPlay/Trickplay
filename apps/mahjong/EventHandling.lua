@@ -6,6 +6,14 @@ local event_listener_en = true
 local key_handler = {}
 local key_hints = {}
 function screen:on_key_down(k)
+    if not using_keys then
+        using_keys = true
+        cursor:hide()
+        if router and router:get_active_controller().restore_focus then
+            router:get_active_controller():restore_focus()
+        end
+        if cursor.curr_focus_off then cursor.curr_focus_off(cursor.curr_focus_p) end
+    end
     if k == keys.g then dumptable(_G) end
     if key_handler[k] then
         key_hints[k] = not key_hints[k]

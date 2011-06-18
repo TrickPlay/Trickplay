@@ -127,7 +127,7 @@ function(pres, ctrl)
         if game:get_state():must_restart() then return end
         if comp ~= Components.GAME then
             grid[selector.x][selector.y][selector.z]:hide_yellow()
-        else
+        elseif using_keys then
             grid[selector.x][selector.y][selector.z]:show_yellow()
         end
     end
@@ -140,11 +140,23 @@ function(pres, ctrl)
         if prev_selector then
             grid[prev_selector.x][prev_selector.y][prev_selector.z]:hide_yellow()
         end
-        grid[selector.x][selector.y][selector.z]:show_yellow()
+        if using_keys then
+            grid[selector.x][selector.y][selector.z]:show_yellow()
+        end
 
         local position = Utils.deepcopy(GridPositions[selector.x][selector.y][selector.z])
     end
-
+    
+    function pres:hide_focus()
+        local grid = ctrl:get_grid()
+        local selector = ctrl:get_selector()
+        grid[selector.x][selector.y][selector.z]:hide_yellow()
+    end
+    function pres:restore_focus()
+        local grid = ctrl:get_grid()
+        local selector = ctrl:get_selector()
+        grid[selector.x][selector.y][selector.z]:show_yellow()
+    end
     function pres:choose_focus()
     end
 

@@ -39,6 +39,8 @@ MenuController = Class(Controller,function(self, view, ...)
     local Exit = {}
     local Choose_Map = {}
     local Choose_Tile = {}
+    
+    local buttons = {New_Game,Undo,Shuffle,Hint,Help,Show_Options,Exit}
 
     -- create the graph
     New_Game[Directions.UP] =
@@ -51,6 +53,7 @@ MenuController = Class(Controller,function(self, view, ...)
         function()
             game:reset_game(current_layout)
             router:set_active_component(Components.GAME)
+            hide_options = true
             router:notify()
         end
 
@@ -69,7 +72,7 @@ MenuController = Class(Controller,function(self, view, ...)
         function()
             game:shuffle_game()
         end
-
+    
     local wait = false
     local timer = Timer()
     Hint[Directions.UP] = Shuffle
@@ -94,17 +97,27 @@ MenuController = Class(Controller,function(self, view, ...)
         function()
             HelpScreen(router)
             router:set_active_component(Components.HELP)
+            cursor:raise_to_top()
         end
-
+    
     Show_Options[Directions.UP] = Help
     Show_Options[Directions.DOWN] = Exit
     Show_Options.object = view:get_object("show_options")
     Show_Options.callback =
         function()
+            
+            if not using_keys then
+                if hide_options then
+                    router:set_active_component(Components.MENU)
+                else
+                    router:set_active_component(Components.GAME)
+                end
+            end
             hide_options = not hide_options
+            
             view:update(NotifyEvent())
         end
-
+    
     Exit[Directions.UP] = Show_Options
     Exit[Directions.DOWN] =
         function()
@@ -172,7 +185,6 @@ MenuController = Class(Controller,function(self, view, ...)
         end
     Choose_Tile[Directions.LEFT] = Choose_Map
     Choose_Tile.object = view:get_object("choose_tile")
-
 
     -- the default selected index
     local selection = New_Game
@@ -263,5 +275,41 @@ MenuController = Class(Controller,function(self, view, ...)
             view:change_tiles(current_tile_image, Directions.UP, true)
         end
     end
+    
+    function self:hide_focus()
+        selection.object.off_focus_inst()
+        router:set_active_component(Components.GAME)
+    end
+    
+    
+    for _,button in ipairs(buttons) do
+        --local on_enter = function
+        button.object.image.reactive     = true
+        button.object.image.on_button_up = button.callback
+        button.object.image.on_enter     = function()
+            cursor.curr_focus_on  = button.object.on_focus_inst
+            cursor.curr_focus_off = button.object.off_focus_inst
+            cursor.curr_focus_p   = button.object
+            selection = button
+            --router:set_active_component(Components.MENU)
+            button.object:on_focus_inst()
+        end
+        button.object.image.on_leave     = function()
+            --router:set_active_component(Components.GAME)
+            cursor.curr_focus_on  = nil
+            cursor.curr_focus_off = nil
+            button.object:off_focus_inst()
+        end
+    end
+    
+    Choose_Map.object.arrow_up.group.reactive       = true
+    Choose_Map.object.arrow_up.group.on_button_up   = Choose_Map[Directions.UP] 
+    Choose_Map.object.arrow_down.group.reactive     = true
+    Choose_Map.object.arrow_down.group.on_button_up = Choose_Map[Directions.DOWN] 
+
+    Choose_Tile.object.arrow_up.group.reactive       = true
+    Choose_Tile.object.arrow_up.group.on_button_up   = Choose_Tile[Directions.UP] 
+    Choose_Tile.object.arrow_down.group.reactive     = true
+    Choose_Tile.object.arrow_down.group.on_button_up = Choose_Tile[Directions.DOWN] 
 
 end)

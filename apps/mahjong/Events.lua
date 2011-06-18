@@ -51,3 +51,19 @@ function(even,args,...)
         assert(type(args) == "table", "Event constructor uses named parameters. e.g. pass in a table.")
     end
 end)
+
+SwitchToKeysEvent = Class(Event,
+function(event, args, ...)
+    if args then
+        assert(type(args) == "table", "Event constructor uses named parameters. e.g. pass in a table.")
+        event.cb = args.cb
+    end
+end)
+
+SwitchToMouseEvent = Class(Event,
+function(event, args, ...)
+    if args then
+        assert(type(args) == "table", "Event constructor uses named parameters. e.g. pass in a table.")
+        event.cb = args.cb
+    end
+end)

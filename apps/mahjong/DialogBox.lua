@@ -84,7 +84,10 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
         elseif event:is_a(NotifyEvent) then
             if controller:is_active_component() then
                 dialog_ui.opacity = 255
+                --if using_keys then self:restore_focus() end
                 dialog_ui:show()
+                ---[[
+                if using_keys then
                 for i,item in ipairs(focusable_items) do
                     if i == selector then
                         item:on_focus_inst()
@@ -92,6 +95,8 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
                         item:off_focus_inst()
                     end
                 end
+                end
+                --]]
             else
                 dialog_ui.opacity = 0
                 dialog_ui:hide()
@@ -128,11 +133,38 @@ DialogBox = Class(Controller, function(self, string, id, router, note, ...)
 
     function controller:move_selector(dir)
         if 0 ~= dir[1] then
-            if selector == 1 then selector = 2
-            else selector = 1
-            end
+            if selector == 1 then selector = 2 else selector = 1 end
             self:update(NotifyEvent())
         end
     end
-
+    
+    
+    self.hide_focus    = function() focusable_items[selector]:off_focus_inst() end
+    
+    self.restore_focus = function() focusable_items[selector]:on_focus_inst()  end
+    
+    
+    for i,button in ipairs(focusable_items) do
+        
+        button.group.reactive     = true
+        
+        button.group.on_button_up = function()
+            selector = i
+            controller:return_pressed()
+        end
+        
+        button.group.on_enter     = function()
+            cursor.curr_focus_on  = button.on_focus_inst
+            cursor.curr_focus_off = button.off_focus_inst
+            cursor.curr_focus_p   = button
+            button:on_focus_inst()
+        end
+        
+        button.group.on_leave     = function()
+            cursor.curr_focus_on  = nil
+            cursor.curr_focus_off = nil
+            button:off_focus_inst()
+        end
+    end
+    
 end)

@@ -31,7 +31,7 @@ function(ctrl, router, ...)
         return state:get_tiles_class():get_current_tile_image()
     end
     function ctrl:set_selector(position)
-        if not position then error("need a position", 2) end
+        if not position   then error("need a position", 2) end
         if not position.x then error("need position.x", 2) end
         if not position.y then error("need position.y", 2) end
         selector = Utils.deepcopy(position)
@@ -336,6 +336,14 @@ function(ctrl, router, ...)
             selector.z = new_tile.position[3]
             pres:move_focus()
         end
+    end
+    
+    function ctrl:hide_focus()
+        pres:hide_focus()
+    end
+    
+    function ctrl:restore_focus()
+        pres:restore_focus()
     end
 
 end)

@@ -500,15 +500,17 @@ GameState = Class(nil,function(state, ctrl)
             game_menu:remove_tile_images()
             selected_tile = nil
         else
-            tile:show_yellow()
-            tile.focus.yellow.opacity = 50
+            if using_keys then
+                tile:show_yellow()
+                --tile.focus.yellow.opacity = 50
+            end
             tile:show_red()
             tile.focus.red.opacity = 255
             mediaplayer:play_sound("assets/audio/match-bad.mp3")
             local interval = {opacity = Interval(tile.focus.red.opacity, 0)}
             gameloop:add(tile.focus.red, 200, nil, interval, nil, 
                 function()
-                    tile.focus.yellow.opacity = 255
+                    --tile.focus.yellow.opacity = 255
                     tile:hide_red()
                 end)
         end
