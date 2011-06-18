@@ -416,7 +416,7 @@ MenuView = Class(View, function(view, model, ...)
 
         -- hide focus if not the active component
         if controller:is_active_component() then
-            if selected_object.on_focus then selected_object:on_focus_inst() end
+            if selected_object.on_focus and using_keys then selected_object:on_focus_inst() end
         else
             if selected_object.off_focus then selected_object:off_focus_inst() end
         end

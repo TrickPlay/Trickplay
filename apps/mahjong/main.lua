@@ -14,6 +14,8 @@ Events = {
     NOTIFY = 3
 }
 
+using_keys = true
+
 dofile("DoFiles.lua")
 
 local splash = Image{src = "assets/Mahjong_Splash.jpg", size = {1920, 1080}}
@@ -22,7 +24,12 @@ local start_button_focus = Image{
     opacity = 0,
     position = {800,650}
 }
-screen:add(splash, start_button_focus)
+
+cursor = Image{src = "assets/pointer-mahjong.png",anchor_point={3,2}}
+
+cursor:hide()
+
+screen:add(splash, start_button_focus,cursor)
 screen:show()
 
 local timer = Timer()
@@ -87,7 +94,83 @@ timer.on_timer = function(timer)
             timer:stop()
             timer.on_timer = nil
         end
+        
         timer:start()
+        
+        cursor:raise_to_top()
+        
+        local g_w =  94--(1920 - 460 - 60)/GRID_WIDTH
+        local g_h = 121--(1080 -  60 - 60)/GRID_HEIGHT
+        local sel_tile
+        
+        local sel_tile_z
+        
+        local state = game:get_state()
+        
+        screen.on_button_up = function(self,x,y)
+            
+            if router:get_active_component() ~= Components.GAME then return end
+            --game.state:find_selectable_tiles()
+            
+            
+            --local t_g = game.state:get_top_grid()
+            
+            local t_t = state:get_top_tiles()
+            
+            --[[
+            local i = math.ceil((x-460)/g_w)
+            local j = math.ceil((y-60)/g_h)
+            
+            print(i,j)
+            
+            if t_g[i] and  t_g[i][j] and #t_g[i][j] ~= 0 then
+                
+                print(i,j,t_g[i][j][ #t_g[i][j] ])
+                
+            end            
+            --]]
+            
+            --if sel_tile ~= nil then sel_tile:hide_yellow() end
+            
+            sel_tile   = nil
+            
+            sel_tile_z = nil
+            
+            for _,t in pairs(t_t) do
+                
+                if  x > t.group.x       and
+                    y > t.group.y       and
+                    x < t.group.x + g_w and
+                    y < t.group.y + g_h then
+                    
+                    
+                    if  sel_tile == nil   or   sel_tile_z < t.position[3]  then
+                        
+                        sel_tile   = t
+                        
+                        sel_tile_z = t.position[3]
+                        
+                    end
+                end
+                
+            end
+            if sel_tile ~= nil then 
+                
+                game:set_selector{
+                    
+                    x = sel_tile.position[ 1 ],
+                    
+                    y = sel_tile.position[ 2 ],
+                    
+                    z = sel_tile.position[ 3 ]
+                    
+                }
+                
+                game:return_pressed()
+                
+            end
+            
+        end
     end}
 end
 
@@ -96,4 +179,38 @@ timer:start()
 screen.on_key_down = function()
     screen.on_key_down = nil
     timer:on_timer(timer)
+end
+
+
+
+controllers:start_pointer()
+
+screen.reactive = true
+
+screen.on_motion = function(self,x,y)
+    
+    if using_keys then
+        
+        using_keys = false
+        
+        cursor:show()
+        
+        --[[
+        if router:get_active_component() ~= Components.GAME and game then
+            
+            game:get_presentation():hide_focus()
+            
+        end
+        --]]
+        
+        if router then router:get_active_controller():hide_focus() end
+        
+        if cursor.curr_focus_on then cursor.curr_focus_on(cursor.curr_focus_p) end
+        
+    end
+    
+    cursor.x = x
+    
+    cursor.y = y
+    
 end
