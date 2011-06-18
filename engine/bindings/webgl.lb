@@ -19,7 +19,28 @@ module webgl;
 
 #endif
 
+//-----------------------------------------------------------------------------
+
 #include "typed_array.h"
+#include "bitmap.h"
+
+//=============================================================================
+
+#define TP_LOG_DOMAIN   "WEBGL"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
+//=============================================================================
+
+#define GL_UNPACK_FLIP_Y_WEBGL                  0x9240
+#define GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL       0x9241
+#define GL_CONTEXT_LOST_WEBGL                   0x9242
+#define GL_UNPACK_COLORSPACE_CONVERSION_WEBGL   0x9243
+#define GL_BROWSER_DEFAULT_WEBGL                0x9244
+
+//=============================================================================
 
 GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
 {
@@ -34,9 +55,64 @@ GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
     return value;
 }
 
+TypedArray * get_valid_array( lua_State * L , int index , FreeLater & free_later , TypedArray::Type type , int multiple )
+{
+    TypedArray * array = 0;
+
+    if ( lua_istable( L , index ) )
+    {
+        array = TypedArray::from_lua_table( L , index , type );
+        free_later( array , TypedArray::destroy );
+    }
+    else
+    {
+        array = TypedArray::from_lua( L , index );
+    }
+
+    if ( ! array )
+    {
+        luaL_error( L , "Invalid argument. Expecting either a typed array or a lua table." );
+        return 0;
+    }
+
+    if ( array->get_type() != type )
+    {
+        luaL_error( L , "Invalid type of array" );
+        return 0;
+    }
+
+    if ( array->get_length() == 0 )
+    {
+        luaL_error( L , "Array must not be empty" );
+        return 0;
+    }
+
+    if ( multiple > 1 && ( ( array->get_length() % multiple ) != 0 ) )
+    {
+        luaL_error( L , "Array must have multiple of %d length" , multiple );
+        return 0;
+    }
+
+    return array;
+}
+
+struct WebGLState
+{
+    WebGLState()
+    :
+        unpack_flip_y( false ),
+        unpack_premultiply_alpha( false ),
+        unpack_colorspace_conversion( GL_BROWSER_DEFAULT_WEBGL )
+    {}
+
+    bool            unpack_flip_y;
+    bool            unpack_premultiply_alpha;
+    unsigned long   unpack_colorspace_conversion;
+};
+
 ]]
 
-interface WebGLRenderingContext [[void*]]
+interface WebGLRenderingContext [[ WebGLState *]]
 {
     /* ClearBufferMask */
     const int DEPTH_BUFFER_BIT               = 0x00000100;
@@ -448,11 +524,11 @@ interface WebGLRenderingContext [[void*]]
     const int INVALID_FRAMEBUFFER_OPERATION  = 0x0506;
 
     /* WebGL-specific enums */
-    const int UNPACK_FLIP_Y_WEBGL                   = 0x9240;
-    const int UNPACK_PREMULTIPLY_ALPHA_WEBGL        = 0x9241;
-    const int CONTEXT_LOST_WEBGL                    = 0x9242;
-    const int UNPACK_COLORSPACE_CONVERSION_WEBGL    = 0x9243;
-    const int BROWSER_DEFAULT_WEBGL                 = 0x9244;
+    const int UNPACK_FLIP_Y_WEBGL                   = GL_UNPACK_FLIP_Y_WEBGL;
+    const int UNPACK_PREMULTIPLY_ALPHA_WEBGL        = GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL;
+    const int CONTEXT_LOST_WEBGL                    = GL_CONTEXT_LOST_WEBGL;
+    const int UNPACK_COLORSPACE_CONVERSION_WEBGL    = GL_UNPACK_COLORSPACE_CONVERSION_WEBGL;
+    const int BROWSER_DEFAULT_WEBGL                 = GL_BROWSER_DEFAULT_WEBGL;
 
     typedef int             WebGLProgram;
     typedef int             WebGLShader;
@@ -480,6 +556,7 @@ interface WebGLRenderingContext [[void*]]
     typedef double          GLclampf;
 
     typedef string          DOMString;
+
 
     readonly HTMLCanvasElement canvas
         [[
@@ -909,7 +986,7 @@ interface WebGLRenderingContext [[void*]]
             delete [] name;
         ]];
 
-    /*WebGLShader[ ]*/ table getAttachedShaders(WebGLProgram program )
+     table getAttachedShaders(WebGLProgram program )
         [[
             GLint count = 0;
 
@@ -1663,7 +1740,29 @@ interface WebGLRenderingContext [[void*]]
 
     pixelStorei(GLenum pname, GLint param )
         [[
-            glPixelStorei( pname , param );
+            // TODO: THIS IS A HACK FOR NOW, NOT SURE WHERE TO PUT IT
+
+            glPixelStorei( GL_UNPACK_ROW_LENGTH , 0 );
+
+            switch ( pname )
+            {
+                case GL_UNPACK_FLIP_Y_WEBGL:
+                    self->unpack_flip_y = param == 0 ? false : true;
+                    break;
+
+                case GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL:
+                    g_warning( "PREMULTIPLY CHANGED" );
+                    self->unpack_premultiply_alpha = param == 0 ? false : true;
+                    break;
+
+                case GL_UNPACK_COLORSPACE_CONVERSION_WEBGL:
+                    self->unpack_colorspace_conversion = param == GL_BROWSER_DEFAULT_WEBGL ? GL_BROWSER_DEFAULT_WEBGL : 0;
+                    break;
+
+                default:
+                    glPixelStorei( pname , param );
+                    break;
+            }
         ]];
 
     polygonOffset(GLfloat factor, GLfloat units )
@@ -1729,36 +1828,126 @@ interface WebGLRenderingContext [[void*]]
         [[
             glStencilOpSeparate( face , fail , zfail , zpass );
         ]];
-
-
+/*
     texImage2D(GLenum target, GLint level, GLenum internalformat,
                     GLsizei width, GLsizei height, GLint border, GLenum format,
                     GLenum type, ArrayBufferView pixels )
-        [[
-            luaL_error( L , "texImage2D is not implemented yet" );
-        ]];
-/*
+
     void texImage2D(GLenum target, GLint level, GLenum internalformat,
                     GLenum format, GLenum type, ImageData pixels )
-    [[
-    ]];
 
-    void texImage2D(GLenum target, GLint level, GLenum internalformat,
-                    GLenum format, GLenum type, HTMLImageElement image )
-    [[
-    ]];
-
-    void texImage2D(GLenum target, GLint level, GLenum internalformat,
-                    GLenum format, GLenum type, HTMLCanvasElement canvas )
-    [[
-    ]];
-
-    void texImage2D(GLenum target, GLint level, GLenum internalformat,
-                    GLenum format, GLenum type, HTMLVideoElement video )
-
-    [[
-    ]];
 */
+    void texImage2D(GLenum target , GLint level , GLenum internalformat , ... )
+        [[
+            FreeLater free_later;
+
+            GLsizei width = 0;
+            GLsizei height = 0;
+            GLint border = 0;
+            GLenum format = internalformat;
+            GLenum type = 0;
+            const void * pixels = 0;
+
+            if ( lua_gettop( L ) == 10 )
+            {
+                width = luaL_checkint( L , 5 );
+                height = luaL_checkint( L , 6 );
+                type = luaL_checkint( L , 9 );
+
+                if ( ArrayBuffer * buffer = ArrayBuffer::from_lua( L , 10 ) )
+                {
+                    pixels = buffer->get_data();
+                }
+                else if ( TypedArray * array = TypedArray::from_lua( L , 10 ) )
+                {
+                    pixels = array->get( 0 );
+                }
+
+                if ( pixels )
+                {
+                    // If either one of these is set, we have to convert the pixels
+
+                    if ( self->unpack_flip_y || self->unpack_premultiply_alpha )
+                    {
+                        luaL_error( L , "Flipping and premultiplying array textures is not yet supported" );
+                    }
+                    else
+                    {
+                        glTexImage2D( target , level , internalformat , width , height , 0 , format , type , pixels );
+                    }
+                }
+                else
+                {
+                    luaL_error( L , "Invalid texture data" );
+                }
+            }
+            else
+            {
+                type = luaL_checkint( L , 6 );
+
+                if ( Image * image = Bitmap::get_image( L , 7 ) )
+                {
+                    format = image->depth() == 3 ? GL_RGB : GL_RGBA;
+                    internalformat = format;
+                    type = GL_UNSIGNED_BYTE;
+
+                    if ( ! image->is_packed() )
+                    {
+                        tplog( "IMAGE IS NOT PACKED, HAVE TO COPY IMAGE" );
+                        image = image->make_packed_copy();
+                        free_later( image , Image::destroy );
+                    }
+                    else
+                    {
+                        if ( self->unpack_flip_y )
+                        {
+                            tplog( "FLIPPING Y, HAVE TO COPY IMAGE" );
+                            image = image->make_copy();
+                            free_later( image , Image::destroy );
+                        }
+                        else if ( self->unpack_premultiply_alpha )
+                        {
+                            tplog( "PREMULTIPLYING ALPHA, HAVE TO COPY IMAGE" );
+                            image = image->make_copy();
+                            free_later( image , Image::destroy );
+                        }
+                    }
+
+                    if ( ! image )
+                    {
+                        luaL_error( L , "Out of memory" );
+                    }
+                    else
+                    {
+                        if ( self->unpack_flip_y )
+                        {
+                            tplog( "FLIPPING Y" );
+                            image->flip_y();
+                            tplog( "FLIP DONE" );
+                        }
+
+                        if ( self->unpack_premultiply_alpha )
+                        {
+                            tplog( "PREMULTIPLYING ALPHA" );
+                            image->premultiply_alpha();
+                            tplog( "PREMULTIPLY DONE" );
+                        }
+
+                        width = image->width();
+                        height = image->height();
+
+                        pixels = image->pixels();
+
+                        glTexImage2D( target , level , internalformat , width , height , 0 , format , type , pixels );
+                    }
+                }
+                else
+                {
+                    luaL_error( L , "Invalid texture data" );
+                }
+            }
+        ]];
+
     texParameterf(GLenum target, GLenum pname, GLfloat param )
         [[
             glTexParameterf( target , pname , param );
@@ -1799,142 +1988,161 @@ interface WebGLRenderingContext [[void*]]
 */
     void uniform1f(WebGLUniformLocation location, GLfloat x )
         [[
-            if ( location )
+            glUniform1f( location , x );
+        ]];
+
+    void uniform1fv(WebGLUniformLocation location, Float32Array_or_table v )
+        [[
+            FreeLater free_later;
+
+            if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 0 ) )
             {
-                glUniform1f( location , x );
+                glUniform1fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
             }
         ]];
 
-    void uniform1fv(WebGLUniformLocation location, Float32Array v )
-        [[
-        ]];
-/*
-    void uniform1fv(WebGLUniformLocation location, float[] v )
-    [[
-    ]];
-*/
     void uniform1i(WebGLUniformLocation location, GLint x )
-    [[
-    ]];
-
-    void uniform1iv(WebGLUniformLocation location, Int32Array v )
-    [[
-    ]];
-/*
-    void uniform1iv(WebGLUniformLocation location, long[] v )
-    [[
-    ]];
-*/
-    void uniform2f(WebGLUniformLocation location, GLfloat x, GLfloat y )
-    [[
-    ]];
-
-    void uniform2fv(WebGLUniformLocation location, Float32Array v )
-    [[
-    ]];
-/*
-    void uniform2fv(WebGLUniformLocation location, float[] v )
-    [[
-    ]];
-*/
-    void uniform2i(WebGLUniformLocation location, GLint x, GLint y )
-    [[
-    ]];
-
-    void uniform2iv(WebGLUniformLocation location, Int32Array v )
-    [[
-    ]];
-/*
-    void uniform2iv(WebGLUniformLocation location, long[] v )
-    [[
-    ]];
-*/
-    void uniform3f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z )
-    [[
-    ]];
-
-    void uniform3fv(WebGLUniformLocation location, Float32Array v )
-    [[
-    ]];
-/*
-    void uniform3fv(WebGLUniformLocation location, float[] v )
-    [[
-    ]];
-*/
-    void uniform3i(WebGLUniformLocation location, GLint x, GLint y, GLint z )
-    [[
-    ]];
-
-    void uniform3iv(WebGLUniformLocation location, Int32Array v )
-    [[
-    ]];
-/*
-    void uniform3iv(WebGLUniformLocation location, long[] v )
-    [[
-    ]];
-*/
-    void uniform4f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z, GLfloat w )
-    [[
-    ]];
-
-    void uniform4fv(WebGLUniformLocation location, Float32Array v )
-    [[
-    ]];
-/*
-    void uniform4fv(WebGLUniformLocation location, float[] v )
-    [[
-    ]];
-*/
-    void uniform4i(WebGLUniformLocation location, GLint x, GLint y, GLint z, GLint w )
-    [[
-    ]];
-
-    void uniform4iv(WebGLUniformLocation location, Int32Array v )
-    [[
-    ]];
-/*
-    void uniform4iv(WebGLUniformLocation location, long[] v )
-    [[
-    ]];
-*/
-
-    void uniformMatrix2fv(WebGLUniformLocation location, GLboolean transpose,
-                          Float32Array value )
-    [[
-    ]];
-/*
-    void uniformMatrix2fv(WebGLUniformLocation location, GLboolean transpose,
-                          float[] value )
-    [[
-    ]];
-*/
-    void uniformMatrix3fv(WebGLUniformLocation location, GLboolean transpose,
-                          Float32Array value )
-    [[
-    ]];
-/*
-    void uniformMatrix3fv(WebGLUniformLocation location, GLboolean transpose,
-                          float[] value )
-    [[
-    ]];
-*/
-    uniformMatrix4fv(WebGLUniformLocation location, GLboolean transpose, any float32_array_or_matrix )
         [[
-            if ( lb_check_udata_type( L , float32_array_or_matrix , "Matrix" , false ) )
-            {
-                if ( CoglMatrix * matrix = ( CoglMatrix * ) UserData::get_client( L , float32_array_or_matrix ) )
-                {
-                    glUniformMatrix4fv( location , 1 , transpose ? GL_TRUE : GL_FALSE , cogl_matrix_get_array( matrix ) );
-                }
-            }
+            glUniform1i( location , x );
         ]];
-/*
-    void uniformMatrix4fv(WebGLUniformLocation location, GLboolean transpose,
-                          float[] value )
-    [[
-    ]];
 
-*/
+    void uniform1iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 0 ) )
+              {
+                  glUniform1iv( location , array->get_length() , ( const GLint * ) array->get(0) );
+              }
+        ]];
+
+    void uniform2f(WebGLUniformLocation location, GLfloat x, GLfloat y )
+        [[
+            glUniform2f( location , x , y );
+        ]];
+
+    void uniform2fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 2 ) )
+              {
+                  glUniform2fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
+              }
+        ]];
+
+    void uniform2i(WebGLUniformLocation location, GLint x, GLint y )
+        [[
+            glUniform2i( location , x , y );
+        ]];
+
+    void uniform2iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 2 ) )
+              {
+                  glUniform2iv( location , array->get_length() , ( const GLint * ) array->get(0) );
+              }
+        ]];
+
+    void uniform3f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z )
+        [[
+            glUniform3f( location , x , y , z );
+        ]];
+
+    void uniform3fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 3 ) )
+              {
+                  glUniform3fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
+              }
+        ]];
+
+    void uniform3i(WebGLUniformLocation location, GLint x, GLint y, GLint z )
+        [[
+            glUniform3i( location , x , y , z );
+        ]];
+
+    void uniform3iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 3 ) )
+              {
+                  glUniform3iv( location , array->get_length() , ( const GLint * ) array->get(0) );
+              }
+        ]];
+
+    void uniform4f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z, GLfloat w )
+        [[
+            glUniform4f( location , x , y , z , w );
+        ]];
+
+    void uniform4fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 4 ) )
+              {
+                  glUniform4fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
+              }
+        ]];
+
+    void uniform4i(WebGLUniformLocation location, GLint x, GLint y, GLint z, GLint w )
+        [[
+             glUniform4i( location , x , y , z , w );
+        ]];
+
+    void uniform4iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 4 ) )
+              {
+                  glUniform4iv( location , array->get_length() , ( const GLint * ) array->get(0) );
+              }
+        ]];
+
+    void uniformMatrix2fv(WebGLUniformLocation location, GLboolean transpose, any /* Float32Array or table */ value )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 4 ) )
+              {
+                  glUniformMatrix2fv( location , array->get_length() / 4 , transpose ? GL_TRUE : GL_FALSE , ( const GLfloat * ) array->get(0) );
+              }
+        ]];
+
+    void uniformMatrix3fv(WebGLUniformLocation location, GLboolean transpose, any /* Float32Array or table */ value )
+        [[
+              FreeLater free_later;
+
+              if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 9 ) )
+              {
+                  glUniformMatrix3fv( location , array->get_length() / 9 , transpose ? GL_TRUE : GL_FALSE , ( const GLfloat * ) array->get(0) );
+              }
+        ]];
+
+    void uniformMatrix4fv(WebGLUniformLocation location, GLboolean transpose, any /* Float32Array, table or matrix */ value )
+        [[
+              FreeLater free_later;
+
+              if ( lb_check_udata_type( L , value , "Matrix" , false ) )
+              {
+                  if ( CoglMatrix * matrix = ( CoglMatrix * ) UserData::get_client( L , value ) )
+                  {
+                      glUniformMatrix4fv( location , 1 , transpose ? GL_TRUE : GL_FALSE , cogl_matrix_get_array( matrix ) );
+                  }
+              }
+              else if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 16 ) )
+              {
+                  glUniformMatrix4fv( location , array->get_length() / 16 , transpose ? GL_TRUE : GL_FALSE , ( const GLfloat * ) array->get(0) );
+              }
+        ]];
+
     useProgram(WebGLProgram program )
         [[
             glUseProgram( program );
@@ -1947,58 +2155,69 @@ interface WebGLRenderingContext [[void*]]
 
 
     void vertexAttrib1f(GLuint indx, GLfloat x )
-    [[
-    ]];
+        [[
+            glVertexAttrib1f( indx , x );
+        ]];
 
-    void vertexAttrib1fv(GLuint indx, Float32Array values )
-    [[
-    ]];
-/*
-    void vertexAttrib1fv(GLuint indx, float[] values )
-    [[
-    ]];
-*/
+    void vertexAttrib1fv(GLuint indx, any /* Float32Array or table */ value )
+        [[
+          FreeLater free_later;
+
+          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 0 ) )
+          {
+              glVertexAttrib1fv( indx , ( const GLfloat * ) array->get(0) );
+          }
+        ]];
+
     void vertexAttrib2f(GLuint indx, GLfloat x, GLfloat y )
-    [[
-    ]];
+        [[
+            glVertexAttrib2f( indx , x , y );
+        ]];
 
-    void vertexAttrib2fv(GLuint indx, Float32Array values )
-    [[
-    ]];
-/*
-    void vertexAttrib2fv(GLuint indx, float[] values )
-    [[
-    ]];
-*/
+    void vertexAttrib2fv(GLuint indx, any /* Float32Array or table */ value )
+        [[
+          FreeLater free_later;
+
+          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 2 ) )
+          {
+              glVertexAttrib2fv( indx , ( const GLfloat * ) array->get(0) );
+          }
+        ]];
+
     void vertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z )
-    [[
-    ]];
+        [[
+            glVertexAttrib3f( indx , x , y , z );
+        ]];
 
-    void vertexAttrib3fv(GLuint indx, Float32Array values )
-    [[
-    ]];
-/*
-    void vertexAttrib3fv(GLuint indx, float[] values )
-    [[
-    ]];
-*/
+    void vertexAttrib3fv(GLuint indx, any /* Float32Array or table */ value )
+        [[
+          FreeLater free_later;
+
+          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 3 ) )
+          {
+              glVertexAttrib3fv( indx , ( const GLfloat * ) array->get(0) );
+          }
+        ]];
+
     void vertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloat w )
-    [[
-    ]];
+        [[
+            glVertexAttrib4f( indx , x , y , z , w );
+        ]];
 
-    void vertexAttrib4fv(GLuint indx, Float32Array values )
-    [[
-    ]];
-/*
-    void vertexAttrib4fv(GLuint indx, float[] values )
-    [[
-    ]];
-*/
+    void vertexAttrib4fv(GLuint indx, any /* Float32Array or table */ value )
+        [[
+          FreeLater free_later;
+
+          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 4 ) )
+          {
+              glVertexAttrib4fv( indx , ( const GLfloat * ) array->get(0) );
+          }
+        ]];
+
     vertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLintptr offset )
         [[
             glVertexAttribPointer( indx , size , type , normalized ? GL_TRUE : GL_FALSE , stride , (GLvoid*) offset );
         ]];
-
 
     viewport(GLint x, GLint y, GLsizei width, GLsizei height )
         [[
@@ -2015,13 +2234,28 @@ interface WebGLRenderingContext [[void*]]
         ]];
 }
 
-global gl [[void*]] WebGLRenderingContext
+/*
+===============================================================================
+*/
+
+global gl [[ WebGLState * ]] WebGLRenderingContext
 {
     gl()
         [[
-            lb_construct_empty();
+            self = lb_construct( WebGLState , new WebGLState );
         ]];
+
+    ~gl()
+        [[
+            delete self;
+        ]];
+
+
 }
+
+/*
+===============================================================================
+*/
 
 class Matrix [[CoglMatrix*]]
 {
