@@ -1,18 +1,25 @@
 RemoteButton = Class(nil,
 function(button, controller, image_src, focus_src, position, size)
     -- This is the function that gets called when the button is pressed
+    if not focus_src then error("No focus_src RemoteButton", 3) end
     button.callback = nil
+
+    local image
+    local focus
 
     local group = controller.factory:Group()
     button.group = group
 
-    local image = controller.factory:Image{
-        src = image_src,
-        position = position,
-        size = size
-    }
+    if image_src then
+        image = controller.factory:Image{
+            src = image_src,
+            position = position,
+            size = size
+        }
+    end
+    button.image = image
 
-    local focus = controller.factory:Image{
+    focus = controller.factory:Image{
         src = focus_src,
         position = position,
         size = size
@@ -20,7 +27,8 @@ function(button, controller, image_src, focus_src, position, size)
     button.focus = focus
     focus:hide()
 
-    group:add(image, focus)
+    if image then group:add(image) end
+    group:add(focus)
 
     function button:press()
         local button_timer = Timer()

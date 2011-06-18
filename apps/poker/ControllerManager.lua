@@ -2,6 +2,7 @@
 dofile("phone/RemoteButton.lua")
 dofile("phone/controllers/RemoteCharacterSelectionController.lua")
 dofile("phone/controllers/RemoteWaitingRoomController.lua")
+dofile("phone/controllers/RemoteBettingController.lua")
 
 ControllerStates = {
     SPLASH = 1,
@@ -72,8 +73,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         local advanced_ui_ready = false
         local character_selection
         local waiting_room
+        local betting
         local function create_advanced_ui_objects()
-            controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller)
             character_selection = RemoteCharacterSelectionController(router, controller)
             controller.router:notify()
             advanced_ui_ready = true
@@ -86,7 +87,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 Declare resources to be used by the phone
             --]]
             -- buttons for betting
-            controller:declare_resource("buttons", "assets/phone/buttons.png")
+            --controller:declare_resource("buttons", "assets/phone/buttons.png")
             -- buttons for dog selection
             controller:declare_resource("dog_1", "assets/phone/chip1.png")
             controller:declare_resource("dog_2", "assets/phone/chip2.png")
@@ -98,12 +99,14 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:declare_resource("splash", "assets/phone/splash.jpg")
             -- blank background
             controller:declare_resource("bkg", "assets/phone/bkgd-blank.jpg")
+
             -- headers which help instruct the player
             controller:declare_resource("hdr_choose_dog",
                 "assets/phone/text-choose-your-dog.png")
             controller:declare_resource("hdr_name_dog",
                 "assets/phone/text-name-your-dog.png")
-            -- waiting room stuff
+
+            -- Waiting Room stuff
             controller:declare_resource("click_label",
                 "assets/phone/waiting_screen/label-clicktoadd.png")
             controller:declare_resource("comp_label",
@@ -120,11 +123,35 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 controller:declare_resource("player_"..i,
                     "assets/phone/waiting_screen/player"..i..".png")
             end
-            controller:declare_resource("frame", "assets/camera/frame-overlay.png")
             controller:declare_resource("wooden_bar",
                 "assets/camera/help/lower-menu-bar.png")
+
+            controller:declare_resource("frame", "assets/camera/frame-overlay.png")
             controller:declare_resource("chip_touch",
                 "assets/phone/chip-touch.png")
+
+            -- Remote Betting Controller Resources
+            controller:declare_resource("buttons", "assets/phone/betting/buttons.png")
+            controller:declare_resource("call_button_on_touch",
+                "assets/phone/betting/button-touch-call.png")
+            controller:declare_resource("bet_button_on_touch",
+                "assets/phone/betting/button-touch-bet.png")
+            controller:declare_resource("check_button_on_touch",
+                "assets/phone/betting/button-touch-check.png")
+            controller:declare_resource("fold_button_on_touch",
+                "assets/phone/betting/button-touch-fold.png")
+            controller:declare_resource("minus_button_on_touch",
+                "assets/phone/betting/button-touch-minus.png")
+            controller:declare_resource("plus_button_on_touch",
+                "assets/phone/betting/button-touch-plus.png")
+            controller:declare_resource("check_button_off_touch",
+                "assets/phone/betting/button-check.png")
+            controller:declare_resource("exit_button",
+                "assets/phone/betting/button-exit.png")
+            controller:declare_resource("help_button",
+                "assets/phone/betting/button-help.png")
+            controller:declare_resource("new_game_button",
+                "assets/phone/betting/button-new-game.png")
 
             controller:clear_and_set_background("splash")
         end
@@ -144,8 +171,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         local current_bkg = nil
         function controller:clear_and_set_background(image_name)
+            print("Clear and Set Background")
             --if current_bkg ~= image_name then
                 controller:clear_ui()
+                --controller.screen:set_background(image_name)
                 controller:set_ui_background(image_name)
                 current_bkg = image_name
             --end
@@ -325,12 +354,15 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:set_hole_cards(hole)
             assert(hole[1])
             assert(hole[2])
+            if not betting then
+                betting = RemoteBettingController(router, controller)
+            end
             controller:clear_and_set_background("bkg")
             controller.router:set_active_component(RemoteComponents.BETTING)
             controller.router:notify()
 
             controller.state = ControllerStates.BETTING
-            controller:add_image("buttons", 0, 535, 640, 313)
+            --controller:add_image("buttons", 0, 535, 640, 313)
 
             controller:declare_resource("card1",
                 "assets/cards/"..getCardImageName(hole[1])..".png")
@@ -353,9 +385,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 controller:declare_resource(name, resource)
             end
         end
-        declare_necessary_resources()
         function controller:on_advanced_ui_ready()
             print("AdvancedUI Ready")
+            controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller)
+            declare_necessary_resources()
             create_advanced_ui_objects()
         end
         router:get_active_controller():add_controller(controller)
