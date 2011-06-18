@@ -1,0 +1,407 @@
+Class: ButtonPicker
+
+A ButtonPicker enables the user to make a selection by scrolling through a list of available settings. Scrolling direction can be either horizontal or vertical. Items in the list can be added and removed dynamically.
+
+
+
+Function: buttonPicker( properties )
+
+The buttonPicker() function creates a new ButtonPicker UI Element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+
+*Argument:*
+
+properties - table of ButtonPicker property settings
+
+The properties table contains a comma-separated list of property settings for the new ButtonPicker. If a property is not explicitly set, its default value is used.
+
+*Return Value:* Returns a Group object that contains the new ButtonPicker and related support objects. The Group object should be used to access the ButtonPicker's properties and functions.
+
+*Example:* Create a new ButtonPicker, specifying some properties
+
+(code)
+-- Create all the UI Elements
+ui_element = dofile( "/lib/ui_element.lua" )
+
+-- Create a new ButtonPicker, setting some of its ButtonPicker-specific properties
+local colorPicker = ui_element.buttonPicker{ items = { "Red", "Green", "Blue", "B&W" },
+                                             direction = "vertical",
+                                             ui_width = 400 }
+
+-- Set some of the buttonPicker's UIElement properties
+colorPicker.name = "ColorPicker"
+colorPicker.position = { 700, 500, 0 }
+
+-- Add a color to the scrollable list
+colorPicker:insertItem( "Yellow" )
+(end)
+
+
+
+Property: ui_width
+
+The ui_width property is an integer value specifying the ButtonPicker's width in pixels.
+
+*Default Setting:* 180
+
+*See Also:* the <ui_height> property
+
+
+
+Property: ui_height
+
+The ui_height property is an integer specifying the ButtonPicker's height in pixels.
+
+*Default Setting:* 60
+
+*See Also:* the <ui_width> property
+
+
+
+Property: items
+
+The items property is a table of strings where each string specifies one item in the ButtonPicker's scrollable list.
+
+*Default Setting:* { "item1", "item2", "item3" }
+
+*See Also:* the <selected_item> and <direction> properties
+
+
+
+Property: selected_item
+
+The selected_item property is the integer index into the items table for the currently-selected item. The first item in the items list is at index 1.
+
+You can set the selected_item property to initialize the starting item in the list or to force a particular item to be the current item. Setting the selected_item property does not cause the displayed list to automatically scroll to the designated item; the list must be scrolled programmatically to the modified item. Refer to the code example below for a demonstration.
+
+You can retrieve the selected_item property to determine which item has been selected/is current.
+
+*Default Setting:* 1
+
+*Code Example:* Programmatically jump to a particular item in the scrollable list
+
+(code)
+-- Load the UI Element library
+ui_element = dofile("/lib/ui_element.lua")
+
+-- Create a ButtonPicker, defining its scrollable list and other settings
+local bpNumbers = ui_element.buttonPicker{
+		items = { "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix" }
+		}
+bpNumbers.position = { 300, 350, 0 }
+
+-- Create a Button, when pressed, it will jump to the 5th item in the list ("cinq")
+local bJumpToCinq = ui_element.button{ ui_width = 300,
+                                       label = "Jump to Cinq",
+                                     }
+bJumpToCinq.position = { 240, 550, 0 }
+
+-- bJumpToCinq button-pressed event handler
+bJumpToCinq.pressed = function()
+	-- Jump to "cinq", the 5th item in the list
+	-- Note: At this point, the current selected_item may be anywhere in the list.
+	
+	-- Variable definitions
+	local curr      = bpNumbers.selected_item
+	local num_items = #bpNumbers.items
+	local desired   = 5
+	local num_scrolls_back, num_scrolls_forward
+	
+	-- Validate value of desired and verify we're not already at the desired item
+	if desired < 1 or desired > num_items or desired == curr then return end
+
+	-- Find the shortest scrolling path (backward or forward) to the 5th item	
+	-- Is current item past the desired item?
+	if curr > desired then
+		-- Yes, determine the number of scrolls in each direction to get to desired item
+		num_scrolls_back = curr - desired
+		num_scrolls_forward = num_items - curr + desired
+	else
+		-- No, current item is before desired, determine number of scrolls needed
+		num_scrolls_back = curr + num_items - desired
+		num_scrolls_forward = desired - curr
+	end
+	
+	-- Which direction is shorter?
+	if num_scrolls_back < num_scrolls_forward then
+		-- Scroll back
+		for i = 1, num_scrolls_back, 1 do
+			-- Note: These scroll operations occur asynchronously with immediate
+			-- termination of any existing unfinished operation. Because of this,
+			-- all the scrolling ops, except the last one, may be aborted and not
+			-- be viewable onscreen.
+			layout["numbers"].bpNumbers:press_left()
+		end
+	else
+		-- Scroll forward
+		for i = 1, num_scrolls_forward, 1 do
+			layout["numbers"].bpNumbers:press_right()
+		end
+	end
+end
+(end)
+
+*See Also:* the <items> property
+
+
+
+Property: direction
+
+The direction property is a string specifying the scrolling direction of the ButtonPicker's list.
+
+Appropriate arrow scroll-graphics are automatically added to the displayed ButtonPicker. For example, a horizontally-scrolling ButtonPicker will have arrow scroll-graphics added to its right and left sides.
+
+Supported direction settings are shown below.
+
+"horizontal" - scroll horizontally/left<-->right (default)
+"vertical" - scroll vertically/up<-->down
+
+*Default Setting:* "horizontal"
+
+*See Also:* the <items> property
+
+
+
+Property: text_font
+
+The text_font property is a string specifying the ButtonPicker's font. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+
+*Default Setting:* "DejaVu Sans 30px"
+
+*See Also:* the <focus_text_font> and <text_color> properties
+
+
+
+Property: focus_text_font
+
+The focus_text_font property is a string specifying the ButtonPicker's font when it has the input focus. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+
+*Default Setting:* "DejaVu Sans 30px"
+
+*See Also:* the <focus_text_color> and <text_font> properties
+
+
+
+Property: text_color 
+
+The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
+
+*See Also:* the <focus_text_color> and <text_font> properties
+
+
+
+Property: focus_text_color
+
+The focus_text_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's text color when it has input focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
+
+*See Also:* the <focus_text_font> and <text_color> properties
+
+
+
+Property: fill_color
+
+The fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {255, 255, 255, 0} (white and transparent)
+
+*See Also:* the <focus_fill_color> and <border_color> properties
+
+
+
+Property: focus_fill_color
+
+The focus_fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when it has focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {0, 255, 0, 0} (green and transparent)
+
+*See Also:* the <focus_color> and <focus_text_color> properties
+
+
+
+Property: border_color
+
+The border_color property is a table of integer RGB and alpha settings specifying the ButtonPicker border's color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
+
+*See Also:* the <focus_color> property
+
+
+
+Property: focus_color
+
+The focus_color is a table of integer RGB and alpha settings specifying the ButtonPicker border's color when it has focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {0, 255, 0, 255} (green and opaque)
+
+*See Also:* the <border_color> property
+
+
+
+Property: skin
+
+The skin property is a string specifying the ButtonPicker's skin. NEED MORE INFORMATION ABOUT THIS.
+
+*Default Setting:* "default"
+
+
+
+Property: rotate_func
+
+The rotate_func property is a reference to a function that is invoked after the ButtonPicker has scrolled to a new item in its list. Based upon the list's current item, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, which includes invoking the rotate_func. Thus, the rotate_func is guaranteed to be called, even if the scrolling operation is aborted early.
+
+*Prototype:* rotate_func( current_item_index )
+
+*Argument:*
+
+current_item_index - integer index referencing the current item in the ButtonPicker's items property. The first item in the items list is at index 1.
+
+*Return Value:* None.
+
+*Default Setting:* nil
+
+*See Also:* the <items> property
+
+
+
+Function: insert_item
+
+The insert_item() function adds an item to the end of the scrollable list contained in the ButtonPicker's items property.
+
+*Prototype:* insert_item( item )
+
+*Argument:*
+
+item - the item to add to the list.
+
+Typically, the item argument is a string, but it can be any type of data that you wish, including a table. Note, however, that a table gets added to the list as a single table item; the items in the table are not added as separate entries. For example, if you insert a table that contains three strings, the last item in the list will be the single table element; the three strings are not directly added to the list and will not be displayed as the list is scrolled. This is the case, even if the table contains only a single string.
+
+*Return Value:* None.
+
+*See Also:* the <items> property
+
+
+
+Function: remove_item
+
+The remove_item() function removes the last item from the scrollable list contained in the ButtonPicker's items property.
+
+*Prototype:* remove_item()
+
+*Return Value:* None.
+
+*See Also:* the <items> property
+
+
+
+Function: press_left
+
+The press_left() function causes the ButtonPicker's scrollable list to scroll to the previous item in the list. The setting of the ButtonPicker's direction property has no effect on this function; even with a vertically-scrolling list, a call to press_left() moves to the list's previous item.
+
+The press_up() function can be called to perform the same operation; the two functions are identical.
+
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
+
+*Prototype:* press_left()
+
+*Return Value:* None.
+
+*See Also:* the <items> property, the <press_up> and <press_right> functions
+
+
+
+Function: press_right
+
+The press_right() function causes the ButtonPicker's scrollable list to scroll to the next item in the list. The setting of the ButtonPicker's direction property has no effect on this function; even with a vertically-scrolling list, a call to press_right() moves to the list's next item.
+
+The press_down() function can be called to perform the same operation; the two functions are identical.
+
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
+
+*Prototype:* press_right()
+
+*Return Value:* None.
+
+*See Also:* the <items> property, the <press_down> and <press_left> functions
+
+
+
+Function: press_up
+
+The press_up() function causes the ButtonPicker's scrollable list to scroll to the previous item in the list. The setting of the ButtonPicker's direction property has no effect on this function; even with a horizontally-scrolling list, a call to press_up() moves to the list's previous item.
+
+The press_left() function can be called to perform the same operation; the two functions are identical.
+
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
+
+*Prototype:* press_up()
+
+*Return Value:* None.
+
+*See Also:* the <items> property, the <press_left> and <press_down> functions
+
+
+
+Function: press_down
+
+The press_down() function causes the ButtonPicker's scrollable list to scroll to the next item in the list. The setting of the ButtonPicker's direction property has no effect on this function; even with a horizontally-scrolling list, a call to press_down() moves to the list's next item.
+
+The press_right() function can be called to perform the same operation; the two functions are identical.
+
+The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
+
+
+
+*Prototype:* press_down()
+
+*Return Value:* None.
+
+*See Also:* the <items> property, the <press_right> and <press_up> functions
+
+
+
+Function: press_enter
+
+The press_enter() function currently performs no operation.
+
+*Prototype:* press_enter()
+
+*Return Value:* None.
+
+
+
+Function: on_focus_in
+
+The on_focus_in() function forces the input focus to the ButtonPicker.
+
+*Prototype:* on_focus_in()
+
+*Return Value:* None.
+
+*See Also:* the <on_focus_out> function
+
+
+
+Function: on_focus_out
+
+The on_focus_out() function releases the input focus from the ButtonPicker. 
+
+NEED MORE INFORMATION ABOUT THIS FUNCTION: Where does the input focus go to? Which element?
+
+*Prototype:* on_focus_out()
+
+*Return Value:* None.
+
+*See Also:* the <on_focus_in> function
+
