@@ -163,7 +163,6 @@
         currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
     }
     [theTableView setDelegate:self];
-    pushingViewController = NO;
 }
 //*/
 
@@ -173,6 +172,7 @@
     }
     
     viewDidAppear = YES;
+    pushingViewController = NO;
 }
 
 /*
@@ -352,6 +352,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+    NSLog(@"AppBrowserController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
     if (theTableView) {

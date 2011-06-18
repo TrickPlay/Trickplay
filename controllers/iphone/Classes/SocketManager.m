@@ -160,8 +160,8 @@
             //NSLog(@"\n\nStream has space available. delegate: %@\n\n", delegate);
             [self sendPackets];
 
-            CFAbsoluteTime bytessenttime = CFAbsoluteTimeGetCurrent();
-            fprintf(stderr, "write time = %lf\n", (bytessenttime-start)*1000.0);
+            //CFAbsoluteTime bytessenttime = CFAbsoluteTimeGetCurrent();
+            //fprintf(stderr, "write time = %lf\n", (bytessenttime-start)*1000.0);
             //NSLog(@"write time = %lf\t. delegate %@", (bytessenttime - start)*1000.0, delegate);
             //NSLog(@"\n\nBytes done sending. delegate: %@\n\n", delegate);
             break;

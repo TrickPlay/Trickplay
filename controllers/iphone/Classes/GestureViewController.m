@@ -98,11 +98,19 @@
     // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
     // from Trickplay
     advancedView = [[TrickplayGroup alloc] initWithID:@"0" args:nil objectManager:nil];
+    advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
     advancedView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height);
     [self.view addSubview:advancedView];
     
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
     advancedView.manager = advancedUIDelegate;
+    
+    // This is where the elements from UG (add_ui_image call) go
+    CGFloat
+    width = self.view.frame.size.width,
+    height = self.view.frame.size.height;
+    CGRect frame = CGRectMake(0.0, 0.0, width, height);
+    foregroundView = [[UIImageView alloc] initWithFrame:frame];
     
     return YES;
 }
@@ -338,13 +346,15 @@
 
 /**
  * Updating the background
+ *
+ * WARNING: CANNOT USE WITH ADVANCED UI
  */
 - (void)do_UB:(NSArray *)args {
     NSLog(@"Updating Background");
-    [args retain];
     
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
+    /*
     if ([resourceManager getResourceInfo:key]) {
         NSData *imageData = [resourceManager fetchResource:key];
         if (imageData) {
@@ -352,12 +362,28 @@
             [loadingIndicator stopAnimating];
             NSLog(@"Creating background view");
             backgroundView.image = tempImage;
-            //**for testing
+            //for testing
             //backgroundView.image = [UIImage imageNamed:@"background.png"];
         }
     }
+    */
     
-    [args release];
+    if ([resourceManager getResourceInfo:key]) {
+        CGFloat
+        width = self.view.frame.size.width,
+        height = self.view.frame.size.height;
+        CGRect frame = CGRectMake(0.0, 0.0, width, height);
+        UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
+        
+        for (UIView *subview in [backgroundView subviews]) {
+            if (subview != foregroundView) {
+                [subview removeFromSuperview];
+            }
+        }
+        
+        [backgroundView addSubview:newImageView];
+        [backgroundView sendSubviewToBack:newImageView];
+    }
 }
 
 /**
@@ -365,7 +391,6 @@
  */
 - (void)do_UG:(NSArray *)args {
     NSLog(@"Updating Graphics");
-    [args retain];
     
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
@@ -378,10 +403,8 @@
         CGRect frame = CGRectMake(x, y, width, height);
         UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
-        [backgroundView addSubview:newImageView];
+        [foregroundView addSubview:newImageView];
     }
-    
-    [args release];
 }
 
 
@@ -582,11 +605,18 @@
     
     UIImageView *newImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background.png"]];
     newImageView.frame = CGRectMake(x, y, width, height);
+    [foregroundView removeFromSuperview];
+    for (UIView *subview in [foregroundView subviews]) {
+        [subview removeFromSuperview];
+    }
     [backgroundView removeFromSuperview];
     self.backgroundView = newImageView;
     [self.view addSubview:backgroundView];
     [self.view sendSubviewToBack:backgroundView];
+    
     [newImageView release];
+
+    [backgroundView addSubview:foregroundView];
     //*/
 }
 
@@ -614,12 +644,17 @@
     
     //backgroundView.image = [UIImage imageNamed:@"background.png"];
     
-    styleAlert = [[UIActionSheet alloc] initWithTitle:@"TrickPlay Multiple Choice"
-                                             delegate:self cancelButtonTitle:nil
+    if (!styleAlert) {
+        styleAlert = [[UIActionSheet alloc]
+                      initWithTitle:@"TrickPlay Multiple Choice"
+                      delegate:self cancelButtonTitle:nil
                                destructiveButtonTitle:nil
                                     otherButtonTitles:nil];
+    }
     
-    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    if (!multipleChoiceArray) {
+        multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    }
     
     
     
@@ -674,10 +709,18 @@
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+    NSLog(@"GestureViewController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
-    if (camera) {
-        [self canceledPickingImage];
+    if (styleAlert) {
+        [styleAlert release];
+        styleAlert = nil;
+    }
+    
+    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    if (multipleChoiceArray) {
+        [multipleChoiceArray release];
+        multipleChoiceArray = nil;
     }
 }
 
@@ -726,7 +769,6 @@
     }
     if (advancedView) {
         [advancedView release];
-        NSLog(@"\n\nretain count: %u", [advancedView retainCount]);
     }
     if (socketTimer) {
         [socketTimer invalidate];
@@ -735,6 +777,7 @@
     }
     [loadingIndicator release];
     [theTextField release];
+    [foregroundView release];
     [backgroundView release];
     
     [super dealloc];

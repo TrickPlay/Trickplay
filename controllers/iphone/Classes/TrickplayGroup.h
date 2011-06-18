@@ -11,9 +11,18 @@
 #import "ResourceManager.h"
 #import "TrickplayUIElement.h"
 
+@protocol AdvancedUIScreenDelegate <NSObject>
+
+@required
+- do_UB:(NSArray *)args;
+
+@end
+
 @interface TrickplayGroup : TrickplayUIElement {
-    
+    id <AdvancedUIScreenDelegate> delegate;
 }
+
+@property (assign) id <AdvancedUIScreenDelegate> delegate;
 
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
 

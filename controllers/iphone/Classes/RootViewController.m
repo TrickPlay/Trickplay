@@ -30,7 +30,9 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"PushAppBrowserNotification" object:nil];
     
     // Initialize the NSNetServiceBrowser stuff
-    netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
+    if (!netServiceManager) {
+        netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
+    }
     
     if (!currentTVIndicator) {
         currentTVIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
@@ -140,7 +142,7 @@
     NSLog(@"navigation controller tag = %d", viewController.view.tag);
 
     // if popping back to self
-    if (viewController.view.tag == self.view.tag) {
+    if (viewController == self) {
         if (appBrowserViewController && ![appBrowserViewController hasRunningApp]) {
             if (gestureViewController) {
                 [gestureViewController release];
@@ -156,7 +158,7 @@
         [netServiceManager start];
     }
     // if popping back to app browser
-    else if (viewController.view.tag == appBrowserViewController.view.tag) {
+    else if (viewController == appBrowserViewController) {
         if ([appBrowserViewController fetchApps]) {
             [appBrowserViewController.theTableView reloadData];
             appBrowserViewController.pushingViewController = NO;
@@ -375,12 +377,15 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (void)viewDidUnload {
+    //[super viewDidUnload];
+    NSLog(@"RootViewController Unload");
     // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
     // For example: self.myOutlet = nil;
     if (currentTVIndicator) {
         [currentTVIndicator release];
         currentTVIndicator = nil;
     }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 

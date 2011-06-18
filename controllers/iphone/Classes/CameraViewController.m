@@ -151,6 +151,9 @@
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     } else {
         [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
+        if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
+            imagePickerController.navigationBar.topItem.title = titleLabel;
+        }
     }
 }
 

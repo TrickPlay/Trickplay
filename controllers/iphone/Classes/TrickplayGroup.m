@@ -13,6 +13,8 @@
 
 @implementation TrickplayGroup
 
+@synthesize delegate;
+
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:groupID objectManager:objectManager])) {
         self.view = [[[UIView alloc] init] autorelease];
@@ -198,8 +200,22 @@
     return [NSNumber numberWithBool:YES];
 }
 
+////////////////// Screen Only method /////////////////////////
+
+- (NSNumber *)do_set_background:(NSArray *)args {
+    if (delegate) {
+        [delegate do_UB:args];
+    }
+    
+    return [NSNumber numberWithBool:YES];
+}
+
+//////////////////////////////////////////////////////////////
+
 - (id)callMethod:(NSString *)method withArgs:(NSArray *)args {
     id result = nil;
+    
+    //NSLog(@"\n\n method = %@,    args = %@\n\n", method, args);
     
     SEL selector = NSSelectorFromString([NSString stringWithFormat:@"do_%@:", method]);
         
