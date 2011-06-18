@@ -20,12 +20,12 @@
         if (source && [source isKindOfClass:[NSString class]]) {
             self.src = source;
         }
-        
-        CGRect frame = [self getFrameFromArgs:args];
-        
+                
+        CGRect frame = [self getFrameFromArgs:args];        
         self.view = [resourceManager fetchImageViewUsingResource:src frame:frame];
         ((AsyncImageView *)self.view).otherDelegate = self;
         view.layer.anchorPoint = CGPointMake(0.0, 0.0);
+        view.layer.frame = CGRectMake(0.0, 0.0, view.layer.frame.size.width, view.layer.frame.size.height);
         
         [self setValuesFromArgs:args];
                 

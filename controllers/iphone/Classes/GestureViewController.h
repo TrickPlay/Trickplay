@@ -121,6 +121,7 @@ CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate
     UIActivityIndicatorView *loadingIndicator;
     UITextField *theTextField;
     UIImageView *backgroundView;
+    UIImageView *foregroundView;
     NSInteger backgroundHeight;
     NSInteger backgroundWidth;
     
