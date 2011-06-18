@@ -58,7 +58,7 @@ local function send_request( end_point , payload )
     if foo%30 == 0 then
         print("\t\tcalls = ", foo)
     end
-    print("just a string")
+    print("request returned")
     --[[
     print("send_request result:", result)
     --]]
