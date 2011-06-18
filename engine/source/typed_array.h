@@ -110,10 +110,10 @@ public:
 
     static TypedArray * from_lua( lua_State * L , int index );
 
-    // Creates a new FLOAT32 array with the numbers from the Lua
+    // Creates a new array with the numbers from the Lua
     // table at index.
 
-    static TypedArray * from_lua_table( lua_State * L , int index );
+    static TypedArray * from_lua_table( lua_State * L , int index , Type type = T_FLOAT32 );
 
     // Makes one base on parameters on the Lua stack
 
@@ -169,6 +169,11 @@ public:
     inline gulong get_byte_length() const
     {
         return length * bpe;
+    }
+
+    static void destroy( void * array )
+    {
+        delete ( TypedArray * ) array;
     }
 
 private:
