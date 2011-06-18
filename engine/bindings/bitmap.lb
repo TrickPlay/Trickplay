@@ -168,6 +168,32 @@ class Bitmap [[ Bitmap * ]]
             h = self->height();
         ]];
 
+
+    /*
+        Property: depth
+
+        The depth property specifies the number of bytes per pixel. If a bitmap has
+        an alpha channel, it will be 4, otherwise it will be 3.
+
+        If the bitmap has not been loaded yet, it will return 0.
+    */
+
+    readonly int depth
+        [[
+            depth = self->depth();
+        ]];
+
+    /*
+        Property: has_alpha
+
+        This property is true when the bitmap has an alpha channel and false otherwise.
+    */
+
+    readonly bool has_alpha
+        [[
+            has_alpha = self->depth() == 4;
+        ]];
+
     /*
         Property: loaded
 

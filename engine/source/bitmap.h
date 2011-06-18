@@ -13,6 +13,7 @@ public:
 
     guint width() const;
     guint height() const;
+    guint depth() const;
 
     bool loaded() const;
 
