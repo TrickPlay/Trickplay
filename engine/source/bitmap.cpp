@@ -76,6 +76,13 @@ guint Bitmap::height() const
 
 //.............................................................................
 
+guint Bitmap::depth() const
+{
+    return image ? image->depth() : 0;
+}
+
+//.............................................................................
+
 bool Bitmap::loaded() const
 {
     return image ? true : false;
