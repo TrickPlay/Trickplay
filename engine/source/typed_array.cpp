@@ -442,7 +442,7 @@ TypedArray * TypedArray::subarray( glong begin , glong end )
 
 //.............................................................................
 
-TypedArray * TypedArray::from_lua_table( lua_State * L , int index )
+TypedArray * TypedArray::from_lua_table( lua_State * L , int index , Type type )
 {
     g_assert( lua_istable( L , index ) );
 
@@ -473,6 +473,15 @@ TypedArray * TypedArray::from_lua_table( lua_State * L , int index )
             ++src;
         }
         lua_pop( L , 1 );
+    }
+
+    if ( type != T_FLOAT32 )
+    {
+        TypedArray * source = result;
+
+        result = new TypedArray( type , source );
+
+        delete source;
     }
 
     return result;
