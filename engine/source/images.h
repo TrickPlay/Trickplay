@@ -51,6 +51,34 @@ public:
 
     bool write_to_png( const gchar * filename ) const;
 
+    //.........................................................................
+
+    bool is_packed() const;
+
+    //.........................................................................
+    // Returns a copy of this image where the pitch == width * depth
+
+    Image * make_packed_copy() const;
+
+    //.........................................................................
+    // Makes a wholesale copy of the image
+
+    Image * make_copy() const;
+
+    //.........................................................................
+    // For WebGL, flips the image vertically
+
+    void flip_y();
+
+    //.........................................................................
+    // Premultiplies alpha
+
+    void premultiply_alpha();
+
+    //.........................................................................
+
+    static void destroy( void * image );
+
 private:
 
     friend class Images;
