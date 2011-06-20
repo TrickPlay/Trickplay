@@ -37,7 +37,7 @@
 -(id)initSocketStream:(NSString *)theHost
                  port:(NSInteger)thePort
              delegate:(id <SocketManagerDelegate>)theDelegate{
-    if (self == [super init]) {
+    if (self = [super init]) {
         
         NSInputStream *inputStream;
         NSOutputStream *outputStream;
