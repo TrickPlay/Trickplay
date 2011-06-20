@@ -46,16 +46,46 @@ function(ctrl, router, controller, ...)
         )
     }
 
+    local wooden_buttons = {
+        exit = controller.factory:Image{
+            src = "exit_button",
+            position = {40*x_ratio, 793*y_ratio},
+            size = {124*x_ratio, 62*y_ratio}
+        },
+        new_game = controller.factory:Image{
+            src = "new_game_button",
+            position = {238*x_ratio, 793*y_ratio},
+            size = {164*x_ratio, 62*y_ratio}
+        },
+        help = controller.factory:Image{
+            src = "help_button",
+            position = {475*x_ratio, 793*y_ratio},
+            size = {124*x_ratio, 62*y_ratio}
+        }
+    }
+
     view:add(buttons, wooden_bar)
     for k,button in pairs(betting_buttons) do
         view:add(button.group)
     end
+    for k,button in pairs(wooden_buttons) do
+        view:add(button)
+    end
 
     controller.screen:add(view)
 
-    blah = betting_buttons
-
     function ctrl:on_touch(event)
+        if event.controller == controller then
+            local button_name = event.pos
+            local button = betting_buttons[button_name]
+            if button then
+                button.callback = function()
+                    button:reset()
+                    if event.cb then event:cb() end
+                end
+                button:press()
+            end
+        end
     end
 
     function ctrl:notify(event)

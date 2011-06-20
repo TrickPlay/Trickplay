@@ -30,6 +30,12 @@ function(ctrl, router, controller, ...)
     controller.screen:add(view)
 
     function ctrl:on_touch(event)
+        local comp = event.controller.router:get_active_component()
+        if comp ~= RemoteComponents.CHOOSE_DOG
+        and comp ~= RemoteComponents.WAITING then
+            return
+        end
+
         local button = dog_buttons[event.pos]
         if event.controller == controller then
             button.callback = function()
