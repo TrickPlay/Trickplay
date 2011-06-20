@@ -353,45 +353,45 @@ function(self, router, ...)
     end
 
     -- constants define coordinate space of button presses
-    local FOLD_X_1 = 65
-    local FOLD_X_2 = 220
-    local FOLD_Y_1 = 600
-    local FOLD_Y_2 = 670
+    local FOLD_X_1 = 60
+    local FOLD_Y_1 = 585
+    local FOLD_X_2 = 217
+    local FOLD_Y_2 = 650
 
-    local CALL_X_1 = 260
+    local CALL_X_1 = 250
+    local CALL_Y_1 = 585
     local CALL_X_2 = 406
-    local CALL_Y_1 = 600
-    local CALL_Y_2 = 670
+    local CALL_Y_2 = 655
 
     local BET_X_1 = 440
+    local BET_Y_1 = 585
     local BET_X_2 = 565
-    local BET_Y_1 = 600
-    local BET_Y_2 = 670
+    local BET_Y_2 = 650
 
     local UP_X_1 = 440
-    local UP_X_2 = 565
-    local UP_Y_1 = 525
-    local UP_Y_2 = 575
+    local UP_Y_1 = 495
+    local UP_X_2 = 560
+    local UP_Y_2 = 545
 
     local DOWN_X_1 = 440
-    local DOWN_X_2 = 550
-    local DOWN_Y_1 = 700
-    local DOWN_Y_2 = 750
+    local DOWN_Y_1 = 680
+    local DOWN_X_2 = 560
+    local DOWN_Y_2 = 735
 
-    local DEAL_X_1 = 66
-    local DEAL_X_2 = 240
-    local DEAL_Y_1 = 780
-    local DEAL_Y_2 = 837
+    local DEAL_X_1 = 238
+    local DEAL_Y_1 = 793
+    local DEAL_X_2 = 402
+    local DEAL_Y_2 = 855
 
-    local HELP_X_1 = 273
-    local HELP_X_2 = 400
-    local HELP_Y_1 = 780
-    local HELP_Y_2 = 837
+    local HELP_X_1 = 475
+    local HELP_Y_1 = 793
+    local HELP_X_2 = 599
+    local HELP_Y_2 = 855
 
-    local EXIT_X_1 = 432
-    local EXIT_X_2 = 567
-    local EXIT_Y_1 = 780
-    local EXIT_Y_2 = 837
+    local EXIT_X_1 = 40
+    local EXIT_Y_1 = 793
+    local EXIT_X_2 = 164
+    local EXIT_Y_2 = 855
     function self:handle_click(controller, x, y)
         if not current_player.controller
         or controller ~= current_player.controller then 
@@ -403,9 +403,31 @@ function(self, router, ...)
 
         if x > FOLD_X_1 and x < FOLD_X_2 and y > FOLD_Y_1 and y < FOLD_Y_2 then
             change_selector(fold_selector)
+            ctrlman:delegate(TouchEvent{
+                controller = controller,
+                cb = function()
+                    self:update_views()
+                    self:return_pressed()
+                end,
+                x = x,
+                y = y,
+                pos = "fold"
+            })
+            return
         elseif x > CALL_X_1 and x < CALL_X_2 and y > CALL_Y_1 and y < CALL_Y_2 then
             change_selector(call_selector)
             self:handle_bet_change()
+            ctrlman:delegate(TouchEvent{
+                controller = controller,
+                cb = function()
+                    self:update_views()
+                    self:return_pressed()
+                end,
+                x = x,
+                y = y,
+                pos = "call"
+            })
+            return
         elseif x > BET_X_1 and x < BET_X_2 and y > BET_Y_1 and y < BET_Y_2 then
             if current_selector == bet_selector then
                 -- be awesome
@@ -416,6 +438,17 @@ function(self, router, ...)
                 mediaplayer:play_sound(BONK_MP3)
                 return
             end
+            ctrlman:delegate(TouchEvent{
+                controller = controller,
+                cb = function()
+                    self:update_views()
+                    self:return_pressed()
+                end,
+                x = x,
+                y = y,
+                pos = "bet"
+            })
+            return
         elseif x > UP_X_1 and x < UP_X_2 and y > UP_Y_1 and y < UP_Y_2 then
             if current_selector == bet_selector then
                 self:move(Directions.UP)
@@ -426,6 +459,13 @@ function(self, router, ...)
             else
                 mediaplayer:play_sound(BONK_MP3)
             end
+            ctrlman:delegate(TouchEvent{
+                controller = controller,
+                cb = nil,
+                x = x,
+                y = y,
+                pos = "plus"
+            })
             return
         elseif x > DOWN_X_1 and x < DOWN_X_2 and y > DOWN_Y_1 and y < DOWN_Y_2 then
             if current_selector == bet_selector then
@@ -437,6 +477,13 @@ function(self, router, ...)
             else
                 mediaplayer:play_sound(BONK_MP3)
             end
+            ctrlman:delegate(TouchEvent{
+                controller = controller,
+                cb = nil,
+                x = x,
+                y = y,
+                pos = "minus"
+            })
             return
         elseif x > DEAL_X_1 and x < DEAL_X_2 and y > DEAL_Y_1 and y < DEAL_Y_2 then
             change_selector(new_deal_selector)

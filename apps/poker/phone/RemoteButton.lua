@@ -32,7 +32,7 @@ function(button, controller, image_src, focus_src, position, size)
 
     function button:press()
         local button_timer = Timer()
-        button_timer.interval = 500
+        button_timer.interval = 200
         function button_timer:on_timer()
             self.on_timer = nil
             self:stop()
