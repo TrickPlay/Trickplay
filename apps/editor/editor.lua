@@ -1735,8 +1735,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		 screen:find_child("mouse_pointer"):raise_to_top()
 	end
 end
-]]
+--]]
 
+--function editor.org_inspector(v, x_pos, y_pos, scroll_y_pos)
 function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local save_items 
 
@@ -2011,6 +2012,383 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end
 end
 
+
+function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
+--function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
+	local save_items 
+	if not scroll_y_pos then 
+	     save_items = true 
+	else 
+	     save_items = false 
+	end 
+	----------------------------------------------------------------------------
+	local WIDTH = 300
+  	local HEIGHT = 400
+    local PADDING = 13
+
+	local L_PADDING = 20
+    local R_PADDING = 50
+
+	local TOP_BAR = 30
+    local MSG_BAR = 530
+    local BOTTOM_BAR = 40
+
+	local Y_PADDING = 22
+    local X_PADDING = 10
+
+	local STYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local WSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
+    local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
+    local ISTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
+    local ISSTYLE = {font = "FreeSans Medium 12px" , color = "000000"}
+
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
+	local title, title_shadow 
+	local inspector_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
+	local inspector_items = {}
+	
+	if is_this_widget(v) == true then 
+		title = Text{name = "title", text = "Inspector: "..v.extra.type}:set(STYLE)
+		title_shadow = Text {name = "title", text = "Inspector: "..v.extra.type}:set(SSTYLE)
+	else 
+		title = Text{name = "title", text = "Inspector: "..v.type}:set(STYLE)
+		title_shadow = Text {name = "title", text = "Inspector: "..v.type}:set(SSTYLE)
+	end 
+	----------------------------------------------------------------------------
+
+	--local WIDTH = 450 -- 255  width for inspector's contents
+	local INSPECTOR_OFFSET = 30 
+    local TOP_PADDING = 12
+    local BOTTOM_PADDING = 12
+	local xbox_xpos = 460
+	-------------------------------------------------------------
+
+	if(current_inspector ~= nil) then 
+		return 
+    end 
+ 	
+	for i, c in pairs(g.children) do
+	     editor.n_selected(c)
+	end
+		-- Scroll	
+	local scroll = editor_ui.scrollPane{}
+
+	-- Buttons 
+    local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+    					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = scroll}
+	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
+    					  skin = "default", ui_width = 100, ui_height = 27, label = "Apply", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
+
+	local s_func = function()
+		if current_focus then 
+			current_focus.on_focus_out()
+		end 
+		button_ok:find_child("active").opacity = 255
+		button_ok:find_child("dim").opacity = 0
+		scroll.on_focus_in()
+	end
+
+	--Focus Destination
+	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
+	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
+
+	--editor_use = false
+	
+	-- inspector group 
+	local inspector = Group {
+		name = "msgw", --"inspector", 
+		position = {0,0},
+	 	anchor_point = {0,0},
+		reactive = true,
+        children = {
+        	inspector_bg,
+	  		xbox:set{position = {275, 0}},
+			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
+			title:set{position = {X_PADDING + 1, 6}}, 
+			scroll:set{name = "scroll", position = {0, TOP_BAR+1}, reactive=true},
+			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
+			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
+		} ,
+		scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}	
+	}
+
+	-- Button Event Handlers
+	button_cancel.pressed = function() xbox:on_button_down(1) end
+	button_ok.pressed = function() inspector_apply(v, inspector) xbox:on_button_down(1) end
+
+
+	local function inspector_position() 
+	     local x_space, y_space
+	     if(v.type == "Video") then return end 
+
+	     if (v.x > screen.w - v.x - v.w) then 
+	        x_space = v.x 
+        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
+				inspector.x = x_space - inspector.w - INSPECTOR_OFFSET
+		  	else 
+				inspector.x = (v.x + v.w - inspector.w)/2
+        	end 
+	     else 
+		  	x_space = screen.w - v.x - v.w
+        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
+				inspector.x = v.x + v.w + INSPECTOR_OFFSET
+		  	else 
+				inspector.x = (v.x + v.w - inspector.w)/2
+        	end 
+	    end  
+
+	    if (v.y > screen.h - v.y - v.h) then 
+			y_space = v.y 
+        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
+				inspector.y = v.y - inspector.h - INSPECTOR_OFFSET
+				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+			    	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
+				end	
+			else 
+            	inspector.y = (v.y + v.h - inspector.h) /2
+				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+					inspector.y = screen:find_child("menu_bar").h + INSPECTOR_OFFSET	
+				end	
+        	end 
+	    
+else 
+			y_space = screen.h - v.y - v.h
+        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
+				inspector.y = v.y + v.h + INSPECTOR_OFFSET
+			else 
+				inspector.y = (v.y + v.h - inspector.h)/2
+				if (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h) then 
+					inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
+				elseif (inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
+			     	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
+				end
+        	end 
+	    end 
+	end 
+
+	-- set the inspector location 
+	if(v.type ~= "Video") then
+	   if(x_pos ~= nil and y_pos ~= nil) then 
+	     inspector.x = x_pos	
+	     inspector.y = y_pos	
+	   else
+	     inspector_position() 
+	   end 
+	else 
+	     inspector.x = screen.w/8
+	     inspector.y = screen.h/8
+	end 
+
+	-- make the inspector contents 
+	local attr_t = make_attr_t(v)
+
+	local attr_n, attr_v, attr_s
+    local items_height = 0
+    local prev_item_h = 0
+	local prev_y = 0 
+	local space = 255
+	local used = 13
+
+	local item_group = Group{name = "item_group"}
+	local H_SPACE = 0 --30
+	local X_INDENT = 13
+	local TOP_PADDING = 43
+	
+	local function make_textImput_item(attr_n, attr_v, attr_s) 
+
+		if attr_n == "button" or attr_n == "title" or attr_n == "label" or attr_n == "lock" or attr_n == "focus" then 
+			return 
+		end 
+
+		local group = Group{}
+
+		-- Property Label
+		local label = Text{text = attr_s, position = {0,0}} 
+		group:add(label)
+
+		editor_use = true
+		-- Text Input Field 	
+		local input_text = ui_element.textInput{name = "input_text", skin = "custom", ui_width = 39, ui_height = 21 , text = "", padding = 3 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0,}
+
+		input_text.x = label.x + label.w + 3
+		input_text.y = 0
+
+		editor_use = false
+		group:add(input_text)
+
+		return group
+	end 
+
+	for i=1, #attr_t do 
+        if (attr_t[i] == nil) then break end 
+	    attr_n = attr_t[i][1] 
+	    attr_v = attr_t[i][2] 
+	    attr_s = attr_t[i][3] 
+        attr_v = tostring(attr_v)
+	    if(attr_s == nil) then attr_s = "" end 
+	    local item = make_textImput_item(attr_n, attr_v, attr_s) 
+
+		if item == nil then 
+			break
+		end 
+
+	    if(item.w <= space) then 
+		 	if (item.h > prev_item_h) then 
+             	items_height = items_height + (item.h - prev_item_h) 
+		     	prev_item_h = item.h
+	     	end 
+         	item.x = used + H_SPACE 
+		 	item.y = prev_y
+		 	space = space - item.w
+	    else 
+		 	if (attr_n == "ui_width" or attr_n == "w") then 
+				items_height = items_height - 12 -- imsi !! 
+ 		 	end 
+		 	item.y = items_height 
+         	item.x = X_INDENT 
+		 	prev_y = item.y 
+		 	items_height = items_height + item.h 
+		 	space = WIDTH - item.w
+        end 
+	    used = item.x + item.w 
+
+	    if (xbox_xpos == 465) then  
+			if (attr_n == "title") then 
+			elseif(attr_n == "button") then 
+	    	else 
+	            item_group:add(item)
+	    	end 
+	    else 
+	        if (attr_n == "title") then 
+		    	--item.y = item.y + TOP_PADDING 
+	            --inspector:add(item)
+	    	elseif(attr_n == "button") then 
+		    	if(attr_v == "view code") then 
+		        	item.y = 570
+		    	else 
+		        	item.y = 620
+		        	space = space + 100
+	            end 
+	            --inspector:add(item)
+	        else 
+		    	item.y = item.y - TOP_PADDING
+	            item_group:add(item)
+	        end 
+	    end
+   	end 
+
+   	scroll.virtual_h = item_group.h
+   	scroll.content = item_group
+	
+   	scroll.extra.focus = {[keys.Tab] = "button_cancel"}
+   	inspector.extra.lock = false
+   	screen:add(inspector)
+   	create_on_button_down_f(inspector)	
+
+	--Focus
+	button_ok:find_child("active").opacity = 255
+	button_ok:find_child("dim").opacity = 0
+	scroll.on_focus_in()
+
+
+	function xbox:on_button_down(x,y,button,num_clicks)
+		screen:remove(inspector)
+		inspector:clear() 
+		current_inspector = nil
+		current_focus = nil 
+		if x then 
+	    	input_mode = S_SELECT
+		end 
+		screen.grab_key_focus(screen) 
+		return true
+	end 
+
+
+	--[[ inspector scroll function 
+	if v.extra then 
+			if v.type == "Rectangle" or v.type == "Text" or v.type == "Clone" or v.type == "Image" or v.type == "Group" and v.extra.type == nil then 
+	       		si = ui_element.scrollPane{visible_w = item_group.w -5 , virtual_w = item_group.w - 5, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
+			else 
+	       		si = ui_element.scrollPane{visible_w = item_group.w + 5, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
+			end 
+
+	       si.content = item_group
+	       si.position = {0,82,0}
+	       si.name ="si"
+	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
+	       inspector:add(si)
+	else -- video  
+	   inspector:add(item_group) 
+	end 
+	screen:add(inspector)
+	]]
+
+--[[
+	if scroll_y_pos then 
+	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+	end 
+]]
+	if v.extra then 
+		if v.extra.type == "MenuButton" then 
+        	v.spin_in()
+		end 
+	end 
+
+	input_mode = S_POPUP
+	--inspector:find_child("name").extra.on_focus_in()
+	
+	current_inspector = inspector
+    inspector.reactive = true
+	inspector.extra.lock = false
+
+--[[
+	create_on_button_down_f(inspector)
+    inspector_xbox.reactive = true
+	function inspector_xbox:on_button_down(x,y,button,num_clicks)
+		editor.n_selected(v, true)
+		screen:remove(inspector)
+		inspector:clear() 
+		current_inspector = nil
+			
+       	for i, c in pairs(g.children) do
+		    if(c.type == "Text") then 
+				c.reactive = true
+		    end 
+        end
+
+		for i, c in pairs(g.children) do
+	     		editor.n_selected(c)
+		end
+
+        screen.grab_key_focus(screen) 
+	    input_mode = S_SELECT
+		if v.extra then 
+			if v.extra.type == "MenuButton" then 
+            	v.spin_out()
+	    	end 
+	    end 
+		return true
+	end 
+]]
+
+	if x_pos ~= nil then 
+		if x_pos ~= "touch" then 
+			screen:add(inspector)
+		else 
+			inspector_apply (v, inspector)
+			inspector_xbox:on_button_down()
+		end 
+	else 
+		screen:add(inspector)
+	end 
+
+
+	if screen:find_child("mouse_pointer") then 
+		 screen:find_child("mouse_pointer"):raise_to_top()
+	end
+end
+
 function editor.view_code(v)
 
 	local WIDTH = 750 
@@ -2190,11 +2568,13 @@ local function save_new_file (fname, save_current_f, save_backup_f)
         local n = table.getn(g.children)
 
 		for i, v in pairs(g.children) do
+				---[[
 			if v.extra then 
 				if v.extra.focus == nil then 
 					editor.inspector(v, "touch")
 				end 
 			end
+				---]]
 	     	local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
 	     	if result2  ~= nil then 
             	contents=result2..contents
@@ -2399,13 +2779,16 @@ function editor.save(save_current_f, save_backup_f)
 
     local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
-	local title = Text {name = "title", text = "Save File" }:set(TSTYLE)
-	local title_shadow = Text {name = "title", text = "Save File"}:set(TSSTYLE)
+	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
+	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
 	local message = Text {text = "File Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
 
 	if save_current_f == nil then 
 		save_current_f = false
+	elseif save_current_f == false then 
+		title.text = "Save As"
+		title_shadow.text = "Save As"
     end 
 
     if current_time_focus then 
@@ -3434,6 +3817,7 @@ function editor.delete()
 		input_mode = S_SELECT
 		return 
    	end 
+
 	for i, v in pairs(g.children) do
     	if g:find_child(v.name) then
 			if(v.extra.selected == true) then
@@ -3452,28 +3836,38 @@ function editor.delete()
 			          			local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") 
 				  				local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(v.name).." SECTION\n\n")
 				  				local main_first = string.sub(main, 1, q-1)
-				  local main_last = string.sub(main, r+1, -1)
-				  main = ""
-				  main = main_first..main_last
-				  editor_lb:writefile("main.lua",main, true)
-	       		        end 
-			     end 
-	       		end 
+				  				local main_last = string.sub(main, r+1, -1)
+				  				main = ""
+				  				main = main_first..main_last
+				  				editor_lb:writefile("main.lua",main, true)
+	       		        	end 
+			     		end 
+	       			end 
 	       	     end 
+
+		 		 for q,w in pairs(g.children) do 
+					if w.type == "Clone" then 
+						if w.source == v then 
+							g:remove(w)
+						end
+					end 
+				 end 
+
         	     g:remove(v)
-		elseif v.extra.type == "ScrollPane" or  v.extra.type == "ArrowPane" then 
-			for j, k in pairs (v.content.children) do 
-			 if(k.extra.selected == true) then
-		     	     editor.n_selected(k)
-        	     	     if (screen:find_child(k.name.."a_m") ~= nil) then 
-	     		 	screen:remove(screen:find_child(k.name.."a_m"))
-                     	     end
-        	     	     v.content:remove(k)
-			 end 
+
+			elseif v.extra.type == "ScrollPane" or  v.extra.type == "ArrowPane" then 
+				for j, k in pairs (v.content.children) do 
+			 		if(k.extra.selected == true) then
+		     	     	editor.n_selected(k)
+        	     	    if (screen:find_child(k.name.."a_m") ~= nil) then 
+	     		 			screen:remove(screen:find_child(k.name.."a_m"))
+                     	end
+        	     	    v.content:remove(k)
+			 		end 
+				end 
 			end 
-		end 
-            end
-        end
+         end
+    end
 
 	if table.getn(g.children) == 0 then 
 	    if screen:find_child("timeline") then 
