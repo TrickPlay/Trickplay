@@ -33,7 +33,7 @@ function ui_element.populate_to (grp, tbl)
 	for i, j in pairs (grp.children) do 
 		local function there()
 			if j.extra then 
-				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" then 
+				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
 					tbl[j.name] = grp:find_child(j.name) 
 					for k,l in pairs (j.content.children) do 
 						if is_this_container(l) == true then 
@@ -1302,7 +1302,7 @@ function ui_element.button(table)
     	fill_color = {255,255,255,0},
     	border_width = 1,
     	border_corner_radius = 12,
-		focussed=nil, 
+		focused=nil, 
 		pressed = nil, 
 		released = nil, 
 		button_image = nil,

@@ -13,7 +13,7 @@ function editor_ui.button(table)
     	text_color = {255,255,255,255}, --"FFFFFF",
     	focus_text_color = {255,255,255,255},
 
-		focussed=nil, 
+		focused=nil, 
 		pressed = nil, 
 		released = nil, 
 
