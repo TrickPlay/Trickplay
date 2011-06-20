@@ -21,6 +21,7 @@ module webgl;
 
 //-----------------------------------------------------------------------------
 
+#include <cstdlib>
 #include "typed_array.h"
 #include "bitmap.h"
 
@@ -54,6 +55,8 @@ GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
     }
     return value;
 }
+
+//-----------------------------------------------------------------------------
 
 TypedArray * get_valid_array( lua_State * L , int index , FreeLater & free_later , TypedArray::Type type , int multiple )
 {
@@ -95,6 +98,53 @@ TypedArray * get_valid_array( lua_State * L , int index , FreeLater & free_later
 
     return array;
 }
+
+//-----------------------------------------------------------------------------
+
+int get_texel_size( GLenum format , GLenum type )
+{
+    if (type == GL_UNSIGNED_BYTE )
+    {
+        switch ( format )
+        {
+            case GL_ALPHA:
+            case GL_LUMINANCE:
+                return 1;
+            case GL_LUMINANCE_ALPHA:
+                return 2;
+            case GL_RGB:
+                return 3;
+            case GL_RGBA:
+                return 4;
+        }
+    }
+    else
+    {
+        switch ( type )
+        {
+            case GL_UNSIGNED_SHORT_4_4_4_4:
+            case GL_UNSIGNED_SHORT_5_5_5_1:
+
+                if ( format == GL_RGBA )
+                {
+                    return 2;
+                }
+                break;
+
+            case GL_UNSIGNED_SHORT_5_6_5:
+
+                if ( format == GL_RGB )
+                {
+                    return 2;
+                }
+                break;
+        }
+    }
+
+    return 0;
+}
+
+
 
 struct WebGLState
 {
@@ -1848,41 +1898,117 @@ interface WebGLRenderingContext [[ WebGLState *]]
             GLenum type = 0;
             const void * pixels = 0;
 
-            if ( lua_gettop( L ) == 10 )
+            if ( lua_gettop( L ) >= 9 )
             {
                 width = luaL_checkint( L , 5 );
                 height = luaL_checkint( L , 6 );
                 type = luaL_checkint( L , 9 );
 
-                if ( ArrayBuffer * buffer = ArrayBuffer::from_lua( L , 10 ) )
-                {
-                    pixels = buffer->get_data();
-                }
-                else if ( TypedArray * array = TypedArray::from_lua( L , 10 ) )
-                {
-                    pixels = array->get( 0 );
-                }
+                int texel_size = get_texel_size( format , type );
 
-                if ( pixels )
+                if ( 0 == texel_size )
                 {
-                    // If either one of these is set, we have to convert the pixels
-
-                    if ( self->unpack_flip_y || self->unpack_premultiply_alpha )
-                    {
-                        luaL_error( L , "Flipping and premultiplying array textures is not yet supported" );
-                    }
-                    else
-                    {
-                        glTexImage2D( target , level , internalformat , width , height , 0 , format , type , pixels );
-                    }
+                    luaL_error( L , "Invalid format/type combination" );
                 }
                 else
                 {
-                    luaL_error( L , "Invalid texture data" );
+                    int row_size = width * texel_size;
+
+                    GLint unpack_alignment;
+
+                    glGetIntegerv( GL_UNPACK_ALIGNMENT , & unpack_alignment );
+
+                    size_t aligned_row_size = ( ( row_size + unpack_alignment - 1 ) / unpack_alignment ) * unpack_alignment;
+
+                    size_t bytes_needed = ( row_size ) + ( aligned_row_size * ( height - 1 ) );
+
+
+                    if ( lua_gettop( L ) == 9 || ( lua_gettop( L ) == 10 && lua_isnil( L , 10 ) ) )
+                    {
+                        pixels = malloc( bytes_needed );
+
+                        if ( pixels )
+                        {
+                            memset( ( void * ) pixels , 0x00 , bytes_needed );
+                            free_later( ( void * ) pixels , free );
+                        }
+                    }
+                    else if ( ArrayBuffer * buffer = ArrayBuffer::from_lua( L , 10 ) )
+                    {
+                        if ( buffer->get_length() < bytes_needed )
+                        {
+                            luaL_error( L , "Buffer is too short" );
+                        }
+                        else
+                        {
+                            pixels = buffer->get_data();
+                        }
+                    }
+                    else if ( TypedArray * array = TypedArray::from_lua( L , 10 ) )
+                    {
+                        switch( type )
+                        {
+                            case GL_UNSIGNED_BYTE:
+
+                                if ( array->get_type() != TypedArray::T_UINT8 )
+                                {
+                                    luaL_error( L , "Array must be Uint8" );
+                                }
+                                else
+                                {
+                                    pixels = array->get( 0 );
+                                }
+                                break;
+
+                            case GL_UNSIGNED_SHORT_5_6_5:
+                            case GL_UNSIGNED_SHORT_4_4_4_4:
+                            case GL_UNSIGNED_SHORT_5_5_5_1:
+
+                                if ( array->get_type() != TypedArray::T_UINT16 )
+                                {
+                                    luaL_error( L , "Array must be Uint16" );
+                                }
+                                else
+                                {
+                                    pixels = array->get( 0 );
+                                }
+                                break;
+                        }
+
+                        if ( pixels && array->get_byte_length() < bytes_needed )
+                        {
+                            pixels = 0;
+
+                            luaL_error( L , "Array is too short" );
+                        }
+                    }
+
+                    if ( pixels )
+                    {
+                        // If either one of these is set, we have to convert the pixels
+
+                        if ( self->unpack_flip_y || self->unpack_premultiply_alpha )
+                        {
+                            luaL_error( L , "Flipping and premultiplying array textures is not yet supported" );
+                        }
+                        else
+                        {
+                            glTexImage2D( target , level , internalformat , width , height , 0 , format , type , pixels );
+                        }
+                    }
+                    else
+                    {
+                        luaL_error( L , "Invalid texture data" );
+                    }
                 }
             }
             else
             {
+                // TODO: In theory, we should convert the image pixels to the given
+                // format/type and upload that, but since we know all of our images are
+                // unsigned byte and RGB or RGBA, we ignore the format/type passed in
+                // and use that. I suppose this could waste some memory...
+
                 type = luaL_checkint( L , 6 );
 
                 if ( Image * image = Bitmap::get_image( L , 7 ) )
