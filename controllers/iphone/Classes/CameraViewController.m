@@ -139,7 +139,8 @@
 
 - (void)presentTheCamera {
     NSLog(@"Presenting the Camera");
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad && imagePickerController.sourceType != UIImagePickerControllerSourceTypeCamera) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
             [popOverController release];
@@ -149,6 +150,7 @@
         CGRect frame = CGRectMake(self.view.frame.size.width/2.0, self.view.frame.size.height/2.0, 20.0, 20.0);
 
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+   
     } else {
         [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
         if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
@@ -162,8 +164,7 @@
     if (!picker) {
         picker = imagePickerController;
     }
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad && picker.sourceType != UIImagePickerControllerSourceTypeCamera) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
             [popOverController release];

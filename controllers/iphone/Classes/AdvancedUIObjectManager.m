@@ -22,10 +22,10 @@
 
 - (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager {
     if ((self = [super init])) {
-        self.rectangles = [[NSMutableDictionary alloc] initWithCapacity:20];
-        self.images = [[NSMutableDictionary alloc] initWithCapacity:20];
-        self.textFields = [[NSMutableDictionary alloc] initWithCapacity:20];
-        self.groups = [[NSMutableDictionary alloc] initWithCapacity:20];
+        self.rectangles = [NSMutableDictionary dictionaryWithCapacity:20];
+        self.images = [NSMutableDictionary dictionaryWithCapacity:20];
+        self.textFields = [NSMutableDictionary dictionaryWithCapacity:20];
+        self.groups = [NSMutableDictionary dictionaryWithCapacity:20];
         currentID = 1;
         
         self.resourceManager = aResourceManager;
