@@ -438,6 +438,7 @@ local mouse_pos = {bottom=0,right=0}
 function left_panes:on_enter(x,y)
     
     --if x ~= RIGHT_PANE_X then return end
+    bottom_i = 1
     mouse_pos.bottom = 0
     mouse_pos.right  = 0
     if overlay.opacity ~= 255*.5 then
@@ -592,6 +593,15 @@ end
 
 function umbrella:to_keys()
     
+    if bottom_i == 1 then
+        
+        animate_list[umbrella.func_tbls.focus_out_button] = nil
+        
+        umbrella.func_tbls.focus_in_button.focus.from = bottom_buttons_foci.opacity
+        
+        animate_list[umbrella.func_tbls.focus_in_button] = umbrella
+        
+    end
     --if mouse_pos ~= nil then
     --    
     --    bottom_buttons_base[mouse_pos]:launch_fade_out()
