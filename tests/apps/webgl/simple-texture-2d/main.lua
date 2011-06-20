@@ -62,10 +62,6 @@ local function CreateSimpleTexture2D( )
         255 , 255 , 0
     })
  
-    pixels:dump()
-    
-    --local bitmap = Bitmap( "nehe.png" )
-
     -- Use tightly packed data
     gl:pixelStorei ( gl.UNPACK_ALIGNMENT, 1 )
   
@@ -76,8 +72,7 @@ local function CreateSimpleTexture2D( )
     gl:bindTexture ( gl.TEXTURE_2D, textureId )
   
     -- Load the texture
-    --gl:texImage2D( gl.TEXTURE_2D , 0 , gl.RGB , gl.RGB , gl.UNSIGNED_BYTE , bitmap )
-    gl:texImage2D ( gl.TEXTURE_2D, 0, gl.RGB, 2, 2, 0, gl.RGB, gl.UNSIGNED_BYTE, pixels )
+    gl:texImage2D ( gl.TEXTURE_2D, 0, gl.RGB, 2, 2, 0, gl.RGB, gl.UNSIGNED_BYTE , pixels )
   
     -- Set the filtering mode
     gl:texParameteri ( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST )
