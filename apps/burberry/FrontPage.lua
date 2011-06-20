@@ -220,7 +220,7 @@ umbrella.func_tbls = {
                 if not right_is_playing then
                     right_blurs[this_func_tbl.curr_tile].opacity=255-this_func_tbl.focus:get_value(p)
                 end
-                if p == 1 then
+                if p == 1 and this_func_tbl.next_tile ~= nil then
                     right_focus.y = TILE_H*(this_func_tbl.next_tile-1)
                     mediaplayer:seek(0)
                     mediaplayer:play()
@@ -351,13 +351,13 @@ umbrella.func_tbls = {
             end,
         },
         fade_in_left_pane = {
-            duration = 500,
+            duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 left_panes.opacity=255*p
             end,
         },
         fade_out_left_pane = {
-            duration = 500,
+            duration = 300,
             func = function(this_obj,this_func_tbl,secs,p)
                 left_panes.opacity=255*(1-p)
             end,
@@ -443,8 +443,10 @@ function left_panes:on_enter(x,y)
     if overlay.opacity ~= 255*.5 then
         
         animate_list[umbrella.func_tbls.fade_out_overlay] = nil
-        animate_list[umbrella.func_tbls.move_to_tile]     = nil
+        --animate_list[umbrella.func_tbls.move_to_tile]     = nil
         animate_list[umbrella.func_tbls.play_next_tile]   = nil
+        
+        umbrella.func_tbls.move_to_tile.next_tile         = nil
         
         umbrella.func_tbls.fade_in_overlay.ovly.from      = overlay.opacity
         
@@ -454,15 +456,6 @@ function left_panes:on_enter(x,y)
         
     end
 end
----[[
-function left_panes:on_leave(x,y)
-    
-    --if x ~= RIGHT_PANE_X then return end
-    mouse_on_nothing = false
-    
-    
-end
---]]
 local function tile_on_enter(i)
     
     if get_curr_page() ~= "front_page" then return end
@@ -475,6 +468,13 @@ local function tile_on_enter(i)
         
         animate_list[umbrella.func_tbls.fade_out_overlay] = umbrella
         
+        if left_is_playing then
+            
+            animate_list[umbrella.func_tbls.fade_in_left_pane] = umbrella
+            
+            left_is_playing = false
+            
+        end
     end
     
     
@@ -512,12 +512,6 @@ local function tile_on_enter(i)
     
     mouse_pos.bottom = bottom_i
     mouse_pos.right  = right_i
-    
-end
-local function tile_on_leave(i)
-    
-    if get_curr_page() ~= "front_page" then return end
-    
     
 end
 for i,t in ipairs(right_tiles) do
@@ -627,16 +621,16 @@ end
 
 mediaplayer.on_end_of_stream = function()
     if left_is_playing then
-        print("l")
+        --print("l")
         left_is_playing = false
         animate_list[front_page.func_tbls.fade_in_left_pane] = front_page
     elseif right_is_playing and bottom_i == 2 then
-        print("r")
+        --print("r")
         front_page.func_tbls.fade_in_blur.next_tile=right_i
         animate_list[front_page.func_tbls.fade_in_blur] = front_page
         right_is_playing=false
     end
-    print("end")
+    --print("end")
 end
 mediaplayer:load("videos/Burberry 1080p.mp4")
 
