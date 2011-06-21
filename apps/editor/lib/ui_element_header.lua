@@ -41,7 +41,10 @@ skin_list = { ["default"] = {
 				   ["button"] = "lib/assets/button-oobe.png",
 				   ["button_focus"] = "lib/assets/buttonfocus-oobe.png", 
 				},
-
+			["tabs"] = {
+				   ["button_focus"] = "lib/assets/tab-active.png", 
+				   ["button"] = "lib/assets/tab-dim.png", 
+				}
 		  }
 	
 	-- used for timeline 

@@ -784,9 +784,237 @@ function editor_ui.scrollPane(t)
             scroll_group:find_child("dn")
 	end 
 ]]
-
-
     return scroll_group
+end
+
+
+function editor_ui.tabBar(t)
+    --default parameters
+    local p = {
+        font  = "FreeSans Medium 12px", 
+        text_font = "FreeSans Medium 12px", 
+    	text_color = {255,255,255,255}, 
+    	text_focus_color = {255,255,255,255}, 
+        
+    	skin = "tabs", 
+    	ui_width = 97,
+    	ui_height = 21, 
+        
+    	focus_color = {255,255,255,255}, --{27,145,27,255}, 	  --"1b911b", 
+    	focus_fill_color = {27,145,27,255}, --"1b911b", 
+    	focus_text_color = {255,255,255,255}, --"1b911b", 
+    	border_width = 1,
+    	border_corner_radius = 12,
+        
+        tab_labels = {
+            "Info",
+            "Focus",
+            --"Items",
+            "More"
+        },
+        tabs = {},
+        label_padding = 0,
+        tab_position = "TOP",
+        
+        display_width  = 280,
+        display_height = 310,
+        tab_spacing = -10,
+        --slant_width  = 20,
+        border_width =  0,
+        border_color = {255,255,255,  0},
+        fill_color   = {  0,  0,  0,  0},
+        label_color  = {255,255,255,  255},
+        unsel_color  = { 60, 60, 60,  0},
+    }
+    
+	local offset = {}
+    local buttons = {}
+    
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+    
+    local create
+    local current_index = 1
+    --local tabs = {}
+    local tab_bg = {}
+    local tab_focus = {}
+	
+    local umbrella     = Group{
+        name="TabContainer",
+		reactive = true,  
+        extra={
+            type="TabBar",
+            insert_tab = function(self,index)
+                
+                if index == nil then index = #p.tab_labels + 1 end
+                
+                table.insert(p.tab_labels,index,"TAB")
+                
+                table.insert(p.tabs,index,Group{})
+                
+                create()
+                
+            end,
+            remove_tab = function(self,index)
+                if index == nil then index = #p.tab_labels + 1 end
+                
+                table.remove(p.tab_labels,index,"TAB")
+                
+                table.remove(p.tabs,index,Group{})
+                
+                create()
+            end,
+            rename_tab = function(self,index,name)
+                assert(index)
+                p.tab_labels[index] = name
+                
+                create()
+            end,
+            
+            move_tab_up = function(self,index)
+                if index == 1 then return end
+                local temp  = p.tab_labels[i-1]
+                p.tab_labels[i-1] = p.tab_labels[i]
+                p.tab_labels[i]   = temp
+                
+                temp      = p.tabs[i-1]
+                p.tabs[i-1] = p.tabs[i]
+                p.tabs[i]   = temp
+                
+                create()
+            end,
+            move_tab_down = function(self,index)
+                if index == #p.tab_labels then return end
+                local temp  = p.tab_labels[i+1]
+                p.tab_labels[i+1] = p.tab_labels[i]
+                p.tab_labels[i]   = temp
+                
+                temp      = p.tabs[i+1]
+                p.tabs[i+1] = p.tabs[i]
+                p.tabs[i]   = temp
+                
+                create()
+            end,
+            
+            --switching 'visible tab' functions
+            display_tab = function(self,index)
+                if index < 1 or index > #p.tab_labels then return end
+                p.tabs[current_index]:hide()
+				--tab_bg[current_index]:show()
+				--tab_focus[current_index]:hide()
+                buttons[current_index].on_focus_out()
+                current_index = index
+                p.tabs[current_index]:show()
+                buttons[current_index]:raise_to_top()
+                buttons[current_index].on_focus_in()
+				--tab_bg[current_index]:hide()
+				--tab_focus[current_index]:show()
+            end,
+            previous_tab = function(self)
+                if current_index == 1 then return end
+                
+                self:display_tab(current_index-1)
+            end,
+            next_tab = function(self)
+                if current_index == #p.tab_labels then return end
+                
+                self:display_tab(current_index+1)
+            end,
+			
+			get_tab_group = function(self,index)
+				return p.tabs[index]
+			end,
+			get_index = function(self)
+				return current_index
+			end,
+			get_offset = function(self)
+				return self.x+offset.x, self.y+offset.y
+			end
+        }
+
+    }
+    
+    create = function()
+        
+        local labels, txt_h, txt_w 
+        
+		current_index = 1
+		
+        umbrella:clear()
+        tab_bg = {}
+        tab_focus = {}
+        
+        local bg = Rectangle{
+            color        = p.fill_color,
+            border_color = p.border_color,
+            border_width = p.border_width,
+            w = p.display_width,
+            h = p.display_height,
+        }
+        
+        umbrella:add(bg)
+        for i = 1, #p.tab_labels do
+			editor_use = true
+            if p.tabs[i] == nil then
+                p.tabs[i] = Group{}
+            end
+
+			buttons[i] = ui_element.button{ skin=p.skin, ui_width=p.ui_width, ui_height=p.ui_height, 
+						 focus_color=p.focus_color, border_width=p.border_width, border_corner_radius=p.border_corner_radius,
+						 label= p.tab_labels[i], text_font=p.font, text_color=p.text_color, fill_color=p.unsel_color, 
+						 focus_fill_color=p.fill_color, focus_text_color=p.focus_text_color, 
+						 pressed=function() umbrella:display_tab(i) end, label_align = "left"} 
+
+			p.tabs[i]:hide()
+            buttons[i].position = {0,0}
+            buttons[i].on_focus_out()
+
+            if p.tab_position == "TOP" then
+                buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
+                p.tabs[i].y  = buttons[i].h
+            else
+                p.tabs[i].x  = buttons[i].w
+                buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
+            end
+            umbrella:add(p.tabs[i],buttons[i])
+			offset.x = p.tabs[i].x
+			offset.y = p.tabs[i].y
+			editor_use = false
+        end
+        if p.tab_position == "TOP" then
+            bg.y = buttons[1].h-p.border_width
+        else
+            bg.x = buttons[1].w-p.border_width
+        end
+        
+        for i = #p.tab_labels+1, #p.tabs do
+            p.tabs[i]  = nil
+            buttons[i] = nil
+        end
+		
+		umbrella:display_tab(current_index)
+    end
+    
+    create()
+    
+    --set the meta table to overwrite the parameters
+    mt = {}
+    mt.__newindex = function(t,k,v)
+        p[k] = v
+		if k ~= "selected" then 
+        	create()
+		end 
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(umbrella.extra, mt)
+
+    return umbrella
 end
 
 

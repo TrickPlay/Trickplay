@@ -2024,7 +2024,7 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	----------------------------------------------------------------------------
 	local WIDTH = 300
   	local HEIGHT = 400
-    local PADDING = 13
+    local PADDING = 6--13
 
 	local L_PADDING = 20
     local R_PADDING = 50
@@ -2045,7 +2045,7 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title, title_shadow 
-	local inspector_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
+	local inspector_bg = Image{src = "lib/assets/panel-tabs.png", name = "open_project", position = {0,0}}
 	local inspector_items = {}
 	
 	if is_this_widget(v) == true then 
@@ -2071,14 +2071,19 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	for i, c in pairs(g.children) do
 	     editor.n_selected(c)
 	end
-		-- Scroll	
+
+	-- Scroll	
 	local scroll = editor_ui.scrollPane{}
 
 	-- Buttons 
+    local button_viewcode = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+    					  skin = "default", ui_width = 80, ui_height = 27, label = "View Code", focus_color = {27,145,27,255}, focus_object = tabs}
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = scroll}
+    					  skin = "default", ui_width = 80, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = tabs}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "Apply", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
+    					  skin = "default", ui_width = 80, ui_height = 27, label = "Apply", focus_color = {27,145,27,255},active_button =true, focus_object = tabs} 
+	--Tabs 
+	local tabs = editor_ui.tabBar{}
 
 	local s_func = function()
 		if current_focus then 
@@ -2086,13 +2091,13 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
-		scroll.on_focus_in()
+		tabs.on_focus_in()
 	end
 
 	--Focus Destination
+	button_viewcode.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel",  [keys.Return] = "button_viewcode", [keys.Up] = s_func}
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
-
 	--editor_use = false
 	
 	-- inspector group 
@@ -2106,14 +2111,17 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	  		xbox:set{position = {275, 0}},
 			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
-			scroll:set{name = "scroll", position = {0, TOP_BAR+1}, reactive=true},
-			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
-			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
-		} ,
+			--scroll:set{name = "scroll", position = {0, TOP_BAR+1}, reactive=true},
+			tabs:set{name = "tabs", position = {5, TOP_BAR}, reactive=true},
+			button_viewcode:set{name = "button_viewcode", position = { WIDTH - button_viewcode.w - button_cancel.w - button_ok.w - 3*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
+			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
+			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - 1*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}
+		},
 		scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}	
 	}
 
 	-- Button Event Handlers
+	button_viewcode.pressed = function() editor.view_code(v)  xbox:on_button_down(1) end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
 	button_ok.pressed = function() inspector_apply(v, inspector) xbox:on_button_down(1) end
 
@@ -2152,7 +2160,7 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 				end	
         	end 
 	    
-else 
+		else 
 			y_space = screen.h - v.y - v.h
         	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
 				inspector.y = v.y + v.h + INSPECTOR_OFFSET
@@ -2195,7 +2203,7 @@ else
 	local X_INDENT = 13
 	local TOP_PADDING = 43
 	
-	local function make_textImput_item(attr_n, attr_v, attr_s) 
+	local function make_textInput_item(attr_n, attr_v, attr_s) 
 
 		if attr_n == "button" or attr_n == "title" or attr_n == "label" or attr_n == "lock" or attr_n == "focus" then 
 			return 
@@ -2211,7 +2219,7 @@ else
 		-- Text Input Field 	
 		local input_text = ui_element.textInput{name = "input_text", skin = "custom", ui_width = 39, ui_height = 21 , text = "", padding = 3 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0,}
 
-		input_text.x = label.x + label.w + 3
+		input_text.x = label.x + label.w + PADDING -- 3
 		input_text.y = 0
 
 		editor_use = false
@@ -2227,60 +2235,77 @@ else
 	    attr_s = attr_t[i][3] 
         attr_v = tostring(attr_v)
 	    if(attr_s == nil) then attr_s = "" end 
-	    local item = make_textImput_item(attr_n, attr_v, attr_s) 
+	    local item = make_textInput_item(attr_n, attr_v, attr_s) 
 
-		if item == nil then 
-			break
-		end 
-
-	    if(item.w <= space) then 
-		 	if (item.h > prev_item_h) then 
-             	items_height = items_height + (item.h - prev_item_h) 
-		     	prev_item_h = item.h
-	     	end 
-         	item.x = used + H_SPACE 
-		 	item.y = prev_y
-		 	space = space - item.w
-	    else 
-		 	if (attr_n == "ui_width" or attr_n == "w") then 
-				items_height = items_height - 12 -- imsi !! 
- 		 	end 
-		 	item.y = items_height 
-         	item.x = X_INDENT 
-		 	prev_y = item.y 
-		 	items_height = items_height + item.h 
-		 	space = WIDTH - item.w
-        end 
-	    used = item.x + item.w 
-
-	    if (xbox_xpos == 465) then  
-			if (attr_n == "title") then 
-			elseif(attr_n == "button") then 
+		if item ~= nil then 
+	    	if(item.w <= space) then 
+		 		if (item.h > prev_item_h) then 
+             		items_height = items_height + (item.h - prev_item_h) 
+		     		prev_item_h = item.h
+	     		end 
+         		item.x = used + H_SPACE 
+		 		item.y = prev_y
+		 		space = space - item.w
 	    	else 
+		 		if (attr_n == "ui_width" or attr_n == "w") then 
+					items_height = items_height - 12 -- imsi !! 
+ 		 		end 
+		 		item.y = items_height 
+         		item.x = X_INDENT 
+		 		prev_y = item.y 
+		 		items_height = items_height + item.h 
+		 		space = WIDTH - item.w
+        	end 
+	    	used = item.x + item.w 
+
+	    	if (xbox_xpos == 465) then  
+				if (attr_n == "title") then 
+				elseif(attr_n == "button") then 
+	    		else 
 	            item_group:add(item)
-	    	end 
-	    else 
-	        if (attr_n == "title") then 
-		    	--item.y = item.y + TOP_PADDING 
-	            --inspector:add(item)
-	    	elseif(attr_n == "button") then 
-		    	if(attr_v == "view code") then 
-		        	item.y = 570
-		    	else 
-		        	item.y = 620
-		        	space = space + 100
-	            end 
-	            --inspector:add(item)
-	        else 
-		    	item.y = item.y - TOP_PADDING
-	            item_group:add(item)
-	        end 
-	    end
+	    		end 
+	    	else 
+	        	if (attr_n == "title") then 
+		    		--item.y = item.y + TOP_PADDING 
+	            	--inspector:add(item)
+	    		elseif(attr_n == "button") then 
+		    		if(attr_v == "view code") then 
+		        		item.y = 570
+		    		else 
+		        		item.y = 620
+		        		space = space + 100
+	            	end 
+	            	--inspector:add(item)
+	        	else 
+		    		item.y = item.y - TOP_PADDING
+	            	item_group:add(item)
+					break
+	        	end 
+	    	end
+	  	end
    	end 
+
+	print(scroll.visible_w, scroll.visible_h)
+	print(scroll.visible_w, scroll.visible_h)
+	print(scroll.visible_w, scroll.visible_h)
+	print(scroll.visible_w, scroll.visible_h)
+	print(scroll.visible_w, scroll.visible_h)
 
    	scroll.virtual_h = item_group.h
    	scroll.content = item_group
-	
+
+	print(scroll.virtual_w, scroll.virtual_h)
+	print(scroll.virtual_w, scroll.virtual_h)
+	print(scroll.virtual_w, scroll.virtual_h)
+	print(scroll.virtual_w, scroll.virtual_h)
+
+	if tabs.tabs[1] == nil then 
+		tabs.tabs[1] = Group{}
+	end 
+
+	tabs.tabs[1] = Group {children = {scroll}} 
+	tabs:add(tabs.tabs[1])
+
    	scroll.extra.focus = {[keys.Tab] = "button_cancel"}
    	inspector.extra.lock = false
    	screen:add(inspector)
@@ -3655,7 +3680,6 @@ function editor.duplicate()
 						   								end
                                     				elseif type(j[b]) == "table" then  
 														print("3 : table", b)
-														--dumptable(j[b])
 						   								local temp_t = {}
 						   								for k,l in pairs (j[b]) do 
 															temp_t[k] = l
