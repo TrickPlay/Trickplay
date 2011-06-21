@@ -6,7 +6,11 @@
 
 //.............................................................................
 
-static Debug_OFF log( "BITMAP" );
+#define TP_LOG_DOMAIN   "BITMAP"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //.............................................................................
 
@@ -31,7 +35,7 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
     }
     else
     {
-        log( "LOADING ASYNC '%s'" , _src );
+        tplog( "LOADING ASYNC '%s'" , _src );
 
         RefCounted::ref( this );
 
@@ -46,7 +50,7 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
 
 Bitmap::~Bitmap()
 {
-    log( "DESTROYING BITMAP %p" , this );
+    tplog( "DESTROYING BITMAP %p" , this );
 
     if ( image )
     {
@@ -72,6 +76,13 @@ guint Bitmap::height() const
 
 //.............................................................................
 
+guint Bitmap::depth() const
+{
+    return image ? image->depth() : 0;
+}
+
+//.............................................................................
+
 bool Bitmap::loaded() const
 {
     return image ? true : false;
@@ -81,7 +92,7 @@ bool Bitmap::loaded() const
 
 void Bitmap::callback( Image * image , gpointer me )
 {
-    log( "  ASYNC DECODE COMPLETED FOR %p : %s" , me , image ? "SUCCESS" : "FAILED" );
+    tplog( "  ASYNC DECODE COMPLETED FOR %p : %s" , me , image ? "SUCCESS" : "FAILED" );
 
     Bitmap * self = ( Bitmap * ) me;
 
@@ -100,7 +111,7 @@ void Bitmap::callback( Image * image , gpointer me )
 
 void Bitmap::destroy_notify( gpointer me )
 {
-    log( "  UNREF %p" , me );
+    tplog( "  UNREF %p" , me );
 
     RefCounted::unref( ( RefCounted * ) me );
 }

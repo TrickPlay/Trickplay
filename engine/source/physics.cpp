@@ -5,12 +5,16 @@
 #include "lb.h"
 #include "util.h"
 
+//-----------------------------------------------------------------------------
+#define TP_LOG_DOMAIN   "PHYSICS"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
+//.............................................................................
+
 namespace Physics
 {
-
-static Debug_OFF plog;
-
-//.............................................................................
 
 World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_meter )
 :
@@ -234,7 +238,7 @@ int World::create_body( int element , int properties , const char * metatable )
 
     if ( ! body )
     {
-        g_warning( "FAILED TO CREATE PHYSICS BODY" );
+        tpwarn( "FAILED TO CREATE PHYSICS BODY" );
         return 0;
     }
 
@@ -981,7 +985,7 @@ Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
     mapped_handler = g_signal_connect_after( G_OBJECT( actor ) , "notify::mapped" , ( GCallback ) actor_mapped_notify , this );
 
 
-    plog( "CREATED BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
+    tplog( "CREATED BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
 }
 
 //.............................................................................
@@ -989,7 +993,7 @@ Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
 
 Body::~Body()
 {
-    plog( "DESTROYING BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
+    tplog( "DESTROYING BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
 
     if ( body )
     {
@@ -1037,11 +1041,11 @@ Body::~Body()
 
 void Body::body_destroyed( b2Body * body )
 {
-    plog( "B2BODY BEING DESTROYED" );
+    tplog( "B2BODY BEING DESTROYED" );
 
     if ( Body * self = Body::get( body ) )
     {
-        plog( "CLEARING B2BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
+        tplog( "CLEARING B2BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
 
         if ( self->actor )
         {
