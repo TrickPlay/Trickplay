@@ -140,12 +140,10 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
 /*
     Class: Image
     
-    Images let you load and display images...wether from local files or URIs. They have
-    all the functions and methods of <UIElement>.
-    
-    All images are, by default, loaded synchronously; you have to set the <async> property
-    to true if you want to override that behavior. If you do, you can attach a function to
-    the <on_loaded> event. This will tell you when, and if, the image data is loaded.   
+    An Image object handles operations associated with image files, such as 
+    their loading and display. In addition, an Image object implements all 
+    the <UIElement> methods and properties.
+
 */
 
 class Image [[ClutterActor*]] actor
@@ -176,30 +174,41 @@ class Image [[ClutterActor*]] actor
     
     	Property: src
     	
-    	This is a string that specifies where the image will be loaded from. It can
-    	be a path into your app bundle or a URI. 
+    	The src property is a string that references an image file. The string
+    	may refer to either a path in your application bundle or a URI.
     	
-    	If the <async> property is not set or is false, the image will be loaded 
-    	immediately after you set this property. You can then consult the <loaded> 
-    	property to make sure it was loaded succesfully.
+    	Setting the src property also begins the process of loading the image.
+    	By default, image loading is performed synchronously. To determine the
+    	success or failure of a synchronous load, you can check the <loaded> 
+    	property immediately after setting the src property.
     	
-    	If the <async> property is set to true, the image will begin loading in 
-    	the background and the <on_loaded> event will fire when it is finished. In the
-    	meantime, the <loaded> property will be false. If you set the src more than once
-    	before you receive the <on_loaded> event, there are no guarantees as to which 
-    	one will be loaded last, so be careful.
+    	Asynchronous image loading is supported by setting the async
+    	property prior to setting the src property. For instructions on 
+    	handling asynchonous image loading, refer to the <async> property.
     	
-    	(code)
-    	local my_image = Image()
-    	my_image.src = "assets/foo.png"
-    	(end)
+    	*Default Setting:* nil
     	
-    	or
+    	*Examples:* Create an Image object and load its associated image synchronously
     	
     	(code)
-    	local my_image = Image{ src = "assets/foo.png" }
+    	local myImage = Image()
+    	myImage.src = "assets/foo.png"		-- load image synchronously
+    	if myImage.loaded == false then
+    	  -- Image not loaded; insert error-handling code here
+    	end
     	(end)
-    
+    	
+    	(code)
+    	-- Same as above, but combining object creation and
+    	-- the setting of the src property in a single statement
+    	local myImage = Image{ src = "assets/foo.png" }
+    	if myImage.loaded == false then
+    	  -- Insert error-handling code here
+    	end
+    	(end)
+    	
+    	*See Also:* the <loaded> property, the <async> property
+    	    
     */
     
     string src
@@ -215,8 +224,20 @@ class Image [[ClutterActor*]] actor
 	/*
 		Property: base_size
 		
-		This is a table containing the width and height of the image as it was when 
-		you loaded it; not its current dimension on screen.
+		The base_size is a table that contains two integer values that specify
+		the image's original width and height, in that order, in pixels.
+		
+		The base_size property is set automatically as part of the image-loading
+		operation. Its values can be retrieved, but they cannot be set.
+		
+		Notice that the image's display width and height may change during
+		the execution of your application, but the base_size values will remain
+		set to the image's original size.
+		
+		*Default Setting:* Before the image has been loaded: nil.
+		
+		*See Also:* the <src> property
+		
 	*/
 	
     readonly table base_size
@@ -242,12 +263,31 @@ class Image [[ClutterActor*]] actor
 	/*
 		Property: tile
 		
-		This property is a table of two boolean values which determine whether the
-		image will be tiled horizontally and vertically to fill its width and height.
+		The tile property is a table containing two boolean values that specify 
+		whether the image should be tiled horizontally and/or vertically. An 
+		image may be tiled if its actual size is less than the size of the area 
+		it needs to fill.
 		
-		So, for example, if you load an image that is 50 pixels wide, set its
-		width to 200 and tile to { true, fale }, the image will be tiled 4 times, to fill
-		the 200 pixels. 
+		The image area to fill is defined by setting the Image object's 
+		width and height properties.
+
+		If tiling is activated, the image will tile as many times as necessary 
+		to fill the area. For example, an image that is 50 pixels wide and 
+		whose width property is 200 pixels will tile four times to fill the 
+		entire width. Given the same scenario, but with tiling not activated, 
+		the image will display one time and the remaining space will remain 
+		empty.
+		
+		*Default Settings:* tile = { false, false }
+		
+		*Example:* Activate horizontal tiling
+		
+		(code)
+		mImage.tile = { true, false }	-- horizontal tiling active, vertical tiling inactive
+		(end)
+		
+		*See Also:* the <UIElement.width> and <UIElement.height> properties
+		
 	*/
 	
     table tile
@@ -280,9 +320,58 @@ class Image [[ClutterActor*]] actor
 	/*
 		Property: async
 		
-		This is a boolean value that determines how the image is loaded. If set to true, the
-		image will be loaded in the background. You should set this before you set the <src> 
-		property.
+		The async property is a boolean value that determines whether the image
+		is loaded synchronously (async == nil or async == false) or 
+		asynchronously (async == true).
+		
+		Asynchronously-loaded images enable your application to continue to run 
+		while the image is loading. After the image is completely loaded, your 
+		application is notified by firing the Image object's on_loaded() event 
+		handler. The event handler can then perform any applicable operations, 
+		such as resize or display the image.
+		
+		After starting one asynchronous load, it is possible for your 
+		application to begin a second image-load  (synchronous or 
+		asynchronous) before the first load completes. There is no guarantee, 
+		however, that load operations will complete in the same order in which 
+		they were started; it is possible that the second load will finish 
+		before the first load. Therefore, your code should not contain any
+		assumptions about the order in which images finish loading.
+		
+		To load the image asynchronously, the async property must be initialized
+		prior to beginning the load operation. The load operation is then started
+		by setting the src property. The example code below demonstrates the required
+		operations.
+		
+		*Default Setting:* false, i.e., images are loaded synchronously
+		
+		*Example:* Load an image asynchronously
+		
+		(code)
+		-- Create an Image object
+		local myImage = Image()
+		myImage.async = true		-- will load image asynchronously
+
+		-- Define event handler
+		function on_loadedHandler( loadedImage, failed )
+		  -- Best practice is to unhook the handler after it has served its purpose
+		  loadedImage.on_loaded = nil
+
+		  if failed then
+		    -- Image did not load; insert handling code here
+		  else
+		    -- Image is loaded; insert any applicable operations here
+		  end
+		end
+
+		-- Hook our event handler to the Image object
+		myImage.on_loaded = on_loadedHandler
+
+		-- Start loading the image asynchronously
+		myImage.src = "images/SplashScreen.png"
+		(end)
+		
+		*See Also:* the <on_loaded> event handler, the <src> property
 	*/
 	
     bool async
@@ -296,8 +385,24 @@ class Image [[ClutterActor*]] actor
 	/*
 		Property: loaded
 		
-		This will be true if an image was loaded successfully. It can be false if the last image
-		failed to load or while a new image is being loaded asynchronously. 
+		The boolean loaded property indicates the success/true or failure/false
+		of the image's synchronous-load operation.
+		
+		The loaded property will also be set to false while an image is loading
+		asynchronously. This may make it tempting to intermittently poll the 
+		loaded property to determine if the image has finished loading, but you 
+		should not do this because the loaded property can also be set to false 
+		due to the load operation failing; in such a scenario, your polling 
+		application will wait forever for the property to become true. Instead, 
+		you should set up an on_loaded() event handler to notify your 
+		application when an asynchronous-load operation has completed.
+		
+		*Default Setting:* false
+		
+		*Example:* To see the loaded property in use, check the code example 
+		given in the <src> property.
+		
+		*See Also:* the <src> property
 	*/	
 	
 	readonly bool loaded
@@ -349,16 +454,33 @@ class Image [[ClutterActor*]] actor
 	/*
 		Event: on_loaded
 		
-		If an image is loaded asynchronously, this event will fire when it is done loading
-		or if it fails to load.
+		The on_loaded() event handler is fired when an asynchronously-loaded 
+		image has finished loading.
 		
-		It is recommended that you detach this event when you are done with it by setting
-		it to nil.
+		*Prototype:*
 		
-		Arguments:
+		(code)
+		void on_loaded( Image loadedImage, boolean failed )
+		(end)
 		
-			image - The image that finished loading.
-			failed - A boolean value that is true if the image failed to load.
+		*Arguments:*
+		
+		loadedImage - the Image object that has finished loading
+		failed - boolean value indicating failure/true or success/false of the 
+		load operation
+		
+		*Return Value:* None
+		
+		When you are finished with the event handler, it is a recommended best
+		practice to set it to nil.
+		
+		*Default Setting:* nil
+		
+		*Example:* To see a code sample that uses the on_loaded() event handler,
+	    refer to the <async> property.
+		
+		*See Also:* the <async> property, the <src> property
+		
 	*/
 	
     callback on_loaded
@@ -374,13 +496,57 @@ class Image [[ClutterActor*]] actor
 	/*
 		Event: on_size_changed
 		
-		This event fires every time the image size changes.
+		The on_size_changed() event handler is fired whenever the image size 
+		changes.
 		
-		Arguments:
+		*Prototype:*
 		
-			image - The image that the event applies to.
-			width - The new width of the image.
-			height - The new height of the image.
+		(code)
+		void on_size_changed( Image changedImage, int newWidth, int newHeight )
+		(end)
+		
+		*Arguments:*
+		
+		changedImage - the Image object that has changed size
+		newWidth - integer width of the resized image
+		newHeight - integer height of the resized image
+
+		*Return Value:* None
+		
+		*Default Setting:* nil
+		
+		*Example:*
+
+		(code)
+		-- Create an Image object
+		local myImage = Image()
+
+		-- Define event handler
+		function on_changeHandler( changedImage, newWidth, newHeight )
+		  -- Perform any desired operations here. For example...
+
+		  -- Get current tile settings
+		  local tile = changedImage.tile
+
+		  -- Will new size fit horizontally in display area?
+		  if( newWidth < changedImage.width )then
+		    -- No, image is too small, so tile the image horizontally
+		    tile[ 1 ] = true
+		  end
+
+		  -- Will image fit vertically?
+		  if( newHeight < changedImage.height )then
+		    -- No, so tile the image vertically
+		    tile[ 2 ] = true
+		  end
+
+		  -- Apply any changed tile settings
+		  changedImage.tile = tile
+		end
+
+		-- Hook our event handler into the Image object
+		myImage.on_size_changed = on_changeHandler
+        (end)
 	*/
 	
     callback on_size_changed
