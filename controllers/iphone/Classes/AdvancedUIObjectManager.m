@@ -429,6 +429,7 @@
     
     if (socketManager) {
         [socketManager release];
+        socketManager.delegate = nil;
         socketManager = nil;
     }
     
