@@ -7,44 +7,85 @@ module bitmap;
 /*
     Class: Bitmap
 
-    Bitmap lets you load images from your app bundle or a URL. Unlike <Image>,
-    you cannot add a Bitmap directly to the screen. Bitmap lets you load and
-    keep a bitmap in system memory until you need to display it.
-
-    To display a Bitmap, you use the <Bitmap.Image> function; which creates an
-    <Image> object. At that point, the Bitmap is no longer necessary and you can
-    choose to keep it or throw it away.
-
-    When you create an image, you can also choose to use only a region of the
-    whole bitmap.
-
-    Bitmaps can also be used as brushes for <Canvas>.
-
+	The Bitmap object is typically used as a brush when drawing on a 
+	vector-graphics-based <Canvas at file:canvas-lb.html#Canvas> object. A 
+	Bitmap object can also be displayed on the screen, but it must first be 
+	converted to an Image object by calling its <Bitmap.Image> function; the 
+	resulting Image object can then be added to the screen for display.
+	
+	Like the Image object, a Bitmap object can be loaded synchronously or 
+	asynchronously from either the application bundle or from a URI.
+	
 */
 
 class Bitmap [[ Bitmap * ]]
 {
     /*
         Constructor: Bitmap
+        
+        The constructor for a Bitmap object; initiates a synchronous(default) 
+        or asynchronous image-load operation.
+        
+        *Arguments:*
 
-        You construct a bitmap by secifying a src, which can be a path to
-        your app bundle or a URI. By default, bitmaps are loaded synchronously
-        but if you pass true for async, they are loaded asynchronously.
+		src - String specifying the image file to load. The src argument can 
+		reference either the application bundle or a URI.
+		async - Optional boolean flag indicating whether to load the image 
+		asynchronously(true) or	synchronously(false). By default, files are 
+		loaded synchronously.
+		
+		*Return Value:* The generated Bitmap object
 
-        You can check the <Bitmap.loaded> property to ensure the Bitmap was
-        loaded successfully.
+		Loading the image file for a Bitmap object is essentially identical to 
+		loading one for an <Image> object. Both objects load the image 
+		synchronously by default, and both also support asynchronous loading. 
+		A Bitmap asynchronous-load operation is initiated by sending a true 
+		value as the async argument to the object's constructor. Completion of 
+		an asynchronous load causes the firing of the <on_loaded> event 
+		handler. Also, the Bitmap object's <loaded> property can be accessed 
+		to check on the success or failure of a synchronous-load operation. 
+		Refer to the discussion of the <Image.async> property for additional 
+		details concerning synchronous and asynchronous file loading.
 
-        Arguments:
+		*Example:* Create a Bitmap object, loading the image synchronously
+		
+		(code)
+		-- Initiate synchronous image load
+		local myBitmap = Bitmap( "image.png" )
+		
+		-- Did error occur during image loading?
+		if myBitmap.loaded == false then
+		  -- Yes, handle error here
+		  print( "Failed to load the image" )
+		end
+		(end)
+		
+		*Example:* Create a Bitmap object, loading the image asynchronously
+		
+		(code)
+		-- Initiate asynchronous image load
+		local myBitmap = Bitmap( "image.png", true )
+		
+		-- Asynchronous-load event handler
+		function myBitmap:on_loaded( failed )
+		  if failed then
+		    -- Image did not load; insert handling code here
+		    print( "Failed to load the image" )
+		  else
+		    -- Image is loaded; insert any applicable operations here
+		    print( "The image has been loaded, size = ", self.width, " x ", self.height )
+		  end
+		end
+		(end)
 
-            src - Path or URI to a bitmap.
-            async - Whether to load it asynchronously.
+		*See Also:* the <Canvas at file:canvas-lb.html#Canvas> class, 
+		the <Image at file:clutter_image-lb.html#Image> class, 
+		the <loaded> property, the <on_loaded> event handler, 
+		the <Image.async> property
 
-        Returns:
-
-            bitmap - A newly created bitmap.
     */
 
-    Bitmap( string src , bool async = false )
+    Bitmap( string src, bool async = false )
         [[
             self = lb_construct( Bitmap , new Bitmap( L , src , async ) );
         ]];
@@ -60,7 +101,12 @@ class Bitmap [[ Bitmap * ]]
     /*
         Property: width
 
-        The width of the bitmap in pixels.
+		The width property specifies the width in pixels of the Bitmap object's
+		loaded image. The value of the width property may be retrieved, but it 
+		may not be set.
+		
+		*See Also:* the <height> property, the <w> property
+
     */
 
     readonly int width
@@ -70,8 +116,16 @@ class Bitmap [[ Bitmap * ]]
 
     /*
         Property: w
+        
+        The w property specifies the width in pixels of the Bitmap object's 
+        loaded image. The value of the w property may be retrieved, but it may 
+        not be set.
+        
+        The w property is a shorthand version of the <width> property; both 
+        properties will return the same value.
+        
+        *See Also:* the <height> property
 
-        The width of the bitmap in pixels.
     */
 
     readonly int w
@@ -82,7 +136,12 @@ class Bitmap [[ Bitmap * ]]
     /*
         Property: height
 
-        The height of the bitmap in pixels.
+		The height property specifies the height in pixels of the Bitmap 
+		object's loaded image. The value of the height property may be 
+		retrieved, but it may not be set.
+		
+		*See Also:* the <width> property, the <h> property
+
     */
 
     readonly int height
@@ -93,7 +152,15 @@ class Bitmap [[ Bitmap * ]]
     /*
         Property: h
 
-        The height of the bitmap in pixels.
+		The h property specifies the height in pixels of the Bitmap object's 
+		loaded image. The value of the h property may be retrieved, but it may 
+		not be set.
+		
+		The h property is a shorthand version of the <height> property; both 
+		properties will return the same value.
+		
+		*See Also:* the <width> property
+
     */
 
     readonly int h
@@ -101,15 +168,54 @@ class Bitmap [[ Bitmap * ]]
             h = self->height();
         ]];
 
+
+    /*
+        Property: depth
+
+        The depth property specifies the number of bytes per pixel. If a bitmap has
+        an alpha channel, it will be 4, otherwise it will be 3.
+
+        If the bitmap has not been loaded yet, it will return 0.
+    */
+
+    readonly int depth
+        [[
+            depth = self->depth();
+        ]];
+
+    /*
+        Property: has_alpha
+
+        This property is true when the bitmap has an alpha channel and false otherwise.
+    */
+
+    readonly bool has_alpha
+        [[
+            has_alpha = self->depth() == 4;
+        ]];
+
     /*
         Property: loaded
 
-        Whether the bitmap has been loaded successfully. If you loaded the bitmap
-        synchronously, you can check the value of this property immediately after
-        you create the bitmap. If you loaded it asynchronously, this property
-        will be false until after the <Bitmap.on_loaded> event is fired. Then,
-        it will become true if the bitmap has been loaded or remain false if there
-        was a problem.
+		The boolean loaded property indicates the success/true or failure/false
+		of the Bitmap object's synchronous-load operation.
+		
+		The loaded property will also be set to false while an image is loading
+		asynchronously. This may make it tempting to intermittently poll the 
+		loaded property to determine if the image has finished loading, but you 
+		should not do this because the loaded property can also be set to false 
+		due to the load operation failing; in such a scenario, your polling 
+		application will wait forever for the property to become true. Instead, 
+		you should set up an <on_loaded> event handler to notify your 
+		application when an asynchronous-load operation has completed.
+		
+		*Default Setting:* false
+		
+		*Example:* To see the loaded property in use, check the synchronous 
+		code example given in the <Bitmap> constructor description.
+		
+		*See Also:* the <Bitmap> constructor
+
     */
 
     readonly bool loaded
@@ -119,36 +225,46 @@ class Bitmap [[ Bitmap * ]]
 
     /*
         Function: Image
+        
+        The Image function converts the Bitmap object to an Image object which 
+        can then be added to the screen. It is possible to convert the Bitmap's 
+        entire image or a just portion of it.
+        
+        After the Bitmap has been converted, the resulting Image object has no 
+        dependencies upon the original Bitmap object; the Bitmap object may be 
+        dereferenced (set to nil), if desired.
 
-        Creates an <Image> object from the bitmap or a part of the bitmap. You can
-        use this Image as you would any other <UIElement> and you do not need to
-        keep the source bitmap once the Image is created.
+        *Arguments:*
 
-        Arguments:
+        props - Optional table of Image properties that are passed to the 
+        Image constructor
 
-            props - Optional table of properties that are passed to the Image constructor.
-
-            source_rectangle - If you only want the Image to use a portion of the original
-                               bitmap, you can pass a table with 4 integers designating the
-                               source rectangle to use for the new Image. The 4 integers are,
-                               in order: the left coordinate, the top coordinate, the width and
-                               the height.
-
-        Returns:
-
-            image - A newly created Image object.
-
-            nil - If the bitmap has not been loaded or the coordinates of the source_rectangle are invalid.
-
-        Example:
-
-        This creates a Bitmap and then an Image from it; using only an area of 100x100 pixels starting
-        at the top left corner of the bitmap. It also sets the Image's opacity to 128.
-
+        source_rectangle - Optional table of four coordinates specifying the 
+        portion of the Bitmap image to convert. The four coordinates, in order, 
+        are { left, top, width(right), height(bottom) }. By default, the entire 
+        image is converted. 
+            
+        *Return Values:*
+        
+        image - the new Image object. If an error occurred, returns nil. 
+        Possible reasons for failure include the Bitmap's image had not been 
+        successfully loaded or the source_rectangle argument's coordinates were 
+        invalid.
+        
+        *Example:* Generate an Image object from a Bitmap
+        
         (code)
-            local bitmap = Bitmap( "image.png" )
-            local image = bitmap:Image( { opacity = 128 } , { 0 , 0 , 100 , 100 } )
+        -- Create a Bitmap object
+        local myBitmap = Bitmap( "image.png" ) -- load synchronously
+        
+        -- Convert to Image, using only a portion of the original Bitmap image,
+        -- and also setting the Image's opacity
+        local myImage = myBitmap:Image( { opacity = 128 },
+                                        { 0, 0, 100, 100 } ) -- portion of Bitmap to convert
         (end)
+
+		*See Also:* the <Image at file:clutter_image-lb.html#Image> class
+		
     */
 
     Image Image( table props = 0 , table source_rectangle = 0 )
@@ -218,14 +334,23 @@ class Bitmap [[ Bitmap * ]]
     /*
         Event: on_loaded
 
-        If the bitmap is loaded asynchronously, this callback will be called when
-        the bitmap is finished loading or fails to load.
+		The on_loaded() event handler is fired when an asynchronously-loaded 
+		image has finished loading.
+		
+		*Arguments:*
+		
+		bitmap - the Bitmap object whose image has finished loading
+		failed - boolean value indicating failure/true or success/false of the 
+		load operation
+		
+		*Return Value:* None
 
-        Arguments:
+		*Example:* To see the on_loaded() event handler in use, check the 
+		asynchronous code example given in the <Bitmap> constructor description.
 
-            bitmap - The original bitmap
-            failed - True if it failed to load, false otherwise.
+		*See Also:* the <Bitmap> constructor
+
     */
 
-    callback on_loaded( Bitmap bitmap , bool failed );
+    callback on_loaded( Bitmap bitmap, bool failed );
 }
