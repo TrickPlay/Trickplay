@@ -13,9 +13,12 @@
 
 @interface RootViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate,
-NetServiceManagerDelegate> {
+GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
     UIWindow *window;
-    //UINavigationController *navigationController;
+
+    NSString *currentTVName;
+    UIView *currentTVIndicator;
+    
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
     AppBrowserViewController *appBrowserViewController;
@@ -27,5 +30,6 @@ NetServiceManagerDelegate> {
 - (void)reloadData;
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
+@property (retain) NSString *currentTVName;
 
 @end

@@ -11,20 +11,149 @@
 
 @implementation TrickplayImage
 
-- (id)initWithID:(NSString *)imageID args:(NSDictionary *)args resourceManager:(ResourceManager *)resourceManager {
-    if ((self = [super init])) {
-        CGRect frame = [self getFrameFromArgs:args];
-        
-        self.view = [resourceManager fetchImageViewUsingResource:[args objectForKey:@"src"] frame:frame];
+@synthesize src;
+
+- (id)initWithID:(NSString *)imageID args:(NSDictionary *)args resourceManager:(ResourceManager *)resourceManager objectManager:(AdvancedUIObjectManager *)objectManager {
+    if ((self = [super initWithID:imageID objectManager:objectManager])) {
+        self.src = nil;
+        id source = [args objectForKey:@"src"];
+        if (source && [source isKindOfClass:[NSString class]]) {
+            self.src = source;
+        }
+                
+        CGRect frame = [self getFrameFromArgs:args];        
+        self.view = [resourceManager fetchImageViewUsingResource:src frame:frame];
+        ((AsyncImageView *)self.view).otherDelegate = self;
+        view.layer.anchorPoint = CGPointMake(0.0, 0.0);
+        view.layer.frame = CGRectMake(0.0, 0.0, view.layer.frame.size.width, view.layer.frame.size.height);
         
         [self setValuesFromArgs:args];
+                
+        [self addSubview:view];
     }
         
     return self;
 }
 
+- (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey {
+    
+}
+
+#pragma mark -
+#pragma mark Deleter
+
+/**
+ * Deleter function
+ */
+
+- (void)deleteValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"delete_%@", property]);
+        
+        if ([TrickplayImage instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
+}
+
+#pragma mark -
+#pragma mark Setters
+
+/**
+ * Set tiling
+ */
+
+- (void)set_tile:(NSDictionary *)args {
+    id tile = [args objectForKey:@"tile"];
+    if (![tile isKindOfClass:[NSArray class]]) {
+        return;
+    }
+    BOOL toTileWidth = [[(NSArray *)tile objectAtIndex:0] boolValue];
+    BOOL toTileHeight = [[(NSArray *)tile objectAtIndex:1] boolValue];
+    [((AsyncImageView *)view) setTileWidth:toTileWidth height:toTileHeight];
+}
+
+/**
+ * Setter function
+ */
+
+- (void)setValuesFromArgs:(NSDictionary *)properties {
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"set_%@:", property]);
+        
+        if ([TrickplayImage instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:properties];
+        }
+    }
+}
+
+#pragma mark -
+#pragma mark Getters
+
+/**
+ * Get the source of the image
+ */
+
+- (void)get_src:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"src"] && src) {
+        [dictionary setObject:src forKey:@"src"];
+    }
+}
+
+/**
+ * Get whether the image loaded
+ */
+
+- (void)get_loaded:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"loaded"]) {
+        [dictionary setObject:[NSNumber numberWithBool:((AsyncImageView *)view).loaded] forKey:@"loaded"];
+    }
+}
+
+/**
+ * Get base image size
+ */
+
+- (void)get_base_size:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"base_size"] && ((AsyncImageView *)view).loaded) {
+        NSNumber *width = [NSNumber numberWithFloat:((UIImageView *)view).image.size.width];
+        NSNumber *height = [NSNumber numberWithFloat:((UIImageView *)view).image.size.height];
+        NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
+        [dictionary setObject:imageSize forKey:@"base_size"];
+    }
+}
+
+/**
+ * Getter function
+ */
+
+- (NSDictionary *)getValuesFromArgs:(NSDictionary *)properties {
+    NSMutableDictionary *JSON_Dictionary = [NSMutableDictionary dictionaryWithDictionary:properties];
+    
+    for (NSString *property in [properties allKeys]) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"get_%@:", property]);
+        
+        if ([TrickplayImage instancesRespondToSelector:selector]) {
+            [self performSelector:selector withObject:JSON_Dictionary];
+        } else {
+            [JSON_Dictionary removeObjectForKey:property];
+        }
+    }
+    
+    return JSON_Dictionary;
+}
+
+#pragma mark -
+#pragma mark New Protocol
+
+- (id)callMethod:(NSString *)method withArgs:(NSArray *)args {
+    return [super callMethod:method withArgs:args];
+}
+
 - (void)dealloc {
     NSLog(@"TrickplayImage dealloc");
+    
+    self.src = nil;
     
     [super dealloc];
 }
