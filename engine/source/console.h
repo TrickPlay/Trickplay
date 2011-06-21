@@ -18,6 +18,10 @@ public:
 
     void attach_to_lua( lua_State * l );
 
+    void enable();
+
+    void disable();
+
 protected:
 
     Console( TPContext * context, bool read_stdin, int port );
@@ -42,7 +46,7 @@ private:
     // Server delegate methods
 
     virtual void connection_accepted( gpointer connection, const char * remote_address );
-    virtual void connection_data_received( gpointer connection, const char * data , gsize );
+    virtual void connection_data_received( gpointer connection, const char * data , gsize , bool * );
 
     static void output_handler( const gchar * line, gpointer data );
 
@@ -56,6 +60,7 @@ private:
     GString        *        stdin_buffer;
     CommandHandlerList      handlers;
     std::auto_ptr<Server>   server;
+    bool                    enabled;
 };
 
 

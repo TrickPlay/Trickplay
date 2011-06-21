@@ -8,8 +8,15 @@
 #include "profiler.h"
 #include "json.h"
 #include "common.h"
+#include "keyboard.h"
 
-static Debug_OFF ai( "APP-IMAGE" );
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "APP"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //-----------------------------------------------------------------------------
 #define APP_TABLE_NAME          "app"
@@ -21,6 +28,7 @@ static Debug_OFF ai( "APP-IMAGE" );
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
 #define APP_FIELD_ACTIONS       "actions"
+#define APP_FIELD_ATTRIBUTES    "attributes"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -64,6 +72,8 @@ extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
 extern int luaopen_canvas( lua_State * L );
+extern int luaopen_keyboard( lua_State * L );
+extern int luaopen_http_module( lua_State * L );
 
 #ifndef TP_PRODUCTION
 extern int luaopen_devtools( lua_State * L );
@@ -328,6 +338,23 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
         }
         lua_pop( L, 1 );
 
+        // Look for attributes
+
+        lua_getfield( L , -1 , APP_FIELD_ATTRIBUTES );
+        if ( lua_istable( L , -1 ) )
+        {
+            lua_pushnil( L );
+            while( lua_next( L , -2 ) )
+            {
+                if ( lua_type( L , -1 ) == LUA_TSTRING )
+                {
+                    md.attributes.insert( lua_tostring( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+            }
+        }
+        lua_pop( L , 1 );
+
         // Look for actions
 
         lua_getfield( L, -1, APP_FIELD_ACTIONS );
@@ -337,7 +364,7 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
 
             while ( lua_next( L, -2 ) )
             {
-                if ( lua_isstring( L, -2 ) && lua_type( L, -1 ) == LUA_TTABLE )
+                if ( lua_really_isstring( L, -2 ) && lua_type( L, -1 ) == LUA_TTABLE )
                 {
                     String action_name = lua_tostring( L, -2 );
                     String uri;
@@ -923,6 +950,8 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_trickplay( L );
     luaopen_bitmap( L );
     luaopen_canvas( L );
+    luaopen_http_module( L );
+    luaopen_keyboard( L );
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
@@ -993,6 +1022,10 @@ App::~App()
     debugger.uninstall();
 
 #endif
+
+    // Get rid of the keyboard
+
+    Keyboard::hide( L , true );
 
     notify( context , TP_NOTIFICATION_APP_CLOSING );
 
@@ -1614,7 +1647,7 @@ gboolean App::animate_out_callback( gpointer s )
 
 Image * App::load_image( const gchar * source )
 {
-    ai( "LOADING SYNC '%s'" , source );
+    tplog( "LOADING SYNC '%s'" , source );
 
     if ( ! source )
     {
@@ -1627,7 +1660,7 @@ Image * App::load_image( const gchar * source )
 
     if ( ! path )
     {
-        ai( "  INVALID PATH" );
+        tplog( "  INVALID PATH" );
         return 0;
     }
 
@@ -1637,7 +1670,7 @@ Image * App::load_image( const gchar * source )
 
     if ( is_uri )
     {
-        ai( "  STARTING REQUEST" );
+        tplog( "  STARTING REQUEST" );
 
         Network::Request request( get_user_agent(), path );
 
@@ -1645,24 +1678,24 @@ Image * App::load_image( const gchar * source )
 
         if ( ! response.failed && response.body->len > 0 )
         {
-            ai( "  DECODING" );
+            tplog( "  DECODING" );
 
             image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
         }
         else
         {
-            ai( "  REQUEST FAILED" );
+            tplog( "  REQUEST FAILED" );
         }
     }
     else
     {
-        ai( "  PATH IS '%s'" , path );
-        ai( "  DECODING" );
+        tplog( "  PATH IS '%s'" , path );
+        tplog( "  DECODING" );
 
         image = Image::decode( path );
     }
 
-    ai( "  %s" , image ? "SUCCEEDED" : "FAILED" );
+    tplog( "  %s" , image ? "SUCCEEDED" : "FAILED" );
 
     return image;
 }
@@ -1685,13 +1718,13 @@ public:
 
         if ( response.failed || response.body->len == 0 )
         {
-            ai( "  REQUEST FAILED" );
+            tplog( "  REQUEST FAILED" );
 
             self->callback( 0 , self->user );
         }
         else
         {
-            ai( "  STARTING DECODE FOM BUFFER" );
+            tplog( "  STARTING DECODE FOM BUFFER" );
 
             Image::decode_async( response.body ,
                     response.get_header( "Content-Type" ),
@@ -1725,7 +1758,7 @@ private:
 
 bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
-    ai( "LOADING ASYNC '%s'" , source );
+    tplog( "LOADING ASYNC '%s'" , source );
 
     if ( ! source )
     {
@@ -1738,7 +1771,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
 
     if ( ! path )
     {
-        ai( "  INVALID PATH" );
+        tplog( "  INVALID PATH" );
         return false;
     }
 
@@ -1746,7 +1779,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
 
     if ( is_uri )
     {
-        ai( "  STARTING NETWORK REQUEST" );
+        tplog( "  STARTING NETWORK REQUEST" );
 
         Network::Request request( get_user_agent(), path );
 
@@ -1759,8 +1792,8 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
     }
     else
     {
-        ai( "  PATH IS '%s'" , path );
-        ai( "  STARTING DECODE FROM FILE" );
+        tplog( "  PATH IS '%s'" , path );
+        tplog( "  STARTING DECODE FROM FILE" );
 
         Image::decode_async( path , callback , user , destroy_notify );
     }

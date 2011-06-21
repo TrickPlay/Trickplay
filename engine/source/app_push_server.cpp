@@ -9,7 +9,11 @@
 
 //.............................................................................
 
-static Debug_ON log( "APP-PUSH" );
+#define TP_LOG_DOMAIN   "APP-PUSH"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //.............................................................................
 
@@ -38,7 +42,7 @@ AppPushServer::AppPushServer( TPContext * _context )
 {
     context->get_http_server()->register_handler( "/push" , this );
 
-    log( "READY" );
+    tplog( "READY" );
 }
 
 //.............................................................................
@@ -658,7 +662,7 @@ void AppPushServer::write_file( const TargetInfo & target_info , const HttpServe
 
 void AppPushServer::launch_it( )
 {
-    log( "LAUNCHING FROM %s" , current_push_info.metadata.path.c_str() );
+    tplog( "LAUNCHING FROM %s" , current_push_info.metadata.path.c_str() );
 
     context->close_current_app();
 

@@ -113,7 +113,7 @@ namespace JSON
 
             case LUA_TBOOLEAN:
 
-                result = lua_toboolean( L, index );
+                result.as<bool>() = lua_toboolean( L, index );
 
                 break;
 
@@ -128,6 +128,11 @@ namespace JSON
             case LUA_TTABLE:
 
                 // If it has a length, we treat it as an array
+
+                // Unfortunately, this means that a Lua empty table will be
+                // converted to an empty object. Should it be an empty array?
+                //
+                // If in Lua it is {} , should it be {} or [] in JSON?
 
                 if ( lua_objlen( L, index ) > 0 )
                 {
@@ -150,7 +155,7 @@ namespace JSON
 
                     while( lua_next( L, index ) )
                     {
-                        if ( lua_isstring( L, -2 ) )
+                        if ( lua_really_isstring( L, -2 ) )
                         {
                             size_t len = 0;
                             const char * key = lua_tolstring( L , -2 , & len );
@@ -665,6 +670,24 @@ namespace JSON
     Value::Type Value::get_type() const
     {
         return type;
+    }
+
+    double Value::as_number() const
+    {
+        switch( type )
+        {
+            case T_DOUBLE:
+                return value.double_value;
+
+            case T_INT:
+                return value.int_value;
+
+            case T_BOOL:
+                return value.boolean_value ? 1 : 0;
+
+            default:
+                return 0;
+        }
     }
 
     std::ostream & operator << ( std::ostream & os , const Value & value )

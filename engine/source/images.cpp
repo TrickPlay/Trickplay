@@ -15,9 +15,12 @@
 #include "app.h"
 
 //=============================================================================
-// Set to OFF to stop image debug log
 
-Debug_OFF images_debug;
+#define TP_LOG_DOMAIN   "IMAGES"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //=============================================================================
 
@@ -74,26 +77,26 @@ public:
     {
         if ( ! enabled() )
         {
-            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+            tplog( "  EXTERNAL IMAGE DECODER IS DISABLED" );
 
             return TP_IMAGE_UNSUPPORTED_FORMAT;
         }
 
-        images_debug( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
+        tplog( "  INVOKING EXTERNAL DECODER WITH BUFFER OF %d BYTES", size );
 
         int result = decoder( data, size, image, decoder_data );
 
-        images_debug( "    EXTERNAL DECODER RETURNED %d", result );
+        tplog( "    EXTERNAL DECODER RETURNED %d", result );
 
         if ( result == TP_IMAGE_DECODE_OK )
         {
-            images_debug( "      pixels      : %p", image->pixels );
-            images_debug( "      width       : %u", image->width );
-            images_debug( "      height      : %u", image->height );
-            images_debug( "      pitch       : %u", image->pitch );
-            images_debug( "      depth       : %u", image->depth );
-            images_debug( "      bgr         : %u", image->bgr );
-            images_debug( "      free_pixels : %p", image->free_pixels );
+            tplog( "      pixels      : %p", image->pixels );
+            tplog( "      width       : %u", image->width );
+            tplog( "      height      : %u", image->height );
+            tplog( "      pitch       : %u", image->pitch );
+            tplog( "      depth       : %u", image->depth );
+            tplog( "      bgr         : %u", image->bgr );
+            tplog( "      free_pixels : %p", image->free_pixels );
 
             g_assert( image->pixels != NULL );
             g_assert( image->pitch >= image->width * image->depth );
@@ -117,7 +120,7 @@ public:
     {
         if ( ! enabled() )
         {
-            images_debug( "  EXTERNAL IMAGE DECODER IS DISABLED" );
+            tplog( "  EXTERNAL IMAGE DECODER IS DISABLED" );
 
             return TP_IMAGE_UNSUPPORTED_FORMAT;
         }
@@ -145,11 +148,11 @@ public:
 
         stream.read( header, header_size );
 
-        images_debug( "  INVOKING EXTERNAL DECODER TO DETECT IMAGE FORMAT WITH %d BYTES", stream.gcount() );
+        tplog( "  INVOKING EXTERNAL DECODER TO DETECT IMAGE FORMAT WITH %d BYTES", stream.gcount() );
 
         int r = decoder( header, stream.gcount(), NULL, decoder_data );
 
-        images_debug( "    EXTERNAL DECODER RETURNED %d", r );
+        tplog( "    EXTERNAL DECODER RETURNED %d", r );
 
         if ( r != TP_IMAGE_SUPPORTED_FORMAT )
         {
@@ -449,6 +452,141 @@ bool Image::write_to_png( const gchar * filename ) const
     }
 
     return result;
+}
+
+//-----------------------------------------------------------------------------
+
+bool Image::is_packed() const
+{
+    return image->pitch == image->width * image->depth;
+}
+
+//-----------------------------------------------------------------------------
+
+Image * Image::make_packed_copy() const
+{
+    if ( ! image )
+    {
+        return 0;
+    }
+
+    TPImage result = * image;
+
+    result.pitch = result.width * result.depth;
+    result.pixels = malloc( result.height * result.pitch );
+    result.free_pixels = 0;
+
+    if ( ! result.pixels )
+    {
+        return 0;
+    }
+
+    const guint8 * source_row = ( const guint8 * ) image->pixels;
+
+    guint8 * dest_row = ( guint8 * ) result.pixels;
+
+    for ( unsigned int r = 0; r < result.height; ++r )
+    {
+        memcpy( dest_row , source_row , result.pitch );
+
+        source_row += image->pitch;
+        dest_row += result.pitch;
+    }
+
+    return Image::make( result );
+}
+
+//-----------------------------------------------------------------------------
+
+Image * Image::make_copy() const
+{
+    if ( ! image )
+    {
+        return 0;
+    }
+
+    TPImage result = * image;
+
+    result.pixels = malloc( result.height * result.pitch );
+    result.free_pixels = 0;
+
+    if ( ! result.pixels )
+    {
+        return 0;
+    }
+
+    memcpy( result.pixels , image->pixels , result.height * result.pitch );
+
+    return Image::make( result );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::flip_y()
+{
+    if ( image->height == 0 )
+    {
+        return;
+    }
+    unsigned int pitch = image->pitch;
+
+    guint8 * top_row = ( guint8 * ) image->pixels;
+    guint8 * bot_row = top_row + ( pitch * ( image->height - 1 ) );
+
+    guint8 * temp_row = ( guint8 * ) malloc( pitch );
+
+    if ( ! temp_row )
+    {
+        return;
+    }
+
+    while( bot_row > top_row )
+    {
+        memcpy( temp_row , top_row , pitch );
+        memcpy( top_row , bot_row , pitch );
+        memcpy( bot_row , temp_row , pitch );
+
+        top_row += pitch;
+        bot_row -= pitch;
+    }
+
+    free( temp_row );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::premultiply_alpha()
+{
+    if ( image->depth != 4 )
+    {
+        return;
+    }
+
+    guint8 * row = ( guint8 * ) image->pixels;
+
+    for ( unsigned int r = 0; r < image->height; ++r )
+    {
+        guint8 * p = row;
+
+        for ( unsigned int c = 0; c < image->width; ++c )
+        {
+            float a = p[3] / 255.0;
+
+            *(p++) *= a;
+            *(p++) *= a;
+            *(p++) *= a;
+            ++p;
+        }
+
+        row += image->pitch;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::destroy( void * image )
+{
+    delete ( Image * ) image;
 }
 
 //-----------------------------------------------------------------------------
@@ -785,23 +923,23 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
 
     for ( DecoderList::const_iterator it = decoders.begin(); it != decoders.end(); ++it )
     {
-        images_debug( "TRYING TO DECODE '%s' USING %s", content_type ? content_type : "<unknown>", ( * it )->name() );
+        tplog( "TRYING TO DECODE '%s' USING %s", content_type ? content_type : "<unknown>", ( * it )->name() );
 
         int r = ( * it )->decode( ( gpointer ) data, size, &image );
 
         if ( r == TP_IMAGE_UNSUPPORTED_FORMAT )
         {
-            images_debug( "  UNSUPPORTED" );
+            tplog( "  UNSUPPORTED" );
             continue;
         }
 
         if ( r == TP_IMAGE_DECODE_FAILED )
         {
-            images_debug( "  FAILED" );
+            tplog( "  FAILED" );
             break;
         }
 
-        images_debug( "  DECODED" );
+        tplog( "  DECODED" );
 
         // It was decoded
 
@@ -813,7 +951,7 @@ TPImage * Images::decode_image( gpointer data, gsize size, const char * content_
         return g_slice_dup( TPImage, &image );
     }
 
-    g_warning( "FAILED TO DECODE IMAGE FROM MEMORY" );
+    tpwarn( "FAILED TO DECODE IMAGE FROM MEMORY" );
 
     return NULL;
 }
@@ -826,7 +964,7 @@ TPImage * Images::decode_image( const char * filename )
 
     if ( ! g_file_test( filename, G_FILE_TEST_IS_REGULAR ) )
     {
-        g_warning( "IMAGE DOES NOT EXIST %s", filename );
+        tpwarn( "IMAGE DOES NOT EXIST %s", filename );
         return NULL;
     }
 
@@ -837,23 +975,23 @@ TPImage * Images::decode_image( const char * filename )
 
     for ( DecoderList::const_iterator it = decoders.begin(); it != decoders.end(); ++it )
     {
-        images_debug( "TRYING TO DECODE '%s' USING %s", filename, ( * it )->name() );
+        tplog( "TRYING TO DECODE '%s' USING %s", filename, ( * it )->name() );
 
         int r = ( * it )->decode( filename, &image );
 
         if ( r == TP_IMAGE_UNSUPPORTED_FORMAT )
         {
-            images_debug( "  UNSUPPORTED" );
+            tplog( "  UNSUPPORTED" );
             continue;
         }
 
         if ( r == TP_IMAGE_DECODE_FAILED )
         {
-            images_debug( "  FAILED" );
+            tplog( "  FAILED" );
             break;
         }
 
-        images_debug( "  DECODED" );
+        tplog( "  DECODED" );
 
         // It was decoded
 
@@ -865,7 +1003,7 @@ TPImage * Images::decode_image( const char * filename )
         return g_slice_dup( TPImage, &image );
     }
 
-    g_warning( "FAILED TO DECODE %s", filename );
+    tpwarn( "FAILED TO DECODE %s", filename );
 
     return NULL;
 }
@@ -1189,11 +1327,11 @@ void Images::prune_cache()
 
     std::sort( prune.begin(), prune.end(), prune_sort );
 
-    images_debug( "PRUNE LIST:" );
+    tplog( "PRUNE LIST:" );
 
     for( PruneVector::const_iterator it = prune.begin(); it != prune.end(); ++it )
     {
-        images_debug( "%d : %u : %s", it->second.second, TPImageSize( it->second.first ) , it->first.c_str() );
+        tplog( "%d : %u : %s", it->second.second, TPImageSize( it->second.first ) , it->first.c_str() );
     }
 
     guint target_limit = cache_limit * 0.85;
@@ -1204,12 +1342,12 @@ void Images::prune_cache()
 
         cache_size -= TPImageSize( it->second.first );
 
-        images_debug( "DROPPING %s : %u", it->first.c_str(), TPImageSize( it->second.first ) );
+        tplog( "DROPPING %s : %u", it->first.c_str(), TPImageSize( it->second.first ) );
 
         destroy_image( it->second.first );
     }
 
-    images_debug( "CACHE SIZE IS NOW %u", cache_size );
+    tplog( "CACHE SIZE IS NOW %u", cache_size );
 }
 
 #endif
