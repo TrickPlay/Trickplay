@@ -21,8 +21,6 @@
         [self setValuesFromArgs:args];
         
         [self addSubview:view];
-        
-        ID = [rectID retain];
     }
     
     return self;
