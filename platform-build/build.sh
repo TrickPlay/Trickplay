@@ -304,7 +304,7 @@ fi
 #Override Clutter CFLAGS so that it is not built optimized
 
 CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
-#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.a ./clutter/.libs/*.la $PREFIX/lib" 
+#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.so $PREFIX/lib" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
 #------------------------------------------------------------------------------
@@ -392,26 +392,6 @@ then
         cp -r ${THERE}/base/* ${PREFIX}/
     fi
 
-fi
-
-#------------------------------------------------------------------------------
-# OpenGL stub
-
-if [[ -d ${THERE}/gl-stub ]]
-then
-
-    if [[ ! -f ${PREFIX}/lib/libGLESv2.so ]]
-    then
-        echo "================================================================="
-        echo "== Building GLES2 stub..."
-        echo "================================================================="
-
-        mkdir "${PREFIX}/lib"
-
-        ${CC} -I ${PREFIX}/include -shared ${THERE}/gl-stub/gl-stub.c -o "${PREFIX}/lib/libGLESv2.so"
-        ln -s ${PREFIX}/lib/libGLESv2.so ${PREFIX}/lib/libGLES2.so   
-        ln -s ${PREFIX}/lib/libGLESv2.so ${PREFIX}/lib/libEGL.so   
-    fi
 fi
 
 #-----------------------------------------------------------------------------
@@ -610,7 +590,8 @@ then
         -L ${PREFIX}/lib \
         -I ${PREFIX}/include \
         -Wl,--start-group \
-        -ltpcore \
+            -ltpcore \
+            -lpthread \
 	    -ljson-glib-1.0 \
 	    -latk-1.0 \
 	    -lclutter-eglnative-1.0 \
@@ -659,6 +640,7 @@ then
 	    -lsndfile \
 	    -lsoup-2.4 \
 	    -lxml2 \
+            -lMali \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group 
 	
@@ -666,59 +648,26 @@ then
 fi
 
 #------------------------------------------------------------------------------
-# Build the Broadcom executable
+# Build the LG addon
 
-echo "================================================================="
-echo "== Building broadcom executable..."
-echo "================================================================="
-
-NEXUS_TOP=${NEXUS_TOP:-0}
-
-if [[ "$NEXUS_TOP" == "0" ]]
+if [[ -d "${THERE}/lg-source" ]]
 then
-    echo "NEXUS_TOP is not defined. Skipping."
-    exit
-fi   
 
-TRICKPLAY_INCLUDE="$PREFIX/include"
-TRICKPLAY_LIB="$PREFIX/lib"
+    echo "================================================================="
+    echo "== Building LG addon..."
+    echo "================================================================="
 
-# Unset all of these so we don't affect building the broadcom stuff
+    make -C ${THERE}/lg-source --no-print-directory clean 
+    make -C ${THERE}/lg-source TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
+    if [[ ! -d "${HERE}/lg" ]]
+    then
+        mkdir "${HERE}/lg"
+    fi
+    
+    mv ${THERE}/lg-source/bin/trickplay ${HERE}/lg/
+    make -C ${THERE}/lg-source --no-print-directory clean
 
-unset PREFIX 
-unset HOST 
-unset BUILD
-unset CC 
-unset CXX 
-unset AR 
-unset STRIP 
-unset NM 
-unset LD 
-unset RANLIB 
-unset CFLAGS 
-unset CPPFLAGS 
-unset CXXFLAGS 
-unset LDFLAGS 
-unset LIBS 
-unset PKG_CONFIG_PATH
-
-export BCHP_VER=A0
-export PLATFORM=935233
-export HSM_SOURCE_AVAILABLE=y
-export KEYLADDER_SUPPORT=n
-#export LINUX=/home/pablo/Documents/BROADCOM/refsw_935233.20110509_3P/2637.0_0066/ceglinux-2.6
-export V3DIP_REV=v3d_b0/interface
-
-rm -rf "$THERE/broadcom-source/*.o" "$THERE/broadcom-source/trickplay"
-
-make -C $THERE/broadcom-source trickplay TRICKPLAY_INCLUDE="$TRICKPLAY_INCLUDE" TRICKPLAY_LIB="$TRICKPLAY_LIB" 
-if [[ ! -d $HERE/broadcom ]]
-then
-    mkdir $HERE/broadcom
 fi
-
-mv $THERE/broadcom-source/trickplay $HERE/broadcom
-
 
 
 
