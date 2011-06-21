@@ -21,6 +21,14 @@ module canvas;
 
 /*
     Class: Canvas
+    
+    The Canvas class provides an in-memory vector-based drawing surface. Various drawing tools and operations are supported.
+    
+    A Canvas object cannot be displayed directly on the screen, but it can be converted to an Image object which can then be displayed on-screen.
+    
+    The Canvas class uses the <Cairo Vector Graphics library at http://www.cairographics.org>, but you do not need to understand that library before using the Canvas class. All the information you need to create and manipulate a Canvas object is described in this documentation. If you desire additional information about Cairo, refer to the <Cairo documentation at http://www.cairographics.org/documentation>.
+    
+    
 
     Canvas lets you create a bitmap and use various drawing operations on it. It is
     based on the <Cairo graphics library at http://cairographics.org/manual/> and offers a similar API, with some slight
@@ -87,18 +95,24 @@ class Canvas [[ cairo_t * ]]
 {
     /*
         Constructor: Canvas
+        
+        The Canvas constructor creates an empty in-memory drawing surface. Each pixel on the surface contains a Red, a Green, and a Blue color component and an Alpha transparency value.
 
-        The constructor of Canvas takes the desired width and height and returns a new Canvas.
+		*Prototype:*
+		
+		(code)
+		Canvas( width, height )
+		(end)
+		
+        *Arguments:*
+        
+        width - width of the Canvas surface in pixels
+        height - height of the Canvas surface in pixels
 
-        Arguments:
-
-            width - The width of the Canvas surface in pixels.
-
-            height - The height of the Canvas surface.
-
-        Returns:
-
-            canvas - A newly created Canvas whose surface is all zeros.
+        *Return Value:*
+        
+        canvas - a Canvas object whose surface is empty (i.e., all zeros)
+        
     */
 
     Canvas( ... )
@@ -324,13 +338,74 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: fill_rule
-
-        Get or set the rule used for fills.
-
-        Values:
-
-            EVEN_ODD - Even/odd.
-            WINDING - Winding.
+        
+        The fill_rule property specifies the method used to determine which regions of a path are inside the path (and therefore filled) and which regions are outside (and not filled). The fill_rule becomes important when the path intersects itself and thereby creates closed regions within the shape. The fill_rule can determine whether or not these internal closed regions are filled. The code example below demonstrates an example.
+        
+        The fill_rule affects the fill() and clip() operations only.
+        
+        *Supported Settings:* The string settings are case-sensitive.
+        
+        "EVEN_ODD" - NEED MORE INFORMATION ON THIS
+        "WINDING" - NEED MORE INFORMATION ON THIS
+        
+        *Default Setting:* WINDING
+        
+        *Code Example:* Create a path/shape using intersecting lines which create an internal region. Fill the shape using different fill_rule settings.
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "ffffffff" )
+        canvas.line_width = 10
+        
+        -- Draw a star with intersecting lines
+        canvas:move_to( 100, 170 )
+        canvas:line_to( 300, 170 )
+        canvas:line_to( 100, 300 )
+        canvas:line_to( 200, 100 )
+        canvas:line_to( 300, 300 )
+        canvas:close_path()
+        
+        -- Draw the lines, saving the path
+        canvas:stroke( true )
+        
+        -- Set the fill rule
+        canvas.fill_rule = "WINDING"
+        
+        -- Fill the shape, using a fill color
+        canvas:set_source_color( "ff0000ff" )
+        canvas:fill()
+        
+        -- Draw the same shape in another location
+        canvas:move_to( 400, 170 )
+        canvas:line_to( 600, 170 )
+        canvas:line_to( 400, 300 )
+        canvas:line_to( 500, 100 )
+        canvas:line_to( 600, 300 )
+        canvas:close_path()
+        
+        -- Draw the lines, saving the path
+        canvas:set_source_color( "ffffffff" )
+        canvas:stroke( true )
+        
+        -- Set the fill rule
+        canvas.fill_rule = "EVEN_ODD"
+        
+        -- Fill the shape, using a fill color
+        canvas:set_source_color( "ff0000ff" )
+        canvas:fill()
+        
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        The resulting shapes from the example code are shown below.
+        
+        (see canvasFillRules.png)
+        
+		*See Also:* the <fill> and <clip> functions
     */
 
     string fill_rule
@@ -463,14 +538,65 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: line_cap
+        
+        The line_cap property is a string that specifies the type of path-ends to render when performing a stroke operation.
+        
+        The line_cap property is used only by the Canvas <stroke> function.
+        
+        *Supported Settings:* The line_cap setting is case-sensitive.
+        
+        "BUTT" - start and stop the line at the path's exact end points (default)
+        "ROUND" - use a rounded end; the path's end points specify the center of the circle
+        "SQUARE" - use a squared end; the path's end points specify the center of the square
+        
+        *Default Setting:* "BUTT"
+        
+        Notice that the "ROUND" and "SQUARE" settings add a rounded or squared end to each endpoint of the path. This will cause the generated line to extend slightly beyond the path's specified endpoints. The extra distance added to each endpoint is determined by the line's width specified in the Canvas object's line_width property. Specifically, each endpoint is extended line_width/2 pixels, i.e., line_width pixels for the entire line.
+        
+        *Code Example:* Demonstrate line_cap settings
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        
+        -- Set a large line_width
+        canvas.line_width = 100
+        
+        -- Set a path
+        canvas:move_to( 500, 100 )
+        canvas:line_to( 1000, 100 )
 
-        Get or set the line cap.
+        -- Explicitly set line_cap
+        canvas.line_cap = "BUTT"
+        
+        -- Make a line
+        canvas:stroke()
+        
+        -- Do the same for ROUND line_cap
+        canvas:move_to( 500, 300 )
+        canvas:line_to( 1000, 300 )
+        canvas.line_cap = "ROUND"
+        canvas:stroke()
+        
+        -- Once more for SQUARE
+        canvas:move_to( 500, 500 )
+        canvas:line_to( 1000, 500 )
+        canvas.line_cap = "SQUARE"
+        canvas:stroke()
+        
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        The lines generated by the code example are shown below.
+        
+        (see canvasLineCaps.png)
+        
+        *See Also:* the <stroke> function
 
-        Values:
-
-            ROUND - Round.
-            SQUARE - Square.
-            BUTT - Butt.
     */
 
     string line_cap
@@ -504,13 +630,55 @@ class Canvas [[ cairo_t * ]]
     /*
         Property: line_join
 
-        Get or set how lines are joined.
+		The line_join property is a string specifying the manner in which lines are joined when performing a stroke operation.
+		
+		The line_join property is used only by the Canvas <stroke> function.
+		
+		*Supported Settings:* The line_join setting is case-sensitive.
+		
+		"BEVEL" - join lines using a beveled joint
+		"MITER" - join lines using a mitered joint
+		"ROUND" - join lines using a rounded joint
+		
+		*Default Setting:* "MITER"
+		
+		*Code Example:* Demonstrate line_join settings
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        
+        -- Set a large line_width
+        canvas.line_width = 75
+        
+		-- Draw a rectangle using the BEVEL line_join
+		canvas.line_join = "BEVEL"
+		canvas:rectangle( 100, 100, 200, 200 )
+		canvas:stroke()
+		
+        -- Draw a rectangle using the MITER line_join
+        canvas.line_join = "MITER"
+        canvas:rectangle( 400, 100, 200, 200 )
+        canvas:stroke()
 
-        Values:
+		-- Draw a rectangle using the ROUND line_join
+		canvas.line_join = "ROUND"
+		canvas:rectangle( 700, 100, 200, 200 )
+		canvas:stroke()
+		
+		-- Show the rectangles
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()
+		(end)
 
-            ROUND - Round.
-            BEVEL - Bevel.
-            MITER - Miter.
+        The rectangles generated by the code example are shown below.
+        
+        (see canvasLineJoins.png)
+
+		*See Also:* the <stroke> function
+		
     */
 
     string line_join
@@ -543,8 +711,15 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: line_width
+        
+        The line_width property specifies the diameter in pixels of the circular pen to use during the stroke operation.
+        
+        *Default Setting:* 2.0
+        
+        *Code Example:* see <this example at http://cairographics.org/FAQ/#sharp_lines> for possible example code
+        
+        *See Also:* the <stroke> function
 
-        Get or set the line width in pixels.
     */
 
     double line_width
@@ -557,8 +732,18 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: miter_limit
+        
+        The miter_limit property is a double value that specifies the maximum miter limit possible when joining lines. The miter_limit property is used only when the Canvas object's <line_join> property is set to "MITER". When lines are miter-joined, if the length of the resulting miter would exceed the miter_limit setting, the lines are joined using a bevel instead of a miter.
 
-        The miter limit used when <line_join> is set to MITER.
+		To determine if the miter_limit has been exceeded, the would-be miter length is divided by the line width. If the result is larger than the miter_limit setting then the lines are bevel-joined.
+		
+		The default setting of 10.0 results in lines with interior angles of less than 11 degrees being converted to bevel-joins. A miter_limit of 2.0 will bevel any interior angle less than 60 degrees. A miter_limit value of 1.414 bevels any angle less than 90 degrees.
+		
+		A miter_limit for a desired angle can be calculated with the following equation: miter_limit = 1 / sin( angle / 2 )
+		
+		*Default Setting:* 10.0 (lines with interior angles less than 11 degrees will be converted to bevels)
+		
+		*See Also:* the <line_join> property
     */
 
     double miter_limit
@@ -662,11 +847,65 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: set_dash
 
-        Sets the dash pattern used for lines. The table dashes contains a list of
-        integers that define when dashes are ON and OFF.
+		The set_dash() function defines the dash pattern used by the Canvas stroke function when generating lines.
+		
+		The dash pattern is used only by the Canvas <stroke> function.
+		
+		*Arguments:*
+		
+		offset - number of leading empty pixels before dash begins
+		dashes - table of positive double values that define the dash pattern. Each value specifies the length in pixels for alternating ON and OFF portions of the line. If the dashes argument is nil then dashes are disabled. If the dashes table contains a single value then a symmetric pattern of equal ON and OFF lengths is generated, and the single value specifies the segment length. The table may contain the value 0, but all values in the table cannot be 0.
+		
+		*Default Setting:* Dashes are disabled.
+		
+		*Code Example:* Create some sample dashed lines
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        canvas.line_width = 10
+        
+		-- Define some dash patterns
+		dash_regular = { 16.0, 4.0 }
+		dash_dash_dash_dot = { 16.0, 4.0, 16.0 }
+		dash_small = { 4.0 }
+
+		-- Set the dash pattern
+		canvas:set_dash( 0, dash_regular )
+		
+        -- Set a path and make a line
+        canvas:move_to( 500, 100 )
+        canvas:line_to( 1000, 100 )
+        canvas:stroke()
+
+		-- Make another line using a different dash pattern
+		canvas:set_dash( 0, dash_dash_dash_dot )
+		canvas:move_to( 500, 200 )
+		canvas:line_to( 1000, 200 )
+		canvas:stroke()
+		
+		-- Make a final line with another dash pattern
+		canvas:set_dash( 0, dash_small )
+		canvas:move_to( 500, 300 )
+		canvas:line_to( 1000, 300 )
+		canvas:stroke()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+
+        The dashed lines generated by the code example are shown below.
+        
+        (see canvasDashes.png)
+
+		*See Also:* the <stroke> function
+
     */
 
-    set_dash( double offset , table dashes )
+    set_dash( double offset, table dashes )
         [[
             std::vector< double > d;
 
@@ -687,8 +926,29 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: save
+        
+        The save() function saves the current state of the Canvas object on an internal stack. Multiple Canvas states can be saved. The restore() function pops the last saved state from the internal stack.
+        
+        *Arguments:* None.
+        
+        *Return Value:* None.
 
-        Saves the current state of the Canvas.
+		*Code Example:* Save Canvas state upon function entry and restore upon exit
+		
+		(code)
+		-- It is common to save a Canvas state upon entry to a function and then restore it upon exit
+		function transformCanvas( canvas )
+			-- Save initial Canvas state
+			canvas:save()
+			
+			-- ...Change Canvas state and perform some transformations...
+			
+			-- Restore original Canvas state
+			canvas:restore()
+		end
+		(end)
+		
+		*See Also:* the <restore> function
     */
 
     save()
@@ -698,8 +958,14 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: restore
-
-        Restores the state of the Canvas from a previously saved state.
+        
+        The restore() function pops the last saved Canvas state from an internal stack. If you mistakenly perform a restore from an empty stack, the Canvas object becomes corrupted. There is no way to The <ok> property can be 
+        
+        *Arguments:* None.
+        
+        *Return Value:* None.
+        
+        *See Also:* the <save> function
     */
 
     restore()
@@ -843,12 +1109,14 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: stroke
+        
+        The stroke function draws the current path using the settings of the line_width, line_join, line_cap and dash pattern.
 
-        Strokes the current path with the current source.
+        *Arguments:*
 
-        Arguments:
+        preserve - boolean flag indicating whether or not the current path should be saved after it has been drawn. Default value is false, i.e., the path will not be saved.
 
-            preserve - If true, the path is preserved.
+        *See Also:* the <line_width>, <line_join> and <line_cap> properties and the <set_dash> function
     */
 
     stroke( bool preserve = false )
@@ -980,16 +1248,45 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: line_to
+        
+        The line_to() function draws a straight line from the path's current point to the X and Y coordinates specified in the function's arguments. The function's X, Y coordinates also become the path's new current point. The path's starting point is typically set by the <move_to> function.
 
-        Adds a straight line to the current path, from the current point to x,y.
+        *Arguments:*
+        
+        x - double value specifying the ending X coordinate
+        y - double value specifying the ending Y coordinate
+        relative - boolean value indicating whether or not the specified coordinates are relative to the path's starting point. Default value is false, i.e., the coordinates are absolute to the Canvas.
+        
+        *Return Value:* None.
 
-        Arguments:
-
-            x,y - The coordinates for the end point of the line.
-            relative - If true, coordinates are relative to the current point.
+		*Code Example:* Draw some lines
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        canvas.line_width = 75
+        canvas.line_cap = "SQUARE"
+        
+        -- Define a triangular path
+        canvas:move_to( 500, 100 )
+        canvas:line_to( 1000, 100 )
+        canvas:line_to( 500, 750 )
+        canvas:close_path()			-- Same as canvas:line_to( 500, 100 )
+        
+        -- Draw the lines on the path
+        canvas:stroke()
+                
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		*See Also:* the <move_to> and <stroke> functions
     */
 
-    line_to( double x , double y , bool relative = false )
+    line_to( double x, double y, bool relative = false )
         [[
             if ( relative )
             {
@@ -1004,15 +1301,21 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: move_to
 
-        Moves the current point to x,y.
+		The move_to() function sets the current X, Y coordinates. Use the move_to() function to define a path's starting point for lines generated by the <stroke> function.
+		
+		*Arguments:*
+		
+		x - double value specifying the X coordinate
+		y - double value specifying the Y coordinate
+		relative - boolean value indicating whether or not the specified coordinates are relative to the current starting point. Default value is false, i.e., the coordinates are absolute to the Canvas.
+		
+		*Return Value:* None.
 
-        Arguments:
-
-            x,y - The coordinates for the new current point.
-            relative - If true, coordinates are relative to the current point.
+		*See Also:* the <line_to>, <rectangle> and <stroke> functions
+		
     */
 
-    move_to( double x , double y , bool relative = false )
+    move_to( double x, double y, bool relative = false )
         [[
             if ( relative )
             {
@@ -1026,33 +1329,78 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: rectangle
+        
+        The rectangle() function adds a rectangle to the current path. The rectangle's <line_width>, <line_cap>, <line_join> and dash properties are defined by their respective values at the time the path is drawn by the <stroke> function.
 
-        Adds a rectangle to the current path.
+        *Arguments:*
+        
+        x - X coordinate of rectangle's top left corner
+        y - Y coordinate of rectangle's top left corner
+        width - rectangle's width in pixels
+        height - rectangle's height in pixels
+        
+        *Return Value:* None.
 
-        Arguments:
-
-            x,y - Coordinates for the top left corner of the rectangle.
-            width,height - The width and height of the rectangle.
+		The rectangle() function is logically equivalent to the following code statements.
+		
+		(code)
+		move_to( x, y )				-- Begin the path
+		line_to( width, 0, true )	-- Define top line using relative values
+		line_to( 0, height, true )	-- Define right edge
+		line_to( -width, 0, true )	-- Define bottom line 
+		close_path()				-- Define left edge
+		(end)
+		
+		*See Also:* the <line_width>, <line_cap> and <line_join> properties and the <set_dash> function
     */
 
-    rectangle( double x , double y , double width , double height )
+    rectangle( double x, double y, double width, double height )
         [[
             cairo_rectangle( self , x , y , width , height );
         ]];
 
     /*
         Function: round_rectangle
+        
+        The round_rectangle() function creates a rectangular path with rounded corners. The rectangle's <line_width>, <line_cap>, <line_join> and dash properties are defined by their respective values at the time the path is drawn by the <stroke> function.
+        
+        A rectangle with rounded corners can also be generated by setting the <line_join> property to "ROUND" and calling the <rectangle> function.
 
-        Adds a rectangle with rounded corners to the current path.
+        *Arguments:*
+        
+        x - X coordinate of rectangle's top left corner
+        y - Y coordinate of rectangle's top left corner
+        width - rectangle's width in pixels
+        height - rectangle's height in pixels
+        
+        *Return Value:* None.
 
-        Arguments:
-
-            x,y - Coordinates for the top left corner of the rectangle.
-            w,h - The width and height of the rectangle.
-            r - The radius of the corners.
+		*Code Example:* Create two rectangles with rounded corners
+		
+		(code)
+		-- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        canvas.line_width = 75
+        
+        -- Draw a rounded rectangle
+        canvas:round_rectangle( 100, 100, 200, 200, canvas.line_width/2 )
+        
+        -- Draw a rectangle with rounded line joins
+        canvas.line_join = "ROUND"
+        canvas:rectangle( 400, 100, 200, 200 )
+        
+        -- Draw the rectangles
+        canvas:stroke()
+		
+		-- Show the rectangles
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()
+		(end)
     */
 
-    round_rectangle( double x , double y , double w , double h , double r )
+    round_rectangle( double x, double y, double w, double h, double r )
         [[
             cairo_move_to(self,x+r,y);
             cairo_line_to(self,x+w-r,y);
@@ -1212,12 +1560,30 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: set_source_color
 
-        Sets the source pattern to a solid color.
+		The set_source_color() function sets the color and alpha/transparency for subsequent drawing operations. If the color is not explicitly set, the default starting color is black and transparent.
+		
+		*Prototype:*
+		
+		(code)
+		set_source_color( color )
+		(end)
 
-        Arguments:
+        *Arguments:*
 
-            color - This can be a color specified as a string with hex RGBA values or a table
-                    with 3 or 4 integer components for RGB and A.
+        color - color and alpha/transparency specified as three RGB (Red/Green/Blue) integer values and an optional alpha/transparency integer value. The format of the color argument is described in <RGB/Alpha Color Formats>.
+        
+        *Return Value:* None.
+        
+        *Code Example:* Demonstrate various methods of setting the color and alpha
+        
+        (code)
+        -- Specify color and alpha in a table
+        canvas.set_source_color( { 0, 255, 0, 255 } )
+        
+        -- Equivalent settings using a string
+        canvas.set_source_color( "00ff00ff" )
+        canvas.set_source_color( "#00ff00ff" )
+        (end)
     */
 
     set_source_color( ... )
@@ -1377,4 +1743,4 @@ class Canvas [[ cairo_t * ]]
         [[
             // Does nothing - only for compatibility with the old canvas
         ]];
-}
+}        Sets the dash pattern used for lines. The table dashes contains a list of
