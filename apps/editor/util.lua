@@ -1709,14 +1709,15 @@ function itemTostring(v, d_list, t_list)
 		--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
 	 	src = v.source 
-	 	if is_in_list(src.name, d_list) == false then  --> need debugging this line :(
-			--  LUA PANIC : /Users/hjkim/code/trickplay/apps/editor/./util.lua:698: attempt to index global 'src' (a nil value)
-	     	if(t_list == nil) then 
-				t_list = {src.name}
-	     	else 
-				table.insert(t_list, src.name) 
-	     	end
-         end 
+		if src ~= nil then 
+	 		if is_in_list(src.name, d_list) == false then 
+	     		if(t_list == nil) then 
+					t_list = {src.name}
+	     		else 
+					table.insert(t_list, src.name) 
+	     		end
+        	end 
+        end 
     elseif (v.type == "Group") and is_this_widget(v) == false then 
 	 	local org_d_list = {}
 

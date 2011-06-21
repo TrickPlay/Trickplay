@@ -1309,6 +1309,7 @@ function ui_element.button(table)
 		focus_image  = nil,
 		text_has_shadow = true,
 		single_button = false,
+		label_align = nil,
     }
 
  --overwrite defaults
@@ -1399,7 +1400,11 @@ function ui_element.button(table)
 	     	focus = Image{}
 		end 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
-        text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
+		if p.label_align ~= nil then 
+        	text:set{name = "text", position = { 10, (p.ui_height - text.h)/2}}
+		else 
+        	text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
+		end 
 	
 		b_group:add(ring, focus_ring, button, focus)
 		if p.text_has_shadow then 
@@ -1411,6 +1416,9 @@ function ui_element.button(table)
             	x     = (p.ui_width  -text.w)/2 - 1,
             	y     = (p.ui_height - text.h)/2 - 1,
             }
+			if p.label_align ~= nil then 
+            	s_txt.x = 9
+			end 
             s_txt.anchor_point={0,s_txt.h/2}
             s_txt.y = s_txt.y+s_txt.h/2
         	b_group:add(s_txt)
@@ -1465,7 +1473,7 @@ function ui_element.button(table)
 				b_group.extra.on_focus_out()
 			end
 			]]
-		end 
+		end
 
 		if p.skin == "editor"  then 
 	     	function b_group:on_motion()
@@ -2798,91 +2806,90 @@ function ui_element.checkBoxGroup(t)
 
     function cb_group.extra.select_button(items) 
 	    p.selected_items = items
-            if p.rotate_func then
+        if p.rotate_func then
 	       p.rotate_func(p.selected_items)
 	    end
     end 
 
     function cb_group.extra.insert_item(itm) 
-	table.insert(p.items, itm) 
-	create_checkBox()
+		table.insert(p.items, itm) 
+		create_checkBox()
     end 
 
     function cb_group.extra.remove_item() 
-	table.remove(p.items)
-	create_checkBox()
+		table.remove(p.items)
+		create_checkBox()
     end 
 
     local function create_checkBox()
+	 	items:clear() 
+	 	checks:clear() 
+	 	boxes:clear() 
+	 	cb_group:clear()
 
-	 items:clear() 
-	 checks:clear() 
-	 boxes:clear() 
-	 cb_group:clear()
-
-	 if(p.skin ~= "custom") then 
+	 	if(p.skin ~= "custom") then 
              p.box_image = assets(skin_list[p.skin]["checkbox"])
              p.check_image = skin_list[p.skin]["check"]
-	 else 
-	     p.box_image = Image{}
+	 	else 
+	     	 p.box_image = Image{}
              p.check_image = "lib/assets/checkmark.png"
-	 end
+	 	end
 	
-	 boxes:set{name = "boxes", position = p.b_pos} 
-	 checks:set{name = "checks", position = p.b_pos} 
-	 items:set{name = "items", position = p.item_pos} 
+	 	boxes:set{name = "boxes", position = p.b_pos} 
+	 	checks:set{name = "checks", position = p.b_pos} 
+	 	items:set{name = "items", position = p.item_pos} 
 
-         local pos = {0, 0}
-         for i, j in pairs(p.items) do 
-	      local box, check
-	      if(p.direction == "vertical") then --vertical 
+        local pos = {0, 0}
+        for i, j in pairs(p.items) do 
+	      	local box, check
+	      	if(p.direction == "vertical") then --vertical 
                   pos= {0, i * p.line_space - p.line_space}
-	      end   			
+	      	end   			
 
-	      items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
-	      if p.skin == "custom" then 
-		   box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
-				       size = p.box_size, position = pos, reactive = true, opacity = 255}
-    	           boxes:add(box) 
-	     else
-	           box = Clone{name = "box"..tostring(i),  source=p.button_image, size = p.box_size, position = pos, reactive = true, opacity = 255}
-		   boxes:add(box) 
-	     end 
-
-	     check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
-	     checks:add(check) 
-
-             if editor_lb == nil or editor_use then  
-	     	function box:on_button_down (x,y,b,n)
-			local box_num = tonumber(box.name:sub(4,-1))
-			--dumptable(p.selected_items)
-			table.insert(p.selected_items, box_num)
-			cb_group:find_child("check"..tostring(box_num)).opacity = 255
-			cb_group:find_child("check"..tostring(box_num)).reactive = true
-    			cb_group.extra.select_button(p.selected_items) 
-			return true
+	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
+	      	if p.skin == "custom" then 
+		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
+				size = p.box_size, position = pos, reactive = true, opacity = 255}
+    	        boxes:add(box) 
+	     	else
+	           	box = Clone{name = "box"..tostring(i),  source=p.button_image, size = p.box_size, position = pos, reactive = true, opacity = 255}
+		   		boxes:add(box) 
 	     	end 
-	     	function check:on_button_down(x,y,b,n)
-			local check_num = tonumber(check.name:sub(6,-1))
-			p.selected_items = table_remove_val(p.selected_items, check_num)
-			check.opacity = 0
-			check.reactive = false
-    			cb_group.extra.select_button(p.selected_items) 
-			return true
-	     	end 
-	     end
 
-	     if(p.direction == "horizontal") then 
-		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
-	     end 
+	     	check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
+	     	checks:add(check) 
+
+            if editor_lb == nil or editor_use then  
+	     		function box:on_button_down (x,y,b,n)
+					local box_num = tonumber(box.name:sub(4,-1))
+					--dumptable(p.selected_items)
+					table.insert(p.selected_items, box_num)
+					cb_group:find_child("check"..tostring(box_num)).opacity = 255
+					cb_group:find_child("check"..tostring(box_num)).reactive = true
+    				cb_group.extra.select_button(p.selected_items) 
+					return true
+	     		end 
+	     		function check:on_button_down(x,y,b,n)
+					local check_num = tonumber(check.name:sub(6,-1))
+					p.selected_items = table_remove_val(p.selected_items, check_num)
+					check.opacity = 0
+					check.reactive = false
+    				cb_group.extra.select_button(p.selected_items) 
+					return true
+	     		end 
+	     	end
+
+	     	if(p.direction == "horizontal") then 
+		  		pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
+	     	end 
          end 
 
-	 for i,j in pairs(p.selected_items) do 
+	 	for i,j in pairs(p.selected_items) do 
              checks:find_child("check"..tostring(j)).opacity = 255 
-	 end 
+             checks:find_child("check"..tostring(j)).reactive = true 
+	 	end 
 
-
-	 cb_group:add(boxes, items, checks)
+	 	cb_group:add(boxes, items, checks)
     end
     
     create_checkBox()
@@ -5697,6 +5704,8 @@ function ui_element.tabBar(t)
 
     return umbrella
 end
+
+
 function ui_element.arrowPane(t)
 
 	-- reference: http://www.csdgn.org/db/179
