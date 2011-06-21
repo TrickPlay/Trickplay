@@ -1791,8 +1791,9 @@ interface WebGLRenderingContext [[ WebGLState *]]
     pixelStorei(GLenum pname, GLint param )
         [[
             // TODO: THIS IS A HACK FOR NOW, NOT SURE WHERE TO PUT IT
-
+#ifndef TP_CLUTTER_BACKEND_EGL
             glPixelStorei( GL_UNPACK_ROW_LENGTH , 0 );
+#endif            
 
             switch ( pname )
             {
