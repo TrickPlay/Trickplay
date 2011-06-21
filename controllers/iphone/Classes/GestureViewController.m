@@ -747,6 +747,7 @@
     }
     if (socketManager) {
         [socketManager release];
+        socketManager.delegate = nil;
     }
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];

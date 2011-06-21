@@ -153,9 +153,9 @@
    
     } else {
         [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
-        if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
-            imagePickerController.navigationBar.topItem.title = titleLabel;
-        }
+    }
+    if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
+        imagePickerController.navigationBar.topItem.title = titleLabel;
     }
 }
 
