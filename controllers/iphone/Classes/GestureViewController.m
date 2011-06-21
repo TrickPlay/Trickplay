@@ -103,7 +103,7 @@
     [self.view addSubview:advancedView];
     
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
-    advancedView.manager = advancedUIDelegate;
+    advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
     
     // This is where the elements from UG (add_ui_image call) go
     CGFloat

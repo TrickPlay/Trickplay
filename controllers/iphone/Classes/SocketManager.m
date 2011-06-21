@@ -34,7 +34,7 @@
                  port:(NSInteger)thePort
              delegate:(id <SocketManagerDelegate>)theDelegate
              protocol:(CommandProtocol)protocol {
-    if (self == [super init]) {
+    if ((self = [super init])) {
         functional = YES;
         
         // Defines the type of communications protocol that will be used
