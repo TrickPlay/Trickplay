@@ -1,17 +1,15 @@
 //
-//  TrickplayText.h
+//  TrickplayTextHTML.h
 //  TrickplayController
 //
-//  Created by Rex Fenley on 4/8/11.
+//  Created by Rex Fenley on 6/6/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import "ResourceManager.h"
-#import "EditableTextView.h"
 #import "TrickplayUIElement.h"
 
-@interface TrickplayText : TrickplayUIElement <UITextViewDelegate> {
+@interface TrickplayTextHTML : TrickplayUIElement {
     NSUInteger maxLength;
 }
 

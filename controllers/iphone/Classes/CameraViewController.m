@@ -11,9 +11,36 @@
 
 @implementation CameraViewController
 
-@synthesize cameraButton;
-@synthesize imageLibraryButton;
+@synthesize navController;
+@synthesize titleLabel;
+@synthesize cancelLabel;
+@synthesize editable;
 @synthesize delegate;
+
+- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIView *)aMask {
+    if ((self = [super initWithNibName:nil bundle:nil])) {
+        self.view = [[[UIView alloc] initWithFrame:aView.frame] autorelease];
+        [aView addSubview:self.view];
+        
+        imagePickerController = [[UIImagePickerController alloc] init];
+        imagePickerController.delegate = self;
+        //imagePickerController.cameraOverlayView = mask;
+
+        if (aMask) {
+            mask = [aMask retain];
+        } else {
+            mask = nil;
+        }
+        targetWidth = width;
+        targetHeight = height;
+        editable = is_editable;
+        
+        self.titleLabel = nil;
+        self.cancelLabel = nil;
+    }
+    
+    return self;
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -22,7 +49,6 @@
         // Custom initialization
         imagePickerController = [[UIImagePickerController alloc] init];
         imagePickerController.delegate = self;
-        backgroundView = nil;
     }
     return self;
 }
@@ -50,13 +76,13 @@
 }
 
 - (void)sendImage:(UIImage *)image {
-    NSData *imageData = UIImagePNGRepresentation(image);
+    NSData *imageData = UIImageJPEGRepresentation(image, 0.7);
     
     NSURL *postURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", host, port, path]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:postURL];
     
     [request setHTTPMethod:@"POST"];
-    [request setValue:@"image/png" forHTTPHeaderField:@"Content-type"];
+    [request setValue:@"image/jpeg" forHTTPHeaderField:@"Content-type"];
     [request setValue:[NSString stringWithFormat:@"%d", [imageData length]] forHTTPHeaderField:@"Content-length"];
     [request setHTTPBody:imageData];
     
@@ -67,6 +93,7 @@
     }
     
     [connections addObject:connection];
+    [connection release];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
@@ -85,7 +112,7 @@
     }
     
     [(NSMutableData *)[connections objectForKey:connection] appendData:incrementalData];
-     //*/ 
+     //*/
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
@@ -102,59 +129,106 @@
     [connection cancel];
     
     [connections removeObject:connection];
+    
+    [delegate finishedSendingImage];
 }
 
-
-#pragma mark - View lifecycle
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-}
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
 
 #pragma mark -
 #pragma mark Presenting and dissmissing the camera
 
 - (void)presentTheCamera {
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+    NSLog(@"Presenting the Camera");
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad && imagePickerController.sourceType != UIImagePickerControllerSourceTypeCamera) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
             [popOverController release];
         }
         popOverController = [[UIPopoverController alloc] initWithContentViewController:imagePickerController];
-        CGRect frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
+        popOverController.delegate = self;
+        CGRect frame = CGRectMake(self.view.frame.size.width/2.0, self.view.frame.size.height/2.0, 20.0, 20.0);
+
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+   
     } else {
-        [self presentModalViewController:imagePickerController animated:YES];
+        [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
+        if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
+            imagePickerController.navigationBar.topItem.title = titleLabel;
+        }
     }
 }
 
 - (void)dismissTheCamera:(UIImagePickerController *)picker {
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+    NSLog(@"Dismissing the Camera");
+    if (!picker) {
+        picker = imagePickerController;
+    }
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad && picker.sourceType != UIImagePickerControllerSourceTypeCamera) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
             [popOverController release];
             popOverController = nil;
         }
-    } else {
-        [[picker parentViewController] dismissModalViewControllerAnimated:NO];
+    } else if (picker.parentViewController) {
+        [picker.parentViewController dismissModalViewControllerAnimated:NO];
+    }
+}
+
+- (void)dismissImageEditor {
+    if (imageEditor) {
+        if (self.modalViewController) {
+            [self dismissModalViewControllerAnimated:NO];
+        }
+        [imageEditor release];
+        imageEditor = nil;
+    }
+}
+
+#pragma mark -
+#pragma mark Image Editing
+
+- (void)doneEditing:(UIImage *)imageToUse {
+    [self dismissImageEditor];
+    [self sendImage:imageToUse];
+    //[delegate finishedPickingImage:imageToUse];
+
+    //[self dismissTheCamera:nil];
+}
+
+- (void)cancelEditing {
+    [self dismissImageEditor];
+    [self.delegate canceledPickingImage];
+    //[self dismissTheCamera:nil];
+}
+
+- (void)editImage:(UIImage *)image {
+    if (imageEditor) {
+        [imageEditor release];
     }
     
-    [self.navigationController popViewControllerAnimated:YES];
+    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil title:self.titleLabel cancelLabel:self.cancelLabel];
+    imageEditor.imageEditorDelegate = self;
+    
+    imageEditor.imageToEdit = image;
+    imageEditor.targetWidth = targetWidth;
+    imageEditor.targetHeight = targetHeight;
+    imageEditor.mask = mask;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
+    
+        [self presentModalViewController:cntrl animated:NO];
+        [cntrl release];
+    } else if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
+        
+        //imageEditor.modalPresentationStyle = UIModalPresentationPageSheet;
+        [self presentModalViewController:cntrl animated:NO];
+        cntrl.view.frame = CGRectMake(0.0, -45.0, cntrl.view.frame.size.width, cntrl.view.frame.size.height + 45);
+        [cntrl release];
+    } else {
+        NSLog(@"This User Interface Idiom does not exist");
+    }
 }
 
 #pragma mark -
@@ -165,7 +239,7 @@
     NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
     UIImage *originalImage, *editedImage, *imageToUse;
     
-    // Handle a still image picked form a photo album
+    // Handle a still image picked from a photo album
     if (CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
         editedImage = (UIImage *)[info objectForKey:UIImagePickerControllerEditedImage];
         originalImage = (UIImage *)[info objectForKey:UIImagePickerControllerOriginalImage];
@@ -176,32 +250,18 @@
             imageToUse = originalImage;
         }
         
-        if (backgroundView) {
-            [backgroundView removeFromSuperview];
-            [backgroundView release];
+        if (editable) {
+            [self dismissTheCamera:picker];
+            [self editImage:imageToUse];
+        } else {
+            [self sendImage:imageToUse];
+            [self dismissTheCamera:picker];
         }
-        
-        /**for Testing
-        CGFloat
-        x = self.view.frame.origin.x,
-        y = self.view.frame.origin.y,
-        width = self.view.frame.size.width,
-        height = self.view.frame.size.height;
-        
-        backgroundView = [[UIImageView alloc] initWithImage:imageToUse];
-        backgroundView.frame = CGRectMake(x, y, width, height);
-        [self.view addSubview:backgroundView];
-        [self.view sendSubviewToBack:backgroundView];
-        //*/
-        
-        [self sendImage:imageToUse];
     } else if (CFStringCompare((CFStringRef) mediaType, kUTTypeMovie, 0) == kCFCompareEqualTo) {
         
     }
     
-    [self dismissTheCamera:picker];
-    
-    [delegate finishedPickingImage];
+    [delegate finishedPickingImage:nil];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
@@ -210,56 +270,74 @@
     [delegate canceledPickingImage];
 }
 
-#pragma mark - Button press handlers
-#pragma mark --
+#pragma mark -
+#pragma mark Button press handlers
 
-- (IBAction)startCamera:(id)sender {
+- (void)startCamera {
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO) {
         return;
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+    NSLog(@"mask: %@", mask);
+    imagePickerController.cameraOverlayView = mask;
     
-    //Displays camera
-    imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
+    // Displays camera
+    // Allows for video, audio, and image capture
+    // imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
     
-    //Hides the controls for image manipulation for now
+    // Controls iOS standard image manipulation
     imagePickerController.allowsEditing = NO;
     
     [self presentTheCamera];
 }
 
-- (IBAction)openLibrary:(id)sender {
+- (void)openLibrary {
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary] == NO) {
         return;
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    
+        
     // Displays saved pictures and movies, if both are available
-    imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
+    //imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     
-    // Hids the controls for image manipulation for now
+    // Controls iOS standard image manipulation
     imagePickerController.allowsEditing = NO;
     
     [self presentTheCamera];
 }
 
+#pragma mark -
+#pragma mark UIPopOverControllerDelegate
 
+- (BOOL)popoverControllerShouldDismissPopover:(UIPopoverController *)popoverController {
+    [delegate canceledPickingImage];
+    return YES;
+}
+
+#pragma mark -
+#pragma mark View controls
+
+- (void)setMask:(UIView *)aMask {
+    mask = aMask;
+    [self.view addSubview:mask];
+}
 
 - (void)dealloc {
     NSLog(@"CameraViewController dealloc");
     
+    [self dismissImageEditor];
     [self dismissTheCamera:imagePickerController];
+    
+    self.navController = nil;
     
     [imagePickerController release];
     imagePickerController = nil;
-    self.imageLibraryButton = nil;
-    self.cameraButton = nil;
-    if (backgroundView) {
-        [backgroundView release];
+    
+    if (mask) {
+        [mask release];
     }
-    backgroundView = nil;
     
     if (host) {
         [host release];
@@ -276,10 +354,11 @@
         }
         [connections release];
     }
-    if (popOverController) {
-        [popOverController dismissPopoverAnimated:NO];
-        [popOverController release];
-    }
+    
+    self.titleLabel = nil;
+    self.cancelLabel = nil;
+    
+    self.delegate = nil;
     
     [super dealloc];
 }

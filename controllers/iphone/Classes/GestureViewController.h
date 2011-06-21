@@ -14,8 +14,15 @@
 @protocol AdvancedUIDelegate <NSObject>
 
 @required
-- (void)createObject:(NSString *)JSON_String;
-- (void)destroyObject:(NSString *)JSON_String;
+- (void)setupServiceWithPort:(NSInteger)p
+                    hostname:(NSString *)h;
+- (BOOL)startServiceWithID:(NSString *)ID;
+
+- (void)clean;
+
+- (void)createObjects:(NSArray *)JSON_Array;
+- (void)destroyObjects:(NSArray *)JSON_Array;
+- (void)setValuesForObjects:(NSArray *)JSON_Array;
 
 @end
 
@@ -80,6 +87,8 @@
 - (void)startTouches;
 - (void)stopTouches;
 
+- (void)reset;
+
 @end
 
 
@@ -89,24 +98,39 @@
 #import "AudioController.h"
 #import "AdvancedUIObjectManager.h"
 #import "CameraViewController.h"
+#import "GestureImageView.h"
 
+@class TrickplayGroup;
+
+#define CAMERA_BUTTON_TITLE "Camera"
+#define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate> {
+CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate, UINavigationControllerDelegate> {
+    BOOL viewDidAppear;
+    
     SocketManager *socketManager;
     NSString *hostName;
     NSInteger port;
     NSString *http_port;
     NSString *version;
     
+    NSTimer *socketTimer;
+    SocketManager *arbitrarySocket;
+    
     UIActivityIndicatorView *loadingIndicator;
     UITextField *theTextField;
     UIImageView *backgroundView;
+    UIImageView *foregroundView;
     NSInteger backgroundHeight;
     NSInteger backgroundWidth;
     
     NSMutableArray *multipleChoiceArray;
     UIActionSheet *styleAlert;
+    
+    UIActionSheet *cameraActionSheet;
+    
+    TrickplayGroup *advancedView;
     
     ResourceManager *resourceManager;
     
