@@ -3,17 +3,21 @@ cmake_minimum_required( VERSION 2.6 )
 if (NATURAL_DOCS)
 
     add_custom_target(
-        docs
-        ALL
-        COMMENT "Generating documentation"
-	VERBATIM
-
-	COMMAND sed -e "s!__REPLACE_ME_VERSION_TAG__!${GIT_VERSION})!"
+		git-tag-menu-txt
+		COMMENT "Inserting Git tag into docs"
+		DEPENDS ${PROJECT_SOURCE_DIR}/engine/docs/apps/nd/Menu.txt.src
+		VERBATIM
+		COMMAND sed -e "s!__REPLACE_ME_VERSION_TAG__!${GIT_VERSION}!"
 			 ${PROJECT_SOURCE_DIR}/engine/docs/apps/nd/Menu.txt.src
 			 > ${PROJECT_SOURCE_DIR}/engine/docs/apps/nd/Menu.txt
+	)
 
+	add_custom_target(
+		app-docs
+		COMMENT "Generating app docs"
+		VERBATIM
+		DEPENDS git-tag-menu-txt
         COMMAND ${NATURAL_DOCS}
-            -r
             -i ${PROJECT_SOURCE_DIR}/engine
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/editor
@@ -25,9 +29,13 @@ if (NATURAL_DOCS)
             -o HTML ${PROJECT_BINARY_DIR}/docs/apps
             -p ${PROJECT_SOURCE_DIR}/engine/docs/apps/nd
             -s Default Trickplay
+	)
 
+	add_custom_target(
+		oem-docs
+		COMMENT "Generating oem docs"
+		VERBATIM
         COMMAND ${NATURAL_DOCS}
-            -r
             -i ${PROJECT_SOURCE_DIR}/engine            
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/apps
             -xi ${PROJECT_SOURCE_DIR}/engine/bindings
@@ -36,17 +44,29 @@ if (NATURAL_DOCS)
             -xi ${PROJECT_SOURCE_DIR}/engine/lb
             -xi ${PROJECT_SOURCE_DIR}/engine/lua
             -xi ${PROJECT_SOURCE_DIR}/engine/source
-            
             -o HTML ${PROJECT_BINARY_DIR}/docs/oem
             -p ${PROJECT_SOURCE_DIR}/engine/docs/oem/nd
             -s Default Trickplay
+	)
 
+	add_custom_target(
+		editor-docs
+		COMMENT "Generating editor docs"
+		VERBATIM
         COMMAND ${NATURAL_DOCS}
-            -r
             -i ${PROJECT_SOURCE_DIR}/engine/docs/editor/text
             -o HTML ${PROJECT_BINARY_DIR}/docs/editor
             -p ${PROJECT_SOURCE_DIR}/engine/docs/editor/nd
             -s Default Trickplay
+	)
+
+    add_custom_target(
+        docs
+        ALL
+		DEPENDS
+	   		app-docs
+	    	oem-docs
+		   	editor-docs
     )
 
     file(
