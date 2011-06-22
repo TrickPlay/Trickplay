@@ -183,7 +183,13 @@ function(self, router, ...)
     local function call_or_check()
         if call_bet == 0
         or (call_bet <= bb_qty and current_player == bb_player) then
+            if current_player.controller then
+                current_player.controller:call_or_check("check")
+            end
             return "check"
+        end
+        if current_player.controller then
+            current_player.controller:call_or_check("call")
         end
         return "call"
     end

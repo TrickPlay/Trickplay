@@ -19,19 +19,21 @@ function(ctrl, router, controller, ...)
         size = {640*x_ratio, 95*y_ratio}
     }
 
+    local check_button = RemoteButton(
+        controller, "check_button_off_touch", "check_button_on_touch",
+        {257*x_ratio, 592*y_ratio}, {154*x_ratio, 55*y_ratio}
+    )
+    local call_button = RemoteButton(
+        controller, nil, "call_button_on_touch",
+        {261*x_ratio, 592*y_ratio}, {145*x_ratio, 55*y_ratio}
+    )
+
     local betting_buttons = {
         fold = RemoteButton(
             controller, nil, "fold_button_on_touch",
             {74*x_ratio, 592*y_ratio}, {145*x_ratio, 55*y_ratio}
         ),
-        call = RemoteButton(
-            controller, nil, "call_button_on_touch",
-            {261*x_ratio, 592*y_ratio}, {145*x_ratio, 55*y_ratio}
-        ),
-        check = RemoteButton(
-            controller, nil, "call_button_on_touch",
-            {261*x_ratio, 592*y_ratio}, {154*x_ratio, 55*y_ratio}
-        ),
+        call = call_button,
         bet = RemoteButton(
             controller, nil, "bet_button_on_touch",
             {447*x_ratio, 592*y_ratio}, {108*x_ratio, 55*y_ratio}
@@ -45,6 +47,8 @@ function(ctrl, router, controller, ...)
             {481*x_ratio, 692*y_ratio}, {35*x_ratio, 34*y_ratio}
         )
     }
+
+    blah = check_button
 
     local wooden_buttons = {
         exit = controller.factory:Image{
@@ -65,6 +69,8 @@ function(ctrl, router, controller, ...)
     }
 
     view:add(buttons, wooden_bar)
+    view:add(check_button.group)
+    check_button:hide()
     for k,button in pairs(betting_buttons) do
         view:add(button.group)
     end
@@ -73,6 +79,20 @@ function(ctrl, router, controller, ...)
     end
 
     controller.screen:add(view)
+
+    function ctrl:call_or_check(string)
+        if string == "check" then
+            betting_buttons.call = check_button
+            check_button:show()
+            check_button:reset()
+            call_button:hide()
+        else
+            betting_buttons.call = call_button
+            call_button:show()
+            call_button:reset()
+            check_button:hide()
+        end
+    end
 
     function ctrl:on_touch(event)
         if event.controller == controller then

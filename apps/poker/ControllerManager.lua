@@ -171,7 +171,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
         local current_bkg = nil
         function controller:clear_and_set_background(image_name)
-            print("Clear and Set Background")
+            print("\n\nClear and Set Background with image name:", image_name, "\n\n")
             --if current_bkg ~= image_name then
                 controller:clear_ui()
                 --controller.screen:set_background(image_name)
@@ -243,7 +243,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         if start_touch and controller.has_touches then
             print("can accept touches!")
             function controller:on_touch_down(finger, x, y)
-                print("answered", controller.name, x, y)
+                print("touch down:", controller.name, x, y)
 
                 print("component "..tostring(router:get_active_component())
                 .." handling click")
@@ -371,6 +371,15 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
             controller:add_image("card1", 60, 70, 100*3, 130*3)
             controller:add_image("card2", 280, 90, 100*3, 130*3)
+        end
+        
+        function controller:call_or_check(string)
+            ctrl = controller.router:get_active_controller()
+            if ctrl ~= betting then
+                return
+            end
+
+            betting:call_or_check(string)
         end
 
 ---------------On Connected Junk---------------
