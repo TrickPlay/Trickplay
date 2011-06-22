@@ -290,7 +290,8 @@ imgs.water1:set{
 ---[[
 
 base_imgs = {
-	arrow           = Image{ src = "assets/splash/Arrow.png"},
+	arrow_f         = Image{ src = "assets/splash/Arrow.png"},
+	arrow           = Image{ src = "assets/splash/Arrow-outline.png"},
 	water1          = Image{ src = "assets/lvls/bg_tiles/water1.png" },
 	explosion1      = {
                       Image{ src = "assets/fx/explosion1_01.png" },
@@ -315,7 +316,19 @@ base_imgs = {
 	health_g        = Image{ src="assets/player/health_g.png"},
 	guns_g          = Image{ src="assets/player/2xfire_g.png"},
 	up_life_g       = Image{ src="assets/player/up_life_g.png"},
-
+	cursor          = {
+	    menu        = Image{ src="assets/splash/Cursor.png"},
+	    game        = Image{ src="assets/player/target.png"},
+	},
+	button          = {
+	    lg_end_f    = Image{ src = "assets/splash/buttons/btn-lg-end-f.png"},
+	    lg_end      = Image{ src = "assets/splash/buttons/btn-lg-end.png"},
+	    lg_mid_f    = Image{ src = "assets/splash/buttons/btn-lg-middle-f.png"},
+	    lg_mid      = Image{ src = "assets/splash/buttons/btn-lg-middle.png"},
+	    sm_end      = Image{ src = "assets/splash/buttons/btn-sm-end.png"},
+	    sm_mid_f    = Image{ src = "assets/splash/buttons/btn-sm-middle-f.png"},
+	    sm_mid      = Image{ src = "assets/splash/buttons/btn-sm-middle.png"},
+	},
 	my_prop         = {
                       Image{ src = "assets/player/player_prop_01.png"},
                       Image{ src = "assets/player/player_prop_02.png"},
