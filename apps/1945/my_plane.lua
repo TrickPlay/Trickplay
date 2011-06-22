@@ -301,7 +301,8 @@ my_plane =
                     --table.insert(self.render_items,self.smoke_stream[i])
                     --add_to_render_list(self.smoke_stream[i],self.plumes_per_stream)
                 
-            end--]]
+            end
+	    --]]
             self.img_h = self.images[1].h
             self.img_w = self.images[1].w
             if type(o) == "table"  then
@@ -412,7 +413,17 @@ my_plane =
             --update position
             --print(self.h_speed)
             --self.x = self.x + ( self.h_speed * seconds )
-            local x = self.group.x + ( self.h_speed * seconds )
+            local x = self.group.x
+	    
+	    if not using_keys then
+		
+		self.h_speed = clamp( (cursor.x - x-my_plane_sz/2)*5 ,
+                        -self.max_h_speed , self.max_h_speed )
+		
+	    end
+	    
+	    x = x + self.h_speed * seconds
+	    
             
             if x > screen_w - my_plane_sz then
                 
@@ -434,7 +445,17 @@ my_plane =
             
             self.group.x = x
             
-            local y = self.group.y + ( self.v_speed * seconds )
+            local y = self.group.y
+	    
+	    
+	    if not using_keys then
+		
+		self.v_speed = clamp( (cursor.y - y-my_plane_sz/2)*5 ,
+                        -self.max_v_speed , self.max_v_speed )
+		
+	    end
+	    
+	    y = y + self.v_speed * seconds
             
             if y > screen_h - my_plane_sz then
                 
@@ -805,7 +826,7 @@ redo_score_text()
                     self.v_speed = clamp( self.v_speed - self.speed_bump ,
                         -self.max_v_speed , self.max_v_speed )
                 end
-            
+		
             elseif key == keys.Return then
             	local shoot = {
 					function()

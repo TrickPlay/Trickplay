@@ -16,8 +16,9 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     local h_score_txt = Text{text="HIGH SCORE!",font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-110}
     local init_here   = Text{text="Enter your initials:",font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2+200}
     local arrow_up    = Clone{source=base_imgs.arrow, x = screen_w/2-95, y = screen_h-200, z_rotation={-90,0,0}}
-    local arrow_dn    = Clone{source=base_imgs.arrow, x = screen_w/2-55, y = screen_h-100, z_rotation={90,0,0}}
-
+    local arrow_dn    = Clone{source=base_imgs.arrow, x = screen_w/2-55, y = screen_h-100, z_rotation={ 90,0,0}}
+    local ok          = button(screen_w/2+300,screen_h-200,"Submit",nil,nil,true)--Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+260}
+    
     init_here.anchor_point = {init_here.w/2,init_here.h/2}
     menu.initials = {
         Text{font = modal_font , text = "" , color = "FFFFFF",x=screen_w/2-100, y=screen_h-200},
@@ -26,17 +27,105 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     }
     
     menu.group:add(title,h_score_val,h_score_txt,init_here,
-        menu.initials[1],menu.initials[2],menu.initials[3], arrow_up, arrow_dn
+        menu.initials[1],menu.initials[2],menu.initials[3],ok
     )
+    
+    local initial_index = 1
+    
+    for i,initial in pairs(menu.initials) do
+	
+	initial.on_text_change = function()
+	    print(initial)
+	    initial.anchor_point = {initial.w/2,initial.h/2}
+	end
+	
+	initial.up = Clone{source=base_imgs.arrow, x = initial.x, y = initial.y-initial.h/2-5, z_rotation={-90,0,0}}
+	initial.dn = Clone{source=base_imgs.arrow, x = initial.x, y = initial.y+initial.h/2+5, z_rotation={ 90,0,0}}
+	
+	initial.up.anchor_point = {0,initial.up.h/2}
+	initial.dn.anchor_point = {0,initial.dn.h/2}
+	--up arrow
+	function initial.up:on_enter()
+	    
+	    initial.up.source = base_imgs.arrow_f
+	    
+	    cursor.last_on = initial.up.on_enter
+	    
+	    cursor.on_obj = initial.up
+	    
+	    cursor.on_nothing = false
+    	    
+	    initial_index = i
+	    
+        end
+	
+        function initial.up:on_leave()
+	    
+	    cursor.last_on = nil
+    	    
+	    cursor.on_nothing = true
+    	    
+	    initial.up.source = base_imgs.arrow
+	    
+	end
+	
+	function initial.up:on_button_up()
+	    
+	    menu.keys[keys.Up]()
+	    
+	    return true
+	    
+	end
+	--down arrow
+	function initial.dn:on_enter()
+	    
+	    initial.dn.source = base_imgs.arrow_f
+	    
+	    cursor.last_on = initial.dn.on_enter
+	    
+	    cursor.on_obj = initial.dn
+	    
+	    cursor.on_nothing = false
+    	    
+	    initial_index = i
+	    
+        end
+	
+        function initial.dn:on_leave()
+	    
+	    cursor.last_on = nil
+    	    
+	    cursor.on_nothing = true
+    	    
+	    initial.dn.source = base_imgs.arrow
+	    
+	end
+	
+	function initial.dn:on_button_up()
+	    
+	    menu.keys[keys.Down]()
+	    
+	    return true
+	    
+	end
+	menu.group:add(initial.up,initial.dn)
+	
+    end
     
     layers.splash:add(menu.group)
     menu.group:hide()
     
-    local initial_index = 1
     local index_to_be   = 0
     local h_score_to_be = 0
-    local medals = {}
-    local idle_loop = nil
+    local medals        = {}
+    local idle_loop     = nil
+    
+    function menu:lose_focus()
+	
+	menu.initials[initial_index].up.source = base_imgs.arrow
+	menu.initials[initial_index].dn.source = base_imgs.arrow
+	
+    end
     function menu:animate_in(highscore,index,no_delay)
         
         local m
@@ -46,14 +135,33 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
             m = Clone{source=base_imgs["medal_"..i], x=screen_w/2-100-200*(i-1),y=screen_h/2-250}
             table.insert(medals,m)
             self.group:add(m)
-        end 
+        end
+	
+	initial_index    = 1
         
-        menu.initials[1].text = "A"
-        menu.initials[2].text = "A"
-        menu.initials[3].text = "A"
-        arrow_up.x = screen_w/2-95
-        arrow_dn.x = screen_w/2-55
-        initial_index    = 1
+        for i,initial in pairs(menu.initials) do
+	    
+	    initial.text = "A"
+	    initial.anchor_point = {initial.w/2,initial.h/2}
+	    
+	    initial.up.reactive = true
+	    initial.dn.reactive = true
+	    
+	    if i == initial_index and using_keys then
+		
+		initial.up.source = base_imgs.arrow_f
+		initial.dn.source = base_imgs.arrow_f
+		cursor.keys_on    = menu
+	    else
+		
+		initial.up.source = base_imgs.arrow
+		initial.dn.source = base_imgs.arrow
+		
+	    end
+	end
+	
+	ok.reactive = true
+	
         index_to_be      = index
         h_score_to_be    = highscore
         h_score_val.text = string.format("%06d",highscore).." pts"
@@ -100,20 +208,64 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         end,
         [keys.Left]   = function()
             if initial_index - 1 >= 1 then
-                initial_index = initial_index - 1
+		if not ok.focused then
+		    
+		    menu.initials[initial_index].up.source = base_imgs.arrow
+		    menu.initials[initial_index].dn.source = base_imgs.arrow
+		    
+		    initial_index = initial_index - 1
+		    
+		else
+		    
+		    ok:lose_focus()
+		    
+		    cursor.keys_on = menu
+		end
+		
+		menu.initials[initial_index].up.source = base_imgs.arrow_f
+		menu.initials[initial_index].dn.source = base_imgs.arrow_f
+		
                 arrow_up.x = arrow_up.x-100
                 arrow_dn.x = arrow_dn.x-100
             end
         end,
         [keys.Right]  = function()
             if initial_index + 1 <= #menu.initials then
-                initial_index = initial_index + 1
+                
+		menu.initials[initial_index].up.source = base_imgs.arrow
+		menu.initials[initial_index].dn.source = base_imgs.arrow
+		
+		initial_index = initial_index + 1
+		
+		menu.initials[initial_index].up.source = base_imgs.arrow_f
+		menu.initials[initial_index].dn.source = base_imgs.arrow_f
+		
                 arrow_up.x = arrow_up.x+100
                 arrow_dn.x = arrow_dn.x+100
+		
+	    elseif not ok.focused then
+		
+		menu.initials[initial_index].up.source = base_imgs.arrow
+		menu.initials[initial_index].dn.source = base_imgs.arrow
+		
+		ok:get_focus()
+		cursor.keys_on = ok
             end
         end,
         [keys.Return] = function()
             assert(index_to_be > 0 and index_to_be < 11)
+	    
+	    if not ok.focused then return end
+	    
+	    for i,initial in pairs(menu.initials) do
+		
+		initial.up.reactive = true
+		initial.dn.reactive = true
+		
+	    end
+	    
+	    ok.reactive = false
+	    
             local m = state.curr_level-1
             if no_delay ~= nil then m = state.curr_level end
             table.insert(
@@ -168,12 +320,13 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     title.position     = {screen_w/2,100}
     
     local h_score_val = Text{text="000000",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-250}
-    local play_again  = Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+100}
-    local high_scores = Text{text="High Scores", font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+180}
-    local quit        = Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+260}
-    local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+40}
+    local play_again  = button(screen_w/2-100,screen_h/2+ 80,"Play Again")--Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+100}
+    local high_scores = button(screen_w/2-100,screen_h/2+180,"High Scores")--Text{text="High Scores", font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+180}
+    local quit        = button(screen_w/2-100,screen_h/2+280,"Exit")--Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+260}
+    --local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+40}
     
-    menu.group:add(title,h_score_val,play_again,high_scores,quit,arrow)
+    local sel_items = {play_again,high_scores,quit}
+    menu.group:add(title,h_score_val,play_again,high_scores,quit)
     
     layers.splash:add(menu.group)
     menu.group:hide()
@@ -181,6 +334,13 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     local menu_index = 1
     local medals = {}
     function menu:animate_in(highscore,no_delay)
+	
+	play_again.reactive  = true
+	high_scores.reactive = true
+	quit.reactive        = true
+	cursor:switch_to_pointer()
+	cursor.keys_on = play_again
+	
         local m
         local upper = state.curr_level-1
         if no_delay ~= nil then upper = state.curr_level end
@@ -190,9 +350,12 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
             self.group:add(m)
         end   
         
-        
+        sel_items[menu_index]:lose_focus()
         menu_index       = 1
-        arrow.y = play_again.y+40
+	if using_keys then
+	    sel_items[menu_index]:get_focus()
+	end
+        --arrow.y = play_again.y+40
         h_score_val.text = string.format("%06d",highscore).." pts"
         
         local iii = 3000
@@ -212,6 +375,10 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     end
     
     function menu:animate_out()
+	play_again.reactive  = false
+	high_scores.reactive = false
+	quit.reactive        = false
+	cursor:switch_to_target()
         menu.group:hide()
     end
     menu.h_score_menu=nil
@@ -221,14 +388,18 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     menu.keys = {
         [keys.Up]     = function()
             if menu_index - 1 > 0 then
+		sel_items[menu_index]:lose_focus()
                 menu_index = menu_index - 1
-                arrow.y = screen_h/2+140+(menu_index-1)*80
+		sel_items[menu_index]:get_focus()
+                --arrow.y = screen_h/2+140+(menu_index-1)*80
             end
         end,
         [keys.Down]   = function()
             if menu_index + 1 < 4 then
-                menu_index = menu_index + 1
-                arrow.y = screen_h/2+140+(menu_index-1)*80
+                sel_items[menu_index]:lose_focus()
+		menu_index = menu_index + 1
+		sel_items[menu_index]:get_focus()
+                --arrow.y = screen_h/2+140+(menu_index-1)*80
             end
         end,
         [keys.Return] = function()
@@ -292,14 +463,16 @@ Menu_High_Scores = Class(function(menu, ...)
     title.position     = {screen_w/2,100}
     
     local h_score_val = Text{text="000000",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
-    local play_again  = Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2}
-    local quit        = Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2+80}
-    local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+20}
+    local play_again  = button(screen_w/2-750,screen_h/2,"Play Again")--Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2}
+    local quit        = button(screen_w/2-750,screen_h/2+100,"Exit")--Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2+80}
+    --local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+20}
     local highscores_num  = Text{text="1:\n2:\n3:\n4:\n5:\n6:\n7:\n8:",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
     local highscores_sc  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+400, y = screen_h/2-350}
     local highscores_ini  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-350}
     local medals = Group{x = screen_w/2+600}
-    menu.group:add(title,play_again,highscores_num,highscores_sc,highscores_ini,quit,arrow,medals)
+    menu.group:add(title,play_again,highscores_num,highscores_sc,highscores_ini,quit,medals)
+    
+    sel_items = {play_again,quit}
     
     layers.splash:add(menu.group)
     menu.group:hide()
@@ -307,6 +480,11 @@ Menu_High_Scores = Class(function(menu, ...)
     local menu_index = 1
     
     function menu:animate_in()
+	
+	play_again.reactive  = true
+	quit.reactive        = true
+	cursor:switch_to_pointer()
+	cursor.keys_on = play_again
         medals:clear()
         highscores_ini.text = ""
         highscores_sc.text = ""
@@ -315,12 +493,15 @@ Menu_High_Scores = Class(function(menu, ...)
             highscores_ini.text = highscores_ini.text..state.high_scores[i].initials.."\n"
             highscores_sc.text  = highscores_sc.text..state.high_scores[i].score.."\n"
             for j = 1,state.high_scores[i].medals do
-            print("gay")
                 medals:add(Clone{source=base_imgs["medals_"..j.."_sm"], x = 40*j, y = 100*(i-1)})
             end
             
         end
+	sel_items[menu_index]:lose_focus()
         menu_index       = 1
+	if using_keys then
+	    sel_items[menu_index]:get_focus()
+	end
         menu.group:show()
         --menu.group.opacity=255
         state.curr_mode = "HIGH_SCORE"
@@ -331,18 +512,26 @@ Menu_High_Scores = Class(function(menu, ...)
     menu.keys = {
         [keys.Up]     = function()
             if menu_index - 1 > 0 then
-                menu_index = menu_index - 1
-                arrow.y = screen_h/2-80+menu_index*100
+                sel_items[menu_index]:lose_focus()
+		menu_index = menu_index - 1
+		sel_items[menu_index]:get_focus()
+                --arrow.y = screen_h/2-80+menu_index*100
             end
         end,
         [keys.Down]   = function()
             if menu_index + 1 < 3 then
-                menu_index = menu_index + 1
-                arrow.y = screen_h/2-80+menu_index*100
+                sel_items[menu_index]:lose_focus()
+		menu_index = menu_index + 1
+		sel_items[menu_index]:get_focus()
+                --arrow.y = screen_h/2-80+menu_index*100
             end
         end,
         [keys.Return] = function()
             if menu_index == 1 then
+		play_again.reactive  = false
+		quit.reactive        = false
+		cursor:switch_to_target()
+		
                 menu.group:hide()
                 state.curr_mode  = "CAMPAIGN"
                 state.curr_level = 1
@@ -390,7 +579,7 @@ Menu_Level_Complete = Class(function(menu, ...)
     title.position     = {screen_w/2,100}
     
     local h_score_val = Text{text="000000",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-250}
-    local medal_name = Text{text="",font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-140}
+    local medal_name  = Text{text="",font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-140}
     local enter       = Text{text="Press Enter to Continue",        font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2+300}
     enter.anchor_point = {enter.w/2,enter.h/2}
     menu.group:add(title,h_score_val,medal_name,enter)

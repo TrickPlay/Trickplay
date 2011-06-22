@@ -301,9 +301,9 @@ explosions =
                 	else
                 		
                         self.images[self.index].opacity=0
-                		self.index = math.floor( self.time /
-                			( self.duration / self.num_frames ) )+1
-                		self.images[self.index].opacity=255
+                		self.index = math.ceil( self.time /
+                			( self.duration / self.num_frames ) )
+                		self.images[self.index].opacity=255--<<<<<<<<<<<<<<<<<<<
                 	end
             
                     if (not self.hit) and type(dam_list) == "table" then

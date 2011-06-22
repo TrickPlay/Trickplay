@@ -9,16 +9,116 @@ end
 my_font = "Arcade Normal, 32px"
 
 local recycled_tables = {}
+
 function make_table()
+    
     if #recycled_tables ~= 0 then
-        return table.remove(recycled_tables)
+        
+	return table.remove(recycled_tables)
+	
     else
-        return {}
+        
+	return {}
+	
     end
+    
 end
+
 function recycle_table(t)
+    
     table.insert(recycled_tables,t)
+    
 end
+
+cursor = Clone()
+
+function button(x,y,txt,on_e,on_l,anchor_center)
+    local btn = Group{name="Button: "..txt,x=x,y=y}
+    
+    local text = Text{
+	text  = txt,
+	font  = my_font,
+	color = "FFFFFF",
+    }
+    
+    local bg_l = Clone{}
+    local bg_m = Clone{}
+    local bg_r = Clone{}
+    
+    function btn:get_focus()
+	if using_keys then
+	    cursor.keys_on = self
+	end
+	bg_l.source = base_imgs.button.lg_end_f
+	bg_m.source = base_imgs.button.lg_mid_f
+	bg_r.source = base_imgs.button.lg_end_f
+	text.color  = "000000"
+	btn.focused = true
+    end
+    
+    function btn:lose_focus()
+	if using_keys and cursor.keys_on == self then
+	    cursor.keys_on = nil
+	end
+	bg_l.source = base_imgs.button.lg_end
+	bg_m.source = base_imgs.button.lg_mid
+	bg_r.source = base_imgs.button.lg_end
+	text.color  = "ffffff"
+	btn.focused = false
+    end
+    
+    btn:lose_focus()
+    
+    bg_m.x            = bg_l.w
+    bg_m.w            = (text.w+20)
+    
+    bg_r.x            = bg_m.x+bg_m.w
+    bg_r.anchor_point = {bg_r.w,0}
+    bg_r.y_rotation   = {180,0,0}
+    
+    text.anchor_point = {text.w/2,text.h/2}
+    text.y            = bg_m.h/2
+    text.x            = bg_m.x + bg_m.w/2
+    
+    btn.size          = { text.x*2, bg_m.h }
+    
+    btn:add( bg_l, bg_m, bg_r, text )
+    
+    function btn:on_enter()
+	
+	cursor.last_on = btn.on_enter
+	
+	cursor.on_obj = btn
+	
+	btn:get_focus()
+	
+	cursor.on_nothing = false
+	
+	if on_e then on_e() end
+	
+    end
+    
+    function btn:on_leave()
+	
+	cursor.last_on = nil
+	
+	btn:lose_focus()
+	
+	cursor.on_nothing = true
+	
+	if on_l then on_l() end
+	
+    end
+    
+    if anchor_center then
+	
+	btn.anchor_point = { text.x, bg_m.h/2 }
+	
+    end
+    
+    return btn
+end
+
 
 dofile("Class.lua")
 --global variables
@@ -33,14 +133,86 @@ dofile( "hud.lua")
 --	process_collisions()
 dofile("GameLoop.lua")
 
-
-
 --All these files consist of tables which get added to the Game Loop
 dofile("land.lua")
 dofile("my_plane.lua")
 dofile("enemies.lua")
 dofile("enemies/final_boss.lua")
 dofile("Levels.lua")
+
+using_keys = true
+
+function cursor:switch_to_target()
+    self.source       = base_imgs.cursor.game
+    self.anchor_point = {self.w/2,self.h/2}
+    self.is_target    = true
+end
+
+function cursor:switch_to_pointer()
+    self.source       = base_imgs.cursor.menu
+    self.anchor_point = {0,0}
+    self.is_target    = false
+end
+
+cursor:switch_to_pointer()
+
+cursor.on_nothing = true
+
+cursor:hide()
+
+screen:add(cursor)
+
+controllers:start_pointer()
+
+
+screen.reactive = true
+
+screen.on_motion = function(_,x,y)
+    
+    if  using_keys  then
+	
+	using_keys = false
+	
+	cursor:show()
+	
+	if   cursor.keys_on ~= nil   then   cursor.keys_on:lose_focus()   end
+	
+	if   cursor.last_on ~= nil   then   cursor.last_on(cursor.on_obj)   end
+	
+    end
+    
+    cursor.x = x
+    
+    cursor.y = y
+    
+end
+
+screen.on_button_down = function()
+    
+    if  using_keys  then
+	
+	using_keys = false
+	
+	cursor:show()
+	
+	if   cursor.keys_on ~= nil   then   cursor.keys_on:lose_focus()   end
+	
+	if   cursor.last_on ~= nil   then   cursor.last_on(cursor.on_obj)   end
+	
+    end
+    
+end
+local key_down
+
+screen.on_button_up = function()
+    
+    if not cursor.on_nothing or cursor.is_target then
+	
+	key_down( keys.Return )
+	
+    end
+    
+end
 
 --The splash Items
 local splash_screen = Group{}
@@ -57,27 +229,45 @@ splash_screen:add(
 	name     = "instr",
 	src      = "assets/splash/InstructionBar.png",
 	position = {screen_w/2,screen_h - 120}
-    },
-    Image
-    {
-	name     = "arrow",
-	src      = "assets/splash/Arrow.png",
-	position = {screen_w/2-300,screen_h/2+240}
     }
 )
+local splash_unreactive
 local splash_i = 1
 local splash_limit = 1
-if (type(settings.salvage_list) == "table" and #settings.salvage_list > 0) or (settings.state ~= nil and settings.state.in_lvl_complete) then
-    splash_screen:add(
-        Text{text="Continue Old Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240},
-        Text{text="Start New Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+300}
-    )
+if (type(settings.salvage_list) == "table" and #settings.salvage_list > 0) or
+    (settings.state ~= nil and settings.state.in_lvl_complete) then
+    
+    local b1 = button(screen_w/2,screen_h/2+160,"Continue Old Game",function() splash_i = 1 end)
+    local b2 = button(screen_w/2,screen_h/2+300,"Start New Game",   function() splash_i = 2 end)
+    
+    b1.reactive = true
+    b2.reactive = true
+    
+    splash_screen:add(b1,b2)
+    
     splash_limit = 2
+    
+    b1:get_focus()
+    
+    splash_unreactive = function()
+	b1.reactive = false
+	b2.reactive = false
+    end
 else
-    splash_screen:add(
-        Text{text="Start New Game",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2+240}
-    )
+    
+    local b1 = button(screen_w/2,screen_h/2+240,"Start New Game",function() splash_i = 1 end)
+    
+    b1.reactive = true
+    
+    splash_screen:add(b1)
+    
+    b1:get_focus()
+    
+    splash_unreactive = function()
+	b1.reactive = false
+    end
 end
+
 splash_screen:add(
         Text{name="level report",text="",font=my_font,color = "FFFFFF", x = screen_w/2, y = screen_h/2-240}
     )
@@ -149,20 +339,29 @@ local keys = {
         [keys.Up] = function()
             if splash_i - 1 >= 1 then
                 splash_i = splash_i - 1
-                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(splash_i-1)
+                layers.splash:find_child("Button: Continue Old Game"):get_focus()
+                layers.splash:find_child("Button: Start New Game"   ):lose_focus()
             end
         end,
         [keys.Down] = function()
             if splash_i + 1 <= splash_limit then
                 splash_i = splash_i + 1
-                layers.splash:find_child("arrow").y = screen_h/2+240 +60*(splash_i-1)
+                layers.splash:find_child("Button: Continue Old Game"):lose_focus()
+                layers.splash:find_child("Button: Start New Game"   ):get_focus()
             end
         end,
         [keys.Return] = function()
             
+	    splash_unreactive()
+	    
+	    cursor:switch_to_target()
+	    
             if splash_i == 1 and splash_limit == 2 then
-                out_splash__in_hud()
-                recurse_and_apply(state,settings.state)
+		
+                
+		out_splash__in_hud()
+                
+		recurse_and_apply(state,settings.state)
                 
                 if state.in_lvl_complete then
                     
@@ -525,15 +724,23 @@ function idle.on_idle( idle , seconds )
     
 end
 
-
+key_down = function(press)
+    if press == keys.Ok then
+	press = keys.Return
+    elseif press == keys.Space or press == keys.Pause then
+	state.paused = not state.paused
+    elseif keys[state.curr_mode][press] then
+	keys[state.curr_mode][press]()
+    end
+end
 function screen.on_key_down( screen , press )
-
-        if press == keys.Ok then
-            press = keys.Return
-        elseif press == keys.Space or press == keys.Pause then
-            state.paused = not state.paused
-        elseif keys[state.curr_mode][press] then keys[state.curr_mode][press]()--second_press)
-        end
+    
+    if not using_keys then
+	using_keys = true
+	cursor:hide()
+    end
+    
+    key_down(press)
 
 end
 
