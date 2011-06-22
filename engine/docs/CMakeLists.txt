@@ -16,7 +16,6 @@ if (NATURAL_DOCS)
 		app-docs
 		COMMENT "Generating app docs"
 		VERBATIM
-		DEPENDS git-tag-menu-txt
         COMMAND ${NATURAL_DOCS}
             -i ${PROJECT_SOURCE_DIR}/engine
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
@@ -30,6 +29,7 @@ if (NATURAL_DOCS)
             -p ${PROJECT_SOURCE_DIR}/engine/docs/apps/nd
             -s Default Trickplay
 	)
+	add_dependencies(app-docs git-tag-menu-txt)
 
 	add_custom_target(
 		oem-docs
@@ -63,11 +63,13 @@ if (NATURAL_DOCS)
     add_custom_target(
         docs
         ALL
-		DEPENDS
-	   		app-docs
-	    	oem-docs
-		   	editor-docs
     )
+	add_dependencies(
+		docs
+			app-docs
+			oem-docs
+			editor-docs
+	)
 
     file(
         MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/docs/apps
