@@ -686,6 +686,17 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Function: clear_dash
+
+        Clears any dash pattern for lines.
+    */
+
+    clear_dash()
+        [[
+            cairo_set_dash( self , 0 , 0 , 0 );
+        ]];
+
+    /*
         Function: save
 
         Saves the current state of the Canvas.
