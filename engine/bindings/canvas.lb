@@ -666,7 +666,7 @@ class Canvas [[ cairo_t * ]]
         integers that define when dashes are ON and OFF.
     */
 
-    set_dash( double offset , table dashes )
+    bool set_dash( double offset , table dashes )
         [[
             std::vector< double > d;
 
@@ -682,7 +682,32 @@ class Canvas [[ cairo_t * ]]
                 lua_pop( L , 1 );
             }
 
-            cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            result = true;
+
+            size_t zeroes = 0;
+
+            for ( std::vector<double>::const_iterator it = d.begin(); it != d.end(); ++it )
+            {
+                if ( 0 == *it )
+                {
+                    ++zeroes;
+                }
+                else if ( *it < 0 )
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            if ( result && zeroes == d.size() )
+            {
+                result = false;
+            }
+
+            if ( result )
+            {
+                cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            }
         ]];
 
     /*
