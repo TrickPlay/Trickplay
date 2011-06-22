@@ -959,13 +959,15 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: restore
         
-        The restore() function pops the last saved Canvas state from an internal stack. If you mistakenly perform a restore from an empty stack, the Canvas object becomes corrupted. There is no way to The <ok> property can be 
+        The restore() function pops the last saved Canvas state from an internal stack.
+        
+        If you mistakenly perform a restore with an empty stack, the Canvas object becomes corrupted. You can check the Canvas object's <ok> property at any time to verify that the Canvas object is still valid.
         
         *Arguments:* None.
         
         *Return Value:* None.
         
-        *See Also:* the <save> function
+        *See Also:* the <save> function and the <ok> property
     */
 
     restore()
@@ -1067,10 +1069,21 @@ class Canvas [[ cairo_t * ]]
         Function: fill
 
         Fills the current path with the current source.
+        
+        *Arguments:*
+        
+        preserve - boolean flag indicating whether or not to preserve the path after the fill operation. Default value is false, i.e., the path is not preserved.
+        
+        *Return Value:* None.
+        
+        The source can be a solid color, a linear gradient, a radial pattern or a bitmap image. The source is set by one of the Canvas's set_source_* functions listed below.
+        
+        set_source_bitmap() - sets source to a bitmapped image
+        set_source_color() - sets source to a solid color with optional alpha/transparency
+        set_source_linear_pattern() - sets source to a linear gradient
+        set_source_radial_pattern() - sets source to a radial pattern
 
-        Arguments:
-
-            preserve - If true, the path is preserved.
+		*See Also:* the <set_source_bitmap>, <set_source_color>, <set_source_linear_pattern> and <set_source_radial_pattern> functions
     */
 
     fill( bool preserve = false )
@@ -1596,15 +1609,44 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: set_source_linear_pattern
 
-        Sets the source pattern to a linear gradient. The linear gradient moves along the line defined by x1,y1 and x2,y2.
+        The set_source_linear_pattern() function sets subsequent drawing operations to a linear gradient pattern along the line defined by (x1, y1) and (x2, y2).
+        
+        Before using the linear pattern, gradient points should be defined by calling the <add_source_pattern_color_stop> function.
 
-        Arguments:
+        *Arguments:*
 
-            x1,y1 - Starting coordinates for the gradient.
-            x2,y2 - Ending coordinates for the gradient.
+        x1, y1 - coordinates for start of gradient line
+        x2, y2 - coordinates for end of gradient line
+        
+        *Return Value:* None
+        
+        *Code Example:* Create a gradient pattern and use it to fill a rectangle
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas.line_width = 10
+        canvas.line_cap = "SQUARE"
+        
+		-- Define the gradient pattern line
+		canvas:set_source_linear_pattern( 100, 100, 700, 700 )
+		
+		-- Define 10 gradient color-stops from black to red
+		
+        
+        -- Draw the lines on the path
+        canvas:stroke()
+                
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+        (end)
+        
+        
     */
 
-    set_source_linear_pattern( double x1 , double y1 , double x2 , double y2 )
+    set_source_linear_pattern( double x1, double y1, double x2, double y2 )
         [[
             cairo_pattern_t * p = cairo_pattern_create_linear( x1 , y1 , x2 , y2 );
             cairo_set_source( self , p );
