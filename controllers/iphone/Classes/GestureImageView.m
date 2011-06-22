@@ -30,6 +30,7 @@
         //[self addGestureRecognizer:longPressGesture];
         
         self.userInteractionEnabled = YES;
+        self.multipleTouchEnabled = YES;
         
         totalRotation = 0;
         totalScale = 1.0;
@@ -75,6 +76,7 @@
 
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    NSLog(@"gesture 1: %@ , gesture 2: %@", gestureRecognizer, otherGestureRecognizer);
     return YES;
 }
 
