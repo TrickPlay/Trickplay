@@ -1597,6 +1597,8 @@ class Canvas [[ cairo_t * ]]
         canvas.set_source_color( "00ff00ff" )
         canvas.set_source_color( "#00ff00ff" )
         (end)
+        
+        *See Also:* the <fill> and <stroke> functions
     */
 
     set_source_color( ... )
@@ -1611,7 +1613,9 @@ class Canvas [[ cairo_t * ]]
 
         The set_source_linear_pattern() function sets subsequent drawing operations to a linear gradient pattern along the line defined by (x1, y1) and (x2, y2).
         
-        Before using the linear pattern, gradient points should be defined by calling the <add_source_pattern_color_stop> function.
+        The (x1, y1) point defines the start position. Similarly, the (x2, y2) point defines the end position. The gradient moves from the start position to the end position. When defining gradient color stops (see the <add_source_pattern_color_stop> function), the start position is at point 0.0, the end position is at 1.0, and all other points along the gradient fall within those two positions.
+
+        Before using the linear pattern in a drawing operation, gradient color-stop points should be defined by calling the <add_source_pattern_color_stop> function.
 
         *Arguments:*
 
@@ -1679,16 +1683,18 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: set_source_radial_pattern
         
-        The set_source_radial_pattern() function sets subsequent drawing operations to a radial gradient pattern between the two circles specified by the (cx0, cy0, radius0) and (cx1, cy1, radius1) arguments.
+        The set_source_radial_pattern() function sets subsequent drawing operations to a radial gradient pattern between the two circles specified by the (cx0, cy0, radius0) and (cx1, cy1, radius1) arguments. 
         
-        Before using the radial pattern, gradient points should be defined by calling the <add_source_pattern_color_stop> function.
+        The (cx0, cy0, radius0) values define the gradient's start circle. Similarly, the (cx1, cy1, radius1) values define the gradient's end circle. The gradient moves from one point on the start circle to the corresponding point on the end circle. When defining gradient color stops (see the <add_source_pattern_color_stop> function), the start circle is at point 0.0, the end circle is at point 1.0, and all other points along the gradient fall within those two positions.
+
+        Before using the radial pattern in a drawing operation, gradient color-stop points should be defined by calling the <add_source_pattern_color_stop> function.
 
         *Arguments:*
 
-        cx0, cy0 - coordinates for center of first circle
-        radius0 - radius of first circle
-        cx1, cy1 - coordinates for center of second circle
-        radius1 - radius of second circle
+        cx0, cy0 - coordinates for center of start circle
+        radius0 - radius of start circle
+        cx1, cy1 - coordinates for center of end circle
+        radius1 - radius of end circle
         
         *Return Value:* None
         
@@ -1699,14 +1705,14 @@ class Canvas [[ cairo_t * ]]
         canvas = Canvas( 1920, 1080 )
         canvas.line_width = 5
         
-		-- Create a rectangle and draw dashed, gray outline around it
+		-- Create a rectangle and draw gray outline around it
 		canvas:rectangle( 100, 100, 600, 600 )
 		canvas:set_source_color( "d0d0d0ff" )
-		canvas:set_dash( 0, { 16.0, 4.0 } )
 		canvas:stroke( true )   -- save the rectangle for subsequent fill()
 		
-		-- Define a vertical gradient pattern line from rectangle's top to bottom
-		-- The two vertical circles touch each other in the center of the rectangle
+		-- Define a radial gradient pattern using two circles. Both circles share the same
+		-- center, but the first circle has a smaller radius than the second, thereby
+		-- creating a symmetrical donut shape.
 		canvas:set_source_radial_pattern( 400, 400, 50, 400, 400, 300 )
 		
 		-- Define 3 gradient color-stops from black to red and back to black
@@ -1714,27 +1720,30 @@ class Canvas [[ cairo_t * ]]
 		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
 		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- BOTTOM, ...black/transparent
 
-		-- Fill the rectangle with our linear gradient pattern
+		-- Fill the rectangle with our radial gradient pattern
 		canvas:fill()
 		
 		-- Draw the two circles used for the radial gradient
-		canvas:set_source_color( "00ff00ff" )
+		canvas:set_dash( 0, { 16.0, 4.0 } )
+		canvas:set_source_color( "00ff00ff" )  -- green first circle
 
 		canvas:arc( 400, 400, 50, 0, 360 )
 		canvas:stroke()
 		
-		canvas:set_source_color( "0000ffff" )
+		canvas:set_source_color( "0000ffff" )  -- blue second circle
 		canvas:arc( 400, 400, 300, 0, 360 )
 		canvas:stroke()
+		canvas:set_dash(0, nil )
 		
 		-- Create a second rectangle
 		canvas:rectangle( 800, 100, 600, 600 )
 		canvas:set_source_color( "d0d0d0ff" )
 		canvas:stroke( true )   -- save the rectangle for subsequent fill()
 
-		-- Define a horizontal gradient pattern line from rectangle's left to right
-		-- The two horizontal circles touch each other in the center of the rectangle
-		-- Note: We use the same color-stop values
+		-- Define a second radial gradient pattern. This time the smaller inner circle
+		-- is located to the left of the outer circle's center, which results in an
+		-- asymmetrical radial pattern.
+		-- Note: Both patterns use the same color-stop values.
 		canvas:set_source_radial_pattern( 950, 400, 50, 1100, 400, 300 )
 		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- LEFT,   From black/transparent to...
 		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
@@ -1742,11 +1751,12 @@ class Canvas [[ cairo_t * ]]
 		canvas:fill()
 
 		-- Draw the two circles used for the radial gradient
-		canvas:set_source_color( "00ff00ff" )
+		canvas:set_dash( 0, { 16.0, 4.0 } )
+		canvas:set_source_color( "00ff00ff" )  -- green first circle
 		canvas:arc( 950, 400, 50, 0, 360 )
 		canvas:stroke()
 		
-		canvas:set_source_color( "0000ffff" )
+		canvas:set_source_color( "0000ffff" )  -- blue second circle
 		canvas:arc( 1100, 400, 300, 0, 360 )
 		canvas:stroke()
 		
@@ -1773,15 +1783,25 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: add_source_pattern_color_stop
-
-        When the source is a linear or radial gradient, this function lets you add color stops to it. Each color
-        stop has an offset that varies from 0 (the start) to 1 (the end) and the color for the gradient at that
-        offset.
-
-        Arguments:
-
-            offset - A number between 0 and 1.
-            color - A color, either as a hex RGBA string or a table with 3 or 4 components.
+        
+        The add_source_pattern_color_stop() function defines a color and alpha/transparency position along a gradient pattern.
+        
+        *Prototype:*
+        
+        (code)
+        add_source_pattern_color_stop( double offset, color )
+		(end)
+		
+		*Arguments:*
+		
+		offset - double value between 0.0 and 1.0, inclusive, specifying a position along the gradient. The start of the gradient is at 0.0, the gradient's end is at 1.0, and all other positions along the gradient lie within those values.
+        color - color and alpha/transparency specified as three RGB (Red/Green/Blue) integer values and an optional alpha/transparency integer value. The format of the color argument is described in <RGB/Alpha Color Formats>.
+        
+        *Return Value:* None.
+        
+        *Code Example:* Refer to the code examples in the <set_source_linear_pattern> and <set_source_radial_pattern> functions.
+        
+        *See Also:* the <set_source_linear_pattern>, <set_source_radial_pattern> and <fill> functions
     */
 
     add_source_pattern_color_stop( double offset , ... )
