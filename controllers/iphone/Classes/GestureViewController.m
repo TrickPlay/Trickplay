@@ -139,6 +139,7 @@
     NSLog(@"Socket Error Occurred in GestureView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
+    /*
     if (self.navigationController.visibleViewController == self) {
         if (!viewDidAppear) {
             return;
@@ -148,12 +149,15 @@
     } else {
         [socketDelegate socketErrorOccurred];
     }
+     */
+    [socketDelegate socketErrorOccurred];
 }
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in GestureView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
+    /*
     if (self.navigationController.visibleViewController == self) {
         if (!viewDidAppear) {
             return;
@@ -163,6 +167,8 @@
     } else {
         [socketDelegate streamEndEncountered];
     }
+     //*/
+    [socketDelegate socketErrorOccurred];
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount

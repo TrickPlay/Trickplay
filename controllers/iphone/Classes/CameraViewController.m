@@ -177,8 +177,8 @@
 
 - (void)dismissImageEditor {
     if (imageEditor) {
-        if (self.modalViewController) {
-            [self dismissModalViewControllerAnimated:NO];
+        if (imageEditor.parentViewController) {
+            [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
         }
         [imageEditor release];
         imageEditor = nil;
@@ -214,10 +214,16 @@
     imageEditor.targetWidth = targetWidth;
     imageEditor.targetHeight = targetHeight;
     imageEditor.mask = mask;
+    
+    [((UIViewController *)delegate).navigationController presentModalViewController:imageEditor animated:NO];
+
+    
+    /*
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
     
         [self presentModalViewController:cntrl animated:NO];
+        
         [cntrl release];
     } else if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
@@ -229,6 +235,7 @@
     } else {
         NSLog(@"This User Interface Idiom does not exist");
     }
+    //*/
 }
 
 #pragma mark -
