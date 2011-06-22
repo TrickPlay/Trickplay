@@ -22,6 +22,8 @@
         pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(scaleImage:)];
         panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panImage:)];
         panGesture.delegate = self;
+        rotationGesture.delegate = self;
+        pinchGesture.delegate = self;
         //longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(presentResetControl:)];
         
         [self addGestureRecognizer:rotationGesture];
@@ -76,7 +78,6 @@
 
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    NSLog(@"gesture 1: %@ , gesture 2: %@", gestureRecognizer, otherGestureRecognizer);
     return YES;
 }
 
