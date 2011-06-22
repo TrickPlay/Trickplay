@@ -1620,30 +1620,53 @@ class Canvas [[ cairo_t * ]]
         
         *Return Value:* None
         
-        *Code Example:* Create a gradient pattern and use it to fill a rectangle
+        *Code Example:* Fill rectangles with a vertical and horizontal linear gradient pattern
         
         (code)
         -- Create a Canvas object
         canvas = Canvas( 1920, 1080 )
         canvas.line_width = 10
-        canvas.line_cap = "SQUARE"
         
-		-- Define the gradient pattern line
-		canvas:set_source_linear_pattern( 100, 100, 700, 700 )
+		-- Create a rectangle and draw gray outline around it
+		canvas:rectangle( 100, 100, 300, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
 		
-		-- Define 10 gradient color-stops from black to red
+		-- Define a vertical gradient pattern line from rectangle's top to bottom
+		canvas:set_source_linear_pattern( 0, 100, 0, 700 )
 		
-        
-        -- Draw the lines on the path
-        canvas:stroke()
-                
+		-- Define 3 gradient color-stops from black to red and back to black
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- TOP,    From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- BOTTOM, ...black/transparent
+
+		-- Fill the rectangle with our linear gradient pattern
+		canvas:fill()
+		
+		-- Create a second rectangle
+		canvas:rectangle( 500, 100, 300, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
+
+		-- Define a horizontal gradient pattern line from rectangle's left to right
+		-- Note: We use the same color-stop values
+		canvas:set_source_linear_pattern( 500, 0, 800, 0 )
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- LEFT,   From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- RIGHT,  ...black/transparent
+		canvas:fill()
+
         -- Convert Canvas to Image for display and show onscreen
         image = canvas:Image()
         screen:add( image)
         screen:show()       
         (end)
         
+        The filled rectangles created by the code example are shown below.
         
+        (see canvasLinearGradients.png)
+        
+        *See Also:* the <add_source_pattern_color_stop> and <fill> functions
     */
 
     set_source_linear_pattern( double x1, double y1, double x2, double y2 )
@@ -1655,18 +1678,93 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: set_source_radial_pattern
+        
+        The set_source_radial_pattern() function sets subsequent drawing operations to a radial gradient pattern between the two circles specified by the (cx0, cy0, radius0) and (cx1, cy1, radius1) arguments.
+        
+        Before using the radial pattern, gradient points should be defined by calling the <add_source_pattern_color_stop> function.
 
-        Sets the source to a radial pattern between two circles.
+        *Arguments:*
 
-        Arguments:
+        cx0, cy0 - coordinates for center of first circle
+        radius0 - radius of first circle
+        cx1, cy1 - coordinates for center of second circle
+        radius1 - radius of second circle
+        
+        *Return Value:* None
+        
+        *Code Example:* Fill rectangles with a vertical and horizontal radial gradient pattern
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas.line_width = 5
+        
+		-- Create a rectangle and draw dashed, gray outline around it
+		canvas:rectangle( 100, 100, 600, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:set_dash( 0, { 16.0, 4.0 } )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
+		
+		-- Define a vertical gradient pattern line from rectangle's top to bottom
+		-- The two vertical circles touch each other in the center of the rectangle
+		canvas:set_source_radial_pattern( 400, 400, 50, 400, 400, 300 )
+		
+		-- Define 3 gradient color-stops from black to red and back to black
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- TOP,    From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- BOTTOM, ...black/transparent
 
-            cx0,cy0 - The coordinates for the center of the first circle.
-            radius0 - The radius of the first circle.
-            cx1,cy1 - The coordinates for the center of the second circle.
-            radius1 - The radius of the second circle.
+		-- Fill the rectangle with our linear gradient pattern
+		canvas:fill()
+		
+		-- Draw the two circles used for the radial gradient
+		canvas:set_source_color( "00ff00ff" )
+
+		canvas:arc( 400, 400, 50, 0, 360 )
+		canvas:stroke()
+		
+		canvas:set_source_color( "0000ffff" )
+		canvas:arc( 400, 400, 300, 0, 360 )
+		canvas:stroke()
+		
+		-- Create a second rectangle
+		canvas:rectangle( 800, 100, 600, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
+
+		-- Define a horizontal gradient pattern line from rectangle's left to right
+		-- The two horizontal circles touch each other in the center of the rectangle
+		-- Note: We use the same color-stop values
+		canvas:set_source_radial_pattern( 950, 400, 50, 1100, 400, 300 )
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- LEFT,   From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- RIGHT,  ...black/transparent
+		canvas:fill()
+
+		-- Draw the two circles used for the radial gradient
+		canvas:set_source_color( "00ff00ff" )
+		canvas:arc( 950, 400, 50, 0, 360 )
+		canvas:stroke()
+		
+		canvas:set_source_color( "0000ffff" )
+		canvas:arc( 1100, 400, 300, 0, 360 )
+		canvas:stroke()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+        (end)
+        
+        The filled rectangles created by the code example are shown below.
+        
+        (see canvasRadialGradients.png)
+        
+        *See Also:* the <add_source_pattern_color_stop> and <fill> functions
+  
     */
 
-    set_source_radial_pattern( double cx0 , double cy0 , double radius0 , double cx1 , double cy1 , double radius1 )
+    set_source_radial_pattern( double cx0, double cy0, double radius0, double cx1, double cy1, double radius1 )
         [[
             cairo_pattern_t * p = cairo_pattern_create_radial( cx0 , cy0 , radius0 , cx1 , cy1 , radius1 );
             cairo_set_source( self , p );
@@ -1841,4 +1939,4 @@ class Canvas [[ cairo_t * ]]
         [[
             // Does nothing - only for compatibility with the old canvas
         ]];
-}        Sets the dash pattern used for lines. The table dashes contains a list of
+}
