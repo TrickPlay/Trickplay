@@ -1,3 +1,6 @@
+-- TODO: fix the completely screwed up phone controls
+-- uses keypresses but touches come simultaneously!
+
 TutorialController = Class(Controller, function(self, view, router, ...)
     self._base.init(self, router, Components.TUTORIAL)
     
@@ -24,15 +27,26 @@ TutorialController = Class(Controller, function(self, view, router, ...)
         [keys.Left] = function(self) self:move(Directions.LEFT) end,
         [keys.Right] = function(self) self:move(Directions.RIGHT) end,
         [keys.Return] = function(self)
+        --[[
             if selector == 1 and c == 1 
             or selector == 2 and c == 2 then leave_help()
             elseif selector == 2 and c == 1 then self:move_slide_right()
             elseif selector == 1 and c == 2 then self:move_slide_left()
             else error("wtf")
             end
+        --]]
         end,
     }
     keyTable[keys.OK] = keyTable[keys.Return]
+
+    function self:handle_click(controller, x, y)
+        if selector == 1 and c == 1 
+        or selector == 2 and c == 2 then leave_help()
+        elseif selector == 2 and c == 1 then self:move_slide_right()
+        elseif selector == 1 and c == 2 then self:move_slide_left()
+        else error("wtf")
+        end
+    end
     
     function self:on_key_down(k)
         print("Tutorial on_key_down")

@@ -294,16 +294,16 @@ TutorialView = Class(View, function(self, router, ...)
             
             -- Previous should move to the left
             if tutorial[p] then
-                local current = tutorial[p]
-                current.fade = "out"
-                current:render()
-                current.group:raise_to_top()
+                local prev = tutorial[p]
+                prev.fade = "out"
+                prev:render()
+                prev.group:raise_to_top()
             end
             
             -- Next slide should be waiting on the right
             if tutorial[n] then
-                local current = tutorial[n]
-                current.group:animate( current.animate_start )
+                local next_ = tutorial[n]
+                next_.group:animate( next_.animate_start )
             end
             --]]end end
         else
