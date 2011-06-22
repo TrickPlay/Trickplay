@@ -1728,6 +1728,62 @@ class Canvas [[ cairo_t * ]]
             }
         ]];
 
+    /*
+        Function: Bitmap
+
+        Creates a new Bitmap from the current contents of the Canvas.
+
+        Returns:
+
+            bitmap - A newly created Bitmap.
+    */
+
+    Bitmap Bitmap()
+        [[
+          if ( cairo_status( self ) != CAIRO_STATUS_SUCCESS )
+          {
+              lua_pushnil( L );
+          }
+          else
+          {
+              cairo_surface_t * surface = cairo_get_target( self );
+
+              if ( ! surface )
+              {
+                  lua_pushnil( L );
+              }
+              else
+              {
+                  Image * image = Image::make( surface );
+
+                  if ( ! image )
+                  {
+                      lua_pushnil( L );
+                  }
+                  else
+                  {
+                      lua_getglobal( L , "Bitmap" );
+
+                      lua_pushliteral( L , "" );
+                      lua_call( L , 1 , 1 );
+
+                      Bitmap * bitmap = Bitmap::get( L , lua_gettop( L ) );
+
+                      if ( ! bitmap )
+                      {
+                          delete image;
+                          lua_pop( L , 1 );
+                          lua_pushnil( L );
+                      }
+                      else
+                      {
+                          bitmap->set_image( image );
+                      }
+                  }
+              }
+          }
+        ]];
+
     set_line_width( double line_width )
         [[
             // For compatibility with old canvas
