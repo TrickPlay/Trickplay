@@ -98,7 +98,7 @@ function load_test_steps ()
 	local loaded_test_steps = {}
 	
 	local tests_file_string = readfile ("packages/"..test_steps_file)
-	
+	print (tests_file_string)
 	local all_tests = json:parse(tests_file_string)
 
 	return all_tests
@@ -329,10 +329,10 @@ function update_state_txt (state_number )
 	
 	screen:remove (screen:find_child ("video_state_txt"))
 	video_state_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 40 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
-				position = { screen.w - 430, 355 },
+				position = { 1490, 365 },
 				markup = "<b>State:</b> ".. state,
 				name = "video_state_txt"
 				}
@@ -345,8 +345,8 @@ function update_media_name (media_name)
 	
 	screen:remove (screen:find_child ("update_media_name"))
 	update_media_name_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 35 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 390 },
 				markup = "<b>Filename:</b> ".. media_name,
@@ -361,8 +361,8 @@ function update_video_size (video_size)
 	
 	screen:remove (screen:find_child ("update_video_size"))
 	update_video_size_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 35 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 430 },
 				markup = "<b>Video Size: </b>"..video_size,
@@ -377,8 +377,8 @@ function update_duration (duration)
 	
 	screen:remove (screen:find_child ("update_duration"))
 	update_duration_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 35 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 470 },
 				markup = "<b>Duration: </b>"..duration,
@@ -396,8 +396,8 @@ function update_has_av (has_audio, has_video)
 	
 	screen:remove (screen:find_child ("update_has_av"))
 	update_has_av_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 35 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 510 },
 				markup = "<b>Video: </b>"..has_video.."  <b>Audio: </b>"..has_audio,
@@ -414,11 +414,11 @@ function update_audio_status (volume, mute)
 
 	screen:remove (screen:find_child ("update_audio_status"))
 	update_audio_status_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 35 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 550 },
-				markup = "<b>Volume: </b>"..volume.."  <b>Mute: </b>"..mute,
+				markup = "<b>Volume: </b>"..volume.."  <b>\nMute: </b>"..mute,
 				name = "update_audio_status"
 				}
 	screen:add ( update_audio_status_txt )
@@ -429,8 +429,8 @@ function update_buffered_duration (buffer)
 	local state, update_buffer
 	screen:remove (screen:find_child ("update_buffer"))
 	update_buffer_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 35 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 590 },
 				markup = "<b>Buffered Duration: </b>"..buffer[1]..", "..buffer[2],
@@ -445,8 +445,8 @@ function update_video_position (position)
 	
 	screen:remove (screen:find_child ("update_video_position"))
 	update_video_position_txt = Text {
-				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				size = { 300, 35 },
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 630 },
 				markup = "<b>Position: </b>"..position,
@@ -473,7 +473,7 @@ function update_debug_text (debug_text)
 	screen:remove (screen:find_child ("debug_text_txt"))
 	update_debug_text_txt = Text {
 				size = { 100, 35 },
-				font = "DejaVu Serif 25px",
+				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 670 },
 				markup = "<u><b>Debug\n</b></u>"..string_with_crs,
@@ -819,5 +819,6 @@ display_test (tests_to_run, current_test)
 update_state_txt (1)
 create_content_list ()
 set_default_viewport ()
+
 screen:show()
 
