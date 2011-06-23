@@ -692,8 +692,7 @@ Menu_Level_Complete = Class(function(menu, ...)
 
     menu.keys = {
         [keys.Return] = function()
-        state.in_lvl_complete = false
-        print("ddddd")
+	    state.in_lvl_complete = false
 	    cursor.on_nothing = true
             if state.curr_level == max_level then
                 menu.group:hide()
