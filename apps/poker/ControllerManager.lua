@@ -394,10 +394,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 controller:declare_resource(name, resource)
             end
         end
+        declare_necessary_resources()
         function controller:on_advanced_ui_ready()
             print("AdvancedUI Ready")
             controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller)
-            declare_necessary_resources()
             create_advanced_ui_objects()
         end
         router:get_active_controller():add_controller(controller)
