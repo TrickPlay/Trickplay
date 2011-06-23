@@ -32,14 +32,32 @@ end
 
 cursor = Clone()
 
-function button(x,y,txt,on_e,on_l,anchor_center)
-    local btn = Group{name="Button: "..txt,x=x,y=y}
+function button(p)--(x,y,txt,on_e,on_l,anchor_center)
+    
+    assert( type(p) == "table", "expected tabled parameters")
+    assert( p.size == "large" or p.size == "small" )
+    assert( p.x ~= nil and p.y ~= nil and p.text ~= nil )
+    assert( p.on_enter     == nil or type(p.on_enter)     == "function" )
+    assert( p.on_leave     == nil or type(p.on_leave)     == "function" )
+    assert( p.on_button_up == nil or type(p.on_button_up) == "function" )
+    
+    local btn = Group{name="Button: "..p.text,x=p.x,y=p.y}
     
     local text = Text{
-	text  = txt,
-	font  = my_font,
+	text  = p.text,
+	--font  = "Arcade Normal, 24px",
 	color = "FFFFFF",
     }
+    
+    if p.size == "small" then
+	
+	text.font  = "Arcade Normal, 24px"
+	
+    else
+	
+	text.font  = "Arcade Normal, 48px"
+	
+    end
     
     local bg_l = Clone{}
     local bg_m = Clone{}
@@ -49,10 +67,16 @@ function button(x,y,txt,on_e,on_l,anchor_center)
 	if using_keys then
 	    cursor.keys_on = self
 	end
-	bg_l.source = base_imgs.button.lg_end_f
-	bg_m.source = base_imgs.button.lg_mid_f
-	bg_r.source = base_imgs.button.lg_end_f
-	text.color  = "000000"
+	if p.size == "small" then
+	    bg_l.source = base_imgs.button.sm_start_f
+	    bg_m.source = base_imgs.button.sm_mid_f
+	    bg_r.source = base_imgs.button.sm_end_f
+	else
+	    bg_l.source = base_imgs.button.lg_start_f
+	    bg_m.source = base_imgs.button.lg_mid_f
+	    bg_r.source = base_imgs.button.lg_end_f
+	end
+	text.color  = "fffacc"
 	btn.focused = true
     end
     
@@ -60,21 +84,31 @@ function button(x,y,txt,on_e,on_l,anchor_center)
 	if using_keys and cursor.keys_on == self then
 	    cursor.keys_on = nil
 	end
-	bg_l.source = base_imgs.button.lg_end
-	bg_m.source = base_imgs.button.lg_mid
-	bg_r.source = base_imgs.button.lg_end
-	text.color  = "ffffff"
+	if p.size == "small" then
+	    bg_l.source = base_imgs.button.sm_start
+	    bg_m.source = base_imgs.button.sm_mid
+	    bg_r.source = base_imgs.button.sm_end
+	else
+	    bg_l.source = base_imgs.button.lg_start
+	    bg_m.source = base_imgs.button.lg_mid
+	    bg_r.source = base_imgs.button.lg_end
+	end
+	text.color  = "5c5e66"
 	btn.focused = false
     end
     
     btn:lose_focus()
     
     bg_m.x            = bg_l.w
-    bg_m.w            = (text.w+20)
+    if p.w then
+	bg_m.w        = p.w - 2*bg_l.w
+    else
+	bg_m.w        = (text.w+20)
+    end
     
     bg_r.x            = bg_m.x+bg_m.w
-    bg_r.anchor_point = {bg_r.w,0}
-    bg_r.y_rotation   = {180,0,0}
+    --r.anchor_point = {bg_r.w,0}
+    --r.y_rotation   = {180,0,0}
     
     text.anchor_point = {text.w/2,text.h/2}
     text.y            = bg_m.h/2
@@ -94,7 +128,7 @@ function button(x,y,txt,on_e,on_l,anchor_center)
 	
 	cursor.on_nothing = false
 	
-	if on_e then on_e() end
+	if p.on_enter then p.on_enter() end
 	
     end
     
@@ -106,11 +140,13 @@ function button(x,y,txt,on_e,on_l,anchor_center)
 	
 	cursor.on_nothing = true
 	
-	if on_l then on_l() end
+	if p.on_leave then p.on_leave() end
 	
     end
     
-    if anchor_center then
+    btn.on_button_up = p.on_button_up
+    
+    if p.anchor_center then
 	
 	btn.anchor_point = { text.x, bg_m.h/2 }
 	
@@ -118,6 +154,7 @@ function button(x,y,txt,on_e,on_l,anchor_center)
     
     return btn
 end
+key_down = nil
 
 
 dofile("Class.lua")
@@ -144,12 +181,14 @@ using_keys = true
 
 function cursor:switch_to_target()
     self.source       = base_imgs.cursor.game
+    self.opacity      = 255*.5
     self.anchor_point = {self.w/2,self.h/2}
     self.is_target    = true
 end
 
 function cursor:switch_to_pointer()
     self.source       = base_imgs.cursor.menu
+    self.opacity      = 255
     self.anchor_point = {0,0}
     self.is_target    = false
 end
@@ -179,6 +218,8 @@ screen.on_motion = function(_,x,y)
 	
 	if   cursor.last_on ~= nil   then   cursor.last_on(cursor.on_obj)   end
 	
+	if state.curr_mode == "CAMPAIGN" then pause_btn:to_mouse() end
+	
     end
     
     cursor.x = x
@@ -199,10 +240,11 @@ screen.on_button_down = function()
 	
 	if   cursor.last_on ~= nil   then   cursor.last_on(cursor.on_obj)   end
 	
+	--pause_btn:to_mouse()
+	if state.curr_mode == "CAMPAIGN" then pause_btn:to_mouse() end
     end
     
 end
-local key_down
 
 screen.on_button_up = function()
     
@@ -237,8 +279,21 @@ local splash_limit = 1
 if (type(settings.salvage_list) == "table" and #settings.salvage_list > 0) or
     (settings.state ~= nil and settings.state.in_lvl_complete) then
     
-    local b1 = button(screen_w/2,screen_h/2+160,"Continue Old Game",function() splash_i = 1 end)
-    local b2 = button(screen_w/2,screen_h/2+300,"Start New Game",   function() splash_i = 2 end)
+    local b1 = button{
+	size     = "large",
+	x        = screen_w/2,
+	y        = screen_h/2+160,
+	text     = "Continue Old Game",
+	on_enter = function() splash_i = 1 end
+    }
+    local b2 = button{
+	size     = "large",
+	x        = screen_w/2,
+	y        = screen_h/2+300,
+	text     = "Start New Game",
+	w        = b1.w,
+	on_enter = function() splash_i = 2 end
+    }
     
     b1.reactive = true
     b2.reactive = true
@@ -255,7 +310,13 @@ if (type(settings.salvage_list) == "table" and #settings.salvage_list > 0) or
     end
 else
     
-    local b1 = button(screen_w/2,screen_h/2+240,"Start New Game",function() splash_i = 1 end)
+    local b1 = button{
+	size     = "large",
+	x        = screen_w/2,
+	y        = screen_h/2+240,
+	text     = "Start New Game",
+	on_enter = function() splash_i = 1 end
+    }
     
     b1.reactive = true
     
@@ -294,6 +355,7 @@ add_to_render_list( lvlbg[1] )
 --------------------------------------------------------------------------------
 
 --modal menus
+dont_save_game = false
 dofile("menus.lua")
 game_over_save = Menu_Game_Over_Save_Highscore()
 game_over_no_save = Menu_Game_Over_No_Save()
@@ -303,20 +365,22 @@ level_completed = Menu_Level_Complete()
 game_over_save:set_ptr_to_h_scores(high_score_menu)
 game_over_no_save:set_ptr_to_h_scores(high_score_menu)
 
-level_completed:set_ptr_to_g_over(game_over_save)
+level_completed:set_ptr_to_g_over_save(    game_over_save    )
+level_completed:set_ptr_to_g_over_no_save( game_over_no_save )
 
 
 local test_text = Text
 	{
 	    font = my_font,
-	    text =  "Test Mode\n\n"..
-	            "q-y    enemy formations\n"..
-	            "n-m    big enemies\n\n"..
+	    text =
+		"Test Mode\n\n"..
+                "q-y    enemy formations\n"..
+	        "n-m    big enemies\n\n"..
                 "z-c    powerup\n"..
-	            "1-5    bullet   powerups\n\n"..
+	        "1-5    bullet   powerups\n\n"..
                 "9      plane gets hit\n"..
                 "0      plane heals\n\n"..
-	            "h      toggles  this  text\n\n"..
+	        "h      toggles  this  text\n\n"..
                 "fyi, you don't die",
 	    color = "FFFFFF",
         opacity = 0
@@ -333,7 +397,7 @@ end
 lvl_end_i = 1
 --------------------------------------------------------------------------------
 -- Event handler
-local keys = {
+local key_events = {
     ["SPLASH"] =
     {
         [keys.Up] = function()
@@ -356,8 +420,15 @@ local keys = {
 	    
 	    cursor:switch_to_target()
 	    
-            if splash_i == 1 and splash_limit == 2 then
+	    cursor.last_on = pause_btn.to_mouse
+	    cursor.on_obj  = pause_btn
+	    
+	    if not using_keys then
+		pause_btn:to_mouse()
 		
+	    end
+	    
+            if splash_i == 1 and splash_limit == 2 then
                 
 		out_splash__in_hud()
                 
@@ -428,6 +499,10 @@ local keys = {
         end,
         [keys["2"]] = function()
             
+	    splash_unreactive()
+	    
+	    cursor:switch_to_target()
+	    
             out_splash__in_hud()
             
             state.curr_mode  = "CAMPAIGN"
@@ -442,6 +517,10 @@ local keys = {
         end,
         [keys["3"]] = function()
             
+	    splash_unreactive()
+	    
+	    cursor:switch_to_target()
+	    
             out_splash__in_hud()
             
             state.curr_mode  = "CAMPAIGN"
@@ -456,6 +535,10 @@ local keys = {
         end,
         [keys["4"]] = function()
             
+	    splash_unreactive()
+	    
+	    cursor:switch_to_target()
+	    
             out_splash__in_hud()
             
             state.curr_mode  = "CAMPAIGN"
@@ -729,8 +812,8 @@ key_down = function(press)
 	press = keys.Return
     elseif press == keys.Space or press == keys.Pause then
 	state.paused = not state.paused
-    elseif keys[state.curr_mode][press] then
-	keys[state.curr_mode][press]()
+    elseif key_events[state.curr_mode][press] then
+	key_events[state.curr_mode][press]()
     end
 end
 function screen.on_key_down( screen , press )
@@ -738,6 +821,7 @@ function screen.on_key_down( screen , press )
     if not using_keys then
 	using_keys = true
 	cursor:hide()
+	pause_btn:to_keys()
     end
     
     key_down(press)
@@ -750,26 +834,31 @@ end
 
 function app:on_closing()
     
-    settings.salvage_list = {}
-    print("start")
+    print(my_plane.dead)
+    settings.state = {}
     local temp_table = {}
+    recurse_and_apply(temp_table, state)
+    settings.state = temp_table
+    
+    
+    settings.salvage_list = {}
+    if dont_save_game then return end
+    --print("start")
+    temp_table = {}
     local s
     for render_item,  render_f in pairs(render_list) do
         if  render_item.salvage then
-        print("salvage_call")
+        --print("salvage_call")
             s = render_item:salvage()
-        print("before", #temp_table, s)
+        --print("before", #temp_table, s)
             table.insert(temp_table,s)
-            print("after", #temp_table, s,"\n")
+            --print("after", #temp_table, s,"\n")
         end
     end
-    print("um")
+    --print("um")
     settings.salvage_list = temp_table
-    print("done", #settings.salvage_list, s)
-    settings.state = {}
-    temp_table = {}
-    recurse_and_apply(temp_table, state)
-    settings.state = temp_table
+    --print("done", #settings.salvage_list, s)
+
 
 end
 math.randomseed( os.time() )
