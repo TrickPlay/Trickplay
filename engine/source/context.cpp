@@ -981,24 +981,6 @@ static void after_paint( ClutterActor * actor , gpointer )
 
 #endif
 
-
-//-----------------------------------------------------------------------------
-// When the context enters the stage, hide the OS and/or WM cursor
-
-#ifndef TP_CLUTTER_BACKEND_EGL
-
-static void hide_cursor( ClutterActor * actor, gpointer )
-{
-	clutter_stage_hide_cursor( CLUTTER_STAGE( actor ) );
-}
-
-static void show_cursor( ClutterActor * actor, gpointer )
-{
-	clutter_stage_show_cursor( CLUTTER_STAGE( actor ) );
-}
-
-#endif
-
 //-----------------------------------------------------------------------------
 
 class RunningAction : public Action
@@ -1194,7 +1176,6 @@ int TPContext::run()
 #ifndef TP_CLUTTER_BACKEND_EGL
 
     clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
-    clutter_stage_hide_cursor( (ClutterStage *)stage);
 
 #endif
 
@@ -1239,9 +1220,6 @@ int TPContext::run()
 
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
     
-    g_signal_connect( stage, "enter-event", ( GCallback )hide_cursor, stage);
-    g_signal_connect( stage, "leave-event", ( GCallback )show_cursor, stage);
-
 #endif
 
     clutter_stage_set_throttle_motion_events( CLUTTER_STAGE( stage ) , FALSE );
