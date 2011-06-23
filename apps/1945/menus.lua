@@ -432,6 +432,8 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
         end,
         [keys.Return] = function()
             if menu_index == 1 then
+		launch_new_game()
+		--[[
 		dont_save_game = false
                 remove_all_from_render_list()
 		cursor:switch_to_target()
@@ -452,13 +454,13 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
                 end
                 state.hud.curr_score = 0
                 redo_score_text()
+		--]]
             elseif menu_index == 2 then
-                menu.group:hide()
                 menu.h_score_menu:animate_in()
             else
                 exit()
             end
-            menu.group:hide()
+            menu:animate_out()
             --menu.group.opacity=0
             local upper = #medals
             for i = 1,upper do
@@ -577,6 +579,9 @@ Menu_High_Scores = Class(function(menu, ...)
             if menu_index == 1 then
 		play_again.reactive  = false
 		quit.reactive        = false
+		
+		launch_new_game()
+		--[[
 		remove_all_from_render_list()
 		cursor:switch_to_target()
 		dont_save_game = false
@@ -597,6 +602,7 @@ Menu_High_Scores = Class(function(menu, ...)
                 end
                 state.hud.curr_score = 0
                 redo_score_text()
+		--]]
             else
                 exit()
             end

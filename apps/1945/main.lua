@@ -352,10 +352,46 @@ add_to_render_list( lvlbg[1] )
 
 --add_to_render_list( enemies )
 
---------------------------------------------------------------------------------
+dont_save_game = true
 
+function launch_new_game()
+    
+    --cursor stuff
+    cursor.last_on = pause_btn.to_mouse
+    cursor.on_obj  = pause_btn
+    cursor:switch_to_target()
+    if not using_keys then
+	pause_btn:to_mouse()
+    end
+    
+    --State Stuff
+    state.curr_mode  = "CAMPAIGN"
+    state.curr_level = 1
+    state.hud.num_lives = 3
+    for i = 1, #lives do
+	if i <= state.hud.num_lives then
+	    lives[i].opacity=255
+	else
+	    lives[i].opacity=0
+	end
+    end
+    state.hud.curr_score = 0
+    redo_score_text()
+    
+    dont_save_game = false
+    
+    --Render List stuff
+    remove_all_from_render_list()
+    load_imgs[state.curr_level]()
+    add_to_render_list(lvlbg[1])
+    add_to_render_list(my_plane)
+    add_to_render_list(levels[state.curr_level])
+end
+
+
+--------------------------------------------------------------------------------
 --modal menus
-dont_save_game = false
+
 dofile("menus.lua")
 game_over_save = Menu_Game_Over_Save_Highscore()
 game_over_no_save = Menu_Game_Over_No_Save()
@@ -418,19 +454,20 @@ local key_events = {
             
 	    splash_unreactive()
 	    
-	    cursor:switch_to_target()
+	    out_splash__in_hud()
 	    
-	    cursor.last_on = pause_btn.to_mouse
-	    cursor.on_obj  = pause_btn
-	    
-	    if not using_keys then
-		pause_btn:to_mouse()
-		
-	    end
 	    
             if splash_i == 1 and splash_limit == 2 then
                 
-		out_splash__in_hud()
+		cursor:switch_to_target()
+		
+		cursor.last_on = pause_btn.to_mouse
+		cursor.on_obj  = pause_btn
+		
+		
+		if not using_keys then
+		    pause_btn:to_mouse()
+		end
                 
 		recurse_and_apply(state,settings.state)
                 
@@ -452,12 +489,12 @@ local key_events = {
                     for _,i in ipairs(settings.salvage_list) do
                         f = _G
                         for j = 1,#i.func do
-                            print(i.func[j])
+                            --print(i.func[j])
                             f = f[ i.func[j] ]
                         end
-                        print("done\n\n")
+                        --print("done\n\n")
                         f(unpack(i.table_params))
-                        print("?")
+                        --print("?")
                     end
                     
                     for i = 1,#lives do
@@ -474,14 +511,15 @@ local key_events = {
                 end
                 print("done done")
             else
-                out_splash__in_hud()
-                
+                launch_new_game()
+		--[[
                 state.curr_mode  = "CAMPAIGN"
                 state.curr_level = 1
                 
                 add_to_render_list(my_plane)
                 add_to_render_list(levels[state.curr_level])
                 load_imgs[state.curr_level]()
+		--]]
             end
             
             
