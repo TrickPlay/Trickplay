@@ -70,21 +70,6 @@
 "active": "true"
 },
 {
-"step": "For all movie file types, play the movie then select the to-to-end button |>>> and play",
-"verify": "The movie should immediately go to the last frame and on_end of stream\should show in the Debug view",
-"active": "true"
-},
-{
-"step": "For all movie file types, play the movie then select the volume up button several times",
-"verify": "The volume should increase as well as the value for volume in the debug view",
-"active": "true"
-},
-{
-"step": "For all movie file types, play the movie then select the volume down button several times",
-"verify": "The volume should decrease as well as the value for volume in the debug view",
-"active": "true"
-},
-{
 "step": "For all movie file types, play the movie then toggle the mute button several times",
 "verify": "The sound should be muted and unmuted as well as the mute status in the debug view",
 "active": "true"
