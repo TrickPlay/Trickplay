@@ -508,10 +508,11 @@ function fire_bullet(enemy,source)
         }
     else
         bullet = table.remove(old_bullets)
-        bullet.image.x = enemy.group.x
-        bullet.image.y = enemy.group.y
-        bullet.speed_x = math.cos(deg*math.pi/180) * 500
-        bullet.speed_y = math.sin(deg*math.pi/180) * 500
+	bullet.image.source = source
+        bullet.image.x      = enemy.group.x
+        bullet.image.y      = enemy.group.y
+        bullet.speed_x      = math.cos(deg*math.pi/180) * 500
+        bullet.speed_y      = math.sin(deg*math.pi/180) * 500
         
     end
     add_to_render_list( bullet )

@@ -55,13 +55,43 @@ topbar:find_child("HIGHSCORE").x = h_score_txt.x - topbar:find_child("HIGHSCORE"
 
 lives =
 {
-	Clone{name="life1",source=base_imgs.life,x=20,y=15,z=10},
-	Clone{name="life2",source=base_imgs.life,x=80,y=15,z=10},
+	Clone{name="life1",source=base_imgs.life,x= 20,y=15,z=10},
+	Clone{name="life2",source=base_imgs.life,x= 80,y=15,z=10},
 	Clone{name="life3",source=base_imgs.life,x=140,y=15,z=10},
 	Clone{name="life4",source=base_imgs.life,x=200,y=15,z=10,opacity=0},
 	Clone{name="life5",source=base_imgs.life,x=260,y=15,z=10,opacity=0},
 }
 
-layers.hud:add(topbar)
+pause_btn = button{
+	size     = "small",
+	x        = screen_w-200,
+	y        = screen_h-100,
+	text     = "Pause",
+	on_enter = function()
+		--key_down(keys.Pause)
+		cursor:switch_to_pointer()
+	end,
+	on_leave = function()
+		cursor:switch_to_target()
+	end,
+	on_button_up = function()
+		key_down(keys.space)
+		return true
+	end
+}
+function pause_btn:to_mouse()
+	pause_btn:show()
+	pause_btn.reactive = true
+end
+function pause_btn:to_keys()
+	pause_btn:hide()
+	pause_btn.reactive = false
+end
+
+pause_btn:to_keys()
+
+
+
+layers.hud:add(topbar,pause_btn)
 topbar:add(unpack(lives))
 

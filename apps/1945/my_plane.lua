@@ -214,7 +214,6 @@ my_plane =
     
     friction = 200,
     
-    
     speed_bump = 250,
     
     group = Group{},
@@ -450,7 +449,7 @@ my_plane =
 	    
 	    if not using_keys then
 		
-		self.v_speed = clamp( (cursor.y - y-my_plane_sz/2)*5 ,
+		self.v_speed = clamp( (cursor.y - y-my_plane_sz/2-4)*5 ,
                         -self.max_v_speed , self.max_v_speed )
 		
 	    end
@@ -727,7 +726,7 @@ if state.hud.num_lives == 0 then
     local index = 0
     for i=1,8 do
         print(state.hud.curr_score, state.high_scores[i].score)
-        if state.hud.curr_score > state.high_scores[i].score then
+        if state.hud.curr_score > tonumber(state.high_scores[i].score) then
             index = i
             break
         end

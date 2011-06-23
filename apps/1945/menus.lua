@@ -6,7 +6,7 @@ local max_level = 4
 Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     
     menu.group = Group{}
-    menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
+    --menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
     
     local title = Text{text="GAME OVER",font=modal_title,color="FFFFFF"}
     title.anchor_point = {title.w/2,title.h/2}
@@ -17,8 +17,13 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
     local init_here   = Text{text="Enter your initials:",font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2+200}
     local arrow_up    = Clone{source=base_imgs.arrow, x = screen_w/2-95, y = screen_h-200, z_rotation={-90,0,0}}
     local arrow_dn    = Clone{source=base_imgs.arrow, x = screen_w/2-55, y = screen_h-100, z_rotation={ 90,0,0}}
-    local ok          = button(screen_w/2+300,screen_h-200,"Submit",nil,nil,true)--Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+260}
-    
+    local ok          = button{
+	size          = "large",
+	x             = screen_w/2+220,
+	y             = screen_h  -260,
+	text          = "Submit",
+    }
+        
     init_here.anchor_point = {init_here.w/2,init_here.h/2}
     menu.initials = {
         Text{font = modal_font , text = "" , color = "FFFFFF",x=screen_w/2-100, y=screen_h-200},
@@ -127,7 +132,9 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
 	
     end
     function menu:animate_in(highscore,index,no_delay)
-        
+        dont_save_game = true
+	if cursor.is_target then cursor:switch_to_pointer() end
+	ok:lose_focus()
         local m
         local upper = state.curr_level-1
         if no_delay ~= nil then upper = state.curr_level end
@@ -171,7 +178,7 @@ Menu_Game_Over_Save_Highscore = Class(function(menu, ...)
         if no_delay then iii = 100 end
         local timer = Timer{interval=iii}
         timer.on_timer = function()
-            remove_all_from_render_list()
+            --remove_all_from_render_list()
             menu.group:show()
             --menu.group.opacity=255
             scrap_caches()
@@ -313,17 +320,39 @@ end)
 Menu_Game_Over_No_Save = Class(function(menu, ...)
     
     menu.group = Group{}
-    menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
+    --menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
     
     local title = Text{text="GAME OVER",font=modal_title,color="FFFFFF"}
     title.anchor_point = {title.w/2,title.h/2}
     title.position     = {screen_w/2,100}
     
+    local menu_index = 1
+    
     local h_score_val = Text{text="000000",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-250}
-    local play_again  = button(screen_w/2-100,screen_h/2+ 80,"Play Again")--Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+100}
-    local high_scores = button(screen_w/2-100,screen_h/2+180,"High Scores")--Text{text="High Scores", font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+180}
-    local quit        = button(screen_w/2-100,screen_h/2+280,"Exit")--Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-100, y = screen_h/2+260}
-    --local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+40}
+    local high_scores = button{
+	size          = "large",
+	x             = screen_w/2-100,
+	y             = screen_h/2+280,
+	text          = "High Scores",
+	on_enter      = function() menu_index = 2 end,
+    }
+    local play_again  = button{
+	size          = "large",
+	x             = screen_w/2-100,
+	y             = screen_h/2+160,
+	w             = high_scores.w,
+	text          = "Play Again",
+	on_enter      = function() menu_index = 1 end,
+    }
+    
+    local quit        = button{
+	size          = "large",
+	x             = screen_w/2-100,
+	y             = screen_h/2+400,
+	w             = high_scores.w,
+	text          = "Exit",
+	on_enter      = function() menu_index = 3 end,
+    }
     
     local sel_items = {play_again,high_scores,quit}
     menu.group:add(title,h_score_val,play_again,high_scores,quit)
@@ -331,14 +360,13 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
     layers.splash:add(menu.group)
     menu.group:hide()
     
-    local menu_index = 1
     local medals = {}
     function menu:animate_in(highscore,no_delay)
 	
 	play_again.reactive  = true
 	high_scores.reactive = true
 	quit.reactive        = true
-	cursor:switch_to_pointer()
+	if cursor.is_target then cursor:switch_to_pointer() end
 	cursor.keys_on = play_again
 	
         local m
@@ -363,7 +391,7 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
         local timer = Timer{interval=iii}
         
         timer.on_timer = function()
-            remove_all_from_render_list()
+            --remove_all_from_render_list()
             menu.group:show()
             --menu.group.opacity=255
             scrap_caches()
@@ -404,7 +432,9 @@ Menu_Game_Over_No_Save = Class(function(menu, ...)
         end,
         [keys.Return] = function()
             if menu_index == 1 then
-                
+		dont_save_game = false
+                remove_all_from_render_list()
+		cursor:switch_to_target()
                 menu.group:hide()
                 state.curr_mode  = "CAMPAIGN"
                 state.curr_level = 1
@@ -456,29 +486,46 @@ end)
 Menu_High_Scores = Class(function(menu, ...)
     
     menu.group = Group{}
-    menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
+    --menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
     
     local title = Text{text="HIGH SCORES",font=modal_title,color="FFFFFF"}
     title.anchor_point = {title.w/2,title.h/2}
     title.position     = {screen_w/2,100}
     
+    local menu_index = 1
+    
     local h_score_val = Text{text="000000",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
-    local play_again  = button(screen_w/2-750,screen_h/2,"Play Again")--Text{text="Play Again",  font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2}
-    local quit        = button(screen_w/2-750,screen_h/2+100,"Exit")--Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2+80}
+    local play_again  = button{
+	size          = "large",
+	x             = screen_w/2,--750,
+	y             = screen_h/2+100,
+	text          = "Play Again",
+	on_enter      = function() menu_index = 1 end,
+	anchor_center = true,
+    }
+    local quit        = button{
+	size          = "large",
+	x             = screen_w/2,--750,
+	y             = screen_h/2+220,
+	w             = play_again.w,
+	text          = "Exit",
+	on_enter      = function() menu_index = 2 end,
+	anchor_center = true,
+    }
+    
+    --(screen_w/2-750, screen_h/2+120,"Exit",       function() menu_index = 2 end)--Text{text="Exit",        font=modal_font,color="FFFFFF", x = screen_w/2-750, y = screen_h/2+80}
     --local arrow       = Clone{source=base_imgs.arrow, x = play_again.x-50, y = play_again.y+20}
-    local highscores_num  = Text{text="1:\n2:\n3:\n4:\n5:\n6:\n7:\n8:",      font=modal_font,color="FFFFFF", x = screen_w/2, y = screen_h/2-350}
-    local highscores_sc  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+400, y = screen_h/2-350}
-    local highscores_ini  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+150, y = screen_h/2-350}
-    local medals = Group{x = screen_w/2+600}
+    local highscores_num  = Text{text="1:\n2:\n3:\n4:\n5:\n6:\n7:\n8:",      font=modal_font,color="FFFFFF", x = screen_w/2-play_again.w/2, y = screen_h/2-350}
+    local highscores_sc   = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+400-play_again.w/2, y = screen_h/2-350}
+    local highscores_ini  = Text{text="",      font=modal_font,color="FFFFFF", x = screen_w/2+150-play_again.w/2, y = screen_h/2-350}
+    local medals          = Group{x = screen_w/2+600}
     menu.group:add(title,play_again,highscores_num,highscores_sc,highscores_ini,quit,medals)
     
     sel_items = {play_again,quit}
     
     layers.splash:add(menu.group)
     menu.group:hide()
-    
-    local menu_index = 1
-    
+        
     function menu:animate_in()
 	
 	play_again.reactive  = true
@@ -487,9 +534,9 @@ Menu_High_Scores = Class(function(menu, ...)
 	cursor.keys_on = play_again
         medals:clear()
         highscores_ini.text = ""
-        highscores_sc.text = ""
+        highscores_sc.text  = ""
         for i = 1,8 do
-        print(i)
+        --print(i)
             highscores_ini.text = highscores_ini.text..state.high_scores[i].initials.."\n"
             highscores_sc.text  = highscores_sc.text..state.high_scores[i].score.."\n"
             for j = 1,state.high_scores[i].medals do
@@ -530,8 +577,9 @@ Menu_High_Scores = Class(function(menu, ...)
             if menu_index == 1 then
 		play_again.reactive  = false
 		quit.reactive        = false
+		remove_all_from_render_list()
 		cursor:switch_to_target()
-		
+		dont_save_game = false
                 menu.group:hide()
                 state.curr_mode  = "CAMPAIGN"
                 state.curr_level = 1
@@ -572,7 +620,7 @@ end)
 Menu_Level_Complete = Class(function(menu, ...)
     
     menu.group = Group{}
-    menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
+    --menu.group:add(Rectangle{color="000000",w=screen_w,h=screen_h})
     
     local title = Text{text="LEVEL COMPLETE",font=modal_title,color="FFFFFF"}
     title.anchor_point = {title.w/2,title.h/2}
@@ -589,6 +637,7 @@ Menu_Level_Complete = Class(function(menu, ...)
     local medals = {}
     local g_over = nil
     function menu:animate_in(score,from_splash)
+	if my_plane.dead then return end
         print("end of level")
         local m
         for i = 1, state.curr_level do
@@ -607,14 +656,17 @@ Menu_Level_Complete = Class(function(menu, ...)
         play_sound_wrapper("audio/level-complete.mp3")
         local timer = Timer{interval=3000}
         timer.on_timer = function()
-            print("progressing to level "..state.counters[state.curr_level].lvl_points)
+            if my_plane.dead then return end
+	    print("progressing to level "..state.counters[state.curr_level].lvl_points)
             h_score_val.text = string.format("%06d",state.counters[state.curr_level].lvl_points).." pts"
-            remove_all_from_render_list()
+            --remove_all_from_render_list()
             menu.group:show()
             --menu.group.opacity=255
             scrap_caches()
             state.curr_mode = "LEVEL_END"
             timer:stop()
+	    cursor:switch_to_pointer()
+	    cursor.on_nothing = false
             timer = nil
         end
         if from_splash then
@@ -623,28 +675,33 @@ Menu_Level_Complete = Class(function(menu, ...)
             timer:start()
         end
     end
-    menu.g_over_menu=nil
-    function menu:set_ptr_to_g_over(obj)
-        menu.g_over_menu = obj
+    menu.g_over_menu_save=nil
+    menu.g_over_menu_no_save=nil
+    function menu:set_ptr_to_g_over_save(obj)
+        menu.g_over_menu_save = obj
+    end
+    function menu:set_ptr_to_g_over_no_save(obj)
+        menu.g_over_menu_no_save = obj
     end
 
     menu.keys = {
         [keys.Return] = function()
         state.in_lvl_complete = false
         print("ddddd")
+	    cursor.on_nothing = true
             if state.curr_level == max_level then
                 menu.group:hide()
                 local index = 0
                 for i=1,8 do
-                    if state.hud.curr_score > state.high_scores[i].score then
+                    if state.hud.curr_score > tonumber(state.high_scores[i].score) then
                         index = i
                         break
                     end
                 end
                 if index ~= 0 then
-                    menu.g_over_menu:animate_in(state.hud.curr_score,index,true)
+                    menu.g_over_menu_save:animate_in(state.hud.curr_score,index,true)
                 else
-                    menu.g_over_menu:animate_in(state.hud.curr_score,true)
+                    menu.g_over_menu_no_save:animate_in(state.hud.curr_score,true)
                 end
                 local upper = #medals
                 for i = 1,upper do
@@ -652,7 +709,9 @@ Menu_Level_Complete = Class(function(menu, ...)
                     medals[i] = nil
                 end
             else
-                remove_from_render_list(lvlbg[state.curr_level])
+		remove_all_from_render_list()
+		cursor:switch_to_target()
+                --remove_from_render_list(lvlbg[state.curr_level])
                 state.curr_level = state.curr_level + 1
 		load_imgs[state.curr_level]()
                 if lvlbg[state.curr_level] ~= nil then
