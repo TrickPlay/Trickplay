@@ -111,6 +111,10 @@
     CGRect frame = CGRectMake(0.0, 0.0, width, height);
     foregroundView = [[UIImageView alloc] initWithFrame:frame];
     
+    virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
+    [self.view addSubview:virtualRemote.view];
+    virtualRemote.delegate = self;
+    
     return YES;
 }
 
@@ -388,6 +392,8 @@
         
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
+
+        [virtualRemote.view removeFromSuperview];
     }
 }
 
@@ -409,6 +415,7 @@
         UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
         [foregroundView addSubview:newImageView];
+        [virtualRemote.view removeFromSuperview];
     }
 }
 
@@ -423,6 +430,7 @@
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     [self clearUI];
+    [self.view addSubview:virtualRemote.view];
 }
 
 - (void)do_CU {
@@ -625,6 +633,12 @@
     //*/
 }
 
+- (void)object_added {
+    if ([virtualRemote.view superview]) {
+        [virtualRemote.view removeFromSuperview];
+    }
+}
+
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*
  - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
@@ -660,7 +674,6 @@
     if (!multipleChoiceArray) {
         multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
     }
-    
     
     
     UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc] 
@@ -717,6 +730,8 @@
     NSLog(@"GestureViewController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    self.loadingIndicator = nil;
+    
     if (styleAlert) {
         [styleAlert release];
         styleAlert = nil;
@@ -769,6 +784,10 @@
     }
     if (camera) {
         [camera release];
+    }
+    if (virtualRemote) {
+        [virtualRemote release];
+        virtualRemote = nil;
     }
     if (multipleChoiceArray) {
         [multipleChoiceArray release];
