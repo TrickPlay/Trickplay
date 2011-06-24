@@ -1005,6 +1005,15 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// Sometimes the stage goes un-fullscreen when it shouldn't. This corrects
+// that.
+
+void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
+{
+    clutter_stage_set_fullscreen( stage , TRUE );
+}
+
+//-----------------------------------------------------------------------------
 
 int TPContext::run()
 {
@@ -1167,6 +1176,8 @@ int TPContext::run()
     if ( display_width <= 0 || display_height <= 0 )
     {
         clutter_stage_set_fullscreen( CLUTTER_STAGE( stage ) , TRUE );
+
+        g_signal_connect( stage , "unfullscreen" , ( GCallback ) stage_unfullscreen , 0 );
     }
     else
     {
