@@ -220,7 +220,7 @@ umbrella.func_tbls = {
             if not right_is_playing then
                 right_blurs[this_func_tbl.curr_tile].opacity=255-this_func_tbl.focus:get_value(p)
             end
-            if p == 1 then
+            if p == 1 and this_func_tbl.next_tile ~= nil then
                 right_focus.y = TILE_H*(this_func_tbl.next_tile-1)
                 mediaplayer:seek(0)
                 mediaplayer:play()
@@ -348,7 +348,7 @@ umbrella.func_tbls = {
         end,
     },
     slide_new_pane_left = {
-        duration = 500,
+        duration = 300,
         func = function(this_obj,this_func_tbl,secs,p)
             left_panes.x=left_panes.w*2*(1-p)
             if p == 1 then
@@ -357,13 +357,13 @@ umbrella.func_tbls = {
         end,
     },
     fade_in_left_pane = {
-        duration = 500,
+        duration = 300,
         func = function(this_obj,this_func_tbl,secs,p)
             left_panes.opacity=255*p
         end,
     },
     fade_out_left_pane = {
-        duration = 500,
+        duration = 300,
         func = function(this_obj,this_func_tbl,secs,p)
             left_panes.opacity=255*(1-p)
         end,
@@ -446,13 +446,16 @@ local mouse_pos = {bottom=0,right=0}
 function left_panes:on_enter(x,y)
     
     --if x ~= RIGHT_PANE_X then return end
+    bottom_i = 1
     mouse_pos.bottom = 0
     mouse_pos.right  = 0
     if overlay.opacity ~= 255*.5 then
         
         animate_list[umbrella.func_tbls.fade_out_overlay] = nil
-        animate_list[umbrella.func_tbls.move_to_tile]     = nil
+        --animate_list[umbrella.func_tbls.move_to_tile]     = nil
         animate_list[umbrella.func_tbls.play_next_tile]   = nil
+        
+        umbrella.func_tbls.move_to_tile.next_tile         = nil
         
         umbrella.func_tbls.fade_in_overlay.ovly.from      = overlay.opacity
         
@@ -481,7 +484,9 @@ local function tile_on_enter(i)
         
         if left_is_playing then
             
+            animate_list[umbrella.func_tbls.fade_in_left_pane] = umbrella
             
+            left_is_playing = false
             
         end
         
@@ -578,6 +583,28 @@ function bottom_buttons_base:on_button_up()
     umbrella.keys[keys.OK](umbrella)
     
 end
+
+function umbrella:to_keys()
+    
+    if bottom_i == 1 then
+        
+        animate_list[umbrella.func_tbls.focus_out_button] = nil
+        
+        umbrella.func_tbls.focus_in_button.focus.from = bottom_buttons_foci.opacity
+        
+        animate_list[umbrella.func_tbls.focus_in_button] = umbrella
+        
+    end
+    --if mouse_pos ~= nil then
+    --    
+    --    bottom_buttons_base[mouse_pos]:launch_fade_out()
+    --    
+    --end
+    
+    --bottom_buttons_base[bottom_i]:launch_fade_in()
+    
+end
+
 
 function umbrella:to_mouse()
     
