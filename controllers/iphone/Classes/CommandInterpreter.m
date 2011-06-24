@@ -74,7 +74,11 @@
         }
     }
     // delete those commands from the commandLine
-    NSString *newCommandLine = [[[commandLine substringFromIndex:prev] retain] autorelease];
+    /*
+    NSLog(@"commandLine: %@", commandLine);
+    NSLog(@"prev = %d", prev);
+    //*/
+    NSString *newCommandLine = [commandLine substringFromIndex:prev];
     [commandLine release];
     commandLine = [[NSMutableString alloc] initWithCapacity:40];
     [commandLine appendString:newCommandLine];
