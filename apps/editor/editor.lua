@@ -2125,7 +2125,6 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	button_cancel.pressed = function() xbox:on_button_down(1) end
 	button_ok.pressed = function() inspector_apply(v, inspector) xbox:on_button_down(1) end
 
-
 	local function inspector_position() 
 	     local x_space, y_space
 	     if(v.type == "Video") then return end 
@@ -2190,13 +2189,12 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- make the inspector contents 
 	local attr_t = make_attr_t(v)
-
 	local attr_n, attr_v, attr_s
     local items_height = 0
     local prev_item_h = 0
 	local prev_y = 0 
 	local space = 255
-	local used = 13
+	local used = 13 
 
 	local item_group = Group{name = "item_group"}
 	local H_SPACE = 0 --30

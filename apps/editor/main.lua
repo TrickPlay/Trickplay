@@ -359,6 +359,8 @@ dofile("editor.lua")
 				if screen:find_child(c.name.."border") == nil then 
 				 --if c.extra.org_opacity == nil or c.opacity == c.extra.org_opacity then
 					editor.container_selected(c,x,y)	
+					
+					--[[
 					if screen:find_child("mouse_pointer") then 
 					     screen:remove(screen:find_child("mouse_pointer"))
 					     mouse_pointer = CS_move_into
@@ -368,6 +370,7 @@ dofile("editor.lua")
 		     				     mouse_pointer.extra.type = "move_into"
 					     end 
 					end 
+					]]
 				 --end 
 				elseif c.extra.type == "LayoutManager" then 
 				     if screen:find_child(c.name.."border") then 
@@ -381,6 +384,7 @@ dofile("editor.lua")
 			end 
 		elseif  selected_container then 
 			editor.n_selected (selected_container)
+					--[[
 			screen:remove(screen:find_child("mouse_pointer"))
 			if control then 
 				mouse_pointer = CS_move
@@ -390,9 +394,12 @@ dofile("editor.lua")
 		     			mouse_pointer.extra.type = "move"
 				end 
 			end 
+			]]
 			selected_container = nil
 		end 
 	  end 
+
+--[[
 
 	  if(input_mode == S_RECTANGLE) then 
 		if(screen:find_child("mouse_pointer") ~= nil) then 
@@ -428,7 +435,7 @@ dofile("editor.lua")
 		     mouse_pointer.extra.type = "pointer"
 		end 
 	  end 
-
+]]
           if dragging then
 
 	       local actor = unpack(dragging) 
@@ -660,4 +667,5 @@ dofile("editor.lua")
 
     end
 
+    screen:show()
     dolater(main)

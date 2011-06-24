@@ -917,12 +917,14 @@ function create_on_button_down_f(v)
 							if(screen:find_child("mouse_pointer") ~= nil) then 
 		     					screen:remove(screen:find_child("mouse_pointer"))
 							end 
+							--[[
 							mouse_pointer = CS_move
 							mouse_pointer.extra.type = "move"
 							mouse_pointer.position = {x - 10 ,y - 10 ,0}
 							if(screen:find_child("mouse_pointer") == nil) then 
 		     					screen:add(mouse_pointer)
 							end 
+							]]
 
 							selected_content = v 
 			

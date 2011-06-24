@@ -1246,8 +1246,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     local LINE_WIDTH    = 1
     local input_box_width     
     local item_group 
- 
-
 --[[
     if item_n then print("item_n", item_n) end 
     if item_v then print("item_v", item_v) end 
@@ -1324,180 +1322,180 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 
     if(item_n == "title")then 
     	text = Text {text = item_v}:set(STYLE)
-	text.position = {WIDTH/2 - text.w/2, 8} 
+		text.position = {WIDTH/2 - text.w/2, 8} 
     	group:add(text)
     elseif(item_n == "caption") then
     	text = Text {text = item_v}:set(STYLE)
-	text.position = {PADDING_X, 0}
+		text.position = {PADDING_X, 0}
     	group:add(text)
         group.size = {WIDTH, HEIGHT - PADDING_Y}
     elseif (item_n =="line") then 
         line = make_line()
-	if(item_s =="hide") then 
-		line.opacity = 0 
+		if(item_s =="hide") then 
+			line.opacity = 0 
         end 
-	group:add(line)
+		group:add(line)
         group.size = {WIDTH, LINE_WIDTH + PADDING_Y}
     elseif (item_n == "button") then 
-	group.name = item_v
-	group.reactive = true
+		group.name = item_v
+		group.reactive = true
 
-	if v.extra then 
-	   if is_in_list(v.extra.type, uiElements) == true  then
-		WIDTH = WIDTH + 33
-	   end 
-	end
+		if v.extra then 
+	   		if is_in_list(v.extra.type, uiElements) == true  then
+				WIDTH = WIDTH + 33
+	   		end 
+		end
 		
-	if(item_v == "view code") then 
-	     button = make_ring(WIDTH, HEIGHT + PADDING_Y)
-	else 
-	     button = make_ring(WIDTH/2 - 3, HEIGHT + PADDING_Y)
-	end 
-	button.name = "button"
+		if(item_v == "view code") then 
+	     	button = make_ring(WIDTH, HEIGHT + PADDING_Y)
+		else 
+	     	button = make_ring(WIDTH/2 - 3, HEIGHT + PADDING_Y)
+		end 
+		button.name = "button"
         button.position  = {0, 0}
         button.reactive = true
 
-	function button:on_key_down(key)
+		function button:on_key_down(key)
              local si = inspector:find_child("si")
 
     	     if is_this_widget(v) == true  then
                 item_group = (inspector:find_child("si")).content
              else 
-         	item_group = inspector:find_child("item_group")
+         		item_group = inspector:find_child("item_group")
     	     end 
              if key == keys.Return then
-                  if (item_v == "view code") then 
-		      if v.items then 
-			   v.items = org_items
-		      end 
-		      screen:remove(inspector)
-		      if v.extra.type == "MenuButton" then 
+                if (item_v == "view code") then 
+		      		if v.items then 
+			   			v.items = org_items
+		      		end		 
+		      		screen:remove(inspector)
+		      		if v.extra.type == "MenuButton" then 
+                    	v.spin_out()
+		      		end 
+		      		input_mode = S_SELECT
+		      		current_inspector = nil
+		      		for i, c in pairs(g.children) do
+	     		  		editor.n_selected(c)
+		      		end
+                    screen:grab_key_focus(screen) 
+		      		editor.view_code(v)
+		      		text_reactive()
+	              	return true
+		  		elseif (item_v == "apply") then 
+		      		editor.n_selected(v, true)
+		      		inspector_apply (v, inspector) 
+		      		screen:remove(inspector)
+		      		if v.extra.type == "MenuButton" then 
+                    	v.spin_out()
+		      		end 
+		      		input_mode = S_SELECT
+		      		current_inspector = nil
+                    screen:grab_key_focus(screen) 
+		      		text_reactive()
+		      		for i, c in pairs(g.children) do
+	     		  		editor.n_selected(c)
+		      		end
+	              	return true
+		  		elseif (item_v == "cancel") then 
+		      		if v.items then 
+			   				v.items = org_items
+		      		end 
+		      		screen:remove(inspector)
+		      		if v.extra.type == "MenuButton" then 
                       	   v.spin_out()
-		      end 
-		      input_mode = S_SELECT
-		      current_inspector = nil
-		      for i, c in pairs(g.children) do
-	     		  editor.n_selected(c)
-		      end
-                      screen:grab_key_focus(screen) 
-		      editor.view_code(v)
-		      text_reactive()
-	              return true
-		  elseif (item_v == "apply") then 
-		      editor.n_selected(v, true)
-		      inspector_apply (v, inspector) 
-		      screen:remove(inspector)
-		      if v.extra.type == "MenuButton" then 
-                      	   v.spin_out()
-		      end 
-		      input_mode = S_SELECT
-		      current_inspector = nil
-                      screen:grab_key_focus(screen) 
-		      text_reactive()
-		      for i, c in pairs(g.children) do
-	     		  editor.n_selected(c)
-		      end
-	              return true
-		  elseif (item_v == "cancel") then 
-		      if v.items then 
-			   v.items = org_items
-		      end 
-		      screen:remove(inspector)
-		      if v.extra.type == "MenuButton" then 
-                      	   v.spin_out()
-		      end 
-		      input_mode = S_SELECT
-		      current_inspector = nil
-		      editor.n_selected(v, true)
-                      screen:grab_key_focus(screen) 
-		      text_reactive()
-		      for i, c in pairs(g.children) do
-	     		  editor.n_selected(c)
-		      end
-	              return true
-		  end 
- 	     elseif (key == keys.Tab and shift == false) then 
-                  group.extra.on_focus_out()
-		  for i, v in pairs(attr_t_idx) do
-			if(item_n == v or item_v == v) then 
-			     if(attr_t_idx[i+1] == nil) then return true end 
-			     while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-				 i = i + 1
-			     end 
-			     if(item_group:find_child(attr_t_idx[i+1])) then
-			     	local n_item = attr_t_idx[i+1]
-				item_group:find_child(n_item).extra.on_focus_in()	
-				break
-			     end
-			end 
-    		  end
-		  return true
-	     elseif (key == keys.Tab and shift == true )then 
-		  group.extra.on_focus_out()
-		  for i, v in pairs(attr_t_idx) do
-			if(item_n == v or item_v == v) then 
-			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
-				 i = i - 1
-			     end 
-			     if(item_group:find_child(attr_t_idx[i-1])) then
-			     	local p_item = attr_t_idx[i-1]
-				item_group:find_child(p_item).extra.on_focus_in()	
-				break
-			     end
-			end 
-    		  end
-		  return true
+		      		end 
+		      		input_mode = S_SELECT
+		      		current_inspector = nil
+		      		editor.n_selected(v, true)
+                    screen:grab_key_focus(screen) 
+		      		text_reactive()
+		      		for i, c in pairs(g.children) do
+	     		  		editor.n_selected(c)
+		      		end
+	              	return true
+		  		end 
+ 	     	elseif (key == keys.Tab and shift == false) then 
+            	group.extra.on_focus_out()
+		  		for i, v in pairs(attr_t_idx) do
+					if(item_n == v or item_v == v) then 
+			     		if(attr_t_idx[i+1] == nil) then return true end 
+			     			while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
+				 				i = i + 1
+			     			end 
+			     			if(item_group:find_child(attr_t_idx[i+1])) then
+			     				local n_item = attr_t_idx[i+1]
+								item_group:find_child(n_item).extra.on_focus_in()	
+								break
+			     			end
+						end 
+    		  	end
+		  	  	return true
+	     	elseif (key == keys.Tab and shift == true )then 
+		  		group.extra.on_focus_out()
+		  		for i, v in pairs(attr_t_idx) do
+					if(item_n == v or item_v == v) then 
+			     		while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
+				 			i = i - 1
+			     		end 
+			     		if(item_group:find_child(attr_t_idx[i-1])) then
+			     			local p_item = attr_t_idx[i-1]
+							item_group:find_child(p_item).extra.on_focus_in()	
+							break
+			     		end
+					end 
+    		  	end
+		  		return true
             end
         end
 
-	function button:on_button_down () 
- 	     current_focus.extra.on_focus_out()
-	     current_focus = group
-	     group.extra.on_focus_in()
-	     if (item_v == "view code") then 
-		      if v.items then 
-			   v.items = org_items
-		      end 
-		      screen:remove(inspector)
-		      input_mode = S_SELECT
-		      current_inspector = nil
-                      screen:grab_key_focus(screen) 
-		      editor.view_code(v)
-		      text_reactive()
-	     elseif (item_v == "apply") then 
-		      inspector_apply (v, inspector) 
-		      screen:remove(inspector)
-		      input_mode = S_SELECT
-		      current_inspector = nil
-                      screen:grab_key_focus(screen) 
-		      text_reactive()
-		      editor.n_selected(v, true)
-	     elseif (item_v == "cancel") then 
-		      if v.items then 
-			   v.items = org_items
-		      end 
-		      screen:remove(inspector)
-		      input_mode = S_SELECT
-		      current_inspector = nil
-                      screen:grab_key_focus(screen) 
-		      text_reactive()
-		      editor.n_selected(v, true)
-	     end 
-	     if v.extra then 
-	     if v.extra.type == "MenuButton" then 
-                  v.spin_out()
-	     end 
-	     end 
-	     for i, c in pairs(g.children) do
-	     	editor.n_selected(c)
-	     end
-
-             return true
-	end 
+		function button:on_button_down () 
+ 	     	current_focus.extra.on_focus_out()
+	     	current_focus = group
+	     	group.extra.on_focus_in()
+	     	if (item_v == "view code") then 
+		      	if v.items then 
+			   		v.items = org_items
+		      	end 
+		      	screen:remove(inspector)
+		      	input_mode = S_SELECT
+		      	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		      	editor.view_code(v)
+		      	text_reactive()
+	     	elseif (item_v == "apply") then 
+		      	inspector_apply (v, inspector) 
+		      	screen:remove(inspector)
+		      	input_mode = S_SELECT
+		      	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		      	text_reactive()
+		      	editor.n_selected(v, true)
+	     	elseif (item_v == "cancel") then 
+		      	if v.items then 
+			   		v.items = org_items
+		      	end 
+		      	screen:remove(inspector)
+		      	input_mode = S_SELECT
+		      	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		      	text_reactive()
+		      	editor.n_selected(v, true)
+	     	end 
+	     	if v.extra then 
+	     		if v.extra.type == "MenuButton" then 
+                  	v.spin_out()
+	     		end 
+	     	end 
+	     	for i, c in pairs(g.children) do
+	     		editor.n_selected(c)
+	     	end
+	
+            return true
+		end 
 
     	group:add(button)
 
-	local focus = assets( "assets/button-focus.png" )
+		local focus = assets( "assets/button-focus.png" )
         focus.name = "focus"
         focus:set{ position = { 0 , 0 } , size = { group.w , group.h } , opacity = 0 }
         group:add(focus)
@@ -1507,295 +1505,290 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     	group:add(text)
 
         function group.extra.on_focus_in()
-             current_focus = group
-	     button:grab_key_focus(button)
-	     button.opacity = 0 
-             focus.opacity = 255
+        	current_focus = group
+	     	button:grab_key_focus(button)
+	     	button.opacity = 0 
+            focus.opacity = 255
         end
 
         function group.extra.on_focus_out()
-             focus.opacity = 0
-	     button.opacity = 255 
+            focus.opacity = 0
+	     	button.opacity = 255 
         end
 
     elseif(item_n == "focus") then  
-	group:clear()
-	group.name = "focusChanger"
-	group.reactive = true
-	local focus_changer = factory.draw_focus_changer()
+		group:clear()
+		group.name = "focusChanger"
+		group.reactive = true
+		local focus_changer = factory.draw_focus_changer()
 
-	local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
+		local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
 	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
 
-	if v.extra.focus then 
-		for m, n in pairs (v.extra.focus) do
-		     if type(n) ~= "function" then 
-		          focus_changer:find_child("text"..focus_map[m]).text = n
-		     else 
-		          focus_changer:find_child("text"..focus_map[m]).text = v.name
-		          focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
-		          focus_changer:find_child("text"..focus_map[m]).reactive = false
-			
-		     end 
+		if v.extra.focus then 
+			for m, n in pairs (v.extra.focus) do
+		     	if type(n) ~= "function" then 
+		          	focus_changer:find_child("text"..focus_map[m]).text = n
+		     	else 
+		          	focus_changer:find_child("text"..focus_map[m]).text = v.name
+		          	focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
+		          	focus_changer:find_child("text"..focus_map[m]).reactive = false
+		     	end 
+			end 	
+		end
+
+		if v.extra.type == "Button" or v.extra.type == "MenuButton" then
+			focus_changer:find_child("textE").text = v.name 
+			focus_changer:find_child("gE").opacity = 150 
+			focus_changer:find_child("gE").reactive = false 
+		elseif v.extra.type == "TextInput" or  v.extra.type == "ButtonPicker" then 
+			focus_changer:find_child("textE").text = v.name 
+			focus_changer:find_child("gE").opacity = 150 
+			focus_changer:find_child("gE").reactive = false 
+			focus_changer:find_child("textL").text = v.name 
+			focus_changer:find_child("gL").opacity = 150 
+			focus_changer:find_child("gL").reactive = false 
+			focus_changer:find_child("textR").text = v.name 
+			focus_changer:find_child("gR").opacity = 150 
+			focus_changer:find_child("gR").reactive = false 
 		end 	
-	end
 
-	if v.extra.type == "Button" or v.extra.type == "MenuButton" then
-		focus_changer:find_child("textE").text = v.name 
-		focus_changer:find_child("gE").opacity = 150 
-		focus_changer:find_child("gE").reactive = false 
-	elseif v.extra.type == "TextInput" or  v.extra.type == "ButtonPicker" then 
-		focus_changer:find_child("textE").text = v.name 
-		focus_changer:find_child("gE").opacity = 150 
-		focus_changer:find_child("gE").reactive = false 
-		focus_changer:find_child("textL").text = v.name 
-		focus_changer:find_child("gL").opacity = 150 
-		focus_changer:find_child("gL").reactive = false 
-		focus_changer:find_child("textR").text = v.name 
-		focus_changer:find_child("gR").opacity = 150 
-		focus_changer:find_child("gR").reactive = false 
-	end 	
+		local space = WIDTH - PADDING_X  
+    	focus_changer.position  = {WIDTH - space , 5}
+    	group:add(focus_changer)
+		return group
+   	elseif(item_n == "tab_labels") then 
+		if save_items == true then 
+			org_items = table_copy(v.tab_labels)
+		end 
 
-	local space = WIDTH - PADDING_X  
-    focus_changer.position  = {WIDTH - space , 5}
-    group:add(focus_changer)
-	return group
-    elseif(item_n == "tab_labels") then 
-	if save_items == true then 
-		org_items = table_copy(v.tab_labels)
-	end 
-
-	local plus
-	local item_string_t
-	group:clear()
-	group.name = "itemsList"
-	group.reactive = true
-
-	local space = WIDTH - PADDING_X  
-	local text = Text {name = "attr", text = item_s, single_line = true}:set(STYLE)
-    text.position  = {PADDING_X, 5}
-    group:add(text)
-
-	plus = factory.draw_plus_item()
-	plus.position = {text.x + text.w + PADDING_X, 5}
-	plus.reactive = true
-
-	function plus:on_button_down(x,y)
-		table.insert(v.tab_labels, "item"..tostring(table.getn(v.tab_labels)+1)) 
-		screen:remove(inspector)
-		input_mode = S_SELECT
-		current_inspector = nil
-       	screen:grab_key_focus(screen) 
-		text_reactive()
-		editor.n_selected(v, true)
-		inspector_apply (v, inspector)
-		editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-		return true
-	end 
-
-	group:add(plus) 
-
-	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-	local items_list = ui_element.layoutManager{rows = table.getn(v.tab_labels), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=10, cell_size="variable", cells_focusable=false}
-	if text then 
+		local plus
+		local item_string_t
+		group:clear()
+		group.name = "itemsList"
+		group.reactive = true
+	
+		local space = WIDTH - PADDING_X  
+		local text = Text {name = "attr", text = item_s, single_line = true}:set(STYLE)
+    	text.position  = {PADDING_X, 5}
+    	group:add(text)
+	
+		plus = factory.draw_plus_item()
+		plus.position = {text.x + text.w + PADDING_X, 5}
+		plus.reactive = true
+	
+		function plus:on_button_down(x,y)
+			table.insert(v.tab_labels, "item"..tostring(table.getn(v.tab_labels)+1)) 
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+       		screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			inspector_apply (v, inspector)
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true
+		end 
+	
+		group:add(plus) 
+	
+		local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
+		local items_list = ui_element.layoutManager{rows = table.getn(v.tab_labels), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=10, cell_size="variable", cells_focusable=false}
+		if text then 
         	items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
-	else 
+		else 
         	items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
-	end 
+		end 
         items_list.name = "items_list"
 
-	for i,j in pairs(v.tab_labels) do 
-	      local input_txt, item_type 
-	      if v.extra.type =="MenuButton" then 
-		  if j["type"] == "label" then 
-		     input_txt = j["string"] 
-		     item_type = "label"
-		  elseif j["type"] == "item" then 
-		     input_txt = "   "..j["string"] 
-		     item_type = "item"
-		  elseif j["type"] == "seperator" then 
-		     input_txt = "--------------"
-		     item_type = "seperator"
-		  end 
-	      else 
-		     input_txt = j 
-	      end  
-		
-              local item = ui_element.textInput{ui_width = 300, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} 
-	      item.name = "item_text"..tostring(i)
+		for i,j in pairs(v.tab_labels) do 
+	      	local input_txt, item_type 
+	      	if v.extra.type =="MenuButton" then 
+		  		if j["type"] == "label" then 
+		     		input_txt = j["string"] 
+		     		item_type = "label"
+		  		elseif j["type"] == "item" then 
+		     		input_txt = "   "..j["string"] 
+		     		item_type = "item"
+		  		elseif j["type"] == "seperator" then 
+		     		input_txt = "--------------"
+		     		item_type = "seperator"
+		  		end 
+	      	else 
+		     	input_txt = j 
+	      	end  
+            local item = ui_element.textInput{ui_width = 300, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} 
+	      	item.name = "item_text"..tostring(i)
 	     
-	      local minus = factory.draw_minus_item()
-	      minus.name = "item_minus"..tostring(i)
-	      local up = factory.draw_up()
-	      up.name = "item_up"..tostring(i)
-	      local down = factory.draw_down()
-	      down.name = "item_down"..tostring(i)
+	      	local minus = factory.draw_minus_item()
+	      	minus.name = "item_minus"..tostring(i)
+	      	local up = factory.draw_up()
+	      	up.name = "item_up"..tostring(i)
+	      	local down = factory.draw_down()
+	      	down.name = "item_down"..tostring(i)
 
-	      function minus:on_button_down(x,y)
-		     v.tab_labels = table_removekey(v.tab_labels, tonumber(string.sub(minus.name, 11,-1)))
-		     --dumptable(v.tab_labels)
-		     screen:remove(inspector)
-		     input_mode = S_SELECT
-		     current_inspector = nil
-                     screen:grab_key_focus(screen) 
-		     text_reactive()
-		     editor.n_selected(v, true)
-		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     return true 
-	      end 
+	      	function minus:on_button_down(x,y)
+		     	v.tab_labels = table_removekey(v.tab_labels, tonumber(string.sub(minus.name, 11,-1)))
+		     	--dumptable(v.tab_labels)
+		     	screen:remove(inspector)
+		     	input_mode = S_SELECT
+		     	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		     	text_reactive()
+		     	editor.n_selected(v, true)
+		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     	return true 
+	      	end 
 
-	      function up:on_button_down(x,y)
-		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
-		          for i, j in pairs (v.tab_labels) do
-				v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		     	  end 
-		     else
-		          for i, j in pairs (v.tab_labels) do
-				if j["type"] == "label" then 
-		    		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		  		elseif j["type"] == "item" then 
-		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-				end
-		     	  end 
-		     end 
-		     table_move_up(v.tab_labels, tonumber(string.sub(up.name, 8,-1)))
-		     screen:remove(inspector)
-		     input_mode = S_SELECT
-		     current_inspector = nil
-                     screen:grab_key_focus(screen) 
-		     text_reactive()
-		     editor.n_selected(v, true)
-		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     return true 
-	      end 
+	      	function up:on_button_down(x,y)
+		     	if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+		          	for i, j in pairs (v.tab_labels) do
+						v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	  	end 
+		     	else
+		          	for i, j in pairs (v.tab_labels) do
+						if j["type"] == "label" then 
+		    		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  				elseif j["type"] == "item" then 
+		     		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+						end
+		     	  	end 
+		     	end 
+		     	table_move_up(v.tab_labels, tonumber(string.sub(up.name, 8,-1)))
+		     	screen:remove(inspector)
+		     	input_mode = S_SELECT
+		     	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		     	text_reactive()
+		     	editor.n_selected(v, true)
+		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     	return true 
+	      	end 
 
-	      function down:on_button_down(x,y)
-		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
-		          for i, j in pairs (v.tab_labels) do
-				v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		     	  end 
-		     else
-		          for i, j in pairs (v.tab_labels) do
-				if j["type"] == "label" then 
-		    		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		  		elseif j["type"] == "item" then 
-		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-				end
-		     	  end 
-		     end
-		     table_move_down(v.tab_labels, tonumber(string.sub(down.name, 10,-1)))
-		     screen:remove(inspector)
-		     input_mode = S_SELECT
-		     current_inspector = nil
-                     screen:grab_key_focus(screen) 
-		     text_reactive()
-		     editor.n_selected(v, true)
-		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     return true 
+	      	function down:on_button_down(x,y)
+		     	if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+		          	for i, j in pairs (v.tab_labels) do
+						v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	  	end 
+		     	else
+		          	for i, j in pairs (v.tab_labels) do
+						if j["type"] == "label" then 
+		    		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  				elseif j["type"] == "item" then 
+		     		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+						end
+		     	  	end 
+		     	end
+		     	table_move_down(v.tab_labels, tonumber(string.sub(down.name, 10,-1)))
+		     	screen:remove(inspector)
+		     	input_mode = S_SELECT
+		     	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		     	text_reactive()
+		     	editor.n_selected(v, true)
+		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     	return true 
 	      end 
 
 	      function item:on_button_down()
-   		current_focus.extra.on_focus_out()
-	        current_focus = group
-		item.on_focus_in()
-		if item_type then 
-                   item:find_child("textInput").extra.item_type = item_type
-	        end 
-
-		return true
+   				current_focus.extra.on_focus_out()
+	        	current_focus = group
+				item.on_focus_in()
+				if item_type then 
+                   	item:find_child("textInput").extra.item_type = item_type
+	        	end 
+				return true
 	      end 
 
 	      local item_txt = item:find_child("textInput")
 	      item_txt.reactive = true
 	      function item_txt:on_button_down()
-		current_focus.extra.on_focus_out()
-	        current_focus = group
-		item.on_focus_in()
-		if item_type then 
-                   item:find_child("textInput").extra.item_type = item_type
-	        end 
-		return true
+		  		current_focus.extra.on_focus_out()
+	        	current_focus = group
+				item.on_focus_in()
+				if item_type then 
+                   	item:find_child("textInput").extra.item_type = item_type
+	        	end 
+				return true
 	      end 
 
 	      function item:on_button_down()
-   		current_focus.extra.on_focus_out()
-	        current_focus = group
-		item.on_focus_in()
-		if item_type then 
-                   item:find_child("textInput").extra.item_type = item_type
-	        end 
-		return true
+   				current_focus.extra.on_focus_out()
+	        	current_focus = group
+				item.on_focus_in()
+				if item_type then 
+                   	item:find_child("textInput").extra.item_type = item_type
+	        	end 
+				return true
 	      end 
 	
 	      function item:on_key_down(key)
-	       
-	       local si = inspector:find_child("si")
-    	       if is_this_widget(v) == true  then
+	      		local si = inspector:find_child("si")
+    	       	if is_this_widget(v) == true  then
                     item_group = si.content
-               else 
-         	    item_group = inspector:find_child("item_group")
-    	       end 
+               	else 
+         	    	item_group = inspector:find_child("item_group")
+    	       	end 
 
-	       if (key == keys.Tab and shift == false) then
-		  item.on_focus_out()
-		  local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
-		  if (item_group:find_child("item_text"..tostring(next_i))) then
-			item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
-		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
-		  else 	
-		     for i, v in pairs(attr_t_idx) do
- 		        if("itemsList" == v) then 
-			  local function there()
-		          	while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-		               		i = i + 1
-			       		if(attr_t_idx[i+1] == nil) then return true end  
-		          	end 
-			
-		          	if(item_group:find_child(attr_t_idx[i+1])) then
-		               		local n_item = attr_t_idx[i+1]
-			       		if item_group:find_child(n_item).extra.on_focus_in then 
-			           		item_group:find_child(n_item).extra.on_focus_in()	
-		  			        si.seek_to_middle(0,item_group:find_child(n_item).y) 
-			       		else
-				   		there()
-			       		end 
-		          	end
-			  end 
-			  there()
-		        end 
-    		     end
-		  end
-	       elseif (key == keys.Tab and shift == true )then 
-		     item.on_focus_out()
-		     local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
-		     if (item_group:find_child("item_text"..tostring(prev_i))) then
-			item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
-		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
-		     else 	
-		      for i, v in pairs(attr_t_idx) do
-			if("itemsList" == v) then 
-			     if(attr_t_idx[i-1] == nil) then return true end 
-			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
-				 i = i - 1
-			     end 
-			     if(item_group:find_child(attr_t_idx[i-1])) then
-			     	local p_item = attr_t_idx[i-1]
-				item_group:find_child(p_item).extra.on_focus_in()	
-		  	        si.seek_to_middle(0,item_group:find_child(p_item).y) 
-				break
-			     end
-			end 
-    		    end
-		    end 
-	       end 
-	     end 
-	     items_list:replace(i,1,item)
-	     items_list:replace(i,2,minus)
-	     items_list:replace(i,3,up)
-	     items_list:replace(i,4,down)
-	end
+	       		if (key == keys.Tab and shift == false) then
+		  			item.on_focus_out()
+		  			local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
+		  			if (item_group:find_child("item_text"..tostring(next_i))) then
+						item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
+		  				si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
+		  			else 	
+		     			for i, v in pairs(attr_t_idx) do
+ 		        			if("itemsList" == v) then 
+			  					local function there()
+		          					while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
+		               					i = i + 1
+			       						if(attr_t_idx[i+1] == nil) then return true end  
+		          					end 
+		          					if(item_group:find_child(attr_t_idx[i+1])) then
+		               					local n_item = attr_t_idx[i+1]
+			       						if item_group:find_child(n_item).extra.on_focus_in then 
+			        						item_group:find_child(n_item).extra.on_focus_in()	
+		  									si.seek_to_middle(0,item_group:find_child(n_item).y) 
+			   							else
+											there()
+			  							end 
+		      						end
+			  					end 
+			  					there()
+		        			end 
+    		     		end
+		  			end
+	       		elseif (key == keys.Tab and shift == true )then 
+		     		item.on_focus_out()
+		     		local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
+		     		if (item_group:find_child("item_text"..tostring(prev_i))) then
+						item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
+		  				si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
+		     		else 	
+		      			for i, v in pairs(attr_t_idx) do
+							if("itemsList" == v) then 
+			     				if(attr_t_idx[i-1] == nil) then return true end 
+			     				while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
+				 					i = i - 1
+			     				end 
+			     				if(item_group:find_child(attr_t_idx[i-1])) then
+			     					local p_item = attr_t_idx[i-1]
+									item_group:find_child(p_item).extra.on_focus_in()	
+		  	        				si.seek_to_middle(0,item_group:find_child(p_item).y) 
+									break
+			     				end
+							end 
+    		    		end
+		    		end 
+	       		end 
+	     	end 
+	     	items_list:replace(i,1,item)
+	     	items_list:replace(i,2,minus)
+	     	items_list:replace(i,3,up)
+	     	items_list:replace(i,4,down)
+		end
 
-	function group.extra.on_focus_in()
+		function group.extra.on_focus_in()
 	         current_focus = group
 		 a = items_list.tiles[1][1]
 		 a.on_focus_in()
@@ -1803,193 +1796,185 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         end
 
         function group.extra.on_focus_out()
-		for i,j in pairs(items_list.children) do 
-		     if j.on_focus_out then 
-			 j.on_focus_out()
-		     end 
-		end 
-		return true
+			for i,j in pairs(items_list.children) do 
+		     	if j.on_focus_out then 
+			 	j.on_focus_out()
+		     	end 
+			end 
+			return true
         end 
-	group:add(items_list) 
-	return group
-
-
+		group:add(items_list) 
+		return group
     elseif(item_n == "items") then 
-	if save_items == true then 
-	     org_items = table_copy(v.items)
-	end 
+		if save_items == true then 
+	     	org_items = table_copy(v.items)
+		end 
 
-	local plus, item_plus, label_plus, seperator_plus
-	local item_string_t
-	group:clear()
-	group.name = "itemsList"
-	group.reactive = true
+		local plus, item_plus, label_plus, seperator_plus
+		local item_string_t
+		group:clear()
+		group.name = "itemsList"
+		group.reactive = true
 
-	local space = WIDTH - PADDING_X  
-	if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
-
-		local text = Text {name = "attr", text = item_s}:set(STYLE)
+		local space = WIDTH - PADDING_X  
+		if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
+			local text = Text {name = "attr", text = item_s}:set(STYLE)
         	text.position  = {PADDING_X, 5}
     		group:add(text)
 
-		plus = factory.draw_plus_item()
-		plus.position = {text.x + text.w + PADDING_X, 5}
-		plus.reactive = true
-		function plus:on_button_down(x,y)
-			table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
-			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
-                	screen:grab_key_focus(screen) 
-			text_reactive()
-			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-			return true
+			plus = factory.draw_plus_item()
+			plus.position = {text.x + text.w + PADDING_X, 5}
+			plus.reactive = true
+			function plus:on_button_down(x,y)
+				table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
+				screen:remove(inspector)
+				input_mode = S_SELECT
+				current_inspector = nil
+                screen:grab_key_focus(screen) 
+				text_reactive()
+				editor.n_selected(v, true)
+				inspector_apply (v, inspector)
+				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+				return true
+			end 
+		elseif v.extra.type =="MenuButton" then 
+			plus = factory.draw_plus_items()
+			plus.position = {PADDING_X, 5}
+			item_plus = plus:find_child("item_plus")
+			label_plus = plus:find_child("label_plus")
+			seperator_plus = plus:find_child("seperator_plus")
+			function seperator_plus:on_button_down(x,y)
+				table.insert(v.items, {type="seperator"})
+				screen:remove(inspector)
+				input_mode = S_SELECT
+				current_inspector = nil
+                screen:grab_key_focus(screen) 
+				text_reactive()
+				editor.n_selected(v, true)
+				inspector_apply (v, inspector)
+				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+				return true
+			end 
+			function item_plus:on_button_down(x,y)
+				table.insert(v.items, {type="item", string="Item ...", f=nil})
+				screen:remove(inspector)
+				input_mode = S_SELECT
+				current_inspector = nil
+                screen:grab_key_focus(screen) 
+				text_reactive()
+				editor.n_selected(v, true)
+				inspector_apply (v, inspector)
+				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+				return true
+			end 
+
+			function label_plus:on_button_down(x,y)
+				table.insert(v.items, {type="label", string="Label ..."})
+				screen:remove(inspector)
+				input_mode = S_SELECT
+				current_inspector = nil
+                screen:grab_key_focus(screen) 
+				text_reactive()
+				editor.n_selected(v, true)
+				inspector_apply (v, inspector)
+				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+				return true
+			end 
 		end 
-	elseif v.extra.type =="MenuButton" then 
-		plus = factory.draw_plus_items()
-		plus.position = {PADDING_X, 5}
-		item_plus = plus:find_child("item_plus")
-		label_plus = plus:find_child("label_plus")
-		seperator_plus = plus:find_child("seperator_plus")
+		group:add(plus) 
 
-		
-		function seperator_plus:on_button_down(x,y)
-			table.insert(v.items, {type="seperator"})
-			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
-                	screen:grab_key_focus(screen) 
-			text_reactive()
-			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-			return true
+		local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
+		local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=10, cell_size="variable", cells_focusable=false}
+		if text then 
+        		items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
+		else 
+        		items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
 		end 
-
-		function item_plus:on_button_down(x,y)
-			table.insert(v.items, {type="item", string="Item ...", f=nil})
-			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
-                	screen:grab_key_focus(screen) 
-			text_reactive()
-			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-			return true
-		end 
-
-		function label_plus:on_button_down(x,y)
-			table.insert(v.items, {type="label", string="Label ..."})
-			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
-                	screen:grab_key_focus(screen) 
-			text_reactive()
-			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-			return true
-		end 
-
-	end 
-	group:add(plus) 
-
-	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=10, cell_size="variable", cells_focusable=false}
-	if text then 
-        	items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
-	else 
-        	items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
-	end 
         items_list.name = "items_list"
 
-	for i,j in pairs(v.items) do 
-	      local input_txt, item_type 
-	      if v.extra.type =="MenuButton" then 
-		  if j["type"] == "label" then 
-		     input_txt = j["string"] 
-		     item_type = "label"
-		  elseif j["type"] == "item" then 
-		     input_txt = "   "..j["string"] 
-		     item_type = "item"
-		  elseif j["type"] == "seperator" then 
-		     input_txt = "--------------"
-		     item_type = "seperator"
-		  end 
-	      else 
-		     input_txt = j 
-	      end  
-		
-              local item = ui_element.textInput{ui_width = 300, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} 
-	      item.name = "item_text"..tostring(i)
-	     
-	      local minus = factory.draw_minus_item()
-	      minus.name = "item_minus"..tostring(i)
-	      local up = factory.draw_up()
-	      up.name = "item_up"..tostring(i)
-	      local down = factory.draw_down()
-	      down.name = "item_down"..tostring(i)
-
-	      function minus:on_button_down(x,y)
-		     v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
-		     --dumptable(v.items)
-		     screen:remove(inspector)
-		     input_mode = S_SELECT
-		     current_inspector = nil
-                     screen:grab_key_focus(screen) 
-		     text_reactive()
-		     editor.n_selected(v, true)
-		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     return true 
-	      end 
-
-	      function up:on_button_down(x,y)
-		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
-		          for i, j in pairs (v.items) do
-				v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		     	  end 
-		     else
-		          for i, j in pairs (v.items) do
-				if j["type"] == "label" then 
-		    		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		for i,j in pairs(v.items) do 
+	      	local input_txt, item_type 
+	      	if v.extra.type =="MenuButton" then 
+		  		if j["type"] == "label" then 
+		     		input_txt = j["string"] 
+		     		item_type = "label"
 		  		elseif j["type"] == "item" then 
-		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-				end
-		     	  end 
-		     end 
-		     table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
-		     screen:remove(inspector)
-		     input_mode = S_SELECT
-		     current_inspector = nil
-                     screen:grab_key_focus(screen) 
-		     text_reactive()
-		     editor.n_selected(v, true)
-		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     return true 
+		     		input_txt = "   "..j["string"] 
+		     		item_type = "item"
+		  		elseif j["type"] == "seperator" then 
+		     		input_txt = "--------------"
+		     		item_type = "seperator"
+		  		end 
+	      	else 
+		     	input_txt = j 
+	      	end  
+            local item = ui_element.textInput{ui_width = 300, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} 
+	      	item.name = "item_text"..tostring(i)
+	     
+	      	local minus = factory.draw_minus_item()
+	      	minus.name = "item_minus"..tostring(i)
+	      	local up = factory.draw_up()
+	      	up.name = "item_up"..tostring(i)
+	      	local down = factory.draw_down()
+	      	down.name = "item_down"..tostring(i)
+
+	      	function minus:on_button_down(x,y)
+		     	v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+		     	--dumptable(v.items)
+		     	screen:remove(inspector)
+		     	input_mode = S_SELECT
+		     	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		     	text_reactive()
+		     	editor.n_selected(v, true)
+		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     	return true 
+	      	end 
+
+	      	function up:on_button_down(x,y)
+		     	if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+		          	for i, j in pairs (v.items) do
+					v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	  	end 
+		     	else
+		          	for i, j in pairs (v.items) do
+						if j["type"] == "label" then 
+		    		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  				elseif j["type"] == "item" then 
+		     		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+						end
+		     		end 
+		     	end 
+		     	table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
+		     	screen:remove(inspector)
+		     	input_mode = S_SELECT
+		     	current_inspector = nil
+                screen:grab_key_focus(screen) 
+		     	text_reactive()
+		     	editor.n_selected(v, true)
+		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		     	return true 
 	      end 
 
 	      function down:on_button_down(x,y)
 		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		          for i, j in pairs (v.items) do
-				v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+						v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 		     	  end 
 		     else
 		          for i, j in pairs (v.items) do
-				if j["type"] == "label" then 
+				      if j["type"] == "label" then 
 		    		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		  		elseif j["type"] == "item" then 
+		  			  elseif j["type"] == "item" then 
 		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-				end
+					  end
 		     	  end 
 		     end
 		     table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
 		     current_inspector = nil
-                     screen:grab_key_focus(screen) 
+             screen:grab_key_focus(screen) 
 		     text_reactive()
 		     editor.n_selected(v, true)
 		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
@@ -1997,213 +1982,210 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	      end 
 
 	      function item:on_button_down()
-   		current_focus.extra.on_focus_out()
-	        current_focus = group
-		item.on_focus_in()
-		if item_type then 
+   			 current_focus.extra.on_focus_out()
+	         current_focus = group
+		     item.on_focus_in()
+			 if item_type then 
                    item:find_child("textInput").extra.item_type = item_type
-	        end 
-
-		return true
+	         end 
+			 return true
 	      end 
 
 	      local item_txt = item:find_child("textInput")
 	      item_txt.reactive = true
+
 	      function item_txt:on_button_down()
-		current_focus.extra.on_focus_out()
-	        current_focus = group
-		item.on_focus_in()
-		if item_type then 
+			  current_focus.extra.on_focus_out()
+	          current_focus = group
+			  item.on_focus_in()
+			  if item_type then 
                    item:find_child("textInput").extra.item_type = item_type
-	        end 
-		return true
+	          end 
+			  return true
 	      end 
 
-	      function item:on_button_down()
-   		current_focus.extra.on_focus_out()
-	        current_focus = group
-		item.on_focus_in()
-		if item_type then 
-                   item:find_child("textInput").extra.item_type = item_type
-	        end 
-		return true
+	     function item:on_button_down()
+   			 current_focus.extra.on_focus_out()
+	         current_focus = group
+		     item.on_focus_in()
+			 if item_type then 
+             	item:find_child("textInput").extra.item_type = item_type
+	         end 
+			 return true
 	      end 
 	
 	      function item:on_key_down(key)
-	       
-	       local si = inspector:find_child("si")
-    	       if is_this_widget(v) == true  then
-                    item_group = si.content
-               else 
-         	    item_group = inspector:find_child("item_group")
-    	       end 
+	          local si = inspector:find_child("si")
+    	      if is_this_widget(v) == true  then
+                   item_group = si.content
+              else 
+         	  		item_group = inspector:find_child("item_group")
+    	      end 
 
-	       if (key == keys.Tab and shift == false) then
-		  item.on_focus_out()
-		  local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
-		  if (item_group:find_child("item_text"..tostring(next_i))) then
-			item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
-		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
-		  else 	
-		     for i, v in pairs(attr_t_idx) do
- 		        if("itemsList" == v) then 
-			  local function there()
-		          	while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-		               		i = i + 1
-			       		if(attr_t_idx[i+1] == nil) then return true end  
-		          	end 
-			
-		          	if(item_group:find_child(attr_t_idx[i+1])) then
-		               		local n_item = attr_t_idx[i+1]
-			       		if item_group:find_child(n_item).extra.on_focus_in then 
-			           		item_group:find_child(n_item).extra.on_focus_in()	
-		  			        si.seek_to_middle(0,item_group:find_child(n_item).y) 
-			       		else
-				   		there()
-			       		end 
-		          	end
-			  end 
-			  there()
-		        end 
-    		     end
-		  end
-	       elseif (key == keys.Tab and shift == true )then 
-		     item.on_focus_out()
-		     local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
-		     if (item_group:find_child("item_text"..tostring(prev_i))) then
-			item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
-		  	si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
-		     else 	
-		      for i, v in pairs(attr_t_idx) do
-			if("itemsList" == v) then 
-			     if(attr_t_idx[i-1] == nil) then return true end 
-			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
-				 i = i - 1
-			     end 
-			     if(item_group:find_child(attr_t_idx[i-1])) then
-			     	local p_item = attr_t_idx[i-1]
-				item_group:find_child(p_item).extra.on_focus_in()	
-		  	        si.seek_to_middle(0,item_group:find_child(p_item).y) 
-				break
-			     end
-			end 
-    		    end
-		    end 
-	       end 
-	     end 
-	     items_list:replace(i,1,item)
-	     items_list:replace(i,2,minus)
-	     items_list:replace(i,3,up)
-	     items_list:replace(i,4,down)
-	end
+	       	if (key == keys.Tab and shift == false) then
+		  	     item.on_focus_out()
+		  		 local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
+		  		 if (item_group:find_child("item_text"..tostring(next_i))) then
+					 item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
+		  			 si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
+		  		 else 	
+		     		 for i, v in pairs(attr_t_idx) do
+ 		        		   if("itemsList" == v) then 
+			  				   local function there()
+		          			    while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
+		               			  i = i + 1
+			       				  if(attr_t_idx[i+1] == nil) then return true end  
+		          			    end 
+		          			    if(item_group:find_child(attr_t_idx[i+1])) then
+		               			  local n_item = attr_t_idx[i+1]
+			       				  if item_group:find_child(n_item).extra.on_focus_in then 
+			           				item_group:find_child(n_item).extra.on_focus_in()	
+		  			        		si.seek_to_middle(0,item_group:find_child(n_item).y) 
+			       				  else
+				   					there()
+			       				  end 
+		          			    end
+			  				  end 
+			  			     there()
+		        		end 
+    		     	end
+		  		end
+	       	elseif (key == keys.Tab and shift == true )then 
+		     	item.on_focus_out()
+		     	local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
+		     	if (item_group:find_child("item_text"..tostring(prev_i))) then
+					item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
+		  			si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
+		     	else 	
+		      		for i, v in pairs(attr_t_idx) do
+						if("itemsList" == v) then 
+			     			if(attr_t_idx[i-1] == nil) then return true end 
+			     				while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
+				 					i = i - 1
+			     				end 
+			     				if(item_group:find_child(attr_t_idx[i-1])) then
+			     					local p_item = attr_t_idx[i-1]
+									item_group:find_child(p_item).extra.on_focus_in()	
+		  	        				si.seek_to_middle(0,item_group:find_child(p_item).y) 
+									break
+			     				end
+							end 
+    		    		end
+		    		end 
+	       		end 
+	     	end 
+	     	items_list:replace(i,1,item)
+	     	items_list:replace(i,2,minus)
+	     	items_list:replace(i,3,up)
+	     	items_list:replace(i,4,down)
+		end
 
-	function group.extra.on_focus_in()
-	         current_focus = group
-		 a = items_list.tiles[1][1]
-		 a.on_focus_in()
-		 a:grab_key_focus()
+		function group.extra.on_focus_in()
+	    	current_focus = group
+		 	a = items_list.tiles[1][1]
+		 	a.on_focus_in()
+		 	a:grab_key_focus()
         end
 
         function group.extra.on_focus_out()
-		for i,j in pairs(items_list.children) do 
-		     if j.on_focus_out then 
-			 j.on_focus_out()
-		     end 
-		end 
-		return true
+			for i,j in pairs(items_list.children) do 
+		     	if j.on_focus_out then 
+			 		j.on_focus_out()
+		     	end 
+			end 
+			return true
         end 
-	group:add(items_list) 
-	return group
-
+		group:add(items_list) 
+		return group
     elseif item_n == "skin" or item_n == "wrap_mode" then  -- Attribute with button picker 
-	group:clear()
-	group.name = item_n
-	group.reactive = true
+		group:clear()
+		group.name = item_n
+		group.reactive = true
 
         local space = WIDTH - PADDING_X  
-
-	text = Text {name = "attr", text = item_s}:set(STYLE)
+	
+		text = Text {name = "attr", text = item_s}:set(STYLE)
         text.position  = {WIDTH - space , 5}
     	group:add(text)
 	
-	local selected = 1
-  	local itemLists
+		local selected = 1
+  		local itemLists
 	
-	if item_n == "skin" then itemLists = skins else itemLists = {"NONE", "CHAR", "WORD", "WORD_CHAR"} if v.wrap == false then item_v = "NONE" end  end--hjk
+		if item_n == "skin" then itemLists = skins else itemLists = {"NONE", "CHAR", "WORD", "WORD_CHAR"} if v.wrap == false then item_v = "NONE" end  end--hjk
 
-	for i,j in pairs(itemLists) do 
-	    if(item_v == j)then 
-		selected = i 
-	    end
-	end
+		for i,j in pairs(itemLists) do 
+	    	if(item_v == j)then 
+			selected = i 
+	    	end
+		end
 -----qqq
         local item_picker = ui_element.buttonPicker{skin = "custom", items = itemLists, text_font = "DejaVu Sans 26px", selected_item = selected}
-	item_picker.ui_height = 45
-	item_picker.ui_width = 210
+		item_picker.ui_height = 45
+		item_picker.ui_width = 210
         item_picker.position = {text.x + text.w + 50 , 0}
-	item_picker.name = "item_picker"
+		item_picker.name = "item_picker"
 
         group:add(item_picker) 
 	
-	unfocus = item_picker:find_child("unfocus")
-	function unfocus:on_button_down (x,y,b,n)
-   		current_focus.extra.on_focus_out()
+		unfocus = item_picker:find_child("unfocus")
+		function unfocus:on_button_down (x,y,b,n)
+   			current_focus.extra.on_focus_out()
 	        current_focus = group
-		item_picker.on_focus_in()
+			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
-		return true
-	end 
+			return true
+		end 
 
         left_arrow = item_picker:find_child("left_un")
-	left_arrow.reactive = true 
-	function left_arrow:on_button_down(x, y, b, n)
-		current_focus.extra.on_focus_out()
+		left_arrow.reactive = true 
+		function left_arrow:on_button_down(x, y, b, n)
+			current_focus.extra.on_focus_out()
 	        current_focus = group
-		item_picker.on_focus_in()
+			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
-		item_picker.press_left()
-		return true 
-	end 
+			item_picker.press_left()
+			return true 
+		end 
 
-	right_arrow = item_picker:find_child("right_un")
-	right_arrow.reactive = true 
-	function right_arrow:on_button_down(x, y, b, n)
-		current_focus.extra.on_focus_out()
+		right_arrow = item_picker:find_child("right_un")
+		right_arrow.reactive = true 
+		function right_arrow:on_button_down(x, y, b, n)
+			current_focus.extra.on_focus_out()
 	        current_focus = group
-		item_picker.on_focus_in()
+			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
-		item_picker.press_right()
-		return true 
-	end 
+			item_picker.press_right()
+			return true 
+		end 
 
-	function item_picker:on_key_down(key)
-	     local si = inspector:find_child("si")
-    	     if is_this_widget(v) == true  then
+		function item_picker:on_key_down(key)
+	     	local si = inspector:find_child("si")
+    	    if is_this_widget(v) == true  then
                 item_group = (inspector:find_child("si")).content
-             else 
-         	item_group = inspector:find_child("item_group")
-    	     end 
-	       if key == keys.Left then 
-		     item_picker.press_left()
-	       elseif key == keys.Right then  
-		     item_picker.press_right()
-	       elseif (key == keys.Tab and shift == false) then
-		     item_picker.on_focus_out()
-		     for i, v in pairs(attr_t_idx) do
-		     if(item_n == v or item_v == v) then 
-		          while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-		               i = i + 1
-			       if(attr_t_idx[i+1] == nil) then return true end  
-		          end 
-		          if(item_group:find_child(attr_t_idx[i+1])) then
-		               local n_item = attr_t_idx[i+1]
-				if item_group:find_child(n_item).extra.on_focus_in then 
-			       		item_group:find_child(n_item).extra.on_focus_in()	
-			       		si.seek_to_middle(0, item_group:find_child(n_item).y)
-				end 
-			        break
-		          end
-		     end 
+            else 
+         		item_group = inspector:find_child("item_group")
+    	    end 
+	       	if key == keys.Left then 
+		     	item_picker.press_left()
+	       	elseif key == keys.Right then  
+		     	item_picker.press_right()
+	       	elseif (key == keys.Tab and shift == false) then
+		     	item_picker.on_focus_out()
+		     	for i, v in pairs(attr_t_idx) do
+		     		if(item_n == v or item_v == v) then 
+		          		while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
+		               		i = i + 1
+			       			if(attr_t_idx[i+1] == nil) then return true end  
+		          		end 
+		          		if(item_group:find_child(attr_t_idx[i+1])) then
+		               		local n_item = attr_t_idx[i+1]
+							if item_group:find_child(n_item).extra.on_focus_in then 
+			       				item_group:find_child(n_item).extra.on_focus_in()	
+			       				si.seek_to_middle(0, item_group:find_child(n_item).y)
+							end 
+			        		break
+		          		end
+		     		end 
     		     end
 	       elseif (key == keys.Tab and shift == true )then 
 		     item_picker.on_focus_out()
@@ -2222,9 +2204,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			end 
     		    end
 	       end 
-	end 
-
-
+		end 
 
         function group.extra.on_focus_in()
 		 group:find_child("item_picker").extra.on_focus_in()
@@ -2234,9 +2214,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         function group.extra.on_focus_out()
 		 group:find_child("item_picker").extra.on_focus_out()
         end 
-
-	group:add(item_picker)
-
+		group:add(item_picker)
         return group
     elseif item_n == "expansion_location" or item_n == "cell_size" or item_n == "style" or item_n == "direction" then -- Attribute with radio button
 	group:clear()
@@ -2301,126 +2279,124 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	return group
     else 	---- Attributes with focusable ring 
         group:clear()
-	group.name = item_n
-	group.reactive = true
+		group.name = item_n
+		group.reactive = true
 
         local space = WIDTH - PADDING_X  
-	local text
+		local text
 
-	if item_n == "icon" or item_n =="source"  or item_n == "src" then -- File Chooser Button 
-	     input_box_width = WIDTH * 5 / 8
-	     ring = make_ring(input_box_width, HEIGHT + 5 ) 
-	     ring.name = "ring"
-	     if (text) then 
-	     	ring.position = {text.x+text.w+5, 0}
-	     else 
-	        ring.position = {WIDTH - space, 0}
-  	     end
-             ring.opacity = 180
-	     ring.reactive = false
-             group:add(ring)
+		if item_n == "icon" or item_n =="source"  or item_n == "src" then -- File Chooser Button 
+	     	input_box_width = WIDTH * 5 / 8
+	     	ring = make_ring(input_box_width, HEIGHT + 5 ) 
+	     	ring.name = "ring"
+	     	if (text) then 
+	     		ring.position = {text.x+text.w+5, 0}
+	     	else 
+	        	ring.position = {WIDTH - space, 0}
+  	     	end
+            ring.opacity = 180
+	     	ring.reactive = false
+            group:add(ring)
 
-	     input_text = Text {name = "file_name", text =item_v, editable=false,
-             reactive = false, wants_enter = false, cursor_visible = false, font = "DejaVu Sans 26px" , color = {180,180,180,255}}
-             input_text.position  = {ring.x + 15, ring.y + 5}
-	     group:add(input_text) 
+	     	input_text = Text {name = "file_name", text =item_v, editable=false,
+            reactive = false, wants_enter = false, cursor_visible = false, font = "DejaVu Sans 26px" , color = {180,180,180,255}}
+            input_text.position  = {ring.x + 15, ring.y + 5}
+	     	group:add(input_text) 
 	     
+	     	local filechooser = ui_element.button{ui_width = 150, ui_height = 45, text_font ="DejaVu Sans 25px" , label = "Choose ...", }
+	     	filechooser.name = "filechooser"
+	     	filechooser.position = {ring.x + ring.w, ring.y }
 
-	     local filechooser = ui_element.button{ui_width = 150, ui_height = 45, text_font ="DejaVu Sans 25px" , label = "Choose ...", }
-	     filechooser.name = "filechooser"
-	     filechooser.position = {ring.x + ring.w, ring.y }
+	     	if v.type == "Video" then 
+	          	filechooser.pressed = editor.the_video
+	     	else 
+	          	filechooser.pressed = editor.the_image
+	     	end
 
-	     if v.type == "Video" then 
-	          filechooser.pressed = editor.the_video
-	     else 
-	          filechooser.pressed = editor.the_image
-	     end
+ 	     	function filechooser:on_button_down(x,y,b,n)
+				if current_focus then 
+		     		current_focus.on_focus_out()
+				end
+				filechooser.on_focus_in(keys.Return)
+				return true
+	     	end 
 
- 	     function filechooser:on_button_down(x,y,b,n)
-		if current_focus then 
-		     current_focus.on_focus_out()
-		end
-		filechooser.on_focus_in(keys.Return)
-		return true
-	     end 
-
-	     group:add(filechooser)
-	     return group
+	     	group:add(filechooser)
+	     	return group
         elseif(item_n == "name" or item_n == "text") then 
-	     input_box_width = WIDTH - ( PADDING_X * 2) 
-	elseif item_n == "anchor_point" then 
-	     text = Text {name = "attr", text = item_s}:set(STYLE)
-             text.position  = {WIDTH - space , 0}
-    	     group:add(text)
-	     local anchor_pnt = factory.draw_anchor_point(v)
-	     anchor_pnt.position = {300, 0}
-	     group:add(anchor_pnt)
-             return group
-	elseif item_n == "message" or item_n == "label" then 
-	     input_box_width = WIDTH - ( PADDING_X * 2) 
+	     	input_box_width = WIDTH - ( PADDING_X * 2) 
+		elseif item_n == "anchor_point" then 
+	     	text = Text {name = "attr", text = item_s}:set(STYLE)
+            text.position  = {WIDTH - space , 0}
+    	    group:add(text)
+	     	local anchor_pnt = factory.draw_anchor_point(v)
+	     	anchor_pnt.position = {300, 0}
+	     	group:add(anchor_pnt)
+            return group
+		elseif item_n == "message" or item_n == "label" then 
+	     	input_box_width = WIDTH - ( PADDING_X * 2) 
         else  
     	     text = Text {name = "attr", text = item_s}:set(STYLE)
              text.position  = {WIDTH - space , PADDING_Y}
     	     group:add(text)
 
-	     input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
-	     space = space - string.len(item_s) * 20
-             if item_n:find("font") then 
+	     	input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
+	     	space = space - string.len(item_s) * 20
+            if item_n:find("font") then 
 	          input_box_width = WIDTH - 110 - ( PADDING_X * 2) 
-             elseif item_n == "cx" or  item_n == "cy" or  item_n == "cw"  or  item_n == "ch" then 
+            elseif item_n == "cx" or  item_n == "cy" or  item_n == "cw"  or  item_n == "ch" then 
 	          input_box_width = WIDTH - 300 - ( PADDING_X * 2) 
-             elseif(item_n == "wrap_mode" or item_n =="duration" or item_n =="fade_duration") then 
+            elseif(item_n == "wrap_mode" or item_n =="duration" or item_n =="fade_duration") then 
 	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
-             elseif(string.find(item_n,"color")) then 
+            elseif(string.find(item_n,"color")) then 
 	          input_box_width = WIDTH - 350 - ( PADDING_X * 2) 
-	     end
+	     	end
         end 
 
-	local y_space = 0
+		local y_space = 0
 
         ring = make_ring(input_box_width, HEIGHT + 5 ) 
-	ring.name = "ring"
-	if (text) then 
-	     ring.position = {text.x+text.w+5, y_space}
-	else 
-	     ring.position = {WIDTH - space, y_space}
-	end
+		ring.name = "ring"
+		if text then 
+	     	ring.position = {text.x+text.w+5, y_space}
+		else 
+	     	ring.position = {WIDTH - space, y_space}
+		end
         ring.opacity = 255
         group:add(ring)
 
         focus = make_focus_ring(input_box_width, HEIGHT + 5)
         focus.name = "focus"
-	if (text) then 
-	     focus.position = {text.x+text.w+5, y_space}
-	else 
-             focus.position = {WIDTH - space , y_space}
-	end
+		if (text) then 
+	     	focus.position = {text.x+text.w+5, y_space}
+		else 
+            focus.position = {WIDTH - space , y_space}
+		end
 
         focus.opacity = 0
-	group:add(focus)
+		group:add(focus)
 
-	space = space - PADDING_B
+		space = space - PADDING_B
 
 	-- if(item_v == "CHAR" or item_v == "WORD" or item_v =="WORD_CHAR") then item_v = string.lower(item_v) end 
 
     	input_text = Text {name = "input_text", text =item_v, editable=true,
         reactive = true, wants_enter = false, cursor_visible = false}:set(STYLE)
 
-	if (text) then 
+		if (text) then 
              input_text.position  = {text.x+text.w+20, PADDING_Y + y_space}
-	else 
+		else 
              input_text.position  = {WIDTH - space , PADDING_Y + y_space}
-	end
+		end
 
-
-	function input_text:on_button_down(x,y,button,num_clicks)
+		function input_text:on_button_down(x,y,button,num_clicks)
  	       current_focus.extra.on_focus_out()
 	       current_focus = group
 	       group.extra.on_focus_in()
                return true
         end
 
-	function group:on_button_down(x,y,button,num_clicks)
+		function group:on_button_down(x,y,button,num_clicks)
  	       current_focus.extra.on_focus_out()
 	       current_focus = group
 	       group.extra.on_focus_in()
@@ -2428,89 +2404,65 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         end
 
 	
-  	function input_text:on_key_down(key)
+  		function input_text:on_key_down(key)
 	    local si = inspector:find_child("si")
-    	    if is_this_widget(v) == true  then
-                item_group = (inspector:find_child("si")).content
-            else 
+    	if is_this_widget(v) == true  then
+        	item_group = (inspector:find_child("si")).content
+        else 
          	item_group = inspector:find_child("item_group")
-    	    end 
+    	end 
 	    if key == keys.Return or (key == keys.Tab and shift == false)  then
-	       	 group.extra.on_focus_out()
-		 for i, j in pairs(attr_t_idx) do
-		     if(item_n == j or item_v == j) then 
-		          while(item_group:find_child(attr_t_idx[i+1]) == nil ) do 
-				--if v[attr_t_idx[i+1]] == nil then 
-				--end 
+	       	group.extra.on_focus_out()
+		 	for i, j in pairs(attr_t_idx) do
+		    	if(item_n == j or item_v == j) then 
+		          	while(item_group:find_child(attr_t_idx[i+1]) == nil ) do 
 		                i = i + 1
-			       if(attr_t_idx[i+1] == nil) then return true end 
-		          end 
-		          if item_group:find_child("skin") then 
-	                  end 	
-		          if(item_group:find_child(attr_t_idx[i+1])) then
-		               local n_item = attr_t_idx[i+1]
-			       --print("NEXT ITEM : ", n_item)
-			       if item_group:find_child(n_item).extra.on_focus_in then 
-			       		item_group:find_child(n_item).extra.on_focus_in()	
-			       		if (si) then 
-				    		si.seek_to_middle(0, item_group:find_child(n_item).y)
-			       		end
-			       		break
-			       elseif n_item == "src" or n_item == "icon" or n_item == "source" then 
---[[
-				        if key == keys.Return then 
-					     item_group:find_child("filechooser").extra.on_focus_in()
-				        else
-					     local temp_f = item_group:find_child("filechooser").pressed 
-					     item_group:find_child("filechooser").pressed = nil
-					     item_group:find_child("filechooser").extra.on_focus_in()
-					     item_group:find_child("filechooser").pressed = temp_f
-					end 
-]]
-			       elseif n_item == "items" then 
---[[
-				    if v.extra.type == "ButtonPicker" then 
-				    end 
-]]
-			       elseif n_item == "reactive" then 
---[[
-					-- 
-]]
-			       end --added 
-		          end
-		     end 
+			       		if(attr_t_idx[i+1] == nil) then return true end 
+		          	end 
+		          	if item_group:find_child("skin") then end 	
+		          	if(item_group:find_child(attr_t_idx[i+1])) then
+		               	local n_item = attr_t_idx[i+1]
+			       		if item_group:find_child(n_item).extra.on_focus_in then 
+			       			item_group:find_child(n_item).extra.on_focus_in()	
+			       			if (si) then 
+				    			si.seek_to_middle(0, item_group:find_child(n_item).y)
+			       			end
+			       			break
+			      		elseif n_item == "src" or n_item == "icon" or n_item == "source" then 
+			       		elseif n_item == "items" then 
+			       		elseif n_item == "reactive" then 
+			       		end --added 
+		          	end
+		     	end 
     		end
 	     elseif (key == keys.Tab and shift == true )then 
 		    group.extra.on_focus_out()
  		    for i, v in pairs(attr_t_idx) do
-			if(item_n == v or item_v == v) then 
-			     if(attr_t_idx[i-1] == nil) then return true end  
-			     local function here ()
-			     while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
-				 i = i - 1
-			     end 
-			     if(item_group:find_child(attr_t_idx[i-1])) then
-			     	local p_item = attr_t_idx[i-1]
-				if item_group:find_child(p_item).extra.on_focus_in then 	
-				     item_group:find_child(p_item).extra.on_focus_in()	
-			             if (si) then 
-				          si.seek_to_middle(0, item_group:find_child(p_item).y)
-			             end
-				else 
-				     i = i -1
-				     here()
-				end 
-			     end
-			     end 
-			     here()
-			end 
+				if(item_n == v or item_v == v) then 
+			     	if(attr_t_idx[i-1] == nil) then return true end  
+			     		local function here ()
+			     			while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
+				 				i = i - 1
+			     			end 
+			     			if(item_group:find_child(attr_t_idx[i-1])) then
+			     				local p_item = attr_t_idx[i-1]
+								if item_group:find_child(p_item).extra.on_focus_in then 	
+				     				item_group:find_child(p_item).extra.on_focus_in()	
+			             			if (si) then 
+				          				si.seek_to_middle(0, item_group:find_child(p_item).y)
+			             			end
+								else 
+				     				i = i -1
+				     				here()
+								end 
+			     			end
+			     		end 
+			     		here()
+					end 
     		    end
-             end
-   	end 
-
-	
+        	end
+   		end 
     	group:add(input_text)
-
         function group.extra.on_focus_in()
 	         current_focus = group
              	 ring.opacity = 0
@@ -2518,7 +2470,6 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
                  focus.opacity = 255
 	         input_text:grab_key_focus(input_text)
         end
-
         function group.extra.on_focus_out()
                   focus.opacity = 0
                   input_text.cursor_visible = false
