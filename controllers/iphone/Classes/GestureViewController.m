@@ -49,6 +49,7 @@
 }
 
 - (BOOL)startService {
+    NSLog(@"GestureView Start Service");
     // Tell socket manager to create a socket and connect to the service selected
     socketManager = [[SocketManager alloc] initSocketStream:hostName
                                                        port:port
@@ -63,9 +64,7 @@
     }
     
     socketTimer = nil;
-    
-    //arbitrarySocket = [[SocketManager alloc] initSocketStream:<#(NSString *)#> port:<#(NSInteger)#> delegate:<#(id<SocketManagerDelegate>)#> protocol:<#(CommandProtocol)#>
-    
+        
     viewDidAppear = NO;
     
     // Made a connection, let the service know!

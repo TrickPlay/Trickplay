@@ -7,7 +7,7 @@
 //
 
 #import "ImageEditorViewController.h"
-
+#import "ImageEditorHelpViewControllerPhone.h"
 
 @implementation ImageEditorViewController
 
@@ -15,6 +15,7 @@
 @synthesize targetWidth;
 @synthesize targetHeight;
 @synthesize mask;
+@synthesize navBar;
 @synthesize toolbar;
 @synthesize cancelButton;
 @synthesize imageEditorDelegate;
@@ -26,6 +27,7 @@
         // Custom initialization
         cancelButton.title = cancelLabel;
         cancelButtonTitle = [cancelLabel retain];
+        helpPopover = nil;
     }
     return self;
 }
@@ -63,22 +65,39 @@
 
     imageView = [[GestureImageView alloc] initWithImage:image];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        imageView.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - toolbar.frame.size.height - 24.0);
+        CGRect screenFrame = [[UIScreen mainScreen] applicationFrame];
         [self.view addSubview:imageView];
+        //[imageView sizeToFit];
+        imageView.frame = CGRectMake(0.0, 0.0, screenFrame.size.width, screenFrame.size.height - toolbar.frame.size.height);
+        /*
+        if (imageView.frame.size.width > screenFrame.size.width) {
+            CGFloat w_ratio = screenFrame.size.width/imageView.frame.size.width;
+            imageView.frame = CGRectMake(0.0, 0.0, screenFrame.size.width, imageView.frame.size.height*w_ratio);
+        }
+        if (imageView.frame.size.height > screenFrame.size.height) {
+            CGFloat h_ratio = (screenFrame.size.height - toolbar.frame.size.height - 24.0)/imageView.frame.size.height;
+            imageView.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width*h_ratio, screenFrame.size.height - toolbar.frame.size.height - 24.0);
+        }
+        NSLog(@"height = %f", toolbar.frame.size.height);
+        //*/
+        //imageView.center = CGPointMake([[UIScreen mainScreen] applicationFrame].size.width/2, [[UIScreen mainScreen] applicationFrame].size.height/2 - toolbar.frame.size.height/2);
         if (mask) {
             mask.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height);
             [self.view addSubview:mask];
             mask.userInteractionEnabled = NO;
         }
     } else {
+        CGRect screenFrame = [[UIScreen mainScreen] applicationFrame];
         [self.view addSubview:imageView];
-        
-        [imageView sizeToFit];
+        //[imageView sizeToFit];
+        imageView.frame = CGRectMake(0.0, 0.0, screenFrame.size.width, screenFrame.size.height - toolbar.frame.size.height);
+        /*
         // This is a real hacked way of correctly sizing the photo
         // but after trying it about 50 different ways this is all
         // i can figure out that actually works !
         imageView.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height - 2.0*toolbar.frame.size.height + 4.0);
-        
+        //*/
+        //imageView.center = CGPointMake([[UIScreen mainScreen] applicationFrame].size.width/2, [[UIScreen mainScreen] applicationFrame].size.height/2 - toolbar.frame.size.height/2);
         if (mask) {
             mask.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height);
             [self.view addSubview:mask];
@@ -87,6 +106,7 @@
         }
     }
     [toolbar.superview bringSubviewToFront:toolbar];
+    [navBar.superview bringSubviewToFront:navBar];
 }
 
 - (UIImage*)imageByCropping:(GestureImageView *)imageViewToCrop toRect:(CGRect)rect {
@@ -164,12 +184,40 @@
     [imageEditorDelegate cancelEditing];
 }
 
-#pragma mark - View lifecycle
+#pragma mark -
+#pragma mark Help
+
+- (IBAction)help:(id)sender {
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        if (helpPopover) {
+            [helpPopover dismissPopoverAnimated:NO];
+            [helpPopover release];
+            helpPopover = nil;
+        }
+        UIViewController *popoverContent = [[UIViewController alloc] initWithNibName:@"ImageEditorHelpViewPad" bundle:nil];
+        popoverContent.contentSizeForViewInPopover = CGSizeMake(250, 200);
+        helpPopover = [[UIPopoverController alloc] initWithContentViewController:popoverContent];
+        [helpPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
+    } else {
+        UIViewController *helpModal = [[ImageEditorHelpViewControllerPhone alloc] initWithNibName:@"ImageEditorHelpViewControllerPhone" bundle:nil];
+        [self presentModalViewController:helpModal animated:YES];
+    }
+}
+
+- (BOOL)popoverControllerShouldDismissPopover:(UIPopoverController *)popoverController {
+    [helpPopover release];
+    helpPopover = nil;
+    return YES;
+}
+
+#pragma mark -
+#pragma mark View lifecycle
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     cancelButton.title = cancelButtonTitle;
+    navBar.alpha = .75;
     // Do any additional setup after loading the view from its nib.
     [self editImage:imageToEdit];
 }
@@ -183,6 +231,9 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    if (self.modalViewController) {
+        [self dismissModalViewControllerAnimated:NO];
+    }
     if (toolbar) {
         [toolbar release];
         toolbar = nil;
@@ -190,6 +241,10 @@
     if (cancelButton) {
         [cancelButton release];
         cancelButton = nil;
+    }
+    if (navBar) {
+        [navBar release];
+        navBar = nil;
     }
     self.mask = nil;
 }
@@ -201,9 +256,16 @@
 }
 
 - (void)dealloc {
+    if (self.modalViewController) {
+        [self dismissModalViewControllerAnimated:NO];
+    }
     if (toolbar) {
         [toolbar release];
         toolbar = nil;
+    }
+    if (navBar) {
+        [navBar release];
+        navBar = nil;
     }
     if (cancelButton) {
         [cancelButton release];
@@ -219,6 +281,11 @@
     if (cancelButtonTitle) {
         [cancelButtonTitle release];
         cancelButtonTitle = nil;
+    }
+    if (helpPopover) {
+        [helpPopover dismissPopoverAnimated:YES];
+        [helpPopover release];
+        helpPopover = nil;
     }
     
     [super dealloc];

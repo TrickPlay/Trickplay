@@ -326,7 +326,7 @@
 #pragma mark -
 #pragma mark View controls
 
-- (void)setMask:(UIView *)aMask {
+- (void)setMask:(UIImageView *)aMask {
     mask = aMask;
     [self.view addSubview:mask];
 }

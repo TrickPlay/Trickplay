@@ -51,6 +51,7 @@
 }
 
 - (BOOL)startServiceWithID:(NSString *)ID {
+    NSLog(@"AdvancedUI Start Service");
     // Tell socket manager to create a socket and connect to the service selected
     socketManager = [[SocketManager alloc] initSocketStream:hostName
                                                        port:port
@@ -428,8 +429,8 @@
     }
     
     if (socketManager) {
-        [socketManager release];
         socketManager.delegate = nil;
+        [socketManager release];
         socketManager = nil;
     }
     

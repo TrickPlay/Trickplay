@@ -278,6 +278,10 @@
     if ([cell.textLabel.text compare:currentTVName] == NSOrderedSame) {
         [cell addSubview:currentTVIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    } else {
+        if (currentTVIndicator.superview) {
+            [currentTVIndicator removeFromSuperview];
+        }
     }
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	

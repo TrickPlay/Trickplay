@@ -88,15 +88,17 @@
 }
 
 /**
- * Returns current app data.
+ * Returns current app data or nil on error.
  */
 - (NSDictionary *)getCurrentAppInfo {
+    NSLog(@"Getting Current App Info");
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
     
     // TODO: MAKE ASYNC TO PREVENT DEADLOCK
-    NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
+    NSURL *dataURL = [NSURL URLWithString:JSONString];
+    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
     //NSArray *JSONArray = [JSONData yajl_JSON];
     return (NSDictionary *)[[[JSONData yajl_JSON] retain] autorelease];
@@ -104,6 +106,7 @@
 
 
 - (BOOL)fetchApps {
+    NSLog(@"Fetching Apps");
     if (![gestureViewController hasConnection]) {
         return NO;
     }
@@ -112,7 +115,8 @@
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     
     // TODO: MAKE THIS ASYNC TO PREVENT THE CHANCE OF DEADLOCK WHILE ADVANCED_UI CONNECTION SETS UP
-    NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
+    NSURL *dataURL = [NSURL URLWithString:JSONString];
+    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     self.appsAvailable = [JSONData yajl_JSON];
     NSLog(@"Received JSON array app data = %@", appsAvailable);
     if (!appsAvailable) {
