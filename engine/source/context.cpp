@@ -1186,7 +1186,7 @@ int TPContext::run()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
-    clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
+    clutter_stage_set_title( CLUTTER_STAGE( stage ) , "TrickPlay" );
 
 #endif
 
