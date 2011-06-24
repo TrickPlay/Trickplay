@@ -60,6 +60,19 @@ Bitmap::~Bitmap()
     lsp->unref();
 }
 
+
+//.............................................................................
+
+Bitmap * Bitmap::get( lua_State * L , int index )
+{
+    if ( ! lb_check_udata_type( L , index , "Bitmap" ) )
+    {
+        return 0;
+    }
+
+    return ( Bitmap * ) UserData::get_client( L , index );
+}
+
 //.............................................................................
 
 guint Bitmap::width() const
@@ -120,14 +133,11 @@ void Bitmap::destroy_notify( gpointer me )
 
 Image * Bitmap::get_image( lua_State * L , int index )
 {
-    if ( ! lb_check_udata_type( L , index , "Bitmap" ) )
+    if ( Bitmap * bitmap = Bitmap::get( L , index ) )
     {
-        return 0;
+        return bitmap->image;
     }
-
-    Bitmap * b = ( Bitmap * ) UserData::get_client( L , index );
-
-    return b ? b->image : 0;
+    return 0;
 }
 
 //.............................................................................

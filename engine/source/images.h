@@ -22,6 +22,8 @@ public:
 
     static Image * make( const TPImage & image );
 
+    static Image * make( cairo_surface_t * surface );
+
     static Image * decode( gpointer data, gsize size, const gchar * content_type = NULL );
 
     static Image * decode( const gchar * filename );
