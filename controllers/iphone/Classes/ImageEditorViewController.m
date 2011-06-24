@@ -198,9 +198,11 @@
         popoverContent.contentSizeForViewInPopover = CGSizeMake(250, 200);
         helpPopover = [[UIPopoverController alloc] initWithContentViewController:popoverContent];
         [helpPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
+        [popoverContent release];
     } else {
         UIViewController *helpModal = [[ImageEditorHelpViewControllerPhone alloc] initWithNibName:@"ImageEditorHelpViewControllerPhone" bundle:nil];
         [self presentModalViewController:helpModal animated:YES];
+        [helpModal release];
     }
 }
 

@@ -28,6 +28,16 @@
 		CD404C1B134FF6DE0021D36C /* TrickplayText.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C1A134FF6DC0021D36C /* TrickplayText.m */; };
 		CD404C271353DCF00021D36C /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C251353DCE50021D36C /* CameraViewController.m */; };
 		CD404C2A1353E18E0021D36C /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD404C291353E18D0021D36C /* MobileCoreServices.framework */; };
+		CD4CA69013B5092300B5A7A3 /* arrows-generic-controls.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68813B5092300B5A7A3 /* arrows-generic-controls.jpg */; };
+		CD4CA69113B5092300B5A7A3 /* back-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68913B5092300B5A7A3 /* back-touch.png */; };
+		CD4CA69213B5092300B5A7A3 /* down-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68A13B5092300B5A7A3 /* down-touch.png */; };
+		CD4CA69313B5092300B5A7A3 /* exit-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68B13B5092300B5A7A3 /* exit-touch.png */; };
+		CD4CA69413B5092300B5A7A3 /* left-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68C13B5092300B5A7A3 /* left-touch.png */; };
+		CD4CA69513B5092300B5A7A3 /* ok-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68D13B5092300B5A7A3 /* ok-touch.png */; };
+		CD4CA69613B5092300B5A7A3 /* right-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68E13B5092300B5A7A3 /* right-touch.png */; };
+		CD4CA69713B5092300B5A7A3 /* up-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA68F13B5092300B5A7A3 /* up-touch.png */; };
+		CD4CA69C13B50AC100B5A7A3 /* VirtualRemoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4CA69A13B50AC100B5A7A3 /* VirtualRemoteViewController.m */; };
+		CD4CA69D13B50AC100B5A7A3 /* VirtualRemoteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CD68DF3C13861BB700D307D4 /* EditableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD68DF3B13861BB100D307D4 /* EditableTextView.m */; };
 		CD6BC36513678D6F00CF1973 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6BC36313678D6F00CF1973 /* AudioStreamer.m */; };
@@ -98,6 +108,17 @@
 		CD404C241353DCE10021D36C /* CameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraViewController.h; sourceTree = "<group>"; };
 		CD404C251353DCE50021D36C /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraViewController.m; sourceTree = "<group>"; };
 		CD404C291353E18D0021D36C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		CD4CA68813B5092300B5A7A3 /* arrows-generic-controls.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "arrows-generic-controls.jpg"; sourceTree = "<group>"; };
+		CD4CA68913B5092300B5A7A3 /* back-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-touch.png"; sourceTree = "<group>"; };
+		CD4CA68A13B5092300B5A7A3 /* down-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "down-touch.png"; sourceTree = "<group>"; };
+		CD4CA68B13B5092300B5A7A3 /* exit-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "exit-touch.png"; sourceTree = "<group>"; };
+		CD4CA68C13B5092300B5A7A3 /* left-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "left-touch.png"; sourceTree = "<group>"; };
+		CD4CA68D13B5092300B5A7A3 /* ok-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ok-touch.png"; sourceTree = "<group>"; };
+		CD4CA68E13B5092300B5A7A3 /* right-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "right-touch.png"; sourceTree = "<group>"; };
+		CD4CA68F13B5092300B5A7A3 /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up-touch.png"; sourceTree = "<group>"; };
+		CD4CA69913B50AC100B5A7A3 /* VirtualRemoteViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VirtualRemoteViewController.h; path = ../VirtualRemoteViewController.h; sourceTree = "<group>"; };
+		CD4CA69A13B50AC100B5A7A3 /* VirtualRemoteViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VirtualRemoteViewController.m; path = ../VirtualRemoteViewController.m; sourceTree = "<group>"; };
+		CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VirtualRemoteViewController.xib; sourceTree = "<group>"; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CD68DF3A13861B9300D307D4 /* EditableTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditableTextView.h; sourceTree = "<group>"; };
 		CD68DF3B13861BB100D307D4 /* EditableTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditableTextView.m; sourceTree = "<group>"; };
@@ -200,6 +221,7 @@
 				441321321355335600009206 /* Entitlements.plist */,
 				CDFEBB6D130A498C00A14307 /* iPad */,
 				CDFEBB5E130A498600A14307 /* iPhone */,
+				CD4CA68713B5092300B5A7A3 /* GenericControls */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -224,6 +246,7 @@
 				28F335F01007B36200424DE2 /* RootViewController.xib */,
 				CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */,
 				CDFEBC51130A57FA00A14307 /* GestureViewController.xib */,
+				CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */,
 				CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */,
 				CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */,
 				CDFBE29A13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.xib */,
@@ -283,6 +306,49 @@
 			name = UserInterface;
 			sourceTree = "<group>";
 		};
+		CD4CA68713B5092300B5A7A3 /* GenericControls */ = {
+			isa = PBXGroup;
+			children = (
+				CD4CA68813B5092300B5A7A3 /* arrows-generic-controls.jpg */,
+				CD4CA68913B5092300B5A7A3 /* back-touch.png */,
+				CD4CA68A13B5092300B5A7A3 /* down-touch.png */,
+				CD4CA68B13B5092300B5A7A3 /* exit-touch.png */,
+				CD4CA68C13B5092300B5A7A3 /* left-touch.png */,
+				CD4CA68D13B5092300B5A7A3 /* ok-touch.png */,
+				CD4CA68E13B5092300B5A7A3 /* right-touch.png */,
+				CD4CA68F13B5092300B5A7A3 /* up-touch.png */,
+			);
+			path = GenericControls;
+			sourceTree = "<group>";
+		};
+		CD4CA69E13B50AD700B5A7A3 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				28C286DF0D94DF7D0034E888 /* RootViewController.h */,
+				28C286E00D94DF7D0034E888 /* RootViewController.m */,
+				CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */,
+				CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */,
+				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
+				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
+				CD4CA69913B50AC100B5A7A3 /* VirtualRemoteViewController.h */,
+				CD4CA69A13B50AC100B5A7A3 /* VirtualRemoteViewController.m */,
+			);
+			name = Main;
+			sourceTree = "<group>";
+		};
+		CD4CA69F13B50AF000B5A7A3 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				CD404C241353DCE10021D36C /* CameraViewController.h */,
+				CD404C251353DCE50021D36C /* CameraViewController.m */,
+				CD9A68621371CB0E00977730 /* ImageEditorViewController.h */,
+				CD9A68631371CB0E00977730 /* ImageEditorViewController.m */,
+				CDFBE29813B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.h */,
+				CDFBE29913B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.m */,
+			);
+			name = Camera;
+			sourceTree = "<group>";
+		};
 		CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */ = {
 			isa = PBXGroup;
 			children = (
@@ -337,18 +403,8 @@
 		CDFEBBB8130A4CD100A14307 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
-				28C286DF0D94DF7D0034E888 /* RootViewController.h */,
-				28C286E00D94DF7D0034E888 /* RootViewController.m */,
-				CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */,
-				CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */,
-				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
-				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
-				CD404C241353DCE10021D36C /* CameraViewController.h */,
-				CD404C251353DCE50021D36C /* CameraViewController.m */,
-				CD9A68621371CB0E00977730 /* ImageEditorViewController.h */,
-				CD9A68631371CB0E00977730 /* ImageEditorViewController.m */,
-				CDFBE29813B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.h */,
-				CDFBE29913B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.m */,
+				CD4CA69E13B50AD700B5A7A3 /* Main */,
+				CD4CA69F13B50AF000B5A7A3 /* Camera */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -468,6 +524,15 @@
 				CD9A68661371CB0E00977730 /* ImageEditorViewController.xib in Resources */,
 				CDCE770013B28A0E00768A2A /* ImageEditorHelpViewPad.xib in Resources */,
 				CDFBE29C13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.xib in Resources */,
+				CD4CA69013B5092300B5A7A3 /* arrows-generic-controls.jpg in Resources */,
+				CD4CA69113B5092300B5A7A3 /* back-touch.png in Resources */,
+				CD4CA69213B5092300B5A7A3 /* down-touch.png in Resources */,
+				CD4CA69313B5092300B5A7A3 /* exit-touch.png in Resources */,
+				CD4CA69413B5092300B5A7A3 /* left-touch.png in Resources */,
+				CD4CA69513B5092300B5A7A3 /* ok-touch.png in Resources */,
+				CD4CA69613B5092300B5A7A3 /* right-touch.png in Resources */,
+				CD4CA69713B5092300B5A7A3 /* up-touch.png in Resources */,
+				CD4CA69D13B50AC100B5A7A3 /* VirtualRemoteViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -507,6 +572,7 @@
 				CD68DF3C13861BB700D307D4 /* EditableTextView.m in Sources */,
 				CD894BAC139D938000C3DF79 /* TrickplayTextHTML.m in Sources */,
 				CDFBE29B13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.m in Sources */,
+				CD4CA69C13B50AC100B5A7A3 /* VirtualRemoteViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
