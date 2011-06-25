@@ -28,6 +28,28 @@ function(ctrl, router, controller, ...)
         size = {450*x_ratio, 50*y_ratio}
     })
     controller.screen:add(view)
+    
+    function ctrl:init_character_selection(players)
+        if not players then error("no players", 2) end
+        local playing = {}
+        for i,player in pairs(players) do
+            local pos = player.dog_number
+            dog_buttons[pos]:hide()
+            playing[pos] = true
+        end
+        print("hereish")
+        dumptable(playing)
+        for i = 1,6 do
+            if not playing[i] then
+                dog_buttons[i]:show()
+            end
+        end
+    end
+
+    function ctrl:update_character_selection(player)
+        local pos = player.dog_number
+        dog_buttons[pos]:hide()
+    end
 
     function ctrl:on_touch(event)
         local comp = event.controller.router:get_active_component()

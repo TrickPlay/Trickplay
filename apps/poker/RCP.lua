@@ -78,7 +78,7 @@ function(router, ...)
 
     function router:get_active_controller()
         if not self.controllers[self.active_component] then
-            error("no active controller", 2)
+            print("WARNING: no active controller")
         end
         return self.controllers[self.active_component]
     end

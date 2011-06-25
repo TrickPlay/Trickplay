@@ -102,7 +102,7 @@ function(ctrl, router, ...)
         elseif not dont_find_next then
             find_next_dog(dog_number)
         end
-        --ctrlman:update_choose_dog(players)
+        ctrlman:update_choose_dog(player, controller)
         ctrlman:update_waiting_room(player)
 
         return true
