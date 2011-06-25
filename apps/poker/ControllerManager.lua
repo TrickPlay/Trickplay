@@ -268,9 +268,16 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller.router:notify()
             if advanced_ui_ready then
                 controller.router:get_active_controller():reset()
+                controller.router:get_active_controller():init_character_selection(
+                    router:get_controller(Components.CHARACTER_SELECTION):get_players()
+                )
             end
 
             controller.state = ControllerStates.CHOOSE_DOG
+        end
+
+        function controller:update_choose_dog(player)
+            character_selection:update_character_selection(player)
         end
 
         --[[
@@ -335,12 +342,14 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
 
         function controller:waiting_room()
-            if not waiting_room then
-                waiting_room = RemoteWaitingRoomController(router, controller)
-            end
             controller:clear_and_set_background("bkg")
-            controller.router:set_active_component(RemoteComponents.WAITING)
-            controller.router:notify()
+            if advanced_ui_ready then
+                if not waiting_room then
+                    waiting_room = RemoteWaitingRoomController(router, controller)
+                end
+                controller.router:set_active_component(RemoteComponents.WAITING)
+                controller.router:notify()
+            end
 
             controller.state = ControllerStates.WAITING
         end
@@ -397,8 +406,18 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         declare_necessary_resources()
         function controller:on_advanced_ui_ready()
             print("AdvancedUI Ready")
+            advanced_ui_ready = true
             controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller)
             create_advanced_ui_objects()
+            if controller.state == ControllerStates.CHOOSE_DOG
+            and character_selection
+            and controller.router:get_active_controller() == character_selection then
+                character_selection:init_character_selection(
+                    router:get_controller(Components.CHARACTER_SELECTION):get_players()
+                )
+            elseif controller.state == ControllerStates.WAITING then
+                controller:waiting_room()
+            end
         end
         router:get_active_controller():add_controller(controller)
     end
@@ -423,10 +442,11 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         end
     end
 
-    function ctrlman:update_choose_dog(players)
+    function ctrlman:update_choose_dog(player, cntrllr)
         for i,controller in ipairs(active_ctrls) do
-            if controller.state == ControllerStates.CHOOSE_DOG then
-                controller:choose_dog(players)
+            if controller.state == ControllerStates.CHOOSE_DOG
+            and controller ~= cntrllr then
+                controller:update_choose_dog(player)
             end
         end
     end
