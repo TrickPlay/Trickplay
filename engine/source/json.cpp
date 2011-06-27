@@ -748,6 +748,11 @@ namespace JSON
     {
         return map[ key ];
     }
+    
+    Value & Object::at ( const String & key )
+    {
+        return map[ key ];
+    }
 
     bool Object::has( const String & key ) const
     {

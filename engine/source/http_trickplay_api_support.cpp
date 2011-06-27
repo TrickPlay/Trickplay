@@ -38,6 +38,217 @@ private:
 
 //-----------------------------------------------------------------------------
 
+static gint float_to_int( const gfloat & f ) {
+	
+	if ((0 < f && f < 0.0001) || (0 > f && f > -0.001 ) || f < 1000000 || f > 1000000)
+		
+		return 0;
+		
+	else
+		
+		return (gint) f;
+	
+}
+
+static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
+{
+	
+	using namespace JSON;
+	
+    if ( !actor )
+    {
+		return;
+    }
+    
+	ClutterGeometry g;
+
+    clutter_actor_get_geometry( actor, & g );
+
+    const gchar * name = clutter_actor_get_name( actor );
+    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
+
+    if ( g_str_has_prefix( type, "Clutter" ) )
+    {
+        type += 7;
+    }
+	
+	String extra;
+    String details;
+
+	// x, y, z
+	gfloat x;
+	gfloat y;
+	gfloat z = clutter_actor_get_depth( actor ); 
+	clutter_actor_get_position( actor, &x, &y );
+	
+	// w, h
+	gfloat w;
+	gfloat h;
+	clutter_actor_get_size( actor, &w, &h );
+
+	// Scale
+    gdouble sx;
+    gdouble sy;	
+	clutter_actor_get_scale( actor, &sx, &sy );	
+	Object scale;
+	scale["x"] = sx;
+	scale["y"] = sy;
+
+	// Anchor point
+    gfloat ax;
+    gfloat ay;
+    clutter_actor_get_anchor_point( actor, &ax, &ay );
+	Object anchor_point;
+	anchor_point["x"] = ax;
+	anchor_point["y"] = ay;
+
+	// GID
+	gint32 gid = clutter_actor_get_gid( actor );
+
+	// Opacity
+    guint8 opacity = clutter_actor_get_opacity( actor );
+	
+	// Visibility
+	gboolean is_visible = CLUTTER_ACTOR_IS_VISIBLE( actor );
+	
+	// Clip
+	gfloat cxoff;
+	gfloat cyoff;
+	gfloat cw;
+	gfloat ch;
+	clutter_actor_get_clip( actor, &cxoff, &cyoff, &cw, &ch );
+	Object clip;
+		// floats returned are very small nonzero numbers
+	clip["x"] = float_to_int( cxoff );
+	clip["y"] = float_to_int( cyoff );
+	clip["w"] = float_to_int( cw );
+	clip["h"] = float_to_int( ch );
+
+    if ( !extra.empty() )
+    {
+        extra = String( " : " ) + extra;
+    }
+
+	
+	
+	if ( CLUTTER_IS_TEXT( actor ) )
+    {
+        extra = String( "[text='" ) + clutter_text_get_text( CLUTTER_TEXT( actor ) ) + "'";
+		
+        ClutterColor color;
+		
+        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
+		
+        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
+		
+        extra = extra + "," + c + "]";
+		
+        g_free( c );
+		
+    }
+    else if ( CLUTTER_IS_CONTAINER( actor ) )
+    {
+		Array children;
+		
+		GList * list = clutter_container_get_children( CLUTTER_CONTAINER( actor ));
+		
+		for(GList*item=g_list_first(list);item;item=g_list_next(item))
+		{
+			
+			ClutterActor * child = CLUTTER_ACTOR( item->data );     
+			
+			Object child_object;
+			
+			dump_ui_actors( child, &child_object );
+			
+			children.append( child_object );
+			
+		}
+		
+		g_list_free(list);
+		
+		(*object)["children"] = children;
+		
+    }
+	
+	(*object)["z"] 			= z;
+	(*object)["y"] 			= y;
+	(*object)["x"] 			= x;
+	(*object)["w"] 			= w;
+	(*object)["h"] 			= h;
+	(*object)["name"] 			= name;
+	(*object)["gid"]			= gid;
+    (*object)["type"] 			= type;
+	(*object)["is_visible"] 	= is_visible;
+	(*object)["scale"] 		= scale;
+	(*object)["opacity"] 		= opacity;
+	(*object)["anchor_point"] 	= anchor_point;
+	(*object)["clip"]			= clip;
+    
+}
+
+class DebugUIRequestHandler: public Handler
+{
+public:
+
+	DebugUIRequestHandler( TPContext * ctx )
+	:
+	    Handler( ctx , "/debug/ui" )
+	{
+	}
+
+	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
+	{
+	    
+	    using namespace JSON;
+
+	    Object object;
+
+	    //g_info( "" );
+	    g_info( "DEBUGGING INFO AVAIABLE AT http://localhost:8888/debug/ui" );
+	    
+	    dump_ui_actors( clutter_stage_get_default(), &object );
+	    
+	    /*
+	    std::map< String, std::list< ClutterActor * > >::const_iterator it;
+    
+	    for ( it = info.actors_by_type.begin(); it != info.actors_by_type.end(); ++it )
+	    {
+		g_info( "%15s %5u", it->first.c_str(), it->second.size() );
+	    }*/
+	    
+	    response.set_status( HttpServer::HTTP_STATUS_OK );
+
+	    String result;
+
+	    //using namespace JSON;
+
+	    //Object object;
+	    //object[ "Actor" ] = info.type;
+
+	    //Array foo;
+	    
+	    //foo.append( 1 );
+	    //foo.append( true );
+	    //foo.append( "yo" );
+	    
+	    //object[ "foo" ] = foo;
+        
+	    result = object.stringify();
+
+	    if ( ! result.empty() )
+	    {
+		    response.set_response( "application/json", result.data(), result.size() );
+	    }
+	    else
+	    {
+		    response.set_status(HttpServer::HTTP_STATUS_NOT_FOUND);
+	    }
+	}
+};
+
+//-----------------------------------------------------------------------------
+
 class ListAppsRequestHandler : public Handler
 {
 public:
@@ -233,6 +444,7 @@ HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
     handlers.push_back( new ListAppsRequestHandler( context ) );
 	handlers.push_back( new LaunchAppRequestHandler( context ) );
 	handlers.push_back( new CurrentAppRequestHandler( context ) );
+	handlers.push_back( new DebugUIRequestHandler( context ) );
 }
 
 //-----------------------------------------------------------------------------
