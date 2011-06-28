@@ -1310,11 +1310,8 @@ function ui_element.button(table)
 		text_has_shadow = true,
 		single_button = false,
 		label_align = nil,
-		button_status = "released",
+		--------------------------------
 		is_in_menu = false,
-		menu_down = nil, 
-		menu_up = nil, 
-		menu = nil, 
     }
 
  --overwrite defaults
@@ -1337,6 +1334,7 @@ function ui_element.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
+		print("button.on_focus_in")
 		current_focus = b_group
         if (p.skin == "custom") then 
 	     	ring.opacity = 0
@@ -1353,8 +1351,8 @@ function ui_element.button(table)
 
 		if key then 
 	    	if p.pressed and key == keys.Return then
+				print("button p.pressed()")
 				p.pressed()
-				p.button_status = "pressed"
 	    	end 
 		end 
 		
@@ -1366,6 +1364,7 @@ function ui_element.button(table)
     end
     
     function b_group.extra.on_focus_out(key) 
+		print("button.on_focus_out")
 		current_focus = nil 
         if (p.skin == "custom") then 
 	     	ring.opacity = 255
@@ -1377,9 +1376,16 @@ function ui_element.button(table)
 	     	focus_ring.opacity = 0
         end
         b_group:find_child("text").color = p.text_color
-		if p.released then 
-			p.released()
-			p.button_status = "released"
+		if p.released then  
+			if p.is_in_menu then 
+				if key ~= keys.Return then
+					print("button p.released()")
+					p.released()
+				end 
+			else 
+				print("button p.released()")
+				p.released()
+			end
 		end 
     end
 
@@ -1433,36 +1439,12 @@ function ui_element.button(table)
 
         b_group:add(text)
 
-        if (p.skin == "custom") then button.opacity = 0 
-        else ring.opacity = 0 end 
-
-		--yugi
-		---[[
-		if b_group.is_in_menu == true  then 
-			function b_group:on_key_down(key) 
-				print("button on key down !!!!!!!!")
-				if key == keys.Down then 
-					if p.menu_down then
-						p.menu_down()
-					end 
-					return true
-				elseif key == keys.Up then 
-					if p.menu_up then
-						p.menu_up()
-					end 
-					return true
-				elseif key == keys.Return then 
-					if p.button_status == "pressed" then 
-						p.released()
-						p.menu:grab_key_focus()
-					else 
-						--p.pressed()
-					end 
-				end 
-				
-			end 
+        if (p.skin == "custom") then 
+			button.opacity = 0 
+        else 
+			ring.opacity = 0 
 		end 
-		--]]
+
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
 				if current_focus ~= b_group then 
@@ -2222,26 +2204,21 @@ function ui_element.buttonPicker(table)
                items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, opacity = 255})     
      	end 
 
-		local j_padding
+		local j_padding = 0
 
 		for i, j in pairs(items.children) do 
 	  		if i == p.selected_item then  -- i == 1
-               j.position = {p.ui_width/2 - j.width/2, p.ui_height/2 - j.height/2 - padding}
+               j.position = {p.ui_width/2 - j.width/2, p.ui_height/2 - j.height/2 -5 }
 	       	   j_padding = 5 * j.x -- 5 는 진정한 해답이 아니고.. 이걸 바꿔 줘야함.. 그리고 박스 크기가 문자열과 비례해서 적당히 커줘야하고.. ^^;;;
-	  		else 
-               --j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
-	  		end 
-     	end 
+			   break
+			end 
+		end 
 
 		for i, j in pairs(items.children) do 
 	  		if i > p.selected_item then  -- i == 1
-               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2 - padding}
-	  		end 
-     	end 
-
-		for i, j in pairs(items.children) do 
-	  		if i < p.selected_item then  -- i == 1
-               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2 - padding}
+               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
+	  		elseif i < p.selected_item then  -- i == 1
+               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
 	  		end 
      	end 
 
@@ -2336,13 +2313,13 @@ function ui_element.buttonPicker(table)
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
-	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local prev_old_y = p.ui_height/2 - j.height/2 - 5
 	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
+	    local next_old_y = p.ui_height/2 - j.height/2 -5 
 	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local prev_new_y = p.ui_height/2 - j.height/2 -5 
 	    local next_new_x = p.ui_width/2 - j.width/2
-	    local next_new_y = p.ui_height/2 - j.height/2
+	    local next_new_y = p.ui_height/2 - j.height/2 -5 
 
 	    if t ~= nil then
 	       t:stop()
@@ -2390,13 +2367,13 @@ function ui_element.buttonPicker(table)
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
-	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local prev_old_y = p.ui_height/2 - j.height/2 -5 
 	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
+	    local next_old_y = p.ui_height/2 - j.height/2 -5 
 	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local prev_new_y = p.ui_height/2 - j.height/2 -5 
 	    local next_new_x = p.ui_width/2 - j.width/2
-	    local next_new_y = p.ui_height/2 - j.height/2
+	    local next_new_y = p.ui_height/2 - j.height/2 -5 
 
 	    if t ~= nil then
 		t:stop()
@@ -2762,7 +2739,6 @@ function ui_element.radioButtonGroup(table)
           	if editor_lb == nil or editor_use then  
 
 				function donut:on_key_down(key)
-				--- yugi 
 					local ring_num = tonumber(donut.name:sub(5,-1))
 					local next_num
 					if key == keys.Up then 
@@ -3024,7 +3000,6 @@ function ui_element.checkBoxGroup(t)
             if editor_lb == nil or editor_use then  
 
 				function box:on_key_down(key)
-				--- yugi 
 					local box_num = tonumber(box.name:sub(4,-1))
 					local next_num
 					if key == keys.Up then 
@@ -4905,15 +4880,14 @@ button
         
         background_color     = {255,0,0,255},
         
-        menu_width = 250,       -- bg_w 
+        menu_width = 250,   -- bg_w 
         horz_padding  = 10, -- padding 
         separator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         align = "left",
         show_ring     = true,
-        
-        
         skin = "default",
+		status = nil
     }
     --overwrite defaults
     if t ~= nil then
@@ -4954,7 +4928,6 @@ button
 		shadow = false 
     end 
 
-
     local dropDownMenu = Group{}
     local button       = ui_element.button{
 		name = "button",
@@ -4983,38 +4956,39 @@ button
         extra={
             type="MenuButton",
             focus_index = function(i)
-                if curr_index == i then
-                    print("Item on Drop Down Bar is already focused")
-                    return
-                end
-                if selectable_items[curr_index] ~= nil then
-                    selectable_items[curr_index].focus:complete_animation()
-                    selectable_items[curr_index].focus.opacity=255
-                    selectable_items[curr_index].focus:animate{
-                        duration=300,
-                        opacity=0
-                    }
-                elseif curr_index==0 then
+            if curr_index == i then
+            	print("Item on Drop Down Bar is already focused")
+                return
+            end
+            if selectable_items[curr_index] ~= nil then
+            	selectable_items[curr_index].focus:complete_animation()
+                selectable_items[curr_index].focus.opacity=255
+                selectable_items[curr_index].focus:animate{
+                	duration=300,
+                	opacity=0
+                }
+            elseif curr_index==0 then
                     --button:on_focus_out()
-                end
-                if selectable_items[i] ~= nil then
-                   
-                    selectable_items[i].focus:complete_animation()
-                    selectable_items[i].focus.opacity=0
-                    selectable_items[i].focus:animate{
-                        duration=300,
-                        opacity=255,
-                    }
-                    curr_index=i
-                elseif i==0 then
-                    button:on_focus_in()
-                    curr_index=i
-                end
-            end,
+            end
+            if selectable_items[i] ~= nil then
+               selectable_items[i].focus:complete_animation()
+               selectable_items[i].focus.opacity=0
+               selectable_items[i].focus:animate{
+
+               		duration=300,
+                    opacity=255,
+               }
+               curr_index=i
+           elseif i==0 then
+           	   button:on_focus_in()
+               curr_index=i
+           end
+           end,
 	    get_index = function ()
 		return curr_index
 	    end,
             press_up = function()
+				print("press_up()")
                 if curr_index <= 0 then
                     return
                 else
@@ -5022,6 +4996,7 @@ button
                 end
             end,
             press_down = function()
+				print("press_down()")
                 if curr_index >= #selectable_items then
                     return
                 else
@@ -5097,6 +5072,7 @@ button
                 }
             end,
             fade_in = function()
+				print("fade_in()")
                 dropDownMenu:show()
                 dropDownMenu:complete_animation()
                 dropDownMenu.y_rotation={0,0,0}
@@ -5109,23 +5085,25 @@ button
                     s_i.focus.opacity=0
                 end
                 curr_index = 0
-		umbrella:raise_to_top()
-		if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-		end
-
-		input_mode = S_MENU_M
+				umbrella:raise_to_top()
+				if screen:find_child("mouse_pointer") then 
+		 			screen:find_child("mouse_pointer"):raise_to_top()
+				end
+				input_mode = S_MENU_M
+				p.status = "fade_in"
             end,
             fade_out = function()
+				print("fade_out()")
                 dropDownMenu:complete_animation()
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=255
                 dropDownMenu:animate{
                     duration=100,
                     opacity=0,
-		    on_completed = function()  dropDownMenu:hide()  end,
+		    		on_completed = function()  dropDownMenu:hide()  end,
                 }
-		input_mode = S_SELECT
+				input_mode = S_SELECT
+				p.status = "fade_out"
             end,
             set_item_function = function(index,f)
                 assert(index > 0 and index <= #selectable_items, "invalid index")
@@ -5134,6 +5112,7 @@ button
                 
             end,
             press_enter = function(...)
+				print("press_enter()")
                 if selectable_items[curr_index] ~= nil and
                    selectable_items[curr_index].f ~= nil then
                    selectable_items[curr_index].f(...)
@@ -5146,9 +5125,28 @@ button
   	--[[ umbrella.size = {p.ui_width, p.ui_height} ]]
     }
 
-	button.menu_down = umbrella.press_down 
-	button.menu_up = umbrella.press_up 
-	button.menu = umbrella
+	--yugi
+	if editor_lb == nil or editor_use then  
+		function button:on_key_down(key) 
+			print("menuButton.button.on_key_down()")
+			if input_mode == S_SELECT or p.status ==  "fade_out" then 
+				if key == keys.Down then 
+					umbrella.press_down()
+					return true
+				elseif key == keys.Up then 
+					umbrella.press_up()
+					return true
+				elseif key == keys.Return then 
+					if curr_index > 0 then 
+						umbrella.press_enter()
+					end 
+                    umbrella.fade_out()
+					umbrella:grab_key_focus()
+					return true
+				end 
+			end 
+		end 
+	end
 
     local function make_item_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
@@ -5169,18 +5167,22 @@ button
     end
     
     function umbrella.extra.on_focus_in(key) 
-		button.on_focus_in()
-		umbrella.fade_in()
-		--umbrella:grab_key_focus(umbrella) yugiiiii 
-		if key ~= nil then 
-			button:grab_key_focus(button) -- yugiii 
+		print("menuButton.on_focus_in()")
+		if key then 
+			if key == keys.Return then 
+				button.on_focus_in(keys.Return)
+			else 
+				button.on_focus_in()
+				umbrella:grab_key_focus()
+			end 
 		end 
-		--umbrella:grab_key_focus(umbrella) yugiiiii 
     end
     
-    function umbrella.extra.on_focus_out() 
-		button.on_focus_out()
-		umbrella.fade_out()
+    function umbrella.extra.on_focus_out(key) 
+		print("menuButton.on_focus_out()")
+		if key then 
+			button.on_focus_out(key)
+		end
     end
    
     function create()
@@ -5238,8 +5240,6 @@ button
                 )
                 curr_y = curr_y + p.separator_thickness + p.vert_spacing
             elseif item.type == "item" then
-                
-                
                 
                 --Make the text label for each item
                 if p.text_has_shadow then
@@ -5343,7 +5343,7 @@ button
                 ui_ele.name="focus"
                 if i == #p.items and prev_item ~= nil and
                     prev_item.focus ~= nil then
-                    
+                     
                     ui_ele.anchor_point = {  0, prev_item.focus.h/2 }
                     ui_ele.position     = {  0, txt.y }
                 else 
@@ -5456,20 +5456,6 @@ button
 	if editor_lb == nil or editor_use then  
 		button.pressed = function() umbrella.fade_in() end 
 		button.released = function() umbrella.fade_out() end 
-		--yugi
-		--[[ 
-		function button:on_key_down(key)
-			if key == keys.Down then
-				-- move focus to the first item 
-				dropDownMenu.press_down()
-			elseif key == keys.Up then 
-				-- move focus to menuButton
-				dropDownMenu.press_up()
-			end
-			return true
-		end 
-
-		--]]
  	end 
         
         button.position = {button.w/2,button.h/2}
@@ -6151,10 +6137,6 @@ function ui_element.arrowPane(t)
     create()
 	window:add(p.content)
 	
-	
-	
-
-
 	--set the meta table to overwrite the parameters
     mt = {}
     mt.__newindex = function(t,k,v)

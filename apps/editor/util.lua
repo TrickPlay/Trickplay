@@ -917,14 +917,12 @@ function create_on_button_down_f(v)
 							if(screen:find_child("mouse_pointer") ~= nil) then 
 		     					screen:remove(screen:find_child("mouse_pointer"))
 							end 
-							--[[
 							mouse_pointer = CS_move
 							mouse_pointer.extra.type = "move"
 							mouse_pointer.position = {x - 10 ,y - 10 ,0}
 							if(screen:find_child("mouse_pointer") == nil) then 
 		     					screen:add(mouse_pointer)
 							end 
-							]]
 
 							selected_content = v 
 			
@@ -1450,8 +1448,9 @@ function make_attr_t(v)
        ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
        ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
        ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","items","selected_item","reactive","focus"} end,
-       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","items", "reactive","focus",} end,
-       ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_seperator_color","title_seperator_thickness",} end,
+       ["MenuButton"] = function() return {"expansion_location","lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","items", "reactive","focus",} end,
+       --["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items", "reactive","focus",} end,
+       ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","icon","label","message","opacity","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress"} end,
@@ -1571,7 +1570,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_seperator_color","title_seperator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","seperator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible arrow_color", "tab_labels", "tabs"}
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible arrow_color", "tab_labels", "tabs"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
@@ -1836,7 +1835,7 @@ function itemTostring(v, d_list, t_list)
 		..v.name..".focus[key]()\n\t\t"
 		.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
 		.."if "..v.name..".on_focus_out then\n\t\t\t\t"
-		..v.name..".on_focus_out()\n\t\t\t".."end\n\t\t\t"
+		..v.name..".on_focus_out(key)\n\t\t\t".."end\n\t\t\t" -- on_focus_out
 		.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
 		.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
         .."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t\t"
@@ -2191,8 +2190,7 @@ function inputMsgWindow_savefile(input_text, cfn)
 		for i, j in pairs (grp.children) do 
 		     local function there() 
 		     if need_stub_code(j) == true then 
-	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
-
+	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n" 	--SECTION \n\n		
 			   if j.extra.type == "Button" then 
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
 	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
@@ -2204,7 +2202,8 @@ function inputMsgWindow_savefile(input_text, cfn)
 			   elseif j.extra.type == "MenuButton" then 
 			   	for k,l in pairs (j.items) do 
 			   	     if l["type"] == "item" then 
-	                   			new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+	                   			--new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+	                   			new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for the menuButton Item, "..l["string"].."\n"
 			   	     end 
 			   	end 
 			   end 

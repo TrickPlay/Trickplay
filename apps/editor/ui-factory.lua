@@ -1610,9 +1610,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		  		elseif j["type"] == "item" then 
 		     		input_txt = "   "..j["string"] 
 		     		item_type = "item"
-		  		elseif j["type"] == "seperator" then 
+		  		elseif j["type"] == "separator" then 
 		     		input_txt = "--------------"
-		     		item_type = "seperator"
+		     		item_type = "separator"
 		  		end 
 	      	else 
 		     	input_txt = j 
@@ -1810,7 +1810,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 	     	org_items = table_copy(v.items)
 		end 
 
-		local plus, item_plus, label_plus, seperator_plus
+		local plus, item_plus, label_plus, separator_plus
 		local item_string_t
 		group:clear()
 		group.name = "itemsList"
@@ -1842,9 +1842,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			plus.position = {PADDING_X, 5}
 			item_plus = plus:find_child("item_plus")
 			label_plus = plus:find_child("label_plus")
-			seperator_plus = plus:find_child("seperator_plus")
-			function seperator_plus:on_button_down(x,y)
-				table.insert(v.items, {type="seperator"})
+			separator_plus = plus:find_child("separator_plus")
+			function separator_plus:on_button_down(x,y)
+				table.insert(v.items, {type="separator"})
 				screen:remove(inspector)
 				input_mode = S_SELECT
 				current_inspector = nil
@@ -1901,9 +1901,9 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		  		elseif j["type"] == "item" then 
 		     		input_txt = "   "..j["string"] 
 		     		item_type = "item"
-		  		elseif j["type"] == "seperator" then 
+		  		elseif j["type"] == "separator" then 
 		     		input_txt = "--------------"
-		     		item_type = "seperator"
+		     		item_type = "separator"
 		  		end 
 	      	else 
 		     	input_txt = j 
@@ -3100,11 +3100,11 @@ item_plus = Group
 	}
 
 
-text_seperator = Text
+text_separator = Text
 	{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 26px",
-		text = "Seperator +",
+		text = "Separator +",
 		editable = false,
 		wants_enter = true,
 		wrap = false,
@@ -3114,14 +3114,14 @@ text_seperator = Text
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
-		name = "text_seperator",
+		name = "text_separator",
 		position = {7,0,0},
 		size = {180,30},
 		opacity = 255,
 	}
 
 
-rect_seperator = Rectangle
+rect_separator = Rectangle
 	{
 		color = {255,255,255,0},
 		border_color = l_col,
@@ -3131,24 +3131,24 @@ rect_seperator = Rectangle
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
-		name = "rect_seperator",
+		name = "rect_separator",
 		position = {0,0,0},
 		size = {180,35},
 		opacity = 255,
 	}
 
-seperator_plus = Group
+separator_plus = Group
 	{
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
-		name = "seperator_plus",
+		name = "separator_plus",
 		position = {249,0,0},
 		size = {187,35},
 		opacity = 255,
-		children = {text_seperator,rect_seperator},
+		children = {text_separator,rect_separator},
 		reactive = true,
 	}
 
@@ -3164,7 +3164,7 @@ items_plus = Group
 		position = {335,534,0},
 		size = {436,46},
 		opacity = 255,
-		children = {label_plus,item_plus,seperator_plus},
+		children = {label_plus,item_plus,separator_plus},
 	}
 
 return items_plus
