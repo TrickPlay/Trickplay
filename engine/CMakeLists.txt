@@ -508,6 +508,30 @@ list( APPEND
 )
 
 #------------------------------------------------------------------------------
+# OSX Cursor glue stuff
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+list( APPEND
+
+    ENGINE_SOURCE_FILES
+    
+    ${ENGINE_SRC}/source/osx/osx-cursor-glue.m
+)
+
+FIND_LIBRARY (APPKIT_LIBRARY AppKit) 
+MARK_AS_ADVANCED (APPKIT_LIBRARY) 
+
+list( APPEND
+
+    ENGINE_LIBRARIES
+    
+    ${APPKIT_LIBRARY}
+    objc
+)
+
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+#------------------------------------------------------------------------------
 
 add_library(
     
