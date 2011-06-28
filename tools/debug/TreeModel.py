@@ -58,7 +58,7 @@ class NamedNode(TreeNode):
         return [NamedNode(elem, self, index)
             for index, elem in enumerate(self.ref.subelements)]
 
-class NamesModel(TreeModel):
+class NamedModel(TreeModel):
     def __init__(self, rootElements):
         self.rootElements = rootElements
         TreeModel.__init__(self)
