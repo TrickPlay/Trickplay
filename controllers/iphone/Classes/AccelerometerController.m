@@ -19,9 +19,9 @@
         accelerationY = 0;
         accelerationZ = 0;
         accelMode = 0;      //Don't send accelerometer events
+        myAcceleration[0] = 0;
         myAcceleration[1] = 0;
         myAcceleration[2] = 0;
-        myAcceleration[3] = 0;
         accelFreq = ACCEL_FREQ_LOW;
     
         [[UIAccelerometer sharedAccelerometer] setUpdateInterval:(1.0/accelFreq)];

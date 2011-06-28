@@ -349,8 +349,6 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
 
-	${BINDINGS_SRC}/audiosampler.lb
-
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
     ${BINDINGS_SRC}/clutter_screen.lb
@@ -376,6 +374,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/bitmap.lb
     ${BINDINGS_SRC}/canvas.lb
     ${BINDINGS_SRC}/http.lb
+    ${BINDINGS_SRC}/keyboard.lb
 )
 
 #------------------------------------------------------------------------------
@@ -507,6 +506,7 @@ list( APPEND
     ${ENGINE_SRC}/source/http_server.cpp
     ${ENGINE_SRC}/source/http_trickplay_api_support.cpp
     ${ENGINE_SRC}/source/log.cpp
+    ${ENGINE_SRC}/source/keyboard.cpp
 )
 
 #------------------------------------------------------------------------------

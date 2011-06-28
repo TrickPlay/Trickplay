@@ -55,7 +55,26 @@ public:
 
 		if ( SystemDatabase * db = context->get_db() )
 		{
-			SystemDatabase::AppInfo::List apps = db->get_apps_for_current_profile();
+
+	        StringMap params( request.get_parameters() );
+
+	        String sort_param = params[ "sort" ];
+
+	        SystemDatabase::AppSort sort = SystemDatabase::BY_NAME;
+
+	        if ( sort_param == "date" )
+	        {
+	            sort = SystemDatabase::BY_DATE_USED;
+	        }
+	        else if ( sort_param == "count" )
+	        {
+	            sort = SystemDatabase::BY_TIMES_USED;
+	        }
+
+	        bool reverse = params.find( "reverse" ) != params.end();
+
+
+		    SystemDatabase::AppInfo::List apps = db->get_apps_for_current_profile( sort , reverse );
 
 			{
 	            using namespace JSON;

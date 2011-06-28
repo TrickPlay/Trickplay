@@ -121,6 +121,17 @@ if (UNIX AND NOT APPLE)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz DESTINATION share/doc/trickplay-sdk)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz DESTINATION share/doc/trickplay-sdk RENAME changelog.Debian.gz)
 
+        # Resources
+	
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/resources DESTINATION share/trickplay/ )
+	
+	# Menu entry
+	
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.desktop DESTINATION share/applications/)
+	
+	# Icons
+	
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.png DESTINATION share/icons/hicolor/64x64/apps/)
 
         include(CPack)
 

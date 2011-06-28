@@ -7,6 +7,7 @@
 //
 
 #import "GestureViewController.h"
+#import "TrickplayGroup.h"
 
 @implementation GestureViewController
 
@@ -36,18 +37,36 @@
     http_port = nil;
 }
 
+- (void)timerFireMethod:(NSTimer *)timer {
+    //fprintf(stderr, "here\n");
+    [socketManager sendData:"\n" numberOfBytes:1];
+}
+
+- (void)createTimer {
+    socketTimer = [NSTimer timerWithTimeInterval:(NSTimeInterval).1 target:self selector:@selector(timerFireMethod:) userInfo:nil repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
+    [socketTimer retain];
+}
+
 - (BOOL)startService {
     // Tell socket manager to create a socket and connect to the service selected
     socketManager = [[SocketManager alloc] initSocketStream:hostName
                                                        port:port
-                                                   delegate:self];
+                                                   delegate:self
+                                                   protocol:APP_PROTOCOL];
     
-    if (!socketManager) {
+    if (![socketManager isFunctional]) {
         // If null then error connecting, back up to selecting services view
         [self.navigationController popToRootViewControllerAnimated:YES];
         NSLog(@"Could Not Establish Connection");
         return NO;
     }
+    
+    socketTimer = nil;
+    
+    //arbitrarySocket = [[SocketManager alloc] initSocketStream:<#(NSString *)#> port:<#(NSInteger)#> delegate:<#(id<SocketManagerDelegate>)#> protocol:<#(CommandProtocol)#>
+    
+    viewDidAppear = NO;
     
     // Made a connection, let the service know!
 	// Get the actual width and height of the available area
@@ -55,23 +74,43 @@
 	backgroundHeight = mainframe.size.height;
 	backgroundHeight = backgroundHeight - 45;  //subtract the height of navbar
 	backgroundWidth = mainframe.size.width;
+    // Figure out if the device can use pcitures
     NSString *hasPictures = @"";
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
         hasPictures = @"\tPS";
     }
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t3.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
-	
+    // Tell the service what this device is capable of
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.0\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
+	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+    
+    // Manages resources created with declare_resource
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
     
     camera = nil;
 	
+    // For audio playback
     audioController = [[AudioController alloc] initWithResourceManager:resourceManager socketManager:socketManager];
+    // Controls touches
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
+    // Controls Acceleration
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
-    [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
-    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
     
-    //[loadingIndicator stopAnimating];
+    // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
+    // from Trickplay
+    advancedView = [[TrickplayGroup alloc] initWithID:@"0" args:nil objectManager:nil];
+    advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
+    advancedView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height);
+    [self.view addSubview:advancedView];
+    
+    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
+    advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
+    
+    // This is where the elements from UG (add_ui_image call) go
+    CGFloat
+    width = self.view.frame.size.width,
+    height = self.view.frame.size.height;
+    CGRect frame = CGRectMake(0.0, 0.0, width, height);
+    foregroundView = [[UIImageView alloc] initWithFrame:frame];
     
     return YES;
 }
@@ -83,19 +122,28 @@
     }
     http_port = [my_http_port retain];
     [socketManager setPort:[http_port integerValue]];
+    [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
 }
 
 - (BOOL)hasConnection {
-    return socketManager != nil;
+    return socketManager != nil && [socketManager isFunctional];
+}
+
+- (void)handleDroppedConnection {
+    [audioController destroyAudioStreamer];
+    [socketManager release];
+    socketManager = nil;
 }
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in GestureView");
-    [socketManager release];
-    socketManager = nil;
+    [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
     if (self.navigationController.visibleViewController == self) {
-        [self.navigationController.view.layer removeAllAnimations];
+        if (!viewDidAppear) {
+            return;
+        }
+        
         [self.navigationController popToRootViewControllerAnimated:YES];
     } else {
         [socketDelegate socketErrorOccurred];
@@ -104,11 +152,13 @@
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in GestureView");
-    [socketManager release];
-    socketManager = nil;
+    [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
     if (self.navigationController.visibleViewController == self) {
-        [self.navigationController.view.layer removeAllAnimations];
+        if (!viewDidAppear) {
+            return;
+        }
+        
         [self.navigationController popToRootViewControllerAnimated:YES];
     } else {
         [socketDelegate streamEndEncountered];
@@ -144,17 +194,32 @@
 - (void)do_WM:(NSArray *)args {
     self.version = [args objectAtIndex:0];
     [self setHTTPPort:(NSString *)[args objectAtIndex:1]];
+    // if controller ID then open a new socket for advanced UI
+    if ([args count] > 2 && [args objectAtIndex:2]) {
+        if (![advancedUIDelegate startServiceWithID:(NSString *)[args objectAtIndex:2]]) {
+            [advancedUIDelegate release];
+            advancedUIDelegate = nil;
+        }
+    }
 }
 
 //--Audio junk
 
 - (void)do_SS:(NSArray *)args {
     NSMutableDictionary *audioInfo = [resourceManager getResourceInfo:[args objectAtIndex:0]];
+    NSLog(@"Playing audio %@", audioInfo);
     // Add the amount of times to loop this sound file to the info
     NSString *loopValue = [args objectAtIndex:1];
     [audioInfo setObject:loopValue forKey:@"loop"];
     
     [audioController playSoundFile:[audioInfo objectForKey:@"name"] filename:[audioInfo objectForKey:@"link"]];
+}
+
+- (void)do_PS:(NSArray *)args {
+    [audioController destroyAudioStreamer];
+    NSString *sentData = [NSString stringWithFormat:@"UI\tCA"];
+    [socketManager sendData:[sentData UTF8String] 
+              numberOfBytes:[sentData length]];
 }
 
 //--Multiple Choice junk
@@ -164,12 +229,15 @@
     //multiple choice alertview
     //<id>,<text> pairs
     unsigned theindex = 1;
+    
     if (styleAlert != nil)
     {
         [styleAlert release];
         styleAlert = nil;
-        styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
     }
+    
+    styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:nil];
+    
     styleAlert.title = windowtitle;
     [multipleChoiceArray removeAllObjects];
     while (theindex < [args count]) {
@@ -188,19 +256,28 @@
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	//AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    NSLog(@"Dismiss the alertview");
-	if (buttonIndex < 5)
-	{
-		NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
-		[socketManager sendData:[sentData UTF8String]
+	if (actionSheet == styleAlert) {
+        NSLog(@"Dismiss the alertview");
+        if (buttonIndex < 5) {
+            NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
+            [socketManager sendData:[sentData UTF8String]
                   numberOfBytes:[sentData length]];
-	}
-    
-	
+        }
+    } else if (actionSheet == cameraActionSheet) {
+        if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE]] == NSOrderedSame) {
+            
+            [camera startCamera];
+            
+        } else if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE]] == NSOrderedSame) {
+            
+            [camera openLibrary];
+        } else if ([cameraActionSheet cancelButtonIndex] == buttonIndex) {
+            [self canceledPickingImage];
+        }
+    }
 }
 
-//--Text input stuff
+//-------------------Text input stuff---------------------
 
 /**
  * Brings up the text field, sets the text field as the focus, and the
@@ -228,14 +305,11 @@
  */
 - (IBAction)hideTextBox:(id)sender {
     NSLog(@"textbox hidden");
-    NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", theTextField.text];
+    NSString *sentData = [NSString stringWithFormat:@"UI\tET\t%@\n", theTextField.text];
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
-// UITextFieldDelegate methods
-- (void)textFieldDidBeginEditing:(UITextField *)textField {
-    
-}
+//--UITextFieldDelegate methods
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [theTextField resignFirstResponder];
@@ -244,7 +318,7 @@
 }
 
 
-//--Image related
+//----------------------Graphics related----------------------
 
 - (void)do_DR:(NSArray *)args {
     NSLog(@"Declaring Resource");
@@ -272,13 +346,15 @@
 
 /**
  * Updating the background
+ *
+ * WARNING: CANNOT USE WITH ADVANCED UI
  */
 - (void)do_UB:(NSArray *)args {
     NSLog(@"Updating Background");
-    [args retain];
     
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
+    /*
     if ([resourceManager getResourceInfo:key]) {
         NSData *imageData = [resourceManager fetchResource:key];
         if (imageData) {
@@ -286,12 +362,28 @@
             [loadingIndicator stopAnimating];
             NSLog(@"Creating background view");
             backgroundView.image = tempImage;
-            //**for testing
+            //for testing
             //backgroundView.image = [UIImage imageNamed:@"background.png"];
         }
     }
+    */
     
-    [args release];
+    if ([resourceManager getResourceInfo:key]) {
+        CGFloat
+        width = self.view.frame.size.width,
+        height = self.view.frame.size.height;
+        CGRect frame = CGRectMake(0.0, 0.0, width, height);
+        UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
+        
+        for (UIView *subview in [backgroundView subviews]) {
+            if (subview != foregroundView) {
+                [subview removeFromSuperview];
+            }
+        }
+        
+        [backgroundView addSubview:newImageView];
+        [backgroundView sendSubviewToBack:newImageView];
+    }
 }
 
 /**
@@ -299,7 +391,6 @@
  */
 - (void)do_UG:(NSArray *)args {
     NSLog(@"Updating Graphics");
-    [args retain];
     
     NSString *key = [args objectAtIndex:0];
     // If resource has been declared
@@ -310,58 +401,22 @@
         width = [[args objectAtIndex:3] floatValue],
         height = [[args	objectAtIndex:4] floatValue];
         CGRect frame = CGRectMake(x, y, width, height);
-        UIImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
-        newImageView.contentMode = UIViewContentModeScaleAspectFit;
-        newImageView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+        UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
-        // NOTE: Assumes backgroundView is only replaced in clearUI(),
-        // hence, replace backgroundView.image, do not replace the entire View
-        [backgroundView addSubview:newImageView];
-        
-        /*
-        UIGraphicsBeginImageContext(CGSizeMake(backgroundView.bounds.size.width, backgroundView.bounds.size.height));		
-        // get context
-        //
-        CGContextRef context = UIGraphicsGetCurrentContext();		
-        
-        // push context to make it current 
-        // (need to do this manually because we are not drawing in a UIView)
-        //
-        UIGraphicsPushContext(context);								
-        
-        // drawing code comes here- look at CGContext reference
-        // for available operations
-        //
-        // this example draws the inputImage into the context
-        //
-        [backgroundView.image drawInRect:CGRectMake(0,0,backgroundView.bounds.size.width, backgroundView.bounds.size.height)];
-        [tempImage drawInRect:CGRectMake(x, y, width, height)];
-        
-        // pop context 
-        //
-        UIGraphicsPopContext();								
-        
-        // get a UIImage from the image context- enjoy!!!
-        //
-        UIImage *outputImage = UIGraphicsGetImageFromCurrentImageContext();
-        
-        // clean up drawing environment
-        //
-        UIGraphicsEndImageContext();
-        
-        backgroundView.image = outputImage;
-        //*/
+        [foregroundView addSubview:newImageView];
     }
-    
-    [args release];
 }
 
 
-//--Resetting stuff
+//--------------------Resetting stuff-------------------
 
 // TODO: Reset all modules to the initial state
 - (void)do_RT:(NSArray *)args {
     [accelDelegate pauseAccelerometer];
+    [touchDelegate reset];
+    [advancedUIDelegate clean];
+    [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     [self clearUI];
 }
 
@@ -414,32 +469,104 @@
 //-------------------- Camera stuff ----------------------------
 
 - (void)do_PI:(NSArray *)args {
-    if (!camera) {
-        camera = [[CameraViewController alloc] initWithNibName:@"CameraViewController" bundle:nil];
+    NSLog(@"Submit Picture, args:%@", args);
+    if ([self.navigationController visibleViewController] != self) {
+        [self canceledPickingImage];
+        return;
     }
+    // Start the camera in the background
+    if (camera) {
+        [camera release];
+        camera = nil;
+    }
+    
+    UIView *mask = nil;
+    CGFloat width = 0.0, height = 0.0;
+    BOOL editable = NO;
+    NSString *cameraLabel = nil;
+    NSString *cameraCancelLabel = nil;
+    if ([args count] >= 3) {
+        width = [args objectAtIndex:1] ? [[args objectAtIndex:1] floatValue] : 0.0;
+        height = [args objectAtIndex:2] ? [[args objectAtIndex:2] floatValue] : 0.0;
+        editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
+        
+        if ([args objectAtIndex:4] && ([args objectAtIndex:4] != @"")) {
+            mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, 0.0, 0.0)];
+        }
+        
+        if ([args objectAtIndex:5] && ([args objectAtIndex:5] != @"")) {
+            cameraLabel = [args objectAtIndex:5];
+        } else {
+            cameraLabel = @"Send Image to TV";
+        }
+        if ([args objectAtIndex:6] && ([args objectAtIndex:6] != @"")) {
+            cameraCancelLabel = [args objectAtIndex:6];
+        } else {
+            cameraCancelLabel = @"Cancel";
+        }
+    }
+    camera = [[CameraViewController alloc] initWithView:self.view targetWidth:width targetHeight:height editable:editable mask:mask];
+    
     [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
-    [self.navigationController pushViewController:camera animated:YES];
+    camera.titleLabel = cameraLabel;
+    camera.cancelLabel = cameraCancelLabel;
+    camera.navController = self.navigationController;
+    
+    // Use camera or photo library
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary] == NO) {
+        [camera startCamera];
+    } else if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] == NO) {
+        [camera openLibrary];
+    } else {
+        // Give the user the option to choose Camera or Photo Library
+        if (cameraActionSheet) {
+            [cameraActionSheet release];
+            cameraActionSheet = nil;
+        }
+        cameraActionSheet = [[UIActionSheet alloc] initWithTitle:camera.titleLabel delegate:self cancelButtonTitle:camera.cancelLabel destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
+    
+        cameraActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+        [cameraActionSheet showInView:self.view];
+    }
 }
 
-- (void)finishedPickingImage {
+- (void)finishedPickingImage:(UIImage *)image {
     NSLog(@"Finished Picking Image");
+    [self.view addSubview:[[[UIImageView alloc] initWithImage:image] autorelease]];
 }
 
 - (void)finishedSendingImage {
     NSLog(@"Finished Sending Image");
+    [camera.view removeFromSuperview];
+    [camera release];
+    camera = nil;
 }
 
 - (void)canceledPickingImage {
     NSLog(@"Canceled Picking Image");
+    NSString *sentData = [NSString stringWithFormat:@"UI\tCI\n"];
+    [socketManager sendData:[sentData UTF8String] 
+              numberOfBytes:[sentData length]];
+    if (camera) {
+        if (camera.view.superview) {
+            [camera.view removeFromSuperview];
+        }
+        [camera release];
+        camera = nil;
+    }
 }
 
-//-------------------- Super Advanced UI stuff -----------------
+//-------------------- Super Advanced UI stuff (depricated) -----------------
 
 - (void)do_UX:(NSArray *)args {
+    NSArray *JSON_Array = [[args objectAtIndex:1] yajl_JSON];
+    
     if ([(NSString *)[args objectAtIndex:0] compare:@"CREATE"] == NSOrderedSame) {
-        [advancedUIDelegate createObject:[args objectAtIndex:1]];
+        [advancedUIDelegate createObjects:JSON_Array];
     } else if ([(NSString *)[args objectAtIndex:0] compare:@"DESTROY"] == NSOrderedSame) {
-        [advancedUIDelegate destroyObject:[args objectAtIndex:1]];
+        [advancedUIDelegate destroyObjects:JSON_Array];
+    } else if ([(NSString *)[args objectAtIndex:0] compare:@"SET"] == NSOrderedSame) {
+        [advancedUIDelegate setValuesForObjects:JSON_Array];
     }
 }
 
@@ -448,6 +575,7 @@
 
 - (void)clean {
     [self clearUI];
+    [advancedUIDelegate clean];
     [resourceManager clean];
 }
 
@@ -455,6 +583,11 @@
     NSLog(@"Clearing the UI");
     [theTextField resignFirstResponder];
 	theTextField.hidden = YES;
+    
+    if (camera) {
+        [camera release];
+        camera = nil;
+    }
     
     /*
     backgroundView.image = [UIImage imageNamed:@"background.png"];
@@ -472,10 +605,18 @@
     
     UIImageView *newImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background.png"]];
     newImageView.frame = CGRectMake(x, y, width, height);
+    [foregroundView removeFromSuperview];
+    for (UIView *subview in [foregroundView subviews]) {
+        [subview removeFromSuperview];
+    }
     [backgroundView removeFromSuperview];
     self.backgroundView = newImageView;
     [self.view addSubview:backgroundView];
+    [self.view sendSubviewToBack:backgroundView];
+    
     [newImageView release];
+
+    [backgroundView addSubview:foregroundView];
     //*/
 }
 
@@ -503,20 +644,51 @@
     
     //backgroundView.image = [UIImage imageNamed:@"background.png"];
     
-    styleAlert = [[UIActionSheet alloc] initWithTitle:@"TrickPlay Multiple Choice"
-                                             delegate:self cancelButtonTitle:nil
+    if (!styleAlert) {
+        styleAlert = [[UIActionSheet alloc]
+                      initWithTitle:@"TrickPlay Multiple Choice"
+                      delegate:self cancelButtonTitle:nil
                                destructiveButtonTitle:nil
                                     otherButtonTitles:nil];
+    }
     
-    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    if (!multipleChoiceArray) {
+        multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    }
     
-    UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc]
-								  initWithTitle:NSLocalizedString(@"Exit", @"")
-								  style:UIBarButtonItemStyleBordered
+    
+    
+    UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc] 
+                                  initWithTitle:NSLocalizedString(@"Exit", @"")
+                                  style:UIBarButtonItemStyleBordered
 								  target:self action:@selector(exitTrickplayApp:)] autorelease]; 
 	self.navigationItem.rightBarButtonItem = exitItem;
     
+    [loadingIndicator stopAnimating];
+    
+    /*
+    CATransform3D transform = CATransform3DIdentity;
+    transform.m34 = 1.0/-2000;
+    self.view.layer.transform = transform;
+    */
     //[self startService];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    if (!socketManager) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+    
+    viewDidAppear = YES;
+    [self performSelectorOnMainThread:@selector(createTimer) withObject:nil waitUntilDone:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    if (socketTimer) {
+        [socketTimer invalidate];
+        [socketTimer release];
+        socketTimer = nil;
+    }
 }
 //*/
 
@@ -537,8 +709,19 @@
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+    NSLog(@"GestureViewController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    if (styleAlert) {
+        [styleAlert release];
+        styleAlert = nil;
+    }
+    
+    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    if (multipleChoiceArray) {
+        [multipleChoiceArray release];
+        multipleChoiceArray = nil;
+    }
 }
 
 
@@ -574,12 +757,27 @@
     if (styleAlert) {
         [styleAlert release];
     }
+    if (cameraActionSheet) {
+        [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
+        [cameraActionSheet release];
+    }
     if (camera) {
         [camera release];
     }
-    [multipleChoiceArray release];
+    if (multipleChoiceArray) {
+        [multipleChoiceArray release];
+    }
+    if (advancedView) {
+        [advancedView release];
+    }
+    if (socketTimer) {
+        [socketTimer invalidate];
+        [socketTimer release];
+        socketTimer = nil;
+    }
     [loadingIndicator release];
     [theTextField release];
+    [foregroundView release];
     [backgroundView release];
     
     [super dealloc];
