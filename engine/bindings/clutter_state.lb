@@ -396,16 +396,23 @@ class AnimationState [[ClutterState*]]
     	[[
         	ClutterUtil::wrap_timeline(L , clutter_state_get_timeline(self));
     	]];
+    	
+    /*
+        Property: state
+        
+        The name of the current state. If you set it to a new state, the transition
+        to it will begin.
+    */
 
 	string state
     	[[ state = clutter_state_get_state(self);]]
     	[[ clutter_state_set_state (self, state); ]];
 
 	/*
-		Function: wrap 
+		Function: warp 
 		Change to the specified target state immediately with no animation.
 		Arguments:
-			target_state_name - he state to transition to
+			target_state_name - the state to transition to
 	*/	
 
 	warp(string target_state_name)
