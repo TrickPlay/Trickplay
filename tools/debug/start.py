@@ -13,23 +13,60 @@ class StartQT4(QtGui.QMainWindow):
         self.ui.setupUi(self)
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
         
-        node = NamedElement("Screen",  [])
-        self.model = NamedModel([node])
+        # Create data model
+        self.model = QtGui.QStandardItemModel()
+        self.model.setColumnCount(2)
+        root = self.model.invisibleRootItem()
         
-        #i = self.model.index(0, 0, QModelIndex())
-        #print(self.model.parent(index))
-        #print(self.model.data(i, Qt.DisplayRole))
+        data = getTrickplayData()
+        createNode(root, data, True)
+            
         self.ui.Inspector.setModel(self.model)
-        
-        i = self.model.index(0,0,QModelIndex())
-        row = self.model.rowCount(QModelIndex())
-        
-        #self.model._createNode(2)
         
     def refresh(self):
         getTrickplayData()
         #sys.exit("Successfully Exited")
         
+def createNode(parent, data, isStage):
+    
+    # If the node is the Stage, instead set it to Screen
+    nodeData = None;
+    if isStage:
+        nodeData = data["children"][0]
+    else:
+        nodeData = data
+        
+    node = QtGui.QStandardItem(nodeData["type"] + ': ' + nodeData["name"])
+    parent.appendRow([node])
+    createAttrList(node, nodeData)
+        
+def createAttrList(parent, data):
+    print(data)
+    for attr in data:
+        print(attr)
+        attrTitle = attr
+        attrValue = data[attr]
+        
+        title = QtGui.QStandardItem(attr)
+        
+        # Value is the list of children
+        if isinstance(attrValue, list):
+            parent.appendRow(title)
+            for child in attrValue:
+                createNode(title, child, False)
+        
+        # Value is a string
+        elif not isinstance(attrValue, dict):
+            value = QtGui.QStandardItem(str(data[attr]))
+            parent.appendRow([title, value])    
+            
+        # Value is a dictionary, like scale
+        else:
+            parent.appendRow(title)
+            createAttrList(title, attrValue)
+    
+    
+
 def getTrickplayData():
     r = urllib2.Request("http://localhost:8888/debug/ui")
     f = urllib2.urlopen(r)
