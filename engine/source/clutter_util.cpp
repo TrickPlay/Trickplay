@@ -5,9 +5,6 @@
 #include "clutter_util.h"
 #include "lb.h"
 
-#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
-
-
 //.............................................................................
 
 ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
