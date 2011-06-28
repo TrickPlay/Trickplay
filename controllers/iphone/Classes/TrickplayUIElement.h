@@ -24,12 +24,18 @@
      NSNumber *z_rotation;
     */
     
+    CGFloat x_position;
+    CGFloat y_position;
+    CGFloat z_position;
     CGFloat x_scale;
     CGFloat y_scale;
     CGFloat z_scale;
     CGFloat x_rotation;
     CGFloat y_rotation;
     CGFloat z_rotation;
+    CGFloat x_rot_point;
+    CGFloat y_rot_point;
+    CGFloat z_rot_point;
     
     NSArray *clip;
     

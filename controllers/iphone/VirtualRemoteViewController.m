@@ -88,6 +88,8 @@
 }
 
 - (void)dealloc {
+    NSLog(@"VirtualRemote dealloc");
+    
     delegate = nil;
     [super dealloc];
 }
