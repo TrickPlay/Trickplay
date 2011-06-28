@@ -9,18 +9,24 @@
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
 #import "GestureViewController.h"
-#import "TrickplayImage.h"
-#import "TrickplayRectangle.h"
 
-@interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate> {
+@class TrickplayUIElement;
+@class TrickplayGroup;
+
+@interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate, SocketManagerDelegate, CommandInterpreterAdvancedUIDelegate> {
     NSMutableDictionary *rectangles;
     NSMutableDictionary *images;
     NSMutableDictionary *textFields;
     NSMutableDictionary *groups;
+    NSUInteger currentID;
     
     ResourceManager *resourceManager;
+    SocketManager *socketManager;
     
-    UIView *view;
+    NSString *hostName;
+    NSInteger port;
+    
+    TrickplayGroup *view;
 }
 
 @property (nonatomic, retain) NSMutableDictionary *rectangles;
@@ -30,9 +36,19 @@
 
 @property (nonatomic, retain) ResourceManager *resourceManager;
 
-- (id)initWithView:(UIView *)aView resourceManager:(ResourceManager *)aResourceManager;
+- (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager;
 
-- (void)createObject:(NSString *)JSON_String;
-- (void)destroyObject:(NSString *)JSON_String;
+- (void)setupServiceWithPort:(NSInteger)p
+                    hostname:(NSString *)h;
+- (BOOL)startServiceWithID:(NSString *)ID;
+
+- (void)clean;
+
+- (void)createObjects:(NSArray *)JSON_Array;
+- (void)destroyObjects:(NSArray *)JSON_Array;
+- (void)setValuesForObjects:(NSArray *)JSON_Array;
+
+// New protocol
+- (TrickplayUIElement *)findObjectForID:(NSString *)ID;
 
 @end

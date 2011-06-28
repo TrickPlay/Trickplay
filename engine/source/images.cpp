@@ -308,6 +308,79 @@ Image::~Image()
     Images::destroy_image( image );
 }
 
+
+//-----------------------------------------------------------------------------
+
+Image * Image::make( cairo_surface_t * surface )
+{
+    g_assert( surface );
+
+    if ( cairo_image_surface_get_format( surface ) != CAIRO_FORMAT_ARGB32 )
+    {
+        return 0;
+    }
+
+    guint8 * source = ( guint8 * ) cairo_image_surface_get_data( surface );
+
+    if ( ! source )
+    {
+        return 0;
+    }
+
+    TPImage result;
+
+    memset( & result , 0 , sizeof( result ) );
+
+    result.depth = 4;
+    result.width = cairo_image_surface_get_width( surface );
+    result.height = cairo_image_surface_get_height( surface );
+    result.pitch = result.width * 4;
+    result.free_pixels = 0;
+    result.pixels = malloc( result.height * result.pitch );
+
+    if ( ! result.pixels )
+    {
+        return 0;
+    }
+
+    guint8 * destination = ( guint8 * ) result.pixels;
+
+    int source_stride = cairo_image_surface_get_stride( surface );
+
+    for ( unsigned int r = 0; r < result.height; ++r )
+    {
+        guint8 * source_pixel = source;
+        guint8 * dest_pixel = destination;
+
+        for ( unsigned int c = 0; c < result.width; ++c , source_pixel += 4 )
+        {
+#if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
+
+            float alpha = source_pixel[3];
+            alpha = alpha == 0 ? 1 : 255 / alpha;
+
+            *(dest_pixel++) = source_pixel[2] * alpha;
+            *(dest_pixel++) = source_pixel[1] * alpha;
+            *(dest_pixel++) = source_pixel[0] * alpha;
+            *(dest_pixel++) = source_pixel[3];
+#else
+            guint8 alpha = source_pixel[0];
+            alpha = alpha == 0 ? 1 : 255 / alpha;
+
+            *(dest_pixel++) = source_pixel[1] * alpha;
+            *(dest_pixel++) = source_pixel[2] * alpha;
+            *(dest_pixel++) = source_pixel[3] * alpha;
+            *(dest_pixel++) = source_pixel[0];
+#endif
+        }
+
+        destination += result.pitch;
+        source += source_stride;
+    }
+
+    return Image::make( result );
+}
+
 //-----------------------------------------------------------------------------
 
 Image * Image::convert_to_cairo_argb32() const
@@ -452,6 +525,141 @@ bool Image::write_to_png( const gchar * filename ) const
     }
 
     return result;
+}
+
+//-----------------------------------------------------------------------------
+
+bool Image::is_packed() const
+{
+    return image->pitch == image->width * image->depth;
+}
+
+//-----------------------------------------------------------------------------
+
+Image * Image::make_packed_copy() const
+{
+    if ( ! image )
+    {
+        return 0;
+    }
+
+    TPImage result = * image;
+
+    result.pitch = result.width * result.depth;
+    result.pixels = malloc( result.height * result.pitch );
+    result.free_pixels = 0;
+
+    if ( ! result.pixels )
+    {
+        return 0;
+    }
+
+    const guint8 * source_row = ( const guint8 * ) image->pixels;
+
+    guint8 * dest_row = ( guint8 * ) result.pixels;
+
+    for ( unsigned int r = 0; r < result.height; ++r )
+    {
+        memcpy( dest_row , source_row , result.pitch );
+
+        source_row += image->pitch;
+        dest_row += result.pitch;
+    }
+
+    return Image::make( result );
+}
+
+//-----------------------------------------------------------------------------
+
+Image * Image::make_copy() const
+{
+    if ( ! image )
+    {
+        return 0;
+    }
+
+    TPImage result = * image;
+
+    result.pixels = malloc( result.height * result.pitch );
+    result.free_pixels = 0;
+
+    if ( ! result.pixels )
+    {
+        return 0;
+    }
+
+    memcpy( result.pixels , image->pixels , result.height * result.pitch );
+
+    return Image::make( result );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::flip_y()
+{
+    if ( image->height == 0 )
+    {
+        return;
+    }
+    unsigned int pitch = image->pitch;
+
+    guint8 * top_row = ( guint8 * ) image->pixels;
+    guint8 * bot_row = top_row + ( pitch * ( image->height - 1 ) );
+
+    guint8 * temp_row = ( guint8 * ) malloc( pitch );
+
+    if ( ! temp_row )
+    {
+        return;
+    }
+
+    while( bot_row > top_row )
+    {
+        memcpy( temp_row , top_row , pitch );
+        memcpy( top_row , bot_row , pitch );
+        memcpy( bot_row , temp_row , pitch );
+
+        top_row += pitch;
+        bot_row -= pitch;
+    }
+
+    free( temp_row );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::premultiply_alpha()
+{
+    if ( image->depth != 4 )
+    {
+        return;
+    }
+
+    guint8 * row = ( guint8 * ) image->pixels;
+
+    for ( unsigned int r = 0; r < image->height; ++r )
+    {
+        guint8 * p = row;
+
+        for ( unsigned int c = 0; c < image->width; ++c )
+        {
+            float a = p[3] / 255.0;
+
+            *(p++) *= a;
+            *(p++) *= a;
+            *(p++) *= a;
+            ++p;
+        }
+
+        row += image->pitch;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::destroy( void * image )
+{
+    delete ( Image * ) image;
 }
 
 //-----------------------------------------------------------------------------

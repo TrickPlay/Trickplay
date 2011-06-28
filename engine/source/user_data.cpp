@@ -674,17 +674,32 @@ int UserData::invoke_global_callback( lua_State * L , const char * global , cons
 
     lua_getglobal( L , global );
 
-    int top = lua_gettop( L );
-
-    if ( ! lua_isnil( L , top ) )
+    if ( lua_isnil( L , -1 ) )
     {
-        if ( UserData * ud = UserData::get( L , top ) )
-        {
-            result = ud->invoke_callback( name , nargs , nresults );
-        }
+        lua_pop( L , nargs + 1 );
+        return 0;
     }
 
-    lua_remove( L , top );
+    UserData * ud = UserData::get( L , lua_gettop( L ) );
+
+    if ( ! ud )
+    {
+        lua_pop( L , nargs + 1 );
+        return 0;
+    }
+
+    lua_insert( L , - ( nargs + 1 ) );
+
+    result = ud->invoke_callback( name , nargs , nresults );
+
+    if ( result )
+    {
+        lua_remove( L , - ( nresults + 1 ) );
+    }
+    else
+    {
+        lua_pop( L , 1 );
+    }
 
     return result;
 }

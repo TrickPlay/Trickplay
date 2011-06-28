@@ -1,0 +1,51 @@
+
+Topic: Screen Transition
+
+We now have two screens, Language and Mode, but each screen is isolated; there is no way to switch from one to the other. To transition to a different screen, it is necessary to add code to the main.lua file that we looked at earlier in <The main.lua File>.
+
+During our previous examination of main.lua, it was explained that the SDK Visual Editor implements many of its supported UI elements, such as Button and ButtonPicker, in a library called lib/ui_elements.lua. Further, an internal variable called ui_element is created in main.lua and this ui_element object includes methods that perform useful tasks. We've already seen two of these methods: populate_to() which copies the screen's UI elements from a groups{} table to a layout{} table and screen_add() which adds the screen's UI elements to the TrickPlay Engine's global screen object.
+
+The ui_elements.lua library provides another useful method called transit_to() that happens to perform the exact operation we are interested in performing right now: transitioning from one screen to another.
+
+The transit_to() method takes two mandatory arguments and one optional argument. Its syntax is shown below.
+
+(code)
+transit_to( currentScreen, nextScreen, [effect] )
+(end)
+
+where
+
+currentScreen - is a Group object containing the UI elements for the current screen
+nextScreen - is a Group object containing the UI elements for the screen to transition to
+effect - is an optional visual effect to perform during the transition. At this time, only one type of effect is supported: the "fade" effect. If "fade" is specified as the third argument, a fade-out/fade-in effect will occur during the transition between screens.
+
+Using transit_to() we can transition between our Mode and Language screens. When the user clicks the Mode screen's Previous button, we wish to transition back to the Language screen. Using the information about event handlers that was described in the <Connect UI Elements to Code> section, we know that the button's pressed() event handler will fire when the user either clicks on the button or presses the <Enter> key when the input focus is set to the button.
+
+Load the Tutorial project's main.lua file into a text editor and locate the Mode screen's ButtonPrevious event handlers and, specifically, the pressed() event handler. Add a call to the ui_element object's transit_to() method to transition from the current Mode screen back to our Language screen. The modified event handler should look like this.
+
+(code)
+layout["mode"].ButtonPrevious.pressed = function() -- Handler for ButtonPrevious.pressed in this screen
+	-- Transition to Language screen
+	ui_element.transit_to( groups["mode"], groups["language"] )
+end
+(end)
+
+In the same main.lua file, locate the Continue button's event handlers for the Language screen. In the pressed() handler, add another call to transit_to(), but this time transition from the Language screen to the Mode screen. You can optionally add a third argument of "fade" if you wish to see this visual effect in action. The updated handler is shown below.
+
+(code)
+layout["language"].ButtonContinue.pressed = function() -- Handler for ButtonContinue.pressed in this screen
+   -- Transition to Mode screen
+   ui_element.transit_to( groups["language"], groups["mode"], "fade" )
+end
+(end)
+
+Save the modified main.lua file.
+
+Run the updated Tutorial application in the TrickPlay Engine by going to the ~/trickplay-editor/Tutorial directory and running the Engine from the command line as shown below.
+
+(code)
+~/trickplay-editor/Tutorial$ trickplay .
+(end)
+
+By clicking the appropriate screen buttons, you can transition back and forth between the Language and Mode screens.
+

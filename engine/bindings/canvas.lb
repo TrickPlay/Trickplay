@@ -155,6 +155,18 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Property: ok
+
+        Lets you know whether the Canvas is usable. This can change if you perform an invalid operation
+        on the canvas, like calling <restore> without calling <save>.
+    */
+
+    readonly bool ok
+        [[
+            ok = cairo_status( self ) == CAIRO_STATUS_SUCCESS;
+        ]];
+
+    /*
         Property: width
 
         The width of the Canvas.
@@ -231,6 +243,32 @@ class Canvas [[ cairo_t * ]]
             lua_rawseti( L , -2 , 1 );
             lua_pushnumber( L , y );
             lua_rawseti( L , -2 , 2 );
+        ]];
+
+    /*
+        Property: path_extents
+
+        A table of coordinates for a bounding box around the current path.
+    */
+
+    readonly table path_extents
+        [[
+            double x1;
+            double y1;
+            double x2;
+            double y2;
+
+            cairo_path_extents( self , & x1 , & y1 , & x2 , & y2 );
+
+            lua_newtable( L );
+            lua_pushnumber( L , x1 );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushnumber( L , y1 );
+            lua_rawseti( L , -2 , 2 );
+            lua_pushnumber( L , x2 );
+            lua_rawseti( L , -2 , 3 );
+            lua_pushnumber( L , y2 );
+            lua_rawseti( L , -2 , 4 );
         ]];
 
     /*
@@ -373,6 +411,53 @@ class Canvas [[ cairo_t * ]]
             else
             {
                 luaL_error( L , "Invalid filter '%s'" , filter );
+            }
+        ]];
+
+    /*
+        Property: extend
+
+        Get or set how patterns extend beyond their natural area.
+
+        Values:
+
+            NONE - Pixels outside the pattern's area are fully transparent.
+            REPEAT - The pattern is tiled by repeating.
+            REFLECT - The pattern is tiled by reflecting.
+            PAD - Pixels outside the pattern copy the nearest pixel.
+    */
+
+    string extend
+
+        [[
+            switch( cairo_pattern_get_extend( cairo_get_source( self  ) ) )
+            {
+              case CAIRO_EXTEND_REPEAT: extend = "REPEAT"; break;
+              case CAIRO_EXTEND_REFLECT: extend = "REFLECT"; break;
+              case CAIRO_EXTEND_PAD: extend = "PAD"; break;
+              default: extend = "NONE"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( extend , "NONE" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_NONE );
+            }
+            else if ( ! strcmp( extend , "REPEAT" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_REPEAT );
+            }
+            else if ( ! strcmp( extend , "REFLECT" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_REFLECT );
+            }
+            else if ( ! strcmp( extend , "PAD" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_PAD );
+            }
+            else
+            {
+              luaL_error( L , "Invalid extend '%s'" , extend );
             }
         ]];
 
@@ -581,7 +666,7 @@ class Canvas [[ cairo_t * ]]
         integers that define when dashes are ON and OFF.
     */
 
-    set_dash( double offset , table dashes )
+    bool set_dash( double offset , table dashes )
         [[
             std::vector< double > d;
 
@@ -597,7 +682,43 @@ class Canvas [[ cairo_t * ]]
                 lua_pop( L , 1 );
             }
 
-            cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            result = true;
+
+            size_t zeroes = 0;
+
+            for ( std::vector<double>::const_iterator it = d.begin(); it != d.end(); ++it )
+            {
+                if ( 0 == *it )
+                {
+                    ++zeroes;
+                }
+                else if ( *it < 0 )
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            if ( result && zeroes == d.size() )
+            {
+                result = false;
+            }
+
+            if ( result )
+            {
+                cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            }
+        ]];
+
+    /*
+        Function: clear_dash
+
+        Clears any dash pattern for lines.
+    */
+
+    clear_dash()
+        [[
+            cairo_set_dash( self , 0 , 0 , 0 );
         ]];
 
     /*
@@ -1017,6 +1138,114 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Function: text_element_path
+
+        This function lets you use a Text element as the source for a path.
+
+        Arguments:
+
+            text - A Text UI Element.
+    */
+
+    text_element_path( Text text )
+        [[
+            if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , text ) )
+            {
+                if ( CLUTTER_IS_TEXT( actor ) )
+                {
+                    if ( PangoLayout * layout = clutter_text_get_layout( CLUTTER_TEXT( actor ) ) )
+                    {
+                        layout = pango_layout_copy( layout );
+
+                        pango_cairo_update_layout( self , layout );
+
+                        pango_cairo_layout_path( self , layout );
+
+                        g_object_unref( G_OBJECT( layout ) );
+                    }
+                }
+            }
+        ]];
+
+    /*
+        Function: text_element_fill
+
+        This function lets you use a Text element as the source for a path. The path is filled
+        with the text element's color, unless you pass 'use_text_color' as false.
+
+        Arguments:
+
+            text - A Text UI Element.
+
+            use_text_color - If true, the color specified in the Text element will be used as the
+                             default color for the text. If false, the current source of the Canvas
+                             will be used to fill the text path.
+    */
+
+    text_element_fill( Text text , bool use_text_color = true )
+        [[
+          if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , text ) )
+          {
+              if ( CLUTTER_IS_TEXT( actor ) )
+              {
+                  if ( PangoLayout * layout = clutter_text_get_layout( CLUTTER_TEXT( actor ) ) )
+                  {
+                      layout = pango_layout_copy( layout );
+
+                      pango_cairo_update_layout( self , layout );
+
+                      if ( use_text_color )
+                      {
+                          cairo_save( self );
+
+                          ClutterColor color;
+
+                          clutter_text_get_color( CLUTTER_TEXT( actor ) , & color );
+
+                          cairo_set_source_rgba( self , color.red / 255.0 , color.green / 255.0 , color.blue / 255.0 , color.alpha / 255.0 );
+                      }
+
+                      pango_cairo_show_layout( self , layout );
+
+                      g_object_unref( G_OBJECT( layout ) );
+
+                      if ( use_text_color )
+                      {
+                          cairo_restore( self );
+                      }
+                  }
+              }
+          }
+        ]];
+
+    /*
+        Function: add_string_path
+
+        This function lets you use an SVG-like syntax to add segments to the current path.
+
+        M - Tells the path to move to the coordinates, expects 1 set of coordinates.
+        L - Adds a line to the path. Expects 1 set of coordinates.
+        C - Adds a curve to the path. Expects 3 sets of coordinates.
+        z - Closes the path. Expects no coordinates.
+
+        You can also use lower case for M, L and C; which implies the coordinates are
+        relative.
+
+    */
+
+    add_string_path( string path_text )
+        [[
+            ClutterPath * clutter_path = clutter_path_new();
+
+            clutter_path_add_string( clutter_path , path_text );
+
+            clutter_path_to_cairo_path( clutter_path , self );
+
+            g_object_unref( G_OBJECT( clutter_path ) );
+
+        ]];
+
+    /*
         Function: set_source_color
 
         Sets the source pattern to a solid color.
@@ -1136,30 +1365,93 @@ class Canvas [[ cairo_t * ]]
 
     Image Image( table props = 0 )
         [[
-            lua_getglobal( L , "Image" );
-
-            if ( props )
+            if ( cairo_status( self ) != CAIRO_STATUS_SUCCESS )
             {
-                lua_pushvalue( L , props );
+                lua_pushnil( L );
             }
+            else
+            {
+                lua_getglobal( L , "Image" );
 
-            lua_call( L , props ? 1 : 0 , 1 );
+                if ( props )
+                {
+                    lua_pushvalue( L , props );
+                }
 
-            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+                lua_call( L , props ? 1 : 0 , 1 );
 
-            cairo_surface_t * surface = cairo_get_target( self );
+                ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
 
-            CoglHandle cogl_texture = cogl_texture_new_from_data (
-                    cairo_image_surface_get_width( surface),
-                    cairo_image_surface_get_height( surface ),
-                    COGL_TEXTURE_NONE,
-                    CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
-                    COGL_PIXEL_FORMAT_ANY,
-                    cairo_image_surface_get_stride( surface ),
-                    cairo_image_surface_get_data( surface ) );
+                cairo_surface_t * surface = cairo_get_target( self );
 
-            clutter_texture_set_cogl_texture ( t , cogl_texture );
-            cogl_handle_unref( cogl_texture );
+                CoglHandle cogl_texture = cogl_texture_new_from_data (
+                        cairo_image_surface_get_width( surface),
+                        cairo_image_surface_get_height( surface ),
+                        COGL_TEXTURE_NONE,
+                        CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
+                        COGL_PIXEL_FORMAT_ANY,
+                        cairo_image_surface_get_stride( surface ),
+                        cairo_image_surface_get_data( surface ) );
+
+                clutter_texture_set_cogl_texture ( t , cogl_texture );
+                cogl_handle_unref( cogl_texture );
+            }
+        ]];
+
+    /*
+        Function: Bitmap
+
+        Creates a new Bitmap from the current contents of the Canvas.
+
+        Returns:
+
+            bitmap - A newly created Bitmap.
+    */
+
+    Bitmap Bitmap()
+        [[
+          if ( cairo_status( self ) != CAIRO_STATUS_SUCCESS )
+          {
+              lua_pushnil( L );
+          }
+          else
+          {
+              cairo_surface_t * surface = cairo_get_target( self );
+
+              if ( ! surface )
+              {
+                  lua_pushnil( L );
+              }
+              else
+              {
+                  Image * image = Image::make( surface );
+
+                  if ( ! image )
+                  {
+                      lua_pushnil( L );
+                  }
+                  else
+                  {
+                      lua_getglobal( L , "Bitmap" );
+
+                      lua_pushliteral( L , "" );
+                      lua_call( L , 1 , 1 );
+
+                      Bitmap * bitmap = Bitmap::get( L , lua_gettop( L ) );
+
+                      if ( ! bitmap )
+                      {
+                          delete image;
+                          lua_pop( L , 1 );
+                          lua_pushnil( L );
+                      }
+                      else
+                      {
+                          bitmap->set_image( image );
+                      }
+                  }
+              }
+          }
         ]];
 
     set_line_width( double line_width )

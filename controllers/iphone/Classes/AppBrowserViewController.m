@@ -15,6 +15,7 @@
 @synthesize appsAvailable;
 @synthesize currentAppName;
 @synthesize pushingViewController;
+@synthesize socketDelegate;
 
 /*
 @synthesize appShopButton;
@@ -45,6 +46,8 @@
             thetitle:(NSString *)n {
     
     NSLog(@"AppBrowser Service Setup: %@ host: %@ port: %d", n, h, p);
+    
+    viewDidAppear = NO;
     
     [self createGestureViewWithPort:p hostName:h];
 }
@@ -152,11 +155,25 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSLog(@"AppBrowserView Loaded!");
-    
+    if (!currentAppIndicator) {
+        currentAppIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
+        currentAppIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+        currentAppIndicator.layer.borderWidth = 3.0;
+        currentAppIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+        currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
+    }
     [theTableView setDelegate:self];
-    pushingViewController = NO;
 }
 //*/
+
+- (void)viewDidAppear:(BOOL)animated {
+    if (self.navigationController.visibleViewController == self && (!gestureViewController || !gestureViewController.socketManager)) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+    
+    viewDidAppear = YES;
+    pushingViewController = NO;
+}
 
 /*
 // Override to allow orientations other than the default portrait orientation.
@@ -171,16 +188,34 @@
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in AppBrowser");
-    // everything will get released from the navigation controller's delegate call
-    [self.navigationController.view.layer removeAllAnimations];
-    [self.navigationController popToRootViewControllerAnimated:YES];
+
+    // everything will get released from the navigation controller's delegate call (hopefully)
+    if (self.navigationController.visibleViewController == self) {
+        if (!viewDidAppear) {
+            return;
+        }
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    } else {
+        [socketDelegate socketErrorOccurred];
+    }
 }
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in AppBrowser");
-    // everything will get released from the navigation controller's delegate call
-    [self.navigationController.view.layer removeAllAnimations];
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    // everything will get released from the navigation controller's delegate call (hopefully)
+    if (self.navigationController.visibleViewController == self) {
+        if (!viewDidAppear) {
+            return;
+        }
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+    } else {
+        [socketDelegate socketErrorOccurred];
+    }
 }
 
 
@@ -225,7 +260,11 @@
     
     cell.textLabel.text = (NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
     cell.textLabel.textColor = [UIColor blackColor];
-	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    if ([cell.textLabel.text compare:currentAppName] == NSOrderedSame) {
+        [cell addSubview:currentAppIndicator];
+        cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    }
+    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     
 	return cell;
 }
@@ -313,8 +352,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+    NSLog(@"AppBrowserController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    if (theTableView) {
+        [theTableView release];
+        theTableView = nil;
+    }
 }
 
 
@@ -322,6 +366,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"AppBrowserViewController dealloc");
     if (theTableView) {
         [theTableView release];
+        theTableView = nil;
     }
     if (appsAvailable) {
         [appsAvailable release];
@@ -332,6 +377,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentAppName) {
         [currentAppName release];
     }
+    if (currentAppIndicator) {
+        [currentAppIndicator release];
+    }
+    socketDelegate = nil;
     
     [super dealloc];
 }
