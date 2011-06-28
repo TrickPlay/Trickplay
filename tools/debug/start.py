@@ -14,7 +14,7 @@ class StartQT4(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
         
         node = NamedElement("Screen",  [])
-        self.model = NamesModel([node])
+        self.model = NamedModel([node])
         
         #i = self.model.index(0, 0, QModelIndex())
         #print(self.model.parent(index))
