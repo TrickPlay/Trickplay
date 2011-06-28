@@ -5,7 +5,6 @@
 #include "clutter_util.h"
 #include "lb.h"
 
-
 //.............................................................................
 
 ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
@@ -85,6 +84,8 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
 void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
 {
     LSG;
+
+	index = abs_index(L, index);
 
     if ( lua_istable( L, index ) )
     {
@@ -181,6 +182,29 @@ ClutterTimeline * ClutterUtil::user_data_to_timeline( lua_State * L, int n )
     GObject * obj = ud->get_master();
 
     return CLUTTER_IS_TIMELINE( obj ) ? CLUTTER_TIMELINE( obj ) : NULL;
+}
+
+//.............................................................................
+
+ClutterAnimator * ClutterUtil::user_data_to_animator( lua_State * L, int n )
+{
+    if ( ! lb_check_udata_type( L , n , "Animator" , false ) )
+    {
+        luaL_where( L , 1 );
+        lua_pop( L , 1 );
+        return NULL;
+    }
+
+    UserData * ud = UserData::get( L , n );
+
+    if ( ! ud )
+    {
+        return NULL;
+    }
+
+    GObject * obj = ud->get_master();
+
+    return CLUTTER_IS_ANIMATOR( obj ) ? CLUTTER_ANIMATOR( obj ) : NULL;
 }
 
 //.............................................................................
