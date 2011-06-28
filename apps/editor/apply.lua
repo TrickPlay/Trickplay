@@ -35,7 +35,7 @@ function inspector_apply (v, inspector)
 		       		elseif v.extra.type == "TabBar" then 
 		            	v.tab_labels[next] = item:find_child("textInput").text
 	 	       		elseif item:find_child("textInput").text == "--------------" then 
-			    		v.items[next] = {type="seperator"}
+			    		v.items[next] = {type="separator"}
 		       		elseif item:find_child("textInput").extra.item_type == "label" then 
 			    		v.items[next] = {type="label", string=item:find_child("textInput").text}
 		       		elseif item:find_child("textInput").extra.item_type == "item" then 
