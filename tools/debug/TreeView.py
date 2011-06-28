@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Tue Jun 28 12:11:40 2011
+# Created: Tue Jun 28 15:33:08 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,7 +34,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.Inspector.sizePolicy().hasHeightForWidth())
         self.Inspector.setSizePolicy(sizePolicy)
         self.Inspector.setAutoFillBackground(False)
-        self.Inspector.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+        self.Inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.Inspector.setObjectName(_fromUtf8("Inspector"))
         self.button_Refresh = QtGui.QPushButton(self.centralwidget)
         self.button_Refresh.setGeometry(QtCore.QRect(10, 10, 85, 27))
