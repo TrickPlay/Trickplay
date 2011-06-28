@@ -81,5 +81,5 @@ class NamesModel(TreeModel):
     def headerData(self, section, orientation, role):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole \
             and section == 0:
-            return 'UI Elements'
+            return 'Name'
         return None
