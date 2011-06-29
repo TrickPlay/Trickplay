@@ -119,6 +119,19 @@
 }
 
 #pragma mark -
+#pragma mark Animation Delegate
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    for (NSString *key in [view.layer animationKeys]) {
+        if ([key compare:@"scale_x"] == NSOrderedSame) {
+            [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
+        } else if ([key compare:@"scale_y"] == NSOrderedSame) {
+            [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
+        }
+    }
+}
+
+#pragma mark -
 #pragma mark Setters
 
 /**
@@ -164,14 +177,6 @@
     if (!x && !y) {
         return;
     }
-    if (!x) {
-        //x = [NSNumber numberWithFloat:view.layer.position.x];
-    }
-    if (!y) {
-        //y = [NSNumber numberWithFloat:view.layer.position.y];
-    }
-    
-    //view.layer.position = CGPointMake([x floatValue], [y floatValue]);
     
     if (x) {
         x_position = [x floatValue];
@@ -318,12 +323,29 @@
         [view.layer setValue:z_scale forKeyPath:@"transform.scale.z"];
     }
      */
-    
+
     x_scale = [[layer_scale objectAtIndex:0] floatValue];
     y_scale = [[layer_scale objectAtIndex:1] floatValue];
     
     [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
     [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
+    /*
+    CABasicAnimation *animation_x = [CABasicAnimation animationWithKeyPath:@"transform.scale.x"];
+    animation_x.fillMode = kCAFillModeForwards;
+    animation_x.removedOnCompletion = NO;
+    [animation_x setToValue:[NSNumber numberWithFloat:x_scale]];
+    [animation_x setDuration:3.0];
+    animation_x.delegate = self;
+    [view.layer addAnimation:animation_x forKey:@"scale_x"];
+    
+    CABasicAnimation *animation_y = [CABasicAnimation animationWithKeyPath:@"transform.scale.y"];
+    animation_y.fillMode = kCAFillModeForwards;
+    animation_y.removedOnCompletion = NO;
+    [animation_y setToValue:[NSNumber numberWithFloat:y_scale]];
+    [animation_y setDuration:3.0];
+    animation_y.delegate = self;
+    [view.layer addAnimation:animation_y forKey:@"scale_y"];
+     //*/
 }
 
 
@@ -404,6 +426,8 @@
         [self rotate_and_translate];
     }
 }
+
+
 
 
 /**
