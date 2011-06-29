@@ -9,15 +9,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>457</width>
+    <width>458</width>
     <height>605</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="cursor">
+   <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
    <string>Trickplay UI Tree Viewer</string>
@@ -33,9 +36,9 @@
      </rect>
     </property>
     <property name="sizePolicy">
-     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-      <horstretch>150</horstretch>
-      <verstretch>150</verstretch>
+     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
      </sizepolicy>
     </property>
     <property name="autoFillBackground">
@@ -44,6 +47,27 @@
     <property name="dragDropMode">
      <enum>QAbstractItemView::NoDragDrop</enum>
     </property>
+    <property name="alternatingRowColors">
+     <bool>true</bool>
+    </property>
+    <property name="allColumnsShowFocus">
+     <bool>true</bool>
+    </property>
+    <attribute name="headerCascadingSectionResizes">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="headerDefaultSectionSize">
+     <number>200</number>
+    </attribute>
+    <attribute name="headerHighlightSections">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="headerMinimumSectionSize">
+     <number>100</number>
+    </attribute>
+    <attribute name="headerStretchLastSection">
+     <bool>true</bool>
+    </attribute>
    </widget>
    <widget class="QPushButton" name="button_Refresh">
     <property name="geometry">
@@ -58,13 +82,39 @@
      <string>Refresh</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="button_ExpandAll">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>10</y>
+      <width>97</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Expand All</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_CollapseAll">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>10</y>
+      <width>97</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Collapse All</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>457</width>
+     <width>458</width>
      <height>25</height>
     </rect>
    </property>
@@ -72,21 +122,62 @@
     <property name="title">
      <string>File</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuExit">
-    <property name="title">
-     <string>Exit</string>
-    </property>
+    <addaction name="action_Exit"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuExit"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="action_Exit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>button_Refresh</tabstop>
   <tabstop>Inspector</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>button_ExpandAll</sender>
+   <signal>released()</signal>
+   <receiver>Inspector</receiver>
+   <slot>expandAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>146</x>
+     <y>94</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>button_CollapseAll</sender>
+   <signal>released()</signal>
+   <receiver>Inspector</receiver>
+   <slot>collapseAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>239</x>
+     <y>55</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>237</x>
+     <y>89</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
