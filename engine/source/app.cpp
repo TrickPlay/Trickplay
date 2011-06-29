@@ -76,8 +76,10 @@ extern int luaopen_canvas( lua_State * L );
 extern int luaopen_keyboard( lua_State * L );
 extern int luaopen_http_module( lua_State * L );
 
+#ifdef TP_WITH_WEBGL
 extern int luaopen_typed_array( lua_State * L );
 extern int luaopen_webgl( lua_State * L );
+#endif
 
 #ifndef TP_PRODUCTION
 extern int luaopen_devtools( lua_State * L );
@@ -958,8 +960,10 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_http_module( L );
     luaopen_keyboard( L );
 
+#ifdef TP_WITH_WEBGL
     luaopen_typed_array( L );
     luaopen_webgl( L );
+#endif
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
