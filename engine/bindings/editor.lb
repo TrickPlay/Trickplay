@@ -11,9 +11,9 @@
 #ifndef TP_CLUTTER_BACKEND_EGL
 #ifndef __APPLE__
 #include "clutter/x11/clutter-x11.h"
-#else __APPLE__
+#else  // __APPLE__
 #include "osx/osx-cursor-glue.h"
-#endif __APPLE__
+#endif // __APPLE__
 #endif
 
 ]]
@@ -190,7 +190,7 @@ restricted global editor [[ void * ]]
                 XDefineCursor( display , window , None );
             }
 
-#else CLUTTER_WINDOWING_OSX
+#else // CLUTTER_WINDOWING_OSX
 
             osx_cursor_glue_set( shape );
 
