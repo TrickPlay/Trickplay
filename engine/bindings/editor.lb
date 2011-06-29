@@ -9,7 +9,11 @@
 #include <cstdio>
 
 #ifndef TP_CLUTTER_BACKEND_EGL
+#ifndef __APPLE__
 #include "clutter/x11/clutter-x11.h"
+#else __APPLE__
+#include "osx/osx-cursor-glue.h"
+#endif __APPLE__
 #endif
 
 ]]
@@ -154,87 +158,22 @@ restricted global editor [[ void * ]]
         These come from http://tronche.com/gui/x/xlib/appendix/b/
     */
 
-    const int CURSOR_X_CURSOR = 0;
-    const int CURSOR_LL_ANGLE = 76;
-    const int CURSOR_ARROW = 2;
-    const int CURSOR_LR_ANGLE = 78;
-    const int CURSOR_BASED_ARROW_DOWN = 4;
-    const int CURSOR_MAN = 80;
-    const int CURSOR_BASED_ARROW_UP = 6;
-    const int CURSOR_MIDDLEBUTTON = 82;
-    const int CURSOR_BOAT = 8;
-    const int CURSOR_MOUSE = 84;
-    const int CURSOR_BOGOSITY = 10;
-    const int CURSOR_PENCIL = 86;
-    const int CURSOR_BOTTOM_LEFT_CORNER = 12;
-    const int CURSOR_PIRATE = 88;
-    const int CURSOR_BOTTOM_RIGHT_CORNER = 1;
-    const int CURSOR_PLUS = 90;
     const int CURSOR_BOTTOM_SIDE = 16;
-    const int CURSOR_QUESTION_ARROW = 92;
-    const int CURSOR_BOTTOM_TEE = 18;
-    const int CURSOR_RIGHT_PTR = 94;
-    const int CURSOR_BOX_SPIRAL = 20;
-    const int CURSOR_RIGHT_SIDE = 96;
-    const int CURSOR_CENTER_PTR = 22;
-    const int CURSOR_RIGHT_TEE = 98;
-    const int CURSOR_CIRCLE = 24;
-    const int CURSOR_RIGHTBUTTON = 100;
-    const int CURSOR_CLOCK = 26;
-    const int CURSOR_RTL_LOGO = 102;
-    const int CURSOR_COFFEE_MUG = 28;
-    const int CURSOR_SAILBOAT = 104;
-    const int CURSOR_CROSS = 30;
-    const int CURSOR_SB_DOWN_ARROW = 106;
-    const int CURSOR_CROSS_REVERSE = 32;
-    const int CURSOR_SB_H_DOUBLE_ARROW = 108;
     const int CURSOR_CROSSHAIR = 34;
-    const int CURSOR_SB_LEFT_ARROW = 110;
-    const int CURSOR_DIAMOND_CROSS = 36;
-    const int CURSOR_SB_RIGHT_ARROW = 112;
-    const int CURSOR_DOT = 38;
-    const int CURSOR_SB_UP_ARROW = 114;
-    const int CURSOR_DOT_BOX_MASK = 40;
-    const int CURSOR_SB_V_DOUBLE_ARROW = 116;
-    const int CURSOR_DOUBLE_ARROW = 42;
-    const int CURSOR_SHUTTLE = 118;
-    const int CURSOR_DRAFT_LARGE = 44;
-    const int CURSOR_SIZING = 120;
-    const int CURSOR_DRAFT_SMALL = 46;
-    const int CURSOR_SPIDER = 122;
-    const int CURSOR_DRAPED_BOX = 48;
-    const int CURSOR_SPRAYCAN = 124;
-    const int CURSOR_EXCHANGE = 50;
-    const int CURSOR_STAR = 126;
     const int CURSOR_FLEUR = 52;
-    const int CURSOR_TARGET = 128;
-    const int CURSOR_GOBBLER = 54;
-    const int CURSOR_TCROSS = 130;
-    const int CURSOR_GUMBY = 56;
-    const int CURSOR_TOP_LEFT_ARROW = 132;
-    const int CURSOR_HAND1 = 58;
-    const int CURSOR_TOP_LEFT_CORNER = 134;
-    const int CURSOR_HAND2 = 60;
-    const int CURSOR_TOP_RIGHT_CORNER = 136;
-    const int CURSOR_HEART = 62;
-    const int CURSOR_TOP_SIDE = 138;
-    const int CURSOR_ICON = 64;
-    const int CURSOR_TOP_TEE = 140;
-    const int CURSOR_IRON_CROSS = 66;
-    const int CURSOR_TREK = 142;
     const int CURSOR_LEFT_PTR = 68;
-    const int CURSOR_UL_ANGLE = 144;
     const int CURSOR_LEFT_SIDE = 70;
-    const int CURSOR_UMBRELLA = 146;
-    const int CURSOR_LEFT_TEE = 72;
-    const int CURSOR_UR_ANGLE = 148;
-    const int CURSOR_LEFTBUTTON = 74;
-    const int CURSOR_WATCH = 150;
+    const int CURSOR_RIGHT_SIDE = 96;
+    const int CURSOR_SB_H_DOUBLE_ARROW = 108;
+    const int CURSOR_SB_V_DOUBLE_ARROW = 116;
+    const int CURSOR_TOP_SIDE = 138;
     const int CURSOR_XTERM = 152;
 
     set_cursor( int shape )
         [[
 #ifndef TP_CLUTTER_BACKEND_EGL
+
+#ifndef CLUTTER_WINDOWING_OSX
 
             Display * display = clutter_x11_get_default_display();
 
@@ -250,6 +189,13 @@ restricted global editor [[ void * ]]
             {
                 XDefineCursor( display , window , None );
             }
+
+#else CLUTTER_WINDOWING_OSX
+
+            osx_cursor_glue_set( shape );
+
+#endif
+
 #endif
         ]];
 }

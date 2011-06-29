@@ -358,6 +358,8 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_group.lb
     ${BINDINGS_SRC}/clutter_image.lb
     ${BINDINGS_SRC}/clutter_timeline.lb
+    ${BINDINGS_SRC}/clutter_animator.lb
+    ${BINDINGS_SRC}/clutter_state.lb
 	${BINDINGS_SRC}/clutter_score.lb
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb    
@@ -510,6 +512,30 @@ list( APPEND
     ${ENGINE_SRC}/source/keyboard.cpp
     ${ENGINE_SRC}/source/typed_array.cpp
 )
+
+#------------------------------------------------------------------------------
+# OSX Cursor glue stuff
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+list( APPEND
+
+    ENGINE_SOURCE_FILES
+    
+    ${ENGINE_SRC}/source/osx/osx-cursor-glue.m
+)
+
+FIND_LIBRARY (APPKIT_LIBRARY AppKit) 
+MARK_AS_ADVANCED (APPKIT_LIBRARY) 
+
+list( APPEND
+
+    ENGINE_LIBRARIES
+    
+    ${APPKIT_LIBRARY}
+    objc
+)
+
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 #------------------------------------------------------------------------------
 
