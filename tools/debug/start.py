@@ -12,11 +12,13 @@ class StartQT4(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
+        QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
         self.model = QtGui.QStandardItemModel()
         self.createTree()
         
     def createTree(self):
-        self.model.setColumnCount(2)
+        #self.model.setColumnCount(2)
+        self.model.setHorizontalHeaderLabels(["UI Element Property",  "Value"])
         root = self.model.invisibleRootItem()
         data = getTrickplayData()
         createNode(root, data, True)    
@@ -25,6 +27,9 @@ class StartQT4(QtGui.QMainWindow):
     def refresh(self):
         self.model.clear()
         self.createTree()
+        
+    def exit(self):
+        sys.exit()
         
 def createNode(parent, data, isStage):
     
@@ -62,7 +67,13 @@ def createAttrList(parent, data):
             
         # Value is a dictionary, like scale
         else:
-            value = QtGui.QStandardItem(str(attrValue))
+            # The read-only summary of attributes
+            summary = "{"
+            for item in attrValue:
+                summary += item + ': ' + str(attrValue[item]) + ', '
+            summary = summary[:len(summary)-2] + '}'
+            
+            value = QtGui.QStandardItem(summary)
             parent.appendRow([title, value])
             createAttrList(title, attrValue)
     
