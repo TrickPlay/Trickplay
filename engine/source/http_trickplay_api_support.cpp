@@ -38,7 +38,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-static gint float_to_int( const gfloat & f ) {
+/*static gint float_to_int( const gfloat & f ) {
 	
 	if ((0 < f && f < 0.0001) || (0 > f && f > -0.001 ) || f < 1000000 || f > 1000000)
 		
@@ -47,6 +47,15 @@ static gint float_to_int( const gfloat & f ) {
 	else
 		
 		return (gint) f;
+}*/
+
+static void get_actor_color( JSON::Object * color, ClutterColor * c )
+{
+	
+	(*color)["r"] = c->red;
+	(*color)["g"] = c->green;
+	(*color)["b"] = c->blue;
+	(*color)["a"] = c->alpha;
 	
 }
 
@@ -119,33 +128,80 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 	clutter_actor_get_clip( actor, &cxoff, &cyoff, &cw, &ch );
 	Object clip;
 		// floats returned are very small nonzero numbers
-	clip["x"] = float_to_int( cxoff );
-	clip["y"] = float_to_int( cyoff );
-	clip["w"] = float_to_int( cw );
-	clip["h"] = float_to_int( ch );
+	clip["x"] = cxoff;
+	clip["y"] = cyoff;
+	clip["w"] = cw;
+	clip["h"] = ch;
 
     if ( !extra.empty() )
     {
         extra = String( " : " ) + extra;
     }
-
-	
 	
 	if ( CLUTTER_IS_TEXT( actor ) )
     {
-        extra = String( "[text='" ) + clutter_text_get_text( CLUTTER_TEXT( actor ) ) + "'";
 		
-        ClutterColor color;
+		// Text
+        (*object)["text"] = String( clutter_text_get_text( CLUTTER_TEXT( actor ) ) );
 		
-        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
-		
-        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
-		
-        extra = extra + "," + c + "]";
-		
-        g_free( c );
-		
+		// Color
+        ClutterColor c;
+        clutter_text_get_color( CLUTTER_TEXT( actor ), &c );
+		Object color;
+		get_actor_color( &color , &c );
+		(*object)["color"] = color;
+        
     }
+	else if ( CLUTTER_IS_RECTANGLE( actor ) )
+	{
+		
+		// Color
+		ClutterColor c;
+		clutter_rectangle_get_color( CLUTTER_RECTANGLE( actor ), &c );
+		Object color;
+		get_actor_color( &color, &c );
+		(*object)["color"] = color;
+		
+		// Border color
+		ClutterColor bc;
+		clutter_rectangle_get_border_color( CLUTTER_RECTANGLE( actor ), &bc );
+		Object border_color;
+		get_actor_color( &border_color, &bc );
+		(*object)["border_color"] = border_color;
+		
+		// Border width
+		guint border_width = clutter_rectangle_get_border_width( CLUTTER_RECTANGLE( actor ) );
+		(*object)["border_width"] = (int)border_width;
+		
+	}
+	else if ( CLUTTER_IS_TEXTURE( actor ) )
+	{
+		
+		// src
+		(*object)["src"] = ( String )( const gchar * )g_object_get_data( G_OBJECT( actor ) , "tp-src" );
+		
+		// tile
+		gboolean x;
+		gboolean y;
+		clutter_texture_get_repeat( CLUTTER_TEXTURE( actor ) , &x , &y );
+		Object tile;
+		tile["x"] = x;
+		tile["y"] = y;
+		(*object)["tile"] = tile;
+		
+	}
+	else if ( CLUTTER_IS_CLONE( actor ) )
+	{
+		
+		ClutterActor * original = clutter_clone_get_source( CLUTTER_CLONE( actor ) );
+		
+		Object source;
+		
+		dump_ui_actors( original, &source );
+		
+		(*object)["source"] = source;
+		
+	}
     else if ( CLUTTER_IS_CONTAINER( actor ) )
     {
 		Array children;
@@ -171,16 +227,16 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 		
     }
 	
-	(*object)["z"] 			= z;
-	(*object)["y"] 			= y;
-	(*object)["x"] 			= x;
-	(*object)["w"] 			= w;
-	(*object)["h"] 			= h;
+	(*object)["z"]	 			= z;
+	(*object)["y"]	 			= y;
+	(*object)["x"]	 			= x;
+	(*object)["w"]	 			= w;
+	(*object)["h"]	 			= h;
 	(*object)["name"] 			= name;
 	(*object)["gid"]			= gid;
     (*object)["type"] 			= type;
 	(*object)["is_visible"] 	= is_visible;
-	(*object)["scale"] 		= scale;
+	(*object)["scale"]	 		= scale;
 	(*object)["opacity"] 		= opacity;
 	(*object)["anchor_point"] 	= anchor_point;
 	(*object)["clip"]			= clip;
