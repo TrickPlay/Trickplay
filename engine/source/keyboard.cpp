@@ -1558,7 +1558,10 @@ Keyboard::Keyboard( TPContext * context )
 
     event_handler( 0 ),
     focus( 0 ),
-    lsp( 0 )
+    lsp( 0 ),
+
+    typing_handler( 0 ),
+    list_handler( 0 )
 {
     tplog2( "BUILDING" );
 
@@ -1703,13 +1706,15 @@ Keyboard::Keyboard( TPContext * context )
 
     // Load the handlers
 
-    typing_handler.reset( new TypingHandler( this ) );
-    list_handler.reset( new ListHandler( this ) );
+    typing_handler = new TypingHandler( this );
+    list_handler = new ListHandler( this );
 
     if ( ! typing_handler->ok() || ! list_handler->ok() )
     {
-        typing_handler.reset();
-        list_handler.reset();
+        delete typing_handler;
+        delete list_handler;
+        typing_handler = 0;
+        list_handler = 0;
         keyboard = 0;
         return;
     }
@@ -1740,6 +1745,16 @@ Keyboard::~Keyboard()
     if ( lsp )
     {
         lsp->unref();
+    }
+
+    if ( typing_handler )
+    {
+    	delete typing_handler;
+    }
+
+    if ( list_handler )
+    {
+    	delete list_handler;
     }
 }
 
@@ -2024,11 +2039,11 @@ bool Keyboard::build_field_list()
 
         if ( ff.type == Form::Field::LIST )
         {
-            ff.handler = list_handler.get();
+            ff.handler = list_handler;
         }
         else
         {
-            ff.handler = typing_handler.get();
+            ff.handler = typing_handler;
         }
 
         ClutterActor * field = clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , i );
