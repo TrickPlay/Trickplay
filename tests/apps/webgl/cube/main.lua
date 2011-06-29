@@ -33,7 +33,7 @@ local function init_gl_state()
     
     local f_shader_source =
     [[
-      precision mediump float;                  
+      /* precision mediump float;                  */
       varying vec4 v_color;                     
                                                 
       void main()                               
