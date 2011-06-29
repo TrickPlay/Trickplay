@@ -15,7 +15,8 @@ class StartQT4(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
         self.model = QtGui.QStandardItemModel()
         self.createTree()
-        
+        self.model.item(0).setData(QtGui.QBrush(QtGui.QColor.yellow))
+    
     def createTree(self):
         #self.model.setColumnCount(2)
         self.model.setHorizontalHeaderLabels(["UI Element Property",  "Value"])
