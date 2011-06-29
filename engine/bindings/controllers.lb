@@ -52,6 +52,7 @@ public:
     virtual void cancel_image( void );
     virtual void cancel_audio_clip( void );
     virtual void advanced_ui_ready( void );
+    virtual void advanced_ui_event( const char * json );
     
     bool declare_resource( const String & name , const String & uri );
 
@@ -1132,6 +1133,15 @@ interface controller [[ControllerDelegate*]]
 
     callback on_advanced_ui_ready;
 
+
+    /*
+        Event: on_advanced_ui_event
+        
+        An advanced UI event has been received.
+    */
+    
+    callback on_advanced_ui_event;
+    
     /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
 
     bool save_key_map( table map )
@@ -1392,6 +1402,13 @@ bool ControllerDelegate::declare_resource( const String & name , const String & 
 void ControllerDelegate::advanced_ui_ready( void )
 {
     invoke_controller_on_advanced_ui_ready( L, this, 0, 0 );
+}
+
+void ControllerDelegate::advanced_ui_event( const char * json )
+{
+    JSON::parse( L , json );
+    
+    invoke_controller_on_advanced_ui_event( L , this , 1 , 0 );
 }
 
 ]]

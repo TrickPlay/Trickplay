@@ -1350,11 +1350,31 @@ struct TPControllerRequestAudioClip
         controller -    The controller returned by <tp_context_add_controller>.
 */
 
-        TP_API_EXPORT
-        void
-        tp_controller_advanced_ui_ready(
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_ready(
 
-            TPController * controller);
+		TPController * controller);
+
+/*
+	Callback: tp_controller_advanced_ui_event
+
+	Report an advanced UI event.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		json 	   -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_event(
+
+		TPController * controller,
+		const char * json);
+
 
 /*-----------------------------------------------------------------------------*/
 /*
