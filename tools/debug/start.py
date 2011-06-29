@@ -6,6 +6,10 @@ from PyQt4 import QtCore, QtGui
 from TreeView import Ui_MainWindow
 from TreeModel import *
 
+Qt.RowHeaderRow = 33
+
+#print dir(screenItem)
+
 class StartQT4(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -15,8 +19,10 @@ class StartQT4(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
         self.model = QtGui.QStandardItemModel()
         self.createTree()
-        self.model.item(0).setData(QtGui.QBrush(QtGui.QColor.yellow))
+        
+        #self.model.item(0).setData(QtGui.QBrush(QtGui.QColor.yellow))
     
+        
     def createTree(self):
         #self.model.setColumnCount(2)
         self.model.setHorizontalHeaderLabels(["UI Element Property",  "Value"])
@@ -28,6 +34,12 @@ class StartQT4(QtGui.QMainWindow):
     def refresh(self):
         self.model.clear()
         self.createTree()
+        
+        screenItem = self.model.findItems("Group: screen")[0]
+        screenIndex = self.model.indexFromItem(screenItem)
+        childIndex = self.model.index(0, 0, screenIndex)
+        print( self.model.setData(childIndex, QtGui.QBrush(QtGui.QColor(0, 255, 0, 255)), Qt.BackgroundColorRole ))
+        print(self.model.rowCount(screenIndex))
         
     def exit(self):
         sys.exit()
@@ -87,11 +99,14 @@ def getTrickplayData():
 
 def decode(input):
     return json.loads(input)
-
-if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
+    
+def main(argv):
+    app = QtGui.QApplication(argv)
     myapp = StartQT4()
     myapp.show()
     sys.exit(app.exec_())
+    
+if __name__ == "__main__":
+    main(sys.argv)
     
 #QtCore.QAbstractItemModel.insertRow(1)

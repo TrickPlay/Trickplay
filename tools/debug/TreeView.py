@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Wed Jun 29 12:13:16 2011
+# Created: Wed Jun 29 14:08:37 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,13 +28,14 @@ class Ui_MainWindow(object):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.Inspector = QtGui.QTreeView(self.centralwidget)
-        self.Inspector.setGeometry(QtCore.QRect(0, 40, 1920, 1080))
+        self.Inspector.setGeometry(QtCore.QRect(0, 50, 1920, 1080))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.Inspector.sizePolicy().hasHeightForWidth())
         self.Inspector.setSizePolicy(sizePolicy)
         self.Inspector.setAutoFillBackground(False)
+        self.Inspector.setStyleSheet(_fromUtf8(""))
         self.Inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.Inspector.setAlternatingRowColors(True)
         self.Inspector.setAllColumnsShowFocus(True)
