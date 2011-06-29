@@ -2353,10 +2353,14 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     swap()
         [[
-#ifndef TP_CLUTTER_BACKEND_EGL
+#if defined(CLUTTER_WINDOWING_GLX)
             glXSwapBuffers( glXGetCurrentDisplay() , glXGetCurrentDrawable() );
-#else
+#elif defined(CLUTTER_WINDOWING_EGL)
             eglSwapBuffers(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_READ));
+#elif defined(CLUTTER_WINDOWING_OSX)
+            clutter_actor_queue_redraw(clutter_stage_get_default());
+#else
+    #error Need to have some known windowing
 #endif
         ]];
 }
