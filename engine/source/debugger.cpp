@@ -51,8 +51,6 @@ void Debugger::install()
 
 void Debugger::handle_command( const char * parameters )
 {
-    lua_State * L = app->get_lua_state();
-
     install();
 
     if ( ! parameters )
