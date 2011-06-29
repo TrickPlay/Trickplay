@@ -127,16 +127,10 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 	gfloat ch;
 	clutter_actor_get_clip( actor, &cxoff, &cyoff, &cw, &ch );
 	Object clip;
-		// floats returned are very small nonzero numbers
 	clip["x"] = (long long)cxoff;
 	clip["y"] = (long long)cyoff;
 	clip["w"] = (long long)cw;
 	clip["h"] = (long long)ch;
-
-    if ( !extra.empty() )
-    {
-        extra = String( " : " ) + extra;
-    }
 	
 	if ( CLUTTER_IS_TEXT( actor ) )
     {
