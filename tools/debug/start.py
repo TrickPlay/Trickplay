@@ -12,20 +12,19 @@ class StartQT4(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
-        
-        # Create data model
         self.model = QtGui.QStandardItemModel()
+        self.createTree()
+        
+    def createTree(self):
         self.model.setColumnCount(2)
         root = self.model.invisibleRootItem()
-        
         data = getTrickplayData()
-        createNode(root, data, True)
-            
+        createNode(root, data, True)    
         self.ui.Inspector.setModel(self.model)
         
     def refresh(self):
-        getTrickplayData()
-        #sys.exit("Successfully Exited")
+        self.model.clear()
+        self.createTree()
         
 def createNode(parent, data, isStage):
     
@@ -41,9 +40,9 @@ def createNode(parent, data, isStage):
     createAttrList(node, nodeData)
         
 def createAttrList(parent, data):
-    print(data)
+    #print(data)
     for attr in data:
-        print(attr)
+        #print(attr)
         attrTitle = attr
         attrValue = data[attr]
         
@@ -51,18 +50,20 @@ def createAttrList(parent, data):
         
         # Value is the list of children
         if isinstance(attrValue, list):
-            parent.appendRow(title)
+            value = QtGui.QStandardItem(str(len(attrValue)))
+            parent.appendRow([title, value])
             for child in attrValue:
                 createNode(title, child, False)
         
-        # Value is a string
+        # Value is a string/number/etc
         elif not isinstance(attrValue, dict):
             value = QtGui.QStandardItem(str(data[attr]))
             parent.appendRow([title, value])    
             
         # Value is a dictionary, like scale
         else:
-            parent.appendRow(title)
+            value = QtGui.QStandardItem(str(attrValue))
+            parent.appendRow([title, value])
             createAttrList(title, attrValue)
     
     
