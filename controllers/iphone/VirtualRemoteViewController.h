@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#include <AudioToolbox/AudioToolbox.h>
 
 @protocol VirtualRemoteDelegate <NSObject>
 
@@ -15,8 +16,11 @@
 
 @end
 
-@interface VirtualRemoteViewController : UIViewController {
+@interface VirtualRemoteViewController : UIViewController <UIInputViewAudioFeedback> {
     id <VirtualRemoteDelegate> delegate;
+    
+    CFURLRef clickSoundRef;
+    SystemSoundID audioClick;
 }
 
 @property (assign) id<VirtualRemoteDelegate> delegate;
@@ -28,5 +32,9 @@
 - (IBAction)OKPressed:(id)sender;
 - (IBAction)backPressed:(id)sender;
 - (IBAction)exitPressed:(id)sender;
+- (IBAction)redPressed:(id)sender;
+- (IBAction)greenPressed:(id)sender;
+- (IBAction)bluePressed:(id)sender;
+- (IBAction)yellowPressed:(id)sender;
 
 @end

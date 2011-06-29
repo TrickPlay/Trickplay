@@ -51,7 +51,7 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">arrows-generic-controls-comp.jpg</string>
+							<string key="NSResourceName">ios-generic-background.jpg</string>
 						</object>
 					</object>
 					<object class="IBUIButton" id="217810443">
@@ -467,6 +467,42 @@
 					</object>
 					<int key="connectionID">19</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">redPressed:</string>
+						<reference key="source" ref="436021362"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">1</int>
+					</object>
+					<int key="connectionID">24</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">greenPressed:</string>
+						<reference key="source" ref="994954010"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">1</int>
+					</object>
+					<int key="connectionID">25</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">bluePressed:</string>
+						<reference key="source" ref="391561585"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">1</int>
+					</object>
+					<int key="connectionID">26</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">yellowPressed:</string>
+						<reference key="source" ref="945217388"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">1</int>
+					</object>
+					<int key="connectionID">27</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -490,12 +526,12 @@
 							<reference ref="652187912"/>
 							<reference ref="219354077"/>
 							<reference ref="532480181"/>
-							<reference ref="217810443"/>
 							<reference ref="994954010"/>
 							<reference ref="436021362"/>
 							<reference ref="701803562"/>
 							<reference ref="391561585"/>
 							<reference ref="945217388"/>
+							<reference ref="217810443"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -651,7 +687,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">23</int>
+			<int key="maxID">27</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -665,14 +701,22 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>OKPressed:</string>
 							<string>backPressed:</string>
+							<string>bluePressed:</string>
 							<string>downPressed:</string>
 							<string>exitPressed:</string>
+							<string>greenPressed:</string>
 							<string>leftPressed:</string>
+							<string>redPressed:</string>
 							<string>rightPressed:</string>
 							<string>upPressed:</string>
+							<string>yellowPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -688,11 +732,15 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>OKPressed:</string>
 							<string>backPressed:</string>
+							<string>bluePressed:</string>
 							<string>downPressed:</string>
 							<string>exitPressed:</string>
+							<string>greenPressed:</string>
 							<string>leftPressed:</string>
+							<string>redPressed:</string>
 							<string>rightPressed:</string>
 							<string>upPressed:</string>
+							<string>yellowPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -705,6 +753,10 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">bluePressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">downPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -713,7 +765,15 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">greenPressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">leftPressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">redPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -722,6 +782,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">upPressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">yellowPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
@@ -745,7 +809,6 @@
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>arrows-generic-controls-comp.jpg</string>
 				<string>back-touch.png</string>
 				<string>back.png</string>
 				<string>button-blue-touch.png</string>
@@ -760,6 +823,7 @@
 				<string>down.png</string>
 				<string>exit-touch.png</string>
 				<string>exit.png</string>
+				<string>ios-generic-background.jpg</string>
 				<string>left-touch.png</string>
 				<string>left.png</string>
 				<string>ok-touch.png</string>
@@ -771,21 +835,21 @@
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>{209, 57}</string>
+				<string>{209, 57}</string>
+				<string>{107, 51}</string>
+				<string>{107, 51}</string>
+				<string>{107, 51}</string>
+				<string>{107, 51}</string>
+				<string>{107, 51}</string>
+				<string>{107, 51}</string>
+				<string>{107, 51}</string>
+				<string>{107, 51}</string>
+				<string>{202, 110}</string>
+				<string>{202, 110}</string>
+				<string>{209, 57}</string>
+				<string>{209, 57}</string>
 				<string>{640, 960}</string>
-				<string>{209, 57}</string>
-				<string>{209, 57}</string>
-				<string>{107, 51}</string>
-				<string>{107, 51}</string>
-				<string>{107, 51}</string>
-				<string>{107, 51}</string>
-				<string>{107, 51}</string>
-				<string>{107, 51}</string>
-				<string>{107, 51}</string>
-				<string>{107, 51}</string>
-				<string>{202, 110}</string>
-				<string>{202, 110}</string>
-				<string>{209, 57}</string>
-				<string>{209, 57}</string>
 				<string>{110, 202}</string>
 				<string>{110, 202}</string>
 				<string>{202, 202}</string>
