@@ -76,6 +76,9 @@
     }
     NSDictionary *currentAppInfo = [self getCurrentAppInfo];
     NSLog(@"Received JSON dictionary current app data = %@", currentAppInfo);
+    if (!currentAppInfo) {
+        return NO;
+    }
     self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
     if (currentAppName && ![currentAppName isEqualToString:@"Empty"]) {
         return YES;
@@ -85,13 +88,17 @@
 }
 
 /**
- * Returns current app data.
+ * Returns current app data or nil on error.
  */
 - (NSDictionary *)getCurrentAppInfo {
+    NSLog(@"Getting Current App Info");
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
-    NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
+    
+    // TODO: MAKE ASYNC TO PREVENT DEADLOCK
+    NSURL *dataURL = [NSURL URLWithString:JSONString];
+    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
     //NSArray *JSONArray = [JSONData yajl_JSON];
     return (NSDictionary *)[[[JSONData yajl_JSON] retain] autorelease];
@@ -99,24 +106,22 @@
 
 
 - (BOOL)fetchApps {
+    NSLog(@"Fetching Apps");
     if (![gestureViewController hasConnection]) {
         return NO;
     }
     
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
-    //NSLog(@"JSONString = %@", JSONString);
-    NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
-    //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
+    
+    // TODO: MAKE THIS ASYNC TO PREVENT THE CHANCE OF DEADLOCK WHILE ADVANCED_UI CONNECTION SETS UP
+    NSURL *dataURL = [NSURL URLWithString:JSONString];
+    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     self.appsAvailable = [JSONData yajl_JSON];
     NSLog(@"Received JSON array app data = %@", appsAvailable);
-    /*
-    for (NSDictionary *element in appsAvailable) {
-        NSLog(@"is NSDictionary? %d", [element isKindOfClass:[NSDictionary class]]);
-
-        NSLog(@"element = %@", element);
+    if (!appsAvailable) {
+        return NO;
     }
-     */
     
     return YES;
 }
@@ -190,6 +195,7 @@
     NSLog(@"Socket Error Occurred in AppBrowser");
 
     // everything will get released from the navigation controller's delegate call (hopefully)
+    /*
     if (self.navigationController.visibleViewController == self) {
         if (!viewDidAppear) {
             return;
@@ -200,12 +206,15 @@
     } else {
         [socketDelegate socketErrorOccurred];
     }
+     */
+    [socketDelegate socketErrorOccurred];
 }
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in AppBrowser");
     
     // everything will get released from the navigation controller's delegate call (hopefully)
+    /*
     if (self.navigationController.visibleViewController == self) {
         if (!viewDidAppear) {
             return;
@@ -216,6 +225,8 @@
     } else {
         [socketDelegate socketErrorOccurred];
     }
+     */
+    [socketDelegate socketErrorOccurred];
 }
 
 

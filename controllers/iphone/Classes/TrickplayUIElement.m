@@ -39,6 +39,9 @@
         self.y_rotation = [NSNumber numberWithFloat:0.0];
         self.z_rotation = [NSNumber numberWithFloat:0.0];
          */
+        x_position = 0.0;
+        y_position = 0.0;
+        z_position = 0.0;
         x_scale = 1.0;
         y_scale = 1.0;
         z_scale = 1.0;
@@ -104,6 +107,30 @@
 }
 ///////////////////////////
 
+/**
+ * The most important function of them all
+ */
+
+- (void)rotate_and_translate {
+    CGFloat x_prime = (x_rot_point + x_position) - x_rot_point*cos(z_rotation) + y_rot_point*sin(z_rotation);
+    CGFloat y_prime = (y_rot_point + y_position) - x_rot_point*sin(z_rotation) - y_rot_point*cos(z_rotation);
+    
+    view.layer.position = CGPointMake(x_prime, y_prime);
+}
+
+#pragma mark -
+#pragma mark Animation Delegate
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    for (NSString *key in [view.layer animationKeys]) {
+        if ([key compare:@"scale_x"] == NSOrderedSame) {
+            [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
+        } else if ([key compare:@"scale_y"] == NSOrderedSame) {
+            [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
+        }
+    }
+}
+
 #pragma mark -
 #pragma mark Setters
 
@@ -150,14 +177,15 @@
     if (!x && !y) {
         return;
     }
-    if (!x) {
-        x = [NSNumber numberWithFloat:view.layer.position.x];
+    
+    if (x) {
+        x_position = [x floatValue];
     }
-    if (!y) {
-        y = [NSNumber numberWithFloat:view.layer.position.y];
+    if (y) {
+        y_position = [y floatValue];
     }
     
-    view.layer.position = CGPointMake([x floatValue], [y floatValue]);
+    [self rotate_and_translate];
 }
 
 - (void)set_x:(NSDictionary *)args {
@@ -295,12 +323,29 @@
         [view.layer setValue:z_scale forKeyPath:@"transform.scale.z"];
     }
      */
-    
+
     x_scale = [[layer_scale objectAtIndex:0] floatValue];
     y_scale = [[layer_scale objectAtIndex:1] floatValue];
     
     [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
     [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
+    /*
+    CABasicAnimation *animation_x = [CABasicAnimation animationWithKeyPath:@"transform.scale.x"];
+    animation_x.fillMode = kCAFillModeForwards;
+    animation_x.removedOnCompletion = NO;
+    [animation_x setToValue:[NSNumber numberWithFloat:x_scale]];
+    [animation_x setDuration:3.0];
+    animation_x.delegate = self;
+    [view.layer addAnimation:animation_x forKey:@"scale_x"];
+    
+    CABasicAnimation *animation_y = [CABasicAnimation animationWithKeyPath:@"transform.scale.y"];
+    animation_y.fillMode = kCAFillModeForwards;
+    animation_y.removedOnCompletion = NO;
+    [animation_y setToValue:[NSNumber numberWithFloat:y_scale]];
+    [animation_y setDuration:3.0];
+    animation_y.delegate = self;
+    [view.layer addAnimation:animation_y forKey:@"scale_y"];
+     //*/
 }
 
 
@@ -327,6 +372,8 @@
         x_rot = [NSNumber numberWithFloat:[x_rot floatValue] * M_PI/180.0];
         [view.layer setValue:x_rot forKeyPath:@"transform.rotation.x"];
         x_rotation = [x_rot floatValue];
+        
+        [self rotate_and_translate];
     }
 }
 
@@ -347,6 +394,8 @@
         y_rot = [NSNumber numberWithFloat:[y_rot floatValue] * M_PI/180.0];
         [view.layer setValue:y_rot forKeyPath:@"transform.rotation.y"];
         y_rotation = [y_rot floatValue];
+        
+        [self rotate_and_translate];
     }
 }
 
@@ -356,8 +405,14 @@
         id z_rot = nil;
         if ([arg isKindOfClass:[NSNumber class]]) {
             z_rot = arg;
+            x_rot_point = 0.0;
+            y_rot_point = 0.0;
         } else if ([arg isKindOfClass:[NSArray class]]) {
             z_rot = [(NSArray *)arg objectAtIndex:0];
+            if ([arg count] >= 2) {
+                x_rot_point = [[(NSArray *)arg objectAtIndex:1] floatValue];
+                y_rot_point = [[(NSArray *)arg objectAtIndex:2] floatValue];
+            }
         } else {
             return;
         }
@@ -367,8 +422,12 @@
         z_rot = [NSNumber numberWithFloat:[z_rot floatValue] * M_PI/180.0];
         [view.layer setValue:z_rot forKeyPath:@"transform.rotation.z"];
         z_rotation = [z_rot floatValue];
+        
+        [self rotate_and_translate];
     }
 }
+
+
 
 
 /**
@@ -477,11 +536,13 @@
 }
 
 - (void)get_x:(NSMutableDictionary *)dictionary {
-    [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.x] forKey:@"x"];
+    //[dictionary setObject:[NSNumber numberWithFloat:view.layer.position.x] forKey:@"x"];
+    [dictionary setObject:[NSNumber numberWithFloat:x_position] forKey:@"x"];
 }
 
 - (void)get_y:(NSMutableDictionary *)dictionary {
-    [dictionary setObject:[NSNumber numberWithFloat:view.layer.position.y] forKey:@"y"];
+    //[dictionary setObject:[NSNumber numberWithFloat:view.layer.position.y] forKey:@"y"];
+    [dictionary setObject:[NSNumber numberWithFloat:y_position] forKey:@"y"];
 }
 
 - (void)get_z:(NSMutableDictionary *)dictionary {
