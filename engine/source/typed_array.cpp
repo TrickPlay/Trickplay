@@ -198,7 +198,7 @@ TypedArray::~TypedArray()
 
 guint8 * TypedArray::get( gulong index )
 {
-    if ( bad || index < 0 || index >= length )
+    if ( bad || index >= length )
     {
         return 0;
     }
