@@ -35,7 +35,6 @@ function post_main()
 		children = {
 			Clone{
 				source = imgs.bar.mid,
-				--scale  = {faux_len*2,1},
 				width  = faux_len*2,
 				tile   = {true,false},
 				x=screen_w-faux_len,

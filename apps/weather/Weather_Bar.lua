@@ -177,7 +177,6 @@ function Make_Bar(loc,index, master)
                 name   = "mid",
                 source = imgs.bar.mid,
                 tile   = {true,false},
-                --scale  = {408,1},
                 x      = bar_side_w,
                 w      = 408,
             },
