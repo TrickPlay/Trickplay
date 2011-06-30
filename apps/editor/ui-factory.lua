@@ -1,5 +1,7 @@
 local factory = {}
 
+local attr_t_idx 
+
 function factory.make_dropdown( size , color )
 
     local BORDER_WIDTH= 3
@@ -112,39 +114,39 @@ end
 local icon_map = 
 {
 	["Left Edge      "] = function() icon = icon_l return icon end, 
-        ["Right Edge    "] = function() icon = icon_r return icon end, 
-        ["Top             "] = function() icon = icon_t return icon end, 
-        ["Bottom        "] = function() icon = icon_b return icon end, 
-        ["Horiz. Center   "] = function() icon = icon_hc return icon end, 
-        ["Vert. Center    "] = function() icon = icon_vc return icon end, 
-        ["Horizontally	  "] = function() icon = icon_dhc return icon end,  
-        ["Vertically 	  "] = function() icon = icon_dvc return icon end 
+    ["Right Edge    "] = function() icon = icon_r return icon end, 
+    ["Top             "] = function() icon = icon_t return icon end, 
+    ["Bottom        "] = function() icon = icon_b return icon end, 
+    ["Horiz. Center   "] = function() icon = icon_hc return icon end, 
+    ["Vert. Center    "] = function() icon = icon_vc return icon end, 
+    ["Horizontally	  "] = function() icon = icon_dhc return icon end,  
+    ["Vertically 	  "] = function() icon = icon_dvc return icon end 
 }
 
 local item_map = 
 {
-        ["Undo".."\t\t\t".."[U]"]   = function()  return "undo" end,
-     	["Redo".."\t\t\t".."[E]"]   = function()  return "redo" end,
-     	["Clone".."\t\t\t".."[C]"]   = function() return "clone" end,
-     	["Duplicate".."\t\t".."[D]"]   = function() return "duplicate" end,
-     	["Delete".."\t\t     ".."[Del]"]   = function() return "delete" end,
-     	["Group".."\t\t\t".."[G]"]   = function() return "group" end,
-     	["UnGroup".."\t\t\t"..""]   = function() return "ungroup" end,
-     	["Timeline".."\t\t\t".."[J]"]   = function() return "tline" end,
-     	["Timeline Show".."\t".."[J]"]   = function() return "tline" end,
-     	["Timeline Hide".."\t\t".."[J]"]   = function() return "tline" end,
+    ["Undo".."\t\t\t".."[U]"]   = function()  return "undo" end,
+    ["Redo".."\t\t\t".."[E]"]   = function()  return "redo" end,
+    ["Clone".."\t\t\t".."[C]"]   = function() return "clone" end,
+    ["Duplicate".."\t\t".."[D]"]   = function() return "duplicate" end,
+    ["Delete".."\t\t     ".."[Del]"]   = function() return "delete" end,
+    ["Group".."\t\t\t".."[G]"]   = function() return "group" end,
+    ["UnGroup".."\t\t\t"..""]   = function() return "ungroup" end,
+    ["Timeline".."\t\t\t".."[J]"]   = function() return "tline" end,
+    ["Timeline Show".."\t".."[J]"]   = function() return "tline" end,
+    ["Timeline Hide".."\t\t".."[J]"]   = function() return "tline" end,
 	["Left Edge      "] = function() return "left" end, 
-        ["Right Edge    "] = function() return "right" end, 
-        ["Top             "] = function() return "top" end, 
-        ["Bottom        "] = function() return "bottom" end, 
-        ["Horiz. Center   "] = function() return "hcenter" end, 
-        ["Vert. Center    "] = function() return "vcenter" end, 
-        ["Horizontally	  "] = function() return "hspace" end,  
-        ["Vertically 	  "] = function() return "vspace" end,
+    ["Right Edge    "] = function() return "right" end, 
+    ["Top             "] = function() return "top" end, 
+    ["Bottom        "] = function() return "bottom" end, 
+    ["Horiz. Center   "] = function() return "hcenter" end, 
+    ["Vert. Center    "] = function() return "vcenter" end, 
+    ["Horizontally	  "] = function() return "hspace" end,  
+    ["Vertically 	  "] = function() return "vspace" end,
 	["Bring To Front"] = function() return "bring_front" end,
-        ["Bring Forward "] = function() return "bring_forward" end,
-        ["Send To Back "] = function() return "send_back" end,
-        ["Send Backward "] = function() return "send_backward"end,
+    ["Bring Forward "] = function() return "bring_forward" end,
+    ["Send To Back "] = function() return "send_back" end,
+    ["Send Backward "] = function() return "send_backward"end,
 	["Reference Image        "] = function() return "bgimage" end, 
 	["Show Lines"] = function() return "guideline" end, 
 	["Hide Lines"] = function() return "guideline" end,
@@ -1230,28 +1232,114 @@ local org_items
 -------------------------------------------------------------------------------
 -- Makes a popup window contents (attribute name, input text, input button)
 -------------------------------------------------------------------------------
-function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item_s, save_items) 
-    local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF" }
-    local TEXT_SIZE     = 26
-    local PADDING_X     = 7
-    local PADDING_Y     = 7   
-    local PADDING_B     = 15 
-    local WIDTH         = 450
-    local HEIGHT        = TEXT_SIZE  + ( PADDING_Y * 2 )
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = {255,255,255,255}
-    local FOCUS_COLOR  = {0,255,0,255}
-    local LINE_COLOR    = {255,255,255,255}  --"FFFFFF"
-    local BORDER_RADIUS = 12
-    local LINE_WIDTH    = 1
-    local input_box_width     
-    local item_group 
---[[
-    if item_n then print("item_n", item_n) end 
-    if item_v then print("item_v", item_v) end 
-    if item_s then print("item_s", item_s) end 
-]]
-    local function text_reactive()
+function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, save_items)
+	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
+	local group = Group{}
+	local PADDING_X     = 7 -- The focus ring has this much padding around it
+    local PADDING_Y     = 7
+ 	group:clear()
+	group.name = item_n
+	group.reactive = true
+
+	local text
+
+	 local function make_focus_ring(w, h)
+		local ring = Canvas{ size = {w, h} }
+        ring:begin_painting()
+        ring:set_source_color({255,0,0,255})
+        ring:round_rectangle( 1/2, 1/2, w - 1 , h - 1 , 0)
+		ring:set_source_color( {50,0,0,255})
+    	ring:fill(true)
+		ring:set_line_width (1)
+    	ring:set_source_color({255,0,0,255})
+        ring:stroke(true)
+        ring:finish_painting()
+		if ring.Image then
+  	 		ring= ring:Image()
+        end
+        return ring
+
+    end
+
+    local function make_ring(w, h)
+		local ring = Canvas{ size = {w, h} }
+        ring:begin_painting()
+        ring:set_source_color({255,255,255,255})
+        ring:round_rectangle( 1/2, 1/2, w - 1 , h - 1 , 0)
+		ring:set_source_color( {0,0,0,255})
+    	ring:fill(true)
+		ring:set_line_width (1)
+    	ring:set_source_color({255,255,255,255})
+        ring:stroke(true)
+        ring:finish_painting()
+		if ring.Image then
+  	 		ring= ring:Image()
+        end
+        return ring
+    end
+
+	
+	input_box_width = 150
+	ring = make_ring(input_box_width, 23) 
+	ring.name = "ring"
+	if (text) then 
+		ring.position = {text.x+text.w+5, 0}
+	else 
+		ring.position = {0, 0}
+  	end
+
+    ring.opacity = 180
+	ring.reactive = false
+    group:add(ring)
+
+	local file_name = string.sub(item_v,15,-1)
+
+	input_text = Text {name = "file_name", text = file_name, font = "FreeSans Medium 12px", single_line = true, w = 140, color = {180,180,180,255}}
+    input_text.position  = {ring.x + 5, ring.y + 5}
+	group:add(input_text) 
+	     
+	editor_use = true
+	local filechooser = ui_element.button{skin = "inspector", ui_width = 100, ui_height = 23, text_font ="FreeSans Medium 12px" , label = "Browse ...", }
+	filechooser.name = "filechooser"
+	filechooser.position = {ring.x + ring.w + 6, ring.y + 2 }
+	editor_use = false
+
+	local inspector_deactivate = function ()
+		local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
+		inspector:add(rect)
+	end 
+
+	local inspector_activate = function ()
+		inspector:remove(inspector:find_child("deactivate_rect"))
+	end 
+
+	if v.type == "Video" then 
+		filechooser.pressed = function() editor.video(inspector) inspector_deactivate() end 
+	else 
+		filechooser.pressed = function() editor.image(nil,inspector) inspector_deactivate() end 
+	end
+	--filechooser.released = function() inspector_activate() end 
+
+	group:add(filechooser)
+	return group
+end 
+
+function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, save_items)
+	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
+	local group = Group{}
+	local PADDING_X     = 7 -- The focus ring has this much padding around it
+    local PADDING_Y     = 7
+
+	if save_items == true then 
+		org_items = table_copy(v.items)
+	end 
+
+	local plus, item_plus, label_plus, separator_plus
+	group:clear()
+	group.name = "itemsList"
+	group.reactive = true
+
+	local function text_reactive()
 	for i, c in pairs(g.children) do
 	     if(c.type == "Text") then 
 	          c.reactive = true
@@ -1259,704 +1347,201 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         end
     end 
 
-    local function make_focus_ring(w, h)
-        local ring = Canvas{ size = {w, h} }
-        ring:begin_painting()
-        ring:set_source_color( FOCUS_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH /2,
-            PADDING_Y + BORDER_WIDTH /2,
-            w - BORDER_WIDTH - PADDING_X * 2 ,
-            h - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-
-        return ring
-    end
-
-    local function make_ring(w, h)
-	local ring = Canvas{ size = {w, h} }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH /2,
-            PADDING_Y + BORDER_WIDTH /2,
-            w - BORDER_WIDTH - PADDING_X * 2 ,
-            h - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
-    end
-
-    local function make_line()
-	local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
-        line:begin_painting()
-        line:new_path()
-        line:move_to (0,0)
-        line:line_to (WIDTH, 0)
-    	line:set_line_width (LINE_WIDTH)
-        line:set_source_color(LINE_COLOR)
-    	line:stroke (true)
-    	line:fill (true)
-        line:finish_painting()
-	if line.Image then
-  	 line= line:Image()
-        end
-        return line
-    end 
-
-    -- item group 
-    local group = Group {}
-    group:clear()
-    	
-    -- item group's children 
-    local text, input_text, ring, focus, line, button--, checkbox, radio_button, button_picker
-
-    if(item_n == "title")then 
-    	text = Text {text = item_v}:set(STYLE)
-		text.position = {WIDTH/2 - text.w/2, 8} 
-    	group:add(text)
-    elseif(item_n == "caption") then
-    	text = Text {text = item_v}:set(STYLE)
-		text.position = {PADDING_X, 0}
-    	group:add(text)
-        group.size = {WIDTH, HEIGHT - PADDING_Y}
-    elseif (item_n =="line") then 
-        line = make_line()
-		if(item_s =="hide") then 
-			line.opacity = 0 
-        end 
-		group:add(line)
-        group.size = {WIDTH, LINE_WIDTH + PADDING_Y}
-    elseif (item_n == "button") then 
-		group.name = item_v
-		group.reactive = true
-
-		if v.extra then 
-	   		if is_in_list(v.extra.type, uiElements) == true  then
-				WIDTH = WIDTH + 33
-	   		end 
-		end
-		
-		if(item_v == "view code") then 
-	     	button = make_ring(WIDTH, HEIGHT + PADDING_Y)
-		else 
-	     	button = make_ring(WIDTH/2 - 3, HEIGHT + PADDING_Y)
-		end 
-		button.name = "button"
-        button.position  = {0, 0}
-        button.reactive = true
-
-		function button:on_key_down(key)
-             local si = inspector:find_child("si")
-
-    	     if is_this_widget(v) == true  then
-                item_group = (inspector:find_child("si")).content
-             else 
-         		item_group = inspector:find_child("item_group")
-    	     end 
-             if key == keys.Return then
-                if (item_v == "view code") then 
-		      		if v.items then 
-			   			v.items = org_items
-		      		end		 
-		      		screen:remove(inspector)
-		      		if v.extra.type == "MenuButton" then 
-                    	v.spin_out()
-		      		end 
-		      		input_mode = S_SELECT
-		      		current_inspector = nil
-		      		for i, c in pairs(g.children) do
-	     		  		editor.n_selected(c)
-		      		end
-                    screen:grab_key_focus(screen) 
-		      		editor.view_code(v)
-		      		text_reactive()
-	              	return true
-		  		elseif (item_v == "apply") then 
-		      		editor.n_selected(v, true)
-		      		inspector_apply (v, inspector) 
-		      		screen:remove(inspector)
-		      		if v.extra.type == "MenuButton" then 
-                    	v.spin_out()
-		      		end 
-		      		input_mode = S_SELECT
-		      		current_inspector = nil
-                    screen:grab_key_focus(screen) 
-		      		text_reactive()
-		      		for i, c in pairs(g.children) do
-	     		  		editor.n_selected(c)
-		      		end
-	              	return true
-		  		elseif (item_v == "cancel") then 
-		      		if v.items then 
-			   				v.items = org_items
-		      		end 
-		      		screen:remove(inspector)
-		      		if v.extra.type == "MenuButton" then 
-                      	   v.spin_out()
-		      		end 
-		      		input_mode = S_SELECT
-		      		current_inspector = nil
-		      		editor.n_selected(v, true)
-                    screen:grab_key_focus(screen) 
-		      		text_reactive()
-		      		for i, c in pairs(g.children) do
-	     		  		editor.n_selected(c)
-		      		end
-	              	return true
-		  		end 
- 	     	elseif (key == keys.Tab and shift == false) then 
-            	group.extra.on_focus_out()
-		  		for i, v in pairs(attr_t_idx) do
-					if(item_n == v or item_v == v) then 
-			     		if(attr_t_idx[i+1] == nil) then return true end 
-			     			while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-				 				i = i + 1
-			     			end 
-			     			if(item_group:find_child(attr_t_idx[i+1])) then
-			     				local n_item = attr_t_idx[i+1]
-								item_group:find_child(n_item).extra.on_focus_in()	
-								break
-			     			end
-						end 
-    		  	end
-		  	  	return true
-	     	elseif (key == keys.Tab and shift == true )then 
-		  		group.extra.on_focus_out()
-		  		for i, v in pairs(attr_t_idx) do
-					if(item_n == v or item_v == v) then 
-			     		while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
-				 			i = i - 1
-			     		end 
-			     		if(item_group:find_child(attr_t_idx[i-1])) then
-			     			local p_item = attr_t_idx[i-1]
-							item_group:find_child(p_item).extra.on_focus_in()	
-							break
-			     		end
-					end 
-    		  	end
-		  		return true
-            end
-        end
-
-		function button:on_button_down () 
- 	     	current_focus.extra.on_focus_out()
-	     	current_focus = group
-	     	group.extra.on_focus_in()
-	     	if (item_v == "view code") then 
-		      	if v.items then 
-			   		v.items = org_items
-		      	end 
-		      	screen:remove(inspector)
-		      	input_mode = S_SELECT
-		      	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		      	editor.view_code(v)
-		      	text_reactive()
-	     	elseif (item_v == "apply") then 
-		      	inspector_apply (v, inspector) 
-		      	screen:remove(inspector)
-		      	input_mode = S_SELECT
-		      	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		      	text_reactive()
-		      	editor.n_selected(v, true)
-	     	elseif (item_v == "cancel") then 
-		      	if v.items then 
-			   		v.items = org_items
-		      	end 
-		      	screen:remove(inspector)
-		      	input_mode = S_SELECT
-		      	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		      	text_reactive()
-		      	editor.n_selected(v, true)
-	     	end 
-	     	if v.extra then 
-	     		if v.extra.type == "MenuButton" then 
-                  	v.spin_out()
-	     		end 
-	     	end 
-	     	for i, c in pairs(g.children) do
-	     		editor.n_selected(c)
-	     	end
-	
-            return true
-		end 
-
-    	group:add(button)
-
-		local focus = assets( "assets/button-focus.png" )
-        focus.name = "focus"
-        focus:set{ position = { 0 , 0 } , size = { group.w , group.h } , opacity = 0 }
-        group:add(focus)
-
-    	text = Text {text = item_s}:set(STYLE)
-        text.position  = {(button.w - text.w)/2, (button.h - text.h)/2}
+	if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
+		local text = Text {name = "attr", text = item_s}:set(STYLE)
+        --text.position  = {PADDING_X, 5}
+        text.position  = {0,0}
     	group:add(text)
 
-        function group.extra.on_focus_in()
-        	current_focus = group
-	     	button:grab_key_focus(button)
-	     	button.opacity = 0 
-            focus.opacity = 255
-        end
-
-        function group.extra.on_focus_out()
-            focus.opacity = 0
-	     	button.opacity = 255 
-        end
-
-    elseif(item_n == "focus") then  
-		group:clear()
-		group.name = "focusChanger"
-		group.reactive = true
-		local focus_changer = factory.draw_focus_changer()
-
-		local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
-	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
-
-		if v.extra.focus then 
-			for m, n in pairs (v.extra.focus) do
-		     	if type(n) ~= "function" then 
-		          	focus_changer:find_child("text"..focus_map[m]).text = n
-		     	else 
-		          	focus_changer:find_child("text"..focus_map[m]).text = v.name
-		          	focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
-		          	focus_changer:find_child("text"..focus_map[m]).reactive = false
-		     	end 
-			end 	
-		end
-
-		if v.extra.type == "Button" or v.extra.type == "MenuButton" then
-			focus_changer:find_child("textE").text = v.name 
-			focus_changer:find_child("gE").opacity = 150 
-			focus_changer:find_child("gE").reactive = false 
-		elseif v.extra.type == "TextInput" or  v.extra.type == "ButtonPicker" then 
-			focus_changer:find_child("textE").text = v.name 
-			focus_changer:find_child("gE").opacity = 150 
-			focus_changer:find_child("gE").reactive = false 
-			focus_changer:find_child("textL").text = v.name 
-			focus_changer:find_child("gL").opacity = 150 
-			focus_changer:find_child("gL").reactive = false 
-			focus_changer:find_child("textR").text = v.name 
-			focus_changer:find_child("gR").opacity = 150 
-			focus_changer:find_child("gR").reactive = false 
-		end 	
-
-		local space = WIDTH - PADDING_X  
-    	focus_changer.position  = {WIDTH - space , 5}
-    	group:add(focus_changer)
-		return group
-   	elseif(item_n == "tab_labels") then 
-		if save_items == true then 
-			org_items = table_copy(v.tab_labels)
-		end 
-
-		local plus
-		local item_string_t
-		group:clear()
-		group.name = "itemsList"
-		group.reactive = true
-	
-		local space = WIDTH - PADDING_X  
-		local text = Text {name = "attr", text = item_s, single_line = true}:set(STYLE)
-    	text.position  = {PADDING_X, 5}
-    	group:add(text)
-	
-		plus = factory.draw_plus_item()
-		plus.position = {text.x + text.w + PADDING_X, 5}
+		plus = Image{src="lib/assets/li-btn-dim-plus.png"}
+		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
-	
+		group:add(plus)
 		function plus:on_button_down(x,y)
-			table.insert(v.tab_labels, "item"..tostring(table.getn(v.tab_labels)+1)) 
+			plus.src="lib/assets/li-btn-red-plus.png"
+		end 
+		function plus:on_button_up(x,y)
+			table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
 			screen:remove(inspector)
 			input_mode = S_SELECT
 			current_inspector = nil
-       		screen:grab_key_focus(screen) 
+            screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
 			inspector_apply (v, inspector)
+			local si = inspector:find_child("si_more")
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true
 		end 
-	
-		group:add(plus) 
-	
-		local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-		local items_list = ui_element.layoutManager{rows = table.getn(v.tab_labels), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=10, cell_size="variable", cells_focusable=false}
-		if text then 
-        	items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
-		else 
-        	items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
-		end 
-        items_list.name = "items_list"
+	elseif v.extra.type =="MenuButton" then 
+		editor_use = true 
+		item_plus = ui_element.button{text_font ="FreeSans Medium 12px", label="Item +", ui_width=80, ui_height=23, skin="inspector", text_has_shadow = true, reactive = true }
+		item_plus.name = "item_plus"
+		item_plus.position = {0,0,0}
+		item_plus.extra.reactive = true 
 
-		for i,j in pairs(v.tab_labels) do 
-	      	local input_txt, item_type 
-	      	if v.extra.type =="MenuButton" then 
-		  		if j["type"] == "label" then 
-		     		input_txt = j["string"] 
-		     		item_type = "label"
-		  		elseif j["type"] == "item" then 
-		     		input_txt = "   "..j["string"] 
-		     		item_type = "item"
-		  		elseif j["type"] == "separator" then 
-		     		input_txt = "--------------"
-		     		item_type = "separator"
-		  		end 
-	      	else 
-		     	input_txt = j 
-	      	end  
-            local item = ui_element.textInput{ui_width = 300, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} 
-	      	item.name = "item_text"..tostring(i)
+		label_plus = ui_element.button{text_font ="FreeSans Medium 12px", label="Label +", ui_width=80, ui_height=23, skin="inspector", text_has_shadow = true, reactove = true}
+		label_plus.name = "label_plus"
+		label_plus.position = {item_plus.w + 7,0,0}
+		label_plus.extra.reactive = true
+
+		separator_plus = ui_element.button{text_font ="FreeSans Medium 12px", label="Separator +", ui_width=80, ui_height=23, skin="inspector", text_has_shadow = true, reactive = true}
+		separator_plus.name = "separator_plus"
+		separator_plus.position = {label_plus.x + label_plus.w + 7,0,0}
+		editor_use = false 
+
+		group:add(item_plus, label_plus, separator_plus) 
+
+
+		
+		function separator_plus:on_button_down(x,y)
+			separator_plus.on_focus_in()
+			return true 
+		end 
+		function item_plus:on_button_down(x,y)
+			item_plus.on_focus_in()
+			return true 
+		end 
+		function label_plus:on_button_down(x,y)
+			label_plus.on_focus_in()
+			return true 
+		end 
+	    function separator_plus:on_button_up(x,y)
+			table.insert(v.items, {type="separator"})
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+            screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			inspector_apply (v, inspector)
+			local si = inspector:find_child("si_more")
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true 
+	    end 
+
+	    function item_plus:on_button_up(x,y)
+			table.insert(v.items, {type="item", string="Item ...", f=nil})
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+            screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			inspector_apply (v, inspector)
+			local si = inspector:find_child("si_more")
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true 
+		end 
+	    function label_plus:on_button_up(x,y)
+			table.insert(v.items, {type="label", string="Label ..."})
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+            screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			inspector_apply (v, inspector)
+			local si = inspector:find_child("si_more")
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+
+			return true 
+		end 
+	end 
+
+	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
+	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=5, cell_size="variable", cells_focusable=false}
+	if text then 
+    	--items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
+    	items_list.position = {0, text.y + text.h + 7}
+	else 
+        --items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
+        items_list.position = {0 ,plus.y + plus.h + 7}
+	end 
+    items_list.name = "items_list"
+
+	for i,j in pairs(v.items) do 
+		local input_txt, item_type 
+	    if v.extra.type =="MenuButton" then 
+			if j["type"] == "label" then 
+		    	input_txt = j["string"] 
+		     	item_type = "label"
+		  	elseif j["type"] == "item" then 
+		     	input_txt = "   "..j["string"] 
+		     	item_type = "item"
+		  	elseif j["type"] == "separator" then 
+		     	input_txt = "--------------"
+		     	item_type = "separator"
+		  	end 
+	    else 
+		 	input_txt = j 
+	    end  
+
+        local item = ui_element.textInput{ui_width = 175, ui_height = 24, text = input_txt, text_font = "FreeSans Medium 12px", border_width = 1, border_corner_radius = 0, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, fill_color = {0,0,0,255}} 
+	    item.name = "item_text"..tostring(i)
 	     
-	      	local minus = factory.draw_minus_item()
-	      	minus.name = "item_minus"..tostring(i)
-	      	local up = factory.draw_up()
-	      	up.name = "item_up"..tostring(i)
-	      	local down = factory.draw_down()
-	      	down.name = "item_down"..tostring(i)
+	    --local minus = factory.draw_minus_item()
+		local minus = Image{src="lib/assets/li-btn-dim-minus.png"}
+	    minus.name = "item_minus"..tostring(i)
+		minus.reactive = true
+	    --local up = factory.draw_up()
+		local up = Image{src="lib/assets/li-btn-dim-up.png"}
+	    up.name = "item_up"..tostring(i)
+		up.reactive = true
+	    --local down = factory.draw_down()
+		local down = Image{src="lib/assets/li-btn-dim-down.png"}
+	    down.name = "item_down"..tostring(i)
+		down.reactive = true
 
-	      	function minus:on_button_down(x,y)
-		     	v.tab_labels = table_removekey(v.tab_labels, tonumber(string.sub(minus.name, 11,-1)))
-		     	--dumptable(v.tab_labels)
-		     	screen:remove(inspector)
-		     	input_mode = S_SELECT
-		     	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		     	text_reactive()
-		     	editor.n_selected(v, true)
-		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     	return true 
-	      	end 
-
-	      	function up:on_button_down(x,y)
-		     	if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
-		          	for i, j in pairs (v.tab_labels) do
-						v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		     	  	end 
-		     	else
-		          	for i, j in pairs (v.tab_labels) do
-						if j["type"] == "label" then 
-		    		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		  				elseif j["type"] == "item" then 
-		     		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-						end
-		     	  	end 
-		     	end 
-		     	table_move_up(v.tab_labels, tonumber(string.sub(up.name, 8,-1)))
-		     	screen:remove(inspector)
-		     	input_mode = S_SELECT
-		     	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		     	text_reactive()
-		     	editor.n_selected(v, true)
-		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     	return true 
-	      	end 
-
-	      	function down:on_button_down(x,y)
-		     	if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
-		          	for i, j in pairs (v.tab_labels) do
-						v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		     	  	end 
-		     	else
-		          	for i, j in pairs (v.tab_labels) do
-						if j["type"] == "label" then 
-		    		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		  				elseif j["type"] == "item" then 
-		     		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-						end
-		     	  	end 
-		     	end
-		     	table_move_down(v.tab_labels, tonumber(string.sub(down.name, 10,-1)))
-		     	screen:remove(inspector)
-		     	input_mode = S_SELECT
-		     	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		     	text_reactive()
-		     	editor.n_selected(v, true)
-		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     	return true 
-	      end 
-
-	      function item:on_button_down()
-   				current_focus.extra.on_focus_out()
-	        	current_focus = group
-				item.on_focus_in()
-				if item_type then 
-                   	item:find_child("textInput").extra.item_type = item_type
-	        	end 
-				return true
-	      end 
-
-	      local item_txt = item:find_child("textInput")
-	      item_txt.reactive = true
-	      function item_txt:on_button_down()
-		  		current_focus.extra.on_focus_out()
-	        	current_focus = group
-				item.on_focus_in()
-				if item_type then 
-                   	item:find_child("textInput").extra.item_type = item_type
-	        	end 
-				return true
-	      end 
-
-	      function item:on_button_down()
-   				current_focus.extra.on_focus_out()
-	        	current_focus = group
-				item.on_focus_in()
-				if item_type then 
-                   	item:find_child("textInput").extra.item_type = item_type
-	        	end 
-				return true
-	      end 
-	
-	      function item:on_key_down(key)
-	      		local si = inspector:find_child("si")
-    	       	if is_this_widget(v) == true  then
-                    item_group = si.content
-               	else 
-         	    	item_group = inspector:find_child("item_group")
-    	       	end 
-
-	       		if (key == keys.Tab and shift == false) then
-		  			item.on_focus_out()
-		  			local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
-		  			if (item_group:find_child("item_text"..tostring(next_i))) then
-						item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
-		  				si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
-		  			else 	
-		     			for i, v in pairs(attr_t_idx) do
- 		        			if("itemsList" == v) then 
-			  					local function there()
-		          					while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
-		               					i = i + 1
-			       						if(attr_t_idx[i+1] == nil) then return true end  
-		          					end 
-		          					if(item_group:find_child(attr_t_idx[i+1])) then
-		               					local n_item = attr_t_idx[i+1]
-			       						if item_group:find_child(n_item).extra.on_focus_in then 
-			        						item_group:find_child(n_item).extra.on_focus_in()	
-		  									si.seek_to_middle(0,item_group:find_child(n_item).y) 
-			   							else
-											there()
-			  							end 
-		      						end
-			  					end 
-			  					there()
-		        			end 
-    		     		end
-		  			end
-	       		elseif (key == keys.Tab and shift == true )then 
-		     		item.on_focus_out()
-		     		local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
-		     		if (item_group:find_child("item_text"..tostring(prev_i))) then
-						item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
-		  				si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
-		     		else 	
-		      			for i, v in pairs(attr_t_idx) do
-							if("itemsList" == v) then 
-			     				if(attr_t_idx[i-1] == nil) then return true end 
-			     				while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
-				 					i = i - 1
-			     				end 
-			     				if(item_group:find_child(attr_t_idx[i-1])) then
-			     					local p_item = attr_t_idx[i-1]
-									item_group:find_child(p_item).extra.on_focus_in()	
-		  	        				si.seek_to_middle(0,item_group:find_child(p_item).y) 
-									break
-			     				end
-							end 
-    		    		end
-		    		end 
-	       		end 
-	     	end 
-	     	items_list:replace(i,1,item)
-	     	items_list:replace(i,2,minus)
-	     	items_list:replace(i,3,up)
-	     	items_list:replace(i,4,down)
-		end
-
-		function group.extra.on_focus_in()
-	         current_focus = group
-		 a = items_list.tiles[1][1]
-		 a.on_focus_in()
-		 a:grab_key_focus()
-        end
-
-        function group.extra.on_focus_out()
-			for i,j in pairs(items_list.children) do 
-		     	if j.on_focus_out then 
-			 	j.on_focus_out()
-		     	end 
-			end 
-			return true
-        end 
-		group:add(items_list) 
-		return group
-    elseif(item_n == "items") then 
-		if save_items == true then 
-	     	org_items = table_copy(v.items)
+		function minus:on_button_down(x,y)
+			minus.src="lib/assets/li-btn-red-minus.png"
 		end 
+	    function minus:on_button_up(x,y)
+			v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+		    screen:remove(inspector)
+		    input_mode = S_SELECT
+		    current_inspector = nil
+            screen:grab_key_focus(screen) 
+		    text_reactive()
+		    editor.n_selected(v, true)
+			local si = inspector:find_child("si_more")
+		    editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		    return true 
+	    end 
 
-		local plus, item_plus, label_plus, separator_plus
-		local item_string_t
-		group:clear()
-		group.name = "itemsList"
-		group.reactive = true
-
-		local space = WIDTH - PADDING_X  
-		if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
-			local text = Text {name = "attr", text = item_s}:set(STYLE)
-        	text.position  = {PADDING_X, 5}
-    		group:add(text)
-
-			plus = factory.draw_plus_item()
-			plus.position = {text.x + text.w + PADDING_X, 5}
-			plus.reactive = true
-			function plus:on_button_down(x,y)
-				table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
-				screen:remove(inspector)
-				input_mode = S_SELECT
-				current_inspector = nil
-                screen:grab_key_focus(screen) 
-				text_reactive()
-				editor.n_selected(v, true)
-				inspector_apply (v, inspector)
-				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-				return true
-			end 
-		elseif v.extra.type =="MenuButton" then 
-			plus = factory.draw_plus_items()
-			plus.position = {PADDING_X, 5}
-			item_plus = plus:find_child("item_plus")
-			label_plus = plus:find_child("label_plus")
-			separator_plus = plus:find_child("separator_plus")
-			function separator_plus:on_button_down(x,y)
-				table.insert(v.items, {type="separator"})
-				screen:remove(inspector)
-				input_mode = S_SELECT
-				current_inspector = nil
-                screen:grab_key_focus(screen) 
-				text_reactive()
-				editor.n_selected(v, true)
-				inspector_apply (v, inspector)
-				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-				return true
-			end 
-			function item_plus:on_button_down(x,y)
-				table.insert(v.items, {type="item", string="Item ...", f=nil})
-				screen:remove(inspector)
-				input_mode = S_SELECT
-				current_inspector = nil
-                screen:grab_key_focus(screen) 
-				text_reactive()
-				editor.n_selected(v, true)
-				inspector_apply (v, inspector)
-				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-				return true
-			end 
-
-			function label_plus:on_button_down(x,y)
-				table.insert(v.items, {type="label", string="Label ..."})
-				screen:remove(inspector)
-				input_mode = S_SELECT
-				current_inspector = nil
-                screen:grab_key_focus(screen) 
-				text_reactive()
-				editor.n_selected(v, true)
-				inspector_apply (v, inspector)
-				editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-				return true
-			end 
+		function up:on_button_down(x,y)
+			up.src="lib/assets/li-btn-red-up.png"
 		end 
-		group:add(plus) 
-
-		local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
-		local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=10, cell_size="variable", cells_focusable=false}
-		if text then 
-        		items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
-		else 
-        		items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
-		end 
-        items_list.name = "items_list"
-
-		for i,j in pairs(v.items) do 
-	      	local input_txt, item_type 
-	      	if v.extra.type =="MenuButton" then 
-		  		if j["type"] == "label" then 
-		     		input_txt = j["string"] 
-		     		item_type = "label"
-		  		elseif j["type"] == "item" then 
-		     		input_txt = "   "..j["string"] 
-		     		item_type = "item"
-		  		elseif j["type"] == "separator" then 
-		     		input_txt = "--------------"
-		     		item_type = "separator"
-		  		end 
-	      	else 
-		     	input_txt = j 
-	      	end  
-            local item = ui_element.textInput{ui_width = 300, ui_height = 40, text = input_txt, text_font = "DejaVu Sans 26px", border_width = 2} 
-	      	item.name = "item_text"..tostring(i)
-	     
-	      	local minus = factory.draw_minus_item()
-	      	minus.name = "item_minus"..tostring(i)
-	      	local up = factory.draw_up()
-	      	up.name = "item_up"..tostring(i)
-	      	local down = factory.draw_down()
-	      	down.name = "item_down"..tostring(i)
-
-	      	function minus:on_button_down(x,y)
-		     	v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
-		     	--dumptable(v.items)
-		     	screen:remove(inspector)
-		     	input_mode = S_SELECT
-		     	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		     	text_reactive()
-		     	editor.n_selected(v, true)
-		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     	return true 
-	      	end 
-
-	      	function up:on_button_down(x,y)
-		     	if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
-		          	for i, j in pairs (v.items) do
+	    function up:on_button_up(x,y)
+			if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+		    	for i, j in pairs (v.items) do
 					v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		     	  	end 
-		     	else
-		          	for i, j in pairs (v.items) do
-						if j["type"] == "label" then 
-		    		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-		  				elseif j["type"] == "item" then 
-		     		     	j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
-						end
-		     		end 
 		     	end 
-		     	table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
-		     	screen:remove(inspector)
-		     	input_mode = S_SELECT
-		     	current_inspector = nil
-                screen:grab_key_focus(screen) 
-		     	text_reactive()
-		     	editor.n_selected(v, true)
-		     	editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
-		     	return true 
-	      end 
+		    else
+		    	for i, j in pairs (v.items) do
+					if j["type"] == "label" then 
+		    			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  			elseif j["type"] == "item" then 
+		     			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+					end
+		     	end 
+		   end 
+		   table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
+		   screen:remove(inspector)
+		   input_mode = S_SELECT
+		   current_inspector = nil
+           screen:grab_key_focus(screen) 
+		   text_reactive()
+		   editor.n_selected(v, true)
+		   local si = inspector:find_child("si_more")
+		   editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+		   return true 
+	     end 
 
-	      function down:on_button_down(x,y)
+		 function down:on_button_down(x,y)
+			down.src="lib/assets/li-btn-red-down.png"
+		 end 
+	     function down:on_button_up(x,y)
 		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		          for i, j in pairs (v.items) do
 						v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
@@ -1977,12 +1562,16 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
              screen:grab_key_focus(screen) 
 		     text_reactive()
 		     editor.n_selected(v, true)
+		     local si = inspector:find_child("si_more")
 		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
 		     return true 
 	      end 
 
+---www 
 	      function item:on_button_down()
-   			 current_focus.extra.on_focus_out()
+		 	 if current_focus then 
+   			 	current_focus.extra.on_focus_out()
+			 end 
 	         current_focus = group
 		     item.on_focus_in()
 			 if item_type then 
@@ -1991,36 +1580,17 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			 return true
 	      end 
 
-	      local item_txt = item:find_child("textInput")
-	      item_txt.reactive = true
-
-	      function item_txt:on_button_down()
-			  current_focus.extra.on_focus_out()
-	          current_focus = group
-			  item.on_focus_in()
-			  if item_type then 
-                   item:find_child("textInput").extra.item_type = item_type
-	          end 
-			  return true
-	      end 
-
-	     function item:on_button_down()
-   			 current_focus.extra.on_focus_out()
-	         current_focus = group
-		     item.on_focus_in()
-			 if item_type then 
-             	item:find_child("textInput").extra.item_type = item_type
-	         end 
-			 return true
-	      end 
-	
 	      function item:on_key_down(key)
-	          local si = inspector:find_child("si")
-    	      if is_this_widget(v) == true  then
-                   item_group = si.content
-              else 
-         	  		item_group = inspector:find_child("item_group")
-    	      end 
+			local current_tab =  inspector:find_child("tabs").current_tab
+			if current_tab == 1 then 
+				item_group = inspector:find_child("item_group_info")
+				si = inspector:find_child("si_info")
+				attr_t_idx = info_attr_t_idx
+			else
+				item_group = inspector:find_child("item_group_more")  
+				si = inspector:find_child("si_more")
+				attr_t_idx = more_attr_t_idx
+			end 
 
 	       	if (key == keys.Tab and shift == false) then
 		  	     item.on_focus_out()
@@ -2066,64 +1636,93 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     				if(item_group:find_child(attr_t_idx[i-1])) then
 			     					local p_item = attr_t_idx[i-1]
 									item_group:find_child(p_item).extra.on_focus_in()	
-		  	        				si.seek_to_middle(0,item_group:find_child(p_item).y) 
+		  	        				si.seek_to_middle(0,item_group:fyoind_child(p_item).y) 
 									break
 			     				end
 							end 
     		    		end
 		    		end 
 	       		end 
-	     	end 
-	     	items_list:replace(i,1,item)
-	     	items_list:replace(i,2,minus)
-	     	items_list:replace(i,3,up)
-	     	items_list:replace(i,4,down)
-		end
+	    end 
+		items_list:replace(i,1,item)
+	    items_list:replace(i,2,minus)
+	    items_list:replace(i,3,up)
+	    items_list:replace(i,4,down)
+	end
+	function group.extra.on_focus_in()
+		current_focus = group
+		a = items_list.tiles[1][1]
+		a.on_focus_in()
+		a:grab_key_focus()
+    end
 
-		function group.extra.on_focus_in()
-	    	current_focus = group
-		 	a = items_list.tiles[1][1]
-		 	a.on_focus_in()
-		 	a:grab_key_focus()
-        end
+    function group.extra.on_focus_out()
+		for i,j in pairs(items_list.children) do 
+			if j.on_focus_out then 
+				j.on_focus_out()
+		    end 
+		end 
+		return true
+    end 
+	group.reactive = true
+	group:add(items_list) 
+	return group
+end 
 
-        function group.extra.on_focus_out()
-			for i,j in pairs(items_list.children) do 
-		     	if j.on_focus_out then 
-			 		j.on_focus_out()
-		     	end 
-			end 
-			return true
-        end 
-		group:add(items_list) 
-		return group
-    elseif item_n == "skin" or item_n == "wrap_mode" then  -- Attribute with button picker 
+function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s, save_items)
+		local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
+		local group = Group{}
 		group:clear()
 		group.name = item_n
 		group.reactive = true
 
-        local space = WIDTH - PADDING_X  
 	
 		text = Text {name = "attr", text = item_s}:set(STYLE)
-        text.position  = {WIDTH - space , 5}
+        text.position  = {0, 3}
     	group:add(text)
 	
 		local selected = 1
   		local itemLists
 	
-		if item_n == "skin" then itemLists = skins else itemLists = {"NONE", "CHAR", "WORD", "WORD_CHAR"} if v.wrap == false then item_v = "NONE" end  end--hjk
+		if item_n == "skin" then 
+			itemLists = skins 
+		elseif item_n == "wrap_mode" then 
+			itemLists = {"NONE", "CHAR", "WORD", "WORD_CHAR"} 
+			if v.wrap == false then 
+				item_v = "NONE" 	
+			end  
+		elseif item_n == "expansion_location" then 
+			itemLists = {"above", "below"} 
+		elseif item_n == "cell_size" then 
+			itemLists = {"fixed", "variable"} 
+		elseif item_n == "style" then 
+			itemLists = {"orbitting", "spinning"} 
+		elseif item_n == "direction" then 
+			itemLists = {"vertical", "horizontal"} 
+		end
 
 		for i,j in pairs(itemLists) do 
 	    	if(item_v == j)then 
 			selected = i 
 	    	end
 		end
------qqq
-        local item_picker = ui_element.buttonPicker{skin = "custom", items = itemLists, text_font = "DejaVu Sans 26px", selected_item = selected}
+
+		editor_use = true
+        local item_picker = ui_element.buttonPicker{skin = "inspector", items = itemLists, text_font = "FreeSans Medium 12px", selected_item = selected, inspector  = 5}
 		item_picker.ui_height = 45
-		item_picker.ui_width = 210
-        item_picker.position = {text.x + text.w + 50 , 0}
+		if item_n == "expansion_location" or "cell_size" then 
+			item_picker.ui_width = 110
+		else 
+			item_picker.ui_width = 130
+		end
+		--item_picker.text_font = "FreeSans Medium 12px"
+		if item_n == "style" then 
+        	item_picker.position = {text.x + text.w + 17 , -5}
+		else 
+        	item_picker.position = {text.x + text.w + 20 , -5}
+		end
 		item_picker.name = "item_picker"
+		editor_use = false
 
         group:add(item_picker) 
 	
@@ -2159,12 +1758,20 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		end 
 
 		function item_picker:on_key_down(key)
-	     	local si = inspector:find_child("si")
-    	    if is_this_widget(v) == true  then
-                item_group = (inspector:find_child("si")).content
-            else 
-         		item_group = inspector:find_child("item_group")
-    	    end 
+
+
+		    -- 0630 
+			local current_tab =  inspector:find_child("tabs").current_tab
+			if current_tab == 1 then 
+				item_group = inspector:find_child("item_group_info")
+				si = inspector:find_child("si_info") 
+				attr_t_idx = info_attr_t_idx
+			else
+				item_group = inspector:find_child("item_group_more") 
+				si = inspector:find_child("si_more") 
+				attr_t_idx = more_attr_t_idx
+			end 
+
 	       	if key == keys.Left then 
 		     	item_picker.press_left()
 	       	elseif key == keys.Right then  
@@ -2215,152 +1822,260 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 		 group:find_child("item_picker").extra.on_focus_out()
         end 
 		group:add(item_picker)
+		group.h = 23
         return group
-    elseif item_n == "expansion_location" or item_n == "cell_size" or item_n == "style" or item_n == "direction" then -- Attribute with radio button
-	group:clear()
-	group.name = item_n
-	group.reactive = true
+end 
 
-	text = Text {name = "attr", text = item_s}:set(STYLE)
-        text.position  = {PADDING_X, 5}
-    	group:add(text)
-
-	local radio_b, sel_item = 1
-	
-	if item_v == "above" or item_v == "fixed" or item_v == "orbitting" or item_v == "vertical" then 
-	    sel_item = 1
-	else  
-	    sel_item = 2
-	end 
-	editor_use = true
-	if v.extra.type == "LayoutManager" then 
-             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"fixed", "variable"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
-	elseif  v.extra.type == "ProgressSpinner" then
-             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"orbitting", "spinning"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
-	elseif v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" or v.extra.type == "ButtonPicker" then 
-             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"vertical", "horizontal"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
-	else
-             radio_b = ui_element.radioButtonGroup{ui_width = 300, ui_height = 50, items = {"above", "below"}, selected_item = sel_item, direction = "horizontal", font = "DejaVu Sans 26px"}
-	end 
-	editor_use = true
-	
-	radio_b.position = {PADDING_X/2, 40}
-	radio_b.name = "radioB"
-
-	group:add(radio_b)
-
-	return group
-
-    elseif item_n == "reactive" or item_n == "loop" or item_n == "vert_bar_visible" or item_n == "horz_bar_visible" or item_n == "cells_focusable"  or item_n == "lock" then  -- Attribute with single checkbox
-	group:clear()
-	group.name = item_n
-	group.reactive = true
-
-        local space = WIDTH - PADDING_X  
-
-	text = Text {name = "attr", text = item_s}:set(STYLE)
-        text.position  = {WIDTH - space , 5}
-    	group:add(text)
-        
+function factory.make_onecheckbox(assets, inspector, v, item_n, item_v, item_s, save_items)
+	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
+	local group = Group{}
 	local reactive_checkbox
+	group:clear()
+	group.name = item_n
+	group.reactive = true
+
+	text = Text {name = "attr", text = item_s}:set(STYLE)
+    text.position  = {0, 0}
+    group:add(text)
 	
 	editor_use = true
 	if item_v == "true" then 
-	     reactive_checkbox = ui_element.checkBoxGroup {ui_width = 200, ui_height = 100, items = {""}, selected_items = {1},}
+	     reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {1}}
 	else 
-	     reactive_checkbox = ui_element.checkBoxGroup {ui_width = 200, ui_height = 100, items = {""}, selected_items = {},}
+	     reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {}}
 	end 
 	editor_use = false
 
-	reactive_checkbox.position = {text.x + text.w + 10 , 10}
+	reactive_checkbox.position = {text.x + text.w + 5, 0}
 	reactive_checkbox.name = "bool_check"..item_n
 	group:add(reactive_checkbox)
+	if item_n ~= "vert_bar_visible" and item_n ~= "horz_bar_visible" then 
+		group.size = {255,18}
+	else 
+		group.size = {110,18}
+	end
 
 	return group
+end 
+
+function factory.make_anchorpoint(assets, inspector, v, item_n, item_v, item_s, save_items)
+
+	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
+
+	local text = Text {name = "attr", text = item_s}:set(STYLE)
+    local group = Group {}
+	group.name = "anchor_point"
+    group:clear()
+
+    text.position  = {0, 0}
+    group:add(text)
+	local anchor_pnt = factory.draw_anchor_point(v)
+	anchor_pnt.position = {text.x + text.w + 5, 0}
+	group:add(anchor_pnt)
+	group.w = 255
+
+    return group
+end
+
+function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s, save_items)
+-- item group  
+    local PADDING_X     = 0
+    local WIDTH         = 260
+
+    local group = Group {}
+    group:clear()
+    	
+    -- item group's children 
+    local text, input_text, ring, focus, line, button--, checkbox, radio_button, button_picker
+	
+	if(item_n == "focus") then  
+		group:clear()
+		group.name = "focusChanger"
+		group.reactive = true
+		local focus_changer = factory.draw_focus_changer(v)
+
+		--[[
+		local focus_changer_bg = Image{src = "lib/assets/focus-input.png", name = "focuschanger_bg", position = {0,0}}
+		local focus_changer = Group {name = "focusChanger", position {0,0,0}, reactive = true}
+		focus_changer:add(focus_changer)
+		]]
+
+
+		local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
+	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
+
+		if v.extra.focus then 
+			for m, n in pairs (v.extra.focus) do
+		     	if type(n) ~= "function" then 
+		          	focus_changer:find_child("text"..focus_map[m]).text = n
+		     	else 
+		          	focus_changer:find_child("text"..focus_map[m]).text = v.name
+		          	focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
+		          	focus_changer:find_child("text"..focus_map[m]).reactive = false
+		     	end 
+			end 	
+		end
+
+		if v.extra.type == "Button" or v.extra.type == "MenuButton" then
+			focus_changer:find_child("textE").text = v.name 
+			focus_changer:find_child("textE").color = {255,255,255,100}
+			focus_changer:find_child("focuschanger_bgE").opacity = 100 
+			focus_changer:find_child("gE").reactive = false 
+		elseif v.extra.type == "TextInput" or  v.extra.type == "ButtonPicker" then 
+			focus_changer:find_child("textE").text = v.name 
+			focus_changer:find_child("textE").color = {255,255,255,100}
+			focus_changer:find_child("focuschanger_bgE").opacity = 100 
+			focus_changer:find_child("gE").reactive = false 
+			focus_changer:find_child("textL").text = v.name 
+			focus_changer:find_child("textL").color = {255,255,255,100}
+			focus_changer:find_child("focuschanger_bgL").opacity = 100 
+			focus_changer:find_child("gL").reactive = false 
+			focus_changer:find_child("textR").text = v.name 
+			focus_changer:find_child("textR").color = {255,255,255,100}
+			focus_changer:find_child("focuschanger_bgR").opacity = 100 
+			focus_changer:find_child("gR").reactive = false 
+		end 	
+
+    	focus_changer.position  = {0 , 5}
+    	--group:add(focus_changer)
+
+
+	    return focus_changer
+
+end 
+end 
+function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item_s, save_items, old_inspector) 
+
+
+    local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
+    local TEXT_SIZE     = 12
+    local PADDING_X     = 0
+    local PADDING_Y     = 3   
+    local PADDING_B     = 13 
+    local WIDTH         = 255
+    local HEIGHT        = TEXT_SIZE  + ( PADDING_Y * 2 )
+    local BORDER_WIDTH  = 1
+    local BORDER_COLOR  = {255,255,255,255}
+    local FOCUS_COLOR  = {0,255,0,255}
+    local LINE_COLOR    = {255,255,255,255}  --"FFFFFF"
+    local BORDER_RADIUS = 0
+    local LINE_WIDTH    = 1
+    local input_box_width     
+    local item_group 
+
+	local non_textInput_items = {"title", "line", "button", "focus", "tab_labels", "items", "skin", "wrap_mode", 
+		"expansion_location", "cell_size", "style", "direction", "reactive", "loop", "vert_bar_visible", "horz_bar_visible", 
+		"cells_focusable", "lock", "icon", "source", "src", "anchor_point", }
+
+	if old_inspector ~= nil then 
+		for i, j  in pairs (non_textInput_items) do 
+			if j == item_n then 
+				return 
+			end 
+		end 
+	end 	
+
+--[[
+    if item_n then print("item_n", item_n) end 
+    if item_v then print("item_v", item_v) end 
+    if item_s then print("item_s", item_s) end 
+]]
+    local function text_reactive()
+	for i, c in pairs(g.children) do
+	     if(c.type == "Text") then 
+	          c.reactive = true
+	     end 
+        end
+    end 
+
+    local function make_focus_ring(w, h)
+		local ring = Canvas{ size = {w, h} }
+        ring:begin_painting()
+        ring:set_source_color({255,0,0,255})
+        ring:round_rectangle( 1/2, 1/2, w - 1 , h - 1 , 0)
+		ring:set_source_color( {50,0,0,255})
+    	ring:fill(true)
+		ring:set_line_width (1)
+    	ring:set_source_color({255,0,0,255})
+        ring:stroke(true)
+        ring:finish_painting()
+		if ring.Image then
+  	 		ring= ring:Image()
+        end
+        return ring
+
+    end
+
+    local function make_ring(w, h)
+		local ring = Canvas{ size = {w, h} }
+        ring:begin_painting()
+        ring:set_source_color({255,255,255,255})
+        ring:round_rectangle( 1/2, 1/2, w - 1 , h - 1 , 0)
+		ring:set_source_color( {0,0,0,255})
+    	ring:fill(true)
+		ring:set_line_width (1)
+    	ring:set_source_color({255,255,255,255})
+        ring:stroke(true)
+        ring:finish_painting()
+		if ring.Image then
+  	 		ring= ring:Image()
+        end
+        return ring
+    end
+
+    -- item group 
+    local group = Group {}
+    group:clear()
+    	
+    -- item group's children 
+    local text, input_text, ring, focus, line, button --, checkbox, radio_button, button_picker
+
+    if(item_n == "caption") then
+    	text = Text {text = item_v}:set(STYLE)
+		text.position = {0, 0} -- 0,0 
+    	group:add(text)
+		if item_v ~= "Visible" or item_v ~= "Virtual" then 
+        	group.w = 255
+		end 
+        group.h = 12
+		return group
     else 	---- Attributes with focusable ring 
-        group:clear()
+
 		group.name = item_n
 		group.reactive = true
 
-        local space = WIDTH - PADDING_X  
 		local text
 
-		if item_n == "icon" or item_n =="source"  or item_n == "src" then -- File Chooser Button 
-	     	input_box_width = WIDTH * 5 / 8
-	     	ring = make_ring(input_box_width, HEIGHT + 5 ) 
-	     	ring.name = "ring"
-	     	if (text) then 
-	     		ring.position = {text.x+text.w+5, 0}
-	     	else 
-	        	ring.position = {WIDTH - space, 0}
-  	     	end
-            ring.opacity = 180
-	     	ring.reactive = false
-            group:add(ring)
-
-	     	input_text = Text {name = "file_name", text =item_v, editable=false,
-            reactive = false, wants_enter = false, cursor_visible = false, font = "DejaVu Sans 26px" , color = {180,180,180,255}}
-            input_text.position  = {ring.x + 15, ring.y + 5}
-	     	group:add(input_text) 
-	     
-	     	local filechooser = ui_element.button{ui_width = 150, ui_height = 45, text_font ="DejaVu Sans 25px" , label = "Choose ...", }
-	     	filechooser.name = "filechooser"
-	     	filechooser.position = {ring.x + ring.w, ring.y }
-
-	     	if v.type == "Video" then 
-	          	filechooser.pressed = editor.the_video
-	     	else 
-	          	filechooser.pressed = editor.the_image
-	     	end
-
- 	     	function filechooser:on_button_down(x,y,b,n)
-				if current_focus then 
-		     		current_focus.on_focus_out()
-				end
-				filechooser.on_focus_in(keys.Return)
-				return true
-	     	end 
-
-	     	group:add(filechooser)
-	     	return group
-        elseif(item_n == "name" or item_n == "text") then 
-	     	input_box_width = WIDTH - ( PADDING_X * 2) 
-		elseif item_n == "anchor_point" then 
-	     	text = Text {name = "attr", text = item_s}:set(STYLE)
-            text.position  = {WIDTH - space , 0}
-    	    group:add(text)
-	     	local anchor_pnt = factory.draw_anchor_point(v)
-	     	anchor_pnt.position = {300, 0}
-	     	group:add(anchor_pnt)
-            return group
-		elseif item_n == "message" or item_n == "label" then 
-	     	input_box_width = WIDTH - ( PADDING_X * 2) 
+	    if item_n == "name" or item_n == "text" or item_n == "message" or item_n == "label" then 
+			-- no property name text, long textInput Box
+	     	input_box_width = WIDTH 
         else  
-    	     text = Text {name = "attr", text = item_s}:set(STYLE)
-             text.position  = {WIDTH - space , PADDING_Y}
-    	     group:add(text)
+			-- properties' name 
+    	    text = Text {name = "attr", text = item_s}:set(STYLE)
+            text.position  = {0, 4.5}
+    	    group:add(text)
 
-	     	input_box_width = WIDTH/4 - 10 + ( PADDING_X * 2) 
-	     	space = space - string.len(item_s) * 20
+	     	input_box_width = 39 
             if item_n:find("font") then 
-	          input_box_width = WIDTH - 110 - ( PADDING_X * 2) 
-            elseif item_n == "cx" or  item_n == "cy" or  item_n == "cw"  or  item_n == "ch" then 
-	          input_box_width = WIDTH - 300 - ( PADDING_X * 2) 
-            elseif(item_n == "wrap_mode" or item_n =="duration" or item_n =="fade_duration") then 
-	          input_box_width = WIDTH - 250 - ( PADDING_X * 2) 
-            elseif(string.find(item_n,"color")) then 
-	          input_box_width = WIDTH - 350 - ( PADDING_X * 2) 
+	          input_box_width = WIDTH
+			  group:remove(text)
+			  text = nil
+            elseif string.find(item_n,"duration") or string.find(item_n,"time") then 
+	          input_box_width = 49 
 	     	end
         end 
 
-		local y_space = 0
 
         ring = make_ring(input_box_width, HEIGHT + 5 ) 
 		ring.name = "ring"
 		if text then 
-	     	ring.position = {text.x+text.w+5, y_space}
+			if item_n == "menu_width" then 
+	     		ring.position = {text.x+text.w+9, 0}
+			else 
+	     		ring.position = {text.x+text.w+5, 0}
+			end 
 		else 
-	     	ring.position = {WIDTH - space, y_space}
+	     	ring.position = {0, 0}
 		end
         ring.opacity = 255
         group:add(ring)
@@ -2368,49 +2083,65 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         focus = make_focus_ring(input_box_width, HEIGHT + 5)
         focus.name = "focus"
 		if (text) then 
-	     	focus.position = {text.x+text.w+5, y_space}
+	     	focus.position = {text.x+text.w+5, 0}
 		else 
-            focus.position = {WIDTH - space , y_space}
+            focus.position = {0, 0}
 		end
 
         focus.opacity = 0
 		group:add(focus)
 
-		space = space - PADDING_B
 
 	-- if(item_v == "CHAR" or item_v == "WORD" or item_v =="WORD_CHAR") then item_v = string.lower(item_v) end 
 
     	input_text = Text {name = "input_text", text =item_v, editable=true,
-        reactive = true, wants_enter = false, cursor_visible = false}:set(STYLE)
+        reactive = true, wants_enter = true, cursor_visible = false,single_line = true, width = input_box_width - 10}:set(STYLE)
 
 		if (text) then 
-             input_text.position  = {text.x+text.w+20, PADDING_Y + y_space}
+			if item_n == "menu_width" then 
+             	input_text.position  = {text.x+text.w+14, 4.5}
+			else
+             	input_text.position  = {text.x+text.w+10, 4.5}
+			end 
 		else 
-             input_text.position  = {WIDTH - space , PADDING_Y + y_space}
+             input_text.position  = {5,4.5}
 		end
 
 		function input_text:on_button_down(x,y,button,num_clicks)
- 	       current_focus.extra.on_focus_out()
+		   if current_focus then 
+ 	       		current_focus.extra.on_focus_out()
+		   end 
 	       current_focus = group
 	       group.extra.on_focus_in()
-               return true
+           return true
         end
 
 		function group:on_button_down(x,y,button,num_clicks)
- 	       current_focus.extra.on_focus_out()
-	       current_focus = group
-	       group.extra.on_focus_in()
-               return true
+			if current_focus then 
+ 	       		current_focus.extra.on_focus_out()
+			end 
+	        current_focus = group
+	        group.extra.on_focus_in()
+            return true
         end
 
-	
   		function input_text:on_key_down(key)
-	    local si = inspector:find_child("si")
-    	if is_this_widget(v) == true  then
-        	item_group = (inspector:find_child("si")).content
-        else 
-         	item_group = inspector:find_child("item_group")
-    	end 
+		
+
+		local current_tab, item_group, si 
+		
+		current_tab =  inspector:find_child("tabs").current_tab
+		if current_tab == 1 then 
+			item_group = inspector:find_child("item_group_info")
+			si = inspector:find_child("si_info")
+			attr_t_idx = info_attr_t_idx
+		else
+			item_group = inspector:find_child("item_group_more") 
+			si = inspector:find_child("si_more")
+			attr_t_idx = more_attr_t_idx
+		end 
+
+
 	    if key == keys.Return or (key == keys.Tab and shift == false)  then
 	       	group.extra.on_focus_out()
 		 	for i, j in pairs(attr_t_idx) do
@@ -2443,6 +2174,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     		local function here ()
 			     			while(item_group:find_child(attr_t_idx[i-1]) == nil) do 
 				 				i = i - 1
+								if attr_t_idx[i-1] == nil then return end 
 			     			end 
 			     			if(item_group:find_child(attr_t_idx[i-1])) then
 			     				local p_item = attr_t_idx[i-1]
@@ -2462,6 +2194,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
     		    end
         	end
    		end 
+
     	group:add(input_text)
         function group.extra.on_focus_in()
 	         current_focus = group
@@ -2477,6 +2210,13 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         end 
     end
 
+	if item_n == "z" then 
+		group.w = group.w + 50
+	elseif item_n == "h" or item_n == "virtual_h" then 
+		group.w = group.w + 100
+	--elseif item_n == 
+	end 
+
     return group
 end
  
@@ -2484,8 +2224,7 @@ function factory.draw_anchor_point(v, inspector)
     local h_pos = 0
     local v_pos = 0
     local cur_posint = left_top
-    local center, left_top, left_mid, left_bottom, mid_top, mid_bottom, right_top, right_mid, right_bottom
-
+    local object, center, left_top, left_mid, left_bottom, mid_top, mid_bottom, right_top, right_mid, right_bottom
 
     local function find_current_anchor (v)
         if(v.anchor_point == nil) then 
@@ -2504,193 +2243,110 @@ function factory.draw_anchor_point(v, inspector)
 
     local function mark_current_anchor()
 	if(h_pos == 0 and v_pos == 0) then 
-		left_top.color = {200,0,0,200}
+		left_top.src = "lib/assets/anchor-point-on.png" --color = {200,0,0,200}
 		cur_point = left_top
 		anchor_pnt.extra.anchor_point = {0, 0}
 	elseif(h_pos == 0 and v_pos == 1) then 
-		left_mid.color = {200,0,0,200} 
+		left_mid.src = "lib/assets/anchor-point-on.png"--color = {200,0,0,200} 
 		cur_point = left_mid
 		anchor_pnt.extra.anchor_point = {0, v.h/2}
 	elseif(h_pos == 0 and v_pos == 2) then 
-		left_bottom.color = {200,0,0,200}
+		left_bottom.src = "lib/assets/anchor-point-on.png"--color = {200,0,0,200}
 		cur_point = left_bottom
 		anchor_pnt.extra.anchor_point = {0, v.h}
 	elseif(h_pos == 1 and v_pos == 0) then 
-		mid_top.color = {200,0,0,200} 
+		mid_top.src = "lib/assets/anchor-point-on.png"--color = {200,0,0,200} 
 		cur_point = mid_top
 		anchor_pnt.extra.anchor_point = {v.w/2, 0}
 	elseif(h_pos == 1 and v_pos == 1) then 
-		center.color = {200,0,0,200} 
+		center.src = "lib/assets/anchor-point-on.png"--color = {200,0,0,200} 
 		cur_point = center
 		anchor_pnt.extra.anchor_point = {v.w/2, v.h/2}
 	elseif(h_pos == 1 and v_pos == 2) then 
-		mid_bottom.color = {200,0,0,200} 
+		mid_bottom.src = "lib/assets/anchor-point-on.png"--color = {200,0,0,200} 
 		cur_point = mid_bottom
 		anchor_pnt.extra.anchor_point = {v.w/2, v.h}
 	elseif(h_pos == 2 and v_pos == 0) then 
-		right_top.color = {200,0,0,200} 
+		right_top.src = "lib/assets/anchor-point-on.png"--color = {200,0,0,200} 
 		cur_point = right_top
 		anchor_pnt.extra.anchor_point = {v.w, 0}
 	elseif(h_pos == 2 and v_pos == 1) then 
-		right_mid.color = {200,0,0,200} 
+		right_mid.src = "lib/assets/anchor-point-on.png"--color = {200,0,0,200} 
 		cur_point = right_mid
 		anchor_pnt.extra.anchor_point = {v.w, v.h/2}
 	elseif(h_pos == 2 and v_pos == 2) then 
-		right_bottom.color = {200,0,0,200} 
+		right_bottom.src = "lib/assets/anchor-point-on.png" -- color = {200,0,0,200} 
 		cur_point = right_bottom
 		anchor_pnt.extra.anchor_point = {v.w, v.h}
 	end 
     end 
 
     function create_point_on_button_down(point)
-	function point:on_button_down(x,y,button,num)
-		cur_point.color = {25,25,25,250}
-		-- point.color = {200,0,0,200} 
-		if(point.name == "center") then h_pos = 1 v_pos = 1
-		elseif(point.name == "left_top") then h_pos = 0 v_pos = 0
-		elseif(point.name == "left_mid") then h_pos = 0 v_pos = 1
-		elseif(point.name == "left_bottom") then h_pos = 0 v_pos = 2
-		elseif(point.name == "mid_top") then h_pos = 1 v_pos = 0
-		elseif(point.name == "mid_bottom") then h_pos = 1 v_pos = 2
-		elseif(point.name == "right_top") then h_pos = 2 v_pos = 0
-		elseif(point.name == "right_mid") then h_pos = 2 v_pos = 1
-		elseif(point.name == "right_bottom") then h_pos = 2 v_pos = 2
+		function point:on_button_down(x,y,button,num)
+			cur_point.src = "lib/assets/anchor-point-off.png" --color = {25,25,25,250}
+
+			if(point.name == "center") then h_pos = 1 v_pos = 1
+			elseif(point.name == "left_top") then h_pos = 0 v_pos = 0
+			elseif(point.name == "left_mid") then h_pos = 0 v_pos = 1
+			elseif(point.name == "left_bottom") then h_pos = 0 v_pos = 2
+			elseif(point.name == "mid_top") then h_pos = 1 v_pos = 0
+			elseif(point.name == "mid_bottom") then h_pos = 1 v_pos = 2
+			elseif(point.name == "right_top") then h_pos = 2 v_pos = 0
+			elseif(point.name == "right_mid") then h_pos = 2 v_pos = 1
+			elseif(point.name == "right_bottom") then h_pos = 2 v_pos = 2
+			end 
+
+        	mark_current_anchor()
+			cur_point = point
 		end 
-		
-                mark_current_anchor()
-		cur_point = point
-	end 
     end
 
     find_current_anchor (v)
 
-    local object = Rectangle
-	{
-		name="rect0",
-		color={155,155,155,255},
-		size = {50,50},
-		position = {4,6},
-		opacity = 255
-	}
-
-     center = Rectangle
-	{
-		name="center",
-		color={25,25,25,250},
-		size = {15,15},
-		position = {22.25,23},
-		opacity = 255
-	}
-
-     center.reactive = true
-     create_point_on_button_down(center)
-
-     mid_top = Rectangle
-	{
-		name="mid_top",
-		color={25,25,25,250},
-		size={15,15},
-		position = {22.25,0},
-		opacity = 255
-	}
+	object = Image{src = "lib/assets/anchor-point-box.png", name = "rect0", position = {0,0}}
+	mid_top = Image{src = "lib/assets/anchor-point-off.png", name = "mid_top", position = {15,0}}
+	center = Image{src = "lib/assets/anchor-point-off.png", name = "center", position = {15,15}}
+	mid_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "mid_bottom", position = {15,30}}
+	right_mid = Image{src = "lib/assets/anchor-point-off.png", name = "right_mid", position = {30,15}}
+	right_top = Image{src = "lib/assets/anchor-point-off.png", name = "right_top", position = {30,0}}
+	right_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "right_bottom", position = {30,30}}
+	left_mid = Image{src = "lib/assets/anchor-point-off.png", name = "left_mid", position = {0,15}}
+	left_top = Image{src = "lib/assets/anchor-point-off.png", name = "left_top", position = {0,0}}
+	left_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "left_bottom", position = {0,30}}
 
     mid_top.reactive = true
-    create_point_on_button_down(mid_top)
-
-    mid_bottom = Rectangle
-	{
-		name="mid_bottom",
-		color={25,25,25,250},
-		size={15,15},
-		position = {22.25,46},
-		opacity = 255
-	}
-
+    center.reactive = true
     mid_bottom.reactive = true
-    create_point_on_button_down(mid_bottom)
-
-    right_mid = Rectangle
-	{
-		name="right_mid",
-		color={25,25,25,250},
-		size={15,15},
-		position = {44.5,23},
-		opacity = 255
-	}
 
     right_mid.reactive = true
-    create_point_on_button_down(right_mid)
-
-    right_top = Rectangle
-	{
-		name="right_top",
-		color={25,25,25,250},
-		size={15,15},
-		position = {44.5,0},
-		opacity = 255
-	}
     right_top.reactive = true
+    right_bottom.reactive = true
+
+    left_top.reactive = true
+    left_mid.reactive = true
+    left_bottom.reactive = true
+
+    create_point_on_button_down(mid_top)
+    create_point_on_button_down(center)
+    create_point_on_button_down(mid_bottom)
+
     create_point_on_button_down(right_top)
+    create_point_on_button_down(right_mid)
+    create_point_on_button_down(right_bottom)
+    
+    create_point_on_button_down(left_top)
+	create_point_on_button_down(left_mid)
+    create_point_on_button_down(left_bottom)
 
-    left_mid = Rectangle
-	{
-		name="left_mid",
-		color={25,25,25,250},
-		size={15,15},
-		position = {0,23},
-		opacity = 255
-	}
-
-     left_mid.reactive = true
-     create_point_on_button_down(left_mid)
-
-     right_bottom = Rectangle
-	{
-		name="right_bottom",
-		color={25,25,25,250},
-		size={15,15},
-		position = {44.5,46},
-		opacity = 255
-	}
-
-     right_bottom.reactive = true
-     create_point_on_button_down(right_bottom)
-
-     left_bottom = Rectangle
-	{
-		name="left_bottom",
-		color={25,25,25,250},
-		size={15,15},
-		position = {0,46},
-		opacity = 255
-	}
-
-     left_bottom.reactive = true
-     create_point_on_button_down(left_bottom)
-
-     left_top = Rectangle
-	{
-		name="left_top",
-		color={25,25,25,250},
-		size={15,15},
-		position = {0,0},
-		opacity = 255
-	}
-
-     left_top.reactive = true
-     create_point_on_button_down(left_top)
-
-     anchor_pnt = Group
+    anchor_pnt = Group
 	{
 		name="anchor",
-		size={59.5,61},
 		position = {0,0},
 		children = {object,center,mid_top,mid_bottom,right_mid,right_top,left_mid,right_bottom,left_bottom,left_top},
-		scale = {1,1,0,0},
 		opacity = 255
 	}
  
-       mark_current_anchor()
+     mark_current_anchor()
 
     return anchor_pnt
 end 
@@ -2999,38 +2655,17 @@ local l_scale = 1
 text_label = Text
 	{
 		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
+		font = "FreeSans Medium 12px",
 		text = "Label +",
-		editable = false,
-		wants_enter = true,
-		wrap = false,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "text_label",
 		position = {7,0,0},
-		size = {120,30},
 		opacity = 255,
 	}
 
-rect_label = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect_label",
-		position = {0,0,0},
-		size = {120,35},
-		opacity = 255,
-	}
+rect_label = ui_element.button{font ="FreeSans Medium 12px", label="Label +", ui_width=100, ui_hieght=25, skin="inspector"}
+rect_label.name = "rect_label"
+rect_label.position = {0,0,0}
+
 
 label_plus = Group
 	{
@@ -3309,316 +2944,112 @@ plus_minus = Group
 return plus_minus
 end 
 
-function factory.draw_focus_changer()
+function factory.draw_focus_changer(v)
 
-
-
-bnd = Rectangle
+local focus = Group
 	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "bnd",
+		name = "focusChanger",
 		position = {0,0,0},
-		size = {434,580},
-		opacity = 10,
+		reactive = true,
 	}
 
+focus_changer_bgU = Image{src = "lib/assets/assign-focus-up.png", name = "focuschanger_bgU", position = {85,25}}
+focus_changer_bgD = Image{src = "lib/assets/assign-focus-down.png", name = "focuschanger_bgD", position = {85,195}}
+focus_changer_bgR = Image{src = "lib/assets/assign-focus-right.png", name = "focuschanger_bgR", position = {170, 110}}
+focus_changer_bgL = Image{src = "lib/assets/assign-focus-left.png", name = "focuschanger_bgL", position = {0,110}}
+focus_changer_bgE = Image{src = "lib/assets/assign-focus-ok.png", name = "focuschanger_bgE", position = {85,110}}
 
 text11 = Text
 	{
 		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "Focus Destination",
-		editable = true,
-		wants_enter = true,
-		wrap = true,
-		cursor_visible=false,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
+		font = "FreeSans Medium12px",
+		text = "Assign Focus".."["..v.name.."]",
 		name = "text11",
-		position = {0,2,0},
-		size = {300,30},
-		opacity = 255,
-	}
-
-
-text8 = Text
-	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "U",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text8",
-		position = {15,12,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectU = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectU",
 		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
 	}
 
-
-gU = Group
+gU = Rectangle
 	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "gU",
-		position = {188,45,0},
-		size = {50,50},
+		position = {85,25,0},
+		size = {85,85},
 		opacity = 255,
+		color = {255,255,255,0},
 		reactive = true,
-		children = {text8,rectU},
 	}
-
 
 textU = Text
 	{
 		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
+		font = "FreeSans Medium 12px",
 		text = "",
 		wants_enter = true,
 		wrap = true,
 		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "textU",
-		position = {188,95,0},
-		size = {100,30},
+		position = {89,67},
+		size = {77,36},
 		opacity = 255,
 	}
 
-
-text13 = Text
+gL = Rectangle
 	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "L",
-		editable = true,
-		wants_enter = true,
-		wrap = true,
-		cursor_visible=false,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text13",
-		position = {14,5,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectL = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectL",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gL = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "gL",
-		position = {30,177,0},
-		size = {50,50},
+		position = {0,110,0},
+		size = {85, 85},
 		opacity = 255,
-		children = {text13,rectL},
+		color = {255,255,255,0},
+		reactive = true,
 	}
 
 
 textL = Text
 	{
 		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
+		font = "FreeSans Medium 12px",
 		text = "",
 		wants_enter = true,
 		wrap = true,
 		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "textL",
-		position = {30,227,0},
-		size = {100,30},
+		position = {4,152,0},
+		size = {77, 36},
 		opacity = 255,
 	}
 
-text10 = Text
+gE = Rectangle
 	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "E",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text10",
-		position = {14,7,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectE = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectE",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gE = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "gE",
-		position = {188,177,0},
-		size = {50,50},
+		position = {85,110},
+		size = {85,85},
 		opacity = 255,
-		children = {text10,rectE},
+		color = {255,255,255,0},
+		reactive = true,
 	}
 
 
 textE = Text
 	{
 		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
+		font = "FreeSans Medium 12px",
 		text = "",
 		wants_enter = true,
 		wrap = true,
 		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "textE",
-		position = {188,227,0},
-		size = {100,30},
+		position = {89,152,0},
+		size = {77,36},
 		opacity = 255,
 	}
 
-
-text14 = Text
+gR = Rectangle
 	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "R",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text14",
-		position = {14,9,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectR = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectR",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gR = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "gR",
-		position = {346,175,0},
-		size = {50,50},
+		position = {170,110},
+		size = {85,85},
 		opacity = 255,
-		children = {text14,rectR},
+		color = {255,255,255,0},
+		reactive = true,
 	}
 
 
@@ -3626,399 +3057,57 @@ gR = Group
 textR = Text
 	{
 		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
+		font = "FreeSans Medium 12px",
 		text = "",
 		wants_enter = true,
 		wrap = true,
 		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "textR",
-		position = {346,225,0},
-		size = {100,30},
+		position = {174, 152},
+		size = {77,36},
 		opacity = 255,
 	}
 
 
-text12 = Text
+gD = Rectangle
 	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "D",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text12",
-		position = {12,6,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectD = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectD",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gD = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "gD",
-		position = {188,309,0},
-		size = {50,50},
+		position = {85,195} ,
+		size = {85,85},
 		opacity = 255,
-		children = {text12,rectD},
+		color = {255,255,255,0},
+		reactive = true,
 	}
 
 textD = Text
 	{
 		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
+		font = "FreeSans Medium 12px",
 		text = "",
 		wants_enter = true,
 		wrap = true,
 		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
 		name = "textD",
-		position = {188,359,0},
-		size = {100,30},
+		position = {90,237},
+		size = {75,45},
 		opacity = 255,
 	}
 
 
-text16 = Text
-	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "R",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text16",
-		position = {12,10,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectRed = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectRed",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gRed = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "gRed",
-		position = {30,443,0},
-		size = {50,50},
-		opacity = 255,
-		children = {text16,rectRed},
-	}
-
-textRed = Text
-	{
-		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "textRed",
-		position = {30,493,0},
-		size = {100,30},
-		opacity = 255,
-	}
-
-text17 = Text
-	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "G",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text17",
-		position = {12,7,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectG = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectG",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gG = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "gG",
-		position = {135,441,0},
-		size = {50,50},
-		opacity = 255,
-		children = {text17,rectG},
-	}
-
-
-textG = Text
-	{
-		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "textG",
-		position = {135,491,0},
-		size = {100,30},
-		opacity = 255,
-	}
-
-
-text18 = Text
-	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "Y",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text18",
-		position = {14,10,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectY = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectY",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gY = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "gY",
-		position = {240,443,0},
-		size = {50,50},
-		opacity = 255,
-		children = {text18,rectY},
-	}
-
-
-textY = Text
-	{
-		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "textY",
-		position = {240,493,0},
-		size = {100,30},
-		opacity = 255,
-	}
-
-
-
-text19 = Text
-	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "B",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text19",
-		position = {14,8,0},
-		size = {30,30},
-		opacity = 255,
-	}
-
-
-rectB = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = {255,255,255,255},
-		border_width = 2,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rectB",
-		position = {0,0,0},
-		size = {50,50},
-		opacity = 255,
-	}
-
-
-gB = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "gB",
-		position = {346,443,0},
-		size = {50,50},
-		opacity = 255,
-		children = {text19,rectB},
-	}
-
-
-textB = Text
-	{
-		color = {255,255,255,255},
-		font = "Highway Gothic Narrow 22px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "textB",
-		position = {346,493,0},
-		size = {100,30},
-		opacity = 255,
-	}
-
-
-focus = Group
-	{
-		name = "focusChanger",
-		position = {0,0,0},
-		reactive = true,
-	}
-
-focus:add(bnd,text11,gU,textU,gL,textL,gE,textE,gR,textR, gD, textD, gRed, textRed, gG, textG, gY, textY, gB, textB)
+--text11 : Assign Focus [Object Name] 
+--focus:add(text11,focus_changer_bg, gU,textU,gL,textL,gE,textE,gR,textR, gD, textD)
+focus:add(text11,focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, 
+		  focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
 	
-local focus_map  = {["gU"] = function() end,}
-
 function focus.extra.on_focus_in()
-	 current_focus.extra.on_focus_out()
+	 if current_focus then 
+	 	current_focus.extra.on_focus_out()
+	 end 
 	 current_focus = focus
 	 for i,j in pairs(focus.children) do
-		if j.type == "Group" then 
+		if j.type == "Rectangle" then 
 		     local focus_t= j.name:sub(2,-1)
-		     j:find_child("rect"..focus_t).border_color = {255,255,255,255}
+		     j.border_color = {255,255,255,0}
 		end 
 	 end 
 end 
@@ -4027,9 +3116,9 @@ function focus.extra.on_focus_out(call_by_inspector)
 	focus_type = ""
 	input_mode = S_POPUP
         for i,j in pairs(focus.children) do
-		if j.type == "Group" then 
+		if j.type == "Rectangle" then 
 		     local focus_t= j.name:sub(2,-1)
-		     j:find_child("rect"..focus_t).border_color = {255,255,255,255}
+		     j.border_color = {255,255,255,0}
 		end 
 	end 
 
@@ -4037,15 +3126,22 @@ end
 
 function make_on_button_down_f(v)
      function v:on_button_down(x,y,b,n)
-           focus.on_focus_in()
-	   focus_type = v.name:sub(2,-1)
-	   v:find_child("rect"..focus_type).border_color = {0,255,0,255} -- 
-	   if (focus:find_child("text"..focus_type).text ~= "") then
-		focus:find_child("text"..focus_type).text = ""
-	   end 
-	   --dolater : add F to mouse pointer 
-	   input_mode = S_FOCUS
-	   return true 
+	 	if focus then 
+			if focus.extra.on_focus_in then 
+        		focus.extra.on_focus_in()
+			end 
+		end
+	   	focus_type = v.name:sub(2,-1)
+		print("focus_type.....", focus_type)
+	   	--v:find_child("rect"..focus_type).border_color = {0,255,0,255} -- 
+	   	v.border_color = {0,255,0,255} -- 
+	   	v.border_width = 2
+	   	if (focus:find_child("text"..focus_type).text ~= "") then
+			focus:find_child("text"..focus_type).text = ""
+	   	end   
+	   	--dolater : add F to mouse pointer 
+	   	input_mode = S_FOCUS
+	   	return true 
 	end 
 end 
 
@@ -4053,15 +3149,13 @@ end
 
 for i,j in pairs (focus.children) do 
      j.reactive = true 
-     if (j.type == "Group") then 
+     if (j.type == "Rectangle") then 
           make_on_button_down_f(j)
      end
 end
 
 
 return focus
-
 end 
-
 
 return factory

@@ -77,10 +77,10 @@ function menuButton_file:on_key_down(key)
 
 				if menuButton_file.get_index() ~= 0 then 
 				    menuButton_file.press_enter()
-			        end
+			    end
 
 				menuButton_file.on_focus_out()
-				--screen:grab_key_focus()
+				screen:grab_key_focus()
 			end 
 		end
 	end
@@ -171,6 +171,7 @@ function menuButton_edit:on_key_down(key)
 				    menuButton_edit.press_enter()
 			    end
 				menuButton_edit.on_focus_out()
+				screen:grab_key_focus()
 			end 
 		end
 	end
@@ -213,15 +214,15 @@ local menuButton_arrange = ui_element.menuButton
 	}
 
 menuButton_arrange.insert_item(1,{type="label", string="  Align:", bg=assets("assets/menu-item-label.png")} )
-menuButton_arrange.insert_item(2,{type="item", string="Left", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.left} )
-menuButton_arrange.insert_item(3,{type="item", string="Right", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.right} )
-menuButton_arrange.insert_item(4,{type="item", string="Top", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.top})
-menuButton_arrange.insert_item(5,{type="item", string="Bottom", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bottom}) 
-menuButton_arrange.insert_item(6,{type="item", string="Horizontal Center", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.hcenter})
-menuButton_arrange.insert_item(7,{type="item", string="Vertical Center", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.vcenter}) 
+menuButton_arrange.insert_item(2,{type="item", string="Left", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.left, icon=assets("assets/icon-align-left.png")} )
+menuButton_arrange.insert_item(3,{type="item", string="Right", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.right, icon=assets("assets/icon-align-right.png")} )
+menuButton_arrange.insert_item(4,{type="item", string="Top", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.top, icon=assets("assets/icon-align-top.png")})
+menuButton_arrange.insert_item(5,{type="item", string="Bottom", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bottom, icon=assets("assets/icon-align-bottom.png")}) 
+menuButton_arrange.insert_item(6,{type="item", string="Horizontal Center", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.hcenter, icon=assets("assets/icon-align-hcenter.png")})
+menuButton_arrange.insert_item(7,{type="item", string="Vertical Center", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.vcenter, icon=assets("assets/icon-align-vcenter.png")}) 
 menuButton_arrange.insert_item(8,{type="label", string="  Distribute:", bg=assets("assets/menu-item-label.png")} )
-menuButton_arrange.insert_item(9,{type="item", string="Horizontally", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.hspace}) 
-menuButton_arrange.insert_item(10,{type="item", string="Vertically", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.vspace}) 
+menuButton_arrange.insert_item(9,{type="item", string="Horizontally", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.hspace, icon=assets("assets/icon-align-distributeh.png")}) 
+menuButton_arrange.insert_item(10,{type="item", string="Vertically", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.vspace, icon=assets("assets/icon-align-distributev.png")}) 
 menuButton_arrange.insert_item(11,{type="label", string="  Arrange:", bg=assets("assets/menu-item-label.png")} )
 menuButton_arrange.insert_item(12,{type="item", string="Bring to Front", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bring_to_front}) 
 menuButton_arrange.insert_item(13,{type="item", string="Bring Forward", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bring_forward}) 
@@ -256,7 +257,7 @@ function menuButton_arrange:on_key_down(key)
 				    menuButton_arrange.press_enter()
 			        end
 				menuButton_arrange.on_focus_out()
-				--screen:grab_key_focus()
+				screen:grab_key_focus()
 			end
 		end
 	end
@@ -347,6 +348,7 @@ function menuButton_view:on_key_down(key)
 				    menuButton_view.press_enter()
 			      end
 			      menuButton_view.on_focus_out()
+				  screen:grab_key_focus()
 			end
 		end
 	end

@@ -91,9 +91,7 @@ return tbl
 end 
 
 function ui_element.set_cursor_pointer (src_file)
-	--[[
 	user_mouse_pointer.src = "/assets/images/"..src_file
-	]]
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
@@ -204,6 +202,7 @@ local function orderedNext(t, state)
     -- order. We use a temporary ordered key table that is stored in the
     -- table being iterated.
 
+    --print("orderedNext: state = "..tostring(state) )
     if state == nil then
         -- the first time, generate the index
         t.__orderedIndex = __genOrderedIndex( t )
@@ -960,6 +959,8 @@ function ui_element.timeline(t)
 	     	          end 
 		      end 
 			
+		      --print("new_point::",new_timepoint)
+		      --print("next_point::",next_point)
                       if next_point then 
 		          screen:find_child("timeline").points[next_point][2] = next_point - new_timepoint 
 		          screen:find_child("timeline").points[next_point][3] = next_point - new_timepoint 
@@ -1272,6 +1273,8 @@ Arguments:
     	border_corner_radius - Radius of the border for the button
 	pressed - Function that is called by on_focus_in() or on_key_down() event
 	release - Function that is called by on_focus_out()
+
+
 Return:
  	b_group - The group containing the button 
 
@@ -1308,7 +1311,12 @@ function ui_element.button(table)
 		single_button = false,
 		label_align = nil,
 		--------------------------------
+		button_status = "released",
 		is_in_menu = false,
+		--menu_down = nil, 
+		--menu_up = nil, 
+		--menu_enter = nil, 
+		--menu = nil, 
     }
 
  --overwrite defaults
@@ -1331,6 +1339,7 @@ function ui_element.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
+		print("HHHHHHHHHHHHHH")
 		current_focus = b_group
         if (p.skin == "custom") then 
 	     	ring.opacity = 0
@@ -1347,7 +1356,9 @@ function ui_element.button(table)
 
 		if key then 
 	    	if p.pressed and key == keys.Return then
+				print("AAAAAAAAAA")
 				p.pressed()
+				p.button_status = "pressed"
 	    	end 
 		end 
 		
@@ -1373,10 +1384,18 @@ function ui_element.button(table)
 		if p.released then  
 			if p.is_in_menu then 
 				if key ~= keys.Return then
+						print("JJJJJ")
 					p.released()
+					p.button_status = "released"
+				else 
+						print("CCCCCC")
+
 				end 
+
 			else 
+				print("ZZZZZZZZ")
 				p.released()
+				p.button_status = "released"
 			end
 		end 
     end
@@ -1395,23 +1414,6 @@ function ui_element.button(table)
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 	    	focus= assets("assets/menu-bar-focus.png")
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-		elseif(p.skin == "inspector") then 
-	    	button= Group{}
-			left_cap = Image{src="lib/assets/button-small-leftcap.png", position = {0,0}} 
-			repeat_1px = Image{src="lib/assets/button-small-center1px.png", tile={true, false}, width = p.ui_width-left_cap.w*2, position = {left_cap.w, 0}} 
-			right_cap = Image{src="lib/assets/button-small-rightcap.png", position = {p.ui_width-left_cap.w, 0 }} 
-			button:add(left_cap, repeat_1px, right_cap)
-			button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
-			button.reactive = true 
-
-			focus = Group{}
-			left_cap_f = Image{src="lib/assets/button-small-leftcap-focus.png", position = {0,0}} 
-			repeat_1px_f = Image{src="lib/assets/button-small-center1px-focus.png", tile={true, false}, 
-						 width = p.ui_width - left_cap_f.w * 2, position = {left_cap_f.w, 0}} 
-			right_cap_f = Image{src="lib/assets/button-small-rightcap-focus.png", position = {p.ui_width-left_cap_f.w, 0 }} 
-			focus:add(left_cap_f, repeat_1px_f, right_cap_f)
-            focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-			button.reactive = true 
 		elseif(p.skin ~= "custom") then 
             button = assets(skin_list[p.skin]["button"])
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
@@ -1423,9 +1425,9 @@ function ui_element.button(table)
 		end 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
 		if p.label_align ~= nil then 
-        	text:set{name = "text", position = { 10, p.ui_height/2 - text.h/2}}
+        	text:set{name = "text", position = { 10, (p.ui_height - text.h)/2}}
 		else 
-        	text:set{name = "text", position = { (p.ui_width-text.w)/2, p.ui_height/2 - text.h/2}}
+        	text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
 		end 
 	
 		b_group:add(ring, focus_ring, button, focus)
@@ -1435,8 +1437,8 @@ function ui_element.button(table)
             	text  = p.label, 
             	font  = p.text_font,
             	color = {0,0,0,255/2},
-            	x     = p.ui_width/2-text.w/2 - 1,
-            	y     = p.ui_height/2- text.h/2 - 1,
+            	x     = (p.ui_width  -text.w)/2 - 1,
+            	y     = (p.ui_height - text.h)/2 - 1,
             }
 			if p.label_align ~= nil then 
             	s_txt.x = 9
@@ -1678,7 +1680,7 @@ function ui_element.textInput(table)
 		else 
     		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = true, 
 						cursor_color = p.cursor_color, wants_enter = true, 
-						reactive = false, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
+						reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
     		text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
     		t_group:add(box, focus_box, box_img, focus_img, text)
 		end
@@ -1701,7 +1703,6 @@ function ui_element.textInput(table)
 				t_group:grab_key_focus()
 				t_group:on_key_down(key)
 			end 
-			p.text = text.text 
 		end 
 
     	if (p.skin == "custom") then 
@@ -2097,9 +2098,9 @@ function ui_element.buttonPicker(table)
 	focus_color = {0,255,0,255},
 	focus_fill_color = {0,255,0,0},
 	rotate_func = nil, 
-    selected_item = 1, 
+        selected_item = 1, 
 	direction = "horizontal", 
-	inspector = 0
+	
     }
 
  --overwrite defaults
@@ -2150,7 +2151,7 @@ function ui_element.buttonPicker(table)
 	    	right_un  = assets(skin_list["default"]["buttonpicker_right_un"])
         	right_sel = assets(skin_list["default"]["buttonpicker_right_sel"])
 		elseif p.skin == "inspector" then  
-     		unfocus = Group{} --name = "unfocus-button", reactive = true, position = {pos[1], pos[2]}}
+     		unfocus = Group{name = "unfocus-button", reactive = true, position = {pos[1], pos[2]}}
 			local left, right, u1px 
 			
 			left = Image{src="lib/assets/picker-left-cap.png"} 
@@ -2161,21 +2162,21 @@ function ui_element.buttonPicker(table)
 			unfocus:add(u1px)
 			unfocus:add(right)
 
-     		focus = Group{} --name = "focus-button", reactive = true, position = {pos[1], pos[2]}}
+     		focus = Group{name = "focus-button", reactive = true, position = {pos[1], pos[2]}}
 
 			local fleft, fright, f1px
-			fleft = Image{src="lib/assets/picker-left-cap-focus.png"}
-			fright = Image{src="lib/assets/picker-right-cap-focus.png", position = {p.ui_width - fleft.w, 0}}
-			f1px = Image{src="lib/assets/picker-repeat1px-focus.png", position = {fleft.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
+			fleft = Image{src="lib/assets/picker-left-cap.png"}
+			fright = Image{src="lib/assets/picker-right-cap.png", position = {p.ui_width - fleft.w, 0}}
+			f1px = Image{src="lib/assets/picker-repeat1px.png", position = {fleft.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
 
 			focus:add(fleft)
 			focus:add(f1px)
 			focus:add(fright)
 
 	    	left_un   = assets("lib/assets/picker-left-arrow.png")
-	    	left_sel  = assets("lib/assets/picker-left-arrow-focus.png")
+	    	left_sel  = assets("lib/assets/picker-left-arrow.png")
 	    	right_un  = assets("lib/assets/picker-right-arrow.png")
-        	right_sel = assets("lib/assets/picker-right-arrow-focus.png")
+        	right_sel = assets("lib/assets/picker-right-arrow.png")
 		else 
      		unfocus = assets(skin_list[p.skin]["buttonpicker"])
      		focus = assets(skin_list[p.skin]["buttonpicker_focus"])
@@ -2214,21 +2215,26 @@ function ui_element.buttonPicker(table)
                items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, opacity = 255})     
      	end 
 
-		local j_padding = 0
+		local j_padding
 
 		for i, j in pairs(items.children) do 
-	  		if i == p.selected_item then  
-               j.position = {p.ui_width/2 - j.width/2, p.ui_height/2 - j.height/2 - p.inspector }
+	  		if i == p.selected_item then  -- i == 1
+               j.position = {p.ui_width/2 - j.width/2, p.ui_height/2 - j.height/2 - padding}
 	       	   j_padding = 5 * j.x -- 5 는 진정한 해답이 아니고.. 이걸 바꿔 줘야함.. 그리고 박스 크기가 문자열과 비례해서 적당히 커줘야하고.. ^^;;;
-			   break
-			end 
-		end 
+	  		else 
+               --j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
+	  		end 
+     	end 
 
 		for i, j in pairs(items.children) do 
 	  		if i > p.selected_item then  -- i == 1
-               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
-	  		elseif i < p.selected_item then  -- i == 1
-               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
+               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2 - padding}
+	  		end 
+     	end 
+
+		for i, j in pairs(items.children) do 
+	  		if i < p.selected_item then  -- i == 1
+               j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2 - padding}
 	  		end 
      	end 
 
@@ -2323,13 +2329,13 @@ function ui_element.buttonPicker(table)
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
-	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector
+	    local prev_old_y = p.ui_height/2 - j.height/2
 	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2 - p.inspector 
+	    local next_old_y = p.ui_height/2 - j.height/2
 	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2 - p.inspector 
+	    local prev_new_y = p.ui_height/2 - j.height/2
 	    local next_new_x = p.ui_width/2 - j.width/2
-	    local next_new_y = p.ui_height/2 - j.height/2 - p.inspector 
+	    local next_new_y = p.ui_height/2 - j.height/2
 
 	    if t ~= nil then
 	       t:stop()
@@ -2377,13 +2383,13 @@ function ui_element.buttonPicker(table)
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
-	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector 
+	    local prev_old_y = p.ui_height/2 - j.height/2
 	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2 - p.inspector 
+	    local next_old_y = p.ui_height/2 - j.height/2
 	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2 - p.inspector 
+	    local prev_new_y = p.ui_height/2 - j.height/2
 	    local next_new_x = p.ui_width/2 - j.width/2
-	    local next_new_y = p.ui_height/2 - j.height/2 - p.inspector 
+	    local next_new_y = p.ui_height/2 - j.height/2
 
 	    if t ~= nil then
 		t:stop()
@@ -5080,6 +5086,7 @@ button
                 }
             end,
             fade_in = function()
+			print ("KKKKKKKKKKKKKK")
                 dropDownMenu:show()
                 dropDownMenu:complete_animation()
                 dropDownMenu.y_rotation={0,0,0}
@@ -5093,11 +5100,9 @@ button
                 end
                 curr_index = 0
 				umbrella:raise_to_top()
-				--[[
 				if screen:find_child("mouse_pointer") then 
 		 			screen:find_child("mouse_pointer"):raise_to_top()
 				end
-				]]
 				input_mode = S_MENU_M
 				p.status = "fade_in"
             end,
@@ -5120,10 +5125,12 @@ button
                 
             end,
             press_enter = function(...)
+			print("press_enter")
                 if selectable_items[curr_index] ~= nil and
                    selectable_items[curr_index].f ~= nil then
                    selectable_items[curr_index].f(...)
                 else
+                    print("no function")
                 end
             end
         }
@@ -5131,27 +5138,69 @@ button
   	--[[ umbrella.size = {p.ui_width, p.ui_height} ]]
     }
 
+
+	button.menu_down = umbrella.press_down 
+	button.menu_up = umbrella.press_up 
+	button.menu_enter = umbrella.press_enter 
+	button.menu = umbrella
+
 	--yugi
-	if editor_lb == nil or editor_use then  
-		function button:on_key_down(key) 
-			if input_mode == S_SELECT or p.status ==  "fade_out" then 
-				if key == keys.Down then 
+	---[[
+	function button:on_key_down(key) 
+		print("button on key down !!!!!!!!")
+		if input_mode == S_SELECT or p.status ==  "fade_out" then 
+		if key == keys.Down then 
+					print("DDD")
 					umbrella.press_down()
-					return true
-				elseif key == keys.Up then 
-					umbrella.press_up()
-					return true
-				elseif key == keys.Return then 
-					if curr_index > 0 then 
-						umbrella.press_enter()
+					--[[
+					if p.menu_down then
+						p.menu_down()
 					end 
-                    umbrella.fade_out()
-					umbrella:grab_key_focus()
+					]]
 					return true
-				end 
-			end 
+		elseif key == keys.Up then 
+					print("UUU")
+					umbrella.press_up()
+					--[[
+					if p.menu_up then
+						p.menu_up()
+					end 
+					]]
+					return true
+		elseif key == keys.Return then 
+					if curr_index > 0 then 
+					print("EEE")
+					umbrella.press_enter()
+                    umbrella.fade_out()
+					return true
+					end 
+					--[[
+					if p.menu_enter then 
+						p.menu_enter()
+						return true 
+					end
+					]]
+					--[[
+					if p.button_status ~= "pressed" then
+						if p.pressed then
+							print("pressed!!!!")
+							screen:find_child(p.menu.name).on_focus_in(keys.Return) 
+							--b_group.extra.on_focus_in(keys.Return)
+						end 
+					end 
+					if p.menu then 
+						if screen:find_child(p.menu.name) then 
+							print("menu get key focus")
+							screen:find_child(p.menu.name):grab_key_focus()
+							screen:find_child(p.menu.name).status = "leave"
+						    return true
+						end
+					end 
+					]]
+
 		end 
-	end
+		end 
+	end 
 
     local function make_item_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
@@ -5172,20 +5221,23 @@ button
     end
     
     function umbrella.extra.on_focus_in(key) 
+		--umbrella.fade_in()
 		if key then 
 			if key == keys.Return then 
+				print("Return fade in !!")
 				button.on_focus_in(keys.Return)
+				--umbrella:grab_key_focus(umbrella) 
+				--umbrella.fade_in()
 			else 
 				button.on_focus_in()
-				umbrella:grab_key_focus()
 			end 
 		end 
     end
     
     function umbrella.extra.on_focus_out(key) 
-		if key then 
-			button.on_focus_out(key)
-		end
+
+		button.on_focus_out(key)
+		--umbrella.fade_out()
     end
    
     function create()
@@ -5243,6 +5295,8 @@ button
                 )
                 curr_y = curr_y + p.separator_thickness + p.vert_spacing
             elseif item.type == "item" then
+                
+                
                 
                 --Make the text label for each item
                 if p.text_has_shadow then
@@ -5459,6 +5513,20 @@ button
 	if editor_lb == nil or editor_use then  
 		button.pressed = function() umbrella.fade_in() end 
 		button.released = function() umbrella.fade_out() end 
+		--yugi
+		--[[ 
+		function button:on_key_down(key)
+			if key == keys.Down then
+				-- move focus to the first item 
+				dropDownMenu.press_down()
+			elseif key == keys.Up then 
+				-- move focus to menuButton
+				dropDownMenu.press_up()
+			end
+			return true
+		end 
+
+		--]]
  	end 
         
         button.position = {button.w/2,button.h/2}
@@ -5737,7 +5805,6 @@ function ui_element.tabBar(t)
     local tab_focus = {}
 	
     local umbrella     = Group{
-		position = {200,200},
         name="TabContainer",
 		reactive = true,  
         extra={
@@ -6001,6 +6068,7 @@ function ui_element.arrowPane(t)
 			--tries to place virtual coordinates 'x' and 'y' in the middle of the window
 			pan_to = function(self,x,y,top_left)
 				
+				print(x,y)
 				
 				if top_left == true then
 					x = x + p.visible_w/2
@@ -6025,6 +6093,7 @@ function ui_element.arrowPane(t)
                 else
                     new_y = -y + p.visible_h/2
                 end
+				print(new_x,new_y)
 				if new_x ~= p.content.x or new_y ~= p.content.y then
                     p.content:animate{
                         duration = 200,
@@ -6139,6 +6208,10 @@ function ui_element.arrowPane(t)
     create()
 	window:add(p.content)
 	
+	
+	
+
+
 	--set the meta table to overwrite the parameters
     mt = {}
     mt.__newindex = function(t,k,v)

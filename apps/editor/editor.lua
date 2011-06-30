@@ -672,7 +672,7 @@ function editor.close()
         mediaplayer.on_loaded = nil
 	end
 
-	editor.medium_grid()
+	editor.small_grid()
 
 	for i, j in pairs (g.children) do 
 	     if(j.extra.selected == true) then 
@@ -1068,7 +1068,7 @@ function editor.export ()
 	
 end 
 
-local function open_files(input_purpose, bg_image)
+local function open_files(input_purpose, bg_image, inspector)
 	local WIDTH = 300
   	local HEIGHT = 400
     local PADDING = 13
@@ -1149,6 +1149,10 @@ local function open_files(input_purpose, bg_image)
 		end
 	end
 
+	local inspector_activate = function ()
+		inspector:remove(inspector:find_child("deactivate_rect"))
+	end 
+
 	-- Scroll	
 	local scroll = editor_ui.scrollPane{virtual_h = virtual_hieght}
 
@@ -1159,9 +1163,25 @@ local function open_files(input_purpose, bg_image)
     					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() load_file(selected_file)  xbox:on_button_down(1) end
+	button_cancel.pressed = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
+	--button_ok.pressed = function() load_file(selected_file)  xbox:on_button_down(1) end
 	
+	if inspector then 
+		button_ok.pressed = function() 
+			screen:find_child("file_name").text = selected_file 
+			-- clip 
+			local tmpImage = Image{src = "assets/images/"..selected_file}
+			if inspector:find_child("cw") then 
+				inspector:find_child("cw"):find_child("input_text").text = tostring(tmpImage.w)
+				inspector:find_child("ch"):find_child("input_text").text = tostring(tmpImage.h)
+			end 
+			xbox:on_button_down(1) 
+			inspector_activate() 
+		end
+	else 
+		button_ok.pressed = function() load_file(selected_file)  xbox:on_button_down(1) end
+	end 
+
 	local s_func = function()
 		if current_focus then 
 			current_focus.on_focus_out()
@@ -1316,7 +1336,12 @@ local function open_files(input_purpose, bg_image)
 		if x then 
 			input_mode = S_SELECT
 		end 
-		screen.grab_key_focus(screen) 
+
+		if inspector then 
+			inspector_activate() 
+		else 
+			screen.grab_key_focus(screen) 
+		end 
 
 		return true
 	end 
@@ -1331,11 +1356,11 @@ end
 function editor.open()
 	open_files("open_luafile")
 end
-function editor.image(bg_image)
-	open_files("open_imagefile", bg_image)
+function editor.image(bg_image, inspector)
+	open_files("open_imagefile", bg_image, inspector)
 end
-function editor.video()
-	open_files("open_videofile")
+function editor.video(inspector)
+	open_files("open_videofile",nil,inspector)
 end
 
 
@@ -1478,543 +1503,7 @@ function editor.the_open()
 	end
 end 
 
---[[
 function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
-	local save_items 
-
-	if not scroll_y_pos then 
-	     save_items = true 
-	else 
-	     save_items = false 
-	end 
-
-	local WIDTH = 450 -- width for inspector's contents
-
-	local INSPECTOR_OFFSET = 30 
-    local TOP_PADDING = 12
-    local BOTTOM_PADDING = 12
-	local xbox_xpos = 460
-
-	if(current_inspector ~= nil) then 
-		return 
-    end 
- 	
-	for i, c in pairs(g.children) do
-	     editor.n_selected(c)
-	end
-	
-	local inspector_items = {}
-	local inspector_bg
-
-	-- make inspector background image 
-	if v.extra then 
-	   if is_this_widget(v) == true  then
-	   		inspector_bg = factory.make_popup_bg(v.extra.type, 0)
-	   else -- rect, img, text 
-	     	inspector_bg = factory.make_popup_bg(v.type, 0)
-	   end 
-	else -- video  
-	   xbox_xpos = 465
-	   inspector_bg = factory.make_popup_bg(v.type, 0)
-	end 
-
-	local inspector_xbox = factory.make_xbox()
-
-	-- inspector group 
-	local inspector = Group {
-	     name = "inspector",
-	     position ={0, 0},
-	     anchor_point = {0,0},
-         children =
-         {
-         	inspector_bg, 
-	       	inspector_xbox:set{position = {xbox_xpos, 40}}
-         }
-	}
-
-	local function inspector_position() 
-	     local x_space, y_space
-	     if(v.type == "Video") then return end 
-
-	     if (v.x > screen.w - v.x - v.w) then 
-	        x_space = v.x 
-        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
-				inspector.x = x_space - inspector.w - INSPECTOR_OFFSET
-		  	else 
-				inspector.x = (v.x + v.w - inspector.w)/2
-        	end 
-	     else 
-		  	x_space = screen.w - v.x - v.w
-        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
-				inspector.x = v.x + v.w + INSPECTOR_OFFSET
-		  	else 
-				inspector.x = (v.x + v.w - inspector.w)/2
-        	end 
-	    end  
-
-	    if (v.y > screen.h - v.y - v.h) then 
-			y_space = v.y 
-        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
-				inspector.y = v.y - inspector.h - INSPECTOR_OFFSET
-				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-			    	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
-				end	
-			else 
-            	inspector.y = (v.y + v.h - inspector.h) /2
-				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-					inspector.y = screen:find_child("menu_bar").h + INSPECTOR_OFFSET	
-				end	
-        	end 
-	    else 
-			y_space = screen.h - v.y - v.h
-        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
-				inspector.y = v.y + v.h + INSPECTOR_OFFSET
-			else 
-				inspector.y = (v.y + v.h - inspector.h)/2
-				if (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h) then 
-					inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
-				elseif (inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-			     	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
-				end
-        	end 
-	    end 
-	end 
-
-	-- set the inspector location 
-	if(v.type ~= "Video") then
-	   if(x_pos ~= nil and y_pos ~= nil) then 
-	     inspector.x = x_pos	
-	     inspector.y = y_pos	
-	   else
-	     inspector_position() 
-	   end 
-	else 
-	     inspector.x = screen.w/8
-	     inspector.y = screen.h/8
-	end 
-
-	-- make the inspector contents 
-	local attr_t = make_attr_t(v)
-	local attr_n, attr_v, attr_s
-    local items_height = 0
-    local prev_item_h = 0
-	local prev_y = 0 
-	local space = WIDTH
-	local used = 0
-
-	local item_group = Group{name = "item_group"}
-	local H_SPACE = 5 --30
-	local X_INDENT = 15
-	local TOP_PADDING = 30
-	
-	for i=1, #attr_t do 
-        if (attr_t[i] == nil) then break end 
-
-	    attr_n = attr_t[i][1] 
-	    attr_v = attr_t[i][2] 
-	    attr_s = attr_t[i][3] 
-        attr_v = tostring(attr_v)
-
-	    if(attr_s == nil) then attr_s = "" end 
-	     
-	    local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items) 
-	    if(item.w <= space) then 
-		 	if (item.h > prev_item_h) then 
-             	items_height = items_height + (item.h - prev_item_h) 
-		     	prev_item_h = item.h
-	     	end 
-         	item.x = used + H_SPACE 
-		 	item.y = prev_y
-		 	space = space - item.w
-	    else 
-		 	if (attr_n == "ui_width" or attr_n == "w") then 
-				items_height = items_height - 12 -- imsi !! 
- 		 	end 
-		 	item.y = items_height 
-         	item.x = X_INDENT 
-		 	prev_y = item.y 
-		 	items_height = items_height + item.h 
-		 	space = WIDTH - item.w
-        end 
-	    used = item.x + item.w 
-
-	    if (xbox_xpos == 465) then  
-			if (attr_n == "title") then 
-		    	item.y = item.y + TOP_PADDING 
-		    	prev_y = item.y 
-		    	items_height = items_height + TOP_PADDING *3/2
-	            inspector:add(item)
-			elseif(attr_n == "button") then 
-	            inspector:add(item)
-	    	else 
-	            item_group:add(item)
-	    	end 
-	    else 
-	        if (attr_n == "title") then 
-		    	item.y = item.y + TOP_PADDING 
-	            inspector:add(item)
-	    	elseif(attr_n == "button") then 
-		    	if(attr_v == "view code") then 
-		        	item.y = 570
-		    	else 
-		        	item.y = 620
-		        	space = space + 100
-	            end 
-	            inspector:add(item)
-	        else 
-		    	item.y = item.y - TOP_PADDING
-	            item_group:add(item)
-	        end 
-	    end
-        end 
-
-	-- inspector scroll function 
-	if v.extra then 
-			if v.type == "Rectangle" or v.type == "Text" or v.type == "Clone" or v.type == "Image" or v.type == "Group" and v.extra.type == nil then 
-	       		si = ui_element.scrollPane{visible_w = item_group.w -5 , virtual_w = item_group.w - 5, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
-			else 
-	       		si = ui_element.scrollPane{visible_w = item_group.w + 5, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
-			end 
-
-	       si.content = item_group
-	       si.position = {0,82,0}
-	       si.name ="si"
-	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
-	       inspector:add(si)
-	else -- video  
-	   inspector:add(item_group) 
-	end 
-	screen:add(inspector)
-
-	if scroll_y_pos then 
-	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
-	end 
-
-	if v.extra then 
-		if v.extra.type == "MenuButton" then 
-        	v.spin_in()
-		end 
-	end 
-
-	input_mode = S_POPUP
-	inspector:find_child("name").extra.on_focus_in()
-	
-	current_inspector = inspector
-    inspector.reactive = true
-	inspector.extra.lock = false
-	create_on_button_down_f(inspector)
-    inspector_xbox.reactive = true
-
-	function inspector_xbox:on_button_down(x,y,button,num_clicks)
-		editor.n_selected(v, true)
-		screen:remove(inspector)
-		inspector:clear() 
-		current_inspector = nil
-			
-       	for i, c in pairs(g.children) do
-		    if(c.type == "Text") then 
-				c.reactive = true
-		    end 
-        end
-
-		for i, c in pairs(g.children) do
-	     		editor.n_selected(c)
-		end
-
-        screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
-		if v.extra then 
-			if v.extra.type == "MenuButton" then 
-            	v.spin_out()
-	    	end 
-	    end 
-		return true
-	end 
-
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-	end
-end
---]]
-
---function editor.org_inspector(v, x_pos, y_pos, scroll_y_pos)
-function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
-	local save_items 
-
-	if not scroll_y_pos then 
-	     save_items = true 
-	else 
-	     save_items = false 
-	end 
-
-	local WIDTH = 450 -- width for inspector's contents
-
-	local INSPECTOR_OFFSET = 30 
-    local TOP_PADDING = 12
-    local BOTTOM_PADDING = 12
-	local xbox_xpos = 460
-
-	if(current_inspector ~= nil) then 
-		return 
-    end 
- 	
-	for i, c in pairs(g.children) do
-	     editor.n_selected(c)
-	end
-	
-	local inspector_items = {}
-	local inspector_bg
-
-	-- make inspector background image 
-	if v.extra then 
-	   if is_this_widget(v) == true  then
-	   		inspector_bg = factory.make_popup_bg(v.extra.type, 0)
-	   else -- rect, img, text 
-	     	inspector_bg = factory.make_popup_bg(v.type, 0)
-	   end 
-	else -- video  
-	   xbox_xpos = 465
-	   inspector_bg = factory.make_popup_bg(v.type, 0)
-	end 
-
-	local inspector_xbox = factory.make_xbox()
-
-	-- inspector group 
-	local inspector = Group {
-	     name = "inspector",
-	     position ={0, 0},
-	     anchor_point = {0,0},
-         children =
-         {
-         	inspector_bg, 
-	       	inspector_xbox:set{position = {xbox_xpos, 40}}
-         }
-	}
-
-	local function inspector_position() 
-	     local x_space, y_space
-	     if(v.type == "Video") then return end 
-
-	     if (v.x > screen.w - v.x - v.w) then 
-	        x_space = v.x 
-        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
-				inspector.x = x_space - inspector.w - INSPECTOR_OFFSET
-		  	else 
-				inspector.x = (v.x + v.w - inspector.w)/2
-        	end 
-	     else 
-		  	x_space = screen.w - v.x - v.w
-        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
-				inspector.x = v.x + v.w + INSPECTOR_OFFSET
-		  	else 
-				inspector.x = (v.x + v.w - inspector.w)/2
-        	end 
-	    end  
-
-	    if (v.y > screen.h - v.y - v.h) then 
-			y_space = v.y 
-        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
-				inspector.y = v.y - inspector.h - INSPECTOR_OFFSET
-				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-			    	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
-				end	
-			else 
-            	inspector.y = (v.y + v.h - inspector.h) /2
-				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-					inspector.y = screen:find_child("menu_bar").h + INSPECTOR_OFFSET	
-				end	
-        	end 
-	    else 
-			y_space = screen.h - v.y - v.h
-        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
-				inspector.y = v.y + v.h + INSPECTOR_OFFSET
-			else 
-				inspector.y = (v.y + v.h - inspector.h)/2
-				if (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h) then 
-					inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
-				elseif (inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-			     	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
-				end
-        	end 
-	    end 
-	end 
-
-	-- set the inspector location 
-	if(v.type ~= "Video") then
-	   if(x_pos ~= nil and y_pos ~= nil) and type(x_pos) == "number" then 
-	     inspector.x = x_pos	
-	     inspector.y = y_pos	
-	   else
-	     inspector_position() 
-	   end 
-	else 
-	     inspector.x = screen.w/8
-	     inspector.y = screen.h/8
-	end 
-
-	-- make the inspector contents 
-	local attr_t = make_attr_t(v)
-	local attr_n, attr_v, attr_s
-    local items_height = 0
-    local prev_item_h = 0
-	local prev_y = 0 
-	local space = WIDTH
-	local used = 0
-
-	local item_group = Group{name = "item_group"}
-	local H_SPACE = 5 --30
-	local X_INDENT = 15
-	local TOP_PADDING = 30
-	
-	for i=1, #attr_t do 
-        if (attr_t[i] == nil) then break end 
-
-	    attr_n = attr_t[i][1] 
-	    attr_v = attr_t[i][2] 
-	    attr_s = attr_t[i][3] 
-        attr_v = tostring(attr_v)
-
-	    if(attr_s == nil) then attr_s = "" end 
-	     
-	    local item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items) 
-	    if(item.w <= space) then 
-		 	if (item.h > prev_item_h) then 
-             	items_height = items_height + (item.h - prev_item_h) 
-		     	prev_item_h = item.h
-	     	end 
-         	item.x = used + H_SPACE 
-		 	item.y = prev_y
-		 	space = space - item.w
-	    else 
-		 	if (attr_n == "ui_width" or attr_n == "w") then 
-				items_height = items_height - 12 -- imsi !! 
- 		 	end 
-		 	item.y = items_height 
-         	item.x = X_INDENT 
-		 	prev_y = item.y 
-		 	items_height = items_height + item.h 
-		 	space = WIDTH - item.w
-        end 
-	    used = item.x + item.w 
-
-	    if (xbox_xpos == 465) then  
-			if (attr_n == "title") then 
-		    	item.y = item.y + TOP_PADDING 
-		    	prev_y = item.y 
-		    	items_height = items_height + TOP_PADDING *3/2
-	            inspector:add(item)
-			elseif(attr_n == "button") then 
-	            inspector:add(item)
-	    	else 
-	            item_group:add(item)
-	    	end 
-	    else 
-	        if (attr_n == "title") then 
-		    	item.y = item.y + TOP_PADDING 
-	            inspector:add(item)
-	    	elseif(attr_n == "button") then 
-		    	if(attr_v == "view code") then 
-		        	item.y = 570
-		    	else 
-		        	item.y = 620
-		        	space = space + 100
-	            end 
-	            inspector:add(item)
-	        else 
-		    	item.y = item.y - TOP_PADDING
-	            item_group:add(item)
-	        end 
-	    end
-        end 
-
-	-- inspector scroll function 
-	if v.extra then 
-			if v.type == "Rectangle" or v.type == "Text" or v.type == "Clone" or v.type == "Image" or v.type == "Group" and v.extra.type == nil then 
-	       		si = ui_element.scrollPane{visible_w = item_group.w -5 , virtual_w = item_group.w - 5, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
-			else 
-	       		si = ui_element.scrollPane{visible_w = item_group.w + 5, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
-			end 
-
-	       si.content = item_group
-	       si.position = {0,82,0}
-	       si.name ="si"
-	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
-	       inspector:add(si)
-	else -- video  
-	   inspector:add(item_group) 
-	end 
-
-
-	if scroll_y_pos then 
-		 if screen:find_child("si") then 
-	         if screen:find_child("si").seek_to then 
-	     		--screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
-	     		screen:find_child("si").seek_to(0, math.floor(math.abs(scroll_y_pos)))
-			 end 
-	     end
-	end 
-
-	if v.extra then 
-		if v.extra.type == "MenuButton" then 
-        	v.fade_in()
-		end 
-	end 
-
-	input_mode = S_POPUP
-	inspector:find_child("name").extra.on_focus_in()
-	
-	current_inspector = inspector
-    inspector.reactive = true
-	inspector.extra.lock = false
-	create_on_button_down_f(inspector)
-    inspector_xbox.reactive = true
-
-	function inspector_xbox:on_button_down(x,y,button,num_clicks)
-		editor.n_selected(v, true)
-		screen:remove(inspector)
-		inspector:clear() 
-		current_inspector = nil
-			
-       	for i, c in pairs(g.children) do
-		    if(c.type == "Text") then 
-				c.reactive = true
-		    end 
-        end
-
-		for i, c in pairs(g.children) do
-	     		editor.n_selected(c)
-		end
-
-        screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
-		if v.extra then 
-			if v.extra.type == "MenuButton" then 
-            	v.spin_out()
-	    	end 
-	    end 
-		return true
-	end 
-
-
-	if x_pos ~= nil then 
-		if x_pos ~= "touch" then 
-			screen:add(inspector)
-		else 
-			inspector_apply (v, inspector)
-			inspector_xbox:on_button_down()
-		end 
-	else 
-		screen:add(inspector)
-	end 
-
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-	end
-end
-
-
-function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
---function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local save_items 
 	if not scroll_y_pos then 
 	     save_items = true 
@@ -2035,6 +1524,7 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	local Y_PADDING = 22
     local X_PADDING = 10
+	local GUTTER = 13 
 
 	local STYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
     local WSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
@@ -2048,20 +1538,26 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	local inspector_bg = Image{src = "lib/assets/panel-tabs.png", name = "open_project", position = {0,0}}
 	local inspector_items = {}
 	
+	local last_attr_n = "reactive"
+
 	if is_this_widget(v) == true then 
 		title = Text{name = "title", text = "Inspector: "..v.extra.type}:set(STYLE)
 		title_shadow = Text {name = "title", text = "Inspector: "..v.extra.type}:set(SSTYLE)
+		if v.extra.type == "TabBar" or v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or
+		   v.extra.type == "ProgressSpinner" or v.extra.type == "ProgressBar" or 
+		   v.extra.type == "LayoutManager" or v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
+			last_attr_n = "opacity"
+		end 
 	else 
 		title = Text{name = "title", text = "Inspector: "..v.type}:set(STYLE)
 		title_shadow = Text {name = "title", text = "Inspector: "..v.type}:set(SSTYLE)
 	end 
 	----------------------------------------------------------------------------
-
 	--local WIDTH = 450 -- 255  width for inspector's contents
 	local INSPECTOR_OFFSET = 30 
     local TOP_PADDING = 12
     local BOTTOM_PADDING = 12
-	local xbox_xpos = 460
+	--local xbox_xpos = 460
 	-------------------------------------------------------------
 
 	if(current_inspector ~= nil) then 
@@ -2073,7 +1569,10 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	end
 
 	-- Scroll	
-	local scroll = editor_ui.scrollPane{}
+	local scroll_info = editor_ui.scrollPane{visible_h = 310, visible_w = 280, virtual_w = 280}
+	scroll_info.name = "si_info"
+	local scroll_more = editor_ui.scrollPane{visible_h = 310, visible_w = 280, virtual_w = 280}
+	scroll_more.name = "si_more"
 
 	-- Buttons 
     local button_viewcode = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -2083,6 +1582,7 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
     					  skin = "default", ui_width = 80, ui_height = 27, label = "Apply", focus_color = {27,145,27,255},active_button =true, focus_object = tabs} 
 	--Tabs 
+
 	local tabs = editor_ui.tabBar{}
 
 	local s_func = function()
@@ -2111,7 +1611,6 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	  		xbox:set{position = {275, 0}},
 			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
-			--scroll:set{name = "scroll", position = {0, TOP_BAR+1}, reactive=true},
 			tabs:set{name = "tabs", position = {5, TOP_BAR}, reactive=true},
 			button_viewcode:set{name = "button_viewcode", position = { WIDTH - button_viewcode.w - button_cancel.w - button_ok.w - 3*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
@@ -2190,41 +1689,28 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	-- make the inspector contents 
 	local attr_t = make_attr_t(v)
 	local attr_n, attr_v, attr_s
-    local items_height = 0
-    local prev_item_h = 0
-	local prev_y = 0 
-	local space = 255
-	local used = 13 
 
-	local item_group = Group{name = "item_group"}
-	local H_SPACE = 0 --30
-	local X_INDENT = 13
+
+	local X_INDENT = 8 
 	local TOP_PADDING = 43
-	
-	local function make_textInput_item(attr_n, attr_v, attr_s) 
 
-		if attr_n == "button" or attr_n == "title" or attr_n == "label" or attr_n == "lock" or attr_n == "focus" then 
-			return 
-		end 
+	local attrn_map = {
+		["focus"] = function(assets, inspector, v, attr_n, attr_v, attr_s, save_items, b_val) 
+						local focus = factory.make_focuschanger(assets, inspector, v, attr_n, attr_v, attr_s, save_items, b_val) 
+						focus.position = {GUTTER, GUTTER}
+						tabs.tabs[2]:add(focus)	
+					end, 
+	} 
 
-		local group = Group{}
+	local item_group_info = Group{name = "item_group_info", position = {0,0}} --53
+	local item_group_more = Group{name = "item_group_more", position = {0,0}} --53
+	local item_group = item_group_info
 
-		-- Property Label
-		local label = Text{text = attr_s, position = {0,0}} 
-		group:add(label)
-
-		editor_use = true
-		-- Text Input Field 	
-		local input_text = ui_element.textInput{name = "input_text", skin = "custom", ui_width = 39, ui_height = 21 , text = "", padding = 3 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0,}
-
-		input_text.x = label.x + label.w + PADDING -- 3
-		input_text.y = 0
-
-		editor_use = false
-		group:add(input_text)
-
-		return group
-	end 
+    local items_height = 0
+	local space = 261
+	local used = 0
+	local used_y = 0
+	local prev_y = 0 
 
 	for i=1, #attr_t do 
         if (attr_t[i] == nil) then break end 
@@ -2233,78 +1719,95 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	    attr_s = attr_t[i][3] 
         attr_v = tostring(attr_v)
 	    if(attr_s == nil) then attr_s = "" end 
-	    local item = make_textInput_item(attr_n, attr_v, attr_s) 
 
-		if item ~= nil then 
-	    	if(item.w <= space) then 
-		 		if (item.h > prev_item_h) then 
-             		items_height = items_height + (item.h - prev_item_h) 
-		     		prev_item_h = item.h
-	     		end 
-         		item.x = used + H_SPACE 
-		 		item.y = prev_y
-		 		space = space - item.w
-	    	else 
-		 		if (attr_n == "ui_width" or attr_n == "w") then 
-					items_height = items_height - 12 -- imsi !! 
- 		 		end 
-		 		item.y = items_height 
-         		item.x = X_INDENT 
-		 		prev_y = item.y 
-		 		items_height = items_height + item.h 
-		 		space = WIDTH - item.w
-        	end 
-	    	used = item.x + item.w 
+		if attr_n == "focus" then 
+	    	local focus = factory.make_focuschanger(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+			focus.position = {GUTTER, GUTTER}
+			tabs.tabs[2]:add(focus) 
+		else 
+			local item
 
-	    	if (xbox_xpos == 465) then  
-				if (attr_n == "title") then 
-				elseif(attr_n == "button") then 
+			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
+				item = factory.make_filechooser(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+			elseif attr_n == "items" then 
+				item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+				--item.position = {7, GUTTER}
+			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" then  -- Attribute with single checkbox
+				item = factory.make_onecheckbox(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true)
+			elseif attr_n == "anchor_point" then 
+				item = factory.make_anchorpoint(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+			elseif attr_n == "skin" or attr_n == "wrap_mode"  
+			or attr_n == "expansion_location" or attr_n == "cell_size" or attr_n == "style" or attr_n == "direction" then 
+				item = factory.make_buttonpicker(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+			else 
+	    		item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+			end
+		
+			if item ~= nil then 
+				--print("attr_n", attr_n, "attr_s", attr_s)
+				--print("w",item.w,"h",item.h,"s", space,"u", used,"items height", items_height)
+	    		if(item.w < space) then 
+		 			if (item.h > items_height) then 
+             			items_height = item.h
+	     			end 
+					if space == 261 then 
+         				item.x = GUTTER
+					else
+         				item.x = used + PADDING  -- PADDING, 6
+					end 
+
+					if used_y == 0 then 
+		 				item.y = GUTTER
+					else 
+						item.y = prev_y 
+					end 
+					prev_y = item.y 
 	    		else 
-	            item_group:add(item)
-	    		end 
-	    	else 
-	        	if (attr_n == "title") then 
-		    		--item.y = item.y + TOP_PADDING 
-	            	--inspector:add(item)
-	    		elseif(attr_n == "button") then 
-		    		if(attr_v == "view code") then 
-		        		item.y = 570
-		    		else 
-		        		item.y = 620
-		        		space = space + 100
-	            	end 
-	            	--inspector:add(item)
-	        	else 
-		    		item.y = item.y - TOP_PADDING
-	            	item_group:add(item)
-					break
-	        	end 
-	    	end
-	  	end
+		 			if (attr_n == "ui_width" or attr_n == "w") then 
+						--items_height = items_height - 12 -- imsi !! 
+ 		 			end 
+         			item.x = GUTTER
+		 			item.y = used_y +  7
+		 			space = 261 --WIDTH - item.w
+		 			items_height = item.h 
+					prev_y = item.y
+        		end 
+				if attr_s == "W" then 
+					item.x = item.x - 3
+				end
+		 		space = space - item.w - PADDING		
+	    		used = item.x + item.w  
+				used_y = item.y + items_height
+	        	item_group:add(item)
+				
+	  		end
+
+			if attr_n == last_attr_n then 
+				item_group = item_group_more
+				space = 261
+				items_height = 0
+				used_y = 0
+				used = 0
+			end 
+		end 
    	end 
 
-	print(scroll.visible_w, scroll.visible_h)
-	print(scroll.visible_w, scroll.visible_h)
-	print(scroll.visible_w, scroll.visible_h)
-	print(scroll.visible_w, scroll.visible_h)
-	print(scroll.visible_w, scroll.visible_h)
+	scroll_info.virtual_h = item_group_info.h --+ 35
+   	scroll_info.content:add(item_group_info)
+	scroll_info.position = {0, 0}
+	scroll_info.reactive = true
+	tabs.tabs[1]:add(scroll_info) 
 
-   	scroll.virtual_h = item_group.h
-   	scroll.content = item_group
-
-	print(scroll.virtual_w, scroll.virtual_h)
-	print(scroll.virtual_w, scroll.virtual_h)
-	print(scroll.virtual_w, scroll.virtual_h)
-	print(scroll.virtual_w, scroll.virtual_h)
-
-	if tabs.tabs[1] == nil then 
-		tabs.tabs[1] = Group{}
+	scroll_more.virtual_h = item_group_more.h --+ 35
+	if item_group_more.h ~= 0 then 
+   		scroll_more.content:add(item_group_more)
+		scroll_more.position = {0, 0}
+		scroll_more.reactive = true
+		tabs.tabs[3]:add(scroll_more) 
 	end 
 
-	tabs.tabs[1] = Group {children = {scroll}} 
-	tabs:add(tabs.tabs[1])
-
-   	scroll.extra.focus = {[keys.Tab] = "button_cancel"}
+    scroll_info.extra.focus = {[keys.Tab] = "button_cancel"}
+    scroll_more.extra.focus = {[keys.Tab] = "button_cancel"}
    	inspector.extra.lock = false
    	screen:add(inspector)
    	create_on_button_down_f(inspector)	
@@ -2312,8 +1815,17 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	--Focus
 	button_ok:find_child("active").opacity = 255
 	button_ok:find_child("dim").opacity = 0
-	scroll.on_focus_in()
+	scroll_info.on_focus_in()
 
+	local var_i = 1 
+	for i=1, 3 do 
+		local grp = tabs.tabs[var_i] 
+		if table.getn(grp.children) == 0 then 
+			tabs:remove_tab(var_i)
+			var_i = var_i - 1
+		end 
+		var_i = var_i + 1 
+	end 
 
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(inspector)
@@ -2322,6 +1834,11 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 		current_focus = nil 
 		if x then 
 	    	input_mode = S_SELECT
+		end 
+		if v.extra then 
+			if v.extra.type == "MenuButton" then 
+        		v.fade_out()
+			end 
 		end 
 		screen.grab_key_focus(screen) 
 		return true
@@ -2347,14 +1864,13 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	screen:add(inspector)
 	]]
 
---[[
 	if scroll_y_pos then 
-	     screen:find_child("si").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+		 tabs.buttons[3].on_button_down()
+	     screen:find_child("si_more").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 	end 
-]]
 	if v.extra then 
 		if v.extra.type == "MenuButton" then 
-        	v.spin_in()
+        	v.fade_in()
 		end 
 	end 
 
@@ -2365,8 +1881,9 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
     inspector.reactive = true
 	inspector.extra.lock = false
 
---[[
+---[[ 0630 
 	create_on_button_down_f(inspector)
+	inspector_xbox = inspector:find_child("xbox") 
     inspector_xbox.reactive = true
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		editor.n_selected(v, true)
@@ -2393,7 +1910,7 @@ function editor.new_inspector(v, x_pos, y_pos, scroll_y_pos)
 	    end 
 		return true
 	end 
-]]
+--]]
 
 	if x_pos ~= nil then 
 		if x_pos ~= "touch" then 
@@ -3274,13 +2791,13 @@ function editor.the_video()
 	}
 
     msgw:add(dir_text)
- if j.name == "w" or j.name == "h" then 
-				if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
-                            		v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-				end 
-			    else 
-                            		v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-			    end 
+ 	if j.name == "w" or j.name == "h" then 
+		if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
+        	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+		end 
+	else 
+    	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+	end 
 
 	local text_g
 	local input_text
@@ -5067,7 +4584,7 @@ function editor.ui_elements()
 
     for i, v in pairs(uiElements) do
          if (i == 6) then 
-              cur_w =  cur_w + 280 + Y_PADDING
+              cur_w =  cur_w + 255 + Y_PADDING
               cur_h =  TOP_PADDING + widgets_list.h -10
 	 end 
 	 
@@ -5207,4 +4724,42 @@ end
 
 
 
+
+	
+	--[[
+	local function make_textInput_item(attr_n, attr_v, attr_s) 
+
+		local non_textInput_items = {"title", "caption", "line", "button", "focus", "tab_labels", "items", "skin", "wrap_mode", 
+		"expansion_location", "cell_size", "style", "direction", "reactive", "loop", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", 
+		"icon", "source", "src", "anchor_point", }
+
+		--if attr_n == "button" or attr_n == "title" or attr_n == "label" or attr_n == "lock" or attr_n == "focus" then 
+
+		for i, j  in pairs (non_textInput_items) do 
+			if j == attr_n then 
+				return 
+			end 
+		end 
+
+		local group = Group{}
+
+		-- Property Label
+		local label = Text{name = "attr", text = attr_s}:set(ISTYLE)
+		--label.position = {WIDTH - space, PADDING_Y}
+		label.position = {0, 0}
+		group:add(label)
+
+		editor_use = true
+		-- Text Input Field 	
+		local input_text = ui_element.textInput{name = "input_text", skin = "custom", ui_width = 39, ui_height = 21 , text = "", padding = 3 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0,}
+
+		input_text.x = label.x + label.w + PADDING -- 6
+		input_text.y = 0
+
+		editor_use = false
+		group:add(input_text)
+
+		return group
+	end 
+	]]
 

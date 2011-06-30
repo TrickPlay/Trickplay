@@ -119,14 +119,14 @@ function editor_ui.button(table)
 		b_group:add(button, active, focus)
 
 		if p.text_has_shadow then 
-	       s_txt = Text{
+	       s_txt = Text {
 		        	name = "shadow",
                     text  = p.label, 
                     font  = p.text_font,
                     color = {0,0,0,255/2},
                     x= (p.ui_width  -text.w)/2 - 1,
                     y= (p.ui_height - text.h)/2 - 1,
-                    }
+            }
             s_txt.anchor_point={0,s_txt.h/2}
             s_txt.y = s_txt.y+s_txt.h/2
         	b_group:add(s_txt)
@@ -825,10 +825,12 @@ function editor_ui.tabBar(t)
         fill_color   = {  0,  0,  0,  0},
         label_color  = {255,255,255,  255},
         unsel_color  = { 60, 60, 60,  0},
+		buttons = {}, 
+		current_tab = 1,
     }
     
 	local offset = {}
-    local buttons = {}
+    --local buttons = {}
     
     --overwrite defaults
     if t ~= nil then
@@ -906,11 +908,11 @@ function editor_ui.tabBar(t)
                 p.tabs[current_index]:hide()
 				--tab_bg[current_index]:show()
 				--tab_focus[current_index]:hide()
-                buttons[current_index].on_focus_out()
+                p.buttons[current_index].on_focus_out()
                 current_index = index
                 p.tabs[current_index]:show()
-                buttons[current_index]:raise_to_top()
-                buttons[current_index].on_focus_in()
+                p.buttons[current_index]:raise_to_top()
+                p.buttons[current_index].on_focus_in()
 				--tab_bg[current_index]:hide()
 				--tab_focus[current_index]:show()
             end,
@@ -963,37 +965,37 @@ function editor_ui.tabBar(t)
                 p.tabs[i] = Group{}
             end
 
-			buttons[i] = ui_element.button{ skin=p.skin, ui_width=p.ui_width, ui_height=p.ui_height, 
+			p.buttons[i] = ui_element.button{ skin=p.skin, ui_width=p.ui_width, ui_height=p.ui_height, 
 						 focus_color=p.focus_color, border_width=p.border_width, border_corner_radius=p.border_corner_radius,
 						 label= p.tab_labels[i], text_font=p.font, text_color=p.text_color, fill_color=p.unsel_color, 
 						 focus_fill_color=p.fill_color, focus_text_color=p.focus_text_color, 
-						 pressed=function() umbrella:display_tab(i) end, label_align = "left"} 
+						 pressed=function() umbrella:display_tab(i) p.current_tab = i end, label_align = "left"} 
 
 			p.tabs[i]:hide()
-            buttons[i].position = {0,0}
-            buttons[i].on_focus_out()
+            p.buttons[i].position = {0,0}
+            p.buttons[i].on_focus_out()
 
             if p.tab_position == "TOP" then
-                buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
-                p.tabs[i].y  = buttons[i].h
+                p.buttons[i].x = (p.tab_spacing+p.buttons[i].w)*(i-1)
+                p.tabs[i].y  = p.buttons[i].h
             else
-                p.tabs[i].x  = buttons[i].w
-                buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
+                p.tabs[i].x  = p.buttons[i].w
+                p.buttons[i].y = (p.tab_spacing+p.buttons[i].h)*(i-1)
             end
-            umbrella:add(p.tabs[i],buttons[i])
+            umbrella:add(p.tabs[i],p.buttons[i])
 			offset.x = p.tabs[i].x
 			offset.y = p.tabs[i].y
 			editor_use = false
         end
         if p.tab_position == "TOP" then
-            bg.y = buttons[1].h-p.border_width
+            bg.y = p.buttons[1].h-p.border_width
         else
-            bg.x = buttons[1].w-p.border_width
+            bg.x = p.buttons[1].w-p.border_width
         end
         
         for i = #p.tab_labels+1, #p.tabs do
             p.tabs[i]  = nil
-            buttons[i] = nil
+            p.buttons[i] = nil
         end
 		
 		umbrella:display_tab(current_index)
