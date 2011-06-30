@@ -1,5 +1,7 @@
 --local top_card = 1
+
 local r_pos
+
 local function flip_forward(self,msecs,p)
 	
 	for i,c in ipairs(self.cards) do
@@ -31,6 +33,8 @@ local function flip_forward(self,msecs,p)
 			
 		end
         
+        self.cards[self.top_card]:get_focus()
+        
         --self.cards[(top_card - 2) % #self.cards + 1]:raise_to_top()
         
         self.flipping = false
@@ -38,7 +42,10 @@ local function flip_forward(self,msecs,p)
 	end
 	
 end
+
 local function pre_forward_flip(self)
+    
+    self.cards[self.top_card]:lose_focus()
     
     self.cards[(self.top_card - 2) % #self.cards + 1]:raise_to_top()
     
@@ -81,6 +88,8 @@ local function flip_backward(self,msecs,p)
 			
 		end
         
+        self.cards[self.top_card]:get_focus()
+        
         self.flipping = false
         
 	end
@@ -88,6 +97,8 @@ local function flip_backward(self,msecs,p)
 end
 
 local function pre_backward_flip(self)
+    
+    self.cards[self.top_card]:lose_focus()
     
     self.cards[(self.top_card - 2) % #self.cards + 1]:lower_to_bottom()
     
@@ -157,44 +168,64 @@ return function(response_table)
         
         screen:add(App_State.rolodex)
         
-        KEY_HANDLER:add_keys("ROLODEX",{
-    --Flip Backward
-	[keys.Down] = function()
-		
-        if not App_State.rolodex.flipping then
-            
-			App_State.rolodex:pre_backward_flip()
-			
-            Idle_Loop:add_function(
-                App_State.rolodex.flip_backward,
-                App_State.rolodex,
-                1000
-            )
-			
-            App_State.rolodex.flipping = true
+        mouse:raise_to_top()
+        
+        KEY_HANDLER:add_keys("ROLODEX",
+            {
+                --Flip Backward
+                [keys.Down] = function()
+                    
+                    if not App_State.rolodex.flipping then
+                        
+                        App_State.rolodex:pre_backward_flip()
+                        
+                        Idle_Loop:add_function(
+                            App_State.rolodex.flip_backward,
+                            App_State.rolodex,
+                            1000
+                        )
+                        
+                        App_State.rolodex.flipping = true
+                    end
+                    
+                end,
+                
+                --Flip Forward
+                [keys.Up] = function()
+                    
+                    if not App_State.rolodex.flipping then
+                        
+                        App_State.rolodex:pre_forward_flip()
+                        
+                        Idle_Loop:add_function(
+                            App_State.rolodex.flip_forward,
+                            App_State.rolodex,
+                            1000
+                        )
+                        
+                        App_State.rolodex.flipping = true
+                    end
+                    
+                end,
+            }
+        )
+        
+        App_State.rolodex.to_mouse = function()
+            for _,c in pairs(App_State.rolodex.cards) do
+                c:to_mouse()
+            end
         end
         
-	end,
-	
-    --Flip Forward
-	[keys.Up] = function()
-		
-        if not App_State.rolodex.flipping then
-            
-			App_State.rolodex:pre_forward_flip()
-			
-			Idle_Loop:add_function(
-                App_State.rolodex.flip_forward,
-                App_State.rolodex,
-                1000
-            )
-			
-            App_State.rolodex.flipping = true
+        mouse.to_mouse[App_State.rolodex.to_mouse] = true
+        
+        App_State.rolodex.to_keys = function()
+            for _,c in pairs(App_State.rolodex.cards) do
+                c:to_keys()
+            end
         end
         
-		--dumptable(r.visible_cards)
-	end,})
-    --else, reset
+        mouse.to_keys[App_State.rolodex.to_keys] = true
+        
     else
         
         Idle_Loop:remove_function(App_State.rolodex.throb_cards)
@@ -202,8 +233,6 @@ return function(response_table)
         App_State.rolodex.time:stop()
         
         App_State.rolodex:clear()
-        
-        
         
     end
     
@@ -229,7 +258,7 @@ return function(response_table)
             --Pricing
             price         = "$"..d.options[1].price.amount/100,
             msrp          = "$"..d.options[1].value.amount/100,
-            percentage    = d.options[1].discountPercent,
+            percentage    =      d.options[1].discountPercent,
             saved         = "$"..d.options[1].discount.amount/100,
             --Timer
             expiration    = d.endAt,
@@ -267,6 +296,9 @@ return function(response_table)
         
         c:lower_to_bottom()
     end
+    
+    if not using_keys then App_State.rolodex.to_mouse() end
+    
     --[[
     Zip.list_locations(divs)
     
@@ -285,12 +317,12 @@ return function(response_table)
     
     --if CONTOLLER_PROMPT.parent then CONTOLLER_PROMPT:unparent() end
     
-    if ZIP_ENTRY.parent  then ZIP_ENTRY:unparent()  end
+    --if ZIP_ENTRY.parent  then ZIP_ENTRY:unparent()  end
 
     --if SMS_ENTRY.parent  then SMS_ENTRY:unparent()  end    
     
     
-    App_State.rolodex:add(--[[CONTOLLER_PROMPT,]] ZIP_ENTRY)
+   -- App_State.rolodex:add(--[[CONTOLLER_PROMPT,]] ZIP_ENTRY)
     
     --ZIP_PROMPT:set_city(divs)
     
@@ -328,5 +360,7 @@ return function(response_table)
     
     --ROLODEX is ready, change state
     App_State.state:change_state_to("ROLODEX")
+    
+    App_State.rolodex.cards[App_State.rolodex.top_card]:get_focus()
     
 end

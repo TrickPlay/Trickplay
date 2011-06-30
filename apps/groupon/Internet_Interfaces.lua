@@ -1,6 +1,4 @@
-local attempts = {}
-
-local last_req = nil
+--local attempts = {}
 
 local try_again = Timer{
 	
@@ -10,7 +8,9 @@ local try_again = Timer{
 		
 		self:stop()
 		
-		last_req:send()
+        print( "Resending " .. self.req.url )
+        
+		self.req:send()
 		
 	end
 }
@@ -18,17 +18,34 @@ local try_again = Timer{
 try_again:stop()
 
 local response_check = function(request_object,response_object,callback)
-    if response_object.failed or response_object.code ~= 200 then
+	
+	if response_object.failed then
+        print(
+			
+			"URLRequest FAILED, receiving the reponse code: "..
+			
+			response_object.code.." - "..
+			
+			response_object.status..".  Trying again in "..try_again.interval/1000
+			
+		)
+    elseif response_object.code ~= 200 then
 		
+        
+        
+        
 		print(
 			
 			"URLRequest received a reponse code: "..
 			
 			response_object.code.." - "..
 			
-			response_object.status
+			response_object.status..".  Trying again in "..try_again.interval/1000
 			
 		)
+        --]]
+        
+        --[[
 		if attempts[request_object] == nil then
 			
 			attempts[request_object] = 1
@@ -42,42 +59,33 @@ local response_check = function(request_object,response_object,callback)
 			attempts[request_object] = attempts[request_object] + 1
 			
 		end
+		--]]
+        
 		
-		--request_object:send()
-		
-		last_req = request_object
-		
-		try_again:start()
-		
-	elseif response_object.code ~= 200 then
-		
-		error(
-			
-			"URLRequest received a reponse code: "..
-			
-			response_object.code.." - "..
-			
-			response_object.status
-			
-		)
 		
 	elseif response_object.body == nil then
 		
 		error(
-			response_object.code.." - "..
-			
-			response_object.status
+			"\n\nReceived a nil Response body\n"..
+            
+            "Status: "..response_object.code.." - "..response_object.status.."\n"
 		)
 		
 	else
-					
+		
 		local json_response = json:parse(response_object.body)
 		
 		
 		if json_response == nil then
-		
-			json_response = Xml_Parse(response_object.body)
+			
+			callback(  Xml_Parse(response_object.body)  )
+			
+        else
+            
+            callback(json_response)
+            
 		end
+        
 		--[[
 		if json_response == nil or type(json_response) ~= "table" then
 			
@@ -88,9 +96,35 @@ local response_check = function(request_object,response_object,callback)
 		end
 		--]]
 		
-		callback(json_response)
-		
+        return
 	end
+    
+    try_again.req = request_object
+		
+	try_again:start()
+end
+
+--------------------------------------------------------------------------------
+-- GOOGLE MAPS
+--------------------------------------------------------------------------------
+
+local google_maps_get_lat_lng_from_zip = function(zip, callback)
+    
+    assert(type(callback) == "function")
+    
+    local req = URLRequest{
+	
+	url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&"..
+	    "address="..zip,
+	
+	on_complete = function(self,response_object)
+	    
+	    response_check(self,response_object,callback)
+	    
+	end
+    }
+    
+    return req:send()
 end
 
 --------------------------------------------------------------------------------
@@ -99,49 +133,64 @@ end
 
 local groupon_api_key = "4e79a015b2222c3336099a080f7b3508cc62a6a0"
 
-local groupon_get_deals = function(callback,lat,lng,radius)
-    
-    assert(type(callback) == "function")
-    
-    local req = URLRequest{
-        
-        url = "https://api.groupon.com/v2/deals.json?show=all&client_id="..groupon_api_key,
-        
-        on_complete = function(self,response_object)
-            
-            response_check(self,response_object,callback)
-            
-        end
-    }
-    
-    if lat ~= nil and lng ~= nil and radius ~= nil then
-        req.url = req.url.."&lat="..lat.."&lng="..lng.."&radius="..radius
-    end
-    
-    return req:send()
+local function groupon_get_deals(callback,lat,lng,radius)
+	
+	assert(type(callback) == "function")
+	
+	local req = URLRequest{
+		
+		url = "https://api.groupon.com/v2/deals.json?show=all&client_id="..groupon_api_key,
+		
+		on_complete = function(self,response_object)
+			
+			if response_object.code == 400 and lat == nil then
+				
+				groupon_get_deals(callback,33.93,-118.4,50)
+				
+			else
+				
+				response_check(self,response_object,callback)
+				
+			end
+		end
+	}
+	
+	if lat ~= nil and lng ~= nil and radius ~= nil then
+		
+		req.url = req.url.."&lat="..lat.."&lng="..lng.."&radius="..radius
+		
+	end
+	
+	
+	return req:send()
 end
+
 --------------------------------------------------------------------------------
 -- BITLY
 --------------------------------------------------------------------------------
-local login = 'trickplayaffiliate'
+
+local login         = 'trickplayaffiliate'
 local bitly_api_key = 'R_b7a6a475fa6baf58fea332a1718779ed'
 
 local shorten_url = function(url,callback)
-	print(url)
+	
 	assert(type(callback) == "function")
-    	
-    local req = URLRequest{
-        
-        url = "http://api.bitly.com/v3/shorten?login="..login.."&apiKey="..bitly_api_key.."&longUrl="..uri:escape(url),
-        
-        on_complete = function(self,response_object)
-            
-            response_check(self,response_object,callback)
-            
-        end
-    }
-    
-    return req:send()
+	
+	local req = URLRequest{
+		
+		url = "http://api.bitly.com/v3/shorten?"..
+			"login="  ..login.."&"..
+			"apiKey=" ..bitly_api_key.."&"..
+			"longUrl="..uri:escape(url),
+		
+		on_complete = function(self,response_object)
+		    
+			response_check(self,response_object,callback)
+		    
+		end
+	}
+	
+	return req:send()
 	
 end
 
@@ -165,7 +214,7 @@ local tropo_sms = function(callback,merchant_name,deal_url,to)
     
 	
 	assert(type(callback) == "function")
-    	
+	
 	shorten_url(
 		
 		cj_link(deal_url),
@@ -190,29 +239,6 @@ local tropo_sms = function(callback,merchant_name,deal_url,to)
 	)
     
 	print("sent")
-end
-
---------------------------------------------------------------------------------
--- GOOGLE MAPS
---------------------------------------------------------------------------------
-
-local google_maps_get_lat_lng_from_zip = function(zip, callback)
-    
-    assert(type(callback) == "function")
-    
-    local req = URLRequest{
-        
-        url = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&"..
-            "address="..zip,
-        
-        on_complete = function(self,response_object)
-            
-            response_check(self,response_object,callback)
-            
-        end
-    }
-    
-    return req:send()
 end
 
 return groupon_get_deals, tropo_sms, google_maps_get_lat_lng_from_zip, try_again

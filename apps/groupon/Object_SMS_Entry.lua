@@ -111,6 +111,113 @@ for i = 1,phone_digit_max do
     entry[i].anchor_point={0,entry[i].h/2}
 end
 
+local local_to_mouse, to_mouse_obj
+
+local close_btn = Clone{
+    name   = "Close Button",
+    source = assets.close_btn,
+    x= 56,
+    y=432
+}
+close_btn:move_anchor_point(close_btn.w/2,close_btn.h/2)
+function close_btn:on_enter()
+    close_btn.source = assets.close_focus
+    close_btn.anchor_point = {close_btn.w/2,close_btn.h/2}
+    mouse.to_mouse[close_btn.show] = close_btn
+    mouse.to_keys[close_btn.hide]  = close_btn
+end
+function close_btn:on_leave()
+    close_btn.source = assets.close_btn
+    close_btn.anchor_point = {close_btn.w/2,close_btn.h/2}
+    mouse.to_mouse[close_btn.show] = nil
+    mouse.to_keys[close_btn.hide]  = nil
+end
+function close_btn:on_button_up()
+    KEY_HANDLER:key_press(keys.BLUE)
+    return true
+end
+local clear_btn = Clone{
+    name   = "Clear Button",
+    source = assets.clear_btn,
+    x= 176,
+    y=432
+}
+clear_btn:move_anchor_point(clear_btn.w/2,clear_btn.h/2)
+
+function clear_btn:on_button_up()
+    KEY_HANDLER:key_press(keys.YELLOW)
+    return true
+end
+function clear_btn:on_enter()
+    clear_btn.source = assets.clear_focus
+    clear_btn.anchor_point = {clear_btn.w/2,clear_btn.h/2}
+    mouse.to_mouse[clear_btn.show] = clear_btn
+    mouse.to_keys[clear_btn.hide]  = clear_btn
+end
+function clear_btn:on_leave()
+    clear_btn.source = assets.clear_btn
+    clear_btn.anchor_point = {clear_btn.w/2,clear_btn.h/2}
+    mouse.to_mouse[clear_btn.show] = nil
+    mouse.to_keys[clear_btn.hide]  = nil
+end
+
+local num_pad = Clone{
+    source = assets.hor_num_pad,
+    x=291,
+    y=403,
+}
+local num_hl = Clone{
+    source = assets.hor_num_hl,
+    x=291,
+    y=422,
+}
+num_hl:move_anchor_point(num_hl.w/2,num_hl.h/2)
+num_hl:hide()
+function num_pad:on_enter()
+    num_hl:show()
+    --local_to_mouse = num_hl
+    mouse.to_mouse[num_hl.show] = num_hl
+    mouse.to_keys[num_hl.hide]  = num_hl
+end
+function num_pad:on_leave()
+    num_hl:hide()
+    --local_to_mouse = nil
+    mouse.to_mouse[num_hl.show] = nil
+    mouse.to_keys[num_hl.hide]  = nil
+end
+--contain the upvals
+do
+    
+    local num_pad_x = num_pad.x
+    
+    local hover_i
+    
+    function num_pad:on_motion(x,y)
+        
+        hover_i = math.floor((x-num_pad_x-40)/40)
+        
+        if     hover_i <  1 then hover_i =  1
+        
+        elseif hover_i > 10 then hover_i = 10 end
+        
+        num_hl.x = num_pad_x + 40*( hover_i )
+        
+    end
+    
+    function num_pad:on_button_up(x,y)
+        
+        if hover_i > 9 then
+            
+            KEY_HANDLER:key_press(keys["0"])
+            
+        else
+            
+            KEY_HANDLER:key_press(keys[""..hover_i])
+            
+        end
+        
+    end
+end
 local submit_button = Clone{
 	source = assets.submit_btn,
 	x = 627,
@@ -120,11 +227,25 @@ local submit_button_focus = Clone{
 	source = assets.submit_glow,
 	x = 627,
 	y = 335,
-	opacity = 0
 }
+submit_button_focus:hide()
+function submit_button:on_enter()
+    submit_button_focus:show()
+    local_to_mouse = submit_button_focus
+    mouse.to_mouse[submit_button_focus.show] = submit_button_focus
+    mouse.to_keys[submit_button_focus.hide]  = submit_button_focus
+end
+function submit_button:on_leave()
+    submit_button_focus:hide()
+    mouse.to_mouse[submit_button_focus.show] = nil
+    mouse.to_keys[submit_button_focus.hide]  = nil
+end
+function submit_button:on_button_up()
+    KEY_HANDLER:key_press(keys.OK)
+end
 local submit_button_shadow = Text{
-	text = "Send",
-	font = "DejaVu Condensed Bold 22px",
+	text  = "Send",
+	font  = "DejaVu Condensed Bold 22px",
 	color = "#000000",
 	opacity = 255*.5,
 	x = submit_button.x + submit_button.w/2 + 1,
@@ -149,6 +270,10 @@ sms_entry:add(
 	entered,
 	cursor,
 	prompt,
+    close_btn,
+    clear_btn,
+    num_pad,
+    num_hl,
 	submit_button,
 	submit_button_focus,
 	submit_button_shadow,
@@ -179,7 +304,7 @@ local reset_form = function()
     cursor.opacity=255
     cursor_index=1
 	
-	submit_button_focus.opacity = 0
+	submit_button_focus:hide()
 end
 
 local sms_callback = function(sms_result)
@@ -203,32 +328,7 @@ local sms_callback = function(sms_result)
 		state:change_state_to("ACTIVE")
 		
     else
-	--]]
-	
-	
-	
-		--[[
-        local lat = zip_info.results[1].geometry.location.lat
-        local lng = zip_info.results[1].geometry.location.lng
         
-        
-        --zip_prompt.opacity=255
-        
-        --zip_prompt:unparent()
-        
-        GET_DEALS(Rolodex_Constructor,lat,lng,50)
-        
-        
-        Loading_G.opacity=255
-        
-        Loading_G:raise_to_top()
-        
-        Loading_G.x = 450
-        
-        Loading_G.y = screen_h - 200
-        
-        Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
-        --]]
 		App_State.rolodex.cards[App_State.rolodex.top_card]:sent()
 		
         state:change_state_to("ANIMATING_OUT")
@@ -252,7 +352,7 @@ local add_number = function(num)
     if cursor_index == phone_digit_max+1 then
         
         cursor.opacity = 0
-		submit_button_focus.opacity = 255
+		submit_button_focus:show()
         --state:change_state_to("SENDING")
     end
 end
@@ -344,31 +444,32 @@ App_State.state:add_state_change_function(
 state:add_state_change_function(
     function(prev_state,new_state)
 		
-		submit_button_focus.opacity = 0
+		submit_button_focus:hide()
 		
 		cancel_object = SEND_SMS(
 			sms_callback,
 			merchant_name,
 			deal_url,
-			entry[1].text..
-            entry[2].text..
-            entry[3].text..
-            entry[4].text..
-			entry[5].text..
-            entry[6].text..
-            entry[7].text..
-            entry[8].text..
-            entry[9].text..
+			entry[ 1].text..
+            entry[ 2].text..
+            entry[ 3].text..
+            entry[ 4].text..
+			entry[ 5].text..
+            entry[ 6].text..
+            entry[ 7].text..
+            entry[ 8].text..
+            entry[ 9].text..
             entry[10].text
 		)
 		
 		
-		Loading_G.opacity=255
+		Loading_G.opacity = 255
+        
+        Loading_G.y = 350
         
         Loading_G:raise_to_top()
         
-        
-        Loading_G.y = 350
+        mouse:raise_to_top()
         
         Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
 		
@@ -405,9 +506,56 @@ state:add_state_change_function(
     nil
 )
 local card = nil
+
+local to_keys
+
+local to_mouse = function()
+    
+    submit_button.reactive = true
+    
+    close_btn.reactive = true
+    close_btn.opacity  = 255
+    close_btn:on_leave()
+    
+    clear_btn.reactive = true
+    clear_btn.opacity  = 255
+    clear_btn:on_leave()
+    
+    num_pad.reactive   = true
+    num_pad.opacity    = 255
+    --num_pad:on_leave()
+    
+    mouse.to_keys[to_keys] = true
+    
+    --if local_to_mouse ~= nil  then local_to_mouse:show() end
+    
+end
+
+to_keys = function()
+    
+    submit_button.reactive = false
+    
+    close_btn.reactive = false
+    close_btn.opacity  = 0
+    
+    clear_btn.reactive = false
+    clear_btn.opacity  = 0
+    
+    num_pad.reactive   = false
+    num_pad.opacity    = 0
+    
+    mouse.to_mouse[to_mouse] = true
+    
+    --if local_to_mouse ~= nil  then local_to_mouse:hide() end
+    
+end
+
 state:add_state_change_function(
     function(prev_state,new_state)
 		card              = App_State.rolodex.cards[App_State.rolodex.top_card]
+        
+        card:less_info()
+        
 		sms_entry.x       = card.w/2
 		start_y           = card.title_h
 		sms_entry.y       = start_y
@@ -437,6 +585,17 @@ state:add_state_change_function(
 		if clip_h < highlights_h then
 			Idle_Loop:add_function(sms_entry.hl_scroll_down,sms_entry)
 		end
+        
+        if using_keys then
+            
+            to_keys()
+            
+        else
+            
+            to_mouse()
+            
+        end
+        
     end,
     nil,
     "ANIMATING_IN"
@@ -445,7 +604,7 @@ state:add_state_change_function(
     function(prev_state,new_state)
         if prev_state == "ANIMATING_IN" then
             Idle_Loop:remove_function(animate_in)
-			Idle_Loop:remove_function(animate_in_sms)
+			Idle_Loop:remove_function(card.animate_in_sms)
         end
         Idle_Loop:add_function(animate_out,sms_entry,500)
         Idle_Loop:add_function(card.animate_out_sms,card,500)
@@ -453,6 +612,10 @@ state:add_state_change_function(
 		Idle_Loop:remove_function(sms_entry.fp_scroll_down)
 		Idle_Loop:remove_function(sms_entry.hl_scroll_up)
 		Idle_Loop:remove_function(sms_entry.hl_scroll_down)
+        
+        mouse.to_mouse[to_mouse] = nil
+        mouse.to_mouse[to_keys]  = nil
+        card:more_info()
     end,
     nil,
     "ANIMATING_OUT"
@@ -466,7 +629,7 @@ local cancel = function()
     cancel_object:cancel()
 	--print("post_cancel")
     state:change_state_to("ANIMATING_OUT")
-    App_State.state:change_state_to("ROLODEX")
+    --App_State.state:change_state_to("ROLODEX")
 end
 --[[
 local keys_LOADING = {
@@ -538,6 +701,8 @@ local keys_ROLODEX = {
 	[keys.BLUE] = function()
 		--if App_State.rolodex.flipping then return end
 		
+        --App_State.rolodex.cards[App_State.rolodex.top_card]:get_focus()
+        
 		if state:current_state() == "ACTIVE" or
             state:current_state() == "ANIMATING_IN" then
             
@@ -561,11 +726,15 @@ local keys_ROLODEX = {
 				state:change_state_to("ANIMATING_IN")
 				
 			end
+            
+            --App_State.rolodex.cards[App_State.rolodex.top_card]:lose_focus()
 			
 		elseif  state:current_state() == "ACTIVE" and
-			cursor_index == phone_digit_max + 1 then
+			
+            cursor_index == phone_digit_max + 1 then
 			
 			state:change_state_to("SENDING")
+            
 		end
         
 	end,

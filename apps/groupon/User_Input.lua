@@ -27,9 +27,9 @@ key_handler.add_keys = function(self,state,key_table)
 	
 end
 
-key_handler.on_key_down = function(self,k)
-	
-	if key_callbacks[App_State.state.current_state()] then
+key_handler.key_press = function(self,k)
+    
+    if key_callbacks[App_State.state.current_state()] then
 		
 		for key_table,_ in pairs(key_callbacks[App_State.state.current_state()])do
 			
@@ -42,6 +42,24 @@ key_handler.on_key_down = function(self,k)
 		end
 		
 	end
+    
+end
+
+key_handler.on_key_down = function(self,k)
+	
+    if not using_keys then
+		
+		mouse:hide()
+		
+        for f,o in pairs(mouse.to_keys) do f(o) end
+        
+		--if mouse.to_keys then mouse.to_keys() end
+		
+		using_keys = true
+		
+	end
+    
+	key_handler:key_press(k)
 	
 end
 
