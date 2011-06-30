@@ -98,6 +98,9 @@
         TrickplayUIElement *child = [manager findObjectForID:childID];
         [child removeFromSuperview];
         [self.view addSubview:child];
+        if (delegate) {
+            [delegate object_added];
+        }
         result = YES;
     }
     

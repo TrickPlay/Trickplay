@@ -22,6 +22,8 @@
         pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(scaleImage:)];
         panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panImage:)];
         panGesture.delegate = self;
+        rotationGesture.delegate = self;
+        pinchGesture.delegate = self;
         //longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(presentResetControl:)];
         
         [self addGestureRecognizer:rotationGesture];
@@ -30,6 +32,7 @@
         //[self addGestureRecognizer:longPressGesture];
         
         self.userInteractionEnabled = YES;
+        self.multipleTouchEnabled = YES;
         
         totalRotation = 0;
         totalScale = 1.0;
