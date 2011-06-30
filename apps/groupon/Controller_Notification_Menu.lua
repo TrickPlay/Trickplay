@@ -9,9 +9,19 @@ local timeout = Timer{
 timeout:stop()
 
 local prompt = Clone{ source = assets.controller, opacity = 0 }
-
+local first_time = true
 prompt.anchor_point = {prompt.w/2,prompt.h+20}
 
+function prompt:display_controller()
+    
+    prompt.source = assets.control_mmr
+    
+    if state:current_state() == "HIDDEN" or  state:current_state() == "ANIMATING_OUT" then
+        if not first_time then state:change_state_to("ANIMATING_IN") end
+    else
+        timeout:start()
+    end
+end
 
 --terminal animations
 local animate_in = function(self,msecs,p)
@@ -30,7 +40,7 @@ end
 
 ---[[
 --state changes
-local first_time = true
+
 
 App_State.state:add_state_change_function(
     

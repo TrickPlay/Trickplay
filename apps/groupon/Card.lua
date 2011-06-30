@@ -211,8 +211,6 @@ local txt_to_canvas = function(c,t)
 	c:fill(true)
 end
 local img_on_loaded = function(b,failed)
-	print("Bitmap",b)
-	
 	
 	b.on_loaded = nil
 	
@@ -302,7 +300,7 @@ local make_card = function(input)
 	
 	title_text.w   = bmp.title_top.w-title_text.x*2
 	title_shadow.w = title_text.w
-	
+    
 	
 	local slice_h = title_text.y+title_text.h+title_padding-bmp.title_top.h
 	
@@ -352,7 +350,8 @@ local make_card = function(input)
 		
 		y=bmp.shadow.h+title_h+14,
 		
-	}--]]
+	}
+    --]]
 	bg:set_source_bitmap(bmp.tag,48 ,bmp.shadow.h+14)
 	bg:paint(255)
 	
@@ -381,21 +380,26 @@ local make_card = function(input)
 		y=tag.y-4,
 		
 	}
+    
+    --card.na = na
+    
+    
+    
 	
 	card.hourglass = Clone{
-		name = "hourglass",
+		name   = "hourglass",
 		source = assets.hourglass[1],
-		x=117,
-		y = title_h+180
+		x      = 117,
+		y      = title_h+180
 	}
 	card.hourglass.x = card.hourglass.x - card.hourglass.w - 20
 	
 	local value = Text{
-		text="Value",
-		font=font.." 16px",
+		text  = "Value",
+		font  = font.." 16px",
 		color = black_text,
-		x = 73,
-		y = bmp.shadow.h+116,
+		x     = 73,
+		y     = bmp.shadow.h+116,
 	}
 	value.x=value.x+value.w/2
 	value.anchor_point = {value.w/2,0}
@@ -510,16 +514,20 @@ local make_card = function(input)
 		text=input.division,
 		font=font_b.." 18px",
 		color = black_text,
-		x = 303,
-		w = 582 - 303-15,
+		x = 550,
+		--w = 582 - 303 - 15,
 		ellipsize = "END",
-		y = bg.h-74,
+		y = bg.h-74+16,
 	}
+    division.x = division.x - division.w
 	txt_to_canvas(bg,division)
 	
+	local red_dot = Clone{
+        source = assets.red_dot,
+        x      = 562,
+        y      = bmp.shadow.h+313+title_h
+    }
 	
-	bg:set_source_bitmap(bmp.red_dot,562,bmp.shadow.h+315)
-	bg:paint(255)
 	
 	
 	
@@ -533,7 +541,25 @@ local make_card = function(input)
 	}
 	--tag_text.x = tag_text.x + tag_text.w/2
 	tag_text.anchor_point = {0,tag_text.h/2}
+	tag_text:move_anchor_point(tag_text.w/2,tag_text.h/2)
 	
+    function na:on_button_up()
+        
+        if App_State.state:current_state() == "ROLODEX" then
+            
+            if tag_text.text == "More Info" then
+                KEY_HANDLER:key_press(keys.OK)
+            else
+                KEY_HANDLER:key_press(keys.BLUE)
+            end
+            
+            return true
+            
+        end
+        
+    end
+    
+    
 	local tag_price =  Text{
 		name="tag price",
 		text=input.price,
@@ -578,14 +604,38 @@ local make_card = function(input)
 	
 	--]]
 	
-	
+    local change_loc_btn = Clone{
+        name   = "Change Loc Btn",--do not change name
+        source = assets.change,
+        x=556,
+        y=316+title_h
+    }
+    change_loc_btn:hide()
+    change_loc_btn:move_anchor_point(change_loc_btn.w/2,change_loc_btn.h/2)
+	function change_loc_btn:on_enter()
+        change_loc_btn.source               = assets.change_focus
+        change_loc_btn.anchor_point         = {change_loc_btn.w/2,change_loc_btn.h/2}
+        --mouse.to_mouse[change_loc_btn.show] = change_loc_btn
+        --mouse.to_keys[change_loc_btn.hide]  = change_loc_btn
+    end
+    function change_loc_btn:on_leave()
+        change_loc_btn.source               = assets.change
+        change_loc_btn.anchor_point         = {change_loc_btn.w/2,change_loc_btn.h/2}
+        --mouse.to_mouse[change_loc_btn.show] = nil
+        --mouse.to_keys[change_loc_btn.hide]  = nil
+    end
+    
+    function change_loc_btn:on_button_up()
+        KEY_HANDLER:key_press(keys.RED)
+        return true
+    end
 	local change_loc = Text{
 		name="change location",
 		text="Change Location",
 		font=font_b.." 18px",
 		color = "515b4c",
 		x = 739,
-		y = title_h+bg.h-74-bmp.shadow.h,
+		y = title_h+bg.h-74+16-bmp.shadow.h,
 	}
 	change_loc.anchor_point = {change_loc.w,0}
 		
@@ -595,7 +645,19 @@ local make_card = function(input)
 	card.deal_url   = input.deal_url
 	card.merchant   = input.merchant
 	
-	card.sent = function(self)
+	card.less_info = function(self)
+		
+        tag_text.text = "Less Info"
+        tag_text.anchor_point = {tag_text.w/2,tag_text.h/2}
+	end
+    
+    card.more_info = function(self)
+		
+        tag_text.text = "More Info"
+        tag_text.anchor_point = {tag_text.w/2,tag_text.h/2}
+	end
+    
+    card.sent = function(self)
 		
 		self.throb = empty
 		
@@ -610,27 +672,66 @@ local make_card = function(input)
 	end
 	
 	card.not_available = function(self)
-		check.opacity = 0
-		self.glow.opacity = 0
-		self.throb = empty
-		self.update_time = empty
 		
-		na.opacity = 255
+        check.opacity     = 0
 		
-		--SMS_ENTRY
+        self.glow.opacity = 0
+		
+        self.throb        = empty
+        
+		self.update_time  = empty
+		
+		na.opacity        = 255
+		
 	end
+    
 	local title_img = title:Image{name="Card Title Blit"}
-	card.animate_in_sms = function(self,msecs,p)
-		title_img.y = -SMS_ENTRY.h*p
-	end
+    
+	card.animate_in_sms  = function(self,msecs,p) title_img.y = -SMS_ENTRY.h*p     end
 	
-	card.animate_out_sms = function(self,msecs,p)
-		title_img.y = -SMS_ENTRY.h*(1-p)
-	end
+	card.animate_out_sms = function(self,msecs,p) title_img.y = -SMS_ENTRY.h*(1-p) end
 	
-	if links_sent[input.id] then
-		card:sent()
-	end
+	if links_sent[input.id] then card:sent() end
+    
+    
+    function card:get_focus()
+        change_loc_btn.reactive = true
+        
+        na.reactive = true
+    end
+    
+    function card:lose_focus()
+        change_loc_btn.reactive = false
+        change_loc_btn.source = assets.change
+        na.reactive = false
+    end
+    
+    function card:to_mouse()
+        red_dot:hide()
+        change_loc:hide()
+        change_loc_btn:show()
+    end
+    function card:to_keys()
+        red_dot:show()
+        change_loc:show()
+        change_loc_btn:hide()
+    end
+    
+    
+    function card:fade_out_change_locs()
+        change_loc_btn.reactive = false
+        change_loc_btn.source = assets.change
+        red_dot.opacity=255*.5
+        change_loc.opacity=255*.5
+        change_loc_btn.opacity=255*.5
+    end
+    function card:fade_in_change_locs()
+        change_loc_btn.reactive = true
+        red_dot.opacity=255
+        change_loc.opacity=255
+        change_loc_btn.opacity=255
+    end
+    
 	card.title_h = title_h
 	card.h = bg.h+(title_h-bmp.shadow.h)
 	card:add(
@@ -655,8 +756,9 @@ local make_card = function(input)
 		--bought,
 		--lim_quantity,
 		--division,
-		change_loc
-		--red_dot
+		change_loc,
+        red_dot,
+        change_loc_btn
 	)
 	
 	--table.insert(cards,card)

@@ -1,39 +1,11 @@
 --[[ FILE CONTENTS
     
     The Enum of all possible states
-
-    The Game State Manager
     
     The App Loop
 --]]
 
---[[
-local STATES = {
-	OFFLINE = {},--"the app was not launched yet",
-	LOADING = {},--"The app is loading from groupon, user has no control",
-	ROLODEX = {},--"The Cards have been created and are in the rolodex style",
-	ZIP     = {},--"Viewing ZIP Modal menu, entering a new location leads to loading",
-	PHONE   = {},--"Viewing Phone Modal menu, entering number leads to rolodex"
-}
-
---should not be modified, unfortunately a call to 'rawset' can supersede this
-setmetatable(
-    STATES,
-    {
-        __newindex = function(t,k,v)
-            error("Error: Attempt to modify STATES. Received STATES[\""..k.."\"]= \""..v"\"")
-        end
-    }
-)
-
---reverse lookup, used for checking existance of a state
-local states_r = {}
-for state_name,state_value in pairs(STATES) do
-	states_r[state_value] = state_name
-end
---]]
-
---Game State Manager
+--App State
 local App_State = {
 	--app specific state information
 	cards = {},
@@ -43,77 +15,6 @@ local App_State = {
 	--needed
 	state = ENUM({"OFFLINE","LOADING","ROLODEX","ZIP","PHONE"})
 }
---[[
-do
-	--protected variables
-	local current_state = STATES.OFFLINE
-	--the functions called during a state change
-	local state_change_functions = {}
-	
-	--inititalize the 2D hastable of functions
-	for _,prev_state in pairs(STATES) do
-        App_State.states[prev_state] = {}
-		state_change_functions[prev_state] = {}
-		for _,next_state in pairs(STATES) do
-			if prev_state ~= next_state then 
-				state_change_functions[prev_state][next_state] = {}
-			end
-		end
-	end
-	
-	--adds a function to be called when a state change occurs
-	App_State.add_state_change_function = function(self, new_function, old_state, new_state)
-		assert(type(new_function)=="function", "You attempted to add an element of type \""..type(new_function).."\". This function only accepts other functions")
-		if old_state ~= nil then assert(states_r[old_state] ~= nil, tostring(old_state).." is not a State") end
-		if new_state ~= nil then assert(states_r[new_state] ~= nil, tostring(new_state).." is not a State") end
-		if old_state == nil then
-            for _,old_state in pairs(STATES) do
-                if new_state == nil then
-                    for _,new_state in pairs(STATES) do
-						if old_state ~= new_state then 
-							table.insert(state_change_functions[old_state][new_state],new_function)
-						end
-                    end
-                else
-					if old_state ~= new_state then 
-						table.insert(state_change_functions[old_state][new_state],new_function)
-					end
-                end
-            end
-		else
-			if new_state == nil then
-                for _,new_state in pairs(STATES) do
-					if old_state ~= new_state then 
-						table.insert(state_change_functions[old_state][new_state],new_function)
-					end
-                end
-            else
-				assert(old_state ~= new_state, "Attempting to assign a state change function for same state")
-                table.insert(state_change_functions[old_state][new_state],new_function)
-            end
-		end
-	end
-    
-    
-	App_State.change_state_to = function(self, new_state)
-		if current_state == new_state then
-			print("warning changing state to current state")
-			return
-		end
-		assert(states_r[new_state] ~= nil, tostring(new_state).." is not a State")
-		print("changing state")
-		for i,func in ipairs(state_change_functions[current_state][new_state]) do
-			func(current_state,new_state)
-		end
-		current_state = new_state
-	end
-    
-    
-	App_State.current_state = function(self)
-		return current_state
-	end
-end
---]]
 
 local Idle_Loop = {}
 
@@ -140,8 +41,12 @@ do
     
     Idle_Loop.add_function = function(self,new_function, containing_object, duration,loop,delay)
         
-		assert(type(new_function) == "function","Attempted to add object of type \""..
-			type(new_function).."\"to the idle loop. Need object of type \"function\"")
+        if type(new_function) ~= "function" then
+            error("Attempted to add object of type \""..type(new_function)..
+                "\"to the idle loop. Need object of type \"function\"",  2
+            )
+        end
+        
         if to_be_deleted_r[new_function] ~= nil then
 			
 			--error("function is already being deleted from the idle_loop")
@@ -190,7 +95,12 @@ do
     end
     
 	Idle_Loop.has_function = function(self,func)
-		if	to_be_deleted_r[func] or
+		
+        if func == nil then
+            error("Idle_Loop::has_function called with nil function.",2)
+        end
+        
+        if	to_be_deleted_r[func] or
 			iterated_list[func]   or
 			to_be_added_r[func]   then
 			
@@ -201,6 +111,9 @@ do
 	end
 	
     Idle_Loop.remove_function = function(self,old_function)
+        if old_function == nil then
+            error("Idle_Loop::remove_function called with nil function.",2)
+        end
         if in_idle_loop and iterated_list[old_function] then
             table.insert(to_be_deleted,old_function)
 			to_be_deleted_r[old_function] = true
@@ -285,22 +198,27 @@ do
         for i = #to_be_deleted, 1, -1 do
             
 			to_be_deleted_r[to_be_deleted[i]] = nil
+            
             iterated_list[to_be_deleted[i]]   = nil
+            
             parameters[to_be_deleted[i]]      = nil
+            
             to_be_deleted[i]                  = nil
             
         end
+        
     end
     
-    Idle_Loop.pause = function()
-        paused = true
+    Idle_Loop.pause  = function()
+        paused       = true
         idle.on_idle = nil
     end
     
     Idle_Loop.resume = function()
-        paused = false
+        paused       = false
         idle.on_idle = Idle_Loop.loop
     end
+    
 end
 
 --[[
