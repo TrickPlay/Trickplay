@@ -8,18 +8,19 @@ function inspector_apply (v, inspector)
       local org_object, new_object, item_group 
       local function toboolean(s) if (s == "true") then return true else return false end end
       local obj_map = {
-	["Rectangle"] = function() org_obj = Rectangle{} new_obj = Rectangle{} return org_obj, new_obj end, 
-	["Text"] = function() org_obj = Text{} new_obj = Text{} return org_obj, new_obj end, 
-	["Image"] = function() org_obj = Image{} new_obj = Image{} return org_obj, new_obj end, 
-	["Clone"] = function() org_obj = Clone{} new_obj = Clone{} return org_obj, new_obj end, 
-	["Group"] = function() org_obj = Group{} new_obj = Group{} return org_obj, new_obj end, 
-	["Video"] = function() org_obj = {} new_obj = {} return org_obj, new_obj end, 
+		["Rectangle"] = function() org_obj = Rectangle{} new_obj = Rectangle{} return org_obj, new_obj end, 
+		["Text"] = function() org_obj = Text{} new_obj = Text{} return org_obj, new_obj end, 
+		["Image"] = function() org_obj = Image{} new_obj = Image{} return org_obj, new_obj end, 
+		["Clone"] = function() org_obj = Clone{} new_obj = Clone{} return org_obj, new_obj end, 
+		["Group"] = function() org_obj = Group{} new_obj = Group{} return org_obj, new_obj end, 
+		["Video"] = function() org_obj = {} new_obj = {} return org_obj, new_obj end, 
       }
 
       local rgba_map = {["r"] = 1, ["g"] = 2, ["b"] = 3, ["a"] = 4,}  
 
       local attr_map = {
-      ["itemsList"] = function(j)
+      	["itemsList"] = function(j)
+		 print("YUGI") 
          local items, item
 		 if item_group:find_child("itemsList") then 
 		    if item_group:find_child("itemsList"):find_child("items_list") then 
@@ -39,20 +40,20 @@ function inspector_apply (v, inspector)
 		       		elseif item:find_child("textInput").extra.item_type == "label" then 
 			    		v.items[next] = {type="label", string=item:find_child("textInput").text}
 		       		elseif item:find_child("textInput").extra.item_type == "item" then 
-			    		v.items[next] = {type="label", string=item:find_child("textInput").text, f=nil}
+			    		v.items[next] = {type="item", string=item:find_child("textInput").text, f=nil}
 		       		end 
                end 
+			   v.items = v.items -- to redraw item lists 
 		 end
          end,
-       ["skin"] = function()
+       	["skin"] = function()
               v["skin"] = skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
               end,
-       ["anchor_point"] = function()
+       	["anchor_point"] = function()
                v:move_anchor_point(item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[1], 
-	      item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
+	      		item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
               end,     
-       ["wrap_mode"] = function()
-
+       	["wrap_mode"] = function()
 	      local itemLists = {"none", "char", "word", "word_char"}
 	      if tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item) == 1 then 
 		   v.wrap = false
@@ -62,10 +63,10 @@ function inspector_apply (v, inspector)
                    v.wrap_mode = string.upper(itemLists[tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item)])
 	      end 
               end,        
-       ["bwidth"] = function()
+       	["bwidth"] = function()
               v.border_width = tonumber(item_group:find_child("bwidth"):find_child("input_text").text)
               end,
-       ["color"] = function(name)
+       	["color"] = function(name)
 	      local attr_name = "color"
 	      if string.len(name) > 1 then 
 	           attr_name = name:sub(1,-2)
@@ -75,27 +76,27 @@ function inspector_apply (v, inspector)
 	      color_t[rgba_map[string.sub(name,-1, -1)]] = tonumber(item_group:find_child(name):find_child("input_text").text)
 	      v[attr_name] = color_t
 	      end,
-       ["hor_arrow_y"] = function()
+       	["hor_arrow_y"] = function()
 	       v.hor_arrow_y = tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text)
 		end, 
-       ["vert_arrow_x"] = function()
+       	["vert_arrow_x"] = function()
 	       v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
 		end,
-       ["reactive"] = function()
+       	["reactive"] = function()
 	       if item_group:find_child("bool_checkreactive"):find_child("check1").opacity > 0 then 
 	            v.extra.reactive = true
 	       else 
 	            v.extra.reactive = false
 	       end
 	       end,
-       ["loop"] = function()
+       	["loop"] = function()
 	       if item_group:find_child("bool_checkloop"):find_child("check1").opacity > 0 then 
 	            v.loop = true
 	       else 
 	            v.loop = false
 	       end
 	       end,
-	["vert_bar_visible"] = function()
+		["vert_bar_visible"] = function()
 	       if item_group:find_child("bool_checkvert_bar_visible"):find_child("check1").opacity > 0 then 
 	            v.vert_bar_visible = true
 	       else 
@@ -103,7 +104,7 @@ function inspector_apply (v, inspector)
 	       end
 	       end,
 
-	["horz_bar_visible"] = function()
+		["horz_bar_visible"] = function()
  	       if item_group:find_child("bool_checkhorz_bar_visible"):find_child("check1").opacity > 0 then 
 	            v.horz_bar_visible = true
 	       else 
@@ -111,7 +112,7 @@ function inspector_apply (v, inspector)
 	       end
 	       end,
 
-	["lock"] = function()
+		["lock"] = function()
  	       if item_group:find_child("lock"):find_child("check1").opacity > 0 then 
 	            v.extra.lock = true
 		    if v.type == "Group" then 
@@ -129,43 +130,31 @@ function inspector_apply (v, inspector)
 
 	       end
 	       end,
-	["cells_focusable"] = function()
+		["cells_focusable"] = function()
  	       if item_group:find_child("bool_checkcells_focusable"):find_child("check1").opacity > 0 then 
 	            v.cells_focusable = true
 	       else 
 	            v.cells_focusable = false
 	       end
 	       end,
-	["expansion_location"] = function()
-		if  item_group:find_child("radioB").selected_item == 1 then 
-		     v.expansion_location = "above"
-	        else 
-		     v.expansion_location = "below"
-		end
-		end,
-	["direction"] = function()
-		if  item_group:find_child("radioB").selected_item == 1 then 
-		     v.direction = "vertical"
-	        else 
-		     v.direction= "horizontal"
-		end
-		end,
+		["expansion_location"] = function()
+			  local itemLists = {"above", "below"} 
+              v["expansion_location"] = itemLists[tonumber(item_group:find_child("expansion_location"):find_child("item_picker").selected_item)]
+			end,
+		["direction"] = function()
+			  local itemLists = {"vertical", "horizontal"}
+              v["direction"] = itemLists[tonumber(item_group:find_child("direction"):find_child("item_picker").selected_item)]
+			end,
 		
-	["style"] = function()
-		if  item_group:find_child("radioB").selected_item == 1 then 
-		     v.style = "orbitting"
-	        else 
-		     v.style = "spinning"
-		end
-		end,
-	["cell_size"] = function()
-		if  item_group:find_child("radioB").selected_item == 1 then 
-		     v.cell_size = "fixed"
-	        else 
-		     v.cell_size = "variable"
-		end
-		end,
-	["icon"] = function()
+		["style"] = function()
+			  local itemLists = {"orbitting", "spinning"}
+              v["style"] = itemLists[tonumber(item_group:find_child("style"):find_child("item_picker").selected_item)]
+			end,
+		["cell_size"] = function()
+			  local itemLists = {"fixed", "variable"}
+              v["cell_size"] = itemLists[tonumber(item_group:find_child("cell_size"):find_child("item_picker").selected_item)]
+			end,
+		["icon"] = function()
 			   local img_tmp = tostring(item_group:find_child("icon"):find_child("file_name").text)
 			   local a, b = string.find(img_tmp,"assets/images/")
 			   if a then 
@@ -174,7 +163,7 @@ function inspector_apply (v, inspector)
                		v.icon = "assets/images/"..tostring(item_group:find_child("icon"):find_child("file_name").text)
 			   end 
 	       end,
-	["source"] = function()
+		["source"] = function()
                local img_tmp = tostring(item_group:find_child("source"):find_child("file_name").text)
 			   local a, b = string.find(img_tmp, "assets/videos/")
 			   if a then
@@ -183,7 +172,7 @@ function inspector_apply (v, inspector)
                		v.source = "assets/videos/"..tostring(item_group:find_child("source"):find_child("file_name").text)
 			   end 
 	       end,
-	["src"] = function()
+		["src"] = function()
                local img_tmp = tostring(item_group:find_child("src"):find_child("file_name").text)
 			   local a, b = string.find(img_tmp, "assets/images/")
 			   if a then
@@ -192,7 +181,7 @@ function inspector_apply (v, inspector)
                		v.src = "assets/images/"..tostring(item_group:find_child("src"):find_child("file_name").text)
 			   end 
 	       end,
-	["name"] = function ()
+		["name"] = function ()
 	       if v.extra then 
 	        	v.extra.prev_name = v.name  
 	       end 
@@ -200,16 +189,11 @@ function inspector_apply (v, inspector)
 	       end, 
 
       }       
-
-      if is_this_widget(v) == true  then
-              item_group = (inspector:find_child("si")).content
-      else 
-              item_group = inspector:find_child("item_group")
-      end 
-
+	  
       org_object, new_object = obj_map[v.type]()
       set_obj(org_object, v) 
 
+	  local apply = function (item_group) 
 
       for i, j in pairs(item_group.children) do 
           	  
@@ -340,9 +324,49 @@ function inspector_apply (v, inspector)
 		     print(j.name, " 처리해 주세요")
 		end 
 	   end 
-       end 
-       set_obj(new_object, v) 
+       end 	  
+	   end 
 
+	  	if inspector:find_child("item_group_info") then 
+	       item_group = inspector:find_child("item_group_info")
+		   apply(item_group) 
+	  	end 
+	 
+	 
+	  	if inspector:find_child("focusChanger") then 
+		   item_group = inspector:find_child("focusChanger") 
+
+		   v.extra.focus = {}
+		   local focus_t_list = {"U","D","E","L","R",}
+		   local focus_map = {["U"] = keys.Up, ["D"] = keys.Down, ["E"] = keys.Return, ["L"] = keys.Left, ["R"] = keys.Right,["Red"] = keys.RED,["G"] = keys.GREEN,["Y"] = keys.YELLOW,["B"] = keys.BLUE}
+		   local focus_match= {["U"] = keys.Down, ["D"] = keys.Up, ["L"] = keys.Right,["R"] = keys.Left,}
+		   for m,n in pairs (focus_t_list) do 
+		   	    if item_group:find_child("text"..n).text ~= "" then 
+					if item_group:find_child("text"..n).text == v.extra.prev_name then 
+						v.extra.focus[focus_map[n]] = v.name
+					else 
+						v.extra.focus[focus_map[n]] = item_group:find_child("text"..n).text
+					end 
+					if focus_match[n] then 
+						if g:find_child(item_group:find_child("text"..n).text) then 
+						if g:find_child(item_group:find_child("text"..n).text).extra.focus then 
+					     	g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+						else
+					     	g:find_child(item_group:find_child("text"..n).text).extra.focus = {} 
+					     	g:find_child(item_group:find_child("text"..n).text).extra.focus[focus_match[n]] = v.name
+						end
+						end
+					end 
+			    end 
+		  end 
+	  	end 
+
+		if inspector:find_child("item_group_more") then 
+	       item_group = inspector:find_child("item_group_more")
+		   apply(item_group) 
+	  	end 
+
+       set_obj(new_object, v) 
        input_mode = S_SELECT
        if(v.name ~= "video1") then 
        	    table.insert(undo_list, {v.name, CHG, org_object, new_object})

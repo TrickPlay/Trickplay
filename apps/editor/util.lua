@@ -914,6 +914,9 @@ function create_on_button_down_f(v)
 	       				end
 -----[[ 	SHOW POSSIBLE CONTAINERS
 		    			if control == true then 
+							editor_lb:set_cursor(52)
+
+							--[[
 							if(screen:find_child("mouse_pointer") ~= nil) then 
 		     					screen:remove(screen:find_child("mouse_pointer"))
 							end 
@@ -923,7 +926,7 @@ function create_on_button_down_f(v)
 							if(screen:find_child("mouse_pointer") == nil) then 
 		     					screen:add(mouse_pointer)
 							end 
-
+							]]
 							selected_content = v 
 			
 							local odr 
@@ -1065,12 +1068,15 @@ end
 								if(screen:find_child("mouse_pointer") ~= nil) then 
 		     						screen:remove(screen:find_child("mouse_pointer"))
 								end 
+								editor_lb:set_cursor(68)
+								--[[
 								mouse_pointer = CS_pointer
 								mouse_pointer.position = {x ,y  ,0}
 								if(screen:find_child("mouse_pointer") == nil) then 
 		     						screen:add(mouse_pointer)
 		     						mouse_pointer.extra.type = "pointer"
 								end 
+								]]
 			     			end 
 			     			if screen:find_child(c.name.."border") and selected_container then 
 								screen:remove(screen:find_child(c.name.."border"))
@@ -1259,22 +1265,17 @@ function make_attr_t(v)
 	["tab_labels"] = function ()
 		if v.extra.type == "TabBar" then 
 		    table.insert(attr_t, {"tab_labels", v.tab_labels, "Tab Labels"})
-            table.insert(attr_t, {"line", "", "hide"})
-            table.insert(attr_t, {"line", "", "hide"})
 		end
 		end, 
 	["items"] = function ()
 		if v.extra.type == "ButtonPicker" then 
 		    table.insert(attr_t, {"items", v.items, "Items"})
-                    table.insert(attr_t, {"line", "", "hide"})
-                    table.insert(attr_t, {"line", "", "hide"})
 		else 
 		    table.insert(attr_t, {"caption", "Menu Contents"})
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		end 
 		end,
 	["scale"] = function()
- 		table.insert(attr_t, {"line","", "hide"})
 		table.insert(attr_t, {"caption", "Scale"})
 		local scale_t = v.scale
         	if scale_t == nil then
@@ -1320,7 +1321,7 @@ function make_attr_t(v)
              	if color_t == nil then 
                  	color_t = {0,0,0,0}
 	     	end
-		--print("***",j,"***")
+		print("***",j,"***")
 	     	table.insert(attr_t, {j.."r", color_t[1], "R"})
              	table.insert(attr_t, {j.."g", color_t[2], "G"})
              	table.insert(attr_t, {j.."b", color_t[3], "B"})
@@ -1350,7 +1351,7 @@ function make_attr_t(v)
                  	pos_k = j:sub(1,1) 
              	end 
 	     	table.insert(attr_t, {pos_k.."x", pos_t[1], "X"})
-             	table.insert(attr_t, {pos_k.."y", pos_t[2], "Y"})
+            table.insert(attr_t, {pos_k.."y", pos_t[2], "Y"})
 		end,
 	["focus"]= function()
  		if v.extra.focus then 
@@ -1368,7 +1369,7 @@ function make_attr_t(v)
         	table.insert(attr_t, {"label", v.label,"Label"})
 		end,
 	["empty_top_color"] = function()
-		     table.insert(attr_t, {"caption", "Empty Bar :"})
+		     table.insert(attr_t, {"caption", "Empty Bar"})
 		     local color_t = v.empty_top_color 
              	     if color_t == nil then 
                  	color_t = {0,0,0,0}
@@ -1391,7 +1392,7 @@ function make_attr_t(v)
        	     	     table.insert(attr_t, {"empty_bottom_color".."a", color_t[4], "A"})    
 		     end,
 	["filled_top_color"] = function()
-		     table.insert(attr_t, {"caption", "Filled Bar :"})
+		     table.insert(attr_t, {"caption", "Filled Bar"})
 		     local color_t = v.filled_top_color 
              	     if color_t == nil then 
                  	color_t = {0,0,0,0}
@@ -1415,51 +1416,64 @@ function make_attr_t(v)
        	     	     table.insert(attr_t, {"filled_bottom_color".."a", color_t[4], "A"})   
 		     end,
 	["rows"] = function() 
-                     table.insert(attr_t, {"line", "", "hide"})
                      table.insert(attr_t, {"rows", v.rows, "Rows"})
 		     end,  	
 	["visible_w"] = function ()
-		     table.insert(attr_t, {"caption", "Visible : "})
+		     table.insert(attr_t, {"caption", "Visible"})
         	     table.insert(attr_t, {"visible_w", v.visible_w,"W"})
 		     end, 
 	["visible_h"] = function ()
         	     table.insert(attr_t, {"visible_h", v.visible_h,"H"})
 		     end, 
 	["virtual_w"] = function ()
-		     table.insert(attr_t, {"caption", "Virtual : "})
+		     table.insert(attr_t, {"caption", "Virtual"})
         	     table.insert(attr_t, {"virtual_w", v.virtual_w,"W"})
 		     end, 
 	["virtual_h"] = function ()
         	     table.insert(attr_t, {"virtual_h", v.virtual_h,"H"})
 		     end, 
-	["lock"]     = function ()
-                     table.insert(attr_t, {"line", "", "hide"})
+	["lock"]  = function ()
 		     table.insert(attr_t, {"lock", v.extra.lock, "Lock"})
-                     table.insert(attr_t, {"line", "", "hide"})
 		     end,
+	["font"] = function ()
+             table.insert(attr_t, {"caption", "Font"})
+			 table.insert(attr_t, {"font", v.font,"font"})
+			 end,
+	["text_font"] = function ()
+             table.insert(attr_t, {"caption", "Text Font"})
+			 table.insert(attr_t, {"text_font", v.text_font,"text_font"})
+			 end,
+	["message_font"] = function ()
+             table.insert(attr_t, {"caption", "Message Font"})
+			 table.insert(attr_t, {"message_font", v.message_font,"message_font"})
+			 end,
+	["title_font"] = function ()
+             table.insert(attr_t, {"caption", "Title Font"})
+			 table.insert(attr_t, {"title_font", v.title_font,"title_font"})
+			 end,
   }
   
   local obj_map = {
-       ["Rectangle"] = function() return {"lock","x_rotation", "anchor_point", "opacity", "border_color", "color", "border_width", "reactive", "focus"} end,
-       ["Text"] = function() return {"lock", "x_rotation", "anchor_point","opacity", "color", "font", "wrap_mode","reactive", "focus"} end,
-       ["Image"] = function() return {"lock", "src", "clip", "x_rotation", "anchor_point","opacity", "reactive", "focus"} end,
+       ["Rectangle"] = function() return {"border_color", "color", "border_width", "lock","x_rotation", "anchor_point", "opacity", "reactive", "focus"} end,
+       ["Text"] = function() return {"color", "font", "wrap_mode", "lock", "x_rotation","anchor_point","opacity","reactive", "focus", } end,
+       ["Image"] = function() return {"src", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
        ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius","reactive", "focus"} end,
-       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "reactive", "focus"} end,
-       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","items","selected_item","reactive","focus"} end,
-       ["MenuButton"] = function() return {"expansion_location","lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","items", "reactive","focus",} end,
-       --["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items", "reactive","focus",} end,
-       ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","label","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
-       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","icon","label","message","opacity","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
+       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","label","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
+       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius"} end,
+       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","items","selected_item"} end,
+       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus","label","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
+       ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","text_color","focus_color","text_font","direction","items","box_color","fill_color","focus_fill_color", "box_width","box_size","check_size","line_space","b_pos", "item_pos"} end,
+       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","text_color","focus_color","focus_fill_color","text_font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space"} end,
+
+       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height", "border_width", "border_color", "fill_color", "label_color", "unsel_color", "tab_labels"} end,  
+       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label","message","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
+       ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","label","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress"} end,
        ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable",} end,
-       ["ScrollPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
-       ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","box_color","fill_color","box_width","box_size","check_size","line_space","b_pos", "item_pos","reactive", "focus"} end,
-       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","text_color","text_font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space", "reactive", "focus"} end,
-       ["ArrowPane"] = function() return {"lock", "skin","opacity", "visible_w", "visible_h",  "virtual_w", "virtual_h", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","box_color", "box_width"} end,  
-       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height", "border_width", "border_color", "fill_color", "label_color", "unsel_color", "tab_labels"} end,  
+       ["ScrollPane"] = function() return {"lock", "skin", "visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
+       ["ArrowPane"] = function() return {"lock", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","box_color", "box_width"} end,  
    }
   
   if is_this_widget(v) == true  then

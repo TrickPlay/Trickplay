@@ -33,9 +33,11 @@ dofile("editor.lua")
 					    if table.getn(g.children) > 0 then
 						input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
 						screen:find_child("timeline").extra.show = true 
+						--[[
 						if screen:find_child("mouse_pointer") then 
 		 					screen:find_child("mouse_pointer"):raise_to_top()
     					end
+						]]
 					    end
 				       elseif table.getn(g.children) == 0 then 
 		      			    screen:remove(screen:find_child("timeline"))
@@ -45,9 +47,11 @@ dofile("editor.lua")
 				      elseif screen:find_child("timeline").extra.show ~= true  then 
 					    screen:find_child("timeline"):show()
 					    screen:find_child("timeline").extra.show = true
+						--[[
 						if screen:find_child("mouse_pointer") then 
 		 					screen:find_child("mouse_pointer"):raise_to_top()
     					end
+						]]
 
 				      else 
 					    screen:find_child("timeline"):hide()
@@ -214,17 +218,21 @@ dofile("editor.lua")
     function screen.on_key_up( screen , key )
     	if key == keys.Shift_L or key == keys.Shift_R then
              shift = false
+			 --[[
 	     if(screen:find_child("mouse_pointer") ~= nil) then 
 		if screen:find_child("mouse_pointer").extra.type == "pointer_plus" then 
 			screen:remove(screen:find_child("mouse_pointer"))
 		end 
 	     end
+		 ]]
 	end 
     	if key == keys.Control_L or key == keys.Control_R then
              control = false
+			 --[[
 	     if(screen:find_child("mouse_pointer") ~= nil) then 
 			screen:remove(screen:find_child("mouse_pointer"))
 	     end
+		 ]]
 
 	end 
     end
@@ -326,9 +334,11 @@ dofile("editor.lua")
 	      	end 
 
 	      	if(screen:find_child("mouse_pointer") ~= nil) then 
+					--[[
 		  		if screen:find_child("mouse_pointer").extra.type ~= "pointer" then 
 		        	screen:remove(screen:find_child("mouse_pointer"))
 		  		end
+				]]
 	      	end 
             mouse_state = BUTTON_UP
        end
@@ -359,7 +369,7 @@ dofile("editor.lua")
 				if screen:find_child(c.name.."border") == nil then 
 				 --if c.extra.org_opacity == nil or c.opacity == c.extra.org_opacity then
 					editor.container_selected(c,x,y)	
-					
+					editor_lb:set_cursor(52)
 					--[[
 					if screen:find_child("mouse_pointer") then 
 					     screen:remove(screen:find_child("mouse_pointer"))
@@ -384,6 +394,7 @@ dofile("editor.lua")
 			end 
 		elseif  selected_container then 
 			editor.n_selected (selected_container)
+			editor_lb:set_cursor(52)
 					--[[
 			screen:remove(screen:find_child("mouse_pointer"))
 			if control then 
@@ -399,6 +410,13 @@ dofile("editor.lua")
 		end 
 	  end 
 
+	  if(input_mode == S_RECTANGLE) then 
+			editor_lb:set_cursor(34)
+	  elseif shift == true then 
+			editor_lb:set_cursor(68)
+	  else 
+			editor_lb:set_cursor(68)
+	  end 
 --[[
 
 	  if(input_mode == S_RECTANGLE) then 
