@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Thu Jun 30 15:33:50 2011
+# Created: Thu Jun 30 16:18:41 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setEnabled(True)
-        MainWindow.resize(458, 605)
+        MainWindow.resize(458, 760)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -28,21 +28,34 @@ class Ui_MainWindow(object):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.Inspector = QtGui.QTreeView(self.centralwidget)
-        self.Inspector.setGeometry(QtCore.QRect(10, 50, 1920, 1080))
+        self.Inspector.setGeometry(QtCore.QRect(0, 50, 461, 661))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.Inspector.sizePolicy().hasHeightForWidth())
         self.Inspector.setSizePolicy(sizePolicy)
+        palette = QtGui.QPalette()
+        brush = QtGui.QBrush(QtGui.QColor(75, 105, 131, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Highlight, brush)
+        brush = QtGui.QBrush(QtGui.QColor(75, 105, 131, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Highlight, brush)
+        brush = QtGui.QBrush(QtGui.QColor(131, 131, 131))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, brush)
+        self.Inspector.setPalette(palette)
         self.Inspector.setAutoFillBackground(False)
-        self.Inspector.setStyleSheet(_fromUtf8("/*QTreeView::branch {\n"
-"}*/\n"
+        self.Inspector.setStyleSheet(_fromUtf8("QTreeView::branch {\n"
+"    selection-background-color: transparent;\n"
+"}\n"
 "\n"
 "selection-background-color: transparent;"))
         self.Inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.Inspector.setAlternatingRowColors(True)
         self.Inspector.setIndentation(20)
         self.Inspector.setRootIsDecorated(True)
+        self.Inspector.setUniformRowHeights(True)
         self.Inspector.setAllColumnsShowFocus(True)
         self.Inspector.setObjectName(_fromUtf8("Inspector"))
         self.Inspector.header().setCascadingSectionResizes(True)

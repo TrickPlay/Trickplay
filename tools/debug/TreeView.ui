@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>458</width>
-    <height>605</height>
+    <height>760</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,10 +29,10 @@
    <widget class="QTreeView" name="Inspector">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>0</x>
       <y>50</y>
-      <width>1920</width>
-      <height>1080</height>
+      <width>461</width>
+      <height>661</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -41,12 +41,50 @@
       <verstretch>0</verstretch>
      </sizepolicy>
     </property>
+    <property name="palette">
+     <palette>
+      <active>
+       <colorrole role="Highlight">
+        <brush brushstyle="SolidPattern">
+         <color alpha="0">
+          <red>75</red>
+          <green>105</green>
+          <blue>131</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </active>
+      <inactive>
+       <colorrole role="Highlight">
+        <brush brushstyle="SolidPattern">
+         <color alpha="0">
+          <red>75</red>
+          <green>105</green>
+          <blue>131</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </inactive>
+      <disabled>
+       <colorrole role="Highlight">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>131</red>
+          <green>131</green>
+          <blue>131</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </disabled>
+     </palette>
+    </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">/*QTreeView::branch {
-}*/
+     <string notr="true">QTreeView::branch {
+	selection-background-color: transparent;
+}
 
 selection-background-color: transparent;</string>
     </property>
@@ -60,6 +98,9 @@ selection-background-color: transparent;</string>
      <number>20</number>
     </property>
     <property name="rootIsDecorated">
+     <bool>true</bool>
+    </property>
+    <property name="uniformRowHeights">
      <bool>true</bool>
     </property>
     <property name="allColumnsShowFocus">
