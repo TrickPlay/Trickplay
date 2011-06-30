@@ -45,40 +45,10 @@
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">/*
-QTreeView::branch {
-         background: transparent;
- }
+     <string notr="true">/*QTreeView::branch {
+}*/
 
- QTreeView::branch:has-siblings:!adjoins-item {
-         background: transparent;
- }
-
- QTreeView::branch:has-siblings:adjoins-item {
-         background: transparent;
- }
-
- QTreeView::branch:!has-children:!has-siblings:adjoins-item {
-         background: transparent;
- }
-
- QTreeView::branch:closed:has-children:has-siblings {
-         background: transparent;
- }
-
- QTreeView::branch:has-children:!has-siblings:closed {
-         background: transparent;
- }
-
- QTreeView::branch:open:has-children:has-siblings {
-         background: transparent;
- }
-
- QTreeView::branch:open:has-children:!has-siblings {
-         background: transparent;
- 
-}
-*/</string>
+selection-background-color: transparent;</string>
     </property>
     <property name="dragDropMode">
      <enum>QAbstractItemView::NoDragDrop</enum>
@@ -157,7 +127,7 @@ QTreeView::branch {
      <x>0</x>
      <y>0</y>
      <width>458</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

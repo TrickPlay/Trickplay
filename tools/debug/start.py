@@ -8,112 +8,14 @@ from PyQt4 import QtCore, QtGui
 from TreeView import Ui_MainWindow
 from TreeModel import *
 
-Qt.ElementTypeRole = Qt.UserRole + 1
+Qt.Element = Qt.UserRole + 3
+Qt.Value = Qt.UserRole + 2
 
 #List of roles, ItemDataRole
 
 #print dir(screenItem)
 #pprint(dir (QtGui.QTreeView))
-
-model = None
-
-class MyDataModel(QtGui.QStandardItemModel):
-    def __init__(self, parent=None):
-        super(MyDataModel, self).__init__(parent)
         
-    def data(self, index, role=Qt.DisplayRole):
-        #if role == 33:
-            #print("found")
-            #print(super(MyDataModel, self).data(index, role).isValid())
-        return super(MyDataModel, self).data(index, role)
-        
-    def setData(self, index, value, role=Qt.UserRole + 1):
-        result = super(MyDataModel, self).setData(index, value, role)
-        print("setting", role, "to", value, "with result", result)
-        return result
-        
-class MyStandardItem(QtGui.QStandardItem):
-    def __init__(self, a):
-        super(MyStandardItem, self).__init__(a)
-        
-    def addData(self, data):
-        self.myAddedData = data
-        print(self.myAddedData)
-        
-    def getData(self):
-        print(self.myAddedData)
-        return self.myAddedData
-        
-    def data(self, role):
-        #print("Role queried", role)
-        #if role ==33:
-        #    print("result", super(MyStandardItem, self).data(role).isValid())
-        #    return QtCore.QVariant(QString("Hello"))
-        return super(MyStandardItem, self).data(role)
-    
-
-class MyProxyModel(QtGui.QSortFilterProxyModel):
-    def __init__(self, parent=None):
-        super(MyProxyModel, self).__init__(parent)
-        
-    def data(self, index, role):
-        #print(role)
-        if role == Qt.BackgroundRole:
-            print(role)
-            var = super(MyProxyModel, self).data(index, role)
-            color = QtGui.QColor(var)
-            print(color.getRgb())
-    #    if role == Qt.ElementTypeRole:
-    #        return super(MyProxyModel, self).data(index, role)
-    #    elif role == Qt.BackgroundRole:
-    #        q = QtGui.QPalette()
-    #        #print('hi')
-    #        t = super(MyProxyModel, self).data(index, role)
-    #        #print(dir(t))
-    #        v = QtCore.QVariant(QtGui.QColor(0,0,0,0))
-    #        return v
-        return super(MyProxyModel, self).data(index, role)        
-   
-#class MyModelIndex(QtCore.QModelIndex):
-#    def __init__(self, parent=None):
-#        super(MyModelIndex, self).__init__(parent)
-#    
-#    def data(self, role=Qt.DisplayRole):
-#        return super(MyModelIndex, self).data(role)
-    
-class MyTreeView(QtGui.QTreeView):
-    def __init__(self, parent=None):
-        super(QtGui.QTreeView, self).__init__(parent)
-        
-    def drawRow(self, painter, styleopt, index):
-        q = QtGui.QPalette()
-        painter.setPen(QtGui.QColor(255, 255, 255))
-        super(MyTreeView, self).drawRow(painter, styleopt, index)
-        
-        #print(index)
-        #pprint(dir(index))
-        variant = index.data(33)
-        color = QtGui.QColor(variant)
-        #print(variant.toString())
-
-        print(variant.isValid())        
-        
-        #print("data", model.itemData(index))
-        #
-        #print(str(variant))
-        #print(variant.isValid())
-        #
-        ##painter.save()
-        ##r = styleopt.rect
-        ###print(r.top(), r.right(), r.bottom(), r.left(), "x", r.x(), "y", r.y())
-        ###w = sum(self.columnWidth(x) for x in range(self.header().count()))
-        ##painter.setBrush(color)
-        ##painter.drawRect(r.left(), r.top(), r.right(), r.bottom())
-        ##painter.restore()
-        
-    #ef drawBranches(self, painter, rect, index):
-    #    pass
-
 class StartQT4(QtGui.QMainWindow):
     def __init__(self, parent=None):
         global model
@@ -123,15 +25,18 @@ class StartQT4(QtGui.QMainWindow):
         self.ui.setupUi(self)
         
         # Set up TreeView
-        self.ui.Inspector = MyTreeView(self.ui.centralwidget)
-        self.ui.Inspector.setGeometry(QtCore.QRect(10, 50, 1920, 1080))
-        self.ui.Inspector.setAlternatingRowColors(True)
+        #self.ui.Inspector = MyTreeView(self.ui.centralwidget)
+        #self.ui.Inspector.setGeometry(QtCore.QRect(10, 50, 1920, 1080))
+        #self.ui.Inspector.setAlternatingRowColors(True)
         
         
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
         QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
-        self.model = MyDataModel()
+        self.model = QtGui.QStandardItemModel()
         model = self.model
+        
+        self.ui.Inspector.setItemDelegate(delegate.MyDelegate())
+        
         self.createTree()
         
         #q = QtGui.QPalette()
@@ -148,12 +53,12 @@ class StartQT4(QtGui.QMainWindow):
         data = getTrickplayData()
         self.createNode(root, data, True)
         
-        #self.proxyModel = MyProxyModel()
-        #self.proxyModel.setSourceModel(self.model)
+        self.proxyModel = QtGui.QSortFilterProxyModel()
+        self.proxyModel.setSourceModel(self.model)
         
-        self.ui.Inspector.setModel(self.model)
+        self.ui.Inspector.setModel(self.proxyModel)
         
-        #self.proxyModel.sort(0)
+        self.proxyModel.sort(0)
         
     def refresh(self):
         self.model.clear()
@@ -171,31 +76,47 @@ class StartQT4(QtGui.QMainWindow):
         else:
             nodeData = data
             
-        node = MyStandardItem(nodeData["type"] + ': ' + nodeData["name"])
-        parent.appendRow([node])
-        self.createAttrList(node, nodeData)
+        type = nodeData["type"]
+        if "Texture" == type:
+            type = "Image"
+        
+        name = nodeData["name"]
+        
+        node = QtGui.QStandardItem(type + ': ' + name)
+        node.setData(0, 34)
+        
+        blank = QtGui.QStandardItem('')
+        blank.setData(1, 34)
+        blank.setData(type)
+        
+        parent.appendRow([node, blank])
+        self.createAttrList(node, type, nodeData)
             
-    def createAttrList(self, parent, data):
+    def createAttrList(self, parent, parentType, data):
         #print(data)
         for attr in data:
             #print(attr)
             attrTitle = attr
             attrValue = data[attr]
             
-            title = MyStandardItem(attr)
+            title = QtGui.QStandardItem(attr)
+            title.setData(0, 34)
             
             # Value is the list of children
             if isinstance(attrValue, list):
-                value = MyStandardItem(str(len(attrValue)))
+                value = QtGui.QStandardItem(str(len(attrValue)))
+                value.setData(parentType)
+                value.setData(1, 34)
                 parent.appendRow([title, value])
                 for child in attrValue:
                     self.createNode(title, child, False)
             
             # Value is a string/number/etc
             elif not isinstance(attrValue, dict):
-                value = MyStandardItem(str(data[attr]))
+                value = QtGui.QStandardItem(str(data[attr]))
+                value.setData(parentType)
+                value.setData(1, 34)
                 parent.appendRow([title, value])    
-                value.setData("Hi")
                                 
             # Value is a dictionary, like scale
             else:
@@ -205,9 +126,11 @@ class StartQT4(QtGui.QMainWindow):
                     summary += item + ': ' + str(attrValue[item]) + ', '
                 summary = summary[:len(summary)-2] + '}'
                 
-                value = MyStandardItem(summary)
+                value = QtGui.QStandardItem(summary)
+                value.setData(parentType)
+                value.setData(1, 34)
                 parent.appendRow([title, value])
-                self.createAttrList(title, attrValue)
+                self.createAttrList(title, parentType, attrValue)
     
     
 
