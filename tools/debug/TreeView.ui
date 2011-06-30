@@ -29,7 +29,7 @@
    <widget class="QTreeView" name="Inspector">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>50</y>
       <width>1920</width>
       <height>1080</height>
@@ -45,12 +45,51 @@
      <bool>false</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">/*
+QTreeView::branch {
+         background: transparent;
+ }
+
+ QTreeView::branch:has-siblings:!adjoins-item {
+         background: transparent;
+ }
+
+ QTreeView::branch:has-siblings:adjoins-item {
+         background: transparent;
+ }
+
+ QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+         background: transparent;
+ }
+
+ QTreeView::branch:closed:has-children:has-siblings {
+         background: transparent;
+ }
+
+ QTreeView::branch:has-children:!has-siblings:closed {
+         background: transparent;
+ }
+
+ QTreeView::branch:open:has-children:has-siblings {
+         background: transparent;
+ }
+
+ QTreeView::branch:open:has-children:!has-siblings {
+         background: transparent;
+ 
+}
+*/</string>
     </property>
     <property name="dragDropMode">
      <enum>QAbstractItemView::NoDragDrop</enum>
     </property>
     <property name="alternatingRowColors">
+     <bool>true</bool>
+    </property>
+    <property name="indentation">
+     <number>20</number>
+    </property>
+    <property name="rootIsDecorated">
      <bool>true</bool>
     </property>
     <property name="allColumnsShowFocus">
