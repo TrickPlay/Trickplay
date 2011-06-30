@@ -18,17 +18,10 @@ Qt.Value = Qt.UserRole + 2
         
 class StartQT4(QtGui.QMainWindow):
     def __init__(self, parent=None):
-        global model
-        
+
         QtGui.QWidget.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
-        # Set up TreeView
-        #self.ui.Inspector = MyTreeView(self.ui.centralwidget)
-        #self.ui.Inspector.setGeometry(QtCore.QRect(10, 50, 1920, 1080))
-        #self.ui.Inspector.setAlternatingRowColors(True)
-        
         
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
         QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
@@ -38,13 +31,6 @@ class StartQT4(QtGui.QMainWindow):
         self.ui.Inspector.setItemDelegate(delegate.MyDelegate())
         
         self.createTree()
-        
-        #q = QtGui.QPalette()
-        #print(q)
-        #print(q.base())
-        
-        #self.model.item(0).setData(QtGui.QBrush(QtGui.QColor.yellow))
-    
         
     def createTree(self):
         
@@ -85,6 +71,7 @@ class StartQT4(QtGui.QMainWindow):
         node = QtGui.QStandardItem(type + ': ' + name)
         node.setData(0, 34)
         
+        # Blank node used to color full row without double coloring
         blank = QtGui.QStandardItem('')
         blank.setData(1, 34)
         blank.setData(type)
