@@ -17,7 +17,7 @@ local menuButton_file = ui_element.menuButton
 		label = "File",
 		focus_color = {27,145,27,255},
 		text_color = "#cccccc",
-		text_font = "FreeSans Medium 28px",
+		text_font = "FreeSans Bold 28px",
 		focus_text_color = "#cccccc", 
 		border_width = 1,
 		border_corner_radius = 12,
@@ -36,7 +36,7 @@ local menuButton_file = ui_element.menuButton
 		focus_fill_color = {27,145,27,0},
 		label_text_font ="FreeSans Bold 20px", 
     	label_text_color = "#808080",
-        item_text_font = "FreeSans Medium 20px",
+        item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 	}
 
@@ -106,7 +106,7 @@ local menuButton_edit = ui_element.menuButton
 		label = "Edit",
 		focus_color = {27,145,27,255},
 		text_color = "#cccccc",
-		text_font = "FreeSans Medium 28px",
+		text_font = "FreeSans Bold 28px",
 		border_width = 1,
 		border_corner_radius = 12,
 		reactive = true,
@@ -126,7 +126,7 @@ local menuButton_edit = ui_element.menuButton
 		focus_text_color = "#cccccc", --{255,255,255,255},
 		label_text_font ="FreeSans Bold 20px", 
     	label_text_color = "#808080",
-        item_text_font = "FreeSans Medium 20px",
+        item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 	}
 
@@ -189,7 +189,7 @@ local menuButton_arrange = ui_element.menuButton
 		label = "Arrange",
 		focus_color = {27,145,27,255},
 		text_color = "#cccccc",
-		text_font = "FreeSans Medium 28px",
+		text_font = "FreeSans Bold 28px",
 		border_width = 1,
 		border_corner_radius = 12,
 		reactive = true,
@@ -209,7 +209,7 @@ local menuButton_arrange = ui_element.menuButton
 		focus_text_color = "#cccccc", 
 		label_text_font ="FreeSans Bold 20px", 
     	label_text_color = "#808080",
-        item_text_font = "FreeSans Medium 20px",
+        item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 	}
 
@@ -275,7 +275,7 @@ local menuButton_view = ui_element.menuButton
 		label = "View",
 		focus_color = {27,145,27,255},
 		text_color = "#cccccc",
-		text_font = "FreeSans Medium 28px",
+		text_font = "FreeSans Bold 28px",
 		border_width = 1,
 		border_corner_radius = 12,
 		reactive = true,
@@ -295,7 +295,7 @@ local menuButton_view = ui_element.menuButton
 		focus_text_color = "#cccccc", --{255,255,255,255},
 		label_text_font ="FreeSans Bold 20px", 
     	label_text_color = "#808080",
-        item_text_font = "FreeSans Medium 20px",
+        item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 	}
 
@@ -361,7 +361,7 @@ menuButton_view.extra.reactive = true
 local menu_text = Text
 	{
 		color = "#cccccc",
-		font = "FreeSans Medium 20px",
+		font = "FreeSans Bold 20px",
 		text = "",
 		editable = true,
 		wants_enter = false,
@@ -385,7 +385,7 @@ local menu_text = Text
 local menu_text_shadow = Text
 	{
 		color = "000000",
-		font = "FreeSans Medium 20px",
+		font = "FreeSans Bold 20px",
 		text = "",
 		editable = true,
 		wants_enter = false,
