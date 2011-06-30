@@ -1894,13 +1894,6 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 		group.reactive = true
 		local focus_changer = factory.draw_focus_changer(v)
 
-		--[[
-		local focus_changer_bg = Image{src = "lib/assets/focus-input.png", name = "focuschanger_bg", position = {0,0}}
-		local focus_changer = Group {name = "focusChanger", position {0,0,0}, reactive = true}
-		focus_changer:add(focus_changer)
-		]]
-
-
 		local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
 	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
 
@@ -1937,8 +1930,6 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 		end 	
 
     	focus_changer.position  = {0 , 5}
-    	--group:add(focus_changer)
-
 
 	    return focus_changer
 
@@ -2990,6 +2981,7 @@ textU = Text
 		position = {89,67},
 		size = {77,36},
 		opacity = 255,
+		alignment = "CENTER"
 	}
 
 gL = Rectangle
@@ -3015,6 +3007,7 @@ textL = Text
 		position = {4,152,0},
 		size = {77, 36},
 		opacity = 255,
+		alignment = "CENTER"
 	}
 
 gE = Rectangle
@@ -3040,6 +3033,7 @@ textE = Text
 		position = {89,152,0},
 		size = {77,36},
 		opacity = 255,
+		alignment = "CENTER"
 	}
 
 gR = Rectangle
@@ -3066,6 +3060,7 @@ textR = Text
 		position = {174, 152},
 		size = {77,36},
 		opacity = 255,
+		alignment = "CENTER"
 	}
 
 
@@ -3091,6 +3086,7 @@ textD = Text
 		position = {90,237},
 		size = {75,45},
 		opacity = 255,
+		alignment = "CENTER"
 	}
 
 
