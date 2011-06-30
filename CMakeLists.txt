@@ -21,6 +21,8 @@ set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
 
 set( TP_UPNP_CLIENT 1 )
 
+set( TP_WITH_WEBGL 1 )
+
 #------------------------------------------------------------------------------
 
 include(util.cmake)
