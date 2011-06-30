@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Wed Jun 29 14:08:37 2011
+# Created: Wed Jun 29 17:05:49 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,16 +28,51 @@ class Ui_MainWindow(object):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.Inspector = QtGui.QTreeView(self.centralwidget)
-        self.Inspector.setGeometry(QtCore.QRect(0, 50, 1920, 1080))
+        self.Inspector.setGeometry(QtCore.QRect(10, 50, 1920, 1080))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.Inspector.sizePolicy().hasHeightForWidth())
         self.Inspector.setSizePolicy(sizePolicy)
         self.Inspector.setAutoFillBackground(False)
-        self.Inspector.setStyleSheet(_fromUtf8(""))
+        self.Inspector.setStyleSheet(_fromUtf8("/*\n"
+"QTreeView::branch {\n"
+"         background: transparent;\n"
+" }\n"
+"\n"
+" QTreeView::branch:has-siblings:!adjoins-item {\n"
+"         background: transparent;\n"
+" }\n"
+"\n"
+" QTreeView::branch:has-siblings:adjoins-item {\n"
+"         background: transparent;\n"
+" }\n"
+"\n"
+" QTreeView::branch:!has-children:!has-siblings:adjoins-item {\n"
+"         background: transparent;\n"
+" }\n"
+"\n"
+" QTreeView::branch:closed:has-children:has-siblings {\n"
+"         background: transparent;\n"
+" }\n"
+"\n"
+" QTreeView::branch:has-children:!has-siblings:closed {\n"
+"         background: transparent;\n"
+" }\n"
+"\n"
+" QTreeView::branch:open:has-children:has-siblings {\n"
+"         background: transparent;\n"
+" }\n"
+"\n"
+" QTreeView::branch:open:has-children:!has-siblings {\n"
+"         background: transparent;\n"
+" \n"
+"}\n"
+"*/"))
         self.Inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.Inspector.setAlternatingRowColors(True)
+        self.Inspector.setIndentation(20)
+        self.Inspector.setRootIsDecorated(True)
         self.Inspector.setAllColumnsShowFocus(True)
         self.Inspector.setObjectName(_fromUtf8("Inspector"))
         self.Inspector.header().setCascadingSectionResizes(True)
