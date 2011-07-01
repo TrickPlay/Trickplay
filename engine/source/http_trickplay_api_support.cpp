@@ -295,6 +295,133 @@ public:
 		    response.set_status(HttpServer::HTTP_STATUS_NOT_FOUND);
 	    }
 	}
+
+	void handle_http_post( const HttpServer::Request & request, HttpServer::Response & response )
+	{
+		response.set_status( HttpServer::HTTP_STATUS_NOT_FOUND );
+
+		using namespace JSON;
+
+		const char * body = request.get_body().get_data();
+
+		if ( ! body )
+		{
+			return;
+		}
+
+		g_debug( "[%s]" , body );
+
+		Value v = Parser::parse( body );
+
+		if ( v.is<Null>() )
+		{
+			g_debug( "FAILED TO PARSE JSON" );
+			return;
+		}
+
+		Object & o( v.as<Object>() );
+
+		guint32 gid = o[ "gid" ].as<long long>();
+
+		ClutterActor * actor = clutter_get_actor_by_gid( gid );
+
+		if ( ! actor )
+		{
+			g_debug( "UI ELEMENT NOT FOUND" );
+			return;
+		}
+
+		GObjectClass * klass = G_OBJECT_GET_CLASS( G_OBJECT( actor ) );
+
+		Object & props( o[ "properties" ].as<Object>() );
+
+		for( Object::Map::iterator it = props.begin(); it != props.end(); ++it )
+		{
+			GParamSpec * pspec = g_object_class_find_property( klass , it->first.c_str() );
+
+			if ( ! pspec )
+			{
+				g_debug( "SKIPPING UNKNOWN PROPERTY '%s'" , it->first.c_str() );
+				continue;
+			}
+
+			g_debug( "'%s' : %s" , it->first.c_str() , g_type_name( pspec->value_type ) );
+
+			GValue value = {0};
+
+			g_value_init( & value , pspec->value_type );
+
+			switch( pspec->value_type )
+			{
+			case G_TYPE_FLOAT:
+				g_value_set_float( & value , it->second.as_number() );
+				break;
+
+			case G_TYPE_BOOLEAN:
+				g_value_set_boolean( & value , it->second.as<bool>() );
+				break;
+
+			case G_TYPE_INT:
+				g_value_set_int( & value , it->second.as<long long>() );
+				break;
+
+			case G_TYPE_INT64:
+				g_value_set_int64( & value , it->second.as<long long>() );
+				break;
+
+			case G_TYPE_LONG:
+				g_value_set_long( & value , it->second.as<long long>() );
+				break;
+
+			case G_TYPE_UINT:
+				g_value_set_uint( & value , it->second.as<long long>() );
+				break;
+
+			case G_TYPE_UINT64:
+				g_value_set_uint64( & value , it->second.as<long long>() );
+				break;
+
+			case G_TYPE_ULONG:
+				g_value_set_ulong( & value , it->second.as<long long>() );
+				break;
+
+			case G_TYPE_STRING:
+				g_value_set_string( & value , it->second.as<String>().c_str() );
+				break;
+
+			default:
+				{
+					bool ok = false;
+
+					if ( pspec->value_type == CLUTTER_TYPE_COLOR )
+					{
+						ClutterColor color;
+						if ( clutter_color_from_string( & color , it->second.as<String>().c_str() ) )
+						{
+							ok = true;
+							clutter_value_set_color( & value , & color );
+						}
+						else
+						{
+							g_debug( "FAILED TO PARSE COLOR '%s'" , it->second.as<String>().c_str() );
+						}
+					}
+
+					if ( ! ok )
+					{
+						g_debug( "DON'T KNOW HOW TO SET '%s' OF TYPE %s" , it->first.c_str() , g_type_name( pspec->value_type ) );
+						g_value_unset( & value );
+						continue;
+					}
+				}
+			}
+
+			g_object_set_property( G_OBJECT( actor ) , it->first.c_str() , & value );
+			g_value_unset( & value );
+		}
+
+		response.set_status( HttpServer::HTTP_STATUS_OK );
+	}
 };
 
 //-----------------------------------------------------------------------------
@@ -369,6 +496,7 @@ public:
 			response.set_status( HttpServer::HTTP_STATUS_NOT_FOUND );
 		}
 	}
+
 };
 //-----------------------------------------------------------------------------
 
