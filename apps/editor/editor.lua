@@ -88,7 +88,7 @@ local function guideline_inspector(v)
             elseif (button.name == "delete") then  
 		    	screen:remove(screen:find_child(v.name))
             end
-			gw.children = {}
+			--gw:clear()
 			screen:remove(gw)
             input_mode = S_SELECT
 	        screen:grab_key_focus(screen)
@@ -211,14 +211,14 @@ local function guideline_inspector(v)
 	 end
 	
 	 function cancel_b:on_button_down(x,y,button,num_clicks)
-		gw.children = {}
+		--gw:clear()
 		screen:remove(gw)
         input_mode = S_SELECT
 	   	screen:grab_key_focus(screen)
      end 
 
      function cancel_t:on_button_down(x,y,button,num_clicks)
-		gw.children = {}
+		--gw:clear()
 		screen:remove(gw)
         input_mode = S_SELECT
 	    screen:grab_key_focus(screen)
@@ -230,7 +230,7 @@ local function guideline_inspector(v)
 		elseif (input_v.text ~= "") then 
 		     v.x = tonumber(input_v.text) 
 		end 
-		gw.children = {}
+		--gw:clear()
 		screen:remove(gw)
         input_mode = S_SELECT
 	    screen:grab_key_focus(screen)
@@ -243,14 +243,14 @@ local function guideline_inspector(v)
 		     v.x = tonumber(input_v.text) 
 		end 
 
-		gw.children = {}
+		--gw:clear()
 		screen:remove(gw)
         input_mode = S_SELECT
 	    screen:grab_key_focus(screen)
 	 end 
 
 	 function delete_b:on_button_down(x,y,button,num_clicks)
-		gw.children = {}
+		--gw:clear()
 		screen:remove(screen:find_child(v.name))
 		screen:remove(gw)
         input_mode = S_SELECT
@@ -258,7 +258,7 @@ local function guideline_inspector(v)
 	 end 
 
      function delete_t:on_button_down(x,y,button,num_clicks)
-		gw.children = {}
+		--gw:clear()
 		screen:remove(screen:find_child(v.name))
 		screen:remove(gw)
         input_mode = S_SELECT
@@ -758,8 +758,10 @@ function editor.close()
 end 
 
 local function cleanMsgWin(msgw)	
-     msgw.children = {}
-     screen:remove(msgw)
+	 --msgw:clear()
+	 if screen:find_child(msgw.name) then 
+     	screen:remove(msgw)
+	 end 
      --input_mode = S_SELECT 
 end 
 
@@ -1018,7 +1020,9 @@ function editor.the_image(bg_image)
 
 	cancel_b = dialog.content:find_child("button0")
 	function cancel_b:on_button_down ()
-	 	screen:remove(dialog)
+	 	if screen:find_child(dialog.name) then 
+	 		screen:remove(dialog)
+		end
 	 	screen:grab_key_focus(screen)
 	end 
 
@@ -1037,7 +1041,9 @@ function editor.the_image(bg_image)
 	      	else 
 	            inputMsgWindow_openimage("open_imagefile", input_text.text)
 	      	end 
-	      	screen:remove(dialog)
+	 		if screen:find_child(dialog.name) then 
+	      		screen:remove(dialog)
+			end 
 	 	end 
     end 
     screen:add(dialog)
@@ -1329,7 +1335,9 @@ local function open_files(input_purpose, bg_image, inspector)
 	scroll.on_focus_in()
 
 	function xbox:on_button_down(x,y,button,num_clicks)
-		screen:remove(msgw)
+		if screen:find_child(msgw.name) then 
+			screen:remove(msgw)
+		end 
 		msgw:clear() 
 		current_inspector = nil
 		current_focus = nil 
@@ -1452,7 +1460,9 @@ function editor.the_open()
 
 	cancel_b = dialog.content:find_child("button0")
 	function cancel_b:on_button_down ()
-	 	screen:remove(dialog)
+		if screen:find_child(dialog.name) then 
+	 		screen:remove(dialog)
+		end 
 	 	screen:grab_key_focus(screen)
 	end 
 
@@ -1468,7 +1478,9 @@ function editor.the_open()
 		     	end
 	       	end 
             inputMsgWindow_openfile(input_text.text) 
-	       	screen:remove(dialog)
+			if screen:find_child(dialog.name) then
+	       		screen:remove(dialog)
+			end 
 	       	local timeline = screen:find_child("timeline") 
 	       	if timeline then  
             	for n,m in pairs (g.children) do 
@@ -1575,8 +1587,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	scroll_more.name = "si_more"
 
 	-- Buttons 
-    local button_viewcode = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-    					  skin = "default", ui_width = 80, ui_height = 27, label = "View Code", focus_color = {27,145,27,255}, focus_object = tabs}
+    --local button_viewcode = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+    					  --skin = "default", ui_width = 80, ui_height = 27, label = "View Code", focus_color = {27,145,27,255}, focus_object = tabs}
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     					  skin = "default", ui_width = 80, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = tabs}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
@@ -1595,14 +1607,14 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end
 
 	--Focus Destination
-	button_viewcode.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel",  [keys.Return] = "button_viewcode", [keys.Up] = s_func}
+	--button_viewcode.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel",  [keys.Return] = "button_viewcode", [keys.Up] = s_func}
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
 	--editor_use = false
 	
 	-- inspector group 
 	local inspector = Group {
-		name = "msgw", --"inspector", 
+		name = "inspector", --msgw
 		position = {0,0},
 	 	anchor_point = {0,0},
 		reactive = true,
@@ -1612,7 +1624,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
 			tabs:set{name = "tabs", position = {5, TOP_BAR}, reactive=true},
-			button_viewcode:set{name = "button_viewcode", position = { WIDTH - button_viewcode.w - button_cancel.w - button_ok.w - 3*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
+			--button_viewcode:set{name = "button_viewcode", position = { WIDTH - button_viewcode.w - button_cancel.w - button_ok.w - 3*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - 1*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}
 		},
@@ -1620,7 +1632,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	}
 
 	-- Button Event Handlers
-	button_viewcode.pressed = function() editor.view_code(v)  xbox:on_button_down(1) end
+	--button_viewcode.pressed = function() editor.view_code(v)  xbox:on_button_down(1) end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
 	button_ok.pressed = function() inspector_apply(v, inspector) xbox:on_button_down(1) end
 
@@ -1740,7 +1752,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			or attr_n == "expansion_location" or attr_n == "cell_size" or attr_n == "style" or attr_n == "direction" then 
 				item = factory.make_buttonpicker(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			else 
-	    		item = factory.make_text_popup_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+	    		item = factory.make_text_input_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			end
 		
 			if item ~= nil then 
@@ -1809,7 +1821,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     scroll_info.extra.focus = {[keys.Tab] = "button_cancel"}
     scroll_more.extra.focus = {[keys.Tab] = "button_cancel"}
    	inspector.extra.lock = false
-   	screen:add(inspector)
+   	--screen:add(inspector) --0701
    	create_on_button_down_f(inspector)	
 
 	--Focus
@@ -1844,29 +1856,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		return true
 	end 
 
-
-	--[[ inspector scroll function 
-	if v.extra then 
-			if v.type == "Rectangle" or v.type == "Text" or v.type == "Clone" or v.type == "Image" or v.type == "Group" and v.extra.type == nil then 
-	       		si = ui_element.scrollPane{visible_w = item_group.w -5 , virtual_w = item_group.w - 5, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
-			else 
-	       		si = ui_element.scrollPane{visible_w = item_group.w + 5, virtual_w = item_group.w, virtual_h = item_group.h, visible_h = 480, border_is_visible = false, box_width = 0} 
-			end 
-
-	       si.content = item_group
-	       si.position = {0,82,0}
-	       si.name ="si"
-	       si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
-	       inspector:add(si)
-	else -- video  
-	   inspector:add(item_group) 
-	end 
-	screen:add(inspector)
-	]]
-
 	if scroll_y_pos then 
 		 tabs.buttons[3].on_button_down()
-	     screen:find_child("si_more").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+		 if screen:find_child("si_more") then 
+	     	screen:find_child("si_more").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+		 end 
 	end 
 	if v.extra then 
 		if v.extra.type == "MenuButton" then 
@@ -1881,7 +1875,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     inspector.reactive = true
 	inspector.extra.lock = false
 
----[[ 0630 
 	create_on_button_down_f(inspector)
 	inspector_xbox = inspector:find_child("xbox") 
     inspector_xbox.reactive = true
@@ -1910,7 +1903,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    end 
 		return true
 	end 
---]]
 
 	if x_pos ~= nil then 
 		if x_pos ~= "touch" then 
@@ -2079,7 +2071,9 @@ bg("Code", "Widget")
 	xbox.reactive = true
 
 	function xbox:on_button_down(x,y,button,num_clicks)
-		screen:remove(codeViewWin)
+		if screen:find_child(codeViewWin.name) then 
+			screen:remove(codeViewWin)
+		end
 		editor.n_selected(v, true)
         screen.grab_key_focus(screen) 
 	    input_mode = S_SELECT
@@ -2108,13 +2102,11 @@ local function save_new_file (fname, save_current_f, save_backup_f)
         local n = table.getn(g.children)
 
 		for i, v in pairs(g.children) do
-				---[[
 			if v.extra then 
 				if v.extra.focus == nil then 
-					editor.inspector(v, "touch")
+					editor.inspector(v, "touch") --0701
 				end 
 			end
-				---]]
 	     	local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
 	     	if result2  ~= nil then 
             	contents=result2..contents
@@ -2361,8 +2353,8 @@ function editor.save(save_current_f, save_backup_f)
     	  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true, focus_object = text_input} 
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() print("CANCEL") xbox:on_button_down() end 
-	button_ok.pressed = function()print("OK", text_input.text ) save_new_file(text_input.text, save_current_f, save_backup_f) xbox:on_button_down() end
+	button_cancel.pressed = function() xbox:on_button_down() end 
+	button_ok.pressed = function() save_new_file(text_input.text, save_current_f, save_backup_f) xbox:on_button_down() end
 
 	local ti_func = function()
 		if current_focus then 
@@ -2417,7 +2409,7 @@ function editor.save(save_current_f, save_backup_f)
 
 	function xbox:on_button_down()
 		screen:remove(msgw)
-		msgw:clear() 
+		--msgw:clear() 
 		current_inspector = nil
 		current_focus = nil
         screen.grab_key_focus(screen) 
@@ -3200,19 +3192,25 @@ function editor.duplicate()
 															temp_t[k] = l
 															--ui.dup[b][k] = l
 						   								end
-					           							ui.dup_c[b] = temp_t
-						   								if b == "items" then 
+														if ui.dup_c then 
 					           								ui.dup_c[b] = temp_t
-						   								end 
+						   									if b == "items" then 
+					           									ui.dup_c[b] = temp_t
+						   									end 
+														end 
                                    					else --elseif ui.dup_c[b] ~= j[b]  then  
 														print("-->", b, ":", j[b])
-					           							ui.dup_c[b] = j[b] 
+														if ui.dup_c then 
+					           								ui.dup_c[b] = j[b] 
+														end
                                    					end 
                                  				end 
                              				end 
-                        					ui.dup:add(ui.dup_c)
-                        					ui.dup_c.extra.lock = false
-                        					create_on_button_down_f(ui.dup_c)
+											if ui.dup_c then 
+                        						ui.dup:add(ui.dup_c)
+                        						ui.dup_c.extra.lock = false
+                        						create_on_button_down_f(ui.dup_c)
+											end
                         					item_num = item_num + 1
                           					end 
 										--	]]

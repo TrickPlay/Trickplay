@@ -423,8 +423,8 @@ function new_project()
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() print("CANCEL") xbox:on_button_down() end 
-	button_ok.pressed = function()print("OK") set_new_project(text_input.text) xbox:on_button_down() end
+	button_cancel.pressed = function() xbox:on_button_down() end 
+	button_ok.pressed = function() set_new_project(text_input.text) xbox:on_button_down() end
 
 	local ti_func = function()
 		if current_focus then 
@@ -488,9 +488,7 @@ function new_project()
 	end 
 
 	function text_input:on_key_down(key)
-		print("text_input on_key down")
 		if key == keys.Tab then
-			print (key,"popopo")
 		end
 		if text_input.focus[key] then
 			if type(text_input.focus[key]) == "function" then
@@ -1321,11 +1319,10 @@ function make_attr_t(v)
              	if color_t == nil then 
                  	color_t = {0,0,0,0}
 	     	end
-		print("***",j,"***")
 	     	table.insert(attr_t, {j.."r", color_t[1], "R"})
-             	table.insert(attr_t, {j.."g", color_t[2], "G"})
-             	table.insert(attr_t, {j.."b", color_t[3], "B"})
-       	     	table.insert(attr_t, {j.."a", color_t[4], "A"})    
+            table.insert(attr_t, {j.."g", color_t[2], "G"})
+            table.insert(attr_t, {j.."b", color_t[3], "B"})
+       	    table.insert(attr_t, {j.."a", color_t[4], "A"})    
 		end,
 	["size"] = function(j)
 		table.insert(attr_t, {"caption", stringTotitle(j)})
@@ -1461,12 +1458,12 @@ function make_attr_t(v)
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","label","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
        ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius"} end,
-       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","items","selected_item"} end,
+       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","selected_item","items",} end,
        ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus","label","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
-       ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","text_color","focus_color","text_font","direction","items","box_color","fill_color","focus_fill_color", "box_width","box_size","check_size","line_space","b_pos", "item_pos"} end,
-       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","text_color","focus_color","focus_fill_color","text_font","direction","items","button_color","select_color","button_radius","select_radius","b_pos", "item_pos","line_space"} end,
+       ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space","b_pos", "item_pos","items",} end,
+       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","focus_fill_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","b_pos", "item_pos","items",} end,
 
-       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height", "border_width", "border_color", "fill_color", "label_color", "unsel_color", "tab_labels"} end,  
+       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels"} end,  
        ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label","message","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","label","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
@@ -1584,7 +1581,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible arrow_color", "tab_labels", "tabs"}
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible arrow_color", "tab_labels", "tabs"}
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 

@@ -1567,10 +1567,10 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     return true 
 	      end 
 
----www 
 	      function item:on_button_down()
 		 	 if current_focus then 
    			 	current_focus.extra.on_focus_out()
+			 else
 			 end 
 	         current_focus = group
 		     item.on_focus_in()
@@ -1581,23 +1581,26 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	      end 
 
 	      function item:on_key_down(key)
-			local current_tab =  inspector:find_child("tabs").current_tab
-			if current_tab == 1 then 
-				item_group = inspector:find_child("item_group_info")
-				si = inspector:find_child("si_info")
+			local item_group, si, item_group_name, si_name  
+			if inspector:find_child("tabs").current_tab == 1 then 
+				item_group_name = "item_group_info"
+				si_name = "si_info"
 				attr_t_idx = info_attr_t_idx
-			else
-				item_group = inspector:find_child("item_group_more")  
-				si = inspector:find_child("si_more")
+			else 
+				item_group_name = "item_group_more"
+				si_name = "si_more"
 				attr_t_idx = more_attr_t_idx
-			end 
+			end
+			item_group = inspector:find_child(item_group_name)
+			si = inspector:find_child(si_name)
 
 	       	if (key == keys.Tab and shift == false) then
 		  	     item.on_focus_out()
 		  		 local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
 		  		 if (item_group:find_child("item_text"..tostring(next_i))) then
 					 item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
-		  			 si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
+		  			 si.seek_to_middle(0,item_group:find_child("itemsList").y) 
+		  			 --si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
 		  		 else 	
 		     		 for i, v in pairs(attr_t_idx) do
  		        		   if("itemsList" == v) then 
@@ -1610,22 +1613,25 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		               			  local n_item = attr_t_idx[i+1]
 			       				  if item_group:find_child(n_item).extra.on_focus_in then 
 			           				item_group:find_child(n_item).extra.on_focus_in()	
-		  			        		si.seek_to_middle(0,item_group:find_child(n_item).y) 
+	       							current_focus = item_group:find_child(n_item)
+		  			        		--si.seek_to_middle(0,item_group:find_child(n_item).y) 
+		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 			       				  else
 				   					there()
 			       				  end 
 		          			    end
-			  				  end 
-			  			     there()
-		        		end 
-    		     	end
-		  		end
+			  				    end 
+			  			        there()
+		        		    end 
+    		     	  end
+		  		 end
 	       	elseif (key == keys.Tab and shift == true )then 
 		     	item.on_focus_out()
 		     	local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     	if (item_group:find_child("item_text"..tostring(prev_i))) then
 					item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
-		  			si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
+		  			--si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
+		  			si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 		     	else 	
 		      		for i, v in pairs(attr_t_idx) do
 						if("itemsList" == v) then 
@@ -1636,21 +1642,29 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			     				if(item_group:find_child(attr_t_idx[i-1])) then
 			     					local p_item = attr_t_idx[i-1]
 									item_group:find_child(p_item).extra.on_focus_in()	
-		  	        				si.seek_to_middle(0,item_group:fyoind_child(p_item).y) 
+	       							current_focus = item_group:find_child(p_item)
+		  	        				--si.seek_to_middle(0,item_group:fyoind_child(p_item).y) 
+		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 									break
 			     				end
 							end 
     		    		end
-		    		end 
-	       		end 
-	    end 
-		items_list:replace(i,1,item)
-	    items_list:replace(i,2,minus)
-	    items_list:replace(i,3,up)
-	    items_list:replace(i,4,down)
+		    	end 
+	       	elseif (key == keys.Up )then 
+				item:find_child("textInput").cursor_position = 0 -- first charactor position 
+				item:find_child("textInput").selection_end = 0 -- first charactor position 
+	       	elseif (key == keys.Down )then 
+				item:find_child("textInput").cursor_position = -1 -- first charactor position 
+				item:find_child("textInput").selection_end = -1 -- first charactor position 
+	       	end 
+	    	end 
+			items_list:replace(i,1,item)
+	    	items_list:replace(i,2,minus)
+	    	items_list:replace(i,3,up)
+	    	items_list:replace(i,4,down)
 	end
 	function group.extra.on_focus_in()
-		current_focus = group
+		current_focus = group --0701 
 		a = items_list.tiles[1][1]
 		a.on_focus_in()
 		a:grab_key_focus()
@@ -1724,8 +1738,6 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		item_picker.name = "item_picker"
 		editor_use = false
 
-        group:add(item_picker) 
-	
 		unfocus = item_picker:find_child("unfocus")
 		function unfocus:on_button_down (x,y,b,n)
    			current_focus.extra.on_focus_out()
@@ -1758,19 +1770,18 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		end 
 
 		function item_picker:on_key_down(key)
-
-
-		    -- 0630 
-			local current_tab =  inspector:find_child("tabs").current_tab
-			if current_tab == 1 then 
-				item_group = inspector:find_child("item_group_info")
-				si = inspector:find_child("si_info") 
+			local item_group, si, item_group_name, si_name  
+			if inspector:find_child("tabs").current_tab == 1 then 
+				item_group_name = "item_group_info"
+				si_name = "si_info"
 				attr_t_idx = info_attr_t_idx
-			else
-				item_group = inspector:find_child("item_group_more") 
-				si = inspector:find_child("si_more") 
+			else 
+				item_group_name = "item_group_more"
+				si_name = "si_more"
 				attr_t_idx = more_attr_t_idx
-			end 
+			end
+			item_group = inspector:find_child(item_group_name)
+			si = inspector:find_child(si_name)
 
 	       	if key == keys.Left then 
 		     	item_picker.press_left()
@@ -1788,6 +1799,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		               		local n_item = attr_t_idx[i+1]
 							if item_group:find_child(n_item).extra.on_focus_in then 
 			       				item_group:find_child(n_item).extra.on_focus_in()	
+	       						current_focus = item_group:find_child(n_item)
 			       				si.seek_to_middle(0, item_group:find_child(n_item).y)
 							end 
 			        		break
@@ -1805,6 +1817,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
+	       		current_focus = item_group:find_child(p_item)
 				si.seek_to_middle(0, item_group:find_child(p_item).y)
 				break
 			     end
@@ -1935,7 +1948,7 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 
 end 
 end 
-function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item_s, save_items, old_inspector) 
+function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item_s, save_items, old_inspector) 
 
 
     local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
@@ -2117,46 +2130,44 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
         end
 
   		function input_text:on_key_down(key)
-		
+			local item_group, si, item_group_name, si_name  
+			if inspector:find_child("tabs").current_tab == 1 then 
+				item_group_name = "item_group_info"
+				si_name = "si_info"
+				attr_t_idx = info_attr_t_idx
+			else 
+				item_group_name = "item_group_more"
+				si_name = "si_more"
+				attr_t_idx = more_attr_t_idx
+			end
+			item_group = inspector:find_child(item_group_name)
+			si = inspector:find_child(si_name)
 
-		local current_tab, item_group, si 
-		
-		current_tab =  inspector:find_child("tabs").current_tab
-		if current_tab == 1 then 
-			item_group = inspector:find_child("item_group_info")
-			si = inspector:find_child("si_info")
-			attr_t_idx = info_attr_t_idx
-		else
-			item_group = inspector:find_child("item_group_more") 
-			si = inspector:find_child("si_more")
-			attr_t_idx = more_attr_t_idx
-		end 
-
-
-	    if key == keys.Return or (key == keys.Tab and shift == false)  then
-	       	group.extra.on_focus_out()
-		 	for i, j in pairs(attr_t_idx) do
-		    	if(item_n == j or item_v == j) then 
-		          	while(item_group:find_child(attr_t_idx[i+1]) == nil ) do 
-		                i = i + 1
-			       		if(attr_t_idx[i+1] == nil) then return true end 
-		          	end 
-		          	if item_group:find_child("skin") then end 	
-		          	if(item_group:find_child(attr_t_idx[i+1])) then
-		               	local n_item = attr_t_idx[i+1]
-			       		if item_group:find_child(n_item).extra.on_focus_in then 
-			       			item_group:find_child(n_item).extra.on_focus_in()	
+	    	if key == keys.Return or (key == keys.Tab and shift == false)  then
+	       		group.extra.on_focus_out()
+		 		for i, j in pairs(attr_t_idx) do
+		    		if(item_n == j or item_v == j) then 
+		          		while(item_group:find_child(attr_t_idx[i+1]) == nil ) do 
+		                	i = i + 1
+			       			if(attr_t_idx[i+1] == nil) then return true end 
+		          		end 
+		          		if item_group:find_child("skin") then end 	
+		          		if(item_group:find_child(attr_t_idx[i+1])) then
+		               		local n_item = attr_t_idx[i+1]
+			       			if item_group:find_child(n_item).extra.on_focus_in then 
+			       				item_group:find_child(n_item).extra.on_focus_in()	
+	       						current_focus = item_group:find_child(n_item)
 			       			if (si) then 
 				    			si.seek_to_middle(0, item_group:find_child(n_item).y)
 			       			end
 			       			break
-			      		elseif n_item == "src" or n_item == "icon" or n_item == "source" then 
-			       		elseif n_item == "items" then 
-			       		elseif n_item == "reactive" then 
-			       		end --added 
-		          	end
-		     	end 
-    		end
+			      			elseif n_item == "src" or n_item == "icon" or n_item == "source" then 
+			       			elseif n_item == "items" then 
+			       			elseif n_item == "reactive" then 
+			       			end --added 
+		          		end
+		     		end 
+    			end
 	     elseif (key == keys.Tab and shift == true )then 
 		    group.extra.on_focus_out()
  		    for i, v in pairs(attr_t_idx) do
@@ -2171,6 +2182,7 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     				local p_item = attr_t_idx[i-1]
 								if item_group:find_child(p_item).extra.on_focus_in then 	
 				     				item_group:find_child(p_item).extra.on_focus_in()	
+	       							current_focus = item_group:find_child(p_item)
 			             			if (si) then 
 				          				si.seek_to_middle(0, item_group:find_child(p_item).y)
 			             			end
@@ -2183,21 +2195,27 @@ function factory.make_text_popup_item(assets, inspector, v, item_n, item_v, item
 			     		here()
 					end 
     		    end
+	     	elseif (key == keys.Up )then 
+				group:find_child("input_text").cursor_position = 0 
+				group:find_child("input_text").selection_end = 0 
+	     	elseif (key == keys.Down )then 
+				group:find_child("input_text").cursor_position = -1 
+				group:find_child("input_text").selection_end = -1 
         	end
    		end 
 
     	group:add(input_text)
         function group.extra.on_focus_in()
-	         current_focus = group
-             	 ring.opacity = 0
-                 input_text.cursor_visible = true
-                 focus.opacity = 255
+	         current_focus = group --0701
+             ring.opacity = 0
+             input_text.cursor_visible = true
+             focus.opacity = 255
 	         input_text:grab_key_focus(input_text)
         end
         function group.extra.on_focus_out()
-                  focus.opacity = 0
-                  input_text.cursor_visible = false
-                  ring.opacity = 255
+             focus.opacity = 0
+             input_text.cursor_visible = false
+             ring.opacity = 255
         end 
     end
 
@@ -3128,7 +3146,6 @@ function make_on_button_down_f(v)
 			end 
 		end
 	   	focus_type = v.name:sub(2,-1)
-		print("focus_type.....", focus_type)
 	   	--v:find_child("rect"..focus_type).border_color = {0,255,0,255} -- 
 	   	v.border_color = {0,255,0,255} -- 
 	   	v.border_width = 2
