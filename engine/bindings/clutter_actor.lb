@@ -672,6 +672,21 @@ interface actor [[ClutterActor*]]
         [[has_clip=clutter_actor_has_clip(self);]];
         
     /*
+    Property: clip_to_size
+    
+    When set to true, the actor will clip its children to its size. If a clip rectangle has been
+    set using the <clip> property, this property is ignored. 
+    */
+    
+    bool clip_to_size
+        [[
+            clip_to_size = clutter_actor_get_clip_to_allocation( self );
+        ]]
+        [[
+            clutter_actor_set_clip_to_allocation( self , clip_to_size );
+        ]];
+    
+    /*
 	Property: parent
 	
 	If this UI element is inside a container, this property returns the
