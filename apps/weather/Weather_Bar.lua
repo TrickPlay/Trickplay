@@ -155,12 +155,15 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
 end
 
 function Make_Bar(loc,index, master)
+    
     local bar_index = index
     local mini_width = MINI_BAR_MIN_W
     local master_i = nil
     if master then
         master_i = 1
     end
+    
+    --Visual Components
     local bar = Group{
         name = loc.." Weather Bar",
         opacity = 0,
@@ -405,8 +408,10 @@ function Make_Bar(loc,index, master)
             five_day = make_five_day(fcast_tbl.forecast.simpleforecast.forecastday)
             
             full_bar:add(five_day)
-            five_day.opacity=0
-            five_day:hide()
+            if bar_state:current_state() ~= "5_DAY" then
+                five_day.opacity=0
+                five_day:hide()
+            end
             
         end
         if f_tbl ~= nil and pws_tbl ~= nil then
@@ -553,6 +558,7 @@ function Make_Bar(loc,index, master)
                     right_faux_bar.x = 0
                     left_faux_bar.x = 0
                     bars[next_i]:grab_key_focus()
+                    print(next_i,bars[next_i],bars[next_i].parent,screen)
                 end
             end
         },
@@ -602,8 +608,8 @@ function Make_Bar(loc,index, master)
                         blurb_txt.opacity = 255
                         blurb_txt:show()
                     end
-                    if view_5_day then
-                        view_5_day = false
+                    if bar_state:current_state() == "5_DAY" then
+                        --view_5_day = false
                         blurb_txt:show()
                     end
                     
@@ -850,89 +856,89 @@ function Make_Bar(loc,index, master)
                 if zip_focus <= #zip_backing then
                     zip_backing[zip_focus].color={255,255,255}
                 end
-                zip_focus = zip_focus - 1
-                if zip_focus == 0 then
-                    zip_focus = #zip_backing
-                end
+                
+                zip_focus = (zip_focus-2) % (# zip_backing) + 1
+                
                 zip_backing[zip_focus].color = {140,140,140}
                 return
             end
             
-            next_i = bar_i-1
-            if  next_i < 1 then
-                next_i = #bars
-            end
+            next_i = (bar_i-2) % (# bars) + 1
             screen:grab_key_focus()
             bars[next_i]:show()
-            if mini then
+            if bar_state:current_state() == "MINI" then
                 bars[next_i].x = MINI_BAR_X - bar_dist/2
                 bars[next_i].opacity = 255
-                bars[next_i]:go_mini()
+                --bars[next_i]:go_mini()
                 animate_list[bar.func_tbls.mini_move_left] = bar
             else
                 bars[next_i].x = MINI_BAR_X - bar_dist
                 bars[next_i].opacity = 255
-                bars[next_i]:go_full()
+                --bars[next_i]:go_full()
                 left_faux_bar.x = -bar_dist
                 animate_list[bar.func_tbls.full_move_left] = bar
             end
+            bars[next_i].go_to_state(bar_state:current_state())
             time_of_day = bars[next_i].local_time_of_day
             if conditions[bars[next_i].curr_condition] then
                 conditions[bars[next_i].curr_condition]()
             else
                 conditions["Unknown"]()
             end
+            current_bar = bars[next_i]
             print("LEFT switching to "..next_i..", #bars: "..#bars..", previous bar_i: "..bar_i)
             bar_i = next_i
         end,
         [keys.Right]  = function()
-        print("gah")
-            if #bars == 1 then return end
-            if zip_entry.opacity~=0 then
-                print("fgfgdgfdg")
-                if zip_focus <= 5 then
-                    zip_backing[zip_focus].color={255,255,255}
-                end
-                zip_focus = zip_focus + 1
-                if zip_focus == #zip_backing + 1 then
-                    zip_focus = 1
-                    
-                end
+            
+            --if moving within the Zip Entry field
+            if bar_state:current_state() == "ZIP_ENTRY" then
+                
+                if zip_focus <= 5 then zip_backing[zip_focus].color={255,255,255} end
+                
+                zip_focus = (zip_focus) % (# zip_backing) + 1
+                
                 zip_backing[zip_focus].color = {140,140,140}
+                
                 return
-            end
-            
-            
-            next_i = bar_i+1
-            if  next_i > #bars then
-                print("greater than ",#bars)
-                next_i = 1
-            end
-            
-            screen:grab_key_focus()
-            bars[next_i]:show()
-            if mini then
-                bars[next_i].x = MINI_BAR_X + bar_dist/2
-                bars[next_i].opacity = 0
-                bars[next_i]:go_mini()
-                animate_list[bar.func_tbls.mini_move_right] = bar
+                
+            --if switching bars
             else
-                bars[next_i].x = MINI_BAR_X + bar_dist
-                bars[next_i].opacity = 255
-                bars[next_i]:go_full()
-                right_faux_bar.x = bar_dist
-                animate_list[bar.func_tbls.full_move_right] = bar
+                
+                if #bars == 1 then return end
+                
+                next_i = (bar_i) % (# bars) + 1
+                
+                screen:grab_key_focus()
+                
+                bars[next_i]:show()
+                
+                if bar_state:current_state() == "MINI" then
+                    bars[next_i].x = MINI_BAR_X + bar_dist/2
+                    bars[next_i].opacity = 0
+                    --bars[next_i]:go_mini()
+                    animate_list[bar.func_tbls.mini_move_right] = bar
+                else
+                    bars[next_i].x = MINI_BAR_X + bar_dist
+                    bars[next_i].opacity = 255
+                    --bars[next_i]:go_full()
+                    right_faux_bar.x = bar_dist
+                    animate_list[bar.func_tbls.full_move_right] = bar
+                end
+                bars[next_i].go_to_state(bar_state:current_state())
+                time_of_day = bars[next_i].local_time_of_day
+                if conditions[bars[next_i].curr_condition] then
+                    conditions[bars[next_i].curr_condition]()
+                else
+                    conditions["Unknown"]()
+                end
+                current_bar = bars[next_i]
+                print("RIGHT switching to "..next_i..", #bars: "..#bars..", previous bar_i: "..bar_i)
+                
+                bar_i = next_i
             end
-            time_of_day = bars[next_i].local_time_of_day
-            if conditions[bars[next_i].curr_condition] then
-                conditions[bars[next_i].curr_condition]()
-            else
-                conditions["Unknown"]()
-            end
-            print("RIGHT switching to "..next_i..", #bars: "..#bars..", previous bar_i: "..bar_i)
-            bar_i = next_i
         end,
-        
+        --[[
         [keys.OK]     = function()
             if zip_entry.opacity~=0 and zip_focus == 6 then
                 local zip = digits[1].text..digits[2].text..digits[3].text..digits[4].text..digits[5].text
@@ -940,6 +946,7 @@ function Make_Bar(loc,index, master)
                 table.insert(locations,zip)
                 table.insert(bars,Make_Bar(zip,#locations))
                 screen:add(bars[#bars])
+                
                 digits[1].text = ""
                 digits[2].text = ""
                 digits[3].text = ""
@@ -958,8 +965,34 @@ function Make_Bar(loc,index, master)
                 print("ENTER")
             end
         end,
-        
+        --]]
         [keys.BLUE]   = function()
+            ---[[
+            
+            --if bar_state is MINI, then pressing BLUE is ignored
+            if bar_state:current_state() == "MINI" then
+                
+                return
+                
+            --if bar_state is 5_DAY, then go to 1_DAY
+            elseif bar_state:current_state() == "5_DAY" then
+                
+                bar_state:change_state_to("1_DAY")
+                
+            --if bar_state is 1_DAY, then go to 5_DAY
+            elseif bar_state:current_state() == "1_DAY" then
+                
+                bar_state:change_state_to("5_DAY")
+                
+            --if bar_state is ZIP_ENTRY, then go to 1_DAY
+            elseif bar_state:current_state() == "ZIP_ENTRY" then
+                
+                bar_state:change_state_to("1_DAY")
+                
+            end
+            
+            --]]
+            --[[
             if mini then return end
             
             screen:grab_key_focus()
@@ -977,6 +1010,7 @@ function Make_Bar(loc,index, master)
                 animate_list[bar.func_tbls.xfade_in_5_day] = bar
             end
             print("BLUE")
+            --]]
         end,
         [keys.RED]    = function()
             if #bars == 1 then return end
@@ -1008,15 +1042,17 @@ function Make_Bar(loc,index, master)
             if mini then
                 bars[next_i].x = MINI_BAR_X + bar_dist/2
                 bars[next_i].opacity = 0
-                bars[next_i]:go_mini()
+                --bars[next_i]:go_mini()
                 animate_list[bar.func_tbls.mini_move_right] = bar
             else
                 bars[next_i].x = MINI_BAR_X + bar_dist
                 bars[next_i].opacity = 255
-                bars[next_i]:go_full()
+                --bars[next_i]:go_full()
                 right_faux_bar.x = bar_dist
                 animate_list[bar.func_tbls.full_move_right] = bar
             end
+            bars[next_i].go_to_state(bar_state:current_state())
+            current_bar = bars[next_i]
             time_of_day = bars[next_i].local_time_of_day
             if conditions[bars[next_i].curr_condition] then
                 conditions[bars[next_i].curr_condition]()
@@ -1030,6 +1066,22 @@ function Make_Bar(loc,index, master)
             bar_i = next_i
         end,
         [keys.GREEN]  = function()
+            ---[[
+            
+            --if bar_state is MINI, then pressing BLUE is ignored
+            if bar_state:current_state() == "MINI" then
+                
+                bar_state:change_state_to("1_DAY")
+                
+            --if bar_state is anything else, then go to MINI
+            else
+                
+                bar_state:change_state_to("MINI")
+                
+            end
+            
+            --]]
+            --[[
             screen:grab_key_focus()
             if mini then
                 full_bar:show()
@@ -1040,8 +1092,32 @@ function Make_Bar(loc,index, master)
             end
             mini = not mini
             print("GREEN")
+            --]]
         end,
         [keys.YELLOW] = function()
+            ---[[
+            
+            --if bar_state is MINI, then pressing BLUE is ignored
+            if bar_state:current_state() == "MINI" then
+                
+                return
+                
+            --if bar_state is ZIP_ENTRY, then go to 1_DAY
+            elseif bar_state:current_state() == "ZIP_ENTRY" then
+                
+                bar_state:change_state_to("1_DAY")
+                
+            --if bar_state is anything else then go to ZIP_ENTRY
+            else
+                
+                bar_state:change_state_to("ZIP_ENTRY")
+                
+            end
+            
+            --]]
+            
+            
+            --[[
             if mini then return end
             
             screen:grab_key_focus()
@@ -1066,6 +1142,7 @@ function Make_Bar(loc,index, master)
                 animate_list[bar.func_tbls.xfade_in_blurb_from_zip] = bar
             end
             print("YELLOW")
+            --]]
         end,
     }
     
@@ -1095,7 +1172,11 @@ function Make_Bar(loc,index, master)
                     screen:add(bars[#bars])
                     bars[#bars].x = MINI_BAR_X + bar_dist
                     bars[#bars].opacity = 255
-                    bars[#bars]:go_full()
+                    
+                    current_bar = bars[#bars]
+                    bar_state:change_state_to("1_DAY")
+                    bars[#bars].go_to_state(bar_state:current_state())
+                    
                     bars[#bars]:show()
                     right_faux_bar.x = bar_dist
                     next_i = #bars
@@ -1128,7 +1209,10 @@ function Make_Bar(loc,index, master)
                             screen:add(bars[#bars])
                             bars[#bars].x = MINI_BAR_X + bar_dist
                             bars[#bars].opacity = 255
-                            bars[#bars]:go_full()
+                            
+                            current_bar = bars[#bars]
+                            bar_state:change_state_to("1_DAY")
+                            bars[#bars].go_to_state(bar_state:current_state())
                             bars[#bars]:show()
                             right_faux_bar.x = bar_dist
                             next_i = #bars
@@ -1154,7 +1238,7 @@ function Make_Bar(loc,index, master)
             zip_backing[zip_focus].color={140,140,140}
         elseif bar_keys[key] then bar_keys[key]() end
     end
-    
+    --[[
     bar.go_full = function()
         full_bar.opacity=255
         full_bar:show()
@@ -1168,7 +1252,7 @@ function Make_Bar(loc,index, master)
         zip_entry.opacity=0
         zip_entry:hide()
         
-        if view_5_day then
+        if bar_state:current_state() == "5_DAY" then
             five_day.opacity=255
             five_day:show()
             blurb_txt.opacity=0
@@ -1193,6 +1277,187 @@ function Make_Bar(loc,index, master)
         bar:find_child("right").x=bar_side_w + mini_width
         arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
     end
+    --]]
+    
+    
+    local set_bar_to_state = {
+        ["MINI"] = function()
+            full_bar.opacity=0
+            full_bar:hide()
+            mini_bar.opacity=255
+            mini_bar:show()
+            --bar:find_child("mid").scale={mini_width,1}
+            bar:find_child("mid").w = mini_width
+            bar:find_child("right").x=bar_side_w + mini_width
+            arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
+        end,
+        ["1_DAY"] = function()
+            five_day.opacity=0
+            five_day:hide()
+            zip_entry.opacity=0
+            zip_entry:hide()
+            blurb_txt.opacity=255
+            blurb_txt:show()
+            if blurb_txt.has_clip and blurb_txt.opacity ~= 0 then
+                animate_list[bar.func_tbls.blurb] = bar
+            end
+        end,
+        ["5_DAY"] = function()
+            five_day.opacity=255
+            five_day:show()
+            blurb_txt.opacity=0
+            blurb_txt:hide()
+            zip_entry.opacity=0
+            zip_entry:hide()
+        end,
+        ["ZIP_ENTRY"] = function()
+            five_day.opacity=0
+            five_day:hide()
+            blurb_txt.opacity=0
+            blurb_txt:hide()
+            zip_entry.opacity=255
+            zip_entry:show()
+        end,
+        ["FULL"] = function()
+            full_bar.opacity=255
+            full_bar:show()
+            mini_bar.opacity=0
+            mini_bar:hide()
+            --bar:find_child("mid").scale={FULL_BAR_W,1}
+            bar:find_child("mid").w=FULL_BAR_W
+            bar:find_child("right").x=bar_side_w + FULL_BAR_W
+            arrow_r.x = MINI_BAR_X + FULL_BAR_W -bar_side_w/2+1
+        end,
+    }
+    
+    function bar.go_to_state(state)
+        if state ~= "MINI" then
+            set_bar_to_state["FULL"]()
+        end
+        print(state)
+        set_bar_to_state[state]()
+    end
+    ----------------------------------------------------------------------------
+    
+    function bar.launch_move_left_mini()
+    end
+    
+    function bar:on_key_focus_in()
+        print(bar," got the keys!!!")
+    end
+    
+    function bar.launch_full_to_mini()
+        
+        screen:grab_key_focus()
+        
+        mini_bar:show()
+        
+		animate_list[
+            
+            bar.func_tbls.xfade_to_mini
+            
+        ] = bar
+        
+    end
+    
+    function bar.launch_mini_to_full()
+        
+        screen:grab_key_focus()
+        
+        full_bar:show()
+        
+		animate_list[
+            
+            bar.func_tbls.expand_to_full
+            
+        ] = bar
+        
+    end
+    
+    function bar.launch_5_day_to_1_day()
+        
+        screen:grab_key_focus()
+        
+        blurb_txt:show()
+        
+		animate_list[
+            
+            bar.func_tbls.xfade_in_blurb
+            
+        ] = bar
+        
+    end
+    
+    function bar.launch_zip_to_1_day()
+        
+        screen:grab_key_focus()
+        
+        blurb_txt:show()
+        
+		animate_list[
+            
+            bar.func_tbls.xfade_in_blurb_from_zip
+            
+        ] = bar
+        
+    end
+    
+    function bar.launch_1_day_to_5_day()
+        
+        screen:grab_key_focus()
+        
+        five_day:show()
+        
+		animate_list[
+            
+            bar.func_tbls.xfade_in_5_day
+            
+        ] = bar
+        
+    end
+    
+    function bar.reset_zip()
+        
+        for i = 1,5 do
+            digits[i].text       = ""
+            zip_backing[i].color = {255,255,255}
+        end
+        zip_backing[1].color = {140,140,140}
+        
+        zip_focus            = 1
+        zip_code_prompt.text = "Enter a Zip Code"
+        us_only.text         = "(US only)"
+        
+    end
+    
+    function bar.launch_5_day_to_zip_animation()
+        
+        screen:grab_key_focus()
+        
+        zip_entry:show()
+        
+		animate_list[
+            
+            bar.func_tbls.xfade_in_zip_from_5_day
+            
+        ] = bar
+        
+    end
+    
+    function bar.launch_1_day_to_zip_animation()
+        
+        screen:grab_key_focus()
+        
+        zip_entry:show()
+        
+		animate_list[
+            
+            bar.func_tbls.xfade_in_zip_from_blurb
+            
+        ] = bar
+        
+    end
+    
     
     --send weather query
     if master_i == nil then
