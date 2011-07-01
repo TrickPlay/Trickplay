@@ -234,8 +234,8 @@ private:
 
     LuaStateProxy * lsp;
 
-    std::auto_ptr< KeyboardHandler > typing_handler;
-    std::auto_ptr< KeyboardHandler > list_handler;
+    KeyboardHandler * typing_handler;
+    KeyboardHandler * list_handler;
 };
 
 #endif // _TRICKPLAY_KEYBOARD_H

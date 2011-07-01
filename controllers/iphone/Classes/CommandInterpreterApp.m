@@ -61,6 +61,7 @@
         fprintf(stderr, "Unrecognized command %s\n", [key UTF8String]);
     }
     //*/
+    //NSLog(@"CommandInterpreterApp command: %@", args);
     if (firstCommand) {
         if ([command compare:@"WM"] == NSOrderedSame) {
             [delegate do_WM:args];

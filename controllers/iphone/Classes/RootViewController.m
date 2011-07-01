@@ -61,13 +61,18 @@
         [appBrowserViewController pushApp];
         [netServiceManager stop];
     } else {
-        [self.navigationController pushViewController:appBrowserViewController animated:YES];
         if ([appBrowserViewController fetchApps]) {
+            [self.navigationController pushViewController:appBrowserViewController animated:YES];
             [appBrowserViewController.theTableView reloadData];
             [netServiceManager stop];
         } else {
             [self.navigationController.view.layer removeAllAnimations];
             [self.navigationController popToRootViewControllerAnimated:YES];
+            self.currentTVName = nil;
+            [appBrowserViewController release];
+            appBrowserViewController = nil;
+            [netServiceManager start];
+            [self reloadData];
         }
     }
 }
@@ -176,7 +181,9 @@
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in Root");
         
-    if (appBrowserViewController && ![appBrowserViewController hasRunningApp]) {
+    [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    if (appBrowserViewController) {
         if (gestureViewController) {
             [gestureViewController release];
             gestureViewController = nil;
@@ -194,7 +201,9 @@
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in Root");
     
-    if (appBrowserViewController && ![appBrowserViewController hasRunningApp]) {
+    [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    if (appBrowserViewController) {
         if (gestureViewController) {
             [gestureViewController release];
             gestureViewController = nil;
@@ -269,6 +278,10 @@
     if ([cell.textLabel.text compare:currentTVName] == NSOrderedSame) {
         [cell addSubview:currentTVIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    } else {
+        if (currentTVIndicator.superview) {
+            [currentTVIndicator removeFromSuperview];
+        }
     }
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
