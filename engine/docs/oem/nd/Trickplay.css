@@ -1,9 +1,11 @@
 @import url("http://fonts.googleapis.com/css?family=Inconsolata");
-@import url("http://fonts.googleapis.com/css?family=Nobile");
+@import url("http://fonts.googleapis.com/css?family=Kranky");
+@import url("http://fonts.googleapis.com/css?family=Lato");
 
 body
 {
-    font-family: 'Nobile',Arial, Helvetica, sans-serif;
+    font-family: 'Lato',Arial,Helvetica,sans-serif;
+	/*font-weight: 500;*/
 }
 
 p 
@@ -130,7 +132,9 @@ p
 
 .CTitle
 {
+    font-family: 'Kranky',Arial, Helvetica, sans-serif;
     font-variant: small-caps;
+	font-weight: 500;
     background: c0c0c0;
     font-size: 16pt;
 }
@@ -147,6 +151,8 @@ p
 
 .STitle
 {
+    font-family: 'Kranky',Arial, Helvetica, sans-serif;
+	font-weight: 500;
     text-indent: 0;
     margin-left: 0;
     font-size: 24pt;
