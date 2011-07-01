@@ -365,6 +365,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/clutter_alpha.lb
     ${BINDINGS_SRC}/clutter_interval.lb    
     ${BINDINGS_SRC}/clutter_path.lb
+    ${BINDINGS_SRC}/clutter_constraint.lb
     
     ${BINDINGS_SRC}/socket.lb
     

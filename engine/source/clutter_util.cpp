@@ -209,6 +209,29 @@ ClutterAnimator * ClutterUtil::user_data_to_animator( lua_State * L, int n )
 
 //.............................................................................
 
+ClutterConstraint * ClutterUtil::user_data_to_constraint( lua_State * L , int n )
+{
+    if ( ! lb_check_udata_type( L , n , "constraint" , false ) )
+    {
+        luaL_where( L , 1 );
+        lua_pop( L , 1 );
+        return NULL;
+    }
+
+    UserData * ud = UserData::get( L , n );
+
+    if ( ! ud )
+    {
+        return NULL;
+    }
+
+    GObject * obj = ud->get_master();
+
+    return CLUTTER_IS_CONSTRAINT( obj ) ? CLUTTER_CONSTRAINT( obj ) : NULL;
+}
+
+//.............................................................................
+
 void ClutterUtil::set_props_from_table( lua_State * L, int table )
 {
     LSG;
@@ -304,6 +327,24 @@ void ClutterUtil::wrap_concrete_actor( lua_State * L, ClutterActor * actor )
         lua_pushnil( L );
     }
     else if ( UserData * ud = UserData::get( G_OBJECT( actor ) ) )
+    {
+        ud->push_proxy();
+    }
+    else
+    {
+        lua_pushnil( L );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void ClutterUtil::wrap_constraint( lua_State * L , ClutterConstraint * constraint )
+{
+    if ( ! constraint )
+    {
+        lua_pushnil( L );
+    }
+    else if ( UserData * ud = UserData::get( G_OBJECT( constraint ) ) )
     {
         ud->push_proxy();
     }
