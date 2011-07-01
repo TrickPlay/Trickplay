@@ -50,6 +50,7 @@ extern int luaopen_clutter_score( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
 extern int luaopen_clutter_interval( lua_State * L );
 extern int luaopen_clutter_path( lua_State * L );
+extern int luaopen_clutter_constraint( lua_State * L );
 
 extern int luaopen_idle( lua_State * L );
 extern int luaopen_timer( lua_State * L );
@@ -937,6 +938,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
     luaopen_clutter_path( L );
+    luaopen_clutter_constraint( L );
 
     luaopen_idle( L );
     luaopen_timer( L );
