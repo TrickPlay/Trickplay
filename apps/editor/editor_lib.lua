@@ -360,7 +360,7 @@ function editor_ui.scrollPane(t)
 			end 
 		end 
 ]]
-		current_focus = scroll_group
+		--current_focus = scroll_group 0701
 		for i,j in pairs (scroll_group.content.children) do 
 			if j.name then 
 			if string.find(j.name, "h_rect") ~= nil then 
@@ -536,15 +536,13 @@ function editor_ui.scrollPane(t)
 
 		local shell_top= Image{src="lib/assets/scrollbar-track-top.png", position = {0,0}}
 		local shell_bottom= Image{src="lib/assets/scrollbar-track-bottom.png"}
-		local shell_handle= Image{src="lib/assets/scrollbar-track-handle.png"}
-		local shell_t_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h+shell_handle.h))/2}
-		local shell_b_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h+shell_t_1px.h+shell_handle.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h+shell_handle.h))/2}
+		local shell_t_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
+		local shell_b_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h+shell_t_1px.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
 
-		shell_bottom.position={0,shell_top.h+shell_t_1px.h+shell_handle.h+shell_b_1px.h}
-		shell_handle.position={0,shell_top.h + shell_t_1px.h}
+		shell_bottom.position={0,shell_top.h+shell_t_1px.h+shell_b_1px.h}
 
-		fill:add(top,handle,t_1px,handle,b_1px,bottom) 
-		shell:add(shell_top,shell_handle,shell_t_1px,shell_handle,shell_b_1px,shell_bottom) 
+		fill:add(top,t_1px,handle,b_1px,bottom) 
+		shell:add(shell_top,shell_t_1px,shell_b_1px,shell_bottom) 
 
 		bar:add(shell,fill)
 		fill.x = shell_t_1px.w/2

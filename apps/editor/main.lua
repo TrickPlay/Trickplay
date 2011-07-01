@@ -16,6 +16,7 @@ dofile("editor.lua")
         [ keys.c	] = function() editor.clone() input_mode = S_SELECT end,
         [ keys.d	] = function() editor.duplicate() input_mode = S_SELECT end,
         [ keys.e	] = function() editor.redo() input_mode = S_SELECT end,
+        [ keys.f	] = function() new_project() input_mode = S_SELECT end,
         [ keys.g	] = function() editor.group() input_mode = S_SELECT end,
         [ keys.u	] = function() editor.ugroup() input_mode = S_SELECT end,
         [ keys.w	] = function() input_mode = S_SELECT  editor.image() end,
