@@ -535,7 +535,7 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
-    static const char * PROTOCOL_VERSION = "40";
+    static const char * PROTOCOL_VERSION = "41";
 
     guint count = g_strv_length( parts );
 
@@ -802,6 +802,15 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 return;
             }
             tp_controller_ui_event( info.controller, parts[2] );
+        }
+        // Advanced UI event
+        else if (cmp2( parts[1] , "UX" ) )
+        {
+        	if ( count < 3 )
+        	{
+        		return;
+        	}
+        	tp_controller_advanced_ui_event( info.controller , parts[ 2 ] );
         }
         // Cancel image
         else if(cmp2( parts[1], "CI"))

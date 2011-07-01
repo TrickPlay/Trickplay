@@ -16,7 +16,9 @@ if (NATURAL_DOCS)
 		app-docs
 		COMMENT "Generating app docs"
 		VERBATIM
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/apps
         COMMAND ${NATURAL_DOCS}
+			-r
             -i ${PROJECT_SOURCE_DIR}/engine
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/editor
@@ -35,7 +37,9 @@ if (NATURAL_DOCS)
 		oem-docs
 		COMMENT "Generating oem docs"
 		VERBATIM
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/oem
         COMMAND ${NATURAL_DOCS}
+			-r
             -i ${PROJECT_SOURCE_DIR}/engine            
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/apps
             -xi ${PROJECT_SOURCE_DIR}/engine/bindings
@@ -53,7 +57,9 @@ if (NATURAL_DOCS)
 		editor-docs
 		COMMENT "Generating editor docs"
 		VERBATIM
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/editor
         COMMAND ${NATURAL_DOCS}
+			-r
             -i ${PROJECT_SOURCE_DIR}/engine/docs/editor/text
             -o HTML ${PROJECT_BINARY_DIR}/docs/editor
             -p ${PROJECT_SOURCE_DIR}/engine/docs/editor/nd
@@ -70,17 +76,5 @@ if (NATURAL_DOCS)
 			oem-docs
 			editor-docs
 	)
-
-    file(
-        MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/docs/apps
-    )
-
-    file(
-        MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/docs/oem
-    )
-
-    file(
-        MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/docs/editor
-    )
     
 endif(NATURAL_DOCS)
