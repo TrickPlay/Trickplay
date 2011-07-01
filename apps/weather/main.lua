@@ -92,16 +92,68 @@ function post_main()
 	
 	
 	
+	
+	
+	
+	day_time=true
+	mini=true
+	
+	
+    current_bar = nil
+    bar_state = ENUM{"MINI","1_DAY","5_DAY","ZIP_ENTRY"}
+    
 	--save the queried locations
 	function app:on_closing()
 		
 		settings.locations = locations
 		
+		settings.bar_state = bar_state:current_state()
+		
 	end
 	
+	if settings.bar_state then bar_state:change_state_to(settings.bar_state) end
 	
-	day_time=true
-	mini=true
+	bar_state:add_state_change_function(
+        function() current_bar:launch_full_to_mini() end,
+        nil,
+		"MINI"
+    )
+    bar_state:add_state_change_function(
+        function() current_bar:launch_mini_to_full() end,
+        "MINI",
+        "1_DAY"
+    )
+	bar_state:add_state_change_function(
+        function() current_bar:launch_5_day_to_1_day() end,
+        "5_DAY",
+        "1_DAY"
+    )
+	bar_state:add_state_change_function(
+        function() current_bar:launch_zip_to_1_day() end,
+        "ZIP_ENTRY",
+        "1_DAY"
+    )
+	
+	bar_state:add_state_change_function(
+        function() current_bar:launch_1_day_to_5_day() end,
+        "1_DAY",
+        "5_DAY"
+    )
+	bar_state:add_state_change_function(
+        function() current_bar:reset_zip() end,
+        nil,
+        "ZIP_ENTRY"
+    )
+	bar_state:add_state_change_function(
+        function() current_bar:launch_1_day_to_zip_animation() end,
+        "1_DAY",
+        "ZIP_ENTRY"
+    )
+	bar_state:add_state_change_function(
+        function() current_bar:launch_5_day_to_zip_animation() end,
+        "5_DAY",
+        "ZIP_ENTRY"
+    )
 	
 	--make the weather bars for each location
 	for i,location in pairs(locations) do
@@ -114,7 +166,9 @@ function post_main()
 		end
 		
 	end
+	current_bar = bars[1]
 	
+	current_bar.go_to_state(bar_state:current_state())
 	
 	--moon:setup()
 	--animate_list[moon.func_tbls.rise]  = moon
@@ -132,6 +186,7 @@ function post_main()
 	--screen:add(arrow_l,arrow_r)
 	
 	bars[1].opacity=255
+	
 	bars[1]:show()
 	dolater(bars[1].grab_key_focus,bars[1])
 end
