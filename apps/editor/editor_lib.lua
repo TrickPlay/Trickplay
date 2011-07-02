@@ -399,7 +399,6 @@ function editor_ui.scrollPane(t)
 		--if keys[key] then
 			--keys[key]()
 		if scroll_group.focus[key] then
-			print("YUGI 1")
 			if type(scroll_group.focus[key]) == "function" then
 				scroll_group.focus[key]()
 			elseif screen:find_child(scroll_group.focus[key]) then
@@ -412,7 +411,6 @@ function editor_ui.scrollPane(t)
 				end
 			end
 		else
-			print("YUGI 2")
 			dumptable(scroll_group.extra.focus)
 		end
 		]]

@@ -1863,12 +1863,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		return true
 	end 
 
-	if scroll_y_pos then 
-		 tabs.buttons[3].on_button_down()
-		 if screen:find_child("si_more") then 
-	     	screen:find_child("si_more").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
-		 end 
-	end 
 	if v.extra then 
 		if v.extra.type == "MenuButton" then 
         	v.fade_in()
@@ -1920,6 +1914,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		end 
 	else 
 		screen:add(inspector)
+	end 
+
+	if scroll_y_pos then 
+		 tabs.buttons[3].on_button_down()
+		 if screen:find_child("si_more") then 
+	     	screen:find_child("si_more").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+		 end 
 	end 
 
 
