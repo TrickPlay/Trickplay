@@ -1961,7 +1961,7 @@ function ui_element.toastAlert(table)
     	t_box:set{name="t_box"}
 	tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
-	icon = assets(p.icon)
+		icon = Image {src = p.icon}
     	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
