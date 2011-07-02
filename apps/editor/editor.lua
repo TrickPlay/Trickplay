@@ -1174,9 +1174,16 @@ local function open_files(input_purpose, bg_image, inspector)
 	
 	if inspector then 
 		button_ok.pressed = function() 
-			screen:find_child("file_name").text = selected_file 
+			if screen:find_child("file_name") then 
+				if selected_file then 
+					screen:find_child("file_name").text = selected_file 
+				end
+			end 
 			-- clip 
-			local tmpImage = Image{src = "assets/images/"..selected_file}
+			local tmpImage 
+			if selected_file then 
+				tmpImage = Image{src = "assets/images/"..selected_file}
+			end
 			if inspector:find_child("cw") then 
 				inspector:find_child("cw"):find_child("input_text").text = tostring(tmpImage.w)
 				inspector:find_child("ch"):find_child("input_text").text = tostring(tmpImage.h)

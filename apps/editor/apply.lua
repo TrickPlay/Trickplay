@@ -157,6 +157,11 @@ function inspector_apply (v, inspector)
 		["icon"] = function()
 			   local img_tmp = tostring(item_group:find_child("icon"):find_child("file_name").text)
 			   local a, b = string.find(img_tmp,"assets/images/")
+
+			   if a == nil then 
+			   	a, b = string.find(img_tmp,"lib/assets/")
+			   end 
+
 			   if a then 
                		v.icon = tostring(item_group:find_child("icon"):find_child("file_name").text)
 			   else 

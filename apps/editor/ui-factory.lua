@@ -1294,7 +1294,7 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 
 	local file_name = string.sub(item_v,15,-1)
 
-	input_text = Text {name = "file_name", text = file_name, font = "FreeSans Medium 12px", single_line = true, w = 140, color = {180,180,180,255}}
+	input_text = Text {name = "file_name", text = item_v, font = "FreeSans Medium 12px", ellipsize="END", w = 140, color = {180,180,180,255}}
     input_text.position  = {ring.x + 5, ring.y + 5}
 	group:add(input_text) 
 	     
