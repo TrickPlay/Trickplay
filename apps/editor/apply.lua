@@ -20,7 +20,6 @@ function inspector_apply (v, inspector)
 
       local attr_map = {
       	["itemsList"] = function(j)
-		 print("YUGI") 
          local items, item
 		 if item_group:find_child("itemsList") then 
 		    if item_group:find_child("itemsList"):find_child("items_list") then 
