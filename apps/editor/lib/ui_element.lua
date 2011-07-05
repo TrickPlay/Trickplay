@@ -5876,10 +5876,16 @@ function ui_element.tabBar(t)
             if p.tabs[i] == nil then
                 p.tabs[i] = Group{}
             end
+
+			buttons[i] = ui_element.button{position = {0,0}, skin=p.skin, 
+			ui_width=p.ui_width, ui_height=p.ui_height, focus_color=p.focus_color, 
+			border_width=p.border_width, border_corner_radius=p.border_corner_radius, label = p.tab_labels[i], text_font  = p.font, 
+			text_color = p.label_color, fill_color = p.unsel_color, focus_fill_color = p.fill_color, focus_text_color = p.focus_text_color, 
+			pressed = function () umbrella:display_tab(i) end,} 
             buttons[i] = ui_element.button()
 			p.tabs[i]:hide()
-            
             buttons[i].position = {0,0}
+			--[[
             buttons[i].skin=p.skin
             buttons[i].ui_width=p.ui_width
             buttons[i].ui_height=p.ui_height
@@ -5897,7 +5903,7 @@ function ui_element.tabBar(t)
             buttons[i].focus_text_color = p.focus_text_color
            	buttons[i].pressed = function () umbrella:display_tab(i) end  
             buttons[i].on_focus_out()
-            
+            ]]
             if p.tab_position == "TOP" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
@@ -6582,8 +6588,6 @@ function ui_element.arrowPane(t)
 			--tries to place virtual coordinates 'x' and 'y' in the middle of the window
 			pan_to = function(self,x,y,top_left)
 				
-				--print(x,y)
-				
 				if top_left == true then
 					x = x + p.visible_w/2
 					y = y + p.visible_h/2
@@ -6607,7 +6611,6 @@ function ui_element.arrowPane(t)
                 else
                     new_y = -y + p.visible_h/2
                 end
-				--print(new_x,new_y)
 				if new_x ~= p.content.x or new_y ~= p.content.y then
                     p.content:animate{
                         duration = 200,
