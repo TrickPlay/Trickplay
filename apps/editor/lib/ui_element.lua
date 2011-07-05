@@ -5902,8 +5902,11 @@ function ui_element.tabBar(t)
             buttons[i].focus_text_color = p.focus_text_color
            	buttons[i].pressed = function () umbrella:display_tab(i) end  
             --buttons[i].on_focus_out()
+			
 			--]]
+			
 			---[[
+			
 			buttons[i] = ui_element.button{
 				
 				position             = { 0, 0 },
@@ -5921,7 +5924,9 @@ function ui_element.tabBar(t)
 				pressed              = function () umbrella:display_tab(i) end,
 				
 			}
+			
 			buttons[i].position         = {0,0}
+			
             --]]
             if p.tab_position == "TOP" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
