@@ -6701,14 +6701,13 @@ function ui_element.arrowPane(t)
 				arrow.z_rotation = {90,0,0}
 				umbrella:add(arrow)
 				
-				if editor_lb == nil or editor_use then  
+				--if editor_lb == nil or editor_use then  
 					arrow.on_button_down = function()
-					print("sjdfhajkfdalsjdfk")
-						umbrella:pan_by(p.dist_per_press,0)
+					umbrella:pan_by(p.dist_per_press,0)
 					end
 					
 					arrow.reactive=true
-				end
+				--end
 				
 
 				arrow = Clone{source=p.arrow_src}
@@ -6718,13 +6717,13 @@ function ui_element.arrowPane(t)
 				arrow.z_rotation = {270,0,0}
 				umbrella:add(arrow)
 				
-				if editor_lb == nil or editor_use then  
+				--if editor_lb == nil or editor_use then  
 					arrow.on_button_down = function()
 						umbrella:pan_by(-p.dist_per_press,0)
 					end
 					
 					arrow.reactive=true
-				end
+				--end
 			end
 			
 			
