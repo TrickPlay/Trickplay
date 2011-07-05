@@ -62,6 +62,11 @@ local function send_request( end_point , payload )
     --[[
     print("send_request result:", result)
     --]]
+
+    if result == json.null then
+        return nil
+    end
+
     return result
 end
 
@@ -249,6 +254,9 @@ do
         
             local payload = { id = self.id , properties = { [ key ] = true } }
             local result = send_request( "get" , payload ).properties[ key ]
+            if result == json.null then
+                return nil
+            end
             
             -- And cache it
             
