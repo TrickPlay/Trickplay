@@ -1454,7 +1454,7 @@ function ui_element.button(table)
         else 
 			ring.opacity = 0 
 		end
-		print(button.opacity)
+		
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
 				if current_focus ~= b_group then 
