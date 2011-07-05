@@ -991,6 +991,9 @@ end
 
 	
 	function v:on_button_up(x,y,button,num_clicks)
+		if shift == true then 
+			return 
+		end 
 		if (input_mode ~= S_RECTANGLE) then 
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
 	    		if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
