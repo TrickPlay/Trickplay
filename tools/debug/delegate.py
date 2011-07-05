@@ -11,7 +11,7 @@ class MyDelegate(QItemDelegate):
         itemType = index.data(33).toPyObject()
         col = index.data(34).toPyObject()
         
-        print(itemType)
+        #print(itemType)
         
         if "Rectangle" == itemType:
             painter.setBrush(QBrush(QColor(0, 195, 255, 40)))

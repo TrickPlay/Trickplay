@@ -36,8 +36,10 @@ class StartQT4(QtGui.QMainWindow):
         
         self.model.setHorizontalHeaderLabels(["UI Element Property",  "Value"])
         root = self.model.invisibleRootItem()
-        data = getTrickplayData()
-        self.createNode(root, data, True)
+        
+        # Use screen as root, not stage
+        self.data = getTrickplayData()["children"][0]
+        self.createNode(root, self.data)
         
         self.proxyModel = QtGui.QSortFilterProxyModel()
         self.proxyModel.setSourceModel(self.model)
@@ -46,38 +48,99 @@ class StartQT4(QtGui.QMainWindow):
         
         self.proxyModel.sort(0)
         
+    def attrEq(self,  oldData,  newData):
+        for attr in newData:
+            if 'children' != attr:
+                if oldData[attr] != newData[attr]:
+                    return False
+        return True
+    
+    # Return a tuple of nodes, (column0, column1)
+    def findNode(self,  name,  parent):
+        nChildren = self.model.rowCount(parent)
+        for i in range(nChildren):
+            index = self.model.index(i, 0, parent)
+            if name == self.model.data(index):
+                return (index,  self.model.index(i,  1,  parent))
+        exit("Node not found")
+    
+    def refreshNodes(self,  oldData,  newData,  index):
+        # attr is a tuple(number, attrName)
+        for attr in list(enumerate(newData)):
+            name = attr[1]
+            childIndex = self.findNode(name,  index)
+            if name != 'children':
+                try:
+                    oldValue = oldData[name]
+                    newValue = newData[name]
+                    
+                    if oldValue != newValue:
+                        # Value is a dictionary - create new summary and update children
+                        if isinstance(newValue, dict):
+                            for attr in newValue:
+                                childAttrIndex = self.findNode(attr,  childIndex[0])[1]
+                                self.model.setData(childAttrIndex,  newValue[attr])
+                            newValue = self.summarize(newValue)
+                        # Set node value
+                        self.model.setData(childIndex[1],  newValue)
+                        
+                except:
+                    exit('Problem (probably invalid attribute in newData)')
+                    pass
+                    
+            # Deal with children
+            else:
+                if newData['type'] == "Group":
+                    oldChildren = oldData['children']; newChildren = newData['children']
+                    nOldChildren = len(oldChildren); nNewChildren = len(newChildren)
+                    
+                    # Number of children has not changed
+                    if nOldChildren == nNewChildren:
+                        for i in range(nNewChildren):
+                            oldChild = oldChildren[i]
+                            newChild = newChildren[i]
+                            # A change has been made
+                            if not self.attrEq(oldChild, newChild):
+                                # TODO, better place to name child?
+                                # Name won't change if name is removed from attr list 
+                                # and name is the only attr updated
+                                elementType = self.model.index(i,  0,  childIndex[0])
+                                elementValue = self.model.index(i,  1,  childIndex[0])
+                                self.model.setData(elementValue,  newChild['name'])
+                                self.refreshNodes(oldChild,  newChild,  elementType)
+                        
+                pass
+
     def refresh(self):
-        self.model.clear()
-        self.createTree()
+        newData = getTrickplayData()["children"][0]
+        self.refreshNodes(self.data,  newData,  self.model.index(0,  0))
+        self.data = newData
+        #self.model.clear()
+        #self.createTree()
+        #screenIndex = self.model.index(0, 0)
+        #self.model.setData(screenIndex, QString("hello"))
+        pass
         
     def exit(self):
         sys.exit()
         
-    def createNode(self, parent, data, isStage):
+    def createNode(self, parent, data):
         
-        # If the node is the Stage, instead set it to Screen
-        nodeData = None;
-        if isStage:
-            nodeData = data["children"][0]
-        else:
-            nodeData = data
-            
-        type = nodeData["type"]
+        name = data["name"]    
+        type = data["type"]
         if "Texture" == type:
             type = "Image"
         
-        name = nodeData["name"]
-        
-        node = QtGui.QStandardItem(type + ': ' + name)
-        node.setData(0, 34)
+        typeNode = QtGui.QStandardItem(type)
+        typeNode.setData(0, 34)
         
         # Blank node used to color full row without double coloring
-        blank = QtGui.QStandardItem('')
-        blank.setData(1, 34)
-        blank.setData(type)
+        valueNode = QtGui.QStandardItem(name)
+        valueNode.setData(1, 34)
+        valueNode.setData(type)
         
-        parent.appendRow([node, blank])
-        self.createAttrList(node, type, nodeData)
+        parent.appendRow([typeNode, valueNode])
+        self.createAttrList(typeNode, type, data)
             
     def createAttrList(self, parent, parentType, data):
         #print(data)
@@ -96,7 +159,7 @@ class StartQT4(QtGui.QMainWindow):
                 value.setData(1, 34)
                 parent.appendRow([title, value])
                 for child in attrValue:
-                    self.createNode(title, child, False)
+                    self.createNode(title, child)
             
             # Value is a string/number/etc
             elif not isinstance(attrValue, dict):
@@ -104,22 +167,23 @@ class StartQT4(QtGui.QMainWindow):
                 value.setData(parentType)
                 value.setData(1, 34)
                 parent.appendRow([title, value])    
-                                
+                
             # Value is a dictionary, like scale
             else:
-                # The read-only summary of attributes
-                summary = "{"
-                for item in attrValue:
-                    summary += item + ': ' + str(attrValue[item]) + ', '
-                summary = summary[:len(summary)-2] + '}'
-                
+                summary = self.summarize(attrValue)
                 value = QtGui.QStandardItem(summary)
                 value.setData(parentType)
                 value.setData(1, 34)
                 parent.appendRow([title, value])
                 self.createAttrList(title, parentType, attrValue)
     
-    
+    def summarize(self,  value):
+        # The read-only summary of attributes
+        summary = "{"
+        for item in value:
+            summary += item + ': ' + str(value[item]) + ', '
+        summary = summary[:len(summary)-2] + '}'
+        return summary
 
 def getTrickplayData():
     r = urllib2.Request("http://localhost:8888/debug/ui")
