@@ -1389,7 +1389,7 @@ function ui_element.button(table)
 
         focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
-
+		
 		if(p.skin == "editor") then 
 	    	button= assets("assets/invisible_pixel.png")
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
@@ -1417,7 +1417,8 @@ function ui_element.button(table)
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
             focus = assets(skin_list[p.skin]["button_focus"])
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-		else 
+		else
+			
 	     	button = Image{}
 	     	focus = Image{}
 		end 
@@ -1452,8 +1453,8 @@ function ui_element.button(table)
 			button.opacity = 0 
         else 
 			ring.opacity = 0 
-		end 
-
+		end
+		
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
 				if current_focus ~= b_group then 
@@ -5717,7 +5718,8 @@ function ui_element.tabBar(t)
         unsel_color  = { 60, 60, 60,255},
 		
 		arrow_sz     = 15,
-		arrow_dist_to_frame = 5
+		arrow_dist_to_frame = 5,
+		arrow_image = nil,
     }
     
 	local offset = {}
@@ -5725,9 +5727,9 @@ function ui_element.tabBar(t)
     
     --overwrite defaults
     if t ~= nil then
-        for k, v in pairs (t) do
-            p[k] = v
-        end
+		
+		for k, v in pairs (t) do        p[k] = v        end
+		
     end
     
 	local ap = nil
@@ -5743,6 +5745,8 @@ function ui_element.tabBar(t)
         name="TabContainer",
 		
 		reactive = true,
+		
+		position = {200,200},
 		
         extra={
             
@@ -5876,12 +5880,16 @@ function ui_element.tabBar(t)
             if p.tabs[i] == nil then
                 p.tabs[i] = Group{}
             end
+<<<<<<< HEAD
 
 			buttons[i] = ui_element.button{position = {0,0}, skin=p.skin, 
 			ui_width=p.ui_width, ui_height=p.ui_height, focus_color=p.focus_color, 
 			border_width=p.border_width, border_corner_radius=p.border_corner_radius, label = p.tab_labels[i], text_font  = p.font, 
 			text_color = p.label_color, fill_color = p.unsel_color, focus_fill_color = p.fill_color, focus_text_color = p.focus_text_color, 
 			pressed = function () umbrella:display_tab(i) end,} 
+=======
+			--[[
+>>>>>>> 80e33f1cf2ada1fc29d87cc7e82542d05e6bc287
             buttons[i] = ui_element.button()
 			p.tabs[i]:hide()
             buttons[i].position = {0,0}
@@ -5902,8 +5910,38 @@ function ui_element.tabBar(t)
             buttons[i].position         = {0,0}
             buttons[i].focus_text_color = p.focus_text_color
            	buttons[i].pressed = function () umbrella:display_tab(i) end  
+<<<<<<< HEAD
             buttons[i].on_focus_out()
             ]]
+=======
+            --buttons[i].on_focus_out()
+			
+			--]]
+			
+			---[[
+			
+			buttons[i] = ui_element.button{
+				
+				position             = { 0, 0 },
+				skin                 = p.skin,
+				ui_width             = p.ui_width,
+				ui_height            = p.ui_height,
+				focus_color          = p.focus_color,
+				border_width         = p.border_width,
+				border_corner_radius = p.border_corner_radius,
+				label                = p.tab_labels[i],
+				text_font            = p.font,
+				fill_color           = p.unsel_color,
+				focus_fill_color     = p.fill_color,
+				focus_text_color     = p.focus_text_color,
+				pressed              = function () umbrella:display_tab(i) end,
+				
+			}
+			
+			buttons[i].position         = {0,0}
+			
+            --]]
+>>>>>>> 80e33f1cf2ada1fc29d87cc7e82542d05e6bc287
             if p.tab_position == "TOP" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
@@ -5919,8 +5957,10 @@ function ui_element.tabBar(t)
 		
 		ap = nil
 		
+		if p.arrow_image then p.arrow_sz = p.arrow_image.w end
+		
 		if p.tab_position == "TOP" and
-			buttons[# buttons].w + buttons[# buttons].x > p.ui_width then
+			(buttons[# buttons].w + buttons[# buttons].x) > p.ui_width then
 			
 			ap = ui_element.arrowPane{
 				visible_w=p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame),
@@ -5932,7 +5972,9 @@ function ui_element.tabBar(t)
 				dist_per_press=buttons[# buttons].w,
 				arrow_sz = p.arrow_sz,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
+				arrow_src = p.arrow_image,
 			}
+			
 			ap.x = p.arrow_sz+p.arrow_dist_to_frame
 			ap.y = 0
 			
@@ -5945,7 +5987,7 @@ function ui_element.tabBar(t)
 			
 			umbrella:add(ap)
 			
-		elseif buttons[# buttons].h + buttons[# buttons].y > p.ui_height then
+		elseif (buttons[# buttons].h + buttons[# buttons].y) > p.ui_height then
 			
 			ap = ui_element.arrowPane{
 				visible_w=buttons[# buttons].w,
@@ -5957,6 +5999,7 @@ function ui_element.tabBar(t)
 				dist_per_press=buttons[# buttons].h,
 				arrow_sz = p.arrow_sz,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
+				arrow_src = p.arrow_image,
 			}
 			
 			ap.x = 0
@@ -5970,6 +6013,10 @@ function ui_element.tabBar(t)
 			end
 			
 			umbrella:add(ap)
+			
+		end
+		
+		if ap then
 			
 		end
 		
@@ -5991,17 +6038,23 @@ function ui_element.tabBar(t)
     create()
     
     --set the meta table to overwrite the parameters
-    mt = {}
-    mt.__newindex = function(t,k,v)
-        p[k] = v
-		if k ~= "selected" then 
-        	create()
-		end 
-    end
-    mt.__index = function(t,k)       
-       return p[k]
-    end
-    setmetatable(umbrella.extra, mt)
+    setmetatable(umbrella.extra,{
+		
+		__newindex = function(t,k,v)
+			
+			p[k] = v
+			
+			if k ~= "selected" then
+				
+				create()
+				
+			end
+			
+		end,
+		
+		__index = function(t,k)       return p[k]       end,
+		
+    })
 
     return umbrella
 end
@@ -6642,8 +6695,6 @@ function ui_element.arrowPane(t)
 	
 	local function create()
 		
-		
-		
 		umbrella:clear()
 		if p.arrow_src.parent then p.arrow_src:unparent() end
 		umbrella:add(p.arrow_src)
@@ -6668,30 +6719,29 @@ function ui_element.arrowPane(t)
 				arrow.x = border.w/2
 				arrow.y = -p.arrow_dist_to_frame
 				arrow.anchor_point={arrow.w/2,arrow.h}
-				umbrella:add(arrow)
 				
-				if editor_lb == nil or editor_use then  
-					arrow.on_button_down = function()
-						umbrella:pan_by(0,-p.dist_per_press)
-					end
-					
-					arrow.reactive=true
+				--arrow.h=p.arrow_sz
+				
+				arrow.on_button_down = function()
+					umbrella:pan_by(0,-p.dist_per_press)
 				end
+				
+				arrow.reactive=true
+				umbrella:add(arrow)
 				
 				arrow = Clone{source=p.arrow_src}
 				arrow.anchor_point={arrow.w/2,arrow.h}
 				arrow.x = border.w/2
 				arrow.y = border.h+p.arrow_dist_to_frame
 				arrow.z_rotation = {180,0,0}
-				umbrella:add(arrow)
 				
-				if editor_lb == nil or editor_use then  
-					arrow.on_button_down = function()
-						umbrella:pan_by(0,p.dist_per_press)
-					end
-					
-					arrow.reactive=true
+				
+				arrow.on_button_down = function()
+					umbrella:pan_by(0,p.dist_per_press)
 				end
+				
+				arrow.reactive=true
+				umbrella:add(arrow)
 			end
 
 			
@@ -6702,31 +6752,33 @@ function ui_element.arrowPane(t)
 				arrow.x = border.w+p.arrow_dist_to_frame
 				arrow.y = border.h/2
 				arrow.z_rotation = {90,0,0}
-				umbrella:add(arrow)
 				
-				--if editor_lb == nil or editor_use then  
-					arrow.on_button_down = function()
+				
+				
+				arrow.on_button_down = function()
+					print("sjdfhajkfdalsjdfk")
 					umbrella:pan_by(p.dist_per_press,0)
-					end
-					
-					arrow.reactive=true
-				--end
+				end
 				
+				arrow.reactive=true
+				
+				umbrella:add(arrow)
 
 				arrow = Clone{source=p.arrow_src}
 				arrow.anchor_point={arrow.w/2,arrow.h}
 				arrow.x = -p.arrow_dist_to_frame
 				arrow.y = border.h/2
 				arrow.z_rotation = {270,0,0}
-				umbrella:add(arrow)
 				
-				--if editor_lb == nil or editor_use then  
-					arrow.on_button_down = function()
-						umbrella:pan_by(-p.dist_per_press,0)
-					end
-					
-					arrow.reactive=true
-				--end
+				
+				
+				arrow.on_button_down = function()
+					umbrella:pan_by(-p.dist_per_press,0)
+				end
+				
+				arrow.reactive=true
+				
+				umbrella:add(arrow)
 			end
 			
 			
