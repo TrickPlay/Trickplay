@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import urllib
 import urllib2
@@ -8,6 +10,7 @@ from PyQt4 import QtCore, QtGui
 from TreeView import Ui_MainWindow
 from TreeModel import *
 import connection
+from dataTypes import BadDataException
 
 Qt.Element = Qt.UserRole + 3
 Qt.Value = Qt.UserRole + 2
@@ -58,9 +61,16 @@ class StartQT4(QtGui.QMainWindow):
             # lastChanged's text. If user closes editor but hasn't made a change,
             # don't send any data.
             if lineEditor.displayText() == attrValue:
-                params = connection.clean(attrName,  attrValue)
-                print("Params:",  params)
-                connection.send({'gid': gid, 'properties' : {params[0] : params[1]}})
+                try:
+                    params = connection.clean(attrName,  attrValue)
+                    print("Params:",  params)
+                    connection.send({'gid': gid, 'properties' : {params[0] : params[1]}})
+                except BadDataException,  (e):
+                    try:
+                        print("Value entered:" + repr(attrValue))
+                    except:
+                        print("Value entered: could not represent value.")
+                    print(e.value)
             else:
                 print("No changed was made. Editor closed.")
                 
