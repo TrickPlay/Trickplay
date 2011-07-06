@@ -55,7 +55,7 @@ function test_mediaplayer_has_video ()
 end
 
 function test_mediaplayer_volume ()
-    assert_equal ( mediaplayer.volume , 0.5,  "mediaplayer.volume failed" )
+ 	assert_equal ( string.sub(mediaplayer.volume, 1, 5) , "0.500",  "mediaplayer.volume failed" )
 end
 
 function test_mediaplayer_mute ()
