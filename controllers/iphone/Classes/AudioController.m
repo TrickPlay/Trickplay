@@ -54,8 +54,6 @@
     soundLoopName = [resourcename retain];
 }
 
-
-
 - (void)playbackStateChanged:(NSNotification *)aNotification {
     //**
 	if ([audioStreamer isWaiting]) // not sure why this is here

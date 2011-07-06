@@ -672,6 +672,21 @@ interface actor [[ClutterActor*]]
         [[has_clip=clutter_actor_has_clip(self);]];
         
     /*
+    Property: clip_to_size
+    
+    When set to true, the actor will clip its children to its size. If a clip rectangle has been
+    set using the <clip> property, this property is ignored. 
+    */
+    
+    bool clip_to_size
+        [[
+            clip_to_size = clutter_actor_get_clip_to_allocation( self );
+        ]]
+        [[
+            clutter_actor_set_clip_to_allocation( self , clip_to_size );
+        ]];
+    
+    /*
 	Property: parent
 	
 	If this UI element is inside a container, this property returns the
@@ -1617,6 +1632,89 @@ interface actor [[ClutterActor*]]
 	    }
 	]];
 	
+	table constraints
+	   [[
+            GList * list = clutter_actor_get_constraints( self );
+        
+            lua_newtable(L);
+            int n = 1;
+            for( GList * item = g_list_first( list ); item; item = g_list_next( item ) , ++n )
+            {
+                ClutterUtil::wrap_constraint( L , CLUTTER_CONSTRAINT( item->data ) );
+                lua_rawseti( L , -2 , n );
+            }
+            g_list_free( list );
+	   ]]
+	   [[
+	       luaL_checktype( L , 2 , LUA_TTABLE );
+	       
+	       clutter_actor_clear_constraints( self );
+	       
+	       lua_pushnil( L );
+	       
+	       while( lua_next( L , 2 ) )
+	       {
+                if ( ClutterConstraint * c = ClutterUtil::user_data_to_constraint( L , lua_gettop( L ) ) )
+                {
+                    if ( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( c ) ) )
+                    {
+                        g_warning( "Trying to add a constraint that has already been added to another actor" ); 
+                    }
+                    else
+                    {
+                        clutter_actor_add_constraint( self , c );
+                    }
+                }
+                
+                lua_pop( L , 1 );	           
+	       }
+	       
+	   ]];
+	   
+    /*
+    
+    */
+    
+    add_constraints( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( ! lua_isnil( L , i ) )
+                {
+                    if ( ClutterConstraint * c = ClutterUtil::user_data_to_constraint( L , i ) )
+                    {
+                        if ( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( c ) ) )
+                        {
+                            luaL_error( L , "Constraints cannot be added to multiple UI elements" );
+                        }
+                        else
+                        {
+                            clutter_actor_add_constraint( self , c );
+                        }
+                    }
+                }
+            }
+        ]];
+        
+    remove_constraints( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( ! lua_isnil( L , i ) )
+                {
+                    if ( ClutterConstraint * c = ClutterUtil::user_data_to_constraint( L , i ) )
+                    {
+                        clutter_actor_remove_constraint( self , c );
+                    }
+                }
+            }
+        ]];
+        
+    clear_constraints( )
+        [[
+            clutter_actor_clear_constraints( self );
+        ]];
+
     /*
 	Event: on_key_focus_in
 	

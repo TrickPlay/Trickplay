@@ -44,10 +44,13 @@ extern int luaopen_clutter_group( lua_State * L );
 extern int luaopen_clutter_image( lua_State * L );
 
 extern int luaopen_clutter_timeline( lua_State * L );
+extern int luaopen_clutter_animator( lua_State * L );
+extern int luaopen_clutter_state( lua_State * L );
 extern int luaopen_clutter_score( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
 extern int luaopen_clutter_interval( lua_State * L );
 extern int luaopen_clutter_path( lua_State * L );
+extern int luaopen_clutter_constraint( lua_State * L );
 
 extern int luaopen_idle( lua_State * L );
 extern int luaopen_timer( lua_State * L );
@@ -60,7 +63,6 @@ extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
 extern int luaopen_controllers_module( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
-extern int luaopen_audiosampler_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
 
@@ -74,6 +76,11 @@ extern int luaopen_bitmap( lua_State * L );
 extern int luaopen_canvas( lua_State * L );
 extern int luaopen_keyboard( lua_State * L );
 extern int luaopen_http_module( lua_State * L );
+
+#ifdef TP_WITH_WEBGL
+extern int luaopen_typed_array( lua_State * L );
+extern int luaopen_webgl( lua_State * L );
+#endif
 
 #ifndef TP_PRODUCTION
 extern int luaopen_devtools( lua_State * L );
@@ -925,10 +932,13 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_clutter_group( L );
     luaopen_clutter_image( L );
     luaopen_clutter_timeline( L );
+    luaopen_clutter_animator( L );
+    luaopen_clutter_state( L );
     luaopen_clutter_score( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
     luaopen_clutter_path( L );
+    luaopen_clutter_constraint( L );
 
     luaopen_idle( L );
     luaopen_timer( L );
@@ -940,7 +950,6 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_stopwatch( L );
     luaopen_json( L );
     luaopen_controllers_module( L );
-    luaopen_audiosampler_module( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );
@@ -952,6 +961,11 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_canvas( L );
     luaopen_http_module( L );
     luaopen_keyboard( L );
+
+#ifdef TP_WITH_WEBGL
+    luaopen_typed_array( L );
+    luaopen_webgl( L );
+#endif
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );

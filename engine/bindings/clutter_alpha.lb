@@ -113,7 +113,7 @@ class Alpha [[ClutterAlpha*]]
 		    GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
 		    
 		    if(!v)
-			luaL_error(L,"Invalid alpha mode '%s'",mode);
+			return luaL_error(L,"Invalid alpha mode '%s'",mode);
 			
 			
 		    clutter_alpha_set_mode(self,v->value);
