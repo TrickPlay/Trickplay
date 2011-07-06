@@ -7,6 +7,7 @@ from pprint import pprint
 from PyQt4 import QtCore, QtGui
 from TreeView import Ui_MainWindow
 from TreeModel import *
+import connection
 
 Qt.Element = Qt.UserRole + 3
 Qt.Value = Qt.UserRole + 2
@@ -33,20 +34,43 @@ class StartQT4(QtGui.QMainWindow):
         #print('ok')
         
         # Connect it
-        self.model.connect(self.model, QtCore.SIGNAL('itemChanged( QStandardItem *)'), self.itemChanged)
+        self.model.connect(self.model, QtCore.SIGNAL('itemChanged( QStandardItem * )'), self.itemChanged)
         
-        self.ui.Inspector.setItemDelegate(delegate.MyDelegate())
+        self.delegate = delegate.MyDelegate()
+        
+        self.delegate.connect(self.delegate,  QtCore.SIGNAL('closeEditor( QWidget * , QAbstractItemDelegate::EndEditHint )'),  self.editorClosed)
+        
+        self.ui.Inspector.setItemDelegate(self.delegate)
         
         self.createTree()
+        
+    def editorClosed(self,  widget,  hint):
+        
+        # Do a check to see if widget's text is the same as
+        # lastChanged's text. If user closes editor but hasn't made a change,
+        # don't change anything.
+        
+        lastChanged = self.lastChanged
+        self.lastChanged = None
+        
+        attrName = lastChanged[0]
+        attrValue = lastChanged[1]
+        gid = lastChanged[2]
+        
+        connection.send({'gid': lastChanged[2], 'properties' : {attrName : attrValue}})
     
-    def itemChanged(self,  item):
-        print("changed!")
+    def itemChanged(self,  valueItem):
+        row = valueItem.row()
+        parent = valueItem.parent()
+        attrItem = parent.child(row)
+        gidNode = self.findNode('gid',  self.model.indexFromItem(parent))[1].data()
+        gid = int(gidNode.toUInt()[0])
+        #print("GID:",  int(gidNode.toUInt()[0]))
+        #print(valueItem.data(0).toPyObject(),  attrItem.data(0).toPyObject())
         
-    # WHY ISN"T THIS WORKING???
-    #@QtCore.pyqtSignature("on_Inspector_itemChanged()")
-    def on_Inspector_itemChanged(self, item, column):
-        print("changed!!")
+        self.lastChanged = (str(attrItem.data(0).toString()), str(valueItem.data(0).toString()), gid)
         
+        print(self.lastChanged)
         
     def createTree(self):
         
@@ -80,7 +104,7 @@ class StartQT4(QtGui.QMainWindow):
             index = self.model.index(i, 0, parent)
             if name == self.model.data(index):
                 return (index,  self.model.index(i,  1,  parent))
-        exit("Node" +  name +  "not found.")
+        print("Node attribute " +  name +  " not found.")
         
     def findByGid(self,  data,  gid):
         for child in data:
@@ -111,7 +135,6 @@ class StartQT4(QtGui.QMainWindow):
                         
                 except:
                     exit('Problem (probably invalid attribute in newData)')
-                    pass
                     
             # Deal with children
             else:
