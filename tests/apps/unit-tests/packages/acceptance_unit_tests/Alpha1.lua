@@ -66,8 +66,7 @@ function test_Alpha_mode_basic ()
 		i = i + 1
 	end
 
-	--assert_false ( alphaTablesMatch, "Alpha values for different modes are matching")
-	assert_true ( alphaTablesMatch, "Alpha values for different modes are matching")
+	assert_false ( alphaTablesMatch, "Alpha values for different modes are matching")
 end
 
 -- Test Tear down --
