@@ -49,15 +49,15 @@ function test_controller_has_text_entry ()
 	assert_true ( device_has_text_entry, "has_text_entry ~= true")
 end
 
-function test_controller_has_pictures ()
-	assert_true ( device_has_pictures, "has_picture ~= true")
+function test_controller_has_images ()
+	assert_true ( device_has_images, "has_images ~= true")
 end
 
---[[
+
 function test_controller_has_audio_clips ()
 	assert_true ( device_has_audio_clips, "has_audio_clips ~= true")
 end
---]]
+
 
 function test_controller_has_advanced_ui ()
 	assert_true ( device_has_advanced_ui, "has_advanced_ui ~= true")

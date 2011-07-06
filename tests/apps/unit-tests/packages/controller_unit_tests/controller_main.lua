@@ -15,9 +15,9 @@ dofile( "packages/controller_unit_tests/enter_text1.lua" )
 dofile( "packages/controller_unit_tests/reset1.lua" )
 dofile( "packages/controller_unit_tests/clear_ui1.lua" )
 
+
 device_is_connected = false
 device_app_connected = false
-
 
 function controllers:on_controller_connected(controller)
 
@@ -35,8 +35,8 @@ function controllers:on_controller_connected(controller)
 	device_has_sound = controller.has_sound
 	device_has_ui = controller.has_ui
 	device_has_text_entry = controller.has_text_entry
-	device_has_pictures = controller.has_pictures
---	device_has_audio_clips = controller.has_audio_clips
+	device_has_pictures = controller.has_images
+	device_has_audio_clips = controller.has_audio_clips
 	device_has_advanced_ui = controller.has_advanced_ui
 	ui_size = controller.ui_size
 	input_size = controller.input_size
@@ -50,17 +50,24 @@ function controllers:on_controller_connected(controller)
 	multiple_choice_status = controller:show_multiple_choice ( "logo", "1", "pick me", "2", "no, pick me")
 	clear_ui_status = controller:clear_ui()
 	reset_status = controller:reset()
+	print ("has_images",device_has_images)
+ 	local results = unit_test()  
 end
 
 steps_txt.text = "1. Connect to a Device with Trickplay installed.\n2. Select the QA_Test_TV server.\n3.Verify that all tests pass."
 
 screen:show()
-
+--[[
 function idle.on_idle( idle , seconds )
-	
+	--print ("device_is_connected",device_is_connected)
       if device_is_connected == true then
         local results = unit_test()  
         idle.on_idle = nil
       end
+end
+--]]
+
+for _,controller in pairs(controllers.connected) do
+	controllers:on_controller_connected(controller)
 end
 
