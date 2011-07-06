@@ -15,7 +15,7 @@ Qt.Value = Qt.UserRole + 2
 
 #print dir(screenItem)
 #pprint(dir (QtGui.QTreeView))
-        
+    
 class StartQT4(QtGui.QMainWindow):
     def __init__(self, parent=None):
 
@@ -26,10 +26,14 @@ class StartQT4(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
         QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
         self.model = QtGui.QStandardItemModel()
+        #self.model = MyModel
         model = self.model
         
         #print(QtCore.QObject.connect(self.ui.Inspector,  QtCore.SIGNAL("itemClicked(QStandardItem)"),  self.itemChanged))
         #print('ok')
+        
+        # Connect it
+        self.model.connect(self.model, QtCore.SIGNAL('itemChanged( QStandardItem *)'), self.itemChanged)
         
         self.ui.Inspector.setItemDelegate(delegate.MyDelegate())
         
