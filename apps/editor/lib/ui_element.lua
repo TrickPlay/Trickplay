@@ -5522,7 +5522,6 @@ function ui_element.tabBar(t)
     local p = {
         font  = "DejaVu Sans 26px",
         
-        
         text_font = "DejaVu Sans 26px",
     	text_color = {255,255,255,255}, 
     	text_focus_color = {27,145,27,255}, 	  --"1b911b",
@@ -5547,14 +5546,14 @@ function ui_element.tabBar(t)
         --tab_align          = "CENTER",
         --label_align        = "CENTER",
         label_padding = 10,
-        tab_position = "TOP",
+        tab_position = "top",
         
         display_width  = 600,
         display_height = 500,
         tab_spacing = 10,
         --slant_width  = 20,
         border_width =  2,
-        border_color = {255,255,255,255},
+        --border_color = {255,255,255,255},
         fill_color   = {  0,  0,  0,255},
         label_color  = {255,255,255,255},
         unsel_color  = { 60, 60, 60,255},
@@ -5571,9 +5570,7 @@ function ui_element.tabBar(t)
     
     --overwrite defaults
     if t ~= nil then
-		
-		for k, v in pairs (t) do        p[k] = v        end
-		
+		for k, v in pairs (t) do p[k] = v end
     end
     
 	local ap = nil
@@ -5743,7 +5740,7 @@ function ui_element.tabBar(t)
 			
 			--buttons[i].position         = {0,0}
 			
-            if p.tab_position == "TOP" then
+            if p.tab_position == "top" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
             else
@@ -5760,7 +5757,7 @@ function ui_element.tabBar(t)
 		
 		if p.arrow_image then p.arrow_sz = p.arrow_image.w end
 		
-		if p.tab_position == "TOP" and
+		if p.tab_position == "top" and
 			(buttons[# buttons].w + buttons[# buttons].x) > p.ui_width then
 			
 			ap = ui_element.arrowPane{
@@ -5821,7 +5818,7 @@ function ui_element.tabBar(t)
 			
 		end
 		
-        if p.tab_position == "TOP" then
+        if p.tab_position == "top" then
             bg.y = buttons[1].h-p.border_width
         else
             bg.x = buttons[1].w-p.border_width
@@ -5895,7 +5892,7 @@ function ui_element.tabBar(t)
         --tab_align          = "CENTER",
         --label_align        = "CENTER",
         label_padding = 10,
-        tab_position = "TOP",
+        tab_position = "top",
         
         display_width  = 600,
         display_height = 500,
@@ -6067,7 +6064,7 @@ function ui_element.tabBar(t)
            	buttons[i].pressed = function () umbrella:display_tab(i) end  
             buttons[i].on_focus_out()
             
-            if p.tab_position == "TOP" then
+            if p.tab_position == "top" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
             else
@@ -6079,7 +6076,7 @@ function ui_element.tabBar(t)
 			offset.y = p.tabs[i].y
 			editor_use = false
         end
-        if p.tab_position == "TOP" then
+        if p.tab_position == "top" then
             bg.y = buttons[1].h-p.border_width
         else
             bg.x = buttons[1].w-p.border_width
