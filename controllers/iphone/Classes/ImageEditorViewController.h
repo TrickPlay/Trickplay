@@ -24,9 +24,12 @@
     UIView *mask;
     
     GestureImageView *imageView;
+    UINavigationBar *navBar;
     UIToolbar *toolbar;
     UIBarButtonItem *cancelButton;
     NSString *cancelButtonTitle;
+    
+    UIPopoverController *helpPopover;
     
     id <ImageEditorDelegate> imageEditorDelegate;
 }
@@ -36,6 +39,7 @@
 @property (assign) CGFloat targetHeight;
 @property (retain) UIView *mask;
 
+@property (retain) IBOutlet UINavigationBar *navBar;
 @property (retain) IBOutlet UIToolbar *toolbar;
 @property (retain) IBOutlet UIBarButtonItem *cancelButton;
 
@@ -48,5 +52,6 @@
 
 - (IBAction)doneEditing;
 - (IBAction)cancelEditing;
+- (IBAction)help:(id)sender;
 
 @end
