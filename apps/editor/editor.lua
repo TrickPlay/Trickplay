@@ -466,7 +466,8 @@ function editor.container_selected(obj, x, y)
           obj_border = Rectangle{}
           obj_border.name = obj.name.."border"
           obj_border.color = {0,0,0,0}
-          obj_border.border_color = {0,255,0,255}
+          --obj_border.border_color = {0,255,0,255}
+          obj_border.border_color = {255,25,25,255}
           obj_border.border_width = 2
           obj_border.position = obj.position
           obj_border.anchor_point = obj.anchor_point
@@ -509,7 +510,8 @@ function editor.container_selected(obj, x, y)
 	  	obj_border = Rectangle{}
         obj_border.name = obj.name.."border"
         obj_border.color = {0,0,0,0}
-        obj_border.border_color = {0,255,0,255}
+        --obj_border.border_color = {0,255,0,255}
+        obj_border.border_color = {255,25,25,255}
         obj_border.border_width = 2
         obj_border.position = {tile_x, tile_y, 0} 
         obj_border.anchor_point = obj.anchor_point
@@ -551,7 +553,8 @@ function editor.selected(obj, call_by_inspector)
    	obj_border = Rectangle{}
    	obj_border.name = obj.name.."border"
    	obj_border.color = {0,0,0,0}
-   	obj_border.border_color = {0,255,0,255}
+   	--obj_border.border_color = {0,255,0,255}
+    obj_border.border_color = {255,25,25,255}
    	obj_border.border_width = 2
    	local group_pos
 	local bumo	
@@ -1013,7 +1016,8 @@ function editor.the_image(bg_image)
 		    	input_text.color = DEFAULT_COLOR   --{255, 255, 255, 255}
 	      	end	 
             input_text = j
-	      	j.color = {0,255,0,255}
+	      	--j.color = {0,255,0,255}
+	      	j.color = {255,25,25,255}
 	      	return true
          end 
     end 
@@ -1238,6 +1242,13 @@ local function open_files(input_purpose, bg_image, inspector)
     cur_h= PADDING 
 
 	local index = 0
+	if dir == nil then 
+		print("dir is nil ") 
+		return
+	end 
+
+	table.sort(dir)
+
     for i, v in pairs(dir) do 
 		if (input_purpose == "open_luafile" and  is_lua_file(v) == true) or (input_purpose == "open_imagefile" and  is_img_file(v) == true) or 
 		   (input_purpose == "open_videofile" and is_mp4_file(v) == true) then 
@@ -2104,6 +2115,12 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		current_fn = "screens\/"..fname
 	end 
 
+	if(CURRENT_DIR == "") then 
+		editor.error_message("002", nil, new_project)  
+		--open_project() 
+		return 
+	end 
+
     if (save_current_f == true) then 
 		contents = ""
         local obj_names = getObjnames()
@@ -2289,7 +2306,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 					end 
 				end 
     		end
---			print("OOOOOOOOOOOOO", local_ui_elements)
 			if local_ui_elements ~= "" then 
             	contents = "local g = ... \n\nlocal "..local_ui_elements.."\n\n"..contents
 			else 
@@ -3582,7 +3598,8 @@ function editor.multi_select(x,y)
 
         multi_select_border = Rectangle{
                 name="multi_select_border", 
-                border_color= {0,255,0},
+                --border_color= {0,255,0},
+                border_color= {255,25,25,255},
                 border_width=0,
                 color= {0,0,0,0},
                 size = {1,1},
@@ -4351,11 +4368,11 @@ function editor.the_ui_elements()
 	           	g:add(new_widget)
 		   		new_widget.extra.lock = false
                 create_on_button_down_f(new_widget)
-	           	--screen:grab_key_focus()
 			end 
 			xbox:on_button_down(1)
-		else 
-	    	--widget_f_map[v]() 
+		elseif v == "Text" then  
+			xbox:on_button_down(1, nil,nil,nil, 1) 
+		else
 			xbox:on_button_down()
 		end
 	end 
@@ -4415,6 +4432,7 @@ function editor.the_ui_elements()
 	cur_w= PADDING
     cur_h= PADDING 
 
+	table.sort(uiElementLists)
 
     for i, v in pairs(uiElementLists) do 
 
@@ -4513,7 +4531,7 @@ function editor.the_ui_elements()
 	scroll.on_focus_in()
 
 
-	function xbox:on_button_down(x,y,button,num_clicks)
+	function xbox:on_button_down(x,y,button,num_clicks,textUIElement)
 		screen:remove(msgw)
 		msgw:clear() 
 		current_inspector = nil
@@ -4521,7 +4539,9 @@ function editor.the_ui_elements()
 		if x then 
 	    	input_mode = S_SELECT
 		end 
-		screen.grab_key_focus(screen) 
+		if textUIElement == nil then 
+			screen.grab_key_focus(screen) 
+		end
 		return true
 	end 
 
@@ -4614,9 +4634,9 @@ function editor.ui_elements()
 		db=new_widget
 	      elseif (new_widget.extra.type == "ToastAlert") then 
 		tb=new_widget
-	      elseif (new_widget.extra.type == "RadioButton") then 
+	      elseif (new_widget.extra.type == "RadioButtonGroup") then 
 		rb=new_widget
-	      elseif (new_widget.extra.type == "CheckBox") then 
+	      elseif (new_widget.extra.type == "CheckBoxGroup") then 
 		cb=new_widget
 	      elseif (new_widget.extra.type == "ButtonPicker") then 
 		bp=new_widget
@@ -4666,9 +4686,9 @@ function editor.ui_elements()
 		db=new_widget
 	      elseif (new_widget.extra.type == "ToastAlert") then 
 		tb=new_widget
-	      elseif (new_widget.extra.type == "RadioButton") then 
+	      elseif (new_widget.extra.type == "RadioButtonGroup") then 
 		rb=new_widget
-	      elseif (new_widget.extra.type == "CheckBox") then 
+	      elseif (new_widget.extra.type == "CheckBoxGroup") then 
 		cb=new_widget
 	      elseif (new_widget.extra.type == "ButtonPicker") then 
 		bp=new_widget
@@ -4729,43 +4749,106 @@ function editor.ui_elements()
 end 
 
 
+function editor.error_message(error_num, str, func_ok)
+  	local WIDTH = 300
+  	local HEIGHT = 150
+    local PADDING = 13
+	local TOP_BAR = 30
+    local MSG_BAR = 80
+    local BOTTOM_BAR = 40
 
+    local TSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local MSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
+    local MSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
 
+    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
+	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
+	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
+	local OK_label = "OK"
+
+	local error_msg_map = {
+	["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
+	["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
+	["003"] = function() OK_label = "Save As" str = true  return "Save changes before open another project? If you don\'t save, changes will be permanently lost." end, 					
+	}
+
+	local error_msg = error_msg_map[error_num](str) -- "A project named XXX already exists. Do you want to replace it?"
+	--local error_msg = "A project named XXX already exists. Do you want to replace it?"
 	
-	--[[
-	local function make_textInput_item(attr_n, attr_v, attr_s) 
+	local message = Text {text = error_msg }:set(MSTYLE)
+	local message_shadow = Text {text = error_msg}:set(MSSTYLE)
 
-		local non_textInput_items = {"title", "caption", "line", "button", "focus", "tab_labels", "items", "skin", "wrap_mode", 
-		"expansion_location", "cell_size", "style", "direction", "reactive", "loop", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", 
-		"icon", "source", "src", "anchor_point", }
+	title.text = ""
+	title_shadow.text = ""
 
-		--if attr_n == "button" or attr_n == "title" or attr_n == "label" or attr_n == "lock" or attr_n == "focus" then 
+	--Buttons 
+   	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+ 		  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
+	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+    	  skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
 
-		for i, j  in pairs (non_textInput_items) do 
-			if j == attr_n then 
-				return 
-			end 
+	-- Button Event Handlers
+	button_cancel.pressed = function() xbox:on_button_down() end 
+	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
+
+	local ti_func = function()
+		if current_focus then 
+			current_focus.on_focus_out()
 		end 
+		button_ok:find_child("active").opacity = 255
+		button_ok:find_child("dim").opacity = 0
 
-		local group = Group{}
+	end
 
-		-- Property Label
-		local label = Text{name = "attr", text = attr_s}:set(ISTYLE)
-		--label.position = {WIDTH - space, PADDING_Y}
-		label.position = {0, 0}
-		group:add(label)
+	local tab_func = function()
+		button_ok:find_child("active").opacity = 0
+		button_ok:find_child("dim").opacity = 255
+		button_cancel:grab_key_focus()
+		button_cancel.on_focus_in()
+	end
 
-		editor_use = true
-		-- Text Input Field 	
-		local input_text = ui_element.textInput{name = "input_text", skin = "custom", ui_width = 39, ui_height = 21 , text = "", padding = 3 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0,}
+	-- Focus Destination 
+	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
+	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
 
-		input_text.x = label.x + label.w + PADDING -- 6
-		input_text.y = 0
 
-		editor_use = false
-		group:add(input_text)
+	local msgw = Group {
+		name = "msgw",  --ui_element_insert
+		position ={650, 250},
+	 	anchor_point = {0,0},
+		reactive = true,
+        children = {
+        	msgw_bg,
+	  		xbox:set{position = {275, 0}},
+			title_shadow:set{position = {PADDING,PADDING/3}, }, 
+			title:set{position = {PADDING+1, PADDING/3+1}}, 
+			message_shadow:set{position = {PADDING,TOP_BAR+PADDING}, width = WIDTH - 28, wrap= true, wrap_mode = "CHAR"}, 
+			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}, width = WIDTH - 28, wrap= true, wrap_mode = "CHAR"}, 
+			button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}, 
+			button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+		}
+		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
+	}
 
-		return group
+	msgw.extra.lock = false
+ 	screen:add(msgw)
+	create_on_button_down_f(msgw)	
+	-- Focus 
+	ti_func()
+
+	function xbox:on_button_down()
+		screen:remove(msgw)
+		--msgw:clear() 
+		current_inspector = nil
+		current_focus = nil
+        screen.grab_key_focus(screen) 
+	    input_mode = S_SELECT
+		return true
 	end 
-	]]
+
+end 
+
+
 

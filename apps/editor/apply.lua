@@ -276,7 +276,7 @@ function inspector_apply (v, inspector)
 		elseif j.name == "bw" or j.name == "bh" then
                      local not_checkbox = false
                      if v.extra then 
-		         if(v.extra.type == "CheckBox")then
+		         if(v.extra.type == "CheckBoxGroup")then
                             local bsize_t = {}
                             bsize_t[1] = item_group:find_child("bw"):find_child("input_text").text
                             bsize_t[2] = item_group:find_child("bh"):find_child("input_text").text
