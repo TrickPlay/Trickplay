@@ -3,6 +3,8 @@ local log = print
 local class_table = dofile("AdvancedUIClasses.lua")
 local controller , CACHE_LOCAL_PROPERTIES = ...
 
+local foo = 0
+
 assert(controller)
 assert(class_table)
 
@@ -48,15 +50,29 @@ local function send_request( end_point , payload )
     payload = payload or {}
 
     payload.method = end_point
+    --[[
     print("send_request payload:", payload)
     if type(payload) == "table" then
         dumptable(payload)
     end
+    --]]
     result = controller:advanced_ui( payload )
+    foo = foo + 1
+    --result = {id = foo}
+    if foo%30 == 0 then
+        print("\t\tcalls = ", foo)
+    end
+    ---[[
     print("send_request result:", result)
     if type(result) == "table" then
         dumptable(result)
     end
+    --]]
+
+    if result == json.null then
+        return nil
+    end
+
     return result
 end
 
@@ -244,6 +260,9 @@ do
         
             local payload = { id = self.id , properties = { [ key ] = true } }
             local result = send_request( "get" , payload ).properties[ key ]
+            if result == json.null then
+                return nil
+            end
             
             -- And cache it
             
@@ -436,6 +455,7 @@ setmetatable( factory , mt )
 -- Give the controller Container like abilities
 
 controller.screen = factory:create_local(0, "Controller") 
+controller.factory = factory
 
 ---------------------------------------------------------------------------
 

@@ -14,6 +14,10 @@ function controllers:on_controller_connected(controller)
 
     local key_handler = {}
     function screen:on_key_down(key)
+        print("on_key_down:", key)
+        if key == keys.BACK then print("back")
+        elseif key == keys.RED then print("red")
+        end
         for k,func in pairs(key_handler) do
             if k == key then
                 func()
@@ -61,6 +65,27 @@ function controllers:on_controller_connected(controller)
     key_handler[keys.s] = function()
         if r then r:show() end
     end
+    -- speed test
+    key_handler[keys.c] = function()
+        print("idle control")
+        if idle.on_idle then 
+            idle.on_idle = nil
+            return
+        end
+        function idle:on_idle(seconds)
+            print(seconds)
+            g:show()
+            g:hide()
+            --r = factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
+        end
+    end
+    -- set bkg vs adanced_ui image bug
+    key_handler[keys.u] = function()
+        print("bkg vs advanced_ui image")
+        controller:set_ui_background("chip")
+        i = factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
+    end
+    ctrl = controller
 end
 
 for k,controller in pairs(controllers.connected) do
@@ -77,3 +102,7 @@ end
 
 
 screen:show()
+screen:add(Text{
+    w = 100, h = 100, x = 200, y = 200, color = "FF00FF",
+    markup = "text<span style='color:#ff00ff55;font-family:arial;font-variant:small-caps;font-stretch:condensed;font-size:32px;font-style:italic;font-weight:bold;text-decoration:underline;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:10px'>text</span>"
+})

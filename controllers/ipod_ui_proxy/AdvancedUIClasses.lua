@@ -242,13 +242,24 @@ local function GroupClass()
     return get , set , call , event
 end
 
+local function ControllerClass()
+
+    local get , set , call , event = GroupClass()
+    
+    function call:set_background(resource_name)
+        return self("set_background", resource_name)
+    end
+
+    return get , set , call , event
+end
+
 local class_table =
 {
     Rectangle = RectangleClass,
     Image = ImageClass,
     Text = TextClass,
     Group     = GroupClass,
-    Controller = GroupClass
+    Controller = ControllerClass
 }
 
 return class_table
