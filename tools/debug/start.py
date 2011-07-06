@@ -28,9 +28,21 @@ class StartQT4(QtGui.QMainWindow):
         self.model = QtGui.QStandardItemModel()
         model = self.model
         
+        #print(QtCore.QObject.connect(self.ui.Inspector,  QtCore.SIGNAL("itemClicked(QStandardItem)"),  self.itemChanged))
+        #print('ok')
+        
         self.ui.Inspector.setItemDelegate(delegate.MyDelegate())
         
         self.createTree()
+    
+    def itemChanged(self,  item):
+        print("changed!")
+        
+    # WHY ISN"T THIS WORKING???
+    #@QtCore.pyqtSignature("on_Inspector_itemChanged()")
+    def on_Inspector_itemChanged(self, item, column):
+        print("changed!!")
+        
         
     def createTree(self):
         
