@@ -4,7 +4,7 @@
 		-- Define a vertical gradient pattern line from rectangle's top to bottom
 		canvas:set_source_linear_pattern( 960, 0, 960, 1080 )
 		
-		-- Define 3 gradient color-stops from black to red and back to black
+		-- Define 3 gradient color-stops from blue to red to  green
 		canvas:add_source_pattern_color_stop( 0.0, "0000FFFF" )   -- TOP,    From blue/opaque to...
 		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
 		canvas:add_source_pattern_color_stop( 1.0, "00FF00FF" )   -- BOTTOM, ...green/opaque
@@ -21,7 +21,7 @@
 		-- Create our screen Canvas
 		canvas = Canvas( 1920, 1080 )
 		
-		-- Define a table of x,y coordinate around the canvas
+		-- Define a table of x,y coordinates around the canvas
 		points = { 900, 100,
                    1200, 200,
                    1500, 400,

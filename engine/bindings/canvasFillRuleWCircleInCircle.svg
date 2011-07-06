@@ -14,7 +14,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.1 r9760"
-   inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWCircleInCircle.svg.png"
+   inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWCircleInCircle.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
    sodipodi:docname="canvasFillRuleWCircleInCircle.svg">
@@ -55,7 +55,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.5857392"
-     inkscape:cx="241.76774"
+     inkscape:cx="162.62484"
      inkscape:cy="715.64658"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -121,5 +121,49 @@
        id="path8432"
        style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Lend)"
        sodipodi:type="arc" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="138.15573"
+       y="226.87967"
+       id="text3111"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3113"
+         x="138.15573"
+         y="226.87967">+1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="138.23386"
+       y="293.67673"
+       id="text3115"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3117"
+         x="138.23386"
+         y="293.67673">+2</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3119"
+       y="225.61842"
+       x="336.17062"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"><tspan
+         y="225.61842"
+         x="336.17062"
+         id="tspan3121"
+         sodipodi:role="line">+1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="344.69113"
+       y="293.53513"
+       id="text3123"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3125"
+         x="344.69113"
+         y="293.53513">0</tspan></text>
   </g>
 </svg>
