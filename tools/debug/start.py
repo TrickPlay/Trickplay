@@ -46,6 +46,8 @@ class StartQT4(QtGui.QMainWindow):
         
         self.ui.Inspector.setModel(self.proxyModel)
         
+        # TODO, don't sort UIElements,
+        # keep them in the order they are layered in their group
         self.proxyModel.sort(0)
         
     def attrEq(self,  oldData,  newData):
@@ -62,8 +64,14 @@ class StartQT4(QtGui.QMainWindow):
             index = self.model.index(i, 0, parent)
             if name == self.model.data(index):
                 return (index,  self.model.index(i,  1,  parent))
-        exit("Node not found")
-    
+        exit("Node" +  name +  "not found.")
+        
+    def findByGid(self,  data,  gid):
+        for child in data:
+            if child['gid'] == gid:
+                return child
+        return None
+        
     def refreshNodes(self,  oldData,  newData,  index):
         # attr is a tuple(number, attrName)
         for attr in list(enumerate(newData)):
@@ -76,6 +84,7 @@ class StartQT4(QtGui.QMainWindow):
                     
                     if oldValue != newValue:
                         # Value is a dictionary - create new summary and update children
+                        # TODO, don't summarize clone's source attr
                         if isinstance(newValue, dict):
                             for attr in newValue:
                                 childAttrIndex = self.findNode(attr,  childIndex[0])[1]
@@ -90,27 +99,48 @@ class StartQT4(QtGui.QMainWindow):
                     
             # Deal with children
             else:
-                if newData['type'] == "Group":
-                    oldChildren = oldData['children']; newChildren = newData['children']
-                    nOldChildren = len(oldChildren); nNewChildren = len(newChildren)
-                    
-                    # Number of children has not changed
-                    if nOldChildren == nNewChildren:
-                        for i in range(nNewChildren):
-                            oldChild = oldChildren[i]
-                            newChild = newChildren[i]
-                            # A change has been made
-                            if not self.attrEq(oldChild, newChild):
-                                # TODO, better place to name child?
-                                # Name won't change if name is removed from attr list 
-                                # and name is the only attr updated
-                                elementType = self.model.index(i,  0,  childIndex[0])
-                                elementValue = self.model.index(i,  1,  childIndex[0])
-                                self.model.setData(elementValue,  newChild['name'])
-                                self.refreshNodes(oldChild,  newChild,  elementType)
-                        
-                pass
+                if newData['type'] == "Group" and len(newData['children']) > 0:
+                    self.refreshChildren(oldData['children'], newData['children'],  childIndex)
+        
+    def refreshChildren(self,  oldData,  newData,  listIndex):
+        
+        nOld = len(oldData); nNew = len(newData)
 
+        # Traverse backwards to indices aren't changed when nodes are deleted
+        for i in range(nOld-1,  -1,  -1):
+            try:
+                
+                #print('searching',  i)
+                if not self.findByGid(newData, oldData[i]['gid']):
+                    #print('found gid',  oldData[i]['gid'])
+                    self.model.removeRow(i,  listIndex[0])
+            except e:
+                print("ERROR",  e)
+
+        # Update fields and add new children when necessary
+        # TODO, special case for children to prevent too many comparisons
+        for i in range(nNew):
+            
+            newChild = newData[i]
+            oldChild = self.findByGid(oldData, newChild['gid'])
+            
+            if oldChild:
+                elementType = self.model.index(i,  0,  listIndex[0])
+                elementValue = self.model.index(i,  1,  listIndex[0])
+                self.model.setData(elementValue,  newChild['name'])
+                self.refreshNodes(oldChild,  newChild,  elementType)
+            else:
+                self.createNode(self.model.itemFromIndex(listIndex[0]),  newChild)
+                
+        self.model.setData(listIndex[1],  nNew)
+        
+        #if self.findByGid(oldData,  newChild['gid']):
+        # A change has been made
+        #if not self.attrEq(oldChild, newChild):
+            # TODO, better place to name child?
+            # Name won't change if name is removed from attr list 
+            # and name is the only attr updated                
+        
     def refresh(self):
         newData = getTrickplayData()["children"][0]
         self.refreshNodes(self.data,  newData,  self.model.index(0,  0))
