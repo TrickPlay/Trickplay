@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+# Features to add:
+#   Checkboxes for hide/show
+#   Two views, one for UI elements and oen for properties
+#   Drag and drop UI elements?
+
 import sys
 import urllib
 import urllib2
@@ -47,6 +52,8 @@ class StartQT4(QtGui.QMainWindow):
         
         self.createTree()
         
+        self.lastChanged = None
+        
     def editorClosed(self,  lineEditor,  hint):
         if self.lastChanged:
             
@@ -88,7 +95,7 @@ class StartQT4(QtGui.QMainWindow):
         
         self.lastChanged = (str(attrItem.data(0).toString()), str(valueItem.data(0).toString()), gid)
         
-        print(self.lastChanged)
+        print("Changed: " + repr(self.lastChanged))
         
     def createTree(self):
         
@@ -123,6 +130,8 @@ class StartQT4(QtGui.QMainWindow):
             if name == self.model.data(index):
                 return (index,  self.model.index(i,  1,  parent))
         print("ERROR >> Node attribute " +  name +  " not found.")
+        print("Occurred in node:" + str(parent.data(0).toString()))
+        exit()
         
     def findByGid(self,  data,  gid):
         for child in data:
@@ -130,12 +139,16 @@ class StartQT4(QtGui.QMainWindow):
                 return child
         return None
         
+    # TODO
+    # Current algorithm won't work if types change because
+    # some types have values that other types don't.
     def refreshNodes(self,  oldData,  newData,  index):
         # attr is a tuple(number, attrName)
         for attr in list(enumerate(newData)):
             name = attr[1]
-            childIndex = self.findNode(name,  index)
+            childIndex = None
             if name != 'children':
+                childIndex = self.findNode(name,  index)
                 try:
                     oldValue = oldData[name]
                     newValue = newData[name]
@@ -145,6 +158,7 @@ class StartQT4(QtGui.QMainWindow):
                         # TODO, don't summarize clone's source attr
                         if isinstance(newValue, dict):
                             for attr in newValue:
+                                #print(oldValue,  newValue,  name)
                                 childAttrIndex = self.findNode(attr,  childIndex[0])[1]
                                 self.model.setData(childAttrIndex,  newValue[attr])
                             newValue = self.summarize(newValue)
@@ -154,16 +168,22 @@ class StartQT4(QtGui.QMainWindow):
                 except:
                     exit('Problem (probably invalid attribute in newData)')
                     
-            # Deal with children
+            # Deal with group ClutterGroups
             else:
-                if newData['type'] == "Group" and len(newData['children']) > 0:
+                
+                oldType = oldData['type']
+                newType = newData['type']
+                
+                # If both old and new are groups, refresh children
+                if "Group" == oldType and "Group" == newType:
+                    childIndex = self.findNode(name,  index)
                     self.refreshChildren(oldData['children'], newData['children'],  childIndex)
         
     def refreshChildren(self,  oldData,  newData,  listIndex):
         
         nOld = len(oldData); nNew = len(newData)
 
-        # Traverse backwards to indices aren't changed when nodes are deleted
+        # Traverse backwards so indices aren't changed when nodes are deleted
         for i in range(nOld-1,  -1,  -1):
             try:
                 
@@ -189,7 +209,8 @@ class StartQT4(QtGui.QMainWindow):
             else:
                 self.createNode(self.model.itemFromIndex(listIndex[0]),  newChild)
                 
-        self.model.setData(listIndex[1],  nNew)
+        if nOld != nNew:
+            self.model.setData(listIndex[1],  nNew)
         
         #if self.findByGid(oldData,  newChild['gid']):
         # A change has been made
