@@ -340,9 +340,20 @@ local function copy_widget_imgs ()
 
 end 
 
-local function set_new_project (pname)
+function set_new_project (pname, replace)
 	if(pname~= "") then
     	project = pname
+
+    	if table.getn(projects) ~= 0 then 
+			for i, j in pairs (projects) do 
+				if j == pname then 
+					if replace == nil then 
+						editor.error_message("001", pname, set_new_project)  
+						return 
+					end  
+				end 
+			end 
+		end 
    	end   
 	
    	app_path = editor_lb:build_path( base , project )
@@ -565,9 +576,19 @@ function open_project(t, msg)
 	local virtual_hieght = 0
 
 	local function load_project(v)
+
 		if v == nil then 
 			return
 		end
+
+--[[
+		if #g.children > 0 then 
+			xbox:on_button_down()
+			editor.error_message("003", nil, editor.save) 
+			return 
+		end 
+
+ ]]
 
 		selected_prj = v
 --
@@ -675,6 +696,8 @@ function open_project(t, msg)
 
 	cur_w= PADDING
     cur_h= PADDING 
+	
+	table.sort(projects)
 
     for i, v in pairs(projects) do 
 
@@ -1835,10 +1858,17 @@ function itemTostring(v, d_list, t_list)
 			end
     	end
 
+		local focus_map = {["65362"] = function() return "keys.Up" end, 
+						   ["65364"] = function() return "keys.Down" end, 
+						   ["65361"] = function() return "keys.Left" end, 
+						   ["65363"] = function() return "keys.Right" end, 
+						   ["65293"] = function() return "keys.Return" end, 
+						  }
+
 		itm_str = itm_str..v.name.."\.extra\.focus = {" 
 		for m,n in pairs (v.extra.focus) do 
 			if type(n) ~= "function" then 
-		     	itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+		     	itm_str = itm_str.."["..focus_map[tostring(m)]().."] = \""..n.."\", " 
 			end 
 		end 
 		itm_str = itm_str.."}\n\n"
@@ -2255,8 +2285,6 @@ function inputMsgWindow_savefile(input_text, cfn)
 			enter_gen_stub_code =true
 		end 
 	   end 
-
-
      	   for i, v in pairs(main_dir) do
           	if("main.lua" == v)then
 			local main = readfile("main.lua")

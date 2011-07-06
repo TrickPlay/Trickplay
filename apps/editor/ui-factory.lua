@@ -1449,7 +1449,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 	end 
 
-	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={0,255,0,255}, }
+	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={255,25,25,255}, }
 	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=5, cell_size="variable", cells_focusable=false}
 	if text then 
     	--items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
@@ -2367,7 +2367,8 @@ sero = Rectangle
 		name="sero",
 		border_color={255,255,255,192},
 		border_width=0,
-		color={0,255,0,255},
+		--color={0,255,0,255},
+		color={255,25,25,255},
 		size = {4,30},
 		anchor_point = {0,0},
 		x_rotation={0,0,0},
@@ -2382,7 +2383,8 @@ garo = Rectangle
 		name="garo",
 		border_color={255,255,255,192},
 		border_width=0,
-		color={0,255,0,255},
+		--color={0,255,0,255},
+		color={255,25,25,255},
 		size = {30,4},
 		anchor_point = {0,0},
 		x_rotation={0,0,0},
@@ -3147,7 +3149,8 @@ function make_on_button_down_f(v)
 		end
 	   	focus_type = v.name:sub(2,-1)
 	   	--v:find_child("rect"..focus_type).border_color = {0,255,0,255} -- 
-	   	v.border_color = {0,255,0,255} -- 
+	   	--v.border_color = {0,255,0,255} -- 
+	   	v.border_color = {255,25,25,255} 
 	   	v.border_width = 2
 	   	if (focus:find_child("text"..focus_type).text ~= "") then
 			focus:find_child("text"..focus_type).text = ""
