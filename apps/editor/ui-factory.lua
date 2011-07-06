@@ -1713,6 +1713,8 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			itemLists = {"orbitting", "spinning"} 
 		elseif item_n == "direction" then 
 			itemLists = {"vertical", "horizontal"} 
+		elseif item_n == "tab_position" then 
+			itemLists = {"top", "right"} 
 		end
 
 		for i,j in pairs(itemLists) do 

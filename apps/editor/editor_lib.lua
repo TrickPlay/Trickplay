@@ -821,8 +821,16 @@ function editor_ui.tabBar(t)
         fill_color   = {  0,  0,  0,  0},
         label_color  = {255,255,255,  255},
         unsel_color  = { 60, 60, 60,  0},
+		---------------------------------
+
 		buttons = {}, 
 		current_tab = 1,
+		current_tab_focus = nil, 
+		--------------------------------
+		arrow_sz     = 15,
+		arrow_dist_to_frame = 5,
+		arrow_image = nil,
+
     }
     
 	local offset = {}

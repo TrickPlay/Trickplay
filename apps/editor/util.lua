@@ -1489,7 +1489,7 @@ function make_attr_t(v)
        ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space","b_pos", "item_pos","items",} end,
        ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","focus_fill_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","b_pos", "item_pos","items",} end,
 
-       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels"} end,  
+       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
        ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label","message","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","label","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
@@ -2199,34 +2199,37 @@ function inputMsgWindow_savefile(input_text, cfn)
      local main_dir = editor_lb:readdir(CURRENT_DIR)
      local enter_gen_stub_code = false
 
+     --if cfn == nil then 
+	 dumptable(screen_dir)
 
-     if cfn == nil then 
+		if cfn ~= "OK" then 
      	for i, v in pairs(screen_dir) do
           if(input_text == v)then
 			cleanMsgWindow()
-            print("ERR001 The file name "..current_fn.." already exists.\nDo you want to replace it? ")
-           	screen:grab_key_focus(screen) 
-            file_not_exists = false
-			menu_raise_to_top()
+			editor.error_message("004",input_text,inputMsgWindow_savefile)
+           	--screen:grab_key_focus(screen) 
+            --file_not_exists = false
+			--menu_raise_to_top()
 			return 
           end
 		end
-      end
+		end 
+      --end
 
       -- main generation
       if (file_not_exists or cfn) then
-	   local main_exist = false
-	   local app_exist = false
+	   	local main_exist = false
+	   	local app_exist = false
 
-	   local a, b = string.find(input_text,"screens") 
-	   if a then 
+	   	local a, b = string.find(input_text,"screens") 
+	   	if a then 
 			input_text = string.sub(input_text, 9, -1)
-	   end 
+	   	end 
 
-	   local fileUpper= string.upper(string.sub(input_text, 1, -5))
-	   local fileLower= string.lower(string.sub(input_text, 1, -5))
-
-	   local function gen_stub_code (grp) 
+	   	local fileUpper= string.upper(string.sub(input_text, 1, -5))
+	   	local fileLower= string.lower(string.sub(input_text, 1, -5))
+	
+	   	local function gen_stub_code (grp) 
 
 		
 		new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"

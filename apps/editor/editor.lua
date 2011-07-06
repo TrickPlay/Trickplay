@@ -1767,7 +1767,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			elseif attr_n == "anchor_point" then 
 				item = factory.make_anchorpoint(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			elseif attr_n == "skin" or attr_n == "wrap_mode"  
-			or attr_n == "expansion_location" or attr_n == "cell_size" or attr_n == "style" or attr_n == "direction" then 
+			or attr_n == "expansion_location" or attr_n == "cell_size" or attr_n == "style" or attr_n == "direction" or attr_n == "tab_position" then 
 				item = factory.make_buttonpicker(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			else 
 	    		item = factory.make_text_input_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
@@ -2117,7 +2117,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 
 	if(CURRENT_DIR == "") then 
 		editor.error_message("002", nil, new_project)  
-		--open_project() 
 		return 
 	end 
 
@@ -4772,10 +4771,10 @@ function editor.error_message(error_num, str, func_ok)
 	["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
 	["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
 	["003"] = function() OK_label = "Save As" str = true  return "Save changes before open another project? If you don\'t save, changes will be permanently lost." end, 					
+	["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
 	}
 
-	local error_msg = error_msg_map[error_num](str) -- "A project named XXX already exists. Do you want to replace it?"
-	--local error_msg = "A project named XXX already exists. Do you want to replace it?"
+	local error_msg = error_msg_map[error_num](str) 
 	
 	local message = Text {text = error_msg }:set(MSTYLE)
 	local message_shadow = Text {text = error_msg}:set(MSSTYLE)
