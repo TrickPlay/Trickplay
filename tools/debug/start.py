@@ -44,21 +44,29 @@ class StartQT4(QtGui.QMainWindow):
         
         self.createTree()
         
-    def editorClosed(self,  widget,  hint):
-        
-        # Do a check to see if widget's text is the same as
-        # lastChanged's text. If user closes editor but hasn't made a change,
-        # don't change anything.
-        
-        lastChanged = self.lastChanged
-        self.lastChanged = None
-        
-        attrName = lastChanged[0]
-        attrValue = lastChanged[1]
-        gid = lastChanged[2]
-        
-        connection.send({'gid': lastChanged[2], 'properties' : {attrName : attrValue}})
-    
+    def editorClosed(self,  lineEditor,  hint):
+        if self.lastChanged:
+            
+            lastChanged = self.lastChanged
+            self.lastChanged = None
+            
+            attrName = lastChanged[0]
+            attrValue = lastChanged[1]
+            gid = lastChanged[2]
+            
+            # Do a check to see if widget's text is the same as
+            # lastChanged's text. If user closes editor but hasn't made a change,
+            # don't send any data.
+            if lineEditor.displayText() == attrValue:
+                params = connection.clean(attrName,  attrValue)
+                print("Params:",  params)
+                connection.send({'gid': gid, 'properties' : {params[0] : params[1]}})
+            else:
+                print("No changed was made. Editor closed.")
+                
+        else:
+            print("No change has been made since the program started.")
+
     def itemChanged(self,  valueItem):
         row = valueItem.row()
         parent = valueItem.parent()
@@ -104,7 +112,7 @@ class StartQT4(QtGui.QMainWindow):
             index = self.model.index(i, 0, parent)
             if name == self.model.data(index):
                 return (index,  self.model.index(i,  1,  parent))
-        print("Node attribute " +  name +  " not found.")
+        print("ERROR >> Node attribute " +  name +  " not found.")
         
     def findByGid(self,  data,  gid):
         for child in data:
