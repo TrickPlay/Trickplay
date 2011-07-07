@@ -2,115 +2,6 @@ local factory = {}
 
 local attr_t_idx 
 
-function factory.make_dropdown( size , color )
-
-    local BORDER_WIDTH= 3
-    local POINT_HEIGHT=34
-    local POINT_WIDTH=60
-    local BORDER_COLOR="FFFFFF5C"
-    local CORNER_RADIUS=22
-    local POINT_CORNER_RADIUS=2
-    local H_BORDER_WIDTH = BORDER_WIDTH / 2
-    
-    local function draw_path( c )
-    
-        c:new_path()
-    
-        c:move_to( H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-        
-        c:line_to( ( c.w / 2 ) - ( POINT_WIDTH / 2 ) - POINT_CORNER_RADIUS , POINT_HEIGHT - H_BORDER_WIDTH )
-        
-        
-        c:curve_to( ( c.w / 2 ) - ( POINT_WIDTH / 2 ) , POINT_HEIGHT - H_BORDER_WIDTH ,
-                    ( c.w / 2 ) - ( POINT_WIDTH / 2 ) , POINT_HEIGHT - H_BORDER_WIDTH ,
-                     c.w / 2 , H_BORDER_WIDTH  )
-        
-        c:curve_to( ( c.w / 2 ) + ( POINT_WIDTH / 2 ) , POINT_HEIGHT - H_BORDER_WIDTH,
-                    ( c.w / 2 ) + ( POINT_WIDTH / 2 ) , POINT_HEIGHT - H_BORDER_WIDTH,
-                    ( c.w / 2 ) + ( POINT_WIDTH / 2 ) + POINT_CORNER_RADIUS , POINT_HEIGHT - H_BORDER_WIDTH )
-                    
-        c:line_to( c.w - H_BORDER_WIDTH - CORNER_RADIUS , POINT_HEIGHT - H_BORDER_WIDTH )
-        c:curve_to( c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
-                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
-                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
-                    
-        c:line_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
-        c:curve_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    c.w - H_BORDER_WIDTH - CORNER_RADIUS , c.h - H_BORDER_WIDTH )
-        
-        c:line_to( H_BORDER_WIDTH + CORNER_RADIUS , c.h - H_BORDER_WIDTH )
-        c:curve_to( H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
-        
-        c:line_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
-        
-        c:curve_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
-		    BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-    
-
-    end
-    local c = Canvas{ size = size }
-
-    c:begin_painting()
-
-    draw_path( c )
-
-    -- Fill the whole thing with the color passed in and keep the path
-    
-    c:set_source_color( color )
-    c:fill(true)
-    
-    -- Now, translate to the center and scale to its height. This will
-    -- make the radial gradient elliptical.
-    
-    c:save()
-    c:translate( c.w / 2 , c.h / 2 )
-    c:scale( 2 , ( c.h / c.w ) )
-
-    local rr = ( c.w / 2 ) 
-    c:set_source_radial_pattern( 90 , 210 , 0 , 0 , 60 , c.w / 2 )
-    c:add_source_pattern_color_stop( 0 , "00000000" )
-    c:add_source_pattern_color_stop( 1 , "000000F0" )
-    c:fill()   
-    c:restore()
-    -- Draw the glossy glow    
-
-    local R = c.w * 2.2
-
-    c:new_path()
-    c.op = "ATOP"
-    c:arc( 0 , -( R - 240 ) , R , 0 , 360 )
-    c:set_source_linear_pattern( c.w , 0 , 0 , c.h * 0.25 )
-    c:add_source_pattern_color_stop( 0 , "FFFFFF20" )
-    c:add_source_pattern_color_stop( 1 , "FFFFFF04" )
-    c:fill()
-
-    -- Now, draw the path again and stroke it with the border color
-    
-    draw_path( c )
-
-    c:set_line_width( BORDER_WIDTH )
-    c:set_source_color( BORDER_COLOR )
-    c.op = "SOURCE"
-    c:stroke( true )
-
-    c:finish_painting()
-    
-    if c.Image then
-       c= c:Image()
-    end
-
-    return c
-    
-end
-
----------------------------------------------------------------------------
--- Makes a menu item with a white ring around it
----------------------------------------------------------------------------
-
 local icon_map = 
 {
 	["Left Edge      "] = function() icon = icon_l return icon end, 
@@ -152,378 +43,6 @@ local item_map =
 	["Hide Lines"] = function() return "guideline" end,
 }
 
-   
-function factory.make_text_menu_item( assets , caption )
-
-    local STYLE         = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
-    local PADDING_X     = 7 -- The focus ring has this much padding around it
-    local PADDING_Y     = 7
-    local WIDTH         = 330 + ( PADDING_X * 2 )
-    local HEIGHT        = 46  + ( PADDING_Y * 2 )
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-    local ITEM_SPACE = "\t\t\t"
-    
-    local group = Group{}
-
-    local function make_ring()
-        local ring = Canvas{ size = { WIDTH , HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-    	if ring.Image then
-       		ring= ring:Image()
-    	end
-        return ring
-    end
-
-    local function make_line()
-    	local LINE_WIDTH    =7 
-    	local LINE_COLOR    = "FFFFFF5C"
-	local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
-        line:begin_painting()
-        line:new_path()
-        line:move_to (0,0)
-        line:line_to (WIDTH, 0)
-    	line:set_line_width (LINE_WIDTH)
-        line:set_source_color(LINE_COLOR)
-    	line:stroke (true)
-    	line:fill (true)
-        line:finish_painting()
-    	if line.Image then
-       		line= line:Image()
-    	end
-        return line
-    end 
-    local icon 
-
-    if(icon_map[caption]) then icon = icon_map[caption]() end 
-
-    local text = Text{ text = caption }:set( STYLE )
-    text.name = "caption"
-    text.reactive = true
-    local ring = assets( "menu-item-ring" , make_ring )
-    local focus = assets( "assets/button-focus.png" )
-    local text_category, line_category
-    
-    if (caption == "Text".."\t\t\t\t".."[T]") then 
-	text_category = Text{ text = "Insert : "}:set(STYLE)
-    elseif (caption == "LEFT SIDE      ") then
-	text_category = Text{ text = "Align : "}:set(STYLE)
-    elseif (caption == "Horizontally	  ") then
-	text_category = Text{ text = "Distribute : "}:set(STYLE)
-    elseif (caption ==  "Bring To Front" ) then 
-	text_category = Text{ text = "Arrange : "}:set(STYLE)
-    elseif ( caption == "Delete".."\t\t     ".."[Del]") then
-	--line_category = make_line()
-    elseif (caption == "Reference Image        ") then
-	text_category = Text{ text = "Transparency Grid : "}:set(STYLE)
-    elseif (caption == "Add Horiz. Line	[H]") then
-	text_category = Text{ text = "Guide Line : "}:set(STYLE)
-    end 
-        
-    if text_category ~= nil then 
-        text_category.reactive = false
-	if(icon ~= nil) then 
-	group = Group
-    	{
-        	size = { WIDTH , HEIGHT + text_category.h + PADDING_Y },
-        	children =
-        	{
-		icon:set{position = {280, text_category.h + PADDING_Y + 15}, scale = {0.75, 0.75}},
-	    	text_category:set{position = {5, 6}},
-            	ring:set{ position = { 0 , text_category.h + PADDING_Y } },
-            	focus:set{ position = { 0 , text_category.h + PADDING_Y } , size = { WIDTH , HEIGHT } , opacity = 0 },
-            	text:set{ position = { 30 , text_category.h + PADDING_Y + 15 } }
-        	}
-    	}  
-	else 
-	group = Group
-    	{
-        	size = { WIDTH , HEIGHT + text_category.h + PADDING_Y },
-        	children =
-        	{
-	    	text_category:set{position = {5, 6}},
-            	ring:set{ position = { 0 , text_category.h + PADDING_Y } },
-            	focus:set{ position = { 0 , text_category.h + PADDING_Y } , size = { WIDTH , HEIGHT } , opacity = 0 },
-            	text:set{ position = { 30 , text_category.h + PADDING_Y + 15 } }
-        	}
-    	} 
-	end 
-    elseif line_category  ~= nil then 
-	group = Group
-    	{
-        	size = { WIDTH , HEIGHT + line_category.h },
-        	children =
-        	{
-		line_category:set{ position = {0,PADDING_Y } }, 
-            	ring:set{ position = { 0 , PADDING_Y *2 } },
-            	focus:set{ position = { 0 , PADDING_Y *2 } , size = { WIDTH , HEIGHT} , opacity = 0 },
-            	text:set{ position = { 30 , PADDING_Y *2 + 15 } }
-        	}
-    	}
-    elseif( icon == nil ) then  
- 	group = Group
-    	{
-        	size = { WIDTH , HEIGHT },
-        	children =
-        	{
-            	ring:set{ position = { 0 , 0} },
-            	focus:set{ position = { 0 , 0} , size = { WIDTH , HEIGHT } , opacity = 0 },
-            	text:set{ position = { 30 , 15 } }
-        	}
-    	}
-    else
- 	group = Group
-    	{
-        	size = { WIDTH , HEIGHT },
-        	children =
-        	{
-		icon:set{position = {280, 15 }, scale = {0.75, 0.75}},
-            	ring:set{ position = { 0 , 0} },
-            	focus:set{ position = { 0 , 0} , size = { WIDTH , HEIGHT } , opacity = 0 },
-            	text:set{ position = { 30 , 15 } }
-        	}
-    	}
-    end 
-
-    function group.extra.on_focus_in()
-         focus.opacity = 255
-    end
-    
-    function group.extra.on_focus_out()
-    	 focus.opacity = 0
-    end
-    
-    if(item_map[caption]) then 
-         group.name = item_map[caption]()
-    end 
-    return group
-	
-end
-
--------------------------------------------------------------------------------
--- Makes a text menu item with out a ring around it 
--------------------------------------------------------------------------------
-
-function factory.make_text_menu ( assets , caption )
-
-    local STYLE         = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
-    local PADDING_X     = 7 -- 7  The focus ring has this much padding around it
-    local PADDING_Y     = 7
-    local WIDTH         = 330 + ( PADDING_X * 2 )
-    local HEIGHT        = 46  + ( PADDING_Y * 2 )
-    local BORDER_WIDTH  = 1-- 2
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-      
-    local text = Text{ text = caption }:set( STYLE )
-    
-    text.name = "caption"
-
-    text.reactive = false 
-
-    local group = Group
-    {
-        size = { WIDTH , HEIGHT },
-        children =
-        {
-            text:set{ position = { 30 , 15 } }
-        }
-    }
-        
-    return group
-
-end
-
--------------------------------------------------------------------------------
--- Makes a text menu item with two white arrows
--------------------------------------------------------------------------------
-
-function factory.make_text_side_selector( assets , caption )
-
-    local STYLE         = { font = "DejaVu Sans 26px" , color = "FFFFFF" }
-    local PADDING_X     = 7 -- The focus ring has this much padding around it
-    local PADDING_Y     = 7  
-    local WIDTH         = 300 + ( PADDING_X * 2 )
-    local HEIGHT        = 46  + ( PADDING_Y * 2 )
-    local ARROW_COLOR   = "FFFFFF"
-    local ARROW_WIDTH   = HEIGHT / 4
-    local ARROW_HEIGHT  = HEIGHT / 3
-    
-    local function make_arrow()
-        local arrow = Canvas{ size = { ARROW_WIDTH , ARROW_HEIGHT } }
-        arrow:begin_painting()
-        arrow:set_source_color( ARROW_COLOR )
-        arrow:move_to( 0 , ARROW_HEIGHT / 2 )
-        arrow:line_to( ARROW_WIDTH , 0 )
-        arrow:line_to( ARROW_WIDTH , ARROW_HEIGHT )
-        arrow:fill()
-        arrow:finish_painting()
-	if arrow.Image then
-  	 arrow= arrow:Image()
-        end
-
-        return arrow
-    end
-    
-    local text = Text{ text = caption }:set( STYLE )
-    
-    local l_arrow = assets( "menu-item-arrow" , make_arrow )
-    local r_arrow = assets( "menu-item-arrow" , make_arrow )
-    
-    l_arrow.anchor_point = l_arrow.center
-    r_arrow.anchor_point = r_arrow.center
-    
-    r_arrow.z_rotation = { 180 , 0 , 0 }
-    
-    local focus = assets( "assets/button-focus.png" )
-
-    local group = Group
-    {
-        size = { WIDTH , HEIGHT },
-        children =
-        {
-            l_arrow:set{ position = { PADDING_X + ARROW_WIDTH / 2 , HEIGHT / 2 } },
-            r_arrow:set{ position = { WIDTH - PADDING_X - ARROW_WIDTH / 2 , HEIGHT / 2 } },
-            focus:set
-            {
-                position =
-                {
-                    PADDING_X + ARROW_WIDTH * 2,
-                    0
-                } ,
-                size =
-                {
-                    WIDTH - ( PADDING_X * 2 + ARROW_WIDTH * 4 ),
-                    HEIGHT
-                } ,
-                opacity = 0
-            },
-            text:set{ position = { ( WIDTH - text.w ) / 2 , ( HEIGHT - text.h ) / 2 } }
-        }
-    }
-    
-    function group.extra.on_focus_in()
-        focus.opacity = 255
-    end
-    
-    function group.extra.on_focus_out()
-        focus.opacity = 0
-    end
-    
-    return group
-
-end
-    
--------------------------------------------------------------------------------
--- Makes an app tile with a polaroid-style frame
--------------------------------------------------------------------------------
-    
-function factory.make_app_tile( assets , caption , app_id )
-
-    local STYLE         = { font = "DejaVu Sans 24px" , color = "FFFFFF" }
-    local PADDING_X     = 17 -- The focus ring has this much padding around it
-    local PADDING_Y     = 17.5
-    local FRAME_SHADOW  = 1
-    local WIDTH         = 300 + ( PADDING_X * 2 )
-    local HEIGHT        = 200 + ( PADDING_Y * 2 )
-    local ICON_PADDING  = 6
-    local ICON_WIDTH    = 300 - ICON_PADDING * 2
-    local CAPTION_X     = PADDING_X + ICON_PADDING + FRAME_SHADOW + 1
-    local CAPTION_Y     = HEIGHT - PADDING_Y - 37
-    local CAPTION_WIDTH = 300 - ( FRAME_SHADOW * 2 ) - ( ICON_PADDING * 2 )
-    
-    local function make_icon( app_id )
-        local icon = Image()
-        if icon:load_app_icon( app_id , "launcher-icon.png" ) then
-            return icon
-        end
-        return Image{ src = "assets/generic-app-icon.jpg" }
-    end
-    
-    local text = Text{ text = caption }:set( STYLE )
-    
-    local focus = assets( "assets/app-icon-focus.png" )
-    
-    local white_frame = assets( "assets/icon-overlay-white-text-label.png" )
-
-    local black_frame = assets( "assets/icon-overlay-black-text-label.png" )
-    
-    local icon = assets( app_id , make_icon )
-    
-    local scale = ICON_WIDTH / icon.w
-    
-    icon.w = ICON_WIDTH
-    icon.h = icon.h * scale
-    
-    local group = Group
-    {
-        size = { WIDTH , HEIGHT },
-        children =
-        {
-            focus:set{ position = { 0 , 0 }, size = { WIDTH , HEIGHT }, opacity = 0 },
-            icon:set
-            {
-                position = { PADDING_X + ICON_PADDING + FRAME_SHADOW , PADDING_Y + ICON_PADDING + FRAME_SHADOW } 
-            },
-            black_frame:set
-            {
-                position = { PADDING_X + FRAME_SHADOW , PADDING_Y + FRAME_SHADOW } ,
-                size = { WIDTH - PADDING_X * 2 , HEIGHT - PADDING_Y * 2 },
-                opacity = 0
-            },
-            white_frame:set
-            {
-                position = { PADDING_X + FRAME_SHADOW , PADDING_Y + FRAME_SHADOW } ,
-                size = { WIDTH - PADDING_X * 2 , HEIGHT - PADDING_Y * 2 }
-            },
-            text:set
-            {
-                position = { CAPTION_X , CAPTION_Y },
-                width = CAPTION_WIDTH,
-                ellipsize = "END"
-            }
-        }
-    }
-    
-    function group.extra.on_focus_in()
-        focus.opacity = 255
-        black_frame.opacity = 255
-        white_frame.opacity = 0
-        text.color = "FFFFFFFF"
-    end
-    
-    function group.extra.on_focus_out()
-        focus.opacity = 0
-        black_frame.opacity = 0
-        white_frame.opacity = 255
-        text.color = "000000FF"
-    end
-    
-    return group
-
-end
-
-local code_map =
-{
-        [ "Text" ] = function()  size = {800, 800} color =  {0, 25, 25, 255} return size, color end,
-        [ "Image" ] = function()  size = {800, 550} color =  {0, 25, 25, 255}  return size, color end,
-        [ "Rectangle" ] = function()  size = {800, 650} color =  {0, 25, 25, 255} return size, color end,
-        [ "Clone" ] = function()  size = {800, 600} color =  {0, 25, 25, 255} return size, color end,
-        [ "Group" ] = function()  size = {800, 510} color =  {0, 25, 25, 255} return size, color end,
-	[ "Video" ] =  function()  size = {1500, 860} color =  {0, 25, 25, 255} return size, color end,
-	[ "Widget" ] =  function()  size = {800, 800} color =  {0, 25, 25, 255} return size, color end,
-}
-
 local color_map =
 {
         [ "Text" ] = function()  size = {490, 680} color = {25,25,25,100}  return size, color end,
@@ -552,12 +71,12 @@ local color_map =
         [ "OSK" ] = function()  size = {510, 680} color = {25,25,25,100}  return size, color end,
 
         [ "widgets" ] = function() size = {600, 620} color = {25,25,25,100}  return size, color end,
-        --[ "Code" ] = function(file_list_size)  code_map[file_list_size]() return size, color end,
         [ "Code" ] = function(file_list_size) size = {800, 600} color =  {25, 25, 25, 100}  return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = {25,25,25,100}  return size, color end
 }
+
 
 -------------------------------------------------------------------------------
 -- Makes a popup window background 
@@ -740,11 +259,13 @@ function factory.make_msgw_button_item( assets , caption)
         focus.opacity = 0
     end
 	
---group.name = name -- (savefile, cancel, yes, no, openfile, reopenfile, open_imagefile, reopenImg, open_videofile)
-
     return group, text
 
 end
+
+---------------------------------------------------------
+-- 	editor.ui_elements call this function 
+---------------------------------------------------------
 
 function factory.make_msgw_widget_item( assets , caption)
 
@@ -769,8 +290,8 @@ function factory.make_msgw_widget_item( assets , caption)
             BORDER_RADIUS )
         ring:stroke()
         ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
+		if ring.Image then
+  	 		ring= ring:Image()
         end
 
         return ring
@@ -797,8 +318,6 @@ function factory.make_msgw_widget_item( assets , caption)
         }
     }
     
-    
-
     function group.extra.on_focus_in()
         focus.opacity = 255
 	group:grab_key_focus(group)
@@ -808,8 +327,6 @@ function factory.make_msgw_widget_item( assets , caption)
         focus.opacity = 0
     end
 	
---group.name = name -- (savefile, cancel, yes, no, openfile, reopenfile, open_imagefile, reopenImg, open_videofile)
-
 	group.reactive = true
     return group, text
 
@@ -819,7 +336,6 @@ end
 -------------------------------------------------------------------------------
 -- Makes a scroll bar item
 -------------------------------------------------------------------------------
-
 
 function factory.make_y_scroll_box()
     local PADDING_X     = 5 --7
@@ -981,10 +497,10 @@ function factory.make_y_scroll_bar(canvas_sz)
             S_WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
             S_HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
             BORDER_RADIUS )
-	ring:fill()
+		ring:fill()
         ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
+		if ring.Image then
+  	 		ring= ring:Image()
         end
         return ring
     end
@@ -1132,15 +648,6 @@ function factory.draw_small_focus_ring()
         return ring
 end
 
---[[
-	round_rectangle ( 
-        PADDING_X + BORDER_WIDTH /2,
-        PADDING_Y + BORDER_WIDTH /2,
-        w - BORDER_WIDTH - PADDING_X * 2 ,
-        h - BORDER_WIDTH - PADDING_Y * 2 ,
-        BORDER_RADIUS )
-]]--
-
 function factory.draw_tiny_focus_ring()
         local ring = Canvas{ size = {150, 50} }
         ring:begin_painting()
@@ -1166,39 +673,39 @@ function factory.draw_ring()
     	ring:set_line_width (4)
         ring:stroke()
         ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
+		if ring.Image then
+  	 		ring= ring:Image()
         end
         return ring
 end
 
 function factory.draw_small_ring()
 	local ring = Canvas{ size = {375, 60} }
-        ring:begin_painting()
-        ring:set_source_color( "FFFFFFC0" )
-        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 365, 45, 12)
-    	ring:set_line_width (4)
-        ring:stroke()
-        ring:finish_painting()
+    ring:begin_painting()
+    ring:set_source_color( "FFFFFFC0" )
+    ring:round_rectangle( 7 + 1/2, 7 + 1/2, 365, 45, 12)
+    ring:set_line_width (4)
+    ring:stroke()
+    ring:finish_painting()
 	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
+  		ring= ring:Image()
+    end
+    return ring
 end
 
 
 function factory.draw_tiny_ring()
 	local ring = Canvas{ size = {150, 50} }
-        ring:begin_painting()
-        ring:set_source_color( "FFFFFFC0" )
-        ring:round_rectangle( 4, 4, 142, 42, 12 )
-    	ring:set_line_width (4)
-        ring:stroke()
-        ring:finish_painting()
+    ring:begin_painting()
+    ring:set_source_color( "FFFFFFC0" )
+    ring:round_rectangle( 4, 4, 142, 42, 12 )
+    ring:set_line_width (4)
+    ring:stroke()
+    ring:finish_painting()
 	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
+  		ring= ring:Image()
+    end
+    return ring
 end
 
 -------------------------------------------------------------------------------
@@ -1212,23 +719,24 @@ function factory.draw_line()
 
 
 	local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
-        line:begin_painting()
-        line:new_path()
-        line:move_to (0,0)
-        line:line_to (WIDTH, 0)
-    	line:set_line_width (LINE_WIDTH)
-        line:set_source_color(LINE_COLOR)
-    	line:stroke (true)
-    	line:fill (true)
-        line:finish_painting()
+    line:begin_painting()
+    line:new_path()
+    line:move_to (0,0)
+    line:line_to (WIDTH, 0)
+    line:set_line_width (LINE_WIDTH)
+    line:set_source_color(LINE_COLOR)
+    line:stroke (true)
+    line:fill (true)
+    line:finish_painting()
 	if line.Image then
-  	 line= line:Image()
-        end
-        return line
+  		line= line:Image()
+    end
+    return line
 end 
 
 
-local org_items
+local org_items    
+
 -------------------------------------------------------------------------------
 -- Makes a popup window contents (attribute name, input text, input button)
 -------------------------------------------------------------------------------
@@ -1243,7 +751,7 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 
 	local text
 
-	 local function make_focus_ring(w, h)
+	local function make_focus_ring(w, h)
 		local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
         ring:set_source_color({255,0,0,255})
@@ -1258,7 +766,6 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
   	 		ring= ring:Image()
         end
         return ring
-
     end
 
     local function make_ring(w, h)
@@ -1392,8 +899,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 		group:add(item_plus, label_plus, separator_plus) 
 
-
-		
 		function separator_plus:on_button_down(x,y)
 			separator_plus.on_focus_in()
 			return true 
@@ -1950,9 +1455,8 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 
 end 
 end 
+
 function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item_s, save_items, old_inspector) 
-
-
     local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
     local TEXT_SIZE     = 12
     local PADDING_X     = 0
@@ -1981,11 +1485,6 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		end 
 	end 	
 
---[[
-    if item_n then print("item_n", item_n) end 
-    if item_v then print("item_v", item_v) end 
-    if item_s then print("item_s", item_s) end 
-]]
     local function text_reactive()
 	for i, c in pairs(g.children) do
 	     if(c.type == "Text") then 
@@ -2364,51 +1863,11 @@ end
 
 function factory.draw_anchor_pointer() 
 
-sero = Rectangle
-	{
-		name="sero",
-		border_color={255,255,255,192},
-		border_width=0,
-		--color={0,255,0,255},
-		color={255,25,25,255},
-		size = {4,30},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {12.5,0},
-		opacity = 255
-	}
+sero = Rectangle { name="sero", border_color={255,255,255,192}, border_width=0, color={255,25,25,255}, size = {4,30}, anchor_point = {0,0}, x_rotation={0,0,0}, y_rotation={0,0,0}, z_rotation={0,0,0}, position = {12.5,0}, opacity = 255 }
 
-garo = Rectangle
-	{
-		name="garo",
-		border_color={255,255,255,192},
-		border_width=0,
-		--color={0,255,0,255},
-		color={255,25,25,255},
-		size = {30,4},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {0,12},
-		opacity = 255
-	}
+garo = Rectangle { name="garo", border_color={255,255,255,192}, border_width=0, color={255,25,25,255}, size = {30,4}, anchor_point = {0,0}, x_rotation={0,0,0}, y_rotation={0,0,0}, z_rotation={0,0,0}, position = {0,12}, opacity = 255 }
 
-anchor_point = Group
-	{
-		--name="mouse_pointer",
-		size={30,30},
-		position = {0,0},
-		children = {sero, garo},
-		scale = {1,1,0,0},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		opacity = 255
-	}
+anchor_point = Group { size={30,30}, position = {0,0}, children = {sero, garo}, scale = {1,1,0,0}, anchor_point = {0,0}, x_rotation={0,0,0}, y_rotation={0,0,0}, z_rotation={0,0,0}, opacity = 255 }
 
 	anchor_point.anchor_point = {anchor_point.w/2, anchor_point.h/2}
 	anchor_point.scale = {0.5, 0.5}
@@ -2417,49 +1876,11 @@ end
 
 function factory.draw_mouse_pointer() 
 
-sero = Rectangle
-	{
-		name="sero",
-		border_color={255,255,255,192},
-		border_width=0,
-		color={255,255,255,255},
-		size = {5,30},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {12.5,0},
-		opacity = 255
-	}
+sero = Rectangle { name="sero", border_color={255,255,255,192}, border_width=0, color={255,255,255,255}, size = {5,30}, anchor_point = {0,0}, x_rotation={0,0,0}, y_rotation={0,0,0}, z_rotation={0,0,0}, position = {12.5,0}, opacity = 255 }
 
-garo = Rectangle
-	{
-		name="garo",
-		border_color={255,255,255,192},
-		border_width=0,
-		color={255,255,255,255},
-		size = {30,5},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {0,12},
-		opacity = 255
-	}
+garo = Rectangle { name="garo", border_color={255,255,255,192}, border_width=0, color={255,255,255,255}, size = {30,5}, anchor_point = {0,0}, x_rotation={0,0,0}, y_rotation={0,0,0}, z_rotation={0,0,0}, position = {0,12}, opacity = 255 }
 
-mouse_pointer = Group
-	{
-		name="mouse_pointer",
-		size={30,30},
-		position = {300,300},
-		children = {sero, garo},
-		scale = {1,1,0,0},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		opacity = 255
-	}
+mouse_pointer = Group { name="mouse_pointer", size={30,30}, position = {300,300}, children = {sero, garo}, scale = {1,1,0,0}, anchor_point = {0,0}, x_rotation={0,0,0}, y_rotation={0,0,0}, z_rotation={0,0,0}, opacity = 255 }
 
 	mouse_pointer.anchor_point = {mouse_pointer.w/2, mouse_pointer.h/2}
 	return mouse_pointer
@@ -2470,45 +1891,13 @@ local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 1
 
-rect_minus = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		name = "rect_minus",
-		position = {0,0,0},
-		size = {30,30},
-		opacity = 255,
-	}
+rect_minus = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, name = "rect_minus", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-text_minus = Text
-	{
-		color = l_col, 
-		font = "DejaVu Sans bold 30px",
-		text = "-",
-		editable = false,
-		wants_enter = false,
-		wrap = false,
-		wrap_mode = "CHAR",
-		name = "text_minus",
-		cursor_visible = false,
-		position = {10,-5,0},
-		size = {30,30},
-		opacity = 255,
-	}
+text_minus = Text { color = l_col, font = "DejaVu Sans bold 30px", text = "-", editable = false, wants_enter = false, wrap = false, wrap_mode = "CHAR", name = "text_minus", cursor_visible = false, position = {10,-5,0}, size = {30,30}, opacity = 255, }
 
 
-minus = Group
-	{
-		scale = {l_scale,l_scale,0,0},
-		name = "minus",
-		position = {536,727,0},
-		size = {30,30},
-		opacity = 255,
-		children = {rect_minus,text_minus},
-		reactive = true,
-	}
+minus = Group { scale = {l_scale,l_scale,0,0}, name = "minus", position = {536,727,0}, size = {30,30}, opacity = 255, children = {rect_minus,text_minus}, reactive = true, }
 
 return minus
 end
@@ -2517,39 +1906,13 @@ function factory.draw_up()
 local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 0.8
-rect_up = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		name = "rect_up",
-		position = {0,0,0},
-		size = {30,30},
-		opacity = 255,
-	}
+rect_up = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, name = "rect_up", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-img_up = Image
-	{
-		src = "/lib/assets/left.png",
-		scale = {l_scale,l_scale,0,0},
-		z_rotation = {90,0,0},
-		anchor_point = {0,0},
-		name = "img_up",
-		position = {30,5,0},
-		opacity = 255,
-	}
+img_up = Image { src = "/lib/assets/left.png", scale = {l_scale,l_scale,0,0}, z_rotation = {90,0,0}, anchor_point = {0,0}, name = "img_up", position = {30,5,0}, opacity = 255, }
 
 
-up = Group
-	{
-		name = "up",
-		position = {0,0,0},
-		size = {30,30},
-		opacity = 255,
-		children = {rect_up,img_up},
-		reactive = true,
-	}
+up = Group { name = "up", position = {0,0,0}, size = {30,30}, opacity = 255, children = {rect_up,img_up}, reactive = true, }
 
 return up
 end
@@ -2560,39 +1923,13 @@ local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 0.8
 
-rect_down = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		name = "rect_down",
-		position = {0,0,0},
-		size = {30,30},
-		opacity = 255,
-	}
+rect_down = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, name = "rect_down", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-img_down = Image
-	{
-		src = "lib/assets/left.png",
-		scale = {l_scale,l_scale,0,0},
-		z_rotation = {270,0,0},
-		anchor_point = {0,0},
-		name = "img_down",
-		position = {0,23,0},
-		opacity = 255,
-	}
+img_down = Image { src = "lib/assets/left.png", scale = {l_scale,l_scale,0,0}, z_rotation = {270,0,0}, anchor_point = {0,0}, name = "img_down", position = {0,23,0}, opacity = 255, }
 
 
-down = Group
-	{
-		name = "down",
-		position = {0,0,0},
-		size = {30,30},
-		opacity = 255,
-		children = {rect_down,img_down},
-		reactive = true,
-	}
+down = Group { name = "down", position = {0,0,0}, size = {30,30}, opacity = 255, children = {rect_down,img_down}, reactive = true, }
 
 return down
 end
@@ -2603,59 +1940,13 @@ local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 1
 
-rect_plus = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect_plus",
-		position = {0,0,0},
-		size = {30,30},
-		opacity = 255,
-	}
+rect_plus = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_plus", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-text_plus = Text
-	{
-		color = l_col, 
-		font = "DejaVu Sans bold 30px",
-		text = "+",
-		editable = false,
-		wants_enter = false,
-		wrap = false,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text_plus",
-		position = {3,-5,0},
-		size = {30,30},
-		opacity = 255,
-		cursor_visible = false,
-	}
+text_plus = Text { color = l_col, font = "DejaVu Sans bold 30px", text = "+", editable = false, wants_enter = false, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_plus", position = {3,-5,0}, size = {30,30}, opacity = 255, cursor_visible = false, }
 
 
-plus = Group
-	{
-		scale = {l_scale,l_scale,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "plus",
-		position = {0,0,0},
-		size = {30,30},
-		opacity = 255,
-		children = {rect_plus,text_plus},
-		reactive = true,
-	}
+plus = Group { scale = {l_scale,l_scale,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "plus", position = {0,0,0}, size = {30,30}, opacity = 255, children = {rect_plus,text_plus}, reactive = true, }
 
 return plus
 end
@@ -2665,155 +1956,32 @@ local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 1
 
-text_label = Text
-	{
-		color = {255,255,255,255},
-		font = "FreeSans Medium 12px",
-		text = "Label +",
-		name = "text_label",
-		position = {7,0,0},
-		opacity = 255,
-	}
+text_label = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "Label +", name = "text_label", position = {7,0,0}, opacity = 255, }
 
 rect_label = ui_element.button{font ="FreeSans Medium 12px", label="Label +", ui_width=100, ui_hieght=25, skin="inspector"}
 rect_label.name = "rect_label"
 rect_label.position = {0,0,0}
 
 
-label_plus = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "label_plus",
-		position = {0,0,0},
-		size = {127,35},
-		opacity = 255,
-		children = {text_label,rect_label},
-		reactive = true,
-	}
+label_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "label_plus", position = {0,0,0}, size = {127,35}, opacity = 255, children = {text_label,rect_label}, reactive = true, }
 
 
-text_item = Text
-	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "Item +",
-		editable = false,
-		wants_enter = true,
-		wrap = false,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text_item",
-		position = {10,0,0},
-		size = {120,30},
-		opacity = 255,
-	}
+text_item = Text { color = {255,255,255,255}, font = "DejaVu Sans 26px", text = "Item +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_item", position = {10,0,0}, size = {120,30}, opacity = 255, } 
 
-rect_item = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect_item",
-		position = {0,0,0},
-		size = {110,35},
-		opacity = 255,
-	}
+rect_item = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_item", position = {0,0,0}, size = {110,35}, opacity = 255, }
 
-item_plus = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "item_plus",
-		position = {129,0,0},
-		size = {130,35},
-		opacity = 255,
-		children = {text_item,rect_item},
-		reactive = true,
-	}
+item_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "item_plus", position = {129,0,0}, size = {130,35}, opacity = 255, children = {text_item,rect_item}, reactive = true, }
 
 
-text_separator = Text
-	{
-		color = {255,255,255,255},
-		font = "DejaVu Sans 26px",
-		text = "Separator +",
-		editable = false,
-		wants_enter = true,
-		wrap = false,
-		wrap_mode = "CHAR",
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "text_separator",
-		position = {7,0,0},
-		size = {180,30},
-		opacity = 255,
-	}
+text_separator = Text { color = {255,255,255,255}, font = "DejaVu Sans 26px", text = "Separator +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_separator", position = {7,0,0}, size = {180,30}, opacity = 255, }
 
 
-rect_separator = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect_separator",
-		position = {0,0,0},
-		size = {180,35},
-		opacity = 255,
-	}
+rect_separator = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_separator", position = {0,0,0}, size = {180,35}, opacity = 255, }
 
-separator_plus = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "separator_plus",
-		position = {249,0,0},
-		size = {187,35},
-		opacity = 255,
-		children = {text_separator,rect_separator},
-		reactive = true,
-	}
+separator_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "separator_plus", position = {249,0,0}, size = {187,35}, opacity = 255, children = {text_separator,rect_separator}, reactive = true, }
 
 
-items_plus = Group
-	{
-		scale = {l_scale,l_scale,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "items_plus",
-		position = {335,534,0},
-		size = {436,46},
-		opacity = 255,
-		children = {label_plus,item_plus,separator_plus},
-	}
+items_plus = Group { scale = {l_scale,l_scale,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "items_plus", position = {335,534,0}, size = {436,46}, opacity = 255, children = {label_plus,item_plus,separator_plus}, }
 
 return items_plus
 
@@ -2825,355 +1993,121 @@ local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 0.9
 
-rect1 = Rectangle
-	{
-		color = l_col,
-		border_color = {255,255,255,255},
-		border_width = 0,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect1",
-		position = {13,4,0},
-		size = {l_wid,25},
-		opacity = 255,
+rect1 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect1", position = {13,4,0}, size = {l_wid,25}, opacity = 255, }
+
+
+rect2 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect2", position = {2,12,0}, size = {25,l_wid}, opacity = 255, }
+
+
+rect0 = Rectangle { color = {25,25,25,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect0", position = {0,0,0}, size = {29,29}, opacity = 255, }
+
+
+plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "plus", position = {0,0,0}, size = {29,29}, opacity = 255, children = {rect1,rect2,rect0}, }
+
+
+rect5 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect5", position = {2,12,0}, size = {25, l_wid}, opacity = 255, }
+
+
+rect4 = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect4", position = {0,0,0}, size = {29,29}, opacity = 255, }
+
+
+minus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "minus", position = {36,0,0}, size = {29,29}, opacity = 255, children = {rect5,rect4}, }
+
+
+	plus_minus = Group { scale = {l_scale,l_scale,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "plus_minus", position = {0,0,0}, size = {65,29}, opacity = 255, children = {plus, minus},
 	}
 
-
-rect2 = Rectangle
-	{
-		color = l_col,
-		border_color = {255,255,255,255},
-		border_width = 0,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect2",
-		position = {2,12,0},
-		size = {25,l_wid},
-		opacity = 255,
-	}
-
-
-rect0 = Rectangle
-	{
-		color = {25,25,25,0},
-		border_color = l_col,
-		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect0",
-		position = {0,0,0},
-		size = {29,29},
-		opacity = 255,
-	}
-
-
-plus = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "plus",
-		position = {0,0,0},
-		size = {29,29},
-		opacity = 255,
-		children = {rect1,rect2,rect0},
-	}
-
-
-rect5 = Rectangle
-	{
-		color = l_col,
-		border_color = {255,255,255,255},
-		border_width = 0,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect5",
-		position = {2,12,0},
-		size = {25, l_wid},
-		opacity = 255,
-	}
-
-
-rect4 = Rectangle
-	{
-		color = {255,255,255,0},
-		border_color = l_col,
-		border_width = l_wid,
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "rect4",
-		position = {0,0,0},
-		size = {29,29},
-		opacity = 255,
-	}
-
-
-minus = Group
-	{
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "minus",
-		position = {36,0,0},
-		size = {29,29},
-		opacity = 255,
-		children = {rect5,rect4},
-	}
-
-
-plus_minus = Group
-	{
-		scale = {l_scale,l_scale,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "plus_minus",
-		position = {0,0,0},
-		size = {65,29},
-		opacity = 255,
-		children = {plus, minus},
-	}
-
-return plus_minus
+	return plus_minus
 end 
 
 function factory.draw_focus_changer(v)
 
-local focus = Group
+	local focus = Group
 	{
 		name = "focusChanger",
 		position = {0,0,0},
 		reactive = true,
 	}
 
-focus_changer_bgU = Image{src = "lib/assets/assign-focus-up.png", name = "focuschanger_bgU", position = {85,25}}
-focus_changer_bgD = Image{src = "lib/assets/assign-focus-down.png", name = "focuschanger_bgD", position = {85,195}}
-focus_changer_bgR = Image{src = "lib/assets/assign-focus-right.png", name = "focuschanger_bgR", position = {170, 110}}
-focus_changer_bgL = Image{src = "lib/assets/assign-focus-left.png", name = "focuschanger_bgL", position = {0,110}}
-focus_changer_bgE = Image{src = "lib/assets/assign-focus-ok.png", name = "focuschanger_bgE", position = {85,110}}
+	focus_changer_bgU = Image{src = "lib/assets/assign-focus-up.png", name = "focuschanger_bgU", position = {85,25}}
+	focus_changer_bgD = Image{src = "lib/assets/assign-focus-down.png", name = "focuschanger_bgD", position = {85,195}}
+	focus_changer_bgR = Image{src = "lib/assets/assign-focus-right.png", name = "focuschanger_bgR", position = {170, 110}}
+	focus_changer_bgL = Image{src = "lib/assets/assign-focus-left.png", name = "focuschanger_bgL", position = {0,110}}
+	focus_changer_bgE = Image{src = "lib/assets/assign-focus-ok.png", name = "focuschanger_bgE", position = {85,110}}
 
-text11 = Text
-	{
-		color = {255,255,255,255},
-		font = "FreeSans Medium12px",
-		text = "Assign Focus".."["..v.name.."]",
-		name = "text11",
-		position = {0,0,0},
-	}
+	text11 = Text { color = {255,255,255,255}, font = "FreeSans Medium12px", text = "Assign Focus".."["..v.name.."]", name = "text11", position = {0,0,0}, }
 
-gU = Rectangle
-	{
-		name = "gU",
-		position = {85,25,0},
-		size = {85,85},
-		opacity = 255,
-		color = {255,255,255,0},
-		reactive = true,
-	}
+	gU = Rectangle { name = "gU", position = {85,25,0}, size = {85,85}, opacity = 255, color = {255,255,255,0}, reactive = true, } 
 
-textU = Text
-	{
-		color = {255,255,255,255},
-		font = "FreeSans Medium 12px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		name = "textU",
-		position = {89,67},
-		size = {77,36},
-		opacity = 255,
-		alignment = "CENTER"
-	}
+	textU = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "", wants_enter = true, wrap = true, wrap_mode = "CHAR", name = "textU", position = {89,67}, size = {77,36}, opacity = 255, alignment = "CENTER" }
 
-gL = Rectangle
-	{
-		name = "gL",
-		position = {0,110,0},
-		size = {85, 85},
-		opacity = 255,
-		color = {255,255,255,0},
-		reactive = true,
-	}
+	gL = Rectangle { name = "gL", position = {0,110,0}, size = {85, 85}, opacity = 255, color = {255,255,255,0}, reactive = true, } 
 
+	textL = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "", wants_enter = true, wrap = true, wrap_mode = "CHAR", name = "textL", position = {4,152,0}, size = {77, 36}, opacity = 255, alignment = "CENTER" }
 
-textL = Text
-	{
-		color = {255,255,255,255},
-		font = "FreeSans Medium 12px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		name = "textL",
-		position = {4,152,0},
-		size = {77, 36},
-		opacity = 255,
-		alignment = "CENTER"
-	}
+	gE = Rectangle { name = "gE", position = {85,110}, size = {85,85}, opacity = 255, color = {255,255,255,0}, reactive = true, }
 
-gE = Rectangle
-	{
-		name = "gE",
-		position = {85,110},
-		size = {85,85},
-		opacity = 255,
-		color = {255,255,255,0},
-		reactive = true,
-	}
+	textE = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "", wants_enter = true, wrap = true, wrap_mode = "CHAR", name = "textE", position = {89,152,0}, size = {77,36}, opacity = 255, alignment = "CENTER" }
 
+	gR = Rectangle { name = "gR", position = {170,110}, size = {85,85}, opacity = 255, color = {255,255,255,0}, reactive = true, }
 
-textE = Text
-	{
-		color = {255,255,255,255},
-		font = "FreeSans Medium 12px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		name = "textE",
-		position = {89,152,0},
-		size = {77,36},
-		opacity = 255,
-		alignment = "CENTER"
-	}
+	textR = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "", wants_enter = true, wrap = true, wrap_mode = "CHAR", name = "textR", position = {174, 152}, size = {77,36}, opacity = 255, alignment = "CENTER" }
 
-gR = Rectangle
-	{
-		name = "gR",
-		position = {170,110},
-		size = {85,85},
-		opacity = 255,
-		color = {255,255,255,0},
-		reactive = true,
-	}
+	gD = Rectangle { name = "gD", position = {85,195} , size = {85,85}, opacity = 255, color = {255,255,255,0}, reactive = true, }
 
+	textD = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "", wants_enter = true, wrap = true, wrap_mode = "CHAR", name = "textD", position = {90,237}, size = {75,45}, opacity = 255, alignment = "CENTER" }
 
-
-textR = Text
-	{
-		color = {255,255,255,255},
-		font = "FreeSans Medium 12px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		name = "textR",
-		position = {174, 152},
-		size = {77,36},
-		opacity = 255,
-		alignment = "CENTER"
-	}
-
-
-gD = Rectangle
-	{
-		name = "gD",
-		position = {85,195} ,
-		size = {85,85},
-		opacity = 255,
-		color = {255,255,255,0},
-		reactive = true,
-	}
-
-textD = Text
-	{
-		color = {255,255,255,255},
-		font = "FreeSans Medium 12px",
-		text = "",
-		wants_enter = true,
-		wrap = true,
-		wrap_mode = "CHAR",
-		name = "textD",
-		position = {90,237},
-		size = {75,45},
-		opacity = 255,
-		alignment = "CENTER"
-	}
-
-
---text11 : Assign Focus [Object Name] 
---focus:add(text11,focus_changer_bg, gU,textU,gL,textL,gE,textE,gR,textR, gD, textD)
-focus:add(text11,focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, 
-		  focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
+	focus:add(text11,focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
 	
-function focus.extra.on_focus_in()
-	 if current_focus then 
-	 	current_focus.extra.on_focus_out()
-	 end 
-	 current_focus = focus
-	 for i,j in pairs(focus.children) do
-		if j.type == "Rectangle" then 
-		     local focus_t= j.name:sub(2,-1)
-		     j.border_color = {255,255,255,0}
-		end 
-	 end 
-end 
-
-function focus.extra.on_focus_out(call_by_inspector)
-	focus_type = ""
-	input_mode = S_POPUP
-        for i,j in pairs(focus.children) do
-		if j.type == "Rectangle" then 
-		     local focus_t= j.name:sub(2,-1)
-		     j.border_color = {255,255,255,0}
-		end 
-	end 
-
-end 
-
-function make_on_button_down_f(v)
-     function v:on_button_down(x,y,b,n)
-	 	if focus then 
-			if focus.extra.on_focus_in then 
-        		focus.extra.on_focus_in()
+	function focus.extra.on_focus_in()
+	 	if current_focus then 
+	 		current_focus.extra.on_focus_out()
+	 	end 
+	 	current_focus = focus
+	 	for i,j in pairs(focus.children) do
+			if j.type == "Rectangle" then 
+		     	local focus_t= j.name:sub(2,-1)
+		     	j.border_color = {255,255,255,0}
 			end 
-		end
-	   	focus_type = v.name:sub(2,-1)
-	   	--v:find_child("rect"..focus_type).border_color = {0,255,0,255} -- 
-	   	--v.border_color = {0,255,0,255} -- 
-	   	v.border_color = {255,25,25,255} 
-	   	v.border_width = 2
-	   	if (focus:find_child("text"..focus_type).text ~= "") then
-			focus:find_child("text"..focus_type).text = ""
-	   	end   
-	   	--dolater : add F to mouse pointer 
-	   	input_mode = S_FOCUS
-	   	return true 
+	 	end 
 	end 
-end 
 
+	function focus.extra.on_focus_out(call_by_inspector)
+		focus_type = ""
+		input_mode = S_POPUP
+        for i,j in pairs(focus.children) do
+			if j.type == "Rectangle" then 
+		     	local focus_t= j.name:sub(2,-1)
+		     	j.border_color = {255,255,255,0}
+			end 
+		end 
+	end 
 
+	function make_on_button_down_f(v)
+     	function v:on_button_down(x,y,b,n)
+	 		if focus then 
+				if focus.extra.on_focus_in then 
+        			focus.extra.on_focus_in()
+				end 
+			end
+	   		focus_type = v.name:sub(2,-1)
+	   		v.border_color = {255,25,25,255} 
+	   		v.border_width = 2
+	   		if (focus:find_child("text"..focus_type).text ~= "") then
+				focus:find_child("text"..focus_type).text = ""
+	   		end   
+	   		input_mode = S_FOCUS
+	   		return true 
+		end 
+	end 
 
-for i,j in pairs (focus.children) do 
-     j.reactive = true 
-     if (j.type == "Rectangle") then 
-          make_on_button_down_f(j)
-     end
-end
-
-
-return focus
+	for i,j in pairs (focus.children) do 
+     	j.reactive = true 
+     	if (j.type == "Rectangle") then 
+          	make_on_button_down_f(j)
+     	end
+	end
+	return focus
 end 
 
 return factory
