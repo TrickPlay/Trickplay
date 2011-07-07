@@ -16,9 +16,12 @@ from TreeView import Ui_MainWindow
 from TreeModel import *
 import connection
 from dataTypes import BadDataException
+from model import ElementModel
 
-Qt.Element = Qt.UserRole + 3
+
 Qt.Value = Qt.UserRole + 2
+Qt.Element = Qt.UserRole + 3
+Qt.ItemDepth = Qt.UserRole + 4
 
 #List of roles, ItemDataRole
 
@@ -34,7 +37,7 @@ class StartQT4(QtGui.QMainWindow):
         
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
         QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
-        self.model = QtGui.QStandardItemModel()
+        self.model = ElementModel()
         #self.model = MyModel
         model = self.model
         
@@ -113,13 +116,16 @@ class StartQT4(QtGui.QMainWindow):
         
     def createTree(self):
         
-        self.model.setHorizontalHeaderLabels(["UI Element Property",  "Value"])
-        root = self.model.invisibleRootItem()
-        
-        # Use screen as root, not stage
-        self.data = getTrickplayData()["children"][0]
-        self.createNode(root, self.data)
-        
+#        self.model.setHorizontalHeaderLabels(["UI Element Property",  "Value"])
+#        root = self.model.invisibleRootItem()
+#        
+#        # Use screen as root, not stage
+#        self.data = getTrickplayData()["children"][0]
+#        self.createNode(root, self.data)
+#        
+        self.model.initializeModel()
+        self.ui.Inspector.setModel(self.model)
+        return
         self.proxyModel = QtGui.QSortFilterProxyModel()
         self.proxyModel.setSourceModel(self.model)
         self.proxyModel.setFilterRole(0)
@@ -325,14 +331,6 @@ class StartQT4(QtGui.QMainWindow):
             summary += item + ': ' + str(value[item]) + ', '
         summary = summary[:len(summary)-2] + '}'
         return summary
-
-def getTrickplayData():
-    r = urllib2.Request("http://localhost:8888/debug/ui")
-    f = urllib2.urlopen(r)
-    return decode(f.read())
-
-def decode(input):
-    return json.loads(input)
     
 def main(argv):
     app = QtGui.QApplication(argv)
