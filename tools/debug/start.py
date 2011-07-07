@@ -49,7 +49,7 @@ class StartQT4(QtGui.QMainWindow):
         self.delegate.connect(self.delegate,  QtCore.SIGNAL('closeEditor( QWidget * , QAbstractItemDelegate::EndEditHint )'),  self.editorClosed)
         
         self.ui.Inspector.setItemDelegate(self.delegate)
-        
+
         self.createTree()
         
         self.lastChanged = None
@@ -83,6 +83,20 @@ class StartQT4(QtGui.QMainWindow):
                 
         else:
             print("No change has been made since the program started.")
+            
+    def selectionChanged(self,  a,  b):
+        print("SelectionChanged",  a,  b)
+        i = self.InspectorSelectionModel.selection()
+        i = self.proxyModel.mapSelectionToSource(i)
+        self.propertySM.select(i,  QtGui.QItemSelectionModel.SelectCurrent)
+        s = self.ui.propertyView.selectedIndexes()[0]
+        
+        #TODO: find better way to collapse by deselection perhaps?
+        self.ui.propertyView.collapseAll()
+        self.ui.propertyView.setExpanded(s,  True)
+        self.ui.propertyView.scrollTo(s,  1)
+        
+        
 
     def itemChanged(self,  valueItem):
         row = valueItem.row()
@@ -108,12 +122,31 @@ class StartQT4(QtGui.QMainWindow):
         
         self.proxyModel = QtGui.QSortFilterProxyModel()
         self.proxyModel.setSourceModel(self.model)
+        self.proxyModel.setFilterRole(0)
+        #self.proxyModel.setFilterFixedString("")
+
+        self.proxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|children)"))
+        
         
         self.ui.Inspector.setModel(self.proxyModel)
         
+        # propertyView
+        self.ui.propertyView.setModel(self.model)
+        self.propertySM = QtGui.QItemSelectionModel(self.model)
+        self.ui.propertyView.setSelectionModel(self.propertySM)
+        #self.ui.propertyView.setItemDelegate(self.delegate)
+        
+        self.InspectorSelectionModel = QtGui.QItemSelectionModel(self.proxyModel)
+        
+        self.ui.Inspector.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        
+        self.ui.Inspector.setSelectionModel(self.InspectorSelectionModel)
+        
+        self.InspectorSelectionModel.connect(self.InspectorSelectionModel, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.selectionChanged)
+        
         # TODO, don't sort UIElements,
         # keep them in the order they are layered in their group
-        self.proxyModel.sort(0)
+        # self.proxyModel.sort(0)
         
     def attrEq(self,  oldData,  newData):
         for attr in newData:

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
-    <height>760</height>
+    <width>497</width>
+    <height>839</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,140 +26,29 @@
    <string>Trickplay UI Tree Viewer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTreeView" name="Inspector">
+   <widget class="QSplitter" name="splitter">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>50</y>
-      <width>461</width>
-      <height>661</height>
+      <y>0</y>
+      <width>0</width>
+      <height>0</height>
      </rect>
     </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="palette">
-     <palette>
-      <active>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="0">
-          <red>75</red>
-          <green>105</green>
-          <blue>131</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </active>
-      <inactive>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="0">
-          <red>75</red>
-          <green>105</green>
-          <blue>131</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </inactive>
-      <disabled>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>131</red>
-          <green>131</green>
-          <blue>131</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </disabled>
-     </palette>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QTreeView::branch {
-	selection-background-color: transparent;
-}
-
-selection-background-color: transparent;</string>
-    </property>
-    <property name="dragDropMode">
-     <enum>QAbstractItemView::NoDragDrop</enum>
-    </property>
-    <property name="alternatingRowColors">
-     <bool>true</bool>
-    </property>
-    <property name="indentation">
-     <number>20</number>
-    </property>
-    <property name="rootIsDecorated">
-     <bool>true</bool>
-    </property>
-    <property name="uniformRowHeights">
-     <bool>true</bool>
-    </property>
-    <property name="allColumnsShowFocus">
-     <bool>true</bool>
-    </property>
-    <attribute name="headerCascadingSectionResizes">
-     <bool>true</bool>
-    </attribute>
-    <attribute name="headerDefaultSectionSize">
-     <number>200</number>
-    </attribute>
-    <attribute name="headerHighlightSections">
-     <bool>true</bool>
-    </attribute>
-    <attribute name="headerMinimumSectionSize">
-     <number>100</number>
-    </attribute>
-    <attribute name="headerStretchLastSection">
-     <bool>true</bool>
-    </attribute>
-   </widget>
-   <widget class="QPushButton" name="button_Refresh">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>85</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Refresh</string>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
     </property>
    </widget>
-   <widget class="QPushButton" name="button_ExpandAll">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>10</y>
-      <width>97</width>
-      <height>27</height>
+      <x>0</x>
+      <y>0</y>
+      <width>2</width>
+      <height>2</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Expand All</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="button_CollapseAll">
-    <property name="geometry">
-     <rect>
-      <x>200</x>
-      <y>10</y>
-      <width>97</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Collapse All</string>
-    </property>
+    <layout class="QGridLayout" name="gridLayout"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -167,8 +56,8 @@ selection-background-color: transparent;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>458</width>
-     <height>27</height>
+     <width>497</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -180,6 +69,179 @@ selection-background-color: transparent;</string>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="dockWidget_2">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+   <property name="windowTitle">
+    <string>  UI Elements</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="button_Refresh">
+         <property name="text">
+          <string>Refresh</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="button_ExpandAll">
+         <property name="text">
+          <string>Expand All</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="button_CollapseAll">
+         <property name="text">
+          <string>Collapse All</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="0">
+      <widget class="QTreeView" name="Inspector">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>450</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="Highlight">
+           <brush brushstyle="SolidPattern">
+            <color alpha="0">
+             <red>75</red>
+             <green>105</green>
+             <blue>131</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="Highlight">
+           <brush brushstyle="SolidPattern">
+            <color alpha="0">
+             <red>75</red>
+             <green>105</green>
+             <blue>131</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="Highlight">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>131</red>
+             <green>131</green>
+             <blue>131</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QTreeView::branch {
+	selection-background-color: transparent;
+}
+
+selection-background-color: transparent;</string>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::NoDragDrop</enum>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="indentation">
+        <number>20</number>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>true</bool>
+       </property>
+       <property name="uniformRowHeights">
+        <bool>true</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerCascadingSectionResizes">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="headerDefaultSectionSize">
+        <number>200</number>
+       </attribute>
+       <attribute name="headerHighlightSections">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="headerMinimumSectionSize">
+        <number>100</number>
+       </attribute>
+       <attribute name="headerStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>  Properties</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QTreeView" name="propertyView">
+       <property name="minimumSize">
+        <size>
+         <width>450</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>200</number>
+       </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
@@ -196,7 +258,6 @@ selection-background-color: transparent;</string>
  </widget>
  <tabstops>
   <tabstop>button_Refresh</tabstop>
-  <tabstop>Inspector</tabstop>
  </tabstops>
  <resources/>
  <connections>
