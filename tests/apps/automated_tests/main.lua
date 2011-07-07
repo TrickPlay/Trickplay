@@ -10,8 +10,8 @@
 --
 
 -- Test package location
-local test_folder = "acceptance_tests_ubuntu"
-local test_file = "acceptance_tests_ubuntu.txt"
+local test_folder = "smoke_tests_ubuntu"
+local test_file = "smoke_tests_ubuntu.txt"
 
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
@@ -22,10 +22,10 @@ local test_to_run = 13-- if automation_option == 2
 -- the package file. 
 -- It contains the generated checksum so  ensure that all tests pass before using this as a baseline.
 local console_display_option_choices = { test_results = 1, dump_screensum = 2 } 
-local console_display_option = 1
+local console_display_option = 2
 
 -- Time interval between tests
-local test_interval = 0.5
+local test_interval = 0.2
 
 -- Globals --
 local test_list
