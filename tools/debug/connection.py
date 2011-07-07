@@ -1,4 +1,4 @@
-import httplib, urllib, json
+import httplib, urllib, urllib2,  json
 from dataTypes import getTypeTable,  BadDataException
 
 def send(data):
@@ -14,6 +14,14 @@ def send(data):
     data = response.read()
 
     conn.close()
+    
+def getTrickplayData():
+    r = urllib2.Request("http://localhost:8888/debug/ui")
+    f = urllib2.urlopen(r)
+    return decode(f.read())
+
+def decode(input):
+    return json.loads(input)
 
 def test():
     send({'gid': 1, 'properties' :{'x': 1200}})
