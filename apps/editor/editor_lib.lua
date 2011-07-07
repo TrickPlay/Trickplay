@@ -843,6 +843,8 @@ function editor_ui.tabBar(t)
         end
     end
     
+	local ap = nil 
+
     local create
     local current_index = 1
     --local tabs = {}
@@ -919,6 +921,18 @@ function editor_ui.tabBar(t)
                 p.buttons[current_index].on_focus_in()
 				--tab_bg[current_index]:hide()
 				--tab_focus[current_index]:show()
+
+				if ap then
+					
+					ap:pan_to(
+						
+						p.buttons[current_index].x+p.buttons[current_index].w/2,
+						p.buttons[current_index].y+p.buttons[current_index].h/2
+						
+					)
+					
+				end
+
             end,
             previous_tab = function(self)
                 if current_index == 1 then return end

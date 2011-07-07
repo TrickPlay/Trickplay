@@ -91,9 +91,7 @@ return tbl
 end 
 
 function ui_element.set_cursor_pointer (src_file)
-	--[[
 	user_mouse_pointer.src = "/assets/images/"..src_file
-	]]
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
@@ -442,9 +440,6 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
 
     return c
 end 
-
-
-
 
 -- make_toastb_group_bg() : make toast box background  
 

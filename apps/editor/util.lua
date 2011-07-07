@@ -6,11 +6,11 @@ local factory = ui.factory
 local set_project_path 
 
 function table_copy(t)
-  local t2 = {}
-  for k,v in pairs(t) do
-    t2[k] = v
-  end
-  return t2
+  	local t2 = {}
+  	for k,v in pairs(t) do
+    	t2[k] = v
+  	end
+  	return t2
 end
 
 function table_insert(t, val)
@@ -21,39 +21,35 @@ function table_insert(t, val)
 end 
 
 function table_move_up(t, itemNum)
-	--print("itemNum", itemNum)
 	local prev_i, prev_j 
 	for i,j in pairs (t) do 
-	     if i == itemNum then 
-		if prev_i then 
-		     --print(prev_i, j, i, prev_j)
-		     t[prev_i] = j 
-		     t[i] = prev_j 
-		     return
-		else 
-		     return 
-		end 
-	     end 
-	     prev_i = i 
-	     prev_j = j 
+		if i == itemNum then 
+			if prev_i then 
+		     	t[prev_i] = j 
+		     	t[i] = prev_j 
+		     	return
+			else 
+		     	return 
+			end 
+	    end 
+	    prev_i = i 
+	    prev_j = j 
 	end 
 end 
+
 function table_move_down(t, itemNum)
-	--print("itemNum", itemNum)
 	local i, j, next_i, next_j 
 	for i,j in pairs (t) do 
-	     if i == itemNum then 
-	          next_i = i + 1 
-		  if t[next_i] then 
-	     		--print(i,next_j, i, t[next_i])
+		if i == itemNum then 
+	    	next_i = i + 1 
+		  	if t[next_i] then 
 	     		next_j = t[next_i] 
 	     		t[i] = next_j
 	     		t[next_i] = j 
-			return 
-		  else 
-		     return     
-		  end 
-
+				return 
+		  	else 
+		     	return     
+		  	end 
 	     end 
 	end 
 	return     
@@ -78,17 +74,6 @@ function table_removekey(table, key)
 	end 
 	return temp_t
 end
-
-
---[[ org, used in timeline functions  
-function table_removekey(table, key)
-	table[key] = nil
-	end 
-	return 
-end
-
-]]
-
 
 function __genOrderedIndex( t )
     local orderedIndex = {}
@@ -134,7 +119,12 @@ function orderedPairs(t)
     return orderedNext, t, nil
 end
 
+function values(t) 
+	local j = 0 
+	return function () j = j+1 return t[j] end 
+end 
 
+function abs(a) if(a>0) then return a else return -a end end
 
 function is_available(new_name)
     if(g:find_child(new_name) ~= nil) then 
@@ -145,35 +135,36 @@ function is_available(new_name)
 end 
 
 function is_lua_file(fn)
-	     i, j = string.find(fn, ".lua")
-	     if (j == string.len(fn)) then
+	local i, j = string.find(fn, ".lua")
+	if (j == string.len(fn)) then
 		return true
-	     else 
+	else 
 		return false
-	     end 
+	end 
 end 
+
 function is_img_file(fn)
-	     i, j = string.find(fn, ".png")
-	     if (j == string.len(fn)) then
+	local i, j = string.find(fn, ".png")
+	if (j == string.len(fn)) then
 		return true
-	     else 
-	        i, j = string.find(fn, ".jpg")
-	        if (j == string.len(fn)) then
-			return true
-                end
+	else 
+		i, j = string.find(fn, ".jpg")
+	if (j == string.len(fn)) then
+		return true
+    end
 
-		return false
-	     end 
+	return false
+	end 
 end 
+
 function is_mp4_file(fn)
-	     i, j = string.find(fn, ".mp4")
-	     if (j == string.len(fn)) then
+	local i, j = string.find(fn, ".mp4")
+	if (j == string.len(fn)) then
 		return true
-	     else 
+	else 
 		return false
-	     end 
+	end 
 end 
-
 
 function is_in_list(item, list)
     if list == nil then 
@@ -181,36 +172,32 @@ function is_in_list(item, list)
     end 
 
     for i, j in pairs (list) do
-	if item == j then 
-		return true
-	end 
+		if item == j then 
+			return true
+		end 
     end 
     return false
 end 
-    
 
 function need_stub_code(v)
-
     local lists = {"Button", "ButtonPicker", "RadioButtonGroup", "CheckBoxGroup", "MenuButton"}
- 
     if v.extra then 
         if is_in_list(v.extra.type, lists) == true then 
-	    return true
+	    	return true
         else 
-	    return false
+	    	return false
         end 
     else 
         return false
     end 
 end 
 
-
 function is_this_widget(v)
     if v.extra then 
         if is_in_list(v.extra.type, uiElements) == true then 
-	    return true
+	    	return true
         else 
-	    return false
+	    	return false
         end 
     else 
         return false
@@ -221,16 +208,15 @@ end
 function is_this_container(v)
     if v.extra then 
         if is_in_list(v.extra.type, uiContainers) == true then 
-	    return true
+	    	return true
         else 
-	    return false
+	    	return false
         end 
     else 
         return false
     end 
 end 
 
--- Clear background images 
 function clear_bg()
     BG_IMAGE_20.opacity = 0
     BG_IMAGE_40.opacity = 0
@@ -245,13 +231,6 @@ function clear_bg()
     screen:find_child("menuButton_view").items[7]["icon"].opacity = 0
 end
 
-function values(t) 
-	local j = 0 
-	return function () j = j+1 return t[j] end 
-end 
-
-function abs(a) if(a>0) then return a else return -a end end
-
 function getObjnames()
     local obj_names = ""
     for i, v in pairs(g.children) do
@@ -263,6 +242,7 @@ function getObjnames()
     return obj_names
 end
 
+--[[
 function find_parent(child_obj) 
    for i, v in pairs(g.children) do
    	if g:find_child(v.name) then
@@ -274,15 +254,37 @@ function find_parent(child_obj)
    	end
    end
 end 
+]]
 
 local project
 local base
 local projects = {}
 
-
 local function copy_widget_imgs ()
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
-	local source_file, dest_file
+
+	local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE", }
+	local source_files, source_file, dest_file, dest_dir
+
+	--[[
+	for a, b in pairs (copy_dirs) do 
+		source_files = editor_lb:readdir(trickplay.config.app_path..b)
+		local k,l = string.find(b, "/assets/") 
+		if k ~= nil then 
+	     	dest_dir = "/lib/skins/"..string.sub(b,l+1, -1)
+		else 
+			dest_dir = "/lib"..b
+		end 
+
+		for i, j in pairs(source_files) do 
+	     	source_file = trickplay.config.app_path..b..j 
+			dest_file = CURRENT_DIR..dest_dir..j 
+			print(source_file, dest_file)
+	     	editor_lb:file_copy(source_file, dest_file) 
+	    end 
+	end 
+
+	]]
+	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
 	for i, j in pairs(source_files) do 
 	     source_file = trickplay.config.app_path.."/assets/"..j 
 	     dest_file = CURRENT_DIR.."/lib/assets/"..j 
@@ -291,8 +293,7 @@ local function copy_widget_imgs ()
 	     end 
 	end 
 
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
-	local source_file, dest_file
+	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
 	for i, j in pairs(source_files) do 
 	     source_file = trickplay.config.app_path.."/assets/default/"..j 
 	     dest_file = CURRENT_DIR.."/lib/skins/default/"..j 
@@ -301,8 +302,7 @@ local function copy_widget_imgs ()
 	     end 
 	end 
 
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
-	local source_file, dest_file
+	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
 	for i, j in pairs(source_files) do 
 	     source_file = trickplay.config.app_path.."/assets/CarbonCandy/"..j 
 	     dest_file = CURRENT_DIR.."/lib/skins/CarbonCandy/"..j 
@@ -311,8 +311,7 @@ local function copy_widget_imgs ()
 	     end 
 	end 
 
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
-	local source_file, dest_file
+	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
 	for i, j in pairs(source_files) do 
 	     source_file = trickplay.config.app_path.."/assets/OOBE/"..j 
 	     dest_file = CURRENT_DIR.."/lib/skins/OOBE/"..j 
@@ -893,7 +892,7 @@ function create_on_button_down_f(v)
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
 	     		if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
 	       			if (v.extra.is_in_group == true and control == false ) then 
-		    			local p_obj = find_parent(v)
+		    			local p_obj = v.parent --find_parent(v)
                 		if(button == 3) then -- imsi : num_clicks is not correct ! 
                 		--if(button == 3 or num_clicks >= 2) then
                 			editor.inspector(p_obj)
@@ -1021,7 +1020,7 @@ end
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
 	    		if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	    			if (v.extra.is_in_group == true) then 
-						local p_obj = find_parent(v)
+						local p_obj = v.parent --find_parent(v)
 						new_object = copy_obj(p_obj)
 					    if(dragging ~= nil) then 
 	            			local actor , dx , dy = unpack( dragging )
@@ -2048,11 +2047,13 @@ end
 
 local  msgw = Group {
 	     name = "msgw",
+		 --[[
 	     position ={400, 400},
 	     anchor_point = {0,0},
              children =
              {
              }
+		]]
      }
 local msgw_cur_x = 25  
 local msgw_cur_y = 50
@@ -2060,8 +2061,9 @@ local msgw_cur_y = 50
 function cleanMsgWindow()
      msgw_cur_x = 25
      msgw_cur_y = 50
-     screen:remove(msgw)
+	 local msgw = screen:find_child("msgw")
 	 msgw:clear() 
+     screen:remove(msgw)
      input_mode = S_SELECT
 end 
 
@@ -2192,32 +2194,26 @@ function printMsgWindow(txt, name)
      end 
 end
 
-function inputMsgWindow_savefile(input_text, cfn)
+function inputMsgWindow_savefile(input_text, cfn, save_current_file)
+
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
      local screen_dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
      local main_dir = editor_lb:readdir(CURRENT_DIR)
      local enter_gen_stub_code = false
 
-     --if cfn == nil then 
-	 dumptable(screen_dir)
-
-		if cfn ~= "OK" then 
+	 if cfn ~= "OK" and save_current_file == nil then 
      	for i, v in pairs(screen_dir) do
           if(input_text == v)then
 			cleanMsgWindow()
 			editor.error_message("004",input_text,inputMsgWindow_savefile)
-           	--screen:grab_key_focus(screen) 
-            --file_not_exists = false
-			--menu_raise_to_top()
 			return 
           end
 		end
-		end 
-      --end
+	end 
 
       -- main generation
-      if (file_not_exists or cfn) then
+    if (file_not_exists or cfn) then
 	   	local main_exist = false
 	   	local app_exist = false
 
@@ -2343,7 +2339,8 @@ function inputMsgWindow_savefile(input_text, cfn)
            screen:grab_key_focus(screen) 
       end
       menu_raise_to_top()
-end
+
+end -- end of inputMsgWindow_savefile  
 
 function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
      

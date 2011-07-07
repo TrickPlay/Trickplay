@@ -606,7 +606,25 @@ dofile("editor.lua")
     	--set_app_path()
 
 	--local duration = 5--secs
+	--[[
+		local auto_save = true
 
+		local backup_timeline = Timeline {
+		 	  duration = 3000,
+	       	  direction = "FORWARD",
+	       	  loop = true
+	    }
+
+		
+	    function backup_timeline.on_completed()
+			if auto_save == true and current_fn ~= "" then 
+				print("auto save !!!")
+				editor.save(true, true) 
+			end 
+			t = nil
+	    end
+	    backup_timeline:start()
+	]]
 	--[[
 		local elapsed  = 0
 		local auto_save = false
