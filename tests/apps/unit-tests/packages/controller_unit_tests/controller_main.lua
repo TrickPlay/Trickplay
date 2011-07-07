@@ -65,9 +65,9 @@ function idle.on_idle( idle , seconds )
         idle.on_idle = nil
       end
 end
---]]
+
 
 for _,controller in pairs(controllers.connected) do
 	controllers:on_controller_connected(controller)
 end
-
+--]]

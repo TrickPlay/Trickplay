@@ -112,7 +112,7 @@ function unit_test( positive_tests , negative_tests , quiet )
    -- run_tests( negative_tests , true )
 
 	local current_column = 1
-	local column_line_max = 12
+	local column_line_max = 11
 	local line_count = 0
 	local test_count = 0
 	local col_results = {}
@@ -163,9 +163,9 @@ function unit_test( positive_tests , negative_tests , quiet )
                 if not t.passed then
             		col_results[current_column] = col_results[current_column]..string.format( "FAIL [%s] %s" , t.name , t.message or "" ).."\n"
                     print( string.format( "FAIL [%s] %s" , t.name , t.message or "" ) )
-                        		line_count = line_count + 3
+                        		
                 end
-            
+            line_count = line_count + 2
             end
         end
 
