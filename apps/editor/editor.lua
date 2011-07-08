@@ -381,9 +381,6 @@ function editor.timeline()
 			screen:find_child("timeline"):hide()
 			screen:find_child("timeline").extra.show = false
 		end
-		if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    	end
 		screen:grab_key_focus()
 
 end 
@@ -695,10 +692,6 @@ function editor.close()
 	     end 
 	end 
 
-	if(screen:find_child("mouse_pointer") ~= nil) then 
-             screen:remove(screen:find_child("mouse_pointer")) 
-	end 
-	
 	for i, v in pairs(g.children) do
           if g:find_child(v.name) then
                 g:remove(g:find_child(v.name))
@@ -708,12 +701,6 @@ function editor.close()
           end
     end
 
---[[
-	if(table.getn(g.children) ~= 0) then 
-			 g:clear()
-             screen:remove(g)
-	end 
-]]
 	if(screen:find_child("xscroll_bar") ~= nil) then 
 		screen:remove(screen:find_child("xscroll_bar")) 
 		screen:remove(screen:find_child("xscroll_box")) 
@@ -1384,9 +1371,6 @@ local function open_files(input_purpose, bg_image, inspector)
 		return true
 	end 
 
-    if screen:find_child("mouse_pointer") then 
-		screen:find_child("mouse_pointer"):raise_to_top()
-    end
 	
 end
 	
@@ -1540,9 +1524,6 @@ function editor.the_open()
         end 
     end 
     screen:add(dialog)
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-	end
 end 
 
 function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
@@ -1947,9 +1928,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end 
 
 
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-	end
 end
 
 function editor.view_code(v)
@@ -2110,10 +2088,6 @@ bg("Code", "Widget")
 	    input_mode = S_SELECT
 		return true
     end 
-
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
 
 end 
 
@@ -4732,10 +4706,6 @@ function editor.ui_elements()
 
     screen:add(msgw)
 
-    if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
-
 end 
 
 
@@ -4759,11 +4729,11 @@ function editor.error_message(error_num, str, func_ok)
 	local OK_label = "OK"
 
 	local error_msg_map = {
-	["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
-	["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
-	["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
-	["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
-	["005"] = function(str) OK_label = "OK"return "Please enter a file name." end, 
+		["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
+		["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
+		["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
+		["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
+		["005"] = function(str) OK_label = "OK" return "Please enter a file name." end, 
 	}
 
 	local error_msg = error_msg_map[error_num](str) 
