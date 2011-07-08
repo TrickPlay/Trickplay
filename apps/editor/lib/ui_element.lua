@@ -1334,7 +1334,6 @@ function ui_element.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
-		print("button.on_focus_in")
 		current_focus = b_group
         if (p.skin == "custom") then 
 	     	ring.opacity = 0
@@ -1351,7 +1350,6 @@ function ui_element.button(table)
 
 		if key then 
 	    	if p.pressed and key == keys.Return then
-				print("button p.pressed()")
 				p.pressed()
 	    	end 
 		end 
@@ -1364,7 +1362,6 @@ function ui_element.button(table)
     end
     
     function b_group.extra.on_focus_out(key) 
-		print("button.on_focus_out")
 		current_focus = nil 
         if (p.skin == "custom") then 
 	     	ring.opacity = 255
@@ -1379,11 +1376,9 @@ function ui_element.button(table)
 		if p.released then  
 			if p.is_in_menu then 
 				if key ~= keys.Return then
-					print("button p.released()")
 					p.released()
 				end 
 			else 
-				print("button p.released()")
 				p.released()
 			end
 		end 
