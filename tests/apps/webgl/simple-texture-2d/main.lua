@@ -1,5 +1,7 @@
 
-local gl = gl
+local gl = WebGLCanvas{ size = screen.size }
+
+screen:add( gl )
 
 -------------------------------------------------------------------------------
 
@@ -158,7 +160,7 @@ end
 -- Draw a triangle using the shader pair created in Init()
 -------------------------------------------------------------------------------
 
-local vw , vh = unpack( screen.display_size )
+local vw , vh = gl.width , gl.height
 
 function Draw (  )
 
@@ -193,26 +195,19 @@ function Draw (  )
    gl:bindBuffer ( gl.ELEMENT_ARRAY_BUFFER, userData.indexObject );
    gl:drawElements ( gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0 );
    
-   gl:swap()
 end
  
  
 function main ( )
 
-   gl:disable( gl.BLEND )
-   gl:disable( gl.CULL_FACE )
-   gl:disable( gl.DEPTH_TEST )
-   gl:disable( gl.POLYGON_OFFSET_FILL )
-   gl:disable( gl.SAMPLE_ALPHA_TO_COVERAGE )
-   gl:disable( gl.SAMPLE_COVERAGE )
-   gl:disable( gl.SCISSOR_TEST )
-   gl:disable( gl.STENCIL_TEST )
-   gl:enable( gl.DITHER )
-
+    gl:acquire()
     Init();
+    gl:release()
     
     function idle.on_idle()
+        gl:acquire()
         Draw()
+        gl:release()
     end
 
 end
@@ -220,5 +215,5 @@ end
  
 screen:show()
 
-dolater( 1000 , main )
+main()
 

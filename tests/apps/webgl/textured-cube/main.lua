@@ -1,5 +1,7 @@
 
-local gl = gl
+local gl = WebGLCanvas{ size = { 1920 , 1080 } }
+
+screen:add( gl )
 
 -------------------------------------------------------------------------------
 -- Generic creation of a shader program
@@ -271,11 +273,14 @@ local xRot = 0
 local yRot = 0
 local zRot = 0
 
-local vw , vh = unpack( screen.display_size )
+local vw , vh = gl.width , gl.height
+
 local aspect = vw / vh
 
 local function drawScene()
 
+    gl:acquire()
+    
    gl:viewport( 0 , 0 , vw , vh )
    
    gl:clear( gl.COLOR_BUFFER_BIT + gl.DEPTH_BUFFER_BIT )
@@ -351,7 +356,7 @@ local function drawScene()
 
    gl:drawElements( gl.TRIANGLES , cubeVertexIndexBuffer_numItems , gl.UNSIGNED_SHORT , 0 )
 
-   gl:swap()
+    gl:release()
 end
 
 -------------------------------------------------------------------------------
@@ -372,6 +377,7 @@ local function animate()
 end
 
 local function WebGLStart()
+    gl:acquire()
    initGL()
    initShaders()
    initBuffers()
@@ -397,6 +403,7 @@ local function WebGLStart()
    --gl:enable( gl.CULL_FACE )
    gl:enable( gl.BLEND )
    
+  gl:release()
    print( "READY" )
    
 if false then
@@ -419,7 +426,7 @@ else
        
       frames = frames + 1
       if t.elapsed_seconds >= 1 then
-         print( string.format( "%d fps" , frames / t.elapsed_seconds ) )
+         --print( string.format( "%d fps" , frames / t.elapsed_seconds ) )
          frames = 0
          t:start()
       end
@@ -444,5 +451,5 @@ end
 
 screen:show()
 
-dolater( 1000 , WebGLStart )
+WebGLStart()
 
