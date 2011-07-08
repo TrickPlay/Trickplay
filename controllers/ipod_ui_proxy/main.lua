@@ -14,6 +14,10 @@ function controllers:on_controller_connected(controller)
 
     local key_handler = {}
     function screen:on_key_down(key)
+        print("on_key_down:", key)
+        if key == keys.BACK then print("back")
+        elseif key == keys.RED then print("red")
+        end
         for k,func in pairs(key_handler) do
             if k == key then
                 func()
@@ -31,21 +35,39 @@ function controllers:on_controller_connected(controller)
     -- create a Rectangle
     key_handler[keys.r] = function()
         r = factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
+        function r:on_touches(touches, state)
+            print("touched my rectangle with state:", state)
+            dumptable(touches)
+        end
         dumptable(r)
     end
     -- create a Group
     key_handler[keys.g] = function()
-        g = factory:Group{ x = 20, y = 60}
+        g = factory:Group{x = 20, y = 60, w = 50, h = 50}
+        function g:on_touches(touches, state)
+            print("touched my group with state:", state)
+            dumptable(touches)
+        end
         dumptable(g)
     end
     -- create an Image using the 'chip' image
     key_handler[keys.i] = function()
         i = factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
+        j = factory:Image{x = 200, y = 500, w = 100, h = 100, src = ""}
+        function i:on_loaded(failed)
+            print("i image loaded?: "..tostring(not failed))
+        end
+        function j:on_loaded(failed)
+            print("j image loaded?: "..tostring(not failed))
+        end
         dumptable(i)
     end
     -- create a Text element
     key_handler[keys.t] = function()
         t = factory:Text{x = 200, y = 200, w = 100, h = 100, text = "I am text"}
+        function t:on_text_changed(string)
+            print("text changed:", string)
+        end
         dumptable(t)
     end
     -- add the Rectangle to the Group if both exist
@@ -61,6 +83,27 @@ function controllers:on_controller_connected(controller)
     key_handler[keys.s] = function()
         if r then r:show() end
     end
+    -- speed test
+    key_handler[keys.c] = function()
+        print("idle control")
+        if idle.on_idle then 
+            idle.on_idle = nil
+            return
+        end
+        function idle:on_idle(seconds)
+            print(seconds)
+            g:show()
+            g:hide()
+            --r = factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
+        end
+    end
+    -- set bkg vs adanced_ui image bug
+    key_handler[keys.b] = function()
+        print("bkg vs advanced_ui image")
+        controller:set_ui_background("chip")
+        i = factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
+    end
+    ctrl = controller
 end
 
 for k,controller in pairs(controllers.connected) do
@@ -77,3 +120,7 @@ end
 
 
 screen:show()
+screen:add(Text{
+    w = 100, h = 100, x = 200, y = 200, color = "FF00FF",
+    markup = "text<span style='color:#ff00ff55;font-family:arial;font-variant:small-caps;font-stretch:condensed;font-size:32px;font-style:italic;font-weight:bold;text-decoration:underline;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:10px'>text</span>"
+})
