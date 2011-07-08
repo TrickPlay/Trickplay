@@ -30,28 +30,34 @@ local l_leg = physics:Body( Clone{source = assets.l_leg}, limb_properties)
 local r_leg = physics:Body( Clone{source = assets.r_leg}, limb_properties)
 
 --positioning of the physics bodies
-body.position  = {screen.w/2,                           0}
-r_leg.position = {body.x+body.w/2-30,        10+r_leg.h/2}
-l_leg.position = {body.x-body.w/2+30,        10+l_leg.h/2}
-r_arm.position = {body.x+body.w/2,     r_arm.h/2-body.h/3}
-l_arm.position = {body.x-body.w/2,     r_arm.h/2-body.h/3}
-head.position  = {body.position[1]-10,       -20-body.h/2}
+panda.position = function(self,x,y)
+	
+	body.position  = {x,                                 y}
+	r_leg.position = {x+body.w/2-30,        10+r_leg.h/2+y}
+	l_leg.position = {x-body.w/2+30,        10+l_leg.h/2+y}
+	r_arm.position = {x+body.w/2,     r_arm.h/2-body.h/3+y}
+	l_arm.position = {x-body.w/2,     r_arm.h/2-body.h/3+y}
+	head.position  = {x-10,                 -20-body.h/2+y}
+	
+end
+
+panda:position(screen.w/2,0)
 
 --attaching all the physics bodies as Revolute (Hinge) Joints
 r_leg:RevoluteJoint( body , { r_leg.x, 0 },
 	{ enable_limit = true , lower_angle = -20, upper_angle = 20 }
 )
-l_leg:RevoluteJoint( body, { l_leg.x , 0 },
+l_leg:RevoluteJoint( body , { l_leg.x , 0 },
 	{ enable_limit = true , lower_angle = -20, upper_angle = 20 }
 )
-r_arm:RevoluteJoint( body, { r_arm.x-r_arm.w/2, 0 },
+r_arm:RevoluteJoint( body , { r_arm.x-r_arm.w/2, 0 },
 	{ enable_limit = true , lower_angle = -20, upper_angle = 20 }
 )
-l_arm:RevoluteJoint( body, { l_arm.x+ l_arm.w/2, 0 },
+l_arm:RevoluteJoint( body , { l_arm.x+ l_arm.w/2, 0 },
 	{ enable_limit = true , lower_angle = -20, upper_angle = 20 }
 )
-head:RevoluteJoint( body, { head.position[1], head.position[2]+head.h/2 },
-    { enable_limit = true, lower_angle = -10, upper_angle =  10 }
+head:RevoluteJoint(  body , { head.position[1], head.position[2]+head.h/2 },
+    { enable_limit = true , lower_angle = -10, upper_angle = 10 }
 )
 
 --The Bouncing function
@@ -63,8 +69,13 @@ do
     local vy
 	
 	--upval for the mass of the whole panda
-    local panda_mass = body.mass + l_leg.mass + r_leg.mass +
-		l_arm.mass + r_arm.mass + head.mass
+    local panda_mass =
+		body.mass  +
+		l_leg.mass +
+		r_leg.mass +
+		l_arm.mass +
+		r_arm.mass +
+		head.mass
     
     panda.bounce = function( self , contact )
         --dumptable(contact)
@@ -146,6 +157,7 @@ panda.scroll_by = function(self,dy)
 	head.y  = head.y  + dy
 	
 end
+
 
 panda.raise_to_top = function()
 	l_leg:raise_to_top()

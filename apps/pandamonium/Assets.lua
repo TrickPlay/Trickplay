@@ -1,18 +1,25 @@
 local assets = {
 	--Panda
-    torso = Image { src = "assets/panda/body.png"      },
-    r_leg = Image { src = "assets/panda/leg-right.png" },
-    l_leg = Image { src = "assets/panda/leg-left.png"  },
-    r_arm = Image { src = "assets/panda/arm-right.png" },
-    l_arm = Image { src = "assets/panda/arm-left.png"  },
-    head  = Image { src = "assets/panda/head.png"      },
+    torso      = Image { src = "assets/panda/body.png"      },
+    r_leg      = Image { src = "assets/panda/leg-right.png" },
+    l_leg      = Image { src = "assets/panda/leg-left.png"  },
+    r_arm      = Image { src = "assets/panda/arm-right.png" },
+    l_arm      = Image { src = "assets/panda/arm-left.png"  },
+    head       = Image { src = "assets/panda/head.png"      },
+	--Menu Components
+	title      = Image { src = "assets/pandamonium.png" },
+	back       = Image { src = "assets/back.png" },
+	quit       = Image { src = "assets/quit.png" },
+	start      = Image { src = "assets/start.png" },
+	play_again = Image { src = "assets/play-again.png" },
+	arrow      = Image { src = "assets/menu-arrow.png" },
 	--Level Components
 	branches = {
 		Image { src = "assets/branches-1.png" },
 		Image { src = "assets/branches-2.png" },
 		Image { src = "assets/branches-3.png" },
 	},
-	
+	ground = Image { src = "assets/ground.png" },
 }
 
 local bg = Image{ src = "assets/background.jpg", tile={true,true} }

@@ -125,6 +125,18 @@ local new_branch = function()
 		
 	end
 	
+	function branch:scroll_by(dy)
+		
+		self.y = self.y + dy
+		
+		for _,p in pairs(self.palms) do
+			
+			p.y = p.y + dy
+			
+		end
+		
+	end
+	
 	function branch:on_pre_solve_contact(contact)
 		contact.enabled = false
 	end
