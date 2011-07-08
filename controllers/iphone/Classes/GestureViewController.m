@@ -8,6 +8,8 @@
 
 #import "GestureViewController.h"
 #import "TrickplayGroup.h"
+#import "TrickplayScreen.h"
+#import "AdvancedUIObjectManager.h"
 
 @implementation GestureViewController
 
@@ -96,13 +98,17 @@
     
     // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
     // from Trickplay
-    advancedView = [[TrickplayGroup alloc] initWithID:@"0" args:nil objectManager:nil];
+    advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
     advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
-    advancedView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height);
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     [self.view addSubview:advancedView];
     
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
     advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
+    ((AdvancedUIObjectManager *)advancedUIDelegate).gestureViewController = self;
+    
+    // TouchController will also handle touches from the advancedView
+    
     
     // This is where the elements from UG (add_ui_image call) go
     CGFloat
@@ -572,8 +578,9 @@
 //-------------------- Super Advanced UI stuff (depricated) -----------------
 
 - (void)do_UX:(NSArray *)args {
-    NSArray *JSON_Array = [[args objectAtIndex:1] yajl_JSON];
+    //NSArray *JSON_Array = [[args objectAtIndex:1] yajl_JSON];
     
+    /*
     if ([(NSString *)[args objectAtIndex:0] compare:@"CREATE"] == NSOrderedSame) {
         [advancedUIDelegate createObjects:JSON_Array];
     } else if ([(NSString *)[args objectAtIndex:0] compare:@"DESTROY"] == NSOrderedSame) {
@@ -581,8 +588,16 @@
     } else if ([(NSString *)[args objectAtIndex:0] compare:@"SET"] == NSOrderedSame) {
         [advancedUIDelegate setValuesForObjects:JSON_Array];
     }
+    */
 }
 
+- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string {
+    NSLog(@"\n\nJSON_string: %@", JSON_string);
+    NSString *sentData = [NSString stringWithFormat:@"UI\t%@\t%@\n", name, JSON_string];
+    NSLog(@"sent data: %@", sentData);
+    [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
+    fprintf(stderr, "\n%s\n\n",[sentData UTF8String]);
+}
 
 //-------------------- Other View stuff ------------------------
 

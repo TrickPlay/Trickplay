@@ -11,10 +11,14 @@
 #import <QuartzCore/CATransform3D.h>
 #import <YAJLiOS/YAJL.h>
 #import "AdvancedUIObjectManager.h"
+#import "UIViewAdditions.h"
 
 @class AdvancedUIObjectManager;
 
 @interface TrickplayUIElement : UIView {
+    CFMutableDictionaryRef activeTouches;
+    NSUInteger touchNumber;
+    
     /*
      NSNumber *x_scale;
      NSNumber *y_scale;
@@ -78,6 +82,15 @@
 // Exposed function calls
 - (id)do_raise_to_top:(NSArray *)args;
 - (id)do_lower_to_bottom:(NSArray *)args;
+
+- (void)addTouch:(UITouch *)touch;
+- (void)removeTouch:(UITouch *)touch;
+- (void)sendTouches:(NSArray *)touches withState:(NSString *)state;
+
+- (void)handleTouchesBegan:(NSSet *)touches;
+- (void)handleTouchesMoved:(NSSet *)touches;
+- (void)handleTouchesEnded:(NSSet *)touches;
+- (void)handleTouchesCancelled:(NSSet *)touches;
 
 @end
 

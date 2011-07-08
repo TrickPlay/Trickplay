@@ -9,6 +9,7 @@
 #import "TrickplayGroup.h"
 #import "TrickplayRectangle.h"
 #import "TrickplayText.h"
+#import "TrickplayTextHTML.h"
 #import "TrickplayImage.h"
 
 @implementation TrickplayGroup
@@ -19,7 +20,8 @@
     if ((self = [super initWithID:groupID objectManager:objectManager])) {
         self.view = [[[UIView alloc] init] autorelease];
         view.layer.anchorPoint = CGPointMake(0.0, 0.0);
-        //manager = [[AdvancedUIObjectManager alloc] initWithView:self.view resourceManager:resourceManager];
+        //view.backgroundColor = [UIColor colorWithRed:1.0 green:0.0 blue:0.0 alpha:1.0];
+
         if (args) {
             [self setValuesFromArgs:args];
         }
@@ -28,6 +30,114 @@
     }
     
     return self;
+}
+
+/*
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    NSLog(@"This Group has been touched");
+}
+ */
+
+- (void)handleTouchesBegan:(NSSet *)touches {
+    NSLog(@"handle touches began: %@", self);
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            CGFloat
+            x = [touch locationInView:self].x,
+            y = [touch locationInView:self].y,
+            x_sub = [touch locationInView:view].x,
+            y_sub = [touch locationInView:view].y;
+            /*
+            NSLog(@"\ntouch location: self: (%f, %f) view: (%f, %f)\n", x, y, x_sub, y_sub);
+            NSLog(@"\ncomparisons: self: (%f, %f), (%f, %f) view: (%f, %f), (%f, %f)", self.bounds.origin.x, self.bounds.origin.y, self.bounds.size.width, self.bounds.size.height, view.bounds.origin.x, view.bounds.origin.y, view.bounds.size.width, view.bounds.size.height);
+            NSLog(@"\nresults:\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", x >= self.bounds.origin.x, x <= self.bounds.size.width, y >= self.bounds.origin.y, y <= self.bounds.size.width, x_sub >= view.bounds.origin.x, x_sub <= view.bounds.size.width, y_sub >= view.bounds.origin.y, y_sub <= view.bounds.size.height);
+            //*/
+            // check that its within clipping range
+            if (x >= self.bounds.origin.x
+                && x <= self.bounds.size.width
+                && y >= self.bounds.origin.y
+                && y <= self.bounds.size.width
+                // check that its within object range
+                && x_sub >= view.bounds.origin.x
+                && x_sub <= view.bounds.size.width
+                && y_sub >= view.bounds.origin.y
+                && y_sub <= view.bounds.size.height) {
+                
+                CFArrayAppendValue(newTouches, touch);
+                [self addTouch:touch];
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"down"];
+            for (TrickplayUIElement *element in view.subviews) {
+                [element handleTouchesBegan:[NSSet setWithArray:(NSArray *)newTouches]];
+            }
+        }
+        CFRelease(newTouches);
+    }
+}
+
+- (void)handleTouchesMoved:(NSSet *)touches {
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            if (CFDictionaryGetValue(activeTouches, touch)) {
+                CFArrayAppendValue(newTouches, touch);
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"moved"];
+            for (TrickplayUIElement *element in view.subviews) {
+                [element handleTouchesMoved:[NSSet setWithArray:(NSArray *)newTouches]];
+            }
+        }
+        CFRelease(newTouches);
+    }
+}
+
+- (void)handleTouchesEnded:(NSSet *)touches {
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            if (CFDictionaryGetValue(activeTouches, touch)) {
+                CFArrayAppendValue(newTouches, touch);
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"ended"];
+            for (TrickplayUIElement *element in view.subviews) {
+                [element handleTouchesEnded:[NSSet setWithArray:(NSArray *)newTouches]];
+            }
+        }
+        CFRelease(newTouches);
+    }
+    
+    for (UITouch *touch in [touches allObjects]) {
+        [self removeTouch:touch];
+    }
+}
+
+- (void)handleTouchesCancelled:(NSSet *)touches {
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            if (CFDictionaryGetValue(activeTouches, touch)) {
+                CFArrayAppendValue(newTouches, touch);
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"cancelled"];
+            for (TrickplayUIElement *element in view.subviews) {
+                [element handleTouchesCancelled:[NSSet setWithArray:(NSArray *)newTouches]];
+            }
+        }
+        CFRelease(newTouches);
+    }
+    
+    for (UITouch *touch in [touches allObjects]) {
+        [self removeTouch:touch];
+    }
 }
 
 #pragma mark -
@@ -60,6 +170,11 @@
         
         if ([TrickplayGroup instancesRespondToSelector:selector]) {
             [self performSelector:selector withObject:properties];
+        } else {
+            selector = NSSelectorFromString([NSString stringWithFormat:@"do_set_%@:", property]);
+            if ([TrickplayGroup instancesRespondToSelector:selector]) {
+                [self performSelector:selector withObject:properties];
+            }
         }
     }
 }

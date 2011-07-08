@@ -63,7 +63,7 @@ struct Event
         POINTER_MOVE , POINTER_DOWN , POINTER_UP,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
         UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
-        ADVANCED_UI_READY
+        ADVANCED_UI_READY, ADVANCED_UI_EVENT
     };
 
 public:
@@ -85,7 +85,7 @@ public:
 
 #endif
 
-        if ( type == UI )
+        if ( type == UI || type == ADVANCED_UI_EVENT )
         {
             event->ui.parameters = NULL;
         }
@@ -101,6 +101,7 @@ public:
         switch ( event->type )
         {
 			case UI:
+			case ADVANCED_UI_EVENT:
 				g_free( event->ui.parameters );
 				break;
 
@@ -156,6 +157,15 @@ public:
         Event * event = make( UI, controller );
 
         event->ui.parameters = g_strdup( parameters );
+
+        return event;
+    }
+
+    inline static Event * make_advanced_ui_event( Controller * controller, const char * json )
+    {
+        Event * event = make( ADVANCED_UI_EVENT, controller );
+
+        event->ui.parameters = g_strdup( json );
 
         return event;
     }
@@ -248,6 +258,10 @@ public:
             case ADVANCED_UI_READY:
                 controller->advanced_ui_ready();
                 break;
+
+            case ADVANCED_UI_EVENT:
+            	controller->advanced_ui_event( ui.parameters );
+            	break;
         }
     }
 
@@ -815,6 +829,22 @@ void Controller::advanced_ui_ready( void )
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->advanced_ui_ready( );
+    }
+}
+
+
+//.............................................................................
+
+void Controller::advanced_ui_event( const char * json )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->advanced_ui_event( json );
     }
 }
 
@@ -1556,4 +1586,12 @@ void tp_controller_advanced_ui_ready( TPController * controller )
 {
     TPController::check(controller);
     controller->list->post_event( Event::make( Event::ADVANCED_UI_READY, controller->controller ) );
+}
+
+void tp_controller_advanced_ui_event( TPController * controller , const char * json )
+{
+	g_assert( json );
+
+	TPController::check(controller);
+    controller->list->post_event( Event::make_advanced_ui_event( controller->controller , json ) );
 }

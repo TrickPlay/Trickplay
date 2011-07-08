@@ -39,6 +39,19 @@
     
 }
 
+- (void)on_loadedFailed:(BOOL)failed {
+    if (manager && manager.gestureViewController) {
+        NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_loaded" forKey:@"event"];
+        [JSON_dic setObject:[NSNumber numberWithBool:failed] forKey:@"failed"];
+        
+        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        
+        [JSON_dic release];
+    }
+}
+
 #pragma mark -
 #pragma mark Deleter
 
@@ -83,6 +96,11 @@
         
         if ([TrickplayImage instancesRespondToSelector:selector]) {
             [self performSelector:selector withObject:properties];
+        } else {
+            selector = NSSelectorFromString([NSString stringWithFormat:@"do_set_%@:", property]);
+            if ([TrickplayImage instancesRespondToSelector:selector]) {
+                [self performSelector:selector withObject:properties];
+            }
         }
     }
 }
