@@ -5753,7 +5753,7 @@ function ui_element.tabBar(t)
 		
 		if p.arrow_image then p.arrow_sz = p.arrow_image.w end
 		
-		if p.tab_position == "TOP" and
+		if p.tab_position == "top" and
 			(buttons[# buttons].w + buttons[# buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
