@@ -466,8 +466,8 @@ function controller:on_advanced_ui_event(json_object)
     end
 
     -- call the right callback for the event
-    if json_object.event == "touch" and proxy.on_touches then
-        proxy:on_touches(json_object.touch_id_list, json_object.state)
+    if json_object.event == "touch" and proxy.on_touch then
+        proxy:on_touch(json_object.touch_id_list, json_object.state)
     elseif json_object.event == "on_loaded" and proxy.on_loaded then
         proxy:on_loaded(json_object.failed)
     elseif json_object.event == "on_text_changed" and proxy.on_text_changed then
