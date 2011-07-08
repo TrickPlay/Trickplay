@@ -17,6 +17,7 @@
     NSMutableDictionary *rectangles;
     NSMutableDictionary *images;
     NSMutableDictionary *textFields;
+    NSMutableDictionary *webTexts;
     NSMutableDictionary *groups;
     NSUInteger currentID;
     
@@ -27,14 +28,19 @@
     NSInteger port;
     
     TrickplayGroup *view;
+    
+    GestureViewController *gestureViewController;
 }
 
 @property (nonatomic, retain) NSMutableDictionary *rectangles;
 @property (nonatomic, retain) NSMutableDictionary *images;
 @property (nonatomic, retain) NSMutableDictionary *textFields;
+@property (nonatomic, retain) NSMutableDictionary *webTexts;
 @property (nonatomic, retain) NSMutableDictionary *groups;
 
 @property (nonatomic, retain) ResourceManager *resourceManager;
+
+@property (assign) GestureViewController *gestureViewController;
 
 - (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager;
 
@@ -43,10 +49,6 @@
 - (BOOL)startServiceWithID:(NSString *)ID;
 
 - (void)clean;
-
-- (void)createObjects:(NSArray *)JSON_Array;
-- (void)destroyObjects:(NSArray *)JSON_Array;
-- (void)setValuesForObjects:(NSArray *)JSON_Array;
 
 // New protocol
 - (TrickplayUIElement *)findObjectForID:(NSString *)ID;

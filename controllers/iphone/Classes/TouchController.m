@@ -268,7 +268,6 @@
     }
     if (activeTouches) {
         CFRelease(activeTouches);
-        //[activeTouches release];
     }
     
     [super dealloc];

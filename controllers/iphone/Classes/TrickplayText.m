@@ -107,6 +107,11 @@
         
         if ([TrickplayText instancesRespondToSelector:selector]) {
             [self performSelector:selector withObject:properties];
+        } else {
+            selector = NSSelectorFromString([NSString stringWithFormat:@"do_set_%@:", property]);
+            if ([TrickplayText instancesRespondToSelector:selector]) {
+                [self performSelector:selector withObject:properties];
+            }
         }
     }
 }
@@ -198,14 +203,35 @@
  * Set the string of text that is displayed.
  */
 
+- (void)on_text_changed:(NSString *)theText {
+    if (manager && manager.gestureViewController) {
+        NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_text_changed" forKey:@"event"];
+        [JSON_dic setObject:theText forKey:@"text"];
+        
+        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [JSON_dic release];
+    }
+}
+
 - (void)set_text:(NSDictionary *)args {
     NSString *text = [args objectForKey:@"text"];
     
     if (text) {
         ((UITextView *)view).text = text;
     }
+    [self on_text_changed:text];
 }
 
+- (void)do_set_text:(NSDictionary *)args {
+    NSString *text = [args objectForKey:@"text"];
+    
+    if (text) {
+        ((UITextView *)view).text = text;
+    }
+    [self on_text_changed:text];
+}
 
 /**
  * Set the color of the Text.

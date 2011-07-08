@@ -31,6 +31,9 @@
 
 - (id)initWithID:(NSString *)theID objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super init])) {
+        activeTouches = CFDictionaryCreateMutable(NULL, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        touchNumber = 0;
+        
         /*
         self.x_scale = [NSNumber numberWithFloat:1.0];
         self.y_scale = [NSNumber numberWithFloat:1.0];
@@ -54,10 +57,144 @@
         self.clip = nil;
         self.ID = theID;
         self.name = nil;
+        
+        self.frame = [[UIScreen mainScreen] applicationFrame];
     }
     
     return self;
 }
+
+#pragma mark -
+#pragma Touch Event Handling
+
+
+
+// TODO: Give this its own TouchController
+// (i.e. Generalize the TouchController Class)
+
+
+- (void)addTouch:(UITouch *)touch {
+    CFDictionarySetValue(activeTouches, touch, (CFNumberRef)[NSNumber numberWithUnsignedInt:touchNumber]);
+    //[activeTouches setObject:[NSNumber numberWithInt:openFinger] forKey:touch];
+    touchNumber++;
+}
+
+- (void)removeTouch:(UITouch *)touch {
+    CFDictionaryRemoveValue(activeTouches, touch);
+}
+
+- (void)sendTouches:(NSArray *)touches withState:(NSString *)state {
+    NSLog(@"touch sent");
+    NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
+    NSMutableArray *touchNumbers = [[NSMutableArray alloc] initWithCapacity:10];
+    for (UITouch *touch in touches) {
+        [touchNumbers addObject:(NSNumber *)CFDictionaryGetValue(activeTouches, touch)];
+    }
+    
+    if ([touchNumbers count] > 0) {
+        [JSON_dic setObject:state forKey:@"state"];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:touchNumbers forKey:@"touch_id_list"];
+        [JSON_dic setObject:@"touch" forKey:@"event"];
+    
+        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    [touchNumbers release];
+    [JSON_dic release];
+}
+
+- (void)handleTouchesBegan:(NSSet *)touches {
+    NSLog(@"handle touches began: %@", self);
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            CGFloat
+            x = [touch locationInView:self].x,
+            y = [touch locationInView:self].y,
+            x_sub = [touch locationInView:view].x,
+            y_sub = [touch locationInView:view].y;
+            /*
+            NSLog(@"\ntouch location: self: (%f, %f) view: (%f, %f)\n", x, y, x_sub, y_sub);
+            NSLog(@"\ncomparisons: self: (%f, %f), (%f, %f) view: (%f, %f), (%f, %f)", self.bounds.origin.x, self.bounds.origin.y, self.bounds.size.width, self.bounds.size.height, view.bounds.origin.x, view.bounds.origin.y, view.bounds.size.width, view.bounds.size.height);
+            NSLog(@"\nresults:\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", x >= self.bounds.origin.x, x <= self.bounds.size.width, y >= self.bounds.origin.y, y <= self.bounds.size.width, x_sub >= view.bounds.origin.x, x_sub <= view.bounds.size.width, y_sub >= view.bounds.origin.y, y_sub <= view.bounds.size.height);
+            //*/
+            // check that its within clipping range
+            if (x >= self.bounds.origin.x
+                && x <= self.bounds.size.width
+                && y >= self.bounds.origin.y
+                && y <= self.bounds.size.width
+                // check that its within object range
+                && x_sub >= view.bounds.origin.x
+                && x_sub <= view.bounds.size.width
+                && y_sub >= view.bounds.origin.y
+                && y_sub <= view.bounds.size.height) {
+                
+                CFArrayAppendValue(newTouches, touch);
+                [self addTouch:touch];
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"down"];
+        }
+        CFRelease(newTouches);
+    }
+}
+
+- (void)handleTouchesMoved:(NSSet *)touches {
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            if (CFDictionaryGetValue(activeTouches, touch)) {
+                CFArrayAppendValue(newTouches, touch);
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"moved"];
+        }
+        CFRelease(newTouches);
+    }
+}
+
+- (void)handleTouchesEnded:(NSSet *)touches {
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            if (CFDictionaryGetValue(activeTouches, touch)) {
+                CFArrayAppendValue(newTouches, touch);
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"ended"];
+        }
+        CFRelease(newTouches);
+    }
+    
+    for (UITouch *touch in [touches allObjects]) {
+        [self removeTouch:touch];
+    }
+}
+
+- (void)handleTouchesCancelled:(NSSet *)touches {
+    if (manager && manager.gestureViewController) {
+        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        for (UITouch *touch in [touches allObjects]) {
+            if (CFDictionaryGetValue(activeTouches, touch)) {
+                CFArrayAppendValue(newTouches, touch);
+            }
+        }
+        if (((NSArray *)newTouches).count > 0) {
+            [self sendTouches:(NSArray *)newTouches withState:@"cancelled"];
+        }
+        CFRelease(newTouches);
+    }
+    
+    for (UITouch *touch in [touches allObjects]) {
+        [self removeTouch:touch];
+    }
+}
+
+#pragma mark -
+#pragma Useful functions
 
 /**
  * Returns a frame built from the x, y, width, and height in the args.
@@ -254,8 +391,14 @@
         //height = [NSNumber numberWithFloat:view.bounds.size.height];
     }
     
-    view.layer.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
-    //view.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
+    //view.layer.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
+    [UIView animateWithDuration:1.0 delay:0.0 options:UIViewAnimationCurveLinear
+                     animations:^{
+                         if (YES) {
+                             view.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
+                         }
+                     } completion:NULL
+     ];
 }
 
 - (void)set_w:(NSDictionary *)args {
@@ -346,6 +489,10 @@
     animation_y.delegate = self;
     [view.layer addAnimation:animation_y forKey:@"scale_y"];
      //*/
+}
+
+- (void)do_animation:(NSDictionary *)args {
+    //CABasicAnimation *animation = [CABasicAnimation anim
 }
 
 
@@ -877,6 +1024,10 @@
 
 
 - (void)dealloc {
+    if (activeTouches) {
+        CFRelease(activeTouches);
+    }
+    
     /*
     self.x_scale = nil;
     self.y_scale = nil;

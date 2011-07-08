@@ -8,7 +8,6 @@
 
 #import "TrickplayRectangle.h"
 
-
 @implementation TrickplayRectangle
 
 - (id)initWithID:(NSString *)rectID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
@@ -20,7 +19,7 @@
         
         [self setValuesFromArgs:args];
         
-        [self addSubview:view];
+        [self addSubview:view];        
     }
     
     return self;
@@ -56,6 +55,11 @@
         
         if ([TrickplayRectangle instancesRespondToSelector:selector]) {
             [self performSelector:selector withObject:properties];
+        } else {
+            selector = NSSelectorFromString([NSString stringWithFormat:@"do_set_%@:", property]);
+            if ([TrickplayRectangle instancesRespondToSelector:selector]) {
+                [self performSelector:selector withObject:properties];
+            }
         }
     }
 }
