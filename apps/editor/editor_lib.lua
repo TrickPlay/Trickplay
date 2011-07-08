@@ -158,7 +158,6 @@ function editor_ui.button(table)
 		     			current_focus.on_focus_out()
 					end
 				end 
-	
 				b_group.extra.on_focus_in("focus")
 		 end 
 
@@ -186,6 +185,12 @@ function editor_ui.button(table)
 						if screen:find_child(b_group.focus[key]).on_focus_in then
 							screen:find_child(b_group.focus[key]).on_focus_in(key)
 						end
+					else 
+					   print("b_group:grab_key_focus")
+					   print("b_group:grab_key_focus")
+					   print("b_group:grab_key_focus")
+					   print("b_group:grab_key_focus")
+					   b_group:grab_key_focus()
 					end
 				end
 		end

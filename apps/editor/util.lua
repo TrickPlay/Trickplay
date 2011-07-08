@@ -242,101 +242,34 @@ function getObjnames()
     return obj_names
 end
 
---[[
-function find_parent(child_obj) 
-   for i, v in pairs(g.children) do
-   	if g:find_child(v.name) then
-   	     if (v.type == "Group") then 
-   	          if(v:find_child(child_obj.name)) then
-		       return v
-   		  end 
-   	     end 
-   	end
-   end
-end 
-]]
-
 local project
 local base
 local projects = {}
 
 local function copy_widget_imgs ()
-
-	local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE", }
+	local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE/", }
+	local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/localized/strings.lua", } 
 	local source_files, source_file, dest_file, dest_dir
 
-	--[[
 	for a, b in pairs (copy_dirs) do 
 		source_files = editor_lb:readdir(trickplay.config.app_path..b)
 		local k,l = string.find(b, "/assets/") 
-		if k ~= nil then 
-	     	dest_dir = "/lib/skins/"..string.sub(b,l+1, -1)
-		else 
+	    dest_dir = "/lib/skins/"..string.sub(b,l+1, -1)
+		if a == 1 then 
 			dest_dir = "/lib"..b
 		end 
-
 		for i, j in pairs(source_files) do 
 	     	source_file = trickplay.config.app_path..b..j 
 			dest_file = CURRENT_DIR..dest_dir..j 
-			print(source_file, dest_file)
+			--print(source_file, dest_file)
 	     	editor_lb:file_copy(source_file, dest_file) 
 	    end 
 	end 
-
-	]]
-	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/"..j 
-	     dest_file = CURRENT_DIR.."/lib/assets/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
+	for a, b in pairs (copy_files) do 
+		source_file = trickplay.config.app_path..b
+		dest_file = CURRENT_DIR..b
+	 	editor_lb:file_copy(source_file, dest_file)
 	end 
-
-	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/default/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/default/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/CarbonCandy/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/CarbonCandy/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/OOBE/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/OOBE/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	source_file = trickplay.config.app_path.."/.trickplay" 
-	dest_file = CURRENT_DIR.."/.trickplay"
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-	source_file = trickplay.config.app_path.."/lib/ui_element.lua" 
-	dest_file = CURRENT_DIR.."/lib/ui_element.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-	source_file = trickplay.config.app_path.."/lib/ui_element_header.lua" 
-	dest_file = CURRENT_DIR.."/lib/ui_element_header.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-	source_file = trickplay.config.app_path.."/localized/strings.lua" 
-	dest_file = CURRENT_DIR.."/lib/strings.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-
 end 
 
 function set_new_project (pname, replace)
@@ -397,7 +330,7 @@ end
 
 --[ NEW PROJECT ... ]-- 
 
-function new_project()
+function new_project(fname)
 
   	local WIDTH = 300
   	local HEIGHT = 150
@@ -434,7 +367,12 @@ function new_project()
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() set_new_project(text_input.text) xbox:on_button_down() end
+	button_ok.pressed = function() set_new_project(text_input.text) 
+								   xbox:on_button_down()
+							  	   if fname then 
+										editor.save(true)
+								   end 
+						end
 
 	local ti_func = function()
 		if current_focus then 
@@ -514,10 +452,6 @@ function new_project()
 			end
 		end
 	end
-
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
 end 
 
 function open_project(t, msg)
@@ -582,12 +516,19 @@ function open_project(t, msg)
 
 --[[
 		if #g.children > 0 then 
-			xbox:on_button_down()
-			editor.error_message("003", nil, editor.save) 
-			return 
+			if current_fn == "" then 
+				xbox:on_button_down()
+				editor.error_message("003", nil, editor.save) 
+				return 
+			elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
+				xbox:on_button_down()
+				editor.error_message("003", nil, editor.save) 
+				return 
+			end
 		end 
 
- ]]
+]]
+		editor.close()
 
 		selected_prj = v
 --
@@ -636,7 +577,7 @@ function open_project(t, msg)
 
 		copy_widget_imgs()
 
-		editor.close()
+		--editor.close()
 		xbox:on_button_down()
 		return true
 	end 
@@ -806,12 +747,13 @@ function open_project(t, msg)
 	    	input_mode = S_SELECT
 		end 
 		screen.grab_key_focus(screen) 
+		if textUIElement == nil then 
+			screen.grab_key_focus(screen) 
+		end
+
 		return true
 	end 
 
-    if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
 end 
 
 function set_app_path()
@@ -2062,7 +2004,6 @@ function cleanMsgWindow()
      msgw_cur_x = 25
      msgw_cur_y = 50
 	 local msgw = screen:find_child("msgw")
-	 msgw:clear() 
      screen:remove(msgw)
      input_mode = S_SELECT
 end 

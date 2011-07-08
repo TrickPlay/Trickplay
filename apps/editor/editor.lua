@@ -668,6 +668,18 @@ function editor.n_selected(obj, call_by_inspector)
 end  
 
 function editor.close()
+
+	
+	if #g.children > 0 then 
+		if current_fn == "" then 
+			editor.error_message("003", true, editor.save) 
+			return 
+		elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
+			editor.error_message("003", true, editor.save) 
+			return 
+		end
+	end 
+
 	clear_bg()
     if(g.extra.video ~= nil) then 
 	    g.extra.video = nil
@@ -2107,21 +2119,15 @@ end
 
 
 local function save_new_file (fname, save_current_f, save_backup_f)
-
-	print("save_new_file : ", fname,  save_current_f, save_backup_f, "\n")
-
 	if current_fn == "" then 
 		if fname == "" then
 			return
    		end   
-		
-		-- need to check if fname is a name of existing file 
-
 		current_fn = "screens\/"..fname
 	end 
 
 	if(CURRENT_DIR == "") then 
-		editor.error_message("002", nil, new_project)  
+		editor.error_message("002", fname, new_project)  
 		return 
 	end 
 
@@ -2193,6 +2199,12 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 
     undo_list = {}
     redo_list = {}
+
+	if save_backup_f == true then  
+		local back_file = current_fn.."\.back"
+		editor_lb:writefile(back_file, contents, true)	
+		return 
+	end 
 
     if (save_current_f == true) then 
 
@@ -2287,10 +2299,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		inputMsgWindow_savefile(fname, current_fn)
 	end 	
 
-	if save_backup_f == true then  
-		local back_file = current_fn.."\.back"
-		editor_lb:writefile(back_file, contents, true)	
-	end 
 
 end 
 
@@ -2338,6 +2346,11 @@ function editor.save(save_current_f, save_backup_f)
     end 
 
 	-- Save current file and return 
+	if save_backup_f == true and current_fn ~= "" then  
+		save_new_file(current_fn, save_current_f, save_backup_f) 
+		screen:grab_key_focus()
+		return 
+	end 
 
 	if save_current_f == true and current_fn ~= "" then  
 		save_new_file(current_fn, save_current_f, save_backup_f) 
@@ -2361,7 +2374,15 @@ function editor.save(save_current_f, save_backup_f)
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() save_new_file(text_input.text, save_current_f, save_backup_f) xbox:on_button_down() end
+	button_ok.pressed = function() 
+		if text_input.text == "" then 
+			xbox:on_button_down() 
+			editor.error_message("005", save_current_f, editor.save)  
+			return
+   		end   
+		save_new_file(text_input.text, save_current_f, save_backup_f) 
+		xbox:on_button_down() 
+		end
 
 	local ti_func = function()
 		if current_focus then 
@@ -4412,9 +4433,6 @@ function editor.the_ui_elements()
 
     for i, v in pairs(uiElementLists) do 
 
-
-		--local ui_element_g = group{}
-
 		local widget_t, widget_ts = make_msgw_widget_item(v)
 		local h_rect = Rectangle{border_width = 1, border_color = {0,0,0,255}, name="h_rect", color="#a20000", size = {298, 22}, reactive = true, opacity=0}
 		h_rect.name = "h_rect"..i
@@ -4438,7 +4456,6 @@ function editor.the_ui_elements()
 		scroll.content:add(h_rect)
 		scroll.content:add(widget_ts)
 		scroll.content:add(widget_t)
-		--scroll.content:add(ui_element_g)
 
 		cur_h = cur_h + Y_PADDING
 
@@ -4521,9 +4538,6 @@ function editor.the_ui_elements()
 		return true
 	end 
 
-    if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
 end 
 
 
@@ -4747,8 +4761,9 @@ function editor.error_message(error_num, str, func_ok)
 	local error_msg_map = {
 	["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
 	["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
-	["003"] = function() OK_label = "Save As" str = true  return "Save changes before open another project? If you don\'t save, changes will be permanently lost." end, 					
+	["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
 	["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
+	["005"] = function(str) OK_label = "OK"return "Please enter a file name." end, 
 	}
 
 	local error_msg = error_msg_map[error_num](str) 
