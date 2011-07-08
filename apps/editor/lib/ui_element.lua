@@ -5713,6 +5713,7 @@ function ui_element.tabBar(t)
             if p.tabs[i] == nil then
                 p.tabs[i] = Group{}
             end
+            p.tabs[i]:hide()
 
 			
 			buttons[i] = ui_element.button{
@@ -5752,8 +5753,8 @@ function ui_element.tabBar(t)
 		
 		if p.arrow_image then p.arrow_sz = p.arrow_image.w end
 		
-		if p.tab_position == "top" and
-			(buttons[# buttons].w + buttons[# buttons].x) > p.ui_width then
+		if p.tab_position == "TOP" and
+			(buttons[# buttons].w + buttons[# buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
 				visible_w=p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame),
@@ -5780,7 +5781,7 @@ function ui_element.tabBar(t)
 			
 			umbrella:add(ap)
 			
-		elseif (buttons[# buttons].h + buttons[# buttons].y) > p.ui_height then
+		elseif (buttons[# buttons].h + buttons[# buttons].y) > (p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
 				visible_w=buttons[# buttons].w,
