@@ -38,6 +38,7 @@ local menuButton_file = ui_element.menuButton
     	label_text_color = "#808080",
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
+		ui_position = {249,28,0}
 	}
 
 menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, mstring="New\t\t\t\t     <span foreground=\"#a6a6a6\">N</span>"})
@@ -51,13 +52,7 @@ menuButton_file.insert_item(6,{type="item", string="Open Project ...\t     P", b
 menuButton_file.insert_item(7,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=exit, mstring="Quit\t\t\t\t     <span foreground=\"#a6a6a6\">Q</span>"}) 
 
 menuButton_file.name = "menuButton_file"
-menuButton_file.position = {249,28,0}
-menuButton_file.scale = {1,1,0,0}
 menuButton_file.anchor_point = {71,30.5}
-menuButton_file.x_rotation = {0,0,0}
-menuButton_file.y_rotation = {0,0,0}
-menuButton_file.z_rotation = {0,0,0}
-menuButton_file.opacity = 255
 menuButton_file.extra.focus = {[65293] = "menuButton_file", [65363] = "menuButton_edit",  [65364]=menuButton_file.press_down, [65362]=menuButton_file.press_up}
 
 function menuButton_file:on_key_down(key)
@@ -89,15 +84,6 @@ end
 
 menuButton_file.extra.reactive = true
 
---[[
-function screen:on_key_down(key)
-	if key == keys.Return then 
-		menuButton_file:grab_key_focus()
-		menuButton_file.on_focus_in()
-	end
-end
-]]
-
 local menuButton_edit = ui_element.menuButton
 	{
 		ui_width = 142,
@@ -128,6 +114,7 @@ local menuButton_edit = ui_element.menuButton
     	label_text_color = "#808080",
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
+		ui_position = {489,28,0}, 
 	}
 
 menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end, mstring="Undo\t\t\t     <span foreground=\"#a6a6a6\">Z</span>"}) --editor.undo} )
@@ -144,13 +131,7 @@ menuButton_edit.insert_item(8,{type="item", string="Group\t\t\t     G", bg=asset
 menuButton_edit.insert_item(9,{type="item", string="UnGroup\t\t\t     U", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup, mstring="UnGroup\t\t\t     <span foreground=\"#a6a6a6\">U</span>"}) 
 
 menuButton_edit.name = "menuButton_edit"
-menuButton_edit.position = {489,28,0}
-menuButton_edit.scale = {1,1,0,0}
 menuButton_edit.anchor_point = {71,30.5}
-menuButton_edit.x_rotation = {0,0,0}
-menuButton_edit.y_rotation = {0,0,0}
-menuButton_edit.z_rotation = {0,0,0}
-menuButton_edit.opacity = 255
 menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuButton_edit", [65361] = "menuButton_file", [65364]=menuButton_edit.press_down, [65362]=menuButton_edit.press_up}
 
 function menuButton_edit:on_key_down(key)
@@ -211,6 +192,7 @@ local menuButton_arrange = ui_element.menuButton
     	label_text_color = "#808080",
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
+		ui_position = {729,28,0}, 
 	}
 
 menuButton_arrange.insert_item(1,{type="label", string="  Align:", bg=assets("assets/menu-item-label.png")} )
@@ -230,13 +212,7 @@ menuButton_arrange.insert_item(14,{type="item", string="Send to Back", bg=assets
 menuButton_arrange.insert_item(15,{type="item", string="Send Backward", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.send_backward}) 
 
 menuButton_arrange.name = "menuButton_arrange"
-menuButton_arrange.position = {729,28,0}
-menuButton_arrange.scale = {1,1,0,0}
 menuButton_arrange.anchor_point = {71,30.5}
-menuButton_arrange.x_rotation = {0,0,0}
-menuButton_arrange.y_rotation = {0,0,0}
-menuButton_arrange.z_rotation = {0,0,0}
-menuButton_arrange.opacity = 255
 menuButton_arrange.extra.focus = {[65363] = "menuButton_view", [65293] = "menuButton_arrange", [65361] = "menuButton_edit", [65364]=menuButton_arrange.press_down, [65362]=menuButton_arrange.press_up }
 
 function menuButton_arrange:on_key_down(key)
@@ -297,6 +273,7 @@ local menuButton_view = ui_element.menuButton
     	label_text_color = "#808080",
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
+		ui_position = {971,28,0}, 
 	}
 
 
@@ -320,13 +297,7 @@ menuButton_view.insert_item(11,{type="item", string="Show Guides", bg=assets("as
 menuButton_view.insert_item(12,{type="item", string="Snap to Guides", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.snap_guides, icon=assets("assets/menu-checkmark.png")}) 
 
 menuButton_view.name = "menuButton_view"
-menuButton_view.position = {971,28,0}
-menuButton_view.scale = {1,1,0,0}
 menuButton_view.anchor_point = {71,30.5}
-menuButton_view.x_rotation = {0,0,0}
-menuButton_view.y_rotation = {0,0,0}
-menuButton_view.z_rotation = {0,0,0}
-menuButton_view.opacity = 255
 menuButton_view.extra.focus = {[65293] = "menuButton_view", [65361] = "menuButton_arrange", [65364]=menuButton_view.press_down, [65362]=menuButton_view.press_up }
 
 function menuButton_view:on_key_down(key)

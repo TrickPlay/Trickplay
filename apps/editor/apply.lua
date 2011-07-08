@@ -136,6 +136,10 @@ function inspector_apply (v, inspector)
 	            v.cells_focusable = false
 	       end
 	       end,
+		["tab_position"] = function()
+			  local itemLists = {"top", "right"} 
+              v["tab_position"] = itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)]
+			end,
 		["expansion_location"] = function()
 			  local itemLists = {"above", "below"} 
               v["expansion_location"] = itemLists[tonumber(item_group:find_child("expansion_location"):find_child("item_picker").selected_item)]
@@ -202,7 +206,7 @@ function inspector_apply (v, inspector)
       for i, j in pairs(item_group.children) do 
           	  
 	      if j.name then
-		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
+		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "tab_position" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
 		 if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
 			print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
 	        	return 0 
@@ -276,7 +280,7 @@ function inspector_apply (v, inspector)
 		elseif j.name == "bw" or j.name == "bh" then
                      local not_checkbox = false
                      if v.extra then 
-		         if(v.extra.type == "CheckBox")then
+		         if(v.extra.type == "CheckBoxGroup")then
                             local bsize_t = {}
                             bsize_t[1] = item_group:find_child("bw"):find_child("input_text").text
                             bsize_t[2] = item_group:find_child("bh"):find_child("input_text").text

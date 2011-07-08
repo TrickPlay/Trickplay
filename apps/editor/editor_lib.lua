@@ -158,7 +158,6 @@ function editor_ui.button(table)
 		     			current_focus.on_focus_out()
 					end
 				end 
-	
 				b_group.extra.on_focus_in("focus")
 		 end 
 
@@ -186,6 +185,12 @@ function editor_ui.button(table)
 						if screen:find_child(b_group.focus[key]).on_focus_in then
 							screen:find_child(b_group.focus[key]).on_focus_in(key)
 						end
+					else 
+					   print("b_group:grab_key_focus")
+					   print("b_group:grab_key_focus")
+					   print("b_group:grab_key_focus")
+					   print("b_group:grab_key_focus")
+					   b_group:grab_key_focus()
 					end
 				end
 		end
@@ -821,8 +826,16 @@ function editor_ui.tabBar(t)
         fill_color   = {  0,  0,  0,  0},
         label_color  = {255,255,255,  255},
         unsel_color  = { 60, 60, 60,  0},
+		---------------------------------
+
 		buttons = {}, 
 		current_tab = 1,
+		current_tab_focus = nil, 
+		--------------------------------
+		arrow_sz     = 15,
+		arrow_dist_to_frame = 5,
+		arrow_image = nil,
+
     }
     
 	local offset = {}
@@ -835,6 +848,8 @@ function editor_ui.tabBar(t)
         end
     end
     
+	local ap = nil 
+
     local create
     local current_index = 1
     --local tabs = {}
@@ -911,6 +926,18 @@ function editor_ui.tabBar(t)
                 p.buttons[current_index].on_focus_in()
 				--tab_bg[current_index]:hide()
 				--tab_focus[current_index]:show()
+
+				if ap then
+					
+					ap:pan_to(
+						
+						p.buttons[current_index].x+p.buttons[current_index].w/2,
+						p.buttons[current_index].y+p.buttons[current_index].h/2
+						
+					)
+					
+				end
+
             end,
             previous_tab = function(self)
                 if current_index == 1 then return end
