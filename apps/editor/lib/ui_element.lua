@@ -5751,7 +5751,7 @@ function ui_element.tabBar(t)
 		
 		ap = nil
 		
-		if p.arrow_image then p.arrow_sz = p.arrow_image.w end
+		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
 		
 		if p.tab_position == "top" and
 			(buttons[# buttons].w + buttons[# buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
@@ -6491,6 +6491,9 @@ function ui_element.arrowPane(t)
 	local function create()
 		
 		umbrella:clear()
+		
+		if type(p.arrow_src) == "string" then p.arrow_src = assets(p.arrow_src) end
+		
 		if p.arrow_src.parent then p.arrow_src:unparent() end
 		umbrella:add(p.arrow_src)
 		p.arrow_src:hide()
