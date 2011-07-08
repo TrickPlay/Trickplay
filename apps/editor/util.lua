@@ -328,8 +328,6 @@ function set_new_project (pname, replace)
 	copy_widget_imgs()
 end 
 
---[ NEW PROJECT ... ]-- 
-
 function new_project(fname)
 
   	local WIDTH = 300
@@ -367,11 +365,11 @@ function new_project(fname)
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() set_new_project(text_input.text) 
-								   xbox:on_button_down()
-							  	   if fname then 
-										editor.save(true)
-								   end 
+	button_ok.pressed = function() 
+							set_new_project(text_input.text) xbox:on_button_down()
+							if fname then 
+								editor.save(true)
+							end 
 						end
 
 	local ti_func = function()
@@ -419,10 +417,7 @@ function new_project(fname)
 	msgw.extra.lock = false
  	screen:add(msgw)
 	create_on_button_down_f(msgw)	
-	-- Focus 
 	ti_func()
-	--text_input.on_focus_in()
-	--button_ok:find_child("active").opacity = 255
 
 
 	function xbox:on_button_down()
@@ -514,24 +509,10 @@ function open_project(t, msg)
 			return
 		end
 
---[[
-		if #g.children > 0 then 
-			if current_fn == "" then 
-				xbox:on_button_down()
-				editor.error_message("003", nil, editor.save) 
-				return 
-			elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
-				xbox:on_button_down()
-				editor.error_message("003", nil, editor.save) 
-				return 
-			end
-		end 
-
-]]
 		editor.close()
 
 		selected_prj = v
---
+
         if(selected_prj ~= "") then                      
            project = v
 	       selected_prj = ""
@@ -577,7 +558,6 @@ function open_project(t, msg)
 
 		copy_widget_imgs()
 
-		--editor.close()
 		xbox:on_button_down()
 		return true
 	end 
@@ -623,8 +603,7 @@ function open_project(t, msg)
 			scroll:set{name = "scroll", position = {0, TOP_BAR+1}, reactive=true},
 			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
 			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
-		}
-,
+		},
 		scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}	
 	}
 
@@ -791,9 +770,6 @@ function set_app_path()
     printMsgWindow("Select Project : ", "projectlist")
     inputMsgWindow("projectlist")
 
-    if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
 
 end 
 
@@ -1030,9 +1006,6 @@ end
 			     	       				end 
 				    				end 
 			       				end 
-								if(screen:find_child("mouse_pointer") ~= nil) then 
-		     						screen:remove(screen:find_child("mouse_pointer"))
-								end 
 								editor_lb:set_cursor(68)
 								--[[
 								mouse_pointer = CS_pointer
