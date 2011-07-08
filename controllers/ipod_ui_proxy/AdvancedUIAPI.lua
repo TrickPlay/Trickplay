@@ -452,6 +452,30 @@ end
 setmetatable( factory , mt )
 
 ---------------------------------------------------------------------------
+-- Handle events for individual proxies
+
+function controller:on_advanced_ui_event(json_object)
+    print("event recieved:", json_object)
+    if not json_object then
+        return
+    end
+
+    local proxy = rawget( proxies , json_object.id )
+    if not proxy then
+        return
+    end
+
+    -- call the right callback for the event
+    if json_object.event == "touch" and proxy.on_touches then
+        proxy:on_touches(json_object.touch_id_list, json_object.state)
+    elseif json_object.event == "on_loaded" and proxy.on_loaded then
+        proxy:on_loaded(json_object.failed)
+    elseif json_object.event == "on_text_changed" and proxy.on_text_changed then
+        proxy:on_text_changed(json_object.text)
+    end
+end
+
+---------------------------------------------------------------------------
 -- Give the controller Container like abilities
 
 controller.screen = factory:create_local(0, "Controller") 

@@ -35,21 +35,39 @@ function controllers:on_controller_connected(controller)
     -- create a Rectangle
     key_handler[keys.r] = function()
         r = factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
+        function r:on_touches(touches, state)
+            print("touched my rectangle with state:", state)
+            dumptable(touches)
+        end
         dumptable(r)
     end
     -- create a Group
     key_handler[keys.g] = function()
-        g = factory:Group{ x = 20, y = 60}
+        g = factory:Group{x = 20, y = 60, w = 50, h = 50}
+        function g:on_touches(touches, state)
+            print("touched my group with state:", state)
+            dumptable(touches)
+        end
         dumptable(g)
     end
     -- create an Image using the 'chip' image
     key_handler[keys.i] = function()
         i = factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
+        j = factory:Image{x = 200, y = 500, w = 100, h = 100, src = ""}
+        function i:on_loaded(failed)
+            print("i image loaded?: "..tostring(not failed))
+        end
+        function j:on_loaded(failed)
+            print("j image loaded?: "..tostring(not failed))
+        end
         dumptable(i)
     end
     -- create a Text element
     key_handler[keys.t] = function()
         t = factory:Text{x = 200, y = 200, w = 100, h = 100, text = "I am text"}
+        function t:on_text_changed(string)
+            print("text changed:", string)
+        end
         dumptable(t)
     end
     -- add the Rectangle to the Group if both exist
@@ -80,7 +98,7 @@ function controllers:on_controller_connected(controller)
         end
     end
     -- set bkg vs adanced_ui image bug
-    key_handler[keys.u] = function()
+    key_handler[keys.b] = function()
         print("bkg vs advanced_ui image")
         controller:set_ui_background("chip")
         i = factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
