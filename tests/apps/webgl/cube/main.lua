@@ -1,5 +1,7 @@
 
-local gl = gl
+local gl = WebGLCanvas{ size = { 400 , 400 } }
+
+screen:add( gl )
 
 local vbo_0
 local vbo_1
@@ -93,7 +95,7 @@ local function init_gl_state()
     })
     
     gl:clearDepth( 1.0 )
-    gl:clearColor( 0.0 , 0.2 , 0.0 , 1 )
+    gl:clearColor( 0.0 , 0.2 , 0.0 , 0.5 )
     
     gl:enable( gl.DEPTH_TEST )
     gl:enable( gl.CULL_FACE )
@@ -175,39 +177,43 @@ local function display()
     
     gl:drawElements( gl.TRIANGLES , 36 , gl.UNSIGNED_SHORT , 0 )
     
-    gl:swap()
 end
 
 local function main()
     
-    local vw , vh = unpack( screen.display_size )
-    
+    local vw  = gl.width
+    local vh = gl.height
+
+    gl:acquire()    
     init_gl_state()
     init_gl_viewport( vw , vh , 1 , false )
+    gl:release()
     
     for i = 1 , 10 do
         collectgarbage( "collect" )
     end
     
-    print( "Rendering" )
-    
     local frames = 0
     local t = Stopwatch()
     
+    local fps = Text{ font = "60px" , color = "FFFFFF" }
+    screen:add( fps )
+    
     function idle.on_idle()
+        gl:acquire()
         display()
+        gl:release()
+
         frames = frames + 1
         if t.elapsed_seconds >= 1 then
-            print( string.format( "%d fps" , frames / t.elapsed_seconds ) )
+            fps.text = string.format( "%1.1f fps" , frames / t.elapsed_seconds )
             frames = 0
             t:start()
         end
-        
     end
-
+    
 end
 
 screen:show()
 
-dolater(  dolater , main )
---main()
+main()

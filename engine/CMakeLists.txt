@@ -251,7 +251,9 @@ if ( TP_WITH_WEBGL )
     
     list( APPEND LB_FILES ${BINDINGS_SRC}/webgl.lb ${BINDINGS_SRC}/typed_array.lb )
 
-    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/typed_array.cpp )
+    list( APPEND ENGINE_SOURCE_FILES 
+        ${ENGINE_SRC}/source/typed_array.cpp 
+        ${ENGINE_SRC}/source/webgl.cpp)
 
 endif ( TP_WITH_WEBGL )
 
