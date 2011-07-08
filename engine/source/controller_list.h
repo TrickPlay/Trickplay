@@ -71,6 +71,8 @@ public:
 
     void advanced_ui_ready( void );
 
+    void advanced_ui_event( const char * json );
+
     //.........................................................................
 
     class Delegate
@@ -92,6 +94,7 @@ public:
         virtual void cancel_image( void ) = 0;
         virtual void cancel_audio_clip( void ) = 0;
         virtual void advanced_ui_ready( void ) = 0;
+        virtual void advanced_ui_event( const char * json ) = 0;
     };
 
     void add_delegate( Delegate * delegate );
@@ -250,6 +253,7 @@ private:
     friend void tp_controller_cancel_image( TPController * controller );
     friend void tp_controller_cancel_audio_clip( TPController * controller );
     friend void tp_controller_advanced_ui_ready( TPController * controller );
+    friend void tp_controller_advanced_ui_event( TPController * controller , const char * json );
 
     //.........................................................................
 

@@ -155,6 +155,18 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Property: ok
+
+        Lets you know whether the Canvas is usable. This can change if you perform an invalid operation
+        on the canvas, like calling <restore> without calling <save>.
+    */
+
+    readonly bool ok
+        [[
+            ok = cairo_status( self ) == CAIRO_STATUS_SUCCESS;
+        ]];
+
+    /*
         Property: width
 
         The width of the Canvas.
@@ -654,7 +666,7 @@ class Canvas [[ cairo_t * ]]
         integers that define when dashes are ON and OFF.
     */
 
-    set_dash( double offset , table dashes )
+    bool set_dash( double offset , table dashes )
         [[
             std::vector< double > d;
 
@@ -670,7 +682,43 @@ class Canvas [[ cairo_t * ]]
                 lua_pop( L , 1 );
             }
 
-            cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            result = true;
+
+            size_t zeroes = 0;
+
+            for ( std::vector<double>::const_iterator it = d.begin(); it != d.end(); ++it )
+            {
+                if ( 0 == *it )
+                {
+                    ++zeroes;
+                }
+                else if ( *it < 0 )
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            if ( result && zeroes == d.size() )
+            {
+                result = false;
+            }
+
+            if ( result )
+            {
+                cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            }
+        ]];
+
+    /*
+        Function: clear_dash
+
+        Clears any dash pattern for lines.
+    */
+
+    clear_dash()
+        [[
+            cairo_set_dash( self , 0 , 0 , 0 );
         ]];
 
     /*
@@ -1317,30 +1365,93 @@ class Canvas [[ cairo_t * ]]
 
     Image Image( table props = 0 )
         [[
-            lua_getglobal( L , "Image" );
-
-            if ( props )
+            if ( cairo_status( self ) != CAIRO_STATUS_SUCCESS )
             {
-                lua_pushvalue( L , props );
+                lua_pushnil( L );
             }
+            else
+            {
+                lua_getglobal( L , "Image" );
 
-            lua_call( L , props ? 1 : 0 , 1 );
+                if ( props )
+                {
+                    lua_pushvalue( L , props );
+                }
 
-            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+                lua_call( L , props ? 1 : 0 , 1 );
 
-            cairo_surface_t * surface = cairo_get_target( self );
+                ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
 
-            CoglHandle cogl_texture = cogl_texture_new_from_data (
-                    cairo_image_surface_get_width( surface),
-                    cairo_image_surface_get_height( surface ),
-                    COGL_TEXTURE_NONE,
-                    CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
-                    COGL_PIXEL_FORMAT_ANY,
-                    cairo_image_surface_get_stride( surface ),
-                    cairo_image_surface_get_data( surface ) );
+                cairo_surface_t * surface = cairo_get_target( self );
 
-            clutter_texture_set_cogl_texture ( t , cogl_texture );
-            cogl_handle_unref( cogl_texture );
+                CoglHandle cogl_texture = cogl_texture_new_from_data (
+                        cairo_image_surface_get_width( surface),
+                        cairo_image_surface_get_height( surface ),
+                        COGL_TEXTURE_NONE,
+                        CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
+                        COGL_PIXEL_FORMAT_ANY,
+                        cairo_image_surface_get_stride( surface ),
+                        cairo_image_surface_get_data( surface ) );
+
+                clutter_texture_set_cogl_texture ( t , cogl_texture );
+                cogl_handle_unref( cogl_texture );
+            }
+        ]];
+
+    /*
+        Function: Bitmap
+
+        Creates a new Bitmap from the current contents of the Canvas.
+
+        Returns:
+
+            bitmap - A newly created Bitmap.
+    */
+
+    Bitmap Bitmap()
+        [[
+          if ( cairo_status( self ) != CAIRO_STATUS_SUCCESS )
+          {
+              lua_pushnil( L );
+          }
+          else
+          {
+              cairo_surface_t * surface = cairo_get_target( self );
+
+              if ( ! surface )
+              {
+                  lua_pushnil( L );
+              }
+              else
+              {
+                  Image * image = Image::make( surface );
+
+                  if ( ! image )
+                  {
+                      lua_pushnil( L );
+                  }
+                  else
+                  {
+                      lua_getglobal( L , "Bitmap" );
+
+                      lua_pushliteral( L , "" );
+                      lua_call( L , 1 , 1 );
+
+                      Bitmap * bitmap = Bitmap::get( L , lua_gettop( L ) );
+
+                      if ( ! bitmap )
+                      {
+                          delete image;
+                          lua_pop( L , 1 );
+                          lua_pushnil( L );
+                      }
+                      else
+                      {
+                          bitmap->set_image( image );
+                      }
+                  }
+              }
+          }
         ]];
 
     set_line_width( double line_width )
