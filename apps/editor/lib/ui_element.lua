@@ -91,9 +91,7 @@ return tbl
 end 
 
 function ui_element.set_cursor_pointer (src_file)
-	--[[
 	user_mouse_pointer.src = "/assets/images/"..src_file
-	]]
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
@@ -442,9 +440,6 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
 
     return c
 end 
-
-
-
 
 -- make_toastb_group_bg() : make toast box background  
 
@@ -1309,6 +1304,7 @@ function ui_element.button(table)
 		label_align = nil,
 		--------------------------------
 		is_in_menu = false,
+		ui_position = {100,100,0},
     }
 
  --overwrite defaults
@@ -1325,7 +1321,7 @@ function ui_element.button(table)
     {
         name = "button", 
         size = { p.ui_width , p.ui_height},
-        position = {100, 100, 0},  
+        position = p.ui_position, 
         reactive = true,
         extra = {type = "Button"}
     } 
@@ -1595,6 +1591,7 @@ function ui_element.textInput(table)
     	text_color =  {255,255,255,255},
     	border_corner_radius = 12 ,
 		readonly = "",
+		ui_position = {200,200,0},
 
     }
  --overwrite defaults
@@ -1610,7 +1607,7 @@ function ui_element.textInput(table)
     {
        name = "t_group", 
        size = { p.ui_width , p.ui_height},
-       position = {200, 200, 0},  
+       position = p.ui_position, 
        reactive = true, 
        extra = {type = "TextInput"} 
     }
@@ -1927,7 +1924,8 @@ function ui_element.toastAlert(table)
 	border_corner_radius = 22,
 	fade_duration = 2000,
 	on_screen_duration = 5000,
-	icon = "lib/assets/toast-icon.jpg"
+	icon = "lib/assets/toast-icon.jpg", 
+	ui_position = {800,600,0},
     }
 
 
@@ -1942,7 +1940,7 @@ function ui_element.toastAlert(table)
     local t_box, icon, title, message, t_box_img  
     local tb_group = Group {
     	  name = "toastb_group",  
-    	  position = {800, 600, 0}, 
+    	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "ToastAlert"} 
      }
@@ -2100,7 +2098,8 @@ function ui_element.buttonPicker(table)
 	rotate_func = nil, 
     selected_item = 1, 
 	direction = "horizontal", 
-	inspector = 0
+	inspector = 0, 
+	ui_position = {300, 300, 0},  
     }
 
  --overwrite defaults
@@ -2117,7 +2116,7 @@ function ui_element.buttonPicker(table)
      local bp_group = Group
      {
 		name = "buttonPicker", 
-		position = {300, 300, 0}, 
+		position = p.ui_position, 
         reactive = true, 
 		extra = {type = "ButtonPicker"}
      }
@@ -2645,7 +2644,8 @@ function ui_element.radioButtonGroup(table)
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
 	rotate_func = nil, 
 	direction = "vertical", 
-	selected_item = 1 
+	selected_item = 1,  
+	ui_position = {200, 200, 0}, 
     }
 
  --overwrite defaults
@@ -2662,7 +2662,7 @@ function ui_element.radioButtonGroup(table)
 
     local rb_group = Group {
           name = "radioButtonGroup",  
-    	  position = {200, 200, 0}, 
+    	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "RadioButtonGroup"}
      }
@@ -2903,6 +2903,7 @@ function ui_element.checkBoxGroup(t)
 	selected_items = {1},  
 	direction = "vertical",  -- 1:vertical 2:horizontal
 	rotate_func = nil,  
+	ui_position = {200, 200, 0}, 
     } 
 
  --overwrite defaults
@@ -2921,7 +2922,7 @@ function ui_element.checkBoxGroup(t)
 
     local  cb_group = Group {
     	  name = "checkBoxGroup",  
-    	  position = {200, 200, 0}, 
+    	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "CheckBoxGroup"}
     }
@@ -3146,7 +3147,8 @@ function ui_element.progressSpinner(t)
         number_of_dots      = 12,
         overall_diameter   = 100,
         cycle_time = 150*12,
-        style = "orbitting"
+        style = "orbitting", 
+		ui_position = {400,400, 0},
     }
     --overwrite defaults
     if t ~= nil then
@@ -3160,7 +3162,7 @@ function ui_element.progressSpinner(t)
     --the umbrella Group
     local l_dots = Group{ 
         name     = "progressSpinner",
-        position = {400,400},
+        position = p.ui_position,  
         --anchor_point = {p.overall_diameter/2,p.overall_diameter/2},
         reactive = true,
         extra = {
@@ -3359,7 +3361,8 @@ function ui_element.progressBar(t)
         filled_top_color    = {255,  0,  0,255},
         filled_bottom_color = { 96, 48, 48,255},
         progress            = 0,
-        skin                = "default"
+        skin                = "default", 
+		ui_position 		= {400,400},
     }
     --overwrite defaults
     if t ~= nil then
@@ -3382,7 +3385,7 @@ function ui_element.progressBar(t)
         }
 	local l_bar_group = Group{
 		name     = "progressBar",
-        	position = {400,400},
+        	position = p.ui_position, 
 	        anchor_point = {p.radius,p.radius},
         	reactive = true,
 	        extra = {
@@ -3548,13 +3551,14 @@ function ui_element.layoutManager(t)
         cell_w      = 300,
         cell_h      = 200,
         cell_spacing    = 40, --grid_gap
-	cell_timing = 300, -- duration_per_time
-	cell_timing_offset     = 200,
+		cell_timing = 300, -- duration_per_time
+		cell_timing_offset     = 200,
         tiles       = {},
         focus       = nil,
         cells_focusable = true, --focus_visible
         skin="default",
         cell_size="fixed",
+ 		ui_position = {200,100},
     }
     
     local functions={}
@@ -3587,7 +3591,7 @@ function ui_element.layoutManager(t)
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
         name     = "layoutManager",
-        position = {200,100},
+        position = p.ui_position, 
         reactive = true,
         extra    = {
 	    type = "LayoutManager",
@@ -4015,6 +4019,7 @@ function ui_element.scrollPane(t)
         box_color = {160,160,160,255},
         box_width = 2,
         skin="default",
+		ui_position = {200,100},
     }
     --overwrite defaults
     if t ~= nil then
@@ -4041,7 +4046,7 @@ function ui_element.scrollPane(t)
     --the umbrella Group, containing the full slate of tiles
     local scroll_group = Group{ 
         name     = "scrollPane",
-        position = {200,100},
+        position = p.ui_position, 
         reactive = true,
         extra    = {
 			type = "ScrollPane",
@@ -4898,7 +4903,8 @@ button
         align = "left",
         show_ring     = true,
         skin = "default",
-		status = nil
+		status = nil,
+		ui_position = {300,300},
     }
     --overwrite defaults
     if t ~= nil then
@@ -4957,13 +4963,14 @@ button
     	border_corner_radius=p.border_corner_radius,
 		text_has_shadow = shadow,
 		is_in_menu = true, 
+		ui_position = p.ui_position,
     }
     local umbrella
     umbrella     = Group{
         name="menuButton",
         reactive = true,
-        position={300,300},
-        children={button,dropDownMenu},
+        position = p.ui_position, 
+        children = {button,dropDownMenu},
         extra={
             type="MenuButton",
             focus_index = function(i)
@@ -5504,182 +5511,11 @@ button
 end
 
 
---[[
-
-function ui_element.menuBar(t)
-    local p = {
-        bar_widgets = {
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.button(),
-            ui_element.button(),
-            ui_element.button(),
-            ui_element.button(),
-            ui_element.button(),
-        },
-        y_offset  = 20,
-        clip_w      = 2/3*screen.w,
-        bg_pic      = nil,
-        arrow_img   = nil,
-        arrow_y     = 60,
-        skin        = "default"
-    }
-    --overwrite defaults
-    if t ~= nil then
-        for k, v in pairs (t) do
-            p[k] = v
-        end
-    end
-    local create
-    local index = 0
-    
-    local si = ui_element.scrollPane{
-        visible_h    = screen.h,
-        vitual_h = screen.h,
-        --arrow_sz  = 30, --kkk
-        --arrows_centered   = true,
-        --border_is_visible = false,
-    }
-    si.position={40,0}
-    local func = {
-        ["Button"] = {
-            fade_in = "on_focus_in",
-            fade_out = "on_focus_out"
-        },
-        ["MenuButton"] ={
-            fade_in = "spin_in",
-            fade_out = "spin_out"
-        }
-    }
-    local width = {
-        ["Button"]   = 200,
-        ["MenuButton"] = 300
-    }
-    local umbrella = Group{
-        name     = "menubar",
-        reactive = true,
-        position = {0,200},
-        extra    = {
-            type = "MenuBar",
-            press_left = function()
-                if index > 1 then
-                    if p.bar_widgets[index] ~= nil then
-                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
-                        si.seek_to(p.bar_widgets[index].x,0)
-                    end
-                    index = index - 1
-                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
-                end
-            end,
-            press_right = function()
-                if index < #p.bar_widgets then
-                    if p.bar_widgets[index] ~= nil then
-                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
-                    end
-                    index = index + 1
-                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
-                    
-                    si.seek_to(p.bar_widgets[index].x,0)
-                end
-            end,
-            press_up = function()
-                if p.bar_widgets[index].press_up then
-                    p.bar_widgets[index].press_up()
-                end
-            end,
-            press_down = function()
-                if p.bar_widgets[index].press_down then
-                    p.bar_widgets[index].press_down()
-                end
-            end,
-            press_enter= function()
-                if p.bar_widgets[index].press_enter then
-                    p.bar_widgets[index].press_enter()
-                elseif p.bar_widgets[index].pressed then
-                    p.bar_widgets[index].pressed()
-                end
-            end,
-            insert_widget = function(i,w)
-                table.insert(p.bar_widgets,i,w)
-                create()
-            end,
-            replace_widget = function(i,w)
-                p.bar_widgets[i] = w
-                create()
-            end,
-            remove_widget = function(i)
-                table.remove(p.bar_widgets,i)
-                create()
-            end,
-        }
-    }
-    
-    create = function()
-        
-        --clear the groups
-        umbrella:clear()
-        si.content:clear()
-        
-        --load the background
-        if p.bg_pic == nil then
-            umbrella:add(assets(skin_list[p.skin]["menu_bar"]))
-        else
-            umbrella:add(p.bg_pic)
-        end
-        
-        umbrella:add(si)
-        si.seek_to(0,0)
-        si.visible_w = p.clip_w
-        si.skin      = p.skin
-        --si.hor_arrows_y = p.arrow_y --kkkk
-        index = 0
-        
-        local curr_w = 0
-        for i = 1, #p.bar_widgets do
-            
-            assert(
-                p.bar_widgets[i].extra.type == "Button" or
-                p.bar_widgets[i].extra.type == "MenuButton",
-                "invalid widget added to the dropdown bar"
-            )
-            si.content:add(p.bar_widgets[i])
-            p.bar_widgets[i].position = {curr_w,p.y_offset}
-            p.bar_widgets[i].skin     = p.skin
-            
-            curr_w = curr_w + width[p.bar_widgets[i].extra.type] + 15
-            
-        end
-        si.virtual_w = curr_w
-    end
-    
-    create()
-    --set the meta table to overwrite the parameters
-    mt = {}
-    mt.__newindex = function(t,k,v)
-		
-        p[k] = v
-        create()
-		
-    end
-    mt.__index = function(t,k)       
-       return p[k]
-    end
-    setmetatable(umbrella.extra, mt)
-
-    return umbrella
-end
---]]
-
-
 function ui_element.tabBar(t)
     
     --default parameters
     local p = {
         font  = "DejaVu Sans 26px",
-        
         
         text_font = "DejaVu Sans 26px",
     	text_color = {255,255,255,255}, 
@@ -5705,14 +5541,14 @@ function ui_element.tabBar(t)
         --tab_align          = "CENTER",
         --label_align        = "CENTER",
         label_padding = 10,
-        tab_position = "TOP",
+        tab_position = "top",
         
         display_width  = 600,
         display_height = 500,
         tab_spacing = 10,
         --slant_width  = 20,
         border_width =  2,
-        border_color = {255,255,255,255},
+        --border_color = {255,255,255,255},
         fill_color   = {  0,  0,  0,255},
         label_color  = {255,255,255,255},
         unsel_color  = { 60, 60, 60,255},
@@ -5720,6 +5556,8 @@ function ui_element.tabBar(t)
 		arrow_sz     = 15,
 		arrow_dist_to_frame = 5,
 		arrow_image = nil,
+
+		ui_position = {200,200},
     }
     
 	local offset = {}
@@ -5727,9 +5565,7 @@ function ui_element.tabBar(t)
     
     --overwrite defaults
     if t ~= nil then
-		
-		for k, v in pairs (t) do        p[k] = v        end
-		
+		for k, v in pairs (t) do p[k] = v end
     end
     
 	local ap = nil
@@ -5742,12 +5578,9 @@ function ui_element.tabBar(t)
 	
     local umbrella     = Group{
 		
-        name="TabContainer",
-		
+        name="tabBar",
 		reactive = true,
-		
-		position = {200,200},
-		
+		position = p.ui_position, 
         extra={
             
 			type="TabBar",
@@ -5880,37 +5713,12 @@ function ui_element.tabBar(t)
             if p.tabs[i] == nil then
                 p.tabs[i] = Group{}
             end
-			p.tabs[i]:hide()
-			--[[
-            buttons[i] = ui_element.button()
-			p.tabs[i]:hide()
-            
-            buttons[i].position = {0,0}
-            buttons[i].skin=p.skin
-            buttons[i].ui_width=p.ui_width
-            buttons[i].ui_height=p.ui_height
-            
-            buttons[i].focus_color=p.focus_color
-            buttons[i].border_width=p.border_width
-            buttons[i].border_corner_radius=p.border_corner_radius
-            
-            buttons[i].label      = p.tab_labels[i]
-            buttons[i].text_font  = p.font
-            buttons[i].text_color = p.label_color
-            buttons[i].fill_color = p.unsel_color
-            buttons[i].focus_fill_color = p.fill_color
-            buttons[i].position         = {0,0}
-            buttons[i].focus_text_color = p.focus_text_color
-           	buttons[i].pressed = function () umbrella:display_tab(i) end  
-            --buttons[i].on_focus_out()
-			
-			--]]
-			
-			---[[
+            p.tabs[i]:hide()
+
 			
 			buttons[i] = ui_element.button{
 				
-				position             = { 0, 0 },
+				ui_position             = { 0, 0 },
 				skin                 = p.skin,
 				ui_width             = p.ui_width,
 				ui_height            = p.ui_height,
@@ -5926,10 +5734,9 @@ function ui_element.tabBar(t)
 				
 			}
 			
-			buttons[i].position         = {0,0}
+			--buttons[i].position         = {0,0}
 			
-            --]]
-            if p.tab_position == "TOP" then
+            if p.tab_position == "top" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
             else
@@ -6007,7 +5814,7 @@ function ui_element.tabBar(t)
 			
 		end
 		
-        if p.tab_position == "TOP" then
+        if p.tab_position == "top" then
             bg.y = buttons[1].h-p.border_width
         else
             bg.x = buttons[1].w-p.border_width
@@ -6081,7 +5888,7 @@ function ui_element.tabBar(t)
         --tab_align          = "CENTER",
         --label_align        = "CENTER",
         label_padding = 10,
-        tab_position = "TOP",
+        tab_position = "top",
         
         display_width  = 600,
         display_height = 500,
@@ -6253,7 +6060,7 @@ function ui_element.tabBar(t)
            	buttons[i].pressed = function () umbrella:display_tab(i) end  
             buttons[i].on_focus_out()
             
-            if p.tab_position == "TOP" then
+            if p.tab_position == "top" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
             else
@@ -6265,7 +6072,7 @@ function ui_element.tabBar(t)
 			offset.y = p.tabs[i].y
 			editor_use = false
         end
-        if p.tab_position == "TOP" then
+        if p.tab_position == "top" then
             bg.y = buttons[1].h-p.border_width
         else
             bg.x = buttons[1].w-p.border_width
@@ -6568,6 +6375,7 @@ function ui_element.arrowPane(t)
         box_color =   {160,160,160,255},
         box_width =    2,
         skin = "default",
+		ui_position = {200,100},
     }
 	
 	local make_arrow = function()
@@ -6621,14 +6429,12 @@ function ui_element.arrowPane(t)
     --the umbrella Group, containing the full slate of tiles
     local umbrella = Group{ 
         name     = "arrowPane",
-        position = {200,100},
+        position = p.ui_position, 
         reactive = true,
         extra    = {
 			type = "ArrowPane",
 			--tries to place virtual coordinates 'x' and 'y' in the middle of the window
 			pan_to = function(self,x,y,top_left)
-				
-				--print(x,y)
 				
 				if top_left == true then
 					x = x + p.visible_w/2
@@ -6653,7 +6459,6 @@ function ui_element.arrowPane(t)
                 else
                     new_y = -y + p.visible_h/2
                 end
-				--print(new_x,new_y)
 				if new_x ~= p.content.x or new_y ~= p.content.y then
                     p.content:animate{
                         duration = 200,
@@ -6746,7 +6551,6 @@ function ui_element.arrowPane(t)
 				
 				
 				arrow.on_button_down = function()
-					print("sjdfhajkfdalsjdfk")
 					umbrella:pan_by(p.dist_per_press,0)
 				end
 				

@@ -31,89 +31,75 @@ dofile("editor.lua")
         [ keys.v	] = function() editor.v_guideline() input_mode = S_SELECT end,
         [ keys.h	] = function() editor.h_guideline() input_mode = S_SELECT end,
         [ keys.j	] = function() if not screen:find_child("timeline") then 
-					    if table.getn(g.children) > 0 then
-						input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
-						screen:find_child("timeline").extra.show = true 
-						--[[
-						if screen:find_child("mouse_pointer") then 
-		 					screen:find_child("mouse_pointer"):raise_to_top()
-    					end
-						]]
-					    end
-				       elseif table.getn(g.children) == 0 then 
-		      			    screen:remove(screen:find_child("timeline"))
-		                            if screen:find_child("tline") then 
-		                            	screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		                            end 
-				      elseif screen:find_child("timeline").extra.show ~= true  then 
-					    screen:find_child("timeline"):show()
-					    screen:find_child("timeline").extra.show = true
-						--[[
-						if screen:find_child("mouse_pointer") then 
-		 					screen:find_child("mouse_pointer"):raise_to_top()
-    					end
-						]]
-
-				      else 
-					    screen:find_child("timeline"):hide()
-					    screen:find_child("timeline").extra.show = false
-				      end
-		            end,
-        --[ keys.x	] = function() editor.debug() input_mode = S_SELECT end,
+					    				if table.getn(g.children) > 0 then
+											input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
+											screen:find_child("timeline").extra.show = true 
+					    				end
+				       			   elseif table.getn(g.children) == 0 then 
+		      			    			screen:remove(screen:find_child("timeline"))
+		                            	if screen:find_child("tline") then 
+		                            		screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		                            	end 
+				      			   elseif screen:find_child("timeline").extra.show ~= true  then 
+						    			screen:find_child("timeline"):show()
+					    				screen:find_child("timeline").extra.show = true
+				      				else 
+					    				screen:find_child("timeline"):hide()
+					    				screen:find_child("timeline").extra.show = false
+				      				end
+		            	end,
         [ keys.x	] = function() editor.export() input_mode = S_SELECT end,
         [ keys.i	] = function() editor.the_ui_elements() input_mode = S_SELECT end,
-        --[ keys.i	] = function() editor.ui_elements() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
-					    menuShow()
-					    if(screen:find_child("xscroll_bar") ~= nil) then 
-					    	screen:find_child("xscroll_bar"):show() 
-						screen:find_child("xscroll_box"):show() 
-						screen:find_child("x_0_mark"):show()
-						screen:find_child("x_1920_mark"):show()
-					    end 
-					    if(screen:find_child("scroll_bar") ~= nil) then 
-		 				screen:find_child("scroll_bar"):show() 
-						screen:find_child("scroll_box"):show() 
-						screen:find_child("y_0_mark"):show()
-						screen:find_child("y_1080_mark"):show()
-					    end 
-					    menu_hide = false 
-				       else 
-		     			    menuHide()
-					    if(screen:find_child("xscroll_bar") ~= nil) then 
-					    	screen:find_child("xscroll_bar"):hide() 
-						screen:find_child("xscroll_box"):hide() 
-						screen:find_child("x_0_mark"):hide()
-						screen:find_child("x_1920_mark"):hide()
-					    end 
-					    if(screen:find_child("scroll_bar") ~= nil) then 
-		 				screen:find_child("scroll_bar"):hide() 
-						screen:find_child("scroll_box"):hide() 
-						screen:find_child("y_0_mark"):hide()
-						screen:find_child("y_1080_mark"):hide()
-					    end 
-					    menu_hide = true 
-					    screen:grab_key_focus()
-				       end 
-				       input_mode = S_SELECT 
-			    end,
-	--[ keys.w	] = function() editor.the_open() input_mode = S_SELECT end,
+					    				menuShow()
+					    				if(screen:find_child("xscroll_bar") ~= nil) then 
+					    					screen:find_child("xscroll_bar"):show() 
+											screen:find_child("xscroll_box"):show() 
+											screen:find_child("x_0_mark"):show()
+											screen:find_child("x_1920_mark"):show()
+					    				end 
+					    				if(screen:find_child("scroll_bar") ~= nil) then 
+		 									screen:find_child("scroll_bar"):show() 
+											screen:find_child("scroll_box"):show() 
+											screen:find_child("y_0_mark"):show()
+											screen:find_child("y_1080_mark"):show()
+					    			   end 
+					    			   menu_hide = false 
+						          else 
+		     			    		   menuHide()
+					    			  if(screen:find_child("xscroll_bar") ~= nil) then 
+					    			  		screen:find_child("xscroll_bar"):hide() 
+								  		    screen:find_child("xscroll_box"):hide() 
+											screen:find_child("x_0_mark"):hide()
+											screen:find_child("x_1920_mark"):hide()
+					    			  end 
+					    			  if(screen:find_child("scroll_bar") ~= nil) then 
+		 									screen:find_child("scroll_bar"):hide() 
+											screen:find_child("scroll_box"):hide() 
+											screen:find_child("y_0_mark"):hide()
+											screen:find_child("y_1080_mark"):hide()
+					    			 end 
+					    			 menu_hide = true 
+					    			 screen:grab_key_focus()
+				       			end 
+				       			input_mode = S_SELECT 
+			    		end,
         [ keys.BackSpace] = function() editor.delete() input_mode = S_SELECT end,
 		[ keys.Shift_L  ] = function() shift = true end,
 		[ keys.Shift_R  ] = function() shift = true end,
 		[ keys.Control_L  ] = function() control = true end,
 		[ keys.Control_R  ] = function() control = true end,
         [ keys.Return   ] = function() if(current_inspector == nil) then 
-				     for i, j in pairs (g.children) do 
-					if(j.extra.selected == true) then 
-						editor.n_selected(j) 
-					end 
-				     end 
-		   		     screen:find_child("menuButton_file"):grab_key_focus()
-		   		     screen:find_child("menuButton_file").on_focus_in()
-				     input_mode = S_MENU
-			             end 
-			    end ,
+				     						for i, j in pairs (g.children) do 
+												if(j.extra.selected == true) then 
+													editor.n_selected(j) 
+												end 
+				     						end 
+		   		     						screen:find_child("menuButton_file"):grab_key_focus()
+		   		     						screen:find_child("menuButton_file").on_focus_in()
+				     						input_mode = S_MENU
+			             			  end 
+			    			end ,
         [ keys.Left     ] = function() if table.getn(selected_objs) ~= 0 then
 			         for q, w in pairs (selected_objs) do
 				      local t_border = screen:find_child(w)
@@ -196,19 +182,12 @@ dofile("editor.lua")
 			   end end
      }
     
-     function screen.on_key_down( screen , key )
+    function screen.on_key_down( screen , key )
 	if(key == keys.Shift_L) then shift = true end
 	if(key == keys.Shift_R ) then shift = true end
 	if(key == keys.Control_L ) then control = true end
 	if(key == keys.Control_R ) then control = true end
 
-	--[[ 0427
-	if(screen:find_child("mouse_pointer") ~= nil) then 
-             --screen:remove(mouse_pointer) 
-             screen:remove(screen:find_child("mouse_pointer")) 
-        end 
-	]]
-	        
 	if(input_mode ~= S_POPUP) then 
           if key_map[key] then
               key_map[key](self)
@@ -219,28 +198,13 @@ dofile("editor.lua")
     function screen.on_key_up( screen , key )
     	if key == keys.Shift_L or key == keys.Shift_R then
              shift = false
-			 --[[
-	     if(screen:find_child("mouse_pointer") ~= nil) then 
-		if screen:find_child("mouse_pointer").extra.type == "pointer_plus" then 
-			screen:remove(screen:find_child("mouse_pointer"))
 		end 
-	     end
-		 ]]
-	end 
     	if key == keys.Control_L or key == keys.Control_R then
              control = false
-			 --[[
-	     if(screen:find_child("mouse_pointer") ~= nil) then 
-			screen:remove(screen:find_child("mouse_pointer"))
-	     end
-		 ]]
-
-	end 
+		end 
     end
 
     function screen:on_button_down(x,y,button,num_clicks)
-
-	  
 	  if(input_mode == S_MENU_M) then
 		if current_focus then 
 			current_focus.on_focus_out()
@@ -304,7 +268,6 @@ dofile("editor.lua")
      end
 
 	function screen:on_button_up(x,y,button,clicks_count)
-
 		if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
 			local temp_focus = current_focus 
 				current_focus.on_focus_out()
@@ -334,13 +297,6 @@ dofile("editor.lua")
 				editor.multi_select_done(x,y)
 	      	end 
 
-	      	if(screen:find_child("mouse_pointer") ~= nil) then 
-					--[[
-		  		if screen:find_child("mouse_pointer").extra.type ~= "pointer" then 
-		        	screen:remove(screen:find_child("mouse_pointer"))
-		  		end
-				]]
-	      	end 
             mouse_state = BUTTON_UP
        end
 	end
@@ -348,19 +304,6 @@ dofile("editor.lua")
       function screen:on_motion(x,y)
 
 	  local mouse_pointer
-
---[[
-	  if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
-			if current_focus:find_child("red").opacity == 255 then 
-					if current_focus.active_button == true then 
-						current_focus.on_focus_out("active")
-					else 
-						current_focus.on_focus_out()
-					end 
-			end
-	  end 
-
-]]
 
 	  if control == true then 
 		if is_in_container_group(x,y) == true and selected_content then 
@@ -661,28 +604,22 @@ dofile("editor.lua")
     	dofile("menu.lua")
 		open_project()
     	--set_app_path()
-	
 
-	--local duration = 5--secs
+		local auto_save_duration = 500000  --msecs
+		local auto_save = true
+		local backup_timeline = Timeline {
+		 	  duration = auto_save_duration,
+	       	  direction = "FORWARD",
+	       	  loop = true
+	    }
 
---[[
-		local elapsed  = 0
-		local auto_save = false
-		idle.on_idle = function(self,seconds)
-    		elapsed = elapsed + seconds
-    		--local p = elapsed/duration
-		if current_fn ~= "" and auto_save == false then 
-			--print("auto save !!!")
-			editor.save(true, true) 
-			elapsed = 0 
-			auto_save = true
-		end 
-		if elapsed > 10 and auto_save == true then 
-			--print("auto save reset")
-			elapsed = 0 
-			auto_save = false 
-		end 
-	]]		
+	    function backup_timeline.on_completed()
+			if auto_save == true and current_fn ~= "" then 
+				editor.save(nil, true) 
+			end 
+			t = nil
+	    end
+	    backup_timeline:start()
 
     end
 

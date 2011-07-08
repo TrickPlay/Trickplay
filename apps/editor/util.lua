@@ -6,11 +6,11 @@ local factory = ui.factory
 local set_project_path 
 
 function table_copy(t)
-  local t2 = {}
-  for k,v in pairs(t) do
-    t2[k] = v
-  end
-  return t2
+  	local t2 = {}
+  	for k,v in pairs(t) do
+    	t2[k] = v
+  	end
+  	return t2
 end
 
 function table_insert(t, val)
@@ -21,39 +21,35 @@ function table_insert(t, val)
 end 
 
 function table_move_up(t, itemNum)
-	--print("itemNum", itemNum)
 	local prev_i, prev_j 
 	for i,j in pairs (t) do 
-	     if i == itemNum then 
-		if prev_i then 
-		     --print(prev_i, j, i, prev_j)
-		     t[prev_i] = j 
-		     t[i] = prev_j 
-		     return
-		else 
-		     return 
-		end 
-	     end 
-	     prev_i = i 
-	     prev_j = j 
+		if i == itemNum then 
+			if prev_i then 
+		     	t[prev_i] = j 
+		     	t[i] = prev_j 
+		     	return
+			else 
+		     	return 
+			end 
+	    end 
+	    prev_i = i 
+	    prev_j = j 
 	end 
 end 
+
 function table_move_down(t, itemNum)
-	--print("itemNum", itemNum)
 	local i, j, next_i, next_j 
 	for i,j in pairs (t) do 
-	     if i == itemNum then 
-	          next_i = i + 1 
-		  if t[next_i] then 
-	     		--print(i,next_j, i, t[next_i])
+		if i == itemNum then 
+	    	next_i = i + 1 
+		  	if t[next_i] then 
 	     		next_j = t[next_i] 
 	     		t[i] = next_j
 	     		t[next_i] = j 
-			return 
-		  else 
-		     return     
-		  end 
-
+				return 
+		  	else 
+		     	return     
+		  	end 
 	     end 
 	end 
 	return     
@@ -78,17 +74,6 @@ function table_removekey(table, key)
 	end 
 	return temp_t
 end
-
-
---[[ org, used in timeline functions  
-function table_removekey(table, key)
-	table[key] = nil
-	end 
-	return 
-end
-
-]]
-
 
 function __genOrderedIndex( t )
     local orderedIndex = {}
@@ -134,7 +119,12 @@ function orderedPairs(t)
     return orderedNext, t, nil
 end
 
+function values(t) 
+	local j = 0 
+	return function () j = j+1 return t[j] end 
+end 
 
+function abs(a) if(a>0) then return a else return -a end end
 
 function is_available(new_name)
     if(g:find_child(new_name) ~= nil) then 
@@ -145,35 +135,36 @@ function is_available(new_name)
 end 
 
 function is_lua_file(fn)
-	     i, j = string.find(fn, ".lua")
-	     if (j == string.len(fn)) then
+	local i, j = string.find(fn, ".lua")
+	if (j == string.len(fn)) then
 		return true
-	     else 
+	else 
 		return false
-	     end 
+	end 
 end 
+
 function is_img_file(fn)
-	     i, j = string.find(fn, ".png")
-	     if (j == string.len(fn)) then
+	local i, j = string.find(fn, ".png")
+	if (j == string.len(fn)) then
 		return true
-	     else 
-	        i, j = string.find(fn, ".jpg")
-	        if (j == string.len(fn)) then
-			return true
-                end
+	else 
+		i, j = string.find(fn, ".jpg")
+	if (j == string.len(fn)) then
+		return true
+    end
 
-		return false
-	     end 
+	return false
+	end 
 end 
+
 function is_mp4_file(fn)
-	     i, j = string.find(fn, ".mp4")
-	     if (j == string.len(fn)) then
+	local i, j = string.find(fn, ".mp4")
+	if (j == string.len(fn)) then
 		return true
-	     else 
+	else 
 		return false
-	     end 
+	end 
 end 
-
 
 function is_in_list(item, list)
     if list == nil then 
@@ -181,36 +172,32 @@ function is_in_list(item, list)
     end 
 
     for i, j in pairs (list) do
-	if item == j then 
-		return true
-	end 
+		if item == j then 
+			return true
+		end 
     end 
     return false
 end 
-    
 
 function need_stub_code(v)
-
     local lists = {"Button", "ButtonPicker", "RadioButtonGroup", "CheckBoxGroup", "MenuButton"}
- 
     if v.extra then 
         if is_in_list(v.extra.type, lists) == true then 
-	    return true
+	    	return true
         else 
-	    return false
+	    	return false
         end 
     else 
         return false
     end 
 end 
 
-
 function is_this_widget(v)
     if v.extra then 
         if is_in_list(v.extra.type, uiElements) == true then 
-	    return true
+	    	return true
         else 
-	    return false
+	    	return false
         end 
     else 
         return false
@@ -221,16 +208,15 @@ end
 function is_this_container(v)
     if v.extra then 
         if is_in_list(v.extra.type, uiContainers) == true then 
-	    return true
+	    	return true
         else 
-	    return false
+	    	return false
         end 
     else 
         return false
     end 
 end 
 
--- Clear background images 
 function clear_bg()
     BG_IMAGE_20.opacity = 0
     BG_IMAGE_40.opacity = 0
@@ -245,13 +231,6 @@ function clear_bg()
     screen:find_child("menuButton_view").items[7]["icon"].opacity = 0
 end
 
-function values(t) 
-	local j = 0 
-	return function () j = j+1 return t[j] end 
-end 
-
-function abs(a) if(a>0) then return a else return -a end end
-
 function getObjnames()
     local obj_names = ""
     for i, v in pairs(g.children) do
@@ -263,86 +242,50 @@ function getObjnames()
     return obj_names
 end
 
-function find_parent(child_obj) 
-   for i, v in pairs(g.children) do
-   	if g:find_child(v.name) then
-   	     if (v.type == "Group") then 
-   	          if(v:find_child(child_obj.name)) then
-		       return v
-   		  end 
-   	     end 
-   	end
-   end
-end 
-
 local project
 local base
 local projects = {}
 
-
 local function copy_widget_imgs ()
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/"..j 
-	     dest_file = CURRENT_DIR.."/lib/assets/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
+	local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE/", }
+	local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/localized/strings.lua", } 
+	local source_files, source_file, dest_file, dest_dir
 
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/default/")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/default/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/default/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
+	for a, b in pairs (copy_dirs) do 
+		source_files = editor_lb:readdir(trickplay.config.app_path..b)
+		local k,l = string.find(b, "/assets/") 
+	    dest_dir = "/lib/skins/"..string.sub(b,l+1, -1)
+		if a == 1 then 
+			dest_dir = "/lib"..b
+		end 
+		for i, j in pairs(source_files) do 
+	     	source_file = trickplay.config.app_path..b..j 
+			dest_file = CURRENT_DIR..dest_dir..j 
+			--print(source_file, dest_file)
+	     	editor_lb:file_copy(source_file, dest_file) 
+	    end 
 	end 
-
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/CarbonCandy/")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/CarbonCandy/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/CarbonCandy/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
+	for a, b in pairs (copy_files) do 
+		source_file = trickplay.config.app_path..b
+		dest_file = CURRENT_DIR..b
+	 	editor_lb:file_copy(source_file, dest_file)
 	end 
-
-	local source_files = editor_lb:readdir(trickplay.config.app_path.."/assets/OOBE")
-	local source_file, dest_file
-	for i, j in pairs(source_files) do 
-	     source_file = trickplay.config.app_path.."/assets/OOBE/"..j 
-	     dest_file = CURRENT_DIR.."/lib/skins/OOBE/"..j 
-	     if not editor_lb:file_copy(source_file, dest_file) then 
-		--print("couldn't copy widget image"..dest_file) 
-	     end 
-	end 
-
-	source_file = trickplay.config.app_path.."/.trickplay" 
-	dest_file = CURRENT_DIR.."/.trickplay"
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-	source_file = trickplay.config.app_path.."/lib/ui_element.lua" 
-	dest_file = CURRENT_DIR.."/lib/ui_element.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-	source_file = trickplay.config.app_path.."/lib/ui_element_header.lua" 
-	dest_file = CURRENT_DIR.."/lib/ui_element_header.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-	source_file = trickplay.config.app_path.."/localized/strings.lua" 
-	dest_file = CURRENT_DIR.."/lib/strings.lua" 
-	if not editor_lb:file_copy(source_file, dest_file) then 
-	end 
-
 end 
 
-local function set_new_project (pname)
+function set_new_project (pname, replace)
 	if(pname~= "") then
     	project = pname
+
+    	if table.getn(projects) ~= 0 then 
+			for i, j in pairs (projects) do 
+				if j == pname then 
+					if replace == nil then 
+						editor.error_message("001", pname, set_new_project)  
+						return 
+					end  
+				end 
+			end 
+		end 
    	end   
 	
    	app_path = editor_lb:build_path( base , project )
@@ -387,7 +330,7 @@ end
 
 --[ NEW PROJECT ... ]-- 
 
-function new_project()
+function new_project(fname)
 
   	local WIDTH = 300
   	local HEIGHT = 150
@@ -424,7 +367,12 @@ function new_project()
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() set_new_project(text_input.text) xbox:on_button_down() end
+	button_ok.pressed = function() set_new_project(text_input.text) 
+								   xbox:on_button_down()
+							  	   if fname then 
+										editor.save(true)
+								   end 
+						end
 
 	local ti_func = function()
 		if current_focus then 
@@ -504,10 +452,6 @@ function new_project()
 			end
 		end
 	end
-
-	if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
 end 
 
 function open_project(t, msg)
@@ -565,9 +509,26 @@ function open_project(t, msg)
 	local virtual_hieght = 0
 
 	local function load_project(v)
+
 		if v == nil then 
 			return
 		end
+
+--[[
+		if #g.children > 0 then 
+			if current_fn == "" then 
+				xbox:on_button_down()
+				editor.error_message("003", nil, editor.save) 
+				return 
+			elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
+				xbox:on_button_down()
+				editor.error_message("003", nil, editor.save) 
+				return 
+			end
+		end 
+
+]]
+		editor.close()
 
 		selected_prj = v
 --
@@ -616,7 +577,7 @@ function open_project(t, msg)
 
 		copy_widget_imgs()
 
-		editor.close()
+		--editor.close()
 		xbox:on_button_down()
 		return true
 	end 
@@ -675,6 +636,8 @@ function open_project(t, msg)
 
 	cur_w= PADDING
     cur_h= PADDING 
+	
+	table.sort(projects)
 
     for i, v in pairs(projects) do 
 
@@ -784,12 +747,13 @@ function open_project(t, msg)
 	    	input_mode = S_SELECT
 		end 
 		screen.grab_key_focus(screen) 
+		if textUIElement == nil then 
+			screen.grab_key_focus(screen) 
+		end
+
 		return true
 	end 
 
-    if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-    end
 end 
 
 function set_app_path()
@@ -870,7 +834,7 @@ function create_on_button_down_f(v)
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
 	     		if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
 	       			if (v.extra.is_in_group == true and control == false ) then 
-		    			local p_obj = find_parent(v)
+		    			local p_obj = v.parent --find_parent(v)
                 		if(button == 3) then -- imsi : num_clicks is not correct ! 
                 		--if(button == 3 or num_clicks >= 2) then
                 			editor.inspector(p_obj)
@@ -991,11 +955,14 @@ end
 
 	
 	function v:on_button_up(x,y,button,num_clicks)
+		if shift == true then 
+			return 
+		end 
 		if (input_mode ~= S_RECTANGLE) then 
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
 	    		if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
 	    			if (v.extra.is_in_group == true) then 
-						local p_obj = find_parent(v)
+						local p_obj = v.parent --find_parent(v)
 						new_object = copy_obj(p_obj)
 					    if(dragging ~= nil) then 
 	            			local actor , dx , dy = unpack( dragging )
@@ -1463,7 +1430,7 @@ function make_attr_t(v)
        ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space","b_pos", "item_pos","items",} end,
        ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","focus_fill_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","b_pos", "item_pos","items",} end,
 
-       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels"} end,  
+       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
        ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label","message","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","label","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
@@ -1832,10 +1799,17 @@ function itemTostring(v, d_list, t_list)
 			end
     	end
 
+		local focus_map = {["65362"] = function() return "keys.Up" end, 
+						   ["65364"] = function() return "keys.Down" end, 
+						   ["65361"] = function() return "keys.Left" end, 
+						   ["65363"] = function() return "keys.Right" end, 
+						   ["65293"] = function() return "keys.Return" end, 
+						  }
+
 		itm_str = itm_str..v.name.."\.extra\.focus = {" 
 		for m,n in pairs (v.extra.focus) do 
 			if type(n) ~= "function" then 
-		     	itm_str = itm_str.."["..m.."] = \""..n.."\", " 
+		     	itm_str = itm_str.."["..focus_map[tostring(m)]().."] = \""..n.."\", " 
 			end 
 		end 
 		itm_str = itm_str.."}\n\n"
@@ -2015,11 +1989,13 @@ end
 
 local  msgw = Group {
 	     name = "msgw",
+		 --[[
 	     position ={400, 400},
 	     anchor_point = {0,0},
              children =
              {
              }
+		]]
      }
 local msgw_cur_x = 25  
 local msgw_cur_y = 50
@@ -2027,8 +2003,8 @@ local msgw_cur_y = 50
 function cleanMsgWindow()
      msgw_cur_x = 25
      msgw_cur_y = 50
+	 local msgw = screen:find_child("msgw")
      screen:remove(msgw)
-	 msgw:clear() 
      input_mode = S_SELECT
 end 
 
@@ -2159,41 +2135,38 @@ function printMsgWindow(txt, name)
      end 
 end
 
-function inputMsgWindow_savefile(input_text, cfn)
+function inputMsgWindow_savefile(input_text, cfn, save_current_file)
+
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
      local screen_dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
      local main_dir = editor_lb:readdir(CURRENT_DIR)
      local enter_gen_stub_code = false
 
-
-     if cfn == nil then 
+	 if cfn ~= "OK" and save_current_file == nil then 
      	for i, v in pairs(screen_dir) do
           if(input_text == v)then
 			cleanMsgWindow()
-            print("ERR001 The file name "..current_fn.." already exists.\nDo you want to replace it? ")
-           	screen:grab_key_focus(screen) 
-            file_not_exists = false
-			menu_raise_to_top()
+			editor.error_message("004",input_text,inputMsgWindow_savefile)
 			return 
           end
 		end
-      end
+	end 
 
       -- main generation
-      if (file_not_exists or cfn) then
-	   local main_exist = false
-	   local app_exist = false
+    if (file_not_exists or cfn) then
+	   	local main_exist = false
+	   	local app_exist = false
 
-	   local a, b = string.find(input_text,"screens") 
-	   if a then 
+	   	local a, b = string.find(input_text,"screens") 
+	   	if a then 
 			input_text = string.sub(input_text, 9, -1)
-	   end 
+	   	end 
 
-	   local fileUpper= string.upper(string.sub(input_text, 1, -5))
-	   local fileLower= string.lower(string.sub(input_text, 1, -5))
-
-	   local function gen_stub_code (grp) 
+	   	local fileUpper= string.upper(string.sub(input_text, 1, -5))
+	   	local fileLower= string.lower(string.sub(input_text, 1, -5))
+	
+	   	local function gen_stub_code (grp) 
 
 		
 		new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
@@ -2252,8 +2225,6 @@ function inputMsgWindow_savefile(input_text, cfn)
 			enter_gen_stub_code =true
 		end 
 	   end 
-
-
      	   for i, v in pairs(main_dir) do
           	if("main.lua" == v)then
 			local main = readfile("main.lua")
@@ -2309,7 +2280,8 @@ function inputMsgWindow_savefile(input_text, cfn)
            screen:grab_key_focus(screen) 
       end
       menu_raise_to_top()
-end
+
+end -- end of inputMsgWindow_savefile  
 
 function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
      
