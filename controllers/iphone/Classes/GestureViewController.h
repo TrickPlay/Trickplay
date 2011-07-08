@@ -20,10 +20,6 @@
 
 - (void)clean;
 
-- (void)createObjects:(NSArray *)JSON_Array;
-- (void)destroyObjects:(NSArray *)JSON_Array;
-- (void)setValuesForObjects:(NSArray *)JSON_Array;
-
 @end
 
 
@@ -96,18 +92,20 @@
 #import "TouchController.h"
 #import "AccelerometerController.h"
 #import "AudioController.h"
-#import "AdvancedUIObjectManager.h"
 #import "CameraViewController.h"
 #import "VirtualRemoteViewController.h"
 #import "GestureImageView.h"
 
+@class TrickplayScreen;
 @class TrickplayGroup;
+@class AdvancedUIObjectManager;
 
 #define CAMERA_BUTTON_TITLE "Camera"
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate,
+CommandInterpreterAppDelegate, CameraViewControllerDelegate,
+UITextFieldDelegate, UIActionSheetDelegate,
 UINavigationControllerDelegate, VirtualRemoteDelegate> {
     BOOL viewDidAppear;
     
@@ -132,7 +130,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     
     UIActionSheet *cameraActionSheet;
     
-    TrickplayGroup *advancedView;
+    TrickplayScreen *advancedView;
     
     ResourceManager *resourceManager;
     
@@ -168,6 +166,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (BOOL)startService;
 - (BOOL)hasConnection;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
+
+- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 
 - (IBAction)hideTextBox:(id)sender;
 

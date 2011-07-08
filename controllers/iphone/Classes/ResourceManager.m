@@ -118,6 +118,12 @@
         }
     } else {
         NSLog(@"Could not cache data, either no key is specified or the data never arrived over the network");
+        if (resourceKey) {
+            NSMutableArray *dependentImages = [loadingResources objectForKey:resourceKey];
+            for (AsyncImageView *imageView in dependentImages) {
+                [imageView on_loadedFailed:YES];
+            }
+        }
     }
     
     [loadingResources removeObjectForKey:resourceKey];

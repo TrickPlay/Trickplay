@@ -62,6 +62,7 @@
 		CD6BC3B8136A318100CF1973 /* TrickplayGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */; };
 		CD6C178D13BA6B1500F52BFE /* ios-generic-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */; };
 		CD894BAC139D938000C3DF79 /* TrickplayTextHTML.m in Sources */ = {isa = PBXBuildFile; fileRef = CD894BAB139D938000C3DF79 /* TrickplayTextHTML.m */; };
+		CD8EDEC613C51D65009BEFC1 /* TrickplayScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = CD8EDEC513C51D64009BEFC1 /* TrickplayScreen.m */; };
 		CD9A68581370C5BC00977730 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD9A68571370C5BB00977730 /* GestureImageView.m */; };
 		CD9A68651371CB0E00977730 /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD9A68631371CB0E00977730 /* ImageEditorViewController.m */; };
 		CD9A68661371CB0E00977730 /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */; };
@@ -164,6 +165,8 @@
 		CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "ios-generic-background.jpg"; sourceTree = "<group>"; };
 		CD894BAA139D938000C3DF79 /* TrickplayTextHTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayTextHTML.h; sourceTree = "<group>"; };
 		CD894BAB139D938000C3DF79 /* TrickplayTextHTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayTextHTML.m; sourceTree = "<group>"; };
+		CD8EDEC413C51D62009BEFC1 /* TrickplayScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayScreen.h; sourceTree = "<group>"; };
+		CD8EDEC513C51D64009BEFC1 /* TrickplayScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayScreen.m; sourceTree = "<group>"; };
 		CD9A68561370C5BB00977730 /* GestureImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureImageView.h; sourceTree = "<group>"; };
 		CD9A68571370C5BB00977730 /* GestureImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureImageView.m; sourceTree = "<group>"; };
 		CD9A68621371CB0E00977730 /* ImageEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorViewController.h; sourceTree = "<group>"; };
@@ -322,6 +325,8 @@
 				CD894BAB139D938000C3DF79 /* TrickplayTextHTML.m */,
 				CD6BC3B6136A318100CF1973 /* TrickplayGroup.h */,
 				CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */,
+				CD8EDEC413C51D62009BEFC1 /* TrickplayScreen.h */,
+				CD8EDEC513C51D64009BEFC1 /* TrickplayScreen.m */,
 			);
 			name = AdvancedUI;
 			sourceTree = "<group>";
@@ -641,6 +646,7 @@
 				CD894BAC139D938000C3DF79 /* TrickplayTextHTML.m in Sources */,
 				CDFBE29B13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.m in Sources */,
 				CD4CA69C13B50AC100B5A7A3 /* VirtualRemoteViewController.m in Sources */,
+				CD8EDEC613C51D65009BEFC1 /* TrickplayScreen.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
