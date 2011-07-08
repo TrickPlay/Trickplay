@@ -1,0 +1,7 @@
+app=
+{
+    id      = "com.trickplay.pandamonium",
+    name    = "Pandamonium",
+    version = "1.0",
+    release = 1
+}
