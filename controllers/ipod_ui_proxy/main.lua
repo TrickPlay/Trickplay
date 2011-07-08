@@ -35,7 +35,7 @@ function controllers:on_controller_connected(controller)
     -- create a Rectangle
     key_handler[keys.r] = function()
         r = factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
-        function r:on_touches(touches, state)
+        function r:on_touch(touches, state)
             print("touched my rectangle with state:", state)
             dumptable(touches)
         end
@@ -44,7 +44,7 @@ function controllers:on_controller_connected(controller)
     -- create a Group
     key_handler[keys.g] = function()
         g = factory:Group{x = 20, y = 60, w = 50, h = 50}
-        function g:on_touches(touches, state)
+        function g:on_touch(touches, state)
             print("touched my group with state:", state)
             dumptable(touches)
         end
