@@ -808,10 +808,10 @@ function editor_ui.tabBar(t)
     	border_corner_radius = 12,
         
         tab_labels = {
-            "Info",
-            "Focus",
+            --"Info",
+            --"Focus",
             --"Items",
-            "More"
+            --"More"
         },
         tabs = {},
         label_padding = 0,
@@ -1010,6 +1010,75 @@ function editor_ui.tabBar(t)
 			offset.y = p.tabs[i].y
 			editor_use = false
         end
+
+---[[  ap 
+
+		ap = nil
+		
+		if p.arrow_image then p.arrow_sz = p.arrow_image.w end
+		
+			if p.tab_position == "TOP" and
+			(p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+			
+			ap = ui_element.arrowPane{
+				visible_w=p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame),
+				visible_h=p.buttons[# p.buttons].h,
+				virtual_w=p.buttons[# p.buttons].w + p.buttons[# p.buttons].x,
+				virtual_h=p.buttons[# p.buttons].h,
+				arrow_color=p.label_color,
+				box_width=0,
+				dist_per_press=p.buttons[# p.buttons].w,
+				arrow_sz = p.arrow_sz,
+				arrow_dist_to_frame = p.arrow_dist_to_frame,
+				arrow_src = p.arrow_image,
+			}
+			
+			ap.x = p.arrow_sz+p.arrow_dist_to_frame
+			ap.y = 0
+			
+			for _,b in ipairs(p.buttons) do
+				
+				b:unparent()
+				ap.content:add(b)
+				
+			end
+			
+			umbrella:add(ap)
+			
+		elseif (p.buttons[# p.buttons].h + p.buttons[# p.buttons].y) > (p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+			
+			ap = ui_element.arrowPane{
+				visible_w=p.buttons[# p.buttons].w,
+				visible_h=p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame),
+				virtual_w=p.buttons[# p.buttons].w,
+				virtual_h=p.buttons[# p.buttons].h + p.buttons[# p.buttons].y,
+				arrow_color=p.label_color,
+				box_width=0,
+				dist_per_press=p.buttons[# p.buttons].h,
+				arrow_sz = p.arrow_sz,
+				arrow_dist_to_frame = p.arrow_dist_to_frame,
+				arrow_src = p.arrow_image,
+			}
+			
+			ap.x = 0
+			ap.y = p.arrow_sz+p.arrow_dist_to_frame
+			
+			for _,b in ipairs(p.buttons) do
+				
+				b:unparent()
+				ap.content:add(b)
+				
+			end
+			
+			umbrella:add(ap)
+			
+		end
+		
+		if ap then
+			
+		end
+		
+--]]]
         if p.tab_position == "TOP" then
             bg.y = p.buttons[1].h-p.border_width
         else
