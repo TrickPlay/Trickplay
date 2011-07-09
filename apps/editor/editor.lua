@@ -1607,29 +1607,40 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     					  skin = "default", ui_width = 80, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = tabs}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
     					  skin = "default", ui_width = 80, ui_height = 27, label = "Apply", focus_color = {27,145,27,255},active_button =true, focus_object = tabs} 
-	--Tabs 
-	local tabs = editor_ui.tabBar{}
+	local labels_t= {}
 
-	local tab_labels = {}
- 	--[[
+ 	---[[
  	if is_this_widget(v) == true then 
  		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or       -- 2 Tabs 
  		   v.extra.type == "ProgressSpinner" or v.extra.type == "ProgressBar" or 
  		   v.extra.type == "LayoutManager" or v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
- 
- 		elseif v.extra.type == "TabBar" or v.extra.type == "Button" or v.extra.type == "TextInput" or then  -- 3 Tabs
- 
+ 		   table.insert (labels_t, "Info")
+ 		   table.insert (labels_t, "More")
+ 		elseif  v.extra.type == "Button" or v.extra.type == "TextInput" then  -- 3 Tabs
+ 		   table.insert (labels_t, "Info")
+ 		   table.insert (labels_t, "Focus")
+ 		   table.insert (labels_t, "More")
+		elseif v.extra.type == "TabBar" then 
+ 		   table.insert (labels_t, "Info")
+ 		   table.insert (labels_t, "Labels")
+ 		   table.insert (labels_t, "More")
  		else  -- 4 Tabs 
- 
+ 		   table.insert (labels_t, "Info")
+ 		   table.insert (labels_t, "Focus")
+ 		   table.insert (labels_t, "Items")
+ 		   table.insert (labels_t, "More")
  		end 
  	
  	elseif v.type == "Video" then --> 1 Tabs
- 
+ 		   table.insert (labels_t, "Info")
  	else -- Text, Rect, Image Group, Clone -> 2 Tabs
- 
+ 		   table.insert (labels_t, "Info")
+ 		   table.insert (labels_t, "Focus")
  	end
- 	]]
+ 	--- ]]
 
+	--Tabs 
+	local tabs = editor_ui.tabBar{tab_labels = labels_t}
 
 	local s_func = function()
 		if current_focus then 
@@ -1845,11 +1856,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	tabs.tabs[1]:add(scroll_info) 
 
 	scroll_more.virtual_h = item_group_more.h --+ 35
+	local tab_n = table.getn(tabs.tab_labels) 
 	if item_group_more.h ~= 0 then 
    		scroll_more.content:add(item_group_more)
 		scroll_more.position = {0, 0}
 		scroll_more.reactive = true
-		tabs.tabs[3]:add(scroll_more) 
+		tabs.tabs[tab_n]:add(scroll_more) 
 	end 
 
     scroll_info.extra.focus = {[keys.Tab] = "button_cancel"}
@@ -1864,6 +1876,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	scroll_info.on_focus_in()
 
 	local var_i = 1 
+	--[[
 	for i=1, 3 do 
 		local grp = tabs.tabs[var_i] 
 		if table.getn(grp.children) == 0 then 
@@ -1872,7 +1885,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		end 
 		var_i = var_i + 1 
 	end 
-
+	]]
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(inspector)
 		inspector:clear() 
@@ -4786,18 +4799,9 @@ function editor.error_message(error_num, str, func_ok, func_nok)
      				skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  	end 
 	
-	--[[
-   	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
- 		  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
-	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-    	  skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
-	]]
-
 	-- Button Event Handlers
-	--[[
 	button_cancel.pressed = function() xbox:on_button_down() end 
 	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
-	]]
 
 	if func_nok then 
 		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok", [keys.Up] = ti_func}
