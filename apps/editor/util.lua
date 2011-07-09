@@ -248,7 +248,7 @@ local projects = {}
 
 local function copy_widget_imgs ()
 	local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE/", }
-	local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/localized/strings.lua", } 
+	local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/lib/strings.lua", } 
 	local source_files, source_file, dest_file, dest_dir
 
 	for a, b in pairs (copy_dirs) do 
@@ -261,7 +261,6 @@ local function copy_widget_imgs ()
 		for i, j in pairs(source_files) do 
 	     	source_file = trickplay.config.app_path..b..j 
 			dest_file = CURRENT_DIR..dest_dir..j 
-			--print(source_file, dest_file)
 	     	editor_lb:file_copy(source_file, dest_file) 
 	    end 
 	end 
@@ -584,6 +583,13 @@ function open_project(t, msg)
 		scroll.on_focus_in()
 	end
 
+	local tab_func = function()
+		button_ok:find_child("active").opacity = 0
+		button_ok:find_child("dim").opacity = 255
+		button_cancel:grab_key_focus()
+		button_cancel.on_focus_in()
+	end
+
 	--Focus Destination
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
@@ -631,7 +637,7 @@ function open_project(t, msg)
 			selected_project = v
 		end
 
-		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1)}
+		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab] = tab_func}
 
 		project_t.position =  {cur_w, cur_h}
 		project_t.extra.rect = h_rect.name

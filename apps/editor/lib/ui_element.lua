@@ -5534,7 +5534,7 @@ function ui_element.tabBar(t)
         
         tab_labels = {
             "Item 1",
-            "Item 2",
+			"Item 2",
             "Item 3",
         },
         tabs = {},
