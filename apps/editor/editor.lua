@@ -666,14 +666,15 @@ end
 
 function editor.close()
 
+	local func_nok = function() for i, j  in pairs(g.children) do editor.n_selected(j) end g:clear() editor.close() end 
 	
 	if #g.children > 0 then 
 		if current_fn == "" then 
-			editor.error_message("003", true, editor.save) 
-			return 
+			editor.error_message("003", true, editor.save, func_nok) 
+			return 1
 		elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
-			editor.error_message("003", true, editor.save) 
-			return 
+			editor.error_message("003", true, editor.save, func_nok) 
+			return 1
 		end
 	end 
 
@@ -757,6 +758,8 @@ function editor.close()
 	if screen:find_child("menu_text").extra.project then 
 		screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
 	end 
+
+	return
 end 
 
 local function cleanMsgWin(msgw)	
@@ -1605,8 +1608,28 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
     					  skin = "default", ui_width = 80, ui_height = 27, label = "Apply", focus_color = {27,145,27,255},active_button =true, focus_object = tabs} 
 	--Tabs 
-
 	local tabs = editor_ui.tabBar{}
+
+	local tab_labels = {}
+ 	--[[
+ 	if is_this_widget(v) == true then 
+ 		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or       -- 2 Tabs 
+ 		   v.extra.type == "ProgressSpinner" or v.extra.type == "ProgressBar" or 
+ 		   v.extra.type == "LayoutManager" or v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
+ 
+ 		elseif v.extra.type == "TabBar" or v.extra.type == "Button" or v.extra.type == "TextInput" or then  -- 3 Tabs
+ 
+ 		else  -- 4 Tabs 
+ 
+ 		end 
+ 	
+ 	elseif v.type == "Video" then --> 1 Tabs
+ 
+ 	else -- Text, Rect, Image Group, Clone -> 2 Tabs
+ 
+ 	end
+ 	]]
+
 
 	local s_func = function()
 		if current_focus then 
@@ -4709,7 +4732,7 @@ function editor.ui_elements()
 end 
 
 
-function editor.error_message(error_num, str, func_ok)
+function editor.error_message(error_num, str, func_ok, func_nok)
   	local WIDTH = 300
   	local HEIGHT = 150
     local PADDING = 13
@@ -4745,14 +4768,53 @@ function editor.error_message(error_num, str, func_ok)
 	title_shadow.text = ""
 
 	--Buttons 
+	local button_cancel, button_ok, button_nok
+
+	if func_nok then 
+		button_nok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+  					skin = "default", ui_width = 100, ui_height = 27, label = "Without Saving", focus_color = {27,145,27,255}, focus_object = nil}
+    	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+  					skin = "default", ui_width = 75, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
+ 		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+     				skin = "default", ui_width = 75, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
+ 		-- Button Event Handlers
+ 		button_nok.pressed = function() func_nok(1) xbox:on_button_down() end
+ 	else 
+    	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+  					skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
+ 		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+     				skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
+ 	end 
+	
+	--[[
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
  		  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     	  skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
+	]]
 
 	-- Button Event Handlers
+	--[[
 	button_cancel.pressed = function() xbox:on_button_down() end 
 	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
+	]]
+
+	if func_nok then 
+		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok", [keys.Up] = ti_func}
+ 		button_cancel.extra.focus = {[keys.Left] = "button_nok", [keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
+ 		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+ 	-- Button Position Set
+ 		button_nok:set{name = "button_nok", position = {WIDTH-button_cancel.w-button_ok.w-button_nok.w-3*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+ 		button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
+ 		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+ 	else 
+ 	-- Focus Destination 
+ 		button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
+ 		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+ 	-- Button Position Set
+ 		button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
+ 		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+ 	end 
 
 	local ti_func = function()
 		if current_focus then 
@@ -4787,11 +4849,17 @@ function editor.error_message(error_num, str, func_ok)
 			title:set{position = {PADDING+1, PADDING/3+1}}, 
 			message_shadow:set{position = {PADDING,TOP_BAR+PADDING}, width = WIDTH - 28, wrap= true, wrap_mode = "CHAR"}, 
 			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}, width = WIDTH - 28, wrap= true, wrap_mode = "CHAR"}, 
-			button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}, 
-			button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+			--button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}, 
+			--button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+			button_cancel, 
+			button_ok, 
 		}
 		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
 	}
+
+	if func_nok then 
+ 		msgw:add(button_nok) 
+ 	end 
 
 	msgw.extra.lock = false
  	screen:add(msgw)

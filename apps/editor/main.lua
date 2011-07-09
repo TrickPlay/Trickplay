@@ -22,7 +22,7 @@ dofile("editor.lua")
         [ keys.w	] = function() input_mode = S_SELECT  editor.image() end,
         [ keys.n	] = function() editor.close() input_mode = S_SELECT end,
         [ keys.o	] = function() input_mode = S_SELECT editor.open()  end,
-        [ keys.q	] = function() exit() end,
+        [ keys.q	] = function() if editor.close() == nil then exit() end end,
         [ keys.p	] = function() open_project() end,
 		[ keys.r	] = function() input_mode = S_RECTANGLE screen:grab_key_focus() end,
         [ keys.s	] = function() input_mode = S_SELECT editor.save(true) end,
@@ -180,15 +180,15 @@ dofile("editor.lua")
 					      end 
 					end
 			   end end
-     }
+    }
     
     function screen.on_key_down( screen , key )
-	if(key == keys.Shift_L) then shift = true end
-	if(key == keys.Shift_R ) then shift = true end
-	if(key == keys.Control_L ) then control = true end
-	if(key == keys.Control_R ) then control = true end
-
-	if(input_mode ~= S_POPUP) then 
+		if(key == keys.Shift_L) then shift = true end
+		if(key == keys.Shift_R ) then shift = true end
+		if(key == keys.Control_L ) then control = true end
+		if(key == keys.Control_R ) then control = true end
+	
+		if(input_mode ~= S_POPUP) then 
           if key_map[key] then
               key_map[key](self)
      	  end
@@ -596,16 +596,13 @@ dofile("editor.lua")
 		editor_lb:disable_exit()
     	end
 
-    
     	screen_add_bg()
-    	screen:show()
     	screen.reactive=true
     
     	dofile("menu.lua")
 		open_project()
-    	--set_app_path()
 
-		local auto_save_duration = 500000  --msecs
+		local auto_save_duration = 60000  --msecs
 		local auto_save = true
 		local backup_timeline = Timeline {
 		 	  duration = auto_save_duration,
