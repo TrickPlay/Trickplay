@@ -5596,6 +5596,7 @@ function ui_element.tabBar(t)
                 create()
                 
             end,
+
 			
             remove_tab = function(self,index)
                 
@@ -5668,6 +5669,7 @@ function ui_element.tabBar(t)
 			
             previous_tab = function(self)
                 if current_index == 1 then return end
+
                 
                 self:display_tab(current_index-1)
             end,
