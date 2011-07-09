@@ -1599,6 +1599,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	scroll_info.name = "si_info"
 	local scroll_more = editor_ui.scrollPane{visible_h = 310, visible_w = 280, virtual_w = 280}
 	scroll_more.name = "si_more"
+	local scroll_items = editor_ui.scrollPane{visible_h = 310, visible_w = 280, virtual_w = 280}
+	scroll_items.name = "si_items"
 
 	-- Buttons 
     --local button_viewcode = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -1781,13 +1783,24 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    	local focus = factory.make_focuschanger(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			focus.position = {GUTTER, GUTTER}
 			tabs.tabs[2]:add(focus) 
+		elseif attr_n == "items" then 
+			local list_item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+			list_item.position = {GUTTER, GUTTER}
+			--tabs.tabs[3]:add(list_item) 
+
+			scroll_items.virtual_h = list_item.h --+ 35
+   			scroll_items.content:add(list_item)
+			scroll_items.position = {0, 0}
+			scroll_items.reactive = true
+			tabs.tabs[3]:add(scroll_items) 
+
 		else 
 			local item
 
 			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
 				item = factory.make_filechooser(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-			elseif attr_n == "items" then 
-				item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
+		--	elseif attr_n == "items" then 
+		--		item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 				--item.position = {7, GUTTER}
 			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" then  -- Attribute with single checkbox
 				item = factory.make_onecheckbox(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true)
