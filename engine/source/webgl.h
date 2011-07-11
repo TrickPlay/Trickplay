@@ -17,6 +17,7 @@
 #elif defined(CLUTTER_WINDOWING_EGL)
 
 	#include <EGL/egl.h>
+	#include <clutter/egl/clutter-egl.h>
 
 #else
 
@@ -153,13 +154,9 @@ namespace WebGL
 
 	    void context_op( Operation op );
 
-	    static void before_stage_paint( ClutterActor * stage , Context * me );
-
 	    guint			acquisitions;
 
 	    ContextType		my_context;
-
-	    gulong			before_stage_paint_handler;
 
 	    GLuint			texture;
 		GLenum			texture_target;
