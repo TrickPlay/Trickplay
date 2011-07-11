@@ -89,7 +89,7 @@ class StartQT4(QtGui.QMainWindow):
             
     def selectionChanged(self,  a,  b):
         print("SelectionChanged",  a,  b)
-        i = self.InspectorSelectionModel.selection()
+        i = self.inspectorSelectionModel.selection()
         i = self.proxyModel.mapSelectionToSource(i)
         self.propertySM.select(i,  QtGui.QItemSelectionModel.SelectCurrent)
         s = self.ui.propertyView.selectedIndexes()[0]
@@ -123,8 +123,14 @@ class StartQT4(QtGui.QMainWindow):
 #        self.data = getTrickplayData()["children"][0]
 #        self.createNode(root, self.data)
 #        
-        self.model.initializeModel()
+        self.model.initialize()
         self.ui.Inspector.setModel(self.model)
+        
+        self.inspectorSelectionModel = QtGui.QItemSelectionModel(self.model)
+        self.inspectorSelectionModel.connect(self.inspectorSelectionModel, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.selectionChanged)
+        self.ui.Inspector.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.ui.Inspector.setSelectionModel(self.inspectorSelectionModel)
+        
         return
         self.proxyModel = QtGui.QSortFilterProxyModel()
         self.proxyModel.setSourceModel(self.model)
@@ -259,9 +265,11 @@ class StartQT4(QtGui.QMainWindow):
             # and name is the only attr updated                
         
     def refresh(self):
-        newData = getTrickplayData()["children"][0]
-        self.refreshNodes(self.data,  newData,  self.model.index(0,  0))
-        self.data = newData
+        self.model.refreshRoot()
+        #newData = getTrickplayData()["children"][0]
+        #self.model.refreshElements(self.getRoot(),  newData)
+        #self.refreshNodes(self.data,  newData,  self.model.index(0,  0))
+        #self.data = newData
         #self.model.clear()
         #self.createTree()
         #screenIndex = self.model.index(0, 0)
