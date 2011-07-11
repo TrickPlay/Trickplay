@@ -12,15 +12,19 @@ class ElementModel(QStandardItemModel):
     Initialize the model with JSON data
     The root of the model will be the Screen actor (instead of Stage)
     """
-    def initialize(self):
+    def initialize(self,  headers,  populate):
         
-        self.setHorizontalHeaderLabels(["UI Element Property",  "Value"])
-
+        if headers:
+    
+            self.setHorizontalHeaderLabels(headers)
+        
         root = self.invisibleRootItem()
         
-        data = getTrickplayData()["children"][0]
+        if populate:
         
-        self.addElement(root, data)
+            data = getTrickplayData()["children"][0]
+            
+            self.addElement(root, data)
     
     """
     Find an attribute given the index of a UIElement
@@ -191,6 +195,12 @@ class ElementModel(QStandardItemModel):
         # (if an element was promoted in its group)
         
         pass
+        
+    def copyAttrs(self, original, new):
+        for i in self.children(original):
+            titleNode = self.itemFromIndex(i[0]).clone()
+            valueNode = self.itemFromIndex(i[1]).clone()
+            new.appendRow([titleNode,  valueNode])
         
     def refreshAttrs(self):
         pass

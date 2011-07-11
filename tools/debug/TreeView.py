@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Mon Jul 11 10:30:42 2011
+# Created: Mon Jul 11 11:08:28 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -117,12 +117,12 @@ class Ui_MainWindow(object):
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.gridLayout_3 = QtGui.QGridLayout(self.dockWidgetContents)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
-        self.propertyView = QtGui.QTreeView(self.dockWidgetContents)
-        self.propertyView.setMinimumSize(QtCore.QSize(450, 0))
-        self.propertyView.setAlternatingRowColors(True)
-        self.propertyView.setObjectName(_fromUtf8("propertyView"))
-        self.propertyView.header().setDefaultSectionSize(200)
-        self.gridLayout_3.addWidget(self.propertyView, 0, 0, 1, 1)
+        self.property = QtGui.QTreeView(self.dockWidgetContents)
+        self.property.setMinimumSize(QtCore.QSize(450, 0))
+        self.property.setAlternatingRowColors(True)
+        self.property.setObjectName(_fromUtf8("property"))
+        self.property.header().setDefaultSectionSize(200)
+        self.gridLayout_3.addWidget(self.property, 0, 0, 1, 1)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
         self.actionExit = QtGui.QAction(MainWindow)
