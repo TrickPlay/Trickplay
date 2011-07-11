@@ -32,26 +32,28 @@ class StartQT4(QtGui.QMainWindow):
     def __init__(self, parent=None):
 
         QtGui.QWidget.__init__(self, parent)
+        
         self.ui = Ui_MainWindow()
+        
         self.ui.setupUi(self)
         
         QtCore.QObject.connect(self.ui.button_Refresh, QtCore.SIGNAL("clicked()"), self.refresh)
+        
         QtCore.QObject.connect(self.ui.action_Exit, QtCore.SIGNAL("triggered()"),  self.exit)
+        
         self.model = ElementModel()
-        #self.model = MyModel
+        
         model = self.model
         
-        #print(QtCore.QObject.connect(self.ui.Inspector,  QtCore.SIGNAL("itemClicked(QStandardItem)"),  self.itemChanged))
-        #print('ok')
+        #print(QtCore.QObject.connect(self.ui.inspector,  QtCore.SIGNAL("itemClicked(QStandardItem)"),  self.itemChanged))
         
-        # Connect it
         self.model.connect(self.model, QtCore.SIGNAL('itemChanged( QStandardItem * )'), self.itemChanged)
         
         self.delegate = delegate.MyDelegate()
         
         self.delegate.connect(self.delegate,  QtCore.SIGNAL('closeEditor( QWidget * , QAbstractItemDelegate::EndEditHint )'),  self.editorClosed)
         
-        self.ui.Inspector.setItemDelegate(self.delegate)
+        self.ui.inspector.setItemDelegate(self.delegate)
 
         self.createTree()
         
@@ -124,12 +126,12 @@ class StartQT4(QtGui.QMainWindow):
 #        self.createNode(root, self.data)
 #        
         self.model.initialize()
-        self.ui.Inspector.setModel(self.model)
+        self.ui.inspector.setModel(self.model)
         
         self.inspectorSelectionModel = QtGui.QItemSelectionModel(self.model)
         self.inspectorSelectionModel.connect(self.inspectorSelectionModel, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.selectionChanged)
-        self.ui.Inspector.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.ui.Inspector.setSelectionModel(self.inspectorSelectionModel)
+        self.ui.inspector.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.ui.inspector.setSelectionModel(self.inspectorSelectionModel)
         
         return
         self.proxyModel = QtGui.QSortFilterProxyModel()
@@ -140,7 +142,7 @@ class StartQT4(QtGui.QMainWindow):
         self.proxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|children)"))
         
         
-        self.ui.Inspector.setModel(self.proxyModel)
+        self.ui.inspector.setModel(self.proxyModel)
         
         # propertyView
         self.ui.propertyView.setModel(self.model)
@@ -148,13 +150,13 @@ class StartQT4(QtGui.QMainWindow):
         self.ui.propertyView.setSelectionModel(self.propertySM)
         #self.ui.propertyView.setItemDelegate(self.delegate)
         
-        self.InspectorSelectionModel = QtGui.QItemSelectionModel(self.proxyModel)
+        self.inspectorSelectionModel = QtGui.QItemSelectionModel(self.proxyModel)
         
-        self.ui.Inspector.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.ui.inspector.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         
-        self.ui.Inspector.setSelectionModel(self.InspectorSelectionModel)
+        self.ui.inspector.setSelectionModel(self.inspectorSelectionModel)
         
-        self.InspectorSelectionModel.connect(self.InspectorSelectionModel, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.selectionChanged)
+        self.inspectorSelectionModel.connect(self.inspectorSelectionModel, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.selectionChanged)
         
         # TODO, don't sort UIElements,
         # keep them in the order they are layered in their group
@@ -350,7 +352,7 @@ if __name__ == "__main__":
     main(sys.argv)
     
 #QtCore.QAbstractItemModel.insertRow(1)
-#self.ui.Inspector.setItemDelegateForRow(0, delegate.MyDelegate())
+#self.ui.inspector.setItemDelegateForRow(0, delegate.MyDelegate())
 
 #def setColors(self):
     #pass
@@ -362,7 +364,7 @@ if __name__ == "__main__":
     #painter = QtGui.QPainter()
     #painter.setBrush(brush)
     
-    #self.ui.Inspector.drawBranches(painter, QtCore.QRect(0,0,25,25), childIndex)
+    #self.ui.inspector.drawBranches(painter, QtCore.QRect(0,0,25,25), childIndex)
     #self.model.setData(childIndex, brush, Qt.BackgroundColorRole)
     
     #print(self.model.rowCount(screenIndex))
