@@ -110,7 +110,7 @@
       </layout>
      </item>
      <item row="1" column="0">
-      <widget class="QTreeView" name="Inspector">
+      <widget class="QTreeView" name="inspector">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -264,7 +264,7 @@ selection-background-color: transparent;</string>
   <connection>
    <sender>button_ExpandAll</sender>
    <signal>released()</signal>
-   <receiver>Inspector</receiver>
+   <receiver>inspector</receiver>
    <slot>expandAll()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -280,7 +280,7 @@ selection-background-color: transparent;</string>
   <connection>
    <sender>button_CollapseAll</sender>
    <signal>released()</signal>
-   <receiver>Inspector</receiver>
+   <receiver>inspector</receiver>
    <slot>collapseAll()</slot>
    <hints>
     <hint type="sourcelabel">

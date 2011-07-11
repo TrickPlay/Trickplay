@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Thu Jul  7 14:45:30 2011
+# Created: Mon Jul 11 10:30:42 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,13 +67,13 @@ class Ui_MainWindow(object):
         self.button_CollapseAll.setObjectName(_fromUtf8("button_CollapseAll"))
         self.horizontalLayout.addWidget(self.button_CollapseAll)
         self.gridLayout_2.addLayout(self.horizontalLayout, 0, 0, 1, 1)
-        self.Inspector = QtGui.QTreeView(self.dockWidgetContents_2)
+        self.inspector = QtGui.QTreeView(self.dockWidgetContents_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.Inspector.sizePolicy().hasHeightForWidth())
-        self.Inspector.setSizePolicy(sizePolicy)
-        self.Inspector.setMinimumSize(QtCore.QSize(450, 0))
+        sizePolicy.setHeightForWidth(self.inspector.sizePolicy().hasHeightForWidth())
+        self.inspector.setSizePolicy(sizePolicy)
+        self.inspector.setMinimumSize(QtCore.QSize(450, 0))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(75, 105, 131, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -84,26 +84,26 @@ class Ui_MainWindow(object):
         brush = QtGui.QBrush(QtGui.QColor(131, 131, 131))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, brush)
-        self.Inspector.setPalette(palette)
-        self.Inspector.setAutoFillBackground(False)
-        self.Inspector.setStyleSheet(_fromUtf8("QTreeView::branch {\n"
+        self.inspector.setPalette(palette)
+        self.inspector.setAutoFillBackground(False)
+        self.inspector.setStyleSheet(_fromUtf8("QTreeView::branch {\n"
 "    selection-background-color: transparent;\n"
 "}\n"
 "\n"
 "selection-background-color: transparent;"))
-        self.Inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
-        self.Inspector.setAlternatingRowColors(True)
-        self.Inspector.setIndentation(20)
-        self.Inspector.setRootIsDecorated(True)
-        self.Inspector.setUniformRowHeights(True)
-        self.Inspector.setAllColumnsShowFocus(True)
-        self.Inspector.setObjectName(_fromUtf8("Inspector"))
-        self.Inspector.header().setCascadingSectionResizes(True)
-        self.Inspector.header().setDefaultSectionSize(200)
-        self.Inspector.header().setHighlightSections(True)
-        self.Inspector.header().setMinimumSectionSize(100)
-        self.Inspector.header().setStretchLastSection(True)
-        self.gridLayout_2.addWidget(self.Inspector, 1, 0, 1, 1)
+        self.inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
+        self.inspector.setAlternatingRowColors(True)
+        self.inspector.setIndentation(20)
+        self.inspector.setRootIsDecorated(True)
+        self.inspector.setUniformRowHeights(True)
+        self.inspector.setAllColumnsShowFocus(True)
+        self.inspector.setObjectName(_fromUtf8("inspector"))
+        self.inspector.header().setCascadingSectionResizes(True)
+        self.inspector.header().setDefaultSectionSize(200)
+        self.inspector.header().setHighlightSections(True)
+        self.inspector.header().setMinimumSectionSize(100)
+        self.inspector.header().setStretchLastSection(True)
+        self.gridLayout_2.addWidget(self.inspector, 1, 0, 1, 1)
         self.dockWidget_2.setWidget(self.dockWidgetContents_2)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_2)
         self.dockWidget = QtGui.QDockWidget(MainWindow)
@@ -134,8 +134,8 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
-        QtCore.QObject.connect(self.button_ExpandAll, QtCore.SIGNAL(_fromUtf8("released()")), self.Inspector.expandAll)
-        QtCore.QObject.connect(self.button_CollapseAll, QtCore.SIGNAL(_fromUtf8("released()")), self.Inspector.collapseAll)
+        QtCore.QObject.connect(self.button_ExpandAll, QtCore.SIGNAL(_fromUtf8("released()")), self.inspector.expandAll)
+        QtCore.QObject.connect(self.button_CollapseAll, QtCore.SIGNAL(_fromUtf8("released()")), self.inspector.collapseAll)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
