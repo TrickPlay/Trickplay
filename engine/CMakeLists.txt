@@ -40,7 +40,7 @@ IF( PKG_CONFIG_FOUND )
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_BACKEND_EGL)
         pkg_check_modules(UUID      REQUIRED    uuid)
     else(IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_BACKEND_EGL))
-        pkg_check_modules(UUID      REQUIRED    uuid)
+        pkg_check_modules(UUID      REQUIRED    ossp-uuid)
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_BACKEND_EGL)
 
     if (TP_CONTROLLER_DISCOVERY_MDNS)
