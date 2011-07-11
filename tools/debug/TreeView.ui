@@ -224,7 +224,7 @@ selection-background-color: transparent;</string>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="0" column="0">
-      <widget class="QTreeView" name="propertyView">
+      <widget class="QTreeView" name="property">
        <property name="minimumSize">
         <size>
          <width>450</width>

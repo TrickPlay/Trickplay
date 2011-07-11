@@ -1,7 +1,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-class MyDelegate(QItemDelegate):
+class InspectorDelegate(QItemDelegate):
     def __init__(self, parent=None, *args):
         QItemDelegate.__init__(self, parent, *args)
 
