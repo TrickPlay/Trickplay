@@ -143,7 +143,6 @@ Context::Context( ClutterActor * actor )
     unpack_premultiply_alpha( false ),
     unpack_colorspace_conversion( GL_BROWSER_DEFAULT_WEBGL ),
     acquisitions( 0 ),
-    before_stage_paint_handler( 0 ),
     texture( 0 ),
     texture_target( 0 ),
     framebuffer( 0 ),
@@ -322,35 +321,72 @@ void Context::context_op( Context::Operation op )
 			{
 				tpwarn( "FAILED TO CREATE GLXCONTEXT" );
 			}
-//			before_stage_paint_handler = g_signal_connect( clutter_stage_get_default() , "paint" , ( GCallback ) before_stage_paint , this );
-
 			break;
 		}
 
 		case DESTROY_MY_CONTEXT:
 		{
 			glXDestroyContext( clutter_display , my_context );
-//			g_signal_handler_disconnect( clutter_stage_get_default() , before_stage_paint_handler );
 			break;
 		}
     }
 
 #elif defined(CLUTTER_WINDOWING_EGL)
 
-	static ContextType		clutter_context = EGL_NO_CONTEXT
-	static EGLDisplay		clutter_display = EGL_DEFAULT_DISPLAY;
-	static EGLSurface		surface = EGL_NO_SURFACE;
 
-#error "NOT FINISHED YET"
+	static ContextType		clutter_context = EGL_NO_CONTEXT;
+	static EGLDisplay		clutter_display = EGL_DEFAULT_DISPLAY;
+	static EGLSurface		clutter_read_surface = EGL_NO_SURFACE;
+	static EGLSurface		clutter_draw_surface = EGL_NO_SURFACE;
+
+    if ( clutter_context == EGL_NO_CONTEXT )
+    {
+    	clutter_context = eglGetCurrentContext();
+    	clutter_display = eglGetCurrentDisplay();
+    	clutter_read_surface = eglGetCurrentSurface(EGL_READ);
+    	clutter_draw_surface = eglGetCurrentSurface(EGL_DRAW);
+    }
+
+    switch( op )
+    {
+		case SWITCH_TO_MY_CONTEXT:
+		{
+			eglMakeCurrent( clutter_display , clutter_draw_surface , clutter_read_surface , my_context );
+		    glBindFramebuffer( GL_FRAMEBUFFER , framebuffer );
+			break;
+		}
+
+		case SWITCH_TO_CLUTTER_CONTEXT:
+		{
+			eglMakeCurrent( clutter_display , clutter_draw_surface , clutter_read_surface , clutter_context );
+			break;
+		}
+
+		case CREATE_CONTEXT:
+		{
+		    // This function does not exist in Clutter - we added it with a patch
+
+		    EGLConfig config = clutter_egl_get_egl_config();
+
+		    const EGLint attribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+
+			my_context = eglCreateContext( clutter_display , config , clutter_context , attribs );
+
+			if ( my_context == EGL_NO_CONTEXT )
+			{
+				tpwarn( "FAILED TO CREATE EGL CONTEXT" );
+			}
+			break;
+		}
+
+		case DESTROY_MY_CONTEXT:
+		{
+			eglDestroyContext( clutter_display , my_context );
+			break;
+		}
+    }
 
 #endif
-}
-
-//.............................................................................
-
-void Context::before_stage_paint( ClutterActor * stage , Context * me )
-{
-	me->context_op( SWITCH_TO_CLUTTER_CONTEXT );
 }
 
 //.............................................................................
