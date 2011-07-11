@@ -836,12 +836,22 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	local group = Group{}
 	local PADDING_X     = 7 -- The focus ring has this much padding around it
     local PADDING_Y     = 7
+	local plus, item_plus, label_plus, separator_plus, rows, org_items 
 
-	if save_items == true then 
-		org_items = table_copy(v.items)
+	if item_n == "tab_labels" then 
+		rows = table.getn(v.tab_labels)
+	else 
+		rows = table.getn(v.items)
 	end 
 
-	local plus, item_plus, label_plus, separator_plus
+	if save_items == true then 
+		if item_n == "tab_labels" then 
+			org_items = table_copy(v.tab_labels)
+		else 
+			org_items = table_copy(v.items)
+		end 
+	end 
+
 	group:clear()
 	group.name = "itemsList"
 	group.reactive = true
@@ -876,10 +886,37 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			editor.n_selected(v, true)
 			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_more")
+			local si = inspector:find_child("si_items")
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true
 		end 
+	elseif v.extra.type =="TabBar" then 
+		local text = Text {name = "attr", text = item_s}:set(STYLE)
+        --text.position  = {PADDING_X, 5}
+        text.position  = {0,0}
+    	group:add(text)
+
+		plus = Image{src="lib/assets/li-btn-dim-plus.png"}
+		plus.position = {text.x + text.w + PADDING_X, 0}
+		plus.reactive = true
+		group:add(plus)
+		function plus:on_button_down(x,y)
+			plus.src="lib/assets/li-btn-red-plus.png"
+		end 
+		function plus:on_button_up(x,y)
+			v:insert_tab(#v.tab_labels + 1)
+			screen:remove(inspector)
+			input_mode = S_SELECT
+			current_inspector = nil
+            screen:grab_key_focus(screen) 
+			text_reactive()
+			editor.n_selected(v, true)
+			inspector_apply (v, inspector)
+			local si = inspector:find_child("si_items")
+			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			return true
+		end 
+
 	elseif v.extra.type =="MenuButton" then 
 		editor_use = true 
 		item_plus = ui_element.button{text_font ="FreeSans Medium 12px", label="Item +", ui_width=80, ui_height=23, skin="inspector", text_has_shadow = true, reactive = true }
@@ -920,7 +957,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			editor.n_selected(v, true)
 			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_more")
+			local si = inspector:find_child("si_items")
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true 
 	    end 
@@ -934,7 +971,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			editor.n_selected(v, true)
 			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_more")
+			local si = inspector:find_child("si_items")
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true 
 		end 
@@ -947,15 +984,16 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			editor.n_selected(v, true)
 			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_more")
+			local si = inspector:find_child("si_items")
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 
 			return true 
 		end 
 	end 
 
+	
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={255,25,25,255}, }
-	local items_list = ui_element.layoutManager{rows = table.getn(v.items), columns = 4, cell_w = 100, cell_h = 40, cell_spacing=5, cell_size="variable", cells_focusable=false}
+	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_w = 100, cell_h = 40, cell_spacing=5, cell_size="variable", cells_focusable=false}
 	if text then 
     	--items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
     	items_list.position = {0, text.y + text.h + 7}
@@ -965,7 +1003,14 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	end 
     items_list.name = "items_list"
 
-	for i,j in pairs(v.items) do 
+	local itemsList 
+	if v.tab_labels then 
+		itemsList = v.tab_labels
+	else 
+		itemsList = v.items
+	end 
+
+	for i,j in pairs(itemsList) do 
 		local input_txt, item_type 
 	    if v.extra.type =="MenuButton" then 
 			if j["type"] == "label" then 
@@ -1002,14 +1047,18 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			minus.src="lib/assets/li-btn-red-minus.png"
 		end 
 	    function minus:on_button_up(x,y)
-			v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+			if v.tab_labels then 
+				v:remove_tab(tonumber(string.sub(minus.name, 11,-1)))
+			else 
+				v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+			end 
 		    screen:remove(inspector)
 		    input_mode = S_SELECT
 		    current_inspector = nil
             screen:grab_key_focus(screen) 
 		    text_reactive()
 		    editor.n_selected(v, true)
-			local si = inspector:find_child("si_more")
+			local si = inspector:find_child("si_items")
 		    editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
 		    return true 
 	    end 
@@ -1018,10 +1067,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			up.src="lib/assets/li-btn-red-up.png"
 		end 
 	    function up:on_button_up(x,y)
-			if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+			if v.extra.type == "TabBar" then 
+				v:move_tab_up(tonumber(string.sub(up.name, 8,-1))+1)
+			elseif v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		    	for i, j in pairs (v.items) do
 					v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 		     	end 
+		   		table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		    else
 		    	for i, j in pairs (v.items) do
 					if j["type"] == "label" then 
@@ -1030,15 +1082,15 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 					end
 		     	end 
+		   		table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		   end 
-		   table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		   screen:remove(inspector)
 		   input_mode = S_SELECT
 		   current_inspector = nil
            screen:grab_key_focus(screen) 
 		   text_reactive()
 		   editor.n_selected(v, true)
-		   local si = inspector:find_child("si_more")
+		   local si = inspector:find_child("si_items")
 		   editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
 		   return true 
 	     end 
@@ -1047,10 +1099,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			down.src="lib/assets/li-btn-red-down.png"
 		 end 
 	     function down:on_button_up(x,y)
-		     if v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+			 if v.extra.type == "TabBar" then 
+				v:move_tab_down(tonumber(string.sub(up.name, 8,-1))-1)
+		     elseif v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		          for i, j in pairs (v.items) do
 						v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 		     	  end 
+		     	table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     else
 		          for i, j in pairs (v.items) do
 				      if j["type"] == "label" then 
@@ -1059,15 +1114,15 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 					  end
 		     	  end 
+		     	table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     end
-		     table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
 		     current_inspector = nil
              screen:grab_key_focus(screen) 
 		     text_reactive()
 		     editor.n_selected(v, true)
-		     local si = inspector:find_child("si_more")
+		     local si = inspector:find_child("si_items")
 		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
 		     return true 
 	      end 
@@ -1092,8 +1147,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 				si_name = "si_info"
 				attr_t_idx = info_attr_t_idx
 			else 
-				item_group_name = "item_group_more"
-				si_name = "si_more"
+				item_group_name = "item_group_items"
+				si_name = "si_items"
 				attr_t_idx = more_attr_t_idx
 			end
 			item_group = inspector:find_child(item_group_name)
@@ -1105,7 +1160,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		  		 if (item_group:find_child("item_text"..tostring(next_i))) then
 					 item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
 		  			 si.seek_to_middle(0,item_group:find_child("itemsList").y) 
-		  			 --si.seek_to_middle(0,item_group:find_child("item_text"..tostring(next_i)).y) 
 		  		 else 	
 		     		 for i, v in pairs(attr_t_idx) do
  		        		   if("itemsList" == v) then 
@@ -1119,7 +1173,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			       				  if item_group:find_child(n_item).extra.on_focus_in then 
 			           				item_group:find_child(n_item).extra.on_focus_in()	
 	       							current_focus = item_group:find_child(n_item)
-		  			        		--si.seek_to_middle(0,item_group:find_child(n_item).y) 
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 			       				  else
 				   					there()
@@ -1135,7 +1188,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     	local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     	if (item_group:find_child("item_text"..tostring(prev_i))) then
 					item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
-		  			--si.seek_to_middle(0,item_group:find_child("item_text"..tostring(prev_i)).y) 
 		  			si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 		     	else 	
 		      		for i, v in pairs(attr_t_idx) do
@@ -1148,7 +1200,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			     					local p_item = attr_t_idx[i-1]
 									item_group:find_child(p_item).extra.on_focus_in()	
 	       							current_focus = item_group:find_child(p_item)
-		  	        				--si.seek_to_middle(0,item_group:fyoind_child(p_item).y) 
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 									break
 			     				end

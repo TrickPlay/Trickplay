@@ -819,7 +819,7 @@ function editor_ui.tabBar(t)
         
         display_width  = 280,
         display_height = 310,
-        tab_spacing = -10,
+        tab_spacing = -10, -- -10
         --slant_width  = 20,
         border_width =  0,
         border_color = {255,255,255,  0},
@@ -1027,7 +1027,7 @@ function editor_ui.tabBar(t)
 				virtual_h=p.buttons[# p.buttons].h,
 				arrow_color=p.label_color,
 				box_width=0,
-				dist_per_press=p.buttons[# p.buttons].w,
+				dist_per_press=p.buttons[# p.buttons].w - 10,
 				arrow_sz = p.arrow_sz,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
 				arrow_src = p.arrow_image,

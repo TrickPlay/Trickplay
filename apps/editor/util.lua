@@ -448,7 +448,7 @@ function new_project(fname)
 	end
 end 
 
-function open_project(t, msg)
+function open_project(t, msg, from_main)
   	local WIDTH = 300
   	local HEIGHT = 400
     local PADDING = 13
@@ -557,8 +557,19 @@ function open_project(t, msg)
 
 		copy_widget_imgs()
 
+		if from_main and settings.project then 
+			return true
+		end 
+		
+
+		settings.project = project
 		xbox:on_button_down()
 		return true
+	end 
+
+	if from_main and settings.project then 
+		load_project(settings.project)
+		return 
 	end 
 
 	-- Scroll	

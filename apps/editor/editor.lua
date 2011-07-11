@@ -1690,7 +1690,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	     if (v.x > screen.w - v.x - v.w) then 
 	        x_space = v.x 
         	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
-				inspector.x = x_space - inspector.w - INSPECTOR_OFFSET
+				inspector.x = x_space - inspector.w * screen.width/screen.display_size[1] - INSPECTOR_OFFSET
 		  	else 
 				inspector.x = (v.x + v.w - inspector.w)/2
         	end 
@@ -1706,12 +1706,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    if (v.y > screen.h - v.y - v.h) then 
 			y_space = v.y 
         	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
-				inspector.y = v.y - inspector.h - INSPECTOR_OFFSET
+				inspector.y = v.y - inspector.h * screen.height/screen.display_size[2]- INSPECTOR_OFFSET
 				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
 			    	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
 				end	
 			else 
-            	inspector.y = (v.y + v.h - inspector.h) /2
+            	inspector.y = (v.y + v.h - inspector.h *  screen.height/screen.display_size[2] ) /2
 				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
 					inspector.y = screen:find_child("menu_bar").h + INSPECTOR_OFFSET	
 				end	
@@ -1719,12 +1719,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    
 		else 
 			y_space = screen.h - v.y - v.h
-        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
+        	if (inspector.h * screen.height/screen.display_size[2] + INSPECTOR_OFFSET < y_space) then 
 				inspector.y = v.y + v.h + INSPECTOR_OFFSET
 			else 
-				inspector.y = (v.y + v.h - inspector.h)/2
-				if (inspector.y + inspector.h + INSPECTOR_OFFSET >= screen.h) then 
-					inspector.y = screen.h - inspector.h - INSPECTOR_OFFSET
+				inspector.y = (v.y + v.h - inspector.h * screen.height/screen.display_size[2] )/2
+				if (inspector.y + inspector.h *  screen.height/screen.display_size[2] + INSPECTOR_OFFSET >= screen.h) then 
+					inspector.y = screen.h - inspector.h *  screen.height/screen.display_size[2] - INSPECTOR_OFFSET
 				elseif (inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
 			     	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
 				end
@@ -1783,7 +1783,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    	local focus = factory.make_focuschanger(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			focus.position = {GUTTER, GUTTER}
 			tabs.tabs[2]:add(focus) 
-		elseif attr_n == "items" then 
+		elseif attr_n == "items" or attr_n ==  "tab_labels" then 
 			local list_item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			list_item.position = {GUTTER, GUTTER}
 			--tabs.tabs[3]:add(list_item) 
@@ -1792,11 +1792,14 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
    			scroll_items.content:add(list_item)
 			scroll_items.position = {0, 0}
 			scroll_items.reactive = true
-			tabs.tabs[3]:add(scroll_items) 
+			if attr_n == "tab_labels" then 
+				tabs.tabs[2]:add(scroll_items) 
+			else
+				tabs.tabs[3]:add(scroll_items) 
+			end 
 
 		else 
 			local item
-
 			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
 				item = factory.make_filechooser(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 		--	elseif attr_n == "items" then 
@@ -1970,9 +1973,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end 
 
 	if scroll_y_pos then 
-		 tabs.buttons[3].on_button_down()
-		 if screen:find_child("si_more") then 
-	     	screen:find_child("si_more").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
+		 if v.extra.type == "TabBar" then 
+		 	tabs.buttons[2].on_button_down()
+		 else 
+		 	tabs.buttons[3].on_button_down()
+		 end 
+		 if screen:find_child("si_items") then 
+	     	screen:find_child("si_items").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 		 end 
 	end 
 
