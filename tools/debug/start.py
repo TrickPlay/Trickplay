@@ -23,6 +23,7 @@ from dataTypes import BadDataException
 
 # Custom ItemDataRoles
 
+Qt.Pointer = Qt.UserRole + 1
 Qt.Value = Qt.UserRole + 2
 Qt.Element = Qt.UserRole + 3
 Qt.ItemDepth = Qt.UserRole + 4
@@ -115,7 +116,19 @@ class StartQT4(QMainWindow):
         
         s = i.indexes()[0]
         
+        #print(s)
+        
+        #a = s.internalPointer()
+        
+        #b = self.propertyModel.createIndex(0, 0, a)
+        
+        #c = self.propertyModel.itemFromIndex(b)
+        
+        #print(c)
+        
         r = self.propertyModel.invisibleRootItem()
+        
+        r.setData(s,  Qt.Pointer)
         
         r.removeRows(0, r.rowCount())
            
@@ -151,7 +164,7 @@ class StartQT4(QMainWindow):
     def createTree(self):
 
         # Set up Inspector
-        self.inspectorModel.initialize(["UI Element Property",  "Value"],  True)
+        self.inspectorModel.initialize(["UI Element",  "Name"],  True)
         
         #self.ui.inspector.setModel(self.inspectorModel)
         
@@ -162,7 +175,7 @@ class StartQT4(QMainWindow):
         
         self.inspectorProxyModel.setFilterRole(0)
 
-        self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|children)"))
+        self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone)"))
         
         self.ui.inspector.setModel(self.inspectorProxyModel)
         
@@ -178,11 +191,22 @@ class StartQT4(QMainWindow):
         # Set up Property
         self.ui.property.setModel(self.propertyModel)
         
+        self.propertyModel.initialize(["UI Element Property",  "Value"],  False)
+        
         self.propertySelectionModel = QItemSelectionModel(self.propertyModel)
         
         self.ui.property.setSelectionModel(self.propertySelectionModel)
-        
+
         # Property Proxy Model
+        self.propertyProxyModel= QSortFilterProxyModel()
+        
+        self.propertyProxyModel.setSourceModel(self.propertyModel)
+        
+        self.propertyProxyModel.setFilterRole(0)
+
+        self.propertyProxyModel.setFilterRegExp(QRegExp(""))
+        
+        self.ui.property.setModel(self.propertyProxyModel)
         
         # Property Selection Model
         
