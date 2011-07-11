@@ -600,7 +600,7 @@ dofile("editor.lua")
     	screen.reactive=true
     
     	dofile("menu.lua")
-		open_project()
+		open_project(nil,nil,"main")
 
 		local auto_save_duration = 60000  --msecs
 		local auto_save = true

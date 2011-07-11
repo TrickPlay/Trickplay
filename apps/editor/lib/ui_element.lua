@@ -5533,9 +5533,9 @@ function ui_element.tabBar(t)
     	border_corner_radius = 12,
         
         tab_labels = {
-            "Item 1",
-			"Item 2",
-            "Item 3",
+            "Label 1",
+			"Label 2",
+            "Label 3",
         },
         tabs = {},
         --tab_align          = "CENTER",
@@ -5545,7 +5545,7 @@ function ui_element.tabBar(t)
         
         display_width  = 600,
         display_height = 500,
-        tab_spacing = 10,
+        tab_spacing = 0,--10,
         --slant_width  = 20,
         border_width =  2,
         --border_color = {255,255,255,255},
@@ -5589,7 +5589,7 @@ function ui_element.tabBar(t)
                 
                 if index == nil then index = #p.tab_labels + 1 end
                 
-                table.insert(p.tab_labels,index,"TAB")
+                table.insert(p.tab_labels,index,"Label "..tostring(index))
                 
                 table.insert(p.tabs,index,Group{})
                 
@@ -5602,7 +5602,7 @@ function ui_element.tabBar(t)
                 
 				if index == nil then index = #p.tab_labels + 1 end
                 
-                table.remove(p.tab_labels,index,"TAB")
+                table.remove(p.tab_labels,index, "Label "..tostring(index))
                 
                 table.remove(p.tabs,index,Group{})
                 
@@ -6378,6 +6378,9 @@ function ui_element.arrowPane(t)
         box_width =    2,
         skin = "default",
 		ui_position = {200,100},
+		--------------------------
+		tab_num = nil, 
+		tab = nil
     }
 	
 	local make_arrow = function()
@@ -6556,7 +6559,12 @@ function ui_element.arrowPane(t)
 				
 				
 				arrow.on_button_down = function()
+					print("YUGI Right")
 					umbrella:pan_by(p.dist_per_press,0)
+					
+					if left_func then 
+						left_func()
+					end 
 				end
 				
 				arrow.reactive=true
@@ -6572,7 +6580,11 @@ function ui_element.arrowPane(t)
 				
 				
 				arrow.on_button_down = function()
+					print("YUGI Left")
 					umbrella:pan_by(-p.dist_per_press,0)
+					if left_func then 
+						left_func()
+					end 
 				end
 				
 				arrow.reactive=true
