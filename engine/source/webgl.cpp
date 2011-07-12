@@ -147,7 +147,6 @@ Context::Context( ClutterActor * actor )
     texture_target( 0 ),
     framebuffer( 0 ),
     depthbuffer( 0 )
-
 {
 	g_assert( CLUTTER_IS_TEXTURE( actor ) );
 
@@ -183,7 +182,7 @@ Context::Context( ClutterActor * actor )
 
     glBindRenderbuffer( GL_RENDERBUFFER , depthbuffer );
 
-    glRenderbufferStorage( GL_RENDERBUFFER , GL_DEPTH_COMPONENT16 , width , height );
+    glRenderbufferStorage( GL_RENDERBUFFER , GL_DEPTH24_STENCIL8 , width , height );
 
     // Create the framebuffer
 
@@ -193,7 +192,7 @@ Context::Context( ClutterActor * actor )
 
     // Attach the depth buffer
 
-    glFramebufferRenderbuffer( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , depthbuffer );
+    glFramebufferRenderbuffer( GL_FRAMEBUFFER , GL_DEPTH_STENCIL_ATTACHMENT , GL_RENDERBUFFER , depthbuffer );
 
     // Attach the texture as the color buffer
 
@@ -209,6 +208,11 @@ Context::Context( ClutterActor * actor )
     }
 
     context_op( SWITCH_TO_CLUTTER_CONTEXT );
+
+    // TODO: This is cheating. Since GL textures are normally upside down, clutter draws
+    // our texture upside down. We correct by rotating the whole actor, which is wrong.
+
+    clutter_actor_set_rotation( actor , CLUTTER_X_AXIS , 180 , 0 , height / 2 , 0 );
 }
 
 //.............................................................................
@@ -542,7 +546,6 @@ void Context::delete_shader( GLuint n )
 }
 
 //.............................................................................
-
 
 }
 
