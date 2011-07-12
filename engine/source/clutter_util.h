@@ -46,6 +46,14 @@ namespace ClutterUtil
 
     ClutterTimeline * user_data_to_timeline( lua_State * L, int n );
 
+	// Safely casts to a animator
+
+    ClutterAnimator * user_data_to_animator( lua_State * L, int n );
+
+	// Safely casts to a constraint
+
+    ClutterConstraint * user_data_to_constraint( lua_State * L , int n );
+
     // Sets properties from a table
 
     void set_props_from_table( lua_State * L, int table );
@@ -57,6 +65,12 @@ namespace ClutterUtil
     // Given an actor, pushes a Lua object for it
 
     void wrap_concrete_actor( lua_State * L, ClutterActor * actor );
+
+    // Given a timeline, pushes a Lua object for it
+
+    void wrap_timeline( lua_State * L , ClutterTimeline * timeline );
+
+    void wrap_constraint( lua_State * L , ClutterConstraint * constraint );
 
     // Returns the metatable for an actor
 

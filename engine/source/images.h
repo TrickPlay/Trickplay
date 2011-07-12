@@ -22,6 +22,8 @@ public:
 
     static Image * make( const TPImage & image );
 
+    static Image * make( cairo_surface_t * surface );
+
     static Image * decode( gpointer data, gsize size, const gchar * content_type = NULL );
 
     static Image * decode( const gchar * filename );
@@ -50,6 +52,34 @@ public:
     cairo_surface_t * cairo_surface() const;
 
     bool write_to_png( const gchar * filename ) const;
+
+    //.........................................................................
+
+    bool is_packed() const;
+
+    //.........................................................................
+    // Returns a copy of this image where the pitch == width * depth
+
+    Image * make_packed_copy() const;
+
+    //.........................................................................
+    // Makes a wholesale copy of the image
+
+    Image * make_copy() const;
+
+    //.........................................................................
+    // For WebGL, flips the image vertically
+
+    void flip_y();
+
+    //.........................................................................
+    // Premultiplies alpha
+
+    void premultiply_alpha();
+
+    //.........................................................................
+
+    static void destroy( void * image );
 
 private:
 

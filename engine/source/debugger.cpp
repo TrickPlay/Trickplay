@@ -5,6 +5,7 @@
 #include "debugger.h"
 #include "app.h"
 #include "context.h"
+#include "console.h"
 #include "util.h"
 
 Debugger::Debugger( App * _app )
@@ -50,8 +51,6 @@ void Debugger::install()
 
 void Debugger::handle_command( const char * parameters )
 {
-    lua_State * L = app->get_lua_state();
-
     install();
 
     if ( ! parameters )
@@ -216,6 +215,13 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
         return;
     }
 
+    Console * console = app->get_context()->get_console();
+
+    if ( console )
+    {
+        console->disable();
+    }
+
     // Print where we are
 
     String source;
@@ -367,7 +373,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
                     "'s' or 'n' to continue until the next line" << std::endl <<
                     "'l' to list local variables" << std::endl <<
                     "'r <some Lua>' to run some Lua (in global scope)" << std::endl <<
-                    "'q' << to quit TrickPlay" << std::endl;
+                    "'q' to quit TrickPlay" << std::endl;
         }
 
         // Handle it in the command handler
@@ -376,5 +382,10 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
         {
             handle_command( command.c_str() );
         }
+    }
+
+    if ( console )
+    {
+        console->enable();
     }
 }

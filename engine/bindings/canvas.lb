@@ -21,84 +21,73 @@ module canvas;
 
 /*
     Class: Canvas
+    
+    The Canvas class provides an in-memory vector-based drawing surface. Various drawing tools and operations are supported.
+    
+    The Canvas class uses the <Cairo Vector Graphics library at http://www.cairographics.org>, but you do not need to understand that library before using the Canvas class. The basic information necessary to create and manipulate a Canvas object is described in this documentation. If you desire additional information about Cairo, refer to the <Cairo documentation at http://www.cairographics.org/documentation>.
+    
+    This short introduction will acquaint you with Canvas concepts, the drawing tools, and supported operations. Detailed information describing each Canvas property and function follows this introduction.
+    
+    *Making a Line, Drawing a Shape*
+    
+    A Canvas object contains a two-dimensional drawing surface. The size of the drawing surface is specified in pixels when the Canvas is created. All visible drawing operations are performed upon the drawing surface, and, for this reason, the drawing surface is sometimes referred to as the "destination."
+    
+    Similar to real-life drawing when you move a pencil along paper, drawing on a Canvas is performed by moving a point along a path on the drawing surface. You define the path with functions such as <move_to> and <line_to>. You can also specify characteristics of the drawn line, such as the <line_width> and its color (see the <set_source_color> function). Lines can be solid or dashed, joined in various manners, and end in different shapes (see the <set_dash> function and the <line_join> and <line_cap> properties).
+    
+    In addition to drawing lines, the Canvas object provides functions to create simple shapes, such as rectangles, circles, and Bezier curves (see the <rectangle>, <arc> and <curve_to> functions). Text can be drawn onto the Canvas surface by using the <text_path> function.
+    
+    *Stroking the Line, Filling the Shape*
+    
+    Unlike a visible line drawn with a real pencil, the drawn path is initially invisible. Various methods are provided to make the line visible, and the method chosen will depend upon the shape you've defined and how you want the line or shape to look. For example, if you have created a simple flat line, you can make the line visible on the drawing surface by calling the <stroke> function. If your path defines a closed shape, like a rectangle or circle, you can also use the stroke function to draw the outline of the shape. If you want to color the inside of the shape, you can call the <fill> function. If you want to draw both the outline and color the shape, you can call both functions, stroke() and fill(), along the same path.
+    
+    Besides drawing with solid colors, shapes can be filled with linear or radial gradient patterns that shift from one color to another (see the <set_source_linear_pattern> and <set_source_radial_pattern> functions). Support is also provided to fill shapes using an image in a <Bitmap> object.
+    
+    *Bending the Line, Distorting the Shape*
+    
+    An existing path can be manipulated in various ways. For example, it can be rotated to spin it around (see the <rotate> function). It can be scaled to alter its size or stretch it in different directions (the <scale> function). Part of the path can be clipped so a section of it will not be visible (see the <clip> function).
+    
+    Multiple shapes that overlap can be combined in different ways to create new shapes. In the simplest instance, two overlapping shapes can perform a simple union to form a single shape. Or two shapes can be combined so that only their overlapping area is retained. And when shapes are combined, not only their outlines, but also their colors and transparency settings can be combined in various ways. Refer to the <op> property for further information.
 
-    Canvas lets you create a bitmap and use various drawing operations on it. It is
-    based on the <Cairo graphics library at http://cairographics.org/manual/> and offers a similar API, with some slight
-    modifications for ease of use.
+	Finally, after your Canvas is completely drawn and is ready to be displayed on the screen, you can convert the drawing surface to an <Image>. (Canvas objects cannot be displayed directly; they must first be converted to Image objects.)
 
-    You typically use it by creating one, drawing into it and then creating an <Image> object from it.
-    Then, you can use the image object like any other <UIElement>.
-
-    Introduction:
-
-    You start by creating a Canvas with a given size.
-
-    (code)
-    local canvas = Canvas( 200 , 200 )
-    (end)
-
-    Now, you create a path. You can use <move_to>, <line_to>, <rectangle>, <round_rectangle>,
-    <curve_to>, <arc>, <arc_negative> or <text_path> for this. At this point, a path exists,
-    but it is not visible.
-
-    (code)
-    canvas:rectangle( 20 , 20 , 160 , 160 )
-    (end)
-
-    You can use the path in several ways. You can call <clip> to use it as a clipping region
-    for <paint>, you can <fill> it, or you can <stroke> it.
-
-    If you choose to fill it or stroke it, you first have to choose a brush; which is called a source.
-    You can use <set_source_color> to use a solid color, <set_source_linear_pattern> to use a linear color
-    gradient as your brush or <set_source_radial_pattern> to use a radial gradient. You can also use
-    <set_source_bitmap> to use another image as your brush. You can even use <push_group> and <pop_group>
-    to draw yourself a brush.
-
-    (code)
-    canvas:set_source_color( "FF0000" )
-    (end)
-
-    Finally, you can fill it. This will fill the rectangle with red.
-
-    (code)
-    canvas:fill( true )
-    (end)
-
-    Fill and stroke let you keep (preserve) your path, so you can still use it. Since we passed
-    true to <fill> above, the path is still there. Now, we change the source to solid green and
-    stroke the same path.
-
-    (code)
-    canvas:set_source_color( "00FF00" )
-    canvas:stroke()
-    (end)
-
-    In between these calls, you can use transformations like <translate>, <scale> and <rotate> to achieve
-    different results. You can also change the operator using the <op> property.
-
-    When you are happy with your Canvas, you can create an Image from it and add it to the screen.
-
-    (code)
-    screen:add( canvas:Image() )
-    (end)
+	*A Three-Layer Canvas Cake*
+	
+    If you read other Cairo documentation besides this document, they often refer to the path as the "mask." The mask can be thought of as a layer floating above the Canvas drawing surface/destination.
+    
+    There is also a third layer that floats above the path/mask and is called the "source." The source is the color or pattern used to stroke or fill the path/mask.
+    
+    It can be helpful to visualize these three layers as being of the same size, one above the other, with the drawing surface on the bottom, the path/mask in the middle, and the source on top.
+    
+    (see canvasLayers.png)
+    
+    Imagine that the defined path is cut from the path/mask layer, just as if you had used scissors to cut a shape from the middle of a piece of paper. For example, if you want to fill a circle shape, the circle is cut out from the path/mask layer. Then, when you make a path/mask visible on the drawing surface by calling fill(), think of the three layers pressing upon each other. The cut portion of the path/mask enables the source color/pattern to touch the destination, thus transferring the source to the drawing surface.
+    
+    Depending upon what you attempt to draw, it's possible for things to get complicated. If you keep in mind, however, that everything is based on manipulating these three layers, you should be able to keep things under control.
+    
+	With this foundation, you are prepared to read through and understand the various Canvas properties and functions.    
 */
 
 class Canvas [[ cairo_t * ]]
 {
     /*
         Constructor: Canvas
+        
+        The Canvas constructor creates an empty in-memory drawing surface. Each pixel on the surface contains a Red, a Green, and a Blue color component and an Alpha transparency value.
 
-        The constructor of Canvas takes the desired width and height and returns a new Canvas.
+		*Prototype:*
+		
+		(code)
+		Canvas( width, height )
+		(end)
+		
+        *Arguments:*
+        
+        width - width of the Canvas drawing surface in pixels
+        height - height of the Canvas drawing surface in pixels
 
-        Arguments:
-
-            width - The width of the Canvas surface in pixels.
-
-            height - The height of the Canvas surface.
-
-        Returns:
-
-            canvas - A newly created Canvas whose surface is all zeros.
+        *Return Value:*
+        
+        canvas - a Canvas object whose drawing surface is empty, i.e., all zeros. If insufficient memory exists to create the Canvas object, a Canvas object is still returned, but you will not be able to perform any operations with it. After creating a Canvas object, check the <ok> property to verify that a valid object exists.
     */
 
     Canvas( ... )
@@ -155,9 +144,35 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
-        Property: width
+        Property: ok
+        
+        The ok property is a boolean flag indicating whether or not the Canvas is valid and can be converted to an Image or Bitmap object. The Canvas can become invalid if an improper operation is performed, such as calling <restore> or <pop_group> from an empty stack, or if an attempted operation fails, such as not having sufficient memory to create the Canvas object.
+        
+        The ok property may be retrieved, but it cannot be set.
+        
+        *Possible Values:*
+        
+        true - the Canvas is valid
+        false - the Canvas is corrupt and unusable
+        
+        *See Also:* the <Image> and <Bitmap> functions
+    */
 
-        The width of the Canvas.
+    readonly bool ok
+        [[
+            ok = cairo_status( self ) == CAIRO_STATUS_SUCCESS;
+        ]];
+
+    /*
+        Property: width
+        
+        The width property is an integer value specifying the width in pixels of the Canvas. The width is set when the Canvas object is created. The value can be retrieved, but it cannot be modified.
+        
+   		The width value references the Canvas's drawing surface, prior to any alteration that may occur due to the application of an existing transformation matrix.
+        
+        The <w> property is a shorthand version of the width property; both properties retrieve the same value.
+        
+        *See Also:* the <w>, <height> and <size> properties
     */
 
     readonly int width
@@ -167,8 +182,14 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: w
-
-        The width of the Canvas.
+        
+        The w property is an integer value specifying the width in pixels of the Canvas. The width is set when the Canvas object is created. The value can be retrieved, but it cannot be modified.
+        
+   		The w value references the Canvas's drawing surface, prior to any alteration that may occur due to the application of an existing transformation matrix.
+        
+        The <width> property is the "character-verbose" version of the w property; both properties retrieve the same value.
+        
+        *See Also:* the <width>, <size> and <height> properties
     */
 
     readonly int w
@@ -178,8 +199,14 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: height
-
-        The height of the Canvas.
+        
+        The height property is an integer value specifying the height in pixels of the Canvas. The height is set when the Canvas object is created. The value can be retrieved, but it cannot be modified.
+        
+   		The height value references the Canvas's drawing surface, prior to any alteration that may occur due to the application of an existing transformation matrix.
+        
+        The <h> property is a shorthand version of the height property; both properties retrieve the same value.
+        
+        *See Also:* the <width>, <size> and <h> properties
     */
 
     readonly int height
@@ -190,7 +217,14 @@ class Canvas [[ cairo_t * ]]
     /*
         Property: h
 
-        The height of the Canvas.
+        The h property is an integer value specifying the height in pixels of the Canvas. The height is set when the Canvas object is created. The value can be retrieved, but it cannot be modified.
+        
+		The h value references the Canvas's drawing surface, prior to any alteration that may occur due to the application of an existing transformation matrix.
+        
+        The <height> property is the "character-verbose" version of the h property; both properties retrieve the same value.
+        
+        *See Also:* the <width>, <height> and <size> properties
+
     */
 
     readonly int h
@@ -200,8 +234,12 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: size
+        
+        The size property is a table containing integer values of the Canvas's width and height, respectively. The width and height are set when the Canvas is created. The values can be retrieved, but they cannot be modified.
 
-        A table containing the width and height of the Canvas.
+		The size values reference the Canvas's drawing surface, prior to any alteration that may occur due to the application of an existing transformation matrix.
+        
+        *See Also:* the <width> and <height> properties
     */
 
     readonly table size
@@ -215,8 +253,16 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: current_point
-
-        A table containing the coordinates of the current point.
+        
+        The current_point property is a table containing the two double values of the drawing surface's current X and Y coordinates, respectively. The coordinates reference the Canvas's drawing surface, prior to any alteration that may occur due to the application of an existing transformation matrix.
+        
+        If the Canvas does not have a current point or if the Canvas has become corrupt and unusable, the X and Y coordinates will be 0, 0.
+        
+        The current_point property's coordinates can be retrieved, but they may not be modified. Many of the functions that define a path, such as <move_to>, can be used to modify the drawing surface's current point.
+        
+        The <stroke> and <fill> functions normally clear the current path and current point, unless they are called with their preserve argument set to true.
+        
+        *See Also:* the <move_to> function
     */
 
     readonly table current_point
@@ -234,16 +280,52 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Property: path_extents
+        
+        The path_extents property is a table containing a pair of X,Y coordinates defining a rectangular box that bounds the current path. If the current path is empty, the coordinates are both 0,0.
+        
+        *Table Format:* { left_X_value, top_Y_value, right_X_value, bottom_Y_value }
+
+   		The coordinate values reference the Canvas's drawing surface, prior to any alteration that may occur due to the application of an existing transformation matrix. The coordinates do not take into account the results of the current fill rule or clipping settings.
+    */
+
+    readonly table path_extents
+        [[
+            double x1;
+            double y1;
+            double x2;
+            double y2;
+
+            cairo_path_extents( self , & x1 , & y1 , & x2 , & y2 );
+
+            lua_newtable( L );
+            lua_pushnumber( L , x1 );
+            lua_rawseti( L , -2 , 1 );
+            lua_pushnumber( L , y1 );
+            lua_rawseti( L , -2 , 2 );
+            lua_pushnumber( L , x2 );
+            lua_rawseti( L , -2 , 3 );
+            lua_pushnumber( L , y2 );
+            lua_rawseti( L , -2 , 4 );
+        ]];
+
+    /*
         Property: antialias
+        
+        The antialias property is a text string that suggests the type of anti-aliasing to perform when rendering shapes; this property has no affect on text rendering. Anti-aliasing is a process that attempts to reduce the appearance of jagged diagonal edges and make them appear smooth.
+        
+        The antialias property is only a suggestion of the type of anti-aliasing to perform; not all systems will support all available settings.
 
-        Lets you get or set the antialiasing mode used by the Canvas.
+		*Possible Settings:* The antialias property setting is case-sensitive.
 
-        Values:
-
-            DEFAULT - The default mode.
-            NONE - No antialiasing.
-            GRAY - Single color.
-            SUBPIXEL - Subpixel antialiasing.
+        "DEFAULT" - use the anti-aliasing method defined for the underlying subsystem or device
+        "NONE" - do not anti-alias shapes. Instead, use a bi-level alpha mask.
+        "GRAY" - perform single-color anti-aliasing. For example, for black strokes on a white surface, use shades of gray.
+        "SUBPIXEL" - perform anti-aliasing by taking advantage of subpixel element order on devices such as LCD panels
+        
+        *Default Setting:* "DEFAULT"
+        
+        *See Also:* the <filter> property
     */
 
     string antialias
@@ -286,13 +368,122 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: fill_rule
+        
+        The fill_rule property is a string that specifies the method used to determine which regions of a path are inside the path (and therefore filled) and which regions are outside (and not filled). The fill_rule becomes important when shapes overlap or are completely enclosed within other shapes or when the path intersects itself and thereby creates closed regions within the shape.
+        
+        The fill_rule affects the fill() and clip() operations only.
+        
+        *Supported Settings:* The fill_rule setting is case-sensitive.
+        
+        "EVEN_ODD" - an area inside an even number of enclosed areas is not-filled; an area inside an odd number of enclosed areas is filled. See the discussion below for more details.
+        "WINDING" - takes into account the path's direction; creating the same path in an opposite direction can reverse which regions are filled and which are left hollow. See the discussion below for more details. Also known as "Non-Zero Winding" fill rule. 
+        
+        *Default Setting:* WINDING
+        
+        The Even-Odd fill rule counts the number of regions that a particular region is enclosed within. Areas enclosed within an even number of regions are left unfilled; areas enclosed within an odd number of regions are filled. Let's look at some examples.
+        
+        We'll start with the simplest scenario: a single circle. The circle is enclosed within one region: itself. Odd-numbered regions are filled, so the one-region circle is filled.
+        
+        A circle with another circle contained within it is also easy to visualize. The outermost circle is contained only within itself: 1 region. The inner circle is contained within itself and the outer circle: 2 regions. Thus, the even-numbered inner circle is left hollow, while the portion of the odd-numbered outer circle not overlapped by the inner circle is filled. This scenario can be repeated with infinitely smaller circles.
+        
+        (see canvasFillRuleEOSimpleCircles.png)
+        
+        Two overlapping circles present another possibility. The non-overlapping sections of each circle are contained within themselves: 1 region each. The overlapping area is contained in two regions. Thus, the odd-numbered non-overlapping regions are filled, and the even-numbered overlapping region is left hollow.
+        
+        (see canvasFillRuleEOOverlappingCircles.png)
+        
+        Let's enclose our two overlapping circles within a rectangle. The rectangle is contained within itself: 1 region. The non-overlapping portions of the circles are contained within themselves and the rectangle: 2 regions. The circle's overlapping area is contained within the two circles and the rectangle: 3 regions. The odd-numbered/filled and even-numbered/unfilled fill rule is then applied.
+        
+        (see canvasFillRuleEOCirclesInRect.png)
 
-        Get or set the rule used for fills.
-
-        Values:
-
-            EVEN_ODD - Even/odd.
-            WINDING - Winding.
+        The Non-Zero Winding fill rule determines whether or not to fill a region based on the direction of the paths used to enclose the region. A path moving clockwise is assigned a value of +1. A region enclosed by a counter-clockwise path is given a value of -1. Depending on the path, a region may be made up of some segments moving clockwise and other segments moving counter-clockwise. All the paths making up the region are added together. Regions with a non-zero total are filled; those with a sum of zero are not filled. This can get complicated and confusing, so let's look at some simple examples to begin.
+        
+        The simplest scenario is our friendly single circle. If its path direction is clockwise, its total is +1, so it is filled. If its path direction is counter-clockwise, its total is -1, so it is still filled. In this case, the path's direction makes no difference.
+        
+        (see canvasFillRuleWSimpleCircles.png)
+        
+        What about the case of a small circle completely enclosed within a larger circle? Now the path directions become important and will determine whether a circle is filled or not. In the case of the large, outer circle, its total will be either +1 or -1, depending on its path direction. Thus, the region of the outer circle that is *not* shared with the inner circle is always non-zero, and thus is always filled. For the moment, let's assume the outer circle path moves clockwise, so its total is +1, and let's look at the inner circle. If the inner circle's path moves in the same clockwise direction, its value is also +1 for a total of 1 + 1, or 2. Thus, the inner circle will be filled, as well. If the inner circle path moves in the opposite counter-clockwise direction, its value is -1, so its total becomes (+1) + (-1), or 0. Now it will *not* be filled.
+        
+        (see canvasFillRuleWCircleInCircle.png)
+        
+		All shapes, not just circles, are filled by totaling the path-direction values of its own shape, plus any outer shapes that contain it. Let's look at one more example of completely-enclosed shapes before moving on. Let's say there are three rectangles: an outer, a middle, and an inner. The path of the outer rectangle moves clockwise, so it is filled. The path of the middle rectangle moves in the same clockwise direction, so it is filled, too. The path of the inner rectangle moves in the opposite counter-clockwise direction, so it is not filled, right? Wrong! The total of the inner rectangle is the sum of all three rectangles, or (+1) + (+1) + (-1) = +1, so the inner rectangle is filled, too. You have to do the addition for each enclosing shape to determine whether or not a particular shape will be filled.
+		
+		(see canvasFillRuleWRectangles.png)
+		
+		As shapes become more complicated, the calculations become more complicated, too. Let's consider two overlapping circles. In the first scenario, both circle paths will move in the same direction, say clockwise. The non-overlapping portions will have a total of +1, so they will be filled. The overlapping region calculates its total by adding the values of both circles so the region's total is 1 + 1 = 2; thus, the overlapping region is filled. What if the two circles move in opposite directions? Again, the non-overlapping regions have non-zero totals (+1 and -1), so they are filled. But now the total for the overlapping region is the sum of +1 and -1 for a total of 0, so in this case the overlapping region is not filled.
+		
+		(see canvasFillRuleWOverlappingCircles.png)
+		
+		Hang onto your seat, and let's put the two overlapping circles into an enclosing rectangle. We'll just evaluate one scenario, but you can work out all the various possibilities yourself, if you want. Let's say the rectangle moves clockwise and the two circles both move counter-clockwise. The rectangle has a value of +1, so it is filled. The non-overlapping regions of the circles each have values of (-1) and, when combined with the enclosing rectangle, totals (-1) + 1 = 0, so they are not filled. The overlapped region of the circles consists of both circles plus the rectangle ((-1) + (-1) + (+1) = -1); its non-zero total means the circle's overlapping region is filled.
+		
+		(see canvasFillRuleWCirclesInRect.png)
+		
+		You may have noticed that this circles-in-a-rectangle shape using the Non-Zero Winding rule was filled in the exact same way earlier using the Even-Odd filling rule. This occurred, however, only because of the shapes' path directions in this particular scenario. If you change the path direction of the rectangle or one or both circles, the filled areas will change, too. With the Non-Zero Winding rule, you have more available possibilities to manipulate which areas are filled and which are left hollow.
+		
+		With this foundation, you should be able to work out for yourself other complicated overlapping shapes. For example, calculate the filled and non-filled regions of three overlapping circles shown below using the Even-Odd and Non-Zero Winding rules. Use various path directions with the Winding rule to see which filled areas change as the directions change. Some filled areas have already been started for you because in both fill rules, the outer, non-overlapping regions will always be filled.
+		
+		(see canvasFillRuleWThreeCircles.png)
+		
+        *Code Example:* Define a star shape using intersecting lines that also creates an enclosed internal region. Fill the shape using different fill_rule settings.
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "ffffffFF" )
+        canvas.line_width = 10
+        
+        -- Draw a star with intersecting lines
+        canvas:move_to( 100, 170 )
+        canvas:line_to( 300, 170 )
+        canvas:line_to( 100, 300 )
+        canvas:line_to( 200, 100 )
+        canvas:line_to( 300, 300 )
+        canvas:close_path()
+        
+        -- Draw the lines, saving the path
+        canvas:stroke( true )
+        
+        -- Set the fill rule
+        canvas.fill_rule = "WINDING"
+        
+        -- Fill the shape, using a fill color
+        -- The resulting internal shape has five line segments, each going in the
+        -- same clockwise direction for a total of +5, thus it is filled.
+        canvas:set_source_color( "ff0000FF" )
+        canvas:fill()
+        
+        -- Draw the same shape in another location
+        canvas:move_to( 400, 170 )
+        canvas:line_to( 600, 170 )
+        canvas:line_to( 400, 300 )
+        canvas:line_to( 500, 100 )
+        canvas:line_to( 600, 300 )
+        canvas:close_path()
+        
+        -- Draw the lines, saving the path
+        canvas:set_source_color( "ffffffFF" )
+        canvas:stroke( true )
+        
+        -- Set the fill rule
+        canvas.fill_rule = "EVEN_ODD"
+        
+        -- Fill the shape, using a fill color
+        -- In this case, the resulting internal shape is contained within itself and
+        -- the outer star shape for an even-numbered total of 2, thus it is not filled.
+        canvas:set_source_color( "ff0000FF" )
+        canvas:fill()
+        
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        The resulting shapes from the example code are shown below.
+        
+        (see canvasFillRules.png)
+        
+		*See Also:* the <fill> and <clip> functions
     */
 
     string fill_rule
@@ -320,16 +511,20 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: filter
+        
+        The filter property is a text string specifying the filter type used when interpolating pixels in a pattern. Pixel interpolation occurs when a pattern is resized or remapped on the drawing surface, such as when a pattern is scaled or rotated. Image quality can suffer when pixels are added or lost (as occurs during resizing and scaling) or when pixels shift positions (as during rotation). Interpolation is an attempt to determine the best approximation of a pixel's color and transparency based upon its surrounding pixels. Getting an accurate approximation can especially affect the quality of a pattern's edges.
 
-        Get or set the filter used for resizing the source pattern.
+		*Possible Settings:* The filter property is case-sensitive.
 
-        Values:
-
-            FAST - Fast.
-            GOOD - Good.
-            BEST - Best.
-            NEAREST - Nearest.
-            BILINEAR - Bilinear.
+        "FAST" - a high-performance filter, similar in quality to "NEAREST"
+        "GOOD" - a reasonable-performance filter, similar in quality to "BILINEAR"
+        "BEST" - the highest-quality filter; may not be suitable for interactive use
+        "NEAREST" - a nearest-neighbor filter. Each interpolated pixel looks only at the closest corresponding pixel in the original pattern to determine the interpolated pixel's value.
+        "BILINEAR" - a bilinear filter. Each interpolated pixel looks at a 2x2 region of surrounding pixels in the original pattern to determine the interpolated pixel's value. This results in more accurate interpolations than nearest-neighbor, but requires more time to accomplish.
+        
+        *Default Setting:* "GOOD"
+        
+        *See Also:* the <antialias> property
     */
 
     string filter
@@ -377,15 +572,115 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Property: extend
+        
+        The extend property is a text string specifying the method to use when extending a pattern into a region larger than the pattern itself.
+        
+        *Possible Settings:* The extend property is case-sensitive.
+        
+        "NONE" - make pixels beyond the pattern fully transparent
+        "REPEAT" - the pattern is tiled by repeating
+        "REFLECT" - the pattern is tiled by reflecting at the edges
+        "PAD" - pixels beyond the pattern copy the pattern's nearest pixel
+        
+        *Default Settings:* For surface patterns, default is "NONE". For gradient patterns, default is "PAD".
+    */
+
+    string extend
+
+        [[
+            switch( cairo_pattern_get_extend( cairo_get_source( self  ) ) )
+            {
+              case CAIRO_EXTEND_REPEAT: extend = "REPEAT"; break;
+              case CAIRO_EXTEND_REFLECT: extend = "REFLECT"; break;
+              case CAIRO_EXTEND_PAD: extend = "PAD"; break;
+              default: extend = "NONE"; break;
+            }
+        ]]
+        [[
+            if ( ! strcmp( extend , "NONE" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_NONE );
+            }
+            else if ( ! strcmp( extend , "REPEAT" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_REPEAT );
+            }
+            else if ( ! strcmp( extend , "REFLECT" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_REFLECT );
+            }
+            else if ( ! strcmp( extend , "PAD" ) )
+            {
+              cairo_pattern_set_extend( cairo_get_source( self ) , CAIRO_EXTEND_PAD );
+            }
+            else
+            {
+              luaL_error( L , "Invalid extend '%s'" , extend );
+            }
+        ]];
+
+    /*
         Property: line_cap
+        
+        The line_cap property is a string that specifies the type of path-ends to render when performing a stroke operation.
+        
+        The line_cap property is used only by the Canvas <stroke> function.
+        
+        *Supported Settings:* The line_cap setting is case-sensitive.
+        
+        "BUTT" - start and stop the line at the path's exact end points
+        "ROUND" - use a rounded end; the path's end points specify the center of the circle
+        "SQUARE" - use a squared end; the path's end points specify the center of the square
+        
+        *Default Setting:* "BUTT"
+        
+        Notice that the "ROUND" and "SQUARE" settings add a rounded or squared end to each endpoint of the path. This will cause the generated line to extend slightly beyond the path's specified endpoints. The extra distance added to each endpoint is determined by the line's width specified in the Canvas object's line_width property. Specifically, each endpoint is extended line_width/2 pixels, i.e., line_width pixels for the entire line.
+        
+        *Code Example:* Demonstrate line_cap settings
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        
+        -- Set a large line_width
+        canvas.line_width = 100
+        
+        -- Set a path
+        canvas:move_to( 500, 100 )
+        canvas:line_to( 1000, 100 )
 
-        Get or set the line cap.
+        -- Explicitly set line_cap
+        canvas.line_cap = "BUTT"
+        
+        -- Make a line
+        canvas:stroke()
+        
+        -- Do the same for ROUND line_cap
+        canvas:move_to( 500, 300 )
+        canvas:line_to( 1000, 300 )
+        canvas.line_cap = "ROUND"
+        canvas:stroke()
+        
+        -- Once more for SQUARE
+        canvas:move_to( 500, 500 )
+        canvas:line_to( 1000, 500 )
+        canvas.line_cap = "SQUARE"
+        canvas:stroke()
+        
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        The lines generated by the code example are shown below.
+        
+        (see canvasLineCaps.png)
+        
+        *See Also:* the <stroke> function
 
-        Values:
-
-            ROUND - Round.
-            SQUARE - Square.
-            BUTT - Butt.
     */
 
     string line_cap
@@ -419,13 +714,55 @@ class Canvas [[ cairo_t * ]]
     /*
         Property: line_join
 
-        Get or set how lines are joined.
+		The line_join property is a string specifying the manner in which lines are joined when performing a stroke operation.
+		
+		The line_join property is used only by the Canvas <stroke> function.
+		
+		*Supported Settings:* The line_join setting is case-sensitive.
+		
+		"BEVEL" - join lines using a beveled joint
+		"MITER" - join lines using a mitered joint
+		"ROUND" - join lines using a rounded joint
+		
+		*Default Setting:* "MITER"
+		
+		*Code Example:* Demonstrate line_join settings
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        
+        -- Set a large line_width
+        canvas.line_width = 75
+        
+		-- Draw a rectangle using the BEVEL line_join
+		canvas.line_join = "BEVEL"
+		canvas:rectangle( 100, 100, 200, 200 )
+		canvas:stroke()
+		
+        -- Draw a rectangle using the MITER line_join
+        canvas.line_join = "MITER"
+        canvas:rectangle( 400, 100, 200, 200 )
+        canvas:stroke()
 
-        Values:
+		-- Draw a rectangle using the ROUND line_join
+		canvas.line_join = "ROUND"
+		canvas:rectangle( 700, 100, 200, 200 )
+		canvas:stroke()
+		
+		-- Show the rectangles
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()
+		(end)
 
-            ROUND - Round.
-            BEVEL - Bevel.
-            MITER - Miter.
+        The rectangles generated by the code example are shown below.
+        
+        (see canvasLineJoins.png)
+
+		*See Also:* the <stroke> function
+		
     */
 
     string line_join
@@ -458,8 +795,13 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: line_width
+        
+        The line_width property specifies the width in pixels of the "pen" to use during the stroke operation.
+        
+        *Default Setting:* 2.0
+        
+        *See Also:* the <stroke> function
 
-        Get or set the line width in pixels.
     */
 
     double line_width
@@ -472,8 +814,18 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: miter_limit
+        
+        The miter_limit property is a double value that specifies the maximum miter limit possible when joining lines. The miter_limit property is used only when the Canvas object's <line_join> property is set to "MITER". When lines are miter-joined, if the length of the resulting miter would exceed the miter_limit setting, the lines are joined using a bevel-joint instead of a miter-joint.
 
-        The miter limit used when <line_join> is set to MITER.
+		To determine if the miter_limit has been exceeded, the would-be miter length is divided by the line width. If the result is larger than the miter_limit setting then the lines are bevel-joined.
+		
+		The default setting of 10.0 results in lines with interior angles of less than 11 degrees being converted to bevel-joins. A miter_limit of 2.0 will bevel any interior angle less than 60 degrees. A miter_limit value of 1.414 bevels any angle less than 90 degrees.
+		
+		A miter_limit for a desired angle can be calculated with the following equation: miter_limit = 1 / sin( angle / 2 )
+		
+		*Default Setting:* 10.0 (lines with interior angles less than 11 degrees will be converted to bevels)
+		
+		*See Also:* the <line_join> property
     */
 
     double miter_limit
@@ -486,26 +838,95 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: op
+        
+        The op property is a text string specifying the compositing operator to use when combining a shape on the source layer with content on the drawing surface. A detailed description and demonstration of each operator is available in <this Cairo article at http://cairographics.org/operators/>.
+        
+        *Possible Settings:* The op property is case-sensitive. The descriptions below are very brief; for more complete information refer to the Cairo article linked above.
 
-        The operator used to combine the source pattern with the destination.
-        For details, see <this article at http://cairographics.org/operators/>.
+        "CLEAR" - clears the region of the drawing surface under the source shape
+        "SOURCE" - the source shape overwrites anything under it on the drawing surface
+        "OVER" - draws source shape over drawing surface, taking transparency into account
+        "IN" - drawing surface is cleared, source is drawn only where drawing surface content previously existed; in the overlapping area, the source and drawing surface are mixed.
+        "OUT" - drawing surface is cleared, source is drawn unmodified where no drawing surface content previously existed; where source overlaps previously-existing drawing surface content, the transparency of the drawing surface content affects how the source is drawn in the overlapping region.
+        "ATOP" - source shape is drawn where it overlaps with existing drawing surface content
+        "DEST" - the source shape is ignored and the drawing surface is left unchanged
+        "DEST_OVER" - similar to "OVER", but draws drawing surface over source shape, taking transparency into account
+        "DEST_IN" - similar to "IN", but the drawing surface is drawn under the source
+        "DEST_OUT" - source shape is used to reduce the visibility of the drawing surface where they overlap; the source itself is not drawn.
+        "DEST_ATOP" - same as "ATOP", but draws drawing surface over source shape
+        "XOR" - on overlapping areas, source shape and drawing surface are XOR-mixed; on non-overlapping areas, each is drawn unmodified.
+        "ADD" - on overlapping areas, source shape and drawing surface are AND-mixed; on non-overlapping areas, each is drawn unmodified.
+        "SATURATE" - on overlapping areas, source shape and drawing surface are "saturation"-mixed; on non-overlapping areas, each is drawn unmodified.
+        
+        *Default Setting:* "OVER"
+        
+        *Code Examples:* Demonstrate various methods of clearing the screen.
+        
+        (code)
+        -- Method 1: Clear the drawing surface to a flat, opaque color
+        
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
 
-        Values:
+		-- Set the desired color and paint the entire canvas
+        canvas:set_source_color( "dododoFF" )
+        canvas:paint()
 
-            CLEAR - Clear the destination.
-            SOURCE - Source.
-            OVER - Over.
-            IN - In.
-            OUT - Out.
-            ATOP - Atop.
-            DEST - Destination.
-            DEST_OVER - Destination over.
-            DEST_IN - Destination in.
-            DEST_OUT - Destination out.
-            DEST_ATOP - Destination atop.
-            XOR - XOR.
-            ADD - Add.
-            SATURATE - Saturate.
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        (code)
+        -- Method 2: Clear the drawing surface so it is completely transparent
+        -- Note: We cannot use Method 1 to do this because painting a completely transparent source has no effect.
+
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+		
+		-- Save our current drawing context, including the compositing operator in use
+		canvas:save()
+		
+		-- Set compositing operator to "CLEAR" and paint the entire canvas
+		canvas.op = "CLEAR"
+		canvas:paint()
+
+		-- Restore the original drawing context
+		canvas:restore()
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        (code)
+        -- Method 3: Clear the drawing surface to any desired color/transparency
+        -- This is the most general method and can be used in place of Methods 1 and 2.
+        
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+		
+		-- Save our current drawing context, including the compositing operator in use
+		canvas:save()
+		
+		-- Set desired color and transparency values
+		canvas:set_source_color( "dododo00" )
+		
+		-- Set compositing operator to "SOURCE" and paint the entire canvas
+		canvas.op = "SOURCE"
+		canvas:paint()
+
+		-- Restore the original drawing context
+		canvas:restore()
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
     */
 
     string op
@@ -562,8 +983,11 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Property: tolerance
+        
+        The tolerance property is a double value specifying the tolerance used when converting a curved path into a series of line segments for display purposes. Any curved segments of the path are subdivided until the maximum deviation between the original path and the polygonal approximation is less than the tolerance value.
+        
+        *Default Value:* 0.1. Larger values will give better performance. Smaller values will produce better appearance, theoretically; in practice, smaller values than the default do not improve appearance significantly.
 
-        Get or set the tolerance used when converting paths into trapezoids.
     */
 
     double tolerance
@@ -577,11 +1001,72 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: set_dash
 
-        Sets the dash pattern used for lines. The table dashes contains a list of
-        integers that define when dashes are ON and OFF.
+		The set_dash() function defines a dash pattern to be used by the Canvas stroke() function when generating lines.
+		
+		The dash pattern is used only by the Canvas <stroke> function.
+		
+		To clear a dash pattern and return to a solid line, use the <clear_dash> function.
+		
+		*Arguments:*
+		
+		offset - number of leading empty pixels before first dash begins
+		dashes - table of positive double values that define the dash pattern. Each value specifies the length in pixels for alternating ON and OFF portions of the line. If the dashes table contains a single value then a symmetric pattern of equal ON and OFF lengths is generated, and the single value specifies the segment length. The table may contain the value 0, but all values in the table cannot be 0.
+		
+		*Default Setting:* Dashes are disabled.
+		
+		*Return Value:* Boolean value indicating the success or failure of the operation. If an invalid dash pattern is specified, returns false, and the previous dash pattern remains in effect. Otherwise, returns true.
+		
+		*Code Example:* Create some sample dashed lines
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        canvas.line_width = 10
+        
+		-- Define some dash patterns
+		dash_regular = { 16.0, 4.0 }
+		dash_dash_dash_dot = { 16.0, 4.0, 16.0 }
+		dash_small = { 4.0 }
+
+		-- Set the dash pattern
+		canvas:set_dash( 0, dash_regular )
+		
+        -- Set a path and make a line
+        canvas:move_to( 500, 100 )
+        canvas:line_to( 1000, 100 )
+        canvas:stroke()
+
+		-- Make another line using a different dash pattern
+		canvas:set_dash( 0, dash_dash_dash_dot )
+		canvas:move_to( 500, 200 )
+		canvas:line_to( 1000, 200 )
+		canvas:stroke()
+		
+		-- Make a final line with another dash pattern
+		canvas:set_dash( 0, dash_small )
+		canvas:move_to( 500, 300 )
+		canvas:line_to( 1000, 300 )
+		canvas:stroke()
+		
+		-- Return to solid, non-dashed lines
+		canvas:clear_dash()
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+
+        The dashed lines generated by the code example are shown below.
+        
+        (see canvasDashes.png)
+
+		*See Also:* the <clear_dash> and <stroke> functions
     */
 
-    set_dash( double offset , table dashes )
+
+    bool set_dash( double offset, table dashes )
         [[
             std::vector< double > d;
 
@@ -597,13 +1082,77 @@ class Canvas [[ cairo_t * ]]
                 lua_pop( L , 1 );
             }
 
-            cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            result = true;
+
+            size_t zeroes = 0;
+
+            for ( std::vector<double>::const_iterator it = d.begin(); it != d.end(); ++it )
+            {
+                if ( 0 == *it )
+                {
+                    ++zeroes;
+                }
+                else if ( *it < 0 )
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            if ( result && zeroes == d.size() )
+            {
+                result = false;
+            }
+
+            if ( result )
+            {
+                cairo_set_dash( self , & d[ 0 ] , d.size() , offset );
+            }
+        ]];
+
+    /*
+        Function: clear_dash
+        
+        The clear_dash() function clears any defined dash pattern and returns to a solid line in subsequent drawing operations. Dashes can be set again by calling the <set_dash> function.
+        
+        *Arguments:* None
+        
+        *Return Value:* None
+        
+        *See Also:* the <set_dash> and <stroke> functions
+
+    */
+
+    clear_dash()
+        [[
+            cairo_set_dash( self , 0 , 0 , 0 );
         ]];
 
     /*
         Function: save
+        
+        The save() function saves the current state of the Canvas object on an internal stack. Multiple Canvas states can be saved. The restore() function pops the last saved state from the internal stack.
+        
+        *Arguments:* None.
+        
+        *Return Value:* None.
 
-        Saves the current state of the Canvas.
+		*Code Example:* Save Canvas state upon function entry and restore upon exit
+		
+		(code)
+		-- It is common to save a Canvas state upon entry to a function and then restore it upon exit
+		function transformCanvas( canvas )
+			-- Save initial Canvas state
+			canvas:save()
+			
+			-- ...Change Canvas state and perform some transformations...
+			
+			-- Restore original Canvas state
+			canvas:restore()
+		end
+		(end)
+		
+		*See Also:* the <restore> function
     */
 
     save()
@@ -613,8 +1162,16 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: restore
-
-        Restores the state of the Canvas from a previously saved state.
+        
+        The restore() function pops the last saved Canvas state from an internal stack.
+        
+        If you mistakenly perform a restore with an empty stack, the Canvas object becomes corrupted. You can check the Canvas object's <ok> property at any time to verify that the Canvas object is still valid.
+        
+        *Arguments:* None.
+        
+        *Return Value:* None.
+        
+        *See Also:* the <save> function and the <ok> property
     */
 
     restore()
@@ -624,20 +1181,147 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: translate
+        
+        The translate() function shifts the (0, 0) origin of the Canvas object's drawing surface to the (X, Y) coordinates specified in the function's arguments; the argument's (X, Y) coordinates become the drawing surface's new (0, 0) origin, and all subsequent coordinate references are interpreted as offsets from this new origin.
+        
+        Multiple origin shifts can be accumulated and combined to form what is called a "transformation matrix." For example, the following transformation operations can be invoked to create a matrix.
+        
+        - Create a rectangle at coordinate (0,0) and fill it   ; rectangle is created in top-left corner of drawing surface
+        - translate( 100, 100 )   ; drawing surface origin shifts to (100, 100)
+        - Create another rectangle at (0, 0) and fill it   ; rectangle is created at (0, 0) top-left corner of *translated* drawing surface. Actual untranslated coordinate is (100, 100).
+        - translate( 400, 400 )   ; drawing surface origin shifts to (400, 400) of *previous* shifted origin. Actual untranslated coordinate origin is (500, 500).
+        - Create third rectangle at (0, 0) and fill it   ; rectangle is created at (0, 0) top-left corner of *translated* drawing surface. Actual untranslated coordinate is (500, 500).
+        - translate( -100, -100)   ; drawing surface origin shifts up and left of previous shifted origin. Actual untranslated coordinate origin is now (400, 400).
+        - Create fourth rectangle at (0, 0) and fill it   ; rectangle is created at (0, 0) top-left corner of translated drawing surface. Actual untranslated coordinate is (400, 400).
+        
+        Coordinate translation is only one of several transformation operations that can make up a matrix.  Other transformation operations, such as rotation and scaling, can also be added to the matrix, and they will be accumulated and combined in the same manner as coordinate translation operations. Refer to the <rotate> and <scale> functions for information about those operations.
+        
+        *Arguments:*
+        
+        tx - double value specifying the amount to shift the X origin
+        ty - double value specifying the amount to shift the Y origin
+        
+        *Return Value:* None
+        
+        *Code Example:* Implement the transformation matrix described above
+        
+        (code)
+        -- Function to create a new filled rectangle at drawing surface origin.
+        -- Arguments are a Canvas object and an RGB/alpha color specification
+        function new_rectangle( canvas, color )
 
-        Modifies the transformation matrix of the Canvas by translating the origin by tx and ty.
-
+        	-- Create rectangle at (0, 0)
+        	canvas:rectangle( 0, 0, 50, 50 )
+        	canvas:set_source_color( color )
+        	canvas:fill()
+        end
+        
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        
+		-- Create blue rectangle
+		new_rectangle( canvas, "0000ffFF" )
+		
+		-- Be a good code neighbor and save the current drawing context
+		canvas:save()
+		
+		-- Translate origin to 100, 100 and create red rectangle
+		canvas:translate( 100, 100 )
+		new_rectangle( canvas, "ff0000FF" )
+		
+		-- Translate origin to 400, 400 and create green rectangle
+		canvas:translate( 400, 400 )
+		new_rectangle( canvas, "00ff00FF" )
+		
+		-- Translate origin to -100, -100 and create gray rectangle
+		canvas:translate( -100, -100 )
+		new_rectangle( canvas, "d0d0d0FF" )
+		
+		-- Restore original drawing context
+		canvas:restore()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        The rectangles created by the example code are shown below.
+        
+        (see canvasTranslate.png)
+        
+        *See Also:* the <rotate> and <scale> functions
     */
 
-    translate( double tx , double ty )
+    translate( double tx, double ty )
         [[
             cairo_translate( self , tx , ty );
         ]];
 
     /*
         Function: rotate
+        
+        The rotate() function rotates the Canvas's drawing surface by the number of degrees specified in the function's angle argument; positive degrees rotate the surface clockwise, while negative degrees rotate the surface counter-clockwise. All subsequent drawing operations will automatically use this rotated drawing surface.
+        
+        Multiple rotation operations can be accumulated and combined to form a "transformation matrix." Refer to the example code below for a demonstration. Additional information about transformation matrices is also included in the description of the <translate> function.
+        
+        *Argument:*
+        
+        angle - angle in degrees to rotate the drawing surface
+        
+        *Return Value:* None
+        
+        *Code Example:* Draw some rectangles, rotating the drawing surface for each
+        
+        (code)
+        -- Function to create a new filled rectangle at drawing surface origin.
+        -- Arguments are a Canvas object and an RGB/alpha color specification
+        function new_rectangle( canvas, color )
 
-        Rotates the transformation matrix by the given angle (in degrees).
+        	-- Create rectangle at (0, 0)
+        	canvas:rectangle( 0, 0, 50, 50 )
+        	canvas:set_source_color( color )
+        	canvas:fill()
+        end
+        
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        
+		-- Create blue rectangle
+		new_rectangle( canvas, "0000ffFF" )
+		
+		-- Be a good code neighbor and save the current drawing context
+		canvas:save()
+		
+		-- Translate origin to 100, 100, rotate surface 30 degrees, and create red rectangle
+		canvas:translate( 100, 100 )
+		canvas:rotate( 30 )
+		new_rectangle( canvas, "ff0000FF" )
+		
+		-- Translate origin to 400, 400, rotate surface an additional 30 degrees, and create green rectangle
+		canvas:translate( 400, 400 )
+		canvas:rotate( 30 )
+		new_rectangle( canvas, "00ff00FF" )
+		
+		-- Translate origin to -100, -100, rotate surface 45 degrees, and create gray rectangle
+		canvas:translate( -100, -100 )
+		canvas:rotate( 45 )
+		new_rectangle( canvas, "d0d0d0FF" )
+		
+		-- Restore original drawing context
+		canvas:restore()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+
+		The rectangles created by the example code are shown below.
+		
+		(see canvasRotate.png)
+		
+		*See Also:* the <translate> and <scale> functions
     */
 
     rotate( double angle )
@@ -647,20 +1331,146 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: scale
+        
+        The scale() function alters the proportions of the Canvas's drawing surface by the X and Y ratios specified in the function's arguments. At the time the scale() function is called, the current drawing surface (which may have been altered by previous scale operations) is always considered to be at scale 1:1. Thus, a simple scale operation using ratios 2:2 will double the proportions of the drawing surface in both the X and the Y directions. All subsequent drawing operations will automatically use these altered surface proportions.
+        
+        Multiple scaling operations can be accumulated and combined to form a "transformation matrix." Refer to the example code below for a demonstration. Additional information about transformation matrices is also included in the description of the <translate> function.
+       
+		*Arguments:*
+		
+		sx - double value specifying the ratio to alter the X axis
+		sy - double value specifying the ratio to alter the Y axis
 
-        Scales the transformation matrix by the given ratios in x and y.
+		*Return Value:* None
+		
+		*Code Example:* Draw some rectangles of identical width and height, but alter the scale for each
+
+		(code)
+        -- Function to create a new filled rectangle at drawing surface origin.
+        -- Arguments are a Canvas object and an RGB/alpha color specification
+        function new_rectangle( canvas, color )
+
+        	-- Create rectangle at (0, 0)
+        	canvas:rectangle( 0, 0, 50, 50 )
+        	canvas:set_source_color( color )
+        	canvas:fill()
+        end
+        
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        
+		-- Create blue rectangle
+		new_rectangle( canvas, "0000ffFF" )
+		
+		-- Be a good code neighbor and save the current drawing context
+		canvas:save()
+		
+		-- Translate origin to 100, 100, scale to 2:2, and create red rectangle
+		canvas:translate( 100, 100 )
+		canvas:scale( 2, 2 )
+		new_rectangle( canvas, "ff0000FF" )
+		
+		-- Translate origin to 200, 200, scale to 2:1, and create green rectangle
+		-- Note: The X, Y arguments to translate() are themselves scaled according to 
+		-- any scaling factor in the current transformation matrix. Thus, with a 
+		-- current scaling facter of 2:2, X,Y coordinates of 200, 200 will actually
+		-- scale to be 400, 400.
+		canvas:translate( 200, 200 )
+		canvas:scale( 2, 1 )
+		new_rectangle( canvas, "00ff00FF" )
+		
+		-- Translate origin to -100, -100, scale to 3:1, and create light-gray rectangle
+		canvas:translate( -100, -100 )
+		canvas:scale( 3, 1 )
+		new_rectangle( canvas, "d0d0d0FF" )
+		
+		-- Restore original drawing context
+		canvas:restore()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		The rectangles created by the code example are shown below. Each rectangle is created with the same width and height; the varying sizes are due entirely to the various scaling factors used.
+		
+		(see canvasScale.png)
+		
+		*Code Example:* Draw a bunch of ellipses, rotating and scaling each to create an interesting pattern. Note: An ellipse is created by scaling a circle.
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        
+        -- Be a good programming citizen
+        canvas:save()
+        
+		-- Shift the center of the screen to coordinates 0, 0
+        canvas:translate( canvas.width / 2, canvas.height / 2 )
+        
+        -- Create a circle in the center of the screen, i.e., translated coordinates 0,0.
+        -- This circle will contain all the ellipses.
+        canvas:arc( 0, 0, 300, 0, 360 )
+        canvas.line_width = 3
+        canvas:set_source_color( "d0d0d0FF" )
+        canvas:stroke()
+               
+        -- Draw 36 ellipses in our circle
+        for i = 1, 36, 1 do
+        	-- Rotate drawing surface 10 degrees for each ellipse
+        	canvas:rotate( 10 )
+        	
+        	-- Create the circle/ellipse
+        	-- Note: We perform the scaling for each circle because we don't want
+        	-- the scaling factor to affect the rotate operation.
+        	canvas:save()
+        	canvas:scale( .3, 1 )
+        	canvas:arc( 0, 0, 300, 0, 360 )
+        	canvas:restore()
+        	
+        	-- Draw the ellipse
+        	canvas:stroke()
+        end
+        		
+		-- Restore original drawing context
+		canvas:restore()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		The ellipses created by the example code are shown below.
+		
+		(see canvasEllipse.png)
+		
+		*See Also:* the <rotate> and <translate> functions
     */
 
 
-    scale( double sx , double sy )
+    scale( double sx, double sy )
         [[
             cairo_scale( self , sx , sy );
         ]];
 
     /*
         Function: push_group
+        
+        The push_group() function pushes the current drawing surface onto an internal stack and directs subsequent drawing operations to an intermediate surface that can be used to generate a pattern. When all the desired drawing is complete on the intermediate surface, a call to the <pop_group> function restores the previous drawing surface and sets the pattern on the intermediate surface as the source that will be used by subsequent drawing operations.
+        
+        Multiple drawing surfaces can be pushed onto the internal stack. Each call to push_group(), however, should have a corresponding call to pop_group().
+        
+        As part of its operation, the push_group() function saves the current drawing context by calling the <save> function. Similarly, when drawing is complete, the pop_group() function restores the original context by calling <restore>. Thus, transformations, such as scaling and rotating, performed on the intermediate surface will not affect previous drawing contexts after they are popped.
+        
+        One use of push_group()/pop_group() is to generate composite images that are subsequently used in fade-out transitions. In such a situation, all the components of the desired pattern are drawn on the intermediate surface. For example, the surface can be initially filled with a color or pattern, and then subsequent drawn strokes can be placed on top of the fill. The generated popped pattern is a flat, non-layered image that is gradually made transparent during the fade-out. Because the pattern is a flat image without layers, it fades evenly. If, instead, the fading image had been composed of individual layered components, such as stroked lines sitting on top of a fill pattern, as each upper layer becomes slowly transparent, the layers beneath it become partially visible, producing a potentially undesirable effect.
 
-        Temporarily redirects drawing operations to a new pattern until you call pop_group.
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <pop_group> function
     */
 
     push_group()
@@ -670,8 +1480,16 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: pop_group
+        
+        The pop_group() function sets the pattern on the current drawing surface as the source for subsequent drawing operations and then restores a previously-pushed drawing surface by popping it from an internal stack. Refer to the description of the <push_group> function for additional information.
+        
+        If pop_group() is called on an empty stack, the Canvas object becomes corrupted and cannot be repaired. The <ok> property can be accessed to check the validity of the Canvas.
 
-        Pops the current group and sets it as the source pattern.
+        *Arguments:* None
+        
+        *Return Value:* None
+        
+        *See Also:* the <push_group> function
     */
 
     pop_group()
@@ -681,12 +1499,61 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: clip
+        
+        The clip() function restricts the drawing area to the current path.
+        
+        Once a clip region has been defined, the region can be clipped further by subsequent calls to clip(), but the region cannot be enlarged. To enlarge a clip region, it is necessary to first clear the current clip region and then define a new region of the desired size. The clip region can be cleared by either calling the <reset_clip> function or by surrounding the code that defines a clipping region with calls to the <save> and <restore> functions.
+        
+        *Argument:*
+        
+        preserve - boolean flag indicating whether or not to preserve the current path after performing the clip operation. Default value is false, i.e., the path is not preserved.
+        
+        *Return Value:* None
 
-        Clips the Canvas to the current path.
+		*Code Example:* Demonstrate the clipping operation
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        
+        -- Paint the canvas with a solid gray color
+        canvas:set_source_color( "808080FF" )
+        canvas:paint()
 
-        Arguments:
+        -- Save the current drawing context state with no clipping
+        canvas:save()
+        
+		-- Create a rectangle that will be the clipping region
+		canvas:rectangle( 300, 300, 600, 400 )
+		
+		-- Clip everything outside the rectangle's boundary
+		canvas:clip()
 
-            preserve - If true, the path is preserved.
+		-- Define a vertical gradient pattern from screen's top to bottom
+		canvas:set_source_linear_pattern( 0, 0, 0, 1080 )
+		
+		-- Define 2 gradient color-stops from red to black
+		canvas:add_source_pattern_color_stop( 0.0, "FF0000FF" )   -- TOP,    From red...
+		canvas:add_source_pattern_color_stop( 1.0, "000000FF" )   -- BOTTOM, ...to black
+	
+		-- Paint the canvas with the gradient pattern
+		-- Note: Only the portion that lies within our clipping region will actually be painted
+		canvas:paint()
+
+        -- Restore original drawing context with no clipping
+        canvas:restore()       
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+
+		The clipped rectangle region generated by the code example is shown below.
+		
+		(see canvasClip.png)
+		
+		*See Also:* the <reset_clip> function
     */
 
     clip( bool preserve = false )
@@ -703,8 +1570,18 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: reset_clip
+        
+        The reset_clip() function clears all previously-defined clip regions.
+     
+        Be aware of the following situation: Function A() creates a clip region for its own purposes and then calls Function B(). Function B() also creates its own clip region, and when it is finished, being a conscientious function, cleans up after itself by clearing the clip region with a call to reset_clip(). Unfortunately, the call to reset_clip() clears not only Function B's clip region, but also that of Function A. This was probably not the intention.
 
-        Removes clipping.
+        To eliminate such cases, a function that may be called with a previously-defined clip region should surround its own clip-region processing with calls to the <save> and <restore> functions. Doing so will clear the local clip region while retaining any pre-existing region.
+
+        *Arguments:* None
+
+        *Return Value:* None
+
+        *See Also:* the <clip> function
     */
 
     reset_clip()
@@ -715,11 +1592,36 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: fill
 
-        Fills the current path with the current source.
+        The fill() function fills the current path with the current source.
+        
+        *Arguments:*
+        
+        preserve - boolean flag indicating whether or not to preserve the path after the fill operation. Default value is false, i.e., the path is not preserved.
+        
+        *Return Value:* None.
+        
+        The source can be a solid color, a linear gradient, a radial pattern or a bitmap image. The source is set by one of the Canvas's set_source_* functions listed below.
+        
+        set_source_bitmap() - sets source to a bitmapped image
+        set_source_color() - sets source to a solid color with optional alpha/transparency
+        set_source_linear_pattern() - sets source to a linear gradient pattern
+        set_source_radial_pattern() - sets source to a radial pattern
+        
+        *Code Example:* Fill the entire screen with a solid color
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        
+        -- Define a path of the entire screen
+        canvas:rectangle( 0, 0, 1920, 1080 )
+        
+        -- Fill the path/screen with a solid gray color
+        canvas:set_source_color( "808080FF" )
+        canvas:fill()
+        (end)
 
-        Arguments:
-
-            preserve - If true, the path is preserved.
+		*See Also:* the <set_source_bitmap>, <set_source_color>, <set_source_linear_pattern> and <set_source_radial_pattern> functions
     */
 
     fill( bool preserve = false )
@@ -736,12 +1638,29 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: paint
+        
+        The paint() function fills the entire drawing surface with the current source. If a clip region is defined, paint() fills only the clip region.
+        
+        The paint() function differs from the fill() function in that paint() does not consider the path when determining where it paints.
 
-        Paints the current source inside the clipping region.
-
-        Arguments:
-
-            alpha - An alpha value (0-255) to apply to the source while painting.
+        *Arguments:*
+        
+        alpha - integer alpha/transparency value to apply to the source while painting. Supported values are 0 (completely transparent) to 255 (completely opaque), inclusive. Default value is 255.
+        
+        *Return Value:* None
+        
+        *Code Example:* Fill the entire screen with a solid color
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        
+        -- Paint the canvas with a solid gray color
+        canvas:set_source_color( "808080FF" )
+        canvas:paint()
+        (end)
+        
+        *See Also:* the <fill> function
     */
 
     paint( int alpha = 255 )
@@ -758,12 +1677,14 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: stroke
+        
+        The stroke() function draws the current path using the settings of the line_width, line_join, line_cap and dash pattern.
 
-        Strokes the current path with the current source.
+        *Arguments:*
 
-        Arguments:
+        preserve - boolean flag indicating whether or not the current path should be saved after it has been drawn. Default value is false, i.e., the path will not be saved.
 
-            preserve - If true, the path is preserved.
+        *See Also:* the <line_width>, <line_join> and <line_cap> properties and the <set_dash> function
     */
 
     stroke( bool preserve = false )
@@ -781,8 +1702,14 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: new_path
-
-        Starts a new path.
+        
+        The new_path() function clears the current path and current point. After calling this function, no path or current point exist.
+        
+        *Arguments:* None
+        
+        *Return Value:* None
+        
+        *See Also:* the <new_sub_path> function
     */
 
     new_path()
@@ -792,8 +1719,52 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: new_sub_path
+        
+        The new_sub_path() function begins a new sub-path, distinct from any existing path. After calling this function, there is no current point.
 
-        Starts a new sub-path.
+		The new_sub_path() function is useful when used in conjunction with the <arc> and <arc_negative> functions which automatically add a connecting line to the path between the current point and the start of the arc. If this connecting line is not desired, the arc()/arc_negative() call can be preceded by a call to new_sub_path().
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*Code Example:* Demonstrate the effect of new_sub_path() when creating lines and arcs
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "ffffffFF" )
+        canvas.line_width = 10
+
+		-- Draw a vertical line
+		canvas:move_to( 100, 100 )
+		canvas:line_to( 100, 200 )
+		
+		-- Draw an arc; the vertical line will automatically connect to the start of the arc
+		canvas:arc_negative( 150, 300, 50, 180, 360 )
+		
+		-- Draw a second vertical line, similar to the first
+		canvas:move_to( 300, 100 )
+		canvas:line_to( 300, 200 )
+		
+		-- Draw an arc; this time, call new_sub_path() first so the vertical line is not connected to the arc
+		canvas:new_sub_path()
+		canvas:arc_negative( 350, 300, 50, 180, 360 )
+		
+		-- Draw everything
+		canvas:stroke()
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		The graphics generated by the code example are shown below.
+		
+		(see canvasSetSubPath.png)
+		
+		*See Also:* the <move_to> function
     */
 
     new_sub_path()
@@ -803,8 +1774,58 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: close_path
+        
+        The close_path() function adds a line to the path from the current point to the beginning of the path, i.e., the point specified in the most-recent call to move_to(). Also, the current point advances to the joined end-point.
+        
+        Completing a path with close_path() differs from doing so by calling the <line_to> function with an equivalent end-point coordinate. If the path is processed by the stroke() function, the two lines connected by close_path(() will use the current <line_join> property. If the lines are connected by line_to() then the same stroke() operation will connect the lines using the current <line_cap> property.
 
-        Closes the current path.
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*Code Example:* Create two line paths. Close one with close_path() and the other with line_to().
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        canvas.line_width = 75
+        canvas.line_cap = "SQUARE"
+        canvas.line_join = "MITER"
+        
+        -- Define a triangular path
+        canvas:move_to( 400, 500 )
+        canvas:line_to( 400, 100 )
+        canvas:line_to( 900, 100 )
+        
+        -- Close with close_path() (uses current line_join setting)
+        canvas:close_path()
+        
+        -- Draw the lines on the path
+        canvas:stroke()
+                
+        -- Define the same triangular path
+        canvas:move_to( 1100, 500 )
+        canvas:line_to( 1100, 100 )
+        canvas:line_to( 1600, 100 )
+        
+        -- This time, close with line_to() (uses current line_cap setting)
+        canvas:line_to( 1100, 500 )
+        
+        -- Draw the path
+        canvas:stroke()
+        
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		The differing line connections made by the example code are shown at the bottoms of the triangles below.
+		
+		(see canvasClosePath.png)
+		
+		*See Also:* the <line_join> property and the <move_to> and <line_to> functions
     */
 
     close_path()
@@ -814,74 +1835,216 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: arc
+        
+        The arc() function adds a circular, clockwise arc to the path. 
+        
+		An arc is defined by starting and ending angles from its radius. Angles are specified in degrees. An angle of 0 degrees is in the direction of the positive X axis. An angle of 90 degrees is in the direction of the positive Y axis. Angles increase in the direction from the positive X axis toward the positive Y axis, i.e., in a clockwise direction.
+		
+        If there is a current point, a line segment will be added to the path to connect the current point to the start of the arc. If this line is not desired, it can be avoided by first calling the <new_sub_path> function prior to calling arc().
 
-        Adds an arc to the current path.
+		To draw an arc in a counter-clockwise direction, use the <arc_negative> function.
 
-        Arguments:
+        *Arguments:*
+        
+        xc, yc - X,Y coordinates of arc's center
+        radius - double value specifying the arc's radius
+        angle1 - double value specifying the arc's starting angle in degrees
+        angel2 - double value specifying the arc's ending angle in degrees
+        
+		*Return Value:* None
+		
+		*Code Example:* Draw and fill a simple circle
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "D00000ff" )
 
-            xc - The x coordinate for the center of the arc.
-            yc - The y coordinate for the center of the arc.
-            radius - The radius of the arc.
-            angle1 - The starting angle in degrees.
-            angle2 - The ending andle in degrees.
+		-- To draw a circle, define the starting and ending degrees to 0 and 360
+		canvas:arc( 500, 500, 200, 0, 360 )
+		
+		-- Fill the circle
+		canvas:fill()
 
-        Example:
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		Our simple circle is shown below.
+		
+		(see canvasCircle.png)
+		
+		*Code Example:* Draw an arc, including lines of defining angles
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "FFFFFFff" )
+        canvas.line_width = 10
 
-        This can be used to draw circles. The code below will create a Canvas that is
-        100x100 and draw a red-filled circle in the middle of it.
+		-- Draw an arc
+		-- Starting angle is 30 degrees, ending angle is 120 degrees
+		canvas:arc( 500, 500, 200, 30, 120 )
+		
+		-- Draw the arc
+		canvas:stroke()
+		
+		-- Create a path of the angles used in the arc
+		-- First, get current point to start of arc
+		canvas:arc( 500, 500, 200, 30, 30 )  -- this is where our arc begins
+		canvas:line_to( 500, 500 )  -- draw line back to arc's center
+		
+		-- Do the same for the end of the arc
+		canvas:arc( 500, 500, 200, 120, 120 )  -- now current point is where arc ends
+		canvas:line_to( 500, 500 )
 
-        (code)
+		-- Draw the arc's angle lines
+		canvas:set_source_color( "707070ff" )
+		canvas.line_width = 5
+		canvas:stroke()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		The resulting arc and its angles are shown below.
+		
+		(see canvasArc.png)
 
-            local canvas = Canvas( 100 , 100 )
-            canvas:arc( 50 , 50 , 50 , 0 , 360 )
-            canvas:set_source_color( "FF0000" )
-            canvas:fill()
-            screen:add( canvas:Image() )
-
-        (end)
-
+		*See Also:* the <arc_negative> function
     */
 
-    arc( double xc , double yc , double radius , double angle1 , double angle2 )
+    arc( double xc, double yc, double radius, double angle1, double angle2 )
         [[
             cairo_arc( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
         ]];
 
     /*
         Function: arc_negative
+        
+        The arc_negative() function adds a circular, counter-clockwise arc to the path.
+        
+        The arc_negative() function is identical to the <arc> function, except it draws the arc in the opposite direction, i.e., counter-clockwise, from its starting angle to its ending angle. Refer to the description of the <arc> function for additional information.
 
-        Adds an arc to the path, just like <arc>, but the arc goes in decreasing angles from angle1 to angle2.
+        *Arguments:*
 
-        Arguments:
+        xc, yc - X,Y coordinates of arc's center
+        radius - double value specifying the arc's radius
+        angle1 - double value specifying the arc's starting angle in degrees
+        angel2 - double value specifying the arc's ending angle in degrees
+        
+		*Return Value:* None
 
-            xc - The x coordinate for the center of the arc.
-            yc - The y coordinate for the center of the arc.
-            radius - The radius of the arc.
-            angle1 - The starting angle in degrees.
-            angle2 - The ending andle in degrees.
+		*Code Example:* Draw an arc using the same values as in the arc() code example, but 
+		call arc_negative() instead
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "FFFFFFff" )
+        canvas.line_width = 10
+
+		-- Draw an arc going toward decreasing angles/counter-clockwise
+		-- Starting angle is 30 degrees, ending angle is 120 degrees
+		canvas:arc_negative( 500, 500, 200, 30, 120 )
+		
+		-- Draw the arc
+		canvas:stroke()
+		
+		-- Create a path of the angles used in the arc
+		-- First, get current point to start of arc
+		canvas:arc( 500, 500, 200, 30, 30 )  -- this is where our arc begins
+		canvas:line_to( 500, 500 )  -- draw line back to arc's center
+		
+		-- Do the same for the end of the arc
+		canvas:arc( 500, 500, 200, 120, 120 )  -- now current point is where arc ends
+		canvas:line_to( 500, 500 )
+
+		-- Draw the arc's angle lines
+		canvas:set_source_color( "707070ff" )
+		canvas.line_width = 5
+		canvas:stroke()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		The resulting arc and its angles are shown below.
+		
+		(see canvasArcNegative.png)
+
+		*See Also:* the <arc> function
 
     */
 
-    arc_negative( double xc , double yc , double radius , double angle1 , double angle2 )
+    arc_negative( double xc, double yc, double radius, double angle1, double angle2 )
         [[
             cairo_arc_negative( self , xc , yc , radius , degrees_to_radians( angle1 ) , degrees_to_radians( angle2 ) );
         ]];
 
     /*
         Function: curve_to
+        
+        The curve_to() function adds a cubic Bezier spline to the path. The curve will go from the current point to the argument's (x3, y3) coordinates and will use the argument's (x1, y1) and (x2, y2) coordinates as the control points. At the completion of the operation, the current point will be (x3, y3).
+        
+        If there is no current point when the curve_to() function is called, the current point is set to the argument's (x1, y1) coordinates.
 
-        Adds a cubic Bezier spline to the current path from the current point to x3,y3 using x1,y1 and x2,y2 as the control points.
-        If relative is true, the coordinates are interpreted as relative to the current point.
+        *Arguments:*
 
-        Arguments:
+        x1, y1 - (X,Y) coordinates of first control point
+        x2, y2 - (X,Y) coordinates of second control point
+        x3, y3 - (X,Y) coordinates of curve's end point (the curve starts at the drawing surface's current point)
+        relative - boolean flag indicating whether or not the argument's coordinates are relative to the current point. Default value is false, i.e., the coordinates are not relative to the current point; they are absolute to the drawing surface.
+        
+        *Return Value:* None
+        
+        *Code Example:* Draw a simple Bezier curve
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "FFFFFFff" )
+        canvas.line_width = 10
 
-            x1,y1 - The coordinates of the first control point.
-            x2,y2 - The coordinates of the second control point.
-            x3,y3 - The coordinates of the end point.
-            relative - If true, all coordinates are relative to the current point.
+		-- Draw a simple Bezier curve
+		canvas:move_to( 400, 400 )
+		canvas:curve_to( 500, 500, 600, 200, 700, 300 )
+		canvas:stroke()
+		
+		-- Draw the control lines used in the curve
+		canvas:set_source_color( "707070ff" )
+		canvas.line_width = 5
+		
+		-- Draw first control line
+		canvas:move_to( 400, 400 )
+		canvas:line_to( 500, 500 )
+		canvas:stroke()
+		
+		-- Draw second control line
+		canvas:move_to( 600, 200 )
+		canvas:line_to( 700, 300 )
+		canvas:stroke()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+        (end)
+        
+        The Bezier curve generated by the code example, including its control lines, are shown below.
+        
+        (see canvasBezier.png)
+        
+        *See Also:* the <arc> and <arc_negative> functions
     */
 
-    curve_to( double x1 , double y1 , double x2 , double y2 , double x3, double y3 , bool relative = false )
+    curve_to( double x1, double y1, double x2, double y2, double x3, double y3, bool relative = false )
         [[
             if ( relative )
             {
@@ -895,16 +2058,45 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: line_to
+        
+        The line_to() function adds a straight line to the path from the current point to the X and Y coordinates specified in the function's arguments. The function's X, Y coordinates then become the new current point. The path's starting point is typically set by the <move_to> function.
 
-        Adds a straight line to the current path, from the current point to x,y.
+        *Arguments:*
+        
+        x - double value specifying the ending X coordinate
+        y - double value specifying the ending Y coordinate
+        relative - boolean value indicating whether or not the specified coordinates are relative to the path's starting point. Default value is false, i.e., the coordinates are absolute to the drawing surface.
+        
+        *Return Value:* None
 
-        Arguments:
-
-            x,y - The coordinates for the end point of the line.
-            relative - If true, coordinates are relative to the current point.
+		*Code Example:* Draw some lines
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        canvas.line_width = 75
+        canvas.line_cap = "SQUARE"
+        
+        -- Define a triangular path
+        canvas:move_to( 500, 100 )
+        canvas:line_to( 1000, 100 )
+        canvas:line_to( 500, 750 )
+        canvas:close_path()
+        
+        -- Draw the lines on the path
+        canvas:stroke()
+                
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()
+		(end)
+		
+		*See Also:* the <move_to> and <stroke> functions
     */
 
-    line_to( double x , double y , bool relative = false )
+    line_to( double x, double y, bool relative = false )
         [[
             if ( relative )
             {
@@ -919,15 +2111,21 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: move_to
 
-        Moves the current point to x,y.
+		The move_to() function creates a new sub-path and sets the path's starting and current point to the X, Y coordinates specified in the argument.
+		
+		*Arguments:*
+		
+		x - double value specifying the X coordinate
+		y - double value specifying the Y coordinate
+		relative - boolean value indicating whether or not the specified coordinates are relative to the current starting point. Default value is false, i.e., the coordinates are absolute to the drawing surface.
+		
+		*Return Value:* None
 
-        Arguments:
-
-            x,y - The coordinates for the new current point.
-            relative - If true, coordinates are relative to the current point.
+		*See Also:* the <line_to> and <stroke> functions
+		
     */
 
-    move_to( double x , double y , bool relative = false )
+    move_to( double x, double y, bool relative = false )
         [[
             if ( relative )
             {
@@ -941,33 +2139,84 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: rectangle
+        
+        The rectangle() function adds a rectangle to the current path. The rectangle's <line_width>, <line_cap>, <line_join> and dash properties are defined by their respective values at the time the path is drawn by the <stroke> function.
 
-        Adds a rectangle to the current path.
+        *Arguments:*
+        
+        x - X coordinate of rectangle's top left corner
+        y - Y coordinate of rectangle's top left corner
+        width - rectangle's width in pixels
+        height - rectangle's height in pixels
+        
+        *Return Value:* None
 
-        Arguments:
-
-            x,y - Coordinates for the top left corner of the rectangle.
-            width,height - The width and height of the rectangle.
+		The rectangle() function is logically equivalent to the following code statements.
+		
+		(code)
+		move_to( x, y )				-- Begin the path
+		line_to( width, 0, true )	-- Define top line using relative values
+		line_to( 0, height, true )	-- Define right edge
+		line_to( -width, 0, true )	-- Define bottom line 
+		close_path()				-- Define left edge
+		(end)
+		
+		*See Also:* the <line_width>, <line_cap> and <line_join> properties and the <set_dash> function
     */
 
-    rectangle( double x , double y , double width , double height )
+    rectangle( double x, double y, double width, double height )
         [[
             cairo_rectangle( self , x , y , width , height );
         ]];
 
     /*
         Function: round_rectangle
+        
+        The round_rectangle() function creates a rectangular path with rounded corners. The rectangle's <line_width>, <line_cap>, <line_join> and dash properties are defined by their respective values at the time the path is drawn by the <stroke> function.
+        
+        A rectangle with rounded corners can also be generated by setting the <line_join> property to "ROUND" and calling the <rectangle> function. The corners of a rectangle generated in this manner will differ slightly from those created by round_rectangle. The code example below shows the difference.
 
-        Adds a rectangle with rounded corners to the current path.
+        *Arguments:*
+        
+        x - X coordinate of rectangle's top left corner
+        y - Y coordinate of rectangle's top left corner
+        width - rectangle's width in pixels
+        height - rectangle's height in pixels
+        
+        *Return Value:* None
 
-        Arguments:
-
-            x,y - Coordinates for the top left corner of the rectangle.
-            w,h - The width and height of the rectangle.
-            r - The radius of the corners.
+		*Code Example:* Create two rectangles with rounded corners, one by round_rectangle(), the other by rectangle() using a "ROUND" line_join setting.
+		
+		(code)
+		-- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "#ffffffff" )
+        canvas.line_width = 75
+        
+        -- Draw a rounded rectangle
+        canvas:round_rectangle( 100, 100, 200, 200, canvas.line_width/2 )
+        
+        -- Draw a rectangle with rounded line joins
+        canvas.line_join = "ROUND"
+        canvas:rectangle( 400, 100, 200, 200 )
+        
+        -- Draw the rectangles
+        canvas:stroke()
+		
+		-- Show the rectangles
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()
+		(end)
+		
+		The rectangles generated by the code example are shown below.
+		
+		(see canvasRoundRects.png)
+		
+		*See Also:* the <rectangle> function
     */
 
-    round_rectangle( double x , double y , double w , double h , double r )
+    round_rectangle( double x, double y, double w, double h, double r )
         [[
             cairo_move_to(self,x+r,y);
             cairo_line_to(self,x+w-r,y);
@@ -982,17 +2231,61 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: text_path
+        
+        The text_path() function adds specified text to the current path. The text is positioned with its top-left corner at the path's current point. If the path has no current point, the text is positioned at coordinates (0, 0).
+        
+        The text's font family, style and point size can also be specified. All the font information is contained within a text string in the function's font argument.
+        
+        The text can be a simple string or it can contain HTML-like formatting instructions. This formatting capability is provided by the Pango Text Attribute Markup language. Refer to the <Pango documentation at http://developer.gnome.org/pango/stable/PangoMarkupFormat.html> for complete details on the supported syntax.
+        
+        The resulting text path can be manipulated like any other item on the drawing surface; it can be scaled, rotated or have any other transformation performed upon it. To draw the text path, call the usual <stroke> or <fill> functions. The stroke() function draws the text's outlines; the fill() function fills the text outlines. This is demonstrated in the code example below.
 
-        Adds a text path to the current path.
+        *Arguments:*
 
-        Arguments:
-
-            font - A font describing the font family, style and point size.
-            text - The text.
-            markup - If true, the text can contain Pango markup.
+        font - string describing the font family, style and point size. The string's format and supported settings are described in the <Text.font> documentation.
+        text - string containing the text to add to the path. If the markup argument is true, this string may include Pango Text Attribute Markup formatting instructions.
+        markup - boolean flag indicating whether or not the text argument contains Pango Text Attribute Markup instructions. Default is true, i.e., the text argument does contain Pango Markup instructions. Note: Setting this argument to true with a text string that does not have Pango Markup instructions has no harmful effect.
+        
+        *Return Value:* None
+        
+        *Code Example:* Add some text to the path. Draw the text with stroke() and fill() to view the difference.
+        
+        (code)
+		-- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "ffffffFF" )
+        canvas.line_width = 2
+        
+		-- Define a position for the text path
+		canvas:move_to( 100, 100 )
+		
+		-- Add some text to the path
+		canvas:text_path( "FreeSerif 100px", "Stroked Text", false )
+		
+		-- Draw the text path using the stroke() function
+		canvas:stroke()
+		
+		-- Create another text path
+		canvas:move_to( 100, 200 )
+		canvas:text_path( "FreeSerif 100px", "Filled Text", false )
+		
+		-- Draw this text using fill()
+		canvas:fill()
+		
+		-- Show the text
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()
+        (end)
+        
+        The text rendered by the code example is shown below.
+        
+        (see canvasTextPath.png)
+        
+        *See Also:* the <text_element_path> function
     */
 
-    text_path( string font , string text , bool markup = true )
+    text_path( string font, string text, bool markup = true )
         [[
             PangoLayout * layout = pango_cairo_create_layout( self );
 
@@ -1017,14 +2310,277 @@ class Canvas [[ cairo_t * ]]
         ]];
 
     /*
+        Function: text_element_path
+
+        The text_element_path() function adds the string from a <Text> object's text property to the current path. The generated text path will use the font information (family, style and size settings) specified in the Text object. The text color specified in the Text object is not used when drawing the text path; instead, the Canvas source color or pattern is used. To fill the text with the Text object's color, use the <text_element_fill> function.
+        
+        The text is positioned with its top-left corner at the path's current point. If the path has no current point, the text is positioned at coordinates (0, 0).
+        
+        The resulting text path can be manipulated like any other item on the drawing surface; it can be scaled, rotated or have any other transformation performed upon it. To draw the text path, call the usual <stroke> or <fill> functions. The stroke() function draws the text's outlines; the fill() function fills the text outlines. Refer to the code example in the <text_path> function for a demonstration of stroked vs. filled text.
+
+        *Arguments:*
+
+		text - <Text> object whose text property is added to the current path
+
+		*Return Value:* None
+		
+		*Code Example:* Add the text from a Text object to the current path
+		
+		(code)
+		-- Create Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "0000ffFF" )
+        
+        -- Create Text object
+        text = Text{ text = "Hello from the Text object",
+                     font = "FreeSerif 100px" }
+        
+		-- Define a position for the text path
+		canvas:move_to( 100, 100 )
+		
+		-- Add the Text object's text to the path
+		canvas:text_element_path( text )
+		
+		-- Draw the text
+		canvas:fill()
+		
+		-- Show the text
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()
+		(end)
+		
+		The text rendered by the code example is shown below.
+		
+		(see canvasTextElementPath.png)
+		
+		*See Also:* the <text_element_fill> and <text_path> functions
+    */
+
+    text_element_path( Text text )
+        [[
+            if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , text ) )
+            {
+                if ( CLUTTER_IS_TEXT( actor ) )
+                {
+                    if ( PangoLayout * layout = clutter_text_get_layout( CLUTTER_TEXT( actor ) ) )
+                    {
+                        layout = pango_layout_copy( layout );
+
+                        pango_cairo_update_layout( self , layout );
+
+                        pango_cairo_layout_path( self , layout );
+
+                        g_object_unref( G_OBJECT( layout ) );
+                    }
+                }
+            }
+        ]];
+
+    /*
+        Function: text_element_fill
+        
+        The text_element_fill() function renders the string in a <Text> object's text property to the Canvas's drawing surface. The Canvas's current compositing operator (specified in the <op> property) and any active transformation matrix are used when rendering. The rendered text will use the font information (family, style and size settings) specified in the Text object. If the function's use_text_color boolean argument is true, the text is rendered using the color specified in the Text object's color property; otherwise, the Canvas's current source color or pattern is used.
+                
+        The text is positioned with its top-left corner at the path's current point. If the path has no current point, the text is positioned at coordinates (0, 0).
+        
+        *Arguments:*
+
+		text - <Text> object whose text property is rendered to the Canvas's drawing surface
+		use_text_color - boolean flag specifying whether or not to render the text using the Text object's color property. Default is true, i.e., use the Text's color property.
+
+		*Return Value:* None
+		
+		*Code Example:* Render the text from a Text object to the Canvas drawing surface
+		
+		(code)
+		-- Create Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "ffffffFF" )  -- source color is white
+        
+        -- Create Text object
+        text = Text{ text = "Welcome to my world",
+                     font = "FreeSerif 100px",
+                     color = "0000ffFF" }  -- Text color is blue
+        
+		-- Define a position for the text path
+		canvas:move_to( 100, 100 )
+		
+		-- Render the Text object's text to the drawing surface, use Text object's color
+		canvas:text_element_fill( text, true )
+		
+		-- Render Text object's text to drawing surface again, but use Canvas source color
+		canvas:move_to( 100, 200 )
+		canvas:text_element_fill( text, false )
+		
+		-- Show the text
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()
+		(end)
+		
+		The text rendered by the code example is shown below.
+		
+		(see canvasTextElementFill.png)
+
+		*See Also:* the <text_element_path> and <text_path> functions
+    */
+
+    text_element_fill( Text text, bool use_text_color = true )
+        [[
+          if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , text ) )
+          {
+              if ( CLUTTER_IS_TEXT( actor ) )
+              {
+                  if ( PangoLayout * layout = clutter_text_get_layout( CLUTTER_TEXT( actor ) ) )
+                  {
+                      layout = pango_layout_copy( layout );
+
+                      pango_cairo_update_layout( self , layout );
+
+                      if ( use_text_color )
+                      {
+                          cairo_save( self );
+
+                          ClutterColor color;
+
+                          clutter_text_get_color( CLUTTER_TEXT( actor ) , & color );
+
+                          cairo_set_source_rgba( self , color.red / 255.0 , color.green / 255.0 , color.blue / 255.0 , color.alpha / 255.0 );
+                      }
+
+                      pango_cairo_show_layout( self , layout );
+
+                      g_object_unref( G_OBJECT( layout ) );
+
+                      if ( use_text_color )
+                      {
+                          cairo_restore( self );
+                      }
+                  }
+              }
+          }
+        ]];
+
+    /*
+        Function: add_string_path
+        
+        The add_string_path() function adds nodes to the current path by using a textual, SVG-like syntax. If the path has no current point, the nodes assume a current point of (0, 0).
+
+		*Argument:*
+		
+		path_text - string specifying nodes to add to current path. If the string format is incorrect in any way then no nodes are added to the path. The format of the path_text string is described below.
+		
+		*Return Value:* None
+		
+		A node is defined by specifying a node type, usually followed by one or more X,Y coordinates. Node types are specified by a single alphabetic character. An uppercase character indicates that the specified X,Y coordinates are absolute to the Canvas's drawing surface; a lowercase character indicates the X,Y coordinates are relative to the path's current point. The coordinate values can be separated by spaces or a comma.
+		
+		*Supported Node Types:*
+		
+		M, m - adds a move_to-type node. Requires one X,Y coordinate. This is equivalent to calling the Canvas <move_to> function. A new subpath is started and the current point is moved to the specified X,Y.
+		L, l - adds a line_to-type node. Requires one X,Y coordinate. This is equivalent to calling the Canvas <line_to> function.
+		C, c - adds a curve_to-type node. Requires three X,Y coordinates in the following order: FirstControlPoint, SecondControlPoint, EndPoint. This is equivalent to calling the Canvas <curve_to> function.
+		z - adds a close_path-type node. Takes no X,Y coordinates.. This is equivalent to calling the Canvas <close_path> function.
+
+		*Code Example:* Add to the path by calling add_string_path()
+		
+		(code)
+		-- Create Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas:set_source_color( "ffffffFF" )
+        
+		-- Define a path using a string
+		canvas:add_string_path( "M600 600 L600 500 C550 600, 400 450, 500 400 C450 300, 850 300, 800 400" )
+		canvas:add_string_path( "C900 450, 750 600, 700 500 L700 600 z" )
+		
+        --[[
+		-- The above path string is equivalent to calling the following functions...
+		canvas:move_to( 600, 600 )
+		canvas:line_to( 600, 500 )
+		canvas:curve_to( 550, 600, 400, 450, 500, 400 )
+		canvas:curve_to( 450, 300, 850, 300, 800, 400 )
+		canvas:curve_to( 900, 450, 750, 600, 700, 500 )
+		canvas:line_to( 700, 600 )
+		canvas:close_path()
+        ]]--
+		
+		-- Stroke the path
+		canvas:stroke()
+		
+		-- Add some eyes
+		canvas:save()
+		canvas:scale( 2, 1 )
+		canvas:arc( 300, 400, 25, 0, 360 )
+		canvas:arc( 350, 400, 25, 0, 360 )
+		canvas:set_source_color( "0000ffFF" )
+		canvas:fill()
+		
+		-- And a mouth
+		canvas:arc_negative( 325, 450, 30, 180, 360 )
+		canvas:set_source_color( "ff0000FF" )
+		canvas:stroke()
+		canvas:restore()
+		
+		-- Don't forget the eyeballs
+		canvas:arc( 600, 400, 10, 0, 360 )
+		canvas:arc( 700, 400, 10, 0, 360 )
+		canvas:set_source_color( "000000FF" )
+		canvas:fill()
+		
+		-- Show the generated shape
+		image = canvas:Image()
+		screen:add( image )
+		screen:show()		
+		(end)
+		
+		The graphics generated by the code example are shown below. The figure's white outline was generated by the calls to add_string_path().
+		
+		(see canvasAddStringPath.png)
+		
+		*See Also:* the <move_to>, <line_to>, <curve_to> and <close_path> functions
+    */
+
+    add_string_path( string path_text )
+        [[
+            ClutterPath * clutter_path = clutter_path_new();
+
+            clutter_path_add_string( clutter_path , path_text );
+
+            clutter_path_to_cairo_path( clutter_path , self );
+
+            g_object_unref( G_OBJECT( clutter_path ) );
+
+        ]];
+
+    /*
         Function: set_source_color
 
-        Sets the source pattern to a solid color.
+		The set_source_color() function sets the color and alpha/transparency for subsequent drawing operations. If the color is not explicitly set, the default starting color is black and transparent.
+		
+		*Prototype:*
+		
+		(code)
+		set_source_color( color )
+		(end)
 
-        Arguments:
+        *Arguments:*
 
-            color - This can be a color specified as a string with hex RGBA values or a table
-                    with 3 or 4 integer components for RGB and A.
+        color - color and alpha/transparency specified as three RGB (Red/Green/Blue) integer values and an optional alpha/transparency integer value. The format of the color argument is described in <RGB/Alpha Color Formats>.
+        
+        *Return Value:* None
+        
+        *Code Example:* Demonstrate various methods of setting the color and alpha
+        
+        (code)
+        -- Specify color and alpha in a table
+        canvas.set_source_color( { 0, 255, 0, 255 } )
+        
+        -- Equivalent settings using a string
+        canvas.set_source_color( "00ff00ff" )
+        canvas.set_source_color( "#00ff00ff" )
+        (end)
+        
+        *See Also:* the <fill> and <stroke> functions
     */
 
     set_source_color( ... )
@@ -1037,15 +2593,67 @@ class Canvas [[ cairo_t * ]]
     /*
         Function: set_source_linear_pattern
 
-        Sets the source pattern to a linear gradient. The linear gradient moves along the line defined by x1,y1 and x2,y2.
+        The set_source_linear_pattern() function sets subsequent drawing operations to a linear gradient pattern along the line defined by (x1, y1) and (x2, y2).
+        
+        The (x1, y1) point defines the gradient's start position, and the (x2, y2) point defines its end position. The rate at which the grandient occurs is definable by specifying "color stops" at various points along the gradient line. Each color stop specifies the gradient color at that location on the gradient line. The colors of intermediate points are calculated at the time the pattern is realized by the stroke() or fill() function. Color stops are defined by calling the <add_source_pattern_color_stop> function. By defining color stops, a gradient can occur evenly along the entire length of the line, or unevenly with more of the gradient change occuring at one end of the line.
 
-        Arguments:
+        *Arguments:*
 
-            x1,y1 - Starting coordinates for the gradient.
-            x2,y2 - Ending coordinates for the gradient.
+        x1, y1 - coordinates for start of gradient line
+        x2, y2 - coordinates for end of gradient line
+        
+        *Return Value:* None
+        
+        *Code Example:* Fill rectangles with a vertical and horizontal linear gradient pattern
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas.line_width = 10
+        
+		-- Create a rectangle and draw gray outline around it
+		canvas:rectangle( 100, 100, 300, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
+		
+		-- Define a vertical gradient pattern line from rectangle's top to bottom
+		canvas:set_source_linear_pattern( 0, 100, 0, 700 )
+		
+		-- Define 3 gradient color-stops from black to red and back to black
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- TOP,    From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- BOTTOM, ...black/transparent
+
+		-- Fill the rectangle with our linear gradient pattern
+		canvas:fill()
+		
+		-- Create a second rectangle
+		canvas:rectangle( 500, 100, 300, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
+
+		-- Define a horizontal gradient pattern line from rectangle's left to right
+		-- Note: We use the same color-stop values
+		canvas:set_source_linear_pattern( 500, 0, 800, 0 )
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- LEFT,   From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- RIGHT,  ...black/transparent
+		canvas:fill()
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+        (end)
+        
+        The filled rectangles created by the code example are shown below.
+        
+        (see canvasLinearGradients.png)
+        
+        *See Also:* the <add_source_pattern_color_stop> and <fill> functions
     */
 
-    set_source_linear_pattern( double x1 , double y1 , double x2 , double y2 )
+    set_source_linear_pattern( double x1, double y1, double x2, double y2 )
         [[
             cairo_pattern_t * p = cairo_pattern_create_linear( x1 , y1 , x2 , y2 );
             cairo_set_source( self , p );
@@ -1054,18 +2662,121 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: set_source_radial_pattern
+        
+        The set_source_radial_pattern() function sets subsequent drawing operations to a radial gradient pattern between the two circles specified by the (cx0, cy0, radius0) and (cx1, cy1, radius1) arguments. 
+        
+        The (cx0, cy0, radius0) values define the gradient's start circle, and the (cx1, cy1, radius1) values define the gradient's end circle. The gradient moves from one point on the start circle to the corresponding point on the end circle.  The rate at which the grandient occurs is definable by specifying "color stops" at various points along the gradient circle. Each color stop specifies the gradient color at that location on the gradient circle. The colors of intermediate points are calculated at the time the pattern is realized by the stroke() or fill() function. Color stops are defined by calling the <add_source_pattern_color_stop> function. By defining color stops, a gradient can occur evenly along the entire length of the circle, or unevenly with more of the gradient change occuring at one end of the circle.
 
-        Sets the source to a radial pattern between two circles.
+        *Arguments:*
 
-        Arguments:
+        cx0, cy0 - coordinates for center of start circle
+        radius0 - radius of start circle
+        cx1, cy1 - coordinates for center of end circle
+        radius1 - radius of end circle
+        
+        *Return Value:* None
+        
+        *Code Example:* Fill rectangles with radial gradient patterns. This example doesn't produce very useful radial patterns, but it illustrates how the radial pattern moves from one point along the start circle to the corresponding point on the end circle.
+        
+        (code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+        canvas.line_width = 5
+        
+		-- Create a rectangle and draw gray outline around it
+		canvas:rectangle( 100, 100, 600, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
+		
+		-- Define a radial gradient pattern using two circles. Both circles share the same
+		-- center, but the start circle has a smaller radius than the end, thereby
+		-- creating a symmetrical donut shape.
+		canvas:set_source_radial_pattern( 400, 400, 50, 400, 400, 300 )
+		
+		-- Define 3 gradient color-stops from black to red and back to black
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- START,  From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- END,    ...black/transparent
 
-            cx0,cy0 - The coordinates for the center of the first circle.
-            radius0 - The radius of the first circle.
-            cx1,cy1 - The coordinates for the center of the second circle.
-            radius1 - The radius of the second circle.
+		-- Fill the rectangle with our radial gradient pattern
+		canvas:fill()
+		
+		-- Draw the two circles used for the radial gradient
+		canvas:set_dash( 0, { 16.0, 4.0 } )
+		canvas:set_source_color( "00ff00ff" )  -- green start circle
+
+		canvas:arc( 400, 400, 50, 0, 360 )
+		canvas:stroke()
+		
+		canvas:set_source_color( "0000ffff" )  -- blue end circle
+		canvas:arc( 400, 400, 300, 0, 360 )
+		canvas:stroke()
+		canvas:clear_dash() -- return to a solid line
+		
+		-- Create a second rectangle
+		canvas:rectangle( 800, 100, 600, 600 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save the rectangle for subsequent fill()
+
+		-- Define a second radial gradient pattern. This time the smaller start circle
+		-- is located to the left of the outer end circle's center, which results in an
+		-- asymmetrical radial pattern.
+		-- Note: Both radial patterns use the same color-stop values.
+		canvas:set_source_radial_pattern( 950, 400, 50, 1100, 400, 300 )
+		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- START,  From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- END,    ...black/transparent
+		canvas:fill()
+
+		-- Draw the two circles used for the radial gradient
+		canvas:set_dash( 0, { 16.0, 4.0 } )
+		canvas:set_source_color( "00ff00ff" )  -- green start circle
+		canvas:arc( 950, 400, 50, 0, 360 )
+		canvas:stroke()
+		
+		canvas:set_source_color( "0000ffff" )  -- blue end circle
+		canvas:arc( 1100, 400, 300, 0, 360 )
+		canvas:stroke()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+        (end)
+        
+        The filled rectangles created by the code example are shown below.
+        
+        (see canvasRadialGradients.png)
+
+		*Code Example:* Display a sphere using a radial gradient pattern
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+
+		-- Draw a sphere with a radial gradient
+		canvas:scale( 3.0, 3.0 )
+		canvas:set_source_radial_pattern( 115.2, 102.4, 25.6, 102.4, 102.4, 128.0 )
+		canvas:add_source_pattern_color_stop( 0.0, "FFFFFFFF" )
+		canvas:add_source_pattern_color_stop( 1.0, "000000FF" )
+		canvas:arc( 128.0, 128.0, 76.8, 0, 360 )
+		canvas:fill()
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+		(end)
+        
+        The sphere generated by the code example is shown below.
+        
+        (see canvasSphere.png)
+        
+        *See Also:* the <add_source_pattern_color_stop> and <fill> functions
+  
     */
 
-    set_source_radial_pattern( double cx0 , double cy0 , double radius0 , double cx1 , double cy1 , double radius1 )
+    set_source_radial_pattern( double cx0, double cy0, double radius0, double cx1, double cy1, double radius1 )
         [[
             cairo_pattern_t * p = cairo_pattern_create_radial( cx0 , cy0 , radius0 , cx1 , cy1 , radius1 );
             cairo_set_source( self , p );
@@ -1074,18 +2785,28 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: add_source_pattern_color_stop
-
-        When the source is a linear or radial gradient, this function lets you add color stops to it. Each color
-        stop has an offset that varies from 0 (the start) to 1 (the end) and the color for the gradient at that
-        offset.
-
-        Arguments:
-
-            offset - A number between 0 and 1.
-            color - A color, either as a hex RGBA string or a table with 3 or 4 components.
+        
+        The add_source_pattern_color_stop() function defines a color and alpha/transparency position along a linear or radial gradient pattern.
+        
+        *Prototype:*
+        
+        (code)
+        add_source_pattern_color_stop( double offset, color )
+		(end)
+		
+		*Arguments:*
+		
+		offset - double value between 0.0 and 1.0, inclusive, specifying a position along the gradient. The start of the gradient is at 0.0, the gradient's end is at 1.0, and all other positions along the gradient lie within those values.
+        color - color and alpha/transparency specified as three RGB (Red/Green/Blue) integer values and an optional alpha/transparency integer value. The format of the color argument is described in <RGB/Alpha Color Formats>.
+        
+        *Return Value:* None
+        
+        *Code Example:* Refer to the code examples in the <set_source_linear_pattern> and <set_source_radial_pattern> functions.
+        
+        *See Also:* the <set_source_linear_pattern>, <set_source_radial_pattern> and <fill> functions
     */
 
-    add_source_pattern_color_stop( double offset , ... )
+    add_source_pattern_color_stop( double offset, ... )
         [[
             if ( cairo_pattern_t * p = cairo_get_source( self ) )
             {
@@ -1097,16 +2818,51 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: set_source_bitmap
+        
+        The set_source_bitmap() function sets subsequent drawing operations to the specified <Bitmap at file:bitmap-lb.html#Bitmap> object.
+        
+		*Arguments:*
+		
+		bitmap - a <Bitmap at file:bitmap-lb.html#Bitmap> object to use for subsequent drawing operations
+		x, y - double values specifying (X, Y) coordinates within Canvas object's drawing surface at which to position top-left corner of bitmap image. Default value is (0, 0).
+		
+		*Return Value:* None
+		
+		*Code Example:* Create a Bitmap object and use it to fill a rectangle
+		
+		(code)
+        -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+		
+		-- Initiate synchronous image load
+		local myBitmap = Bitmap( "image.png" )
+		
+		-- Did error occur during image loading?
+		if myBitmap.loaded == false then
+		  -- Yes, handle error here
+		  print( "Failed to load the image" )
+		  return
+		end
 
-        Sets the source to a bitmap. This lets you use other images as brushes.
+		-- Create a rectangle and draw a gray outline around it
+		canvas:rectangle( 100, 100, 400, 400 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke( true )   -- save rectangle for fill()
 
-        Arguments:
-
-            bitmap - A <Bitmap>.
-            x,y - Coordinates for the top left corner of the bitmap.
+		-- Set drawing source to bitmap
+		canvas:set_source_bitmap( myBitmap, 100, 100 )
+		canvas:fill()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+		(end)
+		
+		*See Also:* the <Bitmap at file:bitmap-lb.html#Bitmap> class and the <stroke> and <fill> functions
     */
 
-    set_source_bitmap( Bitmap bitmap , double x = 0 , double y = 0 )
+    set_source_bitmap( Bitmap bitmap, double x = 0, double y = 0 )
         [[
             if ( Image * image = Bitmap::get_image( L , bitmap ) )
             {
@@ -1121,45 +2877,198 @@ class Canvas [[ cairo_t * ]]
 
     /*
         Function: Image
+        
+        The Image() function converts the Canvas drawing surface to an <Image at file:clutter_image-lb.html#Image> object which can be displayed onscreen.
 
-        Creates a new <Image> using the current contents of the Canvas. After the
-        image is created, the Canvas is no longer needed.
+		The converted Image object is autonomous from its Canvas origin; subsequent operations to the Canvas, including its destruction, have no effect on the Image.
 
-        Arguments:
+        *Arguments:*
 
-            props - A table of properties to pass to the Image constructor.
+        props - table of Image properties to assign to the generated Image object. Default is empty table.
 
-        Returns:
+        *Return Value:*
 
-            image - A newly created Image.
+        Image - the generated Image object or nil if the Canvas is corrupted and inconvertible.
+        
+        *Code Example:* Convert a Canvas surface to an Image object and display it onscreen
+        
+        (code)
+         -- Create a Canvas object
+        canvas = Canvas( 1920, 1080 )
+		
+		-- Create a rectangle and draw a gray outline around it
+		canvas:rectangle( 100, 100, 400, 400 )
+		canvas:set_source_color( "d0d0d0ff" )
+		canvas:stroke()
+
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+        (end)
+
+		*See Also:* the <Image at file:clutter_image-lb.html#Image> class
     */
 
     Image Image( table props = 0 )
         [[
-            lua_getglobal( L , "Image" );
-
-            if ( props )
+            if ( cairo_status( self ) != CAIRO_STATUS_SUCCESS )
             {
-                lua_pushvalue( L , props );
+                lua_pushnil( L );
             }
+            else
+            {
+                lua_getglobal( L , "Image" );
 
-            lua_call( L , props ? 1 : 0 , 1 );
+                if ( props )
+                {
+                    lua_pushvalue( L , props );
+                }
 
-            ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+                lua_call( L , props ? 1 : 0 , 1 );
 
-            cairo_surface_t * surface = cairo_get_target( self );
+                ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
 
-            CoglHandle cogl_texture = cogl_texture_new_from_data (
-                    cairo_image_surface_get_width( surface),
-                    cairo_image_surface_get_height( surface ),
-                    COGL_TEXTURE_NONE,
-                    CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
-                    COGL_PIXEL_FORMAT_ANY,
-                    cairo_image_surface_get_stride( surface ),
-                    cairo_image_surface_get_data( surface ) );
+                cairo_surface_t * surface = cairo_get_target( self );
 
-            clutter_texture_set_cogl_texture ( t , cogl_texture );
-            cogl_handle_unref( cogl_texture );
+                CoglHandle cogl_texture = cogl_texture_new_from_data (
+                        cairo_image_surface_get_width( surface),
+                        cairo_image_surface_get_height( surface ),
+                        COGL_TEXTURE_NONE,
+                        CLUTTER_CAIRO_TEXTURE_PIXEL_FORMAT,
+                        COGL_PIXEL_FORMAT_ANY,
+                        cairo_image_surface_get_stride( surface ),
+                        cairo_image_surface_get_data( surface ) );
+
+                clutter_texture_set_cogl_texture ( t , cogl_texture );
+                cogl_handle_unref( cogl_texture );
+            }
+        ]];
+
+    /*
+        Function: Bitmap
+        
+        The Bitmap() function converts the Canvas drawing surface to a <Bitmap at file:bitmap-lb.html#Bitmap> object which can be used as the drawing source in subsequent Canvas drawing operations.
+
+		*Arguments:* None
+		
+		*Return Value:*
+		
+		Bitmap - the generated Bitmap object or nil if the Canvas is corrupted and inconvertible.
+		
+		*Code Example:* Create a linear gradient pattern, convert it to a Bitmap object and use the Bitmap to draw some lines
+		
+		(code)
+		-- Create a Canvas object on which to create our gradient pattern
+        canvas = Canvas( 1920, 1080 )
+        
+		-- Define a vertical gradient pattern line from rectangle's top to bottom
+		canvas:set_source_linear_pattern( 960, 0, 960, 1080 )
+		
+		-- Define 3 gradient color-stops from blue to red to green
+		canvas:add_source_pattern_color_stop( 0.0, "0000FFFF" )   -- TOP,    From blue/opaque to...
+		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "00FF00FF" )   -- BOTTOM, ...green/opaque
+
+		-- Create a rectangle that covers the entire Canvas
+		canvas:rectangle( 0, 0, 1920, 1080 )
+		
+		-- Fill the rectangle with our linear gradient pattern
+		canvas:fill()
+		
+		-- Convert gradient to Bitmap
+		gradientBrush = canvas:Bitmap()
+		
+		-- Create our screen Canvas
+		canvas = Canvas( 1920, 1080 )
+		
+		-- Define a table of x,y coordinates around the canvas
+		points = { 900, 100,
+                   1200, 200,
+                   1500, 400,
+                   1800, 600,
+                   1600, 800,
+                   1100, 900,
+                   700, 1000,
+                   300, 700,
+                   100, 500,
+                   500, 300 }
+                   
+		-- Create a path of lines that connect all the x,y coordinate points
+		for one_point = 1, #points, 2 do
+			for all_points = 1, #points, 2 do
+				-- Connect this point to all the other points
+				canvas:move_to( points[ one_point ], points[ one_point + 1 ] )
+				canvas:line_to( points[ all_points ], points[ all_points + 1 ] )
+			end
+		end
+		
+		-- Set the line width
+		canvas.line_width = 10
+		
+		-- Assign our gradientBrush bitmap as the drawing source
+		canvas:set_source_bitmap( gradientBrush )
+		
+		-- Draw all the lines
+		canvas:stroke()
+		
+        -- Convert Canvas to Image for display and show onscreen
+        image = canvas:Image()
+        screen:add( image)
+        screen:show()       
+		(end)
+		
+		The generated image is shown below.
+		
+		(see canvasBitmapBrush.png)
+		
+		*See Also:* the <set_source_bitmap> function and the <Bitmap at file:bitmap-lb.html#Bitmap> class
+    */
+
+    Bitmap Bitmap()
+        [[
+          if ( cairo_status( self ) != CAIRO_STATUS_SUCCESS )
+          {
+              lua_pushnil( L );
+          }
+          else
+          {
+              cairo_surface_t * surface = cairo_get_target( self );
+
+              if ( ! surface )
+              {
+                  lua_pushnil( L );
+              }
+              else
+              {
+                  Image * image = Image::make( surface );
+
+                  if ( ! image )
+                  {
+                      lua_pushnil( L );
+                  }
+                  else
+                  {
+                      lua_getglobal( L , "Bitmap" );
+
+                      lua_pushliteral( L , "" );
+                      lua_call( L , 1 , 1 );
+
+                      Bitmap * bitmap = Bitmap::get( L , lua_gettop( L ) );
+
+                      if ( ! bitmap )
+                      {
+                          delete image;
+                          lua_pop( L , 1 );
+                          lua_pushnil( L );
+                      }
+                      else
+                      {
+                          bitmap->set_image( image );
+                      }
+                  }
+              }
+          }
         ]];
 
     set_line_width( double line_width )
@@ -1177,4 +3086,4 @@ class Canvas [[ cairo_t * ]]
         [[
             // Does nothing - only for compatibility with the old canvas
         ]];
-}
+}the fill results when the two circles in the rectangle move in opposite directions

@@ -110,7 +110,9 @@
     //NSLog(@"multitouch = %d", view.multipleTouchEnabled);
     //NSLog(@"touches = %@", touches);
     if (!view.multipleTouchEnabled) {
-        touchedTime = [NSDate timeIntervalSinceReferenceDate];
+        // leaving the name as a time interval incase in the future
+        // we decide to include this data we'll know which var to use
+        touchedTime = 1.0;//[NSDate timeIntervalSinceReferenceDate];
     } else {
         touchedTime = 0;
     }
@@ -249,6 +251,11 @@
 - (void)stopTouches {
     NSLog(@"stop touches");
     touchEventsAllowed = NO;
+}
+
+- (void)reset {
+    [self stopTouches];
+    [self setMultipleTouch:NO];
 }
 
 - (void)dealloc {

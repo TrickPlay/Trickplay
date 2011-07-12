@@ -7,6 +7,13 @@
 #include "common.h"
 //-----------------------------------------------------------------------------
 
+//.............................................................................
+// Copied from lauxlib.c
+
+#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
+
+//.............................................................................
+
 // Returns ms
 
 inline double timestamp()
@@ -448,7 +455,7 @@ namespace Util
         gchar * first = path_to_native_path( g_strdup( root ) );
         free_later( first );
 
-        return g_build_filename( first, last, NULL );
+        return g_build_filename( first, last, ( gpointer ) 0 );
     }
 
     //-----------------------------------------------------------------------------

@@ -15,6 +15,7 @@
 @synthesize appsAvailable;
 @synthesize currentAppName;
 @synthesize pushingViewController;
+@synthesize socketDelegate;
 
 /*
 @synthesize appShopButton;
@@ -46,6 +47,8 @@
     
     NSLog(@"AppBrowser Service Setup: %@ host: %@ port: %d", n, h, p);
     
+    viewDidAppear = NO;
+    
     [self createGestureViewWithPort:p hostName:h];
 }
 
@@ -73,6 +76,9 @@
     }
     NSDictionary *currentAppInfo = [self getCurrentAppInfo];
     NSLog(@"Received JSON dictionary current app data = %@", currentAppInfo);
+    if (!currentAppInfo) {
+        return NO;
+    }
     self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
     if (currentAppName && ![currentAppName isEqualToString:@"Empty"]) {
         return YES;
@@ -82,13 +88,17 @@
 }
 
 /**
- * Returns current app data.
+ * Returns current app data or nil on error.
  */
 - (NSDictionary *)getCurrentAppInfo {
+    NSLog(@"Getting Current App Info");
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
-    NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
+    
+    // TODO: MAKE ASYNC TO PREVENT DEADLOCK
+    NSURL *dataURL = [NSURL URLWithString:JSONString];
+    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
     //NSArray *JSONArray = [JSONData yajl_JSON];
     return (NSDictionary *)[[[JSONData yajl_JSON] retain] autorelease];
@@ -96,24 +106,22 @@
 
 
 - (BOOL)fetchApps {
+    NSLog(@"Fetching Apps");
     if (![gestureViewController hasConnection]) {
         return NO;
     }
     
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
-    //NSLog(@"JSONString = %@", JSONString);
-    NSData *JSONData = [NSData dataWithContentsOfURL:[NSURL URLWithString:JSONString]];
-    //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
+    
+    // TODO: MAKE THIS ASYNC TO PREVENT THE CHANCE OF DEADLOCK WHILE ADVANCED_UI CONNECTION SETS UP
+    NSURL *dataURL = [NSURL URLWithString:JSONString];
+    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     self.appsAvailable = [JSONData yajl_JSON];
     NSLog(@"Received JSON array app data = %@", appsAvailable);
-    /*
-    for (NSDictionary *element in appsAvailable) {
-        NSLog(@"is NSDictionary? %d", [element isKindOfClass:[NSDictionary class]]);
-
-        NSLog(@"element = %@", element);
+    if (!appsAvailable) {
+        return NO;
     }
-     */
     
     return YES;
 }
@@ -152,11 +160,25 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSLog(@"AppBrowserView Loaded!");
-    
+    if (!currentAppIndicator) {
+        currentAppIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
+        currentAppIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+        currentAppIndicator.layer.borderWidth = 3.0;
+        currentAppIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+        currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
+    }
     [theTableView setDelegate:self];
-    pushingViewController = NO;
 }
 //*/
+
+- (void)viewDidAppear:(BOOL)animated {
+    if (self.navigationController.visibleViewController == self && (!gestureViewController || !gestureViewController.socketManager)) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+    
+    viewDidAppear = YES;
+    pushingViewController = NO;
+}
 
 /*
 // Override to allow orientations other than the default portrait orientation.
@@ -171,16 +193,40 @@
 
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in AppBrowser");
-    // everything will get released from the navigation controller's delegate call
-    [self.navigationController.view.layer removeAllAnimations];
-    [self.navigationController popToRootViewControllerAnimated:YES];
+
+    // everything will get released from the navigation controller's delegate call (hopefully)
+    /*
+    if (self.navigationController.visibleViewController == self) {
+        if (!viewDidAppear) {
+            return;
+        }
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    } else {
+        [socketDelegate socketErrorOccurred];
+    }
+     */
+    [socketDelegate socketErrorOccurred];
 }
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in AppBrowser");
-    // everything will get released from the navigation controller's delegate call
-    [self.navigationController.view.layer removeAllAnimations];
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    // everything will get released from the navigation controller's delegate call (hopefully)
+    /*
+    if (self.navigationController.visibleViewController == self) {
+        if (!viewDidAppear) {
+            return;
+        }
+        [self.navigationController.view.layer removeAllAnimations];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+    } else {
+        [socketDelegate socketErrorOccurred];
+    }
+     */
+    [socketDelegate socketErrorOccurred];
 }
 
 
@@ -225,7 +271,11 @@
     
     cell.textLabel.text = (NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
     cell.textLabel.textColor = [UIColor blackColor];
-	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    if ([cell.textLabel.text compare:currentAppName] == NSOrderedSame) {
+        [cell addSubview:currentAppIndicator];
+        cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    }
+    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     
 	return cell;
 }
@@ -313,8 +363,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+    NSLog(@"AppBrowserController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    if (theTableView) {
+        [theTableView release];
+        theTableView = nil;
+    }
 }
 
 
@@ -322,6 +377,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"AppBrowserViewController dealloc");
     if (theTableView) {
         [theTableView release];
+        theTableView = nil;
     }
     if (appsAvailable) {
         [appsAvailable release];
@@ -332,6 +388,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentAppName) {
         [currentAppName release];
     }
+    if (currentAppIndicator) {
+        [currentAppIndicator release];
+    }
+    socketDelegate = nil;
     
     [super dealloc];
 }

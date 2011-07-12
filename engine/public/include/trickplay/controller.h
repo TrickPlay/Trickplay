@@ -75,7 +75,7 @@ typedef struct TPController TPController;
                                         sent by TrickPlay. This can be via an on
                                         screen keyboard.
 
-    TP_CONTROLLER_HAS_PICTURES        - The controller can can send pictures to Trickplay.
+    TP_CONTROLLER_HAS_IMAGES          - The controller can can send pictures to Trickplay.
 
     TP_CONTROLLER_HAS_AUDIO_CLIPS     - The controller can send audio clips to Trickplay.
 
@@ -91,7 +91,7 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_SOUND                     0x0020
 #define TP_CONTROLLER_HAS_UI                        0x0040
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
-#define TP_CONTROLLER_HAS_PICTURES                	0x0100
+#define TP_CONTROLLER_HAS_IMAGES                	0x0100
 #define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
 
 #define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
@@ -514,34 +514,34 @@ struct TPControllerSpec
 #define TP_CONTROLLER_COMMAND_STOP_SOUND            41
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_SUBMIT_PICTURE
+    Constant: TP_CONTROLLER_COMMAND_REQUEST_IMAGE
 
-    The controller should send a picture.
+    The controller should send an image.
 
-    This command is only sent if the controller includes TP_CONTROLLER_HAS_PICTURES
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_IMAGES
     in its capabilities.
 
     Parameters:
 
-        None
+        A pointer to a <TPControllerRequestImage> structure
 */
 
-#define TP_CONTROLLER_COMMAND_SUBMIT_PICTURE        100
+#define TP_CONTROLLER_COMMAND_REQUEST_IMAGE        100
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP
+    Constant: TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP
 
-    The controller should send a picture.
+    The controller should send an audio clip.
 
     This command is only sent if the controller includes TP_CONTROLLER_HAS_AUDIO_CLIPS
     in its capabilities.
 
     Parameters:
 
-        A pointer to a <TPControllerSubmitPicture> structure.
+        A point to a <TPControllerRequestAudio> structure
 */
 
-#define TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP     101
+#define TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP     101
 
 /*
    Constant: TP_CONTROLLER_COMMAND_ADVANCED_UI
@@ -886,11 +886,6 @@ struct TPControllerPlaySound
 
 typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 
-#define TP_CONTROLLER_ADVANCED_UI_CREATE    1
-#define TP_CONTROLLER_ADVANCED_UI_DESTROY   2
-#define TP_CONTROLLER_ADVANCED_UI_GET       3
-#define TP_CONTROLLER_ADVANCED_UI_SET       4
-
 /*
     Struct: TPControllerAdvancedUI
 
@@ -901,28 +896,28 @@ typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 struct TPControllerAdvancedUI
 {
     /*
-        Field: command
-
-        Values:
-
-            TP_CONTROLLER_ADVANCED_UI_CREATE    - Create UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_DESTROY   - Detsroy UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_GET       - Get UI element properties.
-
-            TP_CONTROLLER_ADVANCED_UI_SET       - Set UI element properties.
-    */
-
-    int             command;
-
-    /*
         Field: payload
 
         A JSON text describing the advanced UI command.
     */
 
     const char *    payload;
+
+    /*
+        Field: result
+
+        A JSON text describing the result of the command.
+    */
+
+    char *          result;
+
+    /*
+        Field: free_result
+
+        A function that will be called to free the result.
+    */
+
+    void            (*free_result)( void * result);
 };
 
 /*-----------------------------------------------------------------------------*/
@@ -930,13 +925,13 @@ struct TPControllerAdvancedUI
 typedef struct TPControllerSubmitPicture TPControllerSubmitPicture;
 
 /*
-    Struct: TPControllerSubmitPicture
+    Struct: TPControllerRequestImage
 
     A pointer to a structure of this type is passed to execute_command when
-    the command is <TP_CONTROLLER_SUBMIT_PICTURE>.
+    the command is <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
 */
 
-struct TPControllerSubmitPicture
+struct TPControllerRequestImage
 {
     /*
         Field: max_width
@@ -978,6 +973,56 @@ struct TPControllerSubmitPicture
     */
 
     const char * mask;
+
+    /*
+        Field: dialog_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user as a 
+        prompt to choose an image to be sent from the controller.
+    */
+    
+    const char * dialog_label;
+
+    /*
+        Field: cancel_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user on a 
+        button, allowing the user to cancel choosing an image to be sent from the controller.
+        When the user presses that button, the controller should then generate a cancel event to the
+        engine through <tp_controller_cancel_image>
+    */
+    
+    const char * cancel_label;
+};
+
+/*
+    Struct: TPControllerRequestAudio
+
+    A pointer to a structure of this type is passed to execute_command when
+    the command is <TP_CONTROLLER_COMMAND_REQUEST_AUDIO>.
+*/
+
+struct TPControllerRequestAudioClip
+{
+    /*
+        Field: dialog_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user as a 
+        prompt to choose an audio clip to be sent from the controller.
+    */
+    
+    const char * dialog_label;
+
+    /*
+        Field: cancel_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user on a 
+        button, allowing the user to cancel choosing an audio clip to be sent from the controller.
+        When the user presses that button, the controller should then generate a cancel event to the
+        engine through <tp_controller_cancel_audio_clip>
+    */
+    
+    const char * cancel_label;
 };
 
 /*-----------------------------------------------------------------------------*/
@@ -1213,24 +1258,24 @@ struct TPControllerSubmitPicture
 
 
 /*
-	Callback: tp_controller_submit_picture
+	Callback: tp_controller_submit_image
 
-	Send picture data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_PICTURE>.
+	Send image data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
 
 	Arguments:
 
 		controller -    The controller returned by <tp_context_add_controller>.
 
-		data 		-   A pointer to the picture data.
+		data 		-   A pointer to the image data.
 
-		size		- 	The size of the picture data.
+		size		- 	The size of the image data.
 
-		mime_type	- 	The mime type of the picture data. This can be NULL.
+		mime_type	- 	The mime type of the image data. This can be NULL.
 */
 
     TP_API_EXPORT
     void
-    tp_controller_submit_picture(
+    tp_controller_submit_image(
 
         TPController * controller,
         const void * data,
@@ -1240,7 +1285,7 @@ struct TPControllerSubmitPicture
 /*
 	Callback: tp_controller_submit_audio_clip
 
-	Send audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP>.
+	Send audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP>.
 
 	Arguments:
 
@@ -1261,6 +1306,75 @@ struct TPControllerSubmitPicture
         const void * data,
         unsigned int size,
         const char * mime_type);
+
+/*
+	Callback: tp_controller_cancel_image
+
+	Cancel send of image data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_cancel_image(
+
+        TPController * controller);
+
+/*
+	Callback: tp_controller_cancel_audio_clip
+
+	Cancel send of audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_cancel_audio_clip(
+
+        TPController * controller);
+
+
+/*
+    Callback: tp_controller_advanced_ui_ready
+
+    Report that advanced UI features are ready for use.
+
+    Arguments:
+
+        controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_ready(
+
+		TPController * controller);
+
+/*
+	Callback: tp_controller_advanced_ui_event
+
+	Report an advanced UI event.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		json 	   -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_event(
+
+		TPController * controller,
+		const char * json);
+
 
 /*-----------------------------------------------------------------------------*/
 /*

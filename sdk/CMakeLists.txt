@@ -11,30 +11,43 @@ if (UNIX AND NOT APPLE)
     	# After this, we concatenate them.
     
     	set( DEPS 
-    	
-			"libc6 (>= 2.7)"
-			"libcairo2 (>= 1.4.10)"
-			"libglib2.0-0 (>= 2.18.0)"
-			"libpango1.0-0 (>= 1.20.0)"
-			"libcurl3 (>=7.19.0)"
-			"libavahi-common3 (>= 0.6.25)"
-			"libavahi-core6 (>= 0.6.25) | libavahi-core7"
-			"libavahi-glib1(>= 0.6.25)"
-			"libclutter-1.0-0 (>= 1.0.6)"
-			"libexpat1"
-			"libsqlite3-0 (>= 3.6.0)"
-			"libclutter-gst-0.10-0 | libclutter-gst-1.0-0"
-			"libtiff4"
-			"libjson-glib-1.0-0 (>= 0.5.0)"
-			"libjpeg62"
-			"libtiffxx0c2"
-			"libgif4"
-			"libossp-uuid15 | libossp-uuid16"
-			"libupnp3 (>= 1.6)"
-			"libreadline6"
-			"liburiparser1"
-			"libsndfile1"
-			"libsoup2.4-1"
+
+            "gstreamer0.10-ffmpeg"
+            "gstreamer0.10-plugins-bad"
+            "gstreamer0.10-plugins-good"
+
+            "libatk1.0-0"
+            "libavahi-common3 (>= 0.6.25)"
+            "libavahi-core6 (>= 0.6.25) | libavahi-core7"
+            "libavahi-glib1(>= 0.6.25)"
+            "libc-ares2"
+            "libc6 (>= 2.7)"
+            "libcairo2 (>= 1.4.10)"
+            "libclutter-1.0-0 (>= 1.0.6)"
+            "libclutter-gst-0.10-0 | libclutter-gst-1.0-0"
+            "libcurl3 (>=7.19.0)"
+            "libexpat1"
+            "libfontconfig1"
+            "libfreetype6"
+            "libgif4"
+            "libglib2.0-0 (>= 2.18.0)"
+            "libgstreamer0.10-0"
+            "libgstreamer-plugins-base0.10-0"
+            "libjpeg62"
+            "libjson-glib-1.0-0 (>= 0.5.0)"
+            "libossp-uuid15 | libossp-uuid16"
+            "libpango1.0-0 (>= 1.20.0)"
+            "libpng12-0"
+            "libreadline6"
+            "libsndfile1"
+            "libsoup2.4-1"
+            "libsqlite3-0 (>= 3.6.0)"
+            "libssl0.9.8"
+            "libtiff4"
+            "libtiffxx0c2"
+            "libupnp3 (>= 1.6)"
+            "liburiparser1"
+            "libxml2"
 		)
 		
 		set( FIRST 1 )
@@ -108,6 +121,17 @@ if (UNIX AND NOT APPLE)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz DESTINATION share/doc/trickplay-sdk)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz DESTINATION share/doc/trickplay-sdk RENAME changelog.Debian.gz)
 
+        # Resources
+	
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/resources DESTINATION share/trickplay/ )
+	
+	# Menu entry
+	
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.desktop DESTINATION share/applications/)
+	
+	# Icons
+	
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.png DESTINATION share/icons/hicolor/64x64/apps/)
 
         include(CPack)
 

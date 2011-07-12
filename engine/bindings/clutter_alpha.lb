@@ -10,9 +10,6 @@ module clutter_alpha;
 [[
 gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp);
 void Alpha_on_alpha_destroy(gpointer lsp);
-
-extern int wrap_Timeline(lua_State*L,ClutterTimeline* self);
-
 ]]
 
 /*
@@ -51,34 +48,12 @@ class Alpha [[ClutterAlpha*]]
 	
     Timeline timeline
 		[[
-		    ClutterTimeline * timeline=clutter_alpha_get_timeline(self);
-		    if ( ! timeline )
-		    {
-		    	lua_pushnil( L );
-		    }
-		    else if ( UserData * ud = UserData::get( G_OBJECT( timeline ) ) )
-		    {
-		    	ud->push_proxy();
-		    }
-		    else
-		    {
-		    	lua_pushnil( L );
-		    }
+            ClutterUtil::wrap_timeline( L , clutter_alpha_get_timeline( self ) );
 		]]
 		[[
-            if ( lb_check_udata_type( L , lua_gettop( L ) , "Timeline" ) )
+            if ( ClutterTimeline * t = ClutterUtil::user_data_to_timeline( L , lua_gettop( L ) ) )
             {
-                UserData * ud = UserData::get( L , -1 );
-
-                if ( ud )
-                {
-                    GObject * timeline = ud->get_master();
-
-                    if ( timeline && CLUTTER_IS_TIMELINE( timeline ) )
-                    {
-                        clutter_alpha_set_timeline(self,CLUTTER_TIMELINE(timeline));
-                    }
-                }
+                clutter_alpha_set_timeline( self , t );
             }
 		]];
 		
@@ -138,7 +113,7 @@ class Alpha [[ClutterAlpha*]]
 		    GEnumValue * v = g_enum_get_value_by_name(ec,cm.c_str());
 		    
 		    if(!v)
-			luaL_error(L,"Invalid alpha mode '%s'",mode);
+			return luaL_error(L,"Invalid alpha mode '%s'",mode);
 			
 			
 		    clutter_alpha_set_mode(self,v->value);
