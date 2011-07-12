@@ -41,7 +41,7 @@ Define the Button Picker by selecting the Edit->Insert UI Element menu item and 
 
 A Button Picker element cycles through a list of possible property settings. Arrows on either the top and bottom of the button (for vertical cycling) or the left and right (for horizontal cycling) cause scrolling through each entry in the list. The entry displayed on the button will be the selected setting.
 
-We'll define our Button Picker so the user can scroll through a list of possible modes. In the Button Picker's Inspector dialog, locate the Direction area. We can define either a vertical scrolling or horizontal scrolling button. We'll select horizontal scrolling for this tutorial, but you can select vertical now if you wish to see how that scrolling method works.
+We'll define our Button Picker so the user can scroll through a list of possible modes. In the Button Picker's Inspector dialog, clip on the More tab and locate the Direction area. We can define either a vertical scrolling or horizontal scrolling button. We'll select horizontal scrolling for this tutorial, but you can select vertical now if you wish to see how that scrolling method works.
 
 In the Items section, three default list entries are specified. Replace each default entry with the following modes.
 
@@ -59,14 +59,14 @@ minus sign - Delete the entry
 up arrow - Shift the entry up in the list
 down arrow - Shift the entry down in the list
 
-When you have the list entries defined, click the OK button to accept the property settings.
+When you have the list entries defined, click the Apply button to accept the property settings.
 
 Your screen should look something like this.
 
 (see images/EdModePicker.png)
 
-Finally, let's define our focus navigation using the same technique that was described when creating the Language screen. In the Mode picker button, define the <Up> arrow key to shift focus to the Previous button and define the <Down> arrow key to move focus to the Continue button. Notice that the <Left> and <Right> arrow buttons have already defined their focus to cycle through the list entries. (If you defined the Picker Button for Vertical scrolling, the <Up> and <Down> arrow keys will be defined to cycle through the list.)
+Finally, let's define our focus navigation using the same technique that was described when creating the Language screen. In the Mode picker button, define the <UpArrow> key to shift focus to the Previous button and define the <DownArrow> key to move focus to the Continue button. Notice that the <LeftArrow> and <RightArrow> buttons have already defined their focus to cycle through the list entries. (If you defined the Picker Button for Vertical scrolling, the <UpArrow> and <DownArrow> keys will be defined to cycle through the list.)
 
-If you check the focus navigation for the Previous and Continue buttons, you'll see that the Editor has already defined the necessary linkage to the Button Picker element based upon the settings just defined for the Picker. Set any additional focus navigations as you see fit. For example, you may wish to define the Previous button's <Right> arrow key to shift focus to the Continue button.
+If you check the focus navigation for the Previous and Continue buttons, you'll see that the Editor has already defined the necessary linkage to the Button Picker element based upon the settings just defined for the Picker. Set any additional focus navigations as you see fit. For example, you may wish to define the Previous button's <RightArrow> key to shift focus to the Continue button.
 
 
