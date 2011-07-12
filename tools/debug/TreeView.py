@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Mon Jul 11 11:08:28 2011
+# Created: Mon Jul 11 14:44:12 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -86,11 +86,11 @@ class Ui_MainWindow(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, brush)
         self.inspector.setPalette(palette)
         self.inspector.setAutoFillBackground(False)
-        self.inspector.setStyleSheet(_fromUtf8("QTreeView::branch {\n"
+        self.inspector.setStyleSheet(_fromUtf8("/*QTreeView::branch {\n"
 "    selection-background-color: transparent;\n"
 "}\n"
 "\n"
-"selection-background-color: transparent;"))
+"selection-background-color: transparent;*/"))
         self.inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.inspector.setAlternatingRowColors(True)
         self.inspector.setIndentation(20)

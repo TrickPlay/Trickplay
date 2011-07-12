@@ -4,7 +4,7 @@ from PyQt4.QtCore import *
 class InspectorDelegate(QItemDelegate):
     def __init__(self, parent=None, *args):
         QItemDelegate.__init__(self, parent, *args)
-
+    
     def paint(self, painter, option, index):
         painter.save()
         

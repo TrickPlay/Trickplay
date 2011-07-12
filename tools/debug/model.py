@@ -2,9 +2,12 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from connection import getTrickplayData
 
+Qt.Pointer = Qt.UserRole + 1
 Qt.Value = Qt.UserRole + 2
 Qt.Element = Qt.UserRole + 3
 Qt.ItemDepth = Qt.UserRole + 4
+Qt.Gid = Qt.UserRole + 5
+Qt.Data = Qt.UserRole + 6
 
 class ElementModel(QStandardItemModel):
     
@@ -67,6 +70,8 @@ class ElementModel(QStandardItemModel):
             title = "Image"
         
         titleNode = QStandardItem(title)
+        titleNode.setData(data['gid'], Qt.Gid)
+
         valueNode = QStandardItem(value)
         
         parent.appendRow([titleNode, valueNode])
@@ -82,20 +87,22 @@ class ElementModel(QStandardItemModel):
             title, value,  isSimple = dataToModel(attr, data[attr])
             
             titleNode = QStandardItem(attr)
+            titleNode.setData(data['gid'], Qt.Gid)
             
             if 'children' == title:
                 for child in value:
                     self.addElement(parent, child)
                 
             elif isSimple:
-                #print(attr,  value)
                 valueNode = QStandardItem()
                 valueNode.setData(value,  Qt.DisplayRole)
+                valueNode.setData(value,  Qt.Data)
                 parent.appendRow([titleNode, valueNode])
                 
             else:
                 summary = summarize(value)
                 valueNode = QStandardItem(summary)
+                valueNode.setData(summary,  Qt.Data)
                 parent.appendRow([titleNode, valueNode])
                 
     """
@@ -199,6 +206,8 @@ class ElementModel(QStandardItemModel):
     def copyAttrs(self, original, new):
         for i in self.children(original):
             titleNode = self.itemFromIndex(i[0]).clone()
+            titleNode.setData(pyData(i[0], Qt.Gid), Qt.Gid)
+            print(Qt.Gid,  pyData(titleNode,  Qt.Gid))
             valueNode = self.itemFromIndex(i[1]).clone()
             new.appendRow([titleNode,  valueNode])
         
@@ -251,6 +260,11 @@ def dataToModel(title,  value):
         v = int(v)
     
     return (t, v, s)
+    
+def modelToData(title,  value):
+    t = title
+    v = value
+    return (t, v)
 
 def summarize(value):
     # The read-only summary of attributes
@@ -260,3 +274,12 @@ def summarize(value):
     summary = summary[:len(summary)-2] + '}'
     return summary
 
+def pyData(index, role):
+    
+    i = index.data(role).toPyObject()
+    
+    if isinstance(i,  QString):
+        
+        i = str(i)
+    
+    return i
