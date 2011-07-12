@@ -164,11 +164,11 @@
         <bool>false</bool>
        </property>
        <property name="styleSheet">
-        <string notr="true">QTreeView::branch {
+        <string notr="true">/*QTreeView::branch {
 	selection-background-color: transparent;
 }
 
-selection-background-color: transparent;</string>
+selection-background-color: transparent;*/</string>
        </property>
        <property name="dragDropMode">
         <enum>QAbstractItemView::NoDragDrop</enum>

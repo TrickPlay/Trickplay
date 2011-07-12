@@ -18,7 +18,7 @@ from TreeView import Ui_MainWindow
 
 from delegate import InspectorDelegate
 import connection
-from model import ElementModel
+from model import ElementModel,  pyData,  modelToData,  dataToModel
 from dataTypes import BadDataException
 
 # Custom ItemDataRoles
@@ -27,7 +27,9 @@ Qt.Pointer = Qt.UserRole + 1
 Qt.Value = Qt.UserRole + 2
 Qt.Element = Qt.UserRole + 3
 Qt.ItemDepth = Qt.UserRole + 4
-    
+Qt.Gid = Qt.UserRole + 5
+Qt.Data = Qt.UserRole + 6
+
 class StartQT4(QMainWindow):
     def __init__(self, parent=None):
 
@@ -51,12 +53,12 @@ class StartQT4(QMainWindow):
         #self.model.connect(self.model, SIGNAL('itemChanged( QStandardItem * )'), self.itemChanged)
         
         # Delegates
-        self.inspectorDelegate = InspectorDelegate()
+        #self.inspectorDelegate = InspectorDelegate()
         
-        #self.inspectorDelegate.connect(self.delegate,  SIGNAL('closeEditor( QWidget * , QAbstractItemDelegate::EndEditHint )'),  self.editorClosed)
-        
-        self.ui.inspector.setItemDelegate(self.inspectorDelegate)
+        #self.ui.inspector.setItemDelegate(self.inspectorDelegate)
 
+        #self.inspectorDelegate.connect(self.delegate,  SIGNAL('closeEditor( QWidget * , QAbstractItemDelegate::EndEditHint )'),  self.editorClosed)
+                
         self.createTree()
         
         self.lastChanged = None
@@ -96,55 +98,60 @@ class StartQT4(QMainWindow):
             
     def selectionChanged(self,  a,  b):
         
-        print("SelectionChanged",  a,  b)
+        print("Selection Changed",  a,  b)
         
         i = self.inspectorSelectionModel.selection()
         
         i = self.inspectorProxyModel.mapSelectionToSource(i)
-        
-        #s = self.ui.inspector.selectedIndexes()[0]
-        
-        #print(s.data(0).toString())
-        
+
         # TODO store index with Activated signal for editing?
-        
-        #s = self.inspectorModel.itemFromIndex(i)
-        
-        #print(s)
-        
-        #print("Data",  s)
         
         s = i.indexes()[0]
         
-        #print(s)
-        
-        #a = s.internalPointer()
-        
-        #b = self.propertyModel.createIndex(0, 0, a)
-        
-        #c = self.propertyModel.itemFromIndex(b)
-        
-        #print(c)
+        #print("gid of sel",  s.child(0, 0).data(Qt.Gid).toPyObject())
         
         r = self.propertyModel.invisibleRootItem()
         
         r.setData(s,  Qt.Pointer)
         
         r.removeRows(0, r.rowCount())
-           
+    
         self.inspectorModel.copyAttrs(s, r)
         
-#        self.propertySM.select(i,  QItemSelectionModel.SelectCurrent)
-#        
-#        s = self.ui.propertyView.selectedIndexes()[0]
-#        
-#        #TODO: find better way to collapse by deselection perhaps?
-#        self.ui.propertyView.collapseAll()
-#        self.ui.propertyView.setExpanded(s,  True)
-#        self.ui.propertyView.scrollTo(s,  1)
+        # self.propertySM.select(i,  QItemSelectionModel.SelectCurrent)
         
+    def dataChanged(self,  topLeft,  bottomRight):
+        print("dataChanged",  str(topLeft.data(0).toString()),  str(bottomRight.data(0).toString())) 
         
-
+        if str(topLeft.data(0).toString()) ==  str(bottomRight.data(0).toString()):
+            
+            valueIndex = topLeft
+            
+            r = self.propertyModel.invisibleRootItem()
+            
+            titleIndex = r.child(valueIndex.row(), 0)
+           
+            inspectorElementIndex = r.data(Qt.Pointer).toPyObject()
+            
+            inspectorIndexPair = self.inspectorModel.findAttr(inspectorElementIndex,  str(titleIndex.data(0).toString()))
+            
+            titleItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[0])
+            valueItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[1])
+            
+            valueItem.setData(topLeft.data(0),  0)
+            
+            gid = pyData(inspectorElementIndex, Qt.Gid)
+            
+            title,  value = modelToData(pyData(titleItem, 0),  pyData(valueItem, 0))
+            
+            print(gid, title, value)
+            
+            connection.send({'gid': gid, 'properties' : {title : value}})
+        
+        else:
+            
+            print("ERROR >> Multiple dataChanged's")
+    
     def itemChanged(self,  valueItem):
         
         return
@@ -167,6 +174,7 @@ class StartQT4(QMainWindow):
         self.inspectorModel.initialize(["UI Element",  "Name"],  True)
         
         #self.ui.inspector.setModel(self.inspectorModel)
+        
         
         # Inspector Proxy Model
         self.inspectorProxyModel= QSortFilterProxyModel()
@@ -210,22 +218,13 @@ class StartQT4(QMainWindow):
         
         # Property Selection Model
         
-        return
+        print self.propertyModel.connect(self.propertyModel, SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"), self.dataChanged)
         
-        # propertyView
-        
-        #self.ui.propertyView.setItemDelegate(self.delegate)
-        
-        self.inspectorSelectionModel = QItemSelectionModel(self.proxyModel)
-        
-        self.ui.inspector.setSelectionMode(QAbstractItemView.SingleSelection)
-        
-        self.ui.inspector.setSelectionModel(self.inspectorSelectionModel)
-        
-        self.inspectorSelectionModel.connect(self.inspectorSelectionModel, SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.selectionChanged)
         
     def refresh(self):
+        self.preventChanges = True
         self.inspectorModel.refreshRoot()
+        self.preventChanges = None
         
     def exit(self):
         sys.exit()
