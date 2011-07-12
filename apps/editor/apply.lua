@@ -34,16 +34,28 @@ function inspector_apply (v, inspector)
 		            	v.items[next] = item:find_child("textInput").text
 		       		elseif v.extra.type == "TabBar" then 
 		            	v.tab_labels[next] = item:find_child("textInput").text
-	 	       		elseif item:find_child("textInput").text == "--------------" then 
-			    		v.items[next] = {type="separator"}
-		       		elseif item:find_child("textInput").extra.item_type == "label" then 
-			    		v.items[next] = {type="label", string=item:find_child("textInput").text}
-		       		elseif item:find_child("textInput").extra.item_type == "item" then 
-			    		v.items[next] = {type="item", string=item:find_child("textInput").text, f=nil}
+						print("tabBar")
+						
+					elseif v.extra.type == "MenuButton" then 
+						print("MENU BUTTONS")
+	 	       			if item:find_child("textInput").text == "--------------" then 
+			    			v.items[next] = {type="separator"}
+							print("seperator")
+		       			elseif item:find_child("textInput").extra.item_type == "label" then 
+			    			v.items[next] = {type="label", string=item:find_child("textInput").text}
+							print("textInpuit")
+		       			elseif item:find_child("textInput").extra.item_type == "item" then 
+							print("itemitmemitemtmeitmet")
+			    			v.items[next] = {type="item", string=item:find_child("textInput").text, f=nil}
+		       			end 
 		       		end 
                end 
-			   v.items = v.items -- to redraw item lists 
-		 end
+		       if v.extra.type == "TabBar" then 
+		       		v.tab_labels = v.tab_labels
+			   else 
+			   		v.items = v.items -- to redraw item lists 
+			   end 
+		 	end
          end,
        	["skin"] = function()
               v["skin"] = skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
@@ -202,13 +214,13 @@ function inspector_apply (v, inspector)
       set_obj(org_object, v) 
 
 	  local apply = function (item_group) 
-
+	  
       for i, j in pairs(item_group.children) do 
           	  
 	      if j.name then
-		 if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "tab_position" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
-		 if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
-			print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
+		 	if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "tab_position" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
+		 		if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
+					print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
 	        	return 0 
 		end 
               end 
@@ -374,6 +386,16 @@ function inspector_apply (v, inspector)
 		   apply(item_group) 
 	  	end 
 
+		if inspector:find_child("item_group_list") then 
+			print("111111111sjdfhjkhdfjkshfd")
+		   item_group = inspector:find_child("item_group_list")
+		   
+		   apply(item_group) 
+	  	end 
+
+		if inspector:find_child("itemsList") then 
+		   
+	  	end 
        set_obj(new_object, v) 
        input_mode = S_SELECT
        if(v.name ~= "video1") then 

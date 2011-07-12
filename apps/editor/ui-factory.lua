@@ -1604,7 +1604,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 	    if item_n == "name" or item_n == "text" or item_n == "message" or item_n == "label" then 
 			-- no property name text, long textInput Box
-	     	input_box_width = WIDTH 
+	     	input_box_width = WIDTH + 5
         else  
 			-- properties' name 
     	    text = Text {name = "attr", text = item_s}:set(STYLE)
@@ -1613,7 +1613,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 	     	input_box_width = 39 
             if item_n:find("font") then 
-	          input_box_width = WIDTH
+	          input_box_width = WIDTH + 5
 			  group:remove(text)
 			  text = nil
             elseif string.find(item_n,"duration") or string.find(item_n,"time") then 

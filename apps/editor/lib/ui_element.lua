@@ -5656,14 +5656,12 @@ function ui_element.tabBar(t)
                 buttons[current_index].on_focus_in()
 				
 				if ap then
-					
 					ap:pan_to(
 						
 						buttons[current_index].x+buttons[current_index].w/2,
 						buttons[current_index].y+buttons[current_index].h/2
 						
 					)
-					
 				end
             end,
 			
@@ -5856,509 +5854,7 @@ function ui_element.tabBar(t)
 end
 
 
---[[
-old version 
-
-function ui_element.tabBar(t)
-    
-    --default parameters
-    local p = {
-        font  = "DejaVu Sans 26px",
-        
-        
-        text_font = "DejaVu Sans 26px",
-    	text_color = {255,255,255,255}, 
-    	text_focus_color = {27,145,27,255}, 	  --"1b911b",
-        
-    	skin = "default", 
-    	ui_width = 150,
-    	ui_height = 60, 
-        
-    	focus_color = {27,145,27,255}, 	  --"1b911b", 
-    	focus_fill_color = {27,145,27,255}, --"1b911b", 
-    	focus_text_color = {255,255,255,255}, --"1b911b", 
-    	border_color = {255,255,255,255}, --"FFFFFF"
-    	border_width = 1,
-    	border_corner_radius = 12,
-        
-        tab_labels = {
-            "Item 1",
-            "Item 2",
-            "Item 3",
-        },
-        tabs = {},
-        --tab_align          = "CENTER",
-        --label_align        = "CENTER",
-        label_padding = 10,
-        tab_position = "top",
-        
-        display_width  = 600,
-        display_height = 500,
-        tab_spacing = 10,
-        --slant_width  = 20,
-        border_width =  2,
-        border_color = {255,255,255,255},
-        fill_color   = {  0,  0,  0,255},
-        label_color  = {255,255,255,255},
-        unsel_color  = { 60, 60, 60,255},
-    }
-    
-	local offset = {}
-    local buttons = {}
-    
-    --overwrite defaults
-    if t ~= nil then
-        for k, v in pairs (t) do
-            p[k] = v
-        end
-    end
-    
-    local create
-    local current_index = 1
-    --local tabs = {}
-    local tab_bg = {}
-    local tab_focus = {}
-	
-    local umbrella     = Group{
-		position = {200,200},
-        name="TabContainer",
-		reactive = true,  
-        extra={
-            type="TabBar",
-            insert_tab = function(self,index)
-                
-                if index == nil then index = #p.tab_labels + 1 end
-                
-                table.insert(p.tab_labels,index,"TAB")
-                
-                table.insert(p.tabs,index,Group{})
-                
-                create()
-                
-            end,
-            remove_tab = function(self,index)
-                if index == nil then index = #p.tab_labels + 1 end
-                
-                table.remove(p.tab_labels,index,"TAB")
-                
-                table.remove(p.tabs,index,Group{})
-                
-                create()
-            end,
-            rename_tab = function(self,index,name)
-                assert(index)
-                p.tab_labels[index] = name
-                
-                create()
-            end,
-            
-            move_tab_up = function(self,index)
-                if index == 1 then return end
-                local temp  = p.tab_labels[i-1]
-                p.tab_labels[i-1] = p.tab_labels[i]
-                p.tab_labels[i]   = temp
-                
-                temp      = p.tabs[i-1]
-                p.tabs[i-1] = p.tabs[i]
-                p.tabs[i]   = temp
-                
-                create()
-            end,
-            move_tab_down = function(self,index)
-                if index == #p.tab_labels then return end
-                local temp  = p.tab_labels[i+1]
-                p.tab_labels[i+1] = p.tab_labels[i]
-                p.tab_labels[i]   = temp
-                
-                temp      = p.tabs[i+1]
-                p.tabs[i+1] = p.tabs[i]
-                p.tabs[i]   = temp
-                
-                create()
-            end,
-            
-            --switching 'visible tab' functions
-            display_tab = function(self,index)
-                if index < 1 or index > #p.tab_labels then return end
-                p.tabs[current_index]:hide()
-				--tab_bg[current_index]:show()
-				--tab_focus[current_index]:hide()
-                buttons[current_index].on_focus_out()
-                current_index = index
-                p.tabs[current_index]:show()
-                buttons[current_index].on_focus_in()
-				--tab_bg[current_index]:hide()
-				--tab_focus[current_index]:show()
-            end,
-            previous_tab = function(self)
-                if current_index == 1 then return end
-                
-                self:display_tab(current_index-1)
-            end,
-            next_tab = function(self)
-                if current_index == #p.tab_labels then return end
-                
-                self:display_tab(current_index+1)
-            end,
-			
-			get_tab_group = function(self,index)
-				return p.tabs[index]
-			end,
-			get_index = function(self)
-				return current_index
-			end,
-			get_offset = function(self)
-				return self.x+offset.x, self.y+offset.y
-			end
-        }
-
-    }
-    
-    create = function()
-        
-        local labels, txt_h, txt_w 
-        
-		current_index = 1
-		
-        umbrella:clear()
-        tab_bg = {}
-        tab_focus = {}
-        
-        local bg = Rectangle{
-            color        = p.fill_color,
-            border_color = p.border_color,
-            border_width = p.border_width,
-            w = p.display_width,
-            h = p.display_height,
-        }
-        
-        umbrella:add(bg)
-        for i = 1, #p.tab_labels do
-            
-			editor_use = true
-            if p.tabs[i] == nil then
-                p.tabs[i] = Group{}
-            end
-            buttons[i] = ui_element.button()
-			p.tabs[i]:hide()
-            
-            buttons[i].position = {0,0}
-            buttons[i].skin=p.skin
-            buttons[i].ui_width=p.ui_width
-            buttons[i].ui_height=p.ui_height
-            
-            buttons[i].focus_color=p.focus_color
-            buttons[i].border_width=p.border_width
-            buttons[i].border_corner_radius=p.border_corner_radius
-            
-            
-            buttons[i].label      = p.tab_labels[i]
-            buttons[i].text_font  = p.font
-            buttons[i].text_color = p.label_color
-            buttons[i].fill_color = p.unsel_color
-            buttons[i].focus_fill_color = p.fill_color
-            buttons[i].position = {0,0}
-            buttons[i].focus_text_color = p.focus_text_color
-           	buttons[i].pressed = function () umbrella:display_tab(i) end  
-            buttons[i].on_focus_out()
-            
-            if p.tab_position == "top" then
-                buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
-                p.tabs[i].y  = buttons[i].h
-            else
-                p.tabs[i].x  = buttons[i].w
-                buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
-            end
-            umbrella:add(p.tabs[i],buttons[i])
-			offset.x = p.tabs[i].x
-			offset.y = p.tabs[i].y
-			editor_use = false
-        end
-        if p.tab_position == "top" then
-            bg.y = buttons[1].h-p.border_width
-        else
-            bg.x = buttons[1].w-p.border_width
-        end
-        
-        for i = #p.tab_labels+1, #p.tabs do
-            p.tabs[i]  = nil
-            --tab_bg[i]  = nil
-            buttons[i] = nil
-        end
-		
-		umbrella:display_tab(current_index)
-    end
-    
-    create()
-    
-    --set the meta table to overwrite the parameters
-    mt = {}
-    mt.__newindex = function(t,k,v)
-        p[k] = v
-		if k ~= "selected" then 
-        	create()
-		end 
-    end
-    mt.__index = function(t,k)       
-       return p[k]
-    end
-    setmetatable(umbrella.extra, mt)
-
-    return umbrella
-end
-
---]]
-
---[=[
-
 function ui_element.arrowPane(t)
-
-	-- reference: http://www.csdgn.org/db/179
-
-    --default parameters
-    local p = {
-        
-		visible_w =     600,
-        visible_h =     600,
-        content   = 	Group{},
-        virtual_h =    1000,
-		virtual_w =    1000,
-        arrow_sz  =      15,
-		
-        arrow_dist_to_frame = 5,
-        arrows_visible =   true,
-        arrow_color = {160,160,160,255},
-        box_color =   {160,160,160,255},
-        box_width =    2,
-        skin = "default",
-    }
-    --overwrite defaults
-    if t ~= nil then
-        for k, v in pairs (t) do
-            p[k] = v
-        end
-    end
-	
-	--Group that Clips the content
-	local window  = Group{name="window"}
-	--Group that contains all of the content
-	--local content = Group{}
-	--declarations for dependencies from scroll_group
-	local scroll, scroll_x, scroll_y
-	--flag to hold back key presses while animating content group
-	local animating = false
-
-	local border = Rectangle{ color = "00000000" }
-	
-	
-	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
-	
-	
-	local make_arrow = function()
-		
-		local c = Canvas{size={p.arrow_sz,p.arrow_sz}}
-		
-		c:move_to(    0,c.h)
-		c:line_to(c.w/2,  0)
-		c:line_to(  c.w,c.h)
-		c:line_to(    0,c.h)
-		
-		c:set_source_color( p.arrow_color )
-		c:fill(true)
-		
-		if c.Image then
-			c= c:Image()
-		end
-		
-		c.anchor_point={c.w/2,c.h}
-		
-		return c
-		
-	end
-	
-	
-    --the umbrella Group, containing the full slate of tiles
-    local umbrella = Group{ 
-        name     = "arrowPane",
-        position = {200,100},
-        reactive = true,
-        extra    = {
-			type = "ArrowPane",
-			--tries to place virtual coordinates 'x' and 'y' in the middle of the window
-			pan_to = function(self,x,y,top_left)
-				
-				
-				if top_left == true then
-					x = x + p.visible_w/2
-					y = y + p.visible_h/2
-				end
-				
-				local new_x, new_y
-                
-				if x > p.virtual_w - p.visible_w/2 then
-                    new_x = -p.virtual_w + p.visible_w
-                elseif x < p.visible_w/2 then
-                    new_x = 0
-                else
-                    new_x = -x + p.visible_w/2
-                end
-				
-                
-                if y > p.virtual_h - p.visible_h/2 then
-                    new_y = -p.virtual_h + p.visible_h
-                elseif y < p.visible_h/2 then
-                    new_y = 0
-                else
-                    new_y = -y + p.visible_h/2
-                end
-				if new_x ~= p.content.x or new_y ~= p.content.y then
-                    p.content:animate{
-                        duration = 200,
-                        x = new_x,
-                        y = new_y,
-                        on_completed = function()
-                            animating = false
-                        end
-                    }
-                    
-                end
-			end,
-        }
-    }
-	umbrella.pan_by = function(self,dx,dy)
-		
-		self:pan_to(
-			-p.content.x + dx,
-			-p.content.y + dy,
-			true
-		)
-		
-	end
-	
-	--this function creates the whole scroll bar box
-    local hold = false
-	local function create()
-		
-		umbrella:clear()
-		
-        window.position={ p.box_width, p.box_width }
-		window.clip = { 0,0, p.visible_w, p.visible_h }
-        border:set{
-            w = p.visible_w+2*p.box_width,
-            h = p.visible_h+2*p.box_width,
-            border_width =    p.box_width,
-            border_color =    p.box_color,
-        }
-		
-        
-        if p.arrows_visible then
-			
-			local arrow = make_arrow()
-			
-			arrow.x = border.w/2
-			arrow.y = -p.arrow_dist_to_frame
-			
-			umbrella:add(arrow)
-			
-			if editor_lb == nil or editor_use then  
-                arrow.on_button_down = function()
-                    umbrella:pan_by(0,-10)
-                end
-                
-                arrow.reactive=true
-            end
-			
-			arrow = Clone{source=arrow}
-			arrow.anchor_point={arrow.w/2,arrow.h}
-			
-			arrow.x = border.w+p.arrow_dist_to_frame
-			arrow.y = border.h/2
-			arrow.z_rotation = {90,0,0}
-			umbrella:add(arrow)
-			
-			if editor_lb == nil or editor_use then  
-                arrow.on_button_down = function()
-                    umbrella:pan_by(10,0)
-                end
-                
-                arrow.reactive=true
-            end
-			
-			arrow = Clone{source=arrow}
-			arrow.anchor_point={arrow.w/2,arrow.h}
-			arrow.x = border.w/2
-			arrow.y = border.h+p.arrow_dist_to_frame
-			arrow.z_rotation = {180,0,0}
-			umbrella:add(arrow)
-			
-			if editor_lb == nil or editor_use then  
-                arrow.on_button_down = function()
-                    umbrella:pan_by(0,10)
-                end
-                
-                arrow.reactive=true
-            end
-			
-			arrow = Clone{source=arrow}
-			arrow.anchor_point={arrow.w/2,arrow.h}
-			arrow.x = -p.arrow_dist_to_frame
-			arrow.y = border.h/2
-			arrow.z_rotation = {270,0,0}
-			umbrella:add(arrow)
-			
-			if editor_lb == nil or editor_use then  
-                arrow.on_button_down = function()
-                    umbrella:pan_by(-10,0)
-                end
-                
-                arrow.reactive=true
-            end
-		end
-		
-        
-		umbrella.size = {p.visible_w, p.visible_h}
-		umbrella:add(border,window)
-	end
-	
-    
-	
-    create()
-	window:add(p.content)
-	
-	--set the meta table to overwrite the parameters
-    mt = {}
-    mt.__newindex = function(t,k,v)
-		
-        if k == "content" then
-            p.content:unparent()
-            if v.parent ~= nil then
-                v:unparent()
-            end
-            v.position={0,0}
-            v.reactive = false
-            window:add(v)
-        	p[k] = v
-		elseif k == "selected" then 
-        	p[k] = v
-		else
-        	p[k] = v
-        	create()
-        end
-    end
-    mt.__index = function(t,k)       
-       return p[k]
-    end
-    setmetatable(umbrella.extra, mt)
-
-    return umbrella
-end
---]=]
-
-
-
-function ui_element.arrowPane(t)
-
-	
 
     --default parameters
     local p = {
@@ -6427,10 +5923,6 @@ function ui_element.arrowPane(t)
 	
 	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
 	
-	
-	
-	
-	
     --the umbrella Group, containing the full slate of tiles
     local umbrella = Group{ 
         name     = "arrowPane",
@@ -6440,7 +5932,6 @@ function ui_element.arrowPane(t)
 			type = "ArrowPane",
 			--tries to place virtual coordinates 'x' and 'y' in the middle of the window
 			pan_to = function(self,x,y,top_left)
-				
 				if top_left == true then
 					x = x + p.visible_w/2
 					y = y + p.visible_h/2
@@ -6449,7 +5940,7 @@ function ui_element.arrowPane(t)
 				local new_x, new_y
                 
 				if x > p.virtual_w - p.visible_w/2 then
-                    new_x = -p.virtual_w + p.visible_w
+                    new_x = -p.virtual_w + p.visible_w - 11
                 elseif x < p.visible_w/2 then
                     new_x = 0
                 else
@@ -6514,17 +6005,12 @@ function ui_element.arrowPane(t)
 		
         
         if p.arrows_visible then
-			
-			
-			
 			if p.visible_h < p.virtual_h then
 				arrow = Clone{source=p.arrow_src}
 				arrow.x = border.w/2
 				arrow.y = -p.arrow_dist_to_frame
 				arrow.anchor_point={arrow.w/2,arrow.h}
-				
 				--arrow.h=p.arrow_sz
-				
 				arrow.on_button_down = function()
 					umbrella:pan_by(0,-p.dist_per_press)
 				end
@@ -6538,7 +6024,6 @@ function ui_element.arrowPane(t)
 				arrow.y = border.h+p.arrow_dist_to_frame
 				arrow.z_rotation = {180,0,0}
 				
-				
 				arrow.on_button_down = function()
 					umbrella:pan_by(0,p.dist_per_press)
 				end
@@ -6550,20 +6035,31 @@ function ui_element.arrowPane(t)
 			
 			if p.visible_w < p.virtual_w then
 				arrow = Clone{source=p.arrow_src}
-				arrow.anchor_point={arrow.w/2,arrow.h}
-				
-				arrow.x = border.w+p.arrow_dist_to_frame
-				arrow.y = border.h/2
-				arrow.z_rotation = {90,0,0}
-				
-				
+
+				if p.tab then 
+					arrow.x = border.w+p.arrow_dist_to_frame  - 20
+					arrow.y = border.h/2 - 10
+					arrow:raise_to_top()
+				else 
+					arrow.anchor_point={arrow.w/2,arrow.h}
+					arrow.x = border.w+p.arrow_dist_to_frame
+					arrow.y = border.h/2
+					arrow.z_rotation = {90,0,0}
+				end 
 				
 				arrow.on_button_down = function()
-					print("YUGI Right")
+					--print("YUGI Right")
 					umbrella:pan_by(p.dist_per_press,0)
-					
-					if left_func then 
-						left_func()
+					if p.tab_num then 
+						if p.tab_num < #p.tab  then 
+							p.tab_num = p.tab_num + 1
+							p.tab[p.tab_num].on_button_down()
+						end 
+						if p.tab_num > 1 and p.tab[4].reactive == false then 
+							p.tab[4]:show()
+							p.tab[4].reactive = true 
+						end 
+						return true
 					end 
 				end
 				
@@ -6572,18 +6068,30 @@ function ui_element.arrowPane(t)
 				umbrella:add(arrow)
 
 				arrow = Clone{source=p.arrow_src}
-				arrow.anchor_point={arrow.w/2,arrow.h}
-				arrow.x = -p.arrow_dist_to_frame
-				arrow.y = border.h/2
-				arrow.z_rotation = {270,0,0}
-				
-				
-				
+
+				if p.tab then 
+					arrow.x = - 20
+					arrow.y = 0
+				else 
+					arrow.anchor_point={arrow.w/2,arrow.h}
+					arrow.x = -p.arrow_dist_to_frame
+					arrow.y = border.h/2
+					arrow.z_rotation = {270,0,0}
+				end 
+
 				arrow.on_button_down = function()
-					print("YUGI Left")
+					--print("YUGI Left")
 					umbrella:pan_by(-p.dist_per_press,0)
-					if left_func then 
-						left_func()
+					if p.tab_num then 
+						if p.tab_num > 1 then 
+							p.tab_num = p.tab_num - 1
+							p.tab[p.tab_num].on_button_down()
+						end 
+						if p.tab_num < 4 and p.tab[4].reactive == true then 
+							p.tab[4]:hide()
+							p.tab[4].reactive = false 
+						end 
+						return true
 					end 
 				end
 				

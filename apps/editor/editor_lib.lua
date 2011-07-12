@@ -804,24 +804,18 @@ function editor_ui.tabBar(t)
     	focus_color = {255,255,255,255}, --{27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,255}, --"1b911b", 
     	focus_text_color = {255,255,255,255}, --"1b911b", 
-    	border_width = 1,
-    	border_corner_radius = 12,
+    	border_width = 0,
+    	border_corner_radius = 0,
         
         tab_labels = {
-            --"Info",
-            --"Focus",
-            --"Items",
-            --"More"
         },
         tabs = {},
         label_padding = 0,
         tab_position = "TOP",
         
-        display_width  = 280,
+        display_width  = 290, 
         display_height = 310,
-        tab_spacing = -10, -- -10
-        --slant_width  = 20,
-        border_width =  0,
+        tab_spacing = -17, 
         border_color = {255,255,255,  0},
         fill_color   = {  0,  0,  0,  0},
         label_color  = {255,255,255,  255},
@@ -832,9 +826,9 @@ function editor_ui.tabBar(t)
 		current_tab = 1,
 		current_tab_focus = nil, 
 		--------------------------------
-		arrow_sz     = 15,
-		arrow_dist_to_frame = 5,
-		arrow_image = nil,
+		arrow_sz = 15,
+		arrow_dist_to_frame = 2,
+		arrow_image = "lib/assets/tab-arrow-left-off.png" --nil,
 
     }
     
@@ -928,14 +922,14 @@ function editor_ui.tabBar(t)
 				--tab_focus[current_index]:show()
 
 				if ap then
-					
+				--[[	
 					ap:pan_to(
 						
 						p.buttons[current_index].x+p.buttons[current_index].w/2,
 						p.buttons[current_index].y+p.buttons[current_index].h/2
 						
 					)
-					
+				]]	
 				end
 
             end,
@@ -1009,30 +1003,36 @@ function editor_ui.tabBar(t)
 			offset.x = p.tabs[i].x
 			offset.y = p.tabs[i].y
 			editor_use = false
+
         end
 
+-- 
 ---[[  ap 
 
 		ap = nil
 		
-		if p.arrow_image then p.arrow_sz = p.arrow_image.w end
+		--if p.arrow_image then p.arrow_sz = p.arrow_image.w end
+		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
 		
-			if p.tab_position == "TOP" and
-			(p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+		if p.tab_position == "TOP" and
+		(p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
-				visible_w=p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame),
+				visible_w=p.display_width - (p.arrow_sz+p.arrow_dist_to_frame),
 				visible_h=p.buttons[# p.buttons].h,
 				virtual_w=p.buttons[# p.buttons].w + p.buttons[# p.buttons].x,
 				virtual_h=p.buttons[# p.buttons].h,
 				arrow_color=p.label_color,
-				box_width=0,
-				dist_per_press=p.buttons[# p.buttons].w - 10,
+				dist_per_press=p.buttons[# p.buttons].w + 20, 
 				arrow_sz = p.arrow_sz,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
 				arrow_src = p.arrow_image,
+				tab_num = p.current_tab, -- 1
+				tab = p.buttons,
+				box_width = 0
 			}
 			
+
 			ap.x = p.arrow_sz+p.arrow_dist_to_frame
 			ap.y = 0
 			
@@ -1045,33 +1045,12 @@ function editor_ui.tabBar(t)
 			
 			umbrella:add(ap)
 			
-		elseif (p.buttons[# p.buttons].h + p.buttons[# p.buttons].y) > (p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
-			
-			ap = ui_element.arrowPane{
-				visible_w=p.buttons[# p.buttons].w,
-				visible_h=p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame),
-				virtual_w=p.buttons[# p.buttons].w,
-				virtual_h=p.buttons[# p.buttons].h + p.buttons[# p.buttons].y,
-				arrow_color=p.label_color,
-				box_width=0,
-				dist_per_press=p.buttons[# p.buttons].h,
-				arrow_sz = p.arrow_sz,
-				arrow_dist_to_frame = p.arrow_dist_to_frame,
-				arrow_src = p.arrow_image,
-			}
-			
-			ap.x = 0
-			ap.y = p.arrow_sz+p.arrow_dist_to_frame
+		elseif (p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) <= (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
 			
 			for _,b in ipairs(p.buttons) do
-				
-				b:unparent()
-				ap.content:add(b)
-				
+				b.x = b.x +8
 			end
-			
-			umbrella:add(ap)
-			
+
 		end
 		
 		if ap then
@@ -1091,6 +1070,12 @@ function editor_ui.tabBar(t)
         end
 		
 		umbrella:display_tab(current_index)
+
+		if p.buttons[4] then 
+			p.buttons[4]:hide()
+			p.buttons[4].reactive = false
+			p.buttons[2]:raise(p.buttons[3])
+		end 
     end
     
     create()
