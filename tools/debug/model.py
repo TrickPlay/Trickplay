@@ -1,6 +1,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from connection import getTrickplayData
+from data import dataToModel,  modelToData,  BadDataException
 
 Qt.Pointer = Qt.UserRole + 1
 Qt.Value = Qt.UserRole + 2
@@ -207,7 +208,7 @@ class ElementModel(QStandardItemModel):
         for i in self.children(original):
             titleNode = self.itemFromIndex(i[0]).clone()
             titleNode.setData(pyData(i[0], Qt.Gid), Qt.Gid)
-            print(Qt.Gid,  pyData(titleNode,  Qt.Gid))
+            #print(Qt.Gid,  pyData(titleNode,  Qt.Gid))
             valueNode = self.itemFromIndex(i[1]).clone()
             new.appendRow([titleNode,  valueNode])
         
@@ -244,27 +245,6 @@ class ElementModel(QStandardItemModel):
             return title
         else:
             return None
-
-def dataToModel(title,  value):
-    t = title
-    v = value
-    s = True
-    
-    if "anchor_point" == t or \
-    "clip" == t or "scale" == t or \
-    "tile" == t or "source" == t or \
-    "color" == t or "border_color" == t:
-        s = False
-        
-    if "gid" == v:
-        v = int(v)
-    
-    return (t, v, s)
-    
-def modelToData(title,  value):
-    t = title
-    v = value
-    return (t, v)
 
 def summarize(value):
     # The read-only summary of attributes

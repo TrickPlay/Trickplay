@@ -2,7 +2,7 @@ typeTable = {
     
     'anchor_point x': lambda v: ('anchor-x',  toFloat(v)),
     'anchor_point y': lambda v: ('anchor-y',  toFloat(v)),
-    'is_visible': lambda v:('visible',  bool(int((v)))),
+    'is_visible': lambda v:('visible',  bool(v)),
     'name': lambda v: ('name',  v),
     'text': lambda v: ('text',  v),
     'opacity': lambda v: ('opacity',  opacity(v)),
@@ -15,6 +15,26 @@ typeTable = {
     'z': lambda v: ('depth',  toFloat(v)),
 
 }
+
+def dataToModel(title,  value):
+    t = title
+    v = value
+    s = True
+    
+    if "anchor_point" == t or \
+    "clip" == t or "scale" == t or \
+    "tile" == t or "source" == t or \
+    "color" == t or "border_color" == t:
+        s = False
+        
+    if "gid" == v:
+        v = int(v)
+    
+    return (t, v, s)
+    
+def modelToData(title,  value):
+    t, v = typeTable[title](value)
+    return (t, v)
 
 def getTypeTable():
     return typeTable
