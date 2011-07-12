@@ -85,6 +85,7 @@ dofile("editor.lua")
 				       			input_mode = S_SELECT 
 			    		end,
         [ keys.BackSpace] = function() editor.delete() input_mode = S_SELECT end,
+        [ keys.Delete] = function() editor.delete() input_mode = S_SELECT end,
 		[ keys.Shift_L  ] = function() shift = true end,
 		[ keys.Shift_R  ] = function() shift = true end,
 		[ keys.Control_L  ] = function() control = true end,
@@ -205,6 +206,7 @@ dofile("editor.lua")
     end
 
     function screen:on_button_down(x,y,button,num_clicks)
+
 	  if(input_mode == S_MENU_M) then
 		if current_focus then 
 			current_focus.on_focus_out()

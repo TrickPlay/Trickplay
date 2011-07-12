@@ -1595,11 +1595,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end
 
 	-- Scroll	
-	local scroll_info = editor_ui.scrollPane{visible_h = 310, visible_w = 280, virtual_w = 280}
+	local scroll_info = editor_ui.scrollPane{visible_h = 310, visible_w = 285, virtual_w = 280}
 	scroll_info.name = "si_info"
-	local scroll_more = editor_ui.scrollPane{visible_h = 310, visible_w = 280, virtual_w = 280}
+	local scroll_more = editor_ui.scrollPane{visible_h = 310, visible_w = 285, virtual_w = 280}
 	scroll_more.name = "si_more"
-	local scroll_items = editor_ui.scrollPane{visible_h = 310, visible_w = 280, virtual_w = 280}
+	local scroll_items = editor_ui.scrollPane{visible_h = 310, visible_w = 285, virtual_w = 280}
 	scroll_items.name = "si_items"
 
 	-- Buttons 
@@ -1670,7 +1670,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	  		xbox:set{position = {275, 0}},
 			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
-			tabs:set{name = "tabs", position = {5, TOP_BAR}, reactive=true},
+			tabs:set{name = "tabs", position = {0, TOP_BAR}, reactive=true},
 			--button_viewcode:set{name = "button_viewcode", position = { WIDTH - button_viewcode.w - button_cancel.w - button_ok.w - 3*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - 1*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}
@@ -1763,6 +1763,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	local item_group_info = Group{name = "item_group_info", position = {0,0}} --53
 	local item_group_more = Group{name = "item_group_more", position = {0,0}} --53
+	local item_group_list = Group{name = "item_group_list", position = {0,0}} --53
 	local item_group = item_group_info
 
     local items_height = 0
@@ -1786,10 +1787,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		elseif attr_n == "items" or attr_n ==  "tab_labels" then 
 			local list_item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			list_item.position = {GUTTER, GUTTER}
-			--tabs.tabs[3]:add(list_item) 
-
-			scroll_items.virtual_h = list_item.h --+ 35
-   			scroll_items.content:add(list_item)
+			item_group_list:add(list_item)
+			scroll_items.virtual_h = item_group_list.h --+ 35
+   			scroll_items.content:add(item_group_list)
 			scroll_items.position = {0, 0}
 			scroll_items.reactive = true
 			if attr_n == "tab_labels" then 
@@ -3668,7 +3668,7 @@ function editor.multi_select_done(x,y)
 	m_init_x = 0 
 	m_init_y = 0 
 	multi_select_border = nil
-        screen.grab_key_focus(screen)
+    screen.grab_key_focus(screen)
 	input_mode = S_SELECT
 
 end 
