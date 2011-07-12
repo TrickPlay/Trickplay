@@ -201,7 +201,6 @@ gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*
     return result;
 }
 
-
 static void animation_completed(ClutterAnimation * animation,lua_State * L)
 {
 	ClutterUtil::wrap_concrete_actor(L,CLUTTER_ACTOR(clutter_animation_get_object(animation)));
