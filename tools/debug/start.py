@@ -19,7 +19,7 @@ from TreeView import Ui_MainWindow
 from delegate import InspectorDelegate
 import connection
 from model import ElementModel,  pyData,  modelToData,  dataToModel
-from dataTypes import BadDataException
+from data import modelToData,  dataToModel, BadDataException
 
 # Custom ItemDataRoles
 
@@ -61,41 +61,13 @@ class StartQT4(QMainWindow):
                 
         self.createTree()
         
-        self.lastChanged = None
+        self.preventChanges = False
         
-    def editorClosed(self,  lineEditor,  hint):
         
-        return
-        
-        if self.lastChanged:
-            
-            lastChanged = self.lastChanged
-            self.lastChanged = None
-            
-            attrName = lastChanged[0]
-            attrValue = lastChanged[1]
-            gid = lastChanged[2]
-            
-            # Do a check to see if widget's text is the same as
-            # lastChanged's text. If user closes editor but hasn't made a change,
-            # don't send any data.
-            if lineEditor.displayText() == attrValue:
-                try:
-                    params = connection.clean(attrName,  attrValue)
-                    print("Params:",  params)
-                    connection.send({'gid': gid, 'properties' : {params[0] : params[1]}})
-                except BadDataException,  (e):
-                    try:
-                        print("Value entered:" + repr(attrValue))
-                    except:
-                        print("Value entered: could not represent value.")
-                    print(e.value)
-            else:
-                print("No changed was made. Editor closed.")
-                
-        else:
-            print("No change has been made since the program started.")
-            
+    """
+    Re-populate the property view every time a new UI element
+    is selected in the inspector view.
+    """
     def selectionChanged(self,  a,  b):
         
         print("Selection Changed",  a,  b)
@@ -103,8 +75,6 @@ class StartQT4(QMainWindow):
         i = self.inspectorSelectionModel.selection()
         
         i = self.inspectorProxyModel.mapSelectionToSource(i)
-
-        # TODO store index with Activated signal for editing?
         
         s = i.indexes()[0]
         
@@ -120,62 +90,71 @@ class StartQT4(QMainWindow):
         
         # self.propertySM.select(i,  QItemSelectionModel.SelectCurrent)
         
+    """
+    Change Trickplay data when data is changed (by the user) in the property view
+    """
     def dataChanged(self,  topLeft,  bottomRight):
         print("dataChanged",  str(topLeft.data(0).toString()),  str(bottomRight.data(0).toString())) 
         
-        if str(topLeft.data(0).toString()) ==  str(bottomRight.data(0).toString()):
+        if not self.preventChanges:
             
-            valueIndex = topLeft
+            # User can only select one element, so these will always be equal. This assertion can be removed later.
+            if str(topLeft.data(0).toString()) ==  str(bottomRight.data(0).toString()):
+                
+                r = self.propertyModel.invisibleRootItem()
+                
+                propertyValueIndex = topLeft
+                
+                propertyTitleIndex = r.child(propertyValueIndex.row(), 0)
+               
+                # Get the index of the UI Element in the inspector
+                inspectorElementIndex = r.data(Qt.Pointer).toPyObject()
+                
+                gid = pyData(inspectorElementIndex, Qt.Gid)
+                
+                inspectorIndexPair = self.inspectorModel.findAttr(inspectorElementIndex,  str(propertyTitleIndex.data(0).toString()))
+                
+                #titleItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[0])
+                
+                valueItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[1])
+                
+                title = pyData(propertyTitleIndex, 0)
+                
+                value = pyData(propertyValueIndex, 0)
+                
+                # Verify data is OK before making any changes to model or Trickplay
+                try:
+                    
+                    modelToData(title, value)
+                
+                except BadDataException, (e):
+                    
+                    print("BadDataException",  e.value)
+                    
+                    return
+                    
+                # Convert the data to proper format for sending
+                title, value = modelToData(title, value)
+                
+                print('Sending:', gid, title, value)
+                
+                connection.send({'gid': gid, 'properties' : {title : value}})
             
-            r = self.propertyModel.invisibleRootItem()
-            
-            titleIndex = r.child(valueIndex.row(), 0)
-           
-            inspectorElementIndex = r.data(Qt.Pointer).toPyObject()
-            
-            inspectorIndexPair = self.inspectorModel.findAttr(inspectorElementIndex,  str(titleIndex.data(0).toString()))
-            
-            titleItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[0])
-            valueItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[1])
-            
-            valueItem.setData(topLeft.data(0),  0)
-            
-            gid = pyData(inspectorElementIndex, Qt.Gid)
-            
-            title,  value = modelToData(pyData(titleItem, 0),  pyData(valueItem, 0))
-            
-            print(gid, title, value)
-            
-            connection.send({'gid': gid, 'properties' : {title : value}})
+                # Update the data in the inspector
+                valueItem.setData(value,  0)
+                
+            else:
+                
+                print("ERROR >> Multiple dataChanged's")
         
-        else:
-            
-            print("ERROR >> Multiple dataChanged's")
-    
-    def itemChanged(self,  valueItem):
-        
-        return
-        
-        row = valueItem.row()
-        parent = valueItem.parent()
-        attrItem = parent.child(row)
-        gidNode = self.findNode('gid',  self.model.indexFromItem(parent))[1].data()
-        gid = int(gidNode.toUInt()[0])
-        #print("GID:",  int(gidNode.toUInt()[0]))
-        #print(valueItem.data(0).toPyObject(),  attrItem.data(0).toPyObject())
-        
-        self.lastChanged = (str(attrItem.data(0).toString()), str(valueItem.data(0).toString()), gid)
-        
-        print("Changed: " + repr(self.lastChanged))
-        
+    """
+    Initialize models, proxy models, selection models, and connections
+    """
     def createTree(self):
 
         # Set up Inspector
         self.inspectorModel.initialize(["UI Element",  "Name"],  True)
-        
-        #self.ui.inspector.setModel(self.inspectorModel)
-        
-        
+
         # Inspector Proxy Model
         self.inspectorProxyModel= QSortFilterProxyModel()
         
@@ -217,14 +196,13 @@ class StartQT4(QMainWindow):
         self.ui.property.setModel(self.propertyProxyModel)
         
         # Property Selection Model
-        
-        print self.propertyModel.connect(self.propertyModel, SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"), self.dataChanged)
+        self.propertyModel.connect(self.propertyModel, SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"), self.dataChanged)
         
         
     def refresh(self):
         self.preventChanges = True
         self.inspectorModel.refreshRoot()
-        self.preventChanges = None
+        self.preventChanges = False
         
     def exit(self):
         sys.exit()

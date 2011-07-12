@@ -1,5 +1,5 @@
 import httplib, urllib, urllib2,  json
-from dataTypes import getTypeTable,  BadDataException
+from data import getTypeTable,  BadDataException
 
 def send(data):
     

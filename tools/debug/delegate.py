@@ -1,5 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from data import modelToData,  dataToModel, BadDataException
 
 class InspectorDelegate(QItemDelegate):
     def __init__(self, parent=None, *args):
