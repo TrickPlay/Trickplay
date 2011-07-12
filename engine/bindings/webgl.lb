@@ -1,4 +1,3 @@
-
 module webgl;
 
 [[
@@ -452,6 +451,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
     typedef int             WebGLUniformLocation;
 
     typedef table           WebGLActiveInfo;
+    typedef table           WebGLContextAttributes;
 
     typedef int             GLenum;
     typedef bool            GLboolean;
@@ -478,17 +478,45 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
     readonly GLsizei drawingBufferWidth
         [[
-            drawingBufferWidth = clutter_actor_get_width( self );
+            gint w;
+            gint h;
+            
+            clutter_texture_get_base_size( CLUTTER_TEXTURE( self ) , & w , & h );
+            
+            drawingBufferWidth = w;
         ]];
 
     readonly GLsizei drawingBufferHeight
         [[
-            drawingBufferHeight = clutter_actor_get_height( self );
+            gint w;
+            gint h;
+            
+            clutter_texture_get_base_size( CLUTTER_TEXTURE( self ) , & w , & h );
+            
+            drawingBufferHeight = h;
         ]];
 
     WebGLContextAttributes getContextAttributes()
         [[
-            lua_pushnil( L );
+            lua_newtable( L );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "alpha" );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "depth" );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "stencil" );
+            
+            lua_pushboolean( L , false );
+            lua_setfield( L , -2 , "antialias" );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "premultipliedAlpha" );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "preserveDrawingBuffer" );
         ]];
 
     bool isContextLost()
