@@ -5,7 +5,6 @@
 #include "clutter_util.h"
 #include "lb.h"
 
-
 //.............................................................................
 
 ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
@@ -85,6 +84,8 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
 void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
 {
     LSG;
+
+	index = abs_index(L, index);
 
     if ( lua_istable( L, index ) )
     {
@@ -181,6 +182,52 @@ ClutterTimeline * ClutterUtil::user_data_to_timeline( lua_State * L, int n )
     GObject * obj = ud->get_master();
 
     return CLUTTER_IS_TIMELINE( obj ) ? CLUTTER_TIMELINE( obj ) : NULL;
+}
+
+//.............................................................................
+
+ClutterAnimator * ClutterUtil::user_data_to_animator( lua_State * L, int n )
+{
+    if ( ! lb_check_udata_type( L , n , "Animator" , false ) )
+    {
+        luaL_where( L , 1 );
+        lua_pop( L , 1 );
+        return NULL;
+    }
+
+    UserData * ud = UserData::get( L , n );
+
+    if ( ! ud )
+    {
+        return NULL;
+    }
+
+    GObject * obj = ud->get_master();
+
+    return CLUTTER_IS_ANIMATOR( obj ) ? CLUTTER_ANIMATOR( obj ) : NULL;
+}
+
+//.............................................................................
+
+ClutterConstraint * ClutterUtil::user_data_to_constraint( lua_State * L , int n )
+{
+    if ( ! lb_check_udata_type( L , n , "constraint" , false ) )
+    {
+        luaL_where( L , 1 );
+        lua_pop( L , 1 );
+        return NULL;
+    }
+
+    UserData * ud = UserData::get( L , n );
+
+    if ( ! ud )
+    {
+        return NULL;
+    }
+
+    GObject * obj = ud->get_master();
+
+    return CLUTTER_IS_CONSTRAINT( obj ) ? CLUTTER_CONSTRAINT( obj ) : NULL;
 }
 
 //.............................................................................
@@ -287,6 +334,58 @@ void ClutterUtil::wrap_concrete_actor( lua_State * L, ClutterActor * actor )
     {
         lua_pushnil( L );
     }
+}
+
+//-----------------------------------------------------------------------------
+
+void ClutterUtil::wrap_constraint( lua_State * L , ClutterConstraint * constraint )
+{
+    if ( ! constraint )
+    {
+        lua_pushnil( L );
+    }
+    else if ( UserData * ud = UserData::get( G_OBJECT( constraint ) ) )
+    {
+        ud->push_proxy();
+    }
+    else
+    {
+        lua_pushnil( L );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void ClutterUtil::wrap_timeline( lua_State * L , ClutterTimeline * timeline )
+{
+    if ( ! timeline )
+    {
+        lua_pushnil( L );
+        return;
+    }
+
+    if ( UserData * ud = UserData::get( G_OBJECT( timeline ) ) )
+    {
+        ud->push_proxy();
+        if ( ! lua_isnil( L , -1 ) )
+        {
+            return;
+        }
+        lua_pop( L , 1 );
+    }
+
+    UserData * ud = UserData::make( L , "Timeline" );
+    g_object_ref( G_OBJECT( timeline ) );
+    ud->initialize_with_master( timeline );
+    ud->check_initialized();
+    luaL_getmetatable( L , "TIMELINE_METATABLE" );
+    if ( lua_isnil( L , -1 ) )
+    {
+        lua_getglobal( L , "Timeline" );
+        lua_pop( L , 2 );
+        luaL_getmetatable( L , "TIMELINE_METATABLE" );
+    }
+    lua_setmetatable( L , -2 );
 }
 
 //-----------------------------------------------------------------------------
