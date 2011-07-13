@@ -1592,6 +1592,8 @@ function ui_element.textInput(table)
     	border_corner_radius = 12 ,
 		readonly = "",
 		ui_position = {200,200,0},
+		----------------
+		item_type = nil
 
     }
  --overwrite defaults
