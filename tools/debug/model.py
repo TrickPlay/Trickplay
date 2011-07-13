@@ -29,39 +29,58 @@ class ElementModel(QStandardItemModel):
             data = getTrickplayData()["children"][0]
             
             self.addElement(root, data)
+            
     
     """
     Find an attribute given the index of a UIElement
+    Return an index tuple (title, value)
     """
     def findAttr(self,  parent,  title):
+        
         if self.isElement(self.title(parent)):
+            
             n = self.rowCount(parent)
+            
             for i in range(n):
+                
                 index = self.index(i, 0, parent)
+                
                 if title == self.data(index):
+                    
                     return (index,  self.index(i,  1,  parent))
-            print("ERROR >> Node attribute " +  str(title) +  " not found.")
-            print("Occurred in node:" + str(parent.data(0).toString()))
-            #exit()
-        else:
-            #print("Only search for attributes on Elements")
-            return None
+                    
+            print("ERROR >> Node attribute " +  str(title) +  " not found in " + str(parent.data(0).toString()) + ".")
 
+        else:
+            
+            return None
+        
+    
     """
     Find the associated data for a child UI element
     If the UI element could not be found (by gid) then return None,
     otherwise return the child data
     """
     def findChildData(self,  index,  data):
+        
         exists = None
+        
         for child in data['children']:
+            
             node = self.findAttr(index,  'gid')[1]
+            
             if child['gid'] == node.data(Qt.DisplayRole).toPyObject():
+            
                 exists = child
+        
         return exists
     
+    """
+    Return the title index of a row given the value index
+    """
     def titleFromValue(self, valueNode):
-        print(pyData(valueNode, 0), pyData(valueNode.parent(),  0), valueNode.row())
+        
+        #print(pyData(valueNode, 0), pyData(valueNode.parent(),  0), valueNode.row())
         
         parentIndex = valueNode.parent()
         
@@ -85,20 +104,30 @@ class ElementModel(QStandardItemModel):
     """
     def addElement(self, parent, data):
         
-        value = data["name"]    
+        value = data["name"]
+        
         title = data["type"]
+        
         if "Texture" == title:
+        
             title = "Image"
         
+        
+        
         titleNode = QStandardItem(title)
+        
         titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
+        
         titleNode.setData(data['gid'], Qt.Gid)
 
         valueNode = QStandardItem(value)
+        
         valueNode.setData(data['gid'], Qt.Gid)
         
         parent.appendRow([titleNode, valueNode])
+        
         self.addAttrs(titleNode, data)
+    
     
     """
     Add the list of UI element attributes to the tree as a QStandardItem
@@ -148,15 +177,19 @@ class ElementModel(QStandardItemModel):
             
             if 'gid' == title or 'source' == title or 'type' == title:
                 
-                 valueNode.setFlags(Qt.NoItemFlags)
-            
+                valueNode.setFlags(Qt.NoItemFlags)
+        
+        
     """
     Refresh all Tree data from the root
     Most data will remain the same between refreshes
     """
     def refreshRoot(self):
+        
         data = getTrickplayData()["children"][0]
+        
         self.refreshElements(self.getRoot(),  data)
+    
     
     """
     Refreshes a UI element given its index
@@ -169,25 +202,25 @@ class ElementModel(QStandardItemModel):
         for i in range(len(children)-1,  -1,  -1):
             
             element = children[i][0]
+            
             title = self.title(element)
             
             # Removed unused elements and update existing ones
             if self.isElement(title):
+                
                 childData = self.findChildData(element,  data)
+                
                 if not childData:
+                    
                     self.removeRow(i,  index)
+                
                 else:
+                    
                     self.refreshElements(element,  childData)
+            
             else:                
-                # Data has this attr
-                try: 
-                    if data[str(title)]:
-                        #print("Refresh",  title)
-                        pass
-                # Data doesn't have this attr
-                except:
-                    #print("Delete me",  title)
-                    pass
+                
+                self.refreshAttr(element, data, str(title))
         
         # Order of elements for rearranging later
         elementOrder = []
@@ -248,6 +281,24 @@ class ElementModel(QStandardItemModel):
         
         pass
         
+        
+        
+    def refreshAttr(self, index, data, title):
+        
+        # Data has this attr
+        try: 
+            
+            if data[title]:
+                
+                #print("Refresh",  title)
+                pass
+        
+        # Data doesn't have this attr
+        except:
+            
+            #print("Delete me",  title)
+            pass
+    
     def copyAttrs(self, original, new):
         for i in self.children(original):
             titleNode = self.itemFromIndex(i[0]).clone()
@@ -256,11 +307,11 @@ class ElementModel(QStandardItemModel):
             valueNode = self.itemFromIndex(i[1]).clone()
             new.appendRow([titleNode,  valueNode])
         
-    def refreshAttrs(self):
-        pass
+
         
     def getRoot(self):
         return self.index(0,  0)
+    
     
     """
     Return a list of tuples (column 0, column 1)
@@ -274,6 +325,7 @@ class ElementModel(QStandardItemModel):
     def title(self,  index):
         return index.data(Qt.DisplayRole).toString()
 
+
     """
     Returns true if title (string or index) is a UIElement name
     """
@@ -286,18 +338,32 @@ class ElementModel(QStandardItemModel):
         "Image" == title or \
         "Rectangle" == title or \
         "Clone" == title:
+        
             return title
+        
         else:
+            
             return None
 
 def summarize(value):
+    
     # The read-only summary of attributes
     summary = "{"
+    
     for item in value:
+        
         summary += item + ': ' + str(value[item]) + ', '
+    
     summary = summary[:len(summary)-2] + '}'
+    
     return summary
 
+
+"""
+Get node data and return the result as a Python object,
+as opposed to data which returns the result as a QVariant
+If the data is a QString, return a Python str
+"""
 def pyData(index, role):
     
     i = index.data(role).toPyObject()
