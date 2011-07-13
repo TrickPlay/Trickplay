@@ -27,8 +27,17 @@ def dataToModel(title,  value):
     "color" == t or "border_color" == t:
         s = False
         
-    if "gid" == v:
-        v = int(v)
+    #if "gid" == v:
+    #    v = int(v)
+        
+    if "type" == t and "Texture" == v:
+        v = "Image"
+        
+    if "is_visible" == t:
+        if v:
+            v = True
+        else:
+            v = False
     
     return (t, v, s)
     

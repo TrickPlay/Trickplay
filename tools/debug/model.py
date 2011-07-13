@@ -59,6 +59,26 @@ class ElementModel(QStandardItemModel):
             if child['gid'] == node.data(Qt.DisplayRole).toPyObject():
                 exists = child
         return exists
+    
+    def titleFromValue(self, valueNode):
+        print(pyData(valueNode, 0), pyData(valueNode.parent(),  0), valueNode.row())
+        
+        parentIndex = valueNode.parent()
+        
+        row = valueNode.row()
+        
+        column = 0
+        
+        # Screen
+        if not parentIndex.isValid():
+
+            return self.indexFromItem(self.invisibleRootItem().child(row, column))
+
+        # Everything else
+        else:
+        
+            return parentIndex.child(row, column)
+        
 
     """
     Add a UI element to the tree as a QStandardItem
@@ -71,9 +91,11 @@ class ElementModel(QStandardItemModel):
             title = "Image"
         
         titleNode = QStandardItem(title)
+        titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
         titleNode.setData(data['gid'], Qt.Gid)
 
         valueNode = QStandardItem(value)
+        valueNode.setData(data['gid'], Qt.Gid)
         
         parent.appendRow([titleNode, valueNode])
         self.addAttrs(titleNode, data)
@@ -88,24 +110,46 @@ class ElementModel(QStandardItemModel):
             title, value,  isSimple = dataToModel(attr, data[attr])
             
             titleNode = QStandardItem(attr)
+            
+            titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
+            
             titleNode.setData(data['gid'], Qt.Gid)
             
+            valueNode = None
+            
             if 'children' == title:
+                
                 for child in value:
+                    
                     self.addElement(parent, child)
                 
             elif isSimple:
+                
                 valueNode = QStandardItem()
+                
                 valueNode.setData(value,  Qt.DisplayRole)
+                
                 valueNode.setData(value,  Qt.Data)
+                
                 parent.appendRow([titleNode, valueNode])
                 
             else:
-                summary = summarize(value)
-                valueNode = QStandardItem(summary)
-                valueNode.setData(summary,  Qt.Data)
-                parent.appendRow([titleNode, valueNode])
                 
+                # TODO, construct summary from child nodes.. works better
+                summary = summarize(value)
+                
+                valueNode = QStandardItem(summary)
+                
+                valueNode.setData(summary,  Qt.Data)
+                
+                valueNode.setFlags(Qt.NoItemFlags)
+                
+                parent.appendRow([titleNode, valueNode])
+            
+            if 'gid' == title or 'source' == title or 'type' == title:
+                
+                 valueNode.setFlags(Qt.NoItemFlags)
+            
     """
     Refresh all Tree data from the root
     Most data will remain the same between refreshes
