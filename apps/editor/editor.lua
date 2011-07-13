@@ -2355,6 +2355,11 @@ function editor.save(save_current_f, save_backup_f)
 	local message = Text {text = "File Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
 
+	if(CURRENT_DIR == "") then 
+		editor.error_message("002", nil, new_project)  
+		return 
+	end 
+
 	if save_current_f == nil then 
 		save_current_f = false
 	end 
@@ -4786,7 +4791,7 @@ function editor.error_message(error_num, str, func_ok, func_nok)
 
 	local error_msg_map = {
 		["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
-		["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
+		["002"] = function() OK_label = "OK" return "Please create a project before you save\n a file." end, 
 		["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
 		["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
 		["005"] = function(str) OK_label = "OK" return "Please enter a file name." end, 
