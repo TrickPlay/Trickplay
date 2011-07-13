@@ -119,6 +119,16 @@ class ElementModel(QStandardItemModel):
         titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
         
         titleNode.setData(data['gid'], Qt.Gid)
+        
+        titleNode.setCheckable(True)
+        
+        checkState = Qt.Unchecked
+        
+        if data['is_visible']:
+            
+            checkState = Qt.Checked
+        
+        titleNode.setCheckState(checkState)
 
         valueNode = QStandardItem(value)
         
@@ -312,6 +322,9 @@ class ElementModel(QStandardItemModel):
                 for r in ordered:
             
                     item.appendRow(r)
+                    
+                # TODO: select the appropriate node (by searching the entire tree for gid)
+                # after the cut & paste
         
     
     

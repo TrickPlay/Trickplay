@@ -71,7 +71,7 @@ class StartQT4(QMainWindow):
     """
     def selectionChanged(self,  a,  b):
         
-        print("Selection Changed",  a,  b)
+        #print("Selection Changed",  a,  b)
         
         i = self.inspectorSelectionModel.selection()
         
@@ -138,26 +138,44 @@ class StartQT4(QMainWindow):
                 
                 valueIndex = topLeft
                 
-                titleIndex = self.inspectorModel.titleFromValue(valueIndex)
+                # If index is an element, it was checked or unchecked
+                if 0 == valueIndex.column():
+                    
+                    checkState = valueIndex.model().itemFromIndex(valueIndex).checkState()
+                    
+                    checkState = bool(checkState)
                 
-                print('title',  titleIndex.data(0).toString())
+                    print("checkbox changed to",  checkState)
+                    
+                    gid = pyData(valueIndex, Qt.Gid)
+                    
+                    if self.sendData(gid, 'is_visible', checkState):
+                        
+                        propertyValueIndex = self.inspectorModel.findAttr(valueIndex, 'is_visible')[1]
+                        
+                        valueIndex.model().itemFromIndex(propertyValueIndex).setData(checkState, 0)
+                        
+                        self.updatePropertyList(valueIndex)
                 
-                gid = pyData(valueIndex, Qt.Gid)
+                # Index is the element's name
+                else:
                 
-                value = pyData(valueIndex, 0)
+                    titleIndex = self.inspectorModel.titleFromValue(valueIndex)
+                    
+                    print('title',  titleIndex.data(0).toString())
+                    
+                    gid = pyData(valueIndex, Qt.Gid)
+                    
+                    value = pyData(valueIndex, 0)
+                    
+                    if self.sendData(gid, 'name', value):
+                        
+                        propertyValueIndex = self.inspectorModel.findAttr(titleIndex, 'name')[1]
+                        
+                        self.inspectorModel.itemFromIndex(propertyValueIndex).setData(value, 0)
+                        
+                        self.updatePropertyList(titleIndex)
                 
-                if self.sendData(gid, 'name', value):
-                    
-                    self.preventChanges = True
-                    
-                    propertyValueIndex = self.inspectorModel.findAttr(titleIndex, 'name')[1]
-                    
-                    self.inspectorModel.itemFromIndex(propertyValueIndex).setData(value, 0)
-                    
-                    self.updatePropertyList(titleIndex)
-                    
-                    self.preventChanges = False
-                    
             self.preventChanges = False
         
     """
@@ -196,9 +214,17 @@ class StartQT4(QMainWindow):
                 
                 value = pyData(propertyValueIndex, 0)
                 
-                # Verify data is  OK before making any changes to model or Trickplay
-                
+                # Verify data is  OK before making any changes to model
                 if self.sendData(gid, title, value):
+                    
+                    # Update the checkbox
+                    if "is_visible" == title:
+                        
+                        if value:
+                            
+                            value = 2
+                        
+                        inspectorElementIndex.model().itemFromIndex(inspectorElementIndex).setCheckState(value)
                         
                     # Update the data in the inspector
                     valueItem.setData(value,  0)
