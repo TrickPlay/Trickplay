@@ -5991,7 +5991,7 @@ function ui_element.arrowPane(t)
 		umbrella:clear()
 		
 		if type(p.arrow_src) == "string" then p.arrow_src = assets(p.arrow_src) end
-		
+
 		if p.arrow_src.parent then p.arrow_src:unparent() end
 		umbrella:add(p.arrow_src)
 		p.arrow_src:hide()
@@ -6036,13 +6036,14 @@ function ui_element.arrowPane(t)
 
 			
 			if p.visible_w < p.virtual_w then
-				arrow = Clone{source=p.arrow_src}
-
+				-- [[ Right Arrow ]]-- 
 				if p.tab then 
-					arrow.x = border.w+p.arrow_dist_to_frame  - 20
+					arrow = Image {name = "right", src ="/lib/assets/tab-arrow-right-on.png"}
+					arrow.x = border.w+p.arrow_dist_to_frame  - 15
 					arrow.y = border.h/2 - 10
 					arrow:raise_to_top()
 				else 
+					arrow = Clone{source=p.arrow_src}
 					arrow.anchor_point={arrow.w/2,arrow.h}
 					arrow.x = border.w+p.arrow_dist_to_frame
 					arrow.y = border.h/2
@@ -6050,12 +6051,13 @@ function ui_element.arrowPane(t)
 				end 
 				
 				arrow.on_button_down = function()
-					--print("YUGI Right")
 					umbrella:pan_by(p.dist_per_press,0)
 					if p.tab_num then 
-						if p.tab_num < #p.tab  then 
-							p.tab_num = p.tab_num + 1
+						if umbrella:find_child("right").src == "/lib/assets/tab-arrow-right-on.png" then
+							p.tab_num = 2
 							p.tab[p.tab_num].on_button_down()
+							umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-off.png"
+							umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-on.png"
 						end 
 						if p.tab_num > 1 and p.tab[4].reactive == false then 
 							p.tab[4]:show()
@@ -6066,15 +6068,16 @@ function ui_element.arrowPane(t)
 				end
 				
 				arrow.reactive=true
-				
 				umbrella:add(arrow)
 
-				arrow = Clone{source=p.arrow_src}
 
+				-- [[ Left Arrow ]]-- 
 				if p.tab then 
+					arrow = Image {name = "left", src ="/lib/assets/tab-arrow-left-off.png"}
 					arrow.x = - 20
 					arrow.y = 0
 				else 
+					arrow = Clone{source=p.arrow_src}
 					arrow.anchor_point={arrow.w/2,arrow.h}
 					arrow.x = -p.arrow_dist_to_frame
 					arrow.y = border.h/2
@@ -6082,11 +6085,12 @@ function ui_element.arrowPane(t)
 				end 
 
 				arrow.on_button_down = function()
-					--print("YUGI Left")
 					umbrella:pan_by(-p.dist_per_press,0)
 					if p.tab_num then 
-						if p.tab_num > 1 then 
-							p.tab_num = p.tab_num - 1
+						if umbrella:find_child("left").src == "/lib/assets/tab-arrow-left-on.png" then 
+							umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-on.png"
+							umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-off.png"
+							p.tab_num = 1
 							p.tab[p.tab_num].on_button_down()
 						end 
 						if p.tab_num < 4 and p.tab[4].reactive == true then 

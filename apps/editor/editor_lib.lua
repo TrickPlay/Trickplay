@@ -1029,7 +1029,11 @@ function editor_ui.tabBar(t)
 				arrow_src = p.arrow_image,
 				tab_num = p.current_tab, -- 1
 				tab = p.buttons,
-				box_width = 0
+				box_width = 0,
+				tab_arrow_left_on = "lib/assets/tab-arrow-left-off.png",  
+				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
+				tab_arrow_left_off = "lib/assets/tab-arrow-left-off.png",  
+				tab_arrow_right_off = "lib/assets/tab-arrow-left-off.png",  
 			}
 			
 
