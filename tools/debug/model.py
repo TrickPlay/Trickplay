@@ -156,11 +156,14 @@ class ElementModel(QStandardItemModel):
             
             valueNode = None
             
+            # Add children in reverse order, so the top of the element stack 
+            # is the first in the list
             if 'children' == title:
                 
-                for child in value:
+                for child in range(len(value)-1,  -1,  -1):
+                #for child in value:
                     
-                    self.addElement(parent, child)
+                    self.addElement(parent, value[child])
                 
             elif isSimple:
                 
@@ -292,6 +295,9 @@ class ElementModel(QStandardItemModel):
                 gid = pyData(pair[0], Qt.Gid)
                 
                 modelElementOrder.append(gid)
+        
+        # Reverse the order to keep the top of the stack as the first element listed
+        dataElementOrder.reverse()
         
         if modelElementOrder != dataElementOrder:
             
