@@ -223,7 +223,7 @@ class ElementModel(QStandardItemModel):
                 self.refreshAttr(element, data, str(title))
         
         # Order of elements for rearranging later
-        elementOrder = []
+        dataElementOrder = []
         
         # Add each nonexistent element of data
         for d in data:
@@ -237,7 +237,7 @@ class ElementModel(QStandardItemModel):
                     
                     gid = i['gid']
                     
-                    elementOrder.append(gid)
+                    dataElementOrder.append(gid)
                     
                     exists = False
                     
@@ -250,39 +250,74 @@ class ElementModel(QStandardItemModel):
                         if r:
                             
                             # If a match is found, this element must be refreshed
-                            if int(str(r[1].data(0).toString())) == gid:
+                            if int(pyData(r[1], 0)) == gid:
                                 
                                 exists = True
                                 
                                 break
-                            
+                    
+                    # If element doesn't exist, add it. If it exists, it was already refreshed
                     if not exists:
                         
                         self.addElement(self.itemFromIndex(index),  i)
-                        
-                    else:
-                    
-                        print("Refresh UI element")
                         
             else:
                 
                 node = self.findAttr(index, d) 
                 
-                if node:
-                
-                    print("refresh data", d)
-                
-                else:
+                if not node:
                 
                     print("add data", d)
                 
-        # Rearrange UI elements if necessary
-        # (if an element was promoted in its group)
+        # Rearrange UI elements if necessary (by taking then inserting rows)
+        children = self.children(index)
         
-        pass
+        modelElementOrder = []
         
+        # First get the old element order
+        for pair in children:
+            
+            if self.isElement(pyData(pair[0], 0)):
+            
+                gid = pyData(pair[0], Qt.Gid)
+                
+                modelElementOrder.append(gid)
         
+        if modelElementOrder != dataElementOrder:
+            
+            print("Re-ordering children")
         
+            ordered = []
+            
+            item = self.itemFromIndex(index)
+        
+            # For each Gid
+            for e in dataElementOrder:
+                
+                i = None
+                
+                # Find the row with the correct Gid
+                for c in children:
+                    
+                    if e == pyData(c[0], Qt.Gid):
+                        
+                        i = c[0].row()
+                        
+                        break
+                
+                # Cut each row, and store them in the correct order
+                ordered.append(item.takeRow(i))
+            
+                # Paste each row
+                for r in ordered:
+            
+                    item.appendRow(r)
+        
+    
+    
+    """
+    Refresh or delete one attribute by title
+    """    
     def refreshAttr(self, index, data, title):
         
         # Data has this attr
