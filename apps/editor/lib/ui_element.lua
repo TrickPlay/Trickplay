@@ -3005,9 +3005,9 @@ function ui_element.checkBoxGroup(t)
 	     	end 
 
 	      	if p.skin == "custom" then 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
+	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
 			else 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = false, opacity = 0}
+	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
 			end
 	     	checks:add(check) 
 
@@ -3067,9 +3067,16 @@ function ui_element.checkBoxGroup(t)
 
 	     		function check:on_button_down(x,y,b,n)
 					local check_num = tonumber(check.name:sub(6,-1))
-					p.selected_items = table_remove_val(p.selected_items, check_num)
-					check.opacity = 0
-					check.reactive = false
+					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
+						p.selected_items = table_remove_val(p.selected_items, check_num)
+						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
+						cb_group:find_child("check"..tostring(check_num)).reactive = true 
+    					cb_group.extra.select_button(p.selected_items) 
+					else 
+						table.insert(p.selected_items, check_num)
+						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
+    					cb_group.extra.select_button(p.selected_items) 
+					end 
     				cb_group.extra.select_button(p.selected_items) 
 					return true
 	     		end 
@@ -3085,6 +3092,8 @@ function ui_element.checkBoxGroup(t)
              checks:find_child("check"..tostring(j)).reactive = true 
 	 	end 
 
+		boxes.reactive = true 
+		checks.reactive = true 
 	 	cb_group:add(boxes, items, checks)
     end
     
