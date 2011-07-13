@@ -5877,8 +5877,8 @@ function ui_element.arrowPane(t)
         skin = "default",
 		ui_position = {200,100},
 		--------------------------
-		tab_num = nil, 
-		tab = nil
+		tab = nil, 
+		tab_buttons = nil 
     }
 	
 	local make_arrow = function()
@@ -6034,10 +6034,9 @@ function ui_element.arrowPane(t)
 				umbrella:add(arrow)
 			end
 
-			
 			if p.visible_w < p.virtual_w then
 				-- [[ Right Arrow ]]-- 
-				if p.tab then 
+				if p.tab_buttons then 
 					arrow = Image {name = "right", src ="/lib/assets/tab-arrow-right-on.png"}
 					arrow.x = border.w+p.arrow_dist_to_frame  - 15
 					arrow.y = border.h/2 - 10
@@ -6052,16 +6051,18 @@ function ui_element.arrowPane(t)
 				
 				arrow.on_button_down = function()
 					umbrella:pan_by(p.dist_per_press,0)
-					if p.tab_num then 
+					if p.tab then 
+						local current_tab = p.tab.current_tab
 						if umbrella:find_child("right").src == "/lib/assets/tab-arrow-right-on.png" then
-							p.tab_num = 2
-							p.tab[p.tab_num].on_button_down()
+							if current_tab == 1 then 
+								p.tab_buttons[2].on_button_down()
+							end 
 							umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-off.png"
 							umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-on.png"
 						end 
-						if p.tab_num > 1 and p.tab[4].reactive == false then 
-							p.tab[4]:show()
-							p.tab[4].reactive = true 
+						if p.tab_buttons[4].reactive == false then 
+							p.tab_buttons[4]:show()
+							p.tab_buttons[4].reactive = true 
 						end 
 						return true
 					end 
@@ -6072,7 +6073,7 @@ function ui_element.arrowPane(t)
 
 
 				-- [[ Left Arrow ]]-- 
-				if p.tab then 
+				if p.tab_buttons then 
 					arrow = Image {name = "left", src ="/lib/assets/tab-arrow-left-off.png"}
 					arrow.x = - 20
 					arrow.y = 0
@@ -6086,16 +6087,18 @@ function ui_element.arrowPane(t)
 
 				arrow.on_button_down = function()
 					umbrella:pan_by(-p.dist_per_press,0)
-					if p.tab_num then 
+					if p.tab then 
+						local current_tab = p.tab.current_tab
 						if umbrella:find_child("left").src == "/lib/assets/tab-arrow-left-on.png" then 
+							if current_tab == 4 then 
+								p.tab_buttons[1].on_button_down()
+							end 
 							umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-on.png"
 							umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-off.png"
-							p.tab_num = 1
-							p.tab[p.tab_num].on_button_down()
 						end 
-						if p.tab_num < 4 and p.tab[4].reactive == true then 
-							p.tab[4]:hide()
-							p.tab[4].reactive = false 
+						if  p.tab_buttons[4].reactive == true then 
+							p.tab_buttons[4]:hide()
+							p.tab_buttons[4].reactive = false 
 						end 
 						return true
 					end 
