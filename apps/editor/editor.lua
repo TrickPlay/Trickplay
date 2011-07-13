@@ -4791,16 +4791,16 @@ function editor.error_message(error_num, str, func_ok, func_nok)
 
 	local error_msg_map = {
 		["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
-		["002"] = function() OK_label = "OK" return "Please create a project before you save\n a file." end, 
+		["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
 		["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
-		["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
+		["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists. Do you want to replace it?" end, 
 		["005"] = function(str) OK_label = "OK" return "Please enter a file name." end, 
 	}
 
 	local error_msg = error_msg_map[error_num](str) 
 	
-	local message = Text {text = error_msg }:set(MSTYLE)
-	local message_shadow = Text {text = error_msg}:set(MSSTYLE)
+	local message = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSTYLE)
+	local message_shadow = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSSTYLE)
 
 	title.text = ""
 	title_shadow.text = ""
@@ -4876,8 +4876,8 @@ function editor.error_message(error_num, str, func_ok, func_nok)
 	  		xbox:set{position = {275, 0}},
 			title_shadow:set{position = {PADDING,PADDING/3}, }, 
 			title:set{position = {PADDING+1, PADDING/3+1}}, 
-			message_shadow:set{position = {PADDING,TOP_BAR+PADDING}, width = WIDTH - 28, wrap= true, wrap_mode = "CHAR"}, 
-			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}, width = WIDTH - 28, wrap= true, wrap_mode = "CHAR"}, 
+			message_shadow:set{position = {PADDING,TOP_BAR+PADDING}, width = WIDTH - 28, wrap= true, wrap_mode = "WORD"}, 
+			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}, width = WIDTH - 28, wrap= true, wrap_mode = "WORD"}, 
 			--button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}, 
 			--button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
 			button_cancel, 

@@ -1005,8 +1005,6 @@ function editor_ui.tabBar(t)
 			editor_use = false
 
         end
-
--- 
 ---[[  ap 
 
 		ap = nil
@@ -1027,8 +1025,8 @@ function editor_ui.tabBar(t)
 				arrow_sz = p.arrow_sz,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
 				arrow_src = p.arrow_image,
-				tab_num = p.current_tab, -- 1
-				tab = p.buttons,
+				tab = umbrella, -- p.current_tab, -- 1
+				tab_buttons = p.buttons,
 				box_width = 0,
 				tab_arrow_left_on = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
