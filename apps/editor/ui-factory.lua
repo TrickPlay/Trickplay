@@ -939,6 +939,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		function separator_plus:on_button_down(x,y)
 			separator_plus.on_focus_in()
 			return true 
+
 		end 
 		function item_plus:on_button_down(x,y)
 			item_plus.on_focus_in()
@@ -975,6 +976,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
 			return true 
 		end 
+
 	    function label_plus:on_button_up(x,y)
 			table.insert(v.items, {type="label", string="Label ..."})
 			screen:remove(inspector)
@@ -986,7 +988,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			inspector_apply (v, inspector)
 			local si = inspector:find_child("si_items")
 			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
-
 			return true 
 		end 
 	end 
@@ -1010,8 +1011,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		itemsList = v.items
 	end 
 
+	local input_txt, item_type 
 	for i,j in pairs(itemsList) do 
-		local input_txt, item_type 
 	    if v.extra.type =="MenuButton" then 
 			if j["type"] == "label" then 
 		    	input_txt = j["string"] 
@@ -1029,7 +1030,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
         local item = ui_element.textInput{ui_width = 175, ui_height = 24, text = input_txt, text_font = "FreeSans Medium 12px", border_width = 1, border_corner_radius = 0, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, fill_color = {0,0,0,255}} 
 	    item.name = "item_text"..tostring(i)
-	     
+
+		if item_type then 
+        	--item:find_child("textInput").item_type = item_type
+        	item.item_type = item_type
+	    end 
 	    --local minus = factory.draw_minus_item()
 		local minus = Image{src="lib/assets/li-btn-dim-minus.png"}
 	    minus.name = "item_minus"..tostring(i)
@@ -1066,6 +1071,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		function up:on_button_down(x,y)
 			up.src="lib/assets/li-btn-red-up.png"
 		end 
+
 	    function up:on_button_up(x,y)
 			if v.extra.type == "TabBar" then 
 				v:move_tab_up(tonumber(string.sub(up.name, 8,-1))+1)
@@ -1236,6 +1242,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
     end 
 	group.reactive = true
 	group:add(items_list) 
+
 	return group
 end 
 

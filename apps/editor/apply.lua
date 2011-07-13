@@ -34,19 +34,16 @@ function inspector_apply (v, inspector)
 		            	v.items[next] = item:find_child("textInput").text
 		       		elseif v.extra.type == "TabBar" then 
 		            	v.tab_labels[next] = item:find_child("textInput").text
-						print("tabBar")
-						
 					elseif v.extra.type == "MenuButton" then 
-						print("MENU BUTTONS")
 	 	       			if item:find_child("textInput").text == "--------------" then 
 			    			v.items[next] = {type="separator"}
-							print("seperator")
-		       			elseif item:find_child("textInput").extra.item_type == "label" then 
-			    			v.items[next] = {type="label", string=item:find_child("textInput").text}
-							print("textInpuit")
-		       			elseif item:find_child("textInput").extra.item_type == "item" then 
-							print("itemitmemitemtmeitmet")
-			    			v.items[next] = {type="item", string=item:find_child("textInput").text, f=nil}
+						else 
+							local pp = item:find_child("textInput").parent
+		       				if pp.item_type == "label" then 
+			    				v.items[next] = {type="label", string=item:find_child("textInput").text}
+		       				elseif pp.item_type == "item" then 
+			    				v.items[next] = {type="item", string=item:find_child("textInput").text, f=nil}
+							end 
 		       			end 
 		       		end 
                end 
@@ -387,9 +384,7 @@ function inspector_apply (v, inspector)
 	  	end 
 
 		if inspector:find_child("item_group_list") then 
-			print("111111111sjdfhjkhdfjkshfd")
 		   item_group = inspector:find_child("item_group_list")
-		   
 		   apply(item_group) 
 	  	end 
 
