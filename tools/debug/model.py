@@ -11,6 +11,217 @@ Qt.Gid = Qt.UserRole + 5
 Qt.Data = Qt.UserRole + 6
 Qt.Nested = Qt.UserRole + 7
 
+TITLE = 0
+VALUE = 1
+GID = 2
+
+class Element(QStandardItem):
+    
+    def __init__(self, value=None):
+        
+        self.lastChild = 0
+        
+        if value:
+        
+            super(QStandardItem, self).__init__(value)
+            
+        else:
+            
+            super(QStandardItem, self).__init__()
+            
+    
+#    def title(self): return self.title
+#    
+#    def setTitle(self, title): self.title = title
+#    
+    def gid(self): return self.gid
+#    
+    def setGid(self, gid): self.gid = gid
+#    
+#    def value(self): return value
+#    
+#    def setValue(self, value): self.value = value
+
+
+    def type(self):
+        
+        return QStandardItem.UserType
+
+
+    
+    def clone(self):
+        
+        new = Element(self.data(Qt.DisplayRole).toString())
+        
+        for i in range(10):
+            
+            role = i + Qt.UserRole
+            
+            if self.pyData(role):
+                
+                new.setData(self.pyData(role), role)
+        
+        new.setFlags(self.flags())
+        
+        return new
+
+
+    """
+    Clone including children
+    """
+    def fullClone(self):
+        
+        new = self.clone()
+        
+        for child in self:
+            
+            r = []
+            
+            for i in child:
+                
+                r.append(i.clone())
+            
+            new.appendRow(r)
+            
+        return new
+
+
+    """
+    Clone this item's attributes
+    """
+    def copy(self):
+        
+        new = []
+        
+        for c in self:
+            
+            print("copying")
+            
+            newRow = []
+            
+            if not c[TITLE].isElement():
+
+                print(c[TITLE].pyData())
+
+                for i in range(len(c)):
+                    
+                    newRow.append(c[i].copy())
+                
+            new.append(newRow)
+            
+        return new
+
+
+    """
+    Returns a list of child items
+    """
+    def children(self):
+        
+        children = []
+        
+        for c in self:
+        
+            children.append(c)
+    
+    
+    """
+    Returns data at a given role as a python object
+    """
+    def pyData(self, role = Qt.DisplayRole):
+        
+        v = self.data(role).toPyObject()
+        
+        if isinstance(v, QString):
+            
+            v = str(v)
+        
+        return v
+
+
+    """
+    Returns true if this object has a UI Element name
+    """
+    def isElement(self):
+        
+        title = self.pyData(Qt.DisplayRole)
+        
+        print(title)
+        
+        if 'Group' == title or 'Image' == title or \
+        'Rectangle' == title or 'Clone' == title or 'Text' == title:
+            
+            return True
+            
+        else:
+        
+            return False
+
+
+    """
+    Returns any UI Elements owned by this item
+    """
+    def elements(self, isElement = True):
+        
+        children = []
+        
+        for c in self:
+            
+            if c[TITLE].isElement() == isElement:
+                
+                children.append(c)
+                
+        return children
+
+
+    """
+    Returns any attributes owned by this item
+    """
+    def attrs(self):
+
+        return self.elements(False)
+
+
+    """
+    Returns the number of children of this item
+    """
+    def __len__(self):
+        
+        return self.rowCount()
+
+    
+    """
+    Return the next row
+    """
+    def next(self):
+        
+        if self.lastChild < self.rowCount():
+            
+            row = []
+            
+            # For each column, get the children of the row
+            for c in range(self.columnCount()):
+            
+                row.append(self.child(self.lastChild, c))
+                
+            self.lastChild += 1
+                
+            return row
+         
+        else:
+            
+            self.lastChild = 0
+            
+            raise StopIteration
+
+
+    """
+    Allow iteration of child nodes
+    """
+    def __iter__(self):
+        
+        return self
+
+
 class ElementModel(QStandardItemModel):
     
     """
@@ -97,7 +308,7 @@ class ElementModel(QStandardItemModel):
     """
     def getPair(self, index):
         
-        if isinstance(index, QStandardItem):
+        if isinstance(index, Element):
             
             index = self.indexFromItem(index)
         
@@ -139,7 +350,7 @@ class ElementModel(QStandardItemModel):
 
 
     """
-    Add a UI element to the tree as a QStandardItem
+    Add a UI element to the tree as a Element
     """
     def addElement(self, parent, data):
         
@@ -155,7 +366,7 @@ class ElementModel(QStandardItemModel):
         
         
         
-        titleNode = QStandardItem(title)
+        titleNode = Element(title)
         
         titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
         
@@ -171,7 +382,7 @@ class ElementModel(QStandardItemModel):
         
         titleNode.setCheckState(checkState)
 
-        valueNode = QStandardItem(value)
+        valueNode = Element(value)
         
         valueNode.setData(gid, Qt.Gid)
         
@@ -179,9 +390,8 @@ class ElementModel(QStandardItemModel):
         
         self.addAttrs(titleNode, data, gid, False)
     
-    
     """
-    Add the list of UI element attributes to the tree as a QStandardItem
+    Add the list of UI element attributes to the tree as a Element
     """
     def addAttrs(self, parent, data, gid, isNested):
         
@@ -191,9 +401,10 @@ class ElementModel(QStandardItemModel):
             
             if isNested:
                 
-                print( title,  value,  isSimple )
+                pass
+                #print( title,  value,  isSimple )
             
-            titleNode = QStandardItem(attr)
+            titleNode = Element(attr)
             
             titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
             
@@ -212,7 +423,7 @@ class ElementModel(QStandardItemModel):
                 
             elif isSimple:
                 
-                valueNode = QStandardItem()
+                valueNode = Element()
                 
                 valueNode.setData(value,  Qt.DisplayRole)
                 
@@ -226,7 +437,7 @@ class ElementModel(QStandardItemModel):
                 # Maybe not, could be harder to compare w/ new data..
                 summary = summarize(value)
                 
-                valueNode = QStandardItem(summary)
+                valueNode = Element(summary)
                 
                 valueNode.setData(summary,  Qt.Data)
                 
@@ -410,7 +621,7 @@ class ElementModel(QStandardItemModel):
     """
     def toIndex(self, node):
         
-        if isinstance(node, QStandardItem):
+        if isinstance(node, Element):
             
             return self.indexFromItem(node)
             
@@ -428,7 +639,7 @@ class ElementModel(QStandardItemModel):
     """
     def toItem(self, node):
         
-        if isinstance(node, QStandardItem):
+        if isinstance(node, Element):
             
             return node
             
@@ -463,6 +674,26 @@ class ElementModel(QStandardItemModel):
     }
     
     def copyAttrs(self, original, new, isNested = False):
+        
+        e = self.itemFromIndex(original)
+
+        attrs = e.attrs()
+        
+        for row in attrs:
+            
+            c = []
+            
+            for i in range(len(row)):
+                
+                c.append(row[i].fullClone())
+            
+            title = c[TITLE].pyData()
+            
+            if 'name' != title and 'gid' != title and 'type' != title:
+            
+                new.appendRow(c)
+
+        return
         
         for attr in ['position', 'size', 'opacity', 'is_visible', 'color']:
             
@@ -553,12 +784,10 @@ class ElementModel(QStandardItemModel):
 
 
     """
-    Returns true if title (string or index) is a UIElement name
+    Returns true if title string is a UIElement name
     """
     def isElement(self,  title):
-        #if not isinstance(title,  str) or not isinstance(title,  QString):
-        #    title = self.title(title)
-        #print(title)
+
         if "Text" == title or \
         "Group" == title or \
         "Image" == title or \
