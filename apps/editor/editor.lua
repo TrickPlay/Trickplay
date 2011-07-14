@@ -486,6 +486,18 @@ function editor.black_bg()
 	screen:grab_key_focus()
 end 
 
+local function is_there_guideline () 
+
+	for i, j in pairs (g.children) do 
+		if j.name then 
+			if string.find(j.name, "_guideline") then 
+				print("GUIDE : ", j.name)
+				return true 
+			end 
+		end 
+    end 
+	return false
+end 
 
 function editor.show_guides()
 	if guideline_show == false then 
@@ -498,7 +510,8 @@ function editor.show_guides()
 			screen:find_child("v_guideline"..tostring(i)):show() 
 		end 
 	else 
-		if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
+		--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
+		if is_there_guideline() then 
 			screen:find_child("menuButton_view").items[11]["icon"].opacity = 0
 			guideline_show = false
 			for i= 1, h_guideline, 1 do 
@@ -515,7 +528,8 @@ function editor.show_guides()
 end 
 
 function editor.snap_guides()
-	if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then
+	--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then
+	if is_there_guideline() then 
 		if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then 
 		 	screen:find_child("menuButton_view").items[12]["icon"].opacity = 0 
 		else 
