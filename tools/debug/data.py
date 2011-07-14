@@ -1,7 +1,11 @@
 typeTable = {
     
-    'anchor_point x': lambda v: ('anchor-x',  toFloat(v)),
-    'anchor_point y': lambda v: ('anchor-y',  toFloat(v)),
+    'anchor_pointx': lambda v: ('anchor-x',  toFloat(v)),
+    'anchor_pointy': lambda v: ('anchor-y',  toFloat(v)),
+    'scalex': lambda v: ('scale-x',  toFloat(v)),
+    'scaley': lambda v: ('scale-y',  toFloat(v)),
+    'clipx': lambda v: ('clip',  clip(v)),
+    'clipy': lambda v: ('clip',  clip(v)),
     'is_visible': lambda v:('visible',  bool(v)),
     'name': lambda v: ('name',  v),
     'text': lambda v: ('text',  v),
@@ -15,7 +19,11 @@ typeTable = {
     'z': lambda v: ('depth',  toFloat(v)),
 
 }
-
+    
+def modelToData(title,  value):
+    t, v = typeTable[title](value)
+    return (t, v)
+    
 def dataToModel(title,  value):
     t = title
     v = value
@@ -40,10 +48,6 @@ def dataToModel(title,  value):
             v = False
     
     return (t, v, s)
-    
-def modelToData(title,  value):
-    t, v = typeTable[title](value)
-    return (t, v)
 
 def getTypeTable():
     return typeTable
@@ -59,6 +63,14 @@ def opacity(v):
     except:
         raise BadDataException('Opacity must be an integer between 0 and 255.')
         
+def clip(v):
+    c = {}
+    c['h']=100
+    c['w']=100
+    c['x']=100
+    c['y']=100
+    return c
+
 def toFloat(v):
     try:
         return float(v)
