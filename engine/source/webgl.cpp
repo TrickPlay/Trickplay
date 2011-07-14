@@ -252,12 +252,22 @@ Context::Context( ClutterActor * actor )
 	clutter_actor_get_size( actor , & width , & height );
 
 	// Create the depth buffer
+    
+    GLenum depth_storage = GL_DEPTH_COMPONENT16;
+    GLenum depth_attachment = GL_DEPTH_ATTACHMENT;
+    
+#ifdef GL_DEPTH24_STENCIL8
+
+    depth_storage = GL_DEPTH24_STENCIL8;
+    depth_attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+
+#endif
 
 	glGenRenderbuffers( 1 , & depthbuffer );
 
     glBindRenderbuffer( GL_RENDERBUFFER , depthbuffer );
 
-    glRenderbufferStorage( GL_RENDERBUFFER , GL_DEPTH24_STENCIL8 , width , height );
+    glRenderbufferStorage( GL_RENDERBUFFER , depth_storage , width , height );
 
     // Create the framebuffer
 
@@ -267,7 +277,7 @@ Context::Context( ClutterActor * actor )
 
     // Attach the depth buffer
 
-    glFramebufferRenderbuffer( GL_FRAMEBUFFER , GL_DEPTH_STENCIL_ATTACHMENT , GL_RENDERBUFFER , depthbuffer );
+    glFramebufferRenderbuffer( GL_FRAMEBUFFER , depth_attachment , GL_RENDERBUFFER , depthbuffer );
 
     // Attach the texture as the color buffer
 
