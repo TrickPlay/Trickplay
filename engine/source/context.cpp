@@ -1198,6 +1198,8 @@ int TPContext::run()
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
 
+    clutter_stage_set_use_alpha( CLUTTER_STAGE( stage ) , true );
+
 #ifdef TP_PROFILING
 
     g_signal_connect( stage , "paint" , ( GCallback ) before_paint , 0 );
