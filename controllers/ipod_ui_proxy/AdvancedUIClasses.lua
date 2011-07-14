@@ -67,6 +67,20 @@ local function UIElement()
         self("transform_point", ancestor, x, y, z)
     end
 
+    local animation_id = 1
+    function call:animate(table)
+        if not self.on_completeds then
+            rawset(self, "on_completeds", {})
+        end
+        if table.on_completed then
+            local on_completeds = rawget(self, "on_completeds")
+            on_completeds[animation_id] = table.on_completed
+            table.on_completed = animation_id
+            animation_id = animation_id + 1
+        end
+        self("animate", table)
+    end
+
     return get , set , call , event
 end
 
