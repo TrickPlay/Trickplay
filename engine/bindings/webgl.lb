@@ -2364,7 +2364,7 @@ class WebGLCanvas [[ ClutterActor * ]] actor WebGLRenderingContext
 {
     WebGLCanvas( table props = 0 )
         [[
-            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( clutter_texture_new ) );
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( trickplay_webgl_canvas_new ) );
  
             ClutterUtil::initialize_actor( L, self, WEBGLCANVAS_METATABLE );
 
@@ -2400,7 +2400,6 @@ class WebGLCanvas [[ ClutterActor * ]] actor WebGLRenderingContext
     
     ~WebGLCanvas()
         [[
-            WebGL::Context::get( self , true );
         ]];
         
     acquire()
