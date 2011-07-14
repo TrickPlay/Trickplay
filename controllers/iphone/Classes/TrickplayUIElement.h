@@ -11,7 +11,6 @@
 #import <QuartzCore/CATransform3D.h>
 #import <YAJLiOS/YAJL.h>
 #import "AdvancedUIObjectManager.h"
-#import "UIViewAdditions.h"
 
 @class AdvancedUIObjectManager;
 
@@ -31,6 +30,8 @@
     CGFloat x_position;
     CGFloat y_position;
     CGFloat z_position;
+    CGFloat w_size;
+    CGFloat h_size;
     CGFloat x_scale;
     CGFloat y_scale;
     CGFloat z_scale;
@@ -45,6 +46,8 @@
     
     NSString *ID;
     NSString *name;
+    
+    NSMutableDictionary *animations;
     
     AdvancedUIObjectManager *manager;
     
