@@ -286,8 +286,9 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-    NSLog(@"mask: %@", mask);
+    //NSLog(@"mask: %@", mask);
     imagePickerController.cameraOverlayView = mask;
+    mask.userInteractionEnabled = NO;
     
     // Displays camera
     // Allows for video, audio, and image capture

@@ -121,7 +121,7 @@
     //*
     CGContextTranslateCTM(context, rect.size.width/2, rect.size.height/2);
     CGContextRotateCTM(context, imageViewToCrop.totalRotation);
-    CGContextScaleCTM(context, imageViewToCrop.totalScale, imageViewToCrop.totalScale);
+    CGContextScaleCTM(context, imageViewToCrop.xScale, imageViewToCrop.yScale);
     //CGContextConcatCTM(context, imageToCrop.transform);
     CGContextTranslateCTM(context, -rect.size.width/2, -rect.size.height/2);
     
@@ -133,6 +133,7 @@
     //*
     // Correct for change of basis caused by a rotation if translating
     if (x || y) {
+        CGFloat xScale = imageViewToCrop.xScale;
         CGFloat r = sqrtf(powf(x, 2.0) + powf(y, 2.0));
         CGFloat theta = !x ? M_PI/2 * y/fabs(y) : atanf(y/x);
         theta -= imageViewToCrop.totalRotation;
@@ -140,25 +141,26 @@
         CGFloat y_multiplier = 1.0;
         // Correct for quadrant with consideration of inversed y-axis
         // 1st quadrant
-        if (x > 0.0 && y > 0.0) {
+        if (x * xScale/fabs(xScale) > 0.0 && y > 0.0) {
             // no change
         // 2nd quadrant
-        } else if (x < 0.0 && y > 0.0) {
+        } else if (x * xScale/fabs(xScale) < 0.0 && y > 0.0) {
             x_multiplier = -1.0;
             y_multiplier = -1.0;
         // 3rd
-        } else if (x < 0.0 && y < 0.0) {
+        } else if (x * xScale/fabs(xScale) < 0.0 && y < 0.0) {
             x_multiplier = -1.0;
             y_multiplier = -1.0;
         // 4th
-        } else if (x > 0.0 && y < 0.0) {
+        } else if (x * xScale/fabs(xScale) > 0.0 && y < 0.0) {
             // no change
         }
-        x = r * cos(theta);// * x_multiplier;
-        y = r * sin(theta);// * y_multiplier;
-        //NSLog(@"translation mid: %f, %f", x, y);
+        x = r * cos(theta); // * x_multiplier;
+        y = r * sin(theta); // * y_multiplier;
+        
         x *= x_multiplier;
         y *= y_multiplier;
+        y *= xScale/fabs(xScale);
     }
     //*/
     //NSLog(@"translation after: %f, %f", x, y);
@@ -195,7 +197,7 @@
             helpPopover = nil;
         }
         UIViewController *popoverContent = [[UIViewController alloc] initWithNibName:@"ImageEditorHelpViewPad" bundle:nil];
-        popoverContent.contentSizeForViewInPopover = CGSizeMake(250, 200);
+        popoverContent.contentSizeForViewInPopover = CGSizeMake(250, 180);
         helpPopover = [[UIPopoverController alloc] initWithContentViewController:popoverContent];
         [helpPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
         [popoverContent release];
