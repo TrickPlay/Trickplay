@@ -10,17 +10,21 @@ typeTable = {
     'colorg': lambda v: ('color', color(v)),
     'colorb': lambda v: ('color', color(v)),
     'colora': lambda v: ('color', color(v)),
+    'border_colorr': lambda v: ('border_color', color(v)),
+    'border_colorg': lambda v: ('border_color', color(v)),
+    'border_colorb': lambda v: ('border_color', color(v)),
+    'border_colora': lambda v: ('border_color', color(v)),
     'is_visible': lambda v:('visible',  bool(v)),
     'name': lambda v: ('name',  v),
     'text': lambda v: ('text',  v),
     'opacity': lambda v: ('opacity',  opacity(v)),
     'width': lambda v: ('width',  width(v)), 
     'height': lambda v: ('height',  toFloat(v)),
-    'w': lambda v: ('width',  toFloat(v)), 
-    'h': lambda v: ('height',  toFloat(v)), 
-    'x': lambda v: ('x',  toFloat(v)), 
-    'y': lambda v: ('y',  toFloat(v)), 
-    'z': lambda v: ('depth',  toFloat(v)),
+    'sizew': lambda v: ('width',  toFloat(v['w'])), 
+    'sizeh': lambda v: ('height',  toFloat(v['h'])), 
+    'positionx': lambda v: ('x',  toFloat(v['x'])), 
+    'positiony': lambda v: ('y',  toFloat(v['y'])), 
+    'positionz': lambda v: ('depth',  toFloat(v['z'])),
 
 }
     
@@ -36,7 +40,8 @@ def dataToModel(title,  value):
     if "anchor_point" == t or \
     "clip" == t or "scale" == t or \
     "tile" == t or "source" == t or \
-    "color" == t or "border_color" == t:
+    "color" == t or "border_color" == t or \
+    "size" ==t or "position" == t:
         s = False
         
     #if "gid" == v:
@@ -46,10 +51,15 @@ def dataToModel(title,  value):
         v = "Image"
         
     if "is_visible" == t:
-        if v:
-            v = True
-        else:
-            v = False
+        #if v:
+        #    v = True
+        #else:
+        #    v = False
+        v = bool(v)
+            
+    if "tile" == t:
+        v['x'] = bool(v['x'])
+        v['y'] = bool(v['y'])
     
     return (t, v, s)
 

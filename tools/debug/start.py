@@ -5,7 +5,7 @@
 Features to add:
 
 1.   Refresh all elements/attributes
-2.   Clip and scale?
+2.   Clip and scale? Rotation?
 3.   (DONE) Two views, one for UI elements and one for properties
 4.   Search by gid/name
 5.   (DONE) Checkboxes for hide/show
@@ -21,7 +21,7 @@ from TreeView import Ui_MainWindow
 
 from delegate import InspectorDelegate
 import connection
-from model import ElementModel,  pyData,  modelToData,  dataToModel
+from model import ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData,  dataToModel, BadDataException
 
 # Custom ItemDataRoles
@@ -212,11 +212,15 @@ class StartQT4(QMainWindow):
                 
                 nested = pyData(propertyValueIndex, Qt.Nested)
                 
+                propertySummaryValueItem = None
+                
                 if (nested):
                     
                     parentProperty = propertyValueIndex.parent()
                     
                     parentPropertyTitle = r.child(parentProperty.row(), 0)
+                    
+                    propertySummaryValueItem = r.child(parentProperty.row(), 1)
                     
                     childPropertyTitle = propertyValueIndex.parent().child(propertyValueIndex.row(), 0)
                     
@@ -261,15 +265,27 @@ class StartQT4(QMainWindow):
                         
                     else:
                         
-                        parentTitleIndex = self.inspectorModel.findAttr(inspectorElementIndex, nested[0])[0]
+                        parentPair = self.inspectorModel.findAttr(inspectorElementIndex, nested[0])
+                        
+                        parentTitleIndex = parentPair[0]
+                        
+                        parentValueItem = self.inspectorModel.itemFromIndex(parentPair[1])
+                        
+                        parentValueItem.setData(summarize(value), 0)
+                        
+                        propertySummaryValueItem.setData(summarize(value), 0)
                         
                         childValueIndex = self.inspectorModel.findAttr(parentTitleIndex, nested[1])[1]
                         
                         valueItem = self.inspectorModel.itemFromIndex(childValueIndex)
                         
                         print(pyData(parentTitleIndex, 0), nested[1])
+                    
+                    print("Changed item data from",  pyData(valueItem, 0))
                         
-                    valueItem.setData(value,  0)
+                    valueItem.setData(value[nested[1]],  0)
+                    
+                    print("Changed item data to  ",  pyData(valueItem, 0))
                     
             else:
                 
@@ -318,9 +334,10 @@ class StartQT4(QMainWindow):
         self.propertyProxyModel.setSourceModel(self.propertyModel)
         
         self.propertyProxyModel.setFilterRole(0)
+        
+        self.propertyProxyModel.setDynamicSortFilter(True)
 
-        self.propertyProxyModel.setFilterRegExp(QRegExp("(opacity|is_visible|scale|clip|anchor_point|x|y|z|h|w"+\
-        "|gid|type|source|src|tile|border_color|border_width|color|text|a|r|g|b)"))
+        self.propertyProxyModel.setFilterRegExp(QRegExp("(opacity|is_visible|scale|clip|anchor_point|position|x|y|z|size|h|w|source|src|tile|border_color|border_width|color|text|a|r|g|b)"))
         
         self.ui.property.setModel(self.propertyProxyModel)
         

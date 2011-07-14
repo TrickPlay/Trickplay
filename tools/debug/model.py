@@ -36,14 +36,13 @@ class ElementModel(QStandardItemModel):
     Find an attribute given the index of a UIElement
     Return an index tuple (title, value)
     """
-    def findAttr(self,  parent,  title):
+    def findAttr(self, parent, title, requiresElement = False):
     
-    #TODO: separate into 2 functions,
-    #one that will just return if the parent is not an Element.
-    #Most of the time searches are done on Elements for gid.
-    #Only in dataChanged do I look for nested attributes on a
-    #nonelement node.
-    #if self.isElement(self.title(parent)):
+        # Set requiresElement if this search should only take place on a UI element
+        # Speed will improve significantly
+        if requiresElement and not self.isElement(self.title(parent)):
+            
+            return None
         
         n = self.rowCount(parent)
         
@@ -57,10 +56,6 @@ class ElementModel(QStandardItemModel):
                 
         print("ERROR >> Node attribute " +  str(title) +  " not found in " + str(parent.data(0).toString()) + ".")
 
-    #else:
-        
-    #    return None
-        
     
     """
     Find the associated data for a child UI element
@@ -73,7 +68,7 @@ class ElementModel(QStandardItemModel):
         
         for child in data['children']:
             
-            node = self.findAttr(index,  'gid')[1]
+            node = self.findAttr(index,  'gid', True)[1]
             
             if child['gid'] == node.data(Qt.DisplayRole).toPyObject():
             
@@ -315,7 +310,7 @@ class ElementModel(QStandardItemModel):
                     for c in children:
                         
                         # Compare the gid of the incoming child with each current child
-                        r = self.findAttr(c[0], 'gid')
+                        r = self.findAttr(c[0], 'gid', True)
                         
                         if r:
                             
@@ -409,6 +404,11 @@ class ElementModel(QStandardItemModel):
             #print("Delete me",  title)
             pass
     
+    """
+    Copy attributes from the inspector model to the property model.
+    This happens every time selection changes in the inspector model.
+    """
+    attrOrder = ['position', 'size', 'opacity', 'is_visible', 'color']
     
     def copyAttrs(self, original, new):
         
@@ -418,7 +418,9 @@ class ElementModel(QStandardItemModel):
             
             titleNode = originalItem.clone()
             
-            if not self.isElement(pyData(titleNode, 0)):
+            title = pyData(titleNode, 0)
+            
+            if not self.isElement(title) and 'name' != title and 'gid' != title and 'type' != title:
             
                 titleNode.setData(pyData(i[0], Qt.Gid), Qt.Gid)
             
@@ -536,3 +538,10 @@ def pyData(index, role):
         i = str(i)
     
     return i
+
+
+
+
+
+
+

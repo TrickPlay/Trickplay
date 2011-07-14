@@ -89,12 +89,19 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 	gfloat y;
 	gfloat z = clutter_actor_get_depth( actor ); 
 	clutter_actor_get_position( actor, &x, &y );
+    Object position;
+    position["x"] = x;
+    position["y"] = y;
+    position["z"] = z;
 	
 	// w, h
 	gfloat w;
 	gfloat h;
 	clutter_actor_get_size( actor, &w, &h );
-
+    Object size;
+    size["w"] = w;
+    size["h"] = h;
+    
 	// Scale
     gdouble sx;
     gdouble sy;	
@@ -221,11 +228,13 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 		
     }
 	
-	(*object)["z"]	 			= z;
-	(*object)["y"]	 			= y;
-	(*object)["x"]	 			= x;
-	(*object)["w"]	 			= w;
-	(*object)["h"]	 			= h;
+    (*object)["position"]   = position;
+	(*object)["size"]   = size;
+	//(*object)["z"]	 			= z;
+	//(*object)["y"]	 			= y;
+	//(*object)["x"]	 			= x;
+	//(*object)["w"]	 			= w;
+	//(*object)["h"]	 			= h;
 	(*object)["name"] 			= name;
 	(*object)["gid"]			= gid;
     (*object)["type"] 			= type;
