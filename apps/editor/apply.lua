@@ -83,6 +83,7 @@ function inspector_apply (v, inspector)
 	      color_t = v[attr_name]
 	      color_t[rgba_map[string.sub(name,-1, -1)]] = tonumber(item_group:find_child(name):find_child("input_text").text)
 	      v[attr_name] = color_t
+		  
 	      end,
        	["hor_arrow_y"] = function()
 	       v.hor_arrow_y = tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text)
