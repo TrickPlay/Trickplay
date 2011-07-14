@@ -280,10 +280,12 @@ class StartQT4(QMainWindow):
                         valueItem = self.inspectorModel.itemFromIndex(childValueIndex)
                         
                         #print(pyData(parentTitleIndex, 0), nested[1])
+                        
+                        value = value[nested[1]]
                     
                     print("Changed item data from",  pyData(valueItem, 0))
                         
-                    valueItem.setData(value[nested[1]],  0)
+                    valueItem.setData(value,  0)
                     
                     print("Changed item data to  ",  pyData(valueItem, 0))
                     
