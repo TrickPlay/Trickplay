@@ -9,6 +9,7 @@ Qt.Element = Qt.UserRole + 3
 Qt.ItemDepth = Qt.UserRole + 4
 Qt.Gid = Qt.UserRole + 5
 Qt.Data = Qt.UserRole + 6
+Qt.Nested = Qt.UserRole + 7
 
 class ElementModel(QStandardItemModel):
     
@@ -36,24 +37,29 @@ class ElementModel(QStandardItemModel):
     Return an index tuple (title, value)
     """
     def findAttr(self,  parent,  title):
+    
+    #TODO: separate into 2 functions,
+    #one that will just return if the parent is not an Element.
+    #Most of the time searches are done on Elements for gid.
+    #Only in dataChanged do I look for nested attributes on a
+    #nonelement node.
+    #if self.isElement(self.title(parent)):
         
-        if self.isElement(self.title(parent)):
+        n = self.rowCount(parent)
+        
+        for i in range(n):
             
-            n = self.rowCount(parent)
+            index = self.index(i, 0, parent)
             
-            for i in range(n):
+            if title == self.data(index):
                 
-                index = self.index(i, 0, parent)
+                return (index,  self.index(i,  1,  parent))
                 
-                if title == self.data(index):
-                    
-                    return (index,  self.index(i,  1,  parent))
-                    
-            print("ERROR >> Node attribute " +  str(title) +  " not found in " + str(parent.data(0).toString()) + ".")
+        print("ERROR >> Node attribute " +  str(title) +  " not found in " + str(parent.data(0).toString()) + ".")
 
-        else:
-            
-            return None
+    #else:
+        
+    #    return None
         
     
     """
@@ -108,6 +114,8 @@ class ElementModel(QStandardItemModel):
         
         title = data["type"]
         
+        gid = data['gid']
+        
         if "Texture" == title:
         
             title = "Image"
@@ -118,7 +126,7 @@ class ElementModel(QStandardItemModel):
         
         titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
         
-        titleNode.setData(data['gid'], Qt.Gid)
+        titleNode.setData(gid, Qt.Gid)
         
         titleNode.setCheckable(True)
         
@@ -132,27 +140,31 @@ class ElementModel(QStandardItemModel):
 
         valueNode = QStandardItem(value)
         
-        valueNode.setData(data['gid'], Qt.Gid)
+        valueNode.setData(gid, Qt.Gid)
         
         parent.appendRow([titleNode, valueNode])
         
-        self.addAttrs(titleNode, data)
+        self.addAttrs(titleNode, data, gid, False)
     
     
     """
     Add the list of UI element attributes to the tree as a QStandardItem
     """
-    def addAttrs(self, parent, data):
+    def addAttrs(self, parent, data, gid, isNested):
         
         for attr in data:
             
-            title, value,  isSimple = dataToModel(attr, data[attr])
+            title, value, isSimple = dataToModel(attr, data[attr])
+            
+            if isNested:
+                
+                print( title,  value,  isSimple )
             
             titleNode = QStandardItem(attr)
             
             titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
             
-            titleNode.setData(data['gid'], Qt.Gid)
+            titleNode.setData(gid, Qt.Gid)
             
             valueNode = None
             
@@ -177,7 +189,8 @@ class ElementModel(QStandardItemModel):
                 
             else:
                 
-                # TODO, construct summary from child nodes.. works better
+                # TODO, construct summary from child nodes? 
+                # Maybe not, could be harder to compare w/ new data..
                 summary = summarize(value)
                 
                 valueNode = QStandardItem(summary)
@@ -187,12 +200,18 @@ class ElementModel(QStandardItemModel):
                 valueNode.setFlags(Qt.NoItemFlags)
                 
                 parent.appendRow([titleNode, valueNode])
+                
+                self.addAttrs(titleNode, value, gid, True)
             
             if 'gid' == title or 'source' == title or 'type' == title:
                 
                 valueNode.setFlags(Qt.NoItemFlags)
-        
-        
+                
+            if isNested:
+                
+                valueNode.setData(True, Qt.Nested)
+    
+    
     """
     Refresh all Tree data from the root
     Most data will remain the same between refreshes
@@ -331,7 +350,6 @@ class ElementModel(QStandardItemModel):
                     
                 # TODO: select the appropriate node (by searching the entire tree for gid)
                 # after the cut & paste
-        
     
     
     """
@@ -353,17 +371,30 @@ class ElementModel(QStandardItemModel):
             #print("Delete me",  title)
             pass
     
+    
     def copyAttrs(self, original, new):
+        
         for i in self.children(original):
-            titleNode = self.itemFromIndex(i[0]).clone()
-            titleNode.setData(pyData(i[0], Qt.Gid), Qt.Gid)
-            #print(Qt.Gid,  pyData(titleNode,  Qt.Gid))
-            valueNode = self.itemFromIndex(i[1]).clone()
-            new.appendRow([titleNode,  valueNode])
-        
-
-        
+            
+            originalItem = self.itemFromIndex(i[0])
+            
+            titleNode = originalItem.clone()
+            
+            if not self.isElement(pyData(titleNode, 0)):
+            
+                titleNode.setData(pyData(i[0], Qt.Gid), Qt.Gid)
+            
+                valueNode = self.itemFromIndex(i[1]).clone()
+            
+                new.appendRow([titleNode,  valueNode])
+            
+                if originalItem.hasChildren():
+                    
+                    self.copyAttrs(i[0], titleNode)
+    
+    
     def getRoot(self):
+        
         return self.index(0,  0)
     
     
@@ -398,6 +429,7 @@ class ElementModel(QStandardItemModel):
         else:
             
             return None
+
 
 def summarize(value):
     

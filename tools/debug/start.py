@@ -4,9 +4,10 @@
 
 Features to add:
 
-1.   Two views, one for UI elements and one for properties
-2.   Search by gid/name
-3.   Checkboxes for hide/show
+1.   Refresh all elements/attributes
+2.   (DONE) Two views, one for UI elements and one for properties
+3.   Search by gid/name
+4.   (DONE) Checkboxes for hide/show
 X.   Drag and drop UI elements?
 
 """
@@ -30,6 +31,7 @@ Qt.Element = Qt.UserRole + 3
 Qt.ItemDepth = Qt.UserRole + 4
 Qt.Gid = Qt.UserRole + 5
 Qt.Data = Qt.UserRole + 6
+Qt.Nested = Qt.UserRole + 7
 
 class StartQT4(QMainWindow):
     def __init__(self, parent=None):
@@ -197,24 +199,42 @@ class StartQT4(QMainWindow):
                 
                 propertyValueIndex = topLeft
                 
-                propertyTitleIndex = r.child(propertyValueIndex.row(), 0)
-               
                 # Get the index of the UI Element in the inspector
                 inspectorElementIndex = r.data(Qt.Pointer).toPyObject()
                 
                 gid = pyData(inspectorElementIndex, Qt.Gid)
                 
-                inspectorIndexPair = self.inspectorModel.findAttr(inspectorElementIndex,  str(propertyTitleIndex.data(0).toString()))
-                
-                #titleItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[0])
-                
-                valueItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[1])
-                
-                title = pyData(propertyTitleIndex, 0)
-                
                 value = pyData(propertyValueIndex, 0)
                 
-                # Verify data is  OK before making any changes to model
+                title = None
+                
+                nested = pyData(propertyValueIndex, Qt.Nested)
+                
+                if (nested):
+                    
+                    parentProperty = propertyValueIndex.parent()
+                    
+                    parentPropertyTitle = r.child(parentProperty.row(), 0)
+                    
+                    childPropertyTitle = propertyValueIndex.parent().child(propertyValueIndex.row(), 0)
+                    
+                    parentTitle = pyData(parentPropertyTitle, 0)
+                    
+                    childTitle = pyData(childPropertyTitle, 0)
+                    
+                    title = parentTitle + childTitle
+                    
+                    nested = (parentTitle, childTitle)
+                    
+                else:
+                
+                    propertyTitleIndex = r.child(propertyValueIndex.row(), 0)
+                    
+                    inspectorIndexPair = self.inspectorModel.findAttr(inspectorElementIndex,  pyData(propertyTitleIndex, 0))
+                    
+                    title = pyData(propertyTitleIndex, 0)
+                
+                # Verify data is OK before making any changes to model
                 if self.sendData(gid, title, value):
                     
                     # Update the checkbox
@@ -227,6 +247,22 @@ class StartQT4(QMainWindow):
                         inspectorElementIndex.model().itemFromIndex(inspectorElementIndex).setCheckState(value)
                         
                     # Update the data in the inspector
+                    valueItem = None
+                    
+                    if not nested:
+                        
+                        valueItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[1])
+                        
+                    else:
+                        
+                        parentTitleIndex = self.inspectorModel.findAttr(inspectorElementIndex, nested[0])[0]
+                        
+                        childValueIndex = self.inspectorModel.findAttr(parentTitleIndex, nested[1])[1]
+                        
+                        valueItem = self.inspectorModel.itemFromIndex(childValueIndex)
+                        
+                        print(pyData(parentTitleIndex, 0), nested[1])
+                        
                     valueItem.setData(value,  0)
                     
             else:
