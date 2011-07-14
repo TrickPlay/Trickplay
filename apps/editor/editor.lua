@@ -66,6 +66,166 @@ end
 
 
 local function guideline_inspector(v)
+  	local WIDTH = 300
+  	local HEIGHT = 150
+    local PADDING = 13
+	local TOP_BAR = 30
+    local MSG_BAR = 80
+    local BOTTOM_BAR = 40
+
+    local TSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local MSTYLE = {font = "FreeSans Medium 12px" , color = {255,255,255,255}}
+    local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
+    local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
+
+    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
+	local title = Text {name = "title", text = "Guideline" }:set(TSTYLE)
+	local title_shadow = Text {name = "title", text = "Guideline"}:set(TSSTYLE)
+	local message = Text {}:set(MSTYLE)
+	local message_shadow = Text {}:set(MSSTYLE)
+
+	-- Text Input Field 	
+	local org_position 
+	if(guideline_type(v.name) == "v_guideline") then
+		org_position = tostring(math.floor(v.x))
+		title.text = "Vertical Guideline"
+		title_shadow.text = "Vertical Guideline"
+		message.text = "X Position:"
+		message_shadow.text = "X Position:"
+	else
+		org_position = tostring(math.floor(v.y))
+		title.text =  "Horizontal Guideline"
+		title_shadow.text = "Horizontal Guideline"
+		message.text = "Y Position:"
+		message_shadow.text = "Y Position:"
+	end 
+
+	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = org_position, padding = 5 , border_width  = 1,
+		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
+		  text_font = "FreeSans Medium 12px", text_color =  {255,255,255,255},
+    	  border_corner_radius = 0,}
+
+	--Buttons 
+   	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+ 		  skin = "default", ui_width = 80, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = text_input}
+   	local button_delete = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+ 		  skin = "default", ui_width = 80, ui_height = 27, label = "Delete", focus_color = {27,145,27,255}, focus_object = text_input}
+	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+    	  skin = "default", ui_width = 80, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true, focus_object = text_input} 
+
+	-- Button Event Handlers
+	button_cancel.pressed = function() xbox:on_button_down() end 
+	button_delete.pressed = function() screen:remove(screen:find_child(v.name))
+ 									   xbox:on_button_down() 
+							end 
+
+	button_ok.pressed = function() 
+		if text_input.text == "" then 
+			xbox:on_button_down() 
+			--editor.error_message("005", save_current_f, editor.save)  
+			return
+   		end    
+		if(guideline_type(v.name) == "v_guideline") then
+				v.x = tonumber(text_input.text)
+		else 
+				v.y = tonumber(text_input.text)
+		end 
+		xbox:on_button_down() 
+	end
+
+	local ti_func = function()
+		if current_focus then 
+			current_focus.on_focus_out()
+		end 
+		button_ok:find_child("active").opacity = 255
+		button_ok:find_child("dim").opacity = 0
+
+		text_input.on_focus_in()
+	end
+
+	local tab_func = function()
+		text_input.on_focus_out()
+		button_ok:find_child("active").opacity = 0
+		button_ok:find_child("dim").opacity = 255
+		button_cancel:grab_key_focus()
+		button_cancel.on_focus_in()
+	end
+
+	-- Focus Destination 
+	button_cancel.extra.focus = {[keys.Right] = "button_delete", [keys.Tab] = "button_delete", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
+	button_delete.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Left] = "button_cancel", [keys.Return] = "button_delete", [keys.Up] = ti_func}
+	button_ok.extra.focus = {[keys.Left] = "button_delete", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+
+	text_input.extra.focus = {[keys.Tab] = tab_func, [keys.Return] = "button_ok",}
+
+	-- Button Position Set
+ 		button_cancel:set{position ={WIDTH-button_delete.w-button_ok.w-button_cancel.w-3*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+ 		button_delete:set{position ={WIDTH-button_delete.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
+ 		button_ok:set{position ={WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+
+	local msgw = Group {
+		name = "msgw",  --ui_element_insert
+		position ={650, 250},
+	 	anchor_point = {0,0},
+		reactive = true,
+        children = {
+        	msgw_bg,
+	  		xbox:set{position = {275, 0}},
+			title_shadow:set{position = {PADDING,PADDING/3}, }, 
+			title:set{position = {PADDING+1, PADDING/3+1}}, 
+			message_shadow:set{position = {PADDING,TOP_BAR+PADDING},}, 
+			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}}, 
+			text_input:set{name = "text_input", position= {PADDING, TOP_BAR+PADDING+PADDING/2+message.h +1}}, 
+			button_cancel,
+			button_delete,
+			button_ok
+		}
+		,scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
+	}
+
+	function xbox:on_button_down()
+		msgw:clear() 
+		screen:remove(msgw)
+		current_inspector = nil
+		current_focus = nil
+        screen.grab_key_focus(screen) 
+	    input_mode = S_SELECT
+		return true
+	end 
+
+	function text_input:on_key_down(key)
+		if text_input.focus[key] then
+			if type(text_input.focus[key]) == "function" then
+				text_input.focus[key]()
+			elseif screen:find_child(text_input.focus[key]) then
+				if text_input.on_focus_out then
+					text_input.on_focus_out()
+				end
+				screen:find_child(text_input.focus[key]):grab_key_focus()
+				if screen:find_child(text_input.focus[key]).on_focus_in then
+					screen:find_child(text_input.focus[key]).on_focus_in(key)
+				end
+			end
+		end
+	end
+
+	if(guideline_type(v.name) == "v_guideline") then
+		msgw.x= v.x - msgw.w/2
+		msgw.y= screen.h/2 - msgw.h/2
+	else
+		msgw.y= v.y - msgw.h/2
+		msgw.x= screen.w/2 - msgw.w/2
+	end 
+
+	msgw.extra.lock = false
+ 	screen:add(msgw)
+	create_on_button_down_f(msgw)	
+	-- Set focus 
+	ti_func()
+
+end 
+local function guideline_inspector_old(v)
 	local gw  = Group {
 	     name = "msgw",
 	     position ={500, 500},
@@ -338,24 +498,32 @@ function editor.show_guides()
 			screen:find_child("v_guideline"..tostring(i)):show() 
 		end 
 	else 
-		screen:find_child("menuButton_view").items[11]["icon"].opacity = 0
-		guideline_show = false
-		for i= 1, h_guideline, 1 do 
-			screen:find_child("h_guideline"..tostring(i)):hide() 
-		end 
-		for i= 1, v_guideline, 1 do 
-			screen:find_child("v_guideline"..tostring(i)):hide() 
-		end 
+		if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
+			screen:find_child("menuButton_view").items[11]["icon"].opacity = 0
+			guideline_show = false
+			for i= 1, h_guideline, 1 do 
+				screen:find_child("h_guideline"..tostring(i)):hide() 
+			end 
+			for i= 1, v_guideline, 1 do 
+				screen:find_child("v_guideline"..tostring(i)):hide() 
+			end 
+		else 
+			editor.error_message("008", nil, nil)
+		end
 	end
 	screen:grab_key_focus()
 end 
 
 function editor.snap_guides()
-	if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then 
-		 screen:find_child("menuButton_view").items[12]["icon"].opacity = 0 
-	else 
-		 screen:find_child("menuButton_view").items[12]["icon"].opacity = 255 
-	end
+	if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then
+		if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then 
+		 	screen:find_child("menuButton_view").items[12]["icon"].opacity = 0 
+		else 
+		 	screen:find_child("menuButton_view").items[12]["icon"].opacity = 255 
+		end
+    else
+    	editor.error_message("008", nil, nil)
+    end
 	screen:grab_key_focus()
 end 
 
@@ -389,7 +557,6 @@ end
 local function create_on_line_down_f(v)
         function v:on_button_down(x,y,button,num_clicks)
             dragging = {v, x - v.x, y - v.y }
-	     	v.color = {50, 50,50,255}
 	     	--if(button == 3 or num_clicks >= 2) then
 	     	if(button == 3) then
 		  		guideline_inspector(v)
@@ -408,7 +575,6 @@ local function create_on_line_down_f(v)
 		  	end 
 	          	dragging = nil
             end
-	     	v.color = {100,255,25,255}
             return true
         end
 end 
@@ -420,15 +586,12 @@ function editor.v_guideline()
      local v_gl = Rectangle {
 		name="v_guideline"..tostring(v_guideline),
 		border_color= DEFAULT_COLOR, 
-		color={255,25,25,255},
-		size = {2, screen.h},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
+		--color={25,255,25,255},
+		color={255,25,25,100},
+		size = {4, screen.h},
 		position = {screen.w/2, 0, 0}, 
 		opacity = 255,
-		reactive = true
+		reactive = true, 
      }
      create_on_line_down_f(v_gl)
      screen:add(v_gl)
@@ -442,12 +605,9 @@ function editor.h_guideline()
      local h_gl = Rectangle {
 		name="h_guideline"..tostring(h_guideline),
 		border_color= DEFAULT_COLOR, 
-		color={255,25,25,255},
-		size = {screen.w, 2},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
+		--color={25,255,25,255},
+		color={255,25,25,100},
+		size = {screen.w, 4},
 		position = {0, screen.h/2, 0}, 
 		opacity = 255,
 		reactive = true
@@ -1381,9 +1541,11 @@ end
 function editor.open()
 	open_files("open_luafile")
 end
+
 function editor.image(bg_image, inspector)
 	open_files("open_imagefile", bg_image, inspector)
 end
+
 function editor.video(inspector)
 	open_files("open_videofile",nil,inspector)
 end
@@ -1681,7 +1843,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	-- Button Event Handlers
 	--button_viewcode.pressed = function() editor.view_code(v)  xbox:on_button_down(1) end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() inspector_apply(v, inspector) xbox:on_button_down(1) end
+	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  print("뿅뿅") xbox:on_button_down(1)  end end
 
 	local function inspector_position() 
 	     local x_space, y_space
@@ -1788,7 +1950,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			local list_item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			list_item.position = {GUTTER, GUTTER}
 			item_group_list:add(list_item)
-			scroll_items.virtual_h = item_group_list.h --+ 35
+			scroll_items.virtual_h = item_group_list.h
    			scroll_items.content:add(item_group_list)
 			scroll_items.position = {0, 0}
 			scroll_items.reactive = true
@@ -1802,9 +1964,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			local item
 			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
 				item = factory.make_filechooser(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-		--	elseif attr_n == "items" then 
-		--		item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-				--item.position = {7, GUTTER}
 			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" then  -- Attribute with single checkbox
 				item = factory.make_onecheckbox(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true)
 			elseif attr_n == "anchor_point" then 
@@ -4770,7 +4929,7 @@ function editor.ui_elements()
 end 
 
 
-function editor.error_message(error_num, str, func_ok, func_nok)
+function editor.error_message(error_num, str, func_ok, func_nok, inspector)
   	local WIDTH = 300
   	local HEIGHT = 150
     local PADDING = 13
@@ -4789,12 +4948,19 @@ function editor.error_message(error_num, str, func_ok, func_nok)
 	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
 	local OK_label = "OK"
 
+	title.text = "" 
+	title_shadow.text = ""
+
 	local error_msg_map = {
 		["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
 		["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
 		["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
 		["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists. Do you want to replace it?" end, 
-		["005"] = function(str) OK_label = "OK" return "Please enter a file name." end, 
+		["005"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter a file name." end, 
+		["006"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter guideline position." end, 
+		["007"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please specify \""..string.upper(str).."\" field." end, 
+		["008"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "There is no guideline."  end, 
+	
 	}
 
 	local error_msg = error_msg_map[error_num](str) 
@@ -4802,8 +4968,6 @@ function editor.error_message(error_num, str, func_ok, func_nok)
 	local message = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSTYLE)
 	local message_shadow = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSSTYLE)
 
-	title.text = ""
-	title_shadow.text = ""
 
 	--Buttons 
 	local button_cancel, button_ok, button_nok
@@ -4817,7 +4981,7 @@ function editor.error_message(error_num, str, func_ok, func_nok)
      				skin = "default", ui_width = 75, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  		-- Button Event Handlers
  		button_nok.pressed = function() func_nok(1) xbox:on_button_down() end
- 	else 
+ 	else
     	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
   					skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -4880,12 +5044,13 @@ function editor.error_message(error_num, str, func_ok, func_nok)
 			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}, width = WIDTH - 28, wrap= true, wrap_mode = "WORD"}, 
 			--button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}, 
 			--button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
-			button_cancel, 
 			button_ok, 
 		}
 		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
 	}
-
+	if error_num ~= "007" and error_num ~= "008" then 
+ 		msgw:add(button_cancel) 
+	end 
 	if func_nok then 
  		msgw:add(button_nok) 
  	end 
@@ -4903,6 +5068,9 @@ function editor.error_message(error_num, str, func_ok, func_nok)
 		current_focus = nil
         screen.grab_key_focus(screen) 
 	    input_mode = S_SELECT
+		if inspector then 
+			inspector:remove(inspector:find_child("deactivate_rect"))
+		end 
 		return true
 	end 
 

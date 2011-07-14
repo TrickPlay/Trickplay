@@ -218,9 +218,15 @@ function inspector_apply (v, inspector)
 	      if j.name then
 		 	if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "tab_position" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
 		 		if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
-					print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
-	        	return 0 
-		end 
+					--print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
+					local inspector_deactivate = function ()
+					local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
+						inspector:add(rect)
+					end 
+					inspector_deactivate()
+					editor.error_message("007",j.name,nil,nil,inspector)
+	        		return -1 
+				 end 
               end 
 
 	      --if j.name == "editable" then 
@@ -343,11 +349,16 @@ function inspector_apply (v, inspector)
 		end 
 	   end 
        end 	  
+	   	return 1 
 	   end 
+
+		local return_v = 0 
 
 	  	if inspector:find_child("item_group_info") then 
 	       item_group = inspector:find_child("item_group_info")
-		   apply(item_group) 
+		   if apply(item_group) == -1 then 
+				return -1 
+		   end 
 	  	end 
 	 
 	 
@@ -381,22 +392,24 @@ function inspector_apply (v, inspector)
 
 		if inspector:find_child("item_group_more") then 
 	       item_group = inspector:find_child("item_group_more")
-		   apply(item_group) 
+		   if apply(item_group) == -1 then 
+				return -1 
+		   end 
 	  	end 
 
 		if inspector:find_child("item_group_list") then 
 		   item_group = inspector:find_child("item_group_list")
-		   apply(item_group) 
+		   if apply(item_group) == -1 then 
+				return -1 
+		   end 
 	  	end 
 
-		if inspector:find_child("itemsList") then 
-		   
-	  	end 
-       set_obj(new_object, v) 
-       input_mode = S_SELECT
-       if(v.name ~= "video1") then 
+        set_obj(new_object, v) 
+        input_mode = S_SELECT
+        if(v.name ~= "video1") then 
        	    table.insert(undo_list, {v.name, CHG, org_object, new_object})
-       end 
+        end 
+		
        return org_object, new_object
 end	
 
