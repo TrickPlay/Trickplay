@@ -1459,8 +1459,9 @@ function ui_element.button(table)
 					end
 					b_group.extra.on_focus_in(keys.Return)
 				else 
-		     		--current_focus.on_focus_in(keys.Return)
 		     		current_focus.on_focus_out()
+					current_focus = b_group
+		     		current_focus.on_focus_in(keys.Return)
 					screen:grab_key_focus()
 				end 
 				return true
