@@ -86,24 +86,62 @@ class ElementModel(QStandardItemModel):
     """
     def titleFromValue(self, valueNode):
         
-        #print(pyData(valueNode, 0), pyData(valueNode.parent(),  0), valueNode.row())
+        return self.getPair(valueNode)[0]
+
+
+    """
+    Return the value index of a row given the title index
+    """
+    def valueFromTitle(self, titleNode):
         
-        parentIndex = valueNode.parent()
+        return self.getPair(titleNode)[1]
+
+    
+    """
+    Return a (title, value) tuple of indexes given one of the pair
+    """
+    def getPair(self, index):
         
-        row = valueNode.row()
+        if isinstance(index, QStandardItem):
+            
+            index = self.indexFromItem(index)
         
-        column = 0
+        parentIndex = index.parent()
+        
+        row = index.row()
+        
+        originalColumn = index.column()
+        
+        column = None
+        
+        if originalColumn:
+        
+            column = 0
+            
+        else:
+            
+            column = 1
+        
+        partnerIndex = None
         
         # Screen
         if not parentIndex.isValid():
 
-            return self.indexFromItem(self.invisibleRootItem().child(row, column))
+            partnerIndex = self.indexFromItem(self.invisibleRootItem().child(row, column))
 
         # Everything else
         else:
         
-            return parentIndex.child(row, column)
+            partnerIndex = parentIndex.child(row, column)
         
+        if originalColumn:
+            
+            return (partnerIndex, index)
+            
+        else:
+            
+            return (index, partnerIndex)
+
 
     """
     Add a UI element to the tree as a QStandardItem
@@ -393,6 +431,45 @@ class ElementModel(QStandardItemModel):
                     self.copyAttrs(i[0], titleNode)
     
     
+    def dataStructure(self, pair):
+    
+        data = {}
+        
+        self.createDataStructure(pair, data)
+    
+        return data
+    
+    
+    """
+    Recreate the python data structure given a (title, value) pair of indexes
+    """
+    def createDataStructure(self, pair, data):
+        
+        titleIndex, valueIndex = pair
+        
+        title = pyData(titleIndex, 0)
+        
+        value = pyData(valueIndex, 0)
+        
+        titleItem = self.itemFromIndex(titleIndex)
+        
+        if titleItem.hasChildren():
+            
+            childData = {}
+                
+            data[title] = childData
+            
+            for i in range(titleItem.rowCount()):
+                
+                self.createDataStructure((titleIndex.child(i, 0), titleIndex.child(i, 1)), childData)
+                
+        else:
+            
+            data[title] = value
+            
+        return data
+    
+    
     def getRoot(self):
         
         return self.index(0,  0)
@@ -454,7 +531,7 @@ def pyData(index, role):
     
     i = index.data(role).toPyObject()
     
-    if isinstance(i,  QString):
+    if isinstance(i, QString):
         
         i = str(i)
     

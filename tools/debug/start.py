@@ -5,9 +5,10 @@
 Features to add:
 
 1.   Refresh all elements/attributes
-2.   (DONE) Two views, one for UI elements and one for properties
-3.   Search by gid/name
-4.   (DONE) Checkboxes for hide/show
+2.   Clip and scale?
+3.   (DONE) Two views, one for UI elements and one for properties
+4.   Search by gid/name
+5.   (DONE) Checkboxes for hide/show
 X.   Drag and drop UI elements?
 
 """
@@ -124,6 +125,7 @@ class StartQT4(QMainWindow):
     
     """
     Allow the user to change the name of a UIElement from the inspector view
+    Also handle hiding/showing using the checkboxes
     """    
     def inspectorDataChanged(self,  topLeft,  bottomRight):
         
@@ -226,6 +228,10 @@ class StartQT4(QMainWindow):
                     
                     nested = (parentTitle, childTitle)
                     
+                    m = parentPropertyTitle.model()
+                    
+                    value = m.dataStructure(m.getPair(parentPropertyTitle))[parentTitle]
+                    
                 else:
                 
                     propertyTitleIndex = r.child(propertyValueIndex.row(), 0)
@@ -314,7 +320,7 @@ class StartQT4(QMainWindow):
         self.propertyProxyModel.setFilterRole(0)
 
         self.propertyProxyModel.setFilterRegExp(QRegExp("(opacity|is_visible|scale|clip|anchor_point|x|y|z|h|w"+\
-        "|gid|type|source|src|tile|border_color|border_width|color|text)"))
+        "|gid|type|source|src|tile|border_color|border_width|color|text|a|r|g|b)"))
         
         self.ui.property.setModel(self.propertyProxyModel)
         

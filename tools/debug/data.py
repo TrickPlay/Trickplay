@@ -1,11 +1,15 @@
 typeTable = {
     
-    'anchor_pointx': lambda v: ('anchor-x',  toFloat(v)),
-    'anchor_pointy': lambda v: ('anchor-y',  toFloat(v)),
+    'anchor_pointx': lambda v: ('anchor-x',  toFloat(v['x'])),
+    'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
     'scalex': lambda v: ('scale-x',  toFloat(v)),
     'scaley': lambda v: ('scale-y',  toFloat(v)),
     'clipx': lambda v: ('clip',  clip(v)),
     'clipy': lambda v: ('clip',  clip(v)),
+    'colorr': lambda v: ('color', color(v)),
+    'colorg': lambda v: ('color', color(v)),
+    'colorb': lambda v: ('color', color(v)),
+    'colora': lambda v: ('color', color(v)),
     'is_visible': lambda v:('visible',  bool(v)),
     'name': lambda v: ('name',  v),
     'text': lambda v: ('text',  v),
@@ -51,6 +55,10 @@ def dataToModel(title,  value):
 
 def getTypeTable():
     return typeTable
+
+def color(v):
+
+    return 'rgba(' + str(v['r']) + ', ' + str(v['g']) + ', ' + str(v['b']) + ', ' + str(v['a']) + ')'
 
 def opacity(v):
     try:
