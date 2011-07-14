@@ -54,6 +54,7 @@
 		CD63B46913B9895300158169 /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45213B9895300158169 /* right.png */; };
 		CD63B46A13B9895300158169 /* up-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45313B9895300158169 /* up-touch.png */; };
 		CD63B46B13B9895300158169 /* up.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45413B9895300158169 /* up.png */; };
+		CD6705EF13CE44940001C6E4 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6705EE13CE44940001C6E4 /* AssetsLibrary.framework */; };
 		CD68DF3C13861BB700D307D4 /* EditableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD68DF3B13861BB100D307D4 /* EditableTextView.m */; };
 		CD6BC36513678D6F00CF1973 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD6BC36313678D6F00CF1973 /* AudioStreamer.m */; };
 		CD6BC36F136794CD00CF1973 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */; };
@@ -153,6 +154,7 @@
 		CD63B45213B9895300158169 /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = right.png; sourceTree = "<group>"; };
 		CD63B45313B9895300158169 /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up-touch.png"; sourceTree = "<group>"; };
 		CD63B45413B9895300158169 /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = up.png; sourceTree = "<group>"; };
+		CD6705EE13CE44940001C6E4 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		CD68DF3A13861B9300D307D4 /* EditableTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditableTextView.h; sourceTree = "<group>"; };
 		CD68DF3B13861BB100D307D4 /* EditableTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditableTextView.m; sourceTree = "<group>"; };
 		CD6BC36313678D6F00CF1973 /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioStreamer.m; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD6705EF13CE44940001C6E4 /* AssetsLibrary.framework in Frameworks */,
 				CD6BC3731367950700CF1973 /* CFNetwork.framework in Frameworks */,
 				CD6BC371136794EA00CF1973 /* MediaPlayer.framework in Frameworks */,
 				CD6BC36F136794CD00CF1973 /* AudioToolbox.framework in Frameworks */,
@@ -296,6 +299,7 @@
 			isa = PBXGroup;
 			children = (
 				CDFEC57E1320608F00A14307 /* Other */,
+				CD6705EE13CE44940001C6E4 /* AssetsLibrary.framework */,
 				CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */,
 				CD6BC370136794EA00CF1973 /* MediaPlayer.framework */,
 				CD6BC3721367950700CF1973 /* CFNetwork.framework */,
@@ -363,6 +367,7 @@
 		CD4CA69F13B50AF000B5A7A3 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				CD6705F113CE44FF0001C6E4 /* PhotoLibrary */,
 				CD404C241353DCE10021D36C /* CameraViewController.h */,
 				CD404C251353DCE50021D36C /* CameraViewController.m */,
 				CD9A68621371CB0E00977730 /* ImageEditorViewController.h */,
@@ -403,6 +408,13 @@
 				CD63B45413B9895300158169 /* up.png */,
 			);
 			path = VirtualRemoteAssets;
+			sourceTree = "<group>";
+		};
+		CD6705F113CE44FF0001C6E4 /* PhotoLibrary */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = PhotoLibrary;
 			sourceTree = "<group>";
 		};
 		CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */ = {
