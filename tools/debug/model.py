@@ -403,18 +403,80 @@ class ElementModel(QStandardItemModel):
             
             #print("Delete me",  title)
             pass
+            
+    
+    """
+    Return an index given either an item or an index
+    """
+    def toIndex(self, node):
+        
+        if isinstance(node, QStandardItem):
+            
+            return self.indexFromItem(node)
+            
+        elif isinstance(node, QModelIndex):
+            
+            return node
+            
+        else:
+            
+            raise BadDataException("toIndex must be called on a node")
+    
+    
+    """
+    Return an index given either an item or an index
+    """
+    def toItem(self, node):
+        
+        if isinstance(node, QStandardItem):
+            
+            return node
+            
+        elif isinstance(node, QModelIndex):
+            
+            return self.indexFromItem(node)
+            
+        else:
+            
+            raise BadDataException("toItem must be called on a node")
+    
+    
+    """
+    Clone an item with children, return the item
+    """
+    def clone(self, node):
+        
+        node = self.toItem(node)
+    
+    
     
     """
     Copy attributes from the inspector model to the property model.
     This happens every time selection changes in the inspector model.
     """
-    attrOrder = ['position', 'size', 'opacity', 'is_visible', 'color']
     
-    def copyAttrs(self, original, new):
+    attrStructure = {
+        'position' : ['x', 'y', 'z'], 
+        'size' : ['w', 'h'], 
+        'color' : ['r', 'g', 'b', 'a'], 
+        'text' : 'text'
+    }
+    
+    def copyAttrs(self, original, new, isNested = False):
         
-        for i in self.children(original):
+        for attr in ['position', 'size', 'opacity', 'is_visible', 'color']:
             
-            originalItem = self.itemFromIndex(i[0])
+            originalItem = None
+            
+            if not isNested:
+                
+                originalItem = self.itemFromIndex(self.findAttr(original, attr)[0])
+                
+            #else:
+                
+            #    originalItem = 
+        
+            i = self.getPair(originalItem)
             
             titleNode = originalItem.clone()
             
