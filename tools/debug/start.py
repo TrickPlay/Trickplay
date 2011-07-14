@@ -21,7 +21,7 @@ from TreeView import Ui_MainWindow
 
 from delegate import InspectorDelegate
 import connection
-from model import ElementModel, pyData, modelToData, dataToModel, summarize
+from model import Element, ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData,  dataToModel, BadDataException
 
 # Custom ItemDataRoles
@@ -166,7 +166,7 @@ class StartQT4(QMainWindow):
                 
                     titleIndex = self.inspectorModel.titleFromValue(valueIndex)
                     
-                    print('title',  titleIndex.data(0).toString())
+                    #print('title',  titleIndex.data(0).toString())
                     
                     gid = pyData(valueIndex, Qt.Gid)
                     
@@ -279,7 +279,7 @@ class StartQT4(QMainWindow):
                         
                         valueItem = self.inspectorModel.itemFromIndex(childValueIndex)
                         
-                        print(pyData(parentTitleIndex, 0), nested[1])
+                        #print(pyData(parentTitleIndex, 0), nested[1])
                     
                     print("Changed item data from",  pyData(valueItem, 0))
                         
@@ -300,6 +300,8 @@ class StartQT4(QMainWindow):
 
         # Set up Inspector
         self.inspectorModel.initialize(["UI Element",  "Name"],  True)
+        
+        self.inspectorModel.setItemPrototype(Element())
 
         # Inspector Proxy Model
         self.inspectorProxyModel= QSortFilterProxyModel()
