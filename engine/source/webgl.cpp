@@ -10,6 +10,86 @@
 #include "log.h"
 
 //=============================================================================
+// webgl_canvas
+//=============================================================================
+
+G_DEFINE_TYPE (TrickplayWebGLCanvas,trickplay_webgl_canvas,CLUTTER_TYPE_TEXTURE);
+
+#define TRICKPLAY_WEBGL_CANVAS_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TRICKPLAY_TYPE_WEBGL_CANVAS, TrickplayWebGLCanvasPrivate))
+
+//.............................................................................
+
+struct _TrickplayWebGLCanvasPrivate
+{
+    WebGL::Context * context;
+};
+
+//.............................................................................
+// Copied from ClutterTexture's paint, but using different texture coordinates.
+
+static void trickplay_webgl_canvas_paint (ClutterActor *self)
+{
+  ClutterTexture *texture = CLUTTER_TEXTURE (self);
+  guint8 paint_opacity = clutter_actor_get_paint_opacity (self);
+
+  CoglMaterial * material = ( CoglMaterial * ) clutter_texture_get_cogl_material( texture );
+
+  cogl_material_set_color4ub (material,
+			      paint_opacity,
+                              paint_opacity,
+                              paint_opacity,
+                              paint_opacity);
+
+  cogl_set_source (material);
+
+  ClutterActorBox box;
+  float t_w = 1.0;
+  float t_h = 1.0;
+
+  clutter_actor_get_allocation_box (self, &box);
+
+  cogl_rectangle_with_texture_coords ( 0 , 0 , box.x2 - box.x1 , box.y2 - box.y1 ,
+			              0, 1, 1, 0);
+}
+
+//.............................................................................
+
+static void trickplay_webgl_canvas_finalize (GObject *object)
+{
+  WebGL::Context::get( CLUTTER_ACTOR( object ) , true );  
+
+  G_OBJECT_CLASS (trickplay_webgl_canvas_parent_class)->finalize (object);
+}
+
+//.............................................................................
+
+static void trickplay_webgl_canvas_class_init (TrickplayWebGLCanvasClass *klass)
+{
+  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+  ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
+
+  gobject_class->finalize     = trickplay_webgl_canvas_finalize;
+  
+  actor_class->paint        = trickplay_webgl_canvas_paint;
+
+  g_type_class_add_private (gobject_class, sizeof (TrickplayWebGLCanvasPrivate));
+}
+
+//.............................................................................
+
+static void trickplay_webgl_canvas_init (TrickplayWebGLCanvas *self)
+{
+  self->priv = TRICKPLAY_WEBGL_CANVAS_GET_PRIVATE (self);
+}
+
+//.............................................................................
+
+ClutterActor * trickplay_webgl_canvas_new ()
+{
+  return CLUTTER_ACTOR( g_object_new (TRICKPLAY_TYPE_WEBGL_CANVAS,NULL) );
+}
+
+//=============================================================================
 
 namespace WebGL
 {
@@ -107,32 +187,27 @@ int get_texel_size( GLenum format , GLenum type )
 Context * Context::get( ClutterActor * actor , bool detach )
 {
 	g_assert( actor );
+    g_assert( TRICKPLAY_IS_WEBGL_CANVAS( actor ) );
+  
+    TrickplayWebGLCanvasPrivate * priv = TRICKPLAY_WEBGL_CANVAS( actor )->priv;
+  
+    if ( detach )
+    {
+        if ( priv->context )
+        {
+            delete priv->context;
+            priv->context = 0;
+        }
+        
+        return 0;
+    }
 
-	static const gchar * key = "tp-webgl-context";
-
-	static GQuark quark = 0;
-
-	if ( ! quark )
-	{
-		quark = g_quark_from_static_string( key );
-	}
-
-	if ( detach )
-	{
-		g_object_set_qdata( G_OBJECT( actor ) , quark , NULL );
-		return 0;
-	}
-
-	Context * context = ( Context * ) g_object_get_qdata( G_OBJECT( actor ) , quark );
-
-	if ( ! context )
-	{
-		context = new Context( actor );
-
-		g_object_set_qdata_full( G_OBJECT( actor ) , quark , context , ( GDestroyNotify ) destroy );
-	}
-
-	return context;
+    if ( ! priv->context )
+    {
+        priv->context = new WebGL::Context( actor );
+    }
+  
+    return priv->context;
 }
 
 //.............................................................................
@@ -208,11 +283,6 @@ Context::Context( ClutterActor * actor )
     }
 
     context_op( SWITCH_TO_CLUTTER_CONTEXT );
-
-    // TODO: This is cheating. Since GL textures are normally upside down, clutter draws
-    // our texture upside down. We correct by rotating the whole actor, which is wrong.
-
-    clutter_actor_set_rotation( actor , CLUTTER_X_AXIS , 180 , 0 , height / 2 , 0 );
 }
 
 //.............................................................................
@@ -276,13 +346,6 @@ Context::~Context()
 	context_op( DESTROY_MY_CONTEXT );
 
 	tplog2( "CONTEXT DESTROYED" );
-}
-
-//.............................................................................
-
-void Context::destroy( Context * context )
-{
-	delete context;
 }
 
 //.............................................................................
@@ -548,4 +611,6 @@ void Context::delete_shader( GLuint n )
 //.............................................................................
 
 }
+
+
 

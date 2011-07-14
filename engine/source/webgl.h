@@ -129,12 +129,10 @@ namespace WebGL
 	    unsigned long   unpack_colorspace_conversion;
 
 	private:
-
+	
 		Context( ClutterActor * actor );
 
 		virtual ~Context();
-
-		static void destroy( Context * context );
 
 #if defined(CLUTTER_WINDOWING_GLX)
 
@@ -174,5 +172,53 @@ namespace WebGL
 	};
 
 }
+
+//=============================================================================
+// webgl_canvas
+//=============================================================================
+/*
+    We had to implement our own actor for one main reason: ClutterTexture
+    assumes that textures are upside down and the WebGL FBO color buffer is
+    not, so we created a new actor that is just like a texture but uses 
+    different texture coordinates.
+    
+    As a bonus, we get 2 additional things:
+    
+    1) The context is part of the new actor's private data structure and is
+       therefore much cheaper to get on every call.
+       
+    2) The actor shows up as WebGLCanvas in /ui output.
+    
+*/
+
+G_BEGIN_DECLS
+
+#define TRICKPLAY_TYPE_WEBGL_CANVAS               (trickplay_webgl_canvas_get_type ())
+#define TRICKPLAY_WEBGL_CANVAS(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), TRICKPLAY_TYPE_WEBGL_CANVAS, TrickplayWebGLCanvas))
+#define TRICKPLAY_WEBGL_CANVAS_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST ((klass), TRICKPLAY_TYPE_WEBGL_CANVAS, TrickplayWebGLCanvasClass))
+#define TRICKPLAY_IS_WEBGL_CANVAS(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TRICKPLAY_TYPE_WEBGL_CANVAS))
+#define TRICKPLAY_IS_WEBGL_CANVAS_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), TRICKPLAY_TYPE_WEBGL_CANVAS))
+#define TRICKPLAY_WEBGL_CANVAS_GET_CLASS(obj)     (G_TYPE_INSTANCE_GET_CLASS ((obj), TRICKPLAY_TYPE_WEBGL_CANVAS, TrickplayWebGLCanvasClass))
+
+typedef struct _TrickplayWebGLCanvas             TrickplayWebGLCanvas;
+typedef struct _TrickplayWebGLCanvasClass        TrickplayWebGLCanvasClass;
+typedef struct _TrickplayWebGLCanvasPrivate      TrickplayWebGLCanvasPrivate;
+
+struct _TrickplayWebGLCanvas
+{
+	ClutterTexture parent_instance;
+	TrickplayWebGLCanvasPrivate *priv;
+};
+
+struct _TrickplayWebGLCanvasClass
+{
+	ClutterTextureClass parent_class;
+};
+
+GType trickplay_webgl_canvas_get_type( void ) G_GNUC_CONST;
+
+ClutterActor * trickplay_webgl_canvas_new();
+
+G_END_DECLS
 
 #endif // _TRICKPLAY_WEBGL_H
