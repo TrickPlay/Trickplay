@@ -50,6 +50,7 @@ Group: TrickPlay Editor  {
 
          File: Button  (no auto-title, reference/button.txt)
          File: ButtonPicker  (no auto-title, reference/buttonPicker.txt)
+         File: CheckBox  (no auto-title, reference/checkBoxGroup.txt)
          }  # Group: UI Elements
 
       }  # Group: Reference
@@ -81,5 +82,6 @@ Group: Index  {
    Function Index: Functions
    Property Index: Properties
    Event Index: Events
+   Constructor Index: Constructors
    }  # Group: Index
 
