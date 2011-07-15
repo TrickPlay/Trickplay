@@ -301,7 +301,7 @@ class StartQT4(QMainWindow):
     def createTree(self):
 
         # Set up Inspector
-        self.inspectorModel.initialize(["UI Element",  "Name"],  True)
+        self.inspectorModel.initialize(["UI Element",  "Name",  "GID"],  True)
         
         self.inspectorModel.setItemPrototype(Element())
 
@@ -315,6 +315,12 @@ class StartQT4(QMainWindow):
         self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone)"))
         
         self.ui.inspector.setModel(self.inspectorProxyModel)
+        
+        #self.ui.inspector.header().resizeSection(0, 100)
+        
+        self.ui.inspector.header().resizeSection(1, 100)
+        
+        #self.ui.inspector.header().resizeSection(2, 20)
         
         # Inspector Selection Model
         self.inspectorSelectionModel = QItemSelectionModel(self.inspectorProxyModel)

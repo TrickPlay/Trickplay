@@ -10,7 +10,7 @@ def send(data):
     conn.request("POST", "/debug/ui", params)
 
     response = conn.getresponse()
-    print response.status, response.reason
+    #print response.status, response.reason
     data = response.read()
 
     conn.close()
