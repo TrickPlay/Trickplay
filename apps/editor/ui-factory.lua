@@ -1535,6 +1535,12 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		"expansion_location", "cell_size", "style", "direction", "reactive", "loop", "vert_bar_visible", "horz_bar_visible", 
 		"cells_focusable", "lock", "icon", "source", "src", "anchor_point", }
 
+
+	if (item_n == "selected_items") then 
+			print("L")
+	end 
+
+
 	if old_inspector ~= nil then 
 		for i, j  in pairs (non_textInput_items) do 
 			if j == item_n then 
