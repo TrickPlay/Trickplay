@@ -195,7 +195,7 @@ selection-background-color: transparent;*/</string>
         <bool>true</bool>
        </attribute>
        <attribute name="headerDefaultSectionSize">
-        <number>180</number>
+        <number>200</number>
        </attribute>
        <attribute name="headerHighlightSections">
         <bool>true</bool>
@@ -239,6 +239,9 @@ selection-background-color: transparent;*/</string>
        </property>
        <attribute name="headerDefaultSectionSize">
         <number>200</number>
+       </attribute>
+       <attribute name="headerMinimumSectionSize">
+        <number>30</number>
        </attribute>
       </widget>
      </item>
