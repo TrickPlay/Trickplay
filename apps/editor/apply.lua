@@ -205,7 +205,27 @@ function inspector_apply (v, inspector)
 	       end 
 	       v.name = tostring(item_group:find_child("name"):find_child("input_text").text)
 	       end, 
-
+		["selected_items"] = function () 
+		    local items_str = tostring(item_group:find_child("selected_items"):find_child("input_text").text)
+		    local items_tbl = {}
+		    local items_idx = 1
+		    while items_str ~= ""  do 
+		   		local i,j = string.find(items_str, ",")
+				print("i",i,"j",j)
+		   		if i then 
+						table.insert(items_tbl, tonumber(string.sub(items_str, items_idx, i-1)))
+						items_str = string.sub(items_str, j+1, -1) 
+				else 
+					 if tonumber(items_str) then 
+						table.insert(items_tbl, tonumber(items_str))
+						items_str = ""
+					 end 
+				end 
+				print(items_str)
+				dumptable(items_tbl)
+		    end 
+				v.extra.selected_items = items_tbl 
+			end 
       }       
 	  
       org_object, new_object = obj_map[v.type]()

@@ -2979,6 +2979,7 @@ function ui_element.checkBoxGroup(t)
 	 	boxes:clear() 
 	 	cb_group:clear()
 
+
 	 	if(p.skin ~= "custom") then 
              p.box_image = skin_list[p.skin]["checkbox"]
              p.box_focus_image = skin_list[p.skin]["checkbox_focus"]
