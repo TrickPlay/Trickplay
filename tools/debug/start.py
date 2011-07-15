@@ -312,7 +312,7 @@ class StartQT4(QMainWindow):
         
         self.inspectorProxyModel.setFilterRole(0)
 
-        self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone)"))
+        #self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
         
         self.ui.inspector.setModel(self.inspectorProxyModel)
         
@@ -347,7 +347,7 @@ class StartQT4(QMainWindow):
         
         self.propertyProxyModel.setDynamicSortFilter(True)
 
-        self.propertyProxyModel.setFilterRegExp(QRegExp("(opacity|is_visible|scale|clip|anchor_point|position|x|y|z|size|h|w|source|src|tile|border_color|border_width|color|text|a|r|g|b)"))
+        #self.propertyProxyModel.setFilterRegExp(QRegExp("(opacity|is_visible|scale|clip|anchor_point|position|x|y|z|size|h|w|source|src|tile|border_color|border_width|color|text|a|r|g|b)"))
         
         self.ui.property.setModel(self.propertyProxyModel)
         

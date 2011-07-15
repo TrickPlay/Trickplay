@@ -2,8 +2,8 @@ typeTable = {
     
     'anchor_pointx': lambda v: ('anchor-x',  toFloat(v['x'])),
     'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
-    'scalex': lambda v: ('scale-x',  toFloat(v)),
-    'scaley': lambda v: ('scale-y',  toFloat(v)),
+    'scalex': lambda v: ('scale-x',  toFloat(v['x'])),
+    'scaley': lambda v: ('scale-y',  toFloat(v['y'])),
     'clipx': lambda v: ('clip',  clip(v)),
     'clipy': lambda v: ('clip',  clip(v)),
     'colorr': lambda v: ('color', color(v)),
@@ -17,6 +17,7 @@ typeTable = {
     'is_visible': lambda v:('visible',  bool(v)),
     'name': lambda v: ('name',  v),
     'text': lambda v: ('text',  v),
+    'font': lambda v: ('font-name',  v),
     'opacity': lambda v: ('opacity',  opacity(v)),
     'width': lambda v: ('width',  width(v)), 
     'height': lambda v: ('height',  toFloat(v)),
@@ -25,6 +26,9 @@ typeTable = {
     'positionx': lambda v: ('x',  toFloat(v['x'])), 
     'positiony': lambda v: ('y',  toFloat(v['y'])), 
     'positionz': lambda v: ('depth',  toFloat(v['z'])),
+    'x_rotationangle': lambda v: ('rotation-angle-x',  toFloat(v['angle'])),
+    'y_rotationangle': lambda v: ('rotation-angle-y',  toFloat(v['angle'])),
+    'z_rotationangle': lambda v: ('rotation-angle-z',  toFloat(v['angle'])),
 
 }
     
@@ -37,12 +41,15 @@ def dataToModel(title,  value):
     v = value
     s = True
     
-    if "anchor_point" == t or \
-    "clip" == t or "scale" == t or \
-    "tile" == t or "source" == t or \
-    "color" == t or "border_color" == t or \
-    "size" ==t or "position" == t:
+    if isinstance(value, dict):
         s = False
+    
+#    if "anchor_point" == t or \
+#    "clip" == t or "scale" == t or \
+#    "tile" == t or "source" == t or \
+#    "color" == t or "border_color" == t or \
+#    "size" ==t or "position" == t:
+#        s = False
         
     #if "gid" == v:
     #    v = int(v)
@@ -68,7 +75,7 @@ def getTypeTable():
 
 def color(v):
 
-    return 'rgba(' + str(v['r']) + ', ' + str(v['g']) + ', ' + str(v['b']) + ', ' + str(v['a']) + ')'
+    return 'rgba(' + str(v['r']) + ', ' + str(v['g']) + ', ' + str(v['b']) + ', ' + str(float(v['a'])/255) + ')'
 
 def opacity(v):
     try:
@@ -93,6 +100,7 @@ def toFloat(v):
     try:
         return float(v)
     except:
+        print(v)
         raise BadDataException('Value entered cannot be converted to a float.')
 
 class BadDataException(Exception):

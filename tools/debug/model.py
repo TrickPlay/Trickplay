@@ -15,72 +15,103 @@ TITLE = 0
 VALUE = 1
 GID = 2
 
-"""
-A row of items
-"""
-class Row:
-    
-    def __init__(self, items):
-    
-        self.last = 0
-    
-        self.items = items
-        
-        self.tNode = items[TITLE]
-        
-        self.t = self.tNode.pyData()
-        
-        self.vNode = items[VALUE]
-        
-        self.v = self.vNode.pyData()
-        
-        try:
-        
-            self.gNode = items[GID]
-        
-            self.g = self.gNode.pyData()
-            
-        except:
-            
-            gid = 0
-    
-    def valueNode(self): return self.vNode
-    
-    def value(self): return self.v
-    
-    def titleNode(self): return self.tNode
-    
-    def title(self): return self.t
-    
-    def gidNode(self): return self.gidNode
-    
-    def gid(self): return self.g
-        
-    def __len__(self):
-        
-        len(self.items)
+UI_ELEMENTS = {
+    "Group", 
+    "Canvas", 
+    "Rectangle", 
+    "Image", 
+    "Clone", 
+    "Bitmap", 
+    "Text"
+}
 
-    def next(self):
-        
-        if self.last < len(self):
-        
-            self.last += 1
-            
-            return self.items(self.last)
+NOT_EDITABLE = {
+    'clip',
+    'source', 
+    'x center', 
+    'y center', 
+    'z center', 
+}
 
+ATTR_LIST = [
+    'source'
+    'src'
+    'text',
+    'font', 
+    'position', 
+    'size',
+    'opacity', 
+    'is_visible', 
+    'color',
+    'border_color',
+    'anchor_point',
+    'scale',
+    'clip',
+    'x_rotation',
+    'y_rotation',
+    'z_rotation' ,
+    
+    # Hidden
+    #'gid',
+    #'name', 
+    #'type', 
+    'children', 
+]
+
+NESTED_ATTR_LIST = {
+    'position' : ['x', 'y', 'z'], 
+    'size' : ['w', 'h'],
+    'color' : ['r', 'g', 'b', 'a'],
+    'border_color' : ['r', 'g', 'b', 'a'],
+    'anchor_point' : ['x', 'y'],
+    'scale' : ['x', 'y'],
+    'clip' : ['x', 'y', 'w', 'h'],
+    'x_rotation' : ['angle', 'y center', 'z center'],
+    'y_rotation' : ['angle', 'x center', 'z center'],
+    'z_rotation' : ['angle', 'x center', 'y center'],
+}
+
+"""
+Return the attributes in the order they should be added to the model
+"""
+class AttrIter:
+    
+    def __init__(self, group = None):
+        
+        if group:
+        
+            self.group = NESTED_ATTR_LIST[group]
+        
         else:
-
-            self.last = 0
             
-            raise StopIteration
-
-
-
+            self.group = ATTR_LIST
+        
+        self.current = 0
+        
+        self.limit = len(self.group)
+        
+        
     def __iter__(self):
         
         return self
+        
+        
+    def next(self):
+        
+        if self.current < self.limit:
+            
+            r = self.group[self.current]
+            
+            self.current += 1
+            
+            return r
+            
+        else:
+            
+            self.current = 0
+            
+            raise StopIteration
 
-    
 
 class Element(QStandardItem):
     
@@ -212,10 +243,7 @@ class Element(QStandardItem):
         
         title = self.pyData(Qt.DisplayRole)
         
-        #print(title)
-        
-        if 'Group' == title or 'Image' == title or \
-        'Rectangle' == title or 'Clone' == title or 'Text' == title:
+        if title in UI_ELEMENTS:
             
             return True
             
@@ -455,7 +483,7 @@ class ElementModel(QStandardItemModel):
             
             l = len(gs)
             
-            value =  gs + ' ' * 2 * (8 - l) + value
+            value =  gs + ' ' * 2 * (6 - l) + value
             
         else:
             
@@ -480,13 +508,25 @@ class ElementModel(QStandardItemModel):
     """
     Add the list of UI element attributes to the tree as a Element
     """
-    def addAttrs(self, parent, data, gid, isNested):
+    def addAttrs(self, parent, data, gid, nested):
         
-        for attr in data:
+        g = None
+        
+        if nested:
+            
+            g = nested
+        
+        a = AttrIter(g)
+        
+        for attr in a:
+            
+            if not data.has_key(attr):
+                
+                continue
             
             title, value, isSimple = dataToModel(attr, data[attr])
             
-            if isNested:
+            if nested:
                 
                 pass
                 #print( title,  value,  isSimple )
@@ -532,13 +572,13 @@ class ElementModel(QStandardItemModel):
                 
                 parent.appendRow([titleNode, valueNode])
                 
-                self.addAttrs(titleNode, value, gid, True)
+                self.addAttrs(titleNode, value, gid, attr)
             
-            if 'gid' == title or 'source' == title or 'type' == title:
+            if title in NOT_EDITABLE or (nested and nested in NOT_EDITABLE):
                 
                 valueNode.setFlags(Qt.NoItemFlags)
                 
-            if isNested:
+            if nested:
                 
                 valueNode.setData(True, Qt.Nested)
     
@@ -753,12 +793,7 @@ class ElementModel(QStandardItemModel):
     This happens every time selection changes in the inspector model.
     """
     
-    attrStructure = {
-        'position' : ['x', 'y', 'z'], 
-        'size' : ['w', 'h'], 
-        'color' : ['r', 'g', 'b', 'a'], 
-        'text' : 'text'
-    }
+
     
     def copyAttrs(self, original, new, isNested = False):
         
@@ -776,9 +811,7 @@ class ElementModel(QStandardItemModel):
             
             title = c[TITLE].pyData()
             
-            if 'name' != title and 'gid' != title and 'type' != title:
-            
-                new.appendRow(c)
+            new.appendRow(c)
 
         return
         
@@ -875,11 +908,7 @@ class ElementModel(QStandardItemModel):
     """
     def isElement(self,  title):
 
-        if "Text" == title or \
-        "Group" == title or \
-        "Image" == title or \
-        "Rectangle" == title or \
-        "Clone" == title:
+        if title in UI_ELEMENTS:
         
             return title
         
