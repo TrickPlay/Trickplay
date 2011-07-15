@@ -3017,7 +3017,17 @@ function ui_element.checkBoxGroup(t)
 				function box:on_key_down(key)
 					local box_num = tonumber(box.name:sub(4,-1))
 					local next_num
-					if key == keys.Up then 
+					local next_key, prev_key
+
+					if cb_group.direction == "vertical" then 
+						next_key = keys.Down 
+						prev_key = keys.Up
+					else 
+						next_key = keys.Right 
+						prev_key = keys.Left
+					end 
+							
+					if key == prev_key then 
 						if box_num > 1 then 
 							next_num = box_num - 1
 				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
@@ -3029,7 +3039,7 @@ function ui_element.checkBoxGroup(t)
 	    					boxes:find_child("box"..next_num):grab_key_focus()
 							return true 
 						end
-					elseif key == keys.Down then 
+					elseif key == next_key then 
 						if box_num < table.getn(boxes.children)/2 then 
 							next_num = box_num + 1
 				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
