@@ -2803,6 +2803,14 @@ function ui_element.radioButtonGroup(table)
 	
 	           	function donut:on_button_down (x,y,b,n)
 				    local ring_num = tonumber(donut.name:sub(5,-1))
+					
+					current_focus = cb_group
+        			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+	    				rings:find_child("ring"..ring_num).opacity = 0 
+	    				rings:find_child("focus"..ring_num).opacity = 255 
+        			end 
+					rings:find_child("ring"..ring_num):grab_key_focus() 
+
 					rb_group.extra.select_button(ring_num)
 					select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
 	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
@@ -3068,7 +3076,14 @@ function ui_element.checkBoxGroup(t)
 
 	     		function box:on_button_down (x,y,b,n)
 					local box_num = tonumber(box.name:sub(4,-1))
-					--dumptable(p.selected_items)
+	  				
+					current_focus = cb_group
+        			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+	    				boxes:find_child("box"..tostring(box_num)).opacity = 0 
+	    				boxes:find_child("focus"..tostring(box_num)).opacity = 255 
+        			end 
+					boxes:find_child("box"..tostring(box_num)):grab_key_focus() 
+
 					table.insert(p.selected_items, box_num)
 					cb_group:find_child("check"..tostring(box_num)).opacity = 255
 					cb_group:find_child("check"..tostring(box_num)).reactive = true
@@ -3078,6 +3093,14 @@ function ui_element.checkBoxGroup(t)
 
 	     		function check:on_button_down(x,y,b,n)
 					local check_num = tonumber(check.name:sub(6,-1))
+
+					current_focus = cb_group
+        			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+	    				boxes:find_child("box"..tostring(check_num)).opacity = 0 
+	    				boxes:find_child("focus"..tostring(check_num)).opacity = 255 
+        			end 
+					boxes:find_child("box"..tostring(check_num)):grab_key_focus() 
+
 					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
 						p.selected_items = table_remove_val(p.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
