@@ -271,6 +271,19 @@ local function copy_widget_imgs ()
 	end 
 end 
 
+function is_there_guideline () 
+
+	for i, j in pairs (g.children) do 
+		if j.name then 
+			if string.find(j.name, "_guideline") then 
+				print("GUIDE : ", j.name)
+				return true 
+			end 
+		end 
+    end 
+	return false
+end 
+
 function set_new_project (pname, replace)
 	if(pname~= "") then
     	project = pname
@@ -1226,7 +1239,7 @@ function make_attr_t(v)
 		if v.extra.type == "ButtonPicker" then 
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		else 
-		    table.insert(attr_t, {"caption", "Menu Contents"})
+		    --table.insert(attr_t, {"caption", "Menu Contents"}) --0714
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		end 
 		end,

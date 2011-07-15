@@ -1,4 +1,4 @@
-dofile("header.lua")
+local hh  = dofile("header.lua")
 dofile("editor.lua")
 
 -------------------------------------------------------------------------------
@@ -303,6 +303,8 @@ dofile("editor.lua")
        end
 	end
 
+
+
       function screen:on_motion(x,y)
 
 	  local mouse_pointer
@@ -312,7 +314,8 @@ dofile("editor.lua")
 			if selected_content.extra.is_in_group ~= true then 
 				local c, t = find_container(x,y) 
 				selected_container = c
-				if screen:find_child(c.name.."border") == nil then 
+				--if screen:find_child(c.name.."border") == nil then 
+				if c.selected == false then
 				 --if c.extra.org_opacity == nil or c.opacity == c.extra.org_opacity then
 					editor.container_selected(c,x,y)	
 					editor_lb:set_cursor(52)
@@ -432,7 +435,8 @@ dofile("editor.lua")
 		        return true 
 		 end 
 	       end
-
+			
+ 	       if is_there_guideline() then 	
 	       if (guideline_type(actor.name) == "v_guideline") then 
 	            actor.x = x - dx
 	            return true
@@ -440,6 +444,7 @@ dofile("editor.lua")
 		    actor.y = y - dy
 	            return true
 	       end 
+		   end 
 
 		   local bumo 
 	       local border = screen:find_child(actor.name.."border")
