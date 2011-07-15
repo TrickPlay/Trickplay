@@ -185,6 +185,9 @@ selection-background-color: transparent;*/</string>
        <property name="uniformRowHeights">
         <bool>true</bool>
        </property>
+       <property name="animated">
+        <bool>false</bool>
+       </property>
        <property name="allColumnsShowFocus">
         <bool>true</bool>
        </property>
@@ -192,13 +195,13 @@ selection-background-color: transparent;*/</string>
         <bool>true</bool>
        </attribute>
        <attribute name="headerDefaultSectionSize">
-        <number>200</number>
+        <number>180</number>
        </attribute>
        <attribute name="headerHighlightSections">
         <bool>true</bool>
        </attribute>
        <attribute name="headerMinimumSectionSize">
-        <number>100</number>
+        <number>30</number>
        </attribute>
        <attribute name="headerStretchLastSection">
         <bool>true</bool>
