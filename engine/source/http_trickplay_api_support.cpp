@@ -128,17 +128,41 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 	gboolean is_visible = CLUTTER_ACTOR_IS_VISIBLE( actor );
 	
 	// Clip
-	gfloat cxoff;
-	gfloat cyoff;
-	gfloat cw;
-	gfloat ch;
-	clutter_actor_get_clip( actor, &cxoff, &cyoff, &cw, &ch );
-	Object clip;
-	clip["x"] = (long long)cxoff;
-	clip["y"] = (long long)cyoff;
-	clip["w"] = (long long)cw;
-	clip["h"] = (long long)ch;
-	
+	if (clutter_actor_has_clip( actor )) {
+        gfloat cxoff;
+        gfloat cyoff;
+        gfloat cw;
+        gfloat ch;
+        clutter_actor_get_clip( actor, &cxoff, &cyoff, &cw, &ch );
+        Object clip;
+        clip["x"] = cxoff;
+        clip["y"] = cyoff;
+        clip["w"] = cw;
+        clip["h"] = ch;
+        (*object)["clip"] = clip;
+    }
+    
+    // Rotation
+    Object x_rotation;
+    Object y_rotation;
+    Object z_rotation;
+    gdouble angle;
+    gfloat rx;
+    gfloat ry;
+    gfloat rz;
+    angle = clutter_actor_get_rotation( actor , CLUTTER_X_AXIS , &rx, &ry, &rz );
+    x_rotation["angle"] = angle;
+    x_rotation["y center"] = ry;
+    x_rotation["z center"] = rz;
+    angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , &rx, &ry, &rz );
+    y_rotation["angle"] = angle;
+    y_rotation["x center"] = rx;
+    y_rotation["z center"] = rz;
+    angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , &rx, &ry, &rz );
+    z_rotation["angle"] = angle;
+    z_rotation["x center"] = rx;
+    z_rotation["y center"] = ry;
+
 	if ( CLUTTER_IS_TEXT( actor ) )
     {
 		
@@ -242,7 +266,9 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 	(*object)["scale"]	 		= scale;
 	(*object)["opacity"] 		= opacity;
 	(*object)["anchor_point"] 	= anchor_point;
-	(*object)["clip"]			= clip;
+    (*object)["x_rotation"] = x_rotation;
+    (*object)["y_rotation"] = y_rotation;
+    (*object)["z_rotation"] = z_rotation;
     
 }
 
@@ -365,7 +391,11 @@ public:
 			case G_TYPE_FLOAT:
 				g_value_set_float( & value , it->second.as_number() );
 				break;
-
+            
+			case G_TYPE_DOUBLE:
+				g_value_set_double( & value , it->second.as_number() );
+				break;
+            
 			case G_TYPE_BOOLEAN:
 				g_value_set_boolean( & value , it->second.as<bool>() );
 				break;

@@ -5,7 +5,7 @@
 Features to add:
 
 1.   Refresh all elements/attributes
-2.   Clip and scale? Rotation?
+2.   (DONE) Clip and scale? Rotation?
 3.   (DONE) Two views, one for UI elements and one for properties
 4.   Search by gid/name
 5.   (DONE) Checkboxes for hide/show
@@ -271,9 +271,9 @@ class StartQT4(QMainWindow):
                         
                         parentValueItem = self.inspectorModel.itemFromIndex(parentPair[1])
                         
-                        parentValueItem.setData(summarize(value), 0)
+                        parentValueItem.setData(summarize(value, nested[0]), 0)
                         
-                        propertySummaryValueItem.setData(summarize(value), 0)
+                        propertySummaryValueItem.setData(summarize(value, nested[0]), 0)
                         
                         childValueIndex = self.inspectorModel.findAttr(parentTitleIndex, nested[1])[1]
                         
@@ -312,9 +312,11 @@ class StartQT4(QMainWindow):
         
         self.inspectorProxyModel.setFilterRole(0)
 
-        #self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
+        self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
         
         self.ui.inspector.setModel(self.inspectorProxyModel)
+        
+        self.ui.inspector.header().setMovable(False)
         
         #self.ui.inspector.header().resizeSection(0, 100)
         
@@ -333,6 +335,8 @@ class StartQT4(QMainWindow):
         self.ui.property.setModel(self.propertyModel)
         
         self.propertyModel.initialize(["UI Element Property",  "Value"],  False)
+        
+        self.ui.property.header().setMovable(False)
         
         self.propertySelectionModel = QItemSelectionModel(self.propertyModel)
         

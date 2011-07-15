@@ -22,7 +22,7 @@ UI_ELEMENTS = {
     "Image", 
     "Clone", 
     "Bitmap", 
-    "Text"
+    "Text", 
 }
 
 NOT_EDITABLE = {
@@ -34,8 +34,8 @@ NOT_EDITABLE = {
 }
 
 ATTR_LIST = [
-    'source'
-    'src'
+    'source', 
+    'src', 
     'text',
     'font', 
     'position', 
@@ -50,6 +50,7 @@ ATTR_LIST = [
     'x_rotation',
     'y_rotation',
     'z_rotation' ,
+    'tile', 
     
     # Hidden
     #'gid',
@@ -69,6 +70,7 @@ NESTED_ATTR_LIST = {
     'x_rotation' : ['angle', 'y center', 'z center'],
     'y_rotation' : ['angle', 'x center', 'z center'],
     'z_rotation' : ['angle', 'x center', 'y center'],
+    'tile' : ['x', 'y'], 
 }
 
 """
@@ -507,16 +509,13 @@ class ElementModel(QStandardItemModel):
     
     """
     Add the list of UI element attributes to the tree as a Element
+    Parent is a QStandardItem (an Element), data is the JSON data,
+    gid is the parent Element's gid, and nested is the name of the parent
+    attribute, like 'anchor_point', if applicable ('anchor_point' has children x, y)
     """
     def addAttrs(self, parent, data, gid, nested):
         
-        g = None
-        
-        if nested:
-            
-            g = nested
-        
-        a = AttrIter(g)
+        a = AttrIter(nested)
         
         for attr in a:
             
@@ -525,11 +524,6 @@ class ElementModel(QStandardItemModel):
                 continue
             
             title, value, isSimple = dataToModel(attr, data[attr])
-            
-            if nested:
-                
-                pass
-                #print( title,  value,  isSimple )
             
             titleNode = Element(attr)
             
@@ -560,9 +554,7 @@ class ElementModel(QStandardItemModel):
                 
             else:
                 
-                # TODO, construct summary from child nodes? 
-                # Maybe not, could be harder to compare w/ new data..
-                summary = summarize(value)
+                summary = summarize(value, attr)
                 
                 valueNode = Element(summary)
                 
@@ -917,19 +909,30 @@ class ElementModel(QStandardItemModel):
             return None
 
 
-def summarize(value):
+"""
+The read-only summary of attributes
+"""
+def summarize(value, nested = None):
     
-    # The read-only summary of attributes
-    summary = "{"
+    try:
     
-    for item in value:
+        a = AttrIter(nested)
         
-        summary += item + ': ' + str(value[item]) + ', '
-    
-    summary = summary[:len(summary)-2] + '}'
-    
-    return summary
+        summary = "{"
+        
+        for item in a:
+            
+            summary += item + ': ' + str(value[item]) + ', '
+        
+        summary = summary[:len(summary)-2] + '}'
+        
+        return summary
 
+    except:
+        
+        print(value,  nested)
+        
+        raise Exception
 
 """
 Get node data and return the result as a Python object,
