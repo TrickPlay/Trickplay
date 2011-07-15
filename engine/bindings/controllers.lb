@@ -8,6 +8,7 @@ module controllers_module;
 #include "images.h"
 #include "bitmap.h"
 #include "json.h"
+#include "clutter_util.h"
 ]]
 
 #==============================================================================
@@ -37,15 +38,15 @@ public:
     // Delegate functions
     
     virtual void disconnected();
-    virtual bool key_down(unsigned int key_code,unsigned long int unicode);
-    virtual bool key_up(unsigned int key_code,unsigned long int unicode);
-    virtual void accelerometer(double x,double y,double z);
-    virtual bool pointer_move( int x, int y );
-    virtual bool pointer_button_down( int button , int x, int y );
-    virtual bool pointer_button_up( int button , int x, int y );
-    virtual void touch_down(int finger,int x,int y);
-    virtual void touch_move(int finger,int x,int y);
-    virtual void touch_up(int finger,int x,int y);
+    virtual bool key_down(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers);
+    virtual bool key_up(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers);
+    virtual void accelerometer(double x,double y,double z,unsigned long int modifiers);
+    virtual bool pointer_move( int x, int y ,unsigned long int modifiers);
+    virtual bool pointer_button_down( int button , int x, int y ,unsigned long int modifiers);
+    virtual bool pointer_button_up( int button , int x, int y ,unsigned long int modifiers);
+    virtual void touch_down(int finger,int x,int y,unsigned long int modifiers);
+    virtual void touch_move(int finger,int x,int y,unsigned long int modifiers);
+    virtual void touch_up(int finger,int x,int y,unsigned long int modifiers);
     virtual void ui_event(const String & parameters);
     virtual void submit_image( void * data, unsigned int size, const char * mime_type );
     virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
@@ -1210,14 +1211,15 @@ void ControllerDelegate::disconnected()
     list->proxy_disconnected(this);    
 }
 
-bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
-
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    
     bool result = true;
 
-    if ( invoke_controller_on_key_down(L,this,2,1) )
+    if ( invoke_controller_on_key_down(L,this,3,1) )
     {
 	    if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
 	    {
@@ -1230,14 +1232,15 @@ bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicod
     return result;
 }
 
-bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
+    ClutterUtil::push_event_modifiers(L,modifiers);
 
     bool result = true;
 
-    if ( invoke_controller_on_key_up(L,this,2,1) )
+    if ( invoke_controller_on_key_up(L,this,3,1) )
     {
     
     	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
@@ -1251,22 +1254,24 @@ bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
     return result;
 }
 
-void ControllerDelegate::accelerometer(double x,double y,double z)
+void ControllerDelegate::accelerometer(double x,double y,double z,unsigned long int modifiers)
 {
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushnumber(L,z);    
-    invoke_controller_on_accelerometer(L,this,3,0);    
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_accelerometer(L,this,4,0);    
 }
 
-bool ControllerDelegate::pointer_move(int x,int y)
+bool ControllerDelegate::pointer_move(int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers(L,modifiers);
 
     bool result = true;
 
-    if ( invoke_controller_on_pointer_move(L,this,2,1) )
+    if ( invoke_controller_on_pointer_move(L,this,3,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -1278,35 +1283,16 @@ bool ControllerDelegate::pointer_move(int x,int y)
     return result;
 }
 
-bool ControllerDelegate::pointer_button_down(int button,int x,int y)
-{
-    lua_pushnumber(L,button);
-    lua_pushnumber(L,x);
-    lua_pushnumber(L,y);
-
-    bool result = true;
-
-    if ( invoke_controller_on_pointer_button_down(L,this,3,1) )
-    {
-        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
-        {
-            result = false;
-        }
-
-        lua_pop( L , 1 );
-    }
-    return result;
-}
-
-bool ControllerDelegate::pointer_button_up(int button,int x,int y)
+bool ControllerDelegate::pointer_button_down(int button,int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,button);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers(L,modifiers);
 
     bool result = true;
 
-    if ( invoke_controller_on_pointer_button_up(L,this,3,1) )
+    if ( invoke_controller_on_pointer_button_down(L,this,4,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -1318,28 +1304,52 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y)
     return result;
 }
 
-void ControllerDelegate::touch_down(int finger,int x,int y)
+bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long int modifiers)
+{
+    lua_pushnumber(L,button);
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_button_up(L,this,4,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
+}
+
+void ControllerDelegate::touch_down(int finger,int x,int y,unsigned long int modifiers)
 {   
     lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_down(L,this,3,0);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_touch_down(L,this,4,0);
 }
 
-void ControllerDelegate::touch_move(int finger, int x,int y)
+void ControllerDelegate::touch_move(int finger, int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_move(L,this,3,0);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_touch_move(L,this,4,0);
 }
 
-void ControllerDelegate::touch_up(int finger, int x,int y)
+void ControllerDelegate::touch_up(int finger, int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_up(L,this,3,0);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_touch_up(L,this,4,0);
 }
 
 void ControllerDelegate::ui_event(const String & parameters)

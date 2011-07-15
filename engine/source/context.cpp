@@ -28,6 +28,7 @@
 #include "app_push_server.h"
 #include "http_server.h"
 #include "http_trickplay_api_support.h"
+#include "clutter_util.h"
 
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
@@ -840,7 +841,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
                     map_key( event , & keyval , & unicode );
 
-                    tp_controller_key_down( ( TPController * )controller, keyval, unicode );
+                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                    tp_controller_key_down( ( TPController * )controller, keyval, unicode , modifiers );
                     return TRUE;
                 }
 
@@ -856,7 +859,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
                     map_key( event , & keyval , & unicode );
 
-                    tp_controller_key_up( ( TPController * )controller, keyval, unicode );
+                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                    tp_controller_key_up( ( TPController * )controller, keyval, unicode , modifiers );
                     return TRUE;
                 }
                 break;
@@ -868,7 +873,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 {
                     if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
                     {
-                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y );
+                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y , modifiers );
                     }
                     return TRUE;
                 }
@@ -881,7 +888,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 {
                     if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
                     {
-                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
                     }
                     return TRUE;
                 }
@@ -893,7 +902,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 {
                     if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
                     {
-                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
                     }
                     return TRUE;
                 }

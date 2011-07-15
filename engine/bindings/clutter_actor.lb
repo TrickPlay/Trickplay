@@ -36,8 +36,9 @@ gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->keyval);
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if (UserData::invoke_callback( G_OBJECT( actor ) , "on_key_down" , 3 , 1 , L ))    
+    if (UserData::invoke_callback( G_OBJECT( actor ) , "on_key_down" , 4 , 1 , L ))    
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -56,8 +57,9 @@ gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->keyval);
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_up" , 3 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_up" , 4 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -80,8 +82,9 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_down" , 4 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_down" , 5 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -103,8 +106,9 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
     lua_pushinteger(L,event->click_count);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_up" , 4 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_up" , 5 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -124,8 +128,9 @@ gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_motion" , 2 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_motion" , 3 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -146,8 +151,9 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->direction);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_scroll" , 3 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_scroll" , 4 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -1765,6 +1771,7 @@ interface actor [[ClutterActor*]]
 	keyval - An integer key value. This can be compared with the <keys> global.
 	unicode - The unicode character, if any.
 	time - The time at which the event was generated.
+	modifiers - If any modifiers are pressed, this is a table of the modifiers. Otherwise, it is nil.
 	
     */
 
@@ -1789,6 +1796,7 @@ interface actor [[ClutterActor*]]
 	keyval - An integer key value. This can be compared with the <keys> global.
 	unicode - The unicode character, if any.
 	time - The time at which the event was generated.
+    modifiers - If any modifiers are pressed, this is a table of the modifiers. Otherwise, it is nil.
 	
     */
 

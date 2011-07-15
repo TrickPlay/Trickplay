@@ -4,6 +4,7 @@
 
 #include "clutter_util.h"
 #include "lb.h"
+#include "trickplay/controller.h"
 
 //.............................................................................
 
@@ -405,8 +406,38 @@ static gboolean event_pump( gpointer )
 
 #endif
 
+static ClutterModifierType to_clutter_modifier( unsigned long int modifiers )
+{
+	unsigned long int result = 0;
 
-void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
+	if ( modifiers & TP_CONTROLLER_MODIFIER_SHIFT )
+	{
+		result |= CLUTTER_SHIFT_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_LOCK )
+	{
+		result |= CLUTTER_LOCK_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_CONTROL )
+	{
+		result |= CLUTTER_CONTROL_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_SUPER )
+	{
+		result |= CLUTTER_SUPER_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_HYPER )
+	{
+		result |= CLUTTER_HYPER_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_META )
+	{
+		result |= CLUTTER_META_MASK;
+	}
+	return ClutterModifierType( result );
+}
+
+void ClutterUtil::inject_key_down( guint key_code, gunichar unicode , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
@@ -416,6 +447,7 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
+    event->key.modifier_state = to_clutter_modifier( modifiers );
 
     clutter_event_put( event );
 
@@ -433,7 +465,7 @@ void ClutterUtil::inject_key_down( guint key_code, gunichar unicode )
 #endif
 }
 
-void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
+void ClutterUtil::inject_key_up( guint key_code, gunichar unicode , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
@@ -443,6 +475,7 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->key.keyval = key_code;
     event->key.unicode_value = unicode;
+    event->key.modifier_state = to_clutter_modifier( modifiers );
 
     clutter_event_put( event );
 
@@ -460,7 +493,7 @@ void ClutterUtil::inject_key_up( guint key_code, gunichar unicode )
 #endif
 }
 
-void ClutterUtil::inject_motion( gfloat x , gfloat y )
+void ClutterUtil::inject_motion( gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
@@ -470,6 +503,7 @@ void ClutterUtil::inject_motion( gfloat x , gfloat y )
     event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
     event->motion.x = x;
     event->motion.y = y;
+    event->motion.modifier_state = to_clutter_modifier( modifiers );
 
     clutter_event_put( event );
 
@@ -487,7 +521,7 @@ void ClutterUtil::inject_motion( gfloat x , gfloat y )
 #endif
 }
 
-void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y )
+void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
@@ -498,6 +532,7 @@ void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y )
     event->button.button = button;
     event->button.x = x;
     event->button.y = y;
+    event->button.modifier_state = to_clutter_modifier( modifiers );
 
     clutter_event_put( event );
 
@@ -515,7 +550,7 @@ void ClutterUtil::inject_button_press( guint32 button , gfloat x , gfloat y )
 #endif
 }
 
-void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y )
+void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y , unsigned long int modifiers )
 {
     clutter_threads_enter();
 
@@ -526,6 +561,7 @@ void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y )
     event->button.button = button;
     event->button.x = x;
     event->button.y = y;
+    event->button.modifier_state = to_clutter_modifier( modifiers );
 
     clutter_event_put( event );
 
@@ -558,5 +594,93 @@ void ClutterUtil::stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *
     }
 }
 
+unsigned long int ClutterUtil::get_tp_modifiers( ClutterEvent * event )
+{
+	unsigned long int result = TP_CONTROLLER_MODIFIER_NONE;
+
+	ClutterModifierType cm = clutter_event_get_state( event );
+
+	if ( cm & CLUTTER_SHIFT_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_SHIFT;
+	}
+	if ( cm & CLUTTER_LOCK_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_LOCK;
+	}
+	if ( cm & CLUTTER_CONTROL_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_CONTROL;
+	}
+	if ( cm & CLUTTER_SUPER_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_SUPER;
+	}
+	if ( cm & CLUTTER_HYPER_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_HYPER;
+	}
+	if ( cm & CLUTTER_META_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_META;
+	}
+
+	return result;
+}
+
+void ClutterUtil::push_event_modifiers( lua_State * L , ClutterEvent * event )
+{
+	push_event_modifiers( L , get_tp_modifiers( event ) );
+}
+
+void ClutterUtil::push_event_modifiers( lua_State * L , unsigned long int modifiers )
+{
+	if ( ! modifiers )
+	{
+		lua_pushnil( L );
+		return;
+	}
+
+	lua_newtable( L );
+
+	int t = lua_gettop( L );
+
+	if ( modifiers & TP_CONTROLLER_MODIFIER_SHIFT )
+	{
+		lua_pushliteral( L , "shift" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_LOCK )
+	{
+		lua_pushliteral( L , "lock" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_CONTROL )
+	{
+		lua_pushliteral( L , "control" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_SUPER )
+	{
+		lua_pushliteral( L , "super" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_HYPER )
+	{
+		lua_pushliteral( L , "hyper" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_META )
+	{
+		lua_pushliteral( L , "meta" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+}
 
 //-----------------------------------------------------------------------------
