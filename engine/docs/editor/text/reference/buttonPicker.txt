@@ -4,9 +4,15 @@ A ButtonPicker enables the user to make a selection by scrolling through a list 
 
 
 
-Function: buttonPicker( properties )
+Constructor: buttonPicker( properties )
 
-The buttonPicker() function creates a new ButtonPicker UI Element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+The buttonPicker() function creates a new ButtonPicker UI element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+
+*Prototype:*
+
+	(code)
+	bpGroup buttonPicker( properties )
+	(end)
 
 *Argument:*
 
@@ -19,7 +25,7 @@ The properties table contains a comma-separated list of property settings for th
 *Example:* Create a new ButtonPicker, specifying some properties
 
 (code)
--- Create all the UI Elements
+-- Load the UI Elements library
 ui_element = dofile( "/lib/ui_element.lua" )
 
 -- Create a new ButtonPicker, setting some of its ButtonPicker-specific properties
@@ -163,7 +169,7 @@ Supported direction settings are shown below.
 
 Property: text_font
 
-The text_font property is a string specifying the ButtonPicker's font. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+The text_font property is a string specifying the ButtonPicker's font when the object does not have the input focus. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
 
 *Default Setting:* "DejaVu Sans 30px"
 
@@ -173,7 +179,7 @@ The text_font property is a string specifying the ButtonPicker's font. The font 
 
 Property: focus_text_font
 
-The focus_text_font property is a string specifying the ButtonPicker's font when it has the input focus. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+The focus_text_font property is a string specifying the ButtonPicker's font when the object has the input focus. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
 
 *Default Setting:* "DejaVu Sans 30px"
 
@@ -183,7 +189,9 @@ The focus_text_font property is a string specifying the ButtonPicker's font when
 
 Property: text_color 
 
-The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the ButtonPicker's text color when the object does not have the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -193,7 +201,9 @@ The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(tra
 
 Property: focus_text_color
 
-The focus_text_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's text color when it has input focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The focus_text_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's text color when the object has the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -203,7 +213,9 @@ The focus_text_color property is a table of integer RGB and alpha settings speci
 
 Property: fill_color
 
-The fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when the object does not have the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
 *Default Setting:* {255, 255, 255, 0} (white and transparent)
 
@@ -213,7 +225,9 @@ The fill_color property is a table of integer RGB and alpha settings specifying 
 
 Property: focus_fill_color
 
-The focus_fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when it has focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The focus_fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when the object has the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
 *Default Setting:* {0, 255, 0, 0} (green and transparent)
 
@@ -223,7 +237,9 @@ The focus_fill_color property is a table of integer RGB and alpha settings speci
 
 Property: border_color
 
-The border_color property is a table of integer RGB and alpha settings specifying the ButtonPicker border's color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The border_color property is a table of integer RGB and alpha settings specifying the ButtonPicker border's color when the object does not have the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -233,7 +249,9 @@ The border_color property is a table of integer RGB and alpha settings specifyin
 
 Property: focus_color
 
-The focus_color is a table of integer RGB and alpha settings specifying the ButtonPicker border's color when it has focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The focus_color is a table of integer RGB and alpha settings specifying the ButtonPicker border's color when the object has the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
 *Default Setting:* {0, 255, 0, 255} (green and opaque)
 
@@ -243,9 +261,21 @@ The focus_color is a table of integer RGB and alpha settings specifying the Butt
 
 Property: skin
 
-The skin property is a string specifying the ButtonPicker's skin. NEED MORE INFORMATION ABOUT THIS.
+The skin property is a string that specifies the display appearance of the ButtonPicker.
+
+Predefined skins are provided, and the developer may define a custom skin. The following skin appearances are supported.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+"CarbonCandy" - an alternative skin. Flashy, attracts attention
+"custom" - the skin is defined by the developer
+
+When the "custom" skin is selected, the developer must define the <text_color>, <fill_color> and <border_color> properties of the ButtonPicker object for its focused and unfocused states.
 
 *Default Setting:* "default"
+
+*See Also:* the <text_color>, <fill_color> and <border_color> properties
 
 
 
@@ -389,19 +419,5 @@ The on_focus_in() function forces the input focus to the ButtonPicker.
 
 *Return Value:* None.
 
-*See Also:* the <on_focus_out> function
 
-
-
-Function: on_focus_out
-
-The on_focus_out() function releases the input focus from the ButtonPicker. 
-
-NEED MORE INFORMATION ABOUT THIS FUNCTION: Where does the input focus go to? Which element?
-
-*Prototype:* on_focus_out()
-
-*Return Value:* None.
-
-*See Also:* the <on_focus_in> function
 

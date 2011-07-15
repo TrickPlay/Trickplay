@@ -1,0 +1,423 @@
+Class: CheckBox
+
+A CheckBox object enables a setting to toggle between two different states, such as On/Off, True/False or Enabled/Disabled.
+
+A CheckBox object may contain one or more checkboxes. Each checkbox can be either checked or unchecked. A checkbox's setting is independent of the settings of the other checkboxes in the group.
+
+In most cases, it will be easiest to associate a single checkbox with each CheckBox object, even if the screen contains multiple checkboxes. However, the capability for a CheckBox object to have multiple checkboxes is available if you want.
+
+In this documentation, when reference is made to a "CheckBox," it refers to a CheckBox object. References to a "checkbox" refers to a checkbox item in a CheckBox object. A CheckBox object may contain one or more checkboxes.
+
+
+
+Constructor: checkBoxGroup( properties )
+
+The checkBoxGroup() function creates a new CheckBox UI element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+
+*Prototype:*
+
+	(code)
+	cbGroup checkBoxGroup( properties )
+	(end)
+
+*Argument:*
+
+properties - table of CheckBox property settings
+
+The properties table contains a comma-separated list of property settings for the new CheckBox. If a property is not explicitly set, its default value is used.
+
+*Return Value:* Returns a Group object that contains the new CheckBox and related support objects. The Group object should be used to access the CheckBox's properties and functions.
+
+*Example:* Create a new CheckBox, specifying some properties
+
+(code)
+-- Load the UI Element library
+ui_element = dofile( "/lib/ui_element.lua" )
+
+-- Create a new CheckBox, setting some of its CheckBox-specific properties
+-- Note: We are creating a single CheckBoxGroup, but that group actually contains 
+-- three checkboxes defined in the items property. The first and third checkboxes will
+-- be initialized as checked; the second checkbox will start out unchecked.
+local checkBox = ui_element.checkBoxGroup{ items = { "Enable scrolling", "Verify file deletions", "Maximize on start-up" },
+                                           selected_items = { 1, 3 } }
+
+-- Set some of the CheckBox's UIElement properties
+checkBox.name = "Preferences"
+checkBox.position = { 700, 500, 0 }
+(end)
+
+
+
+Property: items
+
+The items property is a table of strings where each string specifies the text displayed alongside one checkbox in the CheckBox's group. For each string in the items table, there will be one checkbox displayed in the group. The first checkbox in the items table is at index 1.
+
+*Default Setting:* { "item1", "item2", "item3" }
+
+*See Also:* the <selected_items> and <direction> properties
+
+
+
+Property: selected_items
+
+The selected_items property is a table of integer indices into the CheckBox object's <items> property table. Each entry in the items property references a single checkbox in the CheckBox object. If a checkbox is currently checked, its index in the items table will be stored in the selected_items table. The first item in the items list is at index 1.
+
+As an example, assume a CheckBox object with three checkboxes. If the second checkbox is checked and the others are unchecked, the selected_items table would contain {2}. If checkboxes 2 and 3 were checked, the selected_items table would contain either {2,3} or {3,2}. Notice that the indices may be stored in any order; therefore, code should not make decisions based on index order.
+
+You can assign values to the selected_items property to set a checkbox's checked/unchecked state. If the CheckBox is visible, the display will be updated automatically when the value of the selected_items property changes.
+
+*Default Setting:* {1}, i.e., first checkbox in the object is checked
+
+*Code Example:* Toggle a checkbox. This version works only with Checkbox objects containing a single checkbox.
+
+	(code)
+	-- Load the UI Element library
+	ui_element = dofile("/lib/ui_element.lua")
+
+	-- Create a new CheckBox, setting some of its CheckBox-specific properties
+	-- Initialize the checkbox to the unchecked state
+	local checkBox = ui_element.checkBoxGroup{
+			items = { "Check Me" },
+			selected_items = {} }
+
+	-- Set some of the CheckBox's UIElement properties
+	checkBox.name = "MyCheckBox"
+	checkBox.position = { 700, 500, 0 }
+	
+	-- This code can be placed in an event handler, such as a button.pressed() handler,
+	-- to toggle the checkbox's checked/unchecked state.
+	if checkBox.selected_items[ 1 ] == 1 then
+		-- Box is currently checked; uncheck it
+		checkBox.selected_items = {}
+	else
+		-- Box is currently unchecked; check it
+		checkBox.selected_items = {1}
+	end
+	(end)
+
+*Code Example:* Toggle a checkbox. This version works with CheckBox objects containing any number of checkboxes.
+
+	(code)
+	-- Description: Utility function that toggles the state of a specified checkbox
+	-- This function works for CheckBox objects with any number of checkboxes.
+	-- Prototype: boolean toggleCheckbox( cbox, item )
+	-- Arguments: cbox - checkBoxGroup object that contains the relevant checkbox
+	--            item - string in cbox.items property that identifies a specific checkbox
+	-- Return Value: true if checkbox was successfully toggled, else false
+	
+	function toggleCheckbox( cbox, item )
+		-- Search items property for item string
+		for i, j in pairs( cbox.items ) do
+			-- Is this the checkbox we are looking for?
+			if j == item then
+				-- Yes, i == checkbox's index
+				-- Search the selected_items property for this index to see if it is checked
+				for x, y in pairs( cbox.selected_items ) do
+					-- Is this the index for the relevant checkbox?
+					if y == i then
+						-- Yes, the checkbox is checked
+						-- Uncheck it (Note: x == index of checkbox in selected_items table)
+						table.remove( cbox.selected_items, x )
+						
+						-- If rotate_func() is defined, call it
+						if( cbox.rotate_func ~= nil ) then
+							cbox.rotate_func( cbox.selected_items )
+						end
+						
+						-- Done
+						return true
+					end
+				end
+
+				-- We searched the entire selected_items table and our checkbox was not in it
+				-- Thus, the checkbox is not checked. Uncheck it.
+				-- Note: i == index of checkbox in items table
+				table.insert( cbox.selected_items, i )
+				
+				-- If rotate_func() is defined, call it
+				if( cbox.rotate_func ~= nil ) then
+					cbox.rotate_func( cbox.selected_items )
+				end
+				
+				-- Done
+				return true
+			end
+		end
+		
+		-- We searched the entire items table and did not find the specified checkbox
+		return false
+	end
+	(end)
+
+*Code Example:* Check checkbox's checked/unchecked status. Works with CheckBox objects containing any number of checkboxes.
+
+	(code)
+	-- Description: Utility function that determines whether or not a specified checkbox is checked
+	-- This function works for CheckBox objects with any number of checkboxes.
+	-- Prototype: boolean isChecked( checkBoxGroup cbox, string item )
+	-- Arguments: cbox - checkBoxGroup object that contains the relevant checkbox
+	--            item - string in cbox.items property that identifies a specific checkbox
+	-- Return Value: true if specified checkbox is checked, else false
+	
+	function isChecked( cbox, item )
+		-- Search items property for item string
+		for i, j in pairs( cbox.items ) do
+			-- Is this the checkbox we are looking for?
+			if j == item then
+				-- Yes, i == checkbox's index 
+				-- Search the selected_items property for this index to see if it is checked
+				for x, y in pairs( cbox.selected_items ) do
+					-- Is this the index for the relevant checkbox?
+					if y == i then
+						-- Yes, the checkbox is checked
+						return true
+					end
+				end
+				
+				-- We searched the entire selected_items table and our checkbox was not in it
+				-- Thus, checkbox is not checked
+				return false
+			end
+		end
+		
+		-- We searched the entire items property and did not find the specified checkbox.
+		-- This is really an error, but we'll return false.
+		return false
+	end
+	(end)
+	
+*See Also:* the <items> property
+
+
+
+Property: direction
+
+The direction property is a text string specifying whether multiple checkboxes will display vertically (one atop each other) or horizontally (alongside each other). If the CheckBox has only a single checkbox, the direction property has no effect.
+
+*Supported Settings:* The direction property is case-sensitive
+
+"horizontal" - multiple checkboxes will display alongside each other. The first checkbox is the leftmost.
+"vertical" - multiple checkboxes will display atop each other. The first checkbox is the top-most.
+
+*Default Setting:* "vertical"
+
+*See Also:* the <items> property
+
+
+
+Property: box_width
+
+The box_width property is an integer value specifying the checkbox border width in pixels.
+
+*Default Setting:* 2
+
+*See Also:* the <box_size> and <check_size> properties
+
+
+
+
+Property: box_size
+
+The box_size property is a table of integers specifying the pixel width and height, respectively, of the checkbox's box.
+
+*Default Setting:* { 25, 25 }
+
+*See Also:* the <check_size> and <box_width> properties
+
+
+
+Property: check_size
+
+The check_size property is a table of integers specifying the pixel width and height, respectively, of the checkbox's checkmark.
+
+*Default Setting:* { 25, 25 }
+
+*See Also:* the <box_size> and <box_width> properties
+
+
+
+Property: line_space
+
+The line_space property is an integer value specifying the pixel space between each of the object's checkboxes. The line_space property inserts the spaces below each checkbox for vertically-arranged checkboxes, and after each checkbox for horizontally-arranged checkboxes. If the Checkbox has only a single checkbox, the line_space property has no effect.
+
+*Default Setting:* 40
+
+*See Also:* the <items> and <direction> properties
+
+
+
+Property: ui_position
+
+The ui_position property is a table of integer values specifying the CheckBox object's X, Y, and Z screen coordinates, respectively.
+
+*Default Setting:* { 200, 200, 0 }
+
+*See Also:* the <b_pos> and <item_pos> properties
+
+
+
+Property: b_pos
+
+The b_pos property is a table of integer values specifying the X,Y offsets, respectively, at which to position the checkbox's box. The offsets are specified in pixels and are relative to the object's <ui_position> property.
+
+By specifying the box's location, the box can be positioned in various relations to the checkbox's associated descriptive text, such as to the right of the text or below it.
+
+*Default Setting:* { 0, 0 }, i.e., the box is positioned at the <ui_position> location
+
+*See Also:* the <ui_position> and <item_pos> properties
+
+
+
+Property: item_pos
+
+The item_pos property is a table of integer values specifying the X,Y offsets, respectively, at which to position the checkbox's associated descriptive text. The offsets are specified in pixels and are relative to the object's <ui_position> property.
+
+*Default Setting:* { 50, -5 }, i.e., the text is displayed to the right and slightly above the <ui_position> location
+
+*See Also:* the <ui_position> and <b_pos> properties
+
+
+
+Property: text_font
+
+The text_font property is a text string describing the font to use for the CheckBox's descriptive text. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+
+*Default Setting:* "DejaVu Sans 30px"
+
+*See Also:* the <text_color> property
+
+
+
+Property: text_color
+
+The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the CheckBox object's text.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* { 255, 255, 255, 255 } (white and completely opaque)
+
+*See Also:* the <fill_color> and <box_color> properties
+
+
+
+Property: fill_color
+
+The fill_color property is a table of integer RGB and alpha settings specifying the CheckBox's fill color when the object does not have the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {255, 255, 255, 0} (white and transparent)
+
+*See Also:* the <text_color> and <box_color> properties
+
+
+
+Property: focus_fill_color
+
+The focus_fill_color property is a table of integer RGB and alpha settings specifying the CheckBox's fill color when the object has the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {0, 50, 0, 0} (dark green and transparent)
+
+*See Also:* the <fill_color> property
+
+
+
+Property: box_color
+
+The box_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's box-border when the object does not have the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
+
+*See Also:* the <text_color> and <fill_color> properties
+
+
+
+Property: focus_color
+
+The focus_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's box-border when the object has the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
+
+*See Also:* the <box_color> property
+
+
+Property: skin
+
+The skin property is a string that specifies the display appearance of the CheckBox.
+
+Predefined skins are provided, and the developer may define a custom skin. The following skin appearances are supported.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+"CarbonCandy" - an alternative skin. Flashy, attracts attention
+"custom" - the skin is defined by the developer
+
+When the "custom" skin is selected, the developer must define the text, fill and box-border colors of the CheckBox object for its focused and unfocused states.
+
+*Default Setting:* "default"
+
+
+
+Property: rotate_func
+
+The rotate_func property is a reference to a function that is invoked after any checkbox in the CheckBox object has changed its checked/unchecked state. Based upon the checked/unchecked state, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+*Prototype:* rotate_func( selected_items )
+
+*Argument:*
+
+selected_items - the current setting of the CheckBox object's <selected_items> property
+
+*Return Value:* None.
+
+*Default Setting:* nil
+
+*See Also:* the <items> and <selected_items> properties
+
+
+
+Function: insert_item
+
+The insert_item() function appends a specified string to the CheckBox object's <items> property. The initial state of the inserted checkbox is unchecked.
+
+*Prototype:* insert_item( item )
+
+*Argument:*
+
+item - string specifying the new checkbox
+
+*Return Value:* None
+
+*See Also:* the <items> property and the <remove_item> function
+
+
+
+Function: remove_item
+
+The remove_item() function removes the last item in the CheckBox object's <items> property.
+
+*Prototype:* remove_item()
+
+*Return Value:* None
+
+*See Also:* the <items> property and the <insert_item> function
+
+
+
+Function: on_focus_in
+
+The on_focus_in() function forces the input focus to the CheckBox.
+
+*Prototype:* on_focus_in()
+
+*Return Value:* None
+
+
+
