@@ -449,15 +449,31 @@ class ElementModel(QStandardItemModel):
         
         titleNode.setCheckState(checkState)
 
+        if '' != value:
+            
+            gs = str(gid)
+            
+            l = len(gs)
+            
+            value =  gs + ' ' * 2 * (8 - l) + value
+            
+        else:
+            
+            value = str(gid)
+            
+            
+
         valueNode = Element(value)
         
         valueNode.setData(gid, Qt.Gid)
         
-        gidNode = Element(str(gid))
+        valueNode.setFlags(valueNode.flags() ^ Qt.ItemIsEditable)
         
-        gidNode.setData(gid, Qt.Gid)
+        #gidNode = Element(str(gid))
         
-        parent.appendRow([titleNode, valueNode, gidNode])
+        #gidNode.setData(gid, Qt.Gid)
+        
+        parent.appendRow([titleNode, valueNode])
         
         self.addAttrs(titleNode, data, gid, False)
     

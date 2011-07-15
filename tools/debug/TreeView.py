@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Thu Jul 14 17:31:52 2011
+# Created: Fri Jul 15 09:54:48 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -100,7 +100,7 @@ class Ui_MainWindow(object):
         self.inspector.setAllColumnsShowFocus(True)
         self.inspector.setObjectName(_fromUtf8("inspector"))
         self.inspector.header().setCascadingSectionResizes(True)
-        self.inspector.header().setDefaultSectionSize(180)
+        self.inspector.header().setDefaultSectionSize(200)
         self.inspector.header().setHighlightSections(True)
         self.inspector.header().setMinimumSectionSize(30)
         self.inspector.header().setStretchLastSection(True)
@@ -123,6 +123,7 @@ class Ui_MainWindow(object):
         self.property.setAlternatingRowColors(True)
         self.property.setObjectName(_fromUtf8("property"))
         self.property.header().setDefaultSectionSize(200)
+        self.property.header().setMinimumSectionSize(30)
         self.gridLayout_3.addWidget(self.property, 0, 0, 1, 1)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
