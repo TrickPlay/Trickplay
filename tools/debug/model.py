@@ -53,8 +53,8 @@ ATTR_LIST = [
     'tile', 
     
     # Hidden
-    #'gid',
-    #'name', 
+    'gid',
+    'name', 
     #'type', 
     'children', 
 ]
@@ -212,6 +212,17 @@ class Element(QStandardItem):
         return new
 
 
+    def childrenAsDict(self):
+        
+        d = {}
+        
+        for c in self:
+            
+            d[c[TITLE].pyData(Qt.Gid)] = c
+            
+        return d
+
+
     """
     Returns a list of child items
     """
@@ -223,6 +234,32 @@ class Element(QStandardItem):
         
             children.append(c)
     
+    """
+    Return child with the given gid
+    """
+    def childByGid(self, gid):
+            
+        for c in self:
+            
+            if gid == c[TITLE].pyData(Qt.Gid):
+                
+                return c
+            
+        return None
+
+
+    """
+    Get the child with the given attribute if one exists
+    """
+    def childByAttr(self, attr):
+        
+        for c in self:
+            
+            if attr == c[0].pyData():
+            
+                return c
+            
+        return None
     
     """
     Returns data at a given role as a python object
@@ -322,6 +359,39 @@ class Element(QStandardItem):
 class ElementModel(QStandardItemModel):
     
     """
+    Find a child in the model given a gid
+    """
+    def childByGid(self, gid, current):
+        
+        found = None
+        
+        # Screen
+        if 1 == gid:
+                
+                return (self.invisibleRootItem().child(TITLE, 0), self.invisibleRootItem().child(VALUE, 0))
+
+        # Get the node's children
+        children = current.childrenAsDict()
+        
+        if children.has_key(gid):
+        
+            return children.get(gid)
+
+        else:
+            
+            for c in children:
+                
+                t = children[c][0]
+            
+                found = self.childByGid(gid, t)
+                
+                if found:
+                    
+                    return found
+                    
+        return found
+    
+    """
     Initialize the model with JSON data
     The root of the model will be the Screen actor (instead of Stage)
     """
@@ -370,7 +440,7 @@ class ElementModel(QStandardItemModel):
     If the UI element could not be found (by gid) then return None,
     otherwise return the child data
     """
-    def findChildData(self,  index,  data):
+    def findChildData(self,  item,  data):
         
         exists = None
         
@@ -583,27 +653,33 @@ class ElementModel(QStandardItemModel):
         
         data = getTrickplayData()["children"][0]
         
-        self.refreshElements(self.getRoot(),  data)
+        self.refreshElements(self.toItem(self.getRoot()),  data)
     
     
     """
     Refreshes a UI element given its index
     """
-    def refreshElements(self,  index,  data):
+    def refreshElements(self,  item,  data):
         
-        children = self.children(index)
+        children = item.children()
 
         # Update each child (in reverse, so deletions don't change indexing)
-        for i in range(len(children)-1,  -1,  -1):
+        for i in range(len(item)-1,  -1,  -1):
             
             element = children[i][0]
             
-            title = self.title(element)
+            title = element.pyData()
             
             # Removed unused elements and update existing ones
-            if self.isElement(title):
+            if element.isElement():
                 
-                childData = self.findChildData(element,  data)
+                # Check if this element still exists in the refreshed data
+                found = None
+                
+                for child in data['children']:
+                
+                    found = element.childByGid(child['gid'])
+                
                 
                 if not childData:
                     
@@ -784,9 +860,6 @@ class ElementModel(QStandardItemModel):
     Copy attributes from the inspector model to the property model.
     This happens every time selection changes in the inspector model.
     """
-    
-
-    
     def copyAttrs(self, original, new, isNested = False):
         
         e = self.itemFromIndex(original)
