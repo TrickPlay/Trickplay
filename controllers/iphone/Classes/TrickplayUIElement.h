@@ -27,6 +27,8 @@
      NSNumber *z_rotation;
     */
     
+    CFAbsoluteTime start;
+    
     CGFloat x_position;
     CGFloat y_position;
     CGFloat z_position;
@@ -41,6 +43,7 @@
     CGFloat x_rot_point;
     CGFloat y_rot_point;
     CGFloat z_rot_point;
+    CGFloat opacity;
     
     NSArray *clip;
     
@@ -69,6 +72,22 @@
 @property (retain) NSArray *clip;
 @property (retain) UIView *view;
 
+@property (assign) CGFloat x_position;
+@property (assign) CGFloat y_position;
+@property (assign) CGFloat z_position;
+@property (assign) CGFloat w_size;
+@property (assign) CGFloat h_size;
+@property (assign) CGFloat x_scale;
+@property (assign) CGFloat y_scale;
+@property (assign) CGFloat z_scale;
+@property (assign) CGFloat x_rotation;
+@property (assign) CGFloat y_rotation;
+@property (assign) CGFloat z_rotation;
+@property (assign) CGFloat x_rot_point;
+@property (assign) CGFloat y_rot_point;
+@property (assign) CGFloat z_rot_point;
+@property (assign) CGFloat opacity;
+
 - (id)initWithID:(NSString *)theID objectManager:(AdvancedUIObjectManager *)objectManager;
 
 - (NSMutableDictionary *)createObjectJSONFromObject:(TrickplayUIElement *)object;
@@ -94,6 +113,14 @@
 - (void)handleTouchesMoved:(NSSet *)touches;
 - (void)handleTouchesEnded:(NSSet *)touches;
 - (void)handleTouchesCancelled:(NSSet *)touches;
+
+// Math stuff
+- (CGFloat)get_x_prime;
+- (CGFloat)get_x_prime_half:(CGFloat)z_rot_initial;
+- (CGFloat)get_y_prime;
+- (CGFloat)get_y_prime_half:(CGFloat)z_rot_initial;
+- (CGFloat)get_bezier_middle_point_x:(CGFloat)x_initial :(CGFloat)z_rot_initial;
+- (CGFloat)get_bezier_middle_point_y:(CGFloat)y_initial :(CGFloat)z_rot_initial;
 
 @end
 

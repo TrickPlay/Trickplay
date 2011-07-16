@@ -11,6 +11,7 @@
 #import "TrickplayText.h"
 #import "TrickplayImage.h"
 #import "TrickplayGroup.h"
+#import "TrickplayAnimation.h"
 
 @implementation TrickplayUIElement
 
@@ -28,6 +29,22 @@
 @synthesize ID;
 @synthesize name;
 @synthesize manager;
+
+@synthesize x_position;
+@synthesize y_position;
+@synthesize z_position;
+@synthesize w_size;
+@synthesize h_size;
+@synthesize x_scale;
+@synthesize y_scale;
+@synthesize z_scale;
+@synthesize x_rotation;
+@synthesize y_rotation;
+@synthesize z_rotation;
+@synthesize x_rot_point;
+@synthesize y_rot_point;
+@synthesize z_rot_point;
+@synthesize opacity;
 
 - (id)initWithID:(NSString *)theID objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super init])) {
@@ -53,6 +70,7 @@
         x_rotation = 0.0;
         y_rotation = 0.0;
         z_rotation = 0.0;
+        opacity = 1.0;
         
         animations = [[NSMutableDictionary alloc] initWithCapacity:20];
         
@@ -117,11 +135,7 @@
             y = [touch locationInView:self].y,
             x_sub = [touch locationInView:view].x,
             y_sub = [touch locationInView:view].y;
-            /*
-            NSLog(@"\ntouch location: self: (%f, %f) view: (%f, %f)\n", x, y, x_sub, y_sub);
-            NSLog(@"\ncomparisons: self: (%f, %f), (%f, %f) view: (%f, %f), (%f, %f)", self.bounds.origin.x, self.bounds.origin.y, self.bounds.size.width, self.bounds.size.height, view.bounds.origin.x, view.bounds.origin.y, view.bounds.size.width, view.bounds.size.height);
-            NSLog(@"\nresults:\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", x >= self.bounds.origin.x, x <= self.bounds.size.width, y >= self.bounds.origin.y, y <= self.bounds.size.width, x_sub >= view.bounds.origin.x, x_sub <= view.bounds.size.width, y_sub >= view.bounds.origin.y, y_sub <= view.bounds.size.height);
-            //*/
+            
             // check that its within clipping range
             if (x >= self.bounds.origin.x
                 && x <= self.bounds.size.width
@@ -592,6 +606,7 @@
     id theOpacity = [args objectForKey:@"opacity"];
     if (theOpacity && [theOpacity isKindOfClass:[NSNumber class]]) {
         self.view.alpha = [(NSNumber *)[args objectForKey:@"opacity"] floatValue]/255.0;
+        opacity = self.view.alpha;
     }
 }
 
@@ -609,7 +624,6 @@
     self.clip = [args objectForKey:@"clip"];
     
     if (clip) {
-        NSLog(@"view: %@", self);
         CGFloat
         clip_x = [(NSNumber *)[clip objectAtIndex:0] floatValue],
         clip_y = [(NSNumber *)[clip objectAtIndex:1] floatValue],
@@ -796,9 +810,9 @@
  */
 
 - (void)get_opacity:(NSMutableDictionary *)dictionary {
-    NSNumber *opacity = [NSNumber numberWithFloat:(view.alpha * 255.0)];
+    NSNumber *theOpacity = [NSNumber numberWithFloat:(view.alpha * 255.0)];
         
-    [dictionary setObject:opacity forKey:@"opacity"];
+    [dictionary setObject:theOpacity forKey:@"opacity"];
 }
 
 /**
@@ -1017,6 +1031,8 @@
 #pragma mark Animation Delegate
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    CFAbsoluteTime then = CFAbsoluteTimeGetCurrent();
+    fprintf(stderr, "read time = %lf\n", (then-start)*1000.0);
     for (NSString *key in [view.layer animationKeys]) {
         NSLog(@"key: %@", key);
         NSLog(@"animations: %@", [view.layer animationForKey:key]);
@@ -1030,13 +1046,10 @@
         [view.layer removeAnimationForKey:@"scale_y"];
         [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
     } else if ([view.layer animationForKey:@"x_position"] == anim) {
-        NSLog(@"here");
         [view.layer removeAnimationForKey:@"x_position"];
-        //[view.layer setValue:[NSNumber numberWithFloat:[self get_x_prime]] forKey:@"position.x"];
         view.layer.position = CGPointMake([self get_x_prime], [self get_y_prime]);
     } else if ([view.layer animationForKey:@"y_position"] == anim) {
         [view.layer removeAnimationForKey:@"y_position"];
-        //[view.layer setValue:[NSNumber numberWithFloat:[self get_y_prime]] forKey:@"position.y"];
         view.layer.position = CGPointMake([self get_x_prime], [self get_y_prime]);
     } else if ([view.layer animationForKey:@"w_size"] == anim) {
         [view.layer removeAnimationForKey:@"w_size"];
@@ -1065,6 +1078,10 @@
         
         [animations removeObjectForKey:anim];
     }
+}
+
+- (void)trickplayAnimationDidStop:(TrickplayAnimation *)anim {
+    [animations removeObjectForKey:anim];
 }
 
 #pragma mark -
@@ -1120,156 +1137,12 @@
         return [NSNumber numberWithBool:NO];
     }
     
-    NSMutableDictionary *completion = nil;
-    if ([table objectForKey:@"on_completed"]) {
-        completion = [[[NSMutableDictionary alloc] initWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", @"animation_count", [NSNumber numberWithUnsignedInt:0], nil] autorelease];
-    }
+    TrickplayAnimation *anim = [[TrickplayAnimation alloc] initWithTable:table duration:duration view:self];
+    [animations setObject:@"1" forKey:anim];
+    [anim animationStart];
+    [anim release];
     
-    NSNumber *x = [table objectForKey:@"x"];
-    NSNumber *y = [table objectForKey:@"y"];
-    NSNumber *z = [table objectForKey:@"z"];
-    NSArray *position = [table objectForKey:@"position"];
-    if (position && position.count > 1) {
-        x = [position objectAtIndex:0] ? [position objectAtIndex:0] : x;
-        y = [position objectAtIndex:1] ? [position objectAtIndex:1] : y;
-        if (position.count > 2) {
-            z = [position objectAtIndex:2] ? [position objectAtIndex:2] : z;
-        }
-    }
-    
-    NSNumber *rotation_z = nil;
-    if ([table objectForKey:@"z_rotation"] && [[table objectForKey:@"z_rotation"] isKindOfClass:[NSNumber class]]) {
-        rotation_z = [table objectForKey:@"z_rotation"];
-    }
-    
-    NSNumber *w = [table objectForKey:@"w"] ? [table objectForKey:@"w"] : [table objectForKey:@"width"];
-    NSNumber *h = [table objectForKey:@"h"] ? [table objectForKey:@"h"] : [table objectForKey:@"height"];
-    NSArray *size = [table objectForKey:@"size"];
-    if (size && size.count > 1) {
-        w = [size objectAtIndex:0] ? [size objectAtIndex:0] : w;
-        h = [size objectAtIndex:1] ? [size objectAtIndex:1] : h;
-    }
-    
-    if (x) {
-        x_position = [x floatValue];
-        CABasicAnimation *animation_x = [CABasicAnimation animationWithKeyPath:@"position.x"];
-        animation_x.fillMode = kCAFillModeForwards;
-        animation_x.removedOnCompletion = NO;
-        [animation_x setToValue:[NSNumber numberWithFloat:[self get_x_prime]]];
-        [animation_x setDuration:[duration floatValue]/1000.0];
-        animation_x.delegate = self;
-        [view.layer addAnimation:animation_x forKey:@"x_position"];
-        [self addAnimation:animation_x withCompletion:completion];
-    }
-    if (y) {
-        y_position = [y floatValue];
-        CABasicAnimation *animation_y = [CABasicAnimation animationWithKeyPath:@"position.y"];
-        animation_y.fillMode = kCAFillModeForwards;
-        animation_y.removedOnCompletion = NO;
-        [animation_y setToValue:[NSNumber numberWithFloat:[self get_y_prime]]];
-        [animation_y setDuration:[duration floatValue]/1000.0];
-        animation_y.delegate = self;
-        [view.layer addAnimation:animation_y forKey:@"y_position"];
-        [self addAnimation:animation_y withCompletion:completion];
-    }
-    if (z) {
-        //do nothing for now
-    }
-    
-    if (w) {
-        w_size = [w floatValue];
-        CABasicAnimation *animation_w = [CABasicAnimation animationWithKeyPath:@"bounds.size.width"];
-        animation_w.fillMode = kCAFillModeForwards;
-        animation_w.removedOnCompletion = NO;
-        [animation_w setToValue:[NSNumber numberWithFloat:w_size]];
-        [animation_w setDuration:[duration floatValue]/1000.0];
-        animation_w.delegate = self;
-        [view.layer addAnimation:animation_w forKey:@"w_size"];
-        [self addAnimation:animation_w withCompletion:completion];
-    }
-    if (h) {
-        h_size = [h floatValue];
-        CABasicAnimation *animation_h = [CABasicAnimation animationWithKeyPath:@"bounds.size.height"];
-        animation_h.fillMode = kCAFillModeForwards;
-        animation_h.removedOnCompletion = NO;
-        [animation_h setToValue:[NSNumber numberWithFloat:h_size]];
-        [animation_h setDuration:[duration floatValue]/1000.0];
-        animation_h.delegate = self;
-        [view.layer addAnimation:animation_h forKey:@"h_size"];
-        [self addAnimation:animation_h withCompletion:completion];
-    }
-    
-    if (rotation_z) {
-        NSNumber *z_rot = [NSNumber numberWithFloat:[rotation_z floatValue] * M_PI/180.0];
-        if (x_rot_point != 0.0 || y_rot_point != 0.0) {
-            CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
-            animation.fillMode = kCAFillModeForwards;
-            animation.removedOnCompletion = NO;
-            CGMutablePathRef arc = CGPathCreateMutable();
-            CGFloat x_initial = [self get_x_prime];
-            CGFloat y_initial = [self get_y_prime];
-            CGPathMoveToPoint(arc, NULL, x_initial, y_initial);
-            CGFloat z_rot_initial = z_rotation;
-            CGFloat gradient = ([z_rot floatValue] - z_rotation)/fabs(([z_rot floatValue] - z_rotation));
-            z_rotation += 90.0*gradient*M_PI/180.0;
-            while (z_rotation*gradient < [z_rot floatValue]*gradient) {
-                CGPathAddQuadCurveToPoint(arc, NULL, [self get_bezier_middle_point_x:x_initial :z_rot_initial], [self get_bezier_middle_point_y:y_initial :z_rot_initial], [self get_x_prime], [self get_y_prime]);
-                
-                z_rot_initial = z_rotation;
-                x_initial = [self get_x_prime];
-                y_initial = [self get_y_prime];
-                z_rotation += 90.0*gradient*M_PI/180.0;
-            }
-            z_rotation = [z_rot floatValue];
-            CGPathAddQuadCurveToPoint(arc, NULL, [self get_bezier_middle_point_x:x_initial :z_rot_initial], [self get_bezier_middle_point_y:y_initial :z_rot_initial], [self get_x_prime], [self get_y_prime]);
-            animation.path = arc;
-            CGPathRelease(arc);
-            animation.duration = [duration floatValue]/1000.0;
-            animation.delegate = self;
-            [view.layer addAnimation:animation forKey:@"z_rotation_arc"];
-            [self addAnimation:animation withCompletion:completion];
-        }
-        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-        animation.fillMode = kCAFillModeForwards;
-        animation.removedOnCompletion = NO;
-        [animation setToValue:z_rot];
-        [animation setDuration:[duration floatValue]/1000.0];
-        animation.delegate = self;
-        [view.layer addAnimation:animation forKey:@"z_rotation"];
-        z_rotation = [z_rot floatValue];
-        [self addAnimation:animation withCompletion:completion];
-    }
-    
-    NSArray *scale = [table objectForKey:@"scale"];
-    NSNumber *scale_x = nil;
-    NSNumber *scale_y = nil;
-    if (scale.count > 1) {
-        scale_x = [scale objectAtIndex:0];
-        scale_y = [scale objectAtIndex:1];
-    }
-    
-    if (scale_x) {
-        x_scale = [scale_x floatValue];
-        CABasicAnimation *animation_x = [CABasicAnimation animationWithKeyPath:@"transform.scale.x"];
-        animation_x.fillMode = kCAFillModeForwards;
-        animation_x.removedOnCompletion = NO;
-        [animation_x setToValue:[NSNumber numberWithFloat:x_scale]];
-        [animation_x setDuration:[duration floatValue]/1000.0];
-        animation_x.delegate = self;
-        [view.layer addAnimation:animation_x forKey:@"scale_x"];
-        [self addAnimation:animation_x withCompletion:completion];
-    }
-    if (scale_y) {
-        y_scale = [scale_y floatValue];
-        CABasicAnimation *animation_y = [CABasicAnimation animationWithKeyPath:@"transform.scale.y"];
-        animation_y.fillMode = kCAFillModeForwards;
-        animation_y.removedOnCompletion = NO;
-        [animation_y setToValue:[NSNumber numberWithFloat:y_scale]];
-        [animation_y setDuration:[duration floatValue]/1000.0];
-        animation_y.delegate = self;
-        [view.layer addAnimation:animation_y forKey:@"scale_y"];
-        [self addAnimation:animation_y withCompletion:completion];
-    }
+    start = CFAbsoluteTimeGetCurrent();
     
     return [NSNumber numberWithBool:YES];
 }
