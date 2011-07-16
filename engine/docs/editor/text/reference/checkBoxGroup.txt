@@ -12,7 +12,7 @@ In this documentation, when reference is made to a "CheckBox," it refers to a Ch
 
 Constructor: checkBoxGroup( properties )
 
-The checkBoxGroup() function creates a new CheckBox UI element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+The checkBoxGroup() constructor creates a new CheckBox UI element object. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
 
 *Prototype:*
 
@@ -26,25 +26,25 @@ properties - table of CheckBox property settings
 
 The properties table contains a comma-separated list of property settings for the new CheckBox. If a property is not explicitly set, its default value is used.
 
-*Return Value:* Returns a Group object that contains the new CheckBox and related support objects. The Group object should be used to access the CheckBox's properties and functions.
+*Return Value:* Returns an object that contains the new CheckBox and related support objects. The returned object should be used to access the CheckBox's properties and functions.
 
 *Example:* Create a new CheckBox, specifying some properties
 
-(code)
--- Load the UI Element library
-ui_element = dofile( "/lib/ui_element.lua" )
+	(code)
+	-- Load the UI Element library
+	ui_element = dofile( "/lib/ui_element.lua" )
 
--- Create a new CheckBox, setting some of its CheckBox-specific properties
--- Note: We are creating a single CheckBoxGroup, but that group actually contains 
--- three checkboxes defined in the items property. The first and third checkboxes will
--- be initialized as checked; the second checkbox will start out unchecked.
-local checkBox = ui_element.checkBoxGroup{ items = { "Enable scrolling", "Verify file deletions", "Maximize on start-up" },
-                                           selected_items = { 1, 3 } }
+	-- Create a new CheckBox, setting some of its CheckBox-specific properties
+	-- Note: We are creating a single CheckBoxGroup, but that group actually contains 
+	-- three checkboxes defined in the items property. The first and third checkboxes will
+	-- be initialized as checked; the second checkbox will start out unchecked.
+	local checkBox = ui_element.checkBoxGroup{ items = { "Enable scrolling", "Verify file deletions", "Maximize on start-up" },
+                                               selected_items = { 1, 3 } }
 
--- Set some of the CheckBox's UIElement properties
-checkBox.name = "Preferences"
-checkBox.position = { 700, 500, 0 }
-(end)
+	-- Set some of the CheckBox's UIElement properties
+	checkBox.name = "Preferences"
+	checkBox.position = { 700, 500, 0 }
+	(end)
 
 
 
@@ -54,7 +54,7 @@ The items property is a table of strings where each string specifies the text di
 
 *Default Setting:* { "item1", "item2", "item3" }
 
-*See Also:* the <selected_items> and <direction> properties
+*See Also:* the <selected_items> property
 
 
 
@@ -186,7 +186,25 @@ You can assign values to the selected_items property to set a checkbox's checked
 	end
 	(end)
 	
-*See Also:* the <items> property
+*See Also:* the <items> and <rotate_func> properties
+
+
+
+Property: rotate_func
+
+The rotate_func property is a reference to a function that is invoked automatically after any checkbox in the CheckBox object has changed its checked/unchecked state. Based upon the checked/unchecked state, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+*Prototype:* rotate_func( selected_items )
+
+*Argument:*
+
+selected_items - the current setting of the CheckBox object's <selected_items> property
+
+*Return Value:* None
+
+*Default Setting:* nil
+
+*See Also:* the <items> and <selected_items> properties
 
 
 
@@ -196,8 +214,8 @@ The direction property is a text string specifying whether multiple checkboxes w
 
 *Supported Settings:* The direction property is case-sensitive
 
-"horizontal" - multiple checkboxes will display alongside each other. The first checkbox is the leftmost.
-"vertical" - multiple checkboxes will display atop each other. The first checkbox is the top-most.
+"horizontal" - multiple checkboxes will display alongside each other. The first checkbox in the <items> property is the leftmost.
+"vertical" - multiple checkboxes will display atop each other. The first checkbox in the <items> property is the top-most.
 
 *Default Setting:* "vertical"
 
@@ -238,7 +256,7 @@ The check_size property is a table of integers specifying the pixel width and he
 
 Property: line_space
 
-The line_space property is an integer value specifying the pixel space between each of the object's checkboxes. The line_space property inserts the spaces below each checkbox for vertically-arranged checkboxes, and after each checkbox for horizontally-arranged checkboxes. If the Checkbox has only a single checkbox, the line_space property has no effect.
+The line_space property is an integer value specifying the pixel space between each of the object's checkboxes. The line_space property inserts the space below each checkbox for vertically-arranged checkboxes, and after each checkbox for horizontally-arranged checkboxes. If the Checkbox has only a single checkbox, the line_space property has no effect.
 
 *Default Setting:* 40
 
@@ -359,27 +377,9 @@ Predefined skins are provided, and the developer may define a custom skin. The f
 "CarbonCandy" - an alternative skin. Flashy, attracts attention
 "custom" - the skin is defined by the developer
 
-When the "custom" skin is selected, the developer must define the text, fill and box-border colors of the CheckBox object for its focused and unfocused states.
+When the "custom" skin is selected, the developer must define the object's <box_width>, <box_size>, <box_color>, <fill_color>, <focus_fill_color> and <focus_color> properties.
 
 *Default Setting:* "default"
-
-
-
-Property: rotate_func
-
-The rotate_func property is a reference to a function that is invoked after any checkbox in the CheckBox object has changed its checked/unchecked state. Based upon the checked/unchecked state, the program can perform appropriate operations, such as displaying or hiding display elements.
-
-*Prototype:* rotate_func( selected_items )
-
-*Argument:*
-
-selected_items - the current setting of the CheckBox object's <selected_items> property
-
-*Return Value:* None.
-
-*Default Setting:* nil
-
-*See Also:* the <items> and <selected_items> properties
 
 
 

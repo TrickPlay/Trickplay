@@ -51,6 +51,7 @@ Group: TrickPlay Editor  {
          File: Button  (no auto-title, reference/button.txt)
          File: ButtonPicker  (no auto-title, reference/buttonPicker.txt)
          File: CheckBox  (no auto-title, reference/checkBoxGroup.txt)
+         File: RadioButtonGroup  (no auto-title, reference/radioButtonGroup.txt)
          }  # Group: UI Elements
 
       }  # Group: Reference
