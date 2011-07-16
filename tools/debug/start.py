@@ -67,20 +67,32 @@ class StartQT4(QMainWindow):
         
         self.preventChanges = False
         
+    
+    """
+    Get current selected index
+    """
+    def getSelected(self):
         
+        try:
+        
+            i = self.inspectorSelectionModel.selection()
+            
+            i = self.inspectorProxyModel.mapSelectionToSource(i)
+            
+            return i.indexes()[0]
+            
+        except:
+        
+            return None
+
+
     """
     Re-populate the property view every time a new UI element
     is selected in the inspector view.
     """
     def selectionChanged(self,  a,  b):
         
-        #print("Selection Changed",  a,  b)
-        
-        i = self.inspectorSelectionModel.selection()
-        
-        i = self.inspectorProxyModel.mapSelectionToSource(i)
-        
-        s = i.indexes()[0]
+        s = self.getSelected()
         
         self.updatePropertyList(s)
         
@@ -364,8 +376,39 @@ class StartQT4(QMainWindow):
         
         
     def refresh(self):
+        
         self.preventChanges = True
-        self.inspectorModel.refreshRoot()
+        
+        i = self.inspectorSelectionModel.selection()
+        
+        i = self.inspectorProxyModel.mapSelectionToSource(i)
+        
+        selected = i.indexes()[0]
+        
+        gid = 1
+        
+        if selected:
+        
+            gid = self.inspectorModel.itemFromIndex(selected).pyData(Qt.Gid)
+        
+        self.inspectorModel.clear()
+
+        self.inspectorModel.initialize(["UI Element",  "Name"],  True)
+        
+        found = self.inspectorModel.match(self.inspectorModel.index(0, 0), 0, str(gid))
+        
+        #found = self.inspectorModel.childByGid(gid, self.inspectorModel.invisibleRootItem().child(0, 0))
+        
+        print('found', found)
+        
+        print('problem?')
+        
+        index = found[0].index()
+
+        self.inspectorSelectionModel.select(index, QItemSelectionModel.SelectCurrent)
+        
+        print('problem?')
+        
         self.preventChanges = False
         
     def exit(self):
