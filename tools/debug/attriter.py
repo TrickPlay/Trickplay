@@ -61,8 +61,8 @@ ATTR_LIST = [
     'tile', 
     
     # Hidden
-    'gid',
-    'name', 
+    #'gid',
+    #'name', 
     #'type', 
     'children', 
 ]

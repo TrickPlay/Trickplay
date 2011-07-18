@@ -319,7 +319,7 @@ class StartQT4(QMainWindow):
         
         self.inspectorProxyModel.setFilterRole(0)
 
-        #self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
+        self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
         
         self.ui.inspector.setModel(self.inspectorProxyModel)
         

@@ -48,12 +48,7 @@ class Element(QStandardItem):
         
         for i in range(10):
             
-            role = i + Qt.UserRole - 1
-            
-            #if self.data(role):
-                
-            #    self.setData(self.data(role), role)
-            
+            role = i + Qt.UserRole - 1   
             
             if self.pyData(role):
                 
