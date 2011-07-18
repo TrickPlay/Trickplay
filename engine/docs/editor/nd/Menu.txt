@@ -70,6 +70,7 @@ Group: TrickPlay Editor  {
       File: Connect Elements to Code  (no auto-title, tutorial/connectCode.txt)
       File: Create a Second Screen  (no auto-title, tutorial/createModeScreen.txt)
       File: Transition to Another Screen  (no auto-title, tutorial/screenTransition.txt)
+      File: CheckBox and RadioButton Elements  (no auto-title, tutorial/checkBoxRadioButton.txt)
       }  # Group: Tutorial
 
    }  # Group: TrickPlay Editor
