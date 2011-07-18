@@ -4,13 +4,11 @@ from connection import getTrickplayData
 from data import dataToModel,  modelToData,  BadDataException
 
 Qt.Pointer = Qt.UserRole + 1
-Qt.Value = Qt.UserRole + 2
-Qt.Element = Qt.UserRole + 3
-Qt.ItemDepth = Qt.UserRole + 4
-Qt.Gid = Qt.UserRole + 5
-Qt.Data = Qt.UserRole + 6
-Qt.Nested = Qt.UserRole + 7
+Qt.Element = Qt.UserRole + 2
+Qt.Gid = Qt.UserRole + 3
+Qt.Nested = Qt.UserRole + 4
 
+ALL = -1
 TITLE = 0
 VALUE = 1
 GID = 2
@@ -128,19 +126,6 @@ class Element(QStandardItem):
         else:
             
             super(QStandardItem, self).__init__()
-            
-    
-#    def title(self): return self.title
-#    
-#    def setTitle(self, title): self.title = title
-#    
-    def gid(self): return self.gid
-#    
-    def setGid(self, gid): self.gid = gid
-#    
-#    def value(self): return value
-#    
-#    def setValue(self, value): self.value = value
 
 
     def type(self):
@@ -156,6 +141,11 @@ class Element(QStandardItem):
         for i in range(10):
             
             role = i + Qt.UserRole
+            
+            #if self.data(role):
+                
+            #    self.setData(self.data(role), role)
+            
             
             if self.pyData(role):
                 
@@ -211,6 +201,34 @@ class Element(QStandardItem):
             
         return new
 
+
+    """
+    Get the row that this element belongs in... because
+    most of the time you need the title and value at the same time
+    """
+    def toRow(self):
+        
+        p = self.parent()
+        
+        print(self.parent, self.parent())
+        
+        if not p:
+            
+            p = self.model().invisibleRootItem()
+            
+            return [p.child(0, TITLE), p.child(0, VALUE)]
+        
+        r = self.row()
+        
+        result = []
+        
+        for i in range(p.columnCount()):
+            
+            result.append(p.child(r, i))
+            
+        return result
+        
+        
 
     def childrenAsDict(self):
         
@@ -358,39 +376,30 @@ class Element(QStandardItem):
 
 class ElementModel(QStandardItemModel):
     
-    """
-    Find a child in the model given a gid
-    """
-    def childByGid(self, gid, current):
-        
-        found = None
-        
-        # Screen
-        if 1 == gid:
-                
-                return (self.invisibleRootItem().child(TITLE, 0), self.invisibleRootItem().child(VALUE, 0))
-
-        # Get the node's children
-        children = current.childrenAsDict()
-        
-        if children.has_key(gid):
-        
-            return children.get(gid)
-
-        else:
-            
-            for c in children:
-                
-                t = children[c][0]
-            
-                found = self.childByGid(gid, t)
-                
-                if found:
-                    
-                    return found
-                    
-        return found
     
+    """
+    Find a child in the model given a value
+    """
+    def matchChild(self, value, role = Qt.DisplayRole,
+                   flags = Qt.MatchRecursive, hits = 1,
+                   start = None, column = TITLE):
+        
+        if not start:
+            
+            start = self.index(0, 0)
+        
+        result = self.match(start, role, value, hits, flags)
+        
+        if len(result) and TITLE != column:
+            
+            for i in range(len(result)):
+    
+                item = self.itemFromIndex(result[i])
+                
+                result[i] = item.toRow()
+            
+        return result
+        
     """
     Initialize the model with JSON data
     The root of the model will be the Screen actor (instead of Stage)
@@ -440,6 +449,7 @@ class ElementModel(QStandardItemModel):
     If the UI element could not be found (by gid) then return None,
     otherwise return the child data
     """
+    #TODO, this function makes very little sense..
     def findChildData(self,  item,  data):
         
         exists = None
@@ -618,8 +628,6 @@ class ElementModel(QStandardItemModel):
                 
                 valueNode.setData(value,  Qt.DisplayRole)
                 
-                valueNode.setData(value,  Qt.Data)
-                
                 parent.appendRow([titleNode, valueNode])
                 
             else:
@@ -627,8 +635,6 @@ class ElementModel(QStandardItemModel):
                 summary = summarize(value, attr)
                 
                 valueNode = Element(summary)
-                
-                valueNode.setData(summary,  Qt.Data)
                 
                 valueNode.setFlags(Qt.NoItemFlags)
                 
@@ -878,39 +884,10 @@ class ElementModel(QStandardItemModel):
             
             new.appendRow(c)
 
-        return
-        
-        for attr in ['position', 'size', 'opacity', 'is_visible', 'color']:
-            
-            originalItem = None
-            
-            if not isNested:
-                
-                originalItem = self.itemFromIndex(self.findAttr(original, attr)[0])
-                
-            #else:
-                
-            #    originalItem = 
-        
-            i = self.getPair(originalItem)
-            
-            titleNode = originalItem.clone()
-            
-            title = pyData(titleNode, 0)
-            
-            if not self.isElement(title) and 'name' != title and 'gid' != title and 'type' != title:
-            
-                titleNode.setData(pyData(i[0], Qt.Gid), Qt.Gid)
-            
-                valueNode = self.itemFromIndex(i[1]).clone()
-            
-                new.appendRow([titleNode,  valueNode])
-            
-                if originalItem.hasChildren():
-                    
-                    self.copyAttrs(i[0], titleNode)
     
-    
+    """
+    Recreate the Python data structure given a row of elements
+    """
     def dataStructure(self, pair):
     
         data = {}
