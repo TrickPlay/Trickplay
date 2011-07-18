@@ -2,26 +2,16 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from connection import getTrickplayData
 from data import dataToModel,  modelToData,  BadDataException
+from attriter import AttrIter
+from element import Element, ROW, UI_ELEMENTS
+
+
+# Custom ItemDataRoles
 
 Qt.Pointer = Qt.UserRole + 1
 Qt.Element = Qt.UserRole + 2
 Qt.Gid = Qt.UserRole + 3
 Qt.Nested = Qt.UserRole + 4
-
-ALL = -1
-TITLE = 0
-VALUE = 1
-GID = 2
-
-UI_ELEMENTS = {
-    "Group", 
-    "Canvas", 
-    "Rectangle", 
-    "Image", 
-    "Clone", 
-    "Bitmap", 
-    "Text", 
-}
 
 NOT_EDITABLE = {
     'clip',
@@ -30,348 +20,6 @@ NOT_EDITABLE = {
     'y center', 
     'z center', 
 }
-
-ATTR_LIST = [
-    'source', 
-    'src', 
-    'text',
-    'font', 
-    'position', 
-    'size',
-    'opacity', 
-    'is_visible', 
-    'color',
-    'border_color',
-    'anchor_point',
-    'scale',
-    'clip',
-    'x_rotation',
-    'y_rotation',
-    'z_rotation' ,
-    'tile', 
-    
-    # Hidden
-    'gid',
-    'name', 
-    #'type', 
-    'children', 
-]
-
-NESTED_ATTR_LIST = {
-    'position' : ['x', 'y', 'z'], 
-    'size' : ['w', 'h'],
-    'color' : ['r', 'g', 'b', 'a'],
-    'border_color' : ['r', 'g', 'b', 'a'],
-    'anchor_point' : ['x', 'y'],
-    'scale' : ['x', 'y'],
-    'clip' : ['x', 'y', 'w', 'h'],
-    'x_rotation' : ['angle', 'y center', 'z center'],
-    'y_rotation' : ['angle', 'x center', 'z center'],
-    'z_rotation' : ['angle', 'x center', 'y center'],
-    'tile' : ['x', 'y'], 
-}
-
-"""
-Return the attributes in the order they should be added to the model
-"""
-class AttrIter:
-    
-    def __init__(self, group = None):
-        
-        if group:
-        
-            self.group = NESTED_ATTR_LIST[group]
-        
-        else:
-            
-            self.group = ATTR_LIST
-        
-        self.current = 0
-        
-        self.limit = len(self.group)
-        
-        
-    def __iter__(self):
-        
-        return self
-        
-        
-    def next(self):
-        
-        if self.current < self.limit:
-            
-            r = self.group[self.current]
-            
-            self.current += 1
-            
-            return r
-            
-        else:
-            
-            self.current = 0
-            
-            raise StopIteration
-
-
-class Element(QStandardItem):
-    
-    def __init__(self, value=None):
-        
-        self.lastChild = 0
-        
-        if value:
-        
-            super(QStandardItem, self).__init__(value)
-            
-        else:
-            
-            super(QStandardItem, self).__init__()
-
-
-    def type(self):
-        
-        return QStandardItem.UserType
-
-
-    
-    def clone(self):
-        
-        new = Element(self.data(Qt.DisplayRole).toString())
-        
-        for i in range(10):
-            
-            role = i + Qt.UserRole
-            
-            #if self.data(role):
-                
-            #    self.setData(self.data(role), role)
-            
-            
-            if self.pyData(role):
-                
-                new.setData(self.pyData(role), role)
-        
-        new.setFlags(self.flags())
-        
-        return new
-
-
-    """
-    Clone including children
-    """
-    def fullClone(self):
-        
-        new = self.clone()
-        
-        for child in self:
-            
-            r = []
-            
-            for i in child:
-                
-                r.append(i.clone())
-            
-            new.appendRow(r)
-            
-        return new
-
-
-    """
-    Clone this item's attributes
-    """
-    def copy(self):
-        
-        new = []
-        
-        for c in self:
-            
-            print("copying")
-            
-            newRow = []
-            
-            if not c[TITLE].isElement():
-
-                print(c[TITLE].pyData())
-
-                for i in range(len(c)):
-                    
-                    newRow.append(c[i].copy())
-                
-            new.append(newRow)
-            
-        return new
-
-
-    """
-    Get the row that this element belongs in... because
-    most of the time you need the title and value at the same time
-    """
-    def toRow(self):
-        
-        p = self.parent()
-        
-        print(self.parent, self.parent())
-        
-        if not p:
-            
-            p = self.model().invisibleRootItem()
-            
-            return [p.child(0, TITLE), p.child(0, VALUE)]
-        
-        r = self.row()
-        
-        result = []
-        
-        for i in range(p.columnCount()):
-            
-            result.append(p.child(r, i))
-            
-        return result
-        
-        
-
-    def childrenAsDict(self):
-        
-        d = {}
-        
-        for c in self:
-            
-            d[c[TITLE].pyData(Qt.Gid)] = c
-            
-        return d
-
-
-    """
-    Returns a list of child items
-    """
-    def children(self):
-        
-        children = []
-        
-        for c in self:
-        
-            children.append(c)
-    
-    """
-    Return child with the given gid
-    """
-    def childByGid(self, gid):
-            
-        for c in self:
-            
-            if gid == c[TITLE].pyData(Qt.Gid):
-                
-                return c
-            
-        return None
-
-
-    """
-    Get the child with the given attribute if one exists
-    """
-    def childByAttr(self, attr):
-        
-        for c in self:
-            
-            if attr == c[0].pyData():
-            
-                return c
-            
-        return None
-    
-    """
-    Returns data at a given role as a python object
-    """
-    def pyData(self, role = Qt.DisplayRole):
-        
-        v = self.data(role).toPyObject()
-        
-        if isinstance(v, QString):
-            
-            v = str(v)
-        
-        return v
-
-
-    """
-    Returns true if this object has a UI Element name
-    """
-    def isElement(self):
-        
-        title = self.pyData(Qt.DisplayRole)
-        
-        if title in UI_ELEMENTS:
-            
-            return True
-            
-        else:
-        
-            return False
-
-
-    """
-    Returns any UI Elements owned by this item
-    """
-    def elements(self, isElement = True):
-        
-        children = []
-        
-        for c in self:
-            
-            if c[TITLE].isElement() == isElement:
-                
-                children.append(c)
-                
-        return children
-
-
-    """
-    Returns any attributes owned by this item
-    """
-    def attrs(self):
-
-        return self.elements(False)
-
-
-    """
-    Returns the number of children of this item
-    """
-    def __len__(self):
-        
-        return self.rowCount()
-
-    
-    """
-    Return the next row
-    """
-    def next(self):
-        
-        if self.lastChild < self.rowCount():
-            
-            row = []
-            
-            # For each column, get the children of the row
-            for c in range(self.columnCount()):
-            
-                row.append(self.child(self.lastChild, c))
-                
-            self.lastChild += 1
-                
-            return row
-         
-        else:
-            
-            self.lastChild = 0
-            
-            raise StopIteration
-
-
-    """
-    Allow iteration of child nodes
-    """
-    def __iter__(self):
-        
-        return self
 
 
 class ElementModel(QStandardItemModel):
@@ -382,7 +30,7 @@ class ElementModel(QStandardItemModel):
     """
     def matchChild(self, value, role = Qt.DisplayRole,
                    flags = Qt.MatchRecursive, hits = 1,
-                   start = None, column = TITLE):
+                   start = None, column = ROW['T']):
         
         if not start:
             
@@ -390,7 +38,7 @@ class ElementModel(QStandardItemModel):
         
         result = self.match(start, role, value, hits, flags)
         
-        if len(result) and TITLE != column:
+        if len(result) and ROW['T'] != column:
             
             for i in range(len(result)):
     
@@ -874,13 +522,13 @@ class ElementModel(QStandardItemModel):
         
         for row in attrs:
             
+            print('attr', row)
+            
             c = []
             
             for i in range(2):
                 
                 c.append(row[i].fullClone())
-            
-            title = c[TITLE].pyData()
             
             new.appendRow(c)
 

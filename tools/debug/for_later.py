@@ -14,7 +14,7 @@ class Row:
         
         self.t = self.tNode.pyData()
         
-        self.vNode = items[VALUE]
+        self.vNode = items[ROW['V']]
         
         self.v = self.vNode.pyData()
         

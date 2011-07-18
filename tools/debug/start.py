@@ -24,15 +24,9 @@ from TreeView import Ui_MainWindow
 
 from delegate import InspectorDelegate
 import connection
-from model import Element, ElementModel, pyData, modelToData, dataToModel, summarize
+from element import Element
+from model import ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData,  dataToModel, BadDataException
-
-# Custom ItemDataRoles
-
-Qt.Pointer = Qt.UserRole + 1 
-Qt.Element = Qt.UserRole + 2
-Qt.Gid = Qt.UserRole + 3
-Qt.Nested = Qt.UserRole + 4
 
 
 class StartQT4(QMainWindow):
