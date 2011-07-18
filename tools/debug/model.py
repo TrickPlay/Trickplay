@@ -499,16 +499,7 @@ class ElementModel(QStandardItemModel):
         else:
             
             raise BadDataException("toItem must be called on a node")
-    
-    
-    """
-    Clone an item with children, return the item
-    """
-    def clone(self, node):
-        
-        node = self.toItem(node)
-    
-    
+
     
     """
     Copy attributes from the inspector model to the property model.
@@ -521,9 +512,7 @@ class ElementModel(QStandardItemModel):
         attrs = e.attrs()
         
         for row in attrs:
-            
-            print('attr', row)
-            
+
             c = []
             
             for i in range(2):
