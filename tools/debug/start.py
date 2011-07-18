@@ -15,6 +15,9 @@ X.   Drag and drop UI elements?
 
 import sys,  pprint
 
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from TreeView import Ui_MainWindow
@@ -26,13 +29,11 @@ from data import modelToData,  dataToModel, BadDataException
 
 # Custom ItemDataRoles
 
-Qt.Pointer = Qt.UserRole + 1
-Qt.Value = Qt.UserRole + 2
-Qt.Element = Qt.UserRole + 3
-Qt.ItemDepth = Qt.UserRole + 4
-Qt.Gid = Qt.UserRole + 5
-Qt.Data = Qt.UserRole + 6
-Qt.Nested = Qt.UserRole + 7
+Qt.Pointer = Qt.UserRole + 1 
+Qt.Element = Qt.UserRole + 2
+Qt.Gid = Qt.UserRole + 3
+Qt.Nested = Qt.UserRole + 4
+
 
 class StartQT4(QMainWindow):
     def __init__(self, parent=None):
@@ -324,7 +325,7 @@ class StartQT4(QMainWindow):
         
         self.inspectorProxyModel.setFilterRole(0)
 
-        self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
+        #self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
         
         self.ui.inspector.setModel(self.inspectorProxyModel)
         
@@ -377,49 +378,65 @@ class StartQT4(QMainWindow):
         
     def refresh(self):
         
-        self.preventChanges = True
+        print(self.inspectorModel.index(0, 1).data(0).toString())
         
-        i = self.inspectorSelectionModel.selection()
+        screenIndex = self.inspectorModel.index(0, 0).child(0, 0)
         
-        i = self.inspectorProxyModel.mapSelectionToSource(i)
+        found = self.inspectorModel.matchChild('Group', column = -1, hits = -1)
         
-        selected = i.indexes()[0]
-        
-        gid = 1
-        
-        if selected:
-        
-            gid = self.inspectorModel.itemFromIndex(selected).pyData(Qt.Gid)
-        
-        self.inspectorModel.clear()
-
-        self.inspectorModel.initialize(["UI Element",  "Name"],  True)
-        
-        found = self.inspectorModel.match(self.inspectorModel.index(0, 0), 0, str(gid))
-        
-        #found = self.inspectorModel.childByGid(gid, self.inspectorModel.invisibleRootItem().child(0, 0))
+        #print('found', self.inspectorModel.itemFromIndex(found[0]).pyData())
         
         print('found', found)
         
-        print('problem?')
-        
-        index = found[0].index()
-
-        self.inspectorSelectionModel.select(index, QItemSelectionModel.SelectCurrent)
-        
-        print('problem?')
-        
-        self.preventChanges = False
+        #self.preventChanges = True
+        #
+        #i = self.inspectorSelectionModel.selection()
+        #
+        #i = self.inspectorProxyModel.mapSelectionToSource(i)
+        #
+        #selected = i.indexes()[0]
+        #
+        #gid = 1
+        #
+        #if selected:
+        #
+        #    gid = self.inspectorModel.itemFromIndex(selected).pyData(Qt.Gid)
+        #
+        #self.inspectorModel.clear()
+        #
+        #self.inspectorModel.initialize(["UI Element",  "Name"],  True)
+        #
+        #found = self.inspectorModel.match(self.inspectorModel.index(0, 0), 0, str(gid))
+        #
+        ##found = self.inspectorModel.childByGid(gid, self.inspectorModel.invisibleRootItem().child(0, 0))
+        #
+        #print('found', found)
+        #
+        #print('problem?')
+        #
+        #index = found[0].index()
+        #
+        #self.inspectorSelectionModel.select(index, QItemSelectionModel.SelectCurrent)
+        #
+        #print('problem?')
+        #
+        #self.preventChanges = False
         
     def exit(self):
         sys.exit()
 
 def main(argv):
     
-    app = QApplication(argv)
-    myapp = StartQT4()
-    myapp.show()
-    sys.exit(app.exec_())
+    try:
+    
+        app = QApplication(argv)
+        myapp = StartQT4()
+        myapp.show()
+        sys.exit(app.exec_())
+    
+    except KeyboardInterrupt:
+        
+        exit("Exited")
     
 if __name__ == "__main__":
     
