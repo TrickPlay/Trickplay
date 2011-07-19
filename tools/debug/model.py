@@ -229,7 +229,6 @@ class ElementModel(QStandardItemModel):
             title = "Image"
         
         
-        
         titleNode = Element(title)
         
         titleNode.setFlags(titleNode.flags() ^ Qt.ItemIsEditable)
@@ -238,6 +237,7 @@ class ElementModel(QStandardItemModel):
         
         titleNode.setData(value, Qt.Name)
         
+        # Add a checkbox for everything but screen
         if not screen:
             
             titleNode.setCheckable(True)
@@ -249,7 +249,8 @@ class ElementModel(QStandardItemModel):
                 checkState = Qt.Checked
             
             titleNode.setCheckState(checkState)
-            
+
+        # Screen has no is_visible property because changing it messes up the app            
         else:
             
             del(data['is_visible'])
@@ -265,18 +266,12 @@ class ElementModel(QStandardItemModel):
         else:
             
             value = str(gid)
-            
-            
 
         valueNode = Element(value)
         
         valueNode.setData(gid, Qt.Gid)
         
         valueNode.setFlags(valueNode.flags() ^ Qt.ItemIsEditable)
-        
-        #gidNode = Element(str(gid))
-        
-        #gidNode.setData(gid, Qt.Gid)
         
         parent.appendRow([titleNode, valueNode])
         
@@ -360,24 +355,23 @@ class ElementModel(QStandardItemModel):
     """
     Delete marked children
     """
-    def deleteChildren(self, item):
-    
-        # Check each child (in reverse, so deletions don't change indexing)
-        for i in range(len(item)-1,  -1,  -1):
-            
-            #print(item[i][ROW['T']].pyData(Qt.Save), item[i][ROW['T']].pyData(Qt.Gid))
-            
-            
-            
-            if not item[i][ROW['T']].pyData(Qt.Save):
-                
-                item[i][ROW['T']].setData('DEL', Qt.DisplayRole)
-            
+    #def deleteChildren(self, item):
+    #
+    #    # Check each child (in reverse, so deletions don't change indexing)
+    #    for i in range(len(item)-1,  -1,  -1):
+    #        
+    #        #print(item[i][ROW['T']].pyData(Qt.Save), item[i][ROW['T']].pyData(Qt.Gid))
+    #        
+    #        
+    #        
+    #        if not item[i][ROW['T']].pyData(Qt.Save):
+    #            
+    #            item[i][ROW['T']].setData('DEL', Qt.DisplayRole)
     
     
     """
     TODO:
-        This version doesn't actually work. There is (mostly) working (but slow)
+        This function doesn't actually work. There is (mostly) working (but slow)
         version back in git somewhere... however, given that we will likely not
         refresh every node all at once, this will wait till later.
     
@@ -392,77 +386,77 @@ class ElementModel(QStandardItemModel):
     Put the children back in the model in the correct order
     
     """
-    #TODO perhaps just recreate the entire tree, record which nodes were open,
-    #and reoppen them
-    def refreshElements(self, item, data):
-        
-        # If this UI element is a group...
-        if data.has_key('children'):
-            
-            dataToAdd = []
-            
-            dataOrder = []
-            
-            elementsTaken = {}
-            
-            # Mark children as 'keep' or 'delete'
-            for i in range(len(data['children'])):
-                
-                c = data['children'][i]
-                
-                result = self.matchChild(c['gid'], role = Qt.Gid, column = -1,
-                                         start = item.index().child(0, 0), flags = Qt.MatchWrap)
-                
-                # Child still exists
-                if len(result) > 0:
-                    
-                    result = result[0]
-                    
-                    result[ROW['V']].setData('NEW', Qt.DisplayRole)
-                    
-                    result[ROW['T']].setData(True, Qt.Save)
-                    
-                    self.refreshElements(result[ROW['T']], c)
-                    
-                    dataOrder.append(c['gid'])
-                    
-                    elementsTaken[c['gid']] = item.takeRow(result[ROW['T']].row())
-                
-                # Child doesn't exist; add it
-                else:
-                    
-                    dataToAdd.append(c['gid'])
-                    
-                    #item.addElement(item, c)
-                    
-            for i in elementsTaken:
-                
-                item.appendRow(elementsTaken[i])
-            
-        #attrs = item.attrs()
-        
-        # Update non-children elements
-        #for attr in AttrIter():
-        #    
-        #    if 'children' != attr:
-        #
-        #        attrRow = item[attr]
-        #        
-        #        # Attr still exists
-        #        if attrRow:
-        #            
-        #            attrRow[ROW['V']].setData('NEW', Qt.DisplayRole)
-        #            
-        #            attrRow[ROW['T']].setData(True, Qt.Save)
-        #            
-        #        # Attr doesn't exist; add it
-        #        else:
-        #            
-        #            self.addAttrs(parent, data[attr], data['gid'], nested)
-        #        
-        #
-        #
-        self.deleteChildren(item)        
+    ##TODO perhaps just recreate the entire tree, record which nodes were open,
+    ##and reoppen them
+    #def refreshElements(self, item, data):
+    #    
+    #    # If this UI element is a group...
+    #    if data.has_key('children'):
+    #        
+    #        dataToAdd = []
+    #        
+    #        dataOrder = []
+    #        
+    #        elementsTaken = {}
+    #        
+    #        # Mark children as 'keep' or 'delete'
+    #        for i in range(len(data['children'])):
+    #            
+    #            c = data['children'][i]
+    #            
+    #            result = self.matchChild(c['gid'], role = Qt.Gid, column = -1,
+    #                                     start = item.index().child(0, 0), flags = Qt.MatchWrap)
+    #            
+    #            # Child still exists
+    #            if len(result) > 0:
+    #                
+    #                result = result[0]
+    #                
+    #                result[ROW['V']].setData('NEW', Qt.DisplayRole)
+    #                
+    #                result[ROW['T']].setData(True, Qt.Save)
+    #                
+    #                self.refreshElements(result[ROW['T']], c)
+    #                
+    #                dataOrder.append(c['gid'])
+    #                
+    #                elementsTaken[c['gid']] = item.takeRow(result[ROW['T']].row())
+    #            
+    #            # Child doesn't exist; add it
+    #            else:
+    #                
+    #                dataToAdd.append(c['gid'])
+    #                
+    #                #item.addElement(item, c)
+    #                
+    #        for i in elementsTaken:
+    #            
+    #            item.appendRow(elementsTaken[i])
+    #        
+    #    #attrs = item.attrs()
+    #    
+    #    # Update non-children elements
+    #    #for attr in AttrIter():
+    #    #    
+    #    #    if 'children' != attr:
+    #    #
+    #    #        attrRow = item[attr]
+    #    #        
+    #    #        # Attr still exists
+    #    #        if attrRow:
+    #    #            
+    #    #            attrRow[ROW['V']].setData('NEW', Qt.DisplayRole)
+    #    #            
+    #    #            attrRow[ROW['T']].setData(True, Qt.Save)
+    #    #            
+    #    #        # Attr doesn't exist; add it
+    #    #        else:
+    #    #            
+    #    #            self.addAttrs(parent, data[attr], data['gid'], nested)
+    #    #        
+    #    #
+    #    #
+    #    self.deleteChildren(item)        
 
 
          
