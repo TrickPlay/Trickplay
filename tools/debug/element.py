@@ -113,7 +113,7 @@ class Element(QStandardItem):
         
         p = self.parent()
         
-        print(self.parent, self.parent())
+        #print(self.parent, self.parent())
         
         if not p:
             
@@ -242,6 +242,40 @@ class Element(QStandardItem):
     def __len__(self):
         
         return self.rowCount()
+        
+        
+    """
+    Returns row given an int or
+    Returns a row given the string title
+    """
+    def __getitem__(self, row):
+        
+        if isinstance(row, int):
+        
+            r = []
+            
+            for i in range(self.columnCount()):
+                
+                r.append(self.child(row, i))
+            
+            return r
+        
+        elif isinstance(row, str):
+            
+            result = self.model().matchChild(row, column = -1,
+                                             flags = Qt.MatchWrap, start = self.index())
+            
+            if len(result) > 0:
+                
+                return result[0]
+                
+            else:
+            
+                return None
+            
+        else:
+            
+            exit("Elements can only be indexed by ints and strs")
 
     
     """

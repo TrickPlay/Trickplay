@@ -24,7 +24,7 @@ from TreeView import Ui_MainWindow
 
 from delegate import InspectorDelegate
 import connection
-from element import Element
+from element import Element, ROW
 from model import ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData,  dataToModel, BadDataException
 
@@ -44,6 +44,10 @@ class StartQT4(QMainWindow):
         
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         
+        QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.search)
+        
+        self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
+        
         # Models
         self.inspectorModel = ElementModel()
         
@@ -59,8 +63,59 @@ class StartQT4(QMainWindow):
         #self.inspectorDelegate.connect(self.delegate,  SIGNAL('closeEditor( QWidget * , QAbstractItemDelegate::EndEditHint )'),  self.editorClosed)
                 
         self.createTree()
-        
+         
         self.preventChanges = False
+        
+        
+    """
+    Search for a node by Gid or Name
+    """
+    def search(self):
+        
+        t = self.ui.lineEdit.text()
+        
+        r = Qt.Name
+        
+        #print(t)
+        
+        try:
+        
+            t = int(t)
+            
+            r = Qt.Gid
+        
+        except ValueError:
+            
+            pass
+        
+        print(type(t),t,r)
+            
+        
+        i = self.inspectorModel.invisibleRootItem().child(0,0)
+        
+        row = self.inspectorModel.matchChild(t, role = r, flags = Qt.MatchRecursive, column = -1)
+        
+        if len(row) > 0:
+            
+            row = row[0]
+            
+            self.selectRow(row)
+
+    
+    """
+    Select row
+    """
+    def selectRow(self, row):
+    
+        index = row[ROW['T']].index()
+            
+        proxyIndex = self.inspectorProxyModel.mapFromSource(index)
+        
+        proxyValue = self.inspectorProxyModel.mapFromSource(row[ROW['V']].index())
+        
+        self.ui.inspector.scrollTo(proxyIndex, 3)
+        
+        self.inspectorSelectionModel.select(QItemSelection(proxyIndex, proxyValue), QItemSelectionModel.SelectCurrent)
         
     
     """
@@ -75,11 +130,29 @@ class StartQT4(QMainWindow):
             i = self.inspectorProxyModel.mapSelectionToSource(i)
             
             return i.indexes()[0]
-            
+        
+        # TODO, make this better    
         except:
         
             return None
 
+
+    def getSelectedGid(self):
+        
+        i = self.inspectorSelectionModel.selection()
+        
+        i = self.inspectorProxyModel.mapSelectionToSource(i)
+        
+        selected = i.indexes()[0]
+        
+        gid = 1
+        
+        if selected:
+        
+            gid = self.inspectorModel.itemFromIndex(selected).pyData(Qt.Gid)
+            
+        return gid
+    
 
     """
     Re-populate the property view every time a new UI element
@@ -88,6 +161,8 @@ class StartQT4(QMainWindow):
     def selectionChanged(self,  a,  b):
         
         s = self.getSelected()
+        
+        #print(self.inspectorModel.itemFromIndex(s).pyData(Qt.Name))
         
         self.updatePropertyList(s)
         
@@ -372,17 +447,51 @@ class StartQT4(QMainWindow):
         
     def refresh(self):
         
-        print(self.inspectorModel.index(0, 1).data(0).toString())
+        self.preventChanges = True
         
-        screenIndex = self.inspectorModel.index(0, 0).child(0, 0)
+        #self.inspectorModel.refreshRoot()
         
-        found = self.inspectorModel.matchChild('Group', column = -1, hits = -1)
+        gid = None
         
-        #print('found', self.inspectorModel.itemFromIndex(found[0]).pyData())
+        try:
         
-        print('found', found)
+            gid = self.getSelectedGid()
         
-        #self.preventChanges = True
+        except IndexError:
+            
+            gid = 1
+        
+
+        
+        #self.inspectorProxyModel.setSourceModel(self.inspectorModel)
+        
+        #self.ui.inspector.setModel(self.inspectorProxyModel)
+        
+        #self.inspectorModel.clear()
+        
+        self.inspectorModel.invisibleRootItem().removeRow(0)
+        
+        
+        self.inspectorModel.initialize(None, True)
+        
+        
+        row = self.inspectorModel.matchChild(gid, role = Qt.Gid, column = -1)[0]
+        
+        self.selectRow(row)
+        
+        self.preventChanges = False
+        
+        #print(self.inspectorModel.index(0, 1).data(0).toString())
+        #
+        #screenIndex = self.inspectorModel.index(0, 0).child(0, 0)
+        #
+        #found = self.inspectorModel.matchChild('Group', column = -1, hits = -1)
+        #
+        ##print('found', self.inspectorModel.itemFromIndex(found[0]).pyData())
+        #
+        #print('found', found)
+        
+        #s
         #
         #i = self.inspectorSelectionModel.selection()
         #
