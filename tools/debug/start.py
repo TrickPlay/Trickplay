@@ -475,9 +475,11 @@ class StartQT4(QMainWindow):
         self.inspectorModel.initialize(None, True)
         
         
-        row = self.inspectorModel.matchChild(gid, role = Qt.Gid, column = -1)[0]
+        row = self.inspectorModel.matchChild(gid, role = Qt.Gid, column = -1)
         
-        self.selectRow(row)
+        if len(row) > 0:
+        
+            self.selectRow(row[0])
         
         self.preventChanges = False
         

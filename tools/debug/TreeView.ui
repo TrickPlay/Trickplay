@@ -292,12 +292,12 @@ selection-background-color: transparent;*/</string>
    <slot>expandAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>138</x>
-     <y>61</y>
+     <x>290</x>
+     <y>116</y>
     </hint>
     <hint type="destinationlabel">
      <x>146</x>
-     <y>94</y>
+     <y>177</y>
     </hint>
    </hints>
   </connection>
@@ -308,12 +308,28 @@ selection-background-color: transparent;*/</string>
    <slot>collapseAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>55</y>
+     <x>457</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
      <x>237</x>
-     <y>89</y>
+     <y>172</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>button_Search</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>132</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>77</x>
+     <y>80</y>
     </hint>
    </hints>
   </connection>

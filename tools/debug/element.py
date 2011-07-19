@@ -11,7 +11,7 @@ UI_ELEMENTS = {
     "Text", 
 }
 
-# Row values
+# The different columns in a row, Title, Value, All
 
 ROW = {'T' : 0, 'V' : 1, 'A' : -1}
 

@@ -4,8 +4,10 @@ typeTable = {
     'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
     'scalex': lambda v: ('scale-x',  toFloat(v['x'])),
     'scaley': lambda v: ('scale-y',  toFloat(v['y'])),
-    'clipx': lambda v: ('clip',  clip(v)),
-    'clipy': lambda v: ('clip',  clip(v)),
+    #'clipx': lambda v: ('clip',  clip(v)),
+    #'clipy': lambda v: ('clip',  clip(v)),
+    'tilex': lambda v: ('repeat-x', bool(v)),
+    'tiley': lambda v: ('repeat-y', bool(v)),
     'colorr': lambda v: ('color', color(v)),
     'colorg': lambda v: ('color', color(v)),
     'colorb': lambda v: ('color', color(v)),
@@ -18,6 +20,7 @@ typeTable = {
     'name': lambda v: ('name',  v),
     'text': lambda v: ('text',  v),
     'font': lambda v: ('font-name',  v),
+    #'src': lambda v: ('filename', v),
     'opacity': lambda v: ('opacity',  opacity(v)),
     'width': lambda v: ('width',  width(v)), 
     'height': lambda v: ('height',  toFloat(v)),
@@ -37,20 +40,38 @@ dataToModelTable = {
     'type': lambda v: ('type', typeTextureToImage(v)), 
     'is_visible': lambda v: ('is_visible', bool(v)), 
     'tile': lambda v: ('tile', tileToBool(v)), 
-    'source': lambda v: ('source', summarizeSource(v)), 
+    'source': lambda v: ('source', summarizeSource(v)),
+    'scale': lambda v: ('scale', scaleToFloat(v)),
+    'x_rotation': lambda v: ('x_rotation', angleToFloat(v)),
+    'y_rotation': lambda v: ('y_rotation', angleToFloat(v)),
+    'z_rotation': lambda v: ('z_rotation', angleToFloat(v)),
 
 }
 
+def angleToFloat(v):
+    
+    v['angle'] = float(v['angle'])
+    
+    return v
+
+def scaleToFloat(v):
+    
+    v['x'] = float(v['x'])
+    
+    v['y'] = float(v['y'])
+    
+    return v
+    
+
 def summarizeSource(v):
     
-    # Would like to include name, but would break on 'refresh' if name changed
     s = str(v['gid']) 
     
-#    name = v['name']
-#    
-#    if '' != name:
-#        
-#        s += ' : ' + name
+    name = v['name']
+    
+    if '' != name:
+        
+        s += ' : ' + name
     
     return  s
 
@@ -78,9 +99,6 @@ def dataToModel(title,  value):
     title, value = dataToModelTable.get(title, lambda v: (title, value))(value)
     simple = not isinstance(value, dict)
     
-#    if 'source' == title:
-#        simple = True
-    
     return (title, value, simple)
 
 def getTypeTable():
@@ -100,14 +118,6 @@ def opacity(v):
         return v
     except:
         raise BadDataException('Opacity must be an integer between 0 and 255.')
-        
-def clip(v):
-    c = {}
-    c['h']=100
-    c['w']=100
-    c['x']=100
-    c['y']=100
-    return c
 
 def toFloat(v):
     try:
@@ -122,8 +132,3 @@ class BadDataException(Exception):
        def __str__(self):
            return repr(self.value)
 
-#try:
-#    raise CustomException("My Useful Error Message")
-#except CustomException, (instance):
-#    print "Caught: " + instance.value
-#

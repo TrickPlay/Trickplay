@@ -176,6 +176,13 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 		get_actor_color( &color , &c );
 		(*object)["color"] = color;
         
+        // Font Name
+        const gchar * fname = clutter_text_get_font_name( CLUTTER_TEXT( actor ) );
+        (*object)["font"] = fname;
+        
+        //PangoFontDescription * fdesc = clutter_text_get_font_description( CLUTTER_TEXT( actor ) );
+        //(*object)["font-description"] = fdesc;
+        
     }
 	else if ( CLUTTER_IS_RECTANGLE( actor ) )
 	{
@@ -252,23 +259,23 @@ static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
 		
     }
 	
-    (*object)["position"]   = position;
-	(*object)["size"]   = size;
-	//(*object)["z"]	 			= z;
-	//(*object)["y"]	 			= y;
-	//(*object)["x"]	 			= x;
-	//(*object)["w"]	 			= w;
-	//(*object)["h"]	 			= h;
-	(*object)["name"] 			= name;
-	(*object)["gid"]			= gid;
-    (*object)["type"] 			= type;
-	(*object)["is_visible"] 	= is_visible;
-	(*object)["scale"]	 		= scale;
-	(*object)["opacity"] 		= opacity;
-	(*object)["anchor_point"] 	= anchor_point;
-    (*object)["x_rotation"] = x_rotation;
-    (*object)["y_rotation"] = y_rotation;
-    (*object)["z_rotation"] = z_rotation;
+    (*object)["position"]   		= position;
+    (*object)["size"]   		    = size;
+    //(*object)["z"]	 			= z;
+    //(*object)["y"]	 			= y;
+    //(*object)["x"]	 			= x;
+    //(*object)["w"]	 			= w;
+    //(*object)["h"]	 			= h;
+    (*object)["name"] 			    = name;
+    (*object)["gid"]			    = gid;
+    (*object)["type"] 			    = type;
+    (*object)["is_visible"] 		= is_visible;
+    (*object)["scale"]	 		    = scale;
+    (*object)["opacity"] 		    = opacity;
+    (*object)["anchor_point"] 		= anchor_point;
+    (*object)["x_rotation"] 		= x_rotation;
+    (*object)["y_rotation"] 		= y_rotation;
+    (*object)["z_rotation"] 		= z_rotation;
     
 }
 
