@@ -1,6 +1,6 @@
 import httplib, urllib, urllib2, json
 from socket import error
-from data import getTypeTable,  BadDataException
+from data import BadDataException
 
 def send(data):
     
@@ -23,7 +23,6 @@ def send(data):
         print("Error >> Trickplay Application unavailable.")
         
         print(e)
-        
         
     
 def getTrickplayData():
@@ -61,20 +60,12 @@ def decode(input):
     return json.loads(input)
 
 
+"""
+Test the connection
+"""
 def test():
     
     send({'gid': 1, 'properties' :{'x': 1200}})
-
-
-def clean(name,  value):
-    
-    try:
-    
-        return getTypeTable()[name](value)
-    
-    except BadDataException,  (e):
-    
-        raise e
 
 
 if __name__ == "__main__":

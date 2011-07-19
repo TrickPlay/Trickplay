@@ -1,4 +1,4 @@
-typeTable = {
+modelToDataTable = {
     
     'anchor_pointx': lambda v: ('anchor-x',  toFloat(v['x'])),
     'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
@@ -94,15 +94,16 @@ def modelToData(title,  value):
     t, v = typeTable[title](value)
     return (t, v)
     
-def dataToModel(title,  value):
+def dataToModel(title, value):
 
     title, value = dataToModelTable.get(title, lambda v: (title, value))(value)
     simple = not isinstance(value, dict)
     
     return (title, value, simple)
 
-def getTypeTable():
-    return typeTable
+def modelToData(title, value):
+    
+    return modelToDataTable[title](value)
 
 def color(v):
 
