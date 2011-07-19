@@ -262,8 +262,14 @@ class Element(QStandardItem):
         
         elif isinstance(row, str):
             
+            s = self.index()
+                
+            print('c', s)
+            
             result = self.model().matchChild(row, column = -1,
-                                             flags = Qt.MatchWrap, start = self.index())
+                                             flags = Qt.MatchWrap, start = s)
+            
+            print('r', result)
             
             if len(result) > 0:
                 
