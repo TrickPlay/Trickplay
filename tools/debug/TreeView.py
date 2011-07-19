@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Mon Jul 18 19:14:49 2011
+# Created: Tue Jul 19 13:47:55 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -148,6 +148,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QObject.connect(self.button_ExpandAll, QtCore.SIGNAL(_fromUtf8("released()")), self.inspector.expandAll)
         QtCore.QObject.connect(self.button_CollapseAll, QtCore.SIGNAL(_fromUtf8("released()")), self.inspector.collapseAll)
+        QtCore.QObject.connect(self.lineEdit, QtCore.SIGNAL(_fromUtf8("returnPressed()")), self.button_Search.click)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

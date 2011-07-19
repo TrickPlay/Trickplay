@@ -212,16 +212,12 @@ class StartQT4(QMainWindow):
     def inspectorDataChanged(self,  topLeft,  bottomRight):
         
         if not self.preventChanges:
-            
-            print("preventChanges",  self.preventChanges)
-            
+                        
             self.preventChanges = True
             
             # User can only select one element, so these will always be equal. This assertion can be removed later.
             if str(topLeft.data(0).toString()) ==  str(bottomRight.data(0).toString()):
-                
-                print("inspector dataChanged called")
-                
+                                
                 valueIndex = topLeft
                 
                 # If index is an element, it was checked or unchecked
