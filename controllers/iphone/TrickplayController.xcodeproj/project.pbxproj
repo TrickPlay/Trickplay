@@ -30,6 +30,7 @@
 		CD404C2A1353E18E0021D36C /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD404C291353E18D0021D36C /* MobileCoreServices.framework */; };
 		CD4CA69C13B50AC100B5A7A3 /* VirtualRemoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4CA69A13B50AC100B5A7A3 /* VirtualRemoteViewController.m */; };
 		CD4CA69D13B50AC100B5A7A3 /* VirtualRemoteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */; };
+		CD5CFD6713D50F01002334E7 /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = CD5CFD6613D50F01002334E7 /* click.wav */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CD63B45513B9895300158169 /* arrows-generic-controls-comp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */; };
 		CD63B45613B9895300158169 /* back-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43F13B9895300158169 /* back-touch.png */; };
@@ -69,7 +70,6 @@
 		CD9A68661371CB0E00977730 /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */; };
 		CDB20FF113CFAE6900A9F166 /* TrickplayAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */; };
 		CDCE770013B28A0E00768A2A /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
-		CDD52C3013BACCCD0078C767 /* click.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = CDD52C2F13BACCCD0078C767 /* click.mp3 */; };
 		CDEE44A8137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */; };
 		CDEE44AD137CC93200A4B5E2 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44AC137CC93100A4B5E2 /* CommandInterpreter.m */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
@@ -131,6 +131,7 @@
 		CD4CA69913B50AC100B5A7A3 /* VirtualRemoteViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VirtualRemoteViewController.h; path = ../VirtualRemoteViewController.h; sourceTree = "<group>"; };
 		CD4CA69A13B50AC100B5A7A3 /* VirtualRemoteViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VirtualRemoteViewController.m; path = ../VirtualRemoteViewController.m; sourceTree = "<group>"; };
 		CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VirtualRemoteViewController.xib; sourceTree = "<group>"; };
+		CD5CFD6613D50F01002334E7 /* click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = click.wav; sourceTree = "<group>"; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "arrows-generic-controls-comp.jpg"; sourceTree = "<group>"; };
 		CD63B43F13B9895300158169 /* back-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-touch.png"; sourceTree = "<group>"; };
@@ -178,7 +179,6 @@
 		CDB20FEF13CFAE6900A9F166 /* TrickplayAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayAnimation.h; sourceTree = "<group>"; };
 		CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayAnimation.m; sourceTree = "<group>"; };
 		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
-		CDD52C2F13BACCCD0078C767 /* click.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = click.mp3; sourceTree = "<group>"; };
 		CDEE44A6137CBA2500A4B5E2 /* CommandInterpreterAdvancedUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreterAdvancedUI.h; sourceTree = "<group>"; };
 		CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreterAdvancedUI.m; sourceTree = "<group>"; };
 		CDEE44AB137CC93100A4B5E2 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreter.h; sourceTree = "<group>"; };
@@ -386,7 +386,7 @@
 		CD63B43D13B9895300158169 /* VirtualRemoteAssets */ = {
 			isa = PBXGroup;
 			children = (
-				CDD52C2F13BACCCD0078C767 /* click.mp3 */,
+				CD5CFD6613D50F01002334E7 /* click.wav */,
 				CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */,
 				CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */,
 				CD63B43F13B9895300158169 /* back-touch.png */,
@@ -622,7 +622,7 @@
 				CD63B46A13B9895300158169 /* up-touch.png in Resources */,
 				CD63B46B13B9895300158169 /* up.png in Resources */,
 				CD6C178D13BA6B1500F52BFE /* ios-generic-background.jpg in Resources */,
-				CDD52C3013BACCCD0078C767 /* click.mp3 in Resources */,
+				CD5CFD6713D50F01002334E7 /* click.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
