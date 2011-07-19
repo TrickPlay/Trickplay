@@ -376,6 +376,11 @@ class ElementModel(QStandardItemModel):
     
     
     """
+    TODO:
+        This version doesn't actually work. There is (mostly) working (but slow)
+        version back in git somewhere... however, given that we will likely not
+        refresh every node all at once, this will wait till later.
+    
     Refreshes a UI element given its index
     
     Refresh each child element
@@ -504,13 +509,13 @@ class ElementModel(QStandardItemModel):
     def copyAttrs(self, original, new, isNested = False):
         
         try:
-        
+            
             e = self.itemFromIndex(original)
-    
+            
             attrs = e.attrs()
             
             for row in attrs:
-    
+            
                 c = []
                 
                 for i in range(e.columnCount()):
@@ -518,12 +523,13 @@ class ElementModel(QStandardItemModel):
                     c.append(row[i].fullClone())
                 
                 new.appendRow(c)
-
+            
+        # Nothing was selected, so no rows need be coppied
         except TypeError:
             
-             print("Nothing was selected")
+            pass
             
-            
+            #print("Nothing was selected")
 
     
     """

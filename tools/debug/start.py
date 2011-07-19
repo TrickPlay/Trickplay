@@ -78,6 +78,10 @@ class StartQT4(QMainWindow):
             row = row[0]
             
             self.selectRow(row)
+            
+        else:
+            
+            print('UI Element not found')
 
     
     """
@@ -241,6 +245,7 @@ class StartQT4(QMainWindow):
             
             propertySummaryValueItem = None
             
+            # If the data is nested, figure out the full name and indexes
             if (nested):
                 
                 parentProperty = propertyValueIndex.parent()
@@ -271,7 +276,7 @@ class StartQT4(QMainWindow):
                 
                 title = pyData(propertyTitleIndex, 0)
             
-            # Verify data is OK before making any changes to model
+            # Verify data sent OK before making any changes to model
             if self.sendData(gid, title, value):
                 
                 # Update the checkbox
@@ -306,8 +311,6 @@ class StartQT4(QMainWindow):
                     
                     valueItem = self.inspectorModel.itemFromIndex(childValueIndex)
                     
-                    #print(pyData(parentTitleIndex, 0), nested[1])
-                    
                     value = value[nested[1]]
                 
                 print("Changed item data from",  pyData(valueItem, 0))
@@ -317,7 +320,8 @@ class StartQT4(QMainWindow):
                 print("Changed item data to  ",  pyData(valueItem, 0))
                     
             self.preventChanges = False
-        
+    
+    
     """
     Initialize models, proxy models, selection models, and connections
     """

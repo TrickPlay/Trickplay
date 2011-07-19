@@ -81,28 +81,29 @@ class Element(QStandardItem):
 
     """
     Clone this item's attributes
+    (This may not be fully working...)
     """
-    def copy(self):
-        
-        new = []
-        
-        for c in self:
-            
-            print("copying")
-            
-            newRow = []
-            
-            if not c[ROW['T']].isElement():
-
-                print(c[ROW['T']].pyData())
-
-                for i in range(len(c)):
-                    
-                    newRow.append(c[i].copy())
-                
-            new.append(newRow)
-            
-        return new
+    #def copy(self):
+    #    
+    #    new = []
+    #    
+    #    for c in self:
+    #        
+    #        print("copying")
+    #        
+    #        newRow = []
+    #        
+    #        if not c[ROW['T']].isElement():
+    #
+    #            print(c[ROW['T']].pyData())
+    #
+    #            for i in range(len(c)):
+    #                
+    #                newRow.append(c[i].copy())
+    #            
+    #        new.append(newRow)
+    #        
+    #    return new
 
 
     """
@@ -133,15 +134,15 @@ class Element(QStandardItem):
         
         
 
-    def childrenAsDict(self):
-        
-        d = {}
-        
-        for c in self:
-            
-            d[c[ROW['T']].pyData(Qt.Gid)] = c
-            
-        return d
+    #def childrenAsDict(self):
+    #    
+    #    d = {}
+    #    
+    #    for c in self:
+    #        
+    #        d[c[ROW['T']].pyData(Qt.Gid)] = c
+    #        
+    #    return d
 
 
     """
@@ -156,31 +157,32 @@ class Element(QStandardItem):
             children.append(c)
     
     """
-    Return child with the given gid
-    """
-    def childByGid(self, gid):
-            
-        for c in self:
-            
-            if gid == c[ROW['T']].pyData(Qt.Gid):
-                
-                return c
-            
-        return None
-
-
+    #Return child with the given gid
+    #"""
+    #def childByGid(self, gid):
+    #        
+    #    for c in self:
+    #        
+    #        if gid == c[ROW['T']].pyData(Qt.Gid):
+    #            
+    #            return c
+    #        
+    #    return None
+    
+    
     """
     Get the child with the given attribute if one exists
     """
-    def childByAttr(self, attr):
-        
-        for c in self:
-            
-            if attr == c[0].pyData():
-            
-                return c
-            
-        return None
+    #def childByAttr(self, attr):
+    #    
+    #    for c in self:
+    #        
+    #        if attr == c[0].pyData():
+    #        
+    #            return c
+    #        
+    #    return None
+    
     
     """
     Returns data at a given role as a python object
