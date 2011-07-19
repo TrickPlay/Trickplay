@@ -18,6 +18,7 @@ GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
 
     NSString *currentTVName;
     UIView *currentTVIndicator;
+    UIActivityIndicatorView *loadingSpinner;
     
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;

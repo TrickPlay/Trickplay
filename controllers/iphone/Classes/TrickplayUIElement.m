@@ -424,7 +424,7 @@
     w_size = [width floatValue];
     h_size = [height floatValue];
     
-    view.layer.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
+    view.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
 }
 
 - (void)set_w:(NSDictionary *)args {
@@ -436,11 +436,11 @@
 }
 
 - (void)set_width:(NSDictionary *)args {
-    [self set_width:args];
+    [self set_size:args];
 }
 
 - (void)set_height:(NSDictionary *)args {
-    [self set_height:args];
+    [self set_size:args];
 }
 
 
