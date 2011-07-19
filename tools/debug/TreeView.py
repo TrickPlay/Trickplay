@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Fri Jul 15 09:54:48 2011
+# Created: Mon Jul 18 19:14:49 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setEnabled(True)
-        MainWindow.resize(497, 839)
+        MainWindow.resize(464, 832)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -39,7 +39,7 @@ class Ui_MainWindow(object):
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 497, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 464, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -66,7 +66,7 @@ class Ui_MainWindow(object):
         self.button_CollapseAll = QtGui.QPushButton(self.dockWidgetContents_2)
         self.button_CollapseAll.setObjectName(_fromUtf8("button_CollapseAll"))
         self.horizontalLayout.addWidget(self.button_CollapseAll)
-        self.gridLayout_2.addLayout(self.horizontalLayout, 0, 0, 1, 1)
+        self.gridLayout_2.addLayout(self.horizontalLayout, 2, 0, 1, 1)
         self.inspector = QtGui.QTreeView(self.dockWidgetContents_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -104,7 +104,17 @@ class Ui_MainWindow(object):
         self.inspector.header().setHighlightSections(True)
         self.inspector.header().setMinimumSectionSize(30)
         self.inspector.header().setStretchLastSection(True)
-        self.gridLayout_2.addWidget(self.inspector, 1, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.inspector, 3, 0, 1, 1)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
+        self.button_Search = QtGui.QPushButton(self.dockWidgetContents_2)
+        self.button_Search.setObjectName(_fromUtf8("button_Search"))
+        self.horizontalLayout_5.addWidget(self.button_Search)
+        self.lineEdit = QtGui.QLineEdit(self.dockWidgetContents_2)
+        self.lineEdit.setText(_fromUtf8(""))
+        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
+        self.horizontalLayout_5.addWidget(self.lineEdit)
+        self.gridLayout_2.addLayout(self.horizontalLayout_5, 0, 0, 1, 1)
         self.dockWidget_2.setWidget(self.dockWidgetContents_2)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_2)
         self.dockWidget = QtGui.QDockWidget(MainWindow)
@@ -147,6 +157,7 @@ class Ui_MainWindow(object):
         self.button_Refresh.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
         self.button_ExpandAll.setText(QtGui.QApplication.translate("MainWindow", "Expand All", None, QtGui.QApplication.UnicodeUTF8))
         self.button_CollapseAll.setText(QtGui.QApplication.translate("MainWindow", "Collapse All", None, QtGui.QApplication.UnicodeUTF8))
+        self.button_Search.setText(QtGui.QApplication.translate("MainWindow", "Search", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Properties", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))

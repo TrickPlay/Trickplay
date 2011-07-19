@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>497</width>
-    <height>839</height>
+    <width>464</width>
+    <height>832</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -56,7 +56,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>497</width>
+     <width>464</width>
      <height>25</height>
     </rect>
    </property>
@@ -84,7 +84,7 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
+     <item row="2" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="button_Refresh">
@@ -109,7 +109,7 @@
        </item>
       </layout>
      </item>
-     <item row="1" column="0">
+     <item row="3" column="0">
       <widget class="QTreeView" name="inspector">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -207,6 +207,24 @@ selection-background-color: transparent;*/</string>
         <bool>true</bool>
        </attribute>
       </widget>
+     </item>
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QPushButton" name="button_Search">
+         <property name="text">
+          <string>Search</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
