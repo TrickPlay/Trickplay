@@ -17,6 +17,7 @@ Qt.Name = Qt.UserRole + 6
 
 NOT_EDITABLE = {
     'clip',
+    'src',
     'source', 
     'x center', 
     'y center', 
@@ -26,6 +27,27 @@ NOT_EDITABLE = {
 
 class ElementModel(QStandardItemModel):
     
+    """
+    Return the screen element
+    """
+    def screen(self, column = ROW['T']):
+        
+        r = self.invisibleRootItem()
+        
+        if column >= 0:
+            
+            return r.child(0, column)
+            
+        else:
+        
+            row = []
+            
+            for i in range(r.columnCount()):
+                
+                row.append(r.child(0, i))
+                
+            return row
+        
     
     """
     Find a child in the model given a value
@@ -56,20 +78,20 @@ class ElementModel(QStandardItemModel):
     NOTE: Column parameter is for the column returned
     All columns are searched regardless of this parameter
     """
-    def fullMatch(self, value, role = Qt.DisplayRole,
-                  flags = Qt.MatchRecursive, hits = 1,
-                  start = None, column = ROW['T']):
-        
-        found = []
-        
-        search
-        
-        while 0 == len(found):
-            
-            pass
-            
-            
-        
+    #def fullMatch(self, value, role = Qt.DisplayRole,
+    #              flags = Qt.MatchRecursive, hits = 1,
+    #              start = None, column = ROW['T']):
+    #    
+    #    found = []
+    #    
+    #    search
+    #    
+    #    while 0 == len(found):
+    #        
+    #        pass
+    #        
+    #        
+    #    
         
         
     """
@@ -79,16 +101,29 @@ class ElementModel(QStandardItemModel):
     def initialize(self,  headers,  populate):
         
         if headers:
-    
+            
             self.setHorizontalHeaderLabels(headers)
         
         root = self.invisibleRootItem()
         
         if populate:
-        
-            data = getTrickplayData()["children"][0]
             
-            self.addElement(root, data)
+            data = getTrickplayData()
+            
+            if data:
+            
+                self.addElement(root, data["children"][0], screen = True)
+                
+                #screen = self.screen()
+                
+                #screen.setCheckable(-1)
+                
+                #screen.setCheckState(-1)
+                
+            else:
+                
+                print("Could not retreive data.")
+                
             
     
     """
@@ -181,7 +216,7 @@ class ElementModel(QStandardItemModel):
     """
     Add a UI element to the tree as a Element
     """
-    def addElement(self, parent, data):
+    def addElement(self, parent, data, screen = False):
         
         value = data["name"]
         
@@ -203,15 +238,21 @@ class ElementModel(QStandardItemModel):
         
         titleNode.setData(value, Qt.Name)
         
-        titleNode.setCheckable(True)
-        
-        checkState = Qt.Unchecked
-        
-        if data['is_visible']:
+        if not screen:
             
-            checkState = Qt.Checked
-        
-        titleNode.setCheckState(checkState)
+            titleNode.setCheckable(True)
+            
+            checkState = Qt.Unchecked
+            
+            if data['is_visible']:
+                
+                checkState = Qt.Checked
+            
+            titleNode.setCheckState(checkState)
+            
+        else:
+            
+            del(data['is_visible'])
 
         if '' != value:
             

@@ -49,6 +49,7 @@ ATTR_LIST = [
     'position', 
     'size',
     'opacity', 
+    'tile',
     'is_visible', 
     'color',
     'border_color',
@@ -57,8 +58,7 @@ ATTR_LIST = [
     'clip',
     'x_rotation',
     'y_rotation',
-    'z_rotation' ,
-    'tile', 
+    'z_rotation',
     
     # Hidden
     #'gid',
