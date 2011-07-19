@@ -41,6 +41,11 @@
         currentTVIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
         currentTVIndicator.layer.cornerRadius = currentTVIndicator.frame.size.height/2.0;
     }
+    
+    if (!loadingSpinner) {
+        loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        //loadingSpinner.frame = CGRectMake(10.0, 10.0, 20.0, 20.0);
+    }
         
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
@@ -258,6 +263,7 @@
 	if (count == 0) {
         // If there are no services and searchingForServicesString is set, show one row explaining that to the user.
         [currentTVIndicator removeFromSuperview];
+        [loadingSpinner removeFromSuperview];
         if ([self.navigationController visibleViewController] == self) {
             [currentTVName release];
             currentTVName = nil;
@@ -266,16 +272,18 @@
 		cell.accessoryType = UITableViewCellAccessoryNone;
 		// Make sure to get rid of the activity indicator that may be showing if we were resolving cell zero but
 		// then got didRemoveService callbacks for all services (e.g. the network connection went down).
-		if (cell.accessoryView)
-			cell.accessoryView = nil;
+        cell.accessoryView = nil;
+        
 		return cell;
 	}
 	
 	// Set up the text for the cell
-	NSNetService* service = [services objectAtIndex:indexPath.row];
+	NSNetService *service = [services objectAtIndex:indexPath.row];
 	cell.textLabel.text = [service name];
 	cell.textLabel.textColor = [UIColor blackColor];
     if ([cell.textLabel.text compare:currentTVName] == NSOrderedSame) {
+        [loadingSpinner removeFromSuperview];
+        [loadingSpinner stopAnimating];
         [cell addSubview:currentTVIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
     } else {
@@ -283,6 +291,17 @@
             [currentTVIndicator removeFromSuperview];
         }
     }
+    
+    if (netServiceManager.currentService == service) {
+        cell.accessoryView = loadingSpinner;
+        [loadingSpinner startAnimating];
+        cell.userInteractionEnabled = NO;
+        
+        return cell;
+    }
+    
+    cell.userInteractionEnabled = YES;
+    cell.accessoryView = nil;
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
 	return cell;
@@ -364,7 +383,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         netServiceManager.currentService = [services objectAtIndex:indexPath.row];
         [netServiceManager.currentService setDelegate:netServiceManager];
     
-        [netServiceManager.currentService resolveWithTimeout:0.0];
+        [netServiceManager.currentService resolveWithTimeout:5.0];
+        
+        [tableView reloadData];
     } else {
         [self pushAppBrowser:nil];
     }
@@ -398,6 +419,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [currentTVIndicator release];
         currentTVIndicator = nil;
     }
+    if (loadingSpinner) {
+        [loadingSpinner stopAnimating];
+        [loadingSpinner release];
+        loadingSpinner = nil;
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -418,6 +444,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentTVName) {
         [currentTVName release];
         currentTVName = nil;
+    }
+    if (loadingSpinner) {
+        [loadingSpinner stopAnimating];
+        [loadingSpinner release];
+        loadingSpinner = nil;
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 

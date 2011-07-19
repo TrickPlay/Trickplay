@@ -40,6 +40,15 @@
     
     // .alignment
     NSString *alignment;
+    
+    // .password_char
+    BOOL password_char;
+    
+    // .line_spacing
+    CGFloat line_spacing;
+    
+    // .markup TODO: (could be security risk)
+    NSString *markup;
 }
 
 @property (retain) NSString *text;

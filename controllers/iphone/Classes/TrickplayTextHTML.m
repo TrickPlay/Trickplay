@@ -23,14 +23,15 @@
 
 - (id)initWithID:(NSString *)textID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:textID objectManager:objectManager])) {
-        self.frame = [[UIScreen mainScreen] applicationFrame];
         self.view = [[[UIWebView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
         view.layer.anchorPoint = CGPointMake(0.0, 0.0);
-        
+                
         self.text = @"";
         self.origText = @"";
         
         view.userInteractionEnabled = YES;
+        
+        view.contentMode = UIViewContentModeRedraw;
         
         self.view.backgroundColor = [UIColor clearColor];
         self.view.opaque = NO;
@@ -64,8 +65,14 @@
         // .alignment
         alignment = nil;
         
-        [self setValuesFromArgs:args];
+        // .password_char
+        password_char = NO;
         
+        // .line_spacing
+        line_spacing = 0.0;
+        
+        [self setValuesFromArgs:args];
+                
         [self addSubview:view];
     }
     
@@ -93,7 +100,7 @@
 #pragma mark Setters
 
 - (NSString *)getHtml {
-    NSString *html = [NSString stringWithFormat:@"<html><body><div style='"];
+    NSString *html = [NSString stringWithFormat:@"<html><body><div style='vertical-align:baseline;"];
 
     // .color property
     html = [NSString stringWithFormat:@"%@color:#%02x%02x%02x;", html, red, green, blue];
@@ -154,8 +161,19 @@
         }
     }
     
+    // .line_spacing
+    html = [NSString stringWithFormat:@"%@line-height:%fpx;", html, line_spacing + fontSize];
     
-    html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@</div></body></html>", html, text];
+    // .password_char
+    if (password_char) {
+        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>", html];
+        for (int i = 0; i < text.length; i++) {
+            html = [NSString stringWithFormat:@"%@*", html];
+        }
+        html = [NSString stringWithFormat:@"%@</div></body></html>", html];
+    } else {
+        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@</div></body></html>", html, text];
+    }
     
     NSLog(@"html: %@", html);
     return html;
@@ -393,6 +411,25 @@
 }
 
 /**
+ * Sets the password_char bool
+ */
+
+- (void)set_password_char:(NSDictionary *)args {
+    password_char = [[args objectForKey:@"password_char"] boolValue];
+}
+
+/**
+ * Set line_spacing float
+ */
+
+- (void)set_line_spacing:(NSDictionary *)args {
+    id space = [args objectForKey:@"line_spacing"];
+    if (space && [space isKindOfClass:[NSNumber class]]) {
+        line_spacing = [space floatValue];
+    }
+}
+
+/**
  * Setter function
  */
 
@@ -544,13 +581,28 @@
 }
 
 /**
- * Sets max number of characters
+ * Gets max number of characters
  */
 
 - (void)get_max_length:(NSMutableDictionary *)dictionary {
     [dictionary setObject:[NSNumber numberWithUnsignedInt:maxLength] forKey:@"max_length"];
 }
 
+/**
+ * Gets the password_char bool
+ */
+
+- (void)get_password_char:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithBool:password_char] forKey:@"password_char"];
+}
+
+/**
+ * Gets the line spacing
+ */
+
+- (void)get_line_spacing:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithFloat:line_spacing] forKey:@"line_spacing"];
+}
 
 /**
  * Getter function
