@@ -1,0 +1,127 @@
+Title: SDK Editor
+
+Group: The Basics
+
+Topic: Intro
+
+Our graphical UI editor is the simplest way to create a layout and design for your app. It combines drag and drop simplicity with powerful dynamic code creation to help you get up and running fast on the Trickplay Platform. If you have any specific questions relating to syntax or LUA, refer to the Application Developers Documentation.
+
+Topic: The Top Bar
+
+The top bar behaves like any other graphics program. It has 4 headings. File, Edit, Arrange and Settings.
+
+Topic: The Inspector
+
+The Inspector can be opened by double-clicking on any object.
+
+Topic: Working Directory
+
+A directory named working_space has been created under "apps/editor/working_space" for you to store your working files in.
+
+Topic: Moving Objects
+
+Objects can be moved in several different ways. You can click and drag them, or double-click them to bring up the inspector in order to manually specify X and Y coordinates. Shift-click to select multiple objects. You may also use the 'Arrange' function to line up objects.
+
+Group: The Top Bar
+
+The Top Bar is your central control panel for basic functions in the Trickplay UI Editor.
+
+Topic: File
+
+Basic file modification and quit. Here is where you can Save, Open and create New files, as well as quitting and saving a file under a new name(Save As).
+
+File has 6 different options:
+
+New - Starts a new .lua file.
+Open - Opens an existing .lua file for editing.
+Save - Saves the current .lua file you are working on. If you have not yet named the file, you will be prompted to do so upon saving.
+Save As - Saves the current .lua file under a different name than the original.
+Quit - Exits the Editor.
+
+Topic: Edit
+
+Edit contains the Undo and Redo options as well as Insert and grouping tools. In order to insert an image or video the file must be located locally. A directory named working_space has been created under "apps/editor/working_space" for you to store your working files in.
+
+Edit has 10 different options:
+
+Undo - Undoes the last change, Steps backward.
+Redo - Redoes the last Undo, Steps forward.
+Text - Places a text box.
+Image - Places an image. You must enter the file name and path to that file.
+Rectangle - Allows you to draw a rectangle by clicking and dragging on the space.
+Video - Places a video. You must enter the file name and path to that file.
+Delete - Deletes any objects you have selected.
+Clone - Clones any objects you have selected.
+Group - Groups objects together. You may select multiple objects by Shift-clicking.
+Ungroup - Removes an object(s) from a group.
+
+Topic: Arrange
+
+Arranging objects can be accomplished by selecting multiple objects and selecting their type of arrangement. The first object selected will act as a guide. If you were to select 3 objects spread across a surface horizontally, selecting 'Arrange > Left' would align all of the objects to the first objects left side.
+
+Arrange has 13 different options:
+
+Left - Aligns objects to the left side of the first selected object.
+Right - Aligns objects to the right side of the first selected object.
+Top - Aligns objects to the top side of the first selected object.
+Bottom - Aligns objects to the bottom side of the first selected object.
+H_Center - Aligns objects to the horizontal centre of the first selected object.
+V_Center - Aligns objects to the vertical centre of the first selected object.
+Bring to Front - Brings the object to the front of the stack of objects.
+Bring Forward - Brings the object one step forward in the stack of objects.
+Send to Back - Sends the object to the back of the stack of objects.
+Send Backward - Sends the object one step backward in the stack of objects.
+
+Topic: Setting
+
+Settings helps you control your working environment. A pixel grid helps you visibility in objects with low opacity.
+
+Settings has 5 different options:
+
+Transparency Grid 20 - Shows a 20x20 pixel grid in the background.
+Transparency Grid 40 - Shows a 40x40 pixel grid in the background.
+Transparency Grid 80 - Shows a 80x80 pixel grid in the background.
+White - Shows a white background.
+Black - Shows a black background.
+
+Group: The Inspector
+
+The inspector allows you to quickly edit attributes of the object. You can set many options, including but not limited to: positioning (X, Y, Z), Color, 
+Border, Rotation, Anchor point and opacity. 
+
+Topic: View Code
+
+You can also 'View Code' This allows you a quick look into how the LUA code is being written.
+
+Topic: Dynamic Attributes
+
+The inspector is dynamic, and options displayed depend on what attributes that object has. For example, a video has 'Volume' attributes, whereas an image does not.
+
+Topic: Applying
+
+You must apply the settings you modify in the inspector by clicking 'Apply' before closing the window by clicking the 'X' in the top right corner.
+
+Group: Shortcuts
+
+Shortcuts help you quickly repeat certain tasks.
+
+Topic: Keyboard Shortcuts
+
+File:
+
+New - r
+Open - o
+Save - s
+Save As - a
+Quit - q
+
+Edit:
+
+Undo - u
+Redo - e
+Text - t
+Image - i
+Rectangle - r
+Delete - Delete
+Clone - c
+Group - g

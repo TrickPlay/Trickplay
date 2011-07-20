@@ -1,5 +1,13 @@
 cmake_minimum_required( VERSION 2.6 )
 
+if (NOT NATURAL_DOCS)
+	find_program(
+		NATURAL_DOCS
+
+		NAMES naturaldocs NaturalDocs
+	)
+endif (NOT NATURAL_DOCS)
+
 if (NATURAL_DOCS)
 
     add_custom_target(

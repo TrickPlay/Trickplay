@@ -50,6 +50,9 @@ namespace ClutterUtil
 
     ClutterAnimator * user_data_to_animator( lua_State * L, int n );
 
+	// Safely casts to a constraint
+
+    ClutterConstraint * user_data_to_constraint( lua_State * L , int n );
 
     // Sets properties from a table
 
@@ -67,24 +70,33 @@ namespace ClutterUtil
 
     void wrap_timeline( lua_State * L , ClutterTimeline * timeline );
 
+    void wrap_constraint( lua_State * L , ClutterConstraint * constraint );
+
     // Returns the metatable for an actor
 
     const char * get_actor_metatable( ClutterActor * actor );
 
     // Inject key_down event
 
-    void inject_key_down( guint key_code, gunichar unicode );
+    void inject_key_down( guint key_code, gunichar unicode , unsigned long int modifiers );
 
-    void inject_key_up( guint key_code, gunichar unicode );
+    void inject_key_up( guint key_code, gunichar unicode , unsigned long int modifiers );
 
-    void inject_motion( gfloat x , gfloat y );
+    void inject_motion( gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_button_press( guint32 button , gfloat x , gfloat y );
+    void inject_button_press( guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
 
-    void inject_button_release( guint32 button , gfloat x , gfloat y );
+    void inject_button_release( guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
 
     // Convert stage coordinates into screen coordinates -- adjusts x,y in place
     void stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y );
+
+    unsigned long int get_tp_modifiers( ClutterEvent * event );
+
+    void push_event_modifiers( lua_State * L , ClutterEvent * event );
+
+    void push_event_modifiers( lua_State * L , unsigned long int modifiers );
+
 };
 
 

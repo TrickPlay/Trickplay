@@ -37,15 +37,16 @@ class Bitmap [[ Bitmap * ]]
 		*Return Value:* The generated Bitmap object
 
 		Loading the image file for a Bitmap object is essentially identical to 
-		loading one for an <Image> object. Both objects load the image 
-		synchronously by default, and both also support asynchronous loading. 
-		A Bitmap asynchronous-load operation is initiated by sending a true 
-		value as the async argument to the object's constructor. Completion of 
-		an asynchronous load causes the firing of the <on_loaded> event 
-		handler. Also, the Bitmap object's <loaded> property can be accessed 
-		to check on the success or failure of a synchronous-load operation. 
-		Refer to the discussion of the <Image.async> property for additional 
-		details concerning synchronous and asynchronous file loading.
+		loading one for an <Image at file:clutter_image-lb.html#Image> object. 
+		Both objects load the image synchronously by default, and both also 
+		support asynchronous loading. A Bitmap asynchronous-load operation is 
+		initiated by sending a true value as the async argument to the object's 
+		constructor. Completion of an asynchronous load causes the firing of 
+		the <on_loaded> event handler. Also, the Bitmap object's <loaded> 
+		property can be accessed to check on the success or failure of a 
+		synchronous-load operation. Refer to the discussion of the 
+		<Image.async> property for additional details concerning synchronous 
+		and asynchronous file loading.
 
 		*Example:* Create a Bitmap object, loading the image synchronously
 		
@@ -57,6 +58,7 @@ class Bitmap [[ Bitmap * ]]
 		if myBitmap.loaded == false then
 		  -- Yes, handle error here
 		  print( "Failed to load the image" )
+		  return
 		end
 		(end)
 		
