@@ -1,5 +1,5 @@
 
-local gl = WebGLCanvas{ size = { 400 , 400 } }
+local gl = WebGLCanvas{ size = { 512 , 512 } }
 
 screen:add( gl )
 
@@ -35,7 +35,9 @@ local function init_gl_state()
     
     local f_shader_source =
     [[
-      /* precision mediump float;                  */
+        #ifdef GL_ES
+        precision highp float;
+        #endif
       varying vec4 v_color;                     
                                                 
       void main()                               
