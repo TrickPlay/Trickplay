@@ -50,6 +50,8 @@ Group: TrickPlay Editor  {
 
          File: Button  (no auto-title, reference/button.txt)
          File: ButtonPicker  (no auto-title, reference/buttonPicker.txt)
+         File: CheckBox  (no auto-title, reference/checkBoxGroup.txt)
+         File: RadioButtonGroup  (no auto-title, reference/radioButtonGroup.txt)
          }  # Group: UI Elements
 
       }  # Group: Reference
@@ -68,6 +70,7 @@ Group: TrickPlay Editor  {
       File: Connect Elements to Code  (no auto-title, tutorial/connectCode.txt)
       File: Create a Second Screen  (no auto-title, tutorial/createModeScreen.txt)
       File: Transition to Another Screen  (no auto-title, tutorial/screenTransition.txt)
+      File: CheckBox and RadioButton Elements  (no auto-title, tutorial/checkBoxRadioButton.txt)
       }  # Group: Tutorial
 
    }  # Group: TrickPlay Editor
@@ -81,5 +84,6 @@ Group: Index  {
    Function Index: Functions
    Property Index: Properties
    Event Index: Events
+   Constructor Index: Constructors
    }  # Group: Index
 

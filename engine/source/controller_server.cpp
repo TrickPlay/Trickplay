@@ -716,8 +716,8 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_down( info.controller, key_code, unicode );
-        tp_controller_key_up( info.controller, key_code, unicode );
+        tp_controller_key_down( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
+        tp_controller_key_up( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "KD" ) )
     {
@@ -739,7 +739,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_down( info.controller, key_code, unicode );
+        tp_controller_key_down( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "KU" ) )
     {
@@ -761,7 +761,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_up( info.controller, key_code, unicode );
+        tp_controller_key_up( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "CK" ) )
     {
@@ -782,7 +782,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) );
+        tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "UI" ) )
     {
@@ -833,7 +833,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_pointer_button_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_pointer_button_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "PM" ) )
     {
@@ -845,7 +845,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_pointer_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_pointer_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "PU" ) )
     {
@@ -857,7 +857,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_pointer_button_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_pointer_button_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TD" ) )
     {
@@ -869,7 +869,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TM" ) )
     {
@@ -881,7 +881,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TU" ) )
     {
@@ -893,7 +893,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd , "UX" ) )
     {
