@@ -25,6 +25,10 @@ local assets = {
 	coin_side  = Image { src = "assets/coin-2.png" },
 	firework   = Image { src = "assets/firework.png" },
 	firecracker   = Image { src = "assets/firecracker.png" },
+	envelope = {
+		Image { src = "assets/envelope.png" },
+		Image { src = "assets/envelope-2.png" },
+	},
 	--effects
 	smoke = {
 		Image { src = "assets/smoke1.png" },

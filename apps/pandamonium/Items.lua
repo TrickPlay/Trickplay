@@ -1,9 +1,149 @@
+
+--the coin spins from -90 to 90, and then repeats
+local radians = Interval(-math.pi/2,math.pi/2)
+
+
+local envelope = physics:Body(
+	
+	Clone{  source = assets.envelope[1]  },
+	
+	{
+		type    = "static",
+	    density = .1 ,
+		sensor  = true,
+	    filter  = items_filter,
+	}
+)
+envelope.state = Enum{"RECYCLED","SPINNING","SPARKLING"}
+envelope.index = 0
+
+envelope.tl = {
+	duration = 4,
+	loop     = true,
+	on_step  = function(_,p)
+		t = radians:get_value(p)
+		envelope.scale = {math.cos(t),1}
+	end,
+	on_loop = function()
+		envelope.index  = (envelope.index+1) % (# assets.envelope)
+		envelope.source = assets.envelope[envelope.index]
+	end
+}
+
+envelope.fade = {
+	duration = .4,
+	on_step  = function(_,p)
+		envelope.opacity = 255*(1-p)
+	end,
+	on_completed = function()
+		envelope.state:change_state_to("RECYCLED")
+	end
+}
+
+function envelope:recycle()  self.state:change_state_to("RECYCLED")  end
+
+envelope.state:add_state_change_function(
+	function(old,new)
+		
+		if old == new then  error("envelope is already marked as recycled")  end
+		
+		Animation_Loop:delete_animation(envelope.tl)
+		
+		envelope.opacity = 1
+		--print(coin)
+		envelope:unparent()
+		--print("b")
+		firework.World:remove(envelope)
+	end,
+	nil,"RECYCLED"
+)
+
+envelope.state:add_state_change_function(
+	function(old,new)
+		
+		if old ~= "RECYCLED" then
+			error("envelope started spinning from this state "..old)
+		end
+		
+		layers.items:add(envelope)
+		
+		envelope.opacity = 255
+		
+		Animation_Loop:add_animation(envelope.tl)
+	end,
+	nil,"SPINNING"
+)
+
+envelope.state:add_state_change_function(
+	function(old,new)
+		
+		hud:add_to_score(10)
+		
+		Effects:make_sparkles(envelope.x,envelope.y)
+		
+		Animation_Loop:add_animation(   envelope.fade   )
+		
+	end,
+	nil,"SPARKLING"
+)
+
+function envelope:on_begin_contact(contact)
+	
+	envelope.enabled = false
+	
+	if envelope.state:current_state() == "SPINNING" then
+		
+		envelope.state:change_state_to("SPARKLING")
+		
+	end
+end
+
+envelope.on_pre_solve_contact = function(_,contact) contact.enabled = false end
+
+function envelope:scroll_by(dy)
+	
+	self.y = self.y + dy
+	
+end
+
+function envelope:fade_out(p)
+	self.opacity = 255*(1-p)
+end
+---[[
+function envelope:fade_out_complete(p)
+	self.state:change_state_to("RECYCLED")
+end
+--]]
+function envelope:fade_in_prep()
+	assert(self.state:current_state() == "SPINNING")
+	--print(self)
+	self.opacity = 0
+	self.tl:on_step(.5)
+end
+function envelope:fade_in(p)
+	self.opacity = 255*(p)
+end
+function envelope:fade_in_complete()
+	if self.state:current_state() ~= "SPINNING" then
+		--print(self.state:current_state())
+		--print(self.opacity)
+	end
+	Animation_Loop:set_progress(self.tl,.5)
+end
+
+
+
+
+
+
+
+
+
+
 local old_coins = {}
 
 local coin, t, start_x
 
---the coin spins from -90 to 90, and then repeats
-local radians = Interval(-math.pi/2,math.pi/2)
 
 local function new_coin()
 	local coin  = Group{name="Coin"}
@@ -205,7 +345,11 @@ end
 
 local function make_coin(_,x,y)
 	
-	coin = table.remove(old_coins) or new_coin()
+	if math.random(1,10) == 1 and envelope.state:current_state() == "RECYCLED" then
+		coin = envelope
+	else
+		coin = table.remove(old_coins) or new_coin()
+	end
 	
 	coin.position = { x, y }
 	
