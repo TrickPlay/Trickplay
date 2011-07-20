@@ -2092,7 +2092,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
             glUniform1f( location , x );
         ]];
 
-    void uniform1fv(WebGLUniformLocation location, Float32Array_or_table v )
+    void uniform1fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
         [[
             _GET_CONTEXT_;
             FreeLater free_later;
