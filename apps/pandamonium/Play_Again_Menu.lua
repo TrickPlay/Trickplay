@@ -1,4 +1,4 @@
-local Splash = Group{name = "Splash",opacity = 0}
+local Play_Again = Group{name = "Play Again",opacity = 0}
 
 --Visual Components
 local title      = Clone{
@@ -7,9 +7,9 @@ local title      = Clone{
 	position     = {screen.w/2, 150},
 }
 
-local start      = Clone{
-	source       = assets.start,
-	anchor_point = {0, assets.start.h/2},
+local play_again = Clone{
+	source       = assets.play_again,
+	anchor_point = {0, assets.play_again.h/2},
 	position     = {screen.w/2, 400},
 }
 
@@ -22,17 +22,17 @@ local quit       = Clone{
 local arrow      = Clone{
 	source       = assets.arrow,
 	anchor_point = {assets.arrow.w, assets.arrow.h/2},
-	position     = {screen.w/2-50, start.y},
+	position     = {screen.w/2-50, play_again.y},
 }
 
-Splash:add(title,start,quit,arrow)
+Play_Again:add(title,play_again,quit,arrow)
 
 
 --arrow index, and its selectable items
 local index = 1
 
 local menu_items = {
-	start,
+	play_again,
 	quit
 }
 
@@ -58,9 +58,9 @@ end
 --the press enter functions
 function quit:press_enter()    exit()    end
 
-function start:press_enter()    GameState:change_state_to("GAME")    end
+function play_again:press_enter()    GameState:change_state_to("GAME")    end
 
---the state change animations (fading the Splash screen in and out)
+--the state change animations (fading the Play Again screen in and out)
 do
 	--upval
 	local curr_opacity
@@ -68,18 +68,20 @@ do
 	--fade out
 	GameState:add_state_change_function(
 		function()
-			curr_opacity = Splash.opacity
 			
-			Splash:complete_animation()
+			curr_opacity = Play_Again.opacity
 			
-			Splash.opacity = curr_opacity
+			Play_Again:complete_animation()
 			
-			Splash:animate{
+			Play_Again.opacity = curr_opacity
+			
+			Play_Again:animate{
 				duration = 300,
 				opacity  = 0,
 			}
 		end,
-		"SPLASH", nil
+		
+		"PLAY_AGAIN", nil
 	)
 	
 	--fade in
@@ -90,25 +92,26 @@ do
 			
 			arrow.y = menu_items[index].y
 			
-			curr_opacity = Splash.opacity
+			curr_opacity = Play_Again.opacity
 			
-			Splash:complete_animation()
+			Play_Again:complete_animation()
 			
-			Splash.opacity = curr_opacity
+			Play_Again.opacity = curr_opacity
 			
-			Splash:raise_to_top()
+			Play_Again:raise_to_top()
 			
-			Splash:animate{
-				duration = 300,
+			Play_Again:animate{
+				duration = 500,
 				opacity  = 255,
 				on_completed = function()
-					screen.on_key_down = Splash.on_key_down
+					screen.on_key_down = Play_Again.on_key_down
+					physics:stop()
 				end
 			}
 			
 		end,
 		
-		nil, "SPLASH"
+		nil, "PLAY_AGAIN"
 	)
 end
 
@@ -142,9 +145,9 @@ do
 		end,
 	}
 	
-	function Splash:on_key_down(k)    if keys[k] then    keys[k]()    end    end
+	function Play_Again:on_key_down(k)    if keys[k] then    keys[k]()    end    end
 end
 
-layers.menu:add(Splash)
+layers.menu:add(Play_Again)
 
-return Splash
+return Play_Again
