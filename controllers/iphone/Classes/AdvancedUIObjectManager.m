@@ -133,10 +133,8 @@
     
     TrickplayImage *image = [[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager objectManager:self];
     
-    //NSLog(@"Image created: %@", image);
     [images setObject:image forKey:imageID];
     
-    //[view addSubview:image];
     [image release];
 }
 
@@ -148,10 +146,8 @@
 - (void)createRectangle:(NSString *)rectID withArgs:(NSDictionary *)args {
     TrickplayRectangle *rect = [[TrickplayRectangle alloc] initWithID:rectID args:args objectManager:self];
     
-    //NSLog(@"Rectangle created: %@", rect);
     [rectangles setObject:rect forKey:rectID];
     
-    //[view addSubview:rect];
     [rect release];
 }
 
@@ -163,10 +159,8 @@
 - (void)createText:(NSString *)textID withArgs:(NSDictionary *)args {
     TrickplayText *text = [[TrickplayText alloc] initWithID:textID args:args objectManager:self];
     
-    //NSLog(@"Text created: %@", text);
     [textFields setObject:text forKey:textID];
     
-    //[view addSubview:text];
     [text release];
 }
 
@@ -190,10 +184,8 @@
 - (void)createGroup:(NSString *)groupID withArgs:(NSDictionary *)args {
     TrickplayGroup *group = [[TrickplayGroup alloc] initWithID:groupID args:args objectManager:self];
     
-    //NSLog(@"Group created: %@", group);
     [groups setObject:group forKey:groupID];
     
-    //[view addSubview:group];
     [group release];
 }
 

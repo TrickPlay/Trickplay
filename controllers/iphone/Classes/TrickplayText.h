@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ResourceManager.h"
 #import "EditableTextView.h"
 #import "TrickplayUIElement.h"
 
