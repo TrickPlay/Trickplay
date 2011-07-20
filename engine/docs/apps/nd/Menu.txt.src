@@ -85,6 +85,10 @@ Group: Reference  {
          }  # Group: Animation
 
       }  # Group: UI
+      
+	Group: Components {
+		File: Physics Engine (no auto-title, bindings/physics.lb)
+	}
 
    Group: Globals  {
 
