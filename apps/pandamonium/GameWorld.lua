@@ -1,26 +1,95 @@
---World Object
-local World = {}
+--------------------------------------------------------------------------------
+-- Screen Object
+--
+-- Used to keep track of when things have fallen off the screen
+--------------------------------------------------------------------------------
+
+local Game_Screen = physics:Body(
+	
+	Group{size=screen.size},
+	
+	{
+		type   = "static",
+		sensor = true,
+		filter = uncollidable_filter
+	}
+)
+Game_Screen.position = {screen_w/2,screen_h/2}
+
+local handle_ref = {}
+
+local body
+
+Game_Screen.on_end_contact = function(_,contact)
+	
+	body = contact.bodies[2]
+	
+	if body == Game_Screen.handle then body = contact.bodies[1] end
+	
+	if handle_ref[ body ] == nil then return end
+	
+	dolater(
+		handle_ref[ body ].recycle,
+		handle_ref[ body ]
+	)
+	
+	handle_ref[ body ] = nil
+end
+
+layers.bg:add(Game_Screen)
+
+--------------------------------------------------------------------------------
+-- Wall Object
+--
+-- contains the hopper horizontally
+--------------------------------------------------------------------------------
+
+local wall_properties = {
+	type = "static" ,
+	bounce = 0,
+	density = 1,
+	filter  = surface_filter,
+}
+
+local r_wall = physics:Body(
+	
+	Group{ name = "wall", size = { 100 , screen_h }, },
+	
+	wall_properties
+)
+
+local l_wall = physics:Body(
+	
+	Group{ name = "wall", size = { 100 , screen_h }, },
+	
+	wall_properties
+)
+
+l_wall.position = {        0,  screen_h/2 }
+r_wall.position = { screen_w,  screen_h/2 }
+
+layers.bg:add(   l_wall, r_wall   )
 
 
+
+
+
+
+--[[
+--recycled walls
 local old_walls = {}
 
+--upval, used in the wall constructors and in   World:add_next_branches()
 local wall
 
 local wall_properties = {
 	type = "static" ,
 	bounce = 0,
 	density = 1,
+	filter  = surface_filter,
 }
 
-local real_max_dist = 590
-
-local curr_max_dist = screen_h/5
-
-local next_branch_y = screen_h/2
-
-local active_walls = {}
-
-local new_wall = function(side,y)
+local new_wall = function()
 	
 	wall = physics:Body(
 		
@@ -69,150 +138,378 @@ local new_wall = function(side,y)
 	
 end
 
-
-
-function World:scroll_by(dy)
+local wall_constructor = function()
 	
-	for w,_ in pairs(active_walls) do
-		
-		if not w:scroll_by(dy) then
-			
-			active_walls[w] = nil
-			
-		end
-		
-	end
+	return table.remove(old_walls) or new_wall()
 	
 end
+--]]
+-----------------------------------------
+-- Floor Object
+-----------------------------------------
 
-
----[[
 local backing = Clone{ source = assets.ground }
 local floor = physics:Body(
     Group{
 		name = "floor",
-		size = { screen.w , 100 } ,
+		size = { screen.w , 200 } ,
 	} ,
     {
-		type = "static" ,
-		bounce = 0,
+		type    = "static" ,
+		bounce  = 0,
 		density = 1,
-		--friction = 1
+		filter  = surface_filter,
 	}
 )
-floor.position = {screen.w/2,screen.h+floor.h/2}
+floor.position = {screen.w/2,screen.h}
 floor.on_begin_contact = panda.bounce
+
+function floor:recycle()
+	
+	self:unparent()
+	
+	backing:unparent()
+	
+end
 
 function floor:scroll_by(dy)
 	
+	self.y = self.y + dy
 	
-	y = self.y + dy
+	backing.y = backing.y + dy
 	
-	if y > screen_h*2 then
-		
-		self:unparent()
-		
-		backing:unparent()
-		
-		return false
-		
-	else
-		
-		self.y = y
-		backing.y = backing.y + dy
-		
-		return true
-		
+	--i don't know why i have to do this
+	if backing.y > screen_h then
+		floor:recycle()
+		handle_ref[ floor.handle ] = nil
 	end
 	
 end
 
---]]
+function floor:fade_in_prep()
 
+	backing.opacity = 0
+	
+	floor.y   = screen_h 
+	
+	backing.y = screen_h - backing.h
+	
+	
+	layers.ground:add( floor, backing )
+	
+	
+	
+end
 
-local l_wall, r_wall, wall, side
+function floor:fade_in(p)
+	
+	backing.opacity = 255*p
+	
+end
+
+-----------------------------------------
+--World Object
+-----------------------------------------
+
+local World = {}
+
+local real_max_dist = 570
+local difficulty_increase = 10
+
+local active_objects = {}
+
+local l_wall, r_wall, side, curr_max_dist, next_branch_y
+
+local left_wall_fade_in_prep = function(b)
+	b.opacity    = 0
+	b.y_rotation = {90,-b.w/2,0}
+end
+local left_wall_fade_in = function(b,p)
+	b.opacity    =  255*p
+	b.y_rotation = {90*(1-p),-b.w/2,0}
+end
+local right_wall_fade_in_prep = function(b)
+	b.opacity    = 0
+	b.y_rotation = {90,0,0}
+	b.anchor_point = {
+		0,
+		b.h/2
+	}
+	b.x = b.x + b.w/2
+end
+local right_wall_fade_in = function(b,p)
+	b.opacity    = 255*p
+	b.y_rotation = {90*p+90,0,0}
+end
+local right_wall_fade_in_complete = function(b)
+	b.opacity    = 255
+	b.anchor_point = {
+		b.w/2,
+		b.h/2
+	}
+	b.x = b.x - b.w/2
+end
+local wall_fade_out = function(b,p)
+	b.opacity    = 255*(1-p)
+end
+local wall_fade_out_complete = function(b)
+	b:recycle()
+	
+end
 
 local last_sides = 0
-
-function World:add_first_walls(y)
+local prev_side  = 0
+local item_on_last_branch = false
+function World:add_branch(y)
 	
-	self:add_next_walls(y)
+	--pick a random side
+	side = 3-2*math.random(1,2)
 	
-	active_walls[floor] = floor
-	panda:position(1500,700)
-	screen:add(floor,backing)
-	backing.y = screen_h - backing.h
-end
-function World:add_next_walls(y)
-	
-	l_wall = table.remove(old_walls) or new_wall(-1,y)
-	r_wall = table.remove(old_walls) or new_wall(1,y)
-	
-	l_wall.position = {
-		-l_wall.w/2,
-		screen_h/2+y
-	}
-	
-	r_wall.position = {
-		screen_w+r_wall.w/2,
-		screen_h/2+y
-	}
-	
-	l_wall.branches = {}
-	r_wall.branches = {}
+	--make sure that same side wasn't randomly chosen too
+	--many times in a row
+	if     last_sides == -2 and side == -1 then side =  1
+	elseif last_sides ==  2 and side ==  1 then side = -1 end
+	last_sides = last_sides + side
+	branch = nil
+	if math.random(1,8) == 1 then
+		branch = firework:add_to_screen(
+			screen_w/2+side*400,
+			next_branch_y
+		)
+	end
+	if branch == nil then
 		
-	--print("new wall")
-	while next_branch_y > 0 do
-		
-		--print(next_branch_y,wall.y)
-		side = 3-2*math.random(1,2)
-		
-		
-		if     last_sides == -2 and side == -1 then side =  1
-		elseif last_sides ==  2 and side ==  1 then side = -1 end
-		last_sides = last_sides + side
-		
-		
-		if side == -1 then wall = l_wall
-		elseif side == 1 then wall = r_wall
-		else error("invalid side") end
-		
-		
-		table.insert(
-			
-			wall.branches,
-			
-			branch_constructor(
-				side,
-				next_branch_y,
-				wall
-			)
-			
+		branch = branch_constructor(
+			side,
+			next_branch_y-200
 		)
 		
-		next_branch_y = next_branch_y - math.random(curr_max_dist-100,curr_max_dist)
+		--translate the side value to the wall object
+		if     side == -1 then
+			
+			branch.fade_in_prep      = left_wall_fade_in_prep
+			branch.fade_in           = left_wall_fade_in
+			branch.fade_in_complete  = nil
+			branch.fade_out          = wall_fade_out
+			branch.fade_out_complete = wall_fade_out_complete
+			
+		elseif side ==  1 then
+			
+			branch.fade_in_prep      = right_wall_fade_in_prep
+			branch.fade_in           = right_wall_fade_in
+			branch.fade_in_complete  = right_wall_fade_in_complete
+			branch.fade_out          = wall_fade_out
+			branch.fade_out_complete = wall_fade_out_complete
+			
+		else   error("invalid side") end
 		
-		--print(curr_max_dist)
-		
-		if curr_max_dist < real_max_dist then
-			curr_max_dist = curr_max_dist + 10
+		r =  math.random(1,5)
+		if not item_on_last_branch then
+			if prev_side ~= side then
+				r =  math.random(1,5)
+				if r == 1 then
+					if side == 1 then
+						local c = Coin:plus(250,branch.y+50)
+						for _,c in ipairs(c) do handle_ref[c.handle] = c end
+						item_on_last_branch = true
+					else
+						local c = Coin:plus(screen_w-250,branch.y+50)
+						for _,c in ipairs(c) do handle_ref[c.handle] = c end
+						item_on_last_branch = true
+					end
+				elseif r == 2 then
+					local p = branch.palms
+					local c = Coin:three_in_a_row(p[1].x,p[2].y-350)
+					for _,c in ipairs(c) do handle_ref[c.handle] = c end
+					item_on_last_branch = true
+				end
+			elseif r <= 4 then
+				
+				local p = branch.palms
+				local c = Coin:single(p[1].x,p[2].y-200)
+				
+				handle_ref[c.handle] = c
+				
+				item_on_last_branch = true
+				
+			elseif r == 5 then
+				local p = branch.palms
+				local c = make_firecracker(p[1].x,p[2].y-200)
+				
+				handle_ref[c.handle] = c
+				
+				item_on_last_branch = true
+			end
+		else
+			item_on_last_branch = false
 		end
-		print(curr_max_dist)
-	end
-	
-	next_branch_y = next_branch_y % wall.h
-	
-	active_walls[l_wall] = l_wall
-	active_walls[r_wall] = r_wall
-	
-	screen:add(l_wall)
-	screen:add(r_wall)
 		
+	end
+	handle_ref[branch.handle] = branch
+	
+	
+	
+	
+	
+	
+	prev_side = side
 end
 
+local fade_ins = {}
+local fade_outs
 
+local start_game_tl = Timeline{
+	duration = 500,
+	on_new_frame = function(self,msecs,p)
+		
+		for _,obj in pairs(fade_outs) do
+			if obj.fade_out then obj:fade_out(p) end
+		end
+		for _,obj in pairs(handle_ref) do
+			if obj.fade_in then obj:fade_in(p) end
+		end
+		
+	end,
+	on_completed = function()
+		
+		
+		for _,obj in pairs(handle_ref) do
+			if obj.fade_in_complete then obj:fade_in_complete() end
+		end
+		for _,obj in pairs(fade_outs) do
+			if obj.fade_out_complete then obj:fade_out_complete() end
+		end
+		
+	end
+}
 
+GameState:add_state_change_function(
+	function()
+		for obj,func in pairs(to_be_deleted) do
+			print("del2", obj)
+			func(obj)
+			to_be_deleted[obj]  = nil
+			active_objects[obj] = nil
+		end
+		curr_max_dist = screen_h/5
+		next_branch_y = 3*screen_h/4
+		
+		fade_outs = handle_ref
+		
+		handle_ref = {}
+		
+		World:add_branches()
+		
+		handle_ref[floor.handle] = floor
+		
+		for _,obj in pairs(fade_outs) do
+			
+			if obj.fade_out_prep then obj:fade_out_prep() end
+			
+		end
+		
+		for _,obj in pairs(handle_ref) do
+			
+			if obj.fade_in_prep then obj:fade_in_prep() end
+			
+		end
+		
+		start_game_tl:start()
+		
+	end,
+	
+	nil, "GAME"
+)
+World.remove = function( _,obj)
+	
+	handle_ref[obj.handle] = nil
+	
+end
+--local r = Rectangle{w=5,h=20}
+local dy
+local jump_thresh = screen_h / 4
+local panda_y
+local p_hand = panda:get_hand()
+World.check_hopper = function()
+	
+	for obj,func in pairs(to_be_deleted) do
+		
+		func(obj)
+		to_be_deleted[obj]  = nil
+		World:remove(obj)
+	end
+	--r.x = p_hand.x
+	--r.y = p_hand.y
+	panda_y = panda:get_y()
+	
+	--if the panda crossed the jump threshhold (while jumping upwards), then scroll up
+	if panda.rocket ~= nil and panda.rocket.y < jump_thresh then
+		--the amount to scroll by
+		dy = jump_thresh - panda.rocket.y
+		panda.rocket:scroll_by( dy )
+	elseif panda_y < jump_thresh and panda:get_vy() < 0 then
+		
+		--the amount to scroll by
+		dy = jump_thresh - panda_y
+		
+	elseif panda_y > screen_h*3/2 then
+		
+		GameState:change_state_to("PLAY_AGAIN")
+		
+		return
+		
+	else
+		dy = 0
+	end
+	
+	if dy ~= 0 then
+		--scroll the tiles background by a lesser amount
+		bg.y = (bg.y + dy/3) % bg.base_size[2] - bg.base_size[2]
+		
+		--place the panda at the threshold
+		panda:scroll_by( dy )
+		
+		--move all the branches and everything down
+		--World:scroll_by(dy)
+		for _,obj in pairs(handle_ref) do
+			
+			obj:scroll_by(dy)
+			
+		end
+		
+		Effects:scroll_by(dy)
+		
+		next_branch_y = next_branch_y + dy
+		
+	end
+	
+	World:add_branches()
+	
+end
+--screen:add(r)
+Animation_Loop:add_animation({on_step=World.check_hopper})
 
-
+World.add_branches = function()
+	
+	--if the top walls are now in view, add 2 more walls
+	while next_branch_y > -screen_h/2 do
+		
+		World:add_branch(next_branch_y)
+		
+		--setup the next position
+		next_branch_y = next_branch_y - math.random(curr_max_dist-50,curr_max_dist)
+		
+		--make sure that the difficulty caps at the max possible jump distance
+		if  curr_max_dist < real_max_dist then
+			
+			curr_max_dist = curr_max_dist + difficulty_increase
+			
+		end
+	end
+end
+function World:add(obj)
+	handle_ref[obj.handle] = obj
+end
+firework.World = World
 
 return World
