@@ -9,6 +9,7 @@
 #import "TrickplayUIElement.h"
 #import "TrickplayRectangle.h"
 #import "TrickplayText.h"
+#import "TrickplayTextHTML.h"
 #import "TrickplayImage.h"
 #import "TrickplayGroup.h"
 #import "TrickplayAnimation.h"
@@ -252,7 +253,7 @@
         [objectDictionary setObject:@"Rectangle" forKey:@"type"];
     } else if ([object isKindOfClass:[TrickplayImage class]]) {
         [objectDictionary setObject:@"Image" forKey:@"type"];
-    } else if ([object isKindOfClass:[TrickplayText class]]) {
+    } else if ([object isKindOfClass:[TrickplayTextHTML class]]) {
         [objectDictionary setObject:@"Text" forKey:@"type"];
     } else if ([object isKindOfClass:[TrickplayGroup class]]) {
         [objectDictionary setObject:@"Group" forKey:@"type"];

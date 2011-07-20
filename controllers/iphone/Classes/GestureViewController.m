@@ -139,7 +139,8 @@
 }
 
 - (void)handleDroppedConnection {
-    [audioController destroyAudioStreamer];
+    // resets stuff
+    [self do_RT:nil];
     [socketManager release];
     socketManager = nil;
 }
@@ -148,36 +149,18 @@
     NSLog(@"Socket Error Occurred in GestureView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    /*
-    if (self.navigationController.visibleViewController == self) {
-        if (!viewDidAppear) {
-            return;
-        }
-        
-        [self.navigationController popToRootViewControllerAnimated:YES];
-    } else {
+    if (socketDelegate) {
         [socketDelegate socketErrorOccurred];
     }
-     */
-    [socketDelegate socketErrorOccurred];
 }
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in GestureView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    /*
-    if (self.navigationController.visibleViewController == self) {
-        if (!viewDidAppear) {
-            return;
-        }
-        
-        [self.navigationController popToRootViewControllerAnimated:YES];
-    } else {
+    if (socketDelegate) {
         [socketDelegate streamEndEncountered];
     }
-     //*/
-    [socketDelegate socketErrorOccurred];
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount
@@ -430,6 +413,7 @@
 
 // TODO: Reset all modules to the initial state
 - (void)do_RT:(NSArray *)args {
+    [audioController destroyAudioStreamer];
     [accelDelegate pauseAccelerometer];
     [touchDelegate reset];
     [advancedUIDelegate clean];

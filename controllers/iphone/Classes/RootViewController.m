@@ -183,9 +183,7 @@
 #pragma mark -
 #pragma mark AppBrowserViewControllerSocketDelegate stuff
 
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in Root");
-        
+- (void)handleSocketProblems {
     [self.navigationController popToRootViewControllerAnimated:YES];
     
     if (appBrowserViewController) {
@@ -203,24 +201,16 @@
     [netServiceManager start];
 }
 
+- (void)socketErrorOccurred {
+    NSLog(@"Socket Error Occurred in Root");
+        
+    [self handleSocketProblems];
+}
+
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in Root");
     
-    [self.navigationController popToRootViewControllerAnimated:YES];
-    
-    if (appBrowserViewController) {
-        if (gestureViewController) {
-            [gestureViewController release];
-            gestureViewController = nil;
-        }
-        [appBrowserViewController release];
-        appBrowserViewController = nil;
-        [currentTVName release];
-        currentTVName = nil;
-        [currentTVIndicator removeFromSuperview];
-    }
-    
-    [netServiceManager start];;
+    [self handleSocketProblems];
 }
 
 
@@ -435,7 +425,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [gestureViewController release];
     }
     if (appBrowserViewController) {
+        appBrowserViewController.socketDelegate = nil;
         [appBrowserViewController release];
+        appBrowserViewController = nil;
     }
     if (currentTVIndicator) {
         [currentTVIndicator release];

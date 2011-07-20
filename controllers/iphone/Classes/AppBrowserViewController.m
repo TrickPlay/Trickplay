@@ -194,39 +194,17 @@
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in AppBrowser");
 
-    // everything will get released from the navigation controller's delegate call (hopefully)
-    /*
-    if (self.navigationController.visibleViewController == self) {
-        if (!viewDidAppear) {
-            return;
-        }
-        [self.navigationController.view.layer removeAllAnimations];
-        [self.navigationController popToRootViewControllerAnimated:YES];
-    
-    } else {
+    if (socketDelegate) {
         [socketDelegate socketErrorOccurred];
     }
-     */
-    [socketDelegate socketErrorOccurred];
 }
 
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in AppBrowser");
     
-    // everything will get released from the navigation controller's delegate call (hopefully)
-    /*
-    if (self.navigationController.visibleViewController == self) {
-        if (!viewDidAppear) {
-            return;
-        }
-        [self.navigationController.view.layer removeAllAnimations];
-        [self.navigationController popToRootViewControllerAnimated:YES];
-        
-    } else {
-        [socketDelegate socketErrorOccurred];
+    if (socketDelegate) {
+        [socketDelegate streamEndEncountered];
     }
-     */
-    [socketDelegate socketErrorOccurred];
 }
 
 
@@ -383,7 +361,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [appsAvailable release];
     }
     if (gestureViewController) {
+        gestureViewController.socketDelegate = nil;
         [gestureViewController release];
+        gestureViewController = nil;
     }
     if (currentAppName) {
         [currentAppName release];
