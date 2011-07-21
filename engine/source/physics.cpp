@@ -1130,10 +1130,20 @@ void Body::synchronize_body()
     {
         gfloat x;
         gfloat y;
+        float32 angle;
 
-        clutter_actor_get_position( actor , & x , & y );
+        if ( world->z_for_y )
+        {
+        	x = clutter_actor_get_x( actor );
+        	y = clutter_actor_get_depth( actor );
+        	angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , 0 , 0 , 0 );
+        }
+        else
+        {
+        	clutter_actor_get_position( actor , & x , & y );
 
-        float32 angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , 0 , 0 , 0 );
+        	angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , 0 , 0 , 0 );
+        }
 
         x = world->screen_to_world( x );
         y = world->screen_to_world( y );
