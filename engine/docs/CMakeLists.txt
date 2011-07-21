@@ -28,6 +28,7 @@ if (NATURAL_DOCS)
         COMMAND ${NATURAL_DOCS}
 			-r
             -i ${PROJECT_SOURCE_DIR}/engine
+			-img ${PROJECT_SOURCE_DIR}/engine/docs/apps/images
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/editor
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
