@@ -1097,7 +1097,6 @@ void Body::synchronize_actor()
 
         if ( world->z_for_y )
         {
-
 			clutter_actor_set_x( actor , world->world_to_screen( pos.x ) );
 			clutter_actor_set_depth( actor , - world->world_to_screen( pos.y ) );
 
@@ -1135,7 +1134,7 @@ void Body::synchronize_body()
         if ( world->z_for_y )
         {
         	x = clutter_actor_get_x( actor );
-        	y = clutter_actor_get_depth( actor );
+        	y = -clutter_actor_get_depth( actor );
         	angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , 0 , 0 , 0 );
         }
         else
