@@ -1099,3 +1099,247 @@ function editor_ui.tabBar(t)
 end
 
 
+
+function editor_ui.checkBoxGroup(t) 
+
+ --default parameters
+    local p = {
+	skin = "custom", 
+	ui_width = 600,
+	ui_height = 200,
+	items = {"item1", "item2", "item3"},
+	text_font = "DejaVu Sans 30px", 
+	text_color = {255,255,255,255}, 
+	box_color = {255,255,255,255},
+	fill_color = {255,255,255,0},
+	focus_color = {0,255,0,255},
+	focus_fill_color = {0,50,0,0},
+	box_width = 2,
+	box_size = {25,25},
+	check_size = {25,25},
+	line_space = 40,   
+	b_pos = {0, 0},  
+	item_pos = {50,-5},  
+	selected_items = {1},  
+	direction = "vertical",  -- 1:vertical 2:horizontal
+	rotate_func = nil,  
+	ui_position = {200, 200, 0}, 
+    } 
+
+ --overwrite defaults
+    if t ~= nil then 
+        for k, v in pairs (t) do
+	    p[k] = v 
+        end 
+    end
+
+ --the umbrella Group
+    local check_image
+    local checks = Group()
+    local items = Group{name = "items"}
+    local boxes = Group() 
+    local cb_group = Group()
+
+    local  cb_group = Group {
+    	  name = "checkBoxGroup",  
+    	  position = p.ui_position, 
+          reactive = true, 
+          extra = {type = "CheckBoxGroup"}
+    }
+
+	function cb_group.extra.on_focus_in()
+	  	current_focus = cb_group
+        if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+	    	boxes:find_child("box"..1).opacity = 0 
+	    	boxes:find_child("focus"..1).opacity = 255 
+        end 
+		boxes:find_child("box"..1):grab_key_focus() 
+    end
+
+    function cb_group.extra.on_focus_out()
+        if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+			for i=1, table.getn(boxes.children)/2 do 
+	    		boxes:find_child("box"..i).opacity = 255 
+	    		boxes:find_child("focus"..i).opacity = 0 
+			end 
+        end 
+    end 
+
+    function cb_group.extra.select_button(items) 
+	    p.selected_items = items
+        if p.rotate_func then
+	       p.rotate_func(p.selected_items)
+	    end
+    end 
+
+    function cb_group.extra.insert_item(itm) 
+		table.insert(p.items, itm) 
+		create_checkBox()
+    end 
+
+    function cb_group.extra.remove_item() 
+		table.remove(p.items)
+		create_checkBox()
+    end 
+
+    local function create_checkBox()
+	 	items:clear() 
+	 	checks:clear() 
+	 	boxes:clear() 
+	 	cb_group:clear()
+
+	 	if(p.skin ~= "custom") then 
+             p.box_image = skin_list[p.skin]["checkbox"]
+             p.box_focus_image = skin_list[p.skin]["checkbox_focus"]
+             p.check_image = skin_list[p.skin]["checkbox_sel"]
+	 	else 
+	     	 p.box_image = Image{}
+			 p.box_focus_image = Image{}
+             p.check_image = "lib/assets/checkmark.png"
+	 	end
+	
+	 	boxes:set{name = "boxes", position = p.b_pos} 
+	 	checks:set{name = "checks", position = p.b_pos} 
+	 	items:set{name = "items", position = p.item_pos} 
+
+        local pos = {0, 0}
+        for i, j in pairs(p.items) do 
+	      	local box, check, focus
+	      	if(p.direction == "vertical") then --vertical 
+                  pos= {0, i * p.line_space - p.line_space}
+	      	end   			
+
+	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
+	      	if p.skin == "custom" then 
+		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
+				size = p.box_size, position = pos, reactive = true, opacity = 0}
+		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
+				size = p.box_size, position = pos, reactive = true, opacity = 255}
+    	        boxes:add(box, focus) 
+	     	else
+	           	focus = Image{name = "focus"..tostring(i),  src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
+	           	box = Image{name = "box"..tostring(i),  src=p.box_image, position = pos, reactive = true, opacity = 255}
+		   		boxes:add(box, focus) 
+	     	end 
+
+	      	if p.skin == "custom" then 
+	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
+			else 
+	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
+			end
+	     	checks:add(check) 
+
+            if editor_lb == nil or editor_use then  
+
+				function box:on_key_down(key)
+					local box_num = tonumber(box.name:sub(4,-1))
+					local next_num
+					if key == keys.Up then 
+						if box_num > 1 then 
+							next_num = box_num - 1
+				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
+	    						boxes:find_child("box"..box_num).opacity = 255 
+	    						boxes:find_child("focus"..box_num).opacity = 0 
+	    						boxes:find_child("box"..next_num).opacity = 0 
+	    						boxes:find_child("focus"..next_num).opacity = 255 
+        					end 
+	    					boxes:find_child("box"..next_num):grab_key_focus()
+							return true 
+						end
+					elseif key == keys.Down then 
+						if box_num < table.getn(boxes.children)/2 then 
+							next_num = box_num + 1
+				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
+	    						boxes:find_child("box"..box_num).opacity = 255 
+	    						boxes:find_child("focus"..box_num).opacity = 0 
+	    						boxes:find_child("box"..next_num).opacity = 0 
+	    						boxes:find_child("focus"..next_num).opacity = 255 
+        					end 
+							boxes:find_child("box"..next_num):grab_key_focus() 
+							return true 
+						end
+					elseif key == keys.Return then 
+						if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
+							p.selected_items = table_remove_val(p.selected_items, box_num)
+							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
+							cb_group:find_child("check"..tostring(box_num)).reactive = true 
+    						cb_group.extra.select_button(p.selected_items) 
+						else 
+							table.insert(p.selected_items, box_num)
+							cb_group:find_child("check"..tostring(box_num)).opacity = 255 
+    						cb_group.extra.select_button(p.selected_items) 
+						end 
+						return true 
+					end 
+				end 
+
+	     		function box:on_button_down (x,y,b,n)
+					local box_num = tonumber(box.name:sub(4,-1))
+					--dumptable(p.selected_items)
+					table.insert(p.selected_items, box_num)
+					cb_group:find_child("check"..tostring(box_num)).opacity = 255
+					cb_group:find_child("check"..tostring(box_num)).reactive = true
+    				cb_group.extra.select_button(p.selected_items) 
+					return true
+	     		end 
+
+	     		function check:on_button_down(x,y,b,n)
+					local check_num = tonumber(check.name:sub(6,-1))
+					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
+						p.selected_items = table_remove_val(p.selected_items, check_num)
+						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
+						cb_group:find_child("check"..tostring(check_num)).reactive = true 
+    					cb_group.extra.select_button(p.selected_items) 
+					else 
+						table.insert(p.selected_items, check_num)
+						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
+    					cb_group.extra.select_button(p.selected_items) 
+					end 
+    				cb_group.extra.select_button(p.selected_items) 
+					return true
+	     		end 
+	     	end
+
+	     	if(p.direction == "horizontal") then 
+		  		pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
+	     	end 
+         end 
+
+	 	for i,j in pairs(p.selected_items) do 
+             checks:find_child("check"..tostring(j)).opacity = 255 
+             checks:find_child("check"..tostring(j)).reactive = true 
+	 	end 
+
+		boxes.reactive = true 
+		checks.reactive = true 
+	 	cb_group:add(boxes, items, checks)
+    end
+    
+    create_checkBox()
+
+
+    mt = {}
+    mt.__newindex = function (t, k, v)
+    	if k == "bsize" then  
+	    p.ui_width = v[1] p.ui_height = v[2]  
+        else 
+           p[k] = v
+        end
+		if k ~= "selected" then 
+        	create_checkBox()
+		end
+    end 
+
+    mt.__index = function (t,k)
+        if k == "bsize" then 
+	    return {p.ui_width, p.ui_height}  
+        else 
+	    return p[k]
+        end 
+    end 
+
+    setmetatable (cb_group.extra, mt)
+     
+    return cb_group
+end 
+

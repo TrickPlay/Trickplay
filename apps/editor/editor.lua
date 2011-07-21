@@ -185,8 +185,8 @@ local function guideline_inspector(v)
 	}
 
 	function xbox:on_button_down()
-		msgw:clear() 
 		screen:remove(msgw)
+		msgw:clear() 
 		current_inspector = nil
 		current_focus = nil
         screen.grab_key_focus(screen) 
@@ -272,28 +272,32 @@ function editor.black_bg()
 	screen:grab_key_focus()
 end 
 
+--[[
 local function is_there_guideline () 
-
-	for i, j in pairs (g.children) do 
+	for i, j in pairs (screen.children) do 
 		if j.name then 
 			if string.find(j.name, "_guideline") then 
-				print("GUIDE : ", j.name)
 				return true 
 			end 
 		end 
     end 
 	return false
 end 
+]]
 
 function editor.show_guides()
 	if guideline_show == false then 
 		screen:find_child("menuButton_view").items[11]["icon"].opacity = 255
 		guideline_show = true
 		for i= 1, h_guideline, 1 do 
-			screen:find_child("h_guideline"..tostring(i)):show() 
+			if screen:find_child("h_guideline"..tostring(i)) then 
+				screen:find_child("h_guideline"..tostring(i)):show() 
+			end 
 		end 
 		for i= 1, v_guideline, 1 do 
-			screen:find_child("v_guideline"..tostring(i)):show() 
+			if screen:find_child("v_guideline"..tostring(i)) then 
+				screen:find_child("v_guideline"..tostring(i)):show() 
+			end
 		end 
 	else 
 		--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
@@ -301,10 +305,14 @@ function editor.show_guides()
 			screen:find_child("menuButton_view").items[11]["icon"].opacity = 0
 			guideline_show = false
 			for i= 1, h_guideline, 1 do 
-				screen:find_child("h_guideline"..tostring(i)):hide() 
+				if screen:find_child("h_guideline"..tostring(i)) then 
+					screen:find_child("h_guideline"..tostring(i)):hide() 
+				end
 			end 
 			for i= 1, v_guideline, 1 do 
-				screen:find_child("v_guideline"..tostring(i)):hide() 
+				if screen:find_child("v_guideline"..tostring(i)) then 
+					screen:find_child("v_guideline"..tostring(i)):hide() 
+				end 
 			end 
 		else 
 			editor.error_message("008", nil, nil)
@@ -396,6 +404,10 @@ function editor.v_guideline()
      create_on_line_down_f(v_gl)
      screen:add(v_gl)
      screen:grab_key_focus()
+
+	 if screen:find_child("menuButton_view").items[11]["icon"].opacity < 255 then 
+		v_gl:hide()
+	 end 
 end
 
 function editor.h_guideline()
@@ -415,6 +427,10 @@ function editor.h_guideline()
      create_on_line_down_f(h_gl)
      screen:add(h_gl)
      screen:grab_key_focus()
+
+	 if screen:find_child("menuButton_view").items[11]["icon"].opacity < 255 then 
+		h_gl:hide()
+	 end 
 end
 
 
@@ -1158,7 +1174,8 @@ local function open_files(input_purpose, bg_image, inspector)
 			inspector_activate() 
 		end
 	else 
-		button_ok.pressed = function() load_file(selected_file)  xbox:on_button_down(1) end
+		button_ok.pressed = function() 
+			load_file(selected_file) xbox:on_button_down(1) end
 	end 
 
 	local s_func = function()
@@ -1206,7 +1223,7 @@ local function open_files(input_purpose, bg_image, inspector)
 	local index = 0
 	if dir == nil then 
 		print("dir is nil ") 
-		return
+		return msgw
 	end 
 
 	table.sort(dir)
@@ -1270,7 +1287,7 @@ local function open_files(input_purpose, bg_image, inspector)
 				h_rect.opacity = 255
 				h_rect:grab_key_focus()
 				selected_file = item_t.name 
-				if button == 3 then 
+				if button == 3 and inspector == nil then 
 					load_file(selected_file)
 				end
 				return true
@@ -1284,9 +1301,9 @@ local function open_files(input_purpose, bg_image, inspector)
 							h_rect.on_focus_out()
 						end
 						--screen:find_child(h_rect.focus[key]):grab_key_focus()
-						if screen:find_child(h_rect.focus[key]).on_focus_in then
+						if msgw:find_child(h_rect.focus[key]).on_focus_in then
 							selected_project = v
-							screen:find_child(h_rect.focus[key]).on_focus_in(key)
+							msgw:find_child(h_rect.focus[key]).on_focus_in(key)
 							if h_rect.focus[key] ~= "button_ok" then 
 								scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
 							end
@@ -1334,7 +1351,8 @@ local function open_files(input_purpose, bg_image, inspector)
 		return true
 	end 
 
-	msgw:find_child("h_rect1"):grab_key_focus() -- 0714
+	return msgw
+
 end
 	
 
@@ -1343,11 +1361,11 @@ function editor.open()
 end
 
 function editor.image(bg_image, inspector)
-	open_files("open_imagefile", bg_image, inspector)
+	return open_files("open_imagefile", bg_image, inspector)
 end
 
 function editor.video(inspector)
-	open_files("open_videofile",nil,inspector)
+	return open_files("open_videofile",nil,inspector)
 end
 
 
@@ -1643,7 +1661,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	-- Button Event Handlers
 	--button_viewcode.pressed = function() editor.view_code(v)  xbox:on_button_down(1) end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  print("뿅뿅") xbox:on_button_down(1)  end end
+	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  end end
 
 	local function inspector_position() 
 	     local x_space, y_space
@@ -1723,9 +1741,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 					end, 
 	} 
 
-	local item_group_info = Group{name = "item_group_info", position = {0,0}} --53
-	local item_group_more = Group{name = "item_group_more", position = {0,0}} --53
-	local item_group_list = Group{name = "item_group_list", position = {0,0}} --53
+	local item_group_info = Group{name = "item_group_info", position = {0,0}} 
+	local item_group_more = Group{name = "item_group_more", position = {0,0}} 
+	local item_group_list = Group{name = "item_group_list", position = {0,0}} 
 	local item_group = item_group_info
 
     local items_height = 0
@@ -1764,11 +1782,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			local item
 			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
 				item = factory.make_filechooser(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" then  -- Attribute with single checkbox
+			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" or attr_n == "justify" or attr_n == "single_line" then  -- Attribute with single checkbox
 				item = factory.make_onecheckbox(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true)
 			elseif attr_n == "anchor_point" then 
 				item = factory.make_anchorpoint(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-			elseif attr_n == "skin" or attr_n == "wrap_mode"  
+			elseif attr_n == "skin" or attr_n == "wrap_mode" or attr_n == "alignment" 
 			or attr_n == "expansion_location" or attr_n == "cell_size" or attr_n == "style" or attr_n == "direction" or attr_n == "tab_position" then 
 				item = factory.make_buttonpicker(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			else 
@@ -1894,6 +1912,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	create_on_button_down_f(inspector)
 	inspector_xbox = inspector:find_child("xbox") 
     inspector_xbox.reactive = true
+
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		editor.n_selected(v, true)
 		screen:remove(inspector)
@@ -1941,7 +1960,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	     	screen:find_child("si_items").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 		 end 
 	end 
-
 
 end
 
@@ -2186,8 +2204,10 @@ local function save_new_file (fname, save_current_f, save_backup_f)
             contents = "local g = ... \n\n"..contents
 	end 
 
-    undo_list = {}
-    redo_list = {}
+	if save_backup_f == nil or save_backup_f == false then 
+    	undo_list = {}
+    	redo_list = {}
+	end 
 
 	if save_backup_f == true then  
 		local back_file = current_fn.."\.back"
@@ -2292,9 +2312,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 end 
 
 function editor.save(save_current_f, save_backup_f)
-
-	--print ("save_current_f : ", save_current_f, "save_backup_f : ", save_backup_f) 
-
   	local WIDTH = 300
   	local HEIGHT = 150
     local PADDING = 13
@@ -4760,6 +4777,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		["006"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter guideline position." end, 
 		["007"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please specify \""..string.upper(str).."\" field." end, 
 		["008"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "There is no guideline."  end, 
+		["009"] = function(str) OK_label = "OK" return "You have unsaved changes in the \""..str.."\.back\" would you like to apply the changes into \""..str.."\"."
+		end, 
 	
 	}
 
@@ -4789,7 +4808,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 	
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
+	button_cancel.pressed = function() if error_num == "009" then func_ok(str, "NOK") end xbox:on_button_down() end 
 	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
 
 	if func_nok then 

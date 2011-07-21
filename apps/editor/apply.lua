@@ -61,6 +61,10 @@ function inspector_apply (v, inspector)
                v:move_anchor_point(item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[1], 
 	      		item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[2]) 
               end,     
+		["alignment"] = function()
+	      	  local itemLists = {"left", "center", "right", }
+              v.alignment = string.upper(itemLists[tonumber(item_group:find_child("alignment"):find_child("item_picker").selected_item)])
+              end,     
        	["wrap_mode"] = function()
 	      local itemLists = {"none", "char", "word", "word_char"}
 	      if tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item) == 1 then 
@@ -139,6 +143,21 @@ function inspector_apply (v, inspector)
 
 	       end
 	       end,
+		["justify"] = function()
+ 	       if item_group:find_child("justify"):find_child("check1").opacity > 0 then 
+	            v.justify = true
+	       else 
+	            v.justify = false
+	       end
+	       end,
+		["single_line"] = function()
+ 	       if item_group:find_child("single_line"):find_child("check1").opacity > 0 then 
+	            v.single_line = true
+	       else 
+	            v.single_line = false
+	       end
+	       end,
+
 		["cells_focusable"] = function()
  	       if item_group:find_child("bool_checkcells_focusable"):find_child("check1").opacity > 0 then 
 	            v.cells_focusable = true
@@ -211,7 +230,6 @@ function inspector_apply (v, inspector)
 		    local items_idx = 1
 		    while items_str ~= ""  do 
 		   		local i,j = string.find(items_str, ",")
-				print("i",i,"j",j)
 		   		if i then 
 						table.insert(items_tbl, tonumber(string.sub(items_str, items_idx, i-1)))
 						items_str = string.sub(items_str, j+1, -1) 
@@ -221,8 +239,6 @@ function inspector_apply (v, inspector)
 						items_str = ""
 					 end 
 				end 
-				print(items_str)
-				dumptable(items_tbl)
 		    end 
 				v.extra.selected_items = items_tbl 
 			end 
@@ -236,7 +252,7 @@ function inspector_apply (v, inspector)
       for i, j in pairs(item_group.children) do 
           	  
 	      if j.name then
-		 	if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "tab_position" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" then 
+		 	if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "tab_position" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" and j.name ~= "justify" and j.name ~= "alignment" and j.name ~= "single_line" then 
 		 		if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
 					--print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
 					local inspector_deactivate = function ()

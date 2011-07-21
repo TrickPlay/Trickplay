@@ -1,4 +1,4 @@
-local hh  = dofile("header.lua")
+local header = dofile("header.lua")
 dofile("editor.lua")
 
 -------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ dofile("editor.lua")
 					    				screen:find_child("timeline").extra.show = false
 				      				end
 		            	end,
-        [ keys.x	] = function() editor.export() input_mode = S_SELECT end,
+        --[ keys.x	] = function() editor.export() input_mode = S_SELECT end,
         [ keys.i	] = function() editor.the_ui_elements() input_mode = S_SELECT end,
         [ keys.m	] = function() if (menu_hide == true) then 
 					    				menuShow()
