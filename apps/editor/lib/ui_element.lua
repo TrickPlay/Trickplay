@@ -134,6 +134,7 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
 end 
 
 function ui_element.screen_add(grp)
+	--g:clear()
 	g = grp
 	screen:add(g)
 end 
@@ -285,11 +286,11 @@ local function table_remove_val(t, val)
 	return t
 end 
 
-local function table_removekey(table, key)
+local function table_removekey(t, key)
 	local idx = 1	
 	local temp_t = {}
-	table[key] = nil
-	for i, j in pairs (table) do 
+	t[key] = nil
+	for i, j in pairs (t) do 
 		temp_t[idx] = j 
 		idx = idx + 1 
 	end 
@@ -1276,7 +1277,7 @@ Extra Function:
 	
 ]]
 
-function ui_element.button(table) 
+function ui_element.button(t) 
 
  --default parameters
     local p = {
@@ -1308,14 +1309,14 @@ function ui_element.button(table)
     }
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
 
  --the umbrella Group
-    local ring, focus_ring, text, button, focus, s_txt
+    local ring, focus_ring, text, button, focus, s_txt, create_button
 
     local b_group = Group
     {
@@ -1341,6 +1342,8 @@ function ui_element.button(table)
 			p.focused()
 		end 
 
+		b_group:grab_key_focus(b_group)
+
 		if key then 
 	    	if p.pressed and key == keys.Return then
 				p.pressed()
@@ -1351,7 +1354,6 @@ function ui_element.button(table)
 			input_mode = S_MENU_M
 		end 
 
-		b_group:grab_key_focus(b_group)
     end
     
     function b_group.extra.on_focus_out(key) 
@@ -1368,16 +1370,16 @@ function ui_element.button(table)
         b_group:find_child("text").color = p.text_color
 		if p.released then  
 			if p.is_in_menu then 
-				if key ~= keys.Return then
+				if key ~= keys.Return and b_group.single_button == false then
 					p.released()
 				end 
-			else 
+			elseif b_group.single_button == false then 
 				p.released()
 			end
 		end 
     end
 
-    local create_button = function() 
+    create_button = function() 
         b_group:clear()
         b_group.size = { p.ui_width , p.ui_height}
         ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
@@ -1418,6 +1420,7 @@ function ui_element.button(table)
 	     	button = Image{}
 	     	focus = Image{}
 		end 
+
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
 		if p.label_align ~= nil then 
         	text:set{name = "text", position = { 10, p.ui_height/2 - text.h/2}}
@@ -1468,13 +1471,13 @@ function ui_element.button(table)
 	     	end 
 
 			function b_group:on_button_up(x,y,b,n)
-				if input_mode ~= S_MENU_M then 
+				--if input_mode ~= S_MENU_M then 
 				if b_group.single_button == true then 
 	     			button.opacity = 255
             		focus.opacity = 0
 	     			focus_ring.opacity = 0
 				end 
-				end
+				--end
 				return true
 	     	end 
 
@@ -1574,7 +1577,7 @@ Extra Function:
 ]]
 
 
-function ui_element.textInput(table) 
+function ui_element.textInput(t) 
  --default parameters
     local p = {
     	skin = "custom", 
@@ -1594,18 +1597,22 @@ function ui_element.textInput(table)
 		readonly = "",
 		ui_position = {200,200,0},
 		----------------
-		item_type = nil
-
+		item_type = nil,
+		justify = false,
+		wrap = false,
+		wrap_mode = "CHAR", -- CHAR, WORD, WORD_CHAR 
+		alignment = "LEFT", -- LEFT, CENTER, RIGHT
+		single_line = true, 
     }
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end
 
  --the umbrella Group
-    local box, focus_box, box_img, focus_img, readonly, text
+    local box, focus_box, box_img, focus_img, readonly, text, create_textInputField
     local t_group = Group
     {
        name = "t_group", 
@@ -1645,7 +1652,7 @@ function ui_element.textInput(table)
 		--current_focus = nil
      end 
 
-    local create_textInputField= function()
+    create_textInputField= function()
     	t_group:clear()
         t_group.size = { p.ui_width , p.ui_height}
 
@@ -1668,19 +1675,28 @@ function ui_element.textInput(table)
 		if p.readonly ~= "" then 
 			readonly = Text{text= p.readonly, editable=false, cursor_visible=false, font = p.text_font, color = p.text_color, }
 
-    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = true, 
+    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = p.single_line, 
 						cursor_color = p.cursor_color, wants_enter = true, 
+						alignment = p.alignment, justify = p.justify, wrap = p.wrap, wrap_mode = p.wrap_mode, 
 						reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding - readonly.w}
-
+			
     		readonly:set{name = "readonlyText", position = {p.padding, (p.ui_height - text.h)/2},}
     		text:set{name = "textInput", position = {readonly.x+readonly.w, (p.ui_height - text.h)/2},}
+    		--text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
 
     		t_group:add(box, focus_box, box_img, focus_img, readonly, text)
 		else 
-    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = true, 
+
+    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = p.single_line, 
 						cursor_color = p.cursor_color, wants_enter = true, 
+						alignment = p.alignment, justify = p.justify, wrap = p.wrap, wrap_mode = p.wrap_mode, 
 						reactive = false, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
-    		text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
+
+			if p.single_line == false then 
+    			text:set{name = "textInput", position = {p.padding, p.padding}} 
+			else
+    			text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
+			end 
     		t_group:add(box, focus_box, box_img, focus_img, text)
 		end
 
@@ -1767,7 +1783,7 @@ Return:
  	db_group - group containing the dialog box
 ]]
 
-function ui_element.dialogBox(table) 
+function ui_element.dialogBox(t) 
  
 --default parameters
    local p = {
@@ -1789,15 +1805,15 @@ function ui_element.dialogBox(table)
     }
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
 
  --the umbrella Group
     local db_group_cur_y = 6
-    local d_box, title_separator, title, d_box_img, title_separator_img
+    local d_box, title_separator, title, d_box_img, title_separator_img, create_dialogBox
 
     local  db_group = Group {
     	  name = "dialogBox",  
@@ -1807,7 +1823,7 @@ function ui_element.dialogBox(table)
     }
 
 
-    local create_dialogBox  = function ()
+    create_dialogBox  = function ()
    
         db_group:clear()
         db_group.size = { p.ui_width , p.ui_height - 34}
@@ -1906,7 +1922,7 @@ Extra Function:
 
 
 
-function ui_element.toastAlert(table) 
+function ui_element.toastAlert(t) 
 
  --default parameters
     local p = {
@@ -1933,14 +1949,14 @@ function ui_element.toastAlert(table)
 
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
 
  --the umbrella Group
-    local t_box, icon, title, message, t_box_img  
+    local t_box, icon, title, message, t_box_img, create_toastBox  
     local tb_group = Group {
     	  name = "toastb_group",  
     	  position = p.ui_position, 
@@ -1954,7 +1970,7 @@ function ui_element.toastAlert(table)
     local tb_group_timeline = Timeline ()
     
 
-    local create_toastBox = function()
+    create_toastBox = function()
 
     	tb_group:clear()
         tb_group.size = { p.ui_width , p.ui_height}
@@ -2080,7 +2096,7 @@ Extra Function:
 		remove_item(item) - Remove an item from the items table 
 ]]
 
-function ui_element.buttonPicker(table) 
+function ui_element.buttonPicker(t) 
     local w_scale = 1
     local h_scale = 1
 
@@ -2106,14 +2122,14 @@ function ui_element.buttonPicker(table)
     }
 
  --overwrite defaults
-     if table ~= nil then 
-        for k, v in pairs (table) do
+     if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
      end 
      
  --the umbrella Group
-     local unfocus, focus, left_un, left_sel, right_un, right_sel
+     local unfocus, focus, left_un, left_sel, right_un, right_sel, create_buttonPicker
      local items = Group{name = "items"}
 
      local bp_group = Group
@@ -2131,7 +2147,7 @@ function ui_element.buttonPicker(table)
      local pos = {0, 0}    -- focus, unfocus 
      local t = nil
 
-     local create_buttonPicker = function() 
+     create_buttonPicker = function() 
 
 		index = p.selected_item 
 		bp_group:clear()
@@ -2204,13 +2220,17 @@ function ui_element.buttonPicker(table)
 		elseif p.direction == "vertical" then 
             left_un.anchor_point={left_un.w/2,left_un.h/2}
             left_un.z_rotation={90,0,0}
-			left_un:set{name = "left_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 }, opacity = 255, reactive = true} -- top
-			left_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 }, opacity = 0}
+			left_un:set{name = "left_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 + 12}, opacity = 255, reactive = true} -- top
+			left_sel.anchor_point={left_un.w/2,left_un.h/2}
+            left_sel.z_rotation={90,0,0}
+			left_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2+ 12 }, opacity = 0}
 
             right_un.anchor_point={right_un.w/2,right_un.h/2}
             right_un.z_rotation={90,0,0}
-			right_un:set{name = "right_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 }, opacity = 255, reactive = true} -- bottom
-			right_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2  },  opacity = 0}
+			right_un:set{name = "right_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2+ 5 }, opacity = 255, reactive = true} -- bottom
+            right_sel.anchor_point={right_un.w/2,right_un.h/2}
+            right_sel.z_rotation={90,0,0}
+			right_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 + 5 },  opacity = 0}
 		end
 
      	for i, j in pairs(p.items) do 
@@ -2270,7 +2290,11 @@ function ui_element.buttonPicker(table)
 				end
 				bp_group.on_focus_in()
 	        	bp_group:grab_key_focus()
-				bp_group.press_left()
+				if p.direction == "vertical" then 
+					bp_group.press_up()
+				else 
+					bp_group.press_left()
+				end 
 				return true 
 			end 
 
@@ -2283,7 +2307,11 @@ function ui_element.buttonPicker(table)
 				end
 				bp_group.on_focus_in()
 	        	bp_group:grab_key_focus()
-				bp_group.press_right()
+				if p.direction == "vertical" then 
+					bp_group.press_down()
+				else
+					bp_group.press_right()
+				end 
 				return true 
 			end 
 		end 
@@ -2303,6 +2331,7 @@ function ui_element.buttonPicker(table)
      	for i, j in pairs(p.items) do 
              bp_group:find_child("item"..tostring(i)).color = p.focus_text_color
 		end 
+	    bp_group:grab_key_focus()
      end
 
      function bp_group.extra.on_focus_out()
@@ -2428,19 +2457,23 @@ function ui_element.buttonPicker(table)
 	end
 
  	function bp_group.extra.press_up()
-	          local prev_i = index
+	    local prev_i = index
 
-            local next_i = (index-2)%(#p.items)+1
+        local next_i = (index-2)%(#p.items)+1
 
 	    index = next_i
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
-	    local prev_old_x = p.ui_width/2 - j.width/2
+	    
+		local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2
-	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
-	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+
+	    local next_old_x = p.ui_width/2 - j.width/2 
+	    local next_old_y = p.ui_height/2 - j.height/2 + focus.h
+
+	    local prev_new_x = p.ui_width/2 - j.width/2 
+	    local prev_new_y = p.ui_height/2 - j.height/2 - focus.h
+
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2
 
@@ -2494,10 +2527,10 @@ function ui_element.buttonPicker(table)
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2
-	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
-	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local next_old_x = p.ui_width/2 - j.width/2 
+	    local next_old_y = p.ui_height/2 - j.height/2 - focus.h
+	    local prev_new_x = p.ui_width/2 - j.width/2 
+	    local prev_new_y = p.ui_height/2 - j.height/2 + focus.h
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2
 
@@ -2624,7 +2657,7 @@ Extra Function:
 ]]
 
 
-function ui_element.radioButtonGroup(table) 
+function ui_element.radioButtonGroup(t) 
 
  --default parameters
     local p = {
@@ -2634,10 +2667,10 @@ function ui_element.radioButtonGroup(table)
 	items = {"item1", "item2", "item3"},
 	text_font = "DejaVu Sans 30px", -- items 
 	text_color = {255,255,255,255}, --"FFFFFF", -- items 
-	button_color = {255,255,255,200}, -- items 
+	button_color = {255,255,255,255}, -- items 
 	select_color = {255, 255, 255, 255}, -- items 
 	focus_color = {0,255,0,255},
-	focus_fill_color = {0,50,0,100},
+	--focus_fill_color = {0,50,0,100},
 	button_radius = 10, -- items 
 	select_radius = 4,  -- items 
 	b_pos = {0, 0},  -- items 
@@ -2652,8 +2685,8 @@ function ui_element.radioButtonGroup(table)
     }
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
@@ -2691,11 +2724,14 @@ function ui_element.radioButtonGroup(table)
     end 
 
     function rb_group.extra.select_button(item_n) 
-	    p.selected_item = item_n
-            if p.rotate_func then
+	    rb_group.selected_item = item_n
+	    --p.selected_item = item_n
+        if p.rotate_func then
 	       p.rotate_func(p.selected_item)
 	    end
     end 
+
+    local create_radioButton 
 
     function rb_group.extra.insert_item(itm) 
 		table.insert(p.items, itm) 
@@ -2707,7 +2743,7 @@ function ui_element.radioButtonGroup(table)
 		create_radioButton()
     end 
 
-    local create_radioButton = function() 
+    create_radioButton = function() 
 
 	if(p.skin ~= "custom") then 
 	     p.button_image = skin_list[p.skin]["radi(dobutton"]
@@ -2783,35 +2819,36 @@ function ui_element.radioButtonGroup(table)
 						end
 					elseif key == keys.Return then 
 						rb_group.extra.select_button(ring_num)
-						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
-					--[[
-						if rb_group:find_child("select"..tostring(ring_num)).opacity == 255 then 
-							p.selected_items = table_remove_val(p.selected_items, ring_num)
-							rb_group:find_child("check"..tostring(ring_num)).opacity = 0 
-							rb_group:find_child("check"..tostring(ring_num)).reactive = true 
-    						rb_group.extra.select_button(p.selected_items) 
-						else 
-							table.insert(p.selected_items, ring_num)
-							rb_group:find_child("check"..tostring(ring_num)).opacity = 255 
-    						rb_group.extra.select_button(p.selected_items) 
-						end 
-					]]
+
+						if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+	    					rings:find_child("ring"..ring_num).opacity = 0 
+	    					rings:find_child("focus"..ring_num).opacity = 255 
+        				end 
+
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.b_pos[1]
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.b_pos[2]
+
+						rings:find_child("ring"..ring_num):grab_key_focus() 
+
 						return true 
 					end 
 				end 
 	
 	           	function donut:on_button_down (x,y,b,n)
+					if current_focus then 
+						current_focus.on_focus_out() 
+					end 
+
 				    local ring_num = tonumber(donut.name:sub(5,-1))
-					
-					current_focus = cb_group
+					rb_group.extra.select_button(ring_num)
+
+					current_focus = rb_group
         			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    				rings:find_child("ring"..ring_num).opacity = 0 
 	    				rings:find_child("focus"..ring_num).opacity = 255 
         			end 
 					rings:find_child("ring"..ring_num):grab_key_focus() 
 
-					rb_group.extra.select_button(ring_num)
 					select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
 	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
 					return true
@@ -2821,8 +2858,8 @@ function ui_element.radioButtonGroup(table)
 	 	 rings:set{name = "rings", position = p.b_pos} 
 	 	 items:set{name = "items", position = p.item_pos} 
 
-     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 
+     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.b_pos[1]
+     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.b_pos[2]
 
 	 	 rb_group:add(rings, items, select_img)
 
@@ -2930,6 +2967,7 @@ function ui_element.checkBoxGroup(t)
     local items = Group{name = "items"}
     local boxes = Group() 
     local cb_group = Group()
+	local create_checkBox
 
     local  cb_group = Group {
     	  name = "checkBoxGroup",  
@@ -2957,9 +2995,9 @@ function ui_element.checkBoxGroup(t)
     end 
 
     function cb_group.extra.select_button(items) 
-	    p.selected_items = items
-        if p.rotate_func then
-	       p.rotate_func(p.selected_items)
+	    cb_group.selected_items = items
+        if cb_group.rotate_func then
+	       cb_group.rotate_func(cb_group.selected_items)
 	    end
     end 
 
@@ -2973,7 +3011,7 @@ function ui_element.checkBoxGroup(t)
 		create_checkBox()
     end 
 
-    local function create_checkBox()
+    function create_checkBox()
 	 	items:clear() 
 	 	checks:clear() 
 	 	boxes:clear() 
@@ -3061,58 +3099,63 @@ function ui_element.checkBoxGroup(t)
 							return true 
 						end
 					elseif key == keys.Return then 
+    					cb_group.extra.select_button(p.selected_items) 
 						if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
-							p.selected_items = table_remove_val(p.selected_items, box_num)
+							cb_group.selected_items = table_remove_val(cb_group.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
 							cb_group:find_child("check"..tostring(box_num)).reactive = true 
-    						cb_group.extra.select_button(p.selected_items) 
+	    					cb_group:find_child("box"..box_num).opacity = 0 
+	    					cb_group:find_child("focus"..box_num).opacity = 255 
 						else 
-							table.insert(p.selected_items, box_num)
+							table.insert(cb_group.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 255 
-    						cb_group.extra.select_button(p.selected_items) 
+	    					cb_group:find_child("box"..box_num).opacity = 0 
+	    					cb_group:find_child("focus"..box_num).opacity = 255 
+
 						end 
+						boxes:find_child("box"..box_num):grab_key_focus() 
 						return true 
 					end 
 				end 
 
 	     		function box:on_button_down (x,y,b,n)
+					if current_focus then 
+						current_focus.on_focus_out() 
+					end 
 					local box_num = tonumber(box.name:sub(4,-1))
 	  				
 					current_focus = cb_group
-        			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
-	    				boxes:find_child("box"..tostring(box_num)).opacity = 0 
-	    				boxes:find_child("focus"..tostring(box_num)).opacity = 255 
-        			end 
-					boxes:find_child("box"..tostring(box_num)):grab_key_focus() 
 
-					table.insert(p.selected_items, box_num)
+					table.insert(cb_group.selected_items, box_num)
+    				cb_group.extra.select_button(cb_group.selected_items) 
+
 					cb_group:find_child("check"..tostring(box_num)).opacity = 255
 					cb_group:find_child("check"..tostring(box_num)).reactive = true
-    				cb_group.extra.select_button(p.selected_items) 
+					
+	    			boxes:find_child("box"..tostring(box_num)).opacity = 0 
+	    			boxes:find_child("focus"..tostring(box_num)).opacity = 255 
+					boxes:find_child("box"..tostring(box_num)):grab_key_focus() 
 					return true
 	     		end 
 
 	     		function check:on_button_down(x,y,b,n)
+					if current_focus then 
+						current_focus.on_focus_out() 
+					end 
 					local check_num = tonumber(check.name:sub(6,-1))
-
 					current_focus = cb_group
-        			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
-	    				boxes:find_child("box"..tostring(check_num)).opacity = 0 
-	    				boxes:find_child("focus"..tostring(check_num)).opacity = 255 
-        			end 
-					boxes:find_child("box"..tostring(check_num)):grab_key_focus() 
-
 					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
-						p.selected_items = table_remove_val(p.selected_items, check_num)
+						cb_group.selected_items = table_remove_val(cb_group.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
 						cb_group:find_child("check"..tostring(check_num)).reactive = true 
-    					cb_group.extra.select_button(p.selected_items) 
 					else 
-						table.insert(p.selected_items, check_num)
+						table.insert(cb_group.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
-    					cb_group.extra.select_button(p.selected_items) 
 					end 
-    				cb_group.extra.select_button(p.selected_items) 
+    				cb_group.extra.select_button(cb_group.selected_items) 
+	    			cb_group:find_child("box"..check_num).opacity = 0 
+	    			cb_group:find_child("focus"..check_num).opacity = 255 
+					boxes:find_child("box"..check_num):grab_key_focus() 
 					return true
 	     		end 
 	     	end
@@ -3410,14 +3453,13 @@ function ui_element.progressBar(t)
         skin                = "default", 
 		ui_position 		= {400,400},
     }
+
     --overwrite defaults
     if t ~= nil then
         for k, v in pairs (t) do
             p[k] = v
         end
     end
-
-	
 
 	local c_shell = Canvas{
             size = {p.ui_width,p.ui_height},
@@ -3442,9 +3484,10 @@ function ui_element.progressBar(t)
 	        },
 	}
 
+--[[
 	local l_bar_timer = Timer()
-    	local l_bar_timeline = Timeline ()
-
+    local l_bar_timeline = Timeline ()
+]]
 	local function create_loading_bar()
 		l_bar_group:clear()
         local stroke_width = 2
@@ -3519,33 +3562,36 @@ function ui_element.progressBar(t)
         	c_fill.scale = {(p.ui_width-4)*(p.progress),1}
 		l_bar_group:add(c_shell,c_fill)
 
+--[[
 		l_bar_timer.interval = 1 -- immediately 
-    		l_bar_timeline.duration = 3000 -- progress duration 
-    		l_bar_timeline.direction = "FORWARD"
-    		l_bar_timeline.loop = false
+    	l_bar_timeline.duration = 3000 -- progress duration 
+    	l_bar_timeline.direction = "FORWARD"
+    	l_bar_timeline.loop = false
 
-     		function l_bar_timeline.on_new_frame(t, m, p)
+     	function l_bar_timeline.on_new_frame(t, m, p)
 			l_bar_group.set_prog(p)
-     		end  
+     	end  
 
-     		function l_bar_timeline.on_completed()
+     	function l_bar_timeline.on_completed()
 			l_bar_group.set_prog(1)
-     		end 
+     	end 
 
-     		function l_bar_timer.on_timer(l_bar_timer)
+     	function l_bar_timer.on_timer(l_bar_timer)
 			l_bar_timeline:start()
-        		l_bar_timer:stop()
-     		end 
-
+        	l_bar_timer:stop()
+     	end 
+]]
 	end
     
 	create_loading_bar()
     
-    	function l_bar_group.extra.start_timer() 
+	--[[
+    function l_bar_group.extra.start_timer() 
 		l_bar_timer:start()
-     	end 
- 
-    
+    end 
+ 	]]
+
+
 	local mt = {}
     
     mt.__newindex = function(t,k,v)
@@ -3567,6 +3613,7 @@ function ui_element.progressBar(t)
     
 	return l_bar_group
 end
+
 --[[
 Function: Layout Manager
 
@@ -5233,9 +5280,25 @@ button
 				button.on_focus_in()
 				umbrella:grab_key_focus()
 			end 
+		else 
+				button.on_focus_in()
+				umbrella:grab_key_focus()
 		end 
     end
-    
+	 
+	 --[[ not working
+    function umbrella.extra.on_focus_in(key) 
+		if key then 
+			if key == keys.Return then 
+				button.on_focus_in(keys.Return)
+				return 
+			end 
+		end  
+		button.on_focus_in()
+		umbrella:grab_key_focus()
+    end
+	]]
+
     function umbrella.extra.on_focus_out(key) 
 		if key then 
 			button.on_focus_out(key)

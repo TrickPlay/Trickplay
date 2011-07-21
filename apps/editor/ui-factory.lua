@@ -823,7 +823,13 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 	if v.type == "Video" then 
 		filechooser.pressed = function() editor.video(inspector) inspector_deactivate() end 
 	else 
-		filechooser.pressed = function() editor.image(nil,inspector) inspector_deactivate() end 
+		filechooser.pressed = function() 
+				local msgw_img = editor.image(nil,inspector) 
+				inspector_deactivate() 
+				if msgw_img:find_child("h_rect1") then 
+					msgw_img:find_child("h_rect1"):grab_key_focus()
+				end 
+		end
 	end
 	--filechooser.released = function() inspector_activate() end 
 
@@ -879,15 +885,18 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 		function plus:on_button_up(x,y)
 			table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
+			inspector_apply (v, inspector)
+			local siy = inspector:find_child("si_items").content.y
+			local ix = inspector.x
+			local iy = inspector.y
 			screen:remove(inspector)
 			input_mode = S_SELECT
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_items")
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			inspector:clear()
+			editor.inspector(v, ix, iy, siy) --scroll position !!
 			return true
 		end 
 	elseif v.extra.type =="TabBar" then 
@@ -905,15 +914,18 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 		function plus:on_button_up(x,y)
 			v:insert_tab(#v.tab_labels + 1)
+			inspector_apply (v, inspector)
+			local siy = inspector:find_child("si_items").content.y
+			local ix = inspector.x
+			local iy = inspector.y
 			screen:remove(inspector)
 			input_mode = S_SELECT
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_items")
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			inspector:clear()
+			editor.inspector(v, ix, iy, siy) --scroll position !!
 			return true
 		end 
 
@@ -951,43 +963,53 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 	    function separator_plus:on_button_up(x,y)
 			table.insert(v.items, {type="separator"})
+			inspector_apply (v, inspector)
+			local siy = inspector:find_child("si_items").content.y
+			local ix = inspector.x
+			local iy = inspector.y
 			screen:remove(inspector)
 			input_mode = S_SELECT
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_items")
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			inspector:clear()
+			editor.inspector(v, ix, iy, siy) --scroll position !!
 			return true 
 	    end 
 
 	    function item_plus:on_button_up(x,y)
 			table.insert(v.items, {type="item", string="Item ...", f=nil})
+			inspector_apply (v, inspector)
+			local siy = inspector:find_child("si_items").content.y
+			local ix = inspector.x
+			local iy = inspector.y
 			screen:remove(inspector)
 			input_mode = S_SELECT
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_items")
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			inspector:clear()
+			editor.inspector(v, ix, iy, siy) --scroll position !!
 			return true 
 		end 
 
 	    function label_plus:on_button_up(x,y)
 			table.insert(v.items, {type="label", string="Label ..."})
+			inspector_apply (v, inspector)
+			local siy = inspector:find_child("si_items").content.y
+			local ix = inspector.x
+			local iy = inspector.y
 			screen:remove(inspector)
+			inspector:clear()
 			input_mode = S_SELECT
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
-			inspector_apply (v, inspector)
-			local si = inspector:find_child("si_items")
-			editor.inspector(v, inspector.x, inspector.y, si.content.y) --scroll position !!
+			inspector:clear()
+			editor.inspector(v, ix, iy, siy) --scroll position !!
 			return true 
 		end 
 	end 
@@ -1057,14 +1079,20 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			else 
 				v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
 			end 
+
+			local siy = inspector:find_child("si_items").content.y
+			local ix = inspector.x
+			local iy = inspector.y
+
 		    screen:remove(inspector)
 		    input_mode = S_SELECT
 		    current_inspector = nil
             screen:grab_key_focus(screen) 
 		    text_reactive()
 		    editor.n_selected(v, true)
-			local si = inspector:find_child("si_items")
-		    editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+
+			inspector:clear()
+		    editor.inspector(v, ix, iy, siy)
 		    return true 
 	    end 
 
@@ -1090,14 +1118,20 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     	end 
 		   		table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		   end 
+
+		   local siy = inspector:find_child("si_items").content.y
+		   local ix = inspector.x
+		   local iy = inspector.y
+
 		   screen:remove(inspector)
 		   input_mode = S_SELECT
 		   current_inspector = nil
            screen:grab_key_focus(screen) 
 		   text_reactive()
 		   editor.n_selected(v, true)
-		   local si = inspector:find_child("si_items")
-		   editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+
+		   inspector:clear()
+		   editor.inspector(v, ix, iy, siy)
 		   return true 
 	     end 
 
@@ -1122,14 +1156,20 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     	  end 
 		     	table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     end
+
+			 local siy = inspector:find_child("si_items").content.y
+ 			 local ix = inspector.x
+			 local iy = inspector.y
+
 		     screen:remove(inspector)
 		     input_mode = S_SELECT
 		     current_inspector = nil
              screen:grab_key_focus(screen) 
 		     text_reactive()
 		     editor.n_selected(v, true)
-		     local si = inspector:find_child("si_items")
-		     editor.inspector(v, inspector.x, inspector.y, math.abs(si.content.y))
+
+			 inspector:clear()
+		     editor.inspector(v, ix, iy, siy)
 		     return true 
 	      end 
 
@@ -1153,7 +1193,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 				si_name = "si_info"
 				attr_t_idx = info_attr_t_idx
 			else 
-				item_group_name = "item_group_items"
+				item_group_name = "item_group_list"
 				si_name = "si_items"
 				attr_t_idx = more_attr_t_idx
 			end
@@ -1247,6 +1287,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 end 
 
 function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s, save_items)
+
 		local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
 		local group = Group{}
 		group:clear()
@@ -1254,6 +1295,9 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		group.reactive = true
 
 	
+	 	if item_v == "NONE" or item_v == "CHAR" or item_v == "WORD" or item_v =="WORD_CHAR" or 
+	 	item_v == "LEFT" or item_v == "CENTER" or item_v =="RIGHT" then item_v = string.lower(item_v) end 
+
 		text = Text {name = "attr", text = item_s}:set(STYLE)
         text.position  = {0, 3}
     	group:add(text)
@@ -1264,9 +1308,9 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		if item_n == "skin" then 
 			itemLists = skins 
 		elseif item_n == "wrap_mode" then 
-			itemLists = {"NONE", "CHAR", "WORD", "WORD_CHAR"} 
+			itemLists = {"none", "char", "word", "word_char"} 
 			if v.wrap == false then 
-				item_v = "NONE" 	
+				item_v = "none" 	
 			end  
 		elseif item_n == "expansion_location" then 
 			itemLists = {"above", "below"} 
@@ -1278,6 +1322,8 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			itemLists = {"vertical", "horizontal"} 
 		elseif item_n == "tab_position" then 
 			itemLists = {"top", "right"} 
+		elseif item_n == "alignment" then 
+			itemLists = {"left", "center", "right"} 
 		end
 
 		for i,j in pairs(itemLists) do 
@@ -1305,7 +1351,9 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 
 		unfocus = item_picker:find_child("unfocus")
 		function unfocus:on_button_down (x,y,b,n)
-   			current_focus.extra.on_focus_out()
+			if current_focus then 
+   				current_focus.extra.on_focus_out()
+			end 
 	        current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
@@ -1315,7 +1363,9 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
         left_arrow = item_picker:find_child("left_un")
 		left_arrow.reactive = true 
 		function left_arrow:on_button_down(x, y, b, n)
-			current_focus.extra.on_focus_out()
+			if current_focus then 
+				current_focus.extra.on_focus_out()
+			end 
 	        current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
@@ -1326,7 +1376,9 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		right_arrow = item_picker:find_child("right_un")
 		right_arrow.reactive = true 
 		function right_arrow:on_button_down(x, y, b, n)
-			current_focus.extra.on_focus_out()
+			if current_focus then 
+				current_focus.extra.on_focus_out()
+			end 
 	        current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
@@ -1418,9 +1470,11 @@ function factory.make_onecheckbox(assets, inspector, v, item_n, item_v, item_s, 
 	
 	editor_use = true
 	if item_v == "true" then 
-	     reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {1}}
+	     --reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {1}}
+	     reactive_checkbox = editor_ui.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {1}}
 	else 
-	     reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {}}
+	     --reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {}}
+	     reactive_checkbox = editor_ui.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {}}
 	end 
 	editor_use = false
 
@@ -1534,12 +1588,6 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 	local non_textInput_items = {"title", "line", "button", "focus", "tab_labels", "items", "skin", "wrap_mode", 
 		"expansion_location", "cell_size", "style", "direction", "reactive", "loop", "vert_bar_visible", "horz_bar_visible", 
 		"cells_focusable", "lock", "icon", "source", "src", "anchor_point", }
-
-
-	if (item_n == "selected_items") then 
-			print("L")
-	end 
-
 
 	if old_inspector ~= nil then 
 		for i, j  in pairs (non_textInput_items) do 
@@ -1661,7 +1709,6 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		group:add(focus)
 
 
-	-- if(item_v == "CHAR" or item_v == "WORD" or item_v =="WORD_CHAR") then item_v = string.lower(item_v) end 
 
     	input_text = Text {name = "input_text", text =item_v, editable=true,
         reactive = true, wants_enter = true, cursor_visible = false,single_line = true, width = input_box_width - 10}:set(STYLE)
@@ -1677,12 +1724,23 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		end
 
 		function input_text:on_button_down(x,y,button,num_clicks)
-		   if current_focus then 
- 	       		current_focus.extra.on_focus_out()
-		   end 
-	       current_focus = group
-	       group.extra.on_focus_in()
-           return true
+
+		   	if current_focus then 
+				if current_focus.extra then 
+					if current_focus.extra.type == "Button" then 
+						 local pt = current_focus.parent
+						 pt = pt.extra.type
+						 if pt ~= "TabBar" then 
+							current_focus.extra.on_focus_out()
+		   				end 
+					else 
+						current_focus.extra.on_focus_out()
+					end
+				end
+			end 
+	       	current_focus = group
+	       	group.extra.on_focus_in()
+           	return true
         end
 
 		function group:on_button_down(x,y,button,num_clicks)

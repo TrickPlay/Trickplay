@@ -272,11 +272,9 @@ local function copy_widget_imgs ()
 end 
 
 function is_there_guideline () 
-
-	for i, j in pairs (g.children) do 
+	for i, j in pairs (screen.children) do 
 		if j.name then 
 			if string.find(j.name, "_guideline") then 
-				print("GUIDE : ", j.name)
 				return true 
 			end 
 		end 
@@ -285,9 +283,31 @@ function is_there_guideline ()
 end 
 
 function set_new_project (pname, replace)
+
+	  local home = editor_lb:get_home_dir()
+    
+	   projects = {}
+       assert( home )
+    
+    -- The base directory where the editor will store its files, make sure
+    -- we are able to create it (or it already exists )
+    
+       base = editor_lb:build_path( home , "trickplay-editor"  )
+
+       assert( editor_lb:mkdir( base ) )
+    
+    -- The list of files and directories there. We go through it and look for
+    -- directories.
+       local list = editor_lb:readdir( base )
+    
+       for i = 1 , #list do
+        	if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+            	table.insert( projects , list[ i ] )
+        	end
+       end
+
 	if(pname~= "") then
     	project = pname
-
     	if table.getn(projects) ~= 0 then 
 			for i, j in pairs (projects) do 
 				if j == pname then 
@@ -298,6 +318,8 @@ function set_new_project (pname, replace)
 				end 
 			end 
 		end 
+	else 
+		return
    	end   
 	
    	app_path = editor_lb:build_path( base , project )
@@ -338,6 +360,8 @@ function set_new_project (pname, replace)
 	screen:find_child("menu_text").extra.project = project .. " "
 
 	copy_widget_imgs()
+	settings.project = project
+
 end 
 
 function new_project(fname)
@@ -506,7 +530,7 @@ function open_project(t, msg, from_main)
     if table.getn(projects) == 0 then 
     	for i = 1 , # list do
         	if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
-            	table.insert( projects , list[ i ] )
+            	table.insert( projects , list[ i ])
         	end
     	end
     end 
@@ -574,7 +598,6 @@ function open_project(t, msg, from_main)
 			return true
 		end 
 		
-
 		settings.project = project
 		xbox:on_button_down()
 		return true
@@ -1427,11 +1450,11 @@ function make_attr_t(v)
        ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","label","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
-       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius"} end,
+       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "justify","single_line", "alignment", "wrap_mode"} end,
        ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","selected_item","items",} end,
        ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus","label","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
        ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space","b_pos", "item_pos","items", "selected_items"} end,
-       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","focus_fill_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","b_pos", "item_pos","items","selected_item"} end,
+       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","b_pos", "item_pos","items","selected_item"} end,
 
        ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
        ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label","message","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
@@ -1560,7 +1583,7 @@ function itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "tab_labels", "tabs"}
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "tab_labels", "tabs", "wrap_mode", "wrap", "justify", "alignment", "single_line" }
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
@@ -2559,9 +2582,9 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
      end 
 end
 
-function inputMsgWindow_openfile(input_text)
-	local file_not_exists = true
+function inputMsgWindow_openfile(input_text, ret)
     local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+	local back_fn = input_text..".back"
 
     if(input_text == nil) then
 		print ("input_text is nil") 
@@ -2569,19 +2592,28 @@ function inputMsgWindow_openfile(input_text)
     end 
 
     for i, v in pairs(dir) do
-          if(input_text == v)then
-     	       current_fn = "screens/"..input_text
-               file_not_exists = false
-          end
+          if(v == back_fn)then
+     	       back_fn = "screens/"..back_fn         
+		  end
     end
 
-    if (file_not_exists) then
-		  -- need error handling 
-          return 
-    end
     if(is_lua_file(input_text) == true) then 
         editor.close()
         current_fn = "screens/"..input_text
+
+		local cfc = readfile(current_fn)
+		local bfc = readfile(back_fn)
+
+		if cfc ~= bfc and bfc ~= nil and ret == nil then 
+			editor.error_message("009", input_text, inputMsgWindow_openfile)  
+			return
+		elseif ret == "OK" then 
+			bfc = readfile(back_fn)
+			if bfc then 
+				editor_lb:writefile(current_fn, bfc, true)
+			end 
+		end 
+
         local f = loadfile(current_fn)
         f(g) 
 
