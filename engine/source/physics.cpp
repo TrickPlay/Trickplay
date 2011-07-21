@@ -19,6 +19,7 @@ namespace Physics
 World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_meter )
 :
     ppm( _pixels_per_meter ),
+    z_for_y( false ),
     global_callbacks( 0 ),
     L( _L ),
     world( b2Vec2( 0.0f , 10.0f ) , true ),
@@ -1094,9 +1095,20 @@ void Body::synchronize_actor()
     {
         const b2Vec2 & pos( body->GetPosition() );
 
-        clutter_actor_set_position( actor , world->world_to_screen( pos.x ) , world->world_to_screen( pos.y ) );
+        if ( world->z_for_y )
+        {
 
-        clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+			clutter_actor_set_x( actor , world->world_to_screen( pos.x ) );
+			clutter_actor_set_depth( actor , - world->world_to_screen( pos.y ) );
+
+			clutter_actor_set_rotation( actor , CLUTTER_Y_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+        }
+        else
+        {
+			clutter_actor_set_position( actor , world->world_to_screen( pos.x ) , world->world_to_screen( pos.y ) );
+
+			clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+        }
     }
 }
 

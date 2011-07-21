@@ -1467,4 +1467,12 @@ global physics [[ Physics::World * ]]
         [[
             self->attach_global_callback( Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
         ]];
+        
+    bool z_for_y
+        [[
+            z_for_y = self->z_for_y;
+        ]]
+        [[
+            self->z_for_y = z_for_y;
+        ]];        
 }
