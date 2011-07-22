@@ -1,7 +1,9 @@
 local log = print
 -- Load the AdvancedUI Classes into a class table
-local class_table = dofile("AdvancedUIClasses.lua")
-local controller , CACHE_LOCAL_PROPERTIES = ...
+local controller , class_table , CACHE_LOCAL_PROPERTIES = ...
+if not class_table then
+    class_table = dofile("AdvancedUIClasses.lua")
+end
 
 local foo = 0
 
