@@ -59,6 +59,7 @@ Group: Reference  {
 
       Group: Globals  {
 
+         File: keys (docs/apps/text/key_codes.txt)
          File: screen  (bindings/clutter_screen.lb)
          }  # Group: Globals
 

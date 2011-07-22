@@ -224,6 +224,66 @@ class Bitmap [[ Bitmap * ]]
         [[
             loaded = self->loaded();
         ]];
+        
+    /*
+        Function: get_pixel
+        
+        Returns a table with 4 color components for the given pixel. If the 
+        bitmap has not been loaded or the pixel is out of bounds, it returns
+        nil.
+        
+        *Arguments:*
+        
+        x , y - The coordinates for the desired pixel.
+        
+        *Returns:*
+        
+        table - A table with 4 integer values ranging from 0 to 255 for the pixel's
+                red, green, blue and alpha components. If the bitmap does not have
+                an alpha channel, the alpha component will be 255.
+               
+        nil - If the bitmap has not been loaded or the coordinates are out of bounds.
+    */
+    
+    table get_pixel( int x , int y )
+        [[
+            Image * image = self->get_image();
+            
+            if ( ! image )
+            {
+                lua_pushnil( L );
+            }
+            else if ( x < 0 || x >= int( image->width() ) || y < 0 || y >= int( image->height() ) )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_newtable( L );
+                
+                const guchar * pixel = image->pixels() + ( x * image->depth() ) + ( y * image->pitch() );
+                
+                lua_pushinteger( L , pixel[ 0 ] );
+                lua_rawseti( L , -2 , 1 );
+
+                lua_pushinteger( L , pixel[ 1 ] );
+                lua_rawseti( L , -2 , 2 );
+
+                lua_pushinteger( L , pixel[ 2 ] );
+                lua_rawseti( L , -2 , 3 );
+                
+                if ( image->depth() == 4 )
+                {
+                    lua_pushinteger( L , pixel[ 3 ] );
+                    lua_rawseti( L , -2 , 4 );
+                }
+                else
+                {
+                    lua_pushinteger( L , 255 );
+                    lua_rawseti( L , -2 , 4 );
+                }
+            }
+        ]];
 
     /*
         Function: Image

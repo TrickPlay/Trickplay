@@ -129,6 +129,7 @@ public:
     class Decoder
     {
     public:
+    	virtual ~Decoder() {};
         virtual const char * name() = 0;
         virtual int decode( gpointer data, gsize size, TPImage * image ) = 0;
         virtual int decode( const char * filename, TPImage * image ) = 0;
