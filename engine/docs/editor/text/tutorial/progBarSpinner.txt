@@ -1,0 +1,23 @@
+
+Topic: ProgressBar and ProgressSpinner
+
+If your program needs to perform a time-consuming operation, it is common to let the user know that the program is busy working or to give a running account of how far along the operation has progressed. The Visual Editor provides two UI elements that can be used in such situations: a ProgressBar and a ProgressSpinner.
+
+ProgressBar:
+
+A ProgressBar provides a visual graphic indicating the amount of progress completed on an executing operation. As the operation advances and completes more of its task, the progress bar is updated and advanced to show approximately how much of the operation has finished and how much still remains to be performed.
+
+(see images/edProgBar.png)
+
+A ProgressBar's size and display colors can be configured. As the time-consuming operation advances, the program intermittently sets the ProgressBar's progress property to appropriate values to update the displayed ProgressBar and inform the user of the operation's status.
+
+
+
+ProgressSpinner:
+
+A ProgressSpinner provides an animated visual graphic indicating that an operation is in-progress. A ProgressSpinner is useful in situations where the length of time or amount of work required to complete the operation is indeterminate or difficult to calculate.
+
+(see images/edProgSpinners.png)
+
+A ProgressSpinner supports various display characteristics, including several built-in styles with configurable size, color and animation speed.
+
