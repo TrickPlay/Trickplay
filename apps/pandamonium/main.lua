@@ -93,7 +93,7 @@ GameState          = Enum{"OFFLINE", "SPLASH", "GAME", "PLAY_AGAIN"}
 
 Animation_Loop     = dofile("Animation_Loop.lua")
 
-assets, bg         = dofile("Assets.lua")
+assets, bg, coin_src, sparkles_src = dofile("Assets.lua")
 
 hud                = dofile("hud.lua")
 

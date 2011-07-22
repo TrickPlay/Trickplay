@@ -146,8 +146,9 @@ local coin, t, start_x
 
 
 local function new_coin()
-	local coin  = Group{name="Coin"}
+	local coin  = Clone{ name= "coin", source = coin_src }--Group{name="Coin"}
 	coin.state = Enum{"RECYCLED","SPINNING","SPARKLING"}
+	--[[
 	local front = Clone{ source = assets.coin_front }
 	local back  = Clone{ source = assets.coin_back  }
 	local side  = Clone{ source = assets.coin_side  }
@@ -197,7 +198,7 @@ local function new_coin()
 			
 		end,
 	}
-	
+	--]]
 	coin.fade = {
 		duration = .4,
 		on_step  = function(_,p)
@@ -244,7 +245,7 @@ local function new_coin()
 			
 			table.insert(old_coins,coin)
 			
-			Animation_Loop:delete_animation(coin.tl)
+			--Animation_Loop:delete_animation(coin.tl)
 			
 			coin.opacity = 1
 			--print(coin)
@@ -266,7 +267,7 @@ local function new_coin()
 			
 			coin.opacity = 255
 			
-			Animation_Loop:add_animation(coin.tl)
+			--Animation_Loop:add_animation(coin.tl)
 		end,
 		nil,"SPINNING"
 	)
@@ -327,18 +328,20 @@ local function new_coin()
 		assert(self.state:current_state() == "SPINNING")
 		--print(self)
 		self.opacity = 0
-		self.tl:on_step(.5)
+		--self.tl:on_step(.5)
 	end
 	function coin:fade_in(p)
 		self.opacity = 255*(p)
 	end
+	--[[
 	function coin:fade_in_complete()
 		if self.state:current_state() ~= "SPINNING" then
 			--print(self.state:current_state())
 			--print(self.opacity)
 		end
 		Animation_Loop:set_progress(self.tl,.5)
-	end	
+	end
+	--]]
 	return coin
 end
 
@@ -366,11 +369,11 @@ function Coin_Formations:plus(x,y)
 	
 	local coins = {}
 	
-	table.insert(coins, self:single( x,                                             y))
-	table.insert(coins, self:single( x - assets.coin_front.w,                       y))
-	table.insert(coins, self:single( x + assets.coin_front.w,                       y))
-	table.insert(coins, self:single( x,                       y - assets.coin_front.h))
-	table.insert(coins, self:single( x,                       y + assets.coin_front.h))
+	table.insert(coins, self:single( x,                                     y))
+	table.insert(coins, self:single( x - coin_src.w,                       y))
+	table.insert(coins, self:single( x + coin_src.w,                       y))
+	table.insert(coins, self:single( x,                       y - coin_src.h))
+	table.insert(coins, self:single( x,                       y + coin_src.h))
 	
 	return coins
 end
@@ -379,9 +382,9 @@ function Coin_Formations:three_in_a_row(x,y)
 	
 	local coins = {}
 	
-	table.insert(coins, self:single( x,                       y))
-	table.insert(coins, self:single( x, y - assets.coin_front.h))
-	table.insert(coins, self:single( x, y + assets.coin_front.h))
+	table.insert(coins, self:single( x,              y))
+	table.insert(coins, self:single( x, y - coin_src.h))
+	table.insert(coins, self:single( x, y + coin_src.h))
 	
 	return coins
 end
