@@ -122,8 +122,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     UITextField *theTextField;
     UIImageView *backgroundView;
     UIImageView *foregroundView;
-    NSInteger backgroundHeight;
-    NSInteger backgroundWidth;
+    CGFloat backgroundHeight;
+    CGFloat backgroundWidth;
     
     NSMutableArray *multipleChoiceArray;
     UIActionSheet *styleAlert;

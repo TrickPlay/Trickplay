@@ -40,7 +40,6 @@
 }
 
 - (void)timerFireMethod:(NSTimer *)timer {
-    //fprintf(stderr, "here\n");
     [socketManager sendData:"\n" numberOfBytes:1];
 }
 
@@ -81,7 +80,7 @@
         hasPictures = @"\tPS";
     }
     // Tell the service what this device is capable of
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.0\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, backgroundWidth, backgroundHeight, backgroundWidth, backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.0\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     // Manages resources created with declare_resource
@@ -96,11 +95,15 @@
     // Controls Acceleration
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
     
+    
+    CGFloat
+    width = backgroundWidth,
+    height = backgroundHeight;
     // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
     // from Trickplay
     advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
     advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
-    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    advancedView.frame = CGRectMake(0.0, 0.0, width, height);
     [self.view addSubview:advancedView];
     
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
@@ -111,11 +114,9 @@
     
     
     // This is where the elements from UG (add_ui_image call) go
-    CGFloat
-    width = self.view.frame.size.width,
-    height = self.view.frame.size.height;
     CGRect frame = CGRectMake(0.0, 0.0, width, height);
     foregroundView = [[UIImageView alloc] initWithFrame:frame];
+    [backgroundView addSubview:foregroundView];
     
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
     [self.view addSubview:virtualRemote.view];
@@ -351,20 +352,6 @@
     NSLog(@"Updating Background");
     
     NSString *key = [args objectAtIndex:0];
-    // If resource has been declared
-    /*
-    if ([resourceManager getResourceInfo:key]) {
-        NSData *imageData = [resourceManager fetchResource:key];
-        if (imageData) {
-            UIImage *tempImage = [[[UIImage alloc] initWithData:imageData] autorelease];
-            [loadingIndicator stopAnimating];
-            NSLog(@"Creating background view");
-            backgroundView.image = tempImage;
-            //for testing
-            //backgroundView.image = [UIImage imageNamed:@"background.png"];
-        }
-    }
-    */
     
     if ([resourceManager getResourceInfo:key]) {
         CGFloat
