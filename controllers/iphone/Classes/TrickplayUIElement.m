@@ -12,7 +12,6 @@
 #import "TrickplayTextHTML.h"
 #import "TrickplayImage.h"
 #import "TrickplayGroup.h"
-#import "TrickplayAnimation.h"
 
 @implementation TrickplayUIElement
 
@@ -862,6 +861,14 @@
 }
 
 /**
+ * Check to see if object is animating.
+ */
+
+- (void)get_is_animating:(NSMutableDictionary *)dictionary {
+    [dictionary setObject:[NSNumber numberWithBool:(animations.count > 0)] forKey:@"is_animating"];
+}
+
+/**
  * Getter function
  */
 
@@ -1028,65 +1035,23 @@
     return [NSNumber numberWithBool:NO];
 }
 
-#pragma mark -
-#pragma mark Animation Delegate
-
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
-    CFAbsoluteTime then = CFAbsoluteTimeGetCurrent();
-    fprintf(stderr, "read time = %lf\n", (then-start)*1000.0);
-    for (NSString *key in [view.layer animationKeys]) {
-        NSLog(@"key: %@", key);
-        NSLog(@"animations: %@", [view.layer animationForKey:key]);
-        NSLog(@"anim: %@", anim);
+- (id)do_complete_animation:(NSArray *)args {
+    for (TrickplayAnimation *anim in [animations allKeys]) {
+        [anim animationDidStop:nil finished:NO];
     }
-
-    if ([view.layer animationForKey:@"scale_x"] == anim) {
-        [view.layer removeAnimationForKey:@"scale_x"];
-        [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
-    } else if ([view.layer animationForKey:@"scale_y"] == anim) {
-        [view.layer removeAnimationForKey:@"scale_y"];
-        [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
-    } else if ([view.layer animationForKey:@"x_position"] == anim) {
-        [view.layer removeAnimationForKey:@"x_position"];
-        view.layer.position = CGPointMake([self get_x_prime], [self get_y_prime]);
-    } else if ([view.layer animationForKey:@"y_position"] == anim) {
-        [view.layer removeAnimationForKey:@"y_position"];
-        view.layer.position = CGPointMake([self get_x_prime], [self get_y_prime]);
-    } else if ([view.layer animationForKey:@"w_size"] == anim) {
-        [view.layer removeAnimationForKey:@"w_size"];
-        view.layer.bounds = CGRectMake(0.0, 0.0, w_size, h_size);
-    } else if ([view.layer animationForKey:@"h_size"] == anim) {
-        [view.layer removeAnimationForKey:@"h_size"];
-        view.layer.bounds = CGRectMake(0.0, 0.0, w_size, h_size);
-    } else if ([view.layer animationForKey:@"z_rotation"] == anim) {
-        [view.layer removeAnimationForKey:@"z_rotation"];
-        [view.layer setValue:[NSNumber numberWithFloat:z_rotation] forKeyPath:@"transform.rotation.z"];
-    } else if ([view.layer animationForKey:@"z_rotation_arc"] == anim) {
-        [view.layer removeAnimationForKey:@"z_rotation_arc"];
-        view.layer.position = CGPointMake([self get_x_prime], [self get_y_prime]);
-    }
+    [view.layer removeAllAnimations];
+    [animations removeAllObjects];
     
-    NSMutableDictionary *completion = [animations objectForKey:anim];
-    if (completion) {
-        NSUInteger count = [[completion objectForKey:@"animation_count"] unsignedIntValue] - 1;
-        [completion setObject:[NSNumber numberWithUnsignedInt:count] forKey:@"animation_count"];
-        if (count <= 0) {
-            [completion setObject:ID forKey:@"id"];
-            [completion setObject:@"on_completed" forKey:@"event"];
-            
-            [manager.gestureViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
-        }
-        
-        [animations removeObjectForKey:anim];
-    }
+    return [NSNumber numberWithBool:YES];
 }
+
+
+#pragma mark -
+#pragma mark Animations
 
 - (void)trickplayAnimationDidStop:(TrickplayAnimation *)anim {
     [animations removeObjectForKey:anim];
 }
-
-#pragma mark -
-#pragma mark Animations
 
 - (void)do_animate_x:(NSNumber *)val duration:(NSNumber *)duration {
     x_position = [val floatValue];
@@ -1098,35 +1063,6 @@
                          view.layer.position = CGPointMake(actual_x, actual_y);
                      } completion:NULL
      ];
-}
-
-- (void)do_animate_y:(NSNumber *)val duration:(NSNumber *)duration {
-    y_position = [val floatValue];
-    CGFloat actual_x = [self get_x_prime];
-    CGFloat actual_y = [self get_y_prime];
-    [UIView animateWithDuration:[duration floatValue]/1000.0 delay:0.0
-                        options:UIViewAnimationCurveLinear
-                     animations:^{
-                         view.layer.position = CGPointMake(actual_x, actual_y);
-                     } completion:NULL
-     ];
-}
-
-- (void)do_animate_z:(NSNumber *)val duration:(NSNumber *)duration {
-    
-}
-
-- (void)do_animate_depth:(NSNumber *)val duration:(NSNumber *)duration {
-    [self do_animate_z:val duration:duration];
-}
-
-- (void)addAnimation:(CAAnimation *)anim withCompletion:(NSMutableDictionary *)completion {
-    if (!completion) {
-        return;
-    }
-    [animations setObject:completion forKey:anim];
-    NSUInteger count = [[completion objectForKey:@"animation_count"] unsignedIntValue];
-    [completion setObject:[NSNumber numberWithUnsignedInt:count+1] forKey:@"animation_count"];
 }
 
 - (id)do_animate:(NSArray *)args {
