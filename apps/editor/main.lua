@@ -238,7 +238,7 @@ dofile("editor.lua")
 	       end 
 	  end 
 
-          mouse_state = BUTTON_DOWN
+          --mouse_state = BUTTON_DOWN
           if(input_mode == S_RECTANGLE) then 
 		editor.rectangle(x, y) 
 	  end
@@ -288,7 +288,7 @@ dofile("editor.lua")
 	       	end 
         end 	
 	  	dragging = nil
-        if (mouse_state == BUTTON_DOWN) then
+        --if (mouse_state == BUTTON_DOWN) then
             if (input_mode == S_RECTANGLE) then 
 	           editor.rectangle_done(x, y) 
 	           input_mode = S_SELECT 
@@ -299,8 +299,8 @@ dofile("editor.lua")
 				editor.multi_select_done(x,y)
 	      	end 
 
-            mouse_state = BUTTON_UP
-       end
+            --mouse_state = BUTTON_UP
+       --end
 	end
 
 
@@ -569,12 +569,12 @@ dofile("editor.lua")
                end
           end
 
-          if(mouse_state == BUTTON_DOWN) then
+          --if(mouse_state == BUTTON_DOWN) then
                if (input_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
                if (input_mode == S_SELECT) and 
 		  (screen:find_child("msgw") == nil) then 
 		    editor.multi_select_move(x, y) end
-          end
+          --end
 
 	  
       end
