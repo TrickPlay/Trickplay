@@ -78,6 +78,7 @@ public:
     class Delegate
     {
     public:
+    	virtual ~Delegate() {}
         virtual void disconnected() = 0;
         virtual bool key_down( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
         virtual bool key_up( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
@@ -219,6 +220,7 @@ public:
     class Delegate
     {
     public:
+    	virtual ~Delegate() {}
         virtual void connected( Controller * controller ) = 0;
     };
 
