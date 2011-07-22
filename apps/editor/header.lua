@@ -25,10 +25,10 @@ assets = dofile( "assets-cache" )
 factory = dofile( "ui-factory" )
 
 -- The ui elements 
-ui_element = dofile( "lib/ui_element"),
+ui_element = dofile( "lib/ui_element")
 
 -- The ui elements for editor inspector 
-editor_lib = dofile( "editor_lib"),
+editor_lib = dofile( "editor_lib")
 
 ui =
     {
