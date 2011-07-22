@@ -227,7 +227,7 @@ local function guideline_inspector(v)
 end 
 
 function editor.reference_image()
- 	if(CURRENT_DIR == "") then 
+ 	if(current_dir == "") then 
 		--set_app_path() 
 	else 
 		input_mode = S_SELECT  
@@ -911,15 +911,15 @@ function editor.the_image(bg_image)
 	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
 	local space = WIDTH
 
-	local dir = editor_lb:readdir(CURRENT_DIR.."/assets/images")
-	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR.."/assets/images"}:set(STYLE)
+	local dir = editor_lb:readdir(current_dir.."/assets/images")
+	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/assets/images"}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 
 
 	local dialog = draw_dialogbox()
-	dialog.label =  "File Location : "..CURRENT_DIR.."/assets/images"
+	dialog.label =  "File Location : "..current_dir.."/assets/images"
 	dialog.title_font = "DejaVu Sans 24px"
 
 	function get_file_list_sz() 
@@ -1085,11 +1085,11 @@ local function open_files(input_purpose, bg_image, inspector)
 	local virtual_hieght = 0
 	
 	if input_purpose == "open_luafile" then 
-		dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+		dir = editor_lb:readdir(current_dir.."/screens")
 	elseif input_purpose == "open_imagefile" then 
-		dir = editor_lb:readdir(CURRENT_DIR.."/assets/images")
+		dir = editor_lb:readdir(current_dir.."/assets/images")
 	elseif input_purpose =="open_videofile" then  
-		dir = editor_lb:readdir(CURRENT_DIR.."/assets/videos")
+		dir = editor_lb:readdir(current_dir.."/assets/videos")
 	end 
 
 	local function load_file(v)
@@ -1380,13 +1380,13 @@ function editor.the_open()
 	local X_PADDING = 10
 	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
 	local space = WIDTH
-	local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
-	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR.."/screens"}:set(STYLE)
+	local dir = editor_lb:readdir(current_dir.."/screens")
+	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/screens"}:set(STYLE)
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 	local dialog = draw_dialogbox()
 
-	dialog.label =  "File Location : "..CURRENT_DIR.."/screens"
+	dialog.label =  "File Location : "..current_dir.."/screens"
 	dialog.title_font = "DejaVu Sans 24px"
 
 	function get_file_list_sz() 
@@ -2133,7 +2133,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		current_fn = "screens\/"..fname
 	end 
 
-	if(CURRENT_DIR == "") then 
+	if(current_dir == "") then 
 		editor.error_message("002", fname, new_project)  
 		return 
 	end 
@@ -2217,7 +2217,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 
     if (save_current_f == true) then 
 
-		local screen_dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
+		local screen_dir = editor_lb:readdir(current_dir.."/screens/")
 
 		for i, v in pairs(screen_dir) do
           	if(fname == v)then
@@ -2331,7 +2331,7 @@ function editor.save(save_current_f, save_backup_f)
 	local message = Text {text = "File Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
 
-	if(CURRENT_DIR == "") then 
+	if(current_dir == "") then 
 		editor.error_message("002", nil, new_project)  
 		return 
 	end 
@@ -2757,8 +2757,8 @@ function editor.the_video()
 	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
 	local space = WIDTH
 
-	local dir = editor_lb:readdir(CURRENT_DIR.."/assets/videos")
-	local dir_text = Text {name = "dir", text = "File Location : "..CURRENT_DIR.."/assets/videos"}:set(STYLE)
+	local dir = editor_lb:readdir(current_dir.."/assets/videos")
+	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/assets/videos"}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING

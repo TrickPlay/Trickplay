@@ -5,6 +5,12 @@
 local factory = ui.factory
 local set_project_path 
 
+local uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
+                    "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane" }
+
+local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group", "ArrowPane", "TabBar"} 
+
+
 function table_copy(t)
   	local t2 = {}
   	for k,v in pairs(t) do
@@ -260,13 +266,13 @@ local function copy_widget_imgs ()
 		end 
 		for i, j in pairs(source_files) do 
 	     	source_file = trickplay.config.app_path..b..j 
-			dest_file = CURRENT_DIR..dest_dir..j 
+			dest_file = current_dir..dest_dir..j 
 	     	editor_lb:file_copy(source_file, dest_file) 
 	    end 
 	end 
 	for a, b in pairs (copy_files) do 
 		source_file = trickplay.config.app_path..b
-		dest_file = CURRENT_DIR..b
+		dest_file = current_dir..b
 	 	editor_lb:file_copy(source_file, dest_file)
 	end 
 end 
@@ -328,7 +334,7 @@ function set_new_project (pname, replace)
    	     print("couldn't create ",app_path)  
     else
     	editor_lb:change_app_path( app_path )
-	    CURRENT_DIR = app_path
+	    current_dir = app_path
     end
 
     local screens_path = editor_lb:build_path( app_path, "screens" )
@@ -560,7 +566,7 @@ function open_project(t, msg, from_main)
    	     	print("couldn't create ",app_path)  
         else
             editor_lb:change_app_path( app_path )
-	     	CURRENT_DIR = app_path
+	     	current_dir = app_path
         end
 
         local screens_path = editor_lb:build_path( app_path, "screens" )
@@ -2174,8 +2180,8 @@ function inputMsgWindow_savefile(input_text, cfn, save_current_file)
 
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
-     local screen_dir = editor_lb:readdir(CURRENT_DIR.."/screens/")
-     local main_dir = editor_lb:readdir(CURRENT_DIR)
+     local screen_dir = editor_lb:readdir(current_dir.."/screens/")
+     local main_dir = editor_lb:readdir(current_dir)
      local enter_gen_stub_code = false
 
 	 if cfn ~= "OK" and save_current_file == nil then 
@@ -2583,7 +2589,7 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 end
 
 function inputMsgWindow_openfile(input_text, ret)
-    local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+    local dir = editor_lb:readdir(current_dir.."/screens")
 	local back_fn = input_text..".back"
 
     if(input_text == nil) then
@@ -2755,7 +2761,7 @@ end
 --[[
 function inputMsgWindow_openfile(input_text)
      local file_not_exists = true
-     local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+     local dir = editor_lb:readdir(current_dir.."/screens")
      if(input_text == nil) then
 		print ("input_text is nil") 
 		return 
@@ -2943,7 +2949,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
      end 
 
      local file_not_exists = true
-     local dir = editor_lb:readdir(CURRENT_DIR.."/assets/images")
+     local dir = editor_lb:readdir(current_dir.."/assets/images")
      for i, v in pairs(dir) do
           if(input_text == v)then
                file_not_exists = false
@@ -3040,7 +3046,7 @@ local function set_project_path ()
    	     print("couldn't create ",app_path)  
         else
              editor_lb:change_app_path( app_path )
-	     CURRENT_DIR = app_path
+	     current_dir = app_path
         end
 
 --- new directory structures 
