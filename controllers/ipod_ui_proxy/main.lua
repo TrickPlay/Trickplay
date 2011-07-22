@@ -10,7 +10,9 @@ function controllers:on_controller_connected(controller)
         print("DISCONNECTED", controller.name)
         screen.on_key_down = nil
     end
-    factory = loadfile("AdvancedUIAPI.lua")( controller )
+    function controller:on_advanced_ui_ready()
+        controller.factory = loadfile("AdvancedUIAPI.lua")( controller )
+    end
 
     local key_handler = {}
     function screen:on_key_down(key)
@@ -34,7 +36,7 @@ function controllers:on_controller_connected(controller)
 
     -- create a Rectangle
     key_handler[keys.r] = function()
-        r = factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
+        r = controller.factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
         function r:on_touches(touches, state)
             print("touched my rectangle with state:", state)
             dumptable(touches)
@@ -43,7 +45,7 @@ function controllers:on_controller_connected(controller)
     end
     -- create a Group
     key_handler[keys.g] = function()
-        g = factory:Group{x = 20, y = 60, w = 50, h = 50}
+        g = controller.factory:Group{x = 20, y = 60, w = 50, h = 50}
         function g:on_touches(touches, state)
             print("touched my group with state:", state)
             dumptable(touches)
@@ -52,8 +54,8 @@ function controllers:on_controller_connected(controller)
     end
     -- create an Image using the 'chip' image
     key_handler[keys.i] = function()
-        i = factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
-        j = factory:Image{x = 200, y = 500, w = 100, h = 100, src = ""}
+        i = controller.factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
+        j = controller.factory:Image{x = 200, y = 500, w = 100, h = 100, src = ""}
         function i:on_loaded(failed)
             print("i image loaded?: "..tostring(not failed))
         end
@@ -64,9 +66,13 @@ function controllers:on_controller_connected(controller)
     end
     -- create a Text element
     key_handler[keys.t] = function()
-        t = factory:Text{x = 200, y = 200, w = 100, h = 100, text = "I am text"}
+        t = controller.factory:Text{x = 200, y = 200, w = 100, h = 100, text = "I am text"}
         function t:on_text_changed(string)
             print("text changed:", string)
+        end
+        function t:on_touches(touches, state)
+            print("touched my text with state:", state)
+            dumptable(touches)
         end
         dumptable(t)
     end
@@ -101,7 +107,7 @@ function controllers:on_controller_connected(controller)
     key_handler[keys.b] = function()
         print("bkg vs advanced_ui image")
         controller:set_ui_background("chip")
-        i = factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
+        i = controller.factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
     end
     ctrl = controller
 end
