@@ -42,12 +42,14 @@ local assets = {
 		Image { src = "assets/spark2.png" },
 		Image { src = "assets/spark3.png" },
 	},
+	--[[
 	sparkle = {
 		Image { src = "assets/sparkle1.png" },
 		Image { src = "assets/sparkle2.png" },
 		Image { src = "assets/sparkle3.png" },
 		Image { src = "assets/sparkle4.png" },
 	},
+	--]]
 	--HUD Components
 	coin_symbol = Image{ src = "assets/score/coin-symbol.png" },
 	num = {
@@ -148,17 +150,16 @@ end
 local sparkles = Group{}
 
 do
-	for i = 1, # assets.sparkle do
+	for i = 1, 4 do
         sparkles:add(
-            Clone{
-                source=assets.sparkle[i],
-            }
+            --Clone{ source=assets.sparkle[i] }
+			Image { src = "assets/sparkle"..i..".png" }
         )
     end
     
 	sparkles:foreach_child(function(c) c:hide() end)
     
-    sparkles.anchor_point = {assets.sparkle[1].w/2,assets.sparkle[1].h/2}
+    sparkles.anchor_point = {sparkles.children[1].w/2,sparkles.children[1].h/2}
     
 	local curr = sparkles.children[1]
 
