@@ -81,6 +81,10 @@ local function UIElement()
         self("animate", table)
     end
 
+    function call:complete_animation()
+        self("complete_animation")
+    end
+
     return get , set , call , event
 end
 
