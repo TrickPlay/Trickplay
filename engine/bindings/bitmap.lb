@@ -7,7 +7,7 @@ module bitmap;
 /*
     Class: Bitmap
 
-	The Bitmap object is typically used as a brush when drawing on a 
+	A Bitmap object is typically used as a brush when drawing on a 
 	vector-graphics-based <Canvas at file:canvas-lb.html#Canvas> object. A 
 	Bitmap object can also be displayed on the screen, but it must first be 
 	converted to an Image object by calling its <Bitmap.Image> function; the 
@@ -48,7 +48,7 @@ class Bitmap [[ Bitmap * ]]
 		<Image.async> property for additional details concerning synchronous 
 		and asynchronous file loading.
 
-		*Example:* Create a Bitmap object, loading the image synchronously
+		*Code Example:* Create a Bitmap object, loading the image synchronously
 		
 		(code)
 		-- Initiate synchronous image load
@@ -62,7 +62,7 @@ class Bitmap [[ Bitmap * ]]
 		end
 		(end)
 		
-		*Example:* Create a Bitmap object, loading the image asynchronously
+		*Code Example:* Create a Bitmap object, loading the image asynchronously
 		
 		(code)
 		-- Initiate asynchronous image load
@@ -213,7 +213,7 @@ class Bitmap [[ Bitmap * ]]
 		
 		*Default Setting:* false
 		
-		*Example:* To see the loaded property in use, check the synchronous 
+		*Code Example:* To see the loaded property in use, check the synchronous 
 		code example given in the <Bitmap> constructor description.
 		
 		*See Also:* the <Bitmap> constructor
@@ -228,24 +228,20 @@ class Bitmap [[ Bitmap * ]]
     /*
         Function: get_pixel
         
-        Returns a table with 4 color components for the given pixel. If the 
-        bitmap has not been loaded or the pixel is out of bounds, it returns
-        nil.
+        The get_pixel() function retrieves the RGB color and alpha components 
+        of a specific pixel in the Bitmap object.
         
         *Arguments:*
         
-        x , y - The coordinates for the desired pixel.
+        x, y - coordinates of the desired pixel
         
-        *Returns:*
+        *Return Value:*
         
-        table - A table with 4 integer values ranging from 0 to 255 for the pixel's
-                red, green, blue and alpha components. If the bitmap does not have
-                an alpha channel, the alpha component will be 255.
-               
-        nil - If the bitmap has not been loaded or the coordinates are out of bounds.
+        color_info - table of color and alpha/transparency values specified as three RGB (Red/Green/Blue) integer values and an alpha/transparency integer value. If the bitmap does not have an alpha channel, the returned alpha value will be 255 (opaque). The format of the color_info table is described in <RGB/Alpha Color Formats>. If a bitmap had not yet been loaded or if invalid X, Y coordinates were specified, returns nil.
+
     */
     
-    table get_pixel( int x , int y )
+    table get_pixel( int x, int y )
         [[
             Image * image = self->get_image();
             
@@ -288,7 +284,7 @@ class Bitmap [[ Bitmap * ]]
     /*
         Function: Image
         
-        The Image function converts the Bitmap object to an Image object which 
+        The Image() function converts the Bitmap object to an Image object which 
         can then be added to the screen. It is possible to convert the Bitmap's 
         entire image or a just portion of it.
         
@@ -313,7 +309,7 @@ class Bitmap [[ Bitmap * ]]
         successfully loaded or the source_rectangle argument's coordinates were 
         invalid.
         
-        *Example:* Generate an Image object from a Bitmap
+        *Code Example:* Generate an Image object from a Bitmap
         
         (code)
         -- Create a Bitmap object
@@ -407,7 +403,7 @@ class Bitmap [[ Bitmap * ]]
 		
 		*Return Value:* None
 
-		*Example:* To see the on_loaded() event handler in use, check the 
+		*Code Example:* To see the on_loaded() event handler in use, check the 
 		asynchronous code example given in the <Bitmap> constructor description.
 
 		*See Also:* the <Bitmap> constructor
