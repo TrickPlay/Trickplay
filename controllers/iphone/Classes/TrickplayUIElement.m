@@ -141,7 +141,7 @@
             if (x >= self.bounds.origin.x
                 && x <= self.bounds.size.width
                 && y >= self.bounds.origin.y
-                && y <= self.bounds.size.width
+                && y <= self.bounds.size.height
                 // check that its within object range
                 && x_sub >= view.bounds.origin.x
                 && x_sub <= view.bounds.size.width
