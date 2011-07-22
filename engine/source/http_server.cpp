@@ -401,7 +401,7 @@ public:
         tplog2( "CREATED RESPONSE BODY %p" , this );
     }
 
-    ~StreamBody()
+    virtual ~StreamBody()
     {
         if ( wrote_headers_handler )
         {
