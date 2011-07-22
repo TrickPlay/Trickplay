@@ -20,9 +20,11 @@ local assets = {
 		Image { src = "assets/branches-3.png" },
 	},
 	ground     = Image { src = "assets/ground.png" },
+	--[[
 	coin_front = Image { src = "assets/coin-1.png" },
 	coin_back  = Image { src = "assets/coin-3.png" },
-	coin_side  = Image { src = "assets/coin-2.png" },
+	coin_side  = Image { src = "assets/coin-2.png" },]
+	--]]
 	firework   = Image { src = "assets/firework.png" },
 	firecracker   = Image { src = "assets/firecracker.png" },
 	envelope = {
@@ -69,8 +71,7 @@ bg.w = screen_w
 bg.h = screen_h + bg.h
 layers.bg:add(bg)
 
---All images should be only declared here
-Image = nil
+
 
 
 for _,v in pairs(assets) do
@@ -85,7 +86,102 @@ end
 
 layers.clone_srcs:hide()
 
+local coin = Group{}
+do
+	local front = Image { src = "assets/coin-1.png" }
+	local back  = Image { src = "assets/coin-3.png" }
+	local side  = Image { src = "assets/coin-2.png" }
+	
+	coin:add(side,back,front)
+	
+	coin:foreach_child(
+		function(c)
+			c.anchor_point = {      c.w/2,    c.h/2}
+			c.position     = {front.w/2+3,front.h/2}
+		end
+	)
+	
+	start_x = front.w/2+3
+	
+	coin.size = {
+		front.w+6,
+		front.h
+	}
+	
+	local radians = Interval(-math.pi/2,math.pi/2)
+	
+	coin.tl = {
+		duration = 4,
+		loop     = true,
+		on_step  = function(_,p)
+			
+			--t goes from -90 to 90
+			t = radians:get_value(p)
+			
+			--the front moves from right to left
+			front.x = start_x-3*math.sin(t)
+			--the back moves from left to right
+			back.x  = start_x+3*math.sin(t)
+			
+			--the front and back scale at the same rate
+			front.scale = {math.cos(t),1}
+			back.scale  = {math.cos(t),1}
+			
+			--theres probably a better way to do this
+			if p < .1 or p > .9 then
+				if not side.is_visible then
+					side:show()
+				end
+			elseif side.is_visible then
+				side:hide()
+			end
+			
+		end,
+	}
+	
+	Animation_Loop:add_animation(coin.tl)
+	
+	layers.clone_srcs:add(coin)
+	
+end
+
+local sparkles = Group{}
+
+do
+	for i = 1, # assets.sparkle do
+        sparkles:add(
+            Clone{
+                source=assets.sparkle[i],
+            }
+        )
+    end
+    
+	sparkles:foreach_child(function(c) c:hide() end)
+    
+    sparkles.anchor_point = {assets.sparkle[1].w/2,assets.sparkle[1].h/2}
+    
+	local curr = sparkles.children[1]
+
+	local index = 0
+	sparkles.spin = Timer{
+		interval = 100,
+		on_timer = function()
+			
+			index = ( index + 1 ) % ( # sparkles.children )
+			
+			curr:hide()
+			
+			curr = sparkles.children[index + 1]
+			
+			curr:show()
+		end
+	}
+	
+	layers.clone_srcs:add(sparkles)
+end
 
 
 
-return assets, bg
+--All images should be only declared here
+Image = nil
+return assets, bg, coin, sparkles

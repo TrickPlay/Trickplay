@@ -156,7 +156,8 @@ local old_sparkles = {}
 
 local new_sparkle = function()
     
-    local sparkles = Group{}
+    local sparkles = Clone{ source = sparkles_src, anchor_point = {sparkles_src.w/2,sparkles_src.h/2} }
+    --[[Group{}
     
     for i = 1, # assets.sparkle do
         sparkles:add(
@@ -167,21 +168,22 @@ local new_sparkle = function()
     end
     
     
-    sparkles.anchor_point = {assets.sparkle[1].w/2,assets.sparkle[1].h/2}
+    sparkles.anchor_point = {sparkles_src.w/2,sparkles_src.h/2}
     
     local a, e = 0,0
+    --]]
     sparkles.fade = {
         duration = .7,
         on_step  = function(s,p)
-            
+            --[[
             e = e + s
             if e > .1 then
                 a = ( a + 1 ) % ( # sparkles.children )
                 e = 0
             end
-            
+            --]]
             sparkles.opacity      = 255 * (1 - p)
-            
+            --[[
             for i,s in pairs(sparkles.children) do
                 if i == a + 1 then
                     s:show()
@@ -189,10 +191,11 @@ local new_sparkle = function()
                     s:hide()
                 end
             end
+            --]]
         end,
         on_completed = function()
             
-            a, e = 0,0
+            --a, e = 0,0
             
             sparkles:unparent()
             
@@ -200,7 +203,7 @@ local new_sparkle = function()
             
             Effects.active[sparkles] = nil
             
-            sparkles.coin = nil
+            --sparkles.coin = nil
         end
     }
     
