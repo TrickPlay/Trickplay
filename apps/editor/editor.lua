@@ -10,6 +10,8 @@ local g_init_x = 0
 local g_init_y = 0
 local factory = ui.factory
 
+local uiElementLists = {"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane"}
+
 
 local widget_f_map = {
      ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() end, 
