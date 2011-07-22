@@ -226,7 +226,14 @@
     //*/
     
     //*
-    if ([view.view.layer animationForKey:@"scale_x"] == anim) {
+    if (!flag) {
+        [view.view.layer setValue:[NSNumber numberWithFloat:view.x_scale] forKeyPath:@"transform.scale.x"];
+        [view.view.layer setValue:[NSNumber numberWithFloat:view.y_scale] forKeyPath:@"transform.scale.y"];
+        view.view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
+        view.view.layer.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
+        [view.view.layer setValue:[NSNumber numberWithFloat:view.z_rotation] forKeyPath:@"transform.rotation.z"];
+        view.view.layer.opacity = view.opacity;
+    } else if ([view.view.layer animationForKey:@"scale_x"] == anim) {
         [view.view.layer removeAnimationForKey:@"scale_x"];
         [view.view.layer setValue:[NSNumber numberWithFloat:view.x_scale] forKeyPath:@"transform.scale.x"];
     } else if ([view.view.layer animationForKey:@"scale_y"] == anim) {

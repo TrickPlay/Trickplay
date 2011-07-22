@@ -11,10 +11,11 @@
 #import <QuartzCore/CATransform3D.h>
 #import <YAJLiOS/YAJL.h>
 #import "AdvancedUIObjectManager.h"
+#import "TrickplayAnimation.h"
 
 @class AdvancedUIObjectManager;
 
-@interface TrickplayUIElement : UIView {
+@interface TrickplayUIElement : UIView <TrickplayAnimationDelegate> {
     CFMutableDictionaryRef activeTouches;
     NSUInteger touchNumber;
     
@@ -50,6 +51,7 @@
     NSString *ID;
     NSString *name;
     
+    // Needed for .is_animating property
     NSMutableDictionary *animations;
     
     AdvancedUIObjectManager *manager;

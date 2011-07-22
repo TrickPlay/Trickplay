@@ -224,11 +224,12 @@
             return;
         }
     }
-    NSString *ID = [NSString stringWithFormat:@"%u", currentID];
-    currentID++;
+    // Only screen may have an ID of 0
     if (currentID == 0) {
         currentID++;
     }
+    NSString *ID = [NSString stringWithFormat:@"%u", currentID];
+    currentID++;
     
     if ([type compare:@"Rectangle"] == NSOrderedSame) {
         [self createRectangle:ID withArgs:args];
