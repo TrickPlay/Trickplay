@@ -1,6 +1,6 @@
-Topic: SDK Visual Editor Menus
+Topic: Visual Editor Menus
 
-At the top of the SDK Visual Editor window is the Editor menu bar.
+At the top of the Visual Editor window is the Editor menu bar.
 
 (see images/EdMenus.png)
 
@@ -15,7 +15,7 @@ Save... - Save current screen
 Save As... - Save current screen to a specified file name
 New Project... - Open a new, empty project
 Open Project... - Open an existing project
-Quit - Exit the SDK Visual Editor
+Quit - Exit the Visual Editor
 
 Edit:
 Undo - Undo the last operation
