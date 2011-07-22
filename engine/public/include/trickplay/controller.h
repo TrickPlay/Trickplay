@@ -1047,6 +1047,12 @@ struct TPControllerRequestAudioClip
     TP_CONTROLLER_MODIFIER_SUPER		- The super key is down.
     TP_CONTROLLER_MODIFIER_HYPER		- The hyper key is down.
     TP_CONTROLLER_MODIFIER_META			- The meta key is down.
+
+	TP_CONTROLLER_MODIFIER_1			- Modifier key 1
+	TP_CONTROLLER_MODIFIER_2			- Modifier key 2
+	TP_CONTROLLER_MODIFIER_3			- Modifier key 3
+	TP_CONTROLLER_MODIFIER_4			- Modifier key 4
+	TP_CONTROLLER_MODIFIER_5			- Modifier key 5
 */
 
 #define TP_CONTROLLER_MODIFIER_NONE			0x0000
@@ -1056,6 +1062,13 @@ struct TPControllerRequestAudioClip
 #define TP_CONTROLLER_MODIFIER_SUPER		0x0008
 #define TP_CONTROLLER_MODIFIER_HYPER		0x0010
 #define TP_CONTROLLER_MODIFIER_META			0x0020
+
+#define TP_CONTROLLER_MODIFIER_1			0x0100
+#define TP_CONTROLLER_MODIFIER_2			0x0200
+#define TP_CONTROLLER_MODIFIER_3			0x0400
+#define TP_CONTROLLER_MODIFIER_4			0x0800
+#define TP_CONTROLLER_MODIFIER_5			0x1000
+
 
 /*
     Callback: tp_controller_key_down
