@@ -1,6 +1,7 @@
 local ui_element = {}
 
 dofile("/lib/ui_element_header.lua")     
+
 function ui_element.populate_to (grp, tbl)
 
 	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
@@ -91,7 +92,7 @@ return tbl
 end 
 
 function ui_element.set_cursor_pointer (src_file)
-	user_mouse_pointer.src = "/assets/images/"..src_file
+	--user_mouse_pointer.src = "/assets/images/"..src_file
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
@@ -907,8 +908,8 @@ function ui_element.timeline(t)
 	 local pointer = timeline:find_child(name)
 
 	 local function pointer_on_button_up(x,y,b,n)
-	     if(dragging ~= nil) then 
-	          local actor , dx , dy = unpack( dragging )
+	     if(hdr.dragging ~= nil) then 
+	          local actor , dx , dy = unpack( hdr.dragging )
 		  local timepoint, new_timepoint, prev_point, next_point, last_point, new_x
 		  local timeline_length = 1800
 		  local duration = screen:find_child("timeline").duration
@@ -924,7 +925,7 @@ function ui_element.timeline(t)
 	          end
 		  screen:find_child("text"..tostring(timepoint)).x = new_x - 120 
 		  pointer.x = new_x
-	          dragging = nil
+	          hdr.dragging = nil
 
 		  new_timepoint = math.floor((new_x - 60)/timeline_length * duration)
 
@@ -1044,7 +1045,7 @@ function ui_element.timeline(t)
 	 	--if(b == 3 or n >= 2) then
 			-- point_inspector()
 	   	else
-                 	--imsi : dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
+                 	--imsi : hdr.dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
            	 	return true
 	   	end 
 	   end 
@@ -1328,7 +1329,7 @@ function ui_element.button(t)
     } 
     
     function b_group.extra.on_focus_in(key) 
-		current_focus = b_group
+		hdr.current_focus = b_group
         if (p.skin == "custom") then 
 	     	ring.opacity = 0
 	     	focus_ring.opacity = 255
@@ -1351,13 +1352,13 @@ function ui_element.button(t)
 		end 
 		
 		if p.skin == "edit" then 
-			input_mode = S_MENU_M
+			hdr.input_mode = hdr.S_MENU_M
 		end 
 
     end
     
     function b_group.extra.on_focus_out(key) 
-		current_focus = nil 
+		hdr.current_focus = nil 
         if (p.skin == "custom") then 
 	     	ring.opacity = 255
 	     	focus_ring.opacity = 0
@@ -1456,22 +1457,22 @@ function ui_element.button(t)
 		
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
-				if current_focus ~= b_group then 
-					if current_focus then 
-		     			current_focus.on_focus_out()
+				if hdr.current_focus ~= b_group then 
+					if hdr.current_focus then 
+		     			hdr.current_focus.on_focus_out()
 					end
 					b_group.extra.on_focus_in(keys.Return)
 				else 
-		     		current_focus.on_focus_out()
-					current_focus = b_group
-		     		current_focus.on_focus_in(keys.Return)
+		     		hdr.current_focus.on_focus_out()
+					hdr.current_focus = b_group
+		     		hdr.current_focus.on_focus_in(keys.Return)
 					screen:grab_key_focus()
 				end 
 				return true
 	     	end 
 
 			function b_group:on_button_up(x,y,b,n)
-				--if input_mode ~= S_MENU_M then 
+				--if hdr.input_mode ~= hdr.S_MENU_M then 
 				if b_group.single_button == true then 
 	     			button.opacity = 255
             		focus.opacity = 0
@@ -1483,14 +1484,14 @@ function ui_element.button(t)
 
 		--[[
 			function b_group:on_enter()
-				if input_mode ~= S_MENU_M then 
-		    		if current_focus ~= b_group then 
-						if current_focus then 
-		     				current_focus.on_focus_out()
+				if hdr.input_mode ~= hdr.S_MENU_M then 
+		    		if hdr.current_focus ~= b_group then 
+						if hdr.current_focus then 
+		     				hdr.current_focus.on_focus_out()
 						end
 						b_group.extra.on_focus_in(keys.Return)
 		    		else 
-		     			current_focus.on_focus_in(keys.Return)
+		     			hdr.current_focus.on_focus_in(keys.Return)
 		    		end 
 				end
 				return true
@@ -1504,14 +1505,14 @@ function ui_element.button(t)
 		--[[
 		if p.skin == "editor"  then 
 	     	function b_group:on_motion()
-				if input_mode == S_MENU_M then 
-		    		if current_focus ~= b_group then 
-						if current_focus then 
-		     				current_focus.on_focus_out()
+				if hdr.input_mode == hdr.S_MENU_M then 
+		    		if hdr.current_focus ~= b_group then 
+						if hdr.current_focus then 
+		     				hdr.current_focus.on_focus_out()
 						end
 						b_group.extra.on_focus_in(keys.Return)
 		    		else 
-		     			current_focus.on_focus_in(keys.Return)
+		     			hdr.current_focus.on_focus_in(keys.Return)
 		    		end 
 				end 
              end
@@ -1623,7 +1624,7 @@ function ui_element.textInput(t)
     }
 
  	function t_group.extra.on_focus_in()
-	  	current_focus = t_group
+	  	hdr.current_focus = t_group
 
         if (p.skin == "custom") then 
 	    	box.opacity = 0
@@ -1649,7 +1650,7 @@ function ui_element.textInput(t)
 	  	text.cursor_visible = false
 	  	text.reactive = false 
 		t_group.text = text.text
-		--current_focus = nil
+		--hdr.current_focus = nil
      end 
 
     create_textInputField= function()
@@ -2272,9 +2273,9 @@ function ui_element.buttonPicker(t)
 			unfocus = bp_group:find_child("unfocus")
 			unfocus.reactive = true
 			function unfocus:on_button_down (x,y,b,n)
-				if current_focus then
-   			         current_focus.extra.on_focus_out()
-	        		 current_focus = group
+				if hdr.current_focus then
+   			         hdr.current_focus.extra.on_focus_out()
+	        		 hdr.current_focus = group
 				end 
 				bp_group.on_focus_in()
 	            bp_group:grab_key_focus()
@@ -2284,9 +2285,9 @@ function ui_element.buttonPicker(t)
         	left_arrow = bp_group:find_child("left_un")
 			left_arrow.reactive = true 
 			function left_arrow:on_button_down(x, y, b, n)
-				if current_focus then
-					current_focus.extra.on_focus_out()
-	        		current_focus = group
+				if hdr.current_focus then
+					hdr.current_focus.extra.on_focus_out()
+	        		hdr.current_focus = group
 				end
 				bp_group.on_focus_in()
 	        	bp_group:grab_key_focus()
@@ -2301,9 +2302,9 @@ function ui_element.buttonPicker(t)
 			right_arrow = bp_group:find_child("right_un")
 			right_arrow.reactive = true 
 			function right_arrow:on_button_down(x, y, b, n)
-				if current_focus then
-					current_focus.extra.on_focus_out()
-	        		current_focus = group
+				if hdr.current_focus then
+					hdr.current_focus.extra.on_focus_out()
+	        		hdr.current_focus = group
 				end
 				bp_group.on_focus_in()
 	        	bp_group:grab_key_focus()
@@ -2320,7 +2321,7 @@ function ui_element.buttonPicker(t)
      create_buttonPicker()
 
      function bp_group.extra.on_focus_in()
-		current_focus = bp_group
+		hdr.current_focus = bp_group
 		if(p.skin == "custom") then 
             ring.opacity = 0 
 	     	focus_ring.opacity = 255
@@ -2705,7 +2706,7 @@ function ui_element.radioButtonGroup(t)
 
 
 	function rb_group.extra.on_focus_in()
-	  	current_focus = cb_group
+	  	hdr.current_focus = cb_group
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    	rings:find_child("ring"..1).opacity = 0 
 	    	rings:find_child("focus"..1).opacity = 255 
@@ -2835,14 +2836,14 @@ function ui_element.radioButtonGroup(t)
 				end 
 	
 	           	function donut:on_button_down (x,y,b,n)
-					if current_focus then 
-						current_focus.on_focus_out() 
+					if hdr.current_focus then 
+						hdr.current_focus.on_focus_out() 
 					end 
 
 				    local ring_num = tonumber(donut.name:sub(5,-1))
 					rb_group.extra.select_button(ring_num)
 
-					current_focus = rb_group
+					hdr.current_focus = rb_group
         			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    				rings:find_child("ring"..ring_num).opacity = 0 
 	    				rings:find_child("focus"..ring_num).opacity = 255 
@@ -2977,7 +2978,7 @@ function ui_element.checkBoxGroup(t)
     }
 
 	function cb_group.extra.on_focus_in()
-	  	current_focus = cb_group
+	  	hdr.current_focus = cb_group
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    	boxes:find_child("box"..1).opacity = 0 
 	    	boxes:find_child("focus"..1).opacity = 255 
@@ -3119,12 +3120,12 @@ function ui_element.checkBoxGroup(t)
 				end 
 
 	     		function box:on_button_down (x,y,b,n)
-					if current_focus then 
-						current_focus.on_focus_out() 
+					if hdr.current_focus then 
+						hdr.current_focus.on_focus_out() 
 					end 
 					local box_num = tonumber(box.name:sub(4,-1))
 	  				
-					current_focus = cb_group
+					hdr.current_focus = cb_group
 
 					table.insert(cb_group.selected_items, box_num)
     				cb_group.extra.select_button(cb_group.selected_items) 
@@ -3139,11 +3140,11 @@ function ui_element.checkBoxGroup(t)
 	     		end 
 
 	     		function check:on_button_down(x,y,b,n)
-					if current_focus then 
-						current_focus.on_focus_out() 
+					if hdr.current_focus then 
+						hdr.current_focus.on_focus_out() 
 					end 
 					local check_num = tonumber(check.name:sub(6,-1))
-					current_focus = cb_group
+					hdr.current_focus = cb_group
 					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
 						cb_group.selected_items = table_remove_val(cb_group.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
@@ -4581,10 +4582,10 @@ function ui_element.scrollPane(t)
 --[[
 if editor_lb == nil  then
             function screen:on_motion(x,y) 
-	  	if dragging then
-	        local actor = unpack(dragging)
+	  	if hdr.dragging then
+	        local actor = unpack(hdr.dragging)
 	    	  if (actor.name == "grip") then  
-	             local actor,s_on_motion = unpack(dragging) 
+	             local actor,s_on_motion = unpack(hdr.dragging) 
 	             s_on_motion(x, y)
 	             return true
 	    	  end 
@@ -4592,8 +4593,8 @@ if editor_lb == nil  then
 		end
 	    end 
 	    function screen:on_button_up()
-		if dragging then 
-			dragging = nil 
+		if hdr.dragging then 
+			hdr.dragging = nil 
 		end 
 	    end 
 end
@@ -4639,7 +4640,7 @@ end
             function grip_hor:on_button_down(x,y,button,num_clicks)
                 local dx = x - grip_hor.x
 	   	        
-                dragging = {grip_hor,
+                hdr.dragging = {grip_hor,
 	   		        function(x,y)
 	   			
 	   			        grip_hor.x = x - dx
@@ -4749,7 +4750,7 @@ end
                 
                 local dy = y - grip_vert.y
 	   	        
-                dragging = {grip_vert,
+                hdr.dragging = {grip_vert,
 	   		        function(x,y)
                         
 	   			        grip_vert.y = y - dy
@@ -5199,7 +5200,7 @@ button
 		 			screen:find_child("mouse_pointer"):raise_to_top()
 				end
 				]]
-				input_mode = S_MENU_M
+				hdr.input_mode = hdr.S_MENU_M
 				p.status = "fade_in"
             end,
             fade_out = function()
@@ -5211,7 +5212,7 @@ button
                     opacity=0,
 		    		on_completed = function()  dropDownMenu:hide()  end,
                 }
-				input_mode = S_SELECT
+				hdr.input_mode = hdr.S_SELECT
 				p.status = "fade_out"
             end,
             set_item_function = function(index,f)
@@ -5235,7 +5236,7 @@ button
 	--yugi
 	if editor_lb == nil or editor_use then  
 		function button:on_key_down(key) 
-			if input_mode == S_SELECT or p.status ==  "fade_out" then 
+			if hdr.input_mode == hdr.S_SELECT or p.status ==  "fade_out" then 
 				if key == keys.Down then 
 					umbrella.press_down()
 					return true

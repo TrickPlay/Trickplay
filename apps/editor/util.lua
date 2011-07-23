@@ -1,8 +1,8 @@
 ----------
 -- Utils 
 -----------
-
 local factory = ui.factory
+
 local set_project_path 
 
 local uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
@@ -11,6 +11,7 @@ local uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxG
 local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group", "ArrowPane", "TabBar"} 
 
 local attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "ui_width", "ui_height", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src", "empty_top_color", "empty_bottom_color", "stroke_color", "progress"}
+
 
 function table_copy(t)
   	local t2 = {}
@@ -225,11 +226,12 @@ function is_this_container(v)
 end 
 
 function clear_bg()
-    BG_IMAGE_20.opacity = 0
-    BG_IMAGE_40.opacity = 0
-    BG_IMAGE_80.opacity = 0
-    BG_IMAGE_white.opacity = 0
-    BG_IMAGE_import.opacity = 0
+
+    hdr.BG_IMAGE_20.opacity = 0
+    hdr.BG_IMAGE_40.opacity = 0
+    hdr.BG_IMAGE_80.opacity = 0
+    hdr.BG_IMAGE_white.opacity = 0
+    hdr.BG_IMAGE_import.opacity = 0
     screen:find_child("menuButton_view").items[2]["icon"].opacity = 0
     screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
     screen:find_child("menuButton_view").items[4]["icon"].opacity = 0
@@ -267,13 +269,13 @@ local function copy_widget_imgs ()
 		end 
 		for i, j in pairs(source_files) do 
 	     	source_file = trickplay.config.app_path..b..j 
-			dest_file = current_dir..dest_dir..j 
+			dest_file = hdr.current_dir..dest_dir..j 
 	     	editor_lb:file_copy(source_file, dest_file) 
 	    end 
 	end 
 	for a, b in pairs (copy_files) do 
 		source_file = trickplay.config.app_path..b
-		dest_file = current_dir..b
+		dest_file = hdr.current_dir..b
 	 	editor_lb:file_copy(source_file, dest_file)
 	end 
 end 
@@ -335,7 +337,7 @@ function set_new_project (pname, replace)
    	     print("couldn't create ",app_path)  
     else
     	editor_lb:change_app_path( app_path )
-	    current_dir = app_path
+	    hdr.current_dir = app_path
     end
 
     local screens_path = editor_lb:build_path( app_path, "screens" )
@@ -416,8 +418,8 @@ function new_project(fname)
 						end
 
 	local ti_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -466,10 +468,10 @@ function new_project(fname)
 	function xbox:on_button_down()
 		screen:remove(msgw)
 		msgw:clear() 
-		current_inspector = nil
-		current_focus = nil
+		hdr.current_inspector = nil
+		hdr.current_focus = nil
         screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		return true
 	end 
 
@@ -542,7 +544,7 @@ function open_project(t, msg, from_main)
     	end
     end 
     
-    input_mode = S_POPUP
+    hdr.input_mode = hdr.S_POPUP
 
 	local virtual_hieght = 0
 
@@ -567,7 +569,7 @@ function open_project(t, msg, from_main)
    	     	print("couldn't create ",app_path)  
         else
             editor_lb:change_app_path( app_path )
-	     	current_dir = app_path
+	     	hdr.current_dir = app_path
         end
 
         local screens_path = editor_lb:build_path( app_path, "screens" )
@@ -629,8 +631,8 @@ function open_project(t, msg, from_main)
 	button_ok.pressed = function() load_project(selected_project) end
 	
 	local s_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -780,10 +782,10 @@ function open_project(t, msg, from_main)
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(msgw)
 		msgw:clear() 
-		current_inspector = nil
-		current_focus = nil 
+		hdr.current_inspector = nil
+		hdr.current_focus = nil 
 		if x then 
-	    	input_mode = S_SELECT
+	    	hdr.input_mode = hdr.S_SELECT
 		end 
 		screen.grab_key_focus(screen) 
 		if textUIElement == nil then 
@@ -825,7 +827,7 @@ function set_app_path()
     end
     end 
     
-    input_mode = S_POPUP
+    hdr.input_mode = hdr.S_POPUP
 
     printMsgWindow("Select Project : ", "projectlist")
     inputMsgWindow("projectlist")
@@ -866,9 +868,9 @@ function create_on_button_down_f(v)
 	local org_object, new_object 
 	
 	function v:on_button_down(x,y,button,num_clicks)
-	   if (input_mode ~= S_RECTANGLE) then 
+	   if (hdr.input_mode ~= hdr.S_RECTANGLE) then 
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
-	     		if(input_mode == S_SELECT) and  (screen:find_child("msgw") == nil) then
+	     		if(hdr.input_mode == hdr.S_SELECT) and  (screen:find_child("msgw") == nil) then
 	       			if (v.extra.is_in_group == true and control == false ) then 
 		    			local p_obj = v.parent --find_parent(v)
                 		if(button == 3) then -- imsi : num_clicks is not correct ! 
@@ -877,14 +879,14 @@ function create_on_button_down_f(v)
                     		return true
                 		end 
 
-	            		if(input_mode == S_SELECT and p_obj.extra.selected == false) then 
+	            		if(hdr.input_mode == hdr.S_SELECT and p_obj.extra.selected == false) then 
 		     				editor.selected(p_obj)
 	            		elseif (p_obj.extra.selected == true) then 
 		     				editor.n_select(p_obj)
 		    			end
 	            		org_object = copy_obj(p_obj)
 		    			if v.extra.lock == false then -- or  v.name =="inspector" then 
-           	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
+           	    			hdr.dragging = {p_obj, x - p_obj.x, y - p_obj.y }
 		    			end 
            	    		return true
 	      			else 
@@ -893,7 +895,7 @@ function create_on_button_down_f(v)
                  			editor.inspector(v)
                     		return true
                 		end 
-	            		if(input_mode == S_SELECT and v.extra.selected == false) then 
+	            		if(hdr.input_mode == hdr.S_SELECT and v.extra.selected == false) then 
 								----kkkk
 		     				editor.selected(v) 
 							if(v.type == "Text") then 
@@ -968,21 +970,21 @@ function create_on_button_down_f(v)
 	    			end 
 	    			org_object = copy_obj(v)
 					if v.extra.lock == false then -- or v.name == "inspector" then 
-        				dragging = {v, x - v.x, y - v.y }
+        				hdr.dragging = {v, x - v.x, y - v.y }
 					end
         			return true
 				end
-	    	elseif (input_mode == S_FOCUS) then 
+	    	elseif (hdr.input_mode == hdr.S_FOCUS) then 
 				if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
 		     		editor.selected(v)
-		     		screen:find_child("text"..focus_type).text = v.name 
+		     		screen:find_child("text"..hdr.focus_type).text = v.name 
 				end 
-				input_mode = S_FOCUS
+				hdr.input_mode = hdr.S_FOCUS
            		return true
             end
-	   elseif( input_mode ~= S_RECTANGLE ) then 
+	   elseif( hdr.input_mode ~= hdr.S_RECTANGLE ) then 
 			if v.extra.lock == false then --or v.name == inspector  then  
-				dragging = {v, x - v.x, y - v.y }
+				hdr.dragging = {v, x - v.x, y - v.y }
            		return true
 			end 
     	end
@@ -994,36 +996,36 @@ end
 		if shift == true then 
 			return 
 		end 
-		if (input_mode ~= S_RECTANGLE) then 
+		if (hdr.input_mode ~= hdr.S_RECTANGLE) then 
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
-	    		if(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
+	    		if(hdr.input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
 	    			if (v.extra.is_in_group == true) then 
 						local p_obj = v.parent --find_parent(v)
 						new_object = copy_obj(p_obj)
-					    if(dragging ~= nil) then 
-	            			local actor , dx , dy = unpack( dragging )
+					    if(hdr.dragging ~= nil) then 
+	            			local actor , dx , dy = unpack( hdr.dragging )
 							if type(dx) == "number" then 
 	            				new_object.position = {x-dx, y-dy}
 							else 
 								print("dx is function") 
 							end 
 							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-								editor.n_select(v, false, dragging) 
-								editor.n_select(new_object, false, dragging) 
-								editor.n_select(org_object, false, dragging) 
-                    			table.insert(undo_list, {p_obj.name, CHG, org_object, new_object})
+								editor.n_select(v, false, hdr.dragging) 
+								editor.n_select(new_object, false, hdr.dragging) 
+								editor.n_select(org_object, false, hdr.dragging) 
+                    			table.insert(hdr.undo_list, {p_obj.name, hdr.CHG, org_object, new_object})
 							end 
-	            			dragging = nil
+	            			hdr.dragging = nil
 	            		end 
 		    		return true 
-				elseif( input_mode ~= S_RECTANGLE) then  
-	      	    	if(dragging ~= nil) then 
-	       	       		local actor = unpack(dragging) 
+				elseif( hdr.input_mode ~= hdr.S_RECTANGLE) then  
+	      	    	if(hdr.dragging ~= nil) then 
+	       	       		local actor = unpack(hdr.dragging) 
 		       			if (actor.name == "grip") then  -- scroll_window -> grip
-							dragging = nil 
+							hdr.dragging = nil 
 							return true 
 		       			end 
-	               		local actor , dx , dy = unpack( dragging )
+	               		local actor , dx , dy = unpack( hdr.dragging )
 		       			new_object = copy_obj(v)
 	               		new_object.position = {x-dx, y-dy}
 ---[[ Content Setting 
@@ -1113,7 +1115,7 @@ end
 	                	end 
 			
 						if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then  
-						    for i=1, v_guideline,1 do 
+						    for i=1, hdr.v_guideline,1 do 
 			   					if(screen:find_child("v_guideline"..i) ~= nil) then 
 			     					local gx = screen:find_child("v_guideline"..i).x 
 			     					if(15 >= math.abs(gx - x + dx)) then  
@@ -1131,7 +1133,7 @@ end
 			     					end 
 			   					end 
 		        			end 
-							for i=1, h_guideline,1 do 
+							for i=1, hdr.h_guideline,1 do 
 			   					if(screen:find_child("h_guideline"..i) ~= nil) then 
 			      					local gy =  screen:find_child("h_guideline"..i).y 
 			      					if(15 >= math.abs(gy - y + dy)) then 
@@ -1155,21 +1157,21 @@ end
 							end 
 							if(org_object ~= nil) then  
 		           				if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			     					editor.n_select(v, false, dragging) 
-			     					editor.n_select(new_object, false, dragging) 
-			     					editor.n_select(org_object, false, dragging) 
+			     					editor.n_select(v, false, hdr.dragging) 
+			     					editor.n_select(new_object, false, hdr.dragging) 
+			     					editor.n_select(org_object, false, hdr.dragging) 
 			     					v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
 			     					v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
-                    	     		table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                    	     		table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
 			   					end
 							end 
-	            			dragging = nil
+	            			hdr.dragging = nil
               	  		end
               	  		return true
 	      			end 
              	end
 	   		else 
-	      		dragging = nil
+	      		hdr.dragging = nil
           		return true
        		end
 		end
@@ -2047,7 +2049,7 @@ function cleanMsgWindow()
      msgw_cur_y = 50
 	 local msgw = screen:find_child("msgw")
      screen:remove(msgw)
-     input_mode = S_SELECT
+     hdr.input_mode = hdr.S_SELECT
 end 
 
 local projectlist_len 
@@ -2091,7 +2093,7 @@ function printMsgWindow(txt, name)
      end
 
      msgw:add(msgw_bg)
-     input_mode = S_POPUP
+     hdr.input_mode = hdr.S_POPUP
      local textText = Text{name= name, text = txt, font= "DejaVu Sans 32px",
      color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
      reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
@@ -2104,7 +2106,7 @@ function printMsgWindow(txt, name)
 	 
      	 for i, j in pairs (projects) do  
 	     --local prj_text = Text {text = j, color = {255,255,255,255}, font= "DejaVu Sans 32px", color = "FFFFFF"}
-	     local prj_text = Text {text = j, color = DEFAULT_COLOR, font= "DejaVu Sans 32px", color = "FFFFFF"}
+	     local prj_text = Text {text = j, color = hdr.DEFAULT_COLOR, font= "DejaVu Sans 32px", color = "FFFFFF"}
 	     prj_text.reactive = true
 	     prj_text.position = {msgw_cur_x, msgw_cur_y+10}
 	     prj_text.extra.index = i 
@@ -2181,8 +2183,8 @@ function inputMsgWindow_savefile(input_text, cfn, save_current_file)
 
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
-     local screen_dir = editor_lb:readdir(current_dir.."/screens/")
-     local main_dir = editor_lb:readdir(current_dir)
+     local screen_dir = editor_lb:readdir(hdr.current_dir.."/screens/")
+     local main_dir = editor_lb:readdir(hdr.current_dir)
      local enter_gen_stub_code = false
 
 	 if cfn ~= "OK" and save_current_file == nil then 
@@ -2301,7 +2303,7 @@ function inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		global_section_contents = "function main()\n-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
 	        gen_stub_code(g)
 
-		local screen_mouse_code = "\n-- SCREEN ON_MOTION SECTION\nfunction screen:on_motion(x,y)\n\tif(screen:find_child(\"user_mouse_pointer\") == nil) then\n\t\tscreen:add(user_mouse_pointer)\n\tend\n\tuser_mouse_pointer.position = {x-15 ,y-10 ,0}\n\tuser_mouse_pointer:raise_to_top()\n\tif dragging then\n\t\tlocal actor = unpack(dragging)\n\t\tif (actor.name == \"grip\") then\n\t\t\tlocal actor,s_on_motion = unpack(dragging)\n\t\t\ts_on_motion(x, y)\n\t\t\treturn true\n\t\tend\n\t\treturn true\n\tend\nend\n-- END SCREEN ON_MOTION SECTION\n\n-- SCREEN ON_BUTTON_UP SECTION\nfunction screen:on_button_up()\n\tif dragging then\n\t\tdragging = nil\n\tend\nend\n-- END SCREEN ON_BUTTON_UP SECTION\n"
+		local screen_mouse_code = "\n-- SCREEN ON_MOTION SECTION\nfunction screen:on_motion(x,y)\n\tif hdr.dragging then\n\t\tlocal actor = unpack(dragging)\n\t\tif (actor.name == \"grip\") then\n\t\t\tlocal actor,s_on_motion = unpack(dragging)\n\t\t\ts_on_motion(x, y)\n\t\t\treturn true\n\t\tend\n\t\treturn true\n\tend\nend\n-- END SCREEN ON_MOTION SECTION\n\n-- SCREEN ON_BUTTON_UP SECTION\nfunction screen:on_button_up()\n\tif dragging then\n\t\tdragging = nil\n\tend\nend\n-- END SCREEN ON_BUTTON_UP SECTION\n"
 
 		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n\nui_element.screen_add(groups[\""..fileLower.."\"])\n\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n"..screen_mouse_code.."\n-- END GLOBAL SECTION FOOTER \nend\n\ndolater( main )\n"
 
@@ -2314,10 +2316,10 @@ function inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		editor_lb:writefile("app", app_contents, true)
 	   end 
 	 
-           current_fn = "screens/"..input_text
-           editor_lb:writefile(current_fn, contents, true)
-	   screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
-           contents = ""
+           hdr.current_fn = "screens/"..input_text
+           editor_lb:writefile(hdr.current_fn, hdr.contents, true)
+	   screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..hdr.current_fn
+           hdr.contents = ""
 	   cleanMsgWindow()
            screen:grab_key_focus(screen) 
       end
@@ -2419,10 +2421,10 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 	end 
          
         function x_scroll_bar:on_button_down(x,y,button,num_clicks)
-		dragging = {x_scroll_bar, x-x_scroll_bar.x, y-x_scroll_bar.y }
+		hdr.dragging = {x_scroll_bar, x-x_scroll_bar.x, y-x_scroll_bar.y }
 
-		if table.getn(selected_objs) ~= 0 then
-		     for q, w in pairs (selected_objs) do
+		if table.getn(hdr.selected_objs) ~= 0 then
+		     for q, w in pairs (hdr.selected_objs) do
 			 local t_border = screen:find_child(w)
 			 local i, j = string.find(t_border.name,"border")
 		         local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
@@ -2436,8 +2438,8 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
     	end 
 
     	function x_scroll_bar:on_button_up(x,y,button,num_clicks)
-	 	if(dragging ~= nil) then 
-	      		local actor , dx , dy = unpack( dragging )
+	 	if(hdr.dragging ~= nil) then 
+	      		local actor , dx , dy = unpack( hdr.dragging )
 			local dif
 	      		if (actor.extra.h_x <= x-dx and x-dx <= actor.extra.l_x) then -- 스크롤 되는 범위안에 있으면	
 	           		dif = x - dx - x_scroll_bar.extra.org_x -- 스크롤이 이동한 거리 
@@ -2454,8 +2456,8 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 	           	     j.position = {j.extra.org_x-dif-x_scroll_from, j.y, j.z}
 			end 
 
-			if table.getn(selected_objs) ~= 0 then
-			     for q, w in pairs (selected_objs) do
+			if table.getn(hdr.selected_objs) ~= 0 then
+			     for q, w in pairs (hdr.selected_objs) do
 				 local t_border = screen:find_child(w)
 				 local i, j = string.find(t_border.name,"border")
 		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
@@ -2466,7 +2468,7 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 			end
 
 			g.extra.scroll_x = math.floor(dif) 
-	      		dragging = nil
+	      		hdr.dragging = nil
 	 	end 
          	return true
     	end 
@@ -2536,9 +2538,9 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 	end 
          
         function y_scroll_bar:on_button_down(x,y,button,num_clicks)
-		dragging = {y_scroll_bar, x-y_scroll_bar.x, y-y_scroll_bar.y }
-		if table.getn(selected_objs) ~= 0 then
-			for q, w in pairs (selected_objs) do
+		hdr.dragging = {y_scroll_bar, x-y_scroll_bar.x, y-y_scroll_bar.y }
+		if table.getn(hdr.selected_objs) ~= 0 then
+			for q, w in pairs (hdr.selected_objs) do
 				 local t_border = screen:find_child(w)
 				 local i, j = string.find(t_border.name,"border")
 		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
@@ -2552,8 +2554,8 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
     	end 
 
     	function y_scroll_bar:on_button_up(x,y,button,num_clicks)
-	 	if(dragging ~= nil) then 
-	      		local actor , dx , dy = unpack( dragging )
+	 	if(hdr.dragging ~= nil) then 
+	      		local actor , dx , dy = unpack( hdr.dragging )
 			local dif
 	      		if (actor.extra.h_y <= y-dy and y-dy <= actor.extra.l_y) then -- 스크롤 되는 범위안에 있으면	
 	           		dif = y - dy - y_scroll_bar.extra.org_y -- 스크롤이 이동한 거리 
@@ -2570,8 +2572,8 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 	           	     j.position = {j.x, j.extra.org_y-dif-y_scroll_from, j.z}
 			end 
 
-			if table.getn(selected_objs) ~= 0 then
-			     for q, w in pairs (selected_objs) do
+			if table.getn(hdr.selected_objs) ~= 0 then
+			     for q, w in pairs (hdr.selected_objs) do
 				 local t_border = screen:find_child(w)
 				 local i, j = string.find(t_border.name,"border")
 		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
@@ -2582,7 +2584,7 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 			end
 
 			g.extra.scroll_y = math.floor(dif) 
-	      		dragging = nil
+	      		hdr.dragging = nil
 	 	end 
          	return true
     	end 
@@ -2590,7 +2592,7 @@ function make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)
 end
 
 function inputMsgWindow_openfile(input_text, ret)
-    local dir = editor_lb:readdir(current_dir.."/screens")
+    local dir = editor_lb:readdir(hdr.current_dir.."/screens")
 	local back_fn = input_text..".back"
 
     if(input_text == nil) then
@@ -2606,9 +2608,9 @@ function inputMsgWindow_openfile(input_text, ret)
 
     if(is_lua_file(input_text) == true) then 
         editor.close()
-        current_fn = "screens/"..input_text
+        hdr.current_fn = "screens/"..input_text
 
-		local cfc = readfile(current_fn)
+		local cfc = readfile(hdr.current_fn)
 		local bfc = readfile(back_fn)
 
 		if cfc ~= bfc and bfc ~= nil and ret == nil then 
@@ -2617,11 +2619,11 @@ function inputMsgWindow_openfile(input_text, ret)
 		elseif ret == "OK" then 
 			bfc = readfile(back_fn)
 			if bfc then 
-				editor_lb:writefile(current_fn, bfc, true)
+				editor_lb:writefile(hdr.current_fn, bfc, true)
 			end 
 		end 
 
-        local f = loadfile(current_fn)
+        local f = loadfile(hdr.current_fn)
         f(g) 
 
 	   	if screen:find_child("timeline") then 
@@ -2640,7 +2642,7 @@ function inputMsgWindow_openfile(input_text, ret)
      end 
 
      if(g.extra.video ~= nil) then clear_bg() end 
-     item_num = table.getn(g.children)
+     hdr.item_num = table.getn(g.children)
 
      local x_scroll_from=0
      local x_scroll_to=0
@@ -2753,8 +2755,8 @@ function inputMsgWindow_yn(txt)
      if(txt == "no") then
           editor.save(false)
      elseif(txt =="yes") then 
-          editor_lb:writefile(current_fn, contents, true)
-          contents = ""
+          editor_lb:writefile(hdr.current_fn, hdr.contents, true)
+          hdr.contents = ""
      end
      screen:grab_key_focus(screen) 
 end
@@ -2762,14 +2764,14 @@ end
 --[[
 function inputMsgWindow_openfile(input_text)
      local file_not_exists = true
-     local dir = editor_lb:readdir(current_dir.."/screens")
+     local dir = editor_lb:readdir(hdr.current_dir.."/screens")
      if(input_text == nil) then
 		print ("input_text is nil") 
 		return 
      end 
      for i, v in pairs(dir) do
           if(input_text == v)then
-     	       current_fn = "screens/"..input_text
+     	       hdr.current_fn = "screens/"..input_text
                file_not_exists = false
           end
      end
@@ -2783,8 +2785,8 @@ function inputMsgWindow_openfile(input_text)
      end
      if(is_lua_file(input_text) == true) then 
            editor.close()
-           current_fn = "screens/"..input_text
-           local f = loadfile(current_fn)
+           hdr.current_fn = "screens/"..input_text
+           local f = loadfile(hdr.current_fn)
            f(g) 
 	   if screen:find_child("timeline") then 
 	      for i,j in pairs (screen:find_child("timeline").children) do
@@ -2907,8 +2909,8 @@ function inputMsgWindow_yn(txt)
      if(txt == "no") then
           editor.save(false)
      elseif(txt =="yes") then 
-          editor_lb:writefile(current_fn, contents, true)
-          contents = ""
+          editor_lb:writefile(hdr.current_fn, hdr.contents, true)
+          hdr.contents = ""
      end
      screen:grab_key_focus(screen) 
 end
@@ -2950,7 +2952,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
      end 
 
      local file_not_exists = true
-     local dir = editor_lb:readdir(current_dir.."/assets/images")
+     local dir = editor_lb:readdir(hdr.current_dir.."/assets/images")
      for i, v in pairs(dir) do
           if(input_text == v)then
                file_not_exists = false
@@ -2964,19 +2966,19 @@ function inputMsgWindow_openimage(input_purpose, input_text)
      end
  
      if (input_purpose == "open_bg_imagefile") then  
-	  BG_IMAGE_20.opacity = 0
-	  BG_IMAGE_40.opacity = 0
-	  BG_IMAGE_80.opacity = 0
-	  BG_IMAGE_white.opacity = 0
-	  BG_IMAGE_import:set{src = input_text, opacity = 255} 
-	  input_mode = S_SELECT
+	  hdr.BG_IMAGE_20.opacity = 0
+	  hdr.BG_IMAGE_40.opacity = 0
+	  hdr.BG_IMAGE_80.opacity = 0
+	  hdr.BG_IMAGE_white.opacity = 0
+	  hdr.BG_IMAGE_import:set{src = input_text, opacity = 255} 
+	  hdr.input_mode = hdr.S_SELECT
      elseif(is_img_file(input_text) == true) then 
 	  
-	  while (is_available("image"..tostring(item_num)) == false) do  
-		item_num = item_num + 1
+	  while (is_available("image"..tostring(hdr.item_num)) == false) do  
+		hdr.item_num = hdr.item_num + 1
 	  end 
 
-          ui.image= Image { name="image"..tostring(item_num),
+          ui.image= Image { name="image"..tostring(hdr.item_num),
           --src = input_text, opacity = 255 , position = {200,200}, 
           --src = trickplay.config.app_path.."/assets/images/"..input_text, opacity = 255 , position = {200,200}, 
           src = "/assets/images/"..input_text, opacity = 255 , position = {200,200}, 
@@ -2984,7 +2986,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
           ui.image.reactive = true
 	  ui.image.extra.lock = false
           create_on_button_down_f(ui.image)
-          table.insert(undo_list, {ui.image.name, ADD, ui.image})
+          table.insert(hdr.undo_list, {ui.image.name, hdr.ADD, ui.image})
           g:add(ui.image)
 	  
 	  local timeline = screen:find_child("timeline")
@@ -3018,7 +3020,7 @@ function inputMsgWindow_openimage(input_purpose, input_text)
           if(screen:find_child("screen_objects") == nil) then
                screen:add(g)
           end 
-          item_num = item_num + 1
+          hdr.item_num = hdr.item_num + 1
      else 
 	  --cleanMsgWindow()
 	  --screen:grab_key_focus(screen) -- iii
@@ -3047,7 +3049,7 @@ local function set_project_path ()
    	     print("couldn't create ",app_path)  
         else
              editor_lb:change_app_path( app_path )
-	     current_dir = app_path
+	     	 hdr.current_dir = app_path
         end
 
 --- new directory structures 
@@ -3320,7 +3322,7 @@ function inputMsgWindow(input_purpose, cfn)
      end
 
      screen:add(msgw)
-     input_mode = S_POPUP
+     hdr.input_mode = hdr.S_POPUP
 
 	
      if( input_purpose =="yn") then 

@@ -1,5 +1,50 @@
-local header = dofile("header.lua")
+---------------------------------------------------------
+--		Visual Editor Main.lua 
+---------------------------------------------------------
+
+-- constants 
+
+hdr = dofile("header")
+
+hdr.test = 100
+-- Global 
+---------------------
+editor_lb = editor
+editor_use = false
+
+-- Table g contains all the ui elements in the screen 
+g = Group{name = "screen_objects", extra={canvas_xf = 0, canvas_f = 0, canvas_xt = 0, canvas_t = 0, canvas_w = screen.w, canvas_h = screen.h, scroll_x = 0, scroll_y = 0, scroll_dy = 1}}
+
+-- localized string table
+strings = dofile( "localized:strings.lua" ) or {}
+
+function missing_localized_string( t , s )
+	rawset(t,s,s) -- only warn once per string
+    return s
+end
+
+setmetatable( strings , { __index = missing_localized_string } )
+
+-- The asset cache
+assets = dofile( "assets-cache" )
+
+ui =
+    {
+        assets              = assets,
+        factory             = dofile( "ui-factory" ),
+    }
+
+-- for the modifier keys 
+shift 		      = false
+shift_changed 	  = false
+control 	      = false
+
+skins = {}
+
+ui_element = dofile("/lib/ui_element.lua")
 dofile("editor.lua")
+
+
 
 -------------------------------------------------------------------------------
 -- Build the MENU 
@@ -11,28 +56,28 @@ dofile("editor.lua")
     
     local key_map =
     {
-        [ keys.a	] = function() input_mode = S_SELECT editor.save(false) end,
-		[ keys.b	] = function() editor.undo_history() input_mode = S_SELECT end,
-        [ keys.c	] = function() editor.clone() input_mode = S_SELECT end,
-        [ keys.d	] = function() editor.duplicate() input_mode = S_SELECT end,
-        [ keys.e	] = function() editor.redo() input_mode = S_SELECT end,
-        [ keys.f	] = function() new_project() input_mode = S_SELECT end,
-        [ keys.g	] = function() editor.group() input_mode = S_SELECT end,
-        [ keys.u	] = function() editor.ugroup() input_mode = S_SELECT end,
-        [ keys.w	] = function() input_mode = S_SELECT  editor.image() end,
-        [ keys.n	] = function() editor.close() input_mode = S_SELECT end,
-        [ keys.o	] = function() input_mode = S_SELECT editor.open()  end,
+        [ keys.a	] = function() hdr.input_mode = hdr.S_SELECT editor.save(false) end,
+		[ keys.b	] = function() editor.undo_history() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.c	] = function() editor.clone() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.d	] = function() editor.duplicate() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.e	] = function() editor.redo() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.f	] = function() new_project() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.g	] = function() editor.group() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.u	] = function() editor.ugroup() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.w	] = function() hdr.input_mode = hdr.S_SELECT  editor.image() end,
+        [ keys.n	] = function() editor.close() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.o	] = function() hdr.input_mode = hdr.S_SELECT editor.open()  end,
         [ keys.q	] = function() if editor.close() == nil then exit() end end,
         [ keys.p	] = function() open_project() end,
-		[ keys.r	] = function() input_mode = S_RECTANGLE screen:grab_key_focus() end,
-        [ keys.s	] = function() input_mode = S_SELECT editor.save(true) end,
-        [ keys.t	] = function() editor.text() input_mode = S_SELECT end,
-        [ keys.z	] = function() editor.undo() input_mode = S_SELECT end,
-        [ keys.v	] = function() editor.v_guideline() input_mode = S_SELECT end,
-        [ keys.h	] = function() editor.h_guideline() input_mode = S_SELECT end,
+		[ keys.r	] = function() hdr.input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end,
+        [ keys.s	] = function() hdr.input_mode = hdr.S_SELECT editor.save(true) end,
+        [ keys.t	] = function() editor.text() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.z	] = function() editor.undo() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.v	] = function() editor.v_guideline() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.h	] = function() editor.h_guideline() hdr.input_mode = hdr.S_SELECT end,
         [ keys.j	] = function() if not screen:find_child("timeline") then 
 					    				if table.getn(g.children) > 0 then
-											input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
+											hdr.input_mode = hdr.S_SELECT local tl = ui_element.timeline() screen:add(tl)
 											screen:find_child("timeline").extra.show = true 
 					    				end
 				       			   elseif table.getn(g.children) == 0 then 
@@ -48,9 +93,9 @@ dofile("editor.lua")
 					    				screen:find_child("timeline").extra.show = false
 				      				end
 		            	end,
-        --[ keys.x	] = function() editor.export() input_mode = S_SELECT end,
-        [ keys.i	] = function() editor.the_ui_elements() input_mode = S_SELECT end,
-        [ keys.m	] = function() if (menu_hide == true) then 
+        --[ keys.x	] = function() editor.export() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.i	] = function() editor.the_ui_elements() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.m	] = function() if (hdr.menu_hide  == true) then 
 					    				menuShow()
 					    				if(screen:find_child("xscroll_bar") ~= nil) then 
 					    					screen:find_child("xscroll_bar"):show() 
@@ -64,7 +109,7 @@ dofile("editor.lua")
 											screen:find_child("y_0_mark"):show()
 											screen:find_child("y_1080_mark"):show()
 					    			   end 
-					    			   menu_hide = false 
+					    			   hdr.menu_hide  = false 
 						          else 
 		     			    		   menuHide()
 					    			  if(screen:find_child("xscroll_bar") ~= nil) then 
@@ -79,18 +124,18 @@ dofile("editor.lua")
 											screen:find_child("y_0_mark"):hide()
 											screen:find_child("y_1080_mark"):hide()
 					    			 end 
-					    			 menu_hide = true 
+					    			 hdr.menu_hide  = true 
 					    			 screen:grab_key_focus()
 				       			end 
-				       			input_mode = S_SELECT 
+				       			hdr.input_mode = hdr.S_SELECT 
 			    		end,
-        [ keys.BackSpace] = function() editor.delete() input_mode = S_SELECT end,
-        [ keys.Delete] = function() editor.delete() input_mode = S_SELECT end,
+        [ keys.BackSpace] = function() editor.delete() hdr.input_mode = hdr.S_SELECT end,
+        [ keys.Delete] = function() editor.delete() hdr.input_mode = hdr.S_SELECT end,
 		[ keys.Shift_L  ] = function() shift = true end,
 		[ keys.Shift_R  ] = function() shift = true end,
 		[ keys.Control_L  ] = function() control = true end,
 		[ keys.Control_R  ] = function() control = true end,
-        [ keys.Return   ] = function() if(current_inspector == nil) then 
+        [ keys.Return   ] = function() if(hdr.current_inspector == nil) then 
 				     						for i, j in pairs (g.children) do 
 												if(j.extra.selected == true) then 
 													editor.n_selected(j) 
@@ -98,11 +143,11 @@ dofile("editor.lua")
 				     						end 
 		   		     						screen:find_child("menuButton_file"):grab_key_focus()
 		   		     						screen:find_child("menuButton_file").on_focus_in()
-				     						input_mode = S_MENU
+				     						hdr.input_mode = S_MENU
 			             			  end 
 			    			end ,
-        [ keys.Left     ] = function() if table.getn(selected_objs) ~= 0 then
-			         for q, w in pairs (selected_objs) do
+        [ keys.Left     ] = function() if table.getn(hdr.selected_objs) ~= 0 then
+			         for q, w in pairs (hdr.selected_objs) do
 				      local t_border = screen:find_child(w)
 				      if(t_border ~= nil) then 
 		     			    t_border.x = t_border.x - 1
@@ -118,8 +163,8 @@ dofile("editor.lua")
 	             		      end
 			         end
 			   end end,
-        [ keys.Right    ] = function() if table.getn(selected_objs) ~= 0 then
-			         for q, w in pairs (selected_objs) do
+        [ keys.Right    ] = function() if table.getn(hdr.selected_objs) ~= 0 then
+			         for q, w in pairs (hdr.selected_objs) do
 				      local t_border = screen:find_child(w)
 				      if(t_border ~= nil) then 
 		     			    t_border.x = t_border.x + 1
@@ -135,8 +180,8 @@ dofile("editor.lua")
 	             		      end
 			         end
 			   end end ,
-        [ keys.Down     ] = function()if table.getn(selected_objs) ~= 0 then
-			         for q, w in pairs (selected_objs) do
+        [ keys.Down     ] = function()if table.getn(hdr.selected_objs) ~= 0 then
+			         for q, w in pairs (hdr.selected_objs) do
 				      local t_border = screen:find_child(w)
 				      if(t_border ~= nil) then 
 		     			    t_border.y = t_border.y + 1
@@ -151,15 +196,15 @@ dofile("editor.lua")
                				    end
 	             		      end
 			         end
-			   elseif(current_inspector == nil) then 
-					if current_focus then 	
-					      if current_focus.parent then 
-						     --current_focus.parent.press_down() 
+			   elseif(hdr.current_inspector == nil) then 
+					if hdr.current_focus then 	
+					      if hdr.current_focus.parent then 
+						     --hdr.current_focus.parent.press_down() 
 					      end 
 					end
 			  end end,
-        [ keys.Up       ] = function() if table.getn(selected_objs) ~= 0 then
-			         for q, w in pairs (selected_objs) do
+        [ keys.Up       ] = function() if table.getn(hdr.selected_objs) ~= 0 then
+			         for q, w in pairs (hdr.selected_objs) do
 				      local t_border = screen:find_child(w)
 				      if(t_border ~= nil) then 
 		     			    t_border.y = t_border.y - 1
@@ -174,10 +219,10 @@ dofile("editor.lua")
                				    end
 	             		      end
 			         end
-			   elseif(current_inspector == nil) then 
-					if current_focus then 	
-					      if current_focus.parent then 
-						     --current_focus.parent.press_up() 
+			   elseif(hdr.current_inspector == nil) then 
+					if hdr.current_focus then 	
+					      if hdr.current_focus.parent then 
+						     --hdr.current_focus.parent.press_up() 
 					      end 
 					end
 			   end end
@@ -189,7 +234,7 @@ dofile("editor.lua")
 		if(key == keys.Control_L ) then control = true end
 		if(key == keys.Control_R ) then control = true end
 	
-		if(input_mode ~= S_POPUP) then 
+		if(hdr.input_mode ~= hdr.S_POPUP) then 
           if key_map[key] then
               key_map[key](self)
      	  end
@@ -206,14 +251,13 @@ dofile("editor.lua")
     end
 
     function screen:on_button_down(x,y,button,num_clicks)
-
-	  if(input_mode == S_MENU_M) then
-		if current_focus then 
-			current_focus.on_focus_out()
+	  if(hdr.input_mode == hdr.S_MENU_M) then
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 			screen:grab_key_focus()
 		end 
 	  end 
-	  if(input_mode == S_MENU) then
+	  if(hdr.input_mode == S_MENU) then
 		if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
 			screen:find_child("menuButton_file").on_focus_out()
 		elseif screen:find_child("menuButton_edit"):find_child("focus").opacity > 0 then 
@@ -224,7 +268,7 @@ dofile("editor.lua")
 			screen:find_child("menuButton_view").on_focus_out()
 		end
 		screen:grab_key_focus()
-		input_mode = S_SELECT
+		hdr.input_mode = hdr.S_SELECT
 	  end 
 
 	  for i, j in pairs (g.children) do  
@@ -239,11 +283,11 @@ dofile("editor.lua")
 	  end 
 
           --mouse_state = BUTTON_DOWN
-          if(input_mode == S_RECTANGLE) then 
+          if(hdr.input_mode == hdr.S_RECTANGLE) then 
 		editor.rectangle(x, y) 
 	  end
 
-          if(input_mode == S_MENU) then
+          if(hdr.input_mode == S_MENU) then
 		if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
 			screen:find_child("menuButton_file").on_focus_out()
 		elseif screen:find_child("menuButton_edit"):find_child("focus").opacity > 0 then 
@@ -255,9 +299,9 @@ dofile("editor.lua")
 		end
 		screen:grab_key_focus()
 
-		input_mode = S_SELECT
-          elseif(input_mode == S_SELECT) and (screen:find_child("msgw") == nil) then
-	       if(current_inspector == nil) then 
+		hdr.input_mode = hdr.S_SELECT
+          elseif(hdr.input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
+	       if(hdr.current_inspector == nil) then 
 		   -- if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) then
 		    if(button == 3) and (g.extra.video ~= nil) then -- imsi : num_clicks is not correct in engine 17
                          editor.inspector(g.extra.video)
@@ -270,31 +314,31 @@ dofile("editor.lua")
      end
 
 	function screen:on_button_up(x,y,button,clicks_count)
-		if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
-			local temp_focus = current_focus 
-				current_focus.on_focus_out()
+		if hdr.current_focus ~= nil and  hdr.current_focus.extra.type == "EditorButton" then 
+			local temp_focus = hdr.current_focus 
+				hdr.current_focus.on_focus_out()
 				temp_focus.on_focus_in()
 			return true
 		end 
 
-		if dragging then
-	    	local actor = unpack(dragging)
+		if hdr.dragging then
+	    	local actor = unpack(hdr.dragging)
 	       	if actor.parent then 	
 		   		if actor.parent.name == "timeline" then 
-					local actor, dx , dy, pointer_up_f = unpack( dragging )
+					local actor, dx , dy, pointer_up_f = unpack( hdr.dragging )
 					pointer_up_f(x,y,button,clicks_count) 
 					return true
 		   		end 
 	       	end 
         end 	
-	  	dragging = nil
+	  	hdr.dragging = nil
         --if (mouse_state == BUTTON_DOWN) then
-            if (input_mode == S_RECTANGLE) then 
+            if (hdr.input_mode == hdr.S_RECTANGLE) then 
 	           editor.rectangle_done(x, y) 
-	           input_mode = S_SELECT 
+	           hdr.input_mode = hdr.S_SELECT 
 	    	end
 
-	      	if(input_mode == S_SELECT) and 
+	      	if(hdr.input_mode == hdr.S_SELECT) and 
 		    	(screen:find_child("msgw") == nil) then
 				editor.multi_select_done(x,y)
 	      	end 
@@ -359,7 +403,7 @@ dofile("editor.lua")
 		end 
 	  end 
 
-	  if(input_mode == S_RECTANGLE) then 
+	  if(hdr.input_mode == hdr.S_RECTANGLE) then 
 			editor_lb:set_cursor(34)
 	  elseif shift == true then 
 			editor_lb:set_cursor(68)
@@ -368,7 +412,7 @@ dofile("editor.lua")
 	  end 
 --[[
 
-	  if(input_mode == S_RECTANGLE) then 
+	  if(hdr.input_mode == hdr.S_RECTANGLE) then 
 		if(screen:find_child("mouse_pointer") ~= nil) then 
 		     screen:remove(screen:find_child("mouse_pointer"))
 		end 
@@ -403,17 +447,17 @@ dofile("editor.lua")
 		end 
 	  end 
 ]]
-          if dragging then
+          if hdr.dragging then
 
-	       local actor = unpack(dragging) 
+	       local actor = unpack(hdr.dragging) 
 
 	       if (actor.name == "grip") then  
-	             local actor,s_on_motion = unpack(dragging) 
+	             local actor,s_on_motion = unpack(hdr.dragging) 
 	             s_on_motion(x, y)
 	             return true
 	       end 
 		
-               local actor, dx , dy = unpack( dragging )
+               local actor, dx , dy = unpack( hdr.dragging )
 
 	       local tl = actor.parent          
 	       if tl then 
@@ -503,8 +547,8 @@ dofile("editor.lua")
 	           	           j.position = {j.x, j.extra.org_y- dif - g.extra.canvas_f, j.z}
 			      end 
 			      
-			      if table.getn(selected_objs) ~= 0 then
-			      	for q, w in pairs (selected_objs) do
+			      if table.getn(hdr.selected_objs) ~= 0 then
+			      	for q, w in pairs (hdr.selected_objs) do
 				 local t_border = screen:find_child(w)
 				 local i, j = string.find(t_border.name,"border")
 		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
@@ -536,8 +580,8 @@ dofile("editor.lua")
 		        end 
 
 
-			if table.getn(selected_objs) ~= 0 then
-			     for q, w in pairs (selected_objs) do
+			if table.getn(hdr.selected_objs) ~= 0 then
+			     for q, w in pairs (hdr.selected_objs) do
 				 local t_border = screen:find_child(w)
 				 local i, j = string.find(t_border.name,"border")
 		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
@@ -570,8 +614,8 @@ dofile("editor.lua")
           end
 
           --if(mouse_state == BUTTON_DOWN) then
-               if (input_mode == S_RECTANGLE) then editor.rectangle_move(x, y) end
-               if (input_mode == S_SELECT) and 
+               if (hdr.input_mode == hdr.S_RECTANGLE) then editor.rectangle_move(x, y) end
+               if (hdr.input_mode == hdr.S_SELECT) and 
 		  (screen:find_child("msgw") == nil) then 
 		    editor.multi_select_move(x, y) end
           --end
@@ -580,11 +624,11 @@ dofile("editor.lua")
       end
 
       local function screen_add_bg()
-    	screen:add(BG_IMAGE_20)
-    	screen:add(BG_IMAGE_40)
-    	screen:add(BG_IMAGE_80)
-    	screen:add(BG_IMAGE_white)
-    	screen:add(BG_IMAGE_import)
+    	screen:add(hdr.BG_IMAGE_20)
+    	screen:add(hdr.BG_IMAGE_40)
+    	screen:add(hdr.BG_IMAGE_80)
+    	screen:add(hdr.BG_IMAGE_white)
+    	screen:add(hdr.BG_IMAGE_import)
       end 
 
 
@@ -618,7 +662,7 @@ dofile("editor.lua")
 	    }
 
 	    function backup_timeline.on_completed()
-			if auto_save == true and current_fn ~= "" then 
+			if auto_save == true and hdr.current_fn ~= "" then 
 				editor.save(nil, true) 
 			end 
 			t = nil
