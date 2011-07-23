@@ -1,3 +1,4 @@
+local ui_element = dofile("/lib/ui_element.lua")
 dofile("apply.lua")
 dofile("editor_lib.lua")
 
@@ -11,13 +12,17 @@ local g_init_y = 0
 local factory = ui.factory
 
 local uiElementLists = {"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane"}
+local uiElements_en = {"Rectangle", "Text", "Image", "Video"}
+
+local uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
+           "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane" }
 
 
 local widget_f_map = {
-     ["Rectangle"]	= function () input_mode = S_RECTANGLE screen:grab_key_focus() end, 
-     ["Text"]		= function () editor.text() input_mode = S_SELECT end, 
-     ["Image"]		= function () input_mode = S_SELECT editor.image() end, 	
-     ["Video"] 		= function () input_mode = S_SELECT editor.video() end,
+     ["Rectangle"]	= function () hdr.input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end, 
+     ["Text"]		= function () editor.text() hdr.input_mode = hdr.S_SELECT end, 
+     ["Image"]		= function () hdr.input_mode = hdr.S_SELECT editor.image() end, 	
+     ["Video"] 		= function () hdr.input_mode = hdr.S_SELECT editor.video() end,
      ["Button"]     = function () return ui_element.button()       end, 
      ["TextInput"] 	= function () return ui_element.textInput()    end, 
      ["DialogBox"] 	= function () return ui_element.dialogBox()    end, 
@@ -137,8 +142,8 @@ local function guideline_inspector(v)
 	end
 
 	local ti_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -189,10 +194,10 @@ local function guideline_inspector(v)
 	function xbox:on_button_down()
 		screen:remove(msgw)
 		msgw:clear() 
-		current_inspector = nil
-		current_focus = nil
+		hdr.current_inspector = nil
+		hdr.current_focus = nil
         screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		return true
 	end 
 
@@ -229,10 +234,10 @@ local function guideline_inspector(v)
 end 
 
 function editor.reference_image()
- 	if(current_dir == "") then 
+ 	if(hdr.current_dir == "") then 
 		--set_app_path() 
 	else 
-		input_mode = S_SELECT  
+		hdr.input_mode = hdr.S_SELECT  
 		editor.image(true)
 		screen:grab_key_focus()
 	end 
@@ -245,31 +250,32 @@ function editor.reference_image()
 end 
 
 function editor.small_grid()
-	clear_bg() BG_IMAGE_20.opacity = 255 input_mode = S_SELECT
+	clear_bg() hdr.BG_IMAGE_20.opacity = 255 hdr.input_mode = hdr.S_SELECT
 	screen:find_child("menuButton_view").items[3]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.medium_grid()
-	clear_bg() BG_IMAGE_40.opacity = 255 input_mode = S_SELECT
+print("sjdhfjkshdfk")
+	clear_bg() hdr.BG_IMAGE_40.opacity = 255 hdr.input_mode = hdr.S_SELECT
 	screen:find_child("menuButton_view").items[4]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.large_grid()
-	clear_bg() BG_IMAGE_80.opacity = 255 input_mode = S_SELECT
+	clear_bg() hdr.BG_IMAGE_80.opacity = 255 hdr.input_mode = hdr.S_SELECT
 	screen:find_child("menuButton_view").items[5]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.white_bg()
-	clear_bg() BG_IMAGE_white.opacity = 255 input_mode = S_SELECT
+	clear_bg() hdr.BG_IMAGE_white.opacity = 255 hdr.input_mode = hdr.S_SELECT
 	screen:find_child("menuButton_view").items[6]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.black_bg()
-	clear_bg() input_mode = S_SELECT
+	clear_bg() hdr.input_mode = hdr.S_SELECT
 	screen:find_child("menuButton_view").items[7]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
@@ -288,15 +294,15 @@ end
 ]]
 
 function editor.show_guides()
-	if guideline_show == false then 
+	if hdr.guideline_show == false then 
 		screen:find_child("menuButton_view").items[11]["icon"].opacity = 255
-		guideline_show = true
-		for i= 1, h_guideline, 1 do 
+		hdr.guideline_show = true
+		for i= 1, hdr.h_guideline, 1 do 
 			if screen:find_child("h_guideline"..tostring(i)) then 
 				screen:find_child("h_guideline"..tostring(i)):show() 
 			end 
 		end 
-		for i= 1, v_guideline, 1 do 
+		for i= 1, hdr.v_guideline, 1 do 
 			if screen:find_child("v_guideline"..tostring(i)) then 
 				screen:find_child("v_guideline"..tostring(i)):show() 
 			end
@@ -305,13 +311,13 @@ function editor.show_guides()
 		--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
 		if is_there_guideline() then 
 			screen:find_child("menuButton_view").items[11]["icon"].opacity = 0
-			guideline_show = false
-			for i= 1, h_guideline, 1 do 
+			hdr.guideline_show = false
+			for i= 1, hdr.h_guideline, 1 do 
 				if screen:find_child("h_guideline"..tostring(i)) then 
 					screen:find_child("h_guideline"..tostring(i)):hide() 
 				end
 			end 
-			for i= 1, v_guideline, 1 do 
+			for i= 1, hdr.v_guideline, 1 do 
 				if screen:find_child("v_guideline"..tostring(i)) then 
 					screen:find_child("v_guideline"..tostring(i)):hide() 
 				end 
@@ -340,7 +346,7 @@ end
 function editor.timeline() 
         if not screen:find_child("timeline") then 
 			if table.getn(g.children) > 0 then
-				input_mode = S_SELECT local tl = ui_element.timeline() screen:add(tl)
+				hdr.input_mode = hdr.S_SELECT local tl = ui_element.timeline() screen:add(tl)
 				screen:find_child("timeline").extra.show = true 
 				screen:find_child("timeline"):raise_to_top()
 			else 
@@ -366,7 +372,7 @@ end
 
 local function create_on_line_down_f(v)
         function v:on_button_down(x,y,button,num_clicks)
-            dragging = {v, x - v.x, y - v.y }
+            hdr.dragging = {v, x - v.x, y - v.y }
 	     	--if(button == 3 or num_clicks >= 2) then
 	     	if(button == 3) then
 		  		guideline_inspector(v)
@@ -376,14 +382,14 @@ local function create_on_line_down_f(v)
         end
 
         function v:on_button_up(x,y,button,num_clicks)
-	     if(dragging ~= nil) then 
-	        local actor , dx , dy = unpack( dragging )
+	     if(hdr.dragging ~= nil) then 
+	        local actor , dx , dy = unpack( hdr.dragging )
 		  	if(guideline_type(v.name) == "v_guideline") then 
 				v.x = x - dx
 		  	elseif(guideline_type(v.name) == "h_guideline") then  
 				v.y = y - dy
 		  	end 
-	          	dragging = nil
+	          	hdr.dragging = nil
             end
             return true
         end
@@ -391,11 +397,11 @@ end
 
 function editor.v_guideline()
 
-     v_guideline = v_guideline + 1 
+     hdr.v_guideline = hdr.v_guideline + 1 
 
      local v_gl = Rectangle {
-		name="v_guideline"..tostring(v_guideline),
-		border_color= DEFAULT_COLOR, 
+		name="v_guideline"..tostring(hdr.v_guideline),
+		border_color= hdr.DEFAULT_COLOR, 
 		--color={25,255,25,255},
 		color={255,25,25,100},
 		size = {4, screen.h},
@@ -414,11 +420,11 @@ end
 
 function editor.h_guideline()
      
-     h_guideline = h_guideline + 1
+     hdr.h_guideline = hdr.h_guideline + 1
 
      local h_gl = Rectangle {
-		name="h_guideline"..tostring(h_guideline),
-		border_color= DEFAULT_COLOR, 
+		name="h_guideline"..tostring(hdr.h_guideline),
+		border_color= hdr.DEFAULT_COLOR, 
 		--color={25,255,25,255},
 		color={255,25,25,100},
 		size = {screen.w, 4},
@@ -472,7 +478,7 @@ function editor.container_selected(obj, x, y)
           screen:add(anchor_mark)
           screen:add(obj_border)
           obj.extra.selected = true
-          table.insert(selected_objs, obj_border.name)
+          table.insert(hdr.selected_objs, obj_border.name)
      else -- Layout Manager Tile border
 	  	local col , row=  obj:r_c_from_abs_position(x,y)
 		local tile_x, tile_y, tile_w, tile_h 
@@ -501,7 +507,7 @@ function editor.container_selected(obj, x, y)
         end 
         screen:add(obj_border)
         obj.extra.selected = true
-        table.insert(selected_objs, obj_border.name)
+        table.insert(hdr.selected_objs, obj_border.name)
      end 
 end  
 
@@ -510,8 +516,8 @@ function editor.selected(obj, call_by_inspector)
 
    if(obj.type ~= "Video") then 
    	if(shift == false)then 
-		while(table.getn(selected_objs) ~= 0) do
-			local t_border = screen:find_child(table.remove(selected_objs)) 
+		while(table.getn(hdr.selected_objs) ~= 0) do
+			local t_border = screen:find_child(table.remove(hdr.selected_objs)) 
 			if(t_border ~= nil) then 
 				screen:remove(t_border)
 		    	local i, j = string.find(t_border.name,"border")
@@ -590,7 +596,7 @@ function editor.selected(obj, call_by_inspector)
     screen:add(anchor_mark)
     screen:add(obj_border)
     obj.extra.selected = true
-    table.insert(selected_objs, obj_border.name)
+    table.insert(hdr.selected_objs, obj_border.name)
     end 
 end  
 
@@ -600,8 +606,8 @@ function editor.n_select(obj, call_by_inspector, drag)
 	 end 
      if(obj.type ~= "Video") then 
      	if(shift == false)then 
-			while(table.getn(selected_objs) ~= 0) do
-				local t_border = screen:find_child(table.remove(selected_objs)) 
+			while(table.getn(hdr.selected_objs) ~= 0) do
+				local t_border = screen:find_child(table.remove(hdr.selected_objs)) 
 				if(t_border ~= nil) then 
 		     		screen:remove(t_border)
 		     		local i, j = string.find(t_border.name,"border")
@@ -622,7 +628,7 @@ function editor.n_select(obj, call_by_inspector, drag)
 	     		screen:remove(screen:find_child(obj.name.."a_m"))
         	end
         	screen:remove(screen:find_child(obj.name.."border"))
-        	table.remove(selected_objs)
+        	table.remove(hdr.selected_objs)
         	obj.extra.selected = false
      	end 
     end
@@ -637,7 +643,7 @@ function editor.n_selected(obj, call_by_inspector)
         if (screen:find_child(obj.name.."a_m") ~= nil) then 
 	     	screen:remove(screen:find_child(obj.name.."a_m"))
         end
-        table.remove(selected_objs)
+        table.remove(hdr.selected_objs)
         obj.extra.selected = false
      end 
 end  
@@ -647,10 +653,10 @@ function editor.close()
 	local func_nok = function() for i, j  in pairs(g.children) do editor.n_selected(j) end g:clear() editor.close() end 
 	
 	if #g.children > 0 then 
-		if current_fn == "" then 
+		if hdr.current_fn == "" then 
 			editor.error_message("003", true, editor.save, func_nok) 
 			return 1
-		elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
+		elseif #hdr.undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
 			editor.error_message("003", true, editor.save, func_nok) 
 			return 1
 		end
@@ -695,22 +701,22 @@ function editor.close()
 	end 
 
 
-	for i=1, v_guideline, 1 do 
+	for i=1, hdr.v_guideline, 1 do 
 	   if(screen:find_child("v_guideline"..i) ~= nil) then 
 	     screen:remove(screen:find_child("v_guideline"..i))
 	   end 
 	end
     
-	for i=1, h_guideline, 1 do 
+	for i=1, hdr.h_guideline, 1 do 
 	   if(screen:find_child("h_guideline"..i) ~= nil) then 
 	     screen:remove(screen:find_child("h_guideline"..i))
 	   end 
 	end
 
-	undo_list = {}
-	redo_list = {}
-    item_num = 0
-    current_fn = ""
+	hdr.undo_list = {}
+	hdr.redo_list  = {}
+    hdr.item_num = 0
+    hdr.current_fn = ""
     screen.grab_key_focus(screen)
 
 	g.extra.canvas_f = 0
@@ -745,7 +751,7 @@ local function cleanMsgWin(msgw)
 	 if screen:find_child(msgw.name) then 
      	screen:remove(msgw)
 	 end 
-     --input_mode = S_SELECT 
+     --hdr.input_mode = hdr.S_SELECT 
 end 
 
 local function draw_dialogbox()
@@ -913,15 +919,15 @@ function editor.the_image(bg_image)
 	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
 	local space = WIDTH
 
-	local dir = editor_lb:readdir(current_dir.."/assets/images")
-	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/assets/images"}:set(STYLE)
+	local dir = editor_lb:readdir(hdr.current_dir.."/assets/images")
+	local dir_text = Text {name = "dir", text = "File Location : "..hdr.current_dir.."/assets/images"}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 
 
 	local dialog = draw_dialogbox()
-	dialog.label =  "File Location : "..current_dir.."/assets/images"
+	dialog.label =  "File Location : "..hdr.current_dir.."/assets/images"
 	dialog.title_font = "DejaVu Sans 24px"
 
 	function get_file_list_sz() 
@@ -993,7 +999,7 @@ function editor.the_image(bg_image)
     for i,j in pairs (text_g.children) do 
     	function j:on_button_down(x,y,button, num_clicks)
 	    	if input_text ~= nil then 
-		    	input_text.color = DEFAULT_COLOR   --{255, 255, 255, 255}
+		    	input_text.color = hdr.DEFAULT_COLOR   --{255, 255, 255, 255}
 	      	end	 
             input_text = j
 	      	--j.color = {0,255,0,255}
@@ -1014,12 +1020,12 @@ function editor.the_image(bg_image)
     function open_b:on_button_down(x,y,button,num_clicks)
 		if (input_text ~= nil) then 
 	    	if bg_image then
-		   		BG_IMAGE_20.opacity = 0
-	            BG_IMAGE_40.opacity = 0
-	           	BG_IMAGE_80.opacity = 0
-	           	BG_IMAGE_white.opacity = 0
-	           	BG_IMAGE_import:set{src = "/assets/images/"..input_text.text, opacity = 255} 
-	           	input_mode = S_SELECT
+		   		hdr.BG_IMAGE_20.opacity = 0
+	            hdr.BG_IMAGE_40.opacity = 0
+	           	hdr.BG_IMAGE_80.opacity = 0
+	           	hdr.BG_IMAGE_white.opacity = 0
+	           	hdr.BG_IMAGE_import:set{src = "/assets/images/"..input_text.text, opacity = 255} 
+	           	hdr.input_mode = hdr.S_SELECT
 	      	elseif screen:find_child("inspector") then 
 		    	screen:find_child("file_name").text = input_text.text
 	      	else 
@@ -1048,11 +1054,11 @@ function editor.export ()
 		screen:find_child("y_0_mark"):hide()
 		screen:find_child("y_1080_mark"):hide()
 	end 
-	menu_hide = true 
+	hdr.menu_hide  = true 
 	screen:grab_key_focus()
 	screen:remove(g)
 	g:clear()
-	local f = loadfile(current_fn)
+	local f = loadfile(hdr.current_fn)
 	f(g)
 	screen:add(g)
 	
@@ -1087,11 +1093,11 @@ local function open_files(input_purpose, bg_image, inspector)
 	local virtual_hieght = 0
 	
 	if input_purpose == "open_luafile" then 
-		dir = editor_lb:readdir(current_dir.."/screens")
+		dir = editor_lb:readdir(hdr.current_dir.."/screens")
 	elseif input_purpose == "open_imagefile" then 
-		dir = editor_lb:readdir(current_dir.."/assets/images")
+		dir = editor_lb:readdir(hdr.current_dir.."/assets/images")
 	elseif input_purpose =="open_videofile" then  
-		dir = editor_lb:readdir(current_dir.."/assets/videos")
+		dir = editor_lb:readdir(hdr.current_dir.."/assets/videos")
 	end 
 
 	local function load_file(v)
@@ -1125,12 +1131,12 @@ local function open_files(input_purpose, bg_image, inspector)
          	end 
 		elseif input_purpose == "open_imagefile" then 
 			if bg_image then
-		   		BG_IMAGE_20.opacity = 0
-	            BG_IMAGE_40.opacity = 0
-	           	BG_IMAGE_80.opacity = 0
-	           	BG_IMAGE_white.opacity = 0
-	           	BG_IMAGE_import:set{src = "/assets/images/"..v, opacity = 255} 
-	           	input_mode = S_SELECT
+		   		hdr.BG_IMAGE_20.opacity = 0
+	            hdr.BG_IMAGE_40.opacity = 0
+	           	hdr.BG_IMAGE_80.opacity = 0
+	           	hdr.BG_IMAGE_white.opacity = 0
+	           	hdr.BG_IMAGE_import:set{src = "/assets/images/"..v, opacity = 255} 
+	           	hdr.input_mode = hdr.S_SELECT
 			else 
         		inputMsgWindow_openimage("open_imagefile", v)
 			end
@@ -1181,8 +1187,8 @@ local function open_files(input_purpose, bg_image, inspector)
 	end 
 
 	local s_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -1338,10 +1344,10 @@ local function open_files(input_purpose, bg_image, inspector)
 			screen:remove(msgw)
 		end 
 		msgw:clear() 
-		current_inspector = nil
-		current_focus = nil 
+		hdr.current_inspector = nil
+		hdr.current_focus = nil 
 		if x then 
-			input_mode = S_SELECT
+			hdr.input_mode = hdr.S_SELECT
 		end 
 
 		if inspector then 
@@ -1382,13 +1388,13 @@ function editor.the_open()
 	local X_PADDING = 10
 	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
 	local space = WIDTH
-	local dir = editor_lb:readdir(current_dir.."/screens")
-	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/screens"}:set(STYLE)
+	local dir = editor_lb:readdir(hdr.current_dir.."/screens")
+	local dir_text = Text {name = "dir", text = "File Location : "..hdr.current_dir.."/screens"}:set(STYLE)
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
 	local dialog = draw_dialogbox()
 
-	dialog.label =  "File Location : "..current_dir.."/screens"
+	dialog.label =  "File Location : "..hdr.current_dir.."/screens"
 	dialog.title_font = "DejaVu Sans 24px"
 
 	function get_file_list_sz() 
@@ -1501,7 +1507,7 @@ function editor.the_open()
     for i,j in pairs (text_g.children) do 
     	function j:on_button_down(x,y,button, num_clicks)
 	    	if input_text ~= nil then 
-		    	input_text.color = DEFAULT_COLOR-- {255, 255, 255, 255}
+		    	input_text.color = hdr.DEFAULT_COLOR-- {255, 255, 255, 255}
 	      	end	 
             input_text = j
 	      	j.color = {0,255,0,255}
@@ -1561,14 +1567,14 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		title_shadow = Text {name = "title", text = "Inspector: "..v.type}:set(SSTYLE)
 	end 
 	----------------------------------------------------------------------------
-	--local WIDTH = 450 -- 255  width for inspector's contents
+	--local WIDTH = 450 -- 255  width for inspector's hdr.contents
 	local INSPECTOR_OFFSET = 30 
     local TOP_PADDING = 12
     local BOTTOM_PADDING = 12
 	--local xbox_xpos = 460
 	-------------------------------------------------------------
 
-	if(current_inspector ~= nil) then 
+	if(hdr.current_inspector ~= nil) then 
 		return 
     end 
  	
@@ -1627,8 +1633,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local tabs = editor_ui.tabBar{tab_labels = labels_t}
 
 	local s_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -1727,7 +1733,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	     inspector.y = screen.h/8
 	end 
 
-	-- make the inspector contents 
+	-- make the inspector hdr.contents 
 	local attr_t = make_attr_t(v)
 	local attr_n, attr_v, attr_s
 
@@ -1884,10 +1890,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(inspector)
 		inspector:clear() 
-		current_inspector = nil
-		current_focus = nil 
+		hdr.current_inspector = nil
+		hdr.current_focus = nil 
 		if x then 
-	    	input_mode = S_SELECT
+	    	hdr.input_mode = hdr.S_SELECT
 		end 
 		if v.extra then 
 			if v.extra.type == "MenuButton" then 
@@ -1904,10 +1910,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		end 
 	end 
 
-	input_mode = S_POPUP
+	hdr.input_mode = hdr.S_POPUP
 	--inspector:find_child("name").extra.on_focus_in()
 	
-	current_inspector = inspector
+	hdr.current_inspector = inspector
     inspector.reactive = true
 	inspector.extra.lock = false
 
@@ -1919,7 +1925,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		editor.n_selected(v, true)
 		screen:remove(inspector)
 		inspector:clear() 
-		current_inspector = nil
+		hdr.current_inspector = nil
 			
        	for i, c in pairs(g.children) do
 		    if(c.type == "Text") then 
@@ -1932,7 +1938,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		end
 
         screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		if v.extra then 
 			if v.extra.type == "MenuButton" then 
             	v.spin_out()
@@ -2110,7 +2116,7 @@ bg("Code", "Widget")
 	screen:add(codeViewWin)
 	codeViewWin.extra.lock = false
     create_on_button_down_f(codeViewWin)
-	input_mode = S_POPUP
+	hdr.input_mode = hdr.S_POPUP
 	si:grab_key_focus()
 	xbox.reactive = true
 
@@ -2120,7 +2126,7 @@ bg("Code", "Widget")
 		end
 		editor.n_selected(v, true)
         screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		return true
     end 
 
@@ -2128,19 +2134,19 @@ end
 
 
 local function save_new_file (fname, save_current_f, save_backup_f)
-	if current_fn == "" then 
+	if hdr.current_fn == "" then 
 		if fname == "" then
 			return
    		end   
-		current_fn = "screens\/"..fname
+		hdr.current_fn = "screens\/"..fname
 	end 
 
-	if(current_dir == "") then 
+	if(hdr.current_dir == "") then 
 		editor.error_message("002", fname, new_project)  
 		return 
 	end 
 
-	contents = ""
+	hdr.contents = ""
     local obj_names = getObjnames()
     local n = table.getn(g.children)
 
@@ -2153,40 +2159,40 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 
 	    local result, d_list, t_list, result2 = itemTostring(v, done_list, todo_list)  
 	    if result2  ~= nil then 
-        	contents=result2..contents
+        	hdr.contents=result2..hdr.contents
 	    end  
 	    if result ~= nil then 
-        	contents=contents..result
+        	hdr.contents=hdr.contents..result
 	    end 
 	    done_list = d_list
 	    todo_list = t_list
 	end
 
 	if(g.extra.video ~= nil) then
-		contents = contents..itemTostring(g.extra.video)
+		hdr.contents = hdr.contents..itemTostring(g.extra.video)
 	end 
 
     local timeline = screen:find_child("timeline")
 	if timeline then
-		contents = contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
+		hdr.contents = hdr.contents .."local timeline = ui_element.timeline { \n\tpoints = {" 
 	    for m,n in orderedPairs (timeline.points) do 
-			contents = contents.."["..tostring(m).."] = {"
+			hdr.contents = hdr.contents.."["..tostring(m).."] = {"
 		    for q,r in pairs (n) do
 		    	if q == 1 then 
-			    	contents = contents.."\""..tostring(r).."\","
+			    	hdr.contents = hdr.contents.."\""..tostring(r).."\","
 		        else 
-			    	contents = contents..tostring(r)..","
+			    	hdr.contents = hdr.contents..tostring(r)..","
 		        end
 		    end 
-		    contents = contents.."},"
+		    hdr.contents = hdr.contents.."},"
 	    end 
-	    contents = contents.."},\n\t" 
-        contents = contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
-        contents = contents.."screen:add(timeline)\n\n"
-	    contents = contents.."if editor_lb == nil then\n\tscreen:find_child(\"timeline\"):hide()\nend\n\n"
+	    hdr.contents = hdr.contents.."},\n\t" 
+        hdr.contents = hdr.contents.."duration = "..timeline.duration..",\n\tnum_point = "..timeline.num_point.."\n}\n" 
+        hdr.contents = hdr.contents.."screen:add(timeline)\n\n"
+	    hdr.contents = hdr.contents.."if editor_lb == nil then\n\tscreen:find_child(\"timeline\"):hide()\nend\n\n"
 	end 
 
-	contents = contents.."\ng:add("..obj_names..")"
+	hdr.contents = hdr.contents.."\ng:add("..obj_names..")"
 
 	local local_ui_elements = ""
 	for i, v in pairs(g.children) do
@@ -2201,25 +2207,25 @@ local function save_new_file (fname, save_current_f, save_backup_f)
     end
 
 	if local_ui_elements ~= "" then 
-    	contents = "local g = ... \n\nlocal "..local_ui_elements.."\n\n"..contents
+    	hdr.contents = "local g = ... \n\nlocal "..local_ui_elements.."\n\n"..hdr.contents
 	else 
-            contents = "local g = ... \n\n"..contents
+            hdr.contents = "local g = ... \n\n"..hdr.contents
 	end 
 
 	if save_backup_f == nil or save_backup_f == false then 
-    	undo_list = {}
-    	redo_list = {}
+    	hdr.undo_list = {}
+    	hdr.redo_list  = {}
 	end 
 
 	if save_backup_f == true then  
-		local back_file = current_fn.."\.back"
-		editor_lb:writefile(back_file, contents, true)	
+		local back_file = hdr.current_fn.."\.back"
+		editor_lb:writefile(back_file, hdr.contents, true)	
 		return 
 	end 
 
     if (save_current_f == true) then 
 
-		local screen_dir = editor_lb:readdir(current_dir.."/screens/")
+		local screen_dir = editor_lb:readdir(hdr.current_dir.."/screens/")
 
 		for i, v in pairs(screen_dir) do
           	if(fname == v)then
@@ -2229,13 +2235,13 @@ local function save_new_file (fname, save_current_f, save_backup_f)
           	end
 		end
 
-		editor_lb:writefile(current_fn, contents, true)	
+		editor_lb:writefile(hdr.current_fn, hdr.contents, true)	
 		local main = readfile("main.lua")
 
-		if(current_fn ~= "" and main ) then 
-			local j,k = string.find(current_fn, "/")
- 	       	local fileUpper= string.upper(string.sub(current_fn, k+1, -5))
-	   		local fileLower= string.lower(string.sub(current_fn, k+1, -5))
+		if(hdr.current_fn ~= "" and main ) then 
+			local j,k = string.find(hdr.current_fn, "/")
+ 	       	local fileUpper= string.upper(string.sub(hdr.current_fn, k+1, -5))
+	   		local fileLower= string.lower(string.sub(hdr.current_fn, k+1, -5))
 			local added_stub_code = ""
 			
 			if string.find(main, "-- "..fileUpper.." SECTION") ~= nil then 
@@ -2295,11 +2301,11 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 			   	end 
      	  	else	-- if string.find(main, "-- "..fileUpper.." SECTION") == nil then 
 			   	--print("main.lua 안에 딱히 해당 될 내용이 없으면 새로 구성해 줘야지..") 
-				inputMsgWindow_savefile(fname, current_fn, save_current_f)
+				inputMsgWindow_savefile(fname, hdr.current_fn, save_current_f)
 	      	end	
-		elseif (current_fn ~= "" and main == nil) then  -- if(current_fn ~= "" and main ) then 
+		elseif (hdr.current_fn ~= "" and main == nil) then  -- if(current_fn ~= "" and main ) then 
 			 --print("main.lua 자체가 없어서 만들라고 ? ") 
-			 inputMsgWindow_savefile(fname, current_fn, save_current_f)
+			 inputMsgWindow_savefile(fname, hdr.current_fn, save_current_f)
 		else
 			 --print("이건 무슨 경우랴 ?") 
 			 editor.save(false)
@@ -2307,7 +2313,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		end 
     else -- save_current_file == false, "Save As"   
 		--print("Save As 경우") 
-		inputMsgWindow_savefile(fname, current_fn)
+		inputMsgWindow_savefile(fname, hdr.current_fn)
 	end 	
 
 
@@ -2333,7 +2339,7 @@ function editor.save(save_current_f, save_backup_f)
 	local message = Text {text = "File Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
 
-	if(current_dir == "") then 
+	if(hdr.current_dir == "") then 
 		editor.error_message("002", nil, new_project)  
 		return 
 	end 
@@ -2359,14 +2365,14 @@ function editor.save(save_current_f, save_backup_f)
     end 
 
 	-- Save current file and return 
-	if save_backup_f == true and current_fn ~= "" then  
-		save_new_file(current_fn, save_current_f, save_backup_f) 
+	if save_backup_f == true and hdr.current_fn ~= "" then  
+		save_new_file(hdr.current_fn, save_current_f, save_backup_f) 
 		screen:grab_key_focus()
 		return 
 	end 
 
-	if save_current_f == true and current_fn ~= "" then  
-		save_new_file(current_fn, save_current_f, save_backup_f) 
+	if save_current_f == true and hdr.current_fn ~= "" then  
+		save_new_file(hdr.current_fn, save_current_f, save_backup_f) 
 		screen:grab_key_focus()
 		return 
 	end 
@@ -2398,8 +2404,8 @@ function editor.save(save_current_f, save_backup_f)
 		end
 
 	local ti_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -2442,10 +2448,10 @@ function editor.save(save_current_f, save_backup_f)
 	function xbox:on_button_down()
 		msgw:clear() -- 0708
 		screen:remove(msgw)
-		current_inspector = nil
-		current_focus = nil
+		hdr.current_inspector = nil
+		hdr.current_focus = nil
         screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		return true
 	end 
 
@@ -2475,24 +2481,24 @@ end
 function editor.rectangle(x, y)
     rect_init_x = x 
     rect_init_y = y 
-    if (ui.rect ~= nil and "rectangle"..tostring(item_num) == ui.rect.name) then
+    if (ui.rect ~= nil and "rectangle"..tostring(hdr.item_num) == ui.rect.name) then
     	return 0
     end
 
-	while (is_available("rectangle"..tostring(item_num)) == false) do  
-		item_num = item_num + 1
+	while (is_available("rectangle"..tostring(hdr.item_num)) == false) do  
+		hdr.item_num = item_num + 1
 	end 
     ui.rect = Rectangle{
-    name="rectangle"..tostring(item_num),
-    border_color= DEFAULT_COLOR,
+    name="rectangle"..tostring(hdr.item_num),
+    border_color= hdr.DEFAULT_COLOR,
     border_width=0,
-    color= DEFAULT_COLOR,
+    color= hdr.DEFAULT_COLOR,
     size = {1,1},
     position = {x,y,0}, 
 	extra = {org_x = x, org_y = y}
     }
     ui.rect.reactive = true
-    table.insert(undo_list, {ui.rect.name, ADD, ui.rect})
+    table.insert(hdr.undo_list, {ui.rect.name, hdr.ADD, ui.rect})
     g:add(ui.rect)
 	if(screen:find_child("screen_objects") == nil) then 
     	--screen:add(g)
@@ -2511,7 +2517,7 @@ function editor.rectangle_done(x,y)
     if(y-rect_init_y < 0) then
     	ui.rect.y = y
     end
-    item_num = item_num + 1
+    hdr.item_num = hdr.item_num + 1
     screen.grab_key_focus(screen)
 
 	local timeline = screen:find_child("timeline")
@@ -2578,23 +2584,23 @@ local function ungroup(v)
 end 
 
 function editor.undo()
-	  if( undo_list == nil) then return true end 
-      local undo_item= table.remove(undo_list)
+	  if( hdr.undo_list == nil) then return true end 
+      local undo_item= table.remove(hdr.undo_list)
 
 	  if(undo_item == nill) then return true end
-	  if undo_item[2] == CHG then 
+	  if undo_item[2] == hdr.CHG then 
 	  	editor.n_selected(undo_item[1])
 		set_obj(g:find_child(undo_item[1]), undo_item[3])
-	    table.insert(redo_list, undo_item)
-	  elseif undo_item[2] == ADD then 
+	    table.insert(hdr.redo_list , undo_item)
+	  elseif undo_item[2] == hdr.ADD then 
 	    editor.n_selected(undo_item[3])
 	    if((undo_item[3]).type == "Group") then 
 			ungroup(undo_item[3])
 	    else
 			g:remove(g:find_child(undo_item[1]))
 	    end 
-        table.insert(redo_list, undo_item)
-	  elseif undo_item[2] == DEL then 
+        table.insert(hdr.redo_list , undo_item)
+	  elseif undo_item[2] == hdr.DEL then 
 	    editor.n_selected(undo_item[3])
 	    if((undo_item[3]).type == "Group") then 
 			if is_in_list(undo_item[3].extra.type, uiElements) == false then 
@@ -2612,20 +2618,20 @@ function editor.undo()
 	    else 
 	    	g:add(undo_item[3])
 	    end
-        table.insert(redo_list, undo_item)
+        table.insert(hdr.redo_list , undo_item)
  	  end 
 	  screen:grab_key_focus() --1115
 end
 	
 function editor.redo()
-	  if(redo_list == nil) then return true end 
-      local redo_item= table.remove(redo_list)
+	  if(hdr.redo_list  == nil) then return true end 
+      local redo_item= table.remove(hdr.redo_list )
 	  if(redo_item == nill) then return true end
  	  
-      if redo_item[2] == CHG then 
+      if redo_item[2] == hdr.CHG then 
 	  	set_obj(g:find_child(redo_item[1]),  redo_item[4])
-	    table.insert(undo_list, redo_item)
-      elseif redo_item[2] == ADD then 
+	    table.insert(hdr.undo_list, redo_item)
+      elseif redo_item[2] == hdr.ADD then 
 	  	if(redo_item[3].type == "Group") then 
 	    	for i, c in pairs(redo_item[3].extra.children) do
 				local c_tmp = g:find_child(c)
@@ -2639,23 +2645,23 @@ function editor.redo()
 	    else 
         	g:add(redo_item[3])
 	    end 
-        table.insert(undo_list, redo_item)
-      elseif redo_item[2] == DEL then 
+        table.insert(hdr.undo_list, redo_item)
+      elseif redo_item[2] == hdr.DEL then 
 	  	if(redo_item[3].type == "Group") then 
 			ungroup(redo_item[3])
 	    else 
         	g:remove(g:find_child(redo_item[1]))
 	    end 
-        table.insert(undo_list, redo_item)
+        table.insert(hdr.undo_list, redo_item)
       end 
 	  screen:grab_key_focus() --1115
 end
 
 function editor.undo_history()
 	print("undo list : ")
-	dumptable(undo_list)
+	dumptable(hdr.undo_list)
 	print("redo list : ")
-	dumptable(redo_list)
+	dumptable(hdr.redo_list )
 end
 	
 function editor.add(obj)
@@ -2669,29 +2675,29 @@ function editor.rm(obj)
 end
 
 function editor.debug()
-	print("input_mode", input_mode)
+	print("hdr.input_mode", input_mode)
 	print("selected objects")
-	dumptable(selected_objs)
+	dumptable(hdr.selected_objs)
 end 
 
 function editor.text()
 
-	while (is_available("text"..tostring(item_num)) == false) do  
-		item_num = item_num + 1
+	while (is_available("text"..tostring(hdr.item_num)) == false) do  
+		hdr.item_num = item_num + 1
 	end 
 
     ui.text = Text{
-    name="text"..tostring(item_num),
+    name="text"..tostring(hdr.item_num),
 	text = strings[""], font= "DejaVu Sans 30px",
 	-- 0111 text = "", font= "DejaVu Sans 40px",
-    color = DEFAULT_COLOR, 
+    color = hdr.DEFAULT_COLOR, 
 	position ={200, 200, 0}, 
 	editable = true , reactive = true, ellipsize = "END", 
 	--wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
 	wants_enter = true, wrap=true, wrap_mode="CHAR", 
 	extra = {org_x = 200, org_y = 200}
 	} 
-    table.insert(undo_list, {ui.text.name, ADD, ui.text})
+    table.insert(hdr.undo_list, {ui.text.name, hdr.ADD, ui.text})
     g:add(ui.text)
 
 	local timeline = screen:find_child("timeline")
@@ -2739,7 +2745,7 @@ function editor.text()
 			if(total > ui.text.h) then 
 				ui.text.h = total 
 			end 
-			item_num = item_num + 1
+			hdr.item_num = hdr.item_num + 1
 			return true
 	    end 
 	end 
@@ -2759,8 +2765,8 @@ function editor.the_video()
 	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
 	local space = WIDTH
 
-	local dir = editor_lb:readdir(current_dir.."/assets/videos")
-	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/assets/videos"}:set(STYLE)
+	local dir = editor_lb:readdir(hdr.current_dir.."/assets/videos")
+	local dir_text = Text {name = "dir", text = "File Location : "..hdr.current_dir.."/assets/videos"}:set(STYLE)
 
 	local cur_w= (WIDTH - dir_text.w)/2
 	local cur_h= TOP_PADDING/2 + Y_PADDING
@@ -2871,7 +2877,7 @@ function editor.the_video()
 	    msgw:add(scroll_bar)
  
         function scroll_bar:on_button_down(x,y,button,num_clicks)
-	     	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
+	     	hdr.dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
         	return true
     	end  if j.name == "w" or j.name == "h" then 
 				if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
@@ -2883,15 +2889,15 @@ function editor.the_video()
 
 
     	function scroll_bar:on_button_up(x,y,button,num_clicks)
-	 		if(dragging ~= nil) then 
-	    		local actor , dx , dy = unpack( dragging )
+	 		if(hdr.dragging ~= nil) then 
+	    		local actor , dx , dy = unpack( hdr.dragging )
 	       		if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
 	        		local dif = y - dy - scroll_bar.extra.org_y
 	           		scroll_bar.y = y - dy 
 	           		text_g.position = {text_g.x, text_g.extra.org_y -dif}
 	           		text_g.clip = {0,dif,text_g.w,500}
 	      		end 
-	      		dragging = nil
+	      		hdr.dragging = nil
 	 		end 
          		return true
        end 
@@ -2900,7 +2906,7 @@ function editor.the_video()
     for i,j in pairs (text_g.children) do 
     	function j:on_button_down(x,y,button, num_clicks)
 	    	if input_text ~= nil then 
-		    	input_text.color = DEFAULT_COLOR -- {255, 255, 255, 255}
+		    	input_text.color = hdr.DEFAULT_COLOR -- {255, 255, 255, 255}
 	      	end 
             input_text = j
 	      	j.color = {0,255,0,255}
@@ -2958,25 +2964,25 @@ function editor.the_video()
 end 
 
 function editor.clone()
-	if(table.getn(selected_objs) == 0 )then 
+	if(table.getn(hdr.selected_objs) == 0 )then 
 		print("there are no selected objects") 
         screen:grab_key_focus()
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		return 
     end 
-	while (is_available("clone"..tostring(item_num)) == false) do  
-		item_num = item_num + 1
+	while (is_available("clone"..tostring(hdr.item_num)) == false) do  
+		hdr.item_num = item_num + 1
 	end 
 	for i, v in pairs(g.children) do
     	if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
 		     	editor.n_selected(v)
 		     	ui.clone = Clone {
-               	name="clone"..tostring(item_num),
+               	name="clone"..tostring(hdr.item_num),
 		     	source = v,
                 position = {v.x + 20, v.y +20}
         	    }
-        	    table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
+        	    table.insert(hdr.undo_list, {ui.clone.name, hdr.ADD, ui.clone})
         	    g:add(ui.clone)
 
 		     	local timeline = screen:find_child("timeline")
@@ -3012,12 +3018,12 @@ function editor.clone()
         	    ui.clone.reactive = true
 		     	ui.clone.extra.lock = false
 		     	create_on_button_down_f(ui.clone)
-		     	item_num = item_num + 1
+		     	hdr.item_num = item_num + 1
 			end 
         end
 	end
 
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
 end
 	
@@ -3025,10 +3031,10 @@ function editor.duplicate()
 	local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","b_pos", "item_pos","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
 	local next_position 
-    if(table.getn(selected_objs) == 0 )then 
+    if(table.getn(hdr.selected_objs) == 0 )then 
 		print("there are no selected objects") 
         screen:grab_key_focus()
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		return 
     end 
 
@@ -3043,10 +3049,10 @@ function editor.duplicate()
 		     
 			 	local function copy_widget(org)
 					local cpy = widget_f_map[org.extra.type]() 
-        			while(is_available(cpy.name..tostring(item_num))== false) do
-    					item_num = item_num + 1
+        			while(is_available(cpy.name..tostring(hdr.item_num))== false) do
+    					hdr.item_num = item_num + 1
         			end 
-        			cpy.name = cpy.name..tostring(item_num)
+        			cpy.name = cpy.name..tostring(hdr.item_num)
 					if next_position then 
                     	cpy.extra.position = {v.x, v.y}
                         cpy.position = next_position
@@ -3062,14 +3068,14 @@ function editor.duplicate()
 								for m,n in pairs(org.content.children) do 
 			     					if n.name then 
 										local temp_g_c
-										while(is_available(string.lower(n.type)..tostring(item_num))== false) do
-		         							item_num = item_num + 1
+										while(is_available(string.lower(n.type)..tostring(hdr.item_num))== false) do
+		         							hdr.item_num = item_num + 1
 	             						end 
 										if is_this_widget(n) == true then 
-											temp_g_c.name=string.lower(n.extra.type)..tostring(item_num)
+											temp_g_c.name=string.lower(n.extra.type)..tostring(hdr.item_num)
 						    				temp_g_c = copy_widget(n) 
 										else 
-											temp_g_c.name=string.lower(n.type)..tostring(item_num)
+											temp_g_c.name=string.lower(n.type)..tostring(hdr.item_num)
 						    				temp_g_c = copy_obj(n) 
 										end
 										temp_g_c.extra.is_in_group = true
@@ -3085,7 +3091,7 @@ function editor.duplicate()
 			        					end 
 
         	     	        			temp_g:add(temp_g_c)
-		     							item_num = item_num + 1
+		     							hdr.item_num = item_num + 1
 			     	   	 			end 
 			   					end 
 								cpy[j] = temp_g
@@ -3094,22 +3100,22 @@ function editor.duplicate()
 									if type(l) == "table" then 
 										for o,p in pairs(l) do 
 											local t_obj
-											while(is_available(string.lower(p.type)..tostring(item_num))== false) do
-		         								item_num = item_num + 1
+											while(is_available(string.lower(p.type)..tostring(hdr.item_num))== false) do
+		         								hdr.item_num = item_num + 1
 	             							end 
 											if is_this_widget(p) == true then 
-												t_obj.name=string.lower(p.extra.type)..tostring(item_num)
+												t_obj.name=string.lower(p.extra.type)..tostring(hdr.item_num)
 						    					t_obj = copy_widget(p) 
 											else 
 												t_obj = copy_obj(p)
-												t_obj.name = string.lower(p.type)..tostring(item_num)
+												t_obj.name = string.lower(p.type)..tostring(hdr.item_num)
 											end 
 											t_obj.extra.is_in_group = true
 											t_obj.reactive = true
 		     								t_obj.extra.lock = false
 		     								create_on_button_down_f(t_obj)
 				    						cpy:replace(k,o,t_obj) 
-		     								item_num = item_num + 1
+		     								hdr.item_num = item_num + 1
 										end  
 									end 
 								end
@@ -3129,12 +3135,12 @@ function editor.duplicate()
 			
                 function dup_function ()
 		        	if is_this_widget(v) == false  then	
-                    	while(is_available(string.lower(v.type)..tostring(item_num))== false) do
-                        	item_num = item_num + 1
+                    	while(is_available(string.lower(v.type)..tostring(hdr.item_num))== false) do
+                        	hdr.item_num = item_num + 1
                         end 
                         editor.n_selected(v)
                         ui.dup = copy_obj(v)  
-                        ui.dup.name=string.lower(v.type)..tostring(item_num)
+                        ui.dup.name=string.lower(v.type)..tostring(hdr.item_num)
                         if next_position then 
                         	ui.dup.extra.position = {v.x, v.y}
                         	ui.dup.position = next_position
@@ -3146,23 +3152,23 @@ function editor.duplicate()
                         if v.type == "Group" then 
                         	for i,j in pairs(v.children) do 
                         		if j.name then 
-                        			while(is_available(string.lower(j.type)..tostring(item_num))== false) do
-                        				item_num = item_num + 1
+                        			while(is_available(string.lower(j.type)..tostring(hdr.item_num))== false) do
+                        				hdr.item_num = item_num + 1
                         			end 
 									if is_this_widget(j) == false then 
                         				ui.dup_c = copy_obj(j) 
-                        				ui.dup_c.name=string.lower(j.type)..tostring(item_num)
+                        				ui.dup_c.name=string.lower(j.type)..tostring(hdr.item_num)
                         				ui.dup_c.extra.lock = false
                         				create_on_button_down_f(ui.dup_c)
                         				ui.dup:add(ui.dup_c)
-                        				item_num = item_num + 1
+                        				hdr.item_num = item_num + 1
 									else 
 											--[[
 										ui.dup_c = copy_widget(j)
 										ui.dup:add(ui.dup_c)
                         				ui.dup_c.extra.lock = false
                         				create_on_button_down_f(ui.dup_c)
-                        				item_num = item_num + 1
+                        				hdr.item_num = item_num + 1
 										]]
 										-- group's child is widget 
 									---[[	
@@ -3179,11 +3185,11 @@ function editor.duplicate()
 														end 
 														for m,n in pairs(j.content.children) do 
 			     	   		     								if n.name then 
-																	while(is_available(string.lower(n.type)..tostring(item_num))== false) do
-		         														item_num = item_num + 1
+																	while(is_available(string.lower(n.type)..tostring(hdr.item_num))== false) do
+		         														hdr.item_num = item_num + 1
 	             													end 
 						        									temp_g_c = copy_obj(n) 
-																	temp_g_c.name=string.lower(n.type)..tostring(item_num)
+																	temp_g_c.name=string.lower(n.type)..tostring(hdr.item_num)
 																	temp_g_c.extra.is_in_group = true
 																	temp_g_c.reactive = true
 						
@@ -3197,7 +3203,7 @@ function editor.duplicate()
         	     	        										temp_g:add(temp_g_c)
 		     														temp_g_c.extra.lock = false
 		     														create_on_button_down_f(temp_g_c)
-		     														item_num = item_num + 1
+		     														hdr.item_num = item_num + 1
 			     	   	   	     								end 
 			     	   	   								end 
 														ui.dup_c[b] = temp_g
@@ -3206,11 +3212,11 @@ function editor.duplicate()
 						   								for k,l in pairs (j[b]) do 
 															if type(l) == "table" then 
 							     								for o,p in pairs(l) do 
-								  									while(is_available(string.lower(p.type)..tostring(item_num))== false) do
-		         														item_num = item_num + 1
+								  									while(is_available(string.lower(p.type)..tostring(hdr.item_num))== false) do
+		         														hdr.item_num = item_num + 1
 	             						  							end 
 								  									t_obj = copy_obj(p)
-								  									t_obj.name = string.lower(p.type)..tostring(item_num)
+								  									t_obj.name = string.lower(p.type)..tostring(hdr.item_num)
 								  									t_obj.extra.is_in_group = true
 								  									t_obj.reactive = true
 				     			          							ui.dup_c:replace(k,o,t_obj) 
@@ -3245,7 +3251,7 @@ function editor.duplicate()
                         						ui.dup_c.extra.lock = false
                         						create_on_button_down_f(ui.dup_c)
 											end
-                        					item_num = item_num + 1
+                        					hdr.item_num = item_num + 1
                           					end 
 										--	]]
 										end 
@@ -3259,11 +3265,11 @@ function editor.duplicate()
 						----[[
                        	ui.dup = widget_f_map[v.extra.type]() 
 
-                        while(is_available(ui.dup.name..tostring(item_num))== false) do
-		         			item_num = item_num + 1
+                        while(is_available(ui.dup.name..tostring(hdr.item_num))== false) do
+		         			hdr.item_num = item_num + 1
                         end 
 
-                        ui.dup.name = ui.dup.name..tostring(item_num)
+                        ui.dup.name = ui.dup.name..tostring(hdr.item_num)
                         if next_position then 
                         	ui.dup.extra.position = {v.x, v.y}
                             ui.dup.position = next_position
@@ -3280,11 +3286,11 @@ function editor.duplicate()
 										local temp_g = copy_obj(v[j])
 										for m,n in pairs(v.content.children) do 
 			     	   		     			if n.name then 
-												while(is_available(string.lower(n.type)..tostring(item_num))== false) do
-		         									item_num = item_num + 1
+												while(is_available(string.lower(n.type)..tostring(hdr.item_num))== false) do
+		         									hdr.item_num = item_num + 1
 	             								end 
 						        				temp_g_c = copy_obj(n) 
-												temp_g_c.name=string.lower(n.type)..tostring(item_num)
+												temp_g_c.name=string.lower(n.type)..tostring(hdr.item_num)
 												temp_g_c.extra.is_in_group = true
 												temp_g_c.reactive = true
 						
@@ -3298,7 +3304,7 @@ function editor.duplicate()
         	     	        					temp_g:add(temp_g_c)
 		     									temp_g_c.extra.lock = false
 		     									create_on_button_down_f(temp_g_c)
-		     									item_num = item_num + 1
+		     									hdr.item_num = item_num + 1
 			     	   	   	     			end 
 			     	   	   				end 
 										ui.dup[j] = temp_g
@@ -3307,11 +3313,11 @@ function editor.duplicate()
 						   				for k,l in pairs (v[j]) do 
 											if type(l) == "table" then 
 							     				for o,p in pairs(l) do 
-								  					while(is_available(string.lower(p.type)..tostring(item_num))== false) do
-		         										item_num = item_num + 1
+								  					while(is_available(string.lower(p.type)..tostring(hdr.item_num))== false) do
+		         										hdr.item_num = item_num + 1
 	             						  			end 
 								  					t_obj = copy_obj(p)
-								  					t_obj.name = string.lower(p.type)..tostring(item_num)
+								  					t_obj.name = string.lower(p.type)..tostring(hdr.item_num)
 								  					t_obj.extra.is_in_group = true
 								  					t_obj.reactive = true
 				     			          			ui.dup:replace(k,o,t_obj) 
@@ -3341,7 +3347,7 @@ function editor.duplicate()
                 dup_function()
 
 				if ui.dup then 
-                	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
+                	table.insert(hdr.undo_list, {ui.dup.name, hdr.ADD, ui.dup})
                 	g:add(ui.dup)
                 	local timeline = screen:find_child("timeline")
                 	if timeline then 
@@ -3371,21 +3377,21 @@ function editor.duplicate()
                  	ui.dup.reactive = true
                  	ui.dup.extra.lock = false
                  	create_on_button_down_f(ui.dup)
-                 	item_num = item_num + 1
+                 	hdr.item_num = item_num + 1
 				end --ui.dup
 			end --if selected == true
     	end -- if  
     end -- for 
 
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
 end
 
 function editor.delete()
-	if(table.getn(selected_objs) == 0 )then 
+	if(table.getn(hdr.selected_objs) == 0 )then 
 		print("there are no selected objects") 
         screen:grab_key_focus()
-		input_mode = S_SELECT
+		hdr.input_mode = hdr.S_SELECT
 		return 
    	end 
 
@@ -3393,14 +3399,14 @@ function editor.delete()
     	if g:find_child(v.name) then
 			if(v.extra.selected == true) then
 		     	editor.n_selected(v)
-        	    table.insert(undo_list, {v.name, DEL, v})
+        	    table.insert(hdr.undo_list, {v.name, hdr.DEL, v})
         	    if (screen:find_child(v.name.."a_m") ~= nil) then 
 	     			screen:remove(screen:find_child(v.name.."a_m"))
                 end
 		     	if need_stub_code(v) == true then 
-					if current_fn then 
-	   		     		local fileUpper= string.upper(string.sub(current_fn, 1, -5))
-	   		     		local fileLower= string.lower(string.sub(current_fn, 1, -5))
+					if hdr.current_fn then 
+	   		     		local fileUpper= string.upper(string.sub(hdr.current_fn, 1, -5))
+	   		     		local fileLower= string.lower(string.sub(hdr.current_fn, 1, -5))
 			     		local main = readfile("main.lua")
 			     		if main then 
 			        		if string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") ~= nil then  			
@@ -3445,7 +3451,7 @@ function editor.delete()
 		screen:remove(screen:find_child("timeline"))
 	    end 
 	end 
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
 end
 	
@@ -3474,17 +3480,17 @@ end
 function editor.group()
         local min_x, max_x, min_y, max_y = get_min_max () 
        
-	while (is_available("group"..tostring(item_num)) == false) do  
-		item_num = item_num + 1
+	while (is_available("group"..tostring(hdr.item_num)) == false) do  
+		hdr.item_num = item_num + 1
 	end 
         ui.group = Group{
-                name="group"..tostring(item_num),
+                name="group"..tostring(hdr.item_num),
         	position = {min_x, min_y}
         }
         ui.group.reactive = false
         ui.group.extra.selected = false
         ui.group.extra.type = "Group" -- uiContainer
-        table.insert(undo_list, {ui.group.name, ADD, ui.group})
+        table.insert(hdr.undo_list, {ui.group.name, hdr.ADD, ui.group})
 
 	for i, v in pairs(g.children) do
              if g:find_child(v.name) then
@@ -3537,11 +3543,11 @@ function editor.group()
 	     end 
 	end 
 
-        item_num = item_num + 1
+        hdr.item_num = item_num + 1
 	ui.group.extra.lock = false
         --create_on_button_down_f(ui.group) 
         screen.grab_key_focus(screen)
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 end
 
 function editor.ugroup()
@@ -3588,13 +3594,13 @@ function editor.ugroup()
 	  			     end 
 			     end
 			     g:remove(v)
-        		     table.insert(undo_list, {v.name, DEL, v})
+        		     table.insert(hdr.undo_list, {v.name, hdr.DEL, v})
 		        end 
 		   end 
               end
         end
         screen.grab_key_focus(screen)
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 end
 	
 local m_init_x = 0 
@@ -3652,7 +3658,7 @@ function editor.multi_select_done(x,y)
 	m_init_y = 0 
 	multi_select_border = nil
     screen.grab_key_focus(screen)
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 
 end 
 
@@ -3694,11 +3700,11 @@ function editor.group_done(x, y)
              end
         end
 
-        item_num = item_num + 1
+        hdr.item_num = item_num + 1
 	ui.group.extra.lock = false
         create_on_button_down_f(ui.group) 
         screen.grab_key_focus(screen)
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 end 
 
 function editor.group_move(x,y)
@@ -3749,14 +3755,14 @@ function editor.left()
 
      org_cord()
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print("there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
-     local basis_obj_name = getObjName(selected_objs[1])
+     local basis_obj_name = getObjName(hdr.selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
@@ -3766,7 +3772,7 @@ function editor.left()
 	                  org_object = copy_obj(v)
 			  v.x = basis_obj.x
 			  new_object = copy_obj(v)
-                          table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                          table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
 		     end
 		end 
           end
@@ -3775,22 +3781,22 @@ function editor.left()
     ang_cord()
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 function editor.right() 
      local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print(":there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
      org_cord()
 
-     local basis_obj_name = getObjName(selected_objs[1])
+     local basis_obj_name = getObjName(hdr.selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
@@ -3801,7 +3807,7 @@ function editor.right()
 	                org_object = copy_obj(v)
 			v.x = basis_obj.x + basis_obj.w - v.w
 			new_object = copy_obj(v)
-                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                        table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
 		   end
 		end 
           end
@@ -3809,22 +3815,22 @@ function editor.right()
 
     ang_cord()
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 function editor.top()
      local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 		print("there are no selected objects") 
         screen:grab_key_focus()
-		input_mode = S_SELECT
+		hdr.input_mode = hdr.S_SELECT
 		return 
      end 
 
      org_cord()
 
-     local basis_obj_name = getObjName(selected_objs[1])
+     local basis_obj_name = getObjName(hdr.selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
@@ -3835,7 +3841,7 @@ function editor.top()
 	                org_object = copy_obj(v)
 			v.y = basis_obj.y 
 			new_object = copy_obj(v)
-                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                        table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
 		     end 
 		end 
           end
@@ -3849,7 +3855,7 @@ function editor.top()
 	                org_object = copy_obj(v)
 					v.y = basis_obj.y 
 					new_object = copy_obj(v)
-                    table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                    table.insert(hdr.undo_list, {v.name, CHG, org_object, new_object})
 		     	end 
 			end 
         end
@@ -3858,21 +3864,21 @@ function editor.top()
 	
     ang_cord()
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 function editor.bottom()
      local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print(":there are  no selected objects") 
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
      org_cord() 
 
-     local basis_obj_name = getObjName(selected_objs[1])
+     local basis_obj_name = getObjName(hdr.selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
@@ -3883,7 +3889,7 @@ function editor.bottom()
 	                org_object = copy_obj(v)
 			v.y = basis_obj.y + basis_obj.h - v.h 
 			new_object = copy_obj(v)
-                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                        table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
 		     end 
 		end 
           end
@@ -3892,21 +3898,21 @@ function editor.bottom()
     ang_cord()
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 function editor.hcenter()
      local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print("there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
      org_cord() 
 
-     local basis_obj_name = getObjName(selected_objs[1])
+     local basis_obj_name = getObjName(hdr.selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
@@ -3917,7 +3923,7 @@ function editor.hcenter()
 	                org_object = copy_obj(v)
 			v.x = basis_obj.x + basis_obj.w/2 - v.w/2
 			new_object = copy_obj(v)
-                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                        table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
 		     end
 		end 
           end
@@ -3926,23 +3932,23 @@ function editor.hcenter()
     ang_cord() 
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 
 end
 
 function editor.vcenter()
      local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print("there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
      org_cord() 
 
-     local basis_obj_name = getObjName(selected_objs[1])
+     local basis_obj_name = getObjName(hdr.selected_objs[1])
      local basis_obj = g:find_child(basis_obj_name)
 
      for i, v in pairs(g.children) do
@@ -3953,7 +3959,7 @@ function editor.vcenter()
 	                org_object = copy_obj(v)
 			v.y = basis_obj.y + basis_obj.h/2 - v.h/2
 			new_object = copy_obj(v)
-                        table.insert(undo_list, {v.name, CHG, org_object, new_object})
+                        table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
 		     end
 		end 
           end
@@ -3962,7 +3968,7 @@ function editor.vcenter()
     ang_cord()
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 local function get_x_sort_t()
@@ -4017,7 +4023,7 @@ local function get_x_space(x_sort_t)
           b = f
      end 
      
-     local n = table.getn(selected_objs)
+     local n = table.getn(hdr.selected_objs)
      if (n > 2) then 
      	space = space / (n - 1)
      end 
@@ -4028,9 +4034,9 @@ end
 function editor.hspace()
     local org_object, new_object 
 
-    if(table.getn(selected_objs) == 0 )then 
+    if(table.getn(hdr.selected_objs) == 0 )then 
 	print("there are  no selected objects") 
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
     end 
 
@@ -4066,7 +4072,7 @@ function editor.hspace()
 		b.x = 1920 - b.w 
 	      end 
 	      new_object = copy_obj(b)
-              table.insert(undo_list, {b.name, CHG, org_object, new_object})
+              table.insert(hdr.undo_list, {b.name, hdr.CHG, org_object, new_object})
 	 end 
 
          f = b 
@@ -4075,7 +4081,7 @@ function editor.hspace()
     ang_cord()
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 local function get_y_sort_t()
@@ -4123,7 +4129,7 @@ local function get_y_space(y_sort_t)
           b = f
      end 
      
-     local n = table.getn(selected_objs)
+     local n = table.getn(hdr.selected_objs)
      space = space / (n - 1)
      return space
 end 
@@ -4131,10 +4137,10 @@ end
 function editor.vspace()
     local org_object, new_object 
 
-    if(table.getn(selected_objs) == 0 )then 
+    if(table.getn(hdr.selected_objs) == 0 )then 
 	print(":there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
     end 
 
@@ -4156,7 +4162,7 @@ function editor.vspace()
 	      org_object = copy_obj(b)
               b.y = f.y + f.h + space 
 	      new_object = copy_obj(b)
-              table.insert(undo_list, {b.name, CHG, org_object, new_object})
+              table.insert(hdr.undo_list, {b.name, hdr.CHG, org_object, new_object})
 	 end
          f = b 
     end 
@@ -4172,15 +4178,15 @@ function editor.vspace()
     ang_cord()
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 function editor.bring_to_front()
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print(":there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
@@ -4189,22 +4195,22 @@ function editor.bring_to_front()
 	        if(v.extra.selected == true) then
 			g:remove(v)
 			g:add(v)
-    			table.insert(undo_list, {v.name, ARG, BRING_FR})
+    			table.insert(hdr.undo_list, {v.name, hdr.ARG, hdr.BRING_FR})
 			editor.n_selected(v)
 		end 
           end
     end
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 function editor.send_to_back()
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print(":there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
@@ -4225,27 +4231,27 @@ function editor.send_to_back()
     
     while(table.getn(slt_g) ~= 0) do
 	v = table.remove(slt_g)
-         table.insert(undo_list, {v.name, ARG, SEND_BK})
+         table.insert(hdr.undo_list, {v.name, hdr.ARG, hdr.SEND_BK})
 	g:add(v)	
     end 
     
     tmp_g = get_reverse_t(tmp_g) 
     while(table.getn(tmp_g) ~= 0) do
 	v = table.remove(tmp_g)
-        table.insert(undo_list, {v.name, ARG, SEND_BK})
+        table.insert(hdr.undo_list, {v.name, hdr.ARG, hdr.SEND_BK})
 	g:add(v)	
     end 
 	
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 function editor.send_backward()
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print("there are no selected objects") 
                 screen:grab_key_focus()
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
@@ -4282,20 +4288,20 @@ function editor.send_backward()
     while(table.getn(tmp_g) ~= 0) do
 	v = table.remove(tmp_g)
 	g:add(v) 
-        table.insert(undo_list, {v.name, ARG, SEND_BW})
+        table.insert(hdr.undo_list, {v.name, hdr.ARG, hdr.SEND_BW})
     end 
 
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 
 end
 
 
 function editor.bring_forward()
 
-     if(table.getn(selected_objs) == 0 )then 
+     if(table.getn(hdr.selected_objs) == 0 )then 
 	print("there are  no selected objects") 
-	input_mode = S_SELECT
+	hdr.input_mode = hdr.S_SELECT
 	return 
      end 
 
@@ -4324,12 +4330,12 @@ function editor.bring_forward()
     tmp_g = get_reverse_t(tmp_g)
     while(table.getn(tmp_g) ~= 0) do
 	v = table.remove(tmp_g)
-        table.insert(undo_list, {v.name, ARG, BRING_FW})
+        table.insert(hdr.undo_list, {v.name, hdr.ARG, hdr.BRING_FW})
 	g:add(v)
     end 
 	
     screen.grab_key_focus(screen)
-    input_mode = S_SELECT
+    hdr.input_mode = hdr.S_SELECT
 end
 
 
@@ -4370,11 +4376,11 @@ function editor.the_ui_elements()
 			if new_widget.name:find("timeline") then 
 		    	screen:add(new_widget)
 			else 
-	           	while (is_available(new_widget.name..tostring(item_num)) == false) do  
-		     		item_num = item_num + 1
+	           	while (is_available(new_widget.name..tostring(hdr.item_num)) == false) do  
+		     		hdr.item_num = item_num + 1
 	           	end 
-	           	new_widget.name = new_widget.name..tostring(item_num)
-                table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	           	new_widget.name = new_widget.name..tostring(hdr.item_num)
+                table.insert(hdr.undo_list, {new_widget.name, hdr.ADD, new_widget})
 	           	g:add(new_widget)
 		   		new_widget.extra.lock = false
                 create_on_button_down_f(new_widget)
@@ -4401,8 +4407,8 @@ function editor.the_ui_elements()
 	button_ok.pressed = function() load_ui_element(selected_ui_element) end
 	
 	local s_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -4540,10 +4546,10 @@ function editor.the_ui_elements()
 	function xbox:on_button_down(x,y,button,num_clicks,textUIElement)
 		screen:remove(msgw)
 		msgw:clear() 
-		current_inspector = nil
-		current_focus = nil 
+		hdr.current_inspector = nil
+		hdr.current_focus = nil 
 		if x then 
-	    	input_mode = S_SELECT
+	    	hdr.input_mode = hdr.S_SELECT
 		end 
 		if textUIElement == nil then 
 			screen.grab_key_focus(screen) 
@@ -4664,11 +4670,11 @@ function editor.ui_elements()
 	if new_widget.name:find("timeline") then 
 		    screen:add(new_widget)
 	else 
-	           while (is_available(new_widget.name..tostring(item_num)) == false) do  
-		     item_num = item_num + 1
+	           while (is_available(new_widget.name..tostring(hdr.item_num)) == false) do  
+		     hdr.item_num = item_num + 1
 	           end 
-	           new_widget.name = new_widget.name..tostring(item_num)
-                   table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	           new_widget.name = new_widget.name..tostring(hdr.item_num)
+                   table.insert(hdr.undo_list, {new_widget.name, hdr.ADD, new_widget})
 	           g:add(new_widget)
 		   new_widget.extra.lock = false
                    create_on_button_down_f(new_widget)
@@ -4717,11 +4723,11 @@ function editor.ui_elements()
              if new_widget.name:find("timeline") then 
 		    screen:add(new_widget)
 	     else
- 	     	while (is_available(new_widget.name..tostring(item_num)) == false) do  
-			item_num = item_num + 1
+ 	     	while (is_available(new_widget.name..tostring(hdr.item_num)) == false) do  
+			hdr.item_num = item_num + 1
 	      	end 
-	      	new_widget.name = new_widget.name..tostring(item_num)
-              	table.insert(undo_list, {new_widget.name, ADD, new_widget})
+	      	new_widget.name = new_widget.name..tostring(hdr.item_num)
+              	table.insert(hdr.undo_list, {new_widget.name, hdr.ADD, new_widget})
 	      	g:add(new_widget)
 		new_widget.extra.lock = false
               	create_on_button_down_f(new_widget)
@@ -4739,7 +4745,7 @@ function editor.ui_elements()
 	 	screen:remove(msgw)
         msgw:clear()
         screen.grab_key_focus(screen) 
-	  --input_mode = S_SELECT
+	  --hdr.input_mode = hdr.S_SELECT
 	 return true
     end 
 
@@ -4831,8 +4837,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 
 	local ti_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
+		if hdr.current_focus then 
+			hdr.current_focus.on_focus_out()
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
@@ -4885,10 +4891,10 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	function xbox:on_button_down()
 		screen:remove(msgw)
 		--msgw:clear() 
-		current_inspector = nil
-		current_focus = nil
+		hdr.current_inspector = nil
+		hdr.current_focus = nil
         screen.grab_key_focus(screen) 
-	    input_mode = S_SELECT
+	    hdr.input_mode = hdr.S_SELECT
 		if inspector then 
 			inspector:remove(inspector:find_child("deactivate_rect"))
 		end 

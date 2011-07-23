@@ -1,6 +1,5 @@
 local factory = {}
 
-
 -- Arrange Icon image
 local icon_l = Image{src = "assets/left.png", opacity = 155}
 local icon_r = Image{src = "assets/right.png", opacity = 155} 
@@ -15,7 +14,6 @@ local info_attr_t_idx = {"name","left", "top", "width", "height", "volume", "loo
 
 local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","message", "button_colorr","button_colorg","button_colorb","button_colora","border_colorr", "border_colorg", "border_colorb", "border_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_colorr","focus_colorg","focus_colorb","focus_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora", "select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","colorr", "colorg", "colorb", "colora","title_colorr","title_colorg","title_colorb","title_colora","title_font","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora","box_colorr","box_colorg","box_colorb","box_colora", "box_width", "box_height", "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","items","reactive", "focus"} 
 
-local attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "ui_width", "ui_height", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src", "empty_top_color", "empty_bottom_color", "stroke_color", "progress"}
 
 local attr_t_idx 
 
@@ -566,17 +564,17 @@ function factory.make_msgw_scroll_bar(file_list_size)
     scroll_bar.reactive = true 
     
     function scroll_bar:on_button_down(x,y,button,num_clicks)
-	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
+	hdr.dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
         return true
     end 
 
     function scroll_bar:on_button_up(x,y,button,num_clicks)
-	 if(dragging ~= nil) then 
-	      local actor , dx , dy = unpack( dragging )
+	 if(hdr.dragging ~= nil) then 
+	      local actor , dx , dy = unpack( hdr.dragging )
 	      if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
 	           scroll_bar.y = y - dy 
 	      end 
-	      dragging = nil
+	      hdr.dragging = nil
 	 end 
          return true
     end 
@@ -907,8 +905,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
+			hdr.input_mode = hdr.S_SELECT
+			hdr.current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -936,8 +934,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
+			hdr.input_mode = hdr.S_SELECT
+			hdr.current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -985,8 +983,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
+			hdr.input_mode = hdr.S_SELECT
+			hdr.current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -1002,8 +1000,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			input_mode = S_SELECT
-			current_inspector = nil
+			hdr.input_mode = hdr.S_SELECT
+			hdr.current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -1020,8 +1018,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local iy = inspector.y
 			screen:remove(inspector)
 			inspector:clear()
-			input_mode = S_SELECT
-			current_inspector = nil
+			hdr.input_mode = hdr.S_SELECT
+			hdr.current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -1102,8 +1100,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local iy = inspector.y
 
 		    screen:remove(inspector)
-		    input_mode = S_SELECT
-		    current_inspector = nil
+		    hdr.input_mode = hdr.S_SELECT
+		    hdr.current_inspector = nil
             screen:grab_key_focus(screen) 
 		    text_reactive()
 		    editor.n_selected(v, true)
@@ -1141,8 +1139,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		   local iy = inspector.y
 
 		   screen:remove(inspector)
-		   input_mode = S_SELECT
-		   current_inspector = nil
+		   hdr.input_mode = hdr.S_SELECT
+		   hdr.current_inspector = nil
            screen:grab_key_focus(screen) 
 		   text_reactive()
 		   editor.n_selected(v, true)
@@ -1179,8 +1177,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			 local iy = inspector.y
 
 		     screen:remove(inspector)
-		     input_mode = S_SELECT
-		     current_inspector = nil
+		     hdr.input_mode = hdr.S_SELECT
+		     hdr.current_inspector = nil
              screen:grab_key_focus(screen) 
 		     text_reactive()
 		     editor.n_selected(v, true)
@@ -1191,11 +1189,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	      end 
 
 	      function item:on_button_down()
-		 	 if current_focus then 
-   			 	current_focus.extra.on_focus_out()
+		 	 if hdr.current_focus then 
+   			 	hdr.current_focus.extra.on_focus_out()
 			 else
 			 end 
-	         current_focus = group
+	         hdr.current_focus = group
 		     item.on_focus_in()
 			 if item_type then 
                    item:find_child("textInput").extra.item_type = item_type
@@ -1235,7 +1233,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		               			  local n_item = attr_t_idx[i+1]
 			       				  if item_group:find_child(n_item).extra.on_focus_in then 
 			           				item_group:find_child(n_item).extra.on_focus_in()	
-	       							current_focus = item_group:find_child(n_item)
+	       							hdr.current_focus = item_group:find_child(n_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 			       				  else
 				   					there()
@@ -1262,7 +1260,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			     				if(item_group:find_child(attr_t_idx[i-1])) then
 			     					local p_item = attr_t_idx[i-1]
 									item_group:find_child(p_item).extra.on_focus_in()	
-	       							current_focus = item_group:find_child(p_item)
+	       							hdr.current_focus = item_group:find_child(p_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 									break
 			     				end
@@ -1283,7 +1281,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    	items_list:replace(i,4,down)
 	end
 	function group.extra.on_focus_in()
-		current_focus = group --0701 
+		hdr.current_focus = group --0701 
 		a = items_list.tiles[1][1]
 		a.on_focus_in()
 		a:grab_key_focus()
@@ -1323,7 +1321,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
   		local itemLists
 	
 		if item_n == "skin" then 
-			itemLists = skins 
+			itemLists = hdr.inspector_skins -- skins 
 		elseif item_n == "wrap_mode" then 
 			itemLists = {"none", "char", "word", "word_char"} 
 			if v.wrap == false then 
@@ -1368,10 +1366,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 
 		unfocus = item_picker:find_child("unfocus")
 		function unfocus:on_button_down (x,y,b,n)
-			if current_focus then 
-   				current_focus.extra.on_focus_out()
+			if hdr.current_focus then 
+   				hdr.current_focus.extra.on_focus_out()
 			end 
-	        current_focus = group
+	        hdr.current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
 			return true
@@ -1380,10 +1378,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
         left_arrow = item_picker:find_child("left_un")
 		left_arrow.reactive = true 
 		function left_arrow:on_button_down(x, y, b, n)
-			if current_focus then 
-				current_focus.extra.on_focus_out()
+			if hdr.current_focus then 
+				hdr.current_focus.extra.on_focus_out()
 			end 
-	        current_focus = group
+	        hdr.current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
 			item_picker.press_left()
@@ -1393,10 +1391,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		right_arrow = item_picker:find_child("right_un")
 		right_arrow.reactive = true 
 		function right_arrow:on_button_down(x, y, b, n)
-			if current_focus then 
-				current_focus.extra.on_focus_out()
+			if hdr.current_focus then 
+				hdr.current_focus.extra.on_focus_out()
 			end 
-	        current_focus = group
+	        hdr.current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
 			item_picker.press_right()
@@ -1433,7 +1431,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		               		local n_item = attr_t_idx[i+1]
 							if item_group:find_child(n_item).extra.on_focus_in then 
 			       				item_group:find_child(n_item).extra.on_focus_in()	
-	       						current_focus = item_group:find_child(n_item)
+	       						hdr.current_focus = item_group:find_child(n_item)
 			       				si.seek_to_middle(0, item_group:find_child(n_item).y)
 							end 
 			        		break
@@ -1451,7 +1449,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
-	       		current_focus = item_group:find_child(p_item)
+	       		hdr.current_focus = item_group:find_child(p_item)
 				si.seek_to_middle(0, item_group:find_child(p_item).y)
 				break
 			     end
@@ -1742,29 +1740,29 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 		function input_text:on_button_down(x,y,button,num_clicks)
 
-		   	if current_focus then 
-				if current_focus.extra then 
-					if current_focus.extra.type == "Button" then 
-						 local pt = current_focus.parent
+		   	if hdr.current_focus then 
+				if hdr.current_focus.extra then 
+					if hdr.current_focus.extra.type == "Button" then 
+						 local pt = hdr.current_focus.parent
 						 pt = pt.extra.type
 						 if pt ~= "TabBar" then 
-							current_focus.extra.on_focus_out()
+							hdr.current_focus.extra.on_focus_out()
 		   				end 
 					else 
-						current_focus.extra.on_focus_out()
+						hdr.current_focus.extra.on_focus_out()
 					end
 				end
 			end 
-	       	current_focus = group
+	       	hdr.current_focus = group
 	       	group.extra.on_focus_in()
            	return true
         end
 
 		function group:on_button_down(x,y,button,num_clicks)
-			if current_focus then 
- 	       		current_focus.extra.on_focus_out()
+			if hdr.current_focus then 
+ 	       		hdr.current_focus.extra.on_focus_out()
 			end 
-	        current_focus = group
+	        hdr.current_focus = group
 	        group.extra.on_focus_in()
             return true
         end
@@ -1796,7 +1794,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		               		local n_item = attr_t_idx[i+1]
 			       			if item_group:find_child(n_item).extra.on_focus_in then 
 			       				item_group:find_child(n_item).extra.on_focus_in()	
-	       						current_focus = item_group:find_child(n_item)
+	       						hdr.current_focus = item_group:find_child(n_item)
 			       			if (si) then 
 				    			si.seek_to_middle(0, item_group:find_child(n_item).y)
 			       			end
@@ -1822,7 +1820,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 			     				local p_item = attr_t_idx[i-1]
 								if item_group:find_child(p_item).extra.on_focus_in then 	
 				     				item_group:find_child(p_item).extra.on_focus_in()	
-	       							current_focus = item_group:find_child(p_item)
+	       							hdr.current_focus = item_group:find_child(p_item)
 			             			if (si) then 
 				          				si.seek_to_middle(0, item_group:find_child(p_item).y)
 			             			end
@@ -1846,7 +1844,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
     	group:add(input_text)
         function group.extra.on_focus_in()
-	         current_focus = group --0701
+	         hdr.current_focus = group --0701
              ring.opacity = 0
              input_text.cursor_visible = true
              focus.opacity = 255
@@ -2199,10 +2197,10 @@ function factory.draw_focus_changer(v)
 	focus:add(text11,focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
 	
 	function focus.extra.on_focus_in()
-	 	if current_focus then 
-	 		current_focus.extra.on_focus_out()
+	 	if hdr.current_focus then 
+	 		hdr.current_focus.extra.on_focus_out()
 	 	end 
-	 	current_focus = focus
+	 	hdr.current_focus = focus
 	 	for i,j in pairs(focus.children) do
 			if j.type == "Rectangle" then 
 		     	local focus_t= j.name:sub(2,-1)
@@ -2212,8 +2210,8 @@ function factory.draw_focus_changer(v)
 	end 
 
 	function focus.extra.on_focus_out(call_by_inspector)
-		focus_type = ""
-		input_mode = S_POPUP
+		hdr.focus_type = ""
+		hdr.input_mode = hdr.S_POPUP
         for i,j in pairs(focus.children) do
 			if j.type == "Rectangle" then 
 		     	local focus_t= j.name:sub(2,-1)
@@ -2229,13 +2227,13 @@ function factory.draw_focus_changer(v)
         			focus.extra.on_focus_in()
 				end 
 			end
-	   		focus_type = v.name:sub(2,-1)
+	   		hdr.focus_type = v.name:sub(2,-1)
 	   		v.border_color = {255,25,25,255} 
 	   		v.border_width = 2
-	   		if (focus:find_child("text"..focus_type).text ~= "") then
-				focus:find_child("text"..focus_type).text = ""
+	   		if (focus:find_child("text"..hdr.focus_type).text ~= "") then
+				focus:find_child("text"..hdr.focus_type).text = ""
 	   		end   
-	   		input_mode = S_FOCUS
+	   		hdr.input_mode = hdr.S_FOCUS
 	   		return true 
 		end 
 	end 

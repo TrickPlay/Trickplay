@@ -1,3 +1,5 @@
+--local ui_element = dofile("/lib/ui_element.lua")
+
 editor_use = true
 local menu_bar = Image
 	{
@@ -283,7 +285,7 @@ menuButton_view.insert_item(2,{type="item", string="Image...", bg=assets("assets
 menuButton_view.items[2]["icon"].opacity = 0
 menuButton_view.insert_item(3,{type="item", string="Small Grid", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.small_grid, icon=assets("assets/menu-checkmark.png")} )
 menuButton_view.items[3]["icon"].opacity = 0
-menuButton_view.insert_item(4,{type="item", string="Medium Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.medium_grid, icon=assets("assets/menu-checkmark.png")})
+menuButton_view.insert_item(4,{type="item", string="Medium Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() print ("JJJJJJ") editor.medium_grid() end , icon=assets("assets/menu-checkmark.png")})
 menuButton_view.insert_item(5,{type="item", string="Large Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.large_grid, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.items[5]["icon"].opacity = 0
 menuButton_view.insert_item(6,{type="item", string="White", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.white_bg, icon=assets("assets/menu-checkmark.png")})

@@ -55,7 +55,7 @@ function inspector_apply (v, inspector)
 		 	end
          end,
        	["skin"] = function()
-              v["skin"] = skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
+              v["skin"] = hdr.inspector_skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
               end,
        	["anchor_point"] = function()
                v:move_anchor_point(item_group:find_child("anchor_point"):find_child("anchor").extra.anchor_point[1], 
@@ -441,9 +441,9 @@ function inspector_apply (v, inspector)
 	  	end 
 
         set_obj(new_object, v) 
-        input_mode = S_SELECT
+        hdr.input_mode = hdr.S_SELECT
         if(v.name ~= "video1") then 
-       	    table.insert(undo_list, {v.name, CHG, org_object, new_object})
+       	    table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
         end 
 		
        return org_object, new_object
