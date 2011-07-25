@@ -1,3 +1,5 @@
+screen:add(Image{src="sky.png",size=screen.size})
+
 --[==[
 screen:show()
 
@@ -261,6 +263,24 @@ ball = physics:Body(
         linear_damping = .7
     }
 )
+
+function ball:on_begin_contact(c)
+    --print(ball.linear_velocity[1],ball.linear_velocity[2])
+    
+    if  math.abs(ball.linear_velocity[1]) > 6 or
+        math.abs(ball.linear_velocity[2]) > 6 then
+        
+        mediaplayer:play_sound("tap-lg.mp3")
+        
+    elseif  math.abs(ball.linear_velocity[1]) > 2 or
+        math.abs(ball.linear_velocity[2]) > 2 then
+        
+        mediaplayer:play_sound("tap-sm.mp3")
+        
+    end
+    
+end
+
 
 shadow        = Image{
    src        = "marble-shadow-2x.png",
