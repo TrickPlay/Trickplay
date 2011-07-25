@@ -28,6 +28,7 @@
 #include "app_push_server.h"
 #include "http_server.h"
 #include "http_trickplay_api_support.h"
+#include "clutter_util.h"
 
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
@@ -840,7 +841,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
                     map_key( event , & keyval , & unicode );
 
-                    tp_controller_key_down( ( TPController * )controller, keyval, unicode );
+                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                    tp_controller_key_down( ( TPController * )controller, keyval, unicode , modifiers );
                     return TRUE;
                 }
 
@@ -856,7 +859,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
                     map_key( event , & keyval , & unicode );
 
-                    tp_controller_key_up( ( TPController * )controller, keyval, unicode );
+                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                    tp_controller_key_up( ( TPController * )controller, keyval, unicode , modifiers );
                     return TRUE;
                 }
                 break;
@@ -868,7 +873,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 {
                     if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
                     {
-                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y );
+                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y , modifiers );
                     }
                     return TRUE;
                 }
@@ -881,7 +888,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 {
                     if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
                     {
-                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
                     }
                     return TRUE;
                 }
@@ -893,7 +902,9 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 {
                     if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
                     {
-                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y );
+                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
                     }
                     return TRUE;
                 }
@@ -981,24 +992,6 @@ static void after_paint( ClutterActor * actor , gpointer )
 
 #endif
 
-
-//-----------------------------------------------------------------------------
-// When the context enters the stage, hide the OS and/or WM cursor
-
-#ifndef TP_CLUTTER_BACKEND_EGL
-
-static void hide_cursor( ClutterActor * actor, gpointer )
-{
-	clutter_stage_hide_cursor( CLUTTER_STAGE( actor ) );
-}
-
-static void show_cursor( ClutterActor * actor, gpointer )
-{
-	clutter_stage_show_cursor( CLUTTER_STAGE( actor ) );
-}
-
-#endif
-
 //-----------------------------------------------------------------------------
 
 class RunningAction : public Action
@@ -1021,6 +1014,15 @@ private:
 
     TPContext * context;
 };
+
+//-----------------------------------------------------------------------------
+// Sometimes the stage goes un-fullscreen when it shouldn't. This corrects
+// that.
+
+void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
+{
+    clutter_stage_set_fullscreen( stage , TRUE );
+}
 
 //-----------------------------------------------------------------------------
 
@@ -1185,6 +1187,8 @@ int TPContext::run()
     if ( display_width <= 0 || display_height <= 0 )
     {
         clutter_stage_set_fullscreen( CLUTTER_STAGE( stage ) , TRUE );
+
+        g_signal_connect( stage , "unfullscreen" , ( GCallback ) stage_unfullscreen , 0 );
     }
     else
     {
@@ -1193,8 +1197,7 @@ int TPContext::run()
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
-    clutter_stage_set_title( (ClutterStage *)stage, "TrickPlay" );
-    clutter_stage_hide_cursor( (ClutterStage *)stage);
+    clutter_stage_set_title( CLUTTER_STAGE( stage ) , "TrickPlay" );
 
 #endif
 
@@ -1205,6 +1208,8 @@ int TPContext::run()
     color.alpha = 0;
 
     clutter_stage_set_color( CLUTTER_STAGE( stage ), &color );
+
+    clutter_stage_set_use_alpha( CLUTTER_STAGE( stage ) , true );
 
 #ifdef TP_PROFILING
 
@@ -1239,9 +1244,6 @@ int TPContext::run()
 
     g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
     
-    g_signal_connect( stage, "enter-event", ( GCallback )hide_cursor, stage);
-    g_signal_connect( stage, "leave-event", ( GCallback )show_cursor, stage);
-
 #endif
 
     clutter_stage_set_throttle_motion_events( CLUTTER_STAGE( stage ) , FALSE );

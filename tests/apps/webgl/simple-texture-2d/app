@@ -1,0 +1,9 @@
+{
+    "id" : "com.trickplay.test.weblg-simple-texture-2d",
+    "release" : 1,
+    "version" : "1.0",
+    "name"    : "WebGL Simple Texture 2D",
+    "author"  : "Pablo Pissanetzky",
+    "copyright" : "© Trickplay Inc."
+}
+

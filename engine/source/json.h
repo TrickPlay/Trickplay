@@ -159,6 +159,7 @@ namespace JSON
         virtual ~Object();
 
         Value & operator [] ( const String & key );
+        Value & at( const String & key );
 
         typedef std::map< String , Value > Map;
 

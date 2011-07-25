@@ -100,8 +100,8 @@ global devtools [[ void * ]]
 
     keypress( int key , int unicode = 0 )
         [[
-            ClutterUtil::inject_key_down( key , unicode );
-            ClutterUtil::inject_key_up( key , unicode );
+            ClutterUtil::inject_key_down( key , unicode , 0 );
+            ClutterUtil::inject_key_up( key , unicode , 0 );
         ]];
 
     udata gid( int gid )

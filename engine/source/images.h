@@ -22,6 +22,8 @@ public:
 
     static Image * make( const TPImage & image );
 
+    static Image * make( cairo_surface_t * surface );
+
     static Image * decode( gpointer data, gsize size, const gchar * content_type = NULL );
 
     static Image * decode( const gchar * filename );
@@ -127,6 +129,7 @@ public:
     class Decoder
     {
     public:
+    	virtual ~Decoder() {};
         virtual const char * name() = 0;
         virtual int decode( gpointer data, gsize size, TPImage * image ) = 0;
         virtual int decode( const char * filename, TPImage * image ) = 0;
