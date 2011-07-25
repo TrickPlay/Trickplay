@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export TP_first_app_exits=0
+export TP_app_path="/usr/share/trickplay/apps/editor"
+export TP_console_enabled=0
+
+trickplay &
+

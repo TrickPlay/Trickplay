@@ -1,22 +1,36 @@
 @import url("http://fonts.googleapis.com/css?family=Inconsolata");
+/*
+@import url("http://fonts.googleapis.com/css?family=Crimson+Text");
+@import url("http://fonts.googleapis.com/css?family=Crimson+Text:600");
+@import url("http://fonts.googleapis.com/css?family=Crimson+Text:700");
+@import url("http://fonts.googleapis.com/css?family=Merriweather");
+@import url("http://fonts.googleapis.com/css?family=Merriweather:700");
+*/
 @import url("http://fonts.googleapis.com/css?family=Nobile");
+@import url("http://fonts.googleapis.com/css?family=Nobile:bold");
+@import url("http://fonts.googleapis.com/css?family=Lora");
+@import url("http://fonts.googleapis.com/css?family=Lora:bold");
+@import url("http://fonts.googleapis.com/css?family=Lora:italic");
 
 body
 {
-    font-family: 'Nobile',Arial, Helvetica, sans-serif;
+    font-family: Lora,Times,serif;
+    /*font-family: 'Lato',Arial,Helvetica,sans-serif;*/
+	/*font-weight: 500;*/
 }
 
-p 
+p, ul, ol
 {
-   text-indent: 0;
-   margin-bottom: 1em;
-   margin-top: 1em;
+	font-size: 15px;
+   	text-indent: 0;
+   	margin-bottom: 1em;
+   	margin-top: 1em;
 }
 
 .CBody pre.prettyprint
 {
     font-family: Inconsolata, 'Courier New', Courier, monospace;
-    font-size: 10pt;
+    font-size: 11pt;
     border-width: 1px 1px 1px 1em;
     border-style: dashed dashed dashed solid;
     border-color: #CBCBCB;
@@ -28,7 +42,7 @@ p
 .CBody pre
 {
     font-family: Inconsolata, 'Courier New', Courier, monospace;
-    font-size: 10pt;
+    font-size: 11pt;
     border-width: 1px 1px 1px 1px;
     border-style: dashed dashed dashed dashed;
     border-color: #CBCBCB;
@@ -42,9 +56,15 @@ p
    margin: 0.5em 0.5em 0.5em 0.5em;
 }
 
-.SProperty .SEntry, .SFunction, .SEvent, .SVariable, .SType a
+.Prototype .prettyprint
+{
+	font-size: 11pt;
+}
+
+.SProperty .SEntry, .SFunction, .SEvent, .SVariable, .SType a, .SConstructor .SEntry
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
+    font-size: 12pt;
     font-variant: normal;
 }
 
@@ -61,12 +81,14 @@ p
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
     vertical-align: text-bottom;
-    width: 15%;
+    width: 10%;
+    font-size: 12pt;
 }
 
 .CDLDescription
 {
     vertical-align: text-bottom;
+    font-size: 15px;
 }
 
 .SDescription
@@ -82,7 +104,7 @@ p
 
 .STable
 {
-    font-size: 10pt;
+    font-size: 16pt;
 }
 
 .SClass td, .SDatabase td, .SDatabaseTable td, .SSection td{
@@ -130,9 +152,11 @@ p
 
 .CTitle
 {
+    font-family: Nobile, Arial, Helvetica, sans-serif;
     font-variant: small-caps;
+	font-weight: 700;
     background: c0c0c0;
-    font-size: 16pt;
+    font-size: 18pt;
 }
 
 .SBorder
@@ -147,6 +171,9 @@ p
 
 .STitle
 {
+    font-family: Nobile, Arial, Helvetica, sans-serif;
+	font-weight: 700;
+	font-variant: small-caps;
     text-indent: 0;
     margin-left: 0;
     font-size: 24pt;
@@ -170,6 +197,11 @@ p
 {
     font-style: italic;
     font-variant: small-caps;
+}
+
+.MEntry
+{
+	font-size: 14px;
 }
 
 .CTopic

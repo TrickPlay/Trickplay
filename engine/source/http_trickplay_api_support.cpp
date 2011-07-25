@@ -38,247 +38,6 @@ private:
 
 //-----------------------------------------------------------------------------
 
-/*static gint float_to_int( const gfloat & f ) {
-	
-	if ((0 < f && f < 0.0001) || (0 > f && f > -0.001 ) || f < 1000000 || f > 1000000)
-		
-		return 0;
-		
-	else
-		
-		return (gint) f;
-}*/
-
-static void get_actor_color( JSON::Object * color, ClutterColor * c )
-{
-	
-	(*color)["r"] = c->red;
-	(*color)["g"] = c->green;
-	(*color)["b"] = c->blue;
-	(*color)["a"] = c->alpha;
-	
-}
-
-static void dump_ui_actors( ClutterActor * actor, JSON::Object * object )
-{
-	
-	using namespace JSON;
-	
-    if ( !actor )
-    {
-		return;
-    }
-    
-	ClutterGeometry g;
-
-    clutter_actor_get_geometry( actor, & g );
-
-    const gchar * name = clutter_actor_get_name( actor );
-    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
-
-    if ( g_str_has_prefix( type, "Clutter" ) )
-    {
-        type += 7;
-    }
-	
-	String extra;
-    String details;
-
-	// x, y, z
-	gfloat x;
-	gfloat y;
-	gfloat z = clutter_actor_get_depth( actor ); 
-	clutter_actor_get_position( actor, &x, &y );
-    Object position;
-    position["x"] = x;
-    position["y"] = y;
-    position["z"] = z;
-	
-	// w, h
-	gfloat w;
-	gfloat h;
-	clutter_actor_get_size( actor, &w, &h );
-    Object size;
-    size["w"] = w;
-    size["h"] = h;
-    
-	// Scale
-    gdouble sx;
-    gdouble sy;	
-	clutter_actor_get_scale( actor, &sx, &sy );	
-	Object scale;
-	scale["x"] = sx;
-	scale["y"] = sy;
-
-	// Anchor point
-    gfloat ax;
-    gfloat ay;
-    clutter_actor_get_anchor_point( actor, &ax, &ay );
-	Object anchor_point;
-	anchor_point["x"] = ax;
-	anchor_point["y"] = ay;
-
-	// GID
-	gint32 gid = clutter_actor_get_gid( actor );
-
-	// Opacity
-    guint8 opacity = clutter_actor_get_opacity( actor );
-	
-	// Visibility
-	gboolean is_visible = CLUTTER_ACTOR_IS_VISIBLE( actor );
-	
-	// Clip
-	if (clutter_actor_has_clip( actor )) {
-        gfloat cxoff;
-        gfloat cyoff;
-        gfloat cw;
-        gfloat ch;
-        clutter_actor_get_clip( actor, &cxoff, &cyoff, &cw, &ch );
-        Object clip;
-        clip["x"] = cxoff;
-        clip["y"] = cyoff;
-        clip["w"] = cw;
-        clip["h"] = ch;
-        (*object)["clip"] = clip;
-    }
-    
-    // Rotation
-    Object x_rotation;
-    Object y_rotation;
-    Object z_rotation;
-    gdouble angle;
-    gfloat rx;
-    gfloat ry;
-    gfloat rz;
-    angle = clutter_actor_get_rotation( actor , CLUTTER_X_AXIS , &rx, &ry, &rz );
-    x_rotation["angle"] = angle;
-    x_rotation["y center"] = ry;
-    x_rotation["z center"] = rz;
-    angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , &rx, &ry, &rz );
-    y_rotation["angle"] = angle;
-    y_rotation["x center"] = rx;
-    y_rotation["z center"] = rz;
-    angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , &rx, &ry, &rz );
-    z_rotation["angle"] = angle;
-    z_rotation["x center"] = rx;
-    z_rotation["y center"] = ry;
-
-	if ( CLUTTER_IS_TEXT( actor ) )
-    {
-		
-		// Text
-        (*object)["text"] = String( clutter_text_get_text( CLUTTER_TEXT( actor ) ) );
-		
-		// Color
-        ClutterColor c;
-        clutter_text_get_color( CLUTTER_TEXT( actor ), &c );
-		Object color;
-		get_actor_color( &color , &c );
-		(*object)["color"] = color;
-        
-        // Font Name
-        const gchar * fname = clutter_text_get_font_name( CLUTTER_TEXT( actor ) );
-        (*object)["font"] = fname;
-        
-        //PangoFontDescription * fdesc = clutter_text_get_font_description( CLUTTER_TEXT( actor ) );
-        //(*object)["font-description"] = fdesc;
-        
-    }
-	else if ( CLUTTER_IS_RECTANGLE( actor ) )
-	{
-		
-		// Color
-		ClutterColor c;
-		clutter_rectangle_get_color( CLUTTER_RECTANGLE( actor ), &c );
-		Object color;
-		get_actor_color( &color, &c );
-		(*object)["color"] = color;
-		
-		// Border color
-		ClutterColor bc;
-		clutter_rectangle_get_border_color( CLUTTER_RECTANGLE( actor ), &bc );
-		Object border_color;
-		get_actor_color( &border_color, &bc );
-		(*object)["border_color"] = border_color;
-		
-		// Border width
-		guint border_width = clutter_rectangle_get_border_width( CLUTTER_RECTANGLE( actor ) );
-		(*object)["border_width"] = (int)border_width;
-		
-	}
-	else if ( CLUTTER_IS_TEXTURE( actor ) )
-	{
-		
-		// src
-		(*object)["src"] = ( String )( const gchar * )g_object_get_data( G_OBJECT( actor ) , "tp-src" );
-		
-		// tile
-		gboolean x;
-		gboolean y;
-		clutter_texture_get_repeat( CLUTTER_TEXTURE( actor ) , &x , &y );
-		Object tile;
-		tile["x"] = x;
-		tile["y"] = y;
-		(*object)["tile"] = tile;
-		
-	}
-	else if ( CLUTTER_IS_CLONE( actor ) )
-	{
-		
-		ClutterActor * original = clutter_clone_get_source( CLUTTER_CLONE( actor ) );
-		
-		Object source;
-		
-		dump_ui_actors( original, &source );
-		
-		(*object)["source"] = source;
-		
-	}
-    else if ( CLUTTER_IS_CONTAINER( actor ) )
-    {
-		Array children;
-		
-		GList * list = clutter_container_get_children( CLUTTER_CONTAINER( actor ));
-		
-		for(GList*item=g_list_first(list);item;item=g_list_next(item))
-		{
-			
-			ClutterActor * child = CLUTTER_ACTOR( item->data );     
-			
-			Object child_object;
-			
-			dump_ui_actors( child, &child_object );
-			
-			children.append( child_object );
-			
-		}
-		
-		g_list_free(list);
-		
-		(*object)["children"] = children;
-		
-    }
-	
-    (*object)["position"]   		= position;
-    (*object)["size"]   		    = size;
-    //(*object)["z"]	 			= z;
-    //(*object)["y"]	 			= y;
-    //(*object)["x"]	 			= x;
-    //(*object)["w"]	 			= w;
-    //(*object)["h"]	 			= h;
-    (*object)["name"] 			    = name;
-    (*object)["gid"]			    = gid;
-    (*object)["type"] 			    = type;
-    (*object)["is_visible"] 		= is_visible;
-    (*object)["scale"]	 		    = scale;
-    (*object)["opacity"] 		    = opacity;
-    (*object)["anchor_point"] 		= anchor_point;
-    (*object)["x_rotation"] 		= x_rotation;
-    (*object)["y_rotation"] 		= y_rotation;
-    (*object)["z_rotation"] 		= z_rotation;
-    
-}
-
 class DebugUIRequestHandler: public Handler
 {
 public:
@@ -296,37 +55,11 @@ public:
 
 	    Object object;
 
-	    //g_info( "" );
-	    g_info( "DEBUGGING INFO AVAIABLE AT http://localhost:8888/debug/ui" );
-	    
-	    dump_ui_actors( clutter_stage_get_default(), &object );
-	    
-	    /*
-	    std::map< String, std::list< ClutterActor * > >::const_iterator it;
-    
-	    for ( it = info.actors_by_type.begin(); it != info.actors_by_type.end(); ++it )
-	    {
-		g_info( "%15s %5u", it->first.c_str(), it->second.size() );
-	    }*/
+	    dump_ui_actors( clutter_stage_get_default(), object );
 	    
 	    response.set_status( HttpServer::HTTP_STATUS_OK );
 
-	    String result;
-
-	    //using namespace JSON;
-
-	    //Object object;
-	    //object[ "Actor" ] = info.type;
-
-	    //Array foo;
-	    
-	    //foo.append( 1 );
-	    //foo.append( true );
-	    //foo.append( "yo" );
-	    
-	    //object[ "foo" ] = foo;
-        
-	    result = object.stringify();
+	    String result( object.stringify() );
 
 	    if ( ! result.empty() )
 	    {
@@ -351,7 +84,7 @@ public:
 			return;
 		}
 
-		g_debug( "[%s]" , body );
+//		g_debug( "[%s]" , body );
 
 		Value v = Parser::parse( body );
 
@@ -387,7 +120,7 @@ public:
 				continue;
 			}
 
-			g_debug( "'%s' : %s" , it->first.c_str() , g_type_name( pspec->value_type ) );
+//			g_debug( "'%s' : %s" , it->first.c_str() , g_type_name( pspec->value_type ) );
 
 			GValue value = {0};
 
@@ -467,6 +200,210 @@ public:
 		}
 
 		response.set_status( HttpServer::HTTP_STATUS_OK );
+	}
+
+private:
+
+	static JSON::Object get_actor_color( const ClutterColor & c )
+	{
+		JSON::Object color;
+
+		color["r"] = c.red;
+		color["g"] = c.green;
+		color["b"] = c.blue;
+		color["a"] = c.alpha;
+
+		return color;
+	}
+
+	static String safe_string( const gchar * s )
+	{
+		return s ? String( s ) : String();
+	}
+
+	static void dump_ui_actors( ClutterActor * actor, JSON::Object & object )
+	{
+		using namespace JSON;
+
+	    if ( ! actor )
+	    {
+			return;
+	    }
+
+		ClutterGeometry g;
+
+	    clutter_actor_get_geometry( actor, & g );
+
+	    object["name"] = safe_string( clutter_actor_get_name( actor ) );
+
+	    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
+
+	    if ( g_str_has_prefix( type, "Clutter" ) )
+	    {
+	        type += 7;
+	    }
+	    else if ( g_str_has_prefix( type , "Trickplay" ) )
+	    {
+	    	type += 9;
+	    }
+	    object[ "type" ] = type;
+
+		// x, y, z
+		gfloat x;
+		gfloat y;
+		gfloat z = clutter_actor_get_depth( actor );
+		clutter_actor_get_position( actor, &x, &y );
+	    Object position;
+	    position["x"] = x;
+	    position["y"] = y;
+	    position["z"] = z;
+	    object["position"] = position;
+
+		// w, h
+		gfloat w;
+		gfloat h;
+		clutter_actor_get_size( actor, &w, &h );
+	    Object size;
+	    size["w"] = w;
+	    size["h"] = h;
+	    object["size"] = size;
+
+		// Scale
+	    gdouble sx;
+	    gdouble sy;
+		clutter_actor_get_scale( actor, &sx, &sy );
+		Object scale;
+		scale["x"] = sx;
+		scale["y"] = sy;
+		object["scale"] = scale;
+
+		// Anchor point
+	    gfloat ax;
+	    gfloat ay;
+	    clutter_actor_get_anchor_point( actor, &ax, &ay );
+		Object anchor_point;
+		anchor_point["x"] = ax;
+		anchor_point["y"] = ay;
+		object[ "anchor_point"] = anchor_point;
+
+		// GID
+		object[ "gid" ] = int( clutter_actor_get_gid( actor ) );
+
+		// Opacity
+	    object[ "opacity" ] = clutter_actor_get_opacity( actor );
+
+
+		// Visibility
+		object[ "is_visible" ] = bool( CLUTTER_ACTOR_IS_VISIBLE( actor ) );
+
+		// Clip
+		if ( clutter_actor_has_clip( actor ) )
+		{
+	        gfloat cxoff;
+	        gfloat cyoff;
+	        gfloat cw;
+	        gfloat ch;
+	        clutter_actor_get_clip( actor, &cxoff, &cyoff, &cw, &ch );
+	        Object clip;
+	        clip["x"] = cxoff;
+	        clip["y"] = cyoff;
+	        clip["w"] = cw;
+	        clip["h"] = ch;
+	        object["clip"] = clip;
+	    }
+
+	    // Rotation
+	    Object x_rotation;
+	    Object y_rotation;
+	    Object z_rotation;
+	    gdouble angle;
+	    gfloat rx;
+	    gfloat ry;
+	    gfloat rz;
+	    angle = clutter_actor_get_rotation( actor , CLUTTER_X_AXIS , &rx, &ry, &rz );
+	    x_rotation["angle"] = angle;
+	    x_rotation["y center"] = ry;
+	    x_rotation["z center"] = rz;
+	    object["x_rotation"] = x_rotation;
+
+	    angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , &rx, &ry, &rz );
+	    y_rotation["angle"] = angle;
+	    y_rotation["x center"] = rx;
+	    y_rotation["z center"] = rz;
+	    object[ "y_rotation" ] = y_rotation;
+
+	    angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , &rx, &ry, &rz );
+	    z_rotation["angle"] = angle;
+	    z_rotation["x center"] = rx;
+	    z_rotation["y center"] = ry;
+	    object[ "z_rotation"] = z_rotation;
+
+		if ( CLUTTER_IS_TEXT( actor ) )
+	    {
+			// Text
+	        object["text"] = safe_string( clutter_text_get_text( CLUTTER_TEXT( actor ) ) ) ;
+
+			// Color
+	        ClutterColor c;
+	        clutter_text_get_color( CLUTTER_TEXT( actor ), &c );
+			object["color"] = get_actor_color( c );
+
+	        // Font Name
+	        object["font"] = safe_string( clutter_text_get_font_name( CLUTTER_TEXT( actor ) ) );
+	    }
+		else if ( CLUTTER_IS_RECTANGLE( actor ) )
+		{
+			// Color
+			ClutterColor c;
+			clutter_rectangle_get_color( CLUTTER_RECTANGLE( actor ), &c );
+			object["color"] = get_actor_color( c );
+
+			// Border color
+			clutter_rectangle_get_border_color( CLUTTER_RECTANGLE( actor ), &c );
+			object["border_color"] = get_actor_color( c );
+
+			// Border width
+			object["border_width"] = int( clutter_rectangle_get_border_width( CLUTTER_RECTANGLE( actor ) ) );
+		}
+		else if ( CLUTTER_IS_TEXTURE( actor ) )
+		{
+			// src
+			object["src"] = safe_string( ( const gchar * ) g_object_get_data( G_OBJECT( actor ) , "tp-src" ) );
+
+			// tile
+			gboolean x;
+			gboolean y;
+			clutter_texture_get_repeat( CLUTTER_TEXTURE( actor ) , &x , &y );
+			Object tile;
+			tile["x"] = bool( x );
+			tile["y"] = bool( y );
+			object["tile"] = tile;
+		}
+		else if ( CLUTTER_IS_CLONE( actor ) )
+		{
+			ClutterActor * original = clutter_clone_get_source( CLUTTER_CLONE( actor ) );
+
+			Object source;
+
+			dump_ui_actors( original, source );
+
+			object["source"] = source;
+		}
+	    else if ( CLUTTER_IS_CONTAINER( actor ) )
+	    {
+			Array & children( object[ "children" ].as<Array>() );
+
+			GList * list = clutter_container_get_children( CLUTTER_CONTAINER( actor ) );
+
+			for( GList * item = g_list_first( list ); item ; item = g_list_next( item ) )
+			{
+				Object & child_object( children.append().as<Object>() );
+
+				dump_ui_actors( CLUTTER_ACTOR( item->data ) , child_object );
+			}
+
+			g_list_free( list );
+	    }
 	}
 };
 
