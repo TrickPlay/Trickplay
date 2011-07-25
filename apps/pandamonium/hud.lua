@@ -40,7 +40,7 @@ local add_a_digit = function()
 end
 
 local i = 1
-
+local val
 local hud = {
 	
 	add_to_score = function(_,amt)
@@ -67,7 +67,7 @@ local hud = {
 				
 				amt = math.floor(nums[i].value/10)
 				
-				nums[i].value = 0
+				nums[i].value = nums[i].value%10
 				
 				nums[i].text.source = assets.num[10]
 				
