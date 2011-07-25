@@ -172,7 +172,7 @@
         }
         html = [NSString stringWithFormat:@"%@</div></body></html>", html];
     } else {
-        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@</div></body></html>", html, text];
+        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@<p style='opacity:0;'>a</p></div></body></html>", html, text];
     }
     
     NSLog(@"html: %@", html);
