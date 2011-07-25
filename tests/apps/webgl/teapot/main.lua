@@ -1,5 +1,7 @@
 
-local gl = gl
+local gl = WebGLCanvas{ size = screen.size }
+
+screen:add( gl )
 
 -------------------------------------------------------------------------------
 -- Generic creation of a shader program
@@ -227,7 +229,7 @@ end
 
 -------------------------------------------------------------------------------
 
-local vw , vh = unpack( screen.display_size )
+local vw , vh = gl.width , gl.height
 local aspect = vw / vh
 
 -------------------------------------------------------------------------------
@@ -309,8 +311,6 @@ local function drawScene()
    setMatrixUniforms()
    gl:drawElements(gl.TRIANGLES, teapotVertexIndexBuffer_numItems, gl.UNSIGNED_SHORT, 0)
 
-
-   gl:swap()
 end
 
 -------------------------------------------------------------------------------
@@ -329,20 +329,8 @@ local function animate()
 end
 
 local function WebGLStart()
-   -----------------------------------------
-   -- These are the GL defaults
-   gl:disable( gl.BLEND )
-   gl:disable( gl.CULL_FACE )
-   gl:disable( gl.DEPTH_TEST )
-   gl:disable( gl.POLYGON_OFFSET_FILL )
-   gl:disable( gl.SAMPLE_ALPHA_TO_COVERAGE )
-   gl:disable( gl.SAMPLE_COVERAGE )
-   gl:disable( gl.SCISSOR_TEST )
-   gl:disable( gl.STENCIL_TEST )
-   gl:enable( gl.DITHER )
-   gl:frontFace( gl.CCW )
-   -----------------------------------------
 
+   gl:acquire()
    initGL()
    initShaders()
    initBuffers()
@@ -352,13 +340,16 @@ local function WebGLStart()
    gl:clearColor( 0.2 , 0.0 , 0.0 , 1.0 )
    gl:enable( gl.DEPTH_TEST )
       
+   gl:release()
    print( "READY" )
    
 if false then
 
    function screen:on_key_down( key )
       if key == keys.Return then
+        gl:acquire()
          drawScene()
+         gl:release()
          animate()
       end
    end
@@ -369,7 +360,9 @@ else
    local t = Stopwatch()
    
    function idle.on_idle()
+      gl:acquire()
       drawScene()
+      gl:release()
       animate()
        
       frames = frames + 1
@@ -402,5 +395,5 @@ end
 
 screen:show()
 
-dolater( 1000 , WebGLStart )
+WebGLStart()
 
