@@ -153,9 +153,9 @@
    
     } else {
         [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
-        if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
-            imagePickerController.navigationBar.topItem.title = titleLabel;
-        }
+    }
+    if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
+        imagePickerController.navigationBar.topItem.title = titleLabel;
     }
 }
 
@@ -177,8 +177,8 @@
 
 - (void)dismissImageEditor {
     if (imageEditor) {
-        if (self.modalViewController) {
-            [self dismissModalViewControllerAnimated:NO];
+        if (imageEditor.parentViewController) {
+            [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
         }
         [imageEditor release];
         imageEditor = nil;
@@ -214,10 +214,16 @@
     imageEditor.targetWidth = targetWidth;
     imageEditor.targetHeight = targetHeight;
     imageEditor.mask = mask;
+    
+    [((UIViewController *)delegate).navigationController presentModalViewController:imageEditor animated:NO];
+
+    
+    /*
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
     
         [self presentModalViewController:cntrl animated:NO];
+        
         [cntrl release];
     } else if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         UINavigationController *cntrl = [[UINavigationController alloc] initWithRootViewController:imageEditor];
@@ -229,6 +235,7 @@
     } else {
         NSLog(@"This User Interface Idiom does not exist");
     }
+    //*/
 }
 
 #pragma mark -
@@ -319,7 +326,7 @@
 #pragma mark -
 #pragma mark View controls
 
-- (void)setMask:(UIView *)aMask {
+- (void)setMask:(UIImageView *)aMask {
     mask = aMask;
     [self.view addSubview:mask];
 }

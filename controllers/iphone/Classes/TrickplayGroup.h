@@ -14,7 +14,8 @@
 @protocol AdvancedUIScreenDelegate <NSObject>
 
 @required
-- do_UB:(NSArray *)args;
+- (void)do_UB:(NSArray *)args;
+- (void)object_added;
 
 @end
 

@@ -133,7 +133,33 @@ if (UNIX AND NOT APPLE)
 	
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.png DESTINATION share/icons/hicolor/64x64/apps/)
 
-        include(CPack)
+    #--------------------------------------------------------------------------	
+    # Editor
+
+    if ( EXISTS ${PROJECT_SOURCE_DIR}/apps/editor )
+
+	    # Editor script
+	
+	    install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor DESTINATION bin )
+	
+	    # Editor app
+	
+	    install(DIRECTORY ${PROJECT_SOURCE_DIR}/apps/editor DESTINATION share/trickplay/apps/ )
+
+        #Editor docs	
+
+        install(DIRECTORY ${PROJECT_BINARY_DIR}/docs/editor/ DESTINATION share/doc/trickplay-editor/html )
+        
+        # Editor icons
+
+	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor.desktop DESTINATION share/applications/ ) 
+	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor-docs.desktop DESTINATION share/applications/ ) 
+	    
+    endif ( EXISTS ${PROJECT_SOURCE_DIR}/apps/editor )
+
+    #--------------------------------------------------------------------------	
+
+    include(CPack)
 
     endif (NATURAL_DOCS)		
 		

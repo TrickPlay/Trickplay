@@ -59,6 +59,7 @@ Group: Reference  {
 
       Group: Globals  {
 
+         File: keys (docs/apps/text/key_codes.txt)
          File: screen  (bindings/clutter_screen.lb)
          }  # Group: Globals
 
@@ -76,6 +77,8 @@ Group: Reference  {
       Group: Animation  {
 
          File: Alpha  (bindings/clutter_alpha.lb)
+         File: Animator (bindings/clutter_animator.lb)
+         File: AnimationState (bindings/clutter_state.lb)
          File: Interval  (bindings/clutter_interval.lb)
          File: Path (bindings/clutter_path.lb)
          File: Score (bindings/clutter_score.lb)
@@ -83,6 +86,10 @@ Group: Reference  {
          }  # Group: Animation
 
       }  # Group: UI
+      
+	Group: Components {
+		File: Physics Engine (no auto-title, bindings/physics.lb)
+	}
 
    Group: Globals  {
 

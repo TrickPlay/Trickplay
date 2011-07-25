@@ -98,6 +98,7 @@
 #import "AudioController.h"
 #import "AdvancedUIObjectManager.h"
 #import "CameraViewController.h"
+#import "VirtualRemoteViewController.h"
 #import "GestureImageView.h"
 
 @class TrickplayGroup;
@@ -106,7 +107,8 @@
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
 @interface GestureViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate, UINavigationControllerDelegate> {
+CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate,
+UINavigationControllerDelegate, VirtualRemoteDelegate> {
     BOOL viewDidAppear;
     
     SocketManager *socketManager;
@@ -137,6 +139,8 @@ CommandInterpreterAppDelegate, CameraViewControllerDelegate, UITextFieldDelegate
     AudioController *audioController;
     
     CameraViewController *camera;
+    
+    VirtualRemoteViewController *virtualRemote;
     
     id <ViewControllerTouchDelegate> touchDelegate;
     id <ViewControllerAccelerometerDelegate> accelDelegate;

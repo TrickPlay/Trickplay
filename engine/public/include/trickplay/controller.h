@@ -1035,6 +1035,42 @@ struct TPControllerRequestAudioClip
 */
 
 /*
+    Constants: Key Modifiers
+
+    These constants describe key modifiers for key and pointer events. They can be
+    ORed together and passed as the 'modifier' argument of event functions.
+
+    TP_CONTROLLER_MODIFIER_NONE			- No modifier key is down.
+    TP_CONTROLLER_MODIFIER_SHIFT		- The shift key is down.
+    TP_CONTROLLER_MODIFIER_LOCK			- The caps lock key is down.
+    TP_CONTROLLER_MODIFIER_CONTROL		- A control key is down.
+    TP_CONTROLLER_MODIFIER_SUPER		- The super key is down.
+    TP_CONTROLLER_MODIFIER_HYPER		- The hyper key is down.
+    TP_CONTROLLER_MODIFIER_META			- The meta key is down.
+
+	TP_CONTROLLER_MODIFIER_1			- Modifier key 1
+	TP_CONTROLLER_MODIFIER_2			- Modifier key 2
+	TP_CONTROLLER_MODIFIER_3			- Modifier key 3
+	TP_CONTROLLER_MODIFIER_4			- Modifier key 4
+	TP_CONTROLLER_MODIFIER_5			- Modifier key 5
+*/
+
+#define TP_CONTROLLER_MODIFIER_NONE			0x0000
+#define TP_CONTROLLER_MODIFIER_SHIFT		0x0001
+#define TP_CONTROLLER_MODIFIER_LOCK			0x0002
+#define TP_CONTROLLER_MODIFIER_CONTROL		0x0004
+#define TP_CONTROLLER_MODIFIER_SUPER		0x0008
+#define TP_CONTROLLER_MODIFIER_HYPER		0x0010
+#define TP_CONTROLLER_MODIFIER_META			0x0020
+
+#define TP_CONTROLLER_MODIFIER_1			0x0100
+#define TP_CONTROLLER_MODIFIER_2			0x0200
+#define TP_CONTROLLER_MODIFIER_3			0x0400
+#define TP_CONTROLLER_MODIFIER_4			0x0800
+#define TP_CONTROLLER_MODIFIER_5			0x1000
+
+
+/*
     Callback: tp_controller_key_down
     
     Report that a key was pressed. 
@@ -1046,6 +1082,8 @@ struct TPControllerRequestAudioClip
         key_code -      An identifier for the key. There is a list of key codes in keys.h.
         
         unicode -       The unicode character for the key, if any, or zero.
+
+        modifiers -		A combination of <Key Modifiers>.
 */    
     
     TP_API_EXPORT
@@ -1054,7 +1092,8 @@ struct TPControllerRequestAudioClip
             
         TPController * controller,
         unsigned int key_code,
-        unsigned long int unicode);
+        unsigned long int unicode,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_key_up
@@ -1068,6 +1107,8 @@ struct TPControllerRequestAudioClip
         key_code -      An identifier for the key. There is a list of key codes in keys.h.
         
         unicode -       The unicode character for the key, if any, or zero.
+
+        modifiers -		A combination of <Key Modifiers>.
 */    
 
     TP_API_EXPORT
@@ -1076,7 +1117,8 @@ struct TPControllerRequestAudioClip
                               
         TPController * controller,
         unsigned int key_code,
-        unsigned long int unicode);
+        unsigned long int unicode,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_accelerometer
@@ -1088,6 +1130,8 @@ struct TPControllerRequestAudioClip
         controller -    The controller returned by <tp_context_add_controller>.
         
         x,y,z -         The accelerometer values for each axis.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1097,7 +1141,8 @@ struct TPControllerRequestAudioClip
         TPController * controller,
         double x,
         double y,
-        double z);
+        double z,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_pointer_move
@@ -1109,6 +1154,8 @@ struct TPControllerRequestAudioClip
         controller -    The controller returned by <tp_context_add_controller>.
 
         x,y -           The coordinates of the event, in pixels, relative to the display size.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1117,7 +1164,8 @@ struct TPControllerRequestAudioClip
 
         TPController * controller,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_pointer_button_down
@@ -1131,6 +1179,8 @@ struct TPControllerRequestAudioClip
         button -        The button number, where 1 is the first button.
 
         x,y -           The coordinates of the event, in pixels, relative to the display size.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1140,7 +1190,8 @@ struct TPControllerRequestAudioClip
         TPController * controller,
         int button,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_pointer_button_up
@@ -1154,6 +1205,8 @@ struct TPControllerRequestAudioClip
         button -        The button number, where 1 is the first button.
 
         x,y -           The coordinates of the event, in pixels, relative to the display size.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1163,7 +1216,8 @@ struct TPControllerRequestAudioClip
         TPController * controller,
         int button,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_touch_down
@@ -1177,6 +1231,8 @@ struct TPControllerRequestAudioClip
         finger -        The finger number, starting with 1.
 
         x,y -           The coordinates of the event, in pixels.    
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1186,7 +1242,8 @@ struct TPControllerRequestAudioClip
         TPController * controller,
         int finger,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_touch_move
@@ -1200,6 +1257,8 @@ struct TPControllerRequestAudioClip
         finger -        The finger number, starting with 1.
 
         x,y -           The coordinates of the event, in pixels.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1209,7 +1268,8 @@ struct TPControllerRequestAudioClip
         TPController * controller,
         int finger,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_touch_up
@@ -1223,6 +1283,8 @@ struct TPControllerRequestAudioClip
         finger -        The finger number, starting with 1.
 
         x,y -           The coordinates of the event, in pixels.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1232,7 +1294,8 @@ struct TPControllerRequestAudioClip
         TPController * controller,
         int finger,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_ui_event
@@ -1350,11 +1413,31 @@ struct TPControllerRequestAudioClip
         controller -    The controller returned by <tp_context_add_controller>.
 */
 
-        TP_API_EXPORT
-        void
-        tp_controller_advanced_ui_ready(
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_ready(
 
-            TPController * controller);
+		TPController * controller);
+
+/*
+	Callback: tp_controller_advanced_ui_event
+
+	Report an advanced UI event.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		json 	   -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_event(
+
+		TPController * controller,
+		const char * json);
+
 
 /*-----------------------------------------------------------------------------*/
 /*

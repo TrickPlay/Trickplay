@@ -527,12 +527,16 @@ def emit( stuff , f ):
         
         def profiling_header(name):
         
-        	if options.profiling:
-#        		return "  PROFILER(\"%s\");\n" % name
-				return "  PROFILER(__FUNCTION__,PROFILER_CALLS_FROM_LUA);\n"
-        	else:
-        		return ""
-        		
+            result = ""
+        
+            if options.tracing:
+                result = result + "  g_debug(\"[TRACING] : %s\",__FUNCTION__);\n"
+            
+            if options.profiling:
+                result = result + "  PROFILER(__FUNCTION__,PROFILER_CALLS_FROM_LUA);\n"
+                
+            return result
+
         bind_name = bind[ "name" ]
         bind_type = bind[ "type" ]
         udata_type = bind[ "udata" ]
@@ -1318,6 +1322,8 @@ if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option( "-l" , "--lines" , action="store_true" , default=False , help="Include #line directives" )
     parser.add_option( "-p" , "--profiling" , action="store_true" , default=False , help="Enable profiling" ) 
+    parser.add_option( "-t" , "--tracing" , action="store_true" , default=False , help="Enable tracing of Lua calls" )
+    
     (options,args) = parser.parse_args()
     
     for file_name in args:
@@ -1326,7 +1332,6 @@ if __name__ == "__main__":
         
         binding = parse( open( file_name ).read() )
         
-#        pprint.pprint( binding )
         
         emit( binding , output )
         
