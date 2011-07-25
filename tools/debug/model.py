@@ -112,7 +112,20 @@ class ElementModel(QStandardItemModel):
             
             if data:
             
-                self.addElement(root, data["children"][0], screen = True)
+                child = None
+            
+                for c in data["children"]:
+                    if c[ "name" ] == "screen":
+                        child = c
+                        break
+                    
+                if child is None:
+                    
+                    print( "Could not find screen element." )
+                    
+                else:
+                    
+                    self.addElement(root, child, screen = True)
                 
                 #screen = self.screen()
                 
