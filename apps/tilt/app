@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.coin",
+    release     = "6",
+    version     = "1.1",
+    name        = "Spinning Coin",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}
+
