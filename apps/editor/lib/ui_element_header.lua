@@ -69,9 +69,9 @@ if g == nil then
 	g= Group()
 end 
 
-for i, j in pairs(skin_list) do
-	table.insert(skins, i) 
-end 
+--for i, j in pairs(skin_list) do
+	--table.insert(skins, i) 
+--end 
 
 --- Cursor Images
 --user_mouse_pointer = Image{name = "user_mouse_pointer", src = "/lib/assets/pointer.png", opacity = 255, scale = { screen.width/screen.display_size[1], screen.height/screen.display_size[2]}}

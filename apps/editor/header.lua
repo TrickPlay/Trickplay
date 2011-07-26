@@ -12,6 +12,10 @@ hdr.S_MENU        	  = 3
 hdr.S_FOCUS        	  = 4
 hdr.S_MENU_M	  	  = 5
 
+-- Mouse state 
+hdr.BUTTON_UP         = 0
+hdr.BUTTON_DOWN       = 1
+
 -- Undo/Redo action items  
 hdr.ADD               = 1
 hdr.CHG               = 2
@@ -26,48 +30,14 @@ hdr.SEND_BW		      = 8
 -- Style constants
 hdr.DEFAULT_COLOR     = {255,255,255,255}
 
----------------------
--- Variables
----------------------
-hdr.current_dir 	  = ""
-hdr.current_inspector = nil 
-hdr.current_fn  	  = ""
-hdr.current_focus 	  = nil
-
-hdr.input_mode        = S_MENU
-hdr.menu_hide         = false
-
--- table for mouse dragging information 
-hdr.dragging          = nil
-
---mouse_state       = BUTTON_UP
-hdr.contents    	  = ""
-hdr.item_num 	      = 0
-
-hdr.guideline_show	  = true
-
--- index for new guideline
-hdr.h_guideline       = 0
-hdr.v_guideline       = 0
-
--- key focuses 
-hdr.focus_type        = ""
-
--- table for ui elements selcection 
-hdr.selected_objs	  = {}
-
--- table for undo/redo 
-hdr.undo_list 	  	  = {}
-hdr.redo_list 	      = {}
+hdr.inspector_skins = {"default", "custom", "CarbonCandy"}
 
 
--- background images 
-hdr.BG_IMAGE_20 = Image{src = "assets/transparency-grid-20-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
-hdr.BG_IMAGE_40 = Image{src = "assets/transparency-grid-40-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-hdr.BG_IMAGE_80 = Image{src = "assets/transparency-grid-80-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-hdr.BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-hdr.BG_IMAGE_import = Image{src = "assets/white.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
+hdr.uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
+                    "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane" }
 
-hdr.inspector_skins = {"custom", "defalut", "CarbonCandy"}
+hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group", "ArrowPane", "TabBar"} 
+
+hdr.attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "ui_width", "ui_height", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src", "empty_top_color", "empty_bottom_color", "stroke_color", "progress"}
 
 return hdr

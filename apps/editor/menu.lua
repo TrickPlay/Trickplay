@@ -1,6 +1,6 @@
---local ui_element = dofile("/lib/ui_element.lua")
-
 editor_use = true
+local menu = {}
+
 local menu_bar = Image
 	{
 		src = "assets/menu-bar.png",
@@ -11,6 +11,7 @@ local menu_bar = Image
 		size = {1920,60},
 		reactive = true,
 	}
+
 local menuButton_file = ui_element.menuButton
 	{
 		ui_width = 142,
@@ -48,8 +49,8 @@ menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=asset
 menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, mstring="Open ...\t\t\t     <span foreground=\"#a6a6a6\">O</span>"})
 menuButton_file.insert_item(3,{type="item", string="Save ...\t\t\t     S", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true, mstring="Save ...\t\t\t     <span foreground=\"#a6a6a6\">S</span>"}) 
 menuButton_file.insert_item(4,{type="item", string="Save As ...\t\t     A", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=false, mstring="Save As ...\t\t     <span foreground=\"#a6a6a6\">A</span>" })
-menuButton_file.insert_item(5,{type="item", string="New Project ...\t\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=new_project, parameter=false, mstring="New Project ...\t\t     <span foreground=\"#a6a6a6\">F</span>"})
-menuButton_file.insert_item(6,{type="item", string="Open Project ...\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=open_project, parameter=false, mstring="Open Project ...\t     <span foreground=\"#a6a6a6\">P</span>"})
+menuButton_file.insert_item(5,{type="item", string="New Project ...\t\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.new_project, parameter=false, mstring="New Project ...\t\t     <span foreground=\"#a6a6a6\">F</span>"})
+menuButton_file.insert_item(6,{type="item", string="Open Project ...\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.open_project, parameter=false, mstring="Open Project ...\t     <span foreground=\"#a6a6a6\">P</span>"})
 
 menuButton_file.insert_item(7,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=exit, mstring="Quit\t\t\t\t     <span foreground=\"#a6a6a6\">Q</span>"}) 
 
@@ -281,7 +282,7 @@ local menuButton_view = ui_element.menuButton
 
 menuButton_view.insert_item(1,{type="label", string="  Background:", bg=assets("assets/menu-item-label.png")} )
 menuButton_view.insert_item(2,{type="item", string="Image...", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.reference_image, 
-			       icon=assets("assets/menu-checkmark.png")})
+			       			icon=assets("assets/menu-checkmark.png")})
 menuButton_view.items[2]["icon"].opacity = 0
 menuButton_view.insert_item(3,{type="item", string="Small Grid", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.small_grid, icon=assets("assets/menu-checkmark.png")} )
 menuButton_view.items[3]["icon"].opacity = 0
@@ -292,6 +293,17 @@ menuButton_view.insert_item(6,{type="item", string="White", bg=assets("assets/me
 menuButton_view.items[6]["icon"].opacity = 0
 menuButton_view.insert_item(7,{type="item", string="Black", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.black_bg, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.items[7]["icon"].opacity = 0
+
+
+function menu.clearMenuButtonView_BGIcons() 
+	menuButton_view.items[2]["icon"].opacity = 0
+	menuButton_view.items[3]["icon"].opacity = 0
+	menuButton_view.items[4]["icon"].opacity = 0
+	menuButton_view.items[5]["icon"].opacity = 0
+	menuButton_view.items[6]["icon"].opacity = 0
+	menuButton_view.items[7]["icon"].opacity = 0
+end 
+
 menuButton_view.insert_item(8,{type="label", string="  Guides:", bg=assets("assets/menu-item-label.png")} )
 menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline}) 
 menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline}) 
@@ -379,12 +391,11 @@ local menu_text_shadow = Text
 	}
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
-local menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow}
 
 ----------------------------------------------------------------------------
 -- Hides Menu 
 ----------------------------------------------------------------------------
-    menuHide = function()
+    menu.menuHide = function()
 	screen:find_child("menu_bar"):hide()
 	screen:find_child("menuButton_file"):hide()
 	screen:find_child("menuButton_edit"):hide()
@@ -399,7 +410,7 @@ local menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,
 -- Show Menu
 ----------------------------------------------------------------------------
     
-    menuShow = function()
+    menu.menuShow = function()
 	screen:find_child("menu_bar"):show()
 	screen:find_child("menu_bar"):raise_to_top()
 	screen:find_child("menuButton_file"):show()
@@ -421,11 +432,12 @@ local menu_bar_t = {menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,
 ----------------------------------------------------------------------------
 -- Menu Raise To Top
 ----------------------------------------------------------------------------
-function menu_raise_to_top() 
-	menuShow()
+function menu.menu_raise_to_top() 
+	menu.menuShow()
 end 
 
 screen:add(g)
-menu_raise_to_top()
-
+menu.menu_raise_to_top()
 editor_use = false
+
+return menu

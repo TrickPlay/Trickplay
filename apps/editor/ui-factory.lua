@@ -564,17 +564,17 @@ function factory.make_msgw_scroll_bar(file_list_size)
     scroll_bar.reactive = true 
     
     function scroll_bar:on_button_down(x,y,button,num_clicks)
-	hdr.dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
+	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
         return true
     end 
 
     function scroll_bar:on_button_up(x,y,button,num_clicks)
-	 if(hdr.dragging ~= nil) then 
-	      local actor , dx , dy = unpack( hdr.dragging )
+	 if(dragging ~= nil) then 
+	      local actor , dx , dy = unpack( dragging )
 	      if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
 	           scroll_bar.y = y - dy 
 	      end 
-	      hdr.dragging = nil
+	      dragging = nil
 	 end 
          return true
     end 
@@ -867,9 +867,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	if save_items == true then 
 		if item_n == "tab_labels" then 
-			org_items = table_copy(v.tab_labels)
+			org_items = util.table_copy(v.tab_labels)
 		else 
-			org_items = table_copy(v.items)
+			org_items = util.table_copy(v.items)
 		end 
 	end 
 
@@ -905,8 +905,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			hdr.input_mode = hdr.S_SELECT
-			hdr.current_inspector = nil
+			input_mode = hdr.S_SELECT
+			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -934,8 +934,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			hdr.input_mode = hdr.S_SELECT
-			hdr.current_inspector = nil
+			input_mode = hdr.S_SELECT
+			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -983,8 +983,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			hdr.input_mode = hdr.S_SELECT
-			hdr.current_inspector = nil
+			input_mode = hdr.S_SELECT
+			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -1000,8 +1000,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local ix = inspector.x
 			local iy = inspector.y
 			screen:remove(inspector)
-			hdr.input_mode = hdr.S_SELECT
-			hdr.current_inspector = nil
+			input_mode = hdr.S_SELECT
+			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -1018,8 +1018,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local iy = inspector.y
 			screen:remove(inspector)
 			inspector:clear()
-			hdr.input_mode = hdr.S_SELECT
-			hdr.current_inspector = nil
+			input_mode = hdr.S_SELECT
+			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
 			editor.n_selected(v, true)
@@ -1092,7 +1092,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			if v.tab_labels then 
 				v:remove_tab(tonumber(string.sub(minus.name, 11,-1)))
 			else 
-				v.items = table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+				v.items = util.table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
 			end 
 
 			local siy = inspector:find_child("si_items").content.y
@@ -1100,8 +1100,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			local iy = inspector.y
 
 		    screen:remove(inspector)
-		    hdr.input_mode = hdr.S_SELECT
-		    hdr.current_inspector = nil
+		    input_mode = hdr.S_SELECT
+		    current_inspector = nil
             screen:grab_key_focus(screen) 
 		    text_reactive()
 		    editor.n_selected(v, true)
@@ -1122,7 +1122,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		    	for i, j in pairs (v.items) do
 					v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 		     	end 
-		   		table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
+		   		util.table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		    else
 		    	for i, j in pairs (v.items) do
 					if j["type"] == "label" then 
@@ -1131,7 +1131,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 					end
 		     	end 
-		   		table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
+		   		util.table_move_up(v.items, tonumber(string.sub(up.name, 8,-1)))
 		   end 
 
 		   local siy = inspector:find_child("si_items").content.y
@@ -1139,8 +1139,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		   local iy = inspector.y
 
 		   screen:remove(inspector)
-		   hdr.input_mode = hdr.S_SELECT
-		   hdr.current_inspector = nil
+		   input_mode = hdr.S_SELECT
+		   current_inspector = nil
            screen:grab_key_focus(screen) 
 		   text_reactive()
 		   editor.n_selected(v, true)
@@ -1160,7 +1160,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		          for i, j in pairs (v.items) do
 						v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 		     	  end 
-		     	table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
+		     	util.table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     else
 		          for i, j in pairs (v.items) do
 				      if j["type"] == "label" then 
@@ -1169,7 +1169,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     		     j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
 					  end
 		     	  end 
-		     	table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
+		     	util.table_move_down(v.items, tonumber(string.sub(down.name, 10,-1)))
 		     end
 
 			 local siy = inspector:find_child("si_items").content.y
@@ -1177,8 +1177,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			 local iy = inspector.y
 
 		     screen:remove(inspector)
-		     hdr.input_mode = hdr.S_SELECT
-		     hdr.current_inspector = nil
+		     input_mode = hdr.S_SELECT
+		     current_inspector = nil
              screen:grab_key_focus(screen) 
 		     text_reactive()
 		     editor.n_selected(v, true)
@@ -1189,11 +1189,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	      end 
 
 	      function item:on_button_down()
-		 	 if hdr.current_focus then 
-   			 	hdr.current_focus.extra.on_focus_out()
+		 	 if current_focus then 
+   			 	current_focus.extra.on_focus_out()
 			 else
 			 end 
-	         hdr.current_focus = group
+	         current_focus = group
 		     item.on_focus_in()
 			 if item_type then 
                    item:find_child("textInput").extra.item_type = item_type
@@ -1233,7 +1233,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		               			  local n_item = attr_t_idx[i+1]
 			       				  if item_group:find_child(n_item).extra.on_focus_in then 
 			           				item_group:find_child(n_item).extra.on_focus_in()	
-	       							hdr.current_focus = item_group:find_child(n_item)
+	       							current_focus = item_group:find_child(n_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 			       				  else
 				   					there()
@@ -1260,7 +1260,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			     				if(item_group:find_child(attr_t_idx[i-1])) then
 			     					local p_item = attr_t_idx[i-1]
 									item_group:find_child(p_item).extra.on_focus_in()	
-	       							hdr.current_focus = item_group:find_child(p_item)
+	       							current_focus = item_group:find_child(p_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 									break
 			     				end
@@ -1281,7 +1281,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    	items_list:replace(i,4,down)
 	end
 	function group.extra.on_focus_in()
-		hdr.current_focus = group --0701 
+		current_focus = group --0701 
 		a = items_list.tiles[1][1]
 		a.on_focus_in()
 		a:grab_key_focus()
@@ -1366,10 +1366,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 
 		unfocus = item_picker:find_child("unfocus")
 		function unfocus:on_button_down (x,y,b,n)
-			if hdr.current_focus then 
-   				hdr.current_focus.extra.on_focus_out()
+			if current_focus then 
+   				current_focus.extra.on_focus_out()
 			end 
-	        hdr.current_focus = group
+	        current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
 			return true
@@ -1378,10 +1378,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
         left_arrow = item_picker:find_child("left_un")
 		left_arrow.reactive = true 
 		function left_arrow:on_button_down(x, y, b, n)
-			if hdr.current_focus then 
-				hdr.current_focus.extra.on_focus_out()
+			if current_focus then 
+				current_focus.extra.on_focus_out()
 			end 
-	        hdr.current_focus = group
+	        current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
 			item_picker.press_left()
@@ -1391,10 +1391,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		right_arrow = item_picker:find_child("right_un")
 		right_arrow.reactive = true 
 		function right_arrow:on_button_down(x, y, b, n)
-			if hdr.current_focus then 
-				hdr.current_focus.extra.on_focus_out()
+			if current_focus then 
+				current_focus.extra.on_focus_out()
 			end 
-	        hdr.current_focus = group
+	        current_focus = group
 			item_picker.on_focus_in()
 	        item_picker:grab_key_focus()
 			item_picker.press_right()
@@ -1431,7 +1431,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		               		local n_item = attr_t_idx[i+1]
 							if item_group:find_child(n_item).extra.on_focus_in then 
 			       				item_group:find_child(n_item).extra.on_focus_in()	
-	       						hdr.current_focus = item_group:find_child(n_item)
+	       						current_focus = item_group:find_child(n_item)
 			       				si.seek_to_middle(0, item_group:find_child(n_item).y)
 							end 
 			        		break
@@ -1449,7 +1449,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
 				item_group:find_child(p_item).extra.on_focus_in()	
-	       		hdr.current_focus = item_group:find_child(p_item)
+	       		current_focus = item_group:find_child(p_item)
 				si.seek_to_middle(0, item_group:find_child(p_item).y)
 				break
 			     end
@@ -1740,29 +1740,29 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 		function input_text:on_button_down(x,y,button,num_clicks)
 
-		   	if hdr.current_focus then 
-				if hdr.current_focus.extra then 
-					if hdr.current_focus.extra.type == "Button" then 
-						 local pt = hdr.current_focus.parent
+		   	if current_focus then 
+				if current_focus.extra then 
+					if current_focus.extra.type == "Button" then 
+						 local pt = current_focus.parent
 						 pt = pt.extra.type
 						 if pt ~= "TabBar" then 
-							hdr.current_focus.extra.on_focus_out()
+							current_focus.extra.on_focus_out()
 		   				end 
 					else 
-						hdr.current_focus.extra.on_focus_out()
+						current_focus.extra.on_focus_out()
 					end
 				end
 			end 
-	       	hdr.current_focus = group
+	       	current_focus = group
 	       	group.extra.on_focus_in()
            	return true
         end
 
 		function group:on_button_down(x,y,button,num_clicks)
-			if hdr.current_focus then 
- 	       		hdr.current_focus.extra.on_focus_out()
+			if current_focus then 
+ 	       		current_focus.extra.on_focus_out()
 			end 
-	        hdr.current_focus = group
+	        current_focus = group
 	        group.extra.on_focus_in()
             return true
         end
@@ -1794,7 +1794,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		               		local n_item = attr_t_idx[i+1]
 			       			if item_group:find_child(n_item).extra.on_focus_in then 
 			       				item_group:find_child(n_item).extra.on_focus_in()	
-	       						hdr.current_focus = item_group:find_child(n_item)
+	       						current_focus = item_group:find_child(n_item)
 			       			if (si) then 
 				    			si.seek_to_middle(0, item_group:find_child(n_item).y)
 			       			end
@@ -1820,7 +1820,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 			     				local p_item = attr_t_idx[i-1]
 								if item_group:find_child(p_item).extra.on_focus_in then 	
 				     				item_group:find_child(p_item).extra.on_focus_in()	
-	       							hdr.current_focus = item_group:find_child(p_item)
+	       							current_focus = item_group:find_child(p_item)
 			             			if (si) then 
 				          				si.seek_to_middle(0, item_group:find_child(p_item).y)
 			             			end
@@ -1844,7 +1844,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
     	group:add(input_text)
         function group.extra.on_focus_in()
-	         hdr.current_focus = group --0701
+	         current_focus = group --0701
              ring.opacity = 0
              input_text.cursor_visible = true
              focus.opacity = 255
@@ -2197,10 +2197,10 @@ function factory.draw_focus_changer(v)
 	focus:add(text11,focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
 	
 	function focus.extra.on_focus_in()
-	 	if hdr.current_focus then 
-	 		hdr.current_focus.extra.on_focus_out()
+	 	if current_focus then 
+	 		current_focus.extra.on_focus_out()
 	 	end 
-	 	hdr.current_focus = focus
+	 	current_focus = focus
 	 	for i,j in pairs(focus.children) do
 			if j.type == "Rectangle" then 
 		     	local focus_t= j.name:sub(2,-1)
@@ -2210,8 +2210,8 @@ function factory.draw_focus_changer(v)
 	end 
 
 	function focus.extra.on_focus_out(call_by_inspector)
-		hdr.focus_type = ""
-		hdr.input_mode = hdr.S_POPUP
+		focus_type = ""
+		input_mode = hdr.S_POPUP
         for i,j in pairs(focus.children) do
 			if j.type == "Rectangle" then 
 		     	local focus_t= j.name:sub(2,-1)
@@ -2227,13 +2227,13 @@ function factory.draw_focus_changer(v)
         			focus.extra.on_focus_in()
 				end 
 			end
-	   		hdr.focus_type = v.name:sub(2,-1)
+	   		focus_type = v.name:sub(2,-1)
 	   		v.border_color = {255,25,25,255} 
 	   		v.border_width = 2
-	   		if (focus:find_child("text"..hdr.focus_type).text ~= "") then
-				focus:find_child("text"..hdr.focus_type).text = ""
+	   		if (focus:find_child("text"..focus_type).text ~= "") then
+				focus:find_child("text"..focus_type).text = ""
 	   		end   
-	   		hdr.input_mode = hdr.S_FOCUS
+	   		input_mode = hdr.S_FOCUS
 	   		return true 
 		end 
 	end 
@@ -2246,5 +2246,369 @@ function factory.draw_focus_changer(v)
 	end
 	return focus
 end 
+
+function factory.create_tiny_input_box(txt)
+     	local box_g = Group {}
+     	local box = factory.draw_tiny_ring()
+     	local box_focus = factory.draw_tiny_focus_ring()
+	box_g.name = "input_b"
+        box.position  = {0,0}
+        box.reactive = true
+        box.opacity = 255
+	box_g:add(box)
+	box_focus.opacity = 0 
+	box_g:add(box_focus)
+    	box_g:add(txt)
+
+        function box_g.extra.on_focus_in()
+		txt:grab_key_focus(txt)
+		txt.cursor_visible = true
+	        box.opacity = 0 
+            	box_focus.opacity = 255
+		msgw_focus = "input_b"
+        end
+
+        function box_g.extra.on_focus_out()
+	        box.opacity = 255 
+            	box_focus.opacity = 0
+		txt.cursor_visible = false
+        end
+
+	return box_g
+end 
+
+
+
+function factory.create_small_input_box(txt)
+     	local box_g = Group {}
+     	local box = factory.draw_small_ring()
+     	local box_focus = factory.draw_small_focus_ring()
+
+		box_g.name = "input_b"
+        box.position  = {0,0}
+        box.reactive = true
+        box.opacity = 255
+		box_g:add(box)
+		box_focus.opacity = 0 
+		box_g:add(box_focus)
+    	box_g:add(txt)
+
+        function box_g.extra.on_focus_in()
+		txt:grab_key_focus(txt)
+		txt.cursor_visible = true
+	        box.opacity = 0 
+            	box_focus.opacity = 255
+		msgw_focus = "input_b"
+        end
+
+        function box_g.extra.on_focus_out()
+	        box.opacity = 255 
+            	box_focus.opacity = 0
+		txt.cursor_visible = false
+        end
+
+	return box_g
+end 
+
+
+function factory.create_input_box()
+     	local box_g = Group {}
+        local input_l = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
+              position = {25, 10}, text = project.."/screens/" } --hhhhhh
+        input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" , ellipsize = "END",
+        -- 0111 position = {input_l.w + 25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
+        position = {input_l.w + 25, 10}, text = strings[""] , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
+     	local box = factory.draw_ring()
+     	local box_focus = factory.draw_focus_ring()
+	box_g.name = "input_b"
+        box.position  = {0,0}
+        box.reactive = true
+        box.opacity = 255
+	box_g:add(box)
+	box_focus.opacity = 0 
+	box_g:add(box_focus)
+    	box_g:add(input_l)
+    	box_g:add(input_t)
+
+        function box_g.extra.on_focus_in()
+		input_t:grab_key_focus(input_t)
+	        box.opacity = 0 
+            	box_focus.opacity = 255
+		msgw_focus = "input_b"
+		input_t.cursor_visible = true
+        end
+
+        function box_g.extra.on_focus_out()
+	        box.opacity = 255 
+            	box_focus.opacity = 0
+		input_t.cursor_visible = false
+        end
+
+	return box_g
+end 
+
+function factory.make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
+     
+     local x_scroll_box, y_scroll_box 
+     local x_scroll_bar, y_scroll_bar 
+
+     if(x_scroll_to == 0)then 
+	 x_scroll_to = screen.w
+     end
+     if(y_scroll_to == 0)then 
+	 y_scroll_to = screen.h
+     end
+
+     g.extra.canvas_h = y_scroll_to - y_scroll_from -- y 전체 캔버스 사이즈가 되겠구 
+     g.extra.canvas_w = x_scroll_to - x_scroll_from -- x 전체 캔버스 사이즈가 되겠구 
+     g.extra.canvas_f = y_scroll_from
+     g.extra.canvas_xf = x_scroll_from
+     g.extra.canvas_t = y_scroll_to
+     g.extra.canvas_xt = x_scroll_to
+
+     screen_rect =  Rectangle{
+                name="screen_rect",
+                border_color= {2, 25, 25, 140},
+                border_width=2,
+                color= {255,255,255,0},
+                size = {screen.w+1,screen.h+1},
+                position = {0,0,0}, 
+     }
+     screen_rect.reactive = false
+     g:add(screen_rect)
+
+
+     
+    if (g.extra.canvas_w > screen.w) then 
+	local SCROLL_X_POS = 10
+	local BOX_BAR_SPACE = 6
+	
+        x_scroll_box = factory.make_x_scroll_box()
+        x_scroll_bar = factory.make_x_scroll_bar(g.extra.canvas_w)
+
+	x_scroll_box.position = {SCROLL_X_POS, screen.h - 60}
+	x_scroll_bar.position = {SCROLL_X_POS + BOX_BAR_SPACE, screen.h - 56}
+
+	
+        x_scroll_bar.extra.org_x = 16
+	x_scroll_bar.extra.h_x = 16
+	x_scroll_bar.extra.l_x = x_scroll_box.x + x_scroll_box.w - x_scroll_bar.w - BOX_BAR_SPACE -- 스크롤 되는 영역의 길이 
+
+	screen:add(x_scroll_box) 
+	screen:add(x_scroll_bar) 
+
+        -- 요 값은 스크롤 바가 움직일때 오브젝의 와이 포지션이 밖뀌는 값을 나타내는건데 이름이 너무 헤깔리는군 
+        g.extra.scroll_dx = ((g.extra.canvas_w - screen.w)/(x_scroll_bar.extra.l_x - x_scroll_bar.extra.h_x))
+
+		
+	local x0 = - g.extra.canvas_xf/g.extra.scroll_dx + 10 
+	local x1920 = (-g.extra.canvas_xf+1080)/g.extra.scroll_dx + 10
+
+	x_0_mark= Rectangle {
+		name="x_0_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {2, 40},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {SCROLL_X_POS + x0, screen.h - 55, 0},
+		opacity = 255
+        }
+
+	x_1920_mark= Rectangle {
+		name="x_1920_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {2, 40},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {SCROLL_X_POS + x1920, screen.h - 55, 0},
+		opacity = 255
+        }
+  
+	screen:add(x_0_mark)
+	screen:add(x_1920_mark) 
+
+        -- 스크롤 바 넣고 원래 좌표를 기억해 두는기지요 
+	for n,m in pairs (g.children) do 
+		m.extra.org_x = m.x
+	end 
+         
+        function x_scroll_bar:on_button_down(x,y,button,num_clicks)
+		dragging = {x_scroll_bar, x-x_scroll_bar.x, y-x_scroll_bar.y }
+
+		if table.getn(selected_objs) ~= 0 then
+		     for q, w in pairs (selected_objs) do
+			 local t_border = screen:find_child(w)
+			 local i, j = string.find(t_border.name,"border")
+		         local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		         if(t_obj ~= nil) then 
+			      screen:remove(screen:find_child(t_obj.name.."a_m"))
+			 end
+		     end
+		end
+
+        	return true
+    	end 
+
+    	function x_scroll_bar:on_button_up(x,y,button,num_clicks)
+	 	if(dragging ~= nil) then 
+	      		local actor , dx , dy = unpack( dragging )
+			local dif
+	      		if (actor.extra.h_x <= x-dx and x-dx <= actor.extra.l_x) then -- 스크롤 되는 범위안에 있으면	
+	           		dif = x - dx - x_scroll_bar.extra.org_x -- 스크롤이 이동한 거리 
+	           		x_scroll_bar.x = x - dx 
+	      		elseif (actor.extra.h_x > x-dx ) then
+				dif = actor.extra.h_x - x_scroll_bar.extra.org_x 
+	           		x_scroll_bar.x = actor.extra.h_x
+	      		elseif (actor.extra.l_x < x-dx ) then
+				dif = actor.extra.l_x- x_scroll_bar.extra.org_x 
+	           		x_scroll_bar.x = actor.extra.l_x
+			end 
+			dif = dif * g.extra.scroll_dx -- 스클롤된 길이 * 그 길이가 나타내는 와이값 증감 
+			for i,j in pairs (g.children) do 
+	           	     j.position = {j.extra.org_x-dif-x_scroll_from, j.y, j.z}
+			end 
+
+			if table.getn(selected_objs) ~= 0 then
+			     for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+			              t_border.x = t_obj.x 
+				 end
+			     end
+			end
+
+			g.extra.scroll_x = math.floor(dif) 
+	      		dragging = nil
+	 	end 
+         	return true
+    	end 
+     end 
+
+
+     if(g.extra.canvas_h > screen.h) then 
+
+
+	local SCROLL_Y_POS = 90
+	local BOX_BAR_SPACE = 6
+
+	y_scroll_box = factory.make_y_scroll_box()
+        y_scroll_bar = factory.make_y_scroll_bar(g.extra.canvas_h) 
+
+	y_scroll_box.position = {screen.w - 60, SCROLL_Y_POS}
+	y_scroll_bar.position = {screen.w - 56, SCROLL_Y_POS + BOX_BAR_SPACE}
+
+        y_scroll_bar.extra.org_y = 96
+	y_scroll_bar.extra.h_y = 96
+	y_scroll_bar.extra.l_y = y_scroll_box.y + y_scroll_box.h - y_scroll_bar.h - BOX_BAR_SPACE -- 스크롤 되는 영역의 길이 
+
+	screen:add(y_scroll_box) 
+	screen:add(y_scroll_bar) 
+
+        -- 요 값은 스크롤 바가 움직일때 오브젝의 와이 포지션이 밖뀌는 값을 나타내는건데 이름이 너무 헤깔리는군 
+        g.extra.scroll_dy = ((g.extra.canvas_h - screen.h)/(y_scroll_bar.extra.l_y - y_scroll_bar.extra.h_y))
+  
+	
+	local y0 = - g.extra.canvas_f/g.extra.scroll_dy + 10 
+	local y1080 = (-g.extra.canvas_f+1080)/g.extra.scroll_dy + 10
+
+	y_0_mark= Rectangle {
+		name="y_0_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {40,2},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {screen.w - 55, SCROLL_Y_POS + y0, 0},
+		opacity = 255
+        }
+
+	y_1080_mark= Rectangle {
+		name="y_1080_mark",
+		border_color={255,255,255,255},
+		border_width=0,
+		color={100,255,25,255},
+		size = {40,2},
+		anchor_point = {0,0},
+		x_rotation={0,0,0},
+		y_rotation={0,0,0},
+		z_rotation={0,0,0},
+		position = {screen.w - 55, SCROLL_Y_POS + y1080, 0},
+		opacity = 255
+       }
+  
+	screen:add (y_0_mark)
+	screen:add (y_1080_mark)
+
+        -- 스크롤 바 넣고 원래 좌표를 기억해 두는기지요 
+	for n,m in pairs (g.children) do 
+		m.extra.org_y = m.y
+	end 
+         
+        function y_scroll_bar:on_button_down(x,y,button,num_clicks)
+		dragging = {y_scroll_bar, x-y_scroll_bar.x, y-y_scroll_bar.y }
+		if table.getn(selected_objs) ~= 0 then
+			for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+				      screen:remove(screen:find_child(t_obj.name.."a_m"))
+				 end
+			end
+		end
+
+        	return true
+    	end 
+
+    	function y_scroll_bar:on_button_up(x,y,button,num_clicks)
+	 	if(dragging ~= nil) then 
+	      		local actor , dx , dy = unpack( dragging )
+			local dif
+	      		if (actor.extra.h_y <= y-dy and y-dy <= actor.extra.l_y) then -- 스크롤 되는 범위안에 있으면	
+	           		dif = y - dy - y_scroll_bar.extra.org_y -- 스크롤이 이동한 거리 
+	           		y_scroll_bar.y = y - dy 
+	      		elseif (actor.extra.h_y > y-dy ) then
+				dif = actor.extra.h_y - y_scroll_bar.extra.org_y 
+	           		y_scroll_bar.y = actor.extra.h_y
+	      		elseif (actor.extra.l_y < y-dy ) then
+				dif = actor.extra.l_y- y_scroll_bar.extra.org_y 
+	           		y_scroll_bar.y = actor.extra.l_y
+			end 
+			dif = dif * g.extra.scroll_dy -- 스클롤된 길이 * 그 길이가 나타내는 와이값 증감 
+			for i,j in pairs (g.children) do 
+	           	     j.position = {j.x, j.extra.org_y-dif-y_scroll_from, j.z}
+			end 
+
+			if table.getn(selected_objs) ~= 0 then
+			     for q, w in pairs (selected_objs) do
+				 local t_border = screen:find_child(w)
+				 local i, j = string.find(t_border.name,"border")
+		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+		                 if(t_obj ~= nil) then 
+			              t_border.y = t_obj.y 
+				 end
+			     end
+			end
+
+			g.extra.scroll_y = math.floor(dif) 
+	      		dragging = nil
+	 	end 
+         	return true
+    	end 
+     end 
+end
 
 return factory
