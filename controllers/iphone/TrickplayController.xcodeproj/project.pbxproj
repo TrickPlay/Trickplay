@@ -75,6 +75,8 @@
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFBE29B13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFBE29913B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.m */; };
 		CDFBE29C13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFBE29A13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.xib */; };
+		CDFDCB0713DE49D60025768E /* AudioRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFDCB0513DE49D60025768E /* AudioRecordingViewController.m */; };
+		CDFDCB0813DE49D60025768E /* AudioRecordingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFDCB0613DE49D60025768E /* AudioRecordingViewController.xib */; };
 		CDFEBB68130A498600A14307 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
 		CDFEBB69130A498600A14307 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
 		CDFEBB6C130A498600A14307 /* MainWindow-iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */; };
@@ -187,6 +189,9 @@
 		CDFBE29813B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageEditorHelpViewControllerPhone.h; sourceTree = "<group>"; };
 		CDFBE29913B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageEditorHelpViewControllerPhone.m; sourceTree = "<group>"; };
 		CDFBE29A13B4160500E8FE86 /* ImageEditorHelpViewControllerPhone.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewControllerPhone.xib; path = Classes/ImageEditorHelpViewControllerPhone.xib; sourceTree = "<group>"; };
+		CDFDCB0413DE49D60025768E /* AudioRecordingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRecordingViewController.h; sourceTree = "<group>"; };
+		CDFDCB0513DE49D60025768E /* AudioRecordingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioRecordingViewController.m; sourceTree = "<group>"; };
+		CDFDCB0613DE49D60025768E /* AudioRecordingViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AudioRecordingViewController.xib; sourceTree = "<group>"; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
 		CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPhone.xib"; sourceTree = "<group>"; };
@@ -435,6 +440,16 @@
 			name = CommandInterpreters;
 			sourceTree = "<group>";
 		};
+		CDFDCB0A13DE49DF0025768E /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				CDFDCB0413DE49D60025768E /* AudioRecordingViewController.h */,
+				CDFDCB0513DE49D60025768E /* AudioRecordingViewController.m */,
+				CDFDCB0613DE49D60025768E /* AudioRecordingViewController.xib */,
+			);
+			name = Audio;
+			sourceTree = "<group>";
+		};
 		CDFEBB5E130A498600A14307 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
@@ -478,6 +493,7 @@
 			children = (
 				CD4CA69E13B50AD700B5A7A3 /* Main */,
 				CD4CA69F13B50AF000B5A7A3 /* Camera */,
+				CDFDCB0A13DE49DF0025768E /* Audio */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -623,6 +639,7 @@
 				CD63B46B13B9895300158169 /* up.png in Resources */,
 				CD6C178D13BA6B1500F52BFE /* ios-generic-background.jpg in Resources */,
 				CD5CFD6713D50F01002334E7 /* click.wav in Resources */,
+				CDFDCB0813DE49D60025768E /* AudioRecordingViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -665,6 +682,7 @@
 				CD4CA69C13B50AC100B5A7A3 /* VirtualRemoteViewController.m in Sources */,
 				CD8EDEC613C51D65009BEFC1 /* TrickplayScreen.m in Sources */,
 				CDB20FF113CFAE6900A9F166 /* TrickplayAnimation.m in Sources */,
+				CDFDCB0713DE49D60025768E /* AudioRecordingViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
