@@ -526,7 +526,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (appBrowserViewController) {
         // Make sure to get rid of the AppBrowser's socket delegate
         // or a race condition may occur where the AppBrowser recieves
-        // a call indicating that has an socket error and passes this
+        // a call indicating that has a socket error and passes this
         // information to a deallocated RootViewController before the
         // RootViewController has a chance to deallocate the AppBrowser.
         appBrowserViewController.socketDelegate = nil;

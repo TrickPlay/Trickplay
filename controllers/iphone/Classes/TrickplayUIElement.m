@@ -175,16 +175,40 @@
 
 - (void)handleTouchesEnded:(NSSet *)touches {
     if (manager && manager.gestureViewController) {
-        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
-                CFArrayAppendValue(newTouches, touch);
+                CGFloat
+                x = [touch locationInView:self].x,
+                y = [touch locationInView:self].y,
+                x_sub = [touch locationInView:view].x,
+                y_sub = [touch locationInView:view].y;
+                // check that its within clipping range
+                if (x >= self.bounds.origin.x
+                    && x <= self.bounds.size.width
+                    && y >= self.bounds.origin.y
+                    && y <= self.bounds.size.height
+                    // check that its within object range
+                    && x_sub >= view.bounds.origin.x
+                    && x_sub <= view.bounds.size.width
+                    && y_sub >= view.bounds.origin.y
+                    && y_sub <= view.bounds.size.height) {
+                    
+                    CFArrayAppendValue(newTouchesIn, touch);
+                } else {
+                    CFArrayAppendValue(newTouchesOut, touch);
+                }
             }
         }
-        if (((NSArray *)newTouches).count > 0) {
-            [self sendTouches:(NSArray *)newTouches withState:@"ended"];
+        if (((NSArray *)newTouchesIn).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesIn withState:@"ended_inside"];
         }
-        CFRelease(newTouches);
+        if (((NSArray *)newTouchesOut).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesOut withState:@"ended_outside"];
+        }
+        CFRelease(newTouchesIn);
+        CFRelease(newTouchesOut);
     }
     
     for (UITouch *touch in [touches allObjects]) {
