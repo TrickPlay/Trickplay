@@ -1125,11 +1125,15 @@ function util.itemTostring(v, d_list, t_list)
 	          		item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
 		  		end 
 	      elseif v[j].type == "Group" then 
-		        item_string = item_string..head..j.."= Group { children = {"
-			for m,n in pairs (v[j].children) do
-				item_string = item_string .. n.name..","
-			end 
-			item_string = item_string.."} }"..tail
+				if is_this_widget(v[j]) == true then 
+		        	item_string = item_string..head..j.."= "..v[j].name..tail
+				else 
+		        	item_string = item_string..head..j.."= Group { children = {"
+					for m,n in pairs (v[j].children) do
+						item_string = item_string .. n.name..","
+					end 
+					item_string = item_string.."} }"..tail
+				end 
 	      elseif type(v[j]) == "userdata" then 
 		  item_string = item_string..head..j.." = "..v[j].name..tail 
 	      else
@@ -1315,10 +1319,15 @@ function util.itemTostring(v, d_list, t_list)
     end 
 
     if v.extra.type == "ButtonPicker" then 
-	if v.extra.focus then 
-	    itm_str = itm_str..v.name..".focus[keys.Right] = "..v.name..".press_right\n"
-	    itm_str = itm_str..v.name..".focus[keys.Left] = "..v.name..".press_left\n"
-	end
+		if v.extra.focus then 
+	   		if v.extra.direction == "vertical" then 
+	    		itm_str = itm_str..v.name..".focus[keys.Down] = "..v.name..".press_down\n"
+	    		itm_str = itm_str..v.name..".focus[keys.Up] = "..v.name..".press_up\n"
+			else 
+	    		itm_str = itm_str..v.name..".focus[keys.Right] = "..v.name..".press_right\n"
+	    		itm_str = itm_str..v.name..".focus[keys.Left] = "..v.name..".press_left\n"
+			end
+		end
     end
 
     end -- if v.extra then 
