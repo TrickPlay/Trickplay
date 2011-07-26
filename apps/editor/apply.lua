@@ -245,7 +245,7 @@ function inspector_apply (v, inspector)
       }       
 	  
       org_object, new_object = obj_map[v.type]()
-      set_obj(org_object, v) 
+      util.set_obj(org_object, v) 
 
 	  local apply = function (item_group) 
 	  
@@ -440,10 +440,10 @@ function inspector_apply (v, inspector)
 		   end 
 	  	end 
 
-        set_obj(new_object, v) 
-        hdr.input_mode = hdr.S_SELECT
+        util.set_obj(new_object, v) 
+        input_mode = hdr.S_SELECT
         if(v.name ~= "video1") then 
-       	    table.insert(hdr.undo_list, {v.name, hdr.CHG, org_object, new_object})
+       	    table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
         end 
 		
        return org_object, new_object

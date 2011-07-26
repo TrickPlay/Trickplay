@@ -43,12 +43,12 @@ function editor_ui.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
-		if hdr.current_focus ~= nil then 
-			if hdr.current_focus.on_focus_out then 
-				hdr.current_focus.on_focus_out()
+		if current_focus ~= nil then 
+			if current_focus.on_focus_out then 
+				current_focus.on_focus_out()
 			end 
 		end 
-		hdr.current_focus = b_group
+		current_focus = b_group
 
 		if key == "focus" then 
         	focus.opacity = 255
@@ -87,7 +87,7 @@ function editor_ui.button(table)
 		if p.released then 
 			p.released()
 		end 
-		hdr.current_focus = nil 
+		current_focus = nil 
     end
 
     local create_button = function() 
@@ -134,27 +134,27 @@ function editor_ui.button(table)
         b_group:add(text)
 
 	    function b_group:on_button_down(x,y,b,n)
-			if hdr.current_focus ~= b_group then 
-				if hdr.current_focus then 
-		     		hdr.current_focus.on_focus_out()
+			if current_focus ~= b_group then 
+				if current_focus then 
+		     		current_focus.on_focus_out()
 				end
 			end 
 		    b_group.extra.on_focus_in("focus")
 			return true
 	  	end 
 		function b_group:on_button_up(x,y,b,n)
-				if hdr.current_focus ~= b_group then 
-					if hdr.current_focus then 
-		     			hdr.current_focus.on_focus_out()
+				if current_focus ~= b_group then 
+					if current_focus then 
+		     			current_focus.on_focus_out()
 					end
 				end 
 				b_group.extra.on_focus_in(keys.Return)
 				return true
 	     end 
 	     function b_group:on_enter()
-		 		if hdr.current_focus ~= b_group then 
-					if hdr.current_focus then 
-		     			hdr.current_focus.on_focus_out()
+		 		if current_focus ~= b_group then 
+					if current_focus then 
+		     			current_focus.on_focus_out()
 					end
 				end 
 				b_group.extra.on_focus_in("focus")
@@ -357,14 +357,14 @@ function editor_ui.scrollPane(t)
 		--print("scroll_group focus in", key)
 
 --[[
-		if hdr.current_focus ~= nil then 
-			print(hdr.current_focus.name)
-			if hdr.current_focus.on_focus_out then 
-				hdr.current_focus.on_focus_out()
+		if current_focus ~= nil then 
+			print(current_focus.name)
+			if current_focus.on_focus_out then 
+				current_focus.on_focus_out()
 			end 
 		end 
 ]]
-		--hdr.current_focus = scroll_group 0701
+		--current_focus = scroll_group 0701
 		for i,j in pairs (scroll_group.content.children) do 
 			if j.name then 
 			if string.find(j.name, "h_rect") ~= nil then 
@@ -623,7 +623,7 @@ function editor_ui.scrollPane(t)
             function grip_hor:on_button_down(x,y,button,num_clicks)
                 local dx = x - grip_hor.x
 	   	        
-                hdr.dragging = {grip_hor,
+                dragging = {grip_hor,
 	   		        function(x,y)
 	   			
 	   			        grip_hor.x = x - dx
@@ -709,7 +709,7 @@ function editor_ui.scrollPane(t)
                 
                 local dy = y - grip_vert.y
 	   	        
-                hdr.dragging = {grip_vert,
+                dragging = {grip_vert,
 	   		        function(x,y)
                         
 	   			        grip_vert.y = y - dy
@@ -1147,7 +1147,7 @@ function editor_ui.checkBoxGroup(t)
     }
 
 	function cb_group.extra.on_focus_in()
-	  	hdr.current_focus = cb_group
+	  	current_focus = cb_group
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    	boxes:find_child("box"..1).opacity = 0 
 	    	boxes:find_child("focus"..1).opacity = 255 
@@ -1259,7 +1259,7 @@ function editor_ui.checkBoxGroup(t)
 						end
 					elseif key == keys.Return then 
 						if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
-							p.selected_items = table_remove_val(p.selected_items, box_num)
+							p.selected_items = util.table_remove_val(p.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
 							cb_group:find_child("check"..tostring(box_num)).reactive = true 
     						cb_group.extra.select_button(p.selected_items) 
@@ -1285,7 +1285,7 @@ function editor_ui.checkBoxGroup(t)
 	     		function check:on_button_down(x,y,b,n)
 					local check_num = tonumber(check.name:sub(6,-1))
 					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
-						p.selected_items = table_remove_val(p.selected_items, check_num)
+						p.selected_items = util.table_remove_val(p.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
 						cb_group:find_child("check"..tostring(check_num)).reactive = true 
     					cb_group.extra.select_button(p.selected_items) 
