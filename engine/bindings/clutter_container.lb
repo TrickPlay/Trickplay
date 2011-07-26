@@ -76,37 +76,10 @@ interface container [[ClutterActor*]]
             while(lua_next(L,2))
             {
                 ClutterActor* source=ClutterUtil::user_data_to_actor(L,-1);
-                if(source)
-				{
-                    if ( ClutterActor * parent = clutter_actor_get_parent( source ) )
-                    {
-                        guint32 my_gid = clutter_actor_get_gid( self );
-                        guint32 source_gid = clutter_actor_get_gid( source );
-                        guint32 parent_gid = clutter_actor_get_gid( parent );
-
-                        g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT ALREADY HAS PARENT %" G_GUINT32_FORMAT "" , source_gid , my_gid , parent_gid );
-                    }
-                    else
-                    {
-                        /* check if source is not already a parent or ancestor of the self */
-                        ClutterActor* ancestor = clutter_actor_get_parent( self );
-                        if ( CLUTTER_IS_CONTAINER( source ) && ancestor != NULL )
-                        {
-                            while ( ancestor != NULL && ancestor != source )
-                            {
-                                ancestor = clutter_actor_get_parent( ancestor );
-                            }
-                            if ( ancestor != NULL )
-                            {
-                                guint32 my_gid = clutter_actor_get_gid( self );
-                                guint32 source_gid = clutter_actor_get_gid( source );
-                                g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT IS ALREADY A PARENT OR ANCESTOR OF %" G_GUINT32_FORMAT ". IGNORING %" G_GUINT32_FORMAT "" , source_gid , my_gid , my_gid , source_gid );
-                                continue;
-                            }
-                        }
-                        clutter_container_add_actor( CLUTTER_CONTAINER( self ), source );
-                    }
-				}
+                if ( ClutterUtil::is_qualified_child( self , source ) )
+                {
+                    clutter_container_add_actor( CLUTTER_CONTAINER( self ), source );
+                }
                 lua_pop(L,1);
             }
         ]];
@@ -129,36 +102,10 @@ interface container [[ClutterActor*]]
             {
                 if ( ! lua_isnil( L , i ) )
                 {
-                    if (ClutterActor * source=ClutterUtil::user_data_to_actor(L,i))
-                    {
-                        if ( ClutterActor * parent = clutter_actor_get_parent( source ) )
-                        {
-                            guint32 my_gid = clutter_actor_get_gid( self );
-                            guint32 source_gid = clutter_actor_get_gid( source );
-                            guint32 parent_gid = clutter_actor_get_gid( parent );
-
-                            g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT ALREADY HAS PARENT %" G_GUINT32_FORMAT "" , source_gid , my_gid , parent_gid );
-                        }
-                        else
-                        {
-                            /* check if source is not already a parent or ancestor of the self */
-                            ClutterActor* ancestor = clutter_actor_get_parent( self );
-                            if ( source != NULL && CLUTTER_IS_CONTAINER( source ) && ancestor != NULL )
-                            {
-                                while ( ancestor != NULL && ancestor != source )
-                                {
-                                    ancestor = clutter_actor_get_parent( ancestor );
-                                }
-                                if ( ancestor != NULL )
-                                {
-                                    guint32 my_gid = clutter_actor_get_gid( self );
-                                    guint32 source_gid = clutter_actor_get_gid( source );
-                                    g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT IS ALREADY A PARENT OR ANCESTOR OF %" G_GUINT32_FORMAT ". IGNORING %" G_GUINT32_FORMAT "" , source_gid , my_gid , my_gid, source_gid );
-                                    continue;
-                                }
-                            }
-                            clutter_container_add_actor( CLUTTER_CONTAINER( self ),source );
-                        }
+                    ClutterActor * source=ClutterUtil::user_data_to_actor(L,i);
+                    if ( ClutterUtil::is_qualified_child( self, source ) )
+                    {                   
+                        clutter_container_add_actor( CLUTTER_CONTAINER( self ),source );
                     }
                 }
             }
