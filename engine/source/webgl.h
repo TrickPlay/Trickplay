@@ -127,6 +127,8 @@ namespace WebGL
 	    bool            unpack_flip_y;
 	    bool            unpack_premultiply_alpha;
 	    unsigned long   unpack_colorspace_conversion;
+	    bool			have_depth;
+	    bool			have_stencil;
 
 	private:
 	
@@ -152,6 +154,12 @@ namespace WebGL
 
 	    void context_op( Operation op );
 
+	    enum FBOTry { FBO_TRY_DEPTH_STENCIL = 0x01 , FBO_TRY_DEPTH = 0x02 , FBO_TRY_STENCIL = 0x04 };
+
+	    bool try_create_fbo( GLsizei width , GLsizei height , int flags );
+
+	    typedef std::set< GLuint> GLuintSet;
+
 	    guint			acquisitions;
 
 	    ContextType		my_context;
@@ -159,9 +167,7 @@ namespace WebGL
 	    GLuint			texture;
 		GLenum			texture_target;
 	    GLuint          framebuffer;
-	    GLuint          depthbuffer;
-
-	    typedef std::set< GLuint> GLuintSet;
+	    GLuintSet       renderbuffers;
 
 	    GLuintSet		user_buffers;
 	    GLuintSet		user_framebuffers;
