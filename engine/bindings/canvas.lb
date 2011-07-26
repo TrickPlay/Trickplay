@@ -22,7 +22,7 @@ module canvas;
 /*
     Class: Canvas
     
-    The Canvas class provides an in-memory vector-based drawing surface. Various drawing tools and operations are supported.
+    The Canvas data type provides an in-memory vector-based drawing surface. Various drawing tools and operations are supported.
     
     The Canvas class uses the <Cairo Vector Graphics library at http://www.cairographics.org>, but you do not need to understand that library before using the Canvas class. The basic information necessary to create and manipulate a Canvas object is described in this documentation. If you desire additional information about Cairo, refer to the <Cairo documentation at http://www.cairographics.org/documentation>.
     
