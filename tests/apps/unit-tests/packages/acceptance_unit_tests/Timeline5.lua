@@ -7,6 +7,8 @@ Description:  Verify has_marker returns true if a marker is set
 			  Verify list_markers returns all the markers.
 			  Verify on_marker_reached is called when a marker is reached.
 			  Verify markers returns a list of markers.
+
+Note: This test may fail on fast systems where test_timeline_markers runs before the "end" marker is removed.
 --]]
 
 -- Test Set up --
@@ -62,6 +64,7 @@ end
 
 -- Check that 3 markers are remaining after 4 were created and 1 was removed
 function test_Timeline_markers ()
+	dumptable (myTimeline.markers)
     assert_equal ( myTimeline.markers[1], "start",  "timeline.markers[2] ~= start" )
     assert_equal ( myTimeline.markers[2], "middle",  "timeline.markers[3] ~= middle" )
     assert_equal ( myTimeline.markers[3], "middle2",  "timeline.markers[4] ~= middle2" )
