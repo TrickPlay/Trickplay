@@ -211,7 +211,7 @@ function project_mng.new_project(fname)
 
 	msgw.extra.lock = false
  	screen:add(msgw)
-	create_on_button_down_f(msgw)	
+	util.create_on_button_down_f(msgw)	
 	ti_func()
 
 
