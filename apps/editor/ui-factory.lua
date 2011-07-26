@@ -1117,7 +1117,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	    function up:on_button_up(x,y)
 			if v.extra.type == "TabBar" then 
-				v:move_tab_up(tonumber(string.sub(up.name, 8,-1))+1)
+				if tonumber(string.sub(up.name, 8,-1))-1 >= 1 then 
+					v:move_tab_down(tonumber(string.sub(up.name, 8,-1))-1)
+				end 
 			elseif v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		    	for i, j in pairs (v.items) do
 					v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
@@ -1155,7 +1157,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		 end 
 	     function down:on_button_up(x,y)
 			 if v.extra.type == "TabBar" then 
-				v:move_tab_down(tonumber(string.sub(up.name, 8,-1))-1)
+				 if tonumber(string.sub(up.name, 8,-1))+1 <= #v.tab_labels then 
+					v:move_tab_up(tonumber(string.sub(up.name, 8,-1))+1)
+				 end 
 		     elseif v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
 		          for i, j in pairs (v.items) do
 						v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
