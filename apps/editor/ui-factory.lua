@@ -1561,7 +1561,7 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 			focus_changer:find_child("textE").color = {255,255,255,100}
 			focus_changer:find_child("focuschanger_bgE").opacity = 100 
 			focus_changer:find_child("gE").reactive = false 
-		elseif v.extra.type == "TextInput" or  v.extra.type == "ButtonPicker" then 
+		elseif v.extra.type == "TextInput" then 
 			focus_changer:find_child("textE").text = v.name 
 			focus_changer:find_child("textE").color = {255,255,255,100}
 			focus_changer:find_child("focuschanger_bgE").opacity = 100 
@@ -1574,6 +1574,35 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 			focus_changer:find_child("textR").color = {255,255,255,100}
 			focus_changer:find_child("focuschanger_bgR").opacity = 100 
 			focus_changer:find_child("gR").reactive = false 
+		elseif v.extra.type == "ButtonPicker" then 
+			if v.direction == "vertical" then 
+				focus_changer:find_child("textE").text = v.name 
+				focus_changer:find_child("textE").color = {255,255,255,100}
+				focus_changer:find_child("focuschanger_bgE").opacity = 100 
+				focus_changer:find_child("gE").reactive = false 
+
+				focus_changer:find_child("textU").text = v.name 
+				focus_changer:find_child("textU").color = {255,255,255,100}
+				focus_changer:find_child("focuschanger_bgU").opacity = 100 
+				focus_changer:find_child("gU").reactive = false 
+				focus_changer:find_child("textD").text = v.name 
+				focus_changer:find_child("textD").color = {255,255,255,100}
+				focus_changer:find_child("focuschanger_bgD").opacity = 100 
+				focus_changer:find_child("gD").reactive = false 
+			else 
+				focus_changer:find_child("textE").text = v.name 
+				focus_changer:find_child("textE").color = {255,255,255,100}
+				focus_changer:find_child("focuschanger_bgE").opacity = 100 
+				focus_changer:find_child("gE").reactive = false 
+				focus_changer:find_child("textL").text = v.name 
+				focus_changer:find_child("textL").color = {255,255,255,100}
+				focus_changer:find_child("focuschanger_bgL").opacity = 100 
+				focus_changer:find_child("gL").reactive = false 
+				focus_changer:find_child("textR").text = v.name 
+				focus_changer:find_child("textR").color = {255,255,255,100}
+				focus_changer:find_child("focuschanger_bgR").opacity = 100 
+				focus_changer:find_child("gR").reactive = false 
+			end 
 		end 	
 
     	focus_changer.position  = {0 , 5}
