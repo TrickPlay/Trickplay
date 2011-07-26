@@ -14,11 +14,13 @@ module clutter_screen;
     
     The screen variable is a global variable created automatically by the TrickPlay Engine. The screen variable is available to every application at any time during its execution.
     
-    The screen variable implements the <UIElement> and <Container> interfaces, so all properties and functions defined by those interfaces are available through the screen variable.
+    In addition to the properties and functions described on this page, the screen variable also supports all the properties and functions defined in the <UIElement> and <Container> interfaces.
     
     As its name suggests, the screen variable represents an application's display screen. The screen has a fixed size of 1920 pixels (width) x 1080 pixels (height). This fixed size is automatically scaled to fit the actual display dimensions. A program can retrieve the actual display dimensions by accessing the screen variable's <display_size> property.
     
     Upon application start-up, the screen is not visible. This enables an application to completely organize and arrange the desired display prior to showing it. To place a user interface element on the display, the element should be added to the screen variable. After the screen has been composed and is ready to be displayed, it can be shown by calling the <show> function.
+    
+    The order in which elements are added to the screen defines the screen's Z-order, or the order in which elements are in front of and behind each other. An element added to the screen is appended to the end of the Z-order; that is, it is placed behind all previously-added elements. The screen's Z-order can be modified by calling the <Container.raise_child> and <Container.lower_child> functions, or the <UIElement.raise>, <UIElement.lower>, <UIElement.raise_to_top>, and <UIElement.lower_to_bottom> functions.
 
 */
 
