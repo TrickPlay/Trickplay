@@ -5733,25 +5733,25 @@ function ui_element.tabBar(t)
             
             move_tab_up = function(self,index)
                 if index == 1 then return end
-                local temp  = p.tab_labels[i-1]
-                p.tab_labels[i-1] = p.tab_labels[i]
-                p.tab_labels[i]   = temp
+                local temp  = p.tab_labels[index-1]
+                p.tab_labels[index-1] = p.tab_labels[index]
+                p.tab_labels[index]   = temp
                 
-                temp      = p.tabs[i-1]
-                p.tabs[i-1] = p.tabs[i]
-                p.tabs[i]   = temp
+                temp      = p.tabs[index-1]
+                p.tabs[index-1] = p.tabs[index]
+                p.tabs[index]   = temp
                 
                 create()
             end,
             move_tab_down = function(self,index)
                 if index == #p.tab_labels then return end
-                local temp  = p.tab_labels[i+1]
-                p.tab_labels[i+1] = p.tab_labels[i]
-                p.tab_labels[i]   = temp
+                local temp  = p.tab_labels[index+1]
+                p.tab_labels[index+1] = p.tab_labels[index]
+                p.tab_labels[index]   = temp
                 
-                temp      = p.tabs[i+1]
-                p.tabs[i+1] = p.tabs[i]
-                p.tabs[i]   = temp
+                temp      = p.tabs[index+1]
+                p.tabs[index+1] = p.tabs[index]
+                p.tabs[index]   = temp
                 
                 create()
             end,
