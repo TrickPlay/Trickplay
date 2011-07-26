@@ -14,10 +14,13 @@ void Text_on_text_changed(ClutterText*text,lua_State*L);
 /*
     Class: Text
     
-    The Text class provides various operations to support text on the display.
-    In addition to the methods and properties specific to a Text object, it also
-    implements all the <UIElement> methods and properties.
+    The Text data type provides various operations to support text on the 
+    display.
     
+    In addition to the properties and functions described on this page, the 
+    Text data type also supports all the properties and functions defined in 
+    the <UIElement> interface.
+
 */
 
 class Text [[ClutterActor*]] actor

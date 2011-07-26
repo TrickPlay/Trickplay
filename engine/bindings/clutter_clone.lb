@@ -10,7 +10,7 @@ module clutter_clone;
 /*
     Class: Clone
 
-	A Clone object provides a method for improving memory efficiency by 
+	The Clone data type provides a method for improving memory efficiency by 
 	eliminating resource duplication. A common instance of resource duplication 
 	occurs when the same image is used by multiple objects, with each object 
 	loading and maintaining its own	copy of the image. Using Clone objects, a 
@@ -18,17 +18,18 @@ module clutter_clone;
 	be created that share the Image object's resource. Although the image is 
 	shared, each Clone can position and transform the image as it pleases.
 	
-	Any type of object may be cloned, including Bitmap, Canvas, Text, and even 
-	Group objects. When a Group object is cloned, all the children in the Group 
-	are also cloned.
+	Any data type that implements the UIElement properties and functions may be 
+	cloned, which includes the Text, Image, Rectangle, and even Group date 
+	types. (Bitmap and Canvas data types cannot be cloned.) When a Group object 
+	is cloned, all the children in the Group are also cloned.
 	
-	Objects in the TrickPlay SDK typically implement the UIElement interface 
-	and then add additional functionality to implement a unique  
-	class. For example, the Image object implements the properties and 
-	functions of UIElement and, on top of that, provides image-specific 
-	capabilities, such as functions to specify and load an image file. 
-	When an Image is cloned, the Image-specific properties and functions are 
-	shared by each derived Clone object, while the UIElement properties and 
+	Objects in the TrickPlay SDK typically provide the properties and functions
+	defined in the UIElement interface and then add additional functionality to 
+	implement a unique class. For example, the Image object provides the 
+	properties and functions of UIElement and, on top of that, provides 
+	image-specific capabilities, such as functions to specify and load an image 
+	file. When an Image is cloned, the Image-specific properties and functions 
+	are shared by each derived Clone object, while the UIElement properties and 
 	functions remain unique for each Clone. This enables a Clone to manipulate 
 	the image in its own unique manner by setting UIElement properties and 
 	calling UIElement functions, while operating under the shared 

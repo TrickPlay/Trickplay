@@ -7,7 +7,7 @@ module bitmap;
 /*
     Class: Bitmap
 
-	A Bitmap object is typically used as a brush when drawing on a 
+	The Bitmap data type is typically used as a brush when drawing on a 
 	vector-graphics-based <Canvas at file:canvas-lb.html#Canvas> object. A 
 	Bitmap object can also be displayed on the screen, but it must first be 
 	converted to an Image object by calling its <Bitmap.Image> function; the 
