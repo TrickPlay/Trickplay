@@ -335,7 +335,10 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 	         	end      
 	      	end      
 	   	end 
-	   	screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
+		if input_text ~= "unsaved_temp.lua" then 
+	   		screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
+		end
+	   	--screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
      else 
 		  -- need error handling 
           --printMsgWindow("The file is not a lua file.\nFile Name : ","err_msg")

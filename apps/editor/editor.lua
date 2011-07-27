@@ -639,14 +639,16 @@ function editor.n_selected(obj, call_by_inspector)
      end 
 end  
 
-function editor.close()
+function editor.close(new)
 
 	local func_nok = function() for i, j  in pairs(g.children) do editor.n_selected(j) end g:clear() editor.close() end 
 	
 	if #g.children > 0 then 
-		if current_fn == "" then 
-			editor.error_message("003", true, editor.save, func_nok) 
-			return 1
+		if current_fn == "" and new == nil then 
+			urrent_fn = "/screens/unsaved_temp.lua"
+			editor.save(true, false)
+			--editor.error_message("003", true, editor.save, func_nok) 
+			return 
 		elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
 			editor.error_message("003", true, editor.save, func_nok) 
 			return 1
@@ -1231,6 +1233,7 @@ local function open_files(input_purpose, bg_image, inspector)
 		if (input_purpose == "open_luafile" and  util.is_lua_file(v) == true) or (input_purpose == "open_imagefile" and  util.is_img_file(v) == true) or 
 		   (input_purpose == "open_videofile" and util.is_mp4_file(v) == true) then 
 
+			if v ~= "unsaved_temp.lua" then
 			virtual_hieght = virtual_hieght + 22
 			index = index + 1
 
@@ -1310,6 +1313,7 @@ local function open_files(input_purpose, bg_image, inspector)
 					end
 				end
 				return true
+			end
 			end
 			end 
 	end
@@ -2129,6 +2133,9 @@ end
 
 
 local function save_new_file (fname, save_current_f, save_backup_f)
+	if current_fn == "unsaved_temp.lua" then
+		current_fn = ""
+	end 
 	if current_fn == "" then 
 		if fname == "" then
 			return
@@ -4777,11 +4784,12 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	local error_msg_map = {
 		["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
 		["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
-		["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
+		--["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
+		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save file before closing?" end, 
 		["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists. Do you want to replace it?" end, 
 		["005"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter a file name." end, 
 		["006"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter guideline position." end, 
-		["007"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please specify \""..string.upper(str).."\" field." end, 
+		["007"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please fill \""..string.upper(str).."\" field." end, 
 		["008"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "There is no guideline."  end, 
 		["009"] = function(str) OK_label = "OK" return "You have unsaved changes in the \""..str.."\.back\" would you like to apply the changes into \""..str.."\"."
 		end, 
@@ -4799,7 +4807,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 	if func_nok then 
 		button_nok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-  					skin = "default", ui_width = 100, ui_height = 27, label = "Without Saving", focus_color = {27,145,27,255}, focus_object = nil}
+  					skin = "default", ui_width = 100, ui_height = 27, label = "Don\'t Save", focus_color = {27,145,27,255}, focus_object = nil}
     	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
   					skin = "default", ui_width = 75, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
