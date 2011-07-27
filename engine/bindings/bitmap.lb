@@ -385,6 +385,8 @@ class Bitmap [[ Bitmap * ]]
                     ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
 
                     Images::load_texture( t , image , x , y , w , h );
+
+                    g_object_set_data_full( G_OBJECT( t ), "tp-src", g_strdup( "[bitmap]" ) , g_free );
                 }
             }
         ]];

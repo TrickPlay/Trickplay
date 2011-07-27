@@ -2942,6 +2942,11 @@ class Canvas [[ cairo_t * ]]
 
                 clutter_texture_set_cogl_texture ( t , cogl_texture );
                 cogl_handle_unref( cogl_texture );
+                
+                Images::add_to_image_list( t );
+                
+                g_object_set_data_full( G_OBJECT( t ), "tp-src", g_strdup( "[canvas]" ) , g_free );
+                
             }
         ]];
 
