@@ -1538,6 +1538,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local inspector_bg = Image{src = "lib/assets/panel-tabs.png", name = "open_project", position = {0,0}}
 	local inspector_items = {}
 	
+
+	if v.name == nil then 
+		return 
+	end 
 	local last_attr_n = "reactive"
 
 	if util.is_this_widget(v) == true then 

@@ -509,6 +509,10 @@ skins = {}
 
 	       local actor = unpack(dragging) 
 
+		   if actor.name == nil then  -- 0727
+				   return 
+		   end 
+
 	       if (actor.name == "grip") then  
 	             local actor,s_on_motion = unpack(dragging) 
 	             s_on_motion(x, y)
