@@ -39,6 +39,11 @@
         netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
     }
     
+    // Add a button to the navigation bar that refreshes the list of advertised
+    // services.
+    refreshButton = [[UIBarButtonItem alloc] initWithTitle: @"Refresh" style:UIBarButtonItemStylePlain target:self action:@selector(refresh)];
+    [[self navigationItem] setRightBarButtonItem:refreshButton];
+    
     // Initialize the currentTVIndicator if it does not exist
     if (!currentTVIndicator) {
         currentTVIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
@@ -61,6 +66,12 @@
     [(UITableView *)self.view reloadData];
 }
 
+/**
+ * Refreshes the list of advertised services.
+ */
+- (void)refresh {
+    [netServiceManager start]; [self reloadData];
+}
 
 /**
  * Pushes the AppBrowserViewController to the top of the UINavigationController
@@ -108,8 +119,7 @@
             self.currentTVName = nil;
             [appBrowserViewController release];
             appBrowserViewController = nil;
-            [netServiceManager start];
-            [self reloadData];
+            [self refresh];
         }
     }
 }
@@ -155,8 +165,7 @@
             appBrowserViewController = nil;
         }
     }
-    [netServiceManager start];
-    [self reloadData];
+    [self refresh];
 }
 
 
@@ -452,7 +461,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"services %@\n", services);
     NSLog(@"number of services %d\n", [services count]);
     
-    if ([services count] == 0) { [self reloadData]; [netServiceManager start]; return; }
+    if ([services count] == 0) { [self refresh]; return; }
     
     if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
         if (gestureViewController) {
@@ -512,6 +521,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [loadingSpinner stopAnimating];
         [loadingSpinner release];
         loadingSpinner = nil;
+    }
+    if (refreshButton) {
+        [refreshButton release];
+        refreshButton = nil;
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }

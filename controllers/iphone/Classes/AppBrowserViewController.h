@@ -34,14 +34,24 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     BOOL viewDidAppear;
      
     UITableView *theTableView;
+    // An array of JSON strings containing information of apps available
+    // on the Television/Trickplay
     NSArray *appsAvailable;
     GestureViewController *gestureViewController;
     
+    // Name of the current app running on Trickplay
     NSString *currentAppName;
+    // Orange dot indicating which app is the current app
     UIImageView *currentAppIndicator;
     
+    // YES if the NavigationViewController is in the middle of animating
+    // pushing the GestureViewController or if the visible view is the
+    // GestureViewController. Initialized to NO and set back to NO
+    // when the AppBrowserViewController (self) calls viewDidAppear.
     BOOL pushingViewController;
     
+    // Refers to the RootViewController; informs the view controller
+    // if a socket having an error or closing/ending
     id <GestureViewControllerSocketDelegate> socketDelegate;
 }
 
