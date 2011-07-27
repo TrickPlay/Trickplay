@@ -1475,6 +1475,7 @@ function ui_element.button(t)
 		
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
+			print("B_GROUP, ONBUTTONDOWN")
 				if current_focus ~= b_group then 
 					if current_focus then 
 		     			current_focus.on_focus_out()

@@ -409,6 +409,17 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 	       end 
 	  end 
 
+     end 
+
+	 -- 0727
+
+	 input_mode = hdr.S_SELECT
+	 editor.save(true) 
+	 if 1 then 
+	     return 
+	 end 
+
+--[[
       if(v.x < 0) then 
 			if( v.x < x_scroll_from )then 
 		     	x_scroll_from = v.x 
@@ -438,7 +449,6 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
      if (x_scroll_to ~= 0 or x_scroll_from ~= 0 or y_scroll_to ~=0 or y_scroll_from ~= 0) then 
           --factory.make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
      end 
-
      if(screen:find_child("screen_objects") == nil) then
 	  	for i,j in pairs(g.children) do 
 			if(y_scroll_from < 0) then
@@ -451,7 +461,8 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
         screen:add(g)
      end
 
-     menu.menu_raise_to_top()
+     menu:menu_raise_to_top()
+]]
 end
 
 function msg_window.inputMsgWindow_yn(txt)
@@ -581,6 +592,8 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 
      --cleanMsgWindow()
      --screen:grab_key_focus(screen)
+	 
+	 
 end
 
 
@@ -606,7 +619,7 @@ function msg_window.inputMsgWindow(input_purpose, cfn)
               	elseif (button.name == "openfile") or (button.name == "reopenfile") then msg_window.inputMsgWindow_openfile() 
               	elseif (button.name == "projectlist") then set_project_path() editor.close()
               	elseif (button.name == "open_videofile") or (button.name == "reopen_videofile")then msg_window.inputMsgWindow_openvideo()
-              	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  imsg_window.nputMsgWindow_openimage(input_purpose)
+              	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  msg_window.inputMsgWindow_openimage(input_purpose)
               	elseif (button.name == "cancel") then 	cleanMsgWindow() screen:grab_key_focus(screen)
 							if(input_purpose == "projectlist") then projects = {} end 
                 end
@@ -778,21 +791,21 @@ function msg_window.inputMsgWindow(input_purpose, cfn)
 	       (input_purpose == "reopenImg") then  
 		open_b.name = "open_imagefile"
 		function open_b:on_button_down(x,y,button,num_clicks)
-			imsg_window.nputMsgWindow_openimage(input_purpose) 
+			msg_window.inputMsgWindow_openimage(input_purpose) 
 			--return true
      		end 
 		function open_t:on_button_down(x,y,button,num_clicks)
-			imsg_window.nputMsgWindow_openimage(input_purpose) 
+			msg_window.inputMsgWindow_openimage(input_purpose) 
 			--return true
      		end 
 	elseif (input_purpose == "open_videofile") or (input_purpose == "reopen_videofile") then  
 		open_b.name = "open_videofile"
 		function open_b:on_button_down(x,y,button,num_clicks)
-			imsg_window.nputMsgWindow_openvideo() 
+			msg_window.inputMsgWindow_openvideo() 
 			return true
      		end 
 		function open_t:on_button_down(x,y,button,num_clicks)
-			imsg_window.nputMsgWindow_openvideo() 
+			msg_window.inputMsgWindow_openvideo() 
 			return true
      		end 
 	end 
