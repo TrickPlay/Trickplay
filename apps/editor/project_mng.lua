@@ -368,6 +368,19 @@ function project_mng.open_project(t, msg, from_main)
 
 	if from_main and settings.project then 
 		load_project(settings.project)
+
+		local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+
+		for i, v in pairs(dir) do
+				if v == "unsaved_temp.lua" then 
+					if readfile(v) ~= "" then 
+						inputMsgWindow_openfile(v) 
+						editor_lb:writefile(current_fn, "", true)
+						current_fn = "" 
+					end 
+				end 
+		end 
+
 		return 
 	end 
 

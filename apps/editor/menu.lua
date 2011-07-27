@@ -44,7 +44,7 @@ local menuButton_file = ui_element.menuButton
 		ui_position = {249,28,0}
 	}
 
-menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, mstring="New\t\t\t\t     <span foreground=\"#a6a6a6\">N</span>"})
+menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, parameter=true, mstring="New\t\t\t\t     <span foreground=\"#a6a6a6\">N</span>"})
 
 menuButton_file.insert_item(2,{type="item", string="Open ...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, mstring="Open ...\t\t\t     <span foreground=\"#a6a6a6\">O</span>"})
 menuButton_file.insert_item(3,{type="item", string="Save ...\t\t\t     S", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true, mstring="Save ...\t\t\t     <span foreground=\"#a6a6a6\">S</span>"}) 
@@ -52,7 +52,7 @@ menuButton_file.insert_item(4,{type="item", string="Save As ...\t\t     A", bg=a
 menuButton_file.insert_item(5,{type="item", string="New Project ...\t\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.new_project, parameter=false, mstring="New Project ...\t\t     <span foreground=\"#a6a6a6\">F</span>"})
 menuButton_file.insert_item(6,{type="item", string="Open Project ...\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.open_project, parameter=false, mstring="Open Project ...\t     <span foreground=\"#a6a6a6\">P</span>"})
 
-menuButton_file.insert_item(7,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=exit, mstring="Quit\t\t\t\t     <span foreground=\"#a6a6a6\">Q</span>"}) 
+menuButton_file.insert_item(7,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=function() if editor.close() == nil then exit() end end, mstring="Quit\t\t\t\t     <span foreground=\"#a6a6a6\">Q</span>"}) 
 
 menuButton_file.name = "menuButton_file"
 menuButton_file.anchor_point = {71,30.5}

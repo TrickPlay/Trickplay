@@ -120,7 +120,7 @@ skins = {}
         [ keys.g	] = function() editor.group() input_mode = hdr.S_SELECT end,
         [ keys.u	] = function() editor.ugroup() input_mode = hdr.S_SELECT end,
         [ keys.w	] = function() input_mode = hdr.S_SELECT  editor.image() end,
-        [ keys.n	] = function() editor.close() input_mode = hdr.S_SELECT end,
+        [ keys.n	] = function() editor.close(true) input_mode = hdr.S_SELECT end,
         [ keys.o	] = function() input_mode = hdr.S_SELECT editor.open()  end,
         [ keys.q	] = function() if editor.close() == nil then exit() end end,
         [ keys.p	] = function() project_mng.open_project() end,
