@@ -1,7 +1,6 @@
 --------------------
 -- Message Window 
 --------------------
-
 local msg_window 		= {}
 local msgw_focus 		= ""
 local input_purpose     = ""
@@ -329,7 +328,6 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 
         local f = loadfile(current_fn)
         f(g) 
-
 	   	if screen:find_child("timeline") then 
 	      	for i,j in pairs (screen:find_child("timeline").children) do
 	         	if j.name:find("pointer") then 
@@ -370,7 +368,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 	  
 	  	if(v.type == "Group") then 
 	       for j, c in pairs (v.children) do
-		    	if util.is_in_list(v.extra.type, uiElements) == false then 
+		    	if util.is_in_list(v.extra.type, hdr.uiElements) == false then 
                 	c.reactive = true
 		        	c.extra.is_in_group = true
 	  				c.extra.lock = false
@@ -411,15 +409,9 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 
      end 
 
-	 -- 0727
+	 
+--[[-- 0727
 
-	 input_mode = hdr.S_SELECT
-	 editor.save(true) 
-	 if 1 then 
-	     return 
-	 end 
-
---[[
       if(v.x < 0) then 
 			if( v.x < x_scroll_from )then 
 		     	x_scroll_from = v.x 
@@ -461,8 +453,8 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
         screen:add(g)
      end
 
-     menu:menu_raise_to_top()
 ]]
+     menu:menu_raise_to_top()
 end
 
 function msg_window.inputMsgWindow_yn(txt)
