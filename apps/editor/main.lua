@@ -49,7 +49,7 @@ redo_list 	      = {}
 g = Group{name = "screen_objects", extra={canvas_xf = 0, canvas_f = 0, canvas_xt = 0, canvas_t = 0, canvas_w = screen.w, canvas_h = screen.h, scroll_x = 0, scroll_y = 0, scroll_dy = 1}}
 
 -- localized string table
-strings = dofile( "localized:strings.lua" ) or {}
+strings = dofile( "localized:strings" ) or {}
 
 function missing_localized_string( t , s )
 	rawset(t,s,s) -- only warn once per string
@@ -70,13 +70,13 @@ BG_IMAGE_import = Image{src = "assets/white.png", position = {0,0}, size = {scre
 
 
 -- Editor Defined UI Elements 
-ui_element	= dofile("/lib/ui_element.lua")
+ui_element	= dofile("/lib/ui_element")
 -- Utility Functions 
-util 	   	= dofile("util.lua")
+util 	   	= dofile("util")
 -- Project Management Functions 
-project_mng	= dofile("project_mng.lua")
+project_mng	= dofile("project_mng")
 -- Create Message Windows
-msg_window  = dofile("msgw.lua")
+msg_window  = dofile("msgw")
 
 ui =
     {
@@ -86,13 +86,13 @@ ui =
 
 
 -- Inspector Setting Functions 
-apply	   	= dofile("apply.lua")
+apply	   	= dofile("apply")
 -- UI Elements for Editor UI
-editor_lib  = dofile("editor_lib.lua")
+editor_lib  = dofile("editor_lib")
 -- Editor functions 
-editor 	   	= dofile("editor.lua")
+editor 	   	= dofile("editor")
 -- Editor Main Menu 
-menu 		= dofile("menu.lua")
+menu 		= dofile("menu")
 
 -- for the modifier keys 
 shift 		      = false
