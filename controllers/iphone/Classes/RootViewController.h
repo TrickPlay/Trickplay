@@ -34,6 +34,8 @@ GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
     UIView *currentTVIndicator;
     // Spins while a service is loading; disappears otherwise.
     UIActivityIndicatorView *loadingSpinner;
+    // Refreshes the list of services
+    UIBarButtonItem *refreshButton;
     
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
@@ -44,6 +46,7 @@ GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
 - (void)pushAppBrowser:(NSNotification *)notification;
 - (void)serviceResolved:(NSNetService *)service;
 - (void)reloadData;
+- (void)refresh;
 
 // Exposed properties
 @property (nonatomic, retain) IBOutlet UIWindow *window;

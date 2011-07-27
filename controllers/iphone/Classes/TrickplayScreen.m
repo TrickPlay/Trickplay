@@ -23,7 +23,7 @@
 
 //*
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"\n\nbegin\n\n");
+    //NSLog(@"\n\nbegin\n\n");
 
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesBegan:touches];
@@ -32,7 +32,7 @@
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"\n\nmoved\n\n");
+    //NSLog(@"\n\nmoved\n\n");
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesMoved:touches];
     }
@@ -40,7 +40,7 @@
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"\n\nended\n\n");
+    //NSLog(@"\n\nended\n\n");
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesEnded:touches];
     }
@@ -48,7 +48,7 @@
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"\n\ncancelled\n\n");
+    //NSLog(@"\n\ncancelled\n\n");
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesCancelled:touches];
     }

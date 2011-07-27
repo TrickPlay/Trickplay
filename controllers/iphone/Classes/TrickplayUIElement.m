@@ -106,7 +106,7 @@
 }
 
 - (void)sendTouches:(NSArray *)touches withState:(NSString *)state {
-    NSLog(@"touch sent");
+    //NSLog(@"touch sent");
     NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
     NSMutableArray *touchNumbers = [[NSMutableArray alloc] initWithCapacity:10];
     for (UITouch *touch in touches) {
@@ -126,7 +126,7 @@
 }
 
 - (void)handleTouchesBegan:(NSSet *)touches {
-    NSLog(@"handle touches began: %@", self);
+    //NSLog(@"handle touches began: %@", self);
     if (manager && manager.gestureViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -160,16 +160,40 @@
 
 - (void)handleTouchesMoved:(NSSet *)touches {
     if (manager && manager.gestureViewController) {
-        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
-                CFArrayAppendValue(newTouches, touch);
+                CGFloat
+                x = [touch locationInView:self].x,
+                y = [touch locationInView:self].y,
+                x_sub = [touch locationInView:view].x,
+                y_sub = [touch locationInView:view].y;
+                // check that its within clipping range
+                if (x >= self.bounds.origin.x
+                    && x <= self.bounds.size.width
+                    && y >= self.bounds.origin.y
+                    && y <= self.bounds.size.height
+                    // check that its within object range
+                    && x_sub >= view.bounds.origin.x
+                    && x_sub <= view.bounds.size.width
+                    && y_sub >= view.bounds.origin.y
+                    && y_sub <= view.bounds.size.height) {
+                    
+                    CFArrayAppendValue(newTouchesIn, touch);
+                } else {
+                    CFArrayAppendValue(newTouchesOut, touch);
+                }
             }
         }
-        if (((NSArray *)newTouches).count > 0) {
-            [self sendTouches:(NSArray *)newTouches withState:@"moved"];
+        if (((NSArray *)newTouchesIn).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesIn withState:@"moved_inside"];
         }
-        CFRelease(newTouches);
+        if (((NSArray *)newTouchesOut).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesOut withState:@"moved_outside"];
+        }
+        CFRelease(newTouchesIn);
+        CFRelease(newTouchesOut);
     }
 }
 
@@ -1090,7 +1114,7 @@
 }
 
 - (id)do_animate:(NSArray *)args {
-    NSLog(@"do_animate:%@", args);
+    //NSLog(@"do_animate:%@", args);
     NSMutableDictionary *table = [NSMutableDictionary dictionaryWithDictionary:[args objectAtIndex:0]];
     NSNumber *duration = [table objectForKey:@"duration"];
     [table removeObjectForKey:@"duration"];
@@ -1118,7 +1142,7 @@
     
     if ([TrickplayUIElement instancesRespondToSelector:selector]) {
         result = [self performSelector:selector withObject:args];
-        NSLog(@"result: %@", result);
+        //NSLog(@"result: %@", result);
     }
     
     return result;
