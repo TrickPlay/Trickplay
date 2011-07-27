@@ -500,6 +500,11 @@ end
 
 function editor.selected(obj, call_by_inspector)
 
+
+   if obj.name == nil then 
+	  return 
+   end 
+
    if(obj.type ~= "Video") then 
    	if(shift == false)then 
 		while(table.getn(selected_objs) ~= 0) do
@@ -2310,6 +2315,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 end 
 
 function editor.save(save_current_f, save_backup_f)
+print("editor.save called")
   	local WIDTH = 300
   	local HEIGHT = 150
     local PADDING = 13

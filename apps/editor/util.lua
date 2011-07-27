@@ -391,7 +391,9 @@ function util.create_on_button_down_f(v)
 	    	elseif (input_mode == hdr.S_FOCUS) then 
 				if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
 		     		editor.selected(v)
-		     		screen:find_child("text"..focus_type).text = v.name 
+					if v.name then 
+		     			screen:find_child("text"..focus_type).text = v.name 
+					end 
 				end 
 				input_mode = hdr.S_FOCUS
            		return true
@@ -422,6 +424,9 @@ end
 	            				new_object.position = {x-dx, y-dy}
 							else 
 								print("dx is function") 
+							end 
+							if new_object == nil or org_object == nil then 
+									return 
 							end 
 							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
 								editor.n_select(v, false, dragging) 
@@ -1125,7 +1130,7 @@ function util.itemTostring(v, d_list, t_list)
 	          		item_string = item_string..head..j.." = {"..table.concat(v[j],",").."}"..tail
 		  		end 
 	      elseif v[j].type == "Group" then 
-				if is_this_widget(v[j]) == true then 
+				if util.is_this_widget(v[j]) == true then 
 		        	item_string = item_string..head..j.."= "..v[j].name..tail
 				else 
 		        	item_string = item_string..head..j.."= Group { children = {"
