@@ -447,6 +447,11 @@ function project_mng.open_project(t, msg, from_main)
 	
 	table.sort(projects)
 
+	if #projects == 0 then 
+		new_project()
+		return
+	end 
+
     for i, v in pairs(projects) do 
 
 		virtual_hieght = virtual_hieght + 22
