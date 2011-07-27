@@ -81,7 +81,7 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
-    lua_pushinteger(L,event->click_count);
+    lua_pushinteger(L,event->click_count > 1 ? event->click_count - 1 : 1 );
     ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
     if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_down" , 5 , 1 , L ))
@@ -105,7 +105,7 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
-    lua_pushinteger(L,event->click_count);
+    lua_pushinteger(L,event->click_count > 1 ? event->click_count - 1 : 1 );
     ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
     if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_up" , 5 , 1 , L ))
