@@ -1137,14 +1137,6 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
 
 #ifndef TP_PRODUCTION
 
-    // If the image does not exist in our map, we add it and also set
-    // a weak ref so we know when it is destroyed. If it is already in
-    // the map, we just update its information.
-
-    Images * self( Images::get() );
-
-    Util::GSRMutexLock lock( & self->mutex );
-
     ImageInfo info( image );
 
     if ( w !=0 && h != 0 )
@@ -1153,6 +1145,43 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
         info.height = h;
         info.bytes = w * h * image->depth;
     }
+
+    add_to_image_list( texture , info );
+
+#endif
+
+}
+
+//-----------------------------------------------------------------------------
+
+void Images::add_to_image_list( ClutterTexture * texture )
+{
+#ifndef TP_PRODUCTION
+
+	g_assert( texture );
+
+	add_to_image_list( texture , ImageInfo( texture ) );
+
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+#ifndef TP_PRODUCTION
+
+//-----------------------------------------------------------------------------
+
+void Images::add_to_image_list( ClutterTexture * texture , const ImageInfo & info )
+{
+	g_assert( texture );
+
+	// If the image does not exist in our map, we add it and also set
+    // a weak ref so we know when it is destroyed. If it is already in
+    // the map, we just update its information.
+
+    Images * self( Images::get() );
+
+    Util::GSRMutexLock lock( & self->mutex );
 
     ImageMap::iterator it( self->images.find( texture ) );
 
@@ -1166,15 +1195,9 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
     {
         it->second = info;
     }
-
-#endif
-
 }
 
 //-----------------------------------------------------------------------------
-
-#ifndef TP_PRODUCTION
-
 // This gets called when an image is destroyed - we just remove it from
 // the map.
 
