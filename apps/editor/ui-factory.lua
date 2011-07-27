@@ -1357,7 +1357,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		if item_n == "expansion_location" or "cell_size" then 
 			item_picker.ui_width = 110
 		else 
-			item_picker.ui_width = 130
+			item_picker.ui_width = 150
 		end
 		--item_picker.text_font = "FreeSans Medium 12px"
 		if item_n == "style" then 
@@ -1537,7 +1537,7 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
     group:clear()
     	
     -- item group's children 
-    local text, input_text, ring, focus, line, button--, checkbox, radio_button, button_picker
+    local text, input_text, ring, focus, line, button	--, checkbox, radio_button, button_picker
 	
 	if(item_n == "focus") then  
 		group:clear()
@@ -1548,18 +1548,7 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 		local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
 	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
 
-		if v.extra.focus then 
-			for m, n in pairs (v.extra.focus) do
-		     	if type(n) ~= "function" then 
-		          	focus_changer:find_child("text"..focus_map[m]).text = n
-		     	else 
-		          	focus_changer:find_child("text"..focus_map[m]).text = v.name
-		          	focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
-		          	focus_changer:find_child("text"..focus_map[m]).reactive = false
-		     	end 
-			end 	
-		end
-
+	
 		if v.extra.type == "Button" or v.extra.type == "MenuButton" then
 			focus_changer:find_child("textE").text = v.name 
 			focus_changer:find_child("textE").color = {255,255,255,100}
@@ -1580,6 +1569,15 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 			focus_changer:find_child("gR").reactive = false 
 		elseif v.extra.type == "ButtonPicker" then 
 			if v.direction == "vertical" then 
+				focus_changer:find_child("textL").text = "" 
+				focus_changer:find_child("textL").color = {255,255,255,255}
+				focus_changer:find_child("focuschanger_bgL").opacity = 255 
+				focus_changer:find_child("gL").reactive = true 
+				focus_changer:find_child("textR").text = ""
+				focus_changer:find_child("textR").color = {255,255,255,255}
+				focus_changer:find_child("focuschanger_bgR").opacity = 255 
+				focus_changer:find_child("gR").reactive = true 
+
 				focus_changer:find_child("textE").text = v.name 
 				focus_changer:find_child("textE").color = {255,255,255,100}
 				focus_changer:find_child("focuschanger_bgE").opacity = 100 
@@ -1589,6 +1587,7 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 				focus_changer:find_child("textU").color = {255,255,255,100}
 				focus_changer:find_child("focuschanger_bgU").opacity = 100 
 				focus_changer:find_child("gU").reactive = false 
+
 				focus_changer:find_child("textD").text = v.name 
 				focus_changer:find_child("textD").color = {255,255,255,100}
 				focus_changer:find_child("focuschanger_bgD").opacity = 100 
@@ -1606,8 +1605,31 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 				focus_changer:find_child("textR").color = {255,255,255,100}
 				focus_changer:find_child("focuschanger_bgR").opacity = 100 
 				focus_changer:find_child("gR").reactive = false 
+
+				focus_changer:find_child("textU").text = "" 
+				focus_changer:find_child("textU").color = {255,255,255,255}
+				focus_changer:find_child("focuschanger_bgU").opacity = 255 
+				focus_changer:find_child("gU").reactive = true 
+				focus_changer:find_child("textD").text = ""
+				focus_changer:find_child("textD").color = {255,255,255,255}
+				focus_changer:find_child("focuschanger_bgD").opacity = 255 
+				focus_changer:find_child("gD").reactive = true 
+
 			end 
 		end 	
+
+		if v.extra.focus then 
+			for m, n in pairs (v.extra.focus) do
+		     	if type(n) ~= "function" then 
+		          	focus_changer:find_child("text"..focus_map[m]).text = n
+		     	else 
+		          	focus_changer:find_child("text"..focus_map[m]).text = v.name
+		          	focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
+		          	focus_changer:find_child("text"..focus_map[m]).reactive = false
+		     	end 
+			end 	
+		end
+
 
     	focus_changer.position  = {0 , 5}
 
