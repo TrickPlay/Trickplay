@@ -145,7 +145,7 @@ static int init_gl_state(ApplicationContext* app_context)
     };
 
     glClearDepthf(1.0f);
-    glClearColor(0.0f, 0.0f, 0.0f, 1);  /* Black background */
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);  /* Black transparent background */
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
