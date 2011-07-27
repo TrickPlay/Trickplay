@@ -44,6 +44,7 @@ function ui_element.populate_to (grp, tbl)
 							tbl[l.name] = grp:find_child(l.name) 
 						end 
 					end 
+
 				elseif j.extra.type == "LayoutManager" then
 					tbl[j.name] = grp:find_child(j.name) 
 					for k,l in pairs (j.tiles) do 
@@ -58,6 +59,23 @@ function ui_element.populate_to (grp, tbl)
 							end 
 						end 
 					end 
+
+				elseif j.extra.type == "TabBar" then 
+					tbl[j.name] = grp:find_child(j.name) 
+
+					for k, l in pairs (j.tabs) do 
+						for n,m in pairs (l.children) do 
+							if m then 
+								if is_this_container(m) == true then 
+									j = m 
+									there()
+								else 
+									tbl[m.name] = grp:find_child(m.name) 
+								end 
+							end 
+						end
+					end 
+
 				elseif j.type == "Group" and j.extra.type == nil then 
 					tbl[j.name] = grp:find_child(j.name) 
 					for k,l in pairs (j.children) do 
