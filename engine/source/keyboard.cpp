@@ -689,7 +689,7 @@ public:
                     {
                         * p = 0;
                         field.value = s;
-                        kb->update_field_value();
+                        kb->field_value_changed();
                     }
 
                     g_free( s );
@@ -711,7 +711,7 @@ public:
 
             field.value += button->action;
 
-            kb->update_field_value();
+            kb->field_value_changed();
 
             unshift();
 
@@ -940,9 +940,14 @@ public:
 
         if ( event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == TP_KEY_OK && button->action == "item" )
         {
+            String old_value = kb->form.get_field().value;
+
             kb->form.get_field().value = field->choices[ focused_item ].first;
 
-            kb->update_field_value();
+            if ( kb->form.get_field().value != old_value )
+            {
+                kb->field_value_changed();
+            }
 
             const Layout::Button * target = 0;
 
@@ -1553,7 +1558,10 @@ Keyboard::Keyboard( TPContext * context )
 
     event_handler( 0 ),
     focus( 0 ),
-    lsp( 0 )
+    lsp( 0 ),
+
+    typing_handler( 0 ),
+    list_handler( 0 )
 {
     tplog2( "BUILDING" );
 
@@ -1698,13 +1706,15 @@ Keyboard::Keyboard( TPContext * context )
 
     // Load the handlers
 
-    typing_handler.reset( new TypingHandler( this ) );
-    list_handler.reset( new ListHandler( this ) );
+    typing_handler = new TypingHandler( this );
+    list_handler = new ListHandler( this );
 
     if ( ! typing_handler->ok() || ! list_handler->ok() )
     {
-        typing_handler.reset();
-        list_handler.reset();
+        delete typing_handler;
+        delete list_handler;
+        typing_handler = 0;
+        list_handler = 0;
         keyboard = 0;
         return;
     }
@@ -1735,6 +1745,16 @@ Keyboard::~Keyboard()
     if ( lsp )
     {
         lsp->unref();
+    }
+
+    if ( typing_handler )
+    {
+    	delete typing_handler;
+    }
+
+    if ( list_handler )
+    {
+    	delete list_handler;
     }
 }
 
@@ -2019,11 +2039,11 @@ bool Keyboard::build_field_list()
 
         if ( ff.type == Form::Field::LIST )
         {
-            ff.handler = list_handler.get();
+            ff.handler = list_handler;
         }
         else
         {
-            ff.handler = typing_handler.get();
+            ff.handler = typing_handler;
         }
 
         ClutterActor * field = clutter_group_get_nth_child( CLUTTER_GROUP( field_list_container ) , i );
@@ -2220,6 +2240,24 @@ void Keyboard::move_to_next_field()
     if ( form.current_field < form.fields.size() - 1 )
     {
         switch_to_field( form.current_field + 1 );
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void Keyboard::field_value_changed()
+{
+    update_field_value();
+
+    if ( lsp )
+    {
+        if ( lua_State * L = lsp->get_lua_state() )
+        {
+            lua_pushstring( L , form.get_field().id.c_str() );
+            lua_pushstring( L , form.get_field().value.c_str() );
+
+            UserData::invoke_global_callback( L , "keyboard" , "on_field_changed" , 2 , 0 );
+        }
     }
 }
 

@@ -1,0 +1,205 @@
+Class: ProgressBar
+
+The ProgressBar class implements a visual graphic indicating the amount of progress completed on an executing operation.
+
+
+
+Constructor: progressBar( properties )
+
+The progressBar() constructor creates a new ProgressBar UI element object. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+
+*Prototype:*
+
+	(code)
+	ProgressBar progressBar( properties )
+	(end)
+
+*Argument:*
+
+properties - table of ProgressBar property settings
+
+The properties table contains a comma-separated list of property settings for the new ProgressBar. If a property is not explicitly set, its default value is used.
+
+*Return Value:* Returns an object that contains the new ProgressBar and related support objects. The returned object should be used to access the ProgressBar's properties and functions.
+
+*Example:* Create a new ProgressBar, specifying some properties
+
+	(code)
+	-- Load the UI Element library
+	ui_element = dofile( "/lib/ui_element.lua" )
+
+	-- Create a new ProgressBar, setting some of its ProgressBar-specific properties
+	local progBar = ui_element.progressBar{ ui_position = { 700, 300, 0 },
+                                            filled_bottom_color = { 200, 0, 0, 255 } }
+
+	-- Set some of the ProgressBar's UIElement properties
+	progBar.name = "FileLoadInProgress"
+	progBar.opacity = 180
+	(end)
+
+
+
+Property: ui_width
+
+The ui_width property is an integer value specifying the ProgressBar's display width in pixels.
+
+*Default Setting:* 300
+
+*See Also:* the <ui_height> property
+
+
+
+Property: ui_height
+
+The ui_height property is an integer value specifying the ProgressBar's display height in pixels.
+
+*Default Setting:* 50
+
+*See Also:* the <ui_width> property
+
+
+
+Property: ui_position
+
+The ui_position property is a table of integer values specifying the object's screen coordinates: X, Y and Z, respectively.
+
+*Default Setting:* { 400, 400, 0 }
+
+*See Also:* the <ui_width> and <ui_height> properties
+
+
+
+Property: skin
+
+The skin property is a string specifying the display appearance of the ProgressBar.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+
+*Default Setting:* "default"
+
+
+
+Property: border_color
+
+The border_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the ProgressBar's border.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* { 160, 160, 160, 255 } (light gray and completely opaque)
+
+
+
+Property: empty_top_color
+
+The empty_top_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's beginning color at the top of the empty, "not completed" portion of the ProgressBar.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+The progress bar comprises two portions: the filled or "completed" portion and the empty or "not completed" portion. When the progress bar is first displayed and 100% of the associated operation is not completed, the empty portion takes up the entire bar. As the associated operation progresses, the filled or "completed" portion fills a percentage of the bar's space equal to the percentage of the operation that has completed. Eventually, the operation finishes, and the filled portion then takes 100% of the progress bar.
+
+Both the filled and empty portions are gradients, with a starting top color and a finishing bottom color. The colors in between the top and bottom are calculated automatically to produce the gradient.
+
+*Default Setting:* { 0, 0, 0, 255 } (black and completely opaque)
+ 
+*See Also:* the <empty_bottom_color> property
+
+
+
+Property: empty_bottom_color
+
+The empty_bottom_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's ending color at the bottom of the empty, "not completed" portion of the bar. Refer to the <empty_top_color> property for a description of the empty and filled portions of the ProgressBar.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* { 127, 127, 127, 255 } (gray and opaque)
+
+*See Also:* the <empty_top_color> property
+
+
+
+Property: filled_top_color
+
+The filled_top_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's starting color at the top of the filled, "completed" portion of the bar. Refer to the <empty_top_color> property for a description of the empty and filled portions of the ProgressBar.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* { 255, 0, 0, 255 } (red and opaque)
+
+*See Also:* the <filled_bottom_color> property
+
+
+
+Property: filled_bottom_color
+
+The filled_bottom_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's ending color at the bottom of the filled, "completed" portion of the bar. Refer to the <empty_top_color> property for a description of the empty and filled portions of the ProgressBar.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* { 96, 48, 48, 255 } (reddish-gray and opaque)
+
+*See Also:* the <filled_top_color> property
+
+
+
+Property: progress
+
+The progress property is a floating point value between 0.0 and 1.0, inclusive, specifying the percentage of the progress bar that the filled or "completed" portion should cover. Typically, at the start of an operation, the progress property will be 0.0 and gradually increase until the operation is finished, at which point the progress will be 1.0. When the progress property is modified, the display of the progress bar is automatically updated to reflect the change.
+
+An alternative and equivalent method of updating the progress bar's display is to call the object's <set_prog> function.
+
+*Default Setting:* 0.0
+
+*Code Example*: Code snippets to create and update a ProgressBar
+
+	(code)
+	-- Load the UI Element library
+	ui_element = dofile( "/lib/ui_element.lua" )
+
+	-- Create a new ProgressBar
+	local progBar = ui_element.progressBar{ ui_position = { 700, 300, 0 } }
+	
+	-- Don't display the progress bar until later
+	progBar:hide()
+
+	-- Somewhere later in the program, perhaps in a StartButton.pressed() event handler
+		-- Initialize the progress bar and show it
+		progBar.progress = 0.0
+		progBar:show()
+		-- Then start your operation
+
+	-- During the execution of your operation, you must intermittently update the progress bar
+		-- Note: Changing the progress property automatically causes the display to update
+		progBar.progress = progBar.progress + .1
+		
+	-- Finally, the operation finishes. You can either show a completed progress bar and wait
+	-- for the user to push an OK button or simply hide the progress bar or do whatever is
+	-- appropriate for your application. Here, we display a completed progress bar for a
+	-- fraction of a second and immediately hide it.
+		progBar.progress = 1.0   -- Show a completed progress bar
+		progBar:hide()           -- Immediately hide the progress bar, we're finished
+	(end)
+
+*See Also:* the <set_prog> function
+
+
+
+Function: set_prog
+
+The set_prog() function sets the object's <progress> property and updates the display of the progress bar to reflect the change.
+
+*Prototype:*
+
+	(code)
+	set_prog( progress )
+	(end)
+	
+*Arguments:*
+
+progress - a floating point value between 0.0 and 1.0, inclusive, specifying the percentage of an executing operation that is complete.
+
+*Return Value:* None
+
+*See Also:* the <progress> property
+

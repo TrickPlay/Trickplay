@@ -10,7 +10,7 @@ Create a Rectangle element that is placed roughly in the center of the main disp
 - Object Name: RectButtonGroup
 - X, Y, Z: 600, 250, 0
 - W, H: 700, 500
-- Opacity: 100
+- Fill Color RGBA: 255, 255, 255, 100
 
 Next create a button by selecting the Edit->Insert UI Element menu item and clicking the item marked Button in the displayed dialog box. A new button element will be created in the Editor workspace. Drag the new button so that it is contained within the rectangle you just created.
 
@@ -28,7 +28,7 @@ Your screen should look similar to the figure shown below.
 
 (see images/EdButtonGroupRaw.png)
 
-Each of the four buttons in the button area will specify a different language that the user will be able to choose. Right-click the top button to display its Inspector. Set its following properties.
+Each of the four buttons in the button area will specify a different language that the user will be able to choose. Right-click the top button to display its Inspector. We will set each button's Object Name and Label to unique and meaningful values. The object name will be used to reference the button programatically; we'll set how this is done a little later in this tutorial. We've been setting the Object Name field for the Rectangle UI elements, so this field is already familiar. The label is the text displayed within the button. The Label field is located in the Inspector's More tab near the top of the Inspector dialog. For the English button, set its following properties.
 
 - Object Name: ButtonEnglish
 - Label: English
@@ -82,33 +82,48 @@ We will now align the four language buttons within the button area. First, selec
 
 (see images/EdButtonGroupDistribVert.png)
 
-To align the buttons along the left anchor/English button, select all five, including the Continue button, by <Shift>-Clicking each button individually. Then, from the menu, select Arrange->Align:Left. All the buttons will align along the left edge of the left anchor/English button.
+Next, let's align the buttons along our left anchor, the English button.  When selecting multiple elements by clicking on them, the Editor will use the first-selected element as the anchor. Therefore, starting with no elements selected, <Shift>-Click the English button, followed by the remaining buttons, including the Continue button. Because the English button was selected first, the Editor will use it as the anchor. With all the buttons selected, click the Arrange->Align:Left menu item. All the buttons will align along the left edge of the anchor, the English button.
 
 (see images/EdButtonGroupAligned.png)
 
-Define Keyboard Focus Navigation:
-As the user tabs through a screen's UI elements, the keyboard focus, i.e., the element that will receive keyboard input, travels from one element to another. The order in which elements receive focus can be defined within the SDK Visual Editor. Each element can explicitly specify the next element that will receive focus depending upon the keystroke the user enters. This focus navigation can be defined in an element's Inspector dialog.
+Multiple Selection Using Click-and-Drag:
+In the previous section, you selected multiple elements by <Shift>-Clicking each item. It's also possible to select multiple items by clicking and dragging the mouse to create a selection region. When you select multiple items by clicking and dragging, the entire element must be contained within the dragged selection region; if any part of an item is not within the selection area, the item will not be selected.
 
-Select the English button, right-click to display its Inspector dialog, and scroll down to the "Focus Destination" section. In this area, you can define which UI element will receive focus depending upon which key a user presses, such as the <Up> or <Down> arrow keys on a computer keyboard or the <R>, <G>, <Y>, or <B> buttons on a TV remote control.
+You can try now to select the four language buttons by clicking and dragging, but you will immediately encounter a problem. If you click on the rectangle that defines the button area, it becomes selected, and any subsequent dragging moves it. Similarly, if you click-and-drag on an area outside the button rectangle, you end up selecting and moving the background image which covers the entire display area. There seems to be no place on the screen to click-and-drag that doesn't select some element. If this is the case, how can click-and-drag be used to select multiple items?
+
+The solution lies in making space available on the screen by removing the background image. But this causes another problem because the rectangles we created to lay out the different sections of the display are semi-transparent and depend upon the color of the background image to be able to see their true visual effect. Thus, the complete solution lies not just in removing the background image, but also in replacing it with a temporary, working version that cannot be selected by mouse clicks.
+
+Before we make any further changes, save the current version of the screen by selecting File->Save. The modifications we will perform here will be for demonstration purposes only, so we'll save the current screen, make some changes to walk through the process, and when we're finished, we'll back out of our changes by restoring the saved screen.
+
+The current background image can be deleted by first clicking on it to select it, and then either pressing the <Backspace> key or selecting the Edit->Delete menu item. Then we can place the same background image back on the display, but as a temporary, working version that will not be selectable when it is clicked on. This can be achieved by selecting the View->Background:Image... menu item. An Open File dialog is displayed and the original background.jpg file can be selected. The background image is displayed, and the screen should appear the same now as it did before we removed the background image. The difference is that we are now able to click-and-drag to select multiple items. Verify this by clicking and dragging to select all the language buttons and the Continue button. Remember that the entire button must be contained within the selection region for it to be selected.
+
+The temporary, working background image is active while working in the SDK Visual Editor only; it is not stored as part of the screen, so if the application is run in the TrickPlay Engine, the application will not have a background image. Thus, we'll have to restore our original background image (via the Edit->Insert UI Element... menu item) before the screen can be considered finished.
+
+When elements are selected by clicking and dragging a selection region, the Editor determines the anchor element in a different manner than when elements are selected by <Shift>-Clicking. Recall that when multiple elements are selected by <Shift>-Clicking, the first selected element is the anchor. When multiple selection occurs by the click-and-drag method, the type of alignment operation performed determines the anchor element. For example, if you left-align the elements, the anchor will be the element with the left-most edge; all other elements will align with it. This is why it was important when positioning the language buttons that the anchoring English button be the left-most button. Although we ended up using <Shift>-Click to select multiple buttons, we had arranged the buttons so that we could have successfully used the click-and-drag method, as well.
+
+The anchor element that the Editor uses for each of the supported alignment operations are listed below.
+
+_Alignment_Anchors_
+
+Left alignment - anchor is the element with the left-most edge
+Right alignment - anchor is the element with the right-most edge
+Top alignment - anchor is the element with the top-most edge
+Bottom alignment - anchor is the element with the bottom-most edge
+Horizontal-Center alignment - anchor is the first element that was created
+Vertical-Center alignment - anchor is the first element that was created
+
+Notice that the determining factor when deciding on the anchor for Horizontal-Center and Vertical-Center alignments is the element that was created first among the selected elements. Unless you happen to remember the order in which you created each element, the first-created element may not always be known. This can result in an unintended alignment. For this reason, when you intend to perform a Horizontal-Center or Vertical-Center alignment, using the <Shift>-Click method to select multiple elements, where the first-selected element is the anchor, will often result in more predictable alignments.
+
+Now that we understand the Editor's two methods for selecting multiple elements, let's restore our screen to its last saved position by selecting the File->Open menu item and reloading the saved language.lua screen.
+
+Define Input Focus Navigation:
+As the user travels through a screen's UI elements, the input focus, i.e., the element that will receive user input, migrates from one element to another. The order in which elements receive focus can be defined within the SDK Visual Editor. Each element can explicitly specify the next element that will receive focus depending upon the key or button the user presses. This focus navigation can be defined in an element's Inspector dialog.
+
+Select the English button, right-click to display its Inspector dialog, and click on the "Focus" tab at the top of the dialog. This tab presents a visual facsimile of a TV remote control's navigation buttons (Up, Down, Left, and Right), and enables you to define the UI element that receives focus when the user presses each of the keys.
 
 (see images/EdButtonGroupFocus.png)
 
-The Focus Destination area contains two groups of buttons. The top group represents keystrokes on a computer keyboard that a user may enter to change focus. The bottom group are buttons on a TV remote control that can be pressed to alter focus. The buttons and the associated keystrokes are listed below.
-
-_Computer_Keyboard_Keys_
-- U: <Up> arrow key
-- D: <Down> arrow key
-- L: <Left> arrow key
-- R: <Right> arrow key
-- E: <Enter> key
-
-_TV_Remote_Control_Buttons_
-- R: <R> button
-- G: <G> button
-- Y: <Y> button
-- B: <B> button
-
-To assign focus, first click on one of the Inspector's keyboard/TV remote buttons in the Focus Destination area. Then to specify which element is to receive focus when the user presses that keystroke, click on the appropriate element in the SDK Visual Editor workspace. For example, in the Inspector dialog for the English button, when the user presses a <Down> arrow key, we want the focus to shift from the English button to the button immediately below it, the Spanish button. Thus, in the Focus Destination area of the English button's Inspector, press the <D> button for assignment of the <Down> arrow key. Then in the SDK Visual Editor's workspace, click the Spanish button. The Object Name of the Spanish button, ButtonSpanish, is automatically displayed beneath the Inspector's <D> button to indicate that the key has been assigned to that element. Similarly, the <Up> arrow can be defined to shift focus to the Continue button. First press the <U> button in the Inspector and then click on the Continue button in the Editor workspace. Assign focus destinations to any other keys and buttons that you wish, such as the TV remote buttons. Then click the OK button to close the Inspector dialog.
+To assign focus, first click on one of the Inspector's arrow keys in the Focus tab. Then to specify which element is to receive focus when the user presses that key, click on the appropriate element in the SDK Visual Editor workspace. For example, in the Inspector dialog for the English button, when the user presses a <DownArrow> arrow key, we want the focus to shift from the English button to the button immediately below it, the Spanish button. Thus, in the Focus tab of the English button's Inspector, press the <DownArrow> key. It will display with a red border, indicating that it is the selected. Then in the SDK Visual Editor's workspace, click the Spanish button. The Object Name of the Spanish button, ButtonSpanish, is automatically displayed in the Inspector's <DownArrow> button to indicate that the element has been assigned to the key. Similarly, the <UpArrow> can be defined to shift focus to the Continue button. First press the <UpArrow> button in the Inspector and then click on the Continue button in the Editor workspace. Assign focus destinations to any other keys that you wish. When you have finished, click the Apply button to close the Inspector dialog.
 
 Appropriate focus destinations should be defined for each of the remaining buttons (Spanish, Chinese, Korean, and Continue) so that a user can cycle through all the focusable elements contained in the screen.
 

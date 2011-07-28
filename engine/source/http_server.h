@@ -141,6 +141,7 @@ public:
 	        virtual void cancel() = 0;
 	    protected:
 	        StreamBody() {}
+	        virtual ~StreamBody() {}
 	    private:
 	        StreamBody( const StreamBody & ) {}
 	    };

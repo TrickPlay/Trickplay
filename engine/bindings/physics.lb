@@ -11,6 +11,14 @@ module physics_module;
 
 /*===========================================================================*/
 
+/*
+
+	Interface: Shape
+	
+	TODO
+	
+*/
+
 interface Shape [[ b2Shape * ]]
 {
     Shape()
@@ -26,14 +34,44 @@ interface Shape [[ b2Shape * ]]
 
 /*===========================================================================*/
 
+/*
+	Interface: Body
+	
+	TODO
+	
+*/
+
 interface Body [[ ClutterActor * ]]
 {
+
+	/* 
+		Property: handle
+		
+		TODO
+	*/
+	
 	readonly int handle
         [[
             Physics::Body * me = Physics::Body::get( self );
             handle = me->handle;
         ]];
 		
+	/*
+		Property: type
+		
+		The type property is a string specifying the Body object's type.
+		
+		*Supported Settings:* The type setting is case-sensitive.
+		
+		"static" - the body has infinite mass; it is immovable when operating under the influence of the physics engine, but can be moved manually by the user
+		"kinematic" - moves according to its velocity, but is not influenced by other forces, such as gravity or collisions. Behaves as if it had infinite mass.
+		"dynamic" - moves according to the forces placed upon it, such as gravity and collisions. Has finite, non-zero mass.
+		
+		*Default Settings:* "dynamic"
+		
+		TODO
+	*/
+	
 	string type
 	    [[
             Physics::Body * me = Physics::Body::get( self );
@@ -83,6 +121,12 @@ interface Body [[ ClutterActor * ]]
                 }
             }
 	    ]];
+	    
+	/*
+		Property: awake
+		
+		TODO
+	*/	    
 		
 	bool awake
 		[[
@@ -94,6 +138,12 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetAwake( awake );
 		]];
 		
+	/*
+		Property: active
+		
+		TODO
+	*/
+	
 	bool active
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -104,6 +154,12 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetActive( active );
 		]];
 
+	/*
+		Property: position
+		
+		TODO
+	*/
+	
 	table position
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -132,6 +188,12 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
 		]];
 
+	/*
+		Property: x
+		
+		TODO
+	*/
+	
 	double x
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -152,26 +214,133 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
         ]];
 
+	/*
+		Property: y
+		
+		TODO
+	*/
+	
     double y
         [[
             Physics::Body * me = Physics::Body::get( self );
-
-            const b2Vec2 & pos( me->body->GetPosition() );
-
-            y = me->world->world_to_screen( pos.y );
+    
+            if ( me->world->z_for_y ) 
+            {
+                y = clutter_actor_get_y( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                y = me->world->world_to_screen( pos.y );
+            }
         ]]
         [[
             Physics::Body * me = Physics::Body::get( self );
-
-            b2Vec2 pos( me->body->GetTransform().position );
-
-            pos.y = me->world->screen_to_world( y );
-
-            me->body->SetTransform( pos , me->body->GetAngle() );
-
-            me->synchronize_actor();
+    
+            if ( me->world->z_for_y ) 
+            {
+                clutter_actor_set_y( self , y );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( y );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
         ]];
 
+
+    /*
+        Property: z
+        
+        TODO
+    */
+
+    double z
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+
+            if ( ! me->world->z_for_y ) 
+            {
+                z = clutter_actor_get_depth( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                z = - me->world->world_to_screen( pos.y );
+            }
+        ]]
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+    
+            if ( ! me->world->z_for_y ) 
+            {
+                clutter_actor_set_depth( self , z );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( - z );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
+        ]];
+
+    /*
+        Property: depth
+        
+        TODO
+    */
+
+    double depth
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+
+            if ( ! me->world->z_for_y ) 
+            {
+                depth = clutter_actor_get_depth( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                depth = - me->world->world_to_screen( pos.y );
+            }
+        ]]
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+    
+            if ( ! me->world->z_for_y ) 
+            {
+                clutter_actor_set_depth( self , depth );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( - depth );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
+        ]];
+
+	/*
+		Property: angle
+		
+		TODO
+	*/
+	
 	double angle
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -187,6 +356,12 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
 		]];
 
+	/*
+		Property: rotation
+		
+		TODO
+	*/
+	
     double rotation
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -202,6 +377,12 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
         ]];
 
+	/*
+		Property: world_center
+		
+		TODO
+	*/
+	
     readonly table world_center
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -213,6 +394,12 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 
+	/*
+		Property: local_center
+		
+		TODO
+	*/
+	
 	readonly table local_center
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -224,6 +411,12 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 		
+	/*
+		Property: linear_velocity
+		
+		TODO
+	*/
+	
 	table linear_velocity
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -246,6 +439,12 @@ interface Body [[ ClutterActor * ]]
 			lua_pop( L , 2 );
 		]];
 		
+	/*
+		Property: angular_velocity
+		
+		TODO
+	*/
+	
 	double angular_velocity
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -258,6 +457,12 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetAngularVelocity( Physics::World::degrees_to_radians( angular_velocity ) );
 		]];
 
+	/*
+		Property: mass
+		
+		TODO
+	*/
+	
 	readonly double mass
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -267,6 +472,12 @@ interface Body [[ ClutterActor * ]]
 
 	/* TODO: mass_data */
 		
+	/*
+		Property: linear_damping
+		
+		TODO
+	*/
+	
 	double linear_damping
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -279,6 +490,12 @@ interface Body [[ ClutterActor * ]]
             me->body->SetLinearDamping( linear_damping );
         ]];
 
+	/*
+		Property: angular_damping
+		
+		TODO
+	*/
+	
 	double angular_damping
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -291,6 +508,12 @@ interface Body [[ ClutterActor * ]]
             me->body->SetAngularDamping( angular_damping );
         ]];
 
+	/*
+		Property: bullet
+		
+		TODO
+	*/
+	
 	bool bullet
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -303,6 +526,12 @@ interface Body [[ ClutterActor * ]]
             me->body->SetBullet( bullet );
         ]];
 
+	/*
+		Property: sleeping_allowed
+		
+		TODO
+	*/
+	
 	bool sleeping_allowed
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -315,6 +544,12 @@ interface Body [[ ClutterActor * ]]
             me->body->SetSleepingAllowed( sleeping_allowed );
         ]];
 
+	/*
+		Property: fixed_rotation
+		
+		TODO
+	*/
+	
 	bool fixed_rotation
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -327,6 +562,12 @@ interface Body [[ ClutterActor * ]]
             me->body->SetFixedRotation( fixed_rotation );
         ]];
 
+	/*
+		Property: contacts
+		
+		TODO
+	*/
+	
 	readonly table contacts
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -334,6 +575,12 @@ interface Body [[ ClutterActor * ]]
             me->world->push_contact_list( me->body->GetContactList() );
         ]];
 
+	/*
+		Function: synchronize
+		
+		TODO
+	*/
+	
 	synchronize( )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -341,6 +588,12 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_body();
         ]];
 
+	/*
+		Function: apply_force
+		
+		TODO
+	*/
+	
 	apply_force( table force , table point )
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -359,6 +612,12 @@ interface Body [[ ClutterActor * ]]
 			lua_pop( L , 4 );
 		]];
 		
+	/*
+		Function: apply_torque
+		
+		TODO
+	*/
+	
 	apply_torque( double torque )
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -366,6 +625,12 @@ interface Body [[ ClutterActor * ]]
             me->body->ApplyTorque( torque );
 		]];
 		
+	/*
+		Function: apply_linear_impulse
+		
+		TODO
+	*/
+	
 	apply_linear_impulse( table force , table point )
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -384,6 +649,12 @@ interface Body [[ ClutterActor * ]]
             lua_pop( L , 4 );
 		]];
 	
+	/*
+		Function: apply_angular_impulse
+		
+		TODO
+	*/
+	
 	apply_angular_impulse( double impulse )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -395,6 +666,12 @@ interface Body [[ ClutterActor * ]]
     #-------------------------------------------------------------------------
     # Fixtures
 
+	/*
+		Property: fixtures
+		
+		TODO
+	*/
+	
     readonly table fixtures
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -442,6 +719,12 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+	/*
+		Function: remove_fixture()
+		
+		TODO
+	*/
+	
     bool remove_fixture( int fixture_handle )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -459,6 +742,12 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+	/*
+		Function: remove_all_fixtures
+		
+		TODO
+	*/
+	
     remove_all_fixtures()
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -474,6 +763,12 @@ interface Body [[ ClutterActor * ]]
 
         ]];
 
+	/*
+		Function: add_fixture
+		
+		TODO
+	*/
+	
     int add_fixture( table properties )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -497,6 +792,12 @@ interface Body [[ ClutterActor * ]]
     #..........................................................................
     # Joints
 
+	/*
+		Function: remove_joint
+		
+		TODO
+	*/
+	
     bool remove_joint( int joint_handle )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -518,6 +819,12 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+	/*
+		Function: DistanceJoint
+		
+		TODO
+	*/
+	
     int DistanceJoint( table anchor , Body other_body , table other_anchor , table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
@@ -579,6 +886,12 @@ interface Body [[ ClutterActor * ]]
 
         ]];
 
+	/*
+		Function: RevoluteJoint
+		
+		TODO
+	*/
+	
     int RevoluteJoint( Body other_body , table anchor , table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
@@ -660,6 +973,12 @@ interface Body [[ ClutterActor * ]]
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
+	/*
+		Function: PrismaticJoint
+		
+		TODO
+	*/
+	
     int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
@@ -757,6 +1076,12 @@ interface Body [[ ClutterActor * ]]
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
+	/*
+		Event: on_begin_contact
+		
+		TODO
+	*/
+	
     callback on_begin_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -764,6 +1089,12 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , on_begin_contact );
         ]];
 
+	/*
+		Event: on_end_contact
+		
+		TODO
+	*/
+	
     callback on_end_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -771,7 +1102,12 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::END_CONTACT , on_end_contact );
         ]];
 
-
+	/*
+		Event: on_pre_solve_contact
+		
+		TODO
+	*/
+	
     callback on_pre_solve_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -779,6 +1115,12 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
         ]];
 
+	/*
+		Event: on_post_solve_contact
+		
+		TODO
+	*/
+	
     callback on_post_solve_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -789,8 +1131,21 @@ interface Body [[ ClutterActor * ]]
 
 /*===========================================================================*/
 
+	/*
+		Class: physics
+		
+		TODO
+	*/
+	
 global physics [[ Physics::World * ]]
 {
+
+	/*
+		Constructor: physics
+		
+		TODO
+	*/
+	
 	physics()
 		[[
             ClutterActor * screen = clutter_get_actor_by_gid( App::get( L )->get_screen_gid() );
@@ -803,6 +1158,12 @@ global physics [[ Physics::World * ]]
 			delete self;
 		]];
 
+	/*
+		Property: pixels_per_meter
+		
+		TODO
+	*/
+	
 	double pixels_per_meter
         [[
             pixels_per_meter = self->ppm;
@@ -811,6 +1172,12 @@ global physics [[ Physics::World * ]]
             self->ppm = pixels_per_meter;
         ]];
 
+	/*
+		Property: gravity
+		
+		TODO
+	*/
+	
     table gravity
         [[
             b2Vec2 g( self->get_world()->GetGravity() );
@@ -829,6 +1196,12 @@ global physics [[ Physics::World * ]]
             lua_pop( L , 2 );
         ]];
 
+	/*
+		Property: auto_clear_forces
+		
+		TODO
+	*/
+	
     bool auto_clear_forces
         [[
             auto_clear_forces = self->get_world()->GetAutoClearForces();
@@ -837,46 +1210,100 @@ global physics [[ Physics::World * ]]
             self->get_world()->SetAutoClearForces( auto_clear_forces );
         ]];
 
+	/*
+		Property: contacts
+		
+		TODO
+	*/
+	
     readonly table contacts
         [[
             self->push_contact_list( self->get_world()->GetContactList() );
         ]];
 
+	/*
+		Property: running
+		
+		TODO
+	*/
+	
     readonly bool running
         [[
             running = self->running();
         ]];
 
+	/*
+		Function: start
+		
+		TODO
+	*/
+	
     start( int velocity_iterations = 10, int position_iterations = 10 )
         [[
             self->start( velocity_iterations , position_iterations );
         ]];
 
+	/*
+		Function: stop
+		
+		TODO
+	*/
+	
 	stop()
         [[
             self->stop();
         ]];
 		
+	/*
+		Function: step
+		
+		TODO
+	*/
+	
 	step( double time_step = 1.0f/60.0f , int velocity_iterations = 10, int position_iterations = 10 )
 		[[
             self->step( time_step , velocity_iterations , position_iterations );
 		]];
 
+	/*
+		Function: clear_forces
+		
+		TODO
+	*/
+	
 	clear_forces()
         [[
             self->get_world()->ClearForces();
         ]];
 
+	/*
+		Function: draw_debug
+		
+		TODO
+	*/
+	
 	draw_debug( int opacity = 127 )
         [[
             self->draw_debug( opacity );
         ]];
 
+	/*
+		Function: clear_debug
+		
+		TODO
+	*/
+	
 	clear_debug()
         [[
             self->clear_debug();
         ]];
 
+	/* 
+		Function: get_fixtures_in_rectangle
+	
+		TODO
+	*/
+	
 	table get_fixtures_in_rectangle( table top_left , table bottom_right )
         [[
             float32 x1;
@@ -910,6 +1337,12 @@ global physics [[ Physics::World * ]]
             self->get_world()->QueryAABB( & q , a );
         ]];
 		
+	/*
+		Function: Body
+		
+		TODO
+	*/
+	
 	Body Body( UIElement element , table properties )
 		[[
             lb_check_udata_type( L , element , "actor" );
@@ -929,6 +1362,12 @@ global physics [[ Physics::World * ]]
     #..........................................................................
     # Shape factory methods
 
+	/*
+		Function: Box
+		
+		TODO
+	*/
+	
 	Shape Box( table size , table center = 0 , double rotation = 0 )
         [[
             b2PolygonShape * shape = new b2PolygonShape();
@@ -967,6 +1406,12 @@ global physics [[ Physics::World * ]]
             lua_remove( L , -2 );
         ]];
 
+	/*
+		Function: Edge
+		
+		TODO
+	*/
+	
 	Shape Edge( table point_a , table point_b )
         [[
             b2PolygonShape * shape = new b2PolygonShape();
@@ -990,7 +1435,12 @@ global physics [[ Physics::World * ]]
             lua_remove( L , -2 );
         ]];
 
-
+	/*
+		Function: Polygon
+		
+		TODO
+	*/
+	
 	Shape Polygon( table points )
         [[
             std::vector< b2Vec2 > p;
@@ -1027,6 +1477,12 @@ global physics [[ Physics::World * ]]
             lua_remove( L , -2 );
         ]];
 
+	/*
+		Function: Circle
+		
+		TODO
+	*/
+	
 	Shape Circle( double radius , table center = 0 )
         [[
             b2CircleShape * shape = new b2CircleShape();
@@ -1055,25 +1511,63 @@ global physics [[ Physics::World * ]]
 
     #..........................................................................
 
+	/*
+		Event: on_step
+		
+		TODO
+	*/
+	
     callback on_step;
 
+	/*
+		Event: on_begin_contact
+		
+		TODO
+	*/
+	
 	callback on_begin_contact( table contact )
         [[
             self->attach_global_callback( Physics::BEGIN_CONTACT , on_begin_contact );
         ]];
 
+	/*
+		Event: on_end_contact
+		
+		TODO
+	*/
+	
     callback on_end_contact( table contact )
         [[
             self->attach_global_callback( Physics::END_CONTACT , on_end_contact );
         ]];
 
+	/*
+		Event: on_pre_solve_contact
+		
+		TODO
+	*/
+	
     callback on_pre_solve_contact( table contact )
         [[
             self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
         ]];
 
+	/*
+		Event: on_post_solve_contact
+		
+		TODO
+	*/
+	
     callback on_post_solve_contact( table contact )
         [[
             self->attach_global_callback( Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
         ]];
+        
+    bool z_for_y
+        [[
+            z_for_y = self->z_for_y;
+        ]]
+        [[
+            self->z_for_y = z_for_y;
+        ]];        
 }

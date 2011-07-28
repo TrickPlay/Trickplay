@@ -29,13 +29,15 @@ Open main.lua in a text editor. To the ButtonEnglish.pressed() handler, add the 
 (code)
 layout["language"].ButtonEnglish.pressed = function() -- Handler for ButtonEnglish.pressed in this screen
   -- Create a Text element with our desired string
-  testStr = Text{ text="English button pressed() event handler!", position={800,100}, font="DejaVu Sans 50px", color={255,255,255,255}}
+  testStr = Text{ text = "English button pressed() event handler!",
+                  position = { 800, 100 },
+                  font = "DejaVu Sans 50px",
+                  color = { 255, 255, 255, 255 }
+                }
   -- Display the string
-  screen.add( testStr )
+  screen:add( testStr )
 end
-(end
-
-*NOTE:* The above code doesn't display the string. Why not???
+(end)
 
 To the ButtonSpanish.pressed() handler, add code to erase and destroy the string.
 
@@ -43,7 +45,7 @@ To the ButtonSpanish.pressed() handler, add code to erase and destroy the string
 layout["language"].ButtonSpanish.pressed = function() -- Handler for ButtonSpanish.pressed in this screen
   if testStr ~= nil then
     -- Erase the string from the display
-    screen.remove( testStr )
+    screen:remove( testStr )
     -- Destroy the string
     testStr = nil
   end
@@ -52,7 +54,7 @@ end
 
 Save the modified main.lua file.
 
-To run our application and test the event handler code, go to the Tutorial project's directory at ~/trickplay-editor/Tutorial. Run the Trickplay Engine with the following command line. The Engine will automatically run our Tutorial application.
+To run our application and test the event handler code, go to the Tutorial project's directory at ~/trickplay-editor/Tutorial. Run the TrickPlay Engine with the following command line. The Engine will automatically run our Tutorial application.
 
 (code)
 ~/trickplay-engine/Tutorial$ trickplay .

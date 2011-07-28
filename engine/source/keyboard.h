@@ -84,6 +84,8 @@ private:
 
     // Update the current field's value
 
+    void field_value_changed();
+
     void update_field_value();
 
     // Duh!
@@ -232,8 +234,8 @@ private:
 
     LuaStateProxy * lsp;
 
-    std::auto_ptr< KeyboardHandler > typing_handler;
-    std::auto_ptr< KeyboardHandler > list_handler;
+    KeyboardHandler * typing_handler;
+    KeyboardHandler * list_handler;
 };
 
 #endif // _TRICKPLAY_KEYBOARD_H
