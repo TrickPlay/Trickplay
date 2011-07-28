@@ -2666,8 +2666,8 @@ Arguments:
 	select_color - Color of the selected Radio button
 	button_radius - Radius of the Radio button
 	select_radius - Radius of the selected Radio button
-	ring_pos - The position of the group of Radio buttons 
-	item_pos - The position of the group of text items 
+	ring_position - The position of the group of Radio buttons 
+	item_position - The position of the group of text items 
 	line_space - The space between the text items 
 	selected_item - Selected item's number 
 	rotate_func - function that is called by selceted item number
@@ -2697,8 +2697,8 @@ function ui_element.radioButtonGroup(t)
 	--focus_fill_color = {0,50,0,100},
 	button_radius = 10, -- items 
 	select_radius = 4,  -- items 
-	b_pos = {0, 0},  -- items 
-	item_pos = {50,-5},  -- items 
+	button_position = {0, 0},  -- items 
+	item_position = {50,-5},  -- items 
 	line_space = 40,  -- items 
 	button_image = Image{}, --assets("assets/radiobutton.png"),
 	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
@@ -2770,9 +2770,13 @@ function ui_element.radioButtonGroup(t)
     create_radioButton = function() 
 
 	if(p.skin ~= "custom") then 
-	     p.button_image = skin_list[p.skin]["radi(dobutton"]
+	     p.button_image = skin_list[p.skin]["radiobutton"]
 	     p.button_focus_image = skin_list[p.skin]["radiobutton_focus"]
 	     p.select_image = skin_list[p.skin]["radiobutton_sel"]
+		 if p.skin == "CarbonCandy" then
+			p.item_position = {70, 10}
+			p.line_space = 65
+		 end 
 	end
 
          rb_group:clear()
@@ -2849,8 +2853,8 @@ function ui_element.radioButtonGroup(t)
 	    					rings:find_child("focus"..ring_num).opacity = 255 
         				end 
 
-						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.b_pos[1]
-	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.b_pos[2]
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1]
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2]
 
 						rings:find_child("ring"..ring_num):grab_key_focus() 
 
@@ -2879,11 +2883,16 @@ function ui_element.radioButtonGroup(t)
 	     		end 
 	      	end
          end 
-	 	 rings:set{name = "rings", position = p.b_pos} 
-	 	 items:set{name = "items", position = p.item_pos} 
+	 	 rings:set{name = "rings", position = p.button_position} 
+	 	 items:set{name = "items", position = p.item_position} 
 
-     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.b_pos[1]
-     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.b_pos[2]
+		 local sel_offset = 0
+		 if p.skin == "CarbonCandy" then 
+				sel_offset = 11
+		 end 
+
+     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1] - sel_offset
+     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2] - sel_offset
 
 	 	 rb_group:add(rings, items, select_img)
 
@@ -2937,7 +2946,7 @@ Arguments:
 		box_size - The size of Check box 
         check_size - The size of Check image 
 		box_pos - Postion of the group of check boxes
-		item_pos - Position of the group of text items 
+		item_position - Position of the group of text items 
 		line_space - Space between the text items 
 		selected_item - Selected item's number 
 		rotate_func - function that is called by selected item number   
@@ -2970,13 +2979,18 @@ function ui_element.checkBoxGroup(t)
 	box_size = {25,25},
 	check_size = {25,25},
 	line_space = 40,   
-	b_pos = {0, 0},  
-	item_pos = {50,-5},  
+	box_position = {0, 0},  
+	item_position = {50,-5},  
 	selected_items = {1},  
 	direction = "vertical",  -- 1:vertical 2:horizontal
 	rotate_func = nil,  
 	ui_position = {200, 200, 0}, 
     } 
+
+	if p.skin == "CarbonCandy" then
+		p.item_position = {70, 15}
+		p.line_space = 60
+	end 
 
  --overwrite defaults
     if t ~= nil then 
@@ -3046,15 +3060,21 @@ function ui_element.checkBoxGroup(t)
              p.box_image = skin_list[p.skin]["checkbox"]
              p.box_focus_image = skin_list[p.skin]["checkbox_focus"]
              p.check_image = skin_list[p.skin]["checkbox_sel"]
+
+			 if p.skin == "CarbonCandy" then
+				p.item_position = {70, 15}
+				p.line_space = 60
+			 end 
+
 	 	else 
 	     	 p.box_image = Image{}
 			 p.box_focus_image = Image{}
              p.check_image = "lib/assets/checkmark.png"
 	 	end
 	
-	 	boxes:set{name = "boxes", position = p.b_pos} 
-	 	checks:set{name = "checks", position = p.b_pos} 
-	 	items:set{name = "items", position = p.item_pos} 
+	 	boxes:set{name = "boxes", position = p.box_position} 
+	 	checks:set{name = "checks", position = p.box_position} 
+	 	items:set{name = "items", position = p.item_position} 
 
         local pos = {0, 0}
         for i, j in pairs(p.items) do 

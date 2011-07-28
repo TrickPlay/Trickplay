@@ -343,12 +343,16 @@ function inspector_apply (v, inspector)
                      local bpos_t = {}
                      bpos_t[1] = item_group:find_child("bx"):find_child("input_text").text
                      bpos_t[2] = item_group:find_child("by"):find_child("input_text").text
- 		     v.b_pos = bpos_t
+			 		 if v.extra.type == "CheckBoxGroup" then 
+		 		     	v.box_position = bpos_t
+					 else 
+		 		     	v.button_position = bpos_t
+					 end 
 		elseif j.name == "ix" or j.name == "iy" then
                      local ipos_t = {}
                      ipos_t[1] = item_group:find_child("ix"):find_child("input_text").text
                      ipos_t[2] = item_group:find_child("iy"):find_child("input_text").text
- 		     v.item_pos = ipos_t
+ 		     v.item_position = ipos_t
 		elseif j.name == "focusChanger" then 
 		     v.extra.focus = {}
 		     local focus_t_list = {"U","D","E","L","R","Red","G","Y","B"}
