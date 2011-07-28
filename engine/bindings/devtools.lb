@@ -52,7 +52,7 @@ global devtools [[ void * ]]
             lua_newuserdata( L , 1 );
 
             lua_newtable( L );
-            lua_pushvalue( L , 1 );
+            lua_pushlstring( L , name , name_len );
             lua_pushcclosure( L , marker_gc , 1 );
             lua_setfield( L , -2 , "__gc" );
             lua_setmetatable( L , -2 );
