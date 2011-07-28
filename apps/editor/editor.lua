@@ -4756,9 +4756,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		["006"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter guideline position." end, 
 		["007"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please fill \""..string.upper(str).."\" field." end, 
 		["008"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "There is no guideline."  end, 
-		["009"] = function(str) OK_label = "OK" return "You have unsaved changes in the \""..str.."\.back\" would you like to apply the changes into \""..str.."\"."
-		end, 
-	
+		["009"] = function(str) OK_label = "OK" return "You have unsaved changes in the \""..str.."\.back\" would you like to apply the changes into \""..str.."\"." end, 
+		["010"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Can\'t remove the item. Minimum item number." end, 
 	}
 
 	local error_msg = error_msg_map[error_num](str) 
