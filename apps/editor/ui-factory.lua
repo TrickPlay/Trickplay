@@ -912,6 +912,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			editor.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
+			if v.extra.last then 
+				v.extra.last = nil
+			end 
 			return true
 		end 
 	elseif v.extra.type =="TabBar" then 
@@ -941,6 +944,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			editor.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
+			if v.extra.last then 
+				v.extra.last = nil
+			end 
 			return true
 		end 
 
@@ -990,6 +996,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			editor.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
+			if v.extra.last then 
+				v.extra.last = nil
+			end 
 			return true 
 	    end 
 
@@ -1007,6 +1016,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			editor.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
+			if v.extra.last then 
+				v.extra.last = nil
+			end 
 			return true 
 		end 
 
@@ -1025,6 +1037,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			editor.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
+			if v.extra.last then 
+				v.extra.last = nil
+			end 
 			return true 
 		end 
 	end 
@@ -1086,9 +1101,27 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		down.reactive = true
 
 		function minus:on_button_down(x,y)
-			minus.src="lib/assets/li-btn-red-minus.png"
+			if v.extra.type == "RadioButtonGroup" or v.extra.type == "ButtonPicker" then 
+				if #v.items > 2 then 
+					minus.src="lib/assets/li-btn-red-minus.png"
+				else 
+					v.extra.last = true
+					editor.error_message("010",nil,nil,nil,inspector)
+				end 
+			else
+				if #v.items > 1 then 
+					minus.src="lib/assets/li-btn-red-minus.png"
+				else 
+					v.extra.last = true
+					editor.error_message("010",nil,nil,nil,inspector)
+				end 
+		    end 
 		end 
 	    function minus:on_button_up(x,y)
+			if v.extra.last then 
+				return 
+			end 
+
 			if v.tab_labels then 
 				v:remove_tab(tonumber(string.sub(minus.name, 11,-1)))
 			else 
@@ -1112,10 +1145,16 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    end 
 
 		function up:on_button_down(x,y)
-			up.src="lib/assets/li-btn-red-up.png"
+			if #v.items > 1 then 
+				up.src="lib/assets/li-btn-red-up.png"
+			end 
 		end 
 
 	    function up:on_button_up(x,y)
+			if  #v.items == 1  then 
+				return 
+			end 
+
 			if v.extra.type == "TabBar" then 
 				if tonumber(string.sub(up.name, 8,-1))-1 >= 1 then 
 					v:move_tab_down(tonumber(string.sub(up.name, 8,-1))-1)
@@ -1153,9 +1192,15 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	     end 
 
 		 function down:on_button_down(x,y)
-			down.src="lib/assets/li-btn-red-down.png"
+			if #v.items > 1 then 
+				down.src="lib/assets/li-btn-red-down.png"
+			end 
 		 end 
 	     function down:on_button_up(x,y)
+		 	 if #v.items == 1 then 
+				return 
+			 end 
+
 			 if v.extra.type == "TabBar" then 
 				 if tonumber(string.sub(up.name, 8,-1))+1 <= #v.tab_labels then 
 					v:move_tab_up(tonumber(string.sub(up.name, 8,-1))+1)
