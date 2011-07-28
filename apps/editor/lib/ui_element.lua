@@ -2730,21 +2730,21 @@ function ui_element.radioButtonGroup(t)
 
 	function rb_group.extra.on_focus_in()
 	  	current_focus = cb_group
-        if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+        --if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    	rings:find_child("ring"..1).opacity = 0 
 	    	rings:find_child("focus"..1).opacity = 255 
-        end 
+        --end 
 		rings:find_child("ring"..1):grab_key_focus() 
     end
 
     function rb_group.extra.on_focus_out()
-        if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+        --if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 			--for i=1, table.getn(rings.children)/2 do 
 			for i=1,  #rings.children/2 do 
 	    		rings:find_child("ring"..i).opacity = 255 
 	    		rings:find_child("focus"..i).opacity = 0 
 			end 
-        end 
+        --end 
     end 
 
     function rb_group.extra.select_button(item_n) 
@@ -2769,7 +2769,7 @@ function ui_element.radioButtonGroup(t)
 
     create_radioButton = function() 
 
-	if(p.skin ~= "custom") then 
+	if(p.skin ~= "custom" and p.skin ~= "default") then 
 	     p.button_image = skin_list[p.skin]["radiobutton"]
 	     p.button_focus_image = skin_list[p.skin]["radiobutton_focus"]
 	     p.select_image = skin_list[p.skin]["radiobutton_sel"]
@@ -2784,7 +2784,7 @@ function ui_element.radioButtonGroup(t)
          items:clear()
          --rb_group.size = { p.ui_width , p.ui_height},
 	
-         if(p.skin == "custom") then 
+         if(p.skin == "custom" or p.skin == "default") then 
 	     	select_img = create_select_circle(p.select_radius, p.select_color)
          	select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
          else 
@@ -2800,7 +2800,7 @@ function ui_element.radioButtonGroup(t)
           	   	pos= {0, i * p.line_space - p.line_space}
 	      	end   	
             items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
-	      	if p.skin == "custom" then 
+	      	if p.skin == "custom"  or p.skin == "default"then 
 		   		donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
 		   	   	focus =  create_circle(p.button_radius, p.focus_color):set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
     	       	rings:add(donut, focus) 
@@ -2822,12 +2822,12 @@ function ui_element.radioButtonGroup(t)
 					if key == keys.Up then 
 						if ring_num > 1 then 
 							next_num = ring_num - 1
-				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
 	    						rings:find_child("ring"..ring_num).opacity = 255 
 	    						rings:find_child("focus"..ring_num).opacity = 0 
 	    						rings:find_child("ring"..next_num).opacity = 0 
 	    						rings:find_child("focus"..next_num).opacity = 255 
-        					end 
+        					--end 
 	    					rings:find_child("ring"..next_num):grab_key_focus()
 							return true 
 						end
@@ -2836,22 +2836,22 @@ function ui_element.radioButtonGroup(t)
 						--if ring_num < table.getn(rings.children)/2 then 
 						if ring_num < #rings.children/2 then 
 							next_num = ring_num + 1
-				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
 	    						rings:find_child("ring"..ring_num).opacity = 255 
 	    						rings:find_child("focus"..ring_num).opacity = 0 
 	    						rings:find_child("ring"..next_num).opacity = 0 
 	    						rings:find_child("focus"..next_num).opacity = 255 
-        					end 
+        					--end 
 							rings:find_child("ring"..next_num):grab_key_focus() 
 							return true 
 						end
 					elseif key == keys.Return then 
 						rb_group.extra.select_button(ring_num)
 
-						if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+						--if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    					rings:find_child("ring"..ring_num).opacity = 0 
 	    					rings:find_child("focus"..ring_num).opacity = 255 
-        				end 
+        				--end 
 
 						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1]
 	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2]
@@ -2871,7 +2871,7 @@ function ui_element.radioButtonGroup(t)
 					rb_group.extra.select_button(ring_num)
 
 					current_focus = rb_group
-        			if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+        			--if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    				rings:find_child("ring"..ring_num).opacity = 0 
 	    				rings:find_child("focus"..ring_num).opacity = 255 
         			end 
@@ -3016,20 +3016,20 @@ function ui_element.checkBoxGroup(t)
 
 	function cb_group.extra.on_focus_in()
 	  	current_focus = cb_group
-        if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+        --if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    	boxes:find_child("box"..1).opacity = 0 
 	    	boxes:find_child("focus"..1).opacity = 255 
-        end 
+        --end 
 		boxes:find_child("box"..1):grab_key_focus() 
     end
 
     function cb_group.extra.on_focus_out()
-        if (p.skin == "CarbonCandy") or p.skin == "custom" then 
+        --if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 			for i=1, table.getn(boxes.children)/2 do 
 	    		boxes:find_child("box"..i).opacity = 255 
 	    		boxes:find_child("focus"..i).opacity = 0 
 			end 
-        end 
+        --end 
     end 
 
     function cb_group.extra.select_button(items) 
@@ -3056,7 +3056,7 @@ function ui_element.checkBoxGroup(t)
 	 	cb_group:clear()
 
 
-	 	if(p.skin ~= "custom") then 
+	 	if(p.skin ~= "custom" and p.skin ~= "default") then 
              p.box_image = skin_list[p.skin]["checkbox"]
              p.box_focus_image = skin_list[p.skin]["checkbox_focus"]
              p.check_image = skin_list[p.skin]["checkbox_sel"]
@@ -3084,7 +3084,7 @@ function ui_element.checkBoxGroup(t)
 	      	end   			
 
 	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
-	      	if p.skin == "custom" then 
+	      	if p.skin == "custom"  or p.skin == "default"then 
 		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 0}
 		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
@@ -3096,7 +3096,7 @@ function ui_element.checkBoxGroup(t)
 		   		boxes:add(box, focus) 
 	     	end 
 
-	      	if p.skin == "custom" then 
+	      	if p.skin == "custom"  or p.skin == "default"  then 
 	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
 			else 
 	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
@@ -3121,24 +3121,24 @@ function ui_element.checkBoxGroup(t)
 					if key == prev_key then 
 						if box_num > 1 then 
 							next_num = box_num - 1
-				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
 	    						boxes:find_child("box"..box_num).opacity = 255 
 	    						boxes:find_child("focus"..box_num).opacity = 0 
 	    						boxes:find_child("box"..next_num).opacity = 0 
 	    						boxes:find_child("focus"..next_num).opacity = 255 
-        					end 
+        					--end 
 	    					boxes:find_child("box"..next_num):grab_key_focus()
 							return true 
 						end
 					elseif key == next_key then 
 						if box_num < table.getn(boxes.children)/2 then 
 							next_num = box_num + 1
-				 			if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "custom") then 
 	    						boxes:find_child("box"..box_num).opacity = 255 
 	    						boxes:find_child("focus"..box_num).opacity = 0 
 	    						boxes:find_child("box"..next_num).opacity = 0 
 	    						boxes:find_child("focus"..next_num).opacity = 255 
-        					end 
+        					--end 
 							boxes:find_child("box"..next_num):grab_key_focus() 
 							return true 
 						end
