@@ -408,31 +408,14 @@ skins = {}
 
 
       function screen:on_motion(x,y)
-
-	  local mouse_pointer
-
 	  if control == true then 
 		if util.is_in_container_group(x,y) == true and selected_content then 
 			if selected_content.extra.is_in_group ~= true then 
 				local c, t = util.find_container(x,y) 
 				selected_container = c
-				--if screen:find_child(c.name.."border") == nil then 
 				if c.selected == false then
-				 --if c.extra.org_opacity == nil or c.opacity == c.extra.org_opacity then
 					editor.container_selected(c,x,y)	
 					editor_lb:set_cursor(52)
-					--[[
-					if screen:find_child("mouse_pointer") then 
-					     screen:remove(screen:find_child("mouse_pointer"))
-					     mouse_pointer = CS_move_into
-					     mouse_pointer.position = {x - 10 ,y - 10 ,0}
-					     if(screen:find_child("mouse_pointer") == nil) then 
-		     				     screen:add(mouse_pointer)
-		     				     mouse_pointer.extra.type = "move_into"
-					     end 
-					end 
-					]]
-				 --end 
 				elseif c.extra.type == "LayoutManager" then 
 				     if screen:find_child(c.name.."border") then 
 				     	local col , row=  c:r_c_from_abs_position(x,y)
@@ -446,17 +429,6 @@ skins = {}
 		elseif  selected_container then 
 			editor.n_selected (selected_container)
 			editor_lb:set_cursor(52)
-					--[[
-			screen:remove(screen:find_child("mouse_pointer"))
-			if control then 
-				mouse_pointer = CS_move
-				mouse_pointer.position = {x - 10 ,y - 10 ,0}
-				if(screen:find_child("mouse_pointer") == nil) then 
-		     			screen:add(mouse_pointer)
-		     			mouse_pointer.extra.type = "move"
-				end 
-			end 
-			]]
 			selected_container = nil
 		end 
 	  end 
@@ -468,43 +440,6 @@ skins = {}
 	  else 
 			editor_lb:set_cursor(68)
 	  end 
---[[
-
-	  if(hdr.input_mode == hdr.S_RECTANGLE) then 
-		if(screen:find_child("mouse_pointer") ~= nil) then 
-		     screen:remove(screen:find_child("mouse_pointer"))
-		end 
-		--rect_mouse_pointer = ui.factory.draw_mouse_pointer()
-		mouse_pointer = CS_crosshair 
-		mouse_pointer.position = {x - 15 ,y - 15 ,0}
-		if(screen:find_child("mouse_pointer") == nil) then 
-		     screen:add(mouse_pointer)
-		     mouse_pointer.extra.type = "crosshair"
-		end 
-	  elseif shift == true then 
-		if(screen:find_child("mouse_pointer") ~= nil) then 
-		     screen:remove(screen:find_child("mouse_pointer"))
-		end 
-		mouse_pointer = CS_pointer_plus
-		mouse_pointer.position = {x  ,y  ,0}
-		if(screen:find_child("mouse_pointer") == nil) then 
-		     screen:add(mouse_pointer)
-		     mouse_pointer.extra.type = "pointer_plus"
-		end 
-	  elseif screen:find_child("mouse_pointer") ~= nil  then 
-		     screen:find_child("mouse_pointer").position = {x - 10 ,y - 10 ,0}
-	  elseif screen:find_child("mouse_pointer") == nil then
-		if(screen:find_child("mouse_pointer") ~= nil) then 
-		     screen:remove(screen:find_child("mouse_pointer"))
-		end 
-		mouse_pointer = CS_pointer
-		mouse_pointer.position = {x  ,y  ,0}
-		if(screen:find_child("mouse_pointer") == nil) then 
-		     screen:add(mouse_pointer)
-		     mouse_pointer.extra.type = "pointer"
-		end 
-	  end 
-]]
           if dragging then
 
 	       local actor = unpack(dragging) 

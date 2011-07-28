@@ -266,15 +266,22 @@ function util.is_in_container_group(x_pos, y_pos)
 end 
 
 function util.find_container(x_pos, y_pos)
+
+	local c_tbl = {}
+
 	for i, j in pairs (g.children) do 
 		if j.x < x_pos and x_pos < j.x + j.w and j.y < y_pos and y_pos < j.y + j.h then 
 			if j.extra then 
 				if util.is_this_container(j) then
-					return j, j.extra.type 
+					table.insert(c_tbl, j)
 				end 
 			end 
 		end 
 	end 
+
+	local j = table.remove(c_tbl)
+
+	return j, j.extra.type 
 end 
 
 function util.create_on_button_down_f(v)
@@ -328,19 +335,13 @@ function util.create_on_button_down_f(v)
 	       				end
 -----[[ 	SHOW POSSIBLE CONTAINERS
 		    			if control == true then 
-							editor_lb:set_cursor(52)
+							for i,j in pairs (g.children) do 
+								if is_this_container(j) == true then 
+									j:lower_to_bottom()
+								end 
+							end 
 
-							--[[
-							if(screen:find_child("mouse_pointer") ~= nil) then 
-		     					screen:remove(screen:find_child("mouse_pointer"))
-							end 
-							mouse_pointer = CS_move
-							mouse_pointer.extra.type = "move"
-							mouse_pointer.position = {x - 10 ,y - 10 ,0}
-							if(screen:find_child("mouse_pointer") == nil) then 
-		     					screen:add(mouse_pointer)
-							end 
-							]]
+							editor_lb:set_cursor(52)
 							selected_content = v 
 			
 							local odr 
@@ -352,9 +353,7 @@ function util.create_on_button_down_f(v)
 
 							if odr then 
 								for i,j in pairs (g.children) do 
-									--print(j.name)
 									if util.is_this_container(j) == true then 
-										--print(j.name, "container")
 										if i > odr then 
 											j.extra.org_opacity = j.opacity
                        						j:set{opacity = 50}
@@ -367,8 +366,6 @@ function util.create_on_button_down_f(v)
 						end
 					end 
 -----]]]] 
-
-		    -- Debugging : 841 
 
 					if v.type ~= "Text" then 
 						for i, j in pairs (g.children) do  
@@ -488,14 +485,6 @@ end
 				    				end 
 			       				end 
 								editor_lb:set_cursor(68)
-								--[[
-								mouse_pointer = CS_pointer
-								mouse_pointer.position = {x ,y  ,0}
-								if(screen:find_child("mouse_pointer") == nil) then 
-		     						screen:add(mouse_pointer)
-		     						mouse_pointer.extra.type = "pointer"
-								end 
-								]]
 			     			end 
 			     			if screen:find_child(c.name.."border") and selected_container then 
 								screen:remove(screen:find_child(c.name.."border"))
