@@ -388,12 +388,16 @@ function project_mng.open_project(t, msg, from_main)
 	local scroll = editor_ui.scrollPane{}
 
 	-- Buttons 
+	local button_new = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+    					  skin = "default", ui_width = 90, ui_height = 27, label = "New Project", focus_color = {27,145,27,255}, focus_object = scroll}
+
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = scroll}
+    					  skin = "default", ui_width = 90, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = scroll}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
-    					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
+    					  skin = "default", ui_width = 90, ui_height = 27, label = "OK", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
 
 	-- Button Event Handlers
+	button_new.pressed = function() project_mng.new_project() xbox:on_button_down(1) end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
 	button_ok.pressed = function() load_project(selected_project) end
 	
@@ -414,7 +418,8 @@ function project_mng.open_project(t, msg, from_main)
 	end
 
 	--Focus Destination
-	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
+	button_new.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel",  [keys.Return] = "button_new", [keys.Up] = s_func}
+	button_cancel.extra.focus = {[keys.Left] = "button_new", [keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
 
 	--editor_use = false
@@ -430,8 +435,10 @@ function project_mng.open_project(t, msg, from_main)
 			title_shadow:set{position = {X_PADDING, 5}, opacity=255/2}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
 			scroll:set{name = "scroll", position = {0, TOP_BAR+1}, reactive=true},
-			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
-			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}
+			button_new:set{name = "button_new", position = { WIDTH - button_new.w - button_cancel.w - button_ok.w - PADDING * 3/2,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
+			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - PADDING,HEIGHT - BOTTOM_BAR + PADDING/2}}, 
+			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - PADDING/2,HEIGHT - BOTTOM_BAR + PADDING/2}}
+
 		},
 		scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}	
 	}
@@ -448,7 +455,7 @@ function project_mng.open_project(t, msg, from_main)
 	table.sort(projects)
 
 	if #projects == 0 then 
-		new_project()
+		project_mng.new_project()
 		return
 	end 
 
