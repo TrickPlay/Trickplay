@@ -19,7 +19,7 @@ function generate_test_image ()
 			text = "Small gif\n120x90",
 			position = { 30, screen.h/6 + 100},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		   Image {
 			src = "packages/assets/medium_640x480_compression_shapes.gif",
@@ -29,7 +29,7 @@ function generate_test_image ()
 			text = "Medium gif with compression\n640x480",
 			position = { screen.w/8, screen.h/6 + 500},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		   Image {
 			src = "packages/assets/large_1920x1440_shapes.gif",
@@ -40,7 +40,7 @@ function generate_test_image ()
 			text = "Large gif scaled down\n1920x1440",
 			position = { screen.w/8 * 4, screen.h/6 + 730},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   }
 		}
 	}

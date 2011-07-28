@@ -31,49 +31,49 @@ function generate_test_image ()
 			x = screen.w/8,
 			y = screen.h/4,
 			color = "000000",
-			font = "san 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		    Text {
 	            	text = "y = "..g:find_child("myRec").y,
 			x = screen.w/8,
 			y = screen.h/4 + 40,
 			color = "000000",
-			font = "san 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		    Text {
 	            	text = "w = "..g:find_child("myRec").w,
 			x = screen.w/8,
 			y = screen.h/4 + 80,
 			color = "000000",
-			font = "san 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		    Text {
 	            	text = "h = "..g:find_child("myRec").h,
 			x = screen.w/8,
 			y = screen.h/4 + 120,
 			color = "000000",
-			font = "san 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		    Text {
 	            	text = "size = "..g:find_child("myRec").size[1]..", "..g:find_child("myRec").size[2],
 			x = screen.w/8,
 			y = screen.h/4 + 160,
 			color = "000000",
-			font = "san 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		    Text {
 	            	text = "position = "..g:find_child("myRec").position[1]..", "..g:find_child("myRec").position[2],
 			x = screen.w/8,
 			y = screen.h/4 + 200,
 			color = "000000",
-			font = "san 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		    Text {
 	            	text = "center = "..g:find_child("myRec").center[1]..", "..g:find_child("myRec").center[2],
 			x = screen.w/8,
 			y = screen.h/4 + 240,
 			color = "000000",
-			font = "san 40px"
+			font = "DejaVu Sans 40px"
 		   }
 	    }
 	}

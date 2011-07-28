@@ -16,16 +16,16 @@ local test_file = "smoke_tests_ubuntu.txt"
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
 local automation_option = 1
-local test_to_run = 13-- if automation_option == 2
+local test_to_run = 54-- if automation_option == 2
 
 -- if option 2 then it prints test results in a JSON formatted table to be copied and pasted into
 -- the package file. 
 -- It contains the generated checksum so  ensure that all tests pass before using this as a baseline.
 local console_display_option_choices = { test_results = 1, dump_screensum = 2 } 
-local console_display_option = 2
+local console_display_option = 1
 
 -- Time interval between tests
-local test_interval = 0.2
+local test_interval = 4.0
 
 -- Globals --
 local test_list
@@ -117,13 +117,13 @@ function do_test (tests)
 			background:set_source_color ("FFFFFF")
 			background:fill()
 			background:move_to (screen.w/2 - 500, 50)
-			background:text_path ("Sans 40px","<b>Description:</b> "..test_description)
+			background:text_path ("DejaVu Sans 30px","Description: "..test_description)
 			background:move_to (100, 10)
-			background:text_path ("Sans 40px","<b>Test Group:</b> "..test_group)
+			background:text_path ("DejaVu Sans 30px","Test Group: "..test_group)
 			background:move_to (screen.w/2 - 100, 10)
-			background:text_path ("Sans 40px","<b>Feature:</b> "..test_area)
+			background:text_path ("DejaVu Sans 30px","Feature: "..test_area)
 			background:move_to (screen.w - 450, 10)
-			background:text_path ("Sans 40px","<b>API:</b> "..test_api)
+			background:text_path ("DejaVu Sans 30px","API: "..test_api)
 			background:set_source_color ("000000")
 			background:fill()
 			screen:add(background:Image ())

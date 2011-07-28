@@ -15,7 +15,7 @@ function generate_test_image ()
 	function text_changed (text)
 		print ("text changed")
 		local text1_txt = Text {
-			font="Sans 80px",
+			font="DejaVu Sans 80px",
 			color = "002eb8",
 			 text = "on_text_changed called", 
 			 position = { 200, 450 }
@@ -24,7 +24,7 @@ function generate_test_image ()
 	end
 
 	text_txt = Text {
-			 font="Sans 80px",
+			 font="DejaVu Sans 80px",
 			 text = textString, 
 			 position = { 200, 350 },
 			 single_line = true,

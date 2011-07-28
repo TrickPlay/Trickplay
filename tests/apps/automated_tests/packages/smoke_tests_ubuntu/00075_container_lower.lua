@@ -23,7 +23,7 @@ function generate_test_image ()
 				position = { 200, 200 }
 			     },
 			     Text {
-				font = "Sans 60px",
+				font = "DejaVu Sans 60px",
 				text = "Text 1",
 			    	color = "000000",
 			    	position = { 250, 350 }
@@ -42,7 +42,7 @@ function generate_test_image ()
 				position = { 200, 200 }
 			     },
 			     Text {
-				font = "Sans 60px",
+				font = "DejaVu Sans 60px",
 				text = "Text 2",
 			    	color = "000000",
 			    	position = { 250, 350 }
@@ -61,7 +61,7 @@ function generate_test_image ()
 				position = { 200, 200 }
 			     },
 			     Text {
-				font = "Sans 60px",
+				font = "DejaVu Sans 60px",
 				text = "Text 3",
 			    	color = "000000",
 			    	position = { 250, 350 }

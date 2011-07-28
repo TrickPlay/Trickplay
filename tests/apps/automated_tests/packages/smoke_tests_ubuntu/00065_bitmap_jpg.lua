@@ -32,21 +32,21 @@ function generate_test_image ()
 			text = "Small jpg\n240x160",
 			position = { 30, screen.h/6 + 170},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		   image2,
 		   Text {
 			text = "Medium progressive jpg\n640x420",
 			position = { 300, screen.h/6 + 450},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		   image3,
 		   Text {
 			text = "Large jpg scaled down\n3000x2000",
 			position = { screen.w/8 * 4, screen.h/6 + 600},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   }
 		}
 	}

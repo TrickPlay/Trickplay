@@ -10,7 +10,7 @@ local textString = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Na
 function generate_test_image ()
 	local g = Group ()
 
-	text_txt = Text {font="Sans 40px",
+	text_txt = Text {font="DejaVu Sans 30px",
 			 text = "single_line = true - "..textString, 
 			 position = { 10, 150 },
 			 single_line = true,
@@ -20,9 +20,9 @@ function generate_test_image ()
 			}
 	g:add(text_txt)
 
-	text1_txt = Text {font="Sans 40px",
+	text1_txt = Text {font="DejaVu Sans 30px",
 			 text = "single_line = false - "..textString, 
-			 position = { 10, 450 },
+			 position = { 10, 500 },
 			 single_line = false,
 			 width = screen.w - 200,
 			 height = 45,

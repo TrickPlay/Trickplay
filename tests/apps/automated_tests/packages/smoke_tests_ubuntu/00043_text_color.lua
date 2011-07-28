@@ -17,18 +17,18 @@ function generate_test_image ()
 			local font_size = row + 20
 			local my_scale = 0.3 + (1.5 * col / COLS)
 		
-			text_txt = Text {font="Sans "..font_size.."px",text="TP"}
+			text_txt = Text {font="DejaVu Sans "..font_size.."px",text="TP"}
 			text_txt.color = {col * 35, 255 - col * 35, 255 - col * 35}
 
 			if row == 0 then
-				text_txt = Text {font="Sans "..font_size.."px",text="TP"}
+				text_txt = Text {font="DejaVu Sans "..font_size.."px",text="TP"}
 				text_txt.color = {col * 35, 255 - col * 35, 255 - col * 35}
 				font_size = 10
 				my_scale = 1.0
 			end
 
 			if col == 0 then
-				text_txt = Text {font="Sans "..font_size.."px",text="TP"}
+				text_txt = Text {font="DejaVu Sans "..font_size.."px",text="TP"}
 				text_txt.color = {col * 35, 255 - col * 35, 255 - col * 3500}
 				if row == 0 then
 					text = nil
