@@ -1475,7 +1475,6 @@ function ui_element.button(t)
 		
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
-			print("B_GROUP, ONBUTTONDOWN")
 				if current_focus ~= b_group then 
 					if current_focus then 
 		     			current_focus.on_focus_out()
@@ -2731,8 +2730,8 @@ function ui_element.radioButtonGroup(t)
 	function rb_group.extra.on_focus_in()
 	  	current_focus = cb_group
         --if (p.skin == "CarbonCandy") or p.skin == "custom" then 
-	    	rings:find_child("ring"..1).opacity = 0 
-	    	rings:find_child("focus"..1).opacity = 255 
+	    rings:find_child("ring"..1).opacity = 0 
+	    rings:find_child("focus"..1).opacity = 255 
         --end 
 		rings:find_child("ring"..1):grab_key_focus() 
     end
@@ -2779,43 +2778,43 @@ function ui_element.radioButtonGroup(t)
 		 end 
 	end
 
-         rb_group:clear()
-         rings:clear()
-         items:clear()
+    rb_group:clear()
+    rings:clear()
+    items:clear()
          --rb_group.size = { p.ui_width , p.ui_height},
 	
-         if(p.skin == "custom" or p.skin == "default") then 
-	     	select_img = create_select_circle(p.select_radius, p.select_color)
-         	select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
-         else 
-    	    select_img = Image{src = p.select_image}
-         	select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
-         end 
+    if(p.skin == "custom" or p.skin == "default") then 
+		select_img = create_select_circle(p.select_radius, p.select_color)
+        select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
+    else 
+    	select_img = Image{src = p.select_image}
+        select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
+    end 
     
 
-	 	local pos = {0,0}
-        for i, j in pairs(p.items) do 
-	      	local donut, focus 
-	      	if(p.direction == "vertical") then --vertical 
-          	   	pos= {0, i * p.line_space - p.line_space}
-	      	end   	
-            items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
-	      	if p.skin == "custom"  or p.skin == "default"then 
+	local pos = {0,0}
+    for i, j in pairs(p.items) do 
+		local donut, focus 
+	    if(p.direction == "vertical") then --vertical 
+        	pos= {0, i * p.line_space - p.line_space}
+	    end   	
+        items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
+	    if p.skin == "custom"  or p.skin == "default"then 
 		   		donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
 		   	   	focus =  create_circle(p.button_radius, p.focus_color):set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
     	       	rings:add(donut, focus) 
-	      	else
+	    else
 	           	donut = Image{name = "ring"..tostring(i),  src=p.button_image, position = {pos[1], pos[2] - 8}}
 	           	focus = Image{name = "focus"..tostring(i),  src=p.button_focus_image, position = {pos[1], pos[2] - 8}, opacity = 0}
     	       	rings:add(donut, focus) 
-	      	end 
+	    end 
 
-	      	if(p.direction == "horizontal") then --horizontal
+	    if(p.direction == "horizontal") then --horizontal
 		  	   	pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
-	      	end 
-	      	donut.reactive = true
-          	if editor_lb == nil or editor_use then  
+	    end 
+	    donut.reactive = true
 
+        if editor_lb == nil or editor_use then  
 				function donut:on_key_down(key)
 					local ring_num = tonumber(donut.name:sub(5,-1))
 					local next_num
@@ -2832,7 +2831,6 @@ function ui_element.radioButtonGroup(t)
 							return true 
 						end
 					elseif key == keys.Down then 
-						
 						--if ring_num < table.getn(rings.children)/2 then 
 						if ring_num < #rings.children/2 then 
 							next_num = ring_num + 1
@@ -2874,7 +2872,7 @@ function ui_element.radioButtonGroup(t)
         			--if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    				rings:find_child("ring"..ring_num).opacity = 0 
 	    				rings:find_child("focus"..ring_num).opacity = 255 
-        			end 
+        			--end 
 					rings:find_child("ring"..ring_num):grab_key_focus() 
 
 					select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
