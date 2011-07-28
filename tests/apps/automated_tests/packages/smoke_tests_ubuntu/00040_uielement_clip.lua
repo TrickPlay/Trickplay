@@ -23,7 +23,7 @@ function generate_test_image ()
 	end
 	
 	local has_clip_txt = Text()
-	has_clip_txt.font="sans 30px"
+	has_clip_txt.font="DejaVu Sans 30px"
 	has_clip_txt.position={screen.w/2 - 150, screen.h/2 + 60}
 	has_clip_txt.text = "has_clip ="..result
 	has_clip_txt.color = "000000"

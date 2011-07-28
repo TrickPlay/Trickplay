@@ -10,7 +10,7 @@ local textString = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Na
 function generate_test_image ()
 	local g = Group ()
 
-	text_txt = Text {font="Sans 40px",
+	text_txt = Text {font="DejaVu Sans 30px",
 			 text = "Default - "..textString, 
 			 position = { 220, 200 },
 			 wrap = true,
@@ -20,7 +20,7 @@ function generate_test_image ()
 			}
 	g:add(text_txt)
 
-	text1_txt = Text {font="Sans 40px",
+	text1_txt = Text {font="DejaVu Sans 30px",
 			 text = "Left - "..textString, 
 			 position = { 220, 400 },
 			 alignment = "LEFT",  
@@ -30,7 +30,7 @@ function generate_test_image ()
 			 }
 	g:add(text1_txt)
 
-	text2_txt = Text {font="Sans 40px",
+	text2_txt = Text {font="DejaVu Sans 30px",
 			 text = "Center - "..textString, 
 			 position = { 220, 600 },
 			 alignment = "CENTER", 
@@ -41,7 +41,7 @@ function generate_test_image ()
 	g:add(text2_txt)
 
 
-	text3_txt = Text {font="Sans 40px",
+	text3_txt = Text {font="DejaVu Sans 30px",
 			 text = "Right - "..textString, 
 			 position = { 220, 800 },
 			 alignment = "RIGHT", 

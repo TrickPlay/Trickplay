@@ -9,7 +9,7 @@ local textString = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Na
 function generate_test_image ()
 	local g = Group ()
 
-	text_txt = Text {font="Sans 40px",
+	text_txt = Text {font="DejaVu Sans 30px",
 			 text = "JUSTIFIED\n"..textString, 
 			 position = { 20, 200 },
 			 alignment = "LEFT",
@@ -18,7 +18,7 @@ function generate_test_image ()
 			 width = 800 }
 	g:add(text_txt)
 
-	text1_txt = Text {font="Sans 40px",
+	text1_txt = Text {font="DejaVu Sans 30px",
 			 text = "UNJUSTIFIED\n"..textString, 
 			 position = { screen.w/2, 200 },
 			 justify = false, 

@@ -10,7 +10,7 @@ local textString = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Na
 function generate_test_image ()
 	local g = Group ()
 
-	text_txt = Text {font="Sans 40px",
+	text_txt = Text {font="DejaVu Sans 25px",
 			 text = "max_length = 0 - "..textString, 
 			 position = { 10, 150 },
 			 selection_end = 0,
@@ -19,9 +19,9 @@ function generate_test_image ()
 			}
 	g:add(text_txt)
 
-	text1_txt = Text {font="Sans 40px",
+	text1_txt = Text {font="DejaVu Sans 25px",
 			 text = "max_length = 25 - "..textString, 
-			 position = { 10, 250 },
+			 position = { 10, 375 },
 			 selection_end = 20,
 			 editable = true,
 			 width = screen.w - 200,
@@ -29,9 +29,9 @@ function generate_test_image ()
 			 }
 	g:add(text1_txt)
 
-	text2_txt = Text {font="Sans 40px",
+	text2_txt = Text {font="DejaVu Sans 25px",
 			 text = "max_length = 50 - "..textString, 
-			 position = { 10, 550 },
+			 position = { 10, 600 },
 			 selection_end = 50,
 			 width = screen.w - 200,
 			 height = 45
@@ -39,10 +39,10 @@ function generate_test_image ()
 	g:add(text2_txt)
 
 
-	text3_txt = Text {font="Sans 40px",
+	text3_txt = Text {font="DejaVu Sans 25px",
 			 text = "max_length = 150; wrap = true - "..textString, 
-			 position = { 10, 650 },
-			 selection_end = 800,
+			 position = { 10, 850 },
+			 selection_end = 900,
 			 wrap = true,
 			 width = screen.w - 200,
 			 height = 90

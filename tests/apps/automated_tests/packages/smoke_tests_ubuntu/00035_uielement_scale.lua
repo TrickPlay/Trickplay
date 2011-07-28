@@ -26,7 +26,7 @@ function generate_test_image ()
 		   },
 		Text {
 			text = "scale = { 0.5, 0.5 }",
-			font = "san 30px",
+			font = "DejaVu Sans 30px",
 			position = {screen.w/6, 100},
 			color = "000000"
 		},
@@ -55,7 +55,7 @@ function generate_test_image ()
 			text = "scale = {0.1, 0.1}",
 			x = screen.w/6 - 100,
 			y = screen.h/6 - 50,
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   }
 -- Need to add text for each scale
 		}
@@ -70,7 +70,7 @@ function generate_test_image ()
 	end
 	
 	local is_scaled_txt = Text()
-	is_scaled_txt.font="sans 30px"
+	is_scaled_txt.font="DejaVu Sans 30px"
 	is_scaled_txt.position={screen.w - 300, 100}
 	is_scaled_txt.text = "is_scaled ="..result
 	is_scaled_txt.color = "000000"

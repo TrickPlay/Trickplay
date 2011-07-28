@@ -22,7 +22,7 @@ function generate_test_image ()
 			text = "Small gif tiled",
 			position = { 980, screen.h - 50},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		   Image {
 			async = false,		
@@ -35,7 +35,7 @@ function generate_test_image ()
 			text = "Small png tiled",
 			position = { 50, screen.h - 50},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   },
 		   Image {
 			async = false,			
@@ -48,7 +48,7 @@ function generate_test_image ()
 			text = "Small jpg tiled",
 			position = { 980, screen.h/2 + 50},
 			color = "000000",
-			font = "sans 40px"
+			font = "DejaVu Sans 40px"
 		   }
 		}
 	}

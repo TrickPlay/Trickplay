@@ -10,7 +10,7 @@ local textString = "Lorem ipsum dolor sit amet "
 function generate_test_image ()
 	local g = Group ()
 
-	text_txt = Text {font="Sans 80px",
+	text_txt = Text {font="DejaVu Sans 80px",
 			 text = textString, 
 			 position = { 100, 150 },
 			 single_line = true,

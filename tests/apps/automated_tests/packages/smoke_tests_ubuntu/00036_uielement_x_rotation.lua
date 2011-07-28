@@ -55,7 +55,7 @@ g:add (myImg, myImg1, myImg2, myImg3)
 	end
 	
 	local is_rotated_txt = Text()
-	is_rotated_txt.font="sans 30px"
+	is_rotated_txt.font="DejaVu Sans 30px"
 	is_rotated_txt.position={screen.w - 300, 100}
 	is_rotated_txt.text = "is_rotated = "..result
 	is_rotated_txt.color = "000000"
