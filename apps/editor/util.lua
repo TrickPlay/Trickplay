@@ -296,7 +296,7 @@ function util.create_on_button_down_f(v)
 		    			local p_obj = v.parent --find_parent(v)
                 		if(button == 3) then -- imsi : num_clicks is not correct ! 
                 		--if(button == 3 or num_clicks >= 2) then
-                			editor.inspector(p_obj)
+                			editor.inspector(p_obj, x, y)
                     		return true
                 		end 
 
@@ -313,7 +313,7 @@ function util.create_on_button_down_f(v)
 	      			else 
                 		if(button == 3) then-- imsi : num_clicks is not correct ! 
 		    		--if(button == 3 or num_clicks >= 2) then
-                 			editor.inspector(v)
+                 			editor.inspector(v, x, y)
                     		return true
                 		end 
 	            		if(input_mode == hdr.S_SELECT and v.extra.selected == false) then 

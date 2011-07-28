@@ -1671,60 +1671,25 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  end end
 
 	local function inspector_position() 
-	     local x_space, y_space
-	     if(v.type == "Video") then return end 
+		inspector.x = x_pos
+		inspector.y = y_pos
 
-	     if (v.x > screen.w - v.x - v.w) then 
-	        x_space = v.x 
-        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
-				inspector.x = x_space - inspector.w * screen.width/screen.display_size[1] - INSPECTOR_OFFSET
-		  	else 
-				inspector.x = (v.x + v.w - inspector.w)/2
-        	end 
-	     else 
-		  	x_space = screen.w - v.x - v.w
-        	if (inspector.w + INSPECTOR_OFFSET < x_space) then 
-				inspector.x = v.x + v.w + INSPECTOR_OFFSET
-		  	else 
-				inspector.x = (v.x + v.w - inspector.w)/2
-        	end 
-	    end  
+		local display_x = WIDTH * screen.width/screen.display_size[1]
+		local display_y = HEIGHT * screen.height /screen.display_size[2]
 
-	    if (v.y > screen.h - v.y - v.h) then 
-			y_space = v.y 
-        	if (inspector.h + INSPECTOR_OFFSET < y_space) then 
-				inspector.y = v.y - inspector.h * screen.height/screen.display_size[2]- INSPECTOR_OFFSET
-				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-			    	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
-				end	
-			else 
-            	inspector.y = (v.y + v.h - inspector.h *  screen.height/screen.display_size[2] ) /2
-				if(inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-					inspector.y = screen:find_child("menu_bar").h + INSPECTOR_OFFSET	
-				end	
-        	end 
-	    
-		else 
-			y_space = screen.h - v.y - v.h
-        	if (inspector.h * screen.height/screen.display_size[2] + INSPECTOR_OFFSET < y_space) then 
-				inspector.y = v.y + v.h + INSPECTOR_OFFSET
-			else 
-				inspector.y = (v.y + v.h - inspector.h * screen.height/screen.display_size[2] )/2
-				if (inspector.y + inspector.h *  screen.height/screen.display_size[2] + INSPECTOR_OFFSET >= screen.h) then 
-					inspector.y = screen.h - inspector.h *  screen.height/screen.display_size[2] - INSPECTOR_OFFSET
-				elseif (inspector.y <= screen:find_child("menu_bar").h + INSPECTOR_OFFSET) then
-			     	inspector.y = screen:find_child("menu_bar").h+ INSPECTOR_OFFSET	
-				end
-        	end 
-	    end 
+		if inspector.y + display_y  > screen.h and inspector.x + display_x > screen.w then 
+			inspector.y = y_pos - display_y - 20
+			inspector.x = x_pos - display_x - 20
+		elseif inspector.y + display_y  > screen.h then 
+			inspector.y = screen.h - display_y - 10
+		elseif inspector.x + display_x > screen.w then 
+			inspector.x = screen.w - display_x - 10
+		end
 	end 
 
 	-- set the inspector location 
 	if(v.type ~= "Video") then
 	   if(x_pos ~= nil and y_pos ~= nil) then 
-	     inspector.x = x_pos	
-	     inspector.y = y_pos	
-	   else
 	     inspector_position() 
 	   end 
 	else 
