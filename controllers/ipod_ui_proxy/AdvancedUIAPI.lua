@@ -42,6 +42,8 @@ end
 -- Every local proxy we create is kept here, keyed by its id
 
 local proxies = {}
+-- the proxies have weak values
+setmetatable(proxies, {__mode = "v"})
 
 ---------------------------------------------------------------------------
 -- This is how we talk to the remote end
@@ -67,7 +69,7 @@ local function send_request( end_point , payload )
     ---[[
     print("send_request result:", result)
     if type(result) == "table" then
-        dumptable(result)
+        --dumptable(result)
     end
     --]]
 
@@ -161,6 +163,11 @@ do
         function proxy:__newindex( key , value )
             
             -- See if there is a setter function for this property
+
+            if key == "marker" then
+                print("The key 'marker' is reserved for the garbage collector")
+                return
+            end
 
             local setter = rawget( set , key )
             if type( setter ) == "function" then
@@ -362,7 +369,22 @@ local function create_local( id , T , proxy_metatable , property_cache )
     -- Store it
     
     rawset( proxies , id , proxy )
-    
+
+    -- Set up garbage collection
+
+    local destruction_marker = {}
+    local destruction_payload = {
+        id = id,
+        type = T
+    }
+    destruction_marker.__gc = function()
+
+        send_request( "destroy" , destruction_payload )
+
+    end
+
+    rawset( proxy , "marker" , newudata(destruction_marker) )
+
     return proxy
 end
 
@@ -446,7 +468,7 @@ end
 -- List every proxy !
 
 function mt:list()
-    dumptable(proxies)
+    --dumptable(proxies)
 end
 
 ---------------------------------------------------------------------------

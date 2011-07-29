@@ -11,6 +11,7 @@ local function UIElement()
 
     function get:parent( )
         local parent = self( "get_parent" )
+        if not parent then return nil end
         return self.factory:create_local( parent.id , parent.type )
     end
 
