@@ -1,3 +1,4 @@
+dumptable = function() end
 -- Load the AdvancedUI Classes into a class table.
 local class_table = dofile("AdvancedUIClasses.lua")
 
@@ -24,6 +25,18 @@ function controllers:on_controller_connected(controller)
             if k == key then
                 func()
             end
+        end
+    end
+
+    if controller.has_touches then
+        function controller:on_touch_down(finger, x, y)
+            print("on_touch_down:", finger, "x:", x, "y:", y)
+        end
+        function controller:on_touch_move(finger, x, y)
+            print("on_touch_move:", finger, "x:", x, "y:", y)
+        end
+        function controller:on_touch_up(finger, x, y)
+            print("on_touch_up:", finger, "x:", x, "y:", y)
         end
     end
 
