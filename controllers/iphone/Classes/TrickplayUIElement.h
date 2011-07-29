@@ -106,6 +106,7 @@
 // Exposed function calls
 - (id)do_raise_to_top:(NSArray *)args;
 - (id)do_lower_to_bottom:(NSArray *)args;
+- (id)do_unparent:(NSArray *)args;
 
 - (void)addTouch:(UITouch *)touch;
 - (void)removeTouch:(UITouch *)touch;
