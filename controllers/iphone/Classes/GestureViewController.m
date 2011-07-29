@@ -25,6 +25,10 @@
 @synthesize socketDelegate;
 @synthesize advancedUIDelegate;
 
+/**
+ * Establishes the host and port that will be used for the asynchronous socket
+ * connection managed by GestureViewController's SocketManager.
+ */
 - (void)setupService:(NSInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n {
@@ -39,16 +43,31 @@
     http_port = nil;
 }
 
+/**
+ * Sends an arbitrary newline to the async socket which will be ignored by
+ * Trickplay. This fires every 100ms to keep the wireless transmitter of the
+ * iOS device energized and <20ms ping. Otherwise connection speeds may drop
+ * to >200ms ping.
+ */
 - (void)timerFireMethod:(NSTimer *)timer {
     [socketManager sendData:"\n" numberOfBytes:1];
 }
 
+/**
+ * Creates and starts the timer for timerFireMethod:
+ */
 - (void)createTimer {
     socketTimer = [NSTimer timerWithTimeInterval:(NSTimeInterval).1 target:self selector:@selector(timerFireMethod:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
     [socketTimer retain];
 }
 
+/**
+ * This method begins by creating the SocketManager which handles communication
+ * asynchronously with Trickplay. If the socket is successfully created and
+ * the connection established then all the remaining managers and modules
+ * for TakeControl are allocated and initialized to be used by the app.
+ */
 - (BOOL)startService {
     NSLog(@"GestureView Start Service");
     // Tell socket manager to create a socket and connect to the service selected
@@ -110,22 +129,25 @@
     advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
     ((AdvancedUIObjectManager *)advancedUIDelegate).gestureViewController = self;
     
-    // TouchController will also handle touches from the advancedView
-    
-    
     // This is where the elements from UG (add_ui_image call) go
     CGRect frame = CGRectMake(0.0, 0.0, width, height);
     foregroundView = [[UIImageView alloc] initWithFrame:frame];
     [backgroundView addSubview:foregroundView];
     
+    // the virtual remote for controlling the Television
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
     [self.view addSubview:virtualRemote.view];
     virtualRemote.delegate = self;
     
+    graphics = NO;
+    
     return YES;
 }
 
-
+/**
+ * Sets the http port number used by Trickplay for sending app data, images,
+ * and audio.
+ */
 - (void)setHTTPPort:(NSString *)my_http_port {
     if (http_port) {
         [http_port release];
@@ -135,10 +157,18 @@
     [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
 }
 
+/**
+ * Used to confirm that the GestureViewController has an async socket
+ * connected to Trickplay.
+ */
 - (BOOL)hasConnection {
     return socketManager != nil && [socketManager isFunctional];
 }
 
+/**
+ * Called when a connection drops. Resets GestureViewController and all its
+ * subsequent modules and managers and destoys the SocketManager.
+ */
 - (void)handleDroppedConnection {
     // resets stuff
     [self do_RT:nil];
@@ -146,6 +176,10 @@
     socketManager = nil;
 }
 
+/**
+ * Called when the SocketManager encounters an error then informs all view
+ * controllers lower on the navigation stack of an error occurring.
+ */
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in GestureView");
     [self handleDroppedConnection];
@@ -155,6 +189,10 @@
     }
 }
 
+/**
+ * Called when the SocketManager closes its connection then informs all view
+ * controllers lower on the navigation stack of the connection closing.
+ */
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in GestureView");
     [self handleDroppedConnection];
@@ -164,6 +202,10 @@
     }
 }
 
+/**
+ * Sends a key press over the asynch connection to Trickplay
+ * (i.e. up key, down key, exit key)
+ */
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount
 {
 	if (socketManager)
@@ -177,6 +219,10 @@
     }
 }
 
+/**
+ * Sends the 'escape' key keycode to Trickplay which should call exit() on
+ * Trickplay's side.
+ */
 - (void)exitTrickplayApp:(id)sender {
     //Send Escape key to exit whatever app is currently running
 	[self sendKeyToTrickplay:@"FF1B" thecount:1];
@@ -370,6 +416,7 @@
         [backgroundView sendSubviewToBack:newImageView];
 
         [virtualRemote.view removeFromSuperview];
+        graphics = YES;
     }
 }
 
@@ -392,6 +439,7 @@
         
         [foregroundView addSubview:newImageView];
         [virtualRemote.view removeFromSuperview];
+        graphics = YES;
     }
 }
 
@@ -408,6 +456,7 @@
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     [self clearUI];
     [self.view addSubview:virtualRemote.view];
+    graphics = NO;
 }
 
 - (void)do_CU {
@@ -438,9 +487,13 @@
 //*/
 - (void)do_ST {
     [touchDelegate startTouches];
+    [virtualRemote.view removeFromSuperview];
 }
 - (void)do_PT {
     [touchDelegate stopTouches];
+    if (!graphics) {
+        [self.view addSubview:virtualRemote.view];
+    }
 }
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [touchDelegate touchesBegan:touches withEvent:event];
@@ -563,11 +616,11 @@
 }
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string {
-    NSLog(@"\n\nJSON_string: %@", JSON_string);
+    //NSLog(@"\n\nJSON_string: %@", JSON_string);
     NSString *sentData = [NSString stringWithFormat:@"UI\t%@\t%@\n", name, JSON_string];
-    NSLog(@"sent data: %@", sentData);
+    //NSLog(@"sent data: %@", sentData);
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
-    fprintf(stderr, "\n%s\n\n",[sentData UTF8String]);
+    //fprintf(stderr, "\n%s\n\n",[sentData UTF8String]);
 }
 
 //-------------------- Other View stuff ------------------------
@@ -623,6 +676,7 @@
     if ([virtualRemote.view superview]) {
         [virtualRemote.view removeFromSuperview];
     }
+    graphics = YES;
 }
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
