@@ -268,7 +268,7 @@
 					<object class="IBUIButton" id="436021362">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">319</int>
-						<string key="NSFrame">{{17, 417}, {54, 25}}</string>
+						<string key="NSFrame">{{20, 417}, {54, 25}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="994954010"/>
@@ -324,7 +324,7 @@
 					<object class="IBUIButton" id="391561585">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">319</int>
-						<string key="NSFrame">{{171, 417}, {54, 25}}</string>
+						<string key="NSFrame">{{246, 417}, {54, 25}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="945217388"/>
@@ -352,7 +352,7 @@
 					<object class="IBUIButton" id="945217388">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">319</int>
-						<string key="NSFrame">{{247, 417}, {54, 25}}</string>
+						<string key="NSFrame">{{170, 417}, {54, 25}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -520,10 +520,7 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="994954010"/>
-							<reference ref="436021362"/>
 							<reference ref="701803562"/>
-							<reference ref="391561585"/>
-							<reference ref="945217388"/>
 							<reference ref="219354077"/>
 							<reference ref="217810443"/>
 							<reference ref="317089615"/>
@@ -531,6 +528,9 @@
 							<reference ref="652187912"/>
 							<reference ref="1030394121"/>
 							<reference ref="831243790"/>
+							<reference ref="391561585"/>
+							<reference ref="945217388"/>
+							<reference ref="436021362"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -706,18 +706,12 @@
 							<string>greenPressed:</string>
 							<string>leftPressed:</string>
 							<string>redPressed:</string>
-							<string>rightCancelled:</string>
-							<string>rightEnded:</string>
-							<string>rightMoved:</string>
 							<string>rightPressed:</string>
 							<string>upPressed:</string>
 							<string>yellowPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>id</string>
-							<string>id</string>
-							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -743,9 +737,6 @@
 							<string>greenPressed:</string>
 							<string>leftPressed:</string>
 							<string>redPressed:</string>
-							<string>rightCancelled:</string>
-							<string>rightEnded:</string>
-							<string>rightMoved:</string>
 							<string>rightPressed:</string>
 							<string>upPressed:</string>
 							<string>yellowPressed:</string>
@@ -782,18 +773,6 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">redPressed:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">rightCancelled:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">rightEnded:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">rightMoved:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
