@@ -86,7 +86,7 @@
     CGPoint currentTouchPosition = [touch locationInView:view];
     NSString *sentTouchData = [NSString stringWithFormat:@"%@\t%d\t%f\t%f\n", command, [(NSNumber *)CFDictionaryGetValue(activeTouches, touch) unsignedIntValue], currentTouchPosition.x, currentTouchPosition.y];
     //NSString *sentTouchData = [NSString stringWithFormat:@"%@\t%d\t%f\t%f\n", command, [(NSNumber *)[activeTouches objectForKey:touch] unsignedIntValue], currentTouchPosition.x, currentTouchPosition.y];
-    NSLog(@"sent touch data: '%@'", sentTouchData);
+    //NSLog(@"sent touch data: '%@'", sentTouchData);
     [socketManager sendData:[sentTouchData UTF8String] numberOfBytes:[sentTouchData length]];
     
     return YES;

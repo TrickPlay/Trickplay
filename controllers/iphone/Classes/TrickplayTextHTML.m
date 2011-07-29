@@ -172,7 +172,7 @@
         }
         html = [NSString stringWithFormat:@"%@</div></body></html>", html];
     } else {
-        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@</div></body></html>", html, text];
+        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@<p style='opacity:0;'>a</p></div></body></html>", html, text];
     }
     
     NSLog(@"html: %@", html);
@@ -348,16 +348,16 @@
  */
 
 - (void)set_ellipsize:(NSDictionary *)args {
-    NSString *to_ellipsize = [args objectForKey:@"ellipsize"];
+    id to_ellipsize = [args objectForKey:@"ellipsize"];
     
-    if (to_ellipsize) {
-        if ([to_ellipsize compare:@"START"] == NSOrderedSame) {
+    if (to_ellipsize && [to_ellipsize isKindOfClass:[NSString class]]) {
+        if ([(NSString *)to_ellipsize compare:@"START"] == NSOrderedSame) {
             ellipsize = YES;
-        } else if ([to_ellipsize compare:@"MIDDLE"] == NSOrderedSame) {
+        } else if ([(NSString *)to_ellipsize compare:@"MIDDLE"] == NSOrderedSame) {
             ellipsize = YES;
-        } else if ([to_ellipsize compare:@"END"] == NSOrderedSame) {
+        } else if ([(NSString *)to_ellipsize compare:@"END"] == NSOrderedSame) {
             ellipsize = YES;
-        } else if ([to_ellipsize compare:@"NONE"] == NSOrderedSame) {
+        } else if ([(NSString *)to_ellipsize compare:@"NONE"] == NSOrderedSame) {
             ellipsize = NO;
         }
     }
