@@ -179,8 +179,9 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	
 	   	local function gen_stub_code (grp) 
 
-		
-		new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+		if new_contents == nil then 	
+			new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+		end
 
 		for i, j in pairs (grp.children) do 
 		     local function there() 
@@ -230,13 +231,9 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		     end 
 		     there()	  
 		end 
-
-		if enter_gen_stub_code == false then 
-			new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n" 
-			enter_gen_stub_code =true
-		end 
 	   end 
-     	   for i, v in pairs(main_dir) do
+
+        for i, v in pairs(main_dir) do
           	if("main.lua" == v)then
 			local main = readfile("main.lua")
 			local added_stub_code = ""
@@ -251,6 +248,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 				end
 				if new_contents then 
 					main = ""
+					new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n"
 					main = main_first..new_contents..main_last
 					editor_lb:writefile("main.lua",main, true)
 				end 
@@ -275,6 +273,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n\nui_element.screen_add(groups[\""..fileLower.."\"])\n\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n"..screen_mouse_code.."\n-- END GLOBAL SECTION FOOTER \nend\n\ndolater( main )\n"
 
 		editor_lb:writefile("main.lua", global_section_contents, true)
+		new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n"
 		editor_lb:writefile("main.lua", new_contents, false)
 		editor_lb:writefile("main.lua", global_section_footer_contents, false)
 	   end 
