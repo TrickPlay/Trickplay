@@ -94,6 +94,20 @@
 #pragma mark -
 #pragma mark UI
 
+- (void)storeObject:(TrickplayUIElement *)object {
+    if ([object isKindOfClass:[TrickplayRectangle class]]) {
+        [rectangles setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayGroup class]]) {
+        [groups setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayText class]]) {
+        [textFields setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayTextHTML class]]) {
+        [webTexts setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayImage class]]) {
+        [images setObject:object forKey:object.ID];
+    }
+}
+
 - (void)clean {
     NSLog(@"AdvancedUI clean");
     
@@ -241,11 +255,43 @@
         [self createGroup:ID withArgs:args];
     }
     
-    
-
     [self createObjectReply:ID];
     //CFAbsoluteTime stop = CFAbsoluteTimeGetCurrent();
     //NSLog(@"Create Object Time = %lf", (stop - start)*1000.0);
+}
+
+- (void)destroyObject:(NSDictionary *)object {
+    id type = [object objectForKey:@"type"];
+    id ID = [object objectForKey:@"id"];
+    
+    // Must have class type and id, type must be a string, id must be a string
+    // id cannot equal 0 since this is the ID for screen
+    if (!type || !ID || ![type isKindOfClass:[NSString class]]
+        || ![ID isKindOfClass:[NSString class]] || [ID unsignedIntValue] == 0) {
+        [self reply:nil];
+        return;
+    }
+    
+    if ([rectangles objectForKey:ID]) {
+        [rectangles removeObjectForKey:ID];
+    } else if ([groups objectForKey:ID]) {
+        TrickplayGroup * group = [groups objectForKey:ID];
+        for (TrickplayUIElement *element in group.view.subviews) {
+            [element do_unparent:nil];
+        }
+        [groups removeObjectForKey:ID];
+    } else if ([textFields objectForKey:ID]) {
+        [textFields removeObjectForKey:ID];
+    } else if ([webTexts objectForKey:ID]) {
+        [webTexts removeObjectForKey:ID];
+    } else if ([images objectForKey:ID]) {
+        [images removeObjectForKey:ID];
+    } else {
+        [self reply:nil];
+        return;
+    }
+    
+    [self createObjectReply:ID];
 }
 
 - (void)setValuesForObject:(NSDictionary *)JSON_object {

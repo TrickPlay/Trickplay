@@ -38,8 +38,9 @@
 }
  */
 
+
 - (void)handleTouchesBegan:(NSSet *)touches {
-    NSLog(@"handle touches began: %@", self);
+    //NSLog(@"handle touches began: %@", self);
     if (manager && manager.gestureViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -48,16 +49,12 @@
             y = [touch locationInView:self].y,
             x_sub = [touch locationInView:view].x,
             y_sub = [touch locationInView:view].y;
-            /*
-            NSLog(@"\ntouch location: self: (%f, %f) view: (%f, %f)\n", x, y, x_sub, y_sub);
-            NSLog(@"\ncomparisons: self: (%f, %f), (%f, %f) view: (%f, %f), (%f, %f)", self.bounds.origin.x, self.bounds.origin.y, self.bounds.size.width, self.bounds.size.height, view.bounds.origin.x, view.bounds.origin.y, view.bounds.size.width, view.bounds.size.height);
-            NSLog(@"\nresults:\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", x >= self.bounds.origin.x, x <= self.bounds.size.width, y >= self.bounds.origin.y, y <= self.bounds.size.width, x_sub >= view.bounds.origin.x, x_sub <= view.bounds.size.width, y_sub >= view.bounds.origin.y, y_sub <= view.bounds.size.height);
-            //*/
+            
             // check that its within clipping range
             if (x >= self.bounds.origin.x
                 && x <= self.bounds.size.width
                 && y >= self.bounds.origin.y
-                && y <= self.bounds.size.width
+                && y <= self.bounds.size.height
                 // check that its within object range
                 && x_sub >= view.bounds.origin.x
                 && x_sub <= view.bounds.size.width
@@ -80,37 +77,91 @@
 
 - (void)handleTouchesMoved:(NSSet *)touches {
     if (manager && manager.gestureViewController) {
-        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
-                CFArrayAppendValue(newTouches, touch);
+                CGFloat
+                x = [touch locationInView:self].x,
+                y = [touch locationInView:self].y,
+                x_sub = [touch locationInView:view].x,
+                y_sub = [touch locationInView:view].y;
+                // check that its within clipping range
+                if (x >= self.bounds.origin.x
+                    && x <= self.bounds.size.width
+                    && y >= self.bounds.origin.y
+                    && y <= self.bounds.size.height
+                    // check that its within object range
+                    && x_sub >= view.bounds.origin.x
+                    && x_sub <= view.bounds.size.width
+                    && y_sub >= view.bounds.origin.y
+                    && y_sub <= view.bounds.size.height) {
+                    
+                    CFArrayAppendValue(newTouchesIn, touch);
+                } else {
+                    CFArrayAppendValue(newTouchesOut, touch);
+                }
             }
         }
-        if (((NSArray *)newTouches).count > 0) {
-            [self sendTouches:(NSArray *)newTouches withState:@"moved"];
+        if (((NSArray *)newTouchesIn).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesIn withState:@"moved_inside"];
             for (TrickplayUIElement *element in view.subviews) {
-                [element handleTouchesMoved:[NSSet setWithArray:(NSArray *)newTouches]];
+                [element handleTouchesMoved:[NSSet setWithArray:(NSArray *)newTouchesIn]];
             }
         }
-        CFRelease(newTouches);
+        if (((NSArray *)newTouchesOut).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesOut withState:@"moved_outside"];
+            for (TrickplayUIElement *element in view.subviews) {
+                [element handleTouchesMoved:[NSSet setWithArray:(NSArray *)newTouchesOut]];
+            }
+        }
+        CFRelease(newTouchesIn);
+        CFRelease(newTouchesOut);
     }
 }
 
 - (void)handleTouchesEnded:(NSSet *)touches {
     if (manager && manager.gestureViewController) {
-        CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
+        CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
-                CFArrayAppendValue(newTouches, touch);
+                CGFloat
+                x = [touch locationInView:self].x,
+                y = [touch locationInView:self].y,
+                x_sub = [touch locationInView:view].x,
+                y_sub = [touch locationInView:view].y;
+                // check that its within clipping range
+                if (x >= self.bounds.origin.x
+                    && x <= self.bounds.size.width
+                    && y >= self.bounds.origin.y
+                    && y <= self.bounds.size.height
+                    // check that its within object range
+                    && x_sub >= view.bounds.origin.x
+                    && x_sub <= view.bounds.size.width
+                    && y_sub >= view.bounds.origin.y
+                    && y_sub <= view.bounds.size.height) {
+                    
+                    CFArrayAppendValue(newTouchesIn, touch);
+                } else {
+                    CFArrayAppendValue(newTouchesOut, touch);
+                }
             }
         }
-        if (((NSArray *)newTouches).count > 0) {
-            [self sendTouches:(NSArray *)newTouches withState:@"ended"];
+        if (((NSArray *)newTouchesIn).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesIn withState:@"ended_inside"];
             for (TrickplayUIElement *element in view.subviews) {
-                [element handleTouchesEnded:[NSSet setWithArray:(NSArray *)newTouches]];
+                [element handleTouchesEnded:[NSSet setWithArray:(NSArray *)newTouchesIn]];
             }
         }
-        CFRelease(newTouches);
+        if (((NSArray *)newTouchesOut).count > 0) {
+            [self sendTouches:(NSArray *)newTouchesOut withState:@"ended_outside"];
+            for (TrickplayUIElement *element in view.subviews) {
+                [element handleTouchesEnded:[NSSet setWithArray:(NSArray *)newTouchesOut]];
+            }
+        }
+        CFRelease(newTouchesIn);
+        CFRelease(newTouchesOut);
     }
     
     for (UITouch *touch in [touches allObjects]) {
@@ -250,6 +301,7 @@
         NSLog(@"this is a child: %@", child);
         if ([child isKindOfClass:[TrickplayUIElement class]]) {
             [children addObject:[self createObjectJSONFromObject:(TrickplayUIElement *)child]];
+            [manager storeObject:child];
         }
     }
     

@@ -48,6 +48,8 @@
                     hostname:(NSString *)h;
 - (BOOL)startServiceWithID:(NSString *)ID;
 
+- (void)storeObject:(TrickplayUIElement *)object;
+
 - (void)clean;
 
 // New protocol

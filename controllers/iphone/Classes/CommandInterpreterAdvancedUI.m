@@ -67,6 +67,8 @@
         [delegate callMethodOnObject:JSON_Object];
     } else if ([method compare:@"delete"] == NSOrderedSame) {
         [delegate deleteValuesForObject:JSON_Object];
+    } else if ([method compare:@"destroy"] == NSOrderedSame) {
+        [delegate destroyObject:JSON_Object];
     } else {
         NSLog(@"AdvancedUI Command not recognized");
     }
