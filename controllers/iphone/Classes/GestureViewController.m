@@ -18,6 +18,7 @@
 
 @synthesize loadingIndicator;
 @synthesize theTextField;
+@synthesize textView;
 @synthesize backgroundView;
 
 @synthesize touchDelegate;
@@ -329,6 +330,7 @@
  * user may enter text.
  */
 - (void)do_ET:(NSArray *)args {
+    textView.hidden = NO;
     theTextField.hidden = NO;
     [theTextField becomeFirstResponder];
     
@@ -341,7 +343,7 @@
     [theTextField selectAll:theTextField];
     [UIMenuController sharedMenuController].menuVisible = NO;
     // start editing
-    [self.view bringSubviewToFront:theTextField];
+    [self.view bringSubviewToFront:textView];
 }
 
 /**
@@ -359,6 +361,7 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [theTextField resignFirstResponder];
     theTextField.hidden = YES;
+    textView.hidden = YES;
     return YES;
 }
 
@@ -635,6 +638,7 @@
     NSLog(@"Clearing the UI");
     [theTextField resignFirstResponder];
 	theTextField.hidden = YES;
+    textView.hidden = YES;
     
     if (camera) {
         [camera release];
@@ -695,6 +699,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSLog(@"GestureView loaded!");
+    
+    textView.layer.cornerRadius = 10.0;
+    textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
+    textView.layer.borderWidth = 10.0;
     
     loadingIndicator.hidesWhenStopped = YES;
     //loadingIndicator.bounds = self.view.frame;
@@ -842,6 +850,7 @@
     }
     [loadingIndicator release];
     [theTextField release];
+    [textView release];
     [foregroundView release];
     [backgroundView release];
     
