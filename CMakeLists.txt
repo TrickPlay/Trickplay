@@ -21,7 +21,9 @@ set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
 
 set( TP_UPNP_CLIENT 1 )
 
-set( TP_WITH_WEBGL 1 )
+if(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
+	set( TP_WITH_WEBGL 1 )
+endif(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
 
 #------------------------------------------------------------------------------
 

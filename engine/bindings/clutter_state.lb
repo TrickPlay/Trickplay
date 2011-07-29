@@ -46,6 +46,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_set_float(&gvalue,value);
 
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
 		} 
 		else 
 		{
@@ -71,6 +72,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_set_float(&gvalue,value);
 			lua_pop(L,1);
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "y", nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
 		}
 		else 
 		{
@@ -96,7 +98,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_set_float(&gvalue,value);
 			lua_pop(L,1);
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "height", nmode, &gvalue, pre_delay, post_delay);
-
+            g_value_unset(&gvalue);
 		}			
 		else 
 		{
@@ -122,6 +124,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_set_float(&gvalue,value);
 			lua_pop(L,1);
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "scale-y", nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
 		}			
 		else 
 		{
@@ -140,7 +143,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_float(&gvalue,value);
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "rotation-angle-x", nmode, &gvalue, pre_delay, post_delay);
-
+            g_value_unset(&gvalue);
 		}
 	}
 	else if (!strcmp("y_rotation",k))
@@ -155,6 +158,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_float(&gvalue,value);
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "rotation-angle-y", nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
 		}
 	}
 	else if (!strcmp("z_rotation",k))
@@ -169,6 +173,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_float(&gvalue,value);
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "rotation-angle-z", nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
 		}
 	}
 	else if (!strcmp("color",k))
@@ -182,9 +187,8 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 
 			g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
 			clutter_value_set_color(&gvalue, &color);
-
 			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "color", nmode, &gvalue, pre_delay, post_delay);
-			    
+            g_value_unset(&gvalue);			    
 		}
 		else 
 		{

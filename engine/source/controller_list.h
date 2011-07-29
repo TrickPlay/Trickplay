@@ -41,23 +41,23 @@ public:
 
     void disconnected();
 
-    void key_down( unsigned int key_code, unsigned long int unicode );
+    void key_down( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
 
-    void key_up( unsigned int key_code, unsigned long int unicode );
+    void key_up( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
 
-    void accelerometer( double x, double y, double z );
+    void accelerometer( double x, double y, double z , unsigned long int modifiers );
 
-    void pointer_move( int x, int y );
+    void pointer_move( int x, int y , unsigned long int modifiers );
 
-    void pointer_button_down( int button , int x, int y );
+    void pointer_button_down( int button , int x, int y , unsigned long int modifiers );
 
-    void pointer_button_up( int button , int x, int y );
+    void pointer_button_up( int button , int x, int y , unsigned long int modifiers );
 
-    void touch_down( int finger , int x, int y );
+    void touch_down( int finger , int x, int y , unsigned long int modifiers );
 
-    void touch_move( int finger , int x, int y );
+    void touch_move( int finger , int x, int y , unsigned long int modifiers );
 
-    void touch_up( int finger , int x, int y );
+    void touch_up( int finger , int x, int y , unsigned long int modifiers );
 
     void ui_event( const String & parameters );
 
@@ -78,16 +78,17 @@ public:
     class Delegate
     {
     public:
+    	virtual ~Delegate() {}
         virtual void disconnected() = 0;
-        virtual bool key_down( unsigned int key_code, unsigned long int unicode ) = 0;
-        virtual bool key_up( unsigned int key_code, unsigned long int unicode ) = 0;
-        virtual void accelerometer( double x, double y, double z ) = 0;
-        virtual bool pointer_move( int x, int y ) = 0;
-        virtual bool pointer_button_down( int button , int x, int y ) = 0;
-        virtual bool pointer_button_up( int button , int x, int y ) = 0;
-        virtual void touch_down( int finger , int x, int y ) = 0;
-        virtual void touch_move( int finger , int x, int y ) = 0;
-        virtual void touch_up( int finger , int x, int y ) = 0;
+        virtual bool key_down( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
+        virtual bool key_up( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
+        virtual void accelerometer( double x, double y, double z , unsigned long int modifiers ) = 0;
+        virtual bool pointer_move( int x, int y , unsigned long int modifiers ) = 0;
+        virtual bool pointer_button_down( int button , int x, int y , unsigned long int modifiers ) = 0;
+        virtual bool pointer_button_up( int button , int x, int y , unsigned long int modifiers ) = 0;
+        virtual void touch_down( int finger , int x, int y , unsigned long int modifiers ) = 0;
+        virtual void touch_move( int finger , int x, int y , unsigned long int modifiers ) = 0;
+        virtual void touch_up( int finger , int x, int y , unsigned long int modifiers ) = 0;
         virtual void ui_event( const String & parameters ) = 0;
         virtual void submit_image( void * data, unsigned int size, const char * mime_type ) = 0;
         virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type ) = 0;
@@ -219,6 +220,7 @@ public:
     class Delegate
     {
     public:
+    	virtual ~Delegate() {}
         virtual void connected( Controller * controller ) = 0;
     };
 
@@ -238,15 +240,15 @@ private:
 
     void post_event( gpointer event );
 
-    friend void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode );
-    friend void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode );
-    friend void tp_controller_accelerometer( TPController * controller, double x, double y, double z );
-    friend void tp_controller_pointer_move( TPController * controller, int x, int y );
-    friend void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y );
-    friend void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y );
-    friend void tp_controller_touch_down( TPController * controller, int finger, int x, int y );
-    friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y );
-    friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y );
+    friend void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
+    friend void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
+    friend void tp_controller_accelerometer( TPController * controller, double x, double y, double z , unsigned long int modifiers );
+    friend void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers );
+    friend void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y , unsigned long int modifiers );
+    friend void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y , unsigned long int modifiers );
+    friend void tp_controller_touch_down( TPController * controller, int finger, int x, int y , unsigned long int modifiers );
+    friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y , unsigned long int modifiers );
+    friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y , unsigned long int modifiers );
     friend void tp_controller_ui_event( TPController * controller, const char * parameters );
     friend void tp_controller_submit_image( TPController * controller, const void * data, unsigned int size, const char * mime_type );
     friend void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type );

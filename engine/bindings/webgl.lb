@@ -1,29 +1,14 @@
-
 module webgl;
 
 [[
-#ifdef GLAPIENTRY
-#error "GL IS ALREADY INCLUDED"
-#endif
 
-#ifndef TP_CLUTTER_BACKEND_EGL
-
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/gl.h>
-#include <GL/glx.h>
-
-#else
-
-#include <GLES2/gl2.h>
-#include <EGL/egl.h>
-
-#endif
+#include "webgl.h"
 
 //-----------------------------------------------------------------------------
 
 #include <cstdlib>
-#include "typed_array.h"
 #include "bitmap.h"
+#include "clutter_util.h"
 
 //=============================================================================
 
@@ -35,134 +20,11 @@ module webgl;
 
 //=============================================================================
 
-#define GL_UNPACK_FLIP_Y_WEBGL                  0x9240
-#define GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL       0x9241
-#define GL_CONTEXT_LOST_WEBGL                   0x9242
-#define GL_UNPACK_COLORSPACE_CONVERSION_WEBGL   0x9243
-#define GL_BROWSER_DEFAULT_WEBGL                0x9244
-
-//=============================================================================
-
-GLclampf clamp( GLclampf value , GLclampf min , GLclampf max )
-{
-    if ( value < min )
-    {
-        return min;
-    }
-    if ( value > max )
-    {
-        return max;
-    }
-    return value;
-}
-
-//-----------------------------------------------------------------------------
-
-TypedArray * get_valid_array( lua_State * L , int index , FreeLater & free_later , TypedArray::Type type , int multiple )
-{
-    TypedArray * array = 0;
-
-    if ( lua_istable( L , index ) )
-    {
-        array = TypedArray::from_lua_table( L , index , type );
-        free_later( array , TypedArray::destroy );
-    }
-    else
-    {
-        array = TypedArray::from_lua( L , index );
-    }
-
-    if ( ! array )
-    {
-        luaL_error( L , "Invalid argument. Expecting either a typed array or a lua table." );
-        return 0;
-    }
-
-    if ( array->get_type() != type )
-    {
-        luaL_error( L , "Invalid type of array" );
-        return 0;
-    }
-
-    if ( array->get_length() == 0 )
-    {
-        luaL_error( L , "Array must not be empty" );
-        return 0;
-    }
-
-    if ( multiple > 1 && ( ( array->get_length() % multiple ) != 0 ) )
-    {
-        luaL_error( L , "Array must have multiple of %d length" , multiple );
-        return 0;
-    }
-
-    return array;
-}
-
-//-----------------------------------------------------------------------------
-
-int get_texel_size( GLenum format , GLenum type )
-{
-    if (type == GL_UNSIGNED_BYTE )
-    {
-        switch ( format )
-        {
-            case GL_ALPHA:
-            case GL_LUMINANCE:
-                return 1;
-            case GL_LUMINANCE_ALPHA:
-                return 2;
-            case GL_RGB:
-                return 3;
-            case GL_RGBA:
-                return 4;
-        }
-    }
-    else
-    {
-        switch ( type )
-        {
-            case GL_UNSIGNED_SHORT_4_4_4_4:
-            case GL_UNSIGNED_SHORT_5_5_5_1:
-
-                if ( format == GL_RGBA )
-                {
-                    return 2;
-                }
-                break;
-
-            case GL_UNSIGNED_SHORT_5_6_5:
-
-                if ( format == GL_RGB )
-                {
-                    return 2;
-                }
-                break;
-        }
-    }
-
-    return 0;
-}
-
-
-
-struct WebGLState
-{
-    WebGLState()
-    :
-        unpack_flip_y( false ),
-        unpack_premultiply_alpha( false ),
-        unpack_colorspace_conversion( GL_BROWSER_DEFAULT_WEBGL )
-    {}
-
-    bool            unpack_flip_y;
-    bool            unpack_premultiply_alpha;
-    unsigned long   unpack_colorspace_conversion;
-};
-
+#define _GET_CONTEXT_   WebGL::Context * _ctx_ = WebGL::Context::get( self ); \
+                        if ( ! _ctx_->is_current() ) luaL_error( L , "You must call 'acquire' first" )     
 ]]
 
-interface WebGLRenderingContext [[ WebGLState *]]
+interface WebGLRenderingContext [[ ClutterActor * ]]
 {
     /* ClearBufferMask */
     const int DEPTH_BUFFER_BIT               = 0x00000100;
@@ -589,6 +451,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
     typedef int             WebGLUniformLocation;
 
     typedef table           WebGLActiveInfo;
+    typedef table           WebGLContextAttributes;
 
     typedef int             GLenum;
     typedef bool            GLboolean;
@@ -615,17 +478,47 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     readonly GLsizei drawingBufferWidth
         [[
-            drawingBufferWidth = 0;
+            gint w;
+            gint h;
+            
+            clutter_texture_get_base_size( CLUTTER_TEXTURE( self ) , & w , & h );
+            
+            drawingBufferWidth = w;
         ]];
 
     readonly GLsizei drawingBufferHeight
         [[
-            drawingBufferHeight = 0;
+            gint w;
+            gint h;
+            
+            clutter_texture_get_base_size( CLUTTER_TEXTURE( self ) , & w , & h );
+            
+            drawingBufferHeight = h;
         ]];
 
     WebGLContextAttributes getContextAttributes()
         [[
-            lua_pushnil( L );
+            _GET_CONTEXT_;
+
+            lua_newtable( L );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "alpha" );
+            
+            lua_pushboolean( L , _ctx_->have_depth );
+            lua_setfield( L , -2 , "depth" );
+            
+            lua_pushboolean( L , _ctx_->have_stencil );
+            lua_setfield( L , -2 , "stencil" );
+            
+            lua_pushboolean( L , false );
+            lua_setfield( L , -2 , "antialias" );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "premultipliedAlpha" );
+            
+            lua_pushboolean( L , true );
+            lua_setfield( L , -2 , "preserveDrawingBuffer" );
         ]];
 
     bool isContextLost()
@@ -645,61 +538,73 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     activeTexture( GLenum texture )
         [[
+            _GET_CONTEXT_;
             glActiveTexture( texture );
         ]];
 
     attachShader( WebGLProgram program , WebGLShader shader )
         [[
+            _GET_CONTEXT_;
             glAttachShader( program , shader );
         ]];
 
     bindAttribLocation( WebGLProgram program , GLuint index , DOMString name )
         [[
+            _GET_CONTEXT_;
             glBindAttribLocation( program , index , name );
         ]];
 
     bindBuffer( GLenum target , WebGLBuffer buffer )
         [[
+            _GET_CONTEXT_;
             glBindBuffer( target , buffer );
         ]];
 
     bindFramebuffer( GLenum target , WebGLFramebuffer framebuffer )
         [[
-            glBindFramebuffer( target , framebuffer );
+            _GET_CONTEXT_;
+            _ctx_->bind_framebuffer( target , framebuffer );
         ]];
 
     bindRenderbuffer(GLenum target, WebGLRenderbuffer renderbuffer )
         [[
+            _GET_CONTEXT_;
             glBindRenderbuffer( target , renderbuffer );
         ]];
 
     bindTexture(GLenum target, WebGLTexture texture )
         [[
+            _GET_CONTEXT_;
             glBindTexture( target , texture );
         ]];
 
     blendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha )
         [[
+            _GET_CONTEXT_;
             glBlendColor( red , green , blue , alpha );
         ]];
 
     blendEquation(GLenum mode )
         [[
+            _GET_CONTEXT_;
             glBlendEquation( mode );
         ]];
 
     blendEquationSeparate(GLenum modeRGB, GLenum modeAlpha )
         [[
+            _GET_CONTEXT_;
             glBlendEquationSeparate( modeRGB , modeAlpha );
         ]];
 
     blendFunc(GLenum sfactor, GLenum dfactor )
         [[
+            _GET_CONTEXT_;
             glBlendFunc( sfactor , dfactor );
         ]];
 
     blendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha )
         [[
+            _GET_CONTEXT_;
             glBlendFuncSeparate( srcRGB , dstRGB , srcAlpha , dstAlpha );
         ]];
 
@@ -707,6 +612,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     bufferData(GLenum target, any size_or_array, GLenum usage )
         [[
+            _GET_CONTEXT_;
             if ( lua_isnumber( L , size_or_array ) )
             {
                 int size = lua_tointeger( L , size_or_array );
@@ -732,6 +638,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     bufferSubData(GLenum target, GLintptr offset, any array_or_array_buffer )
         [[
+            _GET_CONTEXT_;
             if ( ArrayBuffer * buffer = ArrayBuffer::from_lua( L , array_or_array_buffer ) )
             {
                 glBufferSubData( target , offset , buffer->get_length() , buffer->get_data() );
@@ -744,40 +651,48 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     GLenum checkFramebufferStatus(GLenum target )
         [[
+            _GET_CONTEXT_;
             result = glCheckFramebufferStatus( target );
         ]];
 
     clear( GLbitfield mask )
         [[
+            _GET_CONTEXT_;
             glClear( mask );
+            clutter_actor_queue_redraw( self );
         ]];
 
     clearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha )
         [[
+            _GET_CONTEXT_;
             glClearColor( red , green , blue , alpha );
         ]];
 
     clearDepth(GLclampf depth )
         [[
+            _GET_CONTEXT_;
 #ifndef TP_CLUTTER_BACKEND_EGL
-            glClearDepth( clamp( depth , 0 , 1 ) );
+            glClearDepth( WebGL::clamp( depth , 0 , 1 ) );
 #else
-            glClearDepthf( clamp( depth , 0 , 1 ) );
+            glClearDepthf( WebGL::clamp( depth , 0 , 1 ) );
 #endif
         ]];
 
     clearStencil(GLint s )
         [[
+            _GET_CONTEXT_;
             glClearStencil( s );
         ]];
 
     colorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha )
         [[
+            _GET_CONTEXT_;
             glColorMask( red , green , blue , alpha );
         ]];
 
     compileShader(WebGLShader shader )
         [[
+            _GET_CONTEXT_;
             glCompileShader( shader );
         ]];
 
@@ -785,109 +700,113 @@ interface WebGLRenderingContext [[ WebGLState *]]
                         GLint x, GLint y, GLsizei width, GLsizei height,
                         GLint border )
         [[
+            _GET_CONTEXT_;
             glCopyTexImage2D( target , level , internalformat , x , y , width , height , border );
         ]];
 
     copyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
                            GLint x, GLint y, GLsizei width, GLsizei height )
         [[
+            _GET_CONTEXT_;
             glCopyTexSubImage2D( target , level , xoffset , yoffset , x , y , width , height );
         ]];
 
 
     WebGLBuffer createBuffer( )
         [[
-            GLuint buffer;
-            glGenBuffers( 1 , & buffer );
-            result = buffer;
+            _GET_CONTEXT_;
+            result = _ctx_->create_buffer();
         ]];
 
     WebGLFramebuffer createFramebuffer( )
         [[
-            GLuint buffer;
-            glGenFramebuffers( 1 , & buffer );
-            result = buffer;
+            _GET_CONTEXT_;
+            result = _ctx_->create_framebuffer();
         ]];
 
     WebGLProgram createProgram( )
         [[
-            result = glCreateProgram();
+            _GET_CONTEXT_;
+            result = _ctx_->create_program();
         ]];
 
     WebGLRenderbuffer createRenderbuffer( )
         [[
-            GLuint buffer;
-            glGenRenderbuffers( 1 , & buffer );
-            result = buffer;
+            _GET_CONTEXT_;
+            result = _ctx_->create_renderbuffer();
         ]];
 
-    WebGLShader createShader( int type )
+    WebGLShader createShader( GLenum type )
         [[
-            result = glCreateShader( type );
+            _GET_CONTEXT_;
+            result = _ctx_->create_shader( type );
         ]];
 
     WebGLTexture createTexture( )
         [[
-            GLuint texture;
-            glGenTextures( 1 , & texture );
-            result = texture;
+            _GET_CONTEXT_;
+            result = _ctx_->create_texture();
         ]];
 
     cullFace(GLenum mode )
         [[
+            _GET_CONTEXT_;
             glCullFace( mode );
         ]];
 
     deleteBuffer(WebGLBuffer buffer )
         [[
-            GLuint b = buffer;
-            glDeleteBuffers( 1 , & b );
+            _GET_CONTEXT_;
+            _ctx_->delete_buffer( buffer );
         ]];
 
     deleteFramebuffer(WebGLFramebuffer framebuffer )
         [[
-            GLuint b = framebuffer;
-            glDeleteFramebuffers( 1 , & b );
+            _GET_CONTEXT_;
+            _ctx_->delete_framebuffer( framebuffer );
         ]];
 
     deleteProgram(WebGLProgram program )
         [[
-            GLuint p = program;
-            glDeleteProgram( p );
+            _GET_CONTEXT_;
+            _ctx_->delete_program( program );
         ]];
 
     deleteRenderbuffer(WebGLRenderbuffer renderbuffer )
         [[
-            GLuint b = renderbuffer;
-            glDeleteRenderbuffers( 1 , & b );
+            _GET_CONTEXT_;
+            _ctx_->delete_renderbuffer( renderbuffer );
         ]];
 
     deleteShader(WebGLShader shader )
         [[
-            GLuint s = shader;
-            glDeleteShader( s );
+            _GET_CONTEXT_;
+            _ctx_->delete_shader( shader );
         ]];
 
     deleteTexture(WebGLTexture texture )
         [[
-            GLuint t = texture;
-            glDeleteTextures( 1 , & t );
+            _GET_CONTEXT_;
+            _ctx_->delete_texture( texture );
         ]];
 
     depthFunc(GLenum func )
         [[
+            _GET_CONTEXT_;
             glDepthFunc( func );
         ]];
 
     depthMask(GLboolean flag )
         [[
+            _GET_CONTEXT_;
             glDepthMask( flag );
         ]];
 
     depthRange(GLclampf zNear, GLclampf zFar )
         [[
-            zNear = clamp( zNear , 0 , 1 );
-            zFar = clamp( zFar , 0 , 1 );
+            _GET_CONTEXT_;
+            zNear = WebGL::clamp( zNear , 0 , 1 );
+            zFar = WebGL::clamp( zFar , 0 , 1 );
 
             if ( zNear <= zFar )
             {
@@ -901,46 +820,57 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     detachShader(WebGLProgram program, WebGLShader shader )
         [[
+            _GET_CONTEXT_;
             glDetachShader( program , shader );
         ]];
 
     disable(GLenum cap )
         [[
+            _GET_CONTEXT_;
             glDisable( cap );
         ]];
 
     disableVertexAttribArray(GLuint index )
         [[
+            _GET_CONTEXT_;
             glDisableVertexAttribArray( index );
         ]];
 
     drawArrays(GLenum mode, GLint first, GLsizei count )
         [[
+            _GET_CONTEXT_;
             glDrawArrays( mode , first , count );
+            clutter_actor_queue_redraw( self );
         ]];
 
     drawElements(GLenum mode, GLsizei count, GLenum type, GLintptr offset )
         [[
+            _GET_CONTEXT_;
             glDrawElements( mode , count , type , (GLvoid*) offset );
+            clutter_actor_queue_redraw( self );
         ]];
 
     enable(GLenum cap )
         [[
+            _GET_CONTEXT_;
             glEnable( cap );
         ]];
 
     enableVertexAttribArray(GLuint index )
         [[
+            _GET_CONTEXT_;
             glEnableVertexAttribArray( index );
         ]];
 
     finish( )
         [[
+            _GET_CONTEXT_;
             glFinish();
         ]];
 
     flush( )
         [[
+            _GET_CONTEXT_;
             glFlush();
         ]];
 
@@ -948,28 +878,33 @@ interface WebGLRenderingContext [[ WebGLState *]]
                                  GLenum renderbuffertarget,
                                  WebGLRenderbuffer renderbuffer )
         [[
+            _GET_CONTEXT_;
             glFramebufferRenderbuffer( target , attachment , renderbuffertarget , renderbuffer );
         ]];
 
     framebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget,
                               WebGLTexture texture, GLint level )
         [[
+            _GET_CONTEXT_;
             glFramebufferTexture2D( target , attachment , textarget , texture , level );
         ]];
 
     frontFace(GLenum mode )
         [[
+            _GET_CONTEXT_;
             glFrontFace( mode );
         ]];
 
 
     generateMipmap(GLenum target )
         [[
+            _GET_CONTEXT_;
             glGenerateMipmap( target );
         ]];
 
     WebGLActiveInfo getActiveAttrib(WebGLProgram program, GLuint index )
         [[
+            _GET_CONTEXT_;
             GLint longest_name;
             glGetProgramiv( program , GL_ACTIVE_ATTRIBUTE_MAX_LENGTH , & longest_name );
 
@@ -1004,6 +939,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     WebGLActiveInfo getActiveUniform(WebGLProgram program, GLuint index )
         [[
+            _GET_CONTEXT_;
             GLint longest_name;
             glGetProgramiv( program , GL_ACTIVE_UNIFORM_MAX_LENGTH , & longest_name );
 
@@ -1038,6 +974,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
      table getAttachedShaders(WebGLProgram program )
         [[
+            _GET_CONTEXT_;
             GLint count = 0;
 
             glGetProgramiv( program , GL_ATTACHED_SHADERS , & count );
@@ -1062,19 +999,21 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     GLint getAttribLocation(WebGLProgram program, DOMString name )
         [[
+            _GET_CONTEXT_;
             result = glGetAttribLocation( program , name );
         ]];
 
 
     any getParameter(GLenum pname )
         [[
+            _GET_CONTEXT_;
+
             #define WEBGL_MAX_FRAGMENT_UNIFORM_VECTORS          0x8DFD
             #define WEBGL_MAX_VARYING_VECTORS                   0x8DFC
             #define WEBGL_MAX_VERTEX_UNIFORM_VECTORS            0x8DFB
             #define WEBGL_UNPACK_COLORSPACE_CONVERSION_WEBGL    0x9243
             #define WEBGL_UNPACK_FLIP_Y_WEBGL                   0x9240
             #define WEBGL_UNPACK_PREMULTIPLY_ALPHA_WEBGL        0x9241
-
 
             int n = lua_gettop( L );
 
@@ -1275,6 +1214,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     int getBufferParameter(GLenum target, GLenum pname )
         [[
+            _GET_CONTEXT_;
             GLint v = 0;
             glGetBufferParameteriv( target , pname , & v );
             result = v;
@@ -1282,11 +1222,13 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     GLenum getError( )
         [[
+            _GET_CONTEXT_;
             result = glGetError();
         ]];
 
     any getFramebufferAttachmentParameter(GLenum target, GLenum attachment, GLenum pname )
         [[
+            _GET_CONTEXT_;
             switch( pname )
             {
                 case GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE:
@@ -1307,6 +1249,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     any getProgramParameter(WebGLProgram program, GLenum pname )
         [[
+            _GET_CONTEXT_;
             switch( pname )
             {
                 case GL_DELETE_STATUS:
@@ -1337,6 +1280,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     DOMString getProgramInfoLog(WebGLProgram program )
         [[
+            _GET_CONTEXT_;
             GLint length = 0;
 
             glGetProgramiv( program , GL_INFO_LOG_LENGTH , & length );
@@ -1359,6 +1303,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     any getRenderbufferParameter(GLenum target, GLenum pname )
         [[
+            _GET_CONTEXT_;
             switch( pname )
             {
                 case GL_RENDERBUFFER_WIDTH:
@@ -1384,6 +1329,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     any getShaderParameter(WebGLShader shader, GLenum pname )
         [[
+            _GET_CONTEXT_;
             switch( pname )
             {
                 case GL_SHADER_TYPE:
@@ -1411,6 +1357,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     DOMString getShaderInfoLog(WebGLShader shader )
         [[
+            _GET_CONTEXT_;
             GLint length = 0;
 
             glGetShaderiv( shader , GL_INFO_LOG_LENGTH , & length );
@@ -1433,6 +1380,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     DOMString getShaderSource(WebGLShader shader )
         [[
+            _GET_CONTEXT_;
             GLint length = 0;
 
             glGetShaderiv( shader , GL_SHADER_SOURCE_LENGTH , & length );
@@ -1455,6 +1403,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     any getTexParameter(GLenum target, GLenum pname )
         [[
+            _GET_CONTEXT_;
             switch( pname )
             {
                 case GL_TEXTURE_MAG_FILTER:
@@ -1475,6 +1424,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     any getUniform(WebGLProgram program, WebGLUniformLocation location )
         [[
+            _GET_CONTEXT_;
             // Copied a lot of this from Mozilla
 
             int top = lua_gettop( L );
@@ -1685,12 +1635,13 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     WebGLUniformLocation getUniformLocation( WebGLProgram program , DOMString name )
         [[
+            _GET_CONTEXT_;
             result = glGetUniformLocation( program , name );
-
         ]];
 
     any getVertexAttrib(GLuint index, GLenum pname )
         [[
+            _GET_CONTEXT_;
             switch( pname )
             {
                 case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING:
@@ -1733,6 +1684,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     GLsizeiptr getVertexAttribOffset(GLuint index, GLenum pname )
         [[
+            _GET_CONTEXT_;
             GLvoid * p = 0;
             glGetVertexAttribPointerv( index , pname , & p );
             result = GPOINTER_TO_INT( p );
@@ -1740,74 +1692,80 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     hint(GLenum target, GLenum mode )
         [[
+            _GET_CONTEXT_;
             glHint( target , mode );
         ]];
 
     GLboolean isBuffer(WebGLBuffer buffer )
         [[
+            _GET_CONTEXT_;
             result = glIsBuffer( buffer ) == GL_TRUE;
         ]];
 
     GLboolean isEnabled(GLenum cap )
         [[
+            _GET_CONTEXT_;
             result = glIsEnabled( cap ) == GL_TRUE;
         ]];
 
     GLboolean isFramebuffer(WebGLFramebuffer framebuffer )
         [[
+            _GET_CONTEXT_;
             result = glIsFramebuffer( framebuffer ) == GL_TRUE;
         ]];
 
     GLboolean isProgram(WebGLProgram program )
         [[
+            _GET_CONTEXT_;
             result = glIsProgram( program ) == GL_TRUE;
         ]];
 
     GLboolean isRenderbuffer(WebGLRenderbuffer renderbuffer )
         [[
+            _GET_CONTEXT_;
             result = glIsRenderbuffer( renderbuffer ) == GL_TRUE;
         ]];
 
     GLboolean isShader(WebGLShader shader )
         [[
+            _GET_CONTEXT_;
             result = glIsShader( shader ) == GL_TRUE;
         ]];
 
     GLboolean isTexture(WebGLTexture texture )
         [[
+            _GET_CONTEXT_;
             result = glIsTexture( texture ) == GL_TRUE;
         ]];
 
     lineWidth(GLfloat width )
         [[
+            _GET_CONTEXT_;
             glLineWidth( width );
         ]];
 
     linkProgram(WebGLProgram program )
         [[
+            _GET_CONTEXT_;
             glLinkProgram( program );
         ]];
 
     pixelStorei(GLenum pname, GLint param )
         [[
-            // TODO: THIS IS A HACK FOR NOW, NOT SURE WHERE TO PUT IT
-#ifndef TP_CLUTTER_BACKEND_EGL
-            glPixelStorei( GL_UNPACK_ROW_LENGTH , 0 );
-#endif            
+            _GET_CONTEXT_;
 
             switch ( pname )
             {
                 case GL_UNPACK_FLIP_Y_WEBGL:
-                    self->unpack_flip_y = param == 0 ? false : true;
+                    _ctx_->unpack_flip_y = param == 0 ? false : true;
                     break;
 
                 case GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL:
-                    g_warning( "PREMULTIPLY CHANGED" );
-                    self->unpack_premultiply_alpha = param == 0 ? false : true;
+                    _ctx_->unpack_premultiply_alpha = param == 0 ? false : true;
                     break;
 
                 case GL_UNPACK_COLORSPACE_CONVERSION_WEBGL:
-                    self->unpack_colorspace_conversion = param == GL_BROWSER_DEFAULT_WEBGL ? GL_BROWSER_DEFAULT_WEBGL : 0;
+                    _ctx_->unpack_colorspace_conversion = param == GL_BROWSER_DEFAULT_WEBGL ? GL_BROWSER_DEFAULT_WEBGL : 0;
                     break;
 
                 default:
@@ -1818,33 +1776,39 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     polygonOffset(GLfloat factor, GLfloat units )
         [[
+            _GET_CONTEXT_;
             glPolygonOffset( factor , units );
         ]];
 
     readPixels(GLint x, GLint y, GLsizei width, GLsizei height,
                     GLenum format, GLenum type, ArrayBufferView pixels )
         [[
+            _GET_CONTEXT_;
             luaL_error( L , "readPixels is not implemented yet." );
         ]];
 
     renderbufferStorage(GLenum target, GLenum internalformat,
                              GLsizei width, GLsizei height )
         [[
+            _GET_CONTEXT_;
             glRenderbufferStorage( target , internalformat , width , height );
         ]];
 
     sampleCoverage(GLclampf value, GLboolean invert )
         [[
+            _GET_CONTEXT_;
             glSampleCoverage( value , invert );
         ]];
 
     scissor(GLint x, GLint y, GLsizei width, GLsizei height )
         [[
+            _GET_CONTEXT_;
             glScissor( x , y , width , height );
         ]];
 
     shaderSource(WebGLShader shader, DOMString source )
         [[
+            _GET_CONTEXT_;
             GLint length = strlen( source );
 
             glShaderSource( shader , 1 , & source , & length );
@@ -1852,31 +1816,37 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     stencilFunc(GLenum func, GLint ref, GLuint mask )
         [[
+            _GET_CONTEXT_;
             glStencilFunc( func , ref , mask );
         ]];
 
     stencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask )
         [[
+            _GET_CONTEXT_;
             glStencilFuncSeparate( face , func , ref , mask );
         ]];
 
     stencilMask(GLuint mask )
         [[
+            _GET_CONTEXT_;
             glStencilMask( mask );
         ]];
 
     stencilMaskSeparate(GLenum face, GLuint mask )
         [[
+            _GET_CONTEXT_;
             glStencilMaskSeparate( face , mask );
         ]];
 
     stencilOp(GLenum fail, GLenum zfail, GLenum zpass )
         [[
+            _GET_CONTEXT_;
             glStencilOp( fail , zfail , zpass );
         ]];
 
     stencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zpass )
         [[
+            _GET_CONTEXT_;
             glStencilOpSeparate( face , fail , zfail , zpass );
         ]];
 /*
@@ -1890,6 +1860,8 @@ interface WebGLRenderingContext [[ WebGLState *]]
 */
     void texImage2D(GLenum target , GLint level , GLenum internalformat , ... )
         [[
+            _GET_CONTEXT_;
+            
             FreeLater free_later;
 
             GLsizei width = 0;
@@ -1905,7 +1877,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
                 height = luaL_checkint( L , 6 );
                 type = luaL_checkint( L , 9 );
 
-                int texel_size = get_texel_size( format , type );
+                int texel_size = WebGL::get_texel_size( format , type );
 
                 if ( 0 == texel_size )
                 {
@@ -1988,7 +1960,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
                     {
                         // If either one of these is set, we have to convert the pixels
 
-                        if ( self->unpack_flip_y || self->unpack_premultiply_alpha )
+                        if ( _ctx_->unpack_flip_y || _ctx_->unpack_premultiply_alpha )
                         {
                             luaL_error( L , "Flipping and premultiplying array textures is not yet supported" );
                         }
@@ -2026,13 +1998,13 @@ interface WebGLRenderingContext [[ WebGLState *]]
                     }
                     else
                     {
-                        if ( self->unpack_flip_y )
+                        if ( _ctx_->unpack_flip_y )
                         {
                             tplog( "FLIPPING Y, HAVE TO COPY IMAGE" );
                             image = image->make_copy();
                             free_later( image , Image::destroy );
                         }
-                        else if ( self->unpack_premultiply_alpha )
+                        else if ( _ctx_->unpack_premultiply_alpha )
                         {
                             tplog( "PREMULTIPLYING ALPHA, HAVE TO COPY IMAGE" );
                             image = image->make_copy();
@@ -2046,14 +2018,14 @@ interface WebGLRenderingContext [[ WebGLState *]]
                     }
                     else
                     {
-                        if ( self->unpack_flip_y )
+                        if ( _ctx_->unpack_flip_y )
                         {
                             tplog( "FLIPPING Y" );
                             image->flip_y();
                             tplog( "FLIP DONE" );
                         }
 
-                        if ( self->unpack_premultiply_alpha )
+                        if ( _ctx_->unpack_premultiply_alpha )
                         {
                             tplog( "PREMULTIPLYING ALPHA" );
                             image->premultiply_alpha();
@@ -2077,19 +2049,21 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     texParameterf(GLenum target, GLenum pname, GLfloat param )
         [[
+            _GET_CONTEXT_;
             glTexParameterf( target , pname , param );
         ]];
 
     texParameteri(GLenum target, GLenum pname, GLint param )
         [[
+            _GET_CONTEXT_;
             glTexParameteri( target , pname , param );
         ]];
-
 
     texSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
                        GLsizei width, GLsizei height,
                        GLenum format, GLenum type, ArrayBufferView pixels )
         [[
+            _GET_CONTEXT_;
             luaL_error( L , "texSubImage2D is not implemented yet" );
         ]];
 /*
@@ -2113,16 +2087,19 @@ interface WebGLRenderingContext [[ WebGLState *]]
     [[
     ]];
 */
+
     void uniform1f(WebGLUniformLocation location, GLfloat x )
         [[
+            _GET_CONTEXT_;
             glUniform1f( location , x );
         ]];
 
-    void uniform1fv(WebGLUniformLocation location, Float32Array_or_table v )
+    void uniform1fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
         [[
+            _GET_CONTEXT_;
             FreeLater free_later;
 
-            if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 0 ) )
+            if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 0 ) )
             {
                 glUniform1fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
             }
@@ -2130,14 +2107,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniform1i(WebGLUniformLocation location, GLint x )
         [[
+            _GET_CONTEXT_;
             glUniform1i( location , x );
         ]];
 
     void uniform1iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 0 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_INT32 , 0 ) )
               {
                   glUniform1iv( location , array->get_length() , ( const GLint * ) array->get(0) );
               }
@@ -2145,14 +2124,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniform2f(WebGLUniformLocation location, GLfloat x, GLfloat y )
         [[
+            _GET_CONTEXT_;
             glUniform2f( location , x , y );
         ]];
 
     void uniform2fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 2 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 2 ) )
               {
                   glUniform2fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
               }
@@ -2160,14 +2141,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniform2i(WebGLUniformLocation location, GLint x, GLint y )
         [[
+            _GET_CONTEXT_;
             glUniform2i( location , x , y );
         ]];
 
     void uniform2iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 2 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_INT32 , 2 ) )
               {
                   glUniform2iv( location , array->get_length() , ( const GLint * ) array->get(0) );
               }
@@ -2175,14 +2158,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniform3f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z )
         [[
+            _GET_CONTEXT_;
             glUniform3f( location , x , y , z );
         ]];
 
     void uniform3fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 3 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 3 ) )
               {
                   glUniform3fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
               }
@@ -2190,14 +2175,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniform3i(WebGLUniformLocation location, GLint x, GLint y, GLint z )
         [[
+            _GET_CONTEXT_;
             glUniform3i( location , x , y , z );
         ]];
 
     void uniform3iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 3 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_INT32 , 3 ) )
               {
                   glUniform3iv( location , array->get_length() , ( const GLint * ) array->get(0) );
               }
@@ -2205,14 +2192,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniform4f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z, GLfloat w )
         [[
+            _GET_CONTEXT_;
             glUniform4f( location , x , y , z , w );
         ]];
 
     void uniform4fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 4 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_FLOAT32 , 4 ) )
               {
                   glUniform4fv( location , array->get_length() , ( const GLfloat * ) array->get(0) );
               }
@@ -2220,14 +2209,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniform4i(WebGLUniformLocation location, GLint x, GLint y, GLint z, GLint w )
         [[
+            _GET_CONTEXT_;
              glUniform4i( location , x , y , z , w );
         ]];
 
     void uniform4iv(WebGLUniformLocation location, any /* Int32Array or table */ v )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , v , free_later , TypedArray::T_INT32 , 4 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , v , free_later , TypedArray::T_INT32 , 4 ) )
               {
                   glUniform4iv( location , array->get_length() , ( const GLint * ) array->get(0) );
               }
@@ -2235,9 +2226,10 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniformMatrix2fv(WebGLUniformLocation location, GLboolean transpose, any /* Float32Array or table */ value )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 4 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 4 ) )
               {
                   glUniformMatrix2fv( location , array->get_length() / 4 , transpose ? GL_TRUE : GL_FALSE , ( const GLfloat * ) array->get(0) );
               }
@@ -2245,9 +2237,10 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniformMatrix3fv(WebGLUniformLocation location, GLboolean transpose, any /* Float32Array or table */ value )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 9 ) )
+              if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 9 ) )
               {
                   glUniformMatrix3fv( location , array->get_length() / 9 , transpose ? GL_TRUE : GL_FALSE , ( const GLfloat * ) array->get(0) );
               }
@@ -2255,6 +2248,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void uniformMatrix4fv(WebGLUniformLocation location, GLboolean transpose, any /* Float32Array, table or matrix */ value )
         [[
+            _GET_CONTEXT_;
               FreeLater free_later;
 
               if ( lb_check_udata_type( L , value , "Matrix" , false ) )
@@ -2264,7 +2258,7 @@ interface WebGLRenderingContext [[ WebGLState *]]
                       glUniformMatrix4fv( location , 1 , transpose ? GL_TRUE : GL_FALSE , cogl_matrix_get_array( matrix ) );
                   }
               }
-              else if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 16 ) )
+              else if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 16 ) )
               {
                   glUniformMatrix4fv( location , array->get_length() / 16 , transpose ? GL_TRUE : GL_FALSE , ( const GLfloat * ) array->get(0) );
               }
@@ -2272,25 +2266,29 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     useProgram(WebGLProgram program )
         [[
+            _GET_CONTEXT_;
             glUseProgram( program );
         ]];
 
     validateProgram(WebGLProgram program )
         [[
+            _GET_CONTEXT_;
             glValidateProgram( program );
         ]];
 
 
     void vertexAttrib1f(GLuint indx, GLfloat x )
         [[
+            _GET_CONTEXT_;
             glVertexAttrib1f( indx , x );
         ]];
 
     void vertexAttrib1fv(GLuint indx, any /* Float32Array or table */ value )
         [[
+            _GET_CONTEXT_;
           FreeLater free_later;
 
-          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 0 ) )
+          if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 0 ) )
           {
               glVertexAttrib1fv( indx , ( const GLfloat * ) array->get(0) );
           }
@@ -2298,14 +2296,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void vertexAttrib2f(GLuint indx, GLfloat x, GLfloat y )
         [[
+            _GET_CONTEXT_;
             glVertexAttrib2f( indx , x , y );
         ]];
 
     void vertexAttrib2fv(GLuint indx, any /* Float32Array or table */ value )
         [[
+            _GET_CONTEXT_;
           FreeLater free_later;
 
-          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 2 ) )
+          if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 2 ) )
           {
               glVertexAttrib2fv( indx , ( const GLfloat * ) array->get(0) );
           }
@@ -2313,14 +2313,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void vertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z )
         [[
+            _GET_CONTEXT_;
             glVertexAttrib3f( indx , x , y , z );
         ]];
 
     void vertexAttrib3fv(GLuint indx, any /* Float32Array or table */ value )
         [[
+            _GET_CONTEXT_;
           FreeLater free_later;
 
-          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 3 ) )
+          if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 3 ) )
           {
               glVertexAttrib3fv( indx , ( const GLfloat * ) array->get(0) );
           }
@@ -2328,14 +2330,16 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     void vertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloat w )
         [[
+            _GET_CONTEXT_;
             glVertexAttrib4f( indx , x , y , z , w );
         ]];
 
     void vertexAttrib4fv(GLuint indx, any /* Float32Array or table */ value )
         [[
+            _GET_CONTEXT_;
           FreeLater free_later;
 
-          if ( TypedArray * array = get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 4 ) )
+          if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 4 ) )
           {
               glVertexAttrib4fv( indx , ( const GLfloat * ) array->get(0) );
           }
@@ -2343,25 +2347,14 @@ interface WebGLRenderingContext [[ WebGLState *]]
 
     vertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLintptr offset )
         [[
+            _GET_CONTEXT_;
             glVertexAttribPointer( indx , size , type , normalized ? GL_TRUE : GL_FALSE , stride , (GLvoid*) offset );
         ]];
 
     viewport(GLint x, GLint y, GLsizei width, GLsizei height )
         [[
+            _GET_CONTEXT_;
             glViewport( x , y , width , height );
-        ]];
-
-    swap()
-        [[
-#if defined(CLUTTER_WINDOWING_GLX)
-            glXSwapBuffers( glXGetCurrentDisplay() , glXGetCurrentDrawable() );
-#elif defined(CLUTTER_WINDOWING_EGL)
-            eglSwapBuffers(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_READ));
-#elif defined(CLUTTER_WINDOWING_OSX)
-            clutter_actor_queue_redraw(clutter_stage_get_default());
-#else
-    #error Need to have some known windowing
-#endif
         ]];
 }
 
@@ -2369,19 +2362,57 @@ interface WebGLRenderingContext [[ WebGLState *]]
 ===============================================================================
 */
 
-global gl [[ WebGLState * ]] WebGLRenderingContext
+class WebGLCanvas [[ ClutterActor * ]] actor WebGLRenderingContext
 {
-    gl()
+    WebGLCanvas( table props = 0 )
         [[
-            self = lb_construct( WebGLState , new WebGLState );
-        ]];
+            self = lb_construct_gobject( ClutterActor , ClutterUtil::make_actor( trickplay_webgl_canvas_new ) );
+ 
+            ClutterUtil::initialize_actor( L, self, WEBGLCANVAS_METATABLE );
 
-    ~gl()
+            ClutterUtil::set_props_from_table( L, props );
+
+            gfloat width;
+            gfloat height;
+            
+            clutter_actor_get_size( self , & width , & height );
+            
+            CoglHandle t = cogl_texture_new_with_size( 
+                width , 
+                height , ( CoglTextureFlags ) ( COGL_TEXTURE_NO_AUTO_MIPMAP | COGL_TEXTURE_NO_SLICING | COGL_TEXTURE_NO_ATLAS ) , 
+                COGL_PIXEL_FORMAT_RGBA_8888 );
+                
+            if ( COGL_INVALID_HANDLE == t ) 
+            {
+                tpwarn( "FAILED TO CREATE TEXTURE" );
+            }   
+            else
+            {
+                clutter_texture_set_cogl_texture( CLUTTER_TEXTURE( self ) , t );
+                
+                cogl_handle_unref( t );
+            }
+
+            // Creates and attaches the webgl context
+            
+            WebGL::Context::get( self );
+            
+            g_object_unref( self );         
+        ]];
+    
+    ~WebGLCanvas()
         [[
-            delete self;
         ]];
-
-
+        
+    acquire()
+        [[
+            WebGL::Context::get( self )->acquire();
+        ]];
+        
+    release()
+        [[
+            WebGL::Context::get( self )->release();                        
+        ]];
 }
 
 /*

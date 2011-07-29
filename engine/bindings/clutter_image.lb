@@ -140,9 +140,12 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
 /*
     Class: Image
     
-    An Image object handles operations associated with image files, such as 
-    their loading and display. In addition, an Image object implements all 
-    the <UIElement> methods and properties.
+    The Image data type handles operations associated with image files, such as 
+    their loading and display.
+    
+    In addition to the properties and functions described on this page, the 
+    Image data type also supports all the properties and functions defined in 
+    the <UIElement> interface.
 
 */
 
@@ -496,8 +499,16 @@ class Image [[ClutterActor*]] actor
 	/*
 		Event: on_size_changed
 		
-		The on_size_changed() event handler is fired whenever the image size 
-		changes.
+		The on_size_changed() event handler is fired in the following 
+		situations: (1) after the object's first image is loaded, and (2) after 
+		the object loads a subsequent image whose size differs from the 
+		previously-loaded image.
+		
+		The event handler is *not* fired by changing the image's display size, 
+		for example, by scaling the image or altering its width or height 
+		properties in any way. The handler is also not fired if a 
+		subsequently-loaded image is the same size as the previously-loaded 
+		image.
 		
 		*Prototype:*
 		
@@ -508,8 +519,8 @@ class Image [[ClutterActor*]] actor
 		*Arguments:*
 		
 		changedImage - the Image object that has changed size
-		newWidth - integer width of the resized image
-		newHeight - integer height of the resized image
+		newWidth - integer width in pixels of the loaded image
+		newHeight - integer height in pixels of the loaded image
 
 		*Return Value:* None
 		

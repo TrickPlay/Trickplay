@@ -34,8 +34,6 @@ bool get_two_floats_from_table( lua_State * L , int index , GValue * a , GValue 
 int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, ClutterActor * source, 
 				  	   const String & name , const String & mode, double progress, bool ease_in)
 {
-	GValue gvalue={0};
-	double value;
 	const char *k = name.c_str();
 	gulong nmode=ClutterUtil::to_clutter_animation_mode(mode.c_str());
 
@@ -44,13 +42,15 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	{
 		if (lua_type(L, index) == LUA_TNUMBER) 
 		{
-			value = lua_tonumber(L, index);
-
+            GValue gvalue={0};
+			
 			g_value_init(&gvalue,G_TYPE_FLOAT);
-			g_value_set_float(&gvalue,value);
+			g_value_set_float(&gvalue,lua_tonumber(L, index));
 
 			clutter_animator_set_key(animator, G_OBJECT(source), name.c_str(), nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), name.c_str(), ease_in);
+			
+			g_value_unset(&gvalue);
 		} 
 		else 
 		{
@@ -59,8 +59,8 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	}
 	else if (!strcmp("position",k))
 	{
-	    GValue x;
-	    GValue y;
+	    GValue x={0};
+	    GValue y={0};
 	    
 	    if ( get_two_floats_from_table( L , index , & x , &y ) )
 	    {
@@ -69,6 +69,9 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 
             clutter_animator_set_key(animator, G_OBJECT(source), "y", nmode, progress, &y);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "y", ease_in);
+
+            g_value_unset(&x);
+            g_value_unset(&y);
 	    }
 	    else
 	    {
@@ -77,8 +80,8 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	} 
 	else if (!strcmp("size",k))
 	{
-	    GValue width;
-	    GValue height;
+	    GValue width={0};
+	    GValue height={0};
 	    
         if ( get_two_floats_from_table( L , index , & width , & height ) )
         {
@@ -87,6 +90,9 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
             
             clutter_animator_set_key(animator, G_OBJECT(source), "height", nmode, progress, &height);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "height", ease_in);
+
+            g_value_unset(&width);
+            g_value_unset(&height);
         }
         else
         {
@@ -95,8 +101,8 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	}
 	else if (!strcmp("scale",k))
 	{
-        GValue scalex;
-        GValue scaley;
+        GValue scalex={0};
+        GValue scaley={0};
         
         if ( get_two_floats_from_table( L , index , &scalex , &scaley ) )
         {
@@ -105,6 +111,9 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
             
             clutter_animator_set_key(animator, G_OBJECT(source), "scale-y", nmode, progress, &scaley);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "scale-y", ease_in);
+
+            g_value_unset(&scalex);
+            g_value_unset(&scaley);
         }
 		else 
 		{
@@ -119,11 +128,12 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_float(&gvalue,value);
+			g_value_set_float(&gvalue,lua_tonumber(L, -1));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-x", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-x", ease_in);
+            g_value_unset(&gvalue);
 		}
 	}
 	else if (!strcmp("y_rotation",k))
@@ -134,11 +144,12 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_float(&gvalue,value);
+			g_value_set_float(&gvalue,lua_tonumber(L, -1));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-y", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-y", ease_in);
+            g_value_unset(&gvalue);
 		}
 	}
 	else if (!strcmp("z_rotation",k))
@@ -149,11 +160,12 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+		    GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_float(&gvalue,value);
+			g_value_set_float(&gvalue,lua_tonumber(L, -1));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-z", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-z", ease_in);
+            g_value_unset(&gvalue);
 		}
 	}
 	else if (!strcmp("color",k))
@@ -165,11 +177,13 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 
 			//ClutterColor color = ClutterUtil::string_to_color(lua_tostring(L, index));
 
+            GValue gvalue={0};
 			g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
 			clutter_value_set_color(&gvalue, &color);
 
 			clutter_animator_set_key(animator, G_OBJECT(source), "color", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "color", ease_in);
+            g_value_unset(&gvalue);
 		}
 		else 
 		{

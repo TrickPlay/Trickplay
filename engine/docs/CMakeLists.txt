@@ -1,5 +1,13 @@
 cmake_minimum_required( VERSION 2.6 )
 
+if (NOT NATURAL_DOCS)
+	find_program(
+		NATURAL_DOCS
+
+		NAMES naturaldocs NaturalDocs
+	)
+endif (NOT NATURAL_DOCS)
+
 if (NATURAL_DOCS)
 
     add_custom_target(
@@ -20,6 +28,7 @@ if (NATURAL_DOCS)
         COMMAND ${NATURAL_DOCS}
 			-r
             -i ${PROJECT_SOURCE_DIR}/engine
+			-img ${PROJECT_SOURCE_DIR}/engine/docs/apps/images
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/editor
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
