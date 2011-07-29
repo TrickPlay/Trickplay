@@ -1,9 +1,10 @@
-@import url("http://fonts.googleapis.com/css?family=Inconsolata");
-@import url("http://fonts.googleapis.com/css?family=Nobile");
+@import url("https://fonts.googleapis.com/css?family=Inconsolata");
+@import url("https://fonts.googleapis.com/css?family=Lato");
 
 body
 {
-    font-family: 'Nobile',Arial, Helvetica, sans-serif;
+    font-family: 'Lato',Arial,Helvetica,sans-serif;
+	/*font-weight: 500;*/
 }
 
 p 
@@ -61,6 +62,7 @@ p
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
     vertical-align: text-bottom;
+    font-size: 12pt;
     width: 15%;
 }
 
@@ -131,6 +133,7 @@ p
 .CTitle
 {
     font-variant: small-caps;
+	font-weight: 500;
     background: c0c0c0;
     font-size: 16pt;
 }
@@ -147,6 +150,7 @@ p
 
 .STitle
 {
+	font-weight: 500;
     text-indent: 0;
     margin-left: 0;
     font-size: 24pt;

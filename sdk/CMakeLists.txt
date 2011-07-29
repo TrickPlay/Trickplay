@@ -23,8 +23,8 @@ if (UNIX AND NOT APPLE)
             "libc-ares2"
             "libc6 (>= 2.7)"
             "libcairo2 (>= 1.4.10)"
-            "libclutter-1.0-0 (>= 1.0.6)"
-            "libclutter-gst-0.10-0 | libclutter-gst-1.0-0"
+            "libclutter-1.0-0 (>= 1.6.14)"
+            "libclutter-gst-1.0-0"
             "libcurl3 (>=7.19.0)"
             "libexpat1"
             "libfontconfig1"
@@ -133,7 +133,33 @@ if (UNIX AND NOT APPLE)
 	
 	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.png DESTINATION share/icons/hicolor/64x64/apps/)
 
-        include(CPack)
+    #--------------------------------------------------------------------------	
+    # Editor
+
+    if ( EXISTS ${PROJECT_SOURCE_DIR}/apps/editor )
+
+	    # Editor script
+	
+	    install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor DESTINATION bin )
+	
+	    # Editor app
+	
+	    install(DIRECTORY ${PROJECT_SOURCE_DIR}/apps/editor DESTINATION share/trickplay/apps/ )
+
+        #Editor docs	
+
+        install(DIRECTORY ${PROJECT_BINARY_DIR}/docs/editor/ DESTINATION share/doc/trickplay-editor/html )
+        
+        # Editor icons
+
+	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor.desktop DESTINATION share/applications/ ) 
+	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor-docs.desktop DESTINATION share/applications/ ) 
+	    
+    endif ( EXISTS ${PROJECT_SOURCE_DIR}/apps/editor )
+
+    #--------------------------------------------------------------------------	
+
+    include(CPack)
 
     endif (NATURAL_DOCS)		
 		
