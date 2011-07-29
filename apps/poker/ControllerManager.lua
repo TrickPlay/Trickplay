@@ -319,6 +319,15 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         --]]
         function controller:photo_dog(pos)
             print("giving dog a photo")
+            local function handle_next_state()
+                if controller.state == ControllerStates.BETTING then
+                    controller.router:set_active_component(RemoteComponents.BETTING)
+                    controller:set_hole_cards(controller.hole_cards)
+                else
+                    controller.router:set_active_component(RemoteComponents.WAITING)
+                    controller:waiting_room()
+                end
+            end
             -- .4 is the constant of proportionality between the frame overlay
             -- on the camera and the frame for the poker dawgz replacement image
             if controller.has_images
@@ -328,21 +337,25 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                     local image = bitmap:Image()
                     controller.player.dog_view:reset_images()
                     controller.player.dog_view:edit_images(image)
-                    controller:waiting_room()
+                    handle_next_state()
                 end
                 function controller:on_image_cancelled()
-                    controller:waiting_room()
+                    handle_next_state()
                 end
 
                 return true
             end
-            controller:waiting_room()
+            handle_next_state()
 
             return false
         end
 
         function controller:waiting_room()
+            if controller.router:get_active_component() == RemoteComponents.NAME_DOG then
+                return
+            end
             controller:clear_and_set_background("bkg")
+
             if advanced_ui_ready then
                 if not waiting_room then
                     waiting_room = RemoteWaitingRoomController(router, controller)
@@ -363,28 +376,30 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:set_hole_cards(hole)
             assert(hole[1])
             assert(hole[2])
-            if not betting then
-                betting = RemoteBettingController(router, controller)
+            controller.hole_cards = hole
+            if controller.router:get_active_component() ~= RemoteComponents.NAME_DOG then
+                if not betting then
+                    betting = RemoteBettingController(router, controller)
+                end
+                controller:clear_and_set_background("bkg")
+                controller.router:set_active_component(RemoteComponents.BETTING)
+                controller.router:notify()
+
+                controller:declare_resource("card1",
+                    "assets/cards/"..getCardImageName(hole[1])..".png")
+                controller:declare_resource("card2",
+                    "assets/cards/"..getCardImageName(hole[2])..".png")
+
+                controller:add_image("card1", 60, 70, 100*3, 130*3)
+                controller:add_image("card2", 280, 90, 100*3, 130*3)
             end
-            controller:clear_and_set_background("bkg")
-            controller.router:set_active_component(RemoteComponents.BETTING)
-            controller.router:notify()
 
             controller.state = ControllerStates.BETTING
-            --controller:add_image("buttons", 0, 535, 640, 313)
-
-            controller:declare_resource("card1",
-                "assets/cards/"..getCardImageName(hole[1])..".png")
-            controller:declare_resource("card2",
-                "assets/cards/"..getCardImageName(hole[2])..".png")
-
-            controller:add_image("card1", 60, 70, 100*3, 130*3)
-            controller:add_image("card2", 280, 90, 100*3, 130*3)
         end
         
         function controller:call_or_check(string)
             ctrl = controller.router:get_active_controller()
-            if ctrl ~= betting then
+            if ctrl ~= betting or not betting then
                 return
             end
 
