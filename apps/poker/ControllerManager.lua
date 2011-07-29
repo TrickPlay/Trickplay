@@ -407,7 +407,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         function controller:on_advanced_ui_ready()
             print("AdvancedUI Ready")
             advanced_ui_ready = true
-            controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller)
+            local class_table = dofile("advanced_ui/AdvancedUIClasses.lua")
+            controller.factory = loadfile("advanced_ui/AdvancedUIAPI.lua")(controller, class_table)
             create_advanced_ui_objects()
             if controller.state == ControllerStates.CHOOSE_DOG
             and character_selection
