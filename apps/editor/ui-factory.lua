@@ -1108,6 +1108,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 					v.extra.last = true
 					editor.error_message("010",nil,nil,nil,inspector)
 				end 
+			elseif v.extra.type == "TabBar" then 
+				if #v.tab_labels > 1 then 
+					minus.src="lib/assets/li-btn-red-minus.png"
+				else 
+					v.extra.last = true
+					editor.error_message("010",nil,nil,nil,inspector)
+				end 
 			else
 				if #v.items > 1 then 
 					minus.src="lib/assets/li-btn-red-minus.png"
@@ -1145,15 +1152,27 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    end 
 
 		function up:on_button_down(x,y)
-			if #v.items > 1 then 
-				up.src="lib/assets/li-btn-red-up.png"
+			if v.extra.type == "TabBar" then 
+				if #v.tab_labels > 1 then 
+					up.src="lib/assets/li-btn-red-up.png"
+				end 
+			else 
+				if #v.items > 1 then 
+					up.src="lib/assets/li-btn-red-up.png"
+				end
 			end 
 		end 
 
 	    function up:on_button_up(x,y)
-			if  #v.items == 1  then 
-				return 
-			end 
+			if v.extra.type == "TabBar" then 
+				if #v.tab_labels == 1 then 
+					return 
+				end 
+			else 
+				if  #v.items == 1  then 
+					return 
+				end 
+			end
 
 			if v.extra.type == "TabBar" then 
 				if tonumber(string.sub(up.name, 8,-1))-1 >= 1 then 
@@ -1192,14 +1211,26 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	     end 
 
 		 function down:on_button_down(x,y)
-			if #v.items > 1 then 
-				down.src="lib/assets/li-btn-red-down.png"
-			end 
+		 	if v.extra.type == "TabBar" then 
+				if #v.tab_labels > 1 then 
+					down.src="lib/assets/li-btn-red-down.png"
+				end 
+			else
+				if #v.items > 1 then 
+					down.src="lib/assets/li-btn-red-down.png"
+				end 
+			end
 		 end 
 	     function down:on_button_up(x,y)
-		 	 if #v.items == 1 then 
-				return 
-			 end 
+		    if v.extra.type == "TabBar" then 
+				if #v.tab_labels == 1 then 
+					return
+				end 
+			else
+		 	 	if #v.items == 1 then 
+					return 
+			 	end 
+			end 
 
 			 if v.extra.type == "TabBar" then 
 				 if tonumber(string.sub(up.name, 8,-1))+1 <= #v.tab_labels then 
