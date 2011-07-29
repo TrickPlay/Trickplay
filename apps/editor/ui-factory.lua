@@ -2272,7 +2272,7 @@ function factory.draw_focus_changer(v)
 	focus_changer_bgL = Image{src = "lib/assets/assign-focus-left.png", name = "focuschanger_bgL", position = {0,110}}
 	focus_changer_bgE = Image{src = "lib/assets/assign-focus-ok.png", name = "focuschanger_bgE", position = {85,110}}
 
-	text11 = Text { color = {255,255,255,255}, font = "FreeSans Medium12px", text = "Assign Focus".."["..v.name.."]", name = "text11", position = {0,0,0}, }
+	text11 = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "Assign Focus".."["..v.name.."]", name = "text11", position = {0,0,0}, }
 
 	gU = Rectangle { name = "gU", position = {85,25,0}, size = {85,85}, opacity = 255, color = {255,255,255,0}, reactive = true, } 
 

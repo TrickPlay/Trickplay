@@ -397,7 +397,7 @@ function project_mng.open_project(t, msg, from_main)
     					  skin = "default", ui_width = 90, ui_height = 27, label = "OK", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
 
 	-- Button Event Handlers
-	button_new.pressed = function() project_mng.new_project() xbox:on_button_down(1) end
+	button_new.pressed = function() xbox:on_button_down(1)  project_mng.new_project() end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
 	button_ok.pressed = function() load_project(selected_project) end
 	
