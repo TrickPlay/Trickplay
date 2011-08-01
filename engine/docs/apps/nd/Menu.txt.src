@@ -59,7 +59,7 @@ Group: Reference  {
 
       Group: Globals  {
 
-         File: keys (docs/apps/text/key_codes.txt)
+         File: keys* (docs/apps/text/key_codes.txt)
          File: screen  (bindings/clutter_screen.lb)
          }  # Group: Globals
 
@@ -76,40 +76,44 @@ Group: Reference  {
 
       Group: Animation  {
 
-         File: Alpha  (bindings/clutter_alpha.lb)
-         File: Animator (bindings/clutter_animator.lb)
-         File: AnimationState (bindings/clutter_state.lb)
-         File: Interval  (bindings/clutter_interval.lb)
-         File: Path (bindings/clutter_path.lb)
-         File: Score (bindings/clutter_score.lb)
-         File: Timeline  (bindings/clutter_timeline.lb)
+         File: Alpha*  (bindings/clutter_alpha.lb)
+         File: Animator* (bindings/clutter_animator.lb)
+         File: AnimationState* (bindings/clutter_state.lb)
+         File: Interval*  (bindings/clutter_interval.lb)
+         File: Path* (bindings/clutter_path.lb)
+         File: Score* (bindings/clutter_score.lb)
+         File: Timeline*  (bindings/clutter_timeline.lb)
          }  # Group: Animation
 
       }  # Group: UI
       
 	Group: Components {
-		File: Physics Engine (no auto-title, bindings/physics.lb)
+		File: Physics Engine* (no auto-title, bindings/physics.lb)
 	}
 
    Group: Globals  {
 
-      File: app  (bindings/app.lb)
-      File: audiosampler  (bindings/audiosampler.lb)
-      File: controllers  (bindings/controllers.lb)
-      File: idle  (bindings/idle.lb)
-      File: json  (bindings/json.lb)
-      File: mediaplayer  (bindings/mediaplayer.lb)
-      File: profile  (bindings/profile.lb)
-      File: settings  (bindings/settings.lb)
-      File: system  (bindings/system.lb)
+      File: app*  (bindings/app.lb)
+      File: audiosampler*  (bindings/audiosampler.lb)
+      File: controllers*  (bindings/controllers.lb)
+      File: idle*  (bindings/idle.lb)
+      File: json*  (bindings/json.lb)
+      File: keyboard*  (bindings/keyboard.lb)
+      File: mediaplayer* (bindings/mediaplayer.lb)
+      File: profile*  (bindings/profile.lb)
+      File: settings*  (bindings/settings.lb)
+      File: system*  (bindings/system.lb)
+      File: trickplay*  (bindings/trickplay.lb)
+      File: uri*  (bindings/uri.lb)
+
       }  # Group: Globals
 
    Group: Classes  {
 
-      File: Stopwatch  (bindings/stopwatch.lb)
-      File: Timer  (bindings/timer.lb)
-      File: URLRequest  (no auto-title, bindings/url_request.lb)
-      File: XMLParser  (bindings/xml.lb)
+      File: Stopwatch*  (bindings/stopwatch.lb)
+      File: Timer*  (bindings/timer.lb)
+      File: URLRequest*  (no auto-title, bindings/url_request.lb)
+      File: XMLParser*  (bindings/xml.lb)
       }  # Group: Classes
 
    Group: Index  {
@@ -127,3 +131,4 @@ Group: Reference  {
 
    }  # Group: Reference
 
+Text: (*) section docs not yet complete
