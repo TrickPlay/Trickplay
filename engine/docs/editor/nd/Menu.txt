@@ -82,7 +82,7 @@ Group: TrickPlay Visual Editor  {
 
 Group: Temporary Docs  {
 
-   File: Reference  (no auto-title, editor.txt)
+   File: Reference*  (no auto-title, editor.txt)
    }  # Group: Temporary Docs
 
 Group: Index  {
