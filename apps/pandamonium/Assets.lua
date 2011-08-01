@@ -62,10 +62,12 @@ local assets = {
 		Image{ src = "assets/score/score-7.png"},
 		Image{ src = "assets/score/score-8.png"},
 		Image{ src = "assets/score/score-9.png"},
-		Image{ src = "assets/score/score-0.png"},
+		
 	}
 }
 
+
+assets.num[0] = Image{ src = "assets/score/score-0.png"}
 local bg = Image{ src = "assets/background.jpg", tile={true,true} }
 
 bg.y = -bg.h
@@ -184,5 +186,5 @@ end
 
 
 --All images should be only declared here
-Image = nil
+--Image = nil
 return assets, bg, coin, sparkles

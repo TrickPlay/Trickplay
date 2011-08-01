@@ -37,7 +37,7 @@ function Animation_Loop:delete_animation(t)
         terminating_animations[t] = nil
     elseif looping_animations[t] then
         looping_animations[t] = nil
-    elseif non_terminating_animations[t.on_step] then
+    elseif non_terminating_animations[t] then
         non_terminating_animations[t] = nil
     else
         dumptable(terminating_animations)

@@ -25,11 +25,13 @@ local joint_hinge = function(self)
 			self.y
 		}
 end
-local joint_properties = function(self)
+local joint_properties = function(self,orientation)
+
+	--print(orientation,-angle_thresh/2+orientation*angle_thresh/2,angle_thresh/2+orientation*angle_thresh/2)
 	return {
 			enable_limit     = true,
-			lower_angle      = -angle_thresh,
-			upper_angle      =  angle_thresh,
+			lower_angle      = -angle_thresh/2+orientation*angle_thresh/2,
+			upper_angle      =  angle_thresh/2+orientation*angle_thresh/2,
 			enable_motor     = true,
 			motor_speed      = -self.orientation*20,
 			max_motor_torque = 100,
@@ -39,13 +41,13 @@ end
 ----------------------------------------------------
 --Function Upvals for the branch methods
 ----------------------------------------------------
-local attach_branch_to_wall = function(branch,wall)
+local attach_branch_to_wall = function(branch,wall,orientation)
 	
 	--attach the branch to the wall
 	branch.joint = branch:RevoluteJoint(
 		wall,
 		joint_hinge(branch),
-		joint_properties(branch)
+		joint_properties(branch,orientation)
 	)
 	
 	--for each palm
@@ -64,7 +66,7 @@ local attach_branch_to_wall = function(branch,wall)
 		p.joint = p:RevoluteJoint(
 			wall,
 			joint_hinge(branch),
-			joint_properties(branch)
+			joint_properties(branch,orientation)
 		)
 	end
 end
@@ -138,7 +140,7 @@ local new_palm = function(branch)
 				-12*branch.orientation
 				
 			)
-			
+			mediaplayer:play_sound("audio/bounce2.mp3")
 		end
 		
 	end
@@ -227,7 +229,7 @@ local branch_constructor = function(
 	branch.y_rotation = {orientation*90+90,0,0}
 	
 	--place it at on the correct side of the sceen
-	branch.x      = orientation*screen_w/2 + screen_w/2 - orientation * math.random(0,branch.w/2)
+	branch.x      = orientation*screen_w/2 + screen_w/2 - orientation * math.random(branch.w/5,2*branch.w/5)
 	branch.stub.x = orientation*screen_w/2 + screen_w/2
 	
 	--position it at the proper y_offset from the top of the wall
@@ -247,7 +249,7 @@ local branch_constructor = function(
 	layers.branches:add(branch.stub)
 	
 	--attach the branch to the wall
-	branch:attach_to(branch.stub)	
+	branch:attach_to(branch.stub,orientation)	
 	
 	--stop the animation in case there was an existing animation on it
 	branch:complete_animation()

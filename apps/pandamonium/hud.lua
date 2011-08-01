@@ -24,12 +24,12 @@ local add_a_digit = function()
 		
 		text = Clone{
 			name         = "Digit " .. ( # nums + 1 ),
-			source       = assets.num[10],
+			source       = assets.num[0],
 			x            = coin.x - init_dist - digit_dist * ( # nums ),
 			y            = coin.y,
 			anchor_point = {
-				assets.num[10].w/2,
-				assets.num[10].h/2
+				assets.num[0].w/2,
+				assets.num[0].h/2
 			},
 		}
 		
@@ -61,6 +61,7 @@ local hud = {
 				
 			end
 			
+			print(i,nums[i].value,amt )
 			nums[i].value = nums[i].value + amt
 			
 			if nums[i].value > 9 then
@@ -69,7 +70,7 @@ local hud = {
 				
 				nums[i].value = nums[i].value%10
 				
-				nums[i].text.source = assets.num[10]
+				nums[i].text.source = assets.num[nums[i].value]
 				
 				nums[i].text.anchor_point = {
 					nums[i].text.w/2,
@@ -82,13 +83,15 @@ local hud = {
 				nums[i].text.source = assets.num[nums[i].value]
 				
 			end
-			
+			print(i,nums[i].value,amt,"\n" )
 			i = i + 1
 		end
 		
 	end,
 	
 	reset = function()
+		
+		score = 0
 		
 		if #nums == 0 then
 			add_a_digit()
@@ -105,6 +108,12 @@ local hud = {
 				n.text:hide()
 			end
 		end
+		
+	end,
+	
+	get_score = function()
+		
+		return score
 		
 	end
 }

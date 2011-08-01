@@ -39,8 +39,8 @@ local make_enum = function(array_of_states)
     
     enum.add_state_change_function = function(self, new_function, old_state, new_state)
 		assert(type(new_function)=="function", "You attempted to add an element of type \""..type(new_function).."\". This function only accepts other functions")
-		if old_state ~= nil then assert(states[old_state] ~= nil, tostring(old_state).." is not a State") end
-		if new_state ~= nil then assert(states[new_state] ~= nil, tostring(new_state).." is not a State") end
+		if old_state ~= nil and states[old_state] == nil then error(tostring(old_state).." is not a State",2) end
+		if new_state ~= nil and states[new_state] == nil then error(tostring(new_state).." is not a State",2) end
 		if old_state == nil then
 			for _,old_state in pairs(states) do
 				if new_state == nil then
