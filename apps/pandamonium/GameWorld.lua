@@ -11,7 +11,7 @@ local Game_Screen = physics:Body(
 	{
 		type   = "static",
 		sensor = true,
-		filter = uncollidable_filter
+		filter = all_filter
 	}
 )
 Game_Screen.position = {screen_w/2,screen_h/2}
@@ -21,7 +21,7 @@ local handle_ref = {}
 local body
 
 Game_Screen.on_end_contact = function(_,contact)
-	
+	print("the fuck")
 	body = contact.bodies[2]
 	
 	if body == Game_Screen.handle then body = contact.bodies[1] end
@@ -213,7 +213,7 @@ end
 
 local World = {}
 
-local real_max_dist = 570
+local real_max_dist = 400
 local difficulty_increase = 10
 
 local active_objects = {}
@@ -274,7 +274,7 @@ function World:add_branch(y)
 	if math.random(1,8) == 1 then
 		branch = firework:add_to_screen(
 			screen_w/2+side*400,
-			next_branch_y
+			next_branch_y-200
 		)
 	end
 	if branch == nil then
@@ -326,7 +326,7 @@ function World:add_branch(y)
 			elseif r <= 4 then
 				
 				local p = branch.palms
-				local c = Coin:single(p[1].x,p[2].y-200)
+				local c = Coin:single(p[1].x,p[2].y-100)
 				
 				handle_ref[c.handle] = c
 				
@@ -334,7 +334,7 @@ function World:add_branch(y)
 				
 			elseif r == 5 then
 				local p = branch.palms
-				local c = make_firecracker(p[1].x,p[2].y-200)
+				local c = make_firecracker(p[1].x,p[2].y-100)
 				
 				handle_ref[c.handle] = c
 				
@@ -391,8 +391,8 @@ GameState:add_state_change_function(
 			to_be_deleted[obj]  = nil
 			active_objects[obj] = nil
 		end
-		curr_max_dist = screen_h/5
-		next_branch_y = 3*screen_h/4
+		curr_max_dist = 250
+		next_branch_y = 5*screen_h/6
 		
 		fade_outs = handle_ref
 		
@@ -427,9 +427,55 @@ World.remove = function( _,obj)
 end
 --local r = Rectangle{w=5,h=20}
 local dy
-local jump_thresh = screen_h / 4
+local jump_thresh = screen_h / 3
 local panda_y
 local p_hand = panda:get_hand()
+local scroll_speed = nil
+scroll_after = {
+	
+	duration = 1.2,
+	
+	on_step = function(s,p)
+		--print(s)
+		dy = scroll_speed*(1-p)*s
+		
+		bg.y = (bg.y + dy/3) % bg.base_size[2] - bg.base_size[2]
+		
+		--place the panda at the threshold
+		panda:scroll_by( dy )
+		
+		--move all the branches and everything down
+		--World:scroll_by(dy)
+		for _,obj in pairs(handle_ref) do
+			
+			obj:scroll_by(dy)
+			
+		end
+		
+		Effects:scroll_by(dy)
+		
+	end,
+	
+	on_completed = function()
+		--print("c")
+		Timer{
+		interval =300,
+		on_timer = function(self)
+			physics:stop()
+			Animation_Loop:add_animation(World.update)
+			if hud:get_score() > highscores[# highscores].score then
+				GameState:change_state_to("SAVE_HIGHSCORE")
+			else
+				GameState:change_state_to("VIEW_HIGHSCORE")
+			end
+			mediaplayer:play_sound("audio/death-sound.mp3")
+			self:stop()
+		end
+		}
+	end
+}
+
+
 World.check_hopper = function()
 	
 	for obj,func in pairs(to_be_deleted) do
@@ -452,10 +498,12 @@ World.check_hopper = function()
 		--the amount to scroll by
 		dy = jump_thresh - panda_y
 		
-	elseif panda_y > screen_h*3/2 then
+	elseif panda_y > screen_h+200 then
 		
-		GameState:change_state_to("PLAY_AGAIN")
-		
+		scroll_speed = -panda:get_vy()*physics.pixels_per_meter/7
+		Animation_Loop:add_animation(scroll_after)
+		print(World.update)
+		Animation_Loop:delete_animation(World.update)
 		return
 		
 	else
@@ -487,7 +535,10 @@ World.check_hopper = function()
 	
 end
 --screen:add(r)
-Animation_Loop:add_animation({on_step=World.check_hopper})
+
+World.update = {on_step=World.check_hopper}
+Animation_Loop:add_animation(World.update)
+print(World.update)
 
 World.add_branches = function()
 	

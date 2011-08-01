@@ -94,7 +94,7 @@ function envelope:on_begin_contact(contact)
 	if envelope.state:current_state() == "SPINNING" then
 		
 		envelope.state:change_state_to("SPARKLING")
-		
+		mediaplayer:play_sound("audio/coin-2.mp3")
 	end
 end
 
@@ -103,7 +103,17 @@ envelope.on_pre_solve_contact = function(_,contact) contact.enabled = false end
 function envelope:scroll_by(dy)
 	
 	self.y = self.y + dy
-	
+	if self.y > screen_h+100 and not self.recycled then
+			--print("coin scrolled off")
+			self.state:change_state_to("RECYCLED")
+			
+			return false
+			
+		else
+			
+			return true
+			
+		end
 end
 
 function envelope:fade_out(p)
@@ -200,7 +210,7 @@ local function new_coin()
 	}
 	--]]
 	coin.fade = {
-		duration = .4,
+		duration = .3,
 		on_step  = function(_,p)
 			coin.opacity = 255*(1-p)
 		end,
@@ -233,6 +243,7 @@ local function new_coin()
 		
 		self:unparent()
 		--]]
+		print("recycle")
 		self.state:change_state_to("RECYCLED")
 		
 	end
@@ -292,7 +303,7 @@ local function new_coin()
 		if coin.state:current_state() == "SPINNING" then
 			
 			coin.state:change_state_to("SPARKLING")
-			
+			mediaplayer:play_sound("audio/coin-1.mp3")
 		end
 	end
 	
@@ -301,9 +312,9 @@ local function new_coin()
 	function coin:scroll_by(dy)
 		
 		self.y = self.y + dy
-		--[[
+		---[[
 		if self.y > screen_h+100 and not self.recycled then
-			print("coin scrolled off")
+			--print("coin scrolled off")
 			self.state:change_state_to("RECYCLED")
 			
 			return false
@@ -365,15 +376,18 @@ local Coin_Formations = {}
 
 Coin_Formations.single = make_coin
 
+local dist = 10
+
+
 function Coin_Formations:plus(x,y)
 	
 	local coins = {}
 	
-	table.insert(coins, self:single( x,                                     y))
-	table.insert(coins, self:single( x - coin_src.w,                       y))
-	table.insert(coins, self:single( x + coin_src.w,                       y))
-	table.insert(coins, self:single( x,                       y - coin_src.h))
-	table.insert(coins, self:single( x,                       y + coin_src.h))
+	table.insert(coins, self:single( x,                                         y))
+	table.insert(coins, self:single( x - coin_src.w-dist,                       y))
+	table.insert(coins, self:single( x + coin_src.w+dist,                       y))
+	table.insert(coins, self:single( x,                       y - coin_src.h-dist))
+	table.insert(coins, self:single( x,                       y + coin_src.h+dist))
 	
 	return coins
 end
@@ -382,9 +396,9 @@ function Coin_Formations:three_in_a_row(x,y)
 	
 	local coins = {}
 	
-	table.insert(coins, self:single( x,              y))
-	table.insert(coins, self:single( x, y - coin_src.h))
-	table.insert(coins, self:single( x, y + coin_src.h))
+	table.insert(coins, self:single( x,                   y))
+	table.insert(coins, self:single( x, y - coin_src.h-dist))
+	table.insert(coins, self:single( x, y + coin_src.h+dist))
 	
 	return coins
 end
@@ -443,7 +457,17 @@ local firework_sensor = physics:Body(
 
 function firework_sensor:scroll_by(dy)
 	self.y = self.y + dy
-	
+	if self.y > screen_h+300 and not self.recycled then
+			--print("coin scrolled off")
+			self:recycle()
+			
+			return false
+			
+		else
+			
+			return true
+			
+		end
 end
 function firework_sensor:recycle()
 	
@@ -465,9 +489,7 @@ function firework_sensor:fade_in(p)
 	self.opacity = 255*(p)
 end	
 
-function firework_sensor:scroll_by(dy)
-	self.y = self.y + dy
-end
+
 
 function firework_sensor.on_pre_solve_contact(c) c.enabled = false end
 
@@ -552,6 +574,8 @@ firework.snap_to_arm = {
 		firework.boost_timer:start()
 		panda:set_vel_to(firework_real.linear_velocity)
 		firework.smoke_timer:start()
+		
+		mediaplayer:play_sound("audio/rocket.mp3")
 	end
 }
 
@@ -589,8 +613,8 @@ local function new_firecracker()
 			type    = "static",
 			fixed_rotation = true,
 			sensor = true,
-			shape  = physics:Box({assets.firework.w/2,assets.firework.h}),
-			filter = items_filter
+			--shape  = physics:Box({assets.firework.w/2,assets.firework.h}),
+			filter = items_filter--surface_filter
 		}
 	)
 	
@@ -612,6 +636,17 @@ local function new_firecracker()
 	
 	function firecracker:scroll_by(dy)
 		self.y = self.y + dy
+		if self.y > screen_h+100 then
+			--print("coin scrolled off")
+			self:recycle()
+			
+			return false
+			
+		else
+			
+			return true
+			
+		end
 	end
 	
 	function firecracker:on_pre_solve_contact(c) c.enabled = false end
@@ -650,6 +685,8 @@ local function new_firecracker()
 	
 	function firecracker:on_begin_contact(c)
 		c.enabled = false
+		
+		--if panda.rocket then return end
 		if panda.get_vy() < 0 then return end
 		
 		local dx = panda:get_x() - self.x
@@ -670,6 +707,7 @@ local function new_firecracker()
 		
 		firecracker.count = 0
 		firecracker.explode:start()
+		mediaplayer:play_sound("audio/firecracker.mp3")
 	end
 	
 	return firecracker

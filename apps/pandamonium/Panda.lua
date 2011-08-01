@@ -15,6 +15,7 @@ local torso_properties = {
     sleeping_allowed = false,-- the main character should never go to sleep
     fixed_rotation   = true, -- the panda doesn't rotate
 	filter  = panda_body_filter,
+	linear_damping = 1.5,
 	--shape = physics:Box({100,assets.torso.h*3/2},{0,assets.torso.h/3})
 }
 local limb_properties = {
@@ -34,7 +35,7 @@ local l_hand = physics:Body( Group{size   = { 10, 10 }   }, limb_properties  )
 ---[[
 body:add_fixture(
 	{
-		shape = physics:Box({100,20},{0,assets.torso.h-20}),
+		shape = physics:Box({150,50},{0,assets.torso.h-55}),
 		
 		filter  = panda_hopper_surface_filter,
 	}
@@ -93,6 +94,15 @@ head:RevoluteJoint(  body , { head.position[1], head.position[2]+head.h/2 },
     { enable_limit = true , lower_angle = -10, upper_angle = 10 }
 )
 
+--upval for the mass of the whole panda
+    local panda_mass =
+		body.mass  +
+		l_leg.mass +
+		r_leg.mass +
+		l_arm.mass +
+		r_arm.mass +
+		head.mass
+
 --The Bouncing function
 do
 	--The target upward velocity to be reached when bouncing back up
@@ -101,14 +111,7 @@ do
 	--upval for y velocity
     local vy
 	
-	--upval for the mass of the whole panda
-    local panda_mass =
-		body.mass  +
-		l_leg.mass +
-		r_leg.mass +
-		l_arm.mass +
-		r_arm.mass +
-		head.mass
+	
     
     panda.bounce = function( self , contact )
         
@@ -138,15 +141,69 @@ do
     
 end
 
+local max_vx = 5
 
+function panda:set_vx(vx)
+	
+	if vx >  max_vx then vx =  max_vx end
+	if vx < -max_vx then vx = -max_vx end
+	
+	body.linear_velocity = {vx,body.linear_velocity[2]}
+	
+end
+
+
+
+
+max_imp = 1
+function panda:imp_x_by(m,dir)
+	
+	
+	--if 
+	
+	if body.linear_velocity[ 1 ] < -max_vx then
+		body:apply_linear_impulse(
+			{ panda_mass * (dir*max_vx-body.linear_velocity[ 1 ]) , 0 } ,
+			body.position
+		)
+	else
+		body:apply_linear_impulse(
+			{ dir*m , 0 } ,
+			body.position
+		)
+	end
+end
 
 
 local keys = {
-    [keys.Left] = function()
-        body:apply_linear_impulse( { -5 , 0 } , body.position )
+    [keys.Left] = function(s)
+        --print(s)
+		
+		--panda_mass * (-max_vx-body.linear_velocity[ 1 ])
+		if body.linear_velocity[ 1 ] < -max_vx then
+			body:apply_linear_impulse(
+				{ panda_mass * (-max_vx-body.linear_velocity[ 1 ]) , 0 } ,
+				body.position
+			)
+		else
+			body:apply_linear_impulse(
+				{ -2 , 0 } ,
+				body.position
+			)
+		end
     end,
-    [keys.Right] = function()
-        body:apply_linear_impulse( {  5 , 0 } , body.position )
+    [keys.Right] = function(s)
+        if body.linear_velocity[ 1 ] > max_vx then
+			body:apply_linear_impulse(
+				{ panda_mass * (max_vx-body.linear_velocity[ 1 ]) , 0 } ,
+				body.position
+			)
+		else
+			body:apply_linear_impulse(
+				{ 2 , 0 } ,
+				body.position
+			)
+		end
     end,
 	[keys.Down] = function()
         physics:draw_debug()
@@ -158,7 +215,7 @@ local keys = {
     end,
 }
 
-panda.on_key_down = function(_,k) if keys[k] then keys[k]() end end
+panda.on_key_down = function(_,k,_,s) if keys[k] then keys[k](s) end end
 panda.get_x       = function()  return body.x  end
 panda.get_y       = function()  return body.y  end
 panda.get_vy      = function()  return body.linear_velocity[2]  end
