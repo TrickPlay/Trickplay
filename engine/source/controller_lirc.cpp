@@ -199,8 +199,8 @@ void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result )
             {
                 if ( g_timer_elapsed( timer , NULL ) >= repeat )
                 {
-                    tp_controller_key_down( controller , it->second , 0 );
-                    tp_controller_key_up( controller , it->second , 0 );
+                    tp_controller_key_down( controller , it->second , 0 , TP_CONTROLLER_MODIFIER_NONE );
+                    tp_controller_key_up( controller , it->second , 0 , TP_CONTROLLER_MODIFIER_NONE );
 
                     g_timer_start( timer );
                 }

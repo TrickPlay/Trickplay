@@ -10,18 +10,19 @@ module clutter_group;
 /*
     Class: Group
     
-    The Group class logically combines multiple TrickPlay objects (Image, Text, 
-    etc.) and enables transformations, such as rotation and scaling, upon 
+    The Group data type logically combines multiple TrickPlay objects (Image, 
+    Text, etc.) and enables transformations, such as rotation and scaling, upon 
     the Group's members as if they were a single object. A Group may also be 
     used to define a display region and enforce clipping of members that reside 
     outside the region.
     
-    The Group class implements the <UIElement> and <Container> interfaces; it 
-    provides no additional properties or functions beyond those interfaces. The 
-    Container and UIElement interfaces are related; Container implements the 
-    operations to add, remove, and find objects in the Group, while UIElement 
-    defines properties and functions to manipulate the objects in the Group, 
-    such as rotating and clipping.
+    The Group data type provides the properties and functions defined in the 
+    <UIElement> and <Container> interfaces; it provides no additional 
+    properties or functions beyond those interfaces. The Container and 
+    UIElement interfaces are related; Container implements the operations to 
+    add, remove, and find objects in the Group, while UIElement defines 
+    properties and functions to manipulate the objects in the Group, such as 
+    rotating and clipping.
     
     Each TrickPlay object in a Group is considered a "child" of that Group and, 
     conversely, the Group is the "parent" of the contained object. An object 

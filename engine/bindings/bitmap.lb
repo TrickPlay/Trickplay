@@ -7,7 +7,7 @@ module bitmap;
 /*
     Class: Bitmap
 
-	The Bitmap object is typically used as a brush when drawing on a 
+	The Bitmap data type is typically used as a brush when drawing on a 
 	vector-graphics-based <Canvas at file:canvas-lb.html#Canvas> object. A 
 	Bitmap object can also be displayed on the screen, but it must first be 
 	converted to an Image object by calling its <Bitmap.Image> function; the 
@@ -37,17 +37,18 @@ class Bitmap [[ Bitmap * ]]
 		*Return Value:* The generated Bitmap object
 
 		Loading the image file for a Bitmap object is essentially identical to 
-		loading one for an <Image> object. Both objects load the image 
-		synchronously by default, and both also support asynchronous loading. 
-		A Bitmap asynchronous-load operation is initiated by sending a true 
-		value as the async argument to the object's constructor. Completion of 
-		an asynchronous load causes the firing of the <on_loaded> event 
-		handler. Also, the Bitmap object's <loaded> property can be accessed 
-		to check on the success or failure of a synchronous-load operation. 
-		Refer to the discussion of the <Image.async> property for additional 
-		details concerning synchronous and asynchronous file loading.
+		loading one for an <Image at file:clutter_image-lb.html#Image> object. 
+		Both objects load the image synchronously by default, and both also 
+		support asynchronous loading. A Bitmap asynchronous-load operation is 
+		initiated by sending a true value as the async argument to the object's 
+		constructor. Completion of an asynchronous load causes the firing of 
+		the <on_loaded> event handler. Also, the Bitmap object's <loaded> 
+		property can be accessed to check on the success or failure of a 
+		synchronous-load operation. Refer to the discussion of the 
+		<Image.async> property for additional details concerning synchronous 
+		and asynchronous file loading.
 
-		*Example:* Create a Bitmap object, loading the image synchronously
+		*Code Example:* Create a Bitmap object, loading the image synchronously
 		
 		(code)
 		-- Initiate synchronous image load
@@ -57,10 +58,11 @@ class Bitmap [[ Bitmap * ]]
 		if myBitmap.loaded == false then
 		  -- Yes, handle error here
 		  print( "Failed to load the image" )
+		  return
 		end
 		(end)
 		
-		*Example:* Create a Bitmap object, loading the image asynchronously
+		*Code Example:* Create a Bitmap object, loading the image asynchronously
 		
 		(code)
 		-- Initiate asynchronous image load
@@ -211,7 +213,7 @@ class Bitmap [[ Bitmap * ]]
 		
 		*Default Setting:* false
 		
-		*Example:* To see the loaded property in use, check the synchronous 
+		*Code Example:* To see the loaded property in use, check the synchronous 
 		code example given in the <Bitmap> constructor description.
 		
 		*See Also:* the <Bitmap> constructor
@@ -222,11 +224,67 @@ class Bitmap [[ Bitmap * ]]
         [[
             loaded = self->loaded();
         ]];
+        
+    /*
+        Function: get_pixel
+        
+        The get_pixel() function retrieves the RGB color and alpha components 
+        of a specific pixel in the Bitmap object.
+        
+        *Arguments:*
+        
+        x, y - coordinates of the desired pixel
+        
+        *Return Value:*
+        
+        color_info - table of color and alpha/transparency values specified as three RGB (Red/Green/Blue) integer values and an alpha/transparency integer value. If the bitmap does not have an alpha channel, the returned alpha value will be 255 (opaque). The format of the color_info table is described in <RGB/Alpha Color Formats>. If a bitmap had not yet been loaded or if invalid X, Y coordinates were specified, returns nil.
+
+    */
+    
+    table get_pixel( int x, int y )
+        [[
+            Image * image = self->get_image();
+            
+            if ( ! image )
+            {
+                lua_pushnil( L );
+            }
+            else if ( x < 0 || x >= int( image->width() ) || y < 0 || y >= int( image->height() ) )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_newtable( L );
+                
+                const guchar * pixel = image->pixels() + ( x * image->depth() ) + ( y * image->pitch() );
+                
+                lua_pushinteger( L , pixel[ 0 ] );
+                lua_rawseti( L , -2 , 1 );
+
+                lua_pushinteger( L , pixel[ 1 ] );
+                lua_rawseti( L , -2 , 2 );
+
+                lua_pushinteger( L , pixel[ 2 ] );
+                lua_rawseti( L , -2 , 3 );
+                
+                if ( image->depth() == 4 )
+                {
+                    lua_pushinteger( L , pixel[ 3 ] );
+                    lua_rawseti( L , -2 , 4 );
+                }
+                else
+                {
+                    lua_pushinteger( L , 255 );
+                    lua_rawseti( L , -2 , 4 );
+                }
+            }
+        ]];
 
     /*
         Function: Image
         
-        The Image function converts the Bitmap object to an Image object which 
+        The Image() function converts the Bitmap object to an Image object which 
         can then be added to the screen. It is possible to convert the Bitmap's 
         entire image or a just portion of it.
         
@@ -251,7 +309,7 @@ class Bitmap [[ Bitmap * ]]
         successfully loaded or the source_rectangle argument's coordinates were 
         invalid.
         
-        *Example:* Generate an Image object from a Bitmap
+        *Code Example:* Generate an Image object from a Bitmap
         
         (code)
         -- Create a Bitmap object
@@ -327,6 +385,8 @@ class Bitmap [[ Bitmap * ]]
                     ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
 
                     Images::load_texture( t , image , x , y , w , h );
+
+                    g_object_set_data_full( G_OBJECT( t ), "tp-src", g_strdup( "[bitmap]" ) , g_free );
                 }
             }
         ]];
@@ -345,7 +405,7 @@ class Bitmap [[ Bitmap * ]]
 		
 		*Return Value:* None
 
-		*Example:* To see the on_loaded() event handler in use, check the 
+		*Code Example:* To see the on_loaded() event handler in use, check the 
 		asynchronous code example given in the <Bitmap> constructor description.
 
 		*See Also:* the <Bitmap> constructor

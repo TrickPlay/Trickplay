@@ -129,10 +129,16 @@ public:
     class Decoder
     {
     public:
+    	virtual ~Decoder() {};
         virtual const char * name() = 0;
         virtual int decode( gpointer data, gsize size, TPImage * image ) = 0;
         virtual int decode( const char * filename, TPImage * image ) = 0;
     };
+
+
+    //.........................................................................
+
+    static void add_to_image_list( ClutterTexture * texture );
 
     //.........................................................................
     // Prints out a list of all loaded Clutter textures along with their
@@ -262,12 +268,72 @@ private:
             bytes( image->width * image->height * image->depth )
         {}
 
+        ImageInfo( ClutterTexture * texture )
+        :
+        	width( 0 ),
+        	height( 0 ),
+        	bytes( 0 )
+        {
+        	if ( texture )
+        	{
+        		gint w;
+        		gint h;
+
+        		clutter_texture_get_base_size( texture , & w , & h );
+
+        		int bpp = 0;
+
+        		switch( clutter_texture_get_pixel_format( texture ) )
+        		{
+        		case COGL_PIXEL_FORMAT_A_8:
+        		case COGL_PIXEL_FORMAT_G_8:
+        			bpp = 1;
+        			break;
+
+        		case COGL_PIXEL_FORMAT_RGB_565:
+        		case COGL_PIXEL_FORMAT_RGBA_4444:
+        		case COGL_PIXEL_FORMAT_RGBA_5551:
+        		case COGL_PIXEL_FORMAT_RGBA_4444_PRE:
+        		case COGL_PIXEL_FORMAT_RGBA_5551_PRE:
+        			bpp = 2;
+        			break;
+
+        		case COGL_PIXEL_FORMAT_RGB_888:
+        		case COGL_PIXEL_FORMAT_BGR_888:
+        			bpp = 3;
+        			break;
+
+        		case COGL_PIXEL_FORMAT_RGBA_8888:
+        		case COGL_PIXEL_FORMAT_BGRA_8888:
+        		case COGL_PIXEL_FORMAT_ARGB_8888:
+        		case COGL_PIXEL_FORMAT_ABGR_8888:
+        		case COGL_PIXEL_FORMAT_RGBA_8888_PRE:
+        		case COGL_PIXEL_FORMAT_BGRA_8888_PRE:
+        		case COGL_PIXEL_FORMAT_ARGB_8888_PRE:
+        		case COGL_PIXEL_FORMAT_ABGR_8888_PRE:
+        			bpp = 4;
+        			break;
+
+        		case COGL_PIXEL_FORMAT_ANY: // not sure
+        		case COGL_PIXEL_FORMAT_YUV: // not supported by cogl
+        			bpp = 0;
+        			break;
+        		}
+
+        		width = w;
+        		height = h;
+        		bytes = width * height * bpp;
+        	}
+        }
+
         guint width;
         guint height;
         guint bytes;
     };
 
     typedef std::map< gpointer, ImageInfo > ImageMap;
+
+    static void add_to_image_list( ClutterTexture * texture , const ImageInfo & info );
 
     ImageMap        images;
 

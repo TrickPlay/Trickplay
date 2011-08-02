@@ -45,12 +45,12 @@ SubTitle: OEM Integration Reference
 # --------------------------------------------------------------------------
 
 
-File: Introduction  (docs/oem/text/introduction.txt)
-File: TrickPlay Context  (public/include/trickplay/trickplay.h)
-File: Controller  (public/include/trickplay/controller.h)
-File: Media Player  (public/include/trickplay/mediaplayer.h)
-File: Image Decoding  (public/include/trickplay/image.h)
-File: Audio Sampling  (public/include/trickplay/audio-sampler.h)
+File: Introduction*  (no auto-title, docs/oem/text/introduction.txt)
+File: TrickPlay Context*  (no auto-title, public/include/trickplay/trickplay.h)
+File: Controller*  (no auto-title, public/include/trickplay/controller.h)
+File: Media Player*  (no auto-title, public/include/trickplay/mediaplayer.h)
+File: Image Decoding*  (no auto-title, public/include/trickplay/image.h)
+File: Audio Sampling*  (no auto-title, public/include/trickplay/audio-sampler.h)
 
 Group: Index  {
 
