@@ -100,7 +100,7 @@
         hasPictures = @"\tPS";
     }
     // Tell the service what this device is capable of
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.0\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     // Manages resources created with declare_resource
@@ -233,12 +233,27 @@
 #pragma mark -
 #pragma mark Handling Commands From Server
 
-//------------------- Handling Commands From Server ------------------
 
 //--Welcome message
 
+/**
+ * WM = Welcome Message
+ *
+ * Executes when a Welcome Message is received from the server. Confirms that
+ * the server successfully established a connection, is aware of the phones
+ * capabilities (accelerometer, touch), and can now begin serving the client.
+ *
+ * Passes two or three arguments:
+ *  0. Version of protocol the server supports. Should be > 4.1 or problems will
+ *     happen.
+ *  1. An HTTP port for HTTP requests. Mainly used for GETting resources.
+ *  2. AdvancedUI Controller ID.
+ */
 - (void)do_WM:(NSArray *)args {
     self.version = [args objectAtIndex:0];
+    if ([version floatValue] < 4.1) {
+        NSLog(@"WARNING: Protocol Version is less than 4.1");
+    }
     [self setHTTPPort:(NSString *)[args objectAtIndex:1]];
     // if controller ID then open a new socket for advanced UI
     if ([args count] > 2 && [args objectAtIndex:2]) {
@@ -251,6 +266,15 @@
 
 //--Audio junk
 
+/**
+ * SS = Start Sound
+ *
+ * Starts playback of an audio clip downloaded from the server.
+ * 
+ * Passes two arguments:
+ *  0. A dictionary of the audio snippet name and a URL path to it.
+ *  1. The number of times to loop the playback, 0 for infinite.
+ */
 - (void)do_SS:(NSArray *)args {
     NSMutableDictionary *audioInfo = [resourceManager getResourceInfo:[args objectAtIndex:0]];
     NSLog(@"Playing audio %@", audioInfo);
@@ -261,6 +285,13 @@
     [audioController playSoundFile:[audioInfo objectForKey:@"name"] filename:[audioInfo objectForKey:@"link"]];
 }
 
+/**
+ * PS = Pause Sound
+ *
+ * Stops Playback of a sound. Sends CA (Cancel Audio) event back to the server.
+ *
+ * No arguments.
+ */
 - (void)do_PS:(NSArray *)args {
     [audioController destroyAudioStreamer];
     NSString *sentData = [NSString stringWithFormat:@"UI\tCA"];
@@ -270,6 +301,21 @@
 
 //--Multiple Choice junk
 
+/**
+ * MC = Multiple Choice
+ *
+ * Presents a view of buttons to choose options from. The View looks like the
+ * options given at the bottom of the TV screen during a game show.
+ *
+ * Passes N number of arguments
+ *  0. A string given as a title to the view presenting the multiple choice options.
+ *  1. The identifier string to return to the server when the first button is pressed.
+ *  2. The title string on the first button.
+ *  3. The identifier string to return to the server when the second button
+ *     is pressed.
+ *  4. The title string on the second button.
+ *  5. ...
+ */
 - (void)do_MC:(NSArray *)args {
     NSString *windowtitle = [args objectAtIndex:0];
     //multiple choice alertview
@@ -301,6 +347,14 @@
     //[styleAlert release];    
 }
 
+/**
+ * UIActionSheetDelegate callback called when a button is pressed on an action
+ * sheet.
+ *
+ * Handles button presses for both the multiple choice action sheet and the
+ * action sheet asking the user if they'd wish to use the camera or their photo
+ * library when sending camera images from the phone to the server.
+ */
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if (actionSheet == styleAlert) {
         NSLog(@"Dismiss the alertview");
@@ -326,8 +380,15 @@
 //-------------------Text input stuff---------------------
 
 /**
+ * ET = Enter Text
+ *
  * Brings up the text field, sets the text field as the focus, and the
  * user may enter text.
+ *
+ * Passes two arguments:
+ *  0. A label used as a title to the text entry field. Used to inform the user
+ *     of what they may be entering text for.
+ *  1. The default text the text entry field starts with.
  */
 - (void)do_ET:(NSArray *)args {
     textView.hidden = NO;
@@ -347,8 +408,8 @@
 }
 
 /**
- * Send the data the user entered into the text field to Trickplay.
- * Then hide text field.
+ * Send the data the user entered into the text field to the server.
+ * Then hides text field.
  */
 - (IBAction)hideTextBox:(id)sender {
     NSLog(@"textbox hidden");
@@ -356,8 +417,12 @@
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
 
-//--UITextFieldDelegate methods
-
+/**
+ * UITextFieldDelegate method. Called after the user presses 'return' or 'enter'
+ * on the devices virtual keyboard.
+ *
+ * Resigns the text entry field as first responder and hides it.
+ */
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [theTextField resignFirstResponder];
     theTextField.hidden = YES;
@@ -368,6 +433,18 @@
 
 //----------------------Graphics related----------------------
 
+/**
+ * DR = Declare Resource
+ *
+ * Informs the client of a URL to download a resource. Resources can be anything
+ * but usually will be image data for graphics or audio data for audio playback.
+ *
+ * Passes three arguments:
+ *  0. A "name" for the asset that will be used as a reference to the asset.
+ *  1. A URL link to download the asset.
+ *  2. A "group name" for the resource. Resources may be included into resource
+ *     groups to assist deletion.
+ */
 - (void)do_DR:(NSArray *)args {
     NSLog(@"Declaring Resource");
     [args retain];
@@ -388,6 +465,13 @@
     [args release];
 }
 
+/**
+ * DG = Drop Resource Group
+ *
+ * Deletes a group of resources from the cache.
+ *
+ * One argument: The "group name" of the resource group.
+ */
 - (void)do_DG:(NSArray *)args {
     [resourceManager dropResourceGroup:(NSString *)[args objectAtIndex:0]];
 }
@@ -424,7 +508,17 @@
 }
 
 /**
- * Update a graphics element
+ * UG = Update Graphics
+ *
+ * Adds a graphics element specified by a resource name to the screen at a specific
+ * position and size.
+ *
+ * Passes five arguments:
+ *  0. Resource name
+ *  1. x position.
+ *  2. y position.
+ *  3. width
+ *  4. height
  */
 - (void)do_UG:(NSArray *)args {
     NSLog(@"Updating Graphics");
@@ -450,18 +544,33 @@
 //--------------------Resetting stuff-------------------
 
 // TODO: Reset all modules to the initial state
+/**
+ * RT = Reset
+ *
+ * Resets everything. Deletes all graphics and objects.
+ *
+ * Passes no arguments.
+ */
 - (void)do_RT:(NSArray *)args {
     [audioController destroyAudioStreamer];
     [accelDelegate pauseAccelerometer];
     [touchDelegate reset];
-    [advancedUIDelegate clean];
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     [self clearUI];
+    [advancedUIDelegate clean];
+    [resourceManager clean];
     [self.view addSubview:virtualRemote.view];
     graphics = NO;
 }
 
+/**
+ * CU = Clear UI
+ *
+ * Clears the screen of all graphics objects not created by AdvancedUI, resets the
+ * background, removes the camera/multiple choice/text entry if currently on the
+ * screen, adds the virtual remote if no AdvancedUI objects are on the screen.
+ */
 - (void)do_CU {
     [self clearUI];
 }
@@ -469,35 +578,61 @@
 
 //------------------ Stuff passed to AccelerometerController ------------
 
+/**
+ * SA = Start Accelerometer
+ *
+ * Informs the AccelerometerController to begin sending accelerometer events to the
+ * server at given intervals after being filtered by the specified filter.
+ *
+ * Passes two arguments:
+ *  0. Filter type (lowpass, highpass)
+ *  1. Interval between events (in milliseconds)
+ */
 - (void)do_SA:(NSArray *)args {
     [accelDelegate startAccelerometerWithFilter:[args objectAtIndex:0] interval:[[args objectAtIndex:1] floatValue]];
 }
 
+/**
+ * PA = Pause Accelerometer
+ *
+ * Tells the AccelerometerController to stop sending accelerometer events to the
+ * server.
+ */
 - (void)do_PA:(NSArray *)args {
     [accelDelegate pauseAccelerometer];
 }
 
 
 //------------------ Stuff passed to TouchController --------------------
-// TODO: Change this design pattern to use Categories/Class-Extensions
-/** depricated
-- (void)do_SC {
-    [touchDelegate startClicks];
-}
-- (void)do_PC {
-    [touchDelegate stopClicks];
-}
-//*/
+
+/**
+ * ST = Stop Touches
+ *
+ * Tells the TouchController to start sending touch events to the server. This
+ * removes the VirtualRemote from the screen.
+ */
 - (void)do_ST {
     [touchDelegate startTouches];
     [virtualRemote.view removeFromSuperview];
 }
+
+/**
+ * PT = Pause Touches
+ *
+ * Tells the TouchController to stop sending touch events to the server.
+ * This adds the VirtualRemote back to the screen if no graphics elements or
+ * AdvancedUI Objects are currently added to the screen.
+ */
 - (void)do_PT {
     [touchDelegate stopTouches];
     if (!graphics) {
         [self.view addSubview:virtualRemote.view];
     }
 }
+
+/**
+ * Touch Event callbacks all passed to the TouchController object for handling.
+ */
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [touchDelegate touchesBegan:touches withEvent:event];
 }
@@ -514,6 +649,23 @@
 
 //-------------------- Camera stuff ----------------------------
 
+/**
+ * PI = Pick Image
+ *
+ * Readies the CameraViewController and all its submodules to send an image
+ * to the server.
+ *
+ * Passes 7 arguments
+ *  0. The URL to POST the image to
+ *  1. The width to scale the image to
+ *  2. The height to scale the image to
+ *  3. A boolean determining whether or not the user has access to scale, rotate,
+ *     or translate the image
+ *  4. Resource name of a possible mask to use to cover the camera view port when
+ *     taking or editing an image.
+ *  5. A label to inform the user of how he or she should be using the camera
+ *  6. A label pasted on any button that when pushed cancels taking a photo.
+ */
 - (void)do_PI:(NSArray *)args {
     NSLog(@"Submit Picture, args:%@", args);
     if ([self.navigationController visibleViewController] != self) {
@@ -618,6 +770,8 @@
     */
 }
 
+//---------------------------------------------------------------------------
+
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string {
     //NSLog(@"\n\nJSON_string: %@", JSON_string);
     NSString *sentData = [NSString stringWithFormat:@"UI\t%@\t%@\n", name, JSON_string];
@@ -671,6 +825,11 @@
     [self.view sendSubviewToBack:backgroundView];
     
     [newImageView release];
+    
+    if (advancedView.subviews.count == 0) {
+        [self.view addSubview:virtualRemote.view];
+        graphics = NO;
+    }
 
     [backgroundView addSubview:foregroundView];
     //*/

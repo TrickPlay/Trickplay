@@ -149,23 +149,20 @@
     
     //Horizontal swipe
     // To be a swipe, direction of touch must be horizontal and long enough.
-    if (fabsf(startTouchPosition.x - currentTouchPosition.x) >= HORIZ_SWIPE_DRAG_MIN) {
-        if (touchedTime > 0) {
-            NSLog(@"swipe speed horiz :%f ", [NSDate timeIntervalSinceReferenceDate] - touchedTime);
-            // It appears to be a swipe.
-            if (startTouchPosition.x < currentTouchPosition.x) {
-                //Send right key -  FF53
-                NSLog(@"swipe right");
-                [self sendKeyToTrickplay:@"FF53" thecount:1];
-            } else {
-                //Send left key  - FF51
-                NSLog(@"Swipe Left");
-                [self sendKeyToTrickplay:@"FF51" thecount:1];
-            }
-            swipeSent = YES;
-            
-            return YES;
+    if (fabsf(startTouchPosition.x - currentTouchPosition.x) > fabsf(startTouchPosition.y - currentTouchPosition.y) && fabsf(startTouchPosition.x - currentTouchPosition.x) >= HORIZ_SWIPE_DRAG_MIN) {
+        // It appears to be a swipe.
+        if (startTouchPosition.x < currentTouchPosition.x) {
+            //Send right key -  FF53
+            NSLog(@"swipe right");
+            [self sendKeyToTrickplay:@"FF53" thecount:1];
+        } else {
+            //Send left key  - FF51
+            NSLog(@"Swipe Left");
+            [self sendKeyToTrickplay:@"FF51" thecount:1];
         }
+        swipeSent = YES;
+            
+        return YES;
     }
     //Vertical swipe
     else if (fabsf(startTouchPosition.y - currentTouchPosition.y) >= VERT_SWIPE_DRAG_MIN) {
