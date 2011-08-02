@@ -689,7 +689,7 @@
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
         
         if ([args objectAtIndex:4] && ([args objectAtIndex:4] != @"")) {
-            mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, 0.0, 0.0)];
+            mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
         }
         
         if ([args objectAtIndex:5] && ([args objectAtIndex:5] != @"")) {
