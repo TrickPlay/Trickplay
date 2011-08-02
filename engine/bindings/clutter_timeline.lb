@@ -434,7 +434,7 @@ class Timeline [[ClutterTimeline*]]
 [[
 void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L)
 {
-    lua_pushinteger(L,msecs);
+    lua_pushinteger(L,clutter_timeline_get_elapsed_time(timeline));
     lua_pushnumber(L,clutter_timeline_get_progress(timeline));
     UserData::invoke_callback(G_OBJECT(timeline),"on_new_frame",2,0,L);
 }

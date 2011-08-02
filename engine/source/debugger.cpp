@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 
 #include "debugger.h"
@@ -8,14 +9,19 @@
 #include "console.h"
 #include "util.h"
 
+//.............................................................................
+
 Debugger::Debugger( App * _app )
 :
     app( _app ),
     installed( false ),
-    break_next( false )
+    break_next( false ),
+    tracing( false )
 {
     app->get_context()->add_console_command_handler( "debug", command_handler, this );
 }
+
+//.............................................................................
 
 Debugger::~Debugger()
 {
@@ -24,10 +30,14 @@ Debugger::~Debugger()
     app->get_context()->remove_console_command_handler( "debug", command_handler, this );
 }
 
+//.............................................................................
+
 void Debugger::command_handler( TPContext * context , const char * command, const char * parameters, void * me )
 {
     ( ( Debugger * ) me )->handle_command( parameters );
 }
+
+//.............................................................................
 
 void Debugger::uninstall()
 {
@@ -35,7 +45,11 @@ void Debugger::uninstall()
     {
         lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
     }
+
+    source.clear();
 }
+
+//.............................................................................
 
 void Debugger::install()
 {
@@ -48,6 +62,8 @@ void Debugger::install()
 
     installed = true;
 }
+
+//.............................................................................
 
 void Debugger::handle_command( const char * parameters )
 {
@@ -156,6 +172,8 @@ void Debugger::handle_command( const char * parameters )
     }
 }
 
+//.............................................................................
+
 void Debugger::lua_hook( lua_State * L, lua_Debug * ar )
 {
     if ( Debugger * debugger = App::get( L )->get_debugger() )
@@ -164,15 +182,19 @@ void Debugger::lua_hook( lua_State * L, lua_Debug * ar )
     }
 }
 
+//.............................................................................
+
 void Debugger::break_next_line()
 {
     install();
     break_next = true;
 }
 
+//.............................................................................
+
 void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 {
-    bool should_break = false;
+    bool should_break = tracing;
 
     lua_getinfo( L, "nSl", ar );
 
@@ -226,23 +248,54 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
     String source;
 
-    if ( g_str_has_prefix( ar->source, "@" ) )
+    StringVector * lines = 0;
+
+	if ( g_str_has_prefix( ar->source, "@" ) )
     {
         gchar * basename = g_path_get_basename( ar->source + 1 );
 
         source = basename;
 
         g_free( basename );
+
+		lines = load_source_file( ar->source + 1 );
     }
     else
     {
         source = ar->source;
     }
 
-    std::cout << source << ":" << ar->currentline << std::endl;
+    std::cout << source << ":" << ar->currentline;
+
+    if ( lines && tracing )
+    {
+    	if ( ( ar->currentline - 1 ) >= 0 && ( ar->currentline - 1 ) < int( lines->size() ) )
+    	{
+    		std::cout << ":" << (*lines)[ ar->currentline - 1 ];
+    	}
+    }
+
+    std::cout << std::endl;
+
+    if ( lines && ! tracing )
+	{
+		int list_start = std::max( ar->currentline - 5 , 1 );
+		int list_end = std::min( ar->currentline + 5 , int( lines->size() ) );
+
+		for ( int i = list_start; i < list_end; ++i )
+		{
+			std::cout << ( ( i == ar->currentline ) ? ">" : " " ) << (*lines)[i-1] << std::endl;
+		}
+
+	}
 
     while ( true )
     {
+    	if ( tracing )
+    	{
+    		break;
+    	}
+
         std::cout << "(debug) ";
 
         String command;
@@ -339,6 +392,11 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
             }
         }
 
+        else if ( command == "t" )
+        {
+        	tracing = true;
+        }
+
         // Run some Lua
 
         else if ( command.substr( 0 , 2 ) == "r " )
@@ -372,6 +430,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
                     "'c' to continue" << std::endl <<
                     "'s' or 'n' to continue until the next line" << std::endl <<
                     "'l' to list local variables" << std::endl <<
+                    "'t' to trace execution" << std::endl <<
                     "'r <some Lua>' to run some Lua (in global scope)" << std::endl <<
                     "'q' to quit TrickPlay" << std::endl;
         }
@@ -388,4 +447,34 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     {
         console->enable();
     }
+}
+
+//.............................................................................
+
+StringVector * Debugger::load_source_file( const char * file_name )
+{
+	SourceMap::iterator it = source.find( file_name );
+
+	if ( it != source.end() )
+	{
+		return & it->second;
+	}
+
+	std::ifstream stream( file_name , std::ios_base::in );
+
+	if ( ! stream )
+	{
+		return 0;
+	}
+
+	String line;
+
+	StringVector & lines( source[ file_name ] );
+
+	while ( std::getline( stream , line ) )
+	{
+		lines.push_back( line );
+	}
+
+	return & lines;
 }

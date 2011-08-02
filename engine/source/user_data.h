@@ -248,6 +248,8 @@ struct UserData
 
     static void dump_cb( lua_State * L , int index = 1 );
 
+    static void dump();
+
 private:
 
     friend struct Handle;

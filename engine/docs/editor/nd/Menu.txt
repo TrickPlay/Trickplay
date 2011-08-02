@@ -1,7 +1,7 @@
 Format: 1.52
 
 
-Title: TrickPlay Editor
+Title: TrickPlay Visual Editor
 
 # You can also add a sub-title to your menu like this:
 # SubTitle: [subtitle]
@@ -42,7 +42,9 @@ Timestamp: mm.d.yyyy
 # --------------------------------------------------------------------------
 
 
-Group: TrickPlay Editor  {
+Group: TrickPlay Visual Editor  {
+
+   File: Introduction  (no auto-title, introduction.txt)
 
    Group: Reference  {
 
@@ -50,6 +52,10 @@ Group: TrickPlay Editor  {
 
          File: Button  (no auto-title, reference/button.txt)
          File: ButtonPicker  (no auto-title, reference/buttonPicker.txt)
+         File: CheckBox  (no auto-title, reference/checkBoxGroup.txt)
+         File: ProgressBar  (no auto-title, reference/progBar.txt)
+         File: ProgressSpinner  (no auto-title, reference/progSpinner.txt)
+         File: RadioButtonGroup  (no auto-title, reference/radioButtonGroup.txt)
          }  # Group: UI Elements
 
       }  # Group: Reference
@@ -57,7 +63,7 @@ Group: TrickPlay Editor  {
    Group: Tutorial  {
 
       File: Introduction  (no auto-title, tutorial/introduction.txt)
-      File: Run the SDK Visual Editor  (no auto-title, tutorial/runEditor.txt)
+      File: Run the Visual Editor  (no auto-title, tutorial/runEditor.txt)
       File: Create a New Project  (no auto-title, tutorial/createnewproject.txt)
       File: Visual Editor Menus  (no auto-title, tutorial/menus.txt)
       File: Add a Background Image  (no auto-title, tutorial/addBackgroundImage.txt)
@@ -68,11 +74,16 @@ Group: TrickPlay Editor  {
       File: Connect Elements to Code  (no auto-title, tutorial/connectCode.txt)
       File: Create a Second Screen  (no auto-title, tutorial/createModeScreen.txt)
       File: Transition to Another Screen  (no auto-title, tutorial/screenTransition.txt)
+      File: CheckBox and RadioButton Elements  (no auto-title, tutorial/checkBoxRadioButton.txt)
+      File: ProgressBar and ProgressSpinner  (no auto-title, tutorial/progBarSpinner.txt)
       }  # Group: Tutorial
 
-   }  # Group: TrickPlay Editor
+   }  # Group: TrickPlay Visual Editor
 
-File: Reference  (editor.txt)
+Group: Temporary Docs  {
+
+   File: Reference*  (no auto-title, editor.txt)
+   }  # Group: Temporary Docs
 
 Group: Index  {
 
@@ -81,5 +92,6 @@ Group: Index  {
    Function Index: Functions
    Property Index: Properties
    Event Index: Events
+   Constructor Index: Constructors
    }  # Group: Index
 

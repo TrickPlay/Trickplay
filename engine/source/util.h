@@ -455,7 +455,7 @@ namespace Util
         gchar * first = path_to_native_path( g_strdup( root ) );
         free_later( first );
 
-        return g_build_filename( first, last, NULL );
+        return g_build_filename( first, last, ( gpointer ) 0 );
     }
 
     //-----------------------------------------------------------------------------
