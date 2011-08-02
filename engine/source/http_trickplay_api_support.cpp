@@ -100,7 +100,9 @@ public:
 
 		ClutterActor * actor = clutter_get_actor_by_gid( gid );
 
-		if ( ! actor )
+		// Bug in Clutter 1.6.14 where free ids are set to this value
+
+		if ( ! actor || actor == (gpointer) 0xdecafbad )
 		{
 			g_debug( "UI ELEMENT NOT FOUND" );
 			return;
