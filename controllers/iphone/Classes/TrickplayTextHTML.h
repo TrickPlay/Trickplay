@@ -10,6 +10,8 @@
 #import "TrickplayUIElement.h"
 
 @interface TrickplayTextHTML : TrickplayUIElement {
+    UIWebView *webview;
+    
     NSUInteger maxLength;
     NSString *origText;
     NSString *text;
@@ -51,6 +53,7 @@
     NSString *markup;
 }
 
+@property (retain) UIWebView *webview;
 @property (retain) NSString *text;
 @property (retain) NSString *origText;
 // .font

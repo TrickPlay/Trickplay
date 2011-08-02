@@ -508,8 +508,8 @@
     }
     
     CGFloat
-    x = [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue],
-    y = [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue];
+    x = [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue]/w_size,
+    y = [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue]/h_size;
     
     view.layer.anchorPoint = CGPointMake(x, y);
 }
@@ -669,9 +669,12 @@
  */
 
 - (void)set_clip:(NSDictionary *)args {
+    if (![[args objectForKey:@"clip"] isKindOfClass:[NSArray class]]) {
+        return;
+    }
     self.clip = [args objectForKey:@"clip"];
     
-    if (clip) {
+    if (clip.count > 3) {
         CGFloat
         clip_x = [(NSNumber *)[clip objectAtIndex:0] floatValue],
         clip_y = [(NSNumber *)[clip objectAtIndex:1] floatValue],
