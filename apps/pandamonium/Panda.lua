@@ -6,6 +6,7 @@
 
 --The Panda Object
 local panda = {}
+panda.dead = false
 
 --Properties for the physics bodies
 local torso_properties = {
@@ -238,7 +239,7 @@ end
 
 GameState:add_state_change_function(
 	function()
-		
+		panda.dead = false
 		panda:position(1500,700)
 		
 		layers.hopper.opacity = 0

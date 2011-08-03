@@ -25,7 +25,7 @@ local title      = Text{
 title = make_text(title,"green")
 
 Death_Screen:add(title)
-
+Death_Screen:hide()
 
 local scores = {}
 
@@ -37,7 +37,7 @@ for i,s in pairs(highscores) do
 		Text{
 			text = s.name,
 			font = "Baveuse 55px",
-			x    = screen_w/3,
+			x    = 2*screen_w/5,
 			y    = 130 + 70*i
 		},"green"
 	)
@@ -46,11 +46,11 @@ for i,s in pairs(highscores) do
 		Text{
 			text = s.score,
 			font = "Baveuse 55px",
-			x    = 2*screen_w/3,
+			x    = 3*screen_w/5,
 			y    = 130 + 70*i
 		},"yellow"
 	)
-	scores[i].score.anchor_point = {scores[i].score.w,scores[i].score.h/2}
+	--scores[i].score.anchor_point = {scores[i].score.w,scores[i].score.h/2}
 	Death_Screen:add(scores[i].name, scores[i].score)
 end
 
@@ -477,6 +477,8 @@ do
 			
 			Death_Screen:raise_to_top()
 			
+			Death_Screen:show()
+			
 			Death_Screen:animate{
 				duration = 500,
 				opacity  = 255,
@@ -490,6 +492,7 @@ do
 	GameState:add_state_change_function(
 		function()
 			wobble:stop()
+			
 			curr_opacity = Death_Screen.opacity
 			
 			Death_Screen:complete_animation()
@@ -499,6 +502,9 @@ do
 			Death_Screen:animate{
 				duration = 300,
 				opacity  = 0,
+				on_completed = function()
+					Death_Screen:hide()
+				end
 			}
 		end,
 		
@@ -570,7 +576,7 @@ do
 								Text{
 									text = highscores[i].name,
 									font = "Baveuse 55px",
-									x    = screen_w/3,
+									x    = 2*screen_w/5,
 									y    = 130 + 70*i
 								},"green"
 							),
@@ -578,13 +584,14 @@ do
 								Text{
 									text = highscores[i].score,
 									font = "Baveuse 55px",
-									x    = 2*screen_w/3,
+									x    = 3*screen_w/5,
 									y    = 130 + 70*i
 								},"yellow"
 							)
 						}
 					)
-					scores[i].score.anchor_point = {scores[i].score.w,scores[i].score.h/2}
+					
+					--scores[i].score.anchor_point = {scores[i].score.w,scores[i].score.h/2}
 					Death_Screen:add(scores[i].name, scores[i].score)
 					
 					scores[# scores].name:unparent()

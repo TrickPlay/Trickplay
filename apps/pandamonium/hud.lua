@@ -1,10 +1,11 @@
 local init_dist  = 100
 local digit_dist = 72
 
-local coin = Clone{
-	source = assets.coin_symbol,
-	x      = screen_w - assets.coin_symbol.w - 20,
-	y      = screen_h - assets.coin_symbol.h - 20,
+local coin  = Clone{
+	source  = assets.coin_symbol,
+	x       = screen_w - assets.coin_symbol.w - 20,
+	y       = screen_h - assets.coin_symbol.h - 20,
+	opacity = 0,
 }
 
 coin:move_anchor_point(
@@ -61,7 +62,7 @@ local hud = {
 				
 			end
 			
-			print(i,nums[i].value,amt )
+			--print(i,nums[i].value,amt )
 			nums[i].value = nums[i].value + amt
 			
 			if nums[i].value > 9 then
@@ -83,7 +84,7 @@ local hud = {
 				nums[i].text.source = assets.num[nums[i].value]
 				
 			end
-			print(i,nums[i].value,amt,"\n" )
+			--print(i,nums[i].value,amt,"\n" )
 			i = i + 1
 		end
 		
@@ -103,7 +104,7 @@ local hud = {
 			n.value = 0
 			
 			if i == 1 then
-				n.text.source = assets.num[10]
+				n.text.source = assets.num[0]
 			else
 				n.text:hide()
 			end
@@ -121,6 +122,15 @@ local hud = {
 GameState:add_state_change_function(
 	hud.reset,
 	nil,"GAME"
+)
+GameState:add_state_change_function(
+	function()
+		coin:animate{
+			duration = 300,
+			opacity  = 255,
+		}
+	end,
+	"SPLASH","GAME"
 )
 layers.hud:add(coin)
 

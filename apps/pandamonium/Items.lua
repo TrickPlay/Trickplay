@@ -31,7 +31,7 @@ envelope.tl = {
 }
 
 envelope.fade = {
-	duration = .4,
+	duration = .8,
 	on_step  = function(_,p)
 		envelope.opacity = 255*(1-p)
 	end,
@@ -70,6 +70,8 @@ envelope.state:add_state_change_function(
 		envelope.opacity = 255
 		
 		Animation_Loop:add_animation(envelope.tl)
+		
+		envelope.tl.duration = 4
 	end,
 	nil,"SPINNING"
 )
@@ -82,6 +84,8 @@ envelope.state:add_state_change_function(
 		Effects:make_sparkles(envelope.x,envelope.y)
 		
 		Animation_Loop:add_animation(   envelope.fade   )
+		
+		envelope.tl.duration = .2
 		
 	end,
 	nil,"SPARKLING"
@@ -209,10 +213,14 @@ local function new_coin()
 		end,
 	}
 	--]]
+	--panda.get_y() + (coin.fade.start_y-panda.get_y())*(1-math.sin(math.pi*2*p))--
 	coin.fade = {
-		duration = .3,
+		start_y = 0,
+		duration = .8,
 		on_step  = function(_,p)
 			coin.opacity = 255*(1-p)
+			--coin.y = coin.fade.start_y - 200*math.sin(math.pi*3/4*p)
+			
 		end,
 		on_completed = function()
 			coin.state:change_state_to("RECYCLED")
@@ -273,7 +281,7 @@ local function new_coin()
 			if old ~= "RECYCLED" then
 				error("coin started spinning from this state "..old)
 			end
-			
+			coin.source = coin_src
 			layers.items:add(coin)
 			
 			coin.opacity = 255
@@ -289,6 +297,9 @@ local function new_coin()
 			hud:add_to_score(1)
 			
 			Effects:make_sparkles(coin.x,coin.y)
+			
+			--coin.fade.start_y = coin.y
+			coin.source = fast_coin
 			
 			Animation_Loop:add_animation(   coin.fade   )
 			
@@ -455,9 +466,10 @@ local firework_sensor = physics:Body(
 	}
 )
 
+local fwork_h = firework_sensor.h
 function firework_sensor:scroll_by(dy)
 	self.y = self.y + dy
-	if self.y > screen_h+300 and not self.recycled then
+	if self.y > screen_h+fwork_h/2 and not self.recycled then
 			--print("coin scrolled off")
 			self:recycle()
 			
@@ -500,12 +512,12 @@ function firework_sensor:on_begin_contact(contact)
 	
 	contact.enabled = false
 	
-	if self.moving then
+	if firework.moving or panda.dead then
 		--print("ignoring impact")
 		return
 	end 
 	--print("impacto")
-	self.moving = true
+	firework.moving = true
 		
 	dx = self.x - p_hand.x
 	dy = self.y - p_hand.y - firework_real.h/4
@@ -553,7 +565,7 @@ firework.snap_to_arm = {
 		firework_sensor.y = p_hand.y + dy*(1-p)
 	end,
 	on_completed = function()
-		firework_sensor.moving = false
+		firework.moving = false
 		firework_sensor:recycle()
 		firework_real.x = p_hand.x
 		firework_real.y = p_hand.y -firework_real.h/4
@@ -658,20 +670,38 @@ local function new_firecracker()
 			
 			firecracker.count = firecracker.count + 1
 			
-			for i = 1,2 do
+			for i = 1,3 do
+				
 				Effects:make_smoke(
-					firecracker.x+math.random(-20,20),
-					firecracker.y+math.random(-5,5),
-					"firecracker"
+					firecracker.x,
+					firecracker.y,
+					"firecracker",
+					100*math.cos(math.pi*2*3/i+.1),
+					100*math.sin(math.pi*2*3/i+.1)
+				)
+				
+				Effects:make_smoke(
+					firecracker.x,
+					firecracker.y,
+					"firecracker",
+					100*math.cos(math.pi*2*3/i-.1),
+					100*math.sin(math.pi*2*3/i-.1)
 				)
 			end
 			
-			for i = 1,4 do
+			for i = 1,3 do
 				Effects:make_spark(
-					firecracker.x+math.random(-20,20),
-					firecracker.y+math.random(-5,5),
-					math.random(-3,3)*6,
-					math.random(-5,5)*6
+					firecracker.x,
+					firecracker.y,
+					100*math.cos(math.pi*2*3/i+.1),
+					100*math.sin(math.pi*2*3/i+.1)
+				)
+				
+				Effects:make_spark(
+					firecracker.x,
+					firecracker.y,
+					100*math.cos(math.pi*2*3/i+.1),
+					100*math.sin(math.pi*2*3/i+.1)
 				)
 			end
 			
@@ -702,11 +732,49 @@ local function new_firecracker()
 		end
 		
 		--print("EXPLODE",dx,dy)
-		panda:impulse(100*dx,30*dy)
+		panda:impulse(100*dx,40*dy)
 		dolater(self.recycle,self)
 		
-		firecracker.count = 0
-		firecracker.explode:start()
+		--firecracker.count = 0
+		--firecracker.explode:start()
+		
+		
+		for i = 1,3 do
+				
+				Effects:make_smoke(
+					firecracker.x,
+					firecracker.y,
+					"firecracker",
+					20*math.cos(math.pi*2*i/3+.2),
+					20*math.sin(math.pi*2*i/3+.2)
+				)
+				
+				Effects:make_smoke(
+					firecracker.x,
+					firecracker.y,
+					"firecracker",
+					20*math.cos(math.pi*2*i/3-.2),
+					20*math.sin(math.pi*2*i/3-.2)
+				)
+			end
+			
+			for i = 1,3 do
+				Effects:make_spark(
+					firecracker.x,
+					firecracker.y,
+					40*math.cos(math.pi*2*i/3+.2),
+					40*math.sin(math.pi*2*i/3+.2)
+				)
+				
+				Effects:make_spark(
+					firecracker.x,
+					firecracker.y,
+					40*math.cos(math.pi*2*i/3-.2),
+					40*math.sin(math.pi*2*i/3-.2)
+				)
+			end
+		
+		
 		mediaplayer:play_sound("audio/firecracker.mp3")
 	end
 	

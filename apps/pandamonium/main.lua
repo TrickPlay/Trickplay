@@ -165,8 +165,8 @@ make_text = function(t,color)
 	c:text_element_path(t)
 	c:clip(true)
 	c:set_source_linear_pattern( c.w/2, 0, c.w/2, c.h-shadow_offset )
-	c:add_source_pattern_color_stop( 0, colors[color].top_g)--"e2e92c" ) 
-	c:add_source_pattern_color_stop( 1, colors[color].btm_g)--"5d8917" ) 
+	c:add_source_pattern_color_stop( 0, colors[color].top_g) 
+	c:add_source_pattern_color_stop( 1, colors[color].btm_g) 
 	c:fill(true)
 	
 	
@@ -174,7 +174,7 @@ make_text = function(t,color)
 	for i = 28,6,-2 do
 		c.line_width = i
 		colors[color].glow[4] = 30-i
-		c:set_source_color(colors[color].glow)--{199,241,30,30-i})
+		c:set_source_color(colors[color].glow)
 		c:stroke(true)
 	end
 	
@@ -182,12 +182,14 @@ make_text = function(t,color)
 	c:reset_clip()
 	
 	c.line_width = 2
-	c:set_source_color(colors[color].stroke)--"2f3a24")
+	c:set_source_color(colors[color].stroke)
 	c:stroke(true)
+	
+	--print(t.text,c.w,c.h,shadow_offset)
 	
 	return c:Image{
 		position     = t.position,
-		anchor_point = {t.w/2-shadow_offset,t.h/2-shadow_offset}
+		anchor_point = {c.w/2-shadow_offset,c.h/2-shadow_offset}
 	}
 end
 
@@ -210,7 +212,7 @@ GameState          = Enum{ "OFFLINE", "SPLASH", "GAME", "SAVE_HIGHSCORE","VIEW_H
 
 Animation_Loop     = dofile("Animation_Loop.lua")
 
-assets, bg, coin_src, sparkles_src = dofile("Assets.lua")
+assets, bg, coin_src, sparkles_src, fast_coin = dofile("Assets.lua")
 
 hud                = dofile("hud.lua")
 
@@ -246,15 +248,24 @@ GameState:change_state_to("SPLASH")
 
 
 
---
+--[[
+function mediaplayer:on_loaded()
+	mediaplayer:play()
+end
+function mediaplayer:on_end_of_stream()
+	mediaplayer:play()
+end
+mediaplayer:load("audio/theme.mp3")
+--]]
 
-
-
-
-
-
-
-
+loop_sound = Timer{
+	interval = 16010,
+	on_timer = function()
+		mediaplayer:play_sound("audio/theme.mp3")
+	end
+}
+mediaplayer:play_sound("audio/theme.mp3")
+--loop_sound:stop()
 
 function controllers.on_controller_connected( controllers , controller )
 	--setup the accelerometer callbacks
@@ -265,7 +276,7 @@ function controllers.on_controller_connected( controllers , controller )
 			
 			
 			
-			panda:set_vx(10*x)
+			panda:set_vx(20*x)
 			
 			---[[
 			

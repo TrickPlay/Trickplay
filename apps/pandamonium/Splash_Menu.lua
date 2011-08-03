@@ -4,65 +4,165 @@ local sel_scale = 1.2
 
 local unsel_scale = 1
 
+local menu_items = {}
 --Visual Components
-local title      = Text{--Clone{
-	--source       = assets.title,
-	font         = "Baveuse 130px",
-	text         = "Pandamonium",
-	color        = "ffffff",
-	position     = {screen.w/2, 80}
+do
+	local title      = Text{--Clone{
+		--source       = assets.title,
+		font         = "Baveuse 130px",
+		text         = "Pandamonium",
+		color        = "ffffff",
+		position     = {screen.w/2, 80}
+		
+	}
 	
-}
-
-title = make_text(title,"green")
-
-local start     = Text{--Clone{
-	--source       = assets.title,
-	font         = "Baveuse 70px",
-	text         = "START",
-	color        = "ffffff",
-	position     = {screen.w/2, 250}
+	title = make_text(title,"green")
 	
-}
-start = make_text(start,"green")
-
-local h_score     = Text{--Clone{
-	--source       = assets.title,
-	font         = "Baveuse 70px",
-	text         = "highscores",
-	color        = "ffffff",
-	position     = {screen.w/2, 350}
+	local start     = Text{--Clone{
+		--source       = assets.title,
+		font         = "Baveuse 70px",
+		text         = "START",
+		position     = {screen.w/2, 250}
+		
+	}
+	start = make_text(start,"green")
 	
-}
-h_score = make_text(h_score,"green")
-
-local quit       = Text{--Clone{
-	--source       = assets.title,
-	font         = "Baveuse 70px",
-	text         = "QUIT",
-	color        = "ffffff",
-	position     = {screen.w/2, 450}
+	local h_score     = Text{--Clone{
+		--source       = assets.title,
+		font         = "Baveuse 70px",
+		text         = "highscores",
+		position     = {screen.w/2, 350}
+		
+	}
+	h_score = make_text(h_score,"green")
 	
-}
-quit = make_text(quit,"green")
---[[
-local arrow      = Clone{
-	source       = assets.arrow,
-	anchor_point = {assets.arrow.w, assets.arrow.h/2},
-	position     = {screen.w/2-50, start.y},
-}
---]]
-Splash:add(title,start,h_score,quit)--,arrow)
-
+	local quit       = Text{--Clone{
+		--source       = assets.title,
+		font         = "Baveuse 70px",
+		text         = "QUIT",
+		position     = {screen.w/2, 450}
+		
+	}
+	quit = make_text(quit,"green")
+	
+	local help_font = "Baveuse 45px"
+	
+	local first_line  = 620
+	local second_line = 670
+	local item_line   = 770
+	
+	
+	local collect       = Text{--Clone{
+		--source       = assets.title,
+		font         = help_font,
+		text         = "Collect",
+		position     = {screen.w/5, first_line}
+		
+	}
+	collect = make_text(collect,"yellow")
+	local coins       = Text{--Clone{
+		--source       = assets.title,
+		font         = help_font,
+		text         = "Coins",
+		position     = {screen.w/5, second_line}
+		
+	}
+	coins = make_text(coins,"yellow")
+	
+	local coin1  = Clone{ source = assets.coin_front, x = screen_w/5-80, y= item_line }
+	coin1.anchor_point = {coin1.w/2,coin1.h/2}
+	local coin2  = Clone{ source = assets.coin_front, x = screen_w/5+80, y= item_line }
+	coin2.anchor_point = {coin2.w/2,coin2.h/2}
+	local catch   = Text{--Clone{
+		--source       = assets.title,
+		font         = help_font,
+		text         = "Catch",
+		position     = {screen.w/2, first_line}
+		
+	}
+	catch = make_text(catch,"yellow")
+	local rocket   = Text{--Clone{
+		--source       = assets.title,
+		font         = help_font,
+		text         = "Rockets",
+		position     = {screen.w/2, second_line}
+		
+	}
+	rocket = make_text(rocket,"yellow")
+	local f_work = Clone{
+			source = assets.firework,
+			z_rotation = {90,0,0},
+			position     = {screen.w/2, item_line}
+		}
+	f_work.anchor_point = {f_work.w/2,f_work.h/2}
+	
+	local avoid       = Text{--Clone{
+		--source       = assets.title,
+		font         = help_font,
+		text         = "Avoid",
+		position     = {4*screen.w/5, first_line}
+		
+	}
+	avoid = make_text(avoid,"yellow")
+	
+	local bomb       = Text{--Clone{
+		--source       = assets.title,
+		font         = help_font,
+		text         = "Bombs",
+		position     = {4*screen.w/5, second_line}
+		
+	}
+	bomb = make_text(bomb,"yellow")
+	
+	local f_cracker =  Clone{
+			source = assets.firecracker,
+			position     = {4*screen.w/5+25, item_line}
+		}
+	f_cracker.anchor_point = {f_cracker.w/2,f_cracker.h/2}
+	
+	local dont_fall       = Text{--Clone{
+		--source       = assets.title,
+		font         = "Baveuse 70px",
+		text         = "Don't Fall!",
+		alignment    = "CENTER",
+		position     = {screen.w/2, 970}
+		
+	}
+	dont_fall = make_text(dont_fall,"yellow")
+	
+	local backing = Rectangle{
+		w= 1600,
+		h= 340,
+		color = "000000",
+		opacity = 255*.4,
+		y=item_line-50,
+		x=screen_w/2,
+	}
+	
+	backing.anchor_point = {backing.w/2,backing.h/2}
+	--[[
+	local arrow      = Clone{
+		source       = assets.arrow,
+		anchor_point = {assets.arrow.w, assets.arrow.h/2},
+		position     = {screen.w/2-50, start.y},
+	}
+	--]]
+	Splash:add(backing,title,start,h_score,quit,collect,coins,avoid,bomb,f_work,catch,rocket,coin1,coin2,f_cracker,dont_fall)--,arrow)
+	
+	
+	
+	
+	function start:press_enter()    GameState:change_state_to("GAME")    end
+	function h_score:press_enter()    GameState:change_state_to("VIEW_HIGHSCORE")    end
+	function quit:press_enter()    exit()    end
+	
+	menu_items[1] = start
+	menu_items[2] = h_score
+	menu_items[3] = quit
+end
 
 --arrow index, and its selectable items
 local index = 1
-
-local menu_items = {
-	start,
-	h_score,
-	quit
-}
 
 --the move animation for the arrow
 --[[
@@ -171,10 +271,8 @@ local function select(i)
 end
 
 --the press enter functions
-function quit:press_enter()    exit()    end
 
-function start:press_enter()    GameState:change_state_to("GAME")    end
-function h_score:press_enter()    GameState:change_state_to("VIEW_HIGHSCORE")    end
+
 
 --the state change animations (fading the Splash screen in and out)
 do
@@ -194,6 +292,22 @@ do
 			Splash:animate{
 				duration = 300,
 				opacity  = 0,
+				on_completed = function()
+					Splash:unparent()
+					Splash:clear()
+					menu_items = {}
+					collectgarbage("collect")
+					
+					GameState:add_state_change_function(
+						function()
+							
+							error("Tried to relaunch the splash screen")
+							
+						end,
+						
+						nil, "SPLASH"
+					)
+				end
 			}
 		end,
 		"SPLASH", nil
@@ -238,7 +352,7 @@ do
 					screen.on_key_down = Splash.on_key_down
 				end
 			}
-			mediaplayer:play_sound("audio/start-sound.mp3")
+			
 		end,
 		
 		nil, "SPLASH"

@@ -213,9 +213,13 @@ local branch_constructor = function(
 		
 		orientation,
 		
-		y_pos
+		y_pos,
+		
+		dist_from_wall
 		
 	)
+	
+	print(dist_from_wall)
 	
 	assert(orientation == 1 or orientation == -1)
 	
@@ -229,7 +233,9 @@ local branch_constructor = function(
 	branch.y_rotation = {orientation*90+90,0,0}
 	
 	--place it at on the correct side of the sceen
-	branch.x      = orientation*screen_w/2 + screen_w/2 - orientation * math.random(branch.w/5,2*branch.w/5)
+	branch.x      = orientation*screen_w/2 + screen_w/2 -
+		orientation * dist_from_wall --math.random(branch.w/5,2*branch.w/5)
+	
 	branch.stub.x = orientation*screen_w/2 + screen_w/2
 	
 	--position it at the proper y_offset from the top of the wall

@@ -21,7 +21,7 @@ local handle_ref = {}
 local body
 
 Game_Screen.on_end_contact = function(_,contact)
-	print("the fuck")
+	--print("the fuck")
 	body = contact.bodies[2]
 	
 	if body == Game_Screen.handle then body = contact.bodies[1] end
@@ -214,7 +214,7 @@ end
 local World = {}
 
 local real_max_dist = 400
-local difficulty_increase = 10
+local difficulty_increase = 2
 
 local active_objects = {}
 
@@ -259,8 +259,9 @@ end
 
 local last_sides = 0
 local prev_side  = 0
-local item_on_last_branch = false
-function World:add_branch(y)
+local item_on_last_branch = 0
+local retval = false
+function World:add_branch(y,x_dist)
 	
 	--pick a random side
 	side = 3-2*math.random(1,2)
@@ -272,16 +273,21 @@ function World:add_branch(y)
 	last_sides = last_sides + side
 	branch = nil
 	if math.random(1,8) == 1 then
+		
 		branch = firework:add_to_screen(
 			screen_w/2+side*400,
 			next_branch_y-200
 		)
+		
+		retval = true
+		
 	end
 	if branch == nil then
 		
 		branch = branch_constructor(
 			side,
-			next_branch_y-200
+			next_branch_y-200,
+			900+30*math.random(0,3)-x_dist
 		)
 		
 		--translate the side value to the wall object
@@ -303,56 +309,47 @@ function World:add_branch(y)
 			
 		else   error("invalid side") end
 		
-		r =  math.random(1,5)
-		if not item_on_last_branch then
-			if prev_side ~= side then
-				r =  math.random(1,5)
-				if r == 1 then
-					if side == 1 then
-						local c = Coin:plus(250,branch.y+50)
-						for _,c in ipairs(c) do handle_ref[c.handle] = c end
-						item_on_last_branch = true
-					else
-						local c = Coin:plus(screen_w-250,branch.y+50)
-						for _,c in ipairs(c) do handle_ref[c.handle] = c end
-						item_on_last_branch = true
-					end
-				elseif r == 2 then
-					local p = branch.palms
-					local c = Coin:three_in_a_row(p[1].x,p[2].y-350)
-					for _,c in ipairs(c) do handle_ref[c.handle] = c end
-					item_on_last_branch = true
-				end
-			elseif r <= 4 then
+		r   = math.random(1,10)
+		p_i = math.random(1,2)
+		if item_on_last_branch <= 0 then
+			if r == 1 then
+				local c = Coin:plus(branch.palms[1].x,branch.y-200)
+				for _,c in ipairs(c) do handle_ref[c.handle] = c end
+				item_on_last_branch = 2
+			elseif r == 2 then
+				local p = branch.palms
+				local c = Coin:three_in_a_row(p[p_i].x, p[p_i].y-240)
+				for _,c in ipairs(c) do handle_ref[c.handle] = c end
+				item_on_last_branch = 2
+			elseif r <= 6 then
 				
 				local p = branch.palms
-				local c = Coin:single(p[1].x,p[2].y-100)
+				local c = Coin:single(p[p_i].x,p[p_i].y-130)
 				
 				handle_ref[c.handle] = c
 				
-				item_on_last_branch = true
+				item_on_last_branch = 0
 				
-			elseif r == 5 then
+			elseif r <= 9 then
 				local p = branch.palms
-				local c = make_firecracker(p[1].x,p[2].y-100)
+				local c = make_firecracker(p[p_i].x,p[p_i].y-120)
 				
 				handle_ref[c.handle] = c
 				
-				item_on_last_branch = true
+				item_on_last_branch = 0
 			end
 		else
-			item_on_last_branch = false
+			item_on_last_branch = item_on_last_branch - 1
 		end
+		
+		retval = false
 		
 	end
 	handle_ref[branch.handle] = branch
 	
-	
-	
-	
-	
-	
 	prev_side = side
+	
+	return retval
 end
 
 local fade_ins = {}
@@ -391,7 +388,7 @@ GameState:add_state_change_function(
 			to_be_deleted[obj]  = nil
 			active_objects[obj] = nil
 		end
-		curr_max_dist = 250
+		curr_max_dist = 200
 		next_branch_y = 5*screen_h/6
 		
 		fade_outs = handle_ref
@@ -498,7 +495,11 @@ World.check_hopper = function()
 		--the amount to scroll by
 		dy = jump_thresh - panda_y
 		
-	elseif panda_y > screen_h+200 then
+	elseif panda_y > screen_h+200 and not panda.rocket and not firework.moving then
+		
+		print("rocket",panda.rocket)
+		
+		panda.dead = true
 		
 		scroll_speed = -panda:get_vy()*physics.pixels_per_meter/7
 		Animation_Loop:add_animation(scroll_after)
@@ -545,10 +546,17 @@ World.add_branches = function()
 	--if the top walls are now in view, add 2 more walls
 	while next_branch_y > -screen_h/2 do
 		
-		World:add_branch(next_branch_y)
+		--if rocket
+		if World:add_branch(next_branch_y,2.3*curr_max_dist) then
+			
+			next_branch_y = next_branch_y - 1200
+			
+		else
+			--setup the next position
+			next_branch_y = next_branch_y - real_max_dist--math.random(curr_max_dist-50,curr_max_dist)
+		end
 		
-		--setup the next position
-		next_branch_y = next_branch_y - math.random(curr_max_dist-50,curr_max_dist)
+		
 		
 		--make sure that the difficulty caps at the max possible jump distance
 		if  curr_max_dist < real_max_dist then
