@@ -522,6 +522,7 @@ list( APPEND
     ${ENGINE_SRC}/source/http_trickplay_api_support.cpp
     ${ENGINE_SRC}/source/log.cpp
     ${ENGINE_SRC}/source/keyboard.cpp
+    ${ENGINE_SRC}/source/jpeg_utils.cpp
 )
 
 #------------------------------------------------------------------------------
