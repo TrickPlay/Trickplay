@@ -44,12 +44,16 @@ local fade_out = {
     
     firecracker = function(smoke)
         return {
-            duration = .7,
+            duration = .3,
             on_step  = function(s,p)
                 smoke:set{
                     opacity = 255 * (1 - p),
                     scale   = {1+2*p,1+2*p},
+                    --x       = smoke.sx + smoke.tx*p,
+                    --y       = smoke.sy + smoke.ty*p,
                 }
+                smoke.x = smoke.x + smoke.vx*s
+                smoke.y = smoke.y + smoke.vy*s
             end,
             on_completed = function()
                 
@@ -63,7 +67,7 @@ local fade_out = {
         }
     end
 }
-Effects.make_smoke = function(_,x,y,type)
+Effects.make_smoke = function(_,x,y,type,tx,ty)
     
     effect = table.remove(old_smoke) or new_smoke()
     
@@ -76,8 +80,15 @@ Effects.make_smoke = function(_,x,y,type)
         scale   = {1,1}
     }
     
-    effect.fade = fade_out[type](effect)
+    effect.sx = x
+    effect.sy = y
     
+    
+    effect.fade = fade_out[type](effect)
+    if tx ~= nil then
+    effect.vx = tx/effect.fade.duration
+    effect.vy = ty/effect.fade.duration
+    end
     layers.items:add(effect)
     
     Animation_Loop:add_animation( effect.fade ) 
@@ -102,14 +113,17 @@ local new_spark = function()
     spark.anchor_point = {spark.w/2,spark.h/2}
     
     spark.fade = {
-        duration = .2,
+        duration = .3,
         on_step  = function(s,p)
+            
             spark:set{
                 opacity = 255 * (1 - p),
                 scale   = {1+1*p,1+1*p},
             }
+            
             spark.x = spark.x + spark.vx*s
             spark.y = spark.y + spark.vy*s
+            
         end,
         on_completed = function()
             
@@ -125,7 +139,7 @@ local new_spark = function()
     return spark
 end
 
-Effects.make_spark = function(_,x,y,vx,vy)
+Effects.make_spark = function(_,x,y,tx,ty)
     
     effect = table.remove(old_sparks) or new_spark()
     
@@ -138,8 +152,11 @@ Effects.make_spark = function(_,x,y,vx,vy)
         scale   = {1,1}
     }
     
-    effect.vx = vx
-    effect.vy = vy
+    effect.sx = x
+    effect.sy = y
+    
+    effect.vx = tx/effect.fade.duration
+    effect.vy = ty/effect.fade.duration
     
     layers.items:add(effect)
     
@@ -173,7 +190,7 @@ local new_sparkle = function()
     local a, e = 0,0
     --]]
     sparkles.fade = {
-        duration = .7,
+        duration = 1,
         on_step  = function(s,p)
             --[[
             e = e + s
