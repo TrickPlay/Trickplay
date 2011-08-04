@@ -44,6 +44,12 @@
     CGFloat x_rot_point;
     CGFloat y_rot_point;
     CGFloat z_rot_point;
+    CGFloat x_anchor;
+    CGFloat y_anchor;
+    CGFloat clip_x;
+    CGFloat clip_y;
+    CGFloat clip_w;
+    CGFloat clip_h;
     CGFloat opacity;
     
     NSArray *clip;

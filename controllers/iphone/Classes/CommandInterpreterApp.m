@@ -32,7 +32,7 @@
 
 
 - (void)interpretCommand:(NSString *)command {
-    //NSLog(@"Received command: %@", command);
+    NSLog(@"\n\nReceived command: %@\n\n", command);
     
     NSArray *components = [[command componentsSeparatedByString:@"\t"] retain];
     NSMutableArray *args = [[[NSMutableArray alloc] initWithCapacity:20] autorelease];
