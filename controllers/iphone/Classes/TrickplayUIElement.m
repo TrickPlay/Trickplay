@@ -70,6 +70,8 @@
         x_rotation = 0.0;
         y_rotation = 0.0;
         z_rotation = 0.0;
+        x_anchor = 0.0;
+        y_anchor = 0.0;
         opacity = 1.0;
         
         animations = [[NSMutableDictionary alloc] initWithCapacity:20];
@@ -81,6 +83,13 @@
         self.name = nil;
         
         self.frame = [[UIScreen mainScreen] applicationFrame];
+        self.layer.anchorPoint = CGPointMake(0.0, 0.0);
+        self.layer.position = CGPointMake(0.0, 0.0);
+        
+        clip_x = self.frame.origin.x;
+        clip_y = self.frame.origin.y;
+        clip_w = self.frame.size.width;
+        clip_h = self.frame.size.height;
     }
     
     return self;
@@ -344,7 +353,7 @@
     CGFloat x_prime = [self get_x_prime];
     CGFloat y_prime = [self get_y_prime];
     
-    view.layer.position = CGPointMake(x_prime, y_prime);
+    self.layer.position = CGPointMake(x_prime, y_prime);
 }
 
 #pragma mark -
@@ -382,10 +391,10 @@
     if (z) {
         // TODO: this isn't working
         NSLog(@"z: %@", z);
-        view.layer.zPosition = [z floatValue];
+        self.layer.zPosition = [z floatValue];
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = 1.0/-2000;
-        view.layer.transform = CATransform3DConcat(view.layer.transform, transform);
+        self.layer.transform = CATransform3DConcat(self.layer.transform, transform);
         //view.layer.transform = CATransform3DMakeTranslation(0.0, 0.0, [z floatValue]);
         //[view.layer setValue:z forKeyPath:@"transform.translation.z"];
         //NSLog(@"z after: %@", [view.layer valueForKeyPath:@"transform.translation.z"]);
@@ -415,19 +424,19 @@
 - (void)set_z:(NSDictionary *)args {
     if ([args objectForKey:@"z"]) {
         //view.layer.transform = CATransform3DMakeTranslation(0.0, 0.0, [[args objectForKey:@"z"] floatValue]);
-        view.layer.zPosition = [[args objectForKey:@"z"] floatValue];
+        self.layer.zPosition = [[args objectForKey:@"z"] floatValue];
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = 1.0/-2000;
-        view.layer.transform = CATransform3DConcat(view.layer.transform, transform);
+        self.layer.transform = CATransform3DConcat(self.layer.transform, transform);
     }
 }
 
 - (void)set_depth:(NSDictionary *)args {
     if ([args objectForKey:@"depth"]) {
-        view.layer.zPosition = [[args objectForKey:@"depth"] floatValue];
+        self.layer.zPosition = [[args objectForKey:@"depth"] floatValue];
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = 1.0/-2000;
-        view.layer.transform = CATransform3DConcat(view.layer.transform, transform);
+        self.layer.transform = CATransform3DConcat(self.layer.transform, transform);
     }
 }
 
@@ -498,6 +507,14 @@
  * anchor point is a CGPoint{0.0 <= x <= 1.0, 0.0 <= y <= 1.0}
  */
 
+- (void)set_anchor {
+    CGFloat
+    x = (x_anchor + view.layer.position.x)/self.bounds.size.width,
+    y = (y_anchor + view.layer.position.y)/self.bounds.size.height;
+    
+    self.layer.anchorPoint = CGPointMake(x, y);
+}
+
 - (void)set_anchor_point:(NSDictionary *)args {
     if (![[args objectForKey:@"anchor_point"] isKindOfClass:[NSArray class]]) {
         return;
@@ -507,11 +524,13 @@
         return;
     }
     
-    CGFloat
-    x = [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue]/w_size,
-    y = [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue]/h_size;
+    //NSLog(@"anchor_x: %f, anchor_y: %f", [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue], [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue]);
+    //NSLog(@"view.layer.position.x: %f; view.layer.position.y: %f", view.layer.position.x, view.layer.position.y);
     
-    view.layer.anchorPoint = CGPointMake(x, y);
+    x_anchor = [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue];
+    y_anchor = [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue];
+    
+    [self set_anchor];
 }
 
 
@@ -544,8 +563,8 @@
     x_scale = [[layer_scale objectAtIndex:0] floatValue];
     y_scale = [[layer_scale objectAtIndex:1] floatValue];
     
-    [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
-    [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
+    [self.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
+    [self.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
     /*
     CABasicAnimation *animation_x = [CABasicAnimation animationWithKeyPath:@"transform.scale.x"];
     animation_x.fillMode = kCAFillModeForwards;
@@ -586,7 +605,7 @@
             return;
         }
         x_rot = [NSNumber numberWithFloat:[x_rot floatValue] * M_PI/180.0];
-        [view.layer setValue:x_rot forKeyPath:@"transform.rotation.x"];
+        [self.layer setValue:x_rot forKeyPath:@"transform.rotation.x"];
         x_rotation = [x_rot floatValue];
         
         [self rotate_and_translate];
@@ -608,7 +627,7 @@
             return;
         }
         y_rot = [NSNumber numberWithFloat:[y_rot floatValue] * M_PI/180.0];
-        [view.layer setValue:y_rot forKeyPath:@"transform.rotation.y"];
+        [self.layer setValue:y_rot forKeyPath:@"transform.rotation.y"];
         y_rotation = [y_rot floatValue];
         
         [self rotate_and_translate];
@@ -636,7 +655,7 @@
             return;
         }
         z_rot = [NSNumber numberWithFloat:[z_rot floatValue] * M_PI/180.0];
-        [view.layer setValue:z_rot forKeyPath:@"transform.rotation.z"];
+        [self.layer setValue:z_rot forKeyPath:@"transform.rotation.z"];
         z_rotation = [z_rot floatValue];
         
         [self rotate_and_translate];
@@ -675,10 +694,9 @@
     self.clip = [args objectForKey:@"clip"];
     
     if (clip.count > 3) {
-        CGFloat
-        clip_x = [(NSNumber *)[clip objectAtIndex:0] floatValue],
-        clip_y = [(NSNumber *)[clip objectAtIndex:1] floatValue],
-        clip_w = [(NSNumber *)[clip objectAtIndex:2] floatValue],
+        clip_x = [(NSNumber *)[clip objectAtIndex:0] floatValue];
+        clip_y = [(NSNumber *)[clip objectAtIndex:1] floatValue];
+        clip_w = [(NSNumber *)[clip objectAtIndex:2] floatValue];
         clip_h = [(NSNumber *)[clip objectAtIndex:3] floatValue];
         // create the bounding box
         
@@ -687,8 +705,11 @@
         NSLog(@"Frame before: %f, %f, %f, %f", self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
         //*/
         
-        self.bounds = CGRectMake(clip_x, clip_y, clip_w, clip_h);
-        self.layer.position = CGPointMake(clip_x + clip_w/2.0, clip_y + clip_h/2.0);
+        self.bounds = CGRectMake(0.0, 0.0, clip_w, clip_h);
+        view.layer.position = CGPointMake(-clip_x, -clip_y);
+        [self set_anchor];
+        [self rotate_and_translate];
+        //self.layer.position = CGPointMake(clip_x + clip_w/2.0, clip_y + clip_h/2.0);
         
         /* for testing
         NSLog(@"clip after: %f, %f, %f, %f", self.layer.bounds.origin.x, self.layer.bounds.origin.y, self.layer.bounds.size.width, self.layer.bounds.size.height);
@@ -749,23 +770,21 @@
  */
 
 - (void)get_position:(NSMutableDictionary *)dictionary {
-    NSArray *position = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.position.x], [NSNumber numberWithFloat:view.layer.position.y], [NSNumber numberWithFloat:view.layer.zPosition], nil];
+    NSArray *position = [NSArray arrayWithObjects:[NSNumber numberWithFloat:x_position], [NSNumber numberWithFloat:y_position], [NSNumber numberWithFloat:self.layer.zPosition], nil];
         
     [dictionary setObject:position forKey:@"position"];
 }
 
 - (void)get_x:(NSMutableDictionary *)dictionary {
-    //[dictionary setObject:[NSNumber numberWithFloat:view.layer.position.x] forKey:@"x"];
     [dictionary setObject:[NSNumber numberWithFloat:x_position] forKey:@"x"];
 }
 
 - (void)get_y:(NSMutableDictionary *)dictionary {
-    //[dictionary setObject:[NSNumber numberWithFloat:view.layer.position.y] forKey:@"y"];
     [dictionary setObject:[NSNumber numberWithFloat:y_position] forKey:@"y"];
 }
 
 - (void)get_z:(NSMutableDictionary *)dictionary {
-    [dictionary setObject:[NSNumber numberWithFloat:view.layer.zPosition] forKey:@"z"];
+    [dictionary setObject:[NSNumber numberWithFloat:self.layer.zPosition] forKey:@"z"];
 }
 
 /**
@@ -799,7 +818,7 @@
  */
 
 - (void)get_anchor_point:(NSMutableDictionary *)dictionary {
-    NSArray *anchor_point = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.anchorPoint.x], [NSNumber numberWithFloat:view.layer.anchorPoint.y], [NSNumber numberWithFloat:view.layer.anchorPointZ], nil];
+    NSArray *anchor_point = [NSArray arrayWithObjects:[NSNumber numberWithFloat:x_anchor], [NSNumber numberWithFloat:y_anchor], [NSNumber numberWithFloat:self.layer.anchorPointZ], nil];
         
     [dictionary setObject:anchor_point forKey:@"anchor_point"];
 }
@@ -809,7 +828,7 @@
  */
 
 - (void)get_scale:(NSMutableDictionary *)dictionary {
-    NSArray *scale = [NSArray arrayWithObjects:[view.layer valueForKeyPath:@"transform.scale.x"], [view.layer valueForKeyPath:@"transform.scale.y"], [view.layer valueForKeyPath:@"transform.scale.z"], nil];
+    NSArray *scale = [NSArray arrayWithObjects:[self.layer valueForKeyPath:@"transform.scale.x"], [self.layer valueForKeyPath:@"transform.scale.y"], [self.layer valueForKeyPath:@"transform.scale.z"], nil];
         
     [dictionary setObject:scale forKey:@"scale"];
 }
@@ -819,19 +838,19 @@
  */
 
 - (void)get_x_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *x_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
+    NSNumber *x_rot = [NSNumber numberWithFloat:[[self.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
         
     [dictionary setObject:x_rot forKey:@"x_rotation"];
 }
 
 - (void)get_y_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *y_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
+    NSNumber *y_rot = [NSNumber numberWithFloat:[[self.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
         
     [dictionary setObject:y_rot forKey:@"y_rotation"];
 }
 
 - (void)get_z_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *z_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
+    NSNumber *z_rot = [NSNumber numberWithFloat:[[self.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
         
     [dictionary setObject:z_rot forKey:@"z_rotation"];
 }
@@ -874,12 +893,6 @@
     if (!self.clipsToBounds) {
         [dictionary removeObjectForKey:@"clip"];
     } else if ([dictionary objectForKey:@"clip"]) {
-        CGFloat
-        clip_x = self.bounds.origin.x,
-        clip_y = self.bounds.origin.y,
-        clip_w = self.bounds.size.width,
-        clip_h = self.bounds.size.height;
-        
         NSArray *clipBox = [NSArray arrayWithObjects:[NSNumber numberWithFloat:clip_x], [NSNumber numberWithFloat:clip_y], [NSNumber numberWithFloat:clip_w], [NSNumber numberWithFloat:clip_h], nil];
         
         [dictionary setObject:clipBox forKey:@"clip"];
@@ -899,7 +912,7 @@
  */
 
 - (void)get_center:(NSMutableDictionary *)dictionary {
-    NSArray *coords = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.center.x], [NSNumber numberWithFloat:view.center.y], nil];
+    NSArray *coords = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.center.x + x_position - x_anchor], [NSNumber numberWithFloat:view.center.y + y_position - y_anchor], nil];
     [dictionary setObject:coords forKey:@"center"];
 }
 
@@ -975,10 +988,10 @@
         return [NSNumber numberWithBool:NO];
     }
     
-    CGFloat x = view.layer.position.x + [[args objectAtIndex:0] floatValue];
-    CGFloat y = view.layer.position.y + [[args objectAtIndex:1] floatValue];
+    x_position += [[args objectAtIndex:0] floatValue];
+    y_position += [[args objectAtIndex:1] floatValue];
     
-    view.layer.position = CGPointMake(x, y);
+    [self rotate_and_translate];
     return [NSNumber numberWithBool:YES];
 }
 
@@ -1060,17 +1073,17 @@
     [self.superview sendSubviewToBack:self];
     return [NSNumber numberWithBool:YES];
 }
-
+// TODO: fix this
 - (id)do_move_anchor_point:(NSArray *)args {
     if (!([args count] >= 2)) {
         return [NSNumber numberWithBool:NO];
     }
     
     CGFloat
-    x = [[args objectAtIndex:0] floatValue],
-    y = [[args objectAtIndex:1] floatValue];
+    x = [(NSNumber *)[args objectAtIndex:0] floatValue]/w_size + view.layer.position.x,
+    y = [(NSNumber *)[args objectAtIndex:1] floatValue]/h_size + view.layer.position.y;
     
-    view.layer.anchorPoint = CGPointMake(x, y);
+    self.layer.anchorPoint = CGPointMake(x, y);
     return [NSNumber numberWithBool:YES];
 }
 
@@ -1090,7 +1103,7 @@
     for (TrickplayAnimation *anim in [animations allKeys]) {
         [anim animationDidStop:nil finished:NO];
     }
-    [view.layer removeAllAnimations];
+    [self.layer removeAllAnimations];
     [animations removeAllObjects];
     
     return [NSNumber numberWithBool:YES];

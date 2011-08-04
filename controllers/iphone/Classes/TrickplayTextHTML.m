@@ -28,6 +28,9 @@
         self.webview = [[[UIWebView alloc] initWithFrame:CGRectMake(0.0, 0.0, 2000.0, 2000.0)] autorelease];
         [view addSubview:webview];
         view.layer.anchorPoint = CGPointMake(0.0, 0.0);
+        view.layer.position = CGPointMake(0.0, 0.0);
+        webview.layer.anchorPoint = CGPointMake(0.0, 0.0);
+        webview.layer.position = CGPointMake(0.0, 0.0);
                 
         self.text = @"";
         self.origText = @"";
@@ -435,6 +438,62 @@
     }
 }
 
+
+/**
+ * Set the background color of the Text.
+ */
+
+- (void)set_background_color:(NSDictionary *)args {
+    // ** Get the color and alpha values **
+    CGFloat a_red, a_green, a_blue, a_alpha;
+    if ([[args objectForKey:@"background_color"] isKindOfClass:[NSArray class]]) {
+        NSArray *colorArray = [args objectForKey:@"background_color"];
+        if (!colorArray || [colorArray count] < 3) {
+            return;
+        }
+        
+        a_red = [(NSNumber *)[colorArray objectAtIndex:0] floatValue]/255.0;
+        a_green = [(NSNumber *)[colorArray objectAtIndex:1] floatValue]/255.0;
+        a_blue = [(NSNumber *)[colorArray objectAtIndex:2] floatValue]/255.0;
+        
+        if ([colorArray count] > 3) {
+            a_alpha = [(NSNumber *)[colorArray objectAtIndex:3] floatValue]/255.0;
+        } else {
+            a_alpha = textAlpha;
+        }
+    } else if ([[args objectForKey:@"background_color"] isKindOfClass:[NSString class]]) {
+        NSString *hexString = [args objectForKey:@"background_color"];
+        if (!hexString || [hexString length] < 6) {
+            return;
+        }
+        
+        unsigned int value;
+        
+        if ([hexString characterAtIndex:0] == '#') {
+            hexString = [hexString substringFromIndex:1];
+        }
+        
+        [[NSScanner scannerWithString:hexString] scanHexInt:&value];
+        if ([hexString length] > 6) {
+            // alpha exists
+            a_red = ((value & 0xFF000000) >> 24)/255.0;
+            a_green = ((value & 0x00FF0000) >> 16)/255.0;
+            a_blue = ((value & 0x0000FF00) >> 8)/255.0;
+            a_alpha = (value & 0x000000FF)/255.0;
+        } else {
+            // just RGB
+            a_red = ((value & 0xFF0000) >> 16)/255.0;
+            a_green = ((value & 0x00FF00) >> 8)/255.0;
+            a_blue = (value & 0x0000FF)/255.0;
+            a_alpha = textAlpha;
+        }
+    } else {
+        return;
+    }
+    
+    webview.backgroundColor = [UIColor colorWithRed:a_red green:a_green blue:a_blue alpha:a_alpha];
+}
+
 /**
  * Setter function
  */
@@ -505,7 +564,6 @@
         [dictionary setObject:origText forKey:@"text"];
     }
 }
-
 
 /**
  * Get the font, this parses it to match HTML

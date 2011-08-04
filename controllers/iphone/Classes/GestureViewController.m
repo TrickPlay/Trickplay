@@ -689,6 +689,7 @@
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
         
         if ([args objectAtIndex:4] && ([args objectAtIndex:4] != @"")) {
+            //TODO: may need to subtract from height
             mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
         }
         

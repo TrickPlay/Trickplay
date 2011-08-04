@@ -79,7 +79,7 @@
         [animation_x setToValue:[NSNumber numberWithFloat:[view get_x_prime]]];
         [animation_x setDuration:[duration floatValue]/1000.0];
         animation_x.delegate = self;
-        [view.view.layer addAnimation:animation_x forKey:@"x_position"];
+        [view.layer addAnimation:animation_x forKey:@"x_position"];
         animationCount++;
     }
     if (y) {
@@ -90,7 +90,7 @@
         [animation_y setToValue:[NSNumber numberWithFloat:[view get_y_prime]]];
         [animation_y setDuration:[duration floatValue]/1000.0];
         animation_y.delegate = self;
-        [view.view.layer addAnimation:animation_y forKey:@"y_position"];
+        [view.layer addAnimation:animation_y forKey:@"y_position"];
         animationCount++;
     }
     if (z) {
@@ -152,7 +152,7 @@
             //animation.rotationMode = kCAAnimationRotateAuto;
             animation.duration = [duration floatValue]/1000.0;
             animation.delegate = self;
-            [view.view.layer addAnimation:animation forKey:@"z_rotation_arc"];
+            [view.layer addAnimation:animation forKey:@"z_rotation_arc"];
             animationCount++;
         }
         //*
@@ -162,7 +162,7 @@
         [animation setToValue:z_rot];
         [animation setDuration:[duration floatValue]/1000.0];
         animation.delegate = self;
-        [view.view.layer addAnimation:animation forKey:@"z_rotation"];
+        [view.layer addAnimation:animation forKey:@"z_rotation"];
         animationCount++;
         //*/
         view.z_rotation = [z_rot floatValue];
@@ -184,7 +184,7 @@
         [animation_x setToValue:[NSNumber numberWithFloat:view.x_scale]];
         [animation_x setDuration:[duration floatValue]/1000.0];
         animation_x.delegate = self;
-        [view.view.layer addAnimation:animation_x forKey:@"scale_x"];
+        [view.layer addAnimation:animation_x forKey:@"scale_x"];
         animationCount++;
     }
     if (scale_y) {
@@ -195,7 +195,7 @@
         [animation_y setToValue:[NSNumber numberWithFloat:view.y_scale]];
         [animation_y setDuration:[duration floatValue]/1000.0];
         animation_y.delegate = self;
-        [view.view.layer addAnimation:animation_y forKey:@"scale_y"];
+        [view.layer addAnimation:animation_y forKey:@"scale_y"];
         animationCount++;
     }
     
@@ -227,38 +227,38 @@
     
     //*
     if (!flag) {
-        [view.view.layer setValue:[NSNumber numberWithFloat:view.x_scale] forKeyPath:@"transform.scale.x"];
-        [view.view.layer setValue:[NSNumber numberWithFloat:view.y_scale] forKeyPath:@"transform.scale.y"];
-        view.view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
+        [view.layer setValue:[NSNumber numberWithFloat:view.x_scale] forKeyPath:@"transform.scale.x"];
+        [view.layer setValue:[NSNumber numberWithFloat:view.y_scale] forKeyPath:@"transform.scale.y"];
+        view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
         view.view.layer.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
-        [view.view.layer setValue:[NSNumber numberWithFloat:view.z_rotation] forKeyPath:@"transform.rotation.z"];
+        [view.layer setValue:[NSNumber numberWithFloat:view.z_rotation] forKeyPath:@"transform.rotation.z"];
         view.view.layer.opacity = view.opacity;
-    } else if ([view.view.layer animationForKey:@"scale_x"] == anim) {
-        [view.view.layer removeAnimationForKey:@"scale_x"];
-        [view.view.layer setValue:[NSNumber numberWithFloat:view.x_scale] forKeyPath:@"transform.scale.x"];
-    } else if ([view.view.layer animationForKey:@"scale_y"] == anim) {
-        [view.view.layer removeAnimationForKey:@"scale_y"];
-        [view.view.layer setValue:[NSNumber numberWithFloat:view.y_scale] forKeyPath:@"transform.scale.y"];
-    } else if ([view.view.layer animationForKey:@"x_position"] == anim) {
-        [view.view.layer removeAnimationForKey:@"x_position"];
+    } else if ([view.layer animationForKey:@"scale_x"] == anim) {
+        [view.layer removeAnimationForKey:@"scale_x"];
+        [view.layer setValue:[NSNumber numberWithFloat:view.x_scale] forKeyPath:@"transform.scale.x"];
+    } else if ([view.layer animationForKey:@"scale_y"] == anim) {
+        [view.layer removeAnimationForKey:@"scale_y"];
+        [view.layer setValue:[NSNumber numberWithFloat:view.y_scale] forKeyPath:@"transform.scale.y"];
+    } else if ([view.layer animationForKey:@"x_position"] == anim) {
+        [view.layer removeAnimationForKey:@"x_position"];
         //[view.layer setValue:[NSNumber numberWithFloat:[self get_x_prime]] forKey:@"position.x"];
-        view.view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
-    } else if ([view.view.layer animationForKey:@"y_position"] == anim) {
-        [view.view.layer removeAnimationForKey:@"y_position"];
+        view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
+    } else if ([view.layer animationForKey:@"y_position"] == anim) {
+        [view.layer removeAnimationForKey:@"y_position"];
         //[view.layer setValue:[NSNumber numberWithFloat:[self get_y_prime]] forKey:@"position.y"];
-        view.view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
+        view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
     } else if ([view.view.layer animationForKey:@"w_size"] == anim) {
         [view.view.layer removeAnimationForKey:@"w_size"];
         view.view.layer.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
     } else if ([view.view.layer animationForKey:@"h_size"] == anim) {
         [view.view.layer removeAnimationForKey:@"h_size"];
         view.view.layer.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
-    } else if ([view.view.layer animationForKey:@"z_rotation"] == anim) {
-        [view.view.layer removeAnimationForKey:@"z_rotation"];
-        [view.view.layer setValue:[NSNumber numberWithFloat:view.z_rotation] forKeyPath:@"transform.rotation.z"];
-    } else if ([view.view.layer animationForKey:@"z_rotation_arc"] == anim) {
-        [view.view.layer removeAnimationForKey:@"z_rotation_arc"];
-        view.view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
+    } else if ([view.layer animationForKey:@"z_rotation"] == anim) {
+        [view.layer removeAnimationForKey:@"z_rotation"];
+        [view.layer setValue:[NSNumber numberWithFloat:view.z_rotation] forKeyPath:@"transform.rotation.z"];
+    } else if ([view.layer animationForKey:@"z_rotation_arc"] == anim) {
+        [view.layer removeAnimationForKey:@"z_rotation_arc"];
+        view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
     } else if ([view.view.layer animationForKey:@"opacity"] == anim) {
         [view.view.layer removeAnimationForKey:@"opacity"];
         view.view.layer.opacity = view.opacity;
