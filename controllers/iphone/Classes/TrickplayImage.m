@@ -56,6 +56,15 @@
 #pragma mark Deleter
 
 /**
+ * Stop tiling
+ */
+- (void)delete_tile {
+    BOOL toTileWidth = NO;
+    BOOL toTileHeight = NO;
+    [((AsyncImageView *)view) setTileWidth:toTileWidth height:toTileHeight];
+}
+
+/**
  * Deleter function
  */
 
@@ -115,6 +124,17 @@
 - (void)get_src:(NSMutableDictionary *)dictionary {
     if ([dictionary objectForKey:@"src"] && src) {
         [dictionary setObject:src forKey:@"src"];
+    }
+}
+
+/**
+ * Get the tile
+ */
+
+- (void)get_tile:(NSMutableDictionary *)dictionary {
+    if ([dictionary objectForKey:@"tile"]) {
+        NSArray *tiling = [NSArray arrayWithObjects:[NSNumber numberWithBool:((AsyncImageView *)view).tileWidth], [NSNumber numberWithBool:((AsyncImageView *)view).tileHeight], nil];
+        [dictionary setObject:tiling forKey:@"tile"];
     }
 }
 

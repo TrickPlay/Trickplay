@@ -14,6 +14,8 @@
 @synthesize dataCacheDelegate;
 @synthesize otherDelegate;
 @synthesize resourceKey;
+@synthesize tileWidth;
+@synthesize tileHeight;
 @synthesize image;
 @synthesize loaded;
 
@@ -197,25 +199,32 @@
         return;
     }
     
-    //Since we are retaining the image, we append with ret_ref.  this reminds us to release at a later date.
-    CGImageRef image_ref = CGImageRetain(self.image.CGImage); 
-    
-    //This sets the tile to the native size of the image.  Change this value to adjust the size of an individual "tile."
-    CGRect image_rect = CGRectMake(0.0, 0.0, self.image.size.width, self.image.size.height);
-    
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
     if (tileHeight || tileWidth) {
+        //Since we are retaining the image, we append with ret_ref.  this reminds us to release at a later date.
+        CGImageRef image_ref = CGImageRetain(self.image.CGImage); 
+        
+        //This sets the tile to the native size of the image.  Change this value to adjust the size of an individual "tile."
+        CGRect image_rect;
+        if (!tileHeight) {
+            image_rect = CGRectMake(0.0, image.size.height, image.size.width, self.bounds.size.height);
+        } else if (!tileWidth) {
+            image_rect = CGRectMake(0.0, 0.0, self.bounds.size.width, image.size.height);
+        } else {
+            image_rect = CGRectMake(0.0, 0.0, self.image.size.width, self.image.size.height);
+        }
+        
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        
         CGContextClearRect(context, rect);
         CGContextTranslateCTM(context, 0, image.size.height);
         CGContextScaleCTM(context, 1.0, -1.0);
-    
+        
         CGContextDrawTiledImage(context, image_rect, image_ref);
+        
+        CGImageRelease(image_ref);
     } else {
         [image drawInRect:rect];
     }
-    
-    CGImageRelease(image_ref);
 }
 //*/
  
