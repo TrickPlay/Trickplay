@@ -103,33 +103,35 @@ TutorialView = Class(View, function(self, router, ...)
                 -- Page 1
                 -- next add some awesome descriptions of how to play
                 local text_left_1 = Text{
-                    text = "Each player is initially dealt two cards visible\nonly "..
-                           "to themselves. Over four betting\nrounds an additional "..
-                           "five cards are dealt face\nup on the table for all to see."..
+                    text = "Each player is initially dealt two cards visible only "..
+                           "to themselves. Over four betting rounds an additional "..
+                           "five cards are dealt face up on the table for all to see."..
                            "\n\nThe goal is to create the best five-card hand\npossible"..
-                           " from your two cards and the five\nshared cards on the "..
+                           " from your two cards and the five shared cards on the "..
                            "table. To win the game\nyou must win all the chips, "..
-                           "eliminating your\nopponents.\n\nIn No Limit Hold \'Em you "..
-                           "can bet as much as\nyou like, even going all in by betting "..
-                           "all your\nchips.",
+                           "eliminating your opponents.\n\nIn No Limit Hold \'Em you "..
+                           "can bet as much as you like, even going all in by betting "..
+                           "all your chips.",
                     size = {685, 600},
                     position = {198, 228},
                     font = "Deja Vu Sans Condensed 32px",
-                    color = Colors.WHITE
+                    color = Colors.WHITE,
+                    wrap = true
                 }
                 local text_right_1 = Text{
                     text = "On the table there are three marker chips:\n\tD = Dealer\n"..
                            "\tSB = Small Blind\n\tBB = Big Blind\nAfter each hand the "..
-                           "chips rotate clockwise\none position.\n\nThe cards are "..
-                           "dealt starting with the player\none position from the "..
-                           "dealer.\n\nThe first round of betting begins with the\n"..
-                           "player one position clockwise from the Big\nBlind. Every "..
-                           "round after begins with the\nplayer one position "..
+                           "chips rotate clockwise one position.\n\nThe cards are "..
+                           "dealt starting with the player one position from the "..
+                           "dealer.\n\nThe first round of betting begins with the "..
+                           "player one position clockwise from the Big Blind. Every "..
+                           "round after begins with the player one position "..
                            "clockwise from the Deal.",
                     size = {685,600},
                     position = {1038, 228},
                     font = "Deja Vu Sans Condensed 32px",
-                    color = Colors.WHITE
+                    color = Colors.WHITE,
+                    wrap = true
                 }
                 -- page number 1
                 local page_number_1 = Text{
