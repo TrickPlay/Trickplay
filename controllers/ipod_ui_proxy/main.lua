@@ -1,4 +1,4 @@
-dumptable = function() end
+--dumptable = function() end
 -- Load the AdvancedUI Classes into a class table.
 local class_table = dofile("AdvancedUIClasses.lua")
 
@@ -13,6 +13,7 @@ function controllers:on_controller_connected(controller)
     end
     function controller:on_advanced_ui_ready()
         controller.factory = loadfile("AdvancedUIAPI.lua")( controller )
+        print(controller.factory)
     end
 
     local key_handler = {}
@@ -139,7 +140,3 @@ end
 
 
 screen:show()
-screen:add(Text{
-    w = 100, h = 100, x = 200, y = 200, color = "FF00FF",
-    markup = "text<span style='color:#ff00ff55;font-family:arial;font-variant:small-caps;font-stretch:condensed;font-size:32px;font-style:italic;font-weight:bold;text-decoration:underline;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:10px'>text</span>"
-})
