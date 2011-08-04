@@ -42,8 +42,8 @@ Colors = {
 
 --------- Fonts and junk --------------------
 
-PLAYER_NAME_FONT = "DejaVu Serif Condensed 28px"
-PLAYER_ACTION_FONT = "DejaVu Serif Condensed 34px"
+PLAYER_NAME_FONT = "DejaVu Serif Condensed normal 28px"
+PLAYER_ACTION_FONT = "DejaVu Serif Condensed normal 34px"
 WINNER_FONT = "DejaVu Serif Condensed Bold 28px"
 
 CUSTOMIZE_TINY_FONT = "KacstArt 24px"

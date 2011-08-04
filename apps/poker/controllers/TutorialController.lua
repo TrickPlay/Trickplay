@@ -27,14 +27,7 @@ TutorialController = Class(Controller, function(self, view, router, ...)
         [keys.Left] = function(self) self:move(Directions.LEFT) end,
         [keys.Right] = function(self) self:move(Directions.RIGHT) end,
         [keys.Return] = function(self)
-        --[[
-            if selector == 1 and c == 1 
-            or selector == 2 and c == 2 then leave_help()
-            elseif selector == 2 and c == 1 then self:move_slide_right()
-            elseif selector == 1 and c == 2 then self:move_slide_left()
-            else error("wtf")
-            end
-        --]]
+            self:handle_click()
         end,
     }
     keyTable[keys.OK] = keyTable[keys.Return]
