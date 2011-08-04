@@ -482,6 +482,8 @@
     h_size = [height floatValue];
     
     view.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
+    
+    [view setNeedsDisplay];
 }
 
 - (void)set_w:(NSDictionary *)args {
@@ -565,23 +567,6 @@
     
     [self.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
     [self.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
-    /*
-    CABasicAnimation *animation_x = [CABasicAnimation animationWithKeyPath:@"transform.scale.x"];
-    animation_x.fillMode = kCAFillModeForwards;
-    animation_x.removedOnCompletion = NO;
-    [animation_x setToValue:[NSNumber numberWithFloat:x_scale]];
-    [animation_x setDuration:3.0];
-    animation_x.delegate = self;
-    [view.layer addAnimation:animation_x forKey:@"scale_x"];
-    
-    CABasicAnimation *animation_y = [CABasicAnimation animationWithKeyPath:@"transform.scale.y"];
-    animation_y.fillMode = kCAFillModeForwards;
-    animation_y.removedOnCompletion = NO;
-    [animation_y setToValue:[NSNumber numberWithFloat:y_scale]];
-    [animation_y setDuration:3.0];
-    animation_y.delegate = self;
-    [view.layer addAnimation:animation_y forKey:@"scale_y"];
-     //*/
 }
 
 /**
@@ -738,7 +723,7 @@
  * Delete Clip
  */
 
-- (void)delete_clip:(NSDictionary *)args {
+- (void)delete_clip {
     self.clipsToBounds = NO;
 }
 

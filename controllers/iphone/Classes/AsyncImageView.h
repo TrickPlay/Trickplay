@@ -43,6 +43,8 @@
 @property (assign) BOOL loaded;
 @property (retain) UIImage *image;
 @property (retain) id resourceKey;
+@property (assign) BOOL tileWidth;
+@property (assign) BOOL tileHeight;
 @property (retain) id <AsyncImageViewDelegate> otherDelegate;
 @property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
