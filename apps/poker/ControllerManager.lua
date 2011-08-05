@@ -152,6 +152,8 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 "assets/phone/betting/button-help.png")
             controller:declare_resource("new_game_button",
                 "assets/phone/betting/button-new-game.png")
+            controller:declare_resource("click_sound",
+                "assets/sounds/enter.mp3")
 
             controller:clear_and_set_background("splash")
         end

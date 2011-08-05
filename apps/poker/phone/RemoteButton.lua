@@ -40,6 +40,7 @@ function(button, controller, image_src, focus_src, position, size)
             if button.callback then button:callback() end
         end
         focus:show()
+        controller:play_sound("click_sound", 1)
         button_timer:start()
     end
 
