@@ -19,7 +19,6 @@
         self.view = aView;
         self.socketManager = sockman;
         touchEventsAllowed = NO;
-        clickEventsAllowed = YES;
         swipeStarted = NO;
         swipeSent = NO;
         keySent = NO;
@@ -34,7 +33,7 @@
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount {
-	if (socketManager)
+	if (socketManager && !touchEventsAllowed)
 	{
 	    int index;	
 		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", thekey];
@@ -229,16 +228,6 @@
 	[self resetTouches];
     // TODO: tell trickplay the touches cancelled
 }
-
-/** depricated
-- (void)startClicks {
-    clickEventsAllowed = YES;
-}
-
-- (void)stopClicks {
-    clickEventsAllowed = NO;
-}
-//*/
 
 - (void)startTouches {
     NSLog(@"start touches");
