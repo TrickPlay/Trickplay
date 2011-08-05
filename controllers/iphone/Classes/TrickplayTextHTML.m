@@ -24,26 +24,27 @@
 
 - (id)initWithID:(NSString *)textID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager {
     if ((self = [super initWithID:textID objectManager:objectManager])) {
-        self.view = [[[UIView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
-        self.webview = [[[UIWebView alloc] initWithFrame:CGRectMake(0.0, 0.0, 2000.0, 2000.0)] autorelease];
-        [view addSubview:webview];
+        //self.view = [[[UIView alloc] initWithFrame:[self getFrameFromArgs:args]] autorelease];
+        self.view = [[[UIWebView alloc] initWithFrame:CGRectMake(0.0, 0.0, 2000.0, 2000.0)] autorelease];
+        //[view addSubview:webview];
         view.layer.anchorPoint = CGPointMake(0.0, 0.0);
         view.layer.position = CGPointMake(0.0, 0.0);
-        webview.layer.anchorPoint = CGPointMake(0.0, 0.0);
-        webview.layer.position = CGPointMake(0.0, 0.0);
+        //webview.layer.anchorPoint = CGPointMake(0.0, 0.0);
+        //webview.layer.position = CGPointMake(0.0, 0.0);
                 
         self.text = @"";
         self.origText = @"";
         
         view.userInteractionEnabled = YES;
         view.clipsToBounds = YES;
+        view.layer.needsDisplayOnBoundsChange = YES;
         
-        webview.contentMode = UIViewContentModeRedraw;
+        view.contentMode = UIViewContentModeRedraw;
         
         view.backgroundColor = [UIColor clearColor];
         view.opaque = NO;
-        webview.backgroundColor = [UIColor clearColor];
-        webview.opaque = NO;
+        //webview.backgroundColor = [UIColor clearColor];
+        //webview.opaque = NO;
         
         maxLength = 0;
         
@@ -190,7 +191,7 @@
 }
 
 - (void)setHTML {
-    [webview loadHTMLString:[self getHtml] baseURL:nil];
+    [(UIWebView *)view loadHTMLString:[self getHtml] baseURL:nil];
 }
 
 /**
@@ -491,7 +492,7 @@
         return;
     }
     
-    webview.backgroundColor = [UIColor colorWithRed:a_red green:a_green blue:a_blue alpha:a_alpha];
+    view.backgroundColor = [UIColor colorWithRed:a_red green:a_green blue:a_blue alpha:a_alpha];
 }
 
 /**
@@ -544,11 +545,11 @@
     if ([dictionary objectForKey:@"background_color"]) {
         NSNumber *a_red, *a_green, *a_blue, *an_alpha;
         
-        const CGFloat *components = CGColorGetComponents(webview.layer.backgroundColor);
+        const CGFloat *components = CGColorGetComponents(view.layer.backgroundColor);
         a_red = [NSNumber numberWithFloat:components[0] * 255.0];
         a_green = [NSNumber numberWithFloat:components[1] * 255.0];
         a_blue = [NSNumber numberWithFloat:components[2] * 255.0];
-        an_alpha = [NSNumber numberWithFloat:CGColorGetAlpha(webview.layer.backgroundColor) * 255.0];
+        an_alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.backgroundColor) * 255.0];
         
         NSArray *colorArray = [NSArray arrayWithObjects:a_red, a_green, a_blue, an_alpha, nil];
         [dictionary setObject:colorArray forKey:@"background_color"];
