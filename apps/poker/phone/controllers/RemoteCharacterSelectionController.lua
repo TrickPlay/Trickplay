@@ -37,8 +37,6 @@ function(ctrl, router, controller, ...)
             dog_buttons[pos]:hide()
             playing[pos] = true
         end
-        print("hereish")
-        dumptable(playing)
         for i = 1,6 do
             if not playing[i] then
                 dog_buttons[i]:show()
