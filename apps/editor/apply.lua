@@ -314,7 +314,7 @@ function inspector_apply (v, inspector)
 		   		local i,j = string.find(items_str, ",")
 		   		if i then 
 						if  tonumber(string.sub(items_str, items_idx, i-1)) then
-							if tonumber(string.sub(items_str, items_idx, i-1)) > #v.items then 
+							if tonumber(string.sub(items_str, items_idx, i-1)) > #v.items  or  tonumber(string.sub(items_str, items_idx, i-1)) < 1  then 
 			        			editor.error_message("012","selected_items",nil,nil,inspector)
 								return -1 
 							else 
@@ -327,7 +327,7 @@ function inspector_apply (v, inspector)
 						end 
 				else 
 					 if tonumber(items_str) then 
-						if tonumber(items_str) > #v.items then 
+						if tonumber(items_str) > #v.items or tonumber(items_str) < 1 then 
 			        		editor.error_message("012","selected_items",nil,nil,inspector)
 							return -1 
 						else
