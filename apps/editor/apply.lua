@@ -1,6 +1,19 @@
-dofile("util.lua") --1208
+dofile("util.lua") 
 
 local factory = ui.factory
+
+
+local check_number_val = function(val, name)
+	if tonumber(val) == nil then 
+		return -1 
+	end 
+end
+
+local number_attrs = { "x", "y", "z", "w", "h", "opacity", "button_radius", "select_radius", "line_space", "volume", "ui_width", "ui_height", "border_width", "border_corner_radius", "on_screen_duration", "fade_duration", "padding", "label_padding", "display_width", "display_height", "arrow_sz", "arrow_dist_to_frame", "visible_w", "visible_h", "virtual_w", "virtual_h", "frame_thickness", "bar_thickness", "bar_offset", "box_width", "overall_diameter", "dot_diameter", "number_of_dots", "cycle_time", "progress", "menu_width", "horz_padding", "vert_spacing", "horz_spacing", "vert_offset", "separator_thickness", "rows", "columns", "cell_w", "cell_h", "cell_spacing", "cell_timing", "cell_timing_offset", "title_separator_thickness",
+} 
+
+local reserved_words = {"and", "end", "break", "do" ,"else", "elseif", "false", "for", "function", "if", "in",
+"local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
 
 
 function inspector_apply (v, inspector)
@@ -19,14 +32,14 @@ function inspector_apply (v, inspector)
       local rgba_map = {["r"] = 1, ["g"] = 2, ["b"] = 3, ["a"] = 4,}  
 
       local attr_map = {
-      	["itemsList"] = function(j)
-         local items, item
-		 if item_group:find_child("itemsList") then 
-		    if item_group:find_child("itemsList"):find_child("items_list") then 
-		        items = item_group:find_child("itemsList"):find_child("items_list")
-		    end 
-         end 
-		 if items then 
+      		["itemsList"] = function(j)
+         	local items, item
+		 	if item_group:find_child("itemsList") then 
+		    	if item_group:find_child("itemsList"):find_child("items_list") then 
+		        	items = item_group:find_child("itemsList"):find_child("items_list")
+		    	end 
+         	end 
+		 	if items then 
                local next = 1
                for next, _ in pairs(items.tiles) do 
 		       		item = items.tiles[next][1]
@@ -63,38 +76,65 @@ function inspector_apply (v, inspector)
               end,     
 		["alignment"] = function()
 	      	  local itemLists = {"left", "center", "right", }
+
               v.alignment = string.upper(itemLists[tonumber(item_group:find_child("alignment"):find_child("item_picker").selected_item)])
               end,     
        	["wrap_mode"] = function()
-	      local itemLists = {"none", "char", "word", "word_char"}
-	      if tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item) == 1 then 
-		   v.wrap = false
-                   v.wrap_mode = "CHAR"
-	      else 
-		   v.wrap = true
-                   v.wrap_mode = string.upper(itemLists[tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item)])
-	      end 
-              end,        
+	      	local itemLists = {"none", "char", "word", "word_char"}
+	      	if tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item) == 1 then 
+		   		v.wrap = false
+                v.wrap_mode = "CHAR"
+	      	else 
+		   		v.wrap = true
+                v.wrap_mode = string.upper(itemLists[tonumber(item_group:find_child("wrap_mode"):find_child("item_picker").selected_item)])
+	      	end 
+            end,        
        	["bwidth"] = function()
-              v.border_width = tonumber(item_group:find_child("bwidth"):find_child("input_text").text)
-              end,
+            --v.border_width = tonumber(item_group:find_child("bwidth"):find_child("input_text").text)
+			if check_number_val(item_group:find_child("bwidth"):find_child("input_text").text, "bwidth") then 
+			     editor.error_message("011","bwidth",nil,nil,inspector)
+			     return -1 
+			else 
+                   v.border_width = tonumber(item_group:find_child("bwidth"):find_child("input_text").text)
+			end
+            end,
        	["color"] = function(name)
-	      local attr_name = "color"
-	      if string.len(name) > 1 then 
-	           attr_name = name:sub(1,-2)
-	      end 
-	      local color_t = {}
-	      color_t = v[attr_name]
-	      color_t[rgba_map[string.sub(name,-1, -1)]] = tonumber(item_group:find_child(name):find_child("input_text").text)
-	      v[attr_name] = color_t
-		  
-	      end,
+	      	local attr_name = "color"
+	      	if string.len(name) > 1 then 
+	           	attr_name = name:sub(1,-2)
+	      	end 
+	      	local color_t = {}
+	      	color_t = v[attr_name]
+
+	      	--color_t[rgba_map[string.sub(name,-1, -1)]] = tonumber(item_group:find_child(name):find_child("input_text").text)
+		  	if check_number_val(item_group:find_child(name):find_child("input_text").text, name) then 
+			  	editor.error_message("011",name,nil,nil,inspector)
+			  	return -1
+		  	else 
+	      			color_t[rgba_map[string.sub(name,-1, -1)]] = tonumber(item_group:find_child(name):find_child("input_text").text)
+		  	end 
+
+	      	v[attr_name] = color_t
+	      	end,
        	["hor_arrow_y"] = function()
-	       v.hor_arrow_y = tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text)
-		end, 
+	       	-- v.hor_arrow_y = tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text)
+			if tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text) then 
+	       		v.hor_arrow_y = tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text)
+			else 
+			    editor.error_message("011","hor_arrow_y",nil,nil,inspector)
+				return -1 
+			end 
+			end, 
        	["vert_arrow_x"] = function()
-	       v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
-		end,
+	       	--v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
+			if tonumber(item_group:find_child("vert_arrow_y"):find_child("input_text").text) then 
+	       		v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_x"):find_child("input_text").text)
+			else 
+			    editor.error_message("011","vert_arrow_y",nil,nil,inspector)
+				return -1 
+			end 
+
+			end,
        	["reactive"] = function()
 	       if item_group:find_child("bool_checkreactive"):find_child("check1").opacity > 0 then 
 	            v.extra.reactive = true
@@ -219,12 +259,35 @@ function inspector_apply (v, inspector)
 			   end 
 	       end,
 		["name"] = function ()
+		--[[
 	       if v.extra then 
 	        	v.extra.prev_name = v.name  
 	       end 
 	       v.name = tostring(item_group:find_child("name"):find_child("input_text").text)
+		  ]]
+		  	   if v.extra then 
+		        	v.extra.prev_name = v.name  
+	    	   end 
+
+			   local name_val =  tostring(item_group:find_child("name"):find_child("input_text").text) 
+			   local name_format = "[%u%l_]+[%w_]*"
+			   local a, b = string.find(name_val, name_format) 
+			   if a and a == 1 and b == string.len(name_val) then 
+					for q, w in pairs (reserved_words) do 
+						if w == name_val then 
+							 editor.error_message("012","name",nil,nil,inspector)
+							 return -1 
+						end 
+					end 
+	       	   		v.name = tostring(item_group:find_child("name"):find_child("input_text").text)
+			   else 
+			        editor.error_message("012","name",nil,nil,inspector)
+					return -1 
+			   end
+
 	       end, 
 		["selected_items"] = function () 
+		--[[
 		    local items_str = tostring(item_group:find_child("selected_items"):find_child("input_text").text)
 		    local items_tbl = {}
 		    local items_idx = 1
@@ -240,38 +303,78 @@ function inspector_apply (v, inspector)
 					 end 
 				end 
 		    end 
+			v.extra.selected_items = items_tbl 
+			]]
+
+			local items_str = tostring(item_group:find_child("selected_items"):find_child("input_text").text)
+		    local items_tbl = {}
+		    local items_idx = 1
+
+		    while items_str ~= ""  do 
+		   		local i,j = string.find(items_str, ",")
+		   		if i then 
+						if  tonumber(string.sub(items_str, items_idx, i-1)) then
+							if tonumber(string.sub(items_str, items_idx, i-1)) > #v.items then 
+			        			editor.error_message("012","selected_items",nil,nil,inspector)
+								return -1 
+							else 
+								table.insert(items_tbl, tonumber(string.sub(items_str, items_idx, i-1)))
+								items_str = string.sub(items_str, j+1, -1) 
+							end 
+						else 
+			        		editor.error_message("012","selected_items",nil,nil,inspector)
+							return -1 
+						end 
+				else 
+					 if tonumber(items_str) then 
+						if tonumber(items_str) > #v.items then 
+			        		editor.error_message("012","selected_items",nil,nil,inspector)
+							return -1 
+						else
+							table.insert(items_tbl, tonumber(items_str))
+							items_str = ""
+						end
+					 else 
+			        	editor.error_message("012","selected_items",nil,nil,inspector)
+						return -1 
+					 end 
+				end 
+		    end 
 				v.extra.selected_items = items_tbl 
+
 			end 
+
       }       
 	  
       org_object, new_object = obj_map[v.type]()
       util.set_obj(org_object, v) 
 
 	  local apply = function (item_group) 
-	  
-      for i, j in pairs(item_group.children) do 
+	  	local inspector_deactivate = function ()
+			local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
+			inspector:add(rect)
+		end 
+
+      	for i, j in pairs(item_group.children) do 
           	  
 	      if j.name then
 		 	if j.name ~= "anchor_point" and j.name ~= "reactive" and j.name ~= "focusChanger" and j.name ~= "src" and j.name ~= "source" and j.name ~= "loop" and j.name ~= "skin" and j.name ~= "wrap_mode" and j.name ~= "items" and j.name ~= "itemsList" and j.name ~= "icon" and j.name ~= "items" and j.name ~= "expansion_location" and j.name ~= "tab_position" and j.name ~= "style" and j.name ~= "cell_size" and j.name ~= "vert_bar_visible" and j.name ~= "horz_bar_visible" and j.name ~= "cells_focusable" and j.name ~= "lock" and j.name ~="direction" and j.name ~= "justify" and j.name ~= "alignment" and j.name ~= "single_line" then 
 		 		if  item_group:find_child(j.name):find_child("input_text").text == nil  or item_group:find_child(j.name):find_child("input_text").text == ""then 
-					--print("여기 빈 공간이 있답니다. 그럼 여기 이 라인을 찍어주고 나가주셩야 하는데.. 왜 죽냐고요.. ") 
-					local inspector_deactivate = function ()
-					local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
-						inspector:add(rect)
-					end 
-					inspector_deactivate()
 					editor.error_message("007",j.name,nil,nil,inspector)
+					inspector_deactivate()
 	        		return -1 
 				 end 
               end 
 
-	      --if j.name == "editable" then 
-                     --v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
               if (attr_map[j.name]) then
-                     attr_map[j.name]()
+					if attr_map[j.name]() then 
+						inspector_deactivate()
+						return -1
+					end 
               elseif(v[j.name] ~= nil)then 
+			  --[[
+			  		-- Text Input Field
                      if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
-					 --0521
 					 	if j.name == "w" or j.name == "h" then 
 							if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
                             	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
@@ -291,68 +394,165 @@ function inspector_apply (v, inspector)
                             v[j.name] = tostring(item_group:find_child(j.name):find_child("input_text").text)
 			    	end 
              end
+			 ]]
+
+			 --	Text Input Field 
+              		if(tonumber(item_group:find_child(j.name):find_child("input_text").text)) then 
+						if j.name == "w" or j.name == "h" then 
+						 	if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
+                        	 	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+							end 
+			    	 	elseif j.name == "selected_item" then 
+							if tonumber(item_group:find_child(j.name):find_child("input_text").text) > #v.items or 
+							   tonumber(item_group:find_child(j.name):find_child("input_text").text) < 1 then 
+			        			editor.error_message("012","selected_item",nil,nil,inspector)
+								inspector_deactivate()
+								return -1 
+							else 
+                        		v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+							end
+						else
+                        	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+			    		end 
+                	else 
+			    		if v[j.name] == true or v[j.name] == false then
+							v[j.name] = toboolean(item_group:find_child(j.name):find_child("input_text").text)
+			    		else 
+							for q,w in pairs (number_attrs) do 
+								if w == j.name then 
+										 
+							--if j.name == "selected_item" or j.name == "w" or j.name == "h" or j.name == "x" or j.name == "y" or j.name == "z" or j.name == "opacity" or j.name == "button_radius" or j.name == "select_radius" or j.name == "line_space" then 
+									editor.error_message("011",j.name,nil,nil,inspector)
+									inspector_deactivate()
+	        						return -1 
+								end 
+							end 
+							if j.name == "message" then 
+								--print (tostring(item_group:find_child(j.name):find_child("input_text").text)) 
+							end 
+							if tostring(item_group:find_child(j.name):find_child("input_text").text) then 
+                        		v[j.name] = tostring(item_group:find_child(j.name):find_child("input_text").text)
+							else 
+								editor.error_message("011",j.name,nil,nil,inspector)
+								inspector_deactivate()
+	        					return -1 
+							end 
+			    		end 
+             		end
+
 	      elseif string.find(j.name,"color") then
-		     attr_map["color"](j.name)
+		    if attr_map["color"](j.name) then 
+				inspector_deactivate()
+				return -1
+			end
 	      elseif(j.name =="x_scale" or j.name =="y_scale")then 
-		     local scale_t = {}
-           	     scale_t[1] = item_group:find_child("x_scale"):find_child("input_text").text
-                     scale_t[2] = item_group:find_child("y_scale"):find_child("input_text").text
-		     v.scale = scale_t
+		     	local scale_t = {}
+           	    scale_t[1] = item_group:find_child("x_scale"):find_child("input_text").text
+                scale_t[2] = item_group:find_child("y_scale"):find_child("input_text").text
+		     	v.scale = scale_t
 	      elseif(j.name =="x_angle" or j.name =="y_angle" or j.name == "z_angle")then 
-		     local attr_n
-		     local rotation_t ={} 
-	             if j.name == "x_angle" then attr_n = "x_rotation"
-		     elseif j.name == "y_angle" then attr_n = "y_rotation"
-		     else attr_n = "z_rotation" end
-          	     rotation_t = v[attr_n] 
-          	     rotation_t[1] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-	  	     v[attr_n] = rotation_t 
+		     	local attr_n
+		     	local rotation_t ={} 
+	            if j.name == "x_angle" then attr_n = "x_rotation"
+		     	elseif j.name == "y_angle" then attr_n = "y_rotation"
+		     	else attr_n = "z_rotation" end
+          	    rotation_t = v[attr_n] 
+          	    rotation_t[1] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
+	  	     	v[attr_n] = rotation_t 
 	      elseif j.name == "cx" or j.name == "cy" or j.name == "cw" or j.name == "ch" then
-                     local not_checkbox = false
-                     if v.extra then 
-		         if(v.extra.type == "CheckBoxGroup")then
+                local not_checkbox = false
+                if v.extra then 
+		        	if(v.extra.type == "CheckBoxGroup")then
                             local csize_t = {}
                             csize_t[1] = item_group:find_child("cw"):find_child("input_text").text
                             csize_t[2] = item_group:find_child("ch"):find_child("input_text").text
- 		     	    v.check_size = csize_t
+ 		     	    		if tonumber(csize_t[1]) and tonumber(csize_t[2]) then 
+ 		     	    			v.check_size = csize_t
+							else 
+			    				editor.error_message("011","check size",nil,nil,inspector)
+								inspector_deactivate()
+								return -1 
+					 		end 
                          else
-                            not_checkbox = true
-		         end 
-		     else
-                            not_checkbox = true
-                     end
-                     if not_checkbox then 
+                            	not_checkbox = true
+		         		end 
+		     		else
+                    	not_checkbox = true
+                    end
+                    if not_checkbox then 
                             local clip_t = {}
-                            clip_t[1] = item_group:find_child("cx"):find_child("input_text").text
-                            clip_t[2] = item_group:find_child("cy"):find_child("input_text").text
-                            clip_t[3] = item_group:find_child("cw"):find_child("input_text").text
-                            clip_t[4] = item_group:find_child("ch"):find_child("input_text").text
+                            if tonumber(item_group:find_child("cx"):find_child("input_text").text) then 
+                	    clip_t[1] = item_group:find_child("cx"):find_child("input_text").text
+					else
+			        	editor.error_message("012","clip",nil,nil,inspector)
+						inspector_deactivate()
+						return -1 
+					end 
+					if tonumber(item_group:find_child("cy"):find_child("input_text").text) then 
+                    	clip_t[2] = item_group:find_child("cy"):find_child("input_text").text
+					else 
+			        	editor.error_message("012","clip",nil,nil,inspector)
+						inspector_deactivate()
+						return -1 
+					end 
+					if tonumber(item_group:find_child("cw"):find_child("input_text").text) then 
+                    	clip_t[3] = item_group:find_child("cw"):find_child("input_text").text
+					else 
+			        	editor.error_message("012","clip",nil,nil,inspector)
+						inspector_deactivate()
+						return -1 
+					end 
+					if tonumber(item_group:find_child("ch"):find_child("input_text").text) then 
+                    	clip_t[4] = item_group:find_child("ch"):find_child("input_text").text
+					else 
+			        	editor.error_message("012","clip",nil,nil,inspector)
+						inspector_deactivate()
+						return -1 
+					end 
                             v.clip = clip_t
                      end 	
 		elseif j.name == "bw" or j.name == "bh" then
                      local not_checkbox = false
                      if v.extra then 
-		         if(v.extra.type == "CheckBoxGroup")then
+		         		if(v.extra.type == "CheckBoxGroup")then
                             local bsize_t = {}
                             bsize_t[1] = item_group:find_child("bw"):find_child("input_text").text
                             bsize_t[2] = item_group:find_child("bh"):find_child("input_text").text
- 		     	    v.box_size = bsize_t
-                         end
-		     end 
+							if tonumber(bsize_t[1]) and tonumber(bsize_t[2]) then 
+ 		     	    			v.box_size = bsize_t
+					 		else 
+			    				editor.error_message("011","box size",nil,nil,inspector)
+								inspector_deactivate()
+								return -1 
+					 		end 
+                       	end
+		     		end 
 		elseif j.name == "bx" or j.name == "by" then
                      local bpos_t = {}
                      bpos_t[1] = item_group:find_child("bx"):find_child("input_text").text
                      bpos_t[2] = item_group:find_child("by"):find_child("input_text").text
-			 		 if v.extra.type == "CheckBoxGroup" then 
-		 		     	v.box_position = bpos_t
+					 if tonumber(bpos_t[1]) and tonumber(bpos_t[2]) then 
+					 	if v.extra.type == "CheckBoxGroup" then 
+		 		     		v.box_position = bpos_t
+					 	else 
+		 		     		v.button_position = bpos_t
+					 	end 
 					 else 
-		 		     	v.button_position = bpos_t
+			    		editor.error_message("011","button size",nil,nil,inspector)
+						inspector_deactivate()
+						return -1 
 					 end 
 		elseif j.name == "ix" or j.name == "iy" then
-                     local ipos_t = {}
-                     ipos_t[1] = item_group:find_child("ix"):find_child("input_text").text
-                     ipos_t[2] = item_group:find_child("iy"):find_child("input_text").text
- 		     v.item_position = ipos_t
+                 local ipos_t = {}
+                 ipos_t[1] = item_group:find_child("ix"):find_child("input_text").text
+                 ipos_t[2] = item_group:find_child("iy"):find_child("input_text").text
+ 		     	 if tonumber(ipos_t[1]) and tonumber(ipos_t[2]) then 
+ 		         	v.item_position = ipos_t
+				 else 
+			    	editor.error_message("011","item position",nil,nil,inspector)
+					inspector_deactivate()
+					return -1 
+				 end 
 		elseif j.name == "focusChanger" then 
 		     v.extra.focus = {}
 		     local focus_t_list = {"U","D","E","L","R","Red","G","Y","B"}
@@ -383,7 +583,14 @@ function inspector_apply (v, inspector)
                      viewport_t[2] = item_group:find_child("top"):find_child("input_text").text
                      viewport_t[3] = item_group:find_child("width"):find_child("input_text").text
                      viewport_t[4] = item_group:find_child("height"):find_child("input_text").text
-                     v.viewport = viewport_t
+					 if tonumber(viewport_t[1]) and tonumber(viewport_t[2]) and tonumber(viewport_t[3]) and tonumber(viewport_t[4]) then
+                    	v.viewport = viewport_t
+				 	else 
+			    		editor.error_message("011","viewport",nil,nil,inspector)
+						inspector_deactivate()
+						return -1 
+				 	end 
+
 		else 
 		     print(j.name, " 처리해 주세요")
 		end 

@@ -1106,21 +1106,21 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 					minus.src="lib/assets/li-btn-red-minus.png"
 				else 
 					v.extra.last = true
-					editor.error_message("010",nil,nil,nil,inspector)
+					editor.error_message("010","two",nil,nil,inspector)
 				end 
 			elseif v.extra.type == "TabBar" then 
 				if #v.tab_labels > 1 then 
 					minus.src="lib/assets/li-btn-red-minus.png"
 				else 
 					v.extra.last = true
-					editor.error_message("010",nil,nil,nil,inspector)
+					editor.error_message("010","one",nil,nil,inspector)
 				end 
 			else
 				if #v.items > 1 then 
 					minus.src="lib/assets/li-btn-red-minus.png"
 				else 
 					v.extra.last = true
-					editor.error_message("010",nil,nil,nil,inspector)
+					editor.error_message("010","one",nil,nil,inspector)
 				end 
 		    end 
 		end 

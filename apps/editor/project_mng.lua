@@ -123,7 +123,7 @@ end
 -- project_mng.new_project 
 ------------------------------------
 
-function project_mng.new_project(fname)
+function project_mng.new_project(fname, from_new_project)
 
   	local WIDTH = 300
   	local HEIGHT = 150
@@ -144,6 +144,20 @@ function project_mng.new_project(fname)
 	local message = Text {text = "Project Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "Project Name:"}:set(MSSTYLE)
 
+	local func_ok = function() 
+		editor.save(true,nil, project_mng.new_project, {fname, true})
+		return
+ 	end 
+	local func_nok = function() 
+		project_mng.new_project(fname,true)
+		return
+	end 
+
+	if #undo_list ~= 0 and from_new_project == nil then  -- 마지막 저장한 이후로 달라 진게 있으면 
+		editor.error_message("003", true, func_ok, func_nok) 
+		return 
+	end
+
 	editor_use = true
 	-- Text Input Field 	
 	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
@@ -161,10 +175,10 @@ function project_mng.new_project(fname)
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
 	button_ok.pressed = function() 
-							set_new_project(text_input.text) xbox:on_button_down()
-							if fname then 
-								editor.save(true)
-							end 
+							set_new_project(text_input.text) 
+							xbox:on_button_down()
+							undo_list = {}
+							editor.close(true)
 						end
 
 	local ti_func = function()
@@ -248,7 +262,7 @@ end
 -- project_mng.open_project 
 ------------------------------------
 
-function project_mng.open_project(t, msg, from_main)
+function project_mng.open_project(t, msg, from_main, from_open_project)
   	local WIDTH = 300
   	local HEIGHT = 400
     local PADDING = 13
@@ -274,6 +288,20 @@ function project_mng.open_project(t, msg, from_main)
 	local title_shadow = Text {name = "title", text = "Open Project"}:set(SSTYLE)
 	local selected_project
 	
+	local func_ok = function() 
+		editor.save(true,nil,project_mng.open_project,{nil,nil,nil,true})
+		return
+ 	end 
+	local func_nok = function() 
+		project_mng.open_project(nil,nil,nil,true)
+		return
+	end 
+
+	if #undo_list ~= 0 and from_open_project == nil then  -- 마지막 저장한 이후로 달라 진게 있으면 
+		editor.error_message("003", true, func_ok, func_nok) 
+		return 
+	end
+
     -- Get the user's home directory and make sure it is valid
     local home = editor_lb:get_home_dir()
     
@@ -307,8 +335,6 @@ function project_mng.open_project(t, msg, from_main)
 		if v == nil then 
 			return
 		end
-
-		editor.close()
 
 		selected_prj = v
 
@@ -363,17 +389,21 @@ function project_mng.open_project(t, msg, from_main)
 		
 		settings.project = project
 		xbox:on_button_down()
+
+		undo_list = {}
+		editor.close(true)
 		return true
 	end 
 
 	if from_main and settings.project then 
+		editor.close(true)
 		load_project(settings.project)
 
 		local dir = editor_lb:readdir(current_dir.."/screens")
 
 		for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
-					if readfile(v) ~= "" then 
+					if readfile("screens/"..v) ~= "" then 
 						msg_window.inputMsgWindow_openfile(v) 
 						editor_lb:writefile(current_fn, "", true)
 						current_fn = "" 

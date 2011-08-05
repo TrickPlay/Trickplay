@@ -140,16 +140,24 @@ end
 
 function util.is_img_file(fn)
 	local i, j = string.find(fn, ".png")
+
 	if (j == string.len(fn)) then
 		return true
-	else 
-		i, j = string.find(fn, ".jpg")
+	end  
+
+	i, j = string.find(fn, ".jpg")
+
+	if (j == string.len(fn)) then
+		return true
+    end
+
+	i, j = string.find(fn, ".jpeg")
+
 	if (j == string.len(fn)) then
 		return true
     end
 
 	return false
-	end 
 end 
 
 function util.is_mp4_file(fn)
@@ -335,6 +343,13 @@ function util.create_on_button_down_f(v)
 	       				end
 -----[[ 	SHOW POSSIBLE CONTAINERS
 		    			if control == true then 
+							if v.type == "Text" then 
+								-- 0729
+								v.editable = false 
+								v.cursor_visible = false
+								screen:grab_key_focus()
+							end
+
 							for i,j in pairs (g.children) do 
 								if is_this_container(j) == true then 
 									j:lower_to_bottom()
