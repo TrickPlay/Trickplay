@@ -65,16 +65,18 @@ function editor_ui.button(table)
 			p.focused()
 		end 
 
+		b_group:grab_key_focus(b_group)
+
 		if key then 
 	    	if p.pressed and key == keys.Return then
 				p.pressed()
 	    	end 
 		end 
 	
-		b_group:grab_key_focus(b_group)
     end
     
     function b_group.extra.on_focus_out(key) 
+		current_focus = nil 
 		if key == "active" then 
         	active.opacity = 255
 	    	button.opacity = 0
@@ -87,7 +89,6 @@ function editor_ui.button(table)
 		if p.released then 
 			p.released()
 		end 
-		current_focus = nil 
     end
 
     local create_button = function() 

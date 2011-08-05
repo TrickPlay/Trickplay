@@ -17,6 +17,7 @@ editor_use = false
 current_dir 	  = ""
 current_inspector = nil 
 current_fn  	  = ""
+restore_fn  	  = ""
 current_focus 	  = nil
 
 input_mode        = S_MENU
@@ -658,7 +659,7 @@ skins = {}
 	    }
 
 	    function backup_timeline.on_completed()
-			if auto_save == true and current_fn ~= "" then 
+			if auto_save == true and current_fn ~= "" and current_fn ~= "unsaved_temp.lua" then 
 				editor.save(nil, true) 
 			end 
 			t = nil

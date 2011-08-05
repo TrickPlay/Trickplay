@@ -1317,14 +1317,14 @@ function ui_element.button(t)
 		focused=nil, 
 		pressed = nil, 
 		released = nil, 
+		text_has_shadow = true,
+		ui_position = {100,100,0},
+		--------------------------------
 		button_image = nil,
 		focus_image  = nil,
-		text_has_shadow = true,
 		single_button = false,
-		label_align = nil,
-		--------------------------------
 		is_in_menu = false,
-		ui_position = {100,100,0},
+		label_align = nil,
     }
 
  --overwrite defaults
@@ -2136,8 +2136,9 @@ function ui_element.buttonPicker(t)
 	rotate_func = nil, 
     selected_item = 1, 
 	direction = "horizontal", 
-	inspector = 0, 
 	ui_position = {300, 300, 0},  
+	----------------------------------------------
+	inspector = 0, 
     }
 
  --overwrite defaults
@@ -2699,15 +2700,17 @@ function ui_element.radioButtonGroup(t)
 	button_position = {0, 0},  -- items 
 	item_position = {50,-5},  -- items 
 	line_space = 40,  -- items 
-	button_image = Image{}, --assets("assets/radiobutton.png"),
-	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
 	rotate_func = nil, 
 	direction = "vertical", 
 	selected_item = 1,  
 	ui_position = {200, 200, 0}, 
+	------------------------------------------------
+	button_image = Image{}, --assets("assets/radiobutton.png"),
+	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
     }
 
  --overwrite defaults
+ ------------------------------------------------
     if t ~= nil then 
         for k, v in pairs (t) do
 	    p[k] = v 
@@ -3685,9 +3688,9 @@ function ui_element.layoutManager(t)
         columns    = 5,
         cell_w      = 300,
         cell_h      = 200,
-        cell_spacing    = 40, --grid_gap
+        cell_spacing = 40, --grid_gap
 		cell_timing = 300, -- duration_per_time
-		cell_timing_offset     = 200,
+		cell_timing_offset = 200,
         tiles       = {},
         focus       = nil,
         cells_focusable = true, --focus_visible

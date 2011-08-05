@@ -639,19 +639,27 @@ function editor.n_selected(obj, call_by_inspector)
      end 
 end  
 
-function editor.close(new)
+function editor.close(new, next_func, next_f_param, from_close)
 
-	local func_nok = function() for i, j  in pairs(g.children) do editor.n_selected(j) end g:clear() editor.close() end 
-	
+	local func_ok = function() 
+ 		editor.save(true, nil, editor.close, {true, nil, nil, true})
+		return
+ 	end 
+	local func_nok = function() 
+		editor.close(true, nil, nil, true)
+		return
+ 	end 
+
 	if #g.children > 0 then 
 		if current_fn == "" and new == nil then 
-			urrent_fn = "/screens/unsaved_temp.lua"
-			editor.save(true, false)
-			--editor.error_message("003", true, editor.save, func_nok) 
-			return 
-		elseif #undo_list ~= 0 then  -- 마지막 저장한 이후로 달라 진게 있으면 
-			editor.error_message("003", true, editor.save, func_nok) 
-			return 1
+			if restore_fn == "" then 
+				current_fn = "/screens/unsaved_temp.lua"
+				editor.save(true, false)
+				return 
+			end 
+		elseif (#undo_list ~= 0 or restore_fn ~= "") and from_close == nil  then  -- 마지막 저장한 이후로 달라 진게 있으면 
+			editor.error_message("003", true, func_ok, func_nok) 
+			return -1
 		end
 	end 
 
@@ -735,6 +743,10 @@ function editor.close(new)
 	if screen:find_child("menu_text").extra.project then 
 		screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
 	end 
+
+	if next_func then 
+ 		next_func(next_f_param)
+ 	end 
 
 	return
 end 
@@ -1176,7 +1188,23 @@ local function open_files(input_purpose, bg_image, inspector)
 		end
 	else 
 		button_ok.pressed = function() 
-			load_file(selected_file) xbox:on_button_down(1) end
+			undo_list = {} 
+			if editor.close(true) ~= "-1" then --, load_file, selected_file) == nil then --0802
+				load_file(selected_file) 
+			end 
+			xbox:on_button_down(1) 
+
+			-- 0802		
+			local dir = editor_lb:readdir(current_dir.."/screens")
+			for i, v in pairs(dir) do
+				if v == "unsaved_temp.lua" then 
+					if readfile("/screens/"..v) ~= "" then 
+						editor_lb:writefile("/screens/"..v, "", true)
+					end 
+				end 
+			end 
+			--0802
+		end 
 	end 
 
 	local s_func = function()
@@ -1359,7 +1387,21 @@ local function open_files(input_purpose, bg_image, inspector)
 end
 	
 
-function editor.open()
+function editor.open(from_open)
+	local func_ok = function() 
+		editor.save(true,nil, editor.open, true)
+		return
+ 	end 
+
+	local func_nok = function() 
+		editor.open(true)
+		return
+ 	end 
+
+	if #undo_list ~= 0 and from_open == nil then  -- 마지막 저장한 이후로 달라 진게 있으면 
+		editor.error_message("003", true, func_ok, func_nok) 
+		return 
+	end
 	open_files("open_luafile")
 end
 
@@ -1734,8 +1776,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 		if attr_n == "focus" then 
 	    	local focus = factory.make_focuschanger(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-			focus.position = {GUTTER, GUTTER}
-			tabs.tabs[2]:add(focus) 
+			if focus then 
+				focus.position = {GUTTER, GUTTER}
+				tabs.tabs[2]:add(focus) 
+			end 
 		elseif attr_n == "items" or attr_n ==  "tab_labels" then 
 			local list_item = factory.make_itemslist(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			list_item.position = {GUTTER, GUTTER}
@@ -1915,8 +1959,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		if x_pos ~= "touch" then 
 			screen:add(inspector)
 		else 
-			inspector_apply (v, inspector)
-			inspector_xbox:on_button_down()
+			if inspector_apply (v, inspector) ~= -1 then 
+				inspector_xbox:on_button_down()
+			end 
 		end 
 	else 
 		screen:add(inspector)
@@ -2184,12 +2229,22 @@ local function save_new_file (fname, save_current_f, save_backup_f)
     	redo_list  = {}
 	end 
 
+--[[
 	if save_backup_f == true then  
 		local back_file = current_fn.."\.back"
 		editor_lb:writefile(back_file, contents, true)	
 		return 
 	end 
+]]
+	if current_fn then 
+		local back_file = current_fn.."\.back"
+		editor_lb:writefile(back_file, contents, true)	
+	end 
 
+	if save_backup_f == true then 
+		return 
+	end 
+	
     if (save_current_f == true) then 
 
 		local screen_dir = editor_lb:readdir(current_dir.."/screens/")
@@ -2282,12 +2337,10 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		--print("Save As 경우") 
 		msg_window.inputMsgWindow_savefile(fname, current_fn)
 	end 	
-
-
 end 
 
-function editor.save(save_current_f, save_backup_f)
-print("editor.save called")
+
+function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
   	local WIDTH = 300
   	local HEIGHT = 150
     local PADDING = 13
@@ -2307,6 +2360,12 @@ print("editor.save called")
 	local message = Text {text = "File Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
 
+		
+	if restore_fn ~= "" then 
+		current_fn = "screens/"..restore_fn
+	end 
+
+	
 	if(current_dir == "") then 
 		editor.error_message("002", nil, project_mng.new_project)  
 		return 
@@ -2336,6 +2395,10 @@ print("editor.save called")
 	if save_backup_f == true and current_fn ~= "" then  
 		save_new_file(current_fn, save_current_f, save_backup_f) 
 		screen:grab_key_focus()
+		if next_func and type (next_func) == "function" then 
+			next_func(next_f_param)
+		end
+		restore_fn = ""
 		return 
 	end 
 
@@ -2362,14 +2425,44 @@ print("editor.save called")
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
 	button_ok.pressed = function() 
+		local file_name 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
 			editor.error_message("005", save_current_f, editor.save)  
 			return
+		elseif text_input.text then 
+			if string.sub(text_input.text, -4, -1) == ".lua" then 
+			   local name_val = string.sub(text_input.text, 1, -5)
+			   local name_format = "[%w_]+"
+			   local a, b = string.find(name_val, name_format) 
+			   if not (a and a == 1 and b == string.len(name_val)) then 
+			        editor.error_message("013","name",nil,nil,inspector)
+					return -1 
+			   end
+			   file_name = text_input.text
+			else
+			   editor.error_message("015","name",nil,nil,inspector)
+			   return -1 
+			end 
+			--[[
+			   local name_val = text_input.text
+			   local name_format = "[%w_]+"
+			   local a, b = string.find(name_val, name_format) 
+			   if not (a and a == 1 and b == string.len(name_val)) then 
+			        editor.error_message("013","name",nil,nil,inspector)
+					return -1 
+			   end
+			   file_name = text_input.text..".lua"
+			]]
    		end   
-		save_new_file(text_input.text, save_current_f, save_backup_f) 
+		save_new_file(file_name, save_current_f, save_backup_f) 
 		xbox:on_button_down() 
+
+		if next_func and type (next_func) == "function" then 
+			next_func(next_f_param)
 		end
+		restore_fn = ""
+	end
 
 	local ti_func = function()
 		if current_focus then 
@@ -4742,22 +4835,28 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
 	local OK_label = "OK"
+	local Cancel_label = "Cancel"
+
 
 	title.text = "" 
 	title_shadow.text = ""
 
 	local error_msg_map = {
-		["001"] = function(str) OK_label = "Replace" return "A project named \" "..str.." \" already exists.\nDo you want to replace it?" end, 
-		["002"] = function() OK_label = "OK" return "Please create a project before you save a file." end, 
-		--["003"] = function() OK_label = "Save" return "Save changes and try it again. If you don\'t save, changes will be permanently lost." end, 					
-		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save file before closing?" end, 
-		["004"] = function(str) OK_label = "Replace" return "A file named \" "..str.." \" already exists. Do you want to replace it?" end, 
-		["005"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter a file name." end, 
-		["006"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please enter guideline position." end, 
-		["007"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Please fill \""..string.upper(str).."\" field." end, 
-		["008"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "There is no guideline."  end, 
-		["009"] = function(str) OK_label = "OK" return "You have unsaved changes in the \""..str.."\.back\" would you like to apply the changes into \""..str.."\"." end, 
-		["010"] = function(str) OK_label = "OK" title.text = "Error" title_shadow.text = "Error" return "Can\'t remove the item. Minimum item number." end, 
+		["001"] = function(str) OK_label = "Open" return "A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
+ 		["002"] = function() OK_label = "OK" return "Before saving the screen, a project must be open." end,
+ 		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save the file before closing?" end, 					
+ 		["004"] = function(str) OK_label = "Overwrite" return "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
+ 		["005"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A file name is required." end, 
+ 		["006"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A guideline position is required." end, 
+ 		["007"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" is required." end, 
+ 		["008"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "There are no guidelines."  end, 
+ 		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
+ 		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
+ 		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
+		["012"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid value for \""..str.."\" field." end, 
+ 		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
+ 		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
+ 		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 
 	}
 
 	local error_msg = error_msg_map[error_num](str) 
@@ -4766,27 +4865,32 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	local message_shadow = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSSTYLE)
 
 
-	--Buttons 
+--Buttons 
 	local button_cancel, button_ok, button_nok
-
-	if func_nok then 
+    if Cancel_label == "" then 
+ 		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+     	skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
+	elseif func_nok then 
 		button_nok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
   					skin = "default", ui_width = 100, ui_height = 27, label = "Don\'t Save", focus_color = {27,145,27,255}, focus_object = nil}
     	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-  					skin = "default", ui_width = 75, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
+  					skin = "default", ui_width = 75, ui_height = 27, label = Cancel_label, focus_color = {27,145,27,255}, focus_object = nil}
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
      				skin = "default", ui_width = 75, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  		-- Button Event Handlers
  		button_nok.pressed = function() func_nok(1) xbox:on_button_down() end
  	else
     	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-  					skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = nil}
+  					skin = "default", ui_width = 100, ui_height = 27, label = Cancel_label, focus_color = {27,145,27,255}, focus_object = nil}
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
      				skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  	end 
+
 	
 	-- Button Event Handlers
-	button_cancel.pressed = function() if error_num == "009" then func_ok(str, "NOK") end xbox:on_button_down() end 
+	if Cancel_label ~= "" then 
+		button_cancel.pressed = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
+	end 
 	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
 
 	if func_nok then 
@@ -4797,34 +4901,23 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		button_nok:set{name = "button_nok", position = {WIDTH-button_cancel.w-button_ok.w-button_nok.w-3*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
  		button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
  		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
- 	else 
+ 	elseif Cancel_label ~= "" then 
  	-- Focus Destination 
  		button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
  		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
  	-- Button Position Set
  		button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
  		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
+	else 
+ 		button_ok.extra.focus = {[keys.Return] = "button_ok", [keys.Up] = ti_func}
+ 		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
  	end 
 
-	local ti_func = function()
-		if current_focus then 
-			current_focus.on_focus_out()
-		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
 
-	end
-
-	local tab_func = function()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
-		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
-	end
-
+	button_ok.name = "error_ok"
 	-- Focus Destination 
-	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
-	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+	--button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
+	--button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
 
 
 	local msgw = Group {
@@ -4839,15 +4932,36 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			title:set{position = {PADDING+1, PADDING/3+1}}, 
 			message_shadow:set{position = {PADDING,TOP_BAR+PADDING}, width = WIDTH - 28, wrap= true, wrap_mode = "WORD"}, 
 			message:set{position = {PADDING+1, TOP_BAR+PADDING+1}, width = WIDTH - 28, wrap= true, wrap_mode = "WORD"}, 
-			--button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}, 
-			--button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
 			button_ok, 
 		}
 		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
 	}
-	if error_num ~= "007" and error_num ~= "008" then 
+
+	local ti_func = function()
+		if current_focus then 
+			current_focus.on_focus_out()
+		end 
+		button_ok:find_child("active").opacity = 255
+		button_ok:find_child("dim").opacity = 0
+
+		--button_ok.on_focus_in()
+		--button_ok:grab_key_focus() 
+	end
+
+	local tab_func = function()
+		button_ok:find_child("active").opacity = 0
+		button_ok:find_child("dim").opacity = 255
+		if button_cancel then 
+			button_cancel:grab_key_focus()
+			button_cancel.on_focus_in()
+		end
+	end
+
+
+	if Cancel_label ~= "" then 
  		msgw:add(button_cancel) 
 	end 
+
 	if func_nok then 
  		msgw:add(button_nok) 
  	end 
@@ -4855,6 +4969,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	msgw.extra.lock = false
  	screen:add(msgw)
 	util.create_on_button_down_f(msgw)	
+
 	-- Focus 
 	ti_func()
 
@@ -4871,7 +4986,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		return true
 	end 
 
+	return msgw
 end 
-
 return editor
 

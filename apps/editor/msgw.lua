@@ -282,12 +282,15 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		editor_lb:writefile("app", app_contents, true)
 	   end 
 	 
-           current_fn = "screens/"..input_text
-           editor_lb:writefile(current_fn, contents, true)
-	   screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
-           contents = ""
-	   cleanMsgWindow()
-           screen:grab_key_focus(screen) 
+            current_fn = "screens/"..input_text
+            editor_lb:writefile(current_fn, contents, true)
+			local fa, fb = string.find(current_fn, "unsaved_temp") 
+	   		if fa == nil then 
+	   			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
+	   		end 
+            contents = ""
+	   		cleanMsgWindow()
+            screen:grab_key_focus(screen) 
       end
       menu.menu_raise_to_top()
 
@@ -319,14 +322,26 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 			editor.error_message("009", input_text, msg_window.inputMsgWindow_openfile)  
 			return
 		elseif ret == "OK" then 
+			-- restore
 			bfc = readfile(back_fn)
 			if bfc then 
-				editor_lb:writefile(current_fn, bfc, true)
+				editor_lb:writefile("unsaved_temp.lua", bfc, true)
+				current_fn = "unsaved_temp.lua"
 			end 
+			restore_fn = input_text
 		end 
 
         local f = loadfile(current_fn)
         f(g) 
+
+		 if current_fn == "unsaved_temp.lua" then 
+			current_fn = ""
+			editor_lb:writefile("unsaved_temp.lua", "", true)
+		else 
+			local back_file = current_fn.."\.back"
+			editor_lb:writefile(back_file, cfc, true)	
+		end 
+
 	   	if screen:find_child("timeline") then 
 	      	for i,j in pairs (screen:find_child("timeline").children) do
 	         	if j.name:find("pointer") then 
@@ -334,10 +349,16 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 	         	end      
 	      	end      
 	   	end 
-		if input_text ~= "unsaved_temp.lua" then 
+
+		if ret == "OK" then 
+			if current_fn == "" then 
+	   			--screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text.."*"
+	   			screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
+			end 
+		else
 	   		screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
 		end
-	   	--screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
+
      else 
 		  -- need error handling 
           --printMsgWindow("The file is not a lua file.\nFile Name : ","err_msg")
@@ -529,7 +550,7 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 	  input_mode = hdr.S_SELECT
      elseif(util.is_img_file(input_text) == true) then 
 	  
-	  while (is_available("image"..tostring(item_num)) == false) do  
+	  while (util.is_available("image"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	  end 
 
