@@ -15,7 +15,6 @@
 
 
 @interface TouchController : NSObject <ViewControllerTouchDelegate> {
-    BOOL clickEventsAllowed; //depricated
     BOOL touchEventsAllowed;
     
     NSTimeInterval touchedTime;
