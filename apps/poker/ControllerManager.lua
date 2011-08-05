@@ -299,10 +299,13 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller:clear_and_set_background("bkg")
             controller:add_image("hdr_name_dog", 109, 30, 422, 50)
             controller:add_image("dog_"..pos, 192, 100, 256, 256)
+
+            local default_name = settings[controller.name] or "Name Your Dog"
             if controller.has_text_entry
-            and controller:enter_text("Name Your Dog", "Name Your Dog") then
+            and controller:enter_text("Name Your Dog", default_name) then
                 function controller:on_ui_event(text)
                     if text ~= "" and text ~= "Name Your Dog" then
+                        settings[controller.name] = text
                         controller.player.status:update_name(text)
                     end
                     controller.on_ui_event = function() end
