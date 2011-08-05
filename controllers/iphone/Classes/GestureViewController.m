@@ -277,7 +277,7 @@
  */
 - (void)do_SS:(NSArray *)args {
     NSMutableDictionary *audioInfo = [resourceManager getResourceInfo:[args objectAtIndex:0]];
-    NSLog(@"Playing audio %@", audioInfo);
+    // NSLog(@"Playing audio %@", audioInfo);
     // Add the amount of times to loop this sound file to the info
     NSString *loopValue = [args objectAtIndex:1];
     [audioInfo setObject:loopValue forKey:@"loop"];

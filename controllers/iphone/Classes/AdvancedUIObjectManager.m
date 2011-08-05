@@ -267,7 +267,7 @@
     // Must have class type and id, type must be a string, id must be a string
     // id cannot equal 0 since this is the ID for screen
     if (!type || !ID || ![type isKindOfClass:[NSString class]]
-        || ![ID isKindOfClass:[NSString class]] || [ID unsignedIntValue] == 0) {
+        || ![ID isKindOfClass:[NSString class]] || [(NSString *)ID compare:@"0"] == NSOrderedSame) {
         [self reply:nil];
         return;
     }

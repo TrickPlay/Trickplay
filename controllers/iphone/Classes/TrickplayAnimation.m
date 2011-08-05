@@ -8,6 +8,7 @@
 
 #import "TrickplayAnimation.h"
 #import "TrickplayUIElement.h"
+#import "TrickplayTextHTML.h"
 
 @implementation TrickplayAnimation
 
@@ -226,6 +227,7 @@
     //*/
     
     //*
+    
     if (!flag) {
         [view.layer setValue:[NSNumber numberWithFloat:view.x_scale] forKeyPath:@"transform.scale.x"];
         [view.layer setValue:[NSNumber numberWithFloat:view.y_scale] forKeyPath:@"transform.scale.y"];
@@ -249,10 +251,10 @@
         view.layer.position = CGPointMake([view get_x_prime], [view get_y_prime]);
     } else if ([view.view.layer animationForKey:@"w_size"] == anim) {
         [view.view.layer removeAnimationForKey:@"w_size"];
-        view.view.layer.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
+        view.view.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
     } else if ([view.view.layer animationForKey:@"h_size"] == anim) {
         [view.view.layer removeAnimationForKey:@"h_size"];
-        view.view.layer.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
+        view.view.bounds = CGRectMake(0.0, 0.0, view.w_size, view.h_size);
     } else if ([view.layer animationForKey:@"z_rotation"] == anim) {
         [view.layer removeAnimationForKey:@"z_rotation"];
         [view.layer setValue:[NSNumber numberWithFloat:view.z_rotation] forKeyPath:@"transform.rotation.z"];
@@ -275,6 +277,7 @@
         }
         [delegate trickplayAnimationDidStop:self];
     }
+    
     //*/
 }
 

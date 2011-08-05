@@ -68,5 +68,6 @@
 @property (retain) NSString *alignment;
 
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
+- (void)setHTML;
 
 @end
