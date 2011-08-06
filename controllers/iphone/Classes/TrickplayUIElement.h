@@ -13,20 +13,12 @@
 #import "AdvancedUIObjectManager.h"
 #import "TrickplayAnimation.h"
 
+
 @class AdvancedUIObjectManager;
 
 @interface TrickplayUIElement : UIView <TrickplayAnimationDelegate> {
     CFMutableDictionaryRef activeTouches;
     NSUInteger touchNumber;
-    
-    /*
-     NSNumber *x_scale;
-     NSNumber *y_scale;
-     NSNumber *z_scale;
-     NSNumber *x_rotation;
-     NSNumber *y_rotation;
-     NSNumber *z_rotation;
-    */
     
     CFAbsoluteTime start;
     
@@ -59,6 +51,7 @@
     
     // Needed for .is_animating property
     NSMutableDictionary *animations;
+    TrickplayTimeline *timeLine;
     
     AdvancedUIObjectManager *manager;
     
@@ -75,6 +68,7 @@
 */
  
 @property (nonatomic, assign) AdvancedUIObjectManager *manager;
+@property (retain) TrickplayTimeline *timeLine;
 @property (retain) NSString *ID;
 @property (retain) NSString *name;
 @property (retain) NSArray *clip;
