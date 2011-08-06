@@ -43,8 +43,8 @@ Timestamp: mm.d.yyyy
 
 Group: Developer's Guide  {
 
-   File: Getting Started  (docs/apps/text/getting_started.txt)
-   File: User Interface  (docs/apps/text/user_interface.txt)
+   File: Getting Started*  (no auto-title, docs/apps/text/getting_started.txt)
+   File: User Interface*  (no auto-title, docs/apps/text/user_interface.txt)
    }  # Group: Developer's Guide
 
 Group: Reference  {
@@ -54,35 +54,35 @@ Group: Reference  {
       Group: Interfaces  {
 
          File: UIElement  (no auto-title, bindings/clutter_actor.lb)
-         File: Container  (bindings/clutter_container.lb)
+         File: Container  (no auto-title, bindings/clutter_container.lb)
          }  # Group: Interfaces
 
       Group: Globals  {
 
-         File: keys* (docs/apps/text/key_codes.txt)
-         File: screen  (bindings/clutter_screen.lb)
+         File: keys* (no auto-title, docs/apps/text/key_codes.txt)
+         File: screen  (no auto-title, bindings/clutter_screen.lb)
          }  # Group: Globals
 
       Group: Classes  {
         
-         File: Bitmap   (bindings/bitmap.lb)
-         File: Canvas  (bindings/canvas.lb)
-         File: Clone  (bindings/clutter_clone.lb)
-         File: Group  (bindings/clutter_group.lb)
-         File: Image  (bindings/clutter_image.lb)
-         File: Rectangle  (bindings/clutter_rectangle.lb)
-         File: Text  (bindings/clutter_text.lb)
+         File: Bitmap   (no auto-title, bindings/bitmap.lb)
+         File: Canvas  (no auto-title, bindings/canvas.lb)
+         File: Clone  (no auto-title, bindings/clutter_clone.lb)
+         File: Group  (no auto-title, bindings/clutter_group.lb)
+         File: Image  (no auto-title, bindings/clutter_image.lb)
+         File: Rectangle  (no auto-title, bindings/clutter_rectangle.lb)
+         File: Text  (no auto-title, bindings/clutter_text.lb)
          }  # Group: Classes
 
       Group: Animation  {
 
-         File: Alpha*  (bindings/clutter_alpha.lb)
-         File: Animator* (bindings/clutter_animator.lb)
-         File: AnimationState* (bindings/clutter_state.lb)
-         File: Interval*  (bindings/clutter_interval.lb)
-         File: Path* (bindings/clutter_path.lb)
-         File: Score* (bindings/clutter_score.lb)
-         File: Timeline*  (bindings/clutter_timeline.lb)
+         File: Alpha*  (no auto-title, bindings/clutter_alpha.lb)
+         File: Animator* (no auto-title, bindings/clutter_animator.lb)
+         File: AnimationState* (no auto-title, bindings/clutter_state.lb)
+         File: Interval*  (no auto-title, bindings/clutter_interval.lb)
+         File: Path* (no auto-title, bindings/clutter_path.lb)
+         File: Score* (no auto-title, bindings/clutter_score.lb)
+         File: Timeline*  (no auto-title, bindings/clutter_timeline.lb)
          }  # Group: Animation
 
       }  # Group: UI
@@ -93,27 +93,28 @@ Group: Reference  {
 
    Group: Globals  {
 
-      File: app*  (bindings/app.lb)
-      File: audiosampler*  (bindings/audiosampler.lb)
-      File: controllers*  (bindings/controllers.lb)
-      File: idle*  (bindings/idle.lb)
-      File: json*  (bindings/json.lb)
-      File: keyboard*  (bindings/keyboard.lb)
-      File: mediaplayer* (bindings/mediaplayer.lb)
-      File: profile*  (bindings/profile.lb)
-      File: settings*  (bindings/settings.lb)
-      File: system*  (bindings/system.lb)
-      File: trickplay*  (bindings/trickplay.lb)
-      File: uri*  (bindings/uri.lb)
+      File: app*  (no auto-title, bindings/app.lb)
+      File: audiosampler*  (no auto-title, bindings/audiosampler.lb)
+      File: controllers*  (no auto-title, bindings/controllers.lb)
+      File: idle*  (no auto-title, bindings/idle.lb)
+      File: json*  (no auto-title, bindings/json.lb)
+      File: keyboard*  (no auto-title, bindings/keyboard.lb)
+      File: mediaplayer* (no auto-title, bindings/mediaplayer.lb)
+      File: profile*  (no auto-title, bindings/profile.lb)
+      File: settings*  (no auto-title, bindings/settings.lb)
+      File: system*  (no auto-title, bindings/system.lb)
+      File: trickplay*  (no auto-title, bindings/trickplay.lb)
+      File: uri*  (no auto-title, bindings/uri.lb)
+      File: Utility Functions*  (no auto-title, bindings/globals.lb)
 
       }  # Group: Globals
 
    Group: Classes  {
 
-      File: Stopwatch*  (bindings/stopwatch.lb)
-      File: Timer*  (bindings/timer.lb)
+      File: Stopwatch*  (no auto-title, bindings/stopwatch.lb)
+      File: Timer*  (no auto-title, bindings/timer.lb)
       File: URLRequest*  (no auto-title, bindings/url_request.lb)
-      File: XMLParser*  (bindings/xml.lb)
+      File: XMLParser*  (no auto-title, bindings/xml.lb)
       }  # Group: Classes
 
    Group: Index  {
