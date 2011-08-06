@@ -194,6 +194,7 @@ local keys = {
 		end
     end,
     [keys.Right] = function(s)
+		
         if body.linear_velocity[ 1 ] > max_vx then
 			body:apply_linear_impulse(
 				{ panda_mass * (max_vx-body.linear_velocity[ 1 ]) , 0 } ,
@@ -244,7 +245,7 @@ GameState:add_state_change_function(
 		
 		layers.hopper.opacity = 0
 		
-		body.linear_velocity = {0,0}
+		body.linear_velocity  = {0,0}
 		
 		layers.hopper:animate{
 			duration = 500,
@@ -257,7 +258,56 @@ GameState:add_state_change_function(
 		
 	end,
 	
-	nil, "GAME"
+	"VIEW_HIGHSCORE", "GAME"
+)
+
+GameState:add_state_change_function(
+	function()
+		panda.dead = false
+		screen.on_key_down = panda.on_key_down
+		
+	end,
+	
+	"SPLASH", "GAME"
+)
+GameState:add_state_change_function(
+	function()
+		physics:stop()
+		--screen.on_key_down = nil
+		layers.hopper:animate{
+			duration = 500,
+			opacity  = 0,
+			on_completed = function()
+				--screen.on_key_down = panda.on_key_down
+			end
+		}
+	end,
+	
+	"SPLASH", "VIEW_HIGHSCORE"
+)
+
+GameState:add_state_change_function(
+	function()
+		panda.dead = false
+		panda:position(1500,700)
+		
+		layers.hopper.opacity = 0
+		
+		body.linear_velocity = {0,0}
+		
+		layers.hopper:animate{
+			duration = 500,
+			opacity  = 255,
+			on_completed = function()
+				
+				physics:start()
+				
+			end
+		}
+		
+	end,
+	
+	"OFFLINE", "SPLASH"
 )
 
 

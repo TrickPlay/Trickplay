@@ -208,7 +208,7 @@ end
 Enum               = dofile("Utils.lua")
 
 -- use the Enum as a state machine
-GameState          = Enum{ "OFFLINE", "SPLASH", "GAME", "SAVE_HIGHSCORE","VIEW_HIGHSCORE"}
+GameState          = Enum{ "OFFLINE", "SPLASH", "HELP", "GAME", "SAVE_HIGHSCORE","VIEW_HIGHSCORE"}
 
 Animation_Loop     = dofile("Animation_Loop.lua")
 
@@ -218,15 +218,17 @@ hud                = dofile("hud.lua")
 
 panda              = dofile("Panda.lua")
 
-Splash             = dofile("Splash_Menu.lua")
-
-Play_Again         = dofile("Play_Again_Menu.lua")
+dofile("Help_Menu.lua")
 
 Effects            = dofile("Effects.lua")
 
 Coin, firework     = dofile("Items.lua")
 
 branch_constructor = dofile("Branches.lua")
+
+Splash             = dofile("Splash_Menu.lua")
+
+Play_Again         = dofile("Play_Again_Menu.lua")
 
 World              = dofile("GameWorld.lua")
 
@@ -264,8 +266,8 @@ loop_sound = Timer{
 		mediaplayer:play_sound("audio/theme.mp3")
 	end
 }
-mediaplayer:play_sound("audio/theme.mp3")
---loop_sound:stop()
+--mediaplayer:play_sound("audio/theme.mp3")
+loop_sound:stop()
 
 function controllers.on_controller_connected( controllers , controller )
 	--setup the accelerometer callbacks

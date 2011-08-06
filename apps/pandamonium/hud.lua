@@ -125,12 +125,14 @@ GameState:add_state_change_function(
 )
 GameState:add_state_change_function(
 	function()
-		coin:animate{
-			duration = 300,
-			opacity  = 255,
-		}
+		if coin.opacity == 0 then
+			coin:animate{
+				duration = 300,
+				opacity  = 255,
+			}
+		end
 	end,
-	"SPLASH","GAME"
+	nil,"GAME"
 )
 layers.hud:add(coin)
 

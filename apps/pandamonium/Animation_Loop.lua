@@ -94,12 +94,23 @@ function Animation_Loop:loop(s)
     
     for t,f in pairs(looping_animations) do
         
-        t.elapsed = (t.elapsed + s) % t.duration
+        t.elapsed = t.elapsed + s
         
-        p = t.elapsed / t.duration
-        
-        f(t.elapsed,p)
-        
+        if t.elapsed > t.duration then
+            
+            f(t.duration,1)
+            
+            t.elapsed = 0
+            
+            if t.on_loop then    t:on_loop()   end
+            
+        else
+            
+            p = t.elapsed / t.duration
+            
+            f(t.elapsed,p)
+            
+        end
     end
     
     
