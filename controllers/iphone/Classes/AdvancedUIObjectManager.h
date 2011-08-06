@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
 #import "GestureViewController.h"
+#import "TrickplayTimeline.h"
 
 @class TrickplayUIElement;
 @class TrickplayGroup;
@@ -23,6 +24,8 @@
     
     ResourceManager *resourceManager;
     SocketManager *socketManager;
+    
+    TrickplayTimeline *timeLine;
     
     NSString *hostName;
     NSInteger port;

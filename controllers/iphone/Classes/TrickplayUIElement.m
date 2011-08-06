@@ -29,6 +29,7 @@
 @synthesize ID;
 @synthesize name;
 @synthesize manager;
+@synthesize timeLine;
 
 @synthesize x_position;
 @synthesize y_position;
@@ -75,6 +76,7 @@
         opacity = 1.0;
         
         animations = [[NSMutableDictionary alloc] initWithCapacity:20];
+        self.timeLine = nil;
         
         self.manager = objectManager;
         
@@ -1098,24 +1100,21 @@
 #pragma mark -
 #pragma mark Animations
 
-- (void)trickplayAnimationDidStop:(TrickplayAnimation *)anim {
+- (void)trickplayAnimationDidStop:(id)anim {
+    id completion = [animations objectForKey:anim];
+    if ([completion isKindOfClass:[NSMutableDictionary class]]) {
+        [completion setObject:ID forKey:@"id"];
+        [completion setObject:@"on_completed" forKey:@"event"];
+        
+        [manager.gestureViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
+    }
+    
     [animations removeObjectForKey:anim];
-}
-
-- (void)do_animate_x:(NSNumber *)val duration:(NSNumber *)duration {
-    x_position = [val floatValue];
-    CGFloat actual_x = [self get_x_prime];
-    CGFloat actual_y = [self get_y_prime];
-    [UIView animateWithDuration:[duration floatValue]/1000.0 delay:0.0
-                        options:UIViewAnimationCurveLinear
-                     animations:^{
-                         view.layer.position = CGPointMake(actual_x, actual_y);
-                     } completion:NULL
-     ];
 }
 
 - (id)do_animate:(NSArray *)args {
     //NSLog(@"do_animate:%@", args);
+    
     NSMutableDictionary *table = [NSMutableDictionary dictionaryWithDictionary:[args objectAtIndex:0]];
     NSNumber *duration = [table objectForKey:@"duration"];
     [table removeObjectForKey:@"duration"];
@@ -1123,12 +1122,22 @@
         return [NSNumber numberWithBool:NO];
     }
     
-    TrickplayAnimation *anim = [[TrickplayAnimation alloc] initWithTable:table duration:duration view:self];
-    [animations setObject:@"1" forKey:anim];
-    [anim animationStart];
-    [anim release];
-    
-    start = CFAbsoluteTimeGetCurrent();
+    if (timeLine) {
+        [timeLine animateWithTable:table duration:duration view:self];
+    } else {
+        TrickplayAnimation *anim = [[TrickplayAnimation alloc] initWithTable:table duration:duration view:self];
+
+        if ([table objectForKey:@"on_completed"]) {
+            NSMutableDictionary *completion = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
+            [animations setObject:completion forKey:anim];
+        } else {
+            [animations setObject:@"1" forKey:anim];
+        }
+        
+        [anim animationStart];
+        [anim release];
+    }
+    //start = CFAbsoluteTimeGetCurrent();
     
     return [NSNumber numberWithBool:YES];
 }
@@ -1149,6 +1158,12 @@
     return result;
 }
 
+#pragma mark -
+#pragma mark Copy/Deallocation
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [self retain];
+}
 
 - (void)dealloc {
     if (activeTouches) {
@@ -1157,15 +1172,7 @@
     if (animations) {
         [animations release];
     }
-    
-    /*
-    self.x_scale = nil;
-    self.y_scale = nil;
-    self.z_scale = nil;
-    self.x_rotation = nil;
-    self.y_rotation = nil;
-    self.z_rotation = nil;
-     */
+    self.timeLine = nil;
     
     self.view = nil;
     self.clip = nil;

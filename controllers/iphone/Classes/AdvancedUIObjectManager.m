@@ -35,6 +35,8 @@
         
         self.resourceManager = aResourceManager;
         
+        timeLine = [[TrickplayTimeline alloc] init];
+        
         view = aView;
         gestureViewController = nil;
     }
@@ -74,6 +76,8 @@
 	NSData *welcomeData = [[NSString stringWithFormat:@"UX\t%@\n", ID] dataUsingEncoding:NSUTF8StringEncoding];
 
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+    
+    [timeLine startTimeline];
     
     return YES;
 }
@@ -148,6 +152,7 @@
     TrickplayImage *image = [[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager objectManager:self];
     
     [images setObject:image forKey:imageID];
+    image.timeLine = timeLine;
     
     [image release];
 }
@@ -161,6 +166,7 @@
     TrickplayRectangle *rect = [[TrickplayRectangle alloc] initWithID:rectID args:args objectManager:self];
     
     [rectangles setObject:rect forKey:rectID];
+    rect.timeLine = timeLine;
     
     [rect release];
 }
@@ -174,6 +180,7 @@
     TrickplayText *text = [[TrickplayText alloc] initWithID:textID args:args objectManager:self];
     
     [textFields setObject:text forKey:textID];
+    text.timeLine = timeLine;
     
     [text release];
 }
@@ -186,6 +193,7 @@
     TrickplayTextHTML *text = [[TrickplayTextHTML alloc] initWithID:textID args:args objectManager:self];
     
     [webTexts setObject:text forKey:textID];
+    text.timeLine = timeLine;
     
     [text release];
 }
@@ -199,6 +207,7 @@
     TrickplayGroup *group = [[TrickplayGroup alloc] initWithID:groupID args:args objectManager:self];
     
     [groups setObject:group forKey:groupID];
+    group.timeLine = timeLine;
     
     [group release];
 }
@@ -375,12 +384,24 @@
     [self reply:nil];
 }
 
+#pragma mark -
+#pragma mark Copy/Deallocation
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [self retain];
+}
 
 - (void)dealloc {
     NSLog(@"AdvancedUIObjectManager dealloc");
     if (hostName) {
         [hostName release];
         hostName = nil;
+    }
+    
+    if (timeLine) {
+        [timeLine stopTimeline];
+        [timeLine release];
+        timeLine = nil;
     }
     
     if (socketManager) {

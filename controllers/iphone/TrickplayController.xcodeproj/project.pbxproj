@@ -21,6 +21,7 @@
 		44AE7A55133C20E4000D7EE2 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A54133C20E4000D7EE2 /* Default.png */; };
 		44AE7A57133C20F0000D7EE2 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A56133C20F0000D7EE2 /* Default@2x.png */; };
 		44AE7A59133C210D000D7EE2 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */; };
+		CD2F80C013EC965F001EACEA /* TrickplayTimeline.m in Sources */ = {isa = PBXBuildFile; fileRef = CD2F80BF13EC965F001EACEA /* TrickplayTimeline.m */; };
 		CD404C0F134A87CF0021D36C /* AdvancedUIObjectManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */; };
 		CD404C12134BF1C70021D36C /* TrickplayUIElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C11134BF1C70021D36C /* TrickplayUIElement.m */; };
 		CD404C15134BF25E0021D36C /* TrickplayRectangle.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C14134BF25E0021D36C /* TrickplayRectangle.m */; };
@@ -117,6 +118,8 @@
 		44AE7A56133C20F0000D7EE2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TrickplayController-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayController-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		CD2F80BE13EC965F001EACEA /* TrickplayTimeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayTimeline.h; sourceTree = "<group>"; };
+		CD2F80BF13EC965F001EACEA /* TrickplayTimeline.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayTimeline.m; sourceTree = "<group>"; };
 		CD404C0D134A87CF0021D36C /* AdvancedUIObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AdvancedUIObjectManager.h; sourceTree = "<group>"; };
 		CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AdvancedUIObjectManager.m; sourceTree = "<group>"; };
 		CD404C10134BF1C70021D36C /* TrickplayUIElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayUIElement.h; sourceTree = "<group>"; };
@@ -323,6 +326,7 @@
 		CD279D0B137B122C00A707D7 /* AdvancedUI */ = {
 			isa = PBXGroup;
 			children = (
+				CD2F80C213ECA8C2001EACEA /* Animations */,
 				CD404C0D134A87CF0021D36C /* AdvancedUIObjectManager.h */,
 				CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */,
 				CD404C10134BF1C70021D36C /* TrickplayUIElement.h */,
@@ -339,10 +343,19 @@
 				CD6BC3B7136A318100CF1973 /* TrickplayGroup.m */,
 				CD8EDEC413C51D62009BEFC1 /* TrickplayScreen.h */,
 				CD8EDEC513C51D64009BEFC1 /* TrickplayScreen.m */,
-				CDB20FEF13CFAE6900A9F166 /* TrickplayAnimation.h */,
-				CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */,
 			);
 			name = AdvancedUI;
+			sourceTree = "<group>";
+		};
+		CD2F80C213ECA8C2001EACEA /* Animations */ = {
+			isa = PBXGroup;
+			children = (
+				CDB20FEF13CFAE6900A9F166 /* TrickplayAnimation.h */,
+				CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */,
+				CD2F80BE13EC965F001EACEA /* TrickplayTimeline.h */,
+				CD2F80BF13EC965F001EACEA /* TrickplayTimeline.m */,
+			);
+			name = Animations;
 			sourceTree = "<group>";
 		};
 		CD404C09134A74CD0021D36C /* UserInterface */ = {
@@ -683,6 +696,7 @@
 				CD8EDEC613C51D65009BEFC1 /* TrickplayScreen.m in Sources */,
 				CDB20FF113CFAE6900A9F166 /* TrickplayAnimation.m in Sources */,
 				CDFDCB0713DE49D60025768E /* AudioRecordingViewController.m in Sources */,
+				CD2F80C013EC965F001EACEA /* TrickplayTimeline.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

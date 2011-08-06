@@ -42,11 +42,10 @@
     return self;
 }
 
+#pragma mark -
+#pragma mark Animations
+
 - (void)animationStart {
-    if ([table objectForKey:@"on_completed"]) {
-        completion = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
-    }
-    
     NSNumber *x = [table objectForKey:@"x"];
     NSNumber *y = [table objectForKey:@"y"];
     NSNumber *z = [table objectForKey:@"z"];
@@ -269,17 +268,14 @@
     animationCount--;
     
     if (animationCount <= 0) {
-        if (completion) {
-            [completion setObject:view.ID forKey:@"id"];
-            [completion setObject:@"on_completed" forKey:@"event"];
-            
-            [view.manager.gestureViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
-        }
         [delegate trickplayAnimationDidStop:self];
     }
     
     //*/
 }
+
+#pragma mark -
+#pragma mark Copy/Deallocation
 
 - (id)copyWithZone:(NSZone *)zone {
     return [self retain];
