@@ -16,7 +16,7 @@ local RectGroup = Group{ position = { 100, 100 },
                          size = { 1, 1 } }                                 
 
 -- Add three Rectangles to the Group
-RectGroup.children = { RectRed, RectGreen, RectBlue }
+RectGroup.children = { RedRect, GreenRect, BlueRect }
 
 -- To clip the Rectangles, set the Group's clip property to the desired
 -- display region
