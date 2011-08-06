@@ -14,7 +14,7 @@ local RectGroup = Group{ position = { 100, 100 },
                          size = { 1400, 650 } }                                 
 
 -- Add three Rectangles to the Group
-RectGroup.children = { RectRed, RectGreen, RectBlue }
+RectGroup.children = { RedRect, GreenRect, BlueRect }
 
 -- Rotate all three Rectangles as a single object
 -- Flip upside-down, i.e., 180 degrees
