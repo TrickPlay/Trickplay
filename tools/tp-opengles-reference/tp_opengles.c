@@ -16,7 +16,7 @@
 
 /*****************************************************************************/
 
-typedef struct 
+typedef struct
 {
     EGLint      width;
     EGLint      height;
@@ -37,8 +37,118 @@ typedef struct
     GLuint      vbo[2];
 
     GLsizei     number_of_elements;
-    
+
 } ApplicationContext;
+
+/*****************************************************************************/
+
+static void print_gl_properties(void)
+{
+	GLboolean shaderCompiler;
+	GLint numBinaryFormats;
+	GLint maxVertexUniformVectors;
+	GLint maxFragmentUniformVectors;
+	GLint maxVertexAttribs;
+	GLint maxCombinedTextureImageUnits;
+	GLint maxCubeMapTextureSize;
+	GLint maxVertexTextureImageUnits;
+	GLint maxRenderBufferSize;
+	GLint maxTextureImageUnits;
+	GLint maxTextureSize;
+	GLint maxVaryingVectors;
+	GLint maxViewPortDimensions[2];
+
+    /* Print some OpenGL vendor information */
+
+    fprintf(stdout, "GL version info: %s\n", glGetString(GL_VERSION));
+    fprintf(stdout, "GL vendor info: %s\n", glGetString(GL_VENDOR));
+    fprintf(stdout, "GL renderer: %s\n", glGetString(GL_RENDERER));
+    fprintf(stdout, "GL shading language version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    fprintf(stdout, "GL extensions: %s\n", glGetString(GL_EXTENSIONS));
+
+
+    /* Determine if a shader compiler is available */
+	glGetBooleanv(GL_SHADER_COMPILER, &shaderCompiler);
+	fprintf(stdout, "GL shader compiler support: %s\n", shaderCompiler ? "TRUE" : "FALSE");
+	/* Determine binary formats available */
+	glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &numBinaryFormats);
+	fprintf(stdout, "GL number of supported binary formats: %d\n", numBinaryFormats);
+
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &maxVertexUniformVectors);
+	fprintf(stdout, "GL max vertex uniform vectors: %d\n", maxVertexUniformVectors);
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+	fprintf(stdout, "GL max vertex attributes: %d\n", maxVertexAttribs);
+
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &maxFragmentUniformVectors);
+	fprintf(stdout, "GL max fragment uniform vectors: %d\n", maxFragmentUniformVectors);
+
+	glGetIntegerv(GL_MAX_VARYING_VECTORS, &maxVaryingVectors);
+	fprintf(stdout, "GL max varying vectors: %d\n", maxVaryingVectors);
+
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits);
+	fprintf(stdout, "GL max texture image units: %d\n", maxTextureImageUnits);
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+	fprintf(stdout, "GL max texture size: %d\n", maxTextureSize);
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureImageUnits);
+	fprintf(stdout, "GL max combined texture image units: %d\n", maxCombinedTextureImageUnits);
+	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxCubeMapTextureSize);
+	fprintf(stdout, "GL max cube map texture size: %d\n", maxCubeMapTextureSize);
+	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextureImageUnits);
+	fprintf(stdout, "GL max vertex texture image units: %d\n", maxVertexTextureImageUnits);
+
+	glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRenderBufferSize);
+	fprintf(stdout, "GL max render buffer size: %d\n", maxRenderBufferSize);
+
+	glGetIntegerv(GL_MAX_VIEWPORT_DIMS, maxViewPortDimensions);
+	fprintf(stdout, "GL max viewport dimensions: %dx%d\n", maxViewPortDimensions[0], maxViewPortDimensions[1]);
+
+	{ /* find max texture memory available for use */
+	    int tidx;
+	    GLenum error;
+	    int texture_size = maxTextureSize;
+		GLuint * sample_texture_ids = malloc(maxTextureImageUnits * sizeof(GLuint));
+		int total_texture_memory_reserved = 0;
+
+		glGenTextures(maxTextureImageUnits, sample_texture_ids);
+		for (tidx=0; tidx < maxTextureImageUnits; tidx++)
+		{
+			glBindTexture(GL_TEXTURE_2D, sample_texture_ids[tidx]);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size, texture_size,
+					0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			while (GL_NO_ERROR != (error = glGetError()))
+			{
+				if (texture_size <= maxTextureSize / 16) {
+					break;
+				}
+				else
+				{
+					texture_size /= 2;
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size, texture_size,
+											0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+				}
+			}
+			if (error == GL_NO_ERROR)
+			{
+				total_texture_memory_reserved += texture_size * texture_size * 4;
+			}
+			else
+			{
+				break;
+			}
+		}
+		glDeleteTextures(maxTextureImageUnits, sample_texture_ids);
+		if (error == GL_NO_ERROR)
+		{
+			fprintf(stdout, "Amount of available texture memory is at least %8.4f MB\n", (float)total_texture_memory_reserved / (1024 * 1024));
+		}
+		else
+		{
+			fprintf(stdout, "Amount of available texture memory is not less than %8.4f MB\n", (float)total_texture_memory_reserved / (1024 * 1024));
+		}
+		free(sample_texture_ids);
+	}
+}
 
 /*****************************************************************************/
 
@@ -88,7 +198,7 @@ static int init_gl_state(ApplicationContext* app_context)
 {
     /* The shaders */
     const char* vShaderStr =
-    
+
         "uniform mat4   u_mvpMatrix;               \n"
         "attribute vec4 a_position;                \n"
         "attribute vec2 a_texCoord;                \n"
@@ -101,7 +211,7 @@ static int init_gl_state(ApplicationContext* app_context)
         "}                                         \n";
 
     const char* fShaderStr_highp =
-    
+
         "precision highp float;                             \n"
         "varying vec2 v_texCoord;                           \n"
         "uniform sampler2D s_texture;                       \n"
@@ -112,7 +222,7 @@ static int init_gl_state(ApplicationContext* app_context)
         "}                                                  \n";
 
     const char* fShaderStr_mediump =
-    
+
         "precision mediump float;                           \n"
         "varying vec2 v_texCoord;                           \n"
         "uniform sampler2D s_texture;                       \n"
@@ -136,12 +246,12 @@ static int init_gl_state(ApplicationContext* app_context)
         -1.0f , -1.0f , 0.0f , 0.0f , 0.0f ,
         -1.0f ,  1.0f , 0.0f , 0.0f , 1.0f ,
          1.0f ,  1.0f , 0.0f , 1.0f , 1.0f ,
-         1.0f , -1.0f , 0.0f , 1.0f , 0.0f 
+         1.0f , -1.0f , 0.0f , 1.0f , 0.0f
     };
 
     const GLushort checker_board_idx[] =
     {
-        1 , 0 , 2 , 3 
+        1 , 0 , 2 , 3
     };
 
     glClearDepthf(1.0f);
@@ -163,7 +273,7 @@ static int init_gl_state(ApplicationContext* app_context)
     {
         return 0;
     }
-    
+
     fprintf(stdout, "Vertex shader compilation successful\n");
 
     f = load_shader(GL_FRAGMENT_SHADER, fShaderStr_highp);
@@ -206,13 +316,13 @@ static int init_gl_state(ApplicationContext* app_context)
         {
             fprintf(stderr,"Failed to link program, no log\n");
         }
-        
+
         glDeleteShader(f);
         glDeleteShader(v);
         glDeleteProgram(app_context->program);
         return 0;
     }
-    
+
     fprintf(stdout, "Linking compiled vertex and fragment shaders successful. Created program object\n");
 
     app_context->position_loc = glGetAttribLocation(app_context->program, "a_position");
@@ -232,13 +342,13 @@ static int init_gl_state(ApplicationContext* app_context)
     glBindTexture(GL_TEXTURE_2D, app_context->texture);
 
     /* create an image for checker board */
-    
+
     for (i = 0; i < CHECKER_BOARD_IMAGE_HEIGHT; ++i)
     {
         for (j = 0; j < CHECKER_BOARD_IMAGE_WIDTH; ++j)
         {
-            c = (((i&0x8)==0)^((j&0x8)==0))*255; 
-            checker_board_image[i][j][0] = (GLubyte) (c | 255); 
+            c = (((i&0x8)==0)^((j&0x8)==0))*255;
+            checker_board_image[i][j][0] = (GLubyte) (c | 255);
             checker_board_image[i][j][1] = (GLubyte) c;
             checker_board_image[i][j][2] = (GLubyte) (c & 255);
             checker_board_image[i][j][3] = (GLubyte) (c & 255);
@@ -252,14 +362,14 @@ static int init_gl_state(ApplicationContext* app_context)
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CHECKER_BOARD_IMAGE_WIDTH, CHECKER_BOARD_IMAGE_HEIGHT,
             0, GL_RGBA, GL_UNSIGNED_BYTE, checker_board_image);
-    
+
     glViewport(0, 0, app_context->width, app_context->height);
 
     esPerspective(&app_context->projection_matrix, 45.0f, (float)app_context->width / (float)app_context->height, 1, 30);
 
     esMatrixLoadIdentity(&app_context->modelview_matrix);
     esTranslate(&app_context->modelview_matrix, 0, 0, -3.6);
-    
+
     return 1;
 }
 
@@ -318,7 +428,7 @@ static int init_egl(ApplicationContext* app_context, EGLNativeDisplayType displa
 
 
     egl_display = eglGetDisplay(display_type);
-    
+
     if (EGL_NO_DISPLAY == egl_display)
     {
         fprintf(stderr, "eglGetDisplay() failed\n");
@@ -334,7 +444,7 @@ static int init_egl(ApplicationContext* app_context, EGLNativeDisplayType displa
     }
 
     fprintf(stdout, "eglInitialize() successful\n");
-    
+
     fprintf(stdout, "EGL version info: major=%d minor=%d\n", major_version, minor_version);
 
     if (EGL_FALSE == eglGetConfigs(egl_display, NULL, 0, &config_count))
@@ -385,13 +495,13 @@ static int init_egl(ApplicationContext* app_context, EGLNativeDisplayType displa
             red_size, green_size, blue_size, alpha_size, depth_size);
 
     egl_surface = eglCreateWindowSurface(egl_display, egl_config, egl_win, NULL);
-    
+
     if (EGL_NO_SURFACE == egl_surface)
     {
         fprintf(stderr, "eglCreateWindowSurface() failed\n");
         return 0;
     }
-    
+
     fprintf(stdout, "eglCreateWindowSurface() successful\n");
 
     eglQuerySurface(egl_display, egl_surface, EGL_WIDTH, &app_context->width);
@@ -418,7 +528,7 @@ static int init_egl(ApplicationContext* app_context, EGLNativeDisplayType displa
     };
 
     egl_context = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, ctx_attrib_list);
-    
+
     if (EGL_NO_CONTEXT == egl_context)
     {
         fprintf(stderr, "eglCreateContext() failed");
@@ -453,12 +563,12 @@ int main(int argc, char** argv)
 
     EGLNativeDisplayType display_type  = EGL_DEFAULT_DISPLAY;
     EGLNativeWindowType  native_window = 0;
-    
+
     EGLDisplay eglDisplay;
-    
+
     int frame_count = 0;
     int max_frames;
-    
+
     ApplicationContext app_context;
 
     if (argc >= 2)
@@ -479,7 +589,7 @@ int main(int argc, char** argv)
     }
 
     memset(&app_context, 0, sizeof(ApplicationContext));
-    
+
     /* Call the custom pre-initialization function */
 
     if (0 != tp_pre_egl_initialize(&display_type, &native_window))
@@ -489,7 +599,7 @@ int main(int argc, char** argv)
     }
 
     /* Initialise EGL */
-    
+
     if (!init_egl(&app_context, display_type, native_window))
     {
         EGLint err = eglGetError();
@@ -498,14 +608,13 @@ int main(int argc, char** argv)
         return 3;
     }
 
-    /* Print some OpenGL vendor information */
-    
-    fprintf(stdout, "GL version info: %s\n", glGetString(GL_VERSION));
-    fprintf(stdout, "GL vendor info: %s\n", glGetString(GL_VENDOR));
-    fprintf(stdout, "GL renderer: %s\n", glGetString(GL_RENDERER));
+    /* print GL system properties */
+
+    print_gl_properties();
+
 
     /* Setup the local OpenGL state for this demo */
-    
+
     if (!init_gl_state(&app_context))
     {
         return 4;
@@ -516,11 +625,11 @@ int main(int argc, char** argv)
     while (1)
     {
         /* Draw the graphics and flush them to the screen */
-        
+
         display( & app_context );
-        
+
         ++frame_count;
-        
+
         if (max_frames > 0 && frame_count >= max_frames)
         {
             break;
@@ -528,7 +637,7 @@ int main(int argc, char** argv)
     }
 
     /* Close the local state for this demo */
-    
+
     terminate_gl_state(&app_context);
 
     /* Terminate EGL */
@@ -538,7 +647,7 @@ int main(int argc, char** argv)
     eglTerminate(eglDisplay);
 
     /* Do post EGL cleanup */
-    
+
     tp_post_egl_terminate();
 
     return 0;
