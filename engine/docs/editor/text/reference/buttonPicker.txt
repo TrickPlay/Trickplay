@@ -135,12 +135,12 @@ bJumpToCinq.pressed = function()
 			-- termination of any existing unfinished operation. Because of this,
 			-- all the scrolling ops, except the last one, may be aborted and not
 			-- be viewable onscreen.
-			layout["numbers"].bpNumbers:press_left()
+			bpNumbers:press_left()
 		end
 	else
 		-- Scroll forward
 		for i = 1, num_scrolls_forward, 1 do
-			layout["numbers"].bpNumbers:press_right()
+			bpNumbers:press_right()
 		end
 	end
 end
