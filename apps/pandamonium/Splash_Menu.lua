@@ -6,6 +6,10 @@ local unsel_scale = 1
 
 local menu_items = {}
 --Visual Components
+
+local scrim = Rectangle{size = screen.size,color="000000",opacity = 0}
+
+
 do
 	local title      = Text{--Clone{
 		--source       = assets.title,
@@ -22,7 +26,7 @@ do
 		--source       = assets.title,
 		font         = "Baveuse 70px",
 		text         = "START",
-		position     = {screen.w/2, 250}
+		position     = {screen.w/2, 200}
 		
 	}
 	start = make_text(start,"green")
@@ -31,115 +35,30 @@ do
 		--source       = assets.title,
 		font         = "Baveuse 70px",
 		text         = "highscores",
-		position     = {screen.w/2, 350}
+		position     = {screen.w/2, start.y+100}
 		
 	}
 	h_score = make_text(h_score,"green")
+	
+	local help       = Text{--Clone{
+		--source       = assets.title,
+		font         = "Baveuse 70px",
+		text         = "help",
+		position     = {screen.w/2, h_score.y+100}
+		
+	}
+	help = make_text(help,"green")
 	
 	local quit       = Text{--Clone{
 		--source       = assets.title,
 		font         = "Baveuse 70px",
 		text         = "QUIT",
-		position     = {screen.w/2, 450}
+		position     = {screen.w/2, help.y+100}
 		
 	}
 	quit = make_text(quit,"green")
 	
-	local help_font = "Baveuse 45px"
 	
-	local first_line  = 620
-	local second_line = 670
-	local item_line   = 770
-	
-	
-	local collect       = Text{--Clone{
-		--source       = assets.title,
-		font         = help_font,
-		text         = "Collect",
-		position     = {screen.w/5, first_line}
-		
-	}
-	collect = make_text(collect,"yellow")
-	local coins       = Text{--Clone{
-		--source       = assets.title,
-		font         = help_font,
-		text         = "Coins",
-		position     = {screen.w/5, second_line}
-		
-	}
-	coins = make_text(coins,"yellow")
-	
-	local coin1  = Clone{ source = assets.coin_front, x = screen_w/5-80, y= item_line }
-	coin1.anchor_point = {coin1.w/2,coin1.h/2}
-	local coin2  = Clone{ source = assets.coin_front, x = screen_w/5+80, y= item_line }
-	coin2.anchor_point = {coin2.w/2,coin2.h/2}
-	local catch   = Text{--Clone{
-		--source       = assets.title,
-		font         = help_font,
-		text         = "Catch",
-		position     = {screen.w/2, first_line}
-		
-	}
-	catch = make_text(catch,"yellow")
-	local rocket   = Text{--Clone{
-		--source       = assets.title,
-		font         = help_font,
-		text         = "Rockets",
-		position     = {screen.w/2, second_line}
-		
-	}
-	rocket = make_text(rocket,"yellow")
-	local f_work = Clone{
-			source = assets.firework,
-			z_rotation = {90,0,0},
-			position     = {screen.w/2, item_line}
-		}
-	f_work.anchor_point = {f_work.w/2,f_work.h/2}
-	
-	local avoid       = Text{--Clone{
-		--source       = assets.title,
-		font         = help_font,
-		text         = "Avoid",
-		position     = {4*screen.w/5, first_line}
-		
-	}
-	avoid = make_text(avoid,"yellow")
-	
-	local bomb       = Text{--Clone{
-		--source       = assets.title,
-		font         = help_font,
-		text         = "Bombs",
-		position     = {4*screen.w/5, second_line}
-		
-	}
-	bomb = make_text(bomb,"yellow")
-	
-	local f_cracker =  Clone{
-			source = assets.firecracker,
-			position     = {4*screen.w/5+25, item_line}
-		}
-	f_cracker.anchor_point = {f_cracker.w/2,f_cracker.h/2}
-	
-	local dont_fall       = Text{--Clone{
-		--source       = assets.title,
-		font         = "Baveuse 70px",
-		text         = "Don't Fall!",
-		alignment    = "CENTER",
-		position     = {screen.w/2, 970}
-		
-	}
-	dont_fall = make_text(dont_fall,"yellow")
-	
-	local backing = Rectangle{
-		w= 1600,
-		h= 340,
-		color = "000000",
-		opacity = 255*.4,
-		y=item_line-50,
-		x=screen_w/2,
-	}
-	
-	backing.anchor_point = {backing.w/2,backing.h/2}
 	--[[
 	local arrow      = Clone{
 		source       = assets.arrow,
@@ -147,18 +66,25 @@ do
 		position     = {screen.w/2-50, start.y},
 	}
 	--]]
-	Splash:add(backing,title,start,h_score,quit,collect,coins,avoid,bomb,f_work,catch,rocket,coin1,coin2,f_cracker,dont_fall)--,arrow)
 	
 	
 	
 	
-	function start:press_enter()    GameState:change_state_to("GAME")    end
+	Splash:add(backing,title,start,h_score,help,quit,scrim)--,arrow)
+	
+	
+	
+	
+	
+	function start:press_enter()   physics:stop(); GameState:change_state_to("GAME")    end
 	function h_score:press_enter()    GameState:change_state_to("VIEW_HIGHSCORE")    end
+	function help:press_enter()   physics:stop(); GameState:change_state_to("HELP")     end
 	function quit:press_enter()    exit()    end
 	
 	menu_items[1] = start
 	menu_items[2] = h_score
-	menu_items[3] = quit
+	menu_items[3] = help
+	menu_items[4] = quit
 end
 
 --arrow index, and its selectable items
@@ -188,11 +114,11 @@ local mag = .02
 
 local first_pass = true
 
-local wobble = Timeline{
+local wobble = {
 	
-	duration     = 700,
+	duration     = .7,
 	loop         = true,
-	on_new_frame = function(_,ms,p)
+	on_step = function(ms,p)
 		
 		if first_pass then
 			
@@ -211,10 +137,30 @@ local wobble = Timeline{
 		}
 		--]]
 	end,
-	on_completed = function() first_pass = false end
+	on_loop = function() first_pass = false end
 }
 
-local curr_scale, curr_o = 0, 0 
+local curr_scale, curr_o = 0, 0
+
+local prev_i = 0
+local unsel_s = Interval( 1,unsel_scale)
+local sel_s   = Interval( 1,  sel_scale)
+local unsel_o = Interval( 1,     .7*255)
+local sel_o   = Interval( 1,        255)
+local select_anim = {
+	duration = .1,
+	on_step = function(s,p)
+		
+		menu_items[prev_i].opacity = unsel_o:get_value(p)
+		menu_items[ index].opacity =   sel_o:get_value(p)
+		
+		menu_items[prev_i].scale = { unsel_s:get_value(p), unsel_s:get_value(p) }
+		menu_items[ index].scale = {   sel_s:get_value(p),   sel_s:get_value(p) }
+	end,
+	on_completed = function()
+		Animation_Loop:add_animation(wobble)
+	end
+}
 local function select(i)
 	
 	if index == i then return end
@@ -224,10 +170,11 @@ local function select(i)
 		"Tried to select "..i.." in the 'Start' menu"
 	)
 	
-	wobble:stop()
+	--wobble:stop()
+	Animation_Loop:delete_animation(wobble)
 	
 	first_pass = true
-	
+	--[[
 	curr_scale = menu_items[index].scale[1]
 	
 	curr_o     = menu_items[index].opacity
@@ -262,15 +209,58 @@ local function select(i)
 		scale        = { sel_scale, sel_scale },
 		opacity      = 255,
 		on_completed = function()
-			wobble:start()
+			--wobble:start()
+			Animation_Loop:add_animation(wobble)
 		end
 	}
 	
 	index = i
+	--]]
 	
+	prev_i = index
+	index  = i
+	
+	unsel_s.from = menu_items[prev_i].scale[1]
+	sel_s.from   = menu_items[index].scale[1]
+	unsel_o.from = menu_items[prev_i].opacity
+	sel_o.from   = menu_items[index].opacity
+
+	Animation_Loop:add_animation(select_anim)
 end
 
 --the press enter functions
+
+
+
+
+
+
+
+local backing = Clone{ source = assets.ground,y = screen_h - assets.ground.h }
+
+local floor = physics:Body(
+	Group{
+		name = "splash floor",
+		size = { screen.w , 200 } ,
+	} ,
+	{
+		type    = "static" ,
+		bounce  = 0,
+		density = 1,
+		filter  = surface_filter,
+	}
+)
+
+local branch = branch_constructor( -1, 700,400 )
+
+floor.on_begin_contact = panda.bounce
+floor.position = {screen_w/2,screen_h}
+layers.ground:add(backing,floor)
+floor:lower_to_bottom()
+
+
+
+
 
 
 
@@ -281,13 +271,57 @@ do
 	
 	--fade out
 	GameState:add_state_change_function(
-		function()
-			wobble:stop()
+		function(old,new)
+			
+			
+			
+			--wobble:stop()
+			Animation_Loop:delete_animation(wobble)
+			
+			if new == "HELP" then
+				
+				screen.on_key_down = nil
+				
+				curr_opacity = scrim.opacity
+				
+				scrim:complete_animation()
+				
+				scrim.opacity = curr_opacity
+				
+				scrim:animate{
+					duration = 300,
+					opacity  = 255*.4,
+				}
+				
+				return
+			end
+			
 			curr_opacity = Splash.opacity
 			
 			Splash:complete_animation()
 			
 			Splash.opacity = curr_opacity
+			
+			branch:animate{
+				duration = 300,
+				opacity  = 0,
+				on_completed = function()
+					
+					
+					branch:recycle()
+				end
+			}
+			
+			backing:animate{
+				duration = 300,
+				opacity  = 0,
+				on_completed = function()
+					
+					floor:unparent()
+					backing:unparent()
+				end
+			}
+			
 			
 			Splash:animate{
 				duration = 300,
@@ -298,6 +332,7 @@ do
 					menu_items = {}
 					collectgarbage("collect")
 					
+					--physics:start()
 					GameState:add_state_change_function(
 						function()
 							
@@ -315,7 +350,7 @@ do
 	
 	--fade in
 	GameState:add_state_change_function(
-		function()
+		function(old, new)
 			
 			index = 1
 			
@@ -325,14 +360,34 @@ do
 					
 					item.scale = {   sel_scale,   sel_scale }
 					
-					wobble:start()
+					item.opacity = 255
+					
+					--wobble:start()
+					Animation_Loop:add_animation(wobble)
 					
 				else
 					
 					item.scale = { unsel_scale, unsel_scale }
 					
+					item.opacity = 255*.7
 				end
 				
+			end
+			
+			if old == "HELP" then
+				
+				curr_opacity = scrim.opacity
+				
+				scrim:complete_animation()
+				
+				scrim.opacity = curr_opacity
+				
+				scrim:animate{
+					duration = 300,
+					opacity  = 0,
+				}
+				
+				return
 			end
 			
 			--arrow.y = menu_items[index].y
@@ -364,6 +419,12 @@ do
 	
 	local keys = {
 		
+		[keys.Left] = function()
+			panda:on_key_down(keys.Left)
+		end,
+		[keys.Right] = function()
+			panda:on_key_down(keys.Right)
+		end,
 		[keys.Down] = function()
 			
 			if index == # menu_items then return end
@@ -397,5 +458,5 @@ do
 end
 
 layers.menu:add(Splash)
-
+w = wobble
 return Splash

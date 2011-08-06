@@ -53,14 +53,14 @@ local wall_properties = {
 
 local r_wall = physics:Body(
 	
-	Group{ name = "wall", size = { 100 , screen_h }, },
+	Group{ name = "wall", size = { 100 , 3*screen_h }, },
 	
 	wall_properties
 )
 
 local l_wall = physics:Body(
 	
-	Group{ name = "wall", size = { 100 , screen_h }, },
+	Group{ name = "wall", size = { 100 , 3*screen_h }, },
 	
 	wall_properties
 )
@@ -376,9 +376,17 @@ local start_game_tl = Timeline{
 		for _,obj in pairs(fade_outs) do
 			if obj.fade_out_complete then obj:fade_out_complete() end
 		end
-		
+		print('ffff')
+		physics:start()
 	end
 }
+
+GameState:add_state_change_function(
+	function()
+		Animation_Loop:delete_animation(World.update)
+	end,
+	"GAME",nil
+)
 
 GameState:add_state_change_function(
 	function()
@@ -390,6 +398,8 @@ GameState:add_state_change_function(
 		end
 		curr_max_dist = 200
 		next_branch_y = 5*screen_h/6
+		
+		Animation_Loop:add_animation(World.update)
 		
 		fade_outs = handle_ref
 		
@@ -538,8 +548,7 @@ end
 --screen:add(r)
 
 World.update = {on_step=World.check_hopper}
-Animation_Loop:add_animation(World.update)
-print(World.update)
+
 
 World.add_branches = function()
 	

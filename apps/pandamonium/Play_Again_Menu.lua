@@ -19,7 +19,7 @@ local title      = Text{
 	font         = "Baveuse 130px",
 	text         = "high scores",
 	color        = "ffffff",
-	position     = {screen.w/2, 80}
+	position     = {screen.w/2, 120}
 }
 
 title = make_text(title,"green")
@@ -38,7 +38,7 @@ for i,s in pairs(highscores) do
 			text = s.name,
 			font = "Baveuse 55px",
 			x    = 2*screen_w/5,
-			y    = 130 + 70*i
+			y    = screen_h/2 + (i-(#highscores+1)/2)*70
 		},"green"
 	)
 	
@@ -47,9 +47,10 @@ for i,s in pairs(highscores) do
 			text = s.score,
 			font = "Baveuse 55px",
 			x    = 3*screen_w/5,
-			y    = 130 + 70*i
+			y    = screen_h/2 + (i-(#highscores+1)/2)*70
 		},"yellow"
 	)
+	
 	--scores[i].score.anchor_point = {scores[i].score.w,scores[i].score.h/2}
 	Death_Screen:add(scores[i].name, scores[i].score)
 end
@@ -61,19 +62,7 @@ end
 --for saving
 local Save_Score_Group = Group{opacity = 0}
 
-local up_arrow   = Clone{
-	source       = assets.arrow,
-	anchor_point = {assets.arrow.w, assets.arrow.h/2},
-	y            = 790,
-	z_rotation   = {-90,0,0}
-}
 
-local dn_arrow   = Clone{
-	source       = assets.arrow,
-	anchor_point = {assets.arrow.w, assets.arrow.h/2},
-	y            = 910,
-	z_rotation   = {90,0,0}
-}
 
 local initials = {}
 
@@ -83,7 +72,7 @@ for i = 1,3 do
 		font    = "Baveuse 55px",
 		color   = "e2e92c",
 		x       = 2*screen_w/5-60 + 60*(i-1),
-		y       = 850
+		y       = screen_h - title.y
 	}
 	initials[i].anchor_point = {
 		initials[i].w/2,
@@ -116,12 +105,28 @@ for i = 1,3 do
 	end
 end
 
+local up_arrow   = Clone{
+	source       = assets.arrow,
+	anchor_point = {assets.arrow.w, assets.arrow.h/2},
+	x            = initials[1].x,
+	y            = initials[1].y-60,
+	z_rotation   = {-90,0,0}
+}
+
+local dn_arrow   = Clone{
+	source       = assets.arrow,
+	anchor_point = {assets.arrow.w, assets.arrow.h/2},
+	x            = initials[1].x,
+	y            = initials[1].y+60,
+	z_rotation   = {90,0,0}
+}
+
 
 local submit = Text{
 	font         = "Baveuse 60px",
 	text         = "Submit",
 	color        = "ffffff",
-	position     = {initials[3].x+300, 840}
+	position     = {initials[3].x+300, screen_h - title.y}
 	
 }
 
@@ -142,7 +147,7 @@ local play_again = Text{
 	font         = "Baveuse 70px",
 	text         = "New Game",
 	color        = "ffffff",
-	position     = {screen.w/3, 900}
+	position     = {screen.w/3, screen_h - title.y}
 	
 }
 play_again = make_text(play_again,"green")
@@ -150,7 +155,7 @@ local quit       = Text{
 	font         = "Baveuse 70px",
 	text         = "QUIT",
 	color        = "ffffff",
-	position     = {screen.w*2/3, 900}
+	position     = {screen.w*2/3, 950}
 	
 }
 quit = make_text(quit,"green")
@@ -577,7 +582,7 @@ do
 									text = highscores[i].name,
 									font = "Baveuse 55px",
 									x    = 2*screen_w/5,
-									y    = 130 + 70*i
+									y    = screen_h/2 + (i-(#highscores+1)/2+1)*70
 								},"green"
 							),
 							score = make_text(
@@ -585,11 +590,12 @@ do
 									text = highscores[i].score,
 									font = "Baveuse 55px",
 									x    = 3*screen_w/5,
-									y    = 130 + 70*i
+									y    = screen_h/2 + (i-(#highscores+1)/2+1)*70
 								},"yellow"
 							)
 						}
 					)
+					--print(screen_h/2 + (i-(#highscores+1)/2)*70)
 					
 					--scores[i].score.anchor_point = {scores[i].score.w,scores[i].score.h/2}
 					Death_Screen:add(scores[i].name, scores[i].score)
@@ -600,8 +606,8 @@ do
 					scores[# scores] = nil
 					
 					for j = i,#scores do
-						scores[j].name.y  = 130 + 70*j
-						scores[j].score.y = 130 + 70*j
+						scores[j].name.y  = screen_h/2 + (j-(#highscores+1)/2)*70
+						scores[j].score.y = screen_h/2 + (j-(#highscores+1)/2)*70
 					end
 					
 					break
