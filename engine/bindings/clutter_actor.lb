@@ -928,15 +928,12 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 	
-    //
-	//Property: min_size
+    /*
+	This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
 	
-	// This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
-	
-	// This is either the preferred size of a UI element or its natural size,
-	// depending on how the element is transformed.
-
-    //
+	This is either the preferred size of a UI element or its natural size,
+	depending on how the element is transformed.
+    */
     
     readonly table min_size
 	[[
@@ -953,15 +950,12 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 
-    //
-	//Property: natural_size
-	
-	// This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
-	
-	
-	// This is the original, or natural size of a UI element. For example, it
-	// may be an image's orginal size before it was transformed.
-    //
+    /*
+	This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
+
+	This is the original, or natural size of a UI element. For example, it
+	may be an image's orginal size before it was transformed.
+    */
     
     readonly table natural_size
 	[[
@@ -978,19 +972,19 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 	
-    //
-	// Property: request_mode
+    
+	/*
 	
-	// This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
+	This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
 
-	// Mostly useful for images, this lets you specify how to resize UI elements.
-	// It can have one of two values:
+	Mostly useful for images, this lets you specify how to resize UI elements.
+	It can have one of two values:
 	
-	// "HEIGHT_FOR_WIDTH" - In this case, given a width, the height is
-	//		    computed automatically. Default setting.
+	HEIGHT_FOR_WIDTH - In this case, given a width, the height is
+		    computed automatically. Default setting.
 			    
-	// "WIDTH_FOR_HEIGHT" - Given a new height, the width is calculated.
-    //
+	WIDTH_FOR_HEIGHT - Given a new height, the width is calculated.
+    */
     
     string request_mode
 	[[
@@ -1459,8 +1453,7 @@ interface actor [[ClutterActor*]]
 	[[clutter_actor_grab_key_focus(self);]];
 	
     
-    // ***FOR INTERNAL USE ONLY***
-    //Function: blur
+    /* ***FOR INTERNAL USE ONLY***
     
     //This function will apply a blur effect to the UI element.  Reversible with unblur()
 
@@ -1469,7 +1462,7 @@ interface actor [[ClutterActor*]]
     //  true - The effect was applied.
 
     //  false - If the effect is not available.
-    //
+    */
 
     bool blur()
     [[
@@ -1483,8 +1476,7 @@ interface actor [[ClutterActor*]]
 #endif
     ]];
 
-    // ***FOR INTERNAL USE ONLY***
-    //Function: unblur
+    /* ***FOR INTERNAL USE ONLY***
     
     //Turn off a blur effect on the UI element.  The opposite of blur()
 
@@ -1493,7 +1485,7 @@ interface actor [[ClutterActor*]]
     //    true - The effect was applied.
 
     //    false - If the effect is not available.
-    //
+    */
 
     bool unblur()
     [[
@@ -1507,8 +1499,7 @@ interface actor [[ClutterActor*]]
 #endif
     ]];
 
-    // ***FOR INTERNAL USE ONLY***
-	//Function: desaturate
+    /* ***FOR INTERNAL USE ONLY***
 	
 	//How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
 
@@ -1521,7 +1512,7 @@ interface actor [[ClutterActor*]]
     //    true - The effect was applied.
 
     //    false - If the effect is not available.
-    //
+    */
 
     bool desaturate(double desaturation)
     [[
@@ -1534,8 +1525,7 @@ interface actor [[ClutterActor*]]
 #endif
     ]];
 
-    // ***FOR INTERNAL USE ONLY***
-	//Function: saturate
+    /* ***FOR INTERNAL USE ONLY***
 	
 	//Restore saturation to the UI element.  This undoes any call to <desaturate>.
 
@@ -1544,7 +1534,7 @@ interface actor [[ClutterActor*]]
     //    true - The effect was applied.
 
     //    false - If the effect is not available.
-    //
+    */
 
     bool saturate()
     [[
@@ -1556,8 +1546,7 @@ interface actor [[ClutterActor*]]
 #endif
     ]];
 
-    // ***FOR INTERNAL USE ONLY***
-    //Function: tint
+    /* ***FOR INTERNAL USE ONLY***
     
     //Turn on a tint effect for the UI element.
     
@@ -1570,7 +1559,7 @@ interface actor [[ClutterActor*]]
     //    true - The effect was applied.
 
     //    false - If the effect is not available.
-    //
+    */
 
     bool tint(...)
     [[
@@ -1585,8 +1574,7 @@ interface actor [[ClutterActor*]]
 #endif
     ]];
 
-    // ***FOR INTERNAL USE ONLY***
-    //Function: untint
+    /* ***FOR INTERNAL USE ONLY***
     
     //Turn off any existing tint effect for the UI element.
 
@@ -1595,7 +1583,7 @@ interface actor [[ClutterActor*]]
     //    true - The effect was applied.
 
     //    false - If the effect is not available.
-    //
+    */
 
     bool untint()
     [[
@@ -1608,8 +1596,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 
-    // ***FOR INTERNAL USE ONLY***
-    //Function: pageturn
+    /* ***FOR INTERNAL USE ONLY***
     
     //Apply a "page turn" effect to the UIElement.
     
@@ -1626,7 +1613,7 @@ interface actor [[ClutterActor*]]
     //    true - The effect was applied.
 
     //    false - If the effect is not available.
-    //
+    */
     
     bool pageturn(double period=0.5, double angle=45, double radius=0)
     [[
@@ -1652,8 +1639,7 @@ interface actor [[ClutterActor*]]
 #endif
     ]];
 
-    // ***FOR INTERNAL USE ONLY***
-    //Function: pageflatten
+    /* ***FOR INTERNAL USE ONLY***
     
     //Remove any "page turn" effect on the UIElement.
 
@@ -1662,7 +1648,7 @@ interface actor [[ClutterActor*]]
     //    true - The effect was applied.
 
     //    false - If the effect is not available.
-    //
+    */
 
     bool pageflatten()
     [[
@@ -2212,8 +2198,7 @@ interface actor [[ClutterActor*]]
 			L);	    
 	]];
 	
-	// ***FOR INTERNAL USE ONLY***
-	//Event: on_scroll
+	/* ***FOR INTERNAL USE ONLY***
 	
 	//The on_scroll() event handler is called whenever a scroll wheel event occurs.
 	
@@ -2222,7 +2207,7 @@ interface actor [[ClutterActor*]]
 		
 	//*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 
-	//
+	*/
 
     callback on_scroll
 	[[
