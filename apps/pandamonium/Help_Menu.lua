@@ -174,11 +174,11 @@ local curr_x_rot = 0
 	GameState:add_state_change_function(
 		function()
 			--wobble:stop()
-			curr_x_rot = Help.x_rotation[1]
+			--curr_x_rot = Help.x_rotation[1]
 			Help:show()
 			Help:complete_animation()
 			
-			Help.x_rotation = {curr_x_rot,0,0}
+			Help.x_rotation = {-100,0,0}
 			
 			Help:raise_to_top()
 			--physics:stop()
@@ -210,7 +210,7 @@ local curr_x_rot = 0
 				duration = 600,
 				
 				--y        = screen_h+200,
-				x_rotation = -100,
+				x_rotation = 100,
 				on_completed = function()
 					screen.on_key_down = Splash.on_key_down
 					physics:start()
