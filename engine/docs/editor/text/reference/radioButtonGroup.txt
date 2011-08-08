@@ -107,6 +107,26 @@ selected_item - the current setting of the RadioButtonGroup's <selected_item> pr
 
 
 
+Property: ui_width 
+
+The ui_width property is an integer value specifying the RadioButtonGroup's width in pixels.
+
+*Default Setting:* 600
+
+*See Also:* the <ui_height> property
+
+
+
+Property: ui_height
+
+The ui_height property is an integer specifying the RadioButtonGroup's height in pixels.
+
+*Default Setting:* 200
+
+*See Also:* the <ui_width> property
+
+
+
 Property: direction
 
 The direction property is a text string specifying whether the radio buttons will display vertically (one atop each other) or horizontally (alongside each other).
@@ -138,29 +158,29 @@ The ui_position property is a table of integer values specifying the RadioButton
 
 *Default Setting:* { 200, 200, 0 }
 
-*See Also:* the <b_pos> and <item_pos> properties
+*See Also:* the <box_position> and <item_position> properties
 
 
 
-Property: b_pos
+Property: box_position
 
-The b_pos property is a table of integer values specifying the X,Y offsets, respectively, at which to position the radio button's outer circle. The offsets are specified in pixels and are relative to the object's <ui_position> property.
+The box_position property is a table of integer values specifying the X,Y offsets, respectively, at which to position the radio button's outer circle. The offsets are specified in pixels and are relative to the object's <ui_position> property.
 
 By specifying the button's outer-circle location, the button can be positioned in various relations to its associated descriptive text, such as to the right of the text or below it.
 
 *Default Setting:* { 0, 0 }, i.e., the button's outer circle is positioned at the <ui_position> location
 
-*See Also:* the <ui_position> and <item_pos> properties
+*See Also:* the <ui_position> and <item_position> properties
 
 
 
-Property: item_pos
+Property: item_position
 
-The item_pos property is a table of integer values specifying the X,Y offsets, respectively, at which to position the radio button's associated descriptive text. The offsets are specified in pixels and are relative to the object's <ui_position> property.
+The item_position property is a table of integer values specifying the X,Y offsets, respectively, at which to position the radio button's associated descriptive text. The offsets are specified in pixels and are relative to the object's <ui_position> property.
 
 *Default Setting:* { 50, -5 }, i.e., the text is displayed to the right and slightly above the <ui_position> location
 
-*See Also:* the <ui_position> and <b_pos> properties
+*See Also:* the <ui_position> and <box_position> properties
 
 
 
@@ -321,4 +341,18 @@ The on_focus_in() function forces the input focus to the RadioButtonGroup.
 *Prototype:* on_focus_in()
 
 *Return Value:* None
+
+
+
+Function: on_focus_out
+
+The on_focus_out() function releases the input focus from the RadioButtonGroup.
+
+After calling on_focus_out(), no UI element has the input focus.
+
+*Prototype:* on_focus_out()
+
+*Arguments:* None.
+
+*Return Value:* None.
 
