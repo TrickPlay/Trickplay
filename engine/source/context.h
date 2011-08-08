@@ -70,7 +70,7 @@ public:
     //.........................................................................
     // Getting context configuration variables
 
-    const char * get( const char * key, const char * def = NULL );
+    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false );
     bool get_bool( const char * key, bool def = false );
     int get_int( const char * key, int def = 0 );
 
