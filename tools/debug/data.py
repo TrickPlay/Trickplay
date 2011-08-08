@@ -64,8 +64,8 @@ def scaleToFloat(v):
     
 
 def summarizeSource(v):
-    
-    # Problem retreiving clone data?
+
+    # Clone may not have source
     try:
     
         s = str(v['gid']) 
@@ -77,10 +77,10 @@ def summarizeSource(v):
             s += ' : ' + name
         
         return s
-    
-    except:
         
-        return ''
+    except:
+    
+        return '' 
 
 def tileToBool(v):
     v['x'] = bool(v['x'])

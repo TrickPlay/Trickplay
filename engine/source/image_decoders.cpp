@@ -20,6 +20,7 @@
 #include "common.h"
 #include "profiler.h"
 #include "util.h"
+#include "jpeg_utils.h"
 
 //=============================================================================
 
@@ -306,6 +307,58 @@ namespace ImageDecoders
         }
     };
 
+    class JPEGTransform
+    {
+    public:
+    	JPEGTransform( int img_orientation,
+    			unsigned int img_width,
+    			unsigned int img_height,
+    			unsigned int img_depth )
+    	: orientation( img_orientation ), width( img_width ), height( img_height ), depth( img_depth )
+    	{
+    	}
+
+    	inline unsigned int get_transformed_location(unsigned int x, unsigned int y)
+    	{
+        	switch(orientation)
+        	{
+        	case 8:
+        		return ( ( width - x - 1) * height + y ) * depth;
+        	case 7:
+        		return ( ( width - x - 1) * height + height - y ) * depth;
+        	case 6:
+        		return ( x * height + height - y ) * depth;
+        	case 5:
+        		return ( x * height + y ) * depth;
+        	case 4:
+        		return ( ( height - y - 1) * width + x ) * depth;
+        	case 3:
+        		return ( ( height - y  - 1) * width + width - x ) * depth;
+        	case 2:
+        		return ( y * width + width - x ) * depth;
+        	case 1:
+        	default:
+        		return ( y * width + x ) * depth;
+        	}
+    	}
+
+    	inline unsigned int get_transformed_height(void)
+    	{
+    		return orientation <= 4 ? height : width;
+    	}
+
+    	inline unsigned int get_transformed_width(void)
+    	{
+    		return orientation <= 4 ? width : height;
+    	}
+
+    private:
+    	const int orientation;
+    	const unsigned int width;
+    	const unsigned int height;
+    	const unsigned int depth;
+    };
+
     class JPEGDecoder : public Images::Decoder
     {
     public:
@@ -330,6 +383,8 @@ namespace ImageDecoders
             {
                 return TP_IMAGE_UNSUPPORTED_FORMAT;
             }
+
+            int orientation = TPJPEGUtils::get_exif_orientation( ( guchar * ) data, size );
 
             jpeg_decompress_struct cinfo;
             jpeg_error_mgr jerr;
@@ -356,7 +411,7 @@ namespace ImageDecoders
 
             try
             {
-                result = decode( &cinfo, image );
+                result = decode( &cinfo, image, orientation );
 
                 jpeg_finish_decompress( &cinfo );
             }
@@ -397,6 +452,8 @@ namespace ImageDecoders
 
             fseek( file, 0, SEEK_SET );
 
+            int orientation = TPJPEGUtils::get_exif_orientation( filename );
+
             jpeg_decompress_struct cinfo;
             jpeg_error_mgr jerr;
 
@@ -411,7 +468,7 @@ namespace ImageDecoders
             {
                 jpeg_stdio_src( &cinfo, file );
 
-                result = decode( &cinfo, image );
+                result = decode( &cinfo, image, orientation );
 
                 jpeg_finish_decompress( &cinfo );
             }
@@ -429,7 +486,7 @@ namespace ImageDecoders
 
     private:
 
-        int decode( j_decompress_ptr cinfo, TPImage * image )
+        int decode( j_decompress_ptr cinfo, TPImage * image, int orientation )
         {
             jpeg_read_header( cinfo, TRUE );
 
@@ -486,6 +543,11 @@ namespace ImageDecoders
 
             try
             {
+            	JPEGTransform jpeg_transform( orientation, cinfo->output_width, cinfo->output_height, 3 );
+            	if ( orientation > 1 )
+            	{
+            		g_info( "Auto rotating JPEG image with orientation=%d", orientation );
+            	}
                 guchar * p = pixels;
 
                 unsigned int index;
@@ -502,7 +564,8 @@ namespace ImageDecoders
 
                             for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 1 )
                             {
-                                *(p++) = (*buffer)[ index ];
+                                p = &pixels[ jpeg_transform.get_transformed_location( c, cinfo->output_scanline - 1 ) ];
+                            	*(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index ];
                             }
@@ -512,7 +575,8 @@ namespace ImageDecoders
 
                             for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 3 )
                             {
-                                *(p++) = (*buffer)[ index ];
+                                p = &pixels[ jpeg_transform.get_transformed_location( c, cinfo->output_scanline - 1 ) ];
+                            	*(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index + 1 ];
                                 *(p++) = (*buffer)[ index + 2 ];
                             }
@@ -522,7 +586,8 @@ namespace ImageDecoders
 
                             for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 4 )
                             {
-                                int k = (*buffer)[index + 3];
+                                p = &pixels[ jpeg_transform.get_transformed_location( c, cinfo->output_scanline - 1 ) ];
+                            	int k = (*buffer)[index + 3];
 
                                 *(p++) = k * (*buffer)[ index ] / 255;
                                 *(p++) = k * (*buffer)[ index + 1 ] / 255;
@@ -533,10 +598,10 @@ namespace ImageDecoders
                 }
 
                 image->pixels = pixels;
-                image->width = cinfo->output_width;
-                image->height = cinfo->output_height;
+                image->width = jpeg_transform.get_transformed_width();
+                image->height = jpeg_transform.get_transformed_height();
                 image->depth = 3;
-                image->pitch = cinfo->output_width * 3;
+                image->pitch = jpeg_transform.get_transformed_width() * 3;
                 image->bgr = 0;
                 image->free_pixels = NULL;
             }

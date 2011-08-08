@@ -498,15 +498,17 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
     WebGLContextAttributes getContextAttributes()
         [[
+            _GET_CONTEXT_;
+
             lua_newtable( L );
             
             lua_pushboolean( L , true );
             lua_setfield( L , -2 , "alpha" );
             
-            lua_pushboolean( L , true );
+            lua_pushboolean( L , _ctx_->have_depth );
             lua_setfield( L , -2 , "depth" );
             
-            lua_pushboolean( L , true );
+            lua_pushboolean( L , _ctx_->have_stencil );
             lua_setfield( L , -2 , "stencil" );
             
             lua_pushboolean( L , false );
@@ -2092,7 +2094,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
             glUniform1f( location , x );
         ]];
 
-    void uniform1fv(WebGLUniformLocation location, Float32Array_or_table v )
+    void uniform1fv(WebGLUniformLocation location, any /* Float32Array or table */ v )
         [[
             _GET_CONTEXT_;
             FreeLater free_later;

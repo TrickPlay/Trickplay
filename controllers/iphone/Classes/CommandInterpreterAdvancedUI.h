@@ -22,6 +22,7 @@
 - (void)getValuesForObject:(NSDictionary *)object;
 - (void)callMethodOnObject:(NSDictionary *)object;
 - (void)deleteValuesForObject:(NSDictionary *)object;
+- (void)destroyObject:(NSDictionary *)object;
 
 @end
 

@@ -10,6 +10,24 @@
 #include "log.h"
 
 //=============================================================================
+
+#ifndef GL_STENCIL_INDEX8
+#define GL_STENCIL_INDEX8       0x8D48
+#endif
+#ifndef GL_DEPTH_STENCIL
+#define GL_DEPTH_STENCIL        0x84F9
+#endif
+#ifndef GL_STENCIL_ATTACHMENT
+#define GL_STENCIL_ATTACHMENT	0x8D00
+#endif
+#ifndef GL_DEPTH_ATTACHMENT
+#define GL_DEPTH_ATTACHMENT     0x8D00
+#endif
+#ifndef GL_DEPTH_COMPONENT16
+#define GL_DEPTH_COMPONENT16    0x81A5
+#endif
+
+//=============================================================================
 // webgl_canvas
 //=============================================================================
 
@@ -217,11 +235,12 @@ Context::Context( ClutterActor * actor )
 	unpack_flip_y( false ),
     unpack_premultiply_alpha( false ),
     unpack_colorspace_conversion( GL_BROWSER_DEFAULT_WEBGL ),
+    have_depth( false ),
+    have_stencil( false ),
     acquisitions( 0 ),
     texture( 0 ),
     texture_target( 0 ),
-    framebuffer( 0 ),
-    depthbuffer( 0 )
+    framebuffer( 0 )
 {
 	g_assert( CLUTTER_IS_TEXTURE( actor ) );
 
@@ -251,46 +270,39 @@ Context::Context( ClutterActor * actor )
 
 	clutter_actor_get_size( actor , & width , & height );
 
-	// Create the depth buffer
-    
-    GLenum depth_storage = GL_DEPTH_COMPONENT16;
-    GLenum depth_attachment = GL_DEPTH_ATTACHMENT;
-    
-#ifdef GL_DEPTH24_STENCIL8
+	// Try to create the frame buffer in different ways until one
+	// succeeds (or all fail).
 
-    depth_storage = GL_DEPTH24_STENCIL8;
-    depth_attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+	const int try_flags[] =
+	{
+
+#if defined(CLUTTER_WINDOWING_GLX)
+
+        FBO_TRY_DEPTH_STENCIL ,
 
 #endif
+        FBO_TRY_DEPTH | FBO_TRY_STENCIL ,
+        FBO_TRY_DEPTH ,
+        FBO_TRY_STENCIL ,
+        0
+	};
 
-	glGenRenderbuffers( 1 , & depthbuffer );
+	for ( size_t i = 0; i < sizeof( try_flags ) / sizeof( int ); ++i )
+	{
+		if ( try_create_fbo( width , height , try_flags[ i ] ) )
+		{
+			break;
+		}
+	}
 
-    glBindRenderbuffer( GL_RENDERBUFFER , depthbuffer );
-
-    glRenderbufferStorage( GL_RENDERBUFFER , depth_storage , width , height );
-
-    // Create the framebuffer
-
-	glGenFramebuffers( 1 , & framebuffer );
-
-    glBindFramebuffer( GL_FRAMEBUFFER , framebuffer );
-
-    // Attach the depth buffer
-
-    glFramebufferRenderbuffer( GL_FRAMEBUFFER , depth_attachment , GL_RENDERBUFFER , depthbuffer );
-
-    // Attach the texture as the color buffer
-
-    glFramebufferTexture2D( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , texture_target , texture , 0 );
-
-    if ( GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus( GL_FRAMEBUFFER ) )
-    {
-        tpwarn( "FRAMEBUFFER IS NOT COMPLETE" );
-    }
-    else
-    {
-        tplog2( "FRAMEBUFFER IS READY" );
-    }
+	if ( ! framebuffer )
+	{
+		tpwarn( "UNABLE TO CREATE FRAMEBUFFER" );
+	}
+	else
+	{
+		tplog2( "FRAMEBUFFER READY : DEPTH = %s : STENCIL = %s" , have_depth ? "YES" : "NO" , have_stencil ? "YES" : "NO" );
+	}
 
     context_op( SWITCH_TO_CLUTTER_CONTEXT );
 }
@@ -303,14 +315,19 @@ Context::~Context()
 
 	glBindFramebuffer( GL_FRAMEBUFFER , 0 );
 
+	tplog2( "DESTROYING FRAMEBUFFER %u" , framebuffer );
 	glDeleteFramebuffers( 1 , & framebuffer );
 
-	glDeleteRenderbuffers( 1 , & depthbuffer );
+	GLuintSet::const_iterator it;
+
+	for ( it = renderbuffers.begin(); it != renderbuffers.end(); ++it )
+	{
+		tplog2( "DESTROYING RENDERBUFFER %u" , * it );
+		glDeleteBuffers( 1 , & * it );
+	}
 
 	//.........................................................................
 	// Delete all the user objects
-
-	GLuintSet::const_iterator it;
 
 	for ( it = user_buffers.begin(); it != user_buffers.end(); ++it )
 	{
@@ -356,6 +373,107 @@ Context::~Context()
 	context_op( DESTROY_MY_CONTEXT );
 
 	tplog2( "CONTEXT DESTROYED" );
+}
+
+
+//.............................................................................
+// I copied this idea from Cogl.
+
+bool Context::try_create_fbo( GLsizei width , GLsizei height , int flags )
+{
+	tplog2( "CREATING FRAMEBUFFER" );
+
+	GLuint 		fbo;
+	GLuintSet 	rb;
+
+	bool h_depth = false;
+	bool h_stencil = false;
+
+	glGenFramebuffers( 1 , & fbo );
+
+	glBindFramebuffer( GL_FRAMEBUFFER , fbo );
+
+	glFramebufferTexture2D( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , texture_target , texture , 0 );
+
+	if ( flags & FBO_TRY_DEPTH_STENCIL )
+	{
+		tplog2( "  CREATING DEPTH/STENCIL RENDERBUFFERS" );
+
+		GLuint depth_stencil_rb;
+
+		glGenRenderbuffers( 1 , & depth_stencil_rb );
+		glBindRenderbuffer( GL_RENDERBUFFER , depth_stencil_rb );
+		glRenderbufferStorage( GL_RENDERBUFFER , GL_DEPTH_STENCIL , width , height );
+		glBindRenderbuffer( GL_RENDERBUFFER , 0 );
+	    glFramebufferRenderbuffer( GL_FRAMEBUFFER , GL_STENCIL_ATTACHMENT , GL_RENDERBUFFER, depth_stencil_rb );
+	    glFramebufferRenderbuffer( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , depth_stencil_rb );
+
+	    rb.insert( depth_stencil_rb );
+
+	    h_depth = true;
+	    h_stencil = true;
+	}
+
+	if ( flags & FBO_TRY_DEPTH )
+	{
+		tplog2( "  CREATING DEPTH RENDERBUFFER" );
+
+		GLuint depth_rb;
+
+		glGenRenderbuffers( 1 , & depth_rb );
+	    glBindRenderbuffer( GL_RENDERBUFFER , depth_rb );
+	    glRenderbufferStorage( GL_RENDERBUFFER , GL_DEPTH_COMPONENT16 , width , height );
+	    glBindRenderbuffer( GL_RENDERBUFFER , 0 );
+	    glFramebufferRenderbuffer( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , depth_rb );
+
+	    rb.insert( depth_rb );
+
+	    h_depth = true;
+	}
+
+	if ( flags & FBO_TRY_STENCIL )
+	{
+		tplog2( "  CREATING STENCIL RENDERBUFFER" );
+
+		GLuint stencil_rb;
+
+	    glGenRenderbuffers( 1 , & stencil_rb );
+	    glBindRenderbuffer( GL_RENDERBUFFER , stencil_rb );
+	    glRenderbufferStorage( GL_RENDERBUFFER , GL_STENCIL_INDEX8 , width , height );
+	    glBindRenderbuffer( GL_RENDERBUFFER , 0 );
+	    glFramebufferRenderbuffer( GL_FRAMEBUFFER , GL_STENCIL_ATTACHMENT , GL_RENDERBUFFER , stencil_rb );
+
+	    rb.insert( stencil_rb );
+
+	    h_stencil = true;
+	}
+
+	if ( GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus( GL_FRAMEBUFFER ) )
+	{
+		glBindFramebuffer( GL_FRAMEBUFFER , 0 );
+
+		tplog2( "  DESTROYING FRAMEBUFFER %u" , fbo );
+		glDeleteFramebuffers( 1 , & fbo );
+
+		for ( GLuintSet::const_iterator it = rb.begin(); it != rb.end(); ++it )
+		{
+			tplog2( "  DESTROYING RENDERBUFFER %u" , *it );
+			glDeleteBuffers( 1 , & * it );
+		}
+
+		tplog2( "* FRAMEBUFFER IS NOT COMPLETE" );
+
+		return false;
+	}
+
+	tplog2( "* FRAMEBUFFER IS COMPLETE" );
+
+	framebuffer = fbo;
+	renderbuffers.insert( rb.begin() , rb.end() );
+	have_depth = h_depth;
+	have_stencil = h_stencil;
+
+	return true;
 }
 
 //.............................................................................

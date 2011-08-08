@@ -832,3 +832,24 @@ void UserData::dump_cb( lua_State * L , int index )
 }
 
 
+void UserData::dump()
+{
+#ifndef TP_PRODUCTION
+
+	GHashTable * client_map = get_client_map();
+
+	GHashTableIter it;
+
+	g_hash_table_iter_init( & it , client_map );
+
+	gpointer client;
+	gpointer master;
+
+	while( g_hash_table_iter_next( & it , & client , & master ) )
+	{
+		UserData * ud = UserData::get( G_OBJECT( master ) );
+
+		g_info( "%p : %p : %s" , master , client , ud->type );
+	}
+#endif
+}

@@ -14,21 +14,26 @@
     UIRotationGestureRecognizer *rotationGesture;
     UIPinchGestureRecognizer *pinchGesture;
     UIPanGestureRecognizer *panGesture;
-    UILongPressGestureRecognizer *longPressGesture;
+    UITapGestureRecognizer *doubleTapGesture;
+    UITapGestureRecognizer *tripleTapGesture;
     
     CGFloat totalRotation;
-    CGFloat totalScale;
+    CGFloat xScale;
+    CGFloat yScale;
     CGFloat xTranslation;
     CGFloat yTranslation;
 }
 
 @property (assign) CGFloat totalRotation;
-@property (assign) CGFloat totalScale;
+@property (assign) CGFloat xScale;
+@property (assign) CGFloat yScale;
 @property (assign) CGFloat xTranslation;
 @property (assign) CGFloat yTranslation;
 
-- (void)panImage:(UIPanGestureRecognizer *)gesture;
+- (void)panImage:(UIPanGestureRecognizer *)gestureRecognizer;
 - (void)rotateImage:(UIRotationGestureRecognizer *)gestureRecognizer;
 - (void)scaleImage:(UIPinchGestureRecognizer *)gestureRecognizer;
+- (void)doubleTapImage:(UITapGestureRecognizer *)gestureRecognizer;
+- (void)tripleTapImage:(UITapGestureRecognizer *)gestureRecognizer;
 
 @end

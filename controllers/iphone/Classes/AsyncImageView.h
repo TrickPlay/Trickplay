@@ -12,6 +12,9 @@
 
 @protocol AsyncImageViewDelegate
 
+@optional
+- (void)on_loadedFailed:(BOOL)failed;
+
 @required
 - (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey;
 
@@ -44,6 +47,7 @@
 @property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key;
+- (void)on_loadedFailed:(BOOL)failed;
 - (void)loadImageFromData:(NSData *)data;
 - (void)setTileWidth:(BOOL)toTileWidth height:(BOOL)toTileHeight;
 - (void)animateSpinner;

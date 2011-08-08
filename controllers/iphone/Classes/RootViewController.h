@@ -11,24 +11,44 @@
 #import "GestureViewController.h"
 #import "AppBrowserViewController.h"
 
+/**
+ * The RootViewController controls the root view of the over-arching
+ * NavigationViewController for the TrickplayController app.
+ *
+ * Loads a TableViewController whose view lists possible TVs to connect to.
+ * These TVs advertise their connection information via an mDNS service broadcast.
+ * From here on the words TV and service will be used synonymously.
+ *
+ * Refer to RootViewController.xib for the Controller's View.
+ */
+
 @interface RootViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate,
 GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
     UIWindow *window;
 
+    // Name of the current TV; stores the name of the current service
+    // used or nil if no service has been selected.
     NSString *currentTVName;
+    // Orange dot that displays next to the current service
     UIView *currentTVIndicator;
+    // Spins while a service is loading; disappears otherwise.
+    UIActivityIndicatorView *loadingSpinner;
+    // Refreshes the list of services
+    UIBarButtonItem *refreshButton;
     
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
     AppBrowserViewController *appBrowserViewController;
 }
 
+// Exposed methods
 - (void)pushAppBrowser:(NSNotification *)notification;
-
 - (void)serviceResolved:(NSNetService *)service;
 - (void)reloadData;
+- (void)refresh;
 
+// Exposed properties
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (retain) NSString *currentTVName;
 

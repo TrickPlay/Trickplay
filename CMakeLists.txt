@@ -21,7 +21,9 @@ set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
 
 set( TP_UPNP_CLIENT 1 )
 
-set( TP_WITH_WEBGL 1 )
+if(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
+	set( TP_WITH_WEBGL 1 )
+endif(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
 
 #------------------------------------------------------------------------------
 
@@ -66,6 +68,8 @@ else (CMAKE_TOOLCHAIN_FILE)
     add_subdirectory( clients/desktop )
 
     add_subdirectory( clients/clutter-mediaplayer )
+    
+    add_subdirectory( clients/jpeg-utils-test )
     
     add_subdirectory( sdk )
     

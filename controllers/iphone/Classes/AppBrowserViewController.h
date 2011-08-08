@@ -10,6 +10,20 @@
 #import <YAJLiOS/YAJL.h>
 #import "GestureViewController.h"
 
+/**
+ * The AppBrowserViewController lists apps available from a service.
+ *
+ * Queries Trickplay for its available apps via a URL Request using an
+ * HTTP port (the port number is received from a welcome message which 
+ * Trickplay sends to the App Browser's associated GestureViewController).
+ * The data received from the URL Request is a JSON string containing a
+ * list of apps avaible for the connected service. The AppBrowser then
+ * lists these available apps in a UITableView so the user may select them;
+ * starting the selected app on the television.
+ *
+ * Refer to AppBrowserViewController.xib for the AppBrowser's view.
+ */
+
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
 UITableViewDataSource, GestureViewControllerSocketDelegate> {
     /*
@@ -20,16 +34,28 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     BOOL viewDidAppear;
      
     UITableView *theTableView;
+    // An array of JSON strings containing information of apps available
+    // on the Television/Trickplay
     NSArray *appsAvailable;
     GestureViewController *gestureViewController;
     
+    // Name of the current app running on Trickplay
     NSString *currentAppName;
+    // Orange dot indicating which app is the current app
     UIImageView *currentAppIndicator;
     
+    // YES if the NavigationViewController is in the middle of animating
+    // pushing the GestureViewController or if the visible view is the
+    // GestureViewController. Initialized to NO and set back to NO
+    // when the AppBrowserViewController (self) calls viewDidAppear.
     BOOL pushingViewController;
     
+    // Refers to the RootViewController; informs the view controller
+    // if a socket having an error or closing/ending
     id <GestureViewControllerSocketDelegate> socketDelegate;
 }
+
+// Exposed properties
 /*
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *appShopButton;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *showcaseButton;
@@ -42,7 +68,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 
 @property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
 
-
+// Exposed methods
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;
 - (void)createGestureViewWithPort:(NSInteger)p hostName:(NSString *)h;
@@ -54,6 +80,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 - (BOOL)hasRunningApp;
 - (void)pushApp;
 
+    // GestureViewControllerSocketDelegate methods
 - (void)socketErrorOccurred;
 - (void)streamEndEncountered;
 

@@ -69,10 +69,20 @@
     if (!connection) {
         NSLog(@"Connection to URL %@ could not be established", url);
         // make a broken link symbol in image
+        [self on_loadedFailed:YES];
         return;
     }
     
     [self animateSpinner];
+}
+
+- (void)on_loadedFailed:(BOOL)failed {
+    if (dataCacheDelegate) {
+        [dataCacheDelegate dataReceived:nil resourcekey:resourceKey];
+    }
+    if (otherDelegate) {
+        [otherDelegate on_loadedFailed:failed];
+    }
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
@@ -97,6 +107,7 @@
 
 - (void)connection:(NSURLConnection *)theConnection didFailWithError:(NSError *)error {
     NSLog(@"Image did fail with error: %@", error);
+    [self on_loadedFailed:YES];
 }
 
 /*
@@ -151,6 +162,11 @@
     }
     if (otherDelegate) {
         [otherDelegate dataReceived:theData resourcekey:resourceKey];
+        if (data) {
+            [otherDelegate on_loadedFailed:NO];
+        } else {
+            [otherDelegate on_loadedFailed:YES];
+        }
     }
     
     [loadingIndicator stopAnimating];

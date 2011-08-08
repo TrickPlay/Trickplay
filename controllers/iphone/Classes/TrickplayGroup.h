@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
-#import "ResourceManager.h"
 #import "TrickplayUIElement.h"
 
 @protocol AdvancedUIScreenDelegate <NSObject>

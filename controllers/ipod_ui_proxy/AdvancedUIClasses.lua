@@ -11,6 +11,7 @@ local function UIElement()
 
     function get:parent( )
         local parent = self( "get_parent" )
+        if not parent then return nil end
         return self.factory:create_local( parent.id , parent.type )
     end
 
@@ -65,6 +66,24 @@ local function UIElement()
 
     function call:transform_point(ancestor, x, y, z)
         self("transform_point", ancestor, x, y, z)
+    end
+
+    local animation_id = 1
+    function call:animate(table)
+        if not self.on_completeds then
+            rawset(self, "on_completeds", {})
+        end
+        if table.on_completed then
+            local on_completeds = rawget(self, "on_completeds")
+            on_completeds[animation_id] = table.on_completed
+            table.on_completed = animation_id
+            animation_id = animation_id + 1
+        end
+        self("animate", table)
+    end
+
+    function call:complete_animation()
+        self("complete_animation")
     end
 
     return get , set , call , event
@@ -242,13 +261,24 @@ local function GroupClass()
     return get , set , call , event
 end
 
+local function ControllerClass()
+
+    local get , set , call , event = GroupClass()
+    
+    function call:set_background(resource_name)
+        return self("set_background", resource_name)
+    end
+
+    return get , set , call , event
+end
+
 local class_table =
 {
     Rectangle = RectangleClass,
     Image = ImageClass,
     Text = TextClass,
     Group     = GroupClass,
-    Controller = GroupClass
+    Controller = ControllerClass
 }
 
 return class_table
