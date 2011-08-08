@@ -1945,6 +1945,15 @@ void TPContext::load_external_configuration()
 
     const char * file_name = get( TP_CONFIG_FROM_FILE );
 
+    // Giving an empty file name for the config file disables
+    // processing of all config files.
+
+    if ( file_name && ( 0 == strlen( file_name ) ) )
+	{
+		g_warning( "CONFIG FILE DISABLED" );
+		return;
+	}
+
     // If a specific file name was given and it does not exist, we
     // bail with an error. If no file name was given and the default one
     // does not exist, we just skip processing it.

@@ -12,26 +12,31 @@
 #import "TrickplayText.h"
 #import "TrickplayTextHTML.h"
 #import "TrickplayGroup.h"
+#import "TrickplayScreen.h"
 
 @implementation AdvancedUIObjectManager
 
 @synthesize rectangles;
 @synthesize images;
 @synthesize textFields;
+@synthesize webTexts;
 @synthesize groups;
 @synthesize resourceManager;
+@synthesize gestureViewController;
 
 - (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager {
     if ((self = [super init])) {
         self.rectangles = [NSMutableDictionary dictionaryWithCapacity:20];
         self.images = [NSMutableDictionary dictionaryWithCapacity:20];
         self.textFields = [NSMutableDictionary dictionaryWithCapacity:20];
+        self.webTexts = [NSMutableDictionary dictionaryWithCapacity:20];
         self.groups = [NSMutableDictionary dictionaryWithCapacity:20];
         currentID = 1;
         
         self.resourceManager = aResourceManager;
         
         view = aView;
+        gestureViewController = nil;
     }
     
     return self;
@@ -41,7 +46,6 @@
 #pragma mark Networking
 
 - (void)setupServiceWithPort:(NSInteger)p hostname:(NSString *)h {
-    
     NSLog(@"AdvancedUI Service Setup: host: %@ port: %d", h, p);
     
     port = p;
@@ -90,6 +94,20 @@
 #pragma mark -
 #pragma mark UI
 
+- (void)storeObject:(TrickplayUIElement *)object {
+    if ([object isKindOfClass:[TrickplayRectangle class]]) {
+        [rectangles setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayGroup class]]) {
+        [groups setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayText class]]) {
+        [textFields setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayTextHTML class]]) {
+        [webTexts setObject:object forKey:object.ID];
+    } else if ([object isKindOfClass:[TrickplayImage class]]) {
+        [images setObject:object forKey:object.ID];
+    }
+}
+
 - (void)clean {
     NSLog(@"AdvancedUI clean");
     
@@ -108,6 +126,11 @@
     }
     [textFields removeAllObjects];
     
+    for (UIView *webText in [webTexts allValues]) {
+        [webText removeFromSuperview];
+    }
+    [webTexts removeAllObjects];
+    
     for (UIView *group in [groups allValues]) {
         [group removeFromSuperview];
     }
@@ -124,10 +147,8 @@
     
     TrickplayImage *image = [[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager objectManager:self];
     
-    //NSLog(@"Image created: %@", image);
     [images setObject:image forKey:imageID];
     
-    //[view addSubview:image];
     [image release];
 }
 
@@ -139,10 +160,8 @@
 - (void)createRectangle:(NSString *)rectID withArgs:(NSDictionary *)args {
     TrickplayRectangle *rect = [[TrickplayRectangle alloc] initWithID:rectID args:args objectManager:self];
     
-    //NSLog(@"Rectangle created: %@", rect);
     [rectangles setObject:rect forKey:rectID];
     
-    //[view addSubview:rect];
     [rect release];
 }
 
@@ -154,10 +173,20 @@
 - (void)createText:(NSString *)textID withArgs:(NSDictionary *)args {
     TrickplayText *text = [[TrickplayText alloc] initWithID:textID args:args objectManager:self];
     
-    //NSLog(@"Text created: %@", text);
     [textFields setObject:text forKey:textID];
     
-    //[view addSubview:text];
+    [text release];
+}
+
+/**
+ * Creates UIWebViews used for Text and stores them
+ */
+
+- (void)createWebText:(NSString *)textID withArgs:(NSDictionary *)args {
+    TrickplayTextHTML *text = [[TrickplayTextHTML alloc] initWithID:textID args:args objectManager:self];
+    
+    [webTexts setObject:text forKey:textID];
+    
     [text release];
 }
 
@@ -169,10 +198,8 @@
 - (void)createGroup:(NSString *)groupID withArgs:(NSDictionary *)args {
     TrickplayGroup *group = [[TrickplayGroup alloc] initWithID:groupID args:args objectManager:self];
     
-    //NSLog(@"Group created: %@", group);
     [groups setObject:group forKey:groupID];
     
-    //[view addSubview:group];
     [group release];
 }
 
@@ -211,27 +238,60 @@
             return;
         }
     }
-    NSString *ID = [NSString stringWithFormat:@"%u", currentID];
-    currentID++;
+    // Only screen may have an ID of 0
     if (currentID == 0) {
         currentID++;
     }
+    NSString *ID = [NSString stringWithFormat:@"%u", currentID];
+    currentID++;
     
     if ([type compare:@"Rectangle"] == NSOrderedSame) {
         [self createRectangle:ID withArgs:args];
     } else if ([type compare:@"Image"] == NSOrderedSame) {
         [self createImage:ID withArgs:args];
     } else if ([type compare:@"Text"] == NSOrderedSame) {
-        [self createText:ID withArgs:args];
+        [self createWebText:ID withArgs:args];
     } else if ([type compare:@"Group"] == NSOrderedSame) {
         [self createGroup:ID withArgs:args];
     }
     
-    
-
     [self createObjectReply:ID];
     //CFAbsoluteTime stop = CFAbsoluteTimeGetCurrent();
     //NSLog(@"Create Object Time = %lf", (stop - start)*1000.0);
+}
+
+- (void)destroyObject:(NSDictionary *)object {
+    id type = [object objectForKey:@"type"];
+    id ID = [object objectForKey:@"id"];
+    
+    // Must have class type and id, type must be a string, id must be a string
+    // id cannot equal 0 since this is the ID for screen
+    if (!type || !ID || ![type isKindOfClass:[NSString class]]
+        || ![ID isKindOfClass:[NSString class]] || [ID unsignedIntValue] == 0) {
+        [self reply:nil];
+        return;
+    }
+    
+    if ([rectangles objectForKey:ID]) {
+        [rectangles removeObjectForKey:ID];
+    } else if ([groups objectForKey:ID]) {
+        TrickplayGroup * group = [groups objectForKey:ID];
+        for (TrickplayUIElement *element in group.view.subviews) {
+            [element do_unparent:nil];
+        }
+        [groups removeObjectForKey:ID];
+    } else if ([textFields objectForKey:ID]) {
+        [textFields removeObjectForKey:ID];
+    } else if ([webTexts objectForKey:ID]) {
+        [webTexts removeObjectForKey:ID];
+    } else if ([images objectForKey:ID]) {
+        [images removeObjectForKey:ID];
+    } else {
+        [self reply:nil];
+        return;
+    }
+    
+    [self createObjectReply:ID];
 }
 
 - (void)setValuesForObject:(NSDictionary *)JSON_object {
@@ -275,6 +335,8 @@
         return [groups objectForKey:ID];
     } else if ([textFields objectForKey:ID]) {
         return [textFields objectForKey:ID];
+    } else if ([webTexts objectForKey:ID]) {
+        return [webTexts objectForKey:ID];
     } else if ([images objectForKey:ID]) {
         return [images objectForKey:ID];
     }
@@ -307,114 +369,6 @@
 }
 
 #pragma mark -
-#pragma mark Old Protocol
-
-/**
- * Object creation function.
- */
-
-- (void)createObjects:(NSArray *)JSON_Array {
-    // Destroy any objects of the same name
-    [self destroyObjects:JSON_Array];
-    
-    //NSLog(@"Creating Objects from JSON: %@", JSON_Array);
-    
-    // Now that we have the JSON Array of objects, create all the objects
-    for (NSDictionary *object in JSON_Array) {
-        //NSLog(@"Creating object %@", object);
-        if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
-            [self createRectangle:(NSString *)[object objectForKey:@"id"]
-                         withArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
-            [self createImage:(NSString *)[object objectForKey:@"id"]
-                     withArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
-            [self createText:(NSString *)[object objectForKey:@"id"]
-                     withArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
-            [self createGroup:(NSString *)[object objectForKey:@"id"]
-                    withArgs:object];
-        }
-    }
-}
-
-
-/**
- * Object Destruction function.
- */
-
-- (void)destroyObjects:(NSArray *)JSON_Array {
-    NSLog(@"Destroying Objects from JSON: %@", JSON_Array);
-    
-    // Total destruction
-    for (NSDictionary *object in JSON_Array) {
-        // remove from local repository
-        NSLog(@"Destroying object %@", object);
-        if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
-            [[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
-            [rectangles removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
-            [[images objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
-            [images removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
-            [[textFields objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
-            [textFields removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
-            for (TrickplayGroup *group in groups) {
-                [group.manager destroyObjects:JSON_Array];
-            }
-            [[groups objectForKey:(NSString *)[object objectForKey:@"id"]]removeFromSuperview];
-            [groups removeObjectForKey:(NSString *)[object objectForKey:@"id"]];
-        }
-    }
-}
-
-
-/**
- * Object Setter function.
- */
-
-- (void)setValuesForObjects:(NSArray *)JSON_Array {
-    for (NSDictionary *object in JSON_Array) {
-        //NSLog(@"Setting object %@", object);
-        
-        // Set values for class specific properties
-        if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
-            [(TrickplayUIElement *)[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
-            [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
-            [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
-            for (TrickplayGroup *group in groups) {
-                [group.manager setValuesForObjects:JSON_Array];
-            }
-            [(TrickplayUIElement *)[groups objectForKey:(NSString *)[object objectForKey:@"id"]] setValuesFromArgs:object];
-        }
-    }
-}
-
-
-/**
- * Object Getter function.
- */
-
-- (void)getValuesForObjects:(NSArray *)JSON_Array {
-    for (NSDictionary *object in JSON_Array) {
-        // Set values for class specific properties
-        if ([(NSString *)[object objectForKey:@"type"] compare:@"Rectangle"] == NSOrderedSame) {
-            [(TrickplayUIElement *)[rectangles objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Image"] == NSOrderedSame) {
-            [(TrickplayUIElement *)[images objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Text"] == NSOrderedSame) {
-            [(TrickplayUIElement *)[textFields objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
-        } else if ([(NSString *)[object objectForKey:@"type"] compare:@"Group"] == NSOrderedSame) {
-            [(TrickplayUIElement *)[groups objectForKey:(NSString *)[object objectForKey:@"id"]] getValuesFromArgs:object];
-        }
-    }
-}
-
-#pragma mark -
 #pragma mark Test method
 
 - (void)respondInstantly {
@@ -440,8 +394,11 @@
     self.rectangles = nil;
     self.images = nil;
     self.textFields = nil;
+    self.webTexts= nil;
     self.groups = nil;
     self.resourceManager = nil;
+    
+    gestureViewController = nil;
     
     [super dealloc];
 }

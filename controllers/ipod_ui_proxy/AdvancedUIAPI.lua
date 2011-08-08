@@ -1,7 +1,11 @@
 local log = print
 -- Load the AdvancedUI Classes into a class table
-local class_table = dofile("AdvancedUIClasses.lua")
-local controller , CACHE_LOCAL_PROPERTIES = ...
+local controller , class_table , CACHE_LOCAL_PROPERTIES = ...
+if not class_table then
+    class_table = dofile("AdvancedUIClasses.lua")
+end
+
+local foo = 0
 
 assert(controller)
 assert(class_table)
@@ -38,6 +42,8 @@ end
 -- Every local proxy we create is kept here, keyed by its id
 
 local proxies = {}
+-- the proxies have weak values
+setmetatable(proxies, {__mode = "v"})
 
 ---------------------------------------------------------------------------
 -- This is how we talk to the remote end
@@ -48,15 +54,29 @@ local function send_request( end_point , payload )
     payload = payload or {}
 
     payload.method = end_point
+    --[[
     print("send_request payload:", payload)
     if type(payload) == "table" then
         dumptable(payload)
     end
+    --]]
     result = controller:advanced_ui( payload )
+    foo = foo + 1
+    --result = {id = foo}
+    if foo%30 == 0 then
+        print("\t\tcalls = ", foo)
+    end
+    ---[[
     print("send_request result:", result)
     if type(result) == "table" then
-        dumptable(result)
+        --dumptable(result)
     end
+    --]]
+
+    if result == json.null then
+        return nil
+    end
+
     return result
 end
 
@@ -143,6 +163,11 @@ do
         function proxy:__newindex( key , value )
             
             -- See if there is a setter function for this property
+
+            if key == "marker" then
+                print("The key 'marker' is reserved for the garbage collector")
+                return
+            end
 
             local setter = rawget( set , key )
             if type( setter ) == "function" then
@@ -244,6 +269,9 @@ do
         
             local payload = { id = self.id , properties = { [ key ] = true } }
             local result = send_request( "get" , payload ).properties[ key ]
+            if result == json.null then
+                return nil
+            end
             
             -- And cache it
             
@@ -341,7 +369,22 @@ local function create_local( id , T , proxy_metatable , property_cache )
     -- Store it
     
     rawset( proxies , id , proxy )
-    
+
+    -- Set up garbage collection
+
+    local destruction_marker = {}
+    local destruction_payload = {
+        id = id,
+        type = T
+    }
+    destruction_marker.__gc = function()
+
+        send_request( "destroy" , destruction_payload )
+
+    end
+
+    rawset( proxy , "marker" , newudata(destruction_marker) )
+
     return proxy
 end
 
@@ -425,7 +468,7 @@ end
 -- List every proxy !
 
 function mt:list()
-    dumptable(proxies)
+    --dumptable(proxies)
 end
 
 ---------------------------------------------------------------------------
@@ -433,9 +476,37 @@ end
 setmetatable( factory , mt )
 
 ---------------------------------------------------------------------------
+-- Handle events for individual proxies
+
+function controller:on_advanced_ui_event(json_object)
+    print("event recieved:", json_object)
+    if not json_object then
+        return
+    end
+
+    local proxy = rawget( proxies , json_object.id )
+    if not proxy then
+        return
+    end
+
+    -- call the right callback for the event
+    if json_object.event == "touch" and proxy.on_touches then
+        proxy:on_touches(json_object.touch_id_list, json_object.state)
+    elseif json_object.event == "on_loaded" and proxy.on_loaded then
+        proxy:on_loaded(json_object.failed)
+    elseif json_object.event == "on_text_changed" and proxy.on_text_changed then
+        proxy:on_text_changed(json_object.text)
+    elseif json_object.event == "on_completed" and proxy.on_completeds then
+        proxy.on_completeds[json_object.animation_id]()
+        proxy.on_completeds[json_object.animation_id] = nil
+    end
+end
+
+---------------------------------------------------------------------------
 -- Give the controller Container like abilities
 
 controller.screen = factory:create_local(0, "Controller") 
+controller.factory = factory
 
 ---------------------------------------------------------------------------
 

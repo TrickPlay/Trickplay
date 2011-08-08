@@ -15,6 +15,9 @@ namespace ClutterUtil
     void actor_on_hide(ClutterActor*actor,void*);
 
 
+    // Checks if a clutter_actor, actor, can be added as a child of another clutter_actor, container
+    bool is_qualified_child( ClutterActor * container , ClutterActor* actor );
+
     // Returns an actor created from the constructor function. It sinks
     // the original ref and then adds another, so you have to unref the
     // result.

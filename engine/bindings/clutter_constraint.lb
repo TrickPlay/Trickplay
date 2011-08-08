@@ -17,7 +17,7 @@ class Align [[ ClutterConstraint * ]] constraint
         [[
             self = clutter_align_constraint_new( NULL , CLUTTER_ALIGN_X_AXIS , 0 );
             g_object_ref( self );
-            lb_construct_gobject( ClutterConstraint , self );
+            (void)lb_construct_gobject( ClutterConstraint , self );
             ClutterUtil::set_props_from_table( L , props );
             g_object_unref( self );
         ]];
@@ -84,7 +84,7 @@ class Bind [[ ClutterConstraint * ]] constraint
         [[
             self = clutter_bind_constraint_new( NULL , CLUTTER_BIND_X , 0 );
             g_object_ref( self );
-            lb_construct_gobject( ClutterConstraint , self );
+            (void)lb_construct_gobject( ClutterConstraint , self );
             ClutterUtil::set_props_from_table( L , props );
             g_object_unref( self );
         ]];
@@ -190,7 +190,7 @@ class Snap [[ ClutterConstraint * ]] constraint
         [[
             self = clutter_snap_constraint_new( NULL , CLUTTER_SNAP_EDGE_TOP , CLUTTER_SNAP_EDGE_TOP , 0 );
             g_object_ref( self );
-            lb_construct_gobject( ClutterConstraint , self );
+            (void)lb_construct_gobject( ClutterConstraint , self );
             ClutterUtil::set_props_from_table( L , props );
             g_object_unref( self );
         ]];

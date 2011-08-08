@@ -17,7 +17,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        NSURL *clickSound = [[NSBundle mainBundle] URLForResource:@"click" withExtension:@"mp3"];
+        NSURL *clickSound = [[NSBundle mainBundle] URLForResource:@"click" withExtension:@"wav"];
         clickSoundRef = (CFURLRef)[clickSound retain];
         AudioServicesCreateSystemSoundID(clickSoundRef, &audioClick);
     }

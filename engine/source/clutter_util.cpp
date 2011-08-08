@@ -434,6 +434,27 @@ static ClutterModifierType to_clutter_modifier( unsigned long int modifiers )
 	{
 		result |= CLUTTER_META_MASK;
 	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_1 )
+	{
+		result |= CLUTTER_MOD1_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_2 )
+	{
+		result |= CLUTTER_MOD2_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_3 )
+	{
+		result |= CLUTTER_MOD3_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_4 )
+	{
+		result |= CLUTTER_MOD4_MASK;
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_5 )
+	{
+		result |= CLUTTER_MOD5_MASK;
+	}
+
 	return ClutterModifierType( result );
 }
 
@@ -625,6 +646,27 @@ unsigned long int ClutterUtil::get_tp_modifiers( ClutterEvent * event )
 		result |= TP_CONTROLLER_MODIFIER_META;
 	}
 
+	if ( cm & CLUTTER_MOD1_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_1;
+	}
+	if ( cm & CLUTTER_MOD2_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_2;
+	}
+	if ( cm & CLUTTER_MOD3_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_3;
+	}
+	if ( cm & CLUTTER_MOD4_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_4;
+	}
+	if ( cm & CLUTTER_MOD5_MASK )
+	{
+		result |= TP_CONTROLLER_MODIFIER_5;
+	}
+
 	return result;
 }
 
@@ -681,6 +723,78 @@ void ClutterUtil::push_event_modifiers( lua_State * L , unsigned long int modifi
 		lua_pushboolean( L , true );
 		lua_rawset( L , t );
 	}
+
+	if ( modifiers & TP_CONTROLLER_MODIFIER_1 )
+	{
+		lua_pushliteral( L , "mod1" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_2 )
+	{
+		lua_pushliteral( L , "mod2" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_3 )
+	{
+		lua_pushliteral( L , "mod3" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_4 )
+	{
+		lua_pushliteral( L , "mod4" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+	if ( modifiers & TP_CONTROLLER_MODIFIER_5 )
+	{
+		lua_pushliteral( L , "mod5" );
+		lua_pushboolean( L , true );
+		lua_rawset( L , t );
+	}
+
+}
+
+//-----------------------------------------------------------------------------
+
+bool ClutterUtil::is_qualified_child( ClutterActor * container , ClutterActor* actor )
+{
+    if(actor)
+	{
+        if ( ClutterActor * parent = clutter_actor_get_parent( actor ) )
+        {
+            guint32 container_gid = clutter_actor_get_gid( container );
+            guint32 actor_gid = clutter_actor_get_gid( actor );
+            guint32 parent_gid = clutter_actor_get_gid( parent );
+
+            g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT ALREADY HAS PARENT %" G_GUINT32_FORMAT "" , actor_gid , container_gid , parent_gid );
+            return false;
+        }
+        else
+        {
+            /* check if source is not already a parent or ancestor of the self */
+            ClutterActor* ancestor = clutter_actor_get_parent( container );
+            if ( CLUTTER_IS_CONTAINER( actor ) && ancestor != NULL )
+            {
+                while ( ancestor != NULL && ancestor != actor )
+                {
+                    ancestor = clutter_actor_get_parent( ancestor );
+                }
+                if ( ancestor != NULL )
+                {
+                    guint32 container_gid = clutter_actor_get_gid( container );
+                    guint32 actor_gid = clutter_actor_get_gid( actor );
+                    g_warning( "TRYING TO ADD ELEMENT %" G_GUINT32_FORMAT " TO CONTAINER %" G_GUINT32_FORMAT" BUT IT IS ALREADY A PARENT OR ANCESTOR OF %" G_GUINT32_FORMAT ". IGNORING %" G_GUINT32_FORMAT "" ,
+								actor_gid , container_gid , container_gid , actor_gid );
+                    return false;
+                }
+            }
+            return true;
+        }
+	}
+    return false;
 }
 
 //-----------------------------------------------------------------------------

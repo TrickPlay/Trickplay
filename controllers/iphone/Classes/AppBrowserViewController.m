@@ -41,6 +41,12 @@
 }
 */
 
+/**
+ * Called by RootViewController after a service is resolved. Creates a
+ * GestureViewController and sends GestureViewController the host and port
+ * it will use for establishing the socket it will use for an initial
+ * connection with Trickplay and communicating with Trickplay asynchronously.
+ */
 - (void)setupService:(NSInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n {
@@ -52,6 +58,10 @@
     [self createGestureViewWithPort:p hostName:h];
 }
 
+/**
+ * Pushes the GestureViewController to the top of the navigation stack making it
+ * the visible view controller.
+ */
 - (void)pushApp {
     pushingViewController = YES;
 
@@ -68,7 +78,8 @@
 
 
 /**
- *  Returns true if app is running.
+ * Returns true if the AppBrowserViewController can confirm an app is running
+ * on Trickplay by asking it over the network.
  */
 - (BOOL)hasRunningApp {
     if (![gestureViewController hasConnection]) {
@@ -88,7 +99,13 @@
 }
 
 /**
- * Returns current app data or nil on error.
+ * Asks Trickplay for the currently running app and any information pertaining
+ * to this app assembled in a JSON string. The method takes this JSON string reply
+ * and returns it as an NSDictionary or nil on error.
+ *
+ * TODO: might want to make this call asynchronous and add a time-to-live, otherwise
+ * future changes to TakeControl could lead to deadlock scenerios since AdvancedUI
+ * is synchronous.
  */
 - (NSDictionary *)getCurrentAppInfo {
     NSLog(@"Getting Current App Info");
@@ -96,15 +113,23 @@
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
     
-    // TODO: MAKE ASYNC TO PREVENT DEADLOCK
     NSURL *dataURL = [NSURL URLWithString:JSONString];
     NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
     //NSArray *JSONArray = [JSONData yajl_JSON];
-    return (NSDictionary *)[[[JSONData yajl_JSON] retain] autorelease];
+    return (NSDictionary *)[JSONData yajl_JSON];
 }
 
-
+/**
+ * Asks Trickplay for the most up-to-date information of apps it has available.
+ * Trickplay replies with a JSON string of up-to-date apps. The method then
+ * composes an NSDictionary with this information and sets appsAvailable to
+ * this Dictionary which will later populate the TableView.
+ *
+ * TODO: might want to make this call asynchronous and add a time-to-live, otherwise
+ * future changes to TakeControl could lead to deadlock scenerios since AdvancedUI
+ * is synchronous. 
+ */
 - (BOOL)fetchApps {
     NSLog(@"Fetching Apps");
     if (![gestureViewController hasConnection]) {
@@ -114,7 +139,6 @@
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     
-    // TODO: MAKE THIS ASYNC TO PREVENT THE CHANCE OF DEADLOCK WHILE ADVANCED_UI CONNECTION SETS UP
     NSURL *dataURL = [NSURL URLWithString:JSONString];
     NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     self.appsAvailable = [JSONData yajl_JSON];
@@ -126,6 +150,10 @@
     return YES;
 }
 
+/**
+ * Tells Trickplay to launch a selected app and sets this app as the current
+ * app.
+ */
 - (void)launchApp:(NSDictionary *)appInfo {
     NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
     NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", gestureViewController.socketManager.host, gestureViewController.socketManager.port, appID];
@@ -137,6 +165,10 @@
     self.currentAppName = (NSString *)[appInfo objectForKey:@"name"];
 }
 
+/**
+ * Creates the GestureViewController, gives it a port and host name to establish
+ * a connection to a service, and tells it to establish this connection.
+ */
 - (void)createGestureViewWithPort:(NSInteger)port hostName:(NSString *)hostName {
     gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
     
@@ -191,42 +223,26 @@
 #pragma mark -
 #pragma mark GestureViewControllerSocketDelegate stuff
 
+/**
+ * Called when a socket error occurs.
+ */
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in AppBrowser");
 
-    // everything will get released from the navigation controller's delegate call (hopefully)
-    /*
-    if (self.navigationController.visibleViewController == self) {
-        if (!viewDidAppear) {
-            return;
-        }
-        [self.navigationController.view.layer removeAllAnimations];
-        [self.navigationController popToRootViewControllerAnimated:YES];
-    
-    } else {
+    if (socketDelegate) {
         [socketDelegate socketErrorOccurred];
     }
-     */
-    [socketDelegate socketErrorOccurred];
 }
 
+/**
+ * Called when a socket closes.
+ */
 - (void)streamEndEncountered {
     NSLog(@"Socket End Encountered in AppBrowser");
     
-    // everything will get released from the navigation controller's delegate call (hopefully)
-    /*
-    if (self.navigationController.visibleViewController == self) {
-        if (!viewDidAppear) {
-            return;
-        }
-        [self.navigationController.view.layer removeAllAnimations];
-        [self.navigationController popToRootViewControllerAnimated:YES];
-        
-    } else {
-        [socketDelegate socketErrorOccurred];
+    if (socketDelegate) {
+        [socketDelegate streamEndEncountered];
     }
-     */
-    [socketDelegate socketErrorOccurred];
 }
 
 
@@ -240,7 +256,10 @@
 
 
 /**
- * Customize the number of rows in the table view.
+ * Customize the number of rows in the table view. The number of rows is equlivalent
+ * to the number of apps available. If Trickplay has no apps then one row is
+ * still created which will be populated with a string informing the user there
+ * are no available apps.
  */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	if (!appsAvailable || [appsAvailable count] == 0) {
@@ -250,7 +269,9 @@
 }
 
 /**
- * Customize the appearance of table view cells.
+ * Customize the appearance of table view cells. Each cell will contain the name
+ * of an app available on Trickplay. Selecting an app will launch the app on
+ * Trickplay.
  */
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
@@ -325,7 +346,8 @@
 #pragma mark Table view delegate
 
 /**
- * Override to support row selection in the table view.
+ * Override to support row selection in the table view. Selecting a row tells
+ * Trickplay to launch the app populated by that row.
  */
 - (void)tableView:(UITableView *)tableView
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -383,7 +405,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [appsAvailable release];
     }
     if (gestureViewController) {
+        gestureViewController.socketDelegate = nil;
         [gestureViewController release];
+        gestureViewController = nil;
     }
     if (currentAppName) {
         [currentAppName release];

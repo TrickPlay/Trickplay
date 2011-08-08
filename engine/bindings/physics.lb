@@ -223,21 +223,116 @@ interface Body [[ ClutterActor * ]]
     double y
         [[
             Physics::Body * me = Physics::Body::get( self );
-
-            const b2Vec2 & pos( me->body->GetPosition() );
-
-            y = me->world->world_to_screen( pos.y );
+    
+            if ( me->world->z_for_y ) 
+            {
+                y = clutter_actor_get_y( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                y = me->world->world_to_screen( pos.y );
+            }
         ]]
         [[
             Physics::Body * me = Physics::Body::get( self );
+    
+            if ( me->world->z_for_y ) 
+            {
+                clutter_actor_set_y( self , y );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( y );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
+        ]];
 
-            b2Vec2 pos( me->body->GetTransform().position );
 
-            pos.y = me->world->screen_to_world( y );
+    /*
+        Property: z
+        
+        TODO
+    */
 
-            me->body->SetTransform( pos , me->body->GetAngle() );
+    double z
+        [[
+            Physics::Body * me = Physics::Body::get( self );
 
-            me->synchronize_actor();
+            if ( ! me->world->z_for_y ) 
+            {
+                z = clutter_actor_get_depth( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                z = - me->world->world_to_screen( pos.y );
+            }
+        ]]
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+    
+            if ( ! me->world->z_for_y ) 
+            {
+                clutter_actor_set_depth( self , z );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( - z );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
+        ]];
+
+    /*
+        Property: depth
+        
+        TODO
+    */
+
+    double depth
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+
+            if ( ! me->world->z_for_y ) 
+            {
+                depth = clutter_actor_get_depth( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                depth = - me->world->world_to_screen( pos.y );
+            }
+        ]]
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+    
+            if ( ! me->world->z_for_y ) 
+            {
+                clutter_actor_set_depth( self , depth );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( - depth );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
         ]];
 
 	/*
@@ -1467,4 +1562,12 @@ global physics [[ Physics::World * ]]
         [[
             self->attach_global_callback( Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
         ]];
+        
+    bool z_for_y
+        [[
+            z_for_y = self->z_for_y;
+        ]]
+        [[
+            self->z_for_y = z_for_y;
+        ]];        
 }
