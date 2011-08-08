@@ -41,6 +41,24 @@ typedef struct
 } ApplicationContext;
 
 /*****************************************************************************/
+static void pretty_print_string_attrib(const char * a_name, const char* a_val)
+{
+	fprintf(stdout, "%-36s%s\n", a_name, a_val);
+}
+
+/*****************************************************************************/
+static void pretty_print_int_attrib(const char * a_name, int a_val)
+{
+	fprintf(stdout, "%-36s%d\n", a_name, a_val);
+}
+
+/*****************************************************************************/
+static void pretty_print_boolean_attrib(const char * a_name, int a_val)
+{
+	fprintf(stdout, "%-36s%s\n", a_name, a_val ? "TRUE" : "FALSE");
+}
+
+/*****************************************************************************/
 
 static void print_gl_properties(void)
 {
@@ -57,97 +75,70 @@ static void print_gl_properties(void)
 	GLint maxTextureSize;
 	GLint maxVaryingVectors;
 	GLint maxViewPortDimensions[2];
+	char allextensions[1024];
+	char dimensions_str[32];
+	char * pch;
+	int is_first_iteration = 1;
 
     /* Print some OpenGL vendor information */
 
-    fprintf(stdout, "GL version info: %s\n", glGetString(GL_VERSION));
-    fprintf(stdout, "GL vendor info: %s\n", glGetString(GL_VENDOR));
-    fprintf(stdout, "GL renderer: %s\n", glGetString(GL_RENDERER));
-    fprintf(stdout, "GL shading language version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    fprintf(stdout, "GL extensions: %s\n", glGetString(GL_EXTENSIONS));
+    pretty_print_string_attrib("GL_VERSION", (const char *) glGetString(GL_VERSION));
+    pretty_print_string_attrib("GL_VENDOR", (const char *)glGetString(GL_VENDOR));
+    pretty_print_string_attrib("GL_RENDERER", (const char *)glGetString(GL_RENDERER));
+    pretty_print_string_attrib("GL_SHADING_LANGUAGE_VERSION", (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    strncpy(allextensions, (const char *)glGetString(GL_EXTENSIONS), 1023);
+    allextensions[1023] = '\0';
+    pch = strtok(allextensions, " ");
+    while(pch != NULL)
+    {
+    	if (is_first_iteration)
+    	{
+    		pretty_print_string_attrib("GL_EXTENSIONS", pch);
+    		is_first_iteration = 0;
+    	}
+    	else
+    	{
+    		pretty_print_string_attrib(" ", pch);
+    	}
+    	pch = strtok(NULL, " ");
+    }
 
 
     /* Determine if a shader compiler is available */
 	glGetBooleanv(GL_SHADER_COMPILER, &shaderCompiler);
-	fprintf(stdout, "GL shader compiler support: %s\n", shaderCompiler ? "TRUE" : "FALSE");
+	pretty_print_boolean_attrib("GL_SHADER_COMPILER", shaderCompiler);
 	/* Determine binary formats available */
 	glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &numBinaryFormats);
-	fprintf(stdout, "GL number of supported binary formats: %d\n", numBinaryFormats);
+	pretty_print_int_attrib("GL_NUM_SHADER_BINARY_FORMATS", numBinaryFormats);
 
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &maxVertexUniformVectors);
-	fprintf(stdout, "GL max vertex uniform vectors: %d\n", maxVertexUniformVectors);
+	pretty_print_int_attrib("GL_MAX_VERTEX_UNIFORM_VECTORS", maxVertexUniformVectors);
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
-	fprintf(stdout, "GL max vertex attributes: %d\n", maxVertexAttribs);
+	pretty_print_int_attrib("GL_MAX_VERTEX_ATTRIBS", maxVertexAttribs);
 
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &maxFragmentUniformVectors);
-	fprintf(stdout, "GL max fragment uniform vectors: %d\n", maxFragmentUniformVectors);
+	pretty_print_int_attrib("GL_MAX_FRAGMENT_UNIFORM_VECTORS", maxFragmentUniformVectors);
 
 	glGetIntegerv(GL_MAX_VARYING_VECTORS, &maxVaryingVectors);
-	fprintf(stdout, "GL max varying vectors: %d\n", maxVaryingVectors);
+	pretty_print_int_attrib("GL_MAX_VARYING_VECTORS", maxVaryingVectors);
 
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits);
-	fprintf(stdout, "GL max texture image units: %d\n", maxTextureImageUnits);
+	pretty_print_int_attrib("GL_MAX_TEXTURE_IMAGE_UNITS", maxTextureImageUnits);
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-	fprintf(stdout, "GL max texture size: %d\n", maxTextureSize);
+	pretty_print_int_attrib("GL_MAX_TEXTURE_SIZE", maxTextureSize);
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedTextureImageUnits);
-	fprintf(stdout, "GL max combined texture image units: %d\n", maxCombinedTextureImageUnits);
+	pretty_print_int_attrib("GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS", maxCombinedTextureImageUnits);
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxCubeMapTextureSize);
-	fprintf(stdout, "GL max cube map texture size: %d\n", maxCubeMapTextureSize);
+	pretty_print_int_attrib("GL_MAX_CUBE_MAP_TEXTURE_SIZE", maxCubeMapTextureSize);
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextureImageUnits);
-	fprintf(stdout, "GL max vertex texture image units: %d\n", maxVertexTextureImageUnits);
+	pretty_print_int_attrib("GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS", maxVertexTextureImageUnits);
 
 	glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRenderBufferSize);
-	fprintf(stdout, "GL max render buffer size: %d\n", maxRenderBufferSize);
+	pretty_print_int_attrib("GL_MAX_RENDERBUFFER_SIZE", maxRenderBufferSize);
 
 	glGetIntegerv(GL_MAX_VIEWPORT_DIMS, maxViewPortDimensions);
-	fprintf(stdout, "GL max viewport dimensions: %dx%d\n", maxViewPortDimensions[0], maxViewPortDimensions[1]);
-
-	{ /* find max texture memory available for use */
-	    int tidx;
-	    GLenum error;
-	    int texture_size = maxTextureSize;
-		GLuint * sample_texture_ids = malloc(maxTextureImageUnits * sizeof(GLuint));
-		int total_texture_memory_reserved = 0;
-
-		glGenTextures(maxTextureImageUnits, sample_texture_ids);
-		for (tidx=0; tidx < maxTextureImageUnits; tidx++)
-		{
-			glBindTexture(GL_TEXTURE_2D, sample_texture_ids[tidx]);
-
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size, texture_size,
-					0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			while (GL_NO_ERROR != (error = glGetError()))
-			{
-				if (texture_size <= maxTextureSize / 16) {
-					break;
-				}
-				else
-				{
-					texture_size /= 2;
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_size, texture_size,
-											0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-				}
-			}
-			if (error == GL_NO_ERROR)
-			{
-				total_texture_memory_reserved += texture_size * texture_size * 4;
-			}
-			else
-			{
-				break;
-			}
-		}
-		glDeleteTextures(maxTextureImageUnits, sample_texture_ids);
-		if (error == GL_NO_ERROR)
-		{
-			fprintf(stdout, "Amount of available texture memory is at least %8.4f MB\n", (float)total_texture_memory_reserved / (1024 * 1024));
-		}
-		else
-		{
-			fprintf(stdout, "Amount of available texture memory is not less than %8.4f MB\n", (float)total_texture_memory_reserved / (1024 * 1024));
-		}
-		free(sample_texture_ids);
-	}
+	sprintf(dimensions_str, "%dx%d", maxViewPortDimensions[0], maxViewPortDimensions[1]);
+	pretty_print_string_attrib("GL_MAX_VIEWPORT_DIMS", dimensions_str);
 }
 
 /*****************************************************************************/
