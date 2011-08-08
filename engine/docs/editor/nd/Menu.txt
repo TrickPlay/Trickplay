@@ -91,7 +91,7 @@ Group: Index  {
    Class Index: Classes
    Function Index: Functions
    Property Index: Properties
-   Event Index: Events
    Constructor Index: Constructors
+   Event Handler Index: Event Handlers
    }  # Group: Index
 

@@ -63,6 +63,16 @@ The ui_height property is an integer specifying the ButtonPicker's height in pix
 
 
 
+Property: ui_position
+
+The ui_position property is a table of integer values specifying the object's screen coordinates: X, Y and Z, respectively.
+
+*Default Setting:* { 300, 300, 0 }
+
+*See Also:* the <ui_width> and <ui_height> properties
+
+
+
 Property: items
 
 The items property is a table of strings where each string specifies one item in the ButtonPicker's scrollable list.
@@ -281,7 +291,9 @@ When the "custom" skin is selected, the developer must define the <text_color>, 
 
 Property: rotate_func
 
-The rotate_func property is a reference to a function that is invoked after the ButtonPicker has scrolled to a new item in its list. Based upon the list's current item, the program can perform appropriate operations, such as displaying or hiding display elements.
+The rotate_func property is a reference to a function that is invoked after the ButtonPicker has scrolled to a new item in its list by a call to either the <press_left>, <press_right>, <press_up> or <press_down> function. Based upon the list's current item, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+Note: Setting the ButtonPicker's <selected_item> property does *not* cause the rotate_func function to be called.
 
 The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, which includes invoking the rotate_func. Thus, the rotate_func is guaranteed to be called, even if the scrolling operation is aborted early.
 
@@ -401,16 +413,6 @@ The scrolling operation occurs asynchronously. If a second scrolling operation i
 
 
 
-Function: press_enter
-
-The press_enter() function currently performs no operation.
-
-*Prototype:* press_enter()
-
-*Return Value:* None.
-
-
-
 Function: on_focus_in
 
 The on_focus_in() function forces the input focus to the ButtonPicker.
@@ -420,4 +422,16 @@ The on_focus_in() function forces the input focus to the ButtonPicker.
 *Return Value:* None.
 
 
+
+Function: on_focus_out
+
+The on_focus_out() function releases the input focus from the ButtonPicker.
+
+After calling on_focus_out(), no UI element has the input focus.
+
+*Prototype:* on_focus_out()
+
+*Arguments:* None.
+
+*Return Value:* None.
 
