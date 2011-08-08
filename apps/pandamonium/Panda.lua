@@ -207,6 +207,7 @@ local keys = {
 			)
 		end
     end,
+	--[[
 	[keys.Down] = function()
         physics:draw_debug()
 		physics:stop()
@@ -215,6 +216,7 @@ local keys = {
 		physics:clear_debug()
         physics:start()
     end,
+	--]]
 }
 
 panda.on_key_down = function(_,k,_,s) if keys[k] then keys[k](s) end end
