@@ -43,7 +43,7 @@ p
    margin: 0.5em 0.5em 0.5em 0.5em;
 }
 
-.SProperty .SEntry, .SFunction, .SEvent, .SVariable, .SType a
+.SProperty .SEntry, .SFunction, .SEvent, .SEventHandler, .SVariable, .SType a
 {
     font-family: Inconsolata, "Courier New", "Courier", monospace;
     font-variant: normal;
