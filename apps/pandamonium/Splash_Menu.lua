@@ -13,10 +13,10 @@ local scrim = Rectangle{size = screen.size,color="000000",opacity = 0}
 do
 	local title      = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 130px",
+		font         = "Baveuse 160px",
 		text         = "Pandamonium",
 		color        = "ffffff",
-		position     = {screen.w/2, 80}
+		position     = {screen.w/2, 110}
 		
 	}
 	
@@ -26,7 +26,7 @@ do
 		--source       = assets.title,
 		font         = "Baveuse 70px",
 		text         = "START",
-		position     = {screen.w/2, 200}
+		position     = {screen.w/2, 300}
 		
 	}
 	start = make_text(start,"green")
@@ -251,7 +251,7 @@ local floor = physics:Body(
 	}
 )
 
-local branch = branch_constructor( -1, 700,400 )
+local branch = branch_constructor( -1, 700,300 )
 
 floor.on_begin_contact = panda.bounce
 floor.position = {screen_w/2,screen_h}
@@ -290,7 +290,7 @@ do
 				
 				scrim:animate{
 					duration = 300,
-					opacity  = 255*.4,
+					opacity  = 255*.6,
 				}
 				
 				return
