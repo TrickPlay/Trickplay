@@ -1,6 +1,6 @@
 
 local Help = Group{name = "Help",y=600,x_rotation = {-100,0,0}}
-
+Help:hide()
 local help_font = "Baveuse 45px"
 
 local done
@@ -170,15 +170,15 @@ local wobble = Timeline{
 }
 
 
-local curr_y = 0
+local curr_x_rot = 0
 	GameState:add_state_change_function(
 		function()
 			--wobble:stop()
-			curr_y = Help.y
-			
+			curr_x_rot = Help.x_rotation[1]
+			Help:show()
 			Help:complete_animation()
 			
-			Help.y = curr_y
+			Help.x_rotation = {curr_x_rot,0,0}
 			
 			Help:raise_to_top()
 			--physics:stop()
@@ -214,6 +214,7 @@ local curr_y = 0
 				on_completed = function()
 					screen.on_key_down = Splash.on_key_down
 					physics:start()
+					Help:hide()
 				end
 			}
 		end,
