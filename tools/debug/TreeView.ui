@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>464</width>
-    <height>832</height>
+    <width>1121</width>
+    <height>811</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,37 +26,27 @@
    <string>Trickplay UI Tree Viewer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QSplitter" name="splitter">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>0</width>
-      <height>0</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>2</width>
-      <height>2</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout"/>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="editor">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Editor</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>464</width>
+     <width>1121</width>
      <height>25</height>
     </rect>
    </property>
@@ -76,16 +66,19 @@
    <property name="contextMenuPolicy">
     <enum>Qt::NoContextMenu</enum>
    </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
    <property name="windowTitle">
-    <string>  UI Elements</string>
+    <string>  Inspector</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="2" column="0">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QPushButton" name="button_Refresh">
          <property name="text">
@@ -93,123 +86,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QPushButton" name="button_ExpandAll">
-         <property name="text">
-          <string>Expand All</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="button_CollapseAll">
-         <property name="text">
-          <string>Collapse All</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="3" column="0">
-      <widget class="QTreeView" name="inspector">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>450</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="palette">
-        <palette>
-         <active>
-          <colorrole role="Highlight">
-           <brush brushstyle="SolidPattern">
-            <color alpha="0">
-             <red>75</red>
-             <green>105</green>
-             <blue>131</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </active>
-         <inactive>
-          <colorrole role="Highlight">
-           <brush brushstyle="SolidPattern">
-            <color alpha="0">
-             <red>75</red>
-             <green>105</green>
-             <blue>131</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </inactive>
-         <disabled>
-          <colorrole role="Highlight">
-           <brush brushstyle="SolidPattern">
-            <color alpha="255">
-             <red>131</red>
-             <green>131</green>
-             <blue>131</blue>
-            </color>
-           </brush>
-          </colorrole>
-         </disabled>
-        </palette>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">/*QTreeView::branch {
-	selection-background-color: transparent;
-}
-
-selection-background-color: transparent;*/</string>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::NoDragDrop</enum>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="indentation">
-        <number>20</number>
-       </property>
-       <property name="rootIsDecorated">
-        <bool>true</bool>
-       </property>
-       <property name="uniformRowHeights">
-        <bool>true</bool>
-       </property>
-       <property name="animated">
-        <bool>false</bool>
-       </property>
-       <property name="allColumnsShowFocus">
-        <bool>true</bool>
-       </property>
-       <attribute name="headerCascadingSectionResizes">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="headerDefaultSectionSize">
-        <number>200</number>
-       </attribute>
-       <attribute name="headerHighlightSections">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="headerMinimumSectionSize">
-        <number>30</number>
-       </attribute>
-       <attribute name="headerStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QPushButton" name="button_Search">
          <property name="text">
@@ -226,42 +102,169 @@ selection-background-color: transparent;*/</string>
        </item>
       </layout>
      </item>
+     <item row="2" column="0">
+      <widget class="QSplitter" name="splitter_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QTreeView" name="inspector">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="0">
+              <red>75</red>
+              <green>105</green>
+              <blue>131</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="0">
+              <red>75</red>
+              <green>105</green>
+              <blue>131</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>131</red>
+              <green>131</green>
+              <blue>131</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/*QTreeView::branch {
+	selection-background-color: transparent;
+}
+
+selection-background-color: transparent;*/</string>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::NoDragDrop</enum>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="indentation">
+         <number>20</number>
+        </property>
+        <property name="rootIsDecorated">
+         <bool>true</bool>
+        </property>
+        <property name="uniformRowHeights">
+         <bool>true</bool>
+        </property>
+        <property name="animated">
+         <bool>false</bool>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>true</bool>
+        </property>
+        <attribute name="headerCascadingSectionResizes">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="headerDefaultSectionSize">
+         <number>200</number>
+        </attribute>
+        <attribute name="headerHighlightSections">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="headerMinimumSectionSize">
+         <number>30</number>
+        </attribute>
+        <attribute name="headerStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+       </widget>
+       <widget class="QTreeView" name="property">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <attribute name="headerDefaultSectionSize">
+         <number>200</number>
+        </attribute>
+        <attribute name="headerMinimumSectionSize">
+         <number>30</number>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>  Properties</string>
+    <string>  File System</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="0">
-      <widget class="QTreeView" name="property">
-       <property name="minimumSize">
-        <size>
-         <width>450</width>
-         <height>0</height>
-        </size>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Push application to selected device</string>
        </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <attribute name="headerDefaultSectionSize">
-        <number>200</number>
-       </attribute>
-       <attribute name="headerMinimumSectionSize">
-        <number>30</number>
-       </attribute>
       </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QTreeView" name="fileSystem"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_3">
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>  Device Manager</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QListView" name="devices"/>
      </item>
     </layout>
    </widget>
@@ -279,44 +282,22 @@ selection-background-color: transparent;*/</string>
     <enum>QAction::QuitRole</enum>
    </property>
   </action>
+  <zorder>dockWidget_2</zorder>
+  <zorder>dockWidget</zorder>
+  <zorder>dockWidget_3</zorder>
  </widget>
  <tabstops>
+  <tabstop>fileSystem</tabstop>
+  <tabstop>pushButton</tabstop>
   <tabstop>button_Refresh</tabstop>
+  <tabstop>button_Search</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>inspector</tabstop>
+  <tabstop>property</tabstop>
+  <tabstop>editor</tabstop>
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>button_ExpandAll</sender>
-   <signal>released()</signal>
-   <receiver>inspector</receiver>
-   <slot>expandAll()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>290</x>
-     <y>116</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>146</x>
-     <y>177</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>button_CollapseAll</sender>
-   <signal>released()</signal>
-   <receiver>inspector</receiver>
-   <slot>collapseAll()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>457</x>
-     <y>110</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>237</x>
-     <y>172</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>lineEdit</sender>
    <signal>returnPressed()</signal>
@@ -324,12 +305,12 @@ selection-background-color: transparent;*/</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>132</x>
-     <y>68</y>
+     <x>1072</x>
+     <y>109</y>
     </hint>
     <hint type="destinationlabel">
-     <x>77</x>
-     <y>80</y>
+     <x>926</x>
+     <y>109</y>
     </hint>
    </hints>
   </connection>
