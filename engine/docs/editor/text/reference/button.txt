@@ -4,7 +4,7 @@ A Button is a standard user interface button. In addition to Button-specific pro
 
 
 
-Function: button( properties )
+Constructor: button( properties )
 
 The button() function creates a new Button UI Element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
 
@@ -49,6 +49,16 @@ The ui_height property is an integer specifying the button's height in pixels.
 *Default Setting:* 60
 
 *See Also:* the <ui_width> property
+
+
+
+Property: ui_position
+
+The ui_position property is a table of integer values specifying the object's screen coordinates: X, Y and Z, respectively.
+
+*Default Setting:* { 100, 100, 0 }
+
+*See Also:* the <ui_width> and <ui_height> properties
 
 
 
@@ -162,26 +172,6 @@ The focus_text_color property is a table of integer RGB and alpha settings speci
 
 
 
-Property: focus_image
-
-The focus_image property is a string specifying the file that contains the image displayed in the button. NEED MORE INFORMATION ABOUT THIS.
-
-*Default Setting:* nil
-
-*See Also:* the <button_image> property
-
-
-
-Property: button_image
-
-The button_image property is a string specifying the file that contains the image displayed in the button. NEED MORE INFORMATION ABOUT THIS.
-
-*Default Setting:* nil
-
-*See Also:* the <focus_image> property
-
-
-
 Property: text_has_shadow
 
 The text_has_shadow property is a boolean value indicating whether or not the button text displays a shadow (true=has shadow).
@@ -190,15 +180,7 @@ The text_has_shadow property is a boolean value indicating whether or not the bu
 
 
 
-Property: single_button
-
-The single_button property is a boolean value indicating ???. NEED FURTHER INFORMATION ABOUT THIS.
-
-*Default Setting:* false
-
-
-
-Event: focused
+Event Handler: focused
 
 The focused() event handler is called whenever the button receives the input focus.
 
@@ -210,7 +192,7 @@ A skeleton focused() event handler is generated automatically by the TrickPlay S
 
 
 
-Event: released
+Event Handler: released
 
 The released() event handler is called whenever the button loses the input focus.
 
@@ -222,7 +204,7 @@ A skeleton released() event handler is generated automatically by the TrickPlay 
 
 
 
-Event: pressed
+Event Handler: pressed
 
 The pressed() event handler is called whenever the button is pressed.
 
@@ -266,13 +248,13 @@ key - NEED FURTHER INFORMATION ABOUT THIS ARGUMENT; If key is equal to keys.Retu
 
 Function: on_focus_out
 
-The on_focus_out() function releases the input focus from the button. Calling on_focus_out() also causes the released() event handler to be called. NEED MORE INFORMATION ABOUT THIS FUNCTION: Where does the input focus go to? Which element?
+The on_focus_out() function releases the input focus from the button. Calling on_focus_out() also causes the released() event handler to be called.
 
-*Prototype:* on_focus_out( key )
+After calling on_focus_out(), no UI element has the input focus.
 
-*Arguments:*
+*Prototype:* on_focus_out()
 
-key - Currently, this argument is not used.
+*Arguments:* None.
 
 *Return Value:* None.
 
