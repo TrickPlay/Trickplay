@@ -247,7 +247,7 @@ public:
 
     //.........................................................................
 
-    Debugger * get_debugger();
+    class Debugger * get_debugger();
 
     //.........................................................................
 
@@ -326,7 +326,7 @@ private:
 
 #ifndef TP_PRODUCTION
 
-    Debugger                debugger;
+    class Debugger                debugger;
 
 #endif
 };
