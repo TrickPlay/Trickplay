@@ -18,7 +18,7 @@ local function make_shader(i,z)
 end
 
 -- http://www.iquilezles.org/apps/shadertoy/
-local shaders = { "monjori", "metablob", "heart", "flower", "julia", "mandelbrot", "kaleidoscope", "plasma", "disco", "clod", "ribbon", "704",  }
+local shaders = { "monjori", "chocolux", "metablob", "heart", "flower", "julia", "mandelbrot", "kaleidoscope", "plasma", "disco", "clod", "ribbon", "704",  }
 local current_shader = #shaders
 local function next_shader()
     if(program) then
