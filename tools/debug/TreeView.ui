@@ -26,24 +26,28 @@
    <string>Trickplay UI Tree Viewer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_4">
-    <item row="0" column="0">
-     <widget class="QTabWidget" name="editor">
-      <property name="currentIndex">
-       <number>-1</number>
-      </property>
-      <property name="documentMode">
-       <bool>true</bool>
-      </property>
-      <property name="tabsClosable">
-       <bool>true</bool>
-      </property>
-      <property name="movable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <widget class="QTabWidget" name="editor">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>9</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>-1</number>
+    </property>
+    <property name="documentMode">
+     <bool>true</bool>
+    </property>
+    <property name="tabsClosable">
+     <bool>true</bool>
+    </property>
+    <property name="movable">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -62,7 +66,6 @@
    </widget>
    <addaction name="menuFile"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidget_2">
    <property name="enabled">
     <bool>true</bool>
@@ -71,7 +74,7 @@
     <enum>Qt::NoContextMenu</enum>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>  Inspector</string>
@@ -98,6 +101,13 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="button_Refresh">
+       <property name="text">
+        <string>Refresh</string>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QSplitter" name="splitter_2">
@@ -210,19 +220,78 @@
        </widget>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="button_Refresh">
-       <property name="text">
-        <string>Refresh</string>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_3">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>  Device Manager</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QFrame" name="frame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Trickplay Device</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="deviceComboBox"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="text">
+           <string>Push application to selected device</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="floating">
+    <bool>false</bool>
+   </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>  File System</string>
@@ -233,50 +302,16 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="0" column="0">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QPushButton" name="rootDirPushButton">
-         <property name="text">
-          <string>Set Root</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="rootDirLineEdit"/>
+        <widget class="QTreeView" name="fileSystem"/>
        </item>
       </layout>
      </item>
-     <item row="5" column="0">
-      <widget class="QTreeView" name="fileSystem"/>
-     </item>
-     <item row="6" column="0">
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Push application to selected device</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget_3">
-   <property name="features">
-    <set>QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="windowTitle">
-    <string>  Device Manager</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QListWidget" name="devices"/>
-     </item>
-    </layout>
-   </widget>
-  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
@@ -296,7 +331,6 @@
  </widget>
  <tabstops>
   <tabstop>fileSystem</tabstop>
-  <tabstop>pushButton</tabstop>
   <tabstop>button_Search</tabstop>
   <tabstop>lineEdit</tabstop>
   <tabstop>inspector</tabstop>
@@ -318,22 +352,6 @@
     <hint type="destinationlabel">
      <x>867</x>
      <y>86</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rootDirLineEdit</sender>
-   <signal>returnPressed()</signal>
-   <receiver>rootDirPushButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>110</x>
-     <y>70</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>87</x>
-     <y>75</y>
     </hint>
    </hints>
   </connection>

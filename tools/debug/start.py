@@ -51,19 +51,11 @@ class StartQT4(QMainWindow):
          
         self.preventChanges = False
         
-        QObject.connect(self.ui.rootDirPushButton, SIGNAL("clicked()"), self.setRootDir)
-
-        
-        self.discovery = TrickplayDiscovery(self.ui.devices)
+        self.discovery = TrickplayDiscovery(self.ui.deviceComboBox)
         
     def test(self, a):
         
         print(a)
-        
-        
-    def setRootDir(self):
-        
-        self.ui.fileSystem.setRootIndex(self.fileModel.index(self.ui.rootDirLineEdit.text()))
         
     
     """
@@ -76,10 +68,6 @@ class StartQT4(QMainWindow):
         QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
         
         self.ui.fileSystem.setModel(self.fileModel)
-        
-        #p = QDir.homePath() #+ '/tp/apps'
-        
-        self.ui.rootDirLineEdit.setText(appPath)
         
         self.fileModel.setRootPath(appPath)
         
