@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Tue Aug  9 16:11:27 2011
+# Created: Tue Aug  9 16:18:38 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,14 +27,23 @@ class Ui_MainWindow(object):
         MainWindow.setCursor(QtCore.Qt.ArrowCursor)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout_4 = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
+        self.dockWidget_4 = QtGui.QDockWidget(self.centralwidget)
+        self.dockWidget_4.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
+        self.dockWidget_4.setObjectName(_fromUtf8("dockWidget_4"))
+        self.dockWidgetContents_5 = QtGui.QWidget()
+        self.dockWidgetContents_5.setObjectName(_fromUtf8("dockWidgetContents_5"))
+        self.gridLayout = QtGui.QGridLayout(self.dockWidgetContents_5)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.editor = QtGui.QTabWidget(self.centralwidget)
+        self.editor = QtGui.QTabWidget(self.dockWidgetContents_5)
         self.editor.setDocumentMode(True)
         self.editor.setTabsClosable(True)
         self.editor.setMovable(True)
         self.editor.setObjectName(_fromUtf8("editor"))
         self.gridLayout.addWidget(self.editor, 0, 0, 1, 1)
+        self.dockWidget_4.setWidget(self.dockWidgetContents_5)
+        self.gridLayout_4.addWidget(self.dockWidget_4, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1121, 25))
@@ -188,6 +197,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay UI Tree Viewer", None, QtGui.QApplication.UnicodeUTF8))
+        self.dockWidget_4.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Text Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget_2.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.button_Search.setText(QtGui.QApplication.translate("MainWindow", "Search", None, QtGui.QApplication.UnicodeUTF8))
@@ -195,7 +205,7 @@ class Ui_MainWindow(object):
         self.dockWidget_3.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Device Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Trickplay Device", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_3.setText(QtGui.QApplication.translate("MainWindow", "Push application to selected device", None, QtGui.QApplication.UnicodeUTF8))
-        self.dockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  File System", None, QtGui.QApplication.UnicodeUTF8))
+        self.dockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  File System", "texty7", QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
 
