@@ -59,7 +59,7 @@ Group: Reference  {
 
       Group: Globals  {
 
-         File: keys* (no auto-title, docs/apps/text/key_codes.txt)
+         File: keys (no auto-title, docs/apps/text/key_codes.txt)
          File: screen  (no auto-title, bindings/clutter_screen.lb)
          }  # Group: Globals
 
