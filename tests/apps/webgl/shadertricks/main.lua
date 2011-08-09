@@ -58,6 +58,8 @@ initGL()
 gl:release()
 print( "READY" )
 
+
+idle.limit = 1/60
 local frames = 0
 local t = Stopwatch()
 local s = Stopwatch()
