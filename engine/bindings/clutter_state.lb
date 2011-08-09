@@ -204,7 +204,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
     if (lua_type(L, index) != LUA_TTABLE) 
 		return luaL_error(L, "incorrect argument, table expected");
 
-	double duration = 2000;
+	double duration = 1000;
 
 	lua_getfield(L, index, "duration");
 	if(!lua_isnil(L, -1)) 
@@ -220,7 +220,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		}
 	}
     lua_pop(L, 1);
-	clutter_state_set_duration(state,NULL,NULL,duration);
+	//clutter_state_set_duration(state,NULL,NULL,duration);
 
 	//transitions 
 	lua_getfield(L, index, "transitions");
@@ -356,6 +356,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	     lua_pop(L,2);
 	 }
 	 lua_pop(L,1);
+
+	 clutter_state_set_duration(state,NULL,NULL,duration);
+	 printf("default duration %f\n", duration);
+
 
      return 0;
 }
