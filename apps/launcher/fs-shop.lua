@@ -606,7 +606,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
         -----------------------------------------------------------------------
         -- Create the timeline and start it
         
-        local timeline = Timeline{ duration = 150 }
+        local timeline = Timeline{ duration = 300 }
         
         function timeline.on_new_frame( timeline , elapsed , progress )
             for _ , t in ipairs( to_animate ) do
