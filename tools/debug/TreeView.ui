@@ -26,21 +26,35 @@
    <string>Trickplay UI Tree Viewer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
-     <widget class="QTabWidget" name="editor">
-      <property name="currentIndex">
-       <number>-1</number>
+     <widget class="QDockWidget" name="dockWidget_4">
+      <property name="features">
+       <set>QDockWidget::DockWidgetClosable</set>
       </property>
-      <property name="documentMode">
-       <bool>true</bool>
+      <property name="windowTitle">
+       <string>  Text Editor</string>
       </property>
-      <property name="tabsClosable">
-       <bool>true</bool>
-      </property>
-      <property name="movable">
-       <bool>true</bool>
-      </property>
+      <widget class="QWidget" name="dockWidgetContents_5">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QTabWidget" name="editor">
+          <property name="currentIndex">
+           <number>-1</number>
+          </property>
+          <property name="documentMode">
+           <bool>true</bool>
+          </property>
+          <property name="tabsClosable">
+           <bool>true</bool>
+          </property>
+          <property name="movable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -290,7 +304,7 @@
     <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
-    <string>  File System</string>
+    <string comment="texty7" extracomment="texty">  File System</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -324,6 +338,7 @@
   <zorder>dockWidget_2</zorder>
   <zorder>dockWidget</zorder>
   <zorder>dockWidget_3</zorder>
+  <zorder>dockWidget_4</zorder>
  </widget>
  <tabstops>
   <tabstop>fileSystem</tabstop>
