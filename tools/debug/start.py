@@ -8,6 +8,7 @@ from PyQt4.QtCore import *
 from TreeView import Ui_MainWindow
 
 import connection
+from devices import TrickplayDiscovery
 from editor import LuaEditor
 from element import Element, ROW
 from model import ElementModel, pyData, modelToData, dataToModel, summarize
@@ -39,7 +40,7 @@ class StartQT4(QMainWindow):
         
         self.createFileSystem()
         
-        self.editor = LuaEditor()
+        self.editors = {}
         
         # Models
         self.inspectorModel = ElementModel()
@@ -51,6 +52,13 @@ class StartQT4(QMainWindow):
         self.preventChanges = False
         
         QObject.connect(self.ui.rootDirPushButton, SIGNAL("clicked()"), self.setRootDir)
+
+        
+        self.discovery = TrickplayDiscovery(self.ui.devices)
+        
+    def test(self, a):
+        
+        print(a)
         
         
     def setRootDir(self):
@@ -88,15 +96,21 @@ class StartQT4(QMainWindow):
         
         if not self.fileModel.isDir(fileIndex):
             
+            editor = LuaEditor()
+            
             name = fileIndex.data(QFileSystemModel.FileNameRole)
             
             name = name.toString()
             
             path = self.fileModel.filePath(fileIndex)
             
-            self.editor.setText(open(path).read())
+            editor.readFile(path)
             
-            self.ui.editor.addTab(self.editor, name)
+            index = self.ui.editor.addTab(editor, name)
+            
+            self.editors[index] = editor
+            
+            self.ui.editor.setCurrentIndex(index)
         
     """
     Search for a node by Gid or Name
@@ -409,7 +423,7 @@ class StartQT4(QMainWindow):
         # Set up Property
         self.ui.property.setModel(self.propertyModel)
         
-        self.propertyModel.initialize(["UI Element Property",  "Value"],  False)
+        self.propertyModel.initialize(["Property",  "Value"],  False)
         
         self.ui.property.header().setMovable(False)
         

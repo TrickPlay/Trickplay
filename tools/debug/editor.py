@@ -78,7 +78,11 @@ class LuaEditor(QsciScintilla):
             self.markerDelete(nline, self.ARROW_MARKER_NUM)
         else:
             self.markerAdd(nline, self.ARROW_MARKER_NUM)
-
+            
+    def readFile(self, path):
+            
+        self.setText(open(path).read())
+            
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     editor = LuaEditor()
