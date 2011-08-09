@@ -506,15 +506,17 @@ function controller:on_advanced_ui_event(json_object)
     
     -- call the right callback for the event
     local events = rawget(proxy, "__events")
+    local on_completeds = rawget(proxy, "on_completeds")
     if json_object.event == "touch" and events.on_touches then
         events:on_touches(json_object.touch_id_list, json_object.state)
     elseif json_object.event == "on_loaded" and events.on_loaded then
         events:on_loaded(json_object.failed)
     elseif json_object.event == "on_text_changed" and events.on_text_changed then
         events:on_text_changed(json_object.text)
-    elseif json_object.event == "on_completed" and events.on_completeds then
-        events.on_completeds[json_object.animation_id]()
-        events.on_completeds[json_object.animation_id] = nil
+    elseif json_object.event == "on_completed" and on_completeds
+    and on_completeds[json_object.animation_id] then
+        on_completeds[json_object.animation_id]()
+        on_completeds[json_object.animation_id] = nil
     end
 end
 
