@@ -117,6 +117,9 @@
 - (void)handleTouchesEnded:(NSSet *)touches;
 - (void)handleTouchesCancelled:(NSSet *)touches;
 
+// Animation completed callback
+- (void)trickplayAnimationDidStop:(id)anim;
+
 // Math stuff
 - (CGFloat)get_x_prime;
 - (CGFloat)get_x_prime_half:(CGFloat)z_rot_initial;
