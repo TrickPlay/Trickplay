@@ -822,7 +822,9 @@ interface actor [[ClutterActor*]]
     */
 
     readonly bool has_clip
-        [[has_clip=clutter_actor_has_clip(self);]];
+        [[
+            has_clip=clutter_actor_has_clip(self) || clutter_actor_get_clip_to_allocation(self);
+        ]];
         
     
     /*
