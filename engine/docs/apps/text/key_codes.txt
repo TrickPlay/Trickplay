@@ -1,96 +1,111 @@
 
 Global: keys
 
-Event handlers for key presses (<controller.on_key_down>, <controller.on_key_up>) pass a key code argument.  We provide a Lua table names <keys> which can be used to reference these keycodes symbolically.
+When handling input from a keyboard or TV remote control, a program's source code can be more readily understandable if a meaningful keyname is used in place of the key's numeric value or keycode. To encourage the use of keynames, the TrickPlay Runtime Engine provides a global variable called "keys" which is a table of keynames matched to their respective keycodes. Anywhere a keycode is provided, such as in the key-press event handlers found in the global <controller> variable and the Visual Editor's UI Elements, the key's name can be substituted with its associated entry in the keys global variable.
 
-Sample code:
-(code)
+Key names can also be used to create function jump tables to provide efficient input handling. A sample jump table implementation is shown below.
+
+	(code)
+	-- Function to handle a move-down keystroke
     local move_down_function = function ()
-        -- do something
+        -- Perform move-down functionality here
     end
+    
+    -- Function to handle a move-up keystroke
     local move_up_function = function ()
-        -- do something
+        -- Perform move-up functionality here
     end
+    
+    -- Define jump table to handle recognized keystrokes
     local key_handlers = {
-        [keys.Down] = move_down_function,
-        [keys.Up] = move_up_function,
+        [keys.Down] = move_down_function,		-- When keys.Down is pressed, call move_down_function()
+        [keys.Up] = move_up_function,			-- When keys.Up   is pressed, call move_up_function()
     }
-    screen:on_key_down = function ( key )
-        if(key_handlers[key]) then
-            key_handlers[key]()
+    
+    -- The screen global variable's keystroke event handler using the jump table
+    screen:on_key_down = function( key )
+    	-- Is this key in the jump table?
+        if( key_handlers[ key ] )then
+        	-- Yes, call its associated function
+            key_handlers[ key ]()
         else
-            -- Key that was not handled was pressed
+        	-- No, do whatever is appropriate, possibly ignoring the keystroke
         end
     end
-(end)
+	(end)
 
+Entries in the keys table can usually be accessed using syntax such as keys.Left, keys.BLUE or keys.PLAY. Some keynames, however, are not valid Lua identifiers because they begin with a digit; references to these keynames must use the alternative table syntax and their index strings must be surrounded by single or double quotation marks, as in keys[ "0" ] and keys[ '3270_Play' ].
 
-This is the list of all key codes in the <keys> table.  Not that some of these are not valid Lua identifiers (since they start with digits, for example), so while you can often reference, eg. <keys.BLUE> in code, you may need to use the alternate syntax *keys["0"]* for number keys.  Not that in all cases, the table index is a string, NOT a number, so *keys[0]* will NOT work.  Note also that this list is supposed to be a superset of all possible controllers, and so it is highly likely that not all of these keys will exist on any given remote.
+Note: The index strings in the keys table are case-sensitive.
 
-Group: TV-centric codes
+The remainder of this section contains a list of the keynames defined in the keys global table. They are divided into two groups: (1) Keys commonly available on TV consoles and remote controls and (2) All other keys, such as those available on computer keyboards and other types of input devices.
 
-Constants: Numeric keypad
-        0 - The "0" key on the remote keypad
-        1 - The "1" key on the remote keypad
-        2 - The "2" key on the remote keypad
-        3 - The "3" key on the remote keypad
-        4 - The "4" key on the remote keypad
-        5 - The "5" key on the remote keypad
-        6 - The "6" key on the remote keypad
-        7 - The "7" key on the remote keypad
-        8 - The "8" key on the remote keypad
-        9 - The "9" key on the remote keypad
+Group: TV Console and Remote Control Names
 
-Remember that these are *strings* and not *numbers* so you can't do keys[0] you have to do keys["0"].  Also, you cannot do keys.0 or keys."0" since that syntax is not allowed in Lua.
+Constants: Numeric Keypad Buttons
 
-Constants: Basic TV control functions
-        CHAN_UP - The "CHANNEL UP" button
-        CHAN_DOWN - The "CHANNEL DOWN" button
-        CHAN_LAST - The "LAST CHANNEL" button
-        CHAN_LIST - The "CHANNEL LIST" button
-        CHAN_FAV - The "FAVORITE CHANNEL" button
-        VOL_UP - The "VOLUME UP" button
-        VOL_DOWN - The "VOLUME DOWN" button
-        MUTE - The "MUTE VOLUME" button
-        CC - The "CLOSED CAPTION" button
+Because the numeric keypad keynames begin with a digit, you must use the alternative Lua syntax of keys[ "0" ] when referencing these keynames; any other syntax, including keys[ 0 ], keys.0 and keys."0", are invalid Lua syntax and will fail.
 
-Constants: Navigation
+	0 - The "0" key on the remote keypad
+    1 - The "1" key on the remote keypad
+    2 - The "2" key on the remote keypad
+    3 - The "3" key on the remote keypad
+    4 - The "4" key on the remote keypad
+    5 - The "5" key on the remote keypad
+    6 - The "6" key on the remote keypad
+    7 - The "7" key on the remote keypad
+    8 - The "8" key on the remote keypad
+    9 - The "9" key on the remote keypad
 
-        Left - The "LEFT" direction button
-        Up - The "UP" direction button
-        Right - The "RIGHT" direction button
-        Down - The "DOWN" direction button
-        OK - The "OK" or "Enter" or "Select" button
-        BACK - The "BACK" function button
-        EXIT - The "EXIT" function button
+Constants: Basic TV Control Functions
+    CHAN_UP - The "CHANNEL UP" button
+    CHAN_DOWN - The "CHANNEL DOWN" button
+    CHAN_LAST - The "LAST CHANNEL" button
+    CHAN_LIST - The "CHANNEL LIST" button
+    CHAN_FAV - The "FAVORITE CHANNEL" button
+    VOL_UP - The "VOLUME UP" button
+    VOL_DOWN - The "VOLUME DOWN" button
+    MUTE - The "MUTE VOLUME" button
+    CC - The "CLOSED CAPTION" button
 
-Constants: Color code buttons
-        RED - The "RED" color key
-        GREEN - The "GREEN" color key
-        YELLOW - The "YELLOW" color key
-        BLUE - The "BLUE" color key
+Constants: Navigation Buttons
 
-Constants: Video trickplay
-        STOP - The "STOP" trickplay function button
-        PLAY - The "PLAY" trickplay function button
-        PAUSE - The "PAUSE" trickplay function button
-        REW - The "REWIND" trickplay function button
-        FFWD - The "FAST FORWARD" trickplay function button
-        REC - The "RECORD" trickplay function button
+    Left - The "LEFT" direction button
+    Up - The "UP" direction button
+    Right - The "RIGHT" direction button
+    Down - The "DOWN" direction button
+    OK - The "OK" or "Enter" or "Select" button
+    BACK - The "BACK" button
+    EXIT - The "EXIT" button
 
-Miscellaneous TV functions:
-        PREV - The "PREVIOUS" function button
-        NEXT - The "NEXT" function button
-        MENU - The "MENU" function button
-        GUIDE - The "GUIDE" function button
-        INFO - The "INFO" function button
-        TOOLS - The "TOOLS" function button
+Constants: Color Buttons
+    RED - The "RED" color key
+    GREEN - The "GREEN" color key
+    YELLOW - The "YELLOW" color key
+    BLUE - The "BLUE" color key
 
-Group: All other keyboard codes
+Constants: TrickPlay Video Buttons
+    STOP - The "STOP" button
+    PLAY - The "PLAY" button
+    PAUSE - The "PAUSE" button
+    REW - The "REWIND" button
+    FFWD - The "FAST FORWARD" button
+    REC - The "RECORD" button
 
-This group includes basically everything else.  There may be some overlap with the above commands; in those cases, OEM television manufacturers are encouraged to map to the TV-centric key codes above, rather than those below.  Application developers are therefore encouraged to do the same.  Generally, all of the codes below are not encouraged for use in applications, since they are unlikely to be available on a wide variety of platforms.  They are included though in case a particular application may have a need for them.
+Constants: Miscellaneous TV Buttons
+    PREV - The "PREVIOUS" button
+    NEXT - The "NEXT" button
+    MENU - The "MENU" button
+    GUIDE - The "GUIDE" button
+    INFO - The "INFO" button
+    TOOLS - The "TOOLS" button
 
-Constants: All other keys
+Group: Keynames Available on Other Input Devices
+
+This group of keynames includes keys available on input devices not normally associated with TV consoles or remote controls.
+
+There may be some overlap with the TV-related keynames; in such cases, application developers and OEM television manufacturers are encouraged to map to the TV-related keynames listed in the previous sections rather than the keynames listed below. The keynames listed below will not be available on a typical TV platform, so their use in applications is not encouraged. However, they are provided for applications that have a need for such special keystrokes.
+
         VoidSymbol - .
         BackSpace - .
         Tab - .
