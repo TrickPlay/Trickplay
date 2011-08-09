@@ -32,6 +32,15 @@
       <property name="currentIndex">
        <number>-1</number>
       </property>
+      <property name="documentMode">
+       <bool>true</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+      <property name="movable">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
    </layout>
@@ -74,13 +83,6 @@
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <item>
-        <widget class="QPushButton" name="button_Refresh">
-         <property name="text">
-          <string>Refresh</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QPushButton" name="button_Search">
          <property name="text">
@@ -156,11 +158,7 @@
          <bool>false</bool>
         </property>
         <property name="styleSheet">
-         <string notr="true">/*QTreeView::branch {
-	selection-background-color: transparent;
-}
-
-selection-background-color: transparent;*/</string>
+         <string notr="true"/>
         </property>
         <property name="dragDropMode">
          <enum>QAbstractItemView::NoDragDrop</enum>
@@ -187,13 +185,10 @@ selection-background-color: transparent;*/</string>
          <bool>true</bool>
         </attribute>
         <attribute name="headerDefaultSectionSize">
-         <number>200</number>
+         <number>150</number>
         </attribute>
         <attribute name="headerHighlightSections">
          <bool>true</bool>
-        </attribute>
-        <attribute name="headerMinimumSectionSize">
-         <number>30</number>
         </attribute>
         <attribute name="headerStretchLastSection">
          <bool>true</bool>
@@ -210,12 +205,16 @@ selection-background-color: transparent;*/</string>
          <bool>true</bool>
         </property>
         <attribute name="headerDefaultSectionSize">
-         <number>200</number>
-        </attribute>
-        <attribute name="headerMinimumSectionSize">
-         <number>30</number>
+         <number>150</number>
         </attribute>
        </widget>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="button_Refresh">
+       <property name="text">
+        <string>Refresh</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -233,16 +232,6 @@ selection-background-color: transparent;*/</string>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="5" column="0">
-      <widget class="QTreeView" name="fileSystem"/>
-     </item>
-     <item row="6" column="0">
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Push application to selected device</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
@@ -256,6 +245,16 @@ selection-background-color: transparent;*/</string>
         <widget class="QLineEdit" name="rootDirLineEdit"/>
        </item>
       </layout>
+     </item>
+     <item row="5" column="0">
+      <widget class="QTreeView" name="fileSystem"/>
+     </item>
+     <item row="6" column="0">
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Push application to selected device</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -273,7 +272,7 @@ selection-background-color: transparent;*/</string>
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QListView" name="devices"/>
+      <widget class="QListWidget" name="devices"/>
      </item>
     </layout>
    </widget>
@@ -298,7 +297,6 @@ selection-background-color: transparent;*/</string>
  <tabstops>
   <tabstop>fileSystem</tabstop>
   <tabstop>pushButton</tabstop>
-  <tabstop>button_Refresh</tabstop>
   <tabstop>button_Search</tabstop>
   <tabstop>lineEdit</tabstop>
   <tabstop>inspector</tabstop>
@@ -318,7 +316,7 @@ selection-background-color: transparent;*/</string>
      <y>86</y>
     </hint>
     <hint type="destinationlabel">
-     <x>887</x>
+     <x>867</x>
      <y>86</y>
     </hint>
    </hints>

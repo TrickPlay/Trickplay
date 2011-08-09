@@ -2,11 +2,24 @@ import httplib, urllib, urllib2, json
 from socket import error
 from data import BadDataException
 
+class Connection():
+    
+    def __init__(self, address, port):
+        self.address = address        
+        self.port = port
+    
+    def get(self):
+        s = str(self.address) + ':' + str(self.port)
+        print('Address returned', s)
+        return s
+
+CON = Connection('localhost', '8888')
+
 def send(data):
     
     params = json.dumps(data)
 
-    conn = httplib.HTTPConnection("localhost:8888")
+    conn = httplib.HTTPConnection( CON.get() )
     
     try:
     
@@ -27,7 +40,11 @@ def send(data):
     
 def getTrickplayData():
     
-    r = urllib2.Request("http://localhost:8888/debug/ui")
+    s = CON.get()
+    
+    print(s)
+    
+    r = urllib2.Request("http://" + s + "/debug/ui")
     
     f = None
     
