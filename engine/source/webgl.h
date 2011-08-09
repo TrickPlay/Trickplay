@@ -19,6 +19,10 @@
 	#include <EGL/egl.h>
 	#include <clutter/egl/clutter-egl.h>
 
+#elif defined(CLUTTER_WINDOWING_OSX)
+
+    #import <AppKit/AppKit.h>
+
 #else
 
 	#error "CANNOT BUILD WEBGL FOR THIS YET"
@@ -131,7 +135,7 @@ namespace WebGL
 	    bool			have_stencil;
 
 	private:
-	
+
 		Context( ClutterActor * actor );
 
 		virtual ~Context();
@@ -143,6 +147,10 @@ namespace WebGL
 #elif defined(CLUTTER_WINDOWING_EGL)
 
 	    typedef EGLContext ContextType;
+
+#elif defined(CLUTTER_WINDOWING_OSX)
+
+        typedef NSOpenGLContext *ContextType;
 
 #else
 
@@ -185,16 +193,16 @@ namespace WebGL
 /*
     We had to implement our own actor for one main reason: ClutterTexture
     assumes that textures are upside down and the WebGL FBO color buffer is
-    not, so we created a new actor that is just like a texture but uses 
+    not, so we created a new actor that is just like a texture but uses
     different texture coordinates.
-    
+
     As a bonus, we get 2 additional things:
-    
+
     1) The context is part of the new actor's private data structure and is
        therefore much cheaper to get on every call.
-       
+
     2) The actor shows up as WebGLCanvas in /ui output.
-    
+
 */
 
 G_BEGIN_DECLS
