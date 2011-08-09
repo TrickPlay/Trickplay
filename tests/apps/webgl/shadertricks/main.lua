@@ -14,6 +14,7 @@ local function make_shader(i,z)
         print("compile failed:",gl:getShaderInfoLog(s))
     end
     gl:attachShader(program,s)
+    gl:deleteShader(s)
 end
 
 -- http://www.iquilezles.org/apps/shadertoy/
