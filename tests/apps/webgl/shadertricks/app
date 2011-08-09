@@ -1,8 +1,8 @@
 {
-    "id" : "com.trickplay.test.kaleidoscope",
+    "id" : "com.trickplay.test.shadertricks",
     "release" : 1,
     "version" : "1.0",
-    "name"    : "WebGL Kaleidoscope",
+    "name"    : "WebGL Shader Tricks",
     "author"  : "Craig Hughes",
     "copyright" : "© Trickplay Inc."
 }
