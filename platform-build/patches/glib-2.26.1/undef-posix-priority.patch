@@ -1,0 +1,13 @@
+Index: glib-2.26.1/gthread/gthread-posix.c
+===================================================================
+--- glib-2.26.1.orig/gthread/gthread-posix.c	2011-08-09 11:39:59.650143437 -0700
++++ glib-2.26.1/gthread/gthread-posix.c	2011-08-09 11:40:50.000143461 -0700
+@@ -97,6 +97,8 @@
+ # error This should not happen. Contact the GLib team.
+ #endif
+ 
++#undef POSIX_MIN_PRIORITY
++#undef POSIX_MAX_PRIORITY
+ #if defined (POSIX_MIN_PRIORITY) && defined (POSIX_MAX_PRIORITY)
+ # define HAVE_PRIORITIES 1
+ static gint priority_normal_value;
