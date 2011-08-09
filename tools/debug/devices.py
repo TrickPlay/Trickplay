@@ -20,7 +20,7 @@ class TrickplayDiscovery(ServiceDiscovery):
         
         self.widget = widget
         
-        QObject.connect(self.widget, SIGNAL('clicked(QModelIndex)'), self.service_selected)
+        #QObject.connect(self.widget, SIGNAL('clicked(QModelIndex)'), self.service_selected)
     
     def service_selected(self, index):
         
@@ -105,12 +105,16 @@ class TrickplayDiscovery(ServiceDiscovery):
         stdb = ServiceTypeDatabase()
         h_type = stdb.get_human_type(type)
         
-        new = QListWidgetItem(name)
-        new.setData(ADDRESS, address)
-        new.setData(PORT, port)
-        new.setData(NAME, name)
-        
-        self.widget.addItem(new)
+        #new = QListWidgetItem(name)
+        #new.setData(ADDRESS, address)
+        #new.setData(PORT, port)
+        #new.setData(NAME, name)
+        #
+        self.widget.addItem(name)
+        index = self.widget.findText(name)
+        self.widget.setItemData(index, address, ADDRESS)
+        self.widget.setItemData(index, port, PORT)
+        self.widget.setItemData(index, address, NAME)
         
         print "Service data for service '%s' of type '%s' (%s) in domain '%s' on %s.%i:" \
             % (
