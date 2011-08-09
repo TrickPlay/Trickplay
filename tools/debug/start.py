@@ -86,15 +86,17 @@ class StartQT4(QMainWindow):
             
     def openInEditor(self, fileIndex):
         
-        name = fileIndex.data(QFileSystemModel.FileNameRole)
-        
-        name = name.toString()
-        
-        path = self.fileModel.filePath(fileIndex)
-        
-        self.editor.setText(open(path).read())
-        
-        self.ui.editor.addTab(self.editor, name)
+        if not self.fileModel.isDir(fileIndex):
+            
+            name = fileIndex.data(QFileSystemModel.FileNameRole)
+            
+            name = name.toString()
+            
+            path = self.fileModel.filePath(fileIndex)
+            
+            self.editor.setText(open(path).read())
+            
+            self.ui.editor.addTab(self.editor, name)
         
     """
     Search for a node by Gid or Name
