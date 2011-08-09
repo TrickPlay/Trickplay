@@ -20,7 +20,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 class StartQT4(QMainWindow):
     
-    def __init__(self, parent=None):
+    def __init__(self, parent, appPath):
 
         # Main window setup
         QWidget.__init__(self, parent)
@@ -38,7 +38,7 @@ class StartQT4(QMainWindow):
         
         self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
         
-        self.createFileSystem()
+        self.createFileSystem(appPath)
         
         self.editors = {}
         
@@ -69,7 +69,7 @@ class StartQT4(QMainWindow):
     """
     Set up the file system model
     """
-    def createFileSystem(self):
+    def createFileSystem(self, appPath):
         
         self.fileModel = QFileSystemModel()
         
@@ -77,13 +77,13 @@ class StartQT4(QMainWindow):
         
         self.ui.fileSystem.setModel(self.fileModel)
         
-        p = QDir.homePath() #+ '/tp/apps'
+        #p = QDir.homePath() #+ '/tp/apps'
         
-        self.ui.rootDirLineEdit.setText(p)
+        self.ui.rootDirLineEdit.setText(appPath)
         
-        self.fileModel.setRootPath(p)
+        self.fileModel.setRootPath(appPath)
         
-        self.ui.fileSystem.setRootIndex(self.fileModel.index(QDir.homePath()))
+        self.ui.fileSystem.setRootIndex(self.fileModel.index(appPath))
         
         header = self.ui.fileSystem.header()
         
@@ -492,11 +492,23 @@ class StartQT4(QMainWindow):
 
 def main(argv):
     
+    appPath = None
+    
+    try:
+        
+        appPath = argv[1]
+        
+    except IndexError:
+        
+        appPath = '/home/devinabbott/trickplay-source/apps/pandamonium/'
+    
+    print('Loaded app directory', appPath)
+    
     try:
     
         app = QApplication(argv)
         
-        myapp = StartQT4()
+        myapp = StartQT4(None, appPath)
         
         myapp.show()
         
