@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Tue Aug  9 16:08:04 2011
+# Created: Tue Aug  9 16:11:27 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,12 +27,14 @@ class Ui_MainWindow(object):
         MainWindow.setCursor(QtCore.Qt.ArrowCursor)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.editor = QtGui.QTabWidget(self.centralwidget)
-        self.editor.setGeometry(QtCore.QRect(9, 9, 16, 16))
         self.editor.setDocumentMode(True)
         self.editor.setTabsClosable(True)
         self.editor.setMovable(True)
         self.editor.setObjectName(_fromUtf8("editor"))
+        self.gridLayout.addWidget(self.editor, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1121, 25))
