@@ -8,6 +8,7 @@ from PyQt4.QtCore import *
 from TreeView import Ui_MainWindow
 
 import connection
+from editor import LuaEditor
 from element import Element, ROW
 from model import ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData, dataToModel, BadDataException
@@ -36,6 +37,10 @@ class StartQT4(QMainWindow):
         
         self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
         
+        self.createFileSystem()
+        
+        self.editor = LuaEditor()
+        
         # Models
         self.inspectorModel = ElementModel()
         
@@ -45,6 +50,51 @@ class StartQT4(QMainWindow):
          
         self.preventChanges = False
         
+        QObject.connect(self.ui.rootDirPushButton, SIGNAL("clicked()"), self.setRootDir)
+        
+        
+    def setRootDir(self):
+        
+        self.ui.fileSystem.setRootIndex(self.fileModel.index(self.ui.rootDirLineEdit.text()))
+        
+    
+    """
+    Set up the file system model
+    """
+    def createFileSystem(self):
+        
+        self.fileModel = QFileSystemModel()
+        
+        QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
+        
+        self.ui.fileSystem.setModel(self.fileModel)
+        
+        p = QDir.homePath() #+ '/tp/apps'
+        
+        self.ui.rootDirLineEdit.setText(p)
+        
+        self.fileModel.setRootPath(p)
+        
+        self.ui.fileSystem.setRootIndex(self.fileModel.index(QDir.homePath()))
+        
+        header = self.ui.fileSystem.header()
+        
+        for i in range(1,4):
+            
+            header.hideSection(header.logicalIndex(i))
+        
+            
+    def openInEditor(self, fileIndex):
+        
+        name = fileIndex.data(QFileSystemModel.FileNameRole)
+        
+        name = name.toString()
+        
+        path = self.fileModel.filePath(fileIndex)
+        
+        self.editor.setText(open(path).read())
+        
+        self.ui.editor.addTab(self.editor, name)
         
     """
     Search for a node by Gid or Name
@@ -438,7 +488,7 @@ def main(argv):
     
     except KeyboardInterrupt:
         
-        exit("Exited")
+        pass
 
 
 if __name__ == "__main__":
