@@ -74,7 +74,7 @@ static void trickplay_webgl_canvas_paint (ClutterActor *self)
 
 static void trickplay_webgl_canvas_finalize (GObject *object)
 {
-  WebGL::Context::get( CLUTTER_ACTOR( object ) , true );  
+  WebGL::Context::get( CLUTTER_ACTOR( object ) , true );
 
   G_OBJECT_CLASS (trickplay_webgl_canvas_parent_class)->finalize (object);
 }
@@ -87,7 +87,7 @@ static void trickplay_webgl_canvas_class_init (TrickplayWebGLCanvasClass *klass)
   ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
 
   gobject_class->finalize     = trickplay_webgl_canvas_finalize;
-  
+
   actor_class->paint        = trickplay_webgl_canvas_paint;
 
   g_type_class_add_private (gobject_class, sizeof (TrickplayWebGLCanvasPrivate));
@@ -206,9 +206,9 @@ Context * Context::get( ClutterActor * actor , bool detach )
 {
 	g_assert( actor );
     g_assert( TRICKPLAY_IS_WEBGL_CANVAS( actor ) );
-  
+
     TrickplayWebGLCanvasPrivate * priv = TRICKPLAY_WEBGL_CANVAS( actor )->priv;
-  
+
     if ( detach )
     {
         if ( priv->context )
@@ -216,7 +216,7 @@ Context * Context::get( ClutterActor * actor , bool detach )
             delete priv->context;
             priv->context = 0;
         }
-        
+
         return 0;
     }
 
@@ -224,7 +224,7 @@ Context * Context::get( ClutterActor * actor , bool detach )
     {
         priv->context = new WebGL::Context( actor );
     }
-  
+
     return priv->context;
 }
 
@@ -580,6 +580,57 @@ void Context::context_op( Context::Operation op )
 			break;
 		}
     }
+
+#elif defined(CLUTTER_WINDOWING_OSX)
+
+    static ContextType  clutter_context = 0;
+
+    if ( clutter_context == 0 )
+    {
+        clutter_context = [NSOpenGLContext currentContext];
+    }
+
+    switch( op )
+    {
+		case SWITCH_TO_MY_CONTEXT:
+		{
+		    [my_context makeCurrentContext];
+		    glBindFramebuffer( GL_FRAMEBUFFER , framebuffer );
+		}
+
+		case SWITCH_TO_CLUTTER_CONTEXT:
+        {
+            [clutter_context makeCurrentContext];
+        }
+
+		case CREATE_CONTEXT:
+		{
+            NSOpenGLPixelFormatAttribute attrs[] = {
+                NSOpenGLPFADoubleBuffer,
+                NSOpenGLPFADepthSize, 24,
+                NSOpenGLPFAStencilSize, 8,
+                0
+            };
+            #ifdef MAC_OS_X_VERSION_10_5
+                const int sw = 1;
+            #else
+                const long sw = 1;
+            #endif
+
+            my_context = [[NSOpenGLContext alloc]
+            initWithFormat: [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs] shareContext: nil];
+            /* Enable vblank sync - http://developer.apple.com/qa/qa2007/qa1521.html */
+            [my_context setValues:&sw forParameter: NSOpenGLCPSwapInterval];
+		}
+
+		case DESTROY_MY_CONTEXT:
+		{
+		}
+    }
+
+#else
+
+    #error "This is not implemented"
 
 #endif
 }
