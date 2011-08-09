@@ -22,6 +22,7 @@
 - (void)startTimeline;
 - (void)stopTimeline;
 - (void)addBlock:(BOOL (^)(NSArray *args))block args:(NSArray *)args;
+- (void)removeAnimations:(TrickplayUIElement *)view;
 - (void)animateWithTable:(NSDictionary *)table duration:(NSNumber *)duration view:(TrickplayUIElement *)aView;
 
 @end

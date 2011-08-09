@@ -1086,23 +1086,16 @@
     return [NSNumber numberWithBool:NO];
 }
 
-- (id)do_complete_animation:(NSArray *)args {
-    for (TrickplayAnimation *anim in [animations allKeys]) {
-        [anim animationDidStop:nil finished:NO];
-    }
-    [self.layer removeAllAnimations];
-    [animations removeAllObjects];
-    
-    return [NSNumber numberWithBool:YES];
-}
-
 
 #pragma mark -
 #pragma mark Animations
 
 - (void)trickplayAnimationDidStop:(id)anim {
     id completion = [animations objectForKey:anim];
-    if ([completion isKindOfClass:[NSMutableDictionary class]]) {
+    if ([anim isKindOfClass:[NSMutableDictionary class]]) {
+        completion = anim;
+    }
+    if (completion && [completion isKindOfClass:[NSMutableDictionary class]]) {
         [completion setObject:ID forKey:@"id"];
         [completion setObject:@"on_completed" forKey:@"event"];
         
@@ -1123,12 +1116,18 @@
     }
     
     if (timeLine) {
+        if ([table objectForKey:@"on_completed"]) {
+            NSMutableDictionary *completion = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
+            [animations setObject:completion forKey:table];
+        } else {
+            [animations setObject:@"1" forKey:table];
+        }
         [timeLine animateWithTable:table duration:duration view:self];
     } else {
         TrickplayAnimation *anim = [[TrickplayAnimation alloc] initWithTable:table duration:duration view:self];
 
         if ([table objectForKey:@"on_completed"]) {
-            NSMutableDictionary *completion = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
+            NSMutableDictionary *completion = [NSMutableDictionary dictionaryWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
             [animations setObject:completion forKey:anim];
         } else {
             [animations setObject:@"1" forKey:anim];
@@ -1138,6 +1137,20 @@
         [anim release];
     }
     //start = CFAbsoluteTimeGetCurrent();
+    
+    return [NSNumber numberWithBool:YES];
+}
+
+- (id)do_complete_animation:(NSArray *)args {
+    if (timeLine) {
+        [timeLine removeAnimations:self];
+    } else {
+        for (TrickplayAnimation *anim in [animations allKeys]) {
+            [anim animationDidStop:nil finished:NO];
+        }
+        [self.layer removeAllAnimations];
+        [animations removeAllObjects];
+    }
     
     return [NSNumber numberWithBool:YES];
 }
