@@ -276,7 +276,7 @@ Context::Context( ClutterActor * actor )
 	const int try_flags[] =
 	{
 
-#if defined(CLUTTER_WINDOWING_GLX)
+#if defined(CLUTTER_WINDOWING_GLX) || defined(CLUTTER_WINDOWING_OSX)
 
         FBO_TRY_DEPTH_STENCIL ,
 
@@ -596,35 +596,37 @@ void Context::context_op( Context::Operation op )
 		{
 		    [my_context makeCurrentContext];
 		    glBindFramebuffer( GL_FRAMEBUFFER , framebuffer );
+		    break;
 		}
 
 		case SWITCH_TO_CLUTTER_CONTEXT:
         {
+            glFlush();
             [clutter_context makeCurrentContext];
+            break;
         }
 
 		case CREATE_CONTEXT:
 		{
             NSOpenGLPixelFormatAttribute attrs[] = {
-                NSOpenGLPFADoubleBuffer,
                 NSOpenGLPFADepthSize, 24,
                 NSOpenGLPFAStencilSize, 8,
                 0
             };
-            #ifdef MAC_OS_X_VERSION_10_5
-                const int sw = 1;
-            #else
-                const long sw = 1;
-            #endif
 
-            my_context = [[NSOpenGLContext alloc]
-            initWithFormat: [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs] shareContext: nil];
-            /* Enable vblank sync - http://developer.apple.com/qa/qa2007/qa1521.html */
-            [my_context setValues:&sw forParameter: NSOpenGLCPSwapInterval];
+            NSOpenGLPixelFormat *pf =  [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
+
+            my_context = [[NSOpenGLContext alloc] initWithFormat:pf shareContext: clutter_context];
+
+            [pf release];
+            break;
 		}
 
 		case DESTROY_MY_CONTEXT:
 		{
+            [my_context release];
+            my_context = 0;
+		    break;
 		}
     }
 
