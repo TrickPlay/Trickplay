@@ -30,13 +30,8 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="editor">
       <property name="currentIndex">
-       <number>0</number>
+       <number>-1</number>
       </property>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Editor</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -238,7 +233,10 @@ selection-background-color: transparent;*/</string>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="1" column="0">
+     <item row="5" column="0">
+      <widget class="QTreeView" name="fileSystem"/>
+     </item>
+     <item row="6" column="0">
       <widget class="QPushButton" name="pushButton">
        <property name="text">
         <string>Push application to selected device</string>
@@ -246,7 +244,18 @@ selection-background-color: transparent;*/</string>
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QTreeView" name="fileSystem"/>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QPushButton" name="rootDirPushButton">
+         <property name="text">
+          <string>Set Root</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="rootDirLineEdit"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -305,12 +314,28 @@ selection-background-color: transparent;*/</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1072</x>
-     <y>109</y>
+     <x>1110</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel">
-     <x>926</x>
-     <y>109</y>
+     <x>887</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rootDirLineEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>rootDirPushButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>110</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>87</x>
+     <y>75</y>
     </hint>
    </hints>
   </connection>
