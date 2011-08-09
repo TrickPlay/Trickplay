@@ -1,0 +1,9 @@
+{
+    "id" : "com.trickplay.test.kaleidoscope",
+    "release" : 1,
+    "version" : "1.0",
+    "name"    : "WebGL Kaleidoscope",
+    "author"  : "Craig Hughes",
+    "copyright" : "© Trickplay Inc."
+}
+
