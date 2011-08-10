@@ -99,3 +99,10 @@ Topic Type: Constructor
 
    Keywords:
       constructor, constructors
+
+
+Topic Type: Event Handler
+
+   Plural: Event Handlers
+   Keywords:
+      event handler, event handlers

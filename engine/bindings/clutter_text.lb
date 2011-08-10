@@ -902,7 +902,7 @@ class Text [[ClutterActor*]] actor
 	]];
 
 	/*
-		Event: on_text_changed
+		Event Handler: on_text_changed
 		
 		The on_text_changed event handler is called whenever the Text object's 
 		text string is modified.
