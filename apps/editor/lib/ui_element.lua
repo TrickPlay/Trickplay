@@ -3567,7 +3567,7 @@ function ui_element.progressBar(t)
 				size = {p.ui_width,p.ui_height},
 		}
 		c_fill  = Canvas{
-				size = {1,p.ui_height-stroke_width},
+				size = {1,p.ui_height-2*stroke_width},
 		}  
         
 		
@@ -4865,7 +4865,7 @@ end
             track_vert=nil
         end
         
-        scroll_group.size = {p.visible_w, p.visible_h}
+        scroll_group.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
 	end
 	
     
@@ -6222,7 +6222,7 @@ function ui_element.arrowPane(t)
 					arrow:raise_to_top()
 				else 
 					arrow = Clone{source=p.arrow_src}
-					arrow.anchor_point={arrow.w/2,arrow.h}
+					arrow.anchor_point={arrow.w/2,arrow.h}=1
 					arrow.x = border.w+p.arrow_dist_to_frame
 					arrow.y = border.h/2
 					arrow.z_rotation = {90,0,0}
@@ -6293,7 +6293,7 @@ function ui_element.arrowPane(t)
 		end
 		
         
-		umbrella.size = {p.visible_w, p.visible_h}
+		umbrella.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
 		umbrella:add(border,window)
 	end
 	
