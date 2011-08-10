@@ -50,15 +50,6 @@ class StartQT4(QMainWindow):
             #sys.exit('No path given')
             self.exit()
 
-        # Main window setup
-        QWidget.__init__(self, parent)
-        
-        # Restore size/position of window
-        settings = QSettings()
-        self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-        
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
         
         # Buttons
         QObject.connect(self.ui.button_Refresh, SIGNAL("clicked()"), self.refresh)        
@@ -85,25 +76,6 @@ class StartQT4(QMainWindow):
         
         self.appPath = appPath
         
-        # Restore sizes/positions of docks
-        self.restoreState(settings.value("mainWindowState").toByteArray());
-
-        
-    """
-    Save window geometry on close
-    """
-    def closeEvent(self, event):
-        settings = QSettings()
-        settings.setValue("mainWindowGeometry", self.saveGeometry());
-        settings.setValue("mainWindowState", self.saveState());
-        
-    def pushApp(self):
-        
-        print('Pushing app to', CON.get())
-        
-        tp = TrickplayPushApp(str(self.appPath))
-        
-        tp.push(address = CON.get())
     
     """
     Set up the file system model
@@ -530,12 +502,9 @@ def main(argv):
     appPath = None
     
     try:
-        
         appPath = argv[1]
-        
     except IndexError:
-        
-        appPath = ''
+        pass
     
     try:
     
@@ -546,10 +515,12 @@ def main(argv):
         QCoreApplication.setApplicationName("Trickplay Debugger");
         QCoreApplication.setApplicationVersion("0.0.1");
         
-        myapp = StartQT4(None, appPath)
-        wizard = Wizard(myapp)
+        #myapp = StartQT4()
+        wizard = Wizard()
         
-        myapp.show()
+        if wizard.start(appPath):
+            pass
+            #app.setActiveWindow(myapp)
         
         sys.exit(app.exec_())
     
