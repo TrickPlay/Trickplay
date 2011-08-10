@@ -28,7 +28,7 @@ add_to_key_handler(keys.a, assetman.show_all)
 screen:show()
 
 -- handles ipods/pads/HIDs/etc
-ctrlman = ControllerManager(false, false, true, nil, 7)
+ctrlman = ControllerManager(false, true, nil, 7)
 
 local betting = BettingController(router)
 TutorialView(router):initialize()
