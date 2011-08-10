@@ -78,7 +78,10 @@ class Wizard():
         
         path = None
         
-        dialog = QFileDialog(None, 'Select app directory', QDir.homePath())
+        settings = QSettings()
+        dir = settings.value('path', QDir.homePath()).toPyObject()
+        
+        dialog = QFileDialog(None, 'Select app directory', dir)
         
         #def openDir(d):
         #    path = str(d)
