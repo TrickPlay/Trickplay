@@ -27,8 +27,8 @@ endforeach( LIB )
 TP_ORDER_PATHS( TPJPEG_INCLUDE_DIRS include )
 include_directories( ${PROJECT_SOURCE_DIR}/engine/source  ${TPJPEG_INCLUDE_DIRS}  )
 add_executable( jpeg-utils-test main.cpp )
-target_link_libraries( jpeg-utils-test tpcore ${TPJPEG_LIBRARY_NAMES} )
-set_target_properties( jpeg-utils-test 
-    PROPERTIES LINKER_LANGUAGE CXX 
+target_link_libraries( jpeg-utils-test tpcore ${TPJPEG_LIBRARIES} )
+set_target_properties( jpeg-utils-test
+    PROPERTIES LINKER_LANGUAGE CXX
     OUTPUT_NAME jpeg-find-orientation)
 
