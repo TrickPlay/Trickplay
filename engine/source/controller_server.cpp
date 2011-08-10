@@ -30,6 +30,10 @@
 #include "log.h"
 
 //-----------------------------------------------------------------------------
+
+#define CONTROLLER_PROTOCOL_VERSION		"42"
+
+//-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
 #define DISCONNECT_TIMEOUT_SEC  30
@@ -408,6 +412,18 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             break;
         }
 
+        case TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE:
+        {
+            server->write( connection, "SV\n" );
+        	break;
+        }
+
+        case TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE:
+        {
+            server->write( connection, "HV\n" );
+        	break;
+        }
+
         default:
         {
             return 3;
@@ -535,8 +551,6 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
-    static const char * PROTOCOL_VERSION = "41";
-
     guint count = g_strv_length( parts );
 
     if ( count < 1 )
@@ -666,6 +680,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ADVANCED_UI;
                 }
+                else if ( cmp2( cap , "VR" ) )
+                {
+                	spec.capabilities |= TP_CONTROLLER_HAS_VIRTUAL_REMOTE;
+                }
                 else
                 {
                     g_warning( "UNKNOWN CONTROLLER CAPABILITY '%s'", cap );
@@ -694,7 +712,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         info.controller = tp_context_add_controller( context, name, &spec, this );
 
-        server->write_printf( connection , "WM\t%s\t%u\t%lu\n" , PROTOCOL_VERSION , context->get_http_server()->get_port() , info.aui_id );
+        server->write_printf( connection , "WM\t%s\t%u\t%lu\n" , CONTROLLER_PROTOCOL_VERSION , context->get_http_server()->get_port() , info.aui_id );
     }
     else if ( cmp2( cmd, "KP" ) )
     {
