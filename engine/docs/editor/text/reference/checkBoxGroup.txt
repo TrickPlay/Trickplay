@@ -190,24 +190,6 @@ You can assign values to the selected_items property to set a checkbox's checked
 
 
 
-Property: rotate_func
-
-The rotate_func property is a reference to a function that is invoked automatically after any checkbox in the CheckBox object has changed its checked/unchecked state. Based upon the checked/unchecked state, the program can perform appropriate operations, such as displaying or hiding display elements.
-
-*Prototype:* rotate_func( selected_items )
-
-*Argument:*
-
-selected_items - the current setting of the CheckBox object's <selected_items> property
-
-*Return Value:* None
-
-*Default Setting:* nil
-
-*See Also:* the <items> and <selected_items> properties
-
-
-
 Property: direction
 
 The direction property is a text string specifying whether multiple checkboxes will display vertically (one atop each other) or horizontally (alongside each other). If the CheckBox has only a single checkbox, the direction property has no effect.
@@ -220,27 +202,6 @@ The direction property is a text string specifying whether multiple checkboxes w
 *Default Setting:* "vertical"
 
 *See Also:* the <items> property
-
-
-
-Property: box_width
-
-The box_width property is an integer value specifying the checkbox border width in pixels.
-
-*Default Setting:* 2
-
-*See Also:* the <box_size> and <check_size> properties
-
-
-
-
-Property: box_size
-
-The box_size property is a table of integers specifying the pixel width and height, respectively, of the checkbox's box.
-
-*Default Setting:* { 25, 25 }
-
-*See Also:* the <check_size> and <box_width> properties
 
 
 
@@ -318,6 +279,57 @@ The format of the RGB and alpha settings is described in the section RGB/Alpha C
 
 
 
+Property: skin
+
+The skin property is a string that specifies the display appearance of the CheckBox. The skin functionality is under active development.
+
+Predefined skins are provided, and the developer may define a custom skin. The following skin appearances are supported.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+"CarbonCandy" - an alternative skin. Flashy, attracts attention
+"custom" - the skin is defined by the developer
+
+When the "custom" skin is selected, the developer must define the object's <box_width>, <box_size>, <box_color>, <fill_color>, <focus_fill_color> and <focus_color> properties.
+
+*Default Setting:* "default"
+
+
+
+Property: box_size
+
+The box_size property is a table of integers specifying the pixel width and height, respectively, of the checkbox's box. The box may define a border with the <box_width> property.
+
+*Default Setting:* { 25, 25 }
+
+*See Also:* the <check_size> and <box_width> properties
+
+
+
+Property: box_width
+
+The box_width property is an integer value specifying the checkbox's border width in pixels.
+
+*Default Setting:* 2
+
+*See Also:* the <box_size> and <check_size> properties
+
+
+
+
+Property: box_color
+
+The box_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object does not have the input focus.
+
+The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
+
+*See Also:* the <text_color> and <fill_color> properties
+
+
+
 Property: fill_color
 
 The fill_color property is a table of integer RGB and alpha settings specifying the CheckBox's fill color when the object does not have the input focus.
@@ -342,21 +354,9 @@ The format of the RGB and alpha settings is described in the section RGB/Alpha C
 
 
 
-Property: box_color
-
-The box_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's box-border when the object does not have the input focus.
-
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
-
-*Default Setting:* {255, 255, 255, 255} (white and opaque)
-
-*See Also:* the <text_color> and <fill_color> properties
-
-
-
 Property: focus_color
 
-The focus_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's box-border when the object has the input focus.
+The focus_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object has the input focus.
 
 The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
@@ -365,22 +365,20 @@ The format of the RGB and alpha settings is described in the section RGB/Alpha C
 *See Also:* the <box_color> property
 
 
-Property: skin
 
-The skin property is a string that specifies the display appearance of the CheckBox.
+Function: select_button
 
-Predefined skins are provided, and the developer may define a custom skin. The following skin appearances are supported.
+The select_button() function updates the CheckBox object's selected_items property and calls the object's rotate_func() event handler.
 
-*Supported Settings:* The skin property is case-sensitive.
+*Prototype:* select_button( new_selected )
 
-"default" - a utilitarian and sedate skin
-"CarbonCandy" - an alternative skin. Flashy, attracts attention
-"custom" - the skin is defined by the developer
+*Argument:*
 
-When the "custom" skin is selected, the developer must define the object's <box_width>, <box_size>, <box_color>, <fill_color>, <focus_fill_color> and <focus_color> properties.
+new_selected - table of integer indexes into the <items> property table specifying the checked checkboxes in the CheckBox object. The first item in the items table is at index 1.
 
-*Default Setting:* "default"
+*Return Value:* None
 
+*See Also:* the <items> and <selected_items> properties
 
 
 Function: insert_item
@@ -413,23 +411,43 @@ The remove_item() function removes the last item in the CheckBox object's <items
 
 Function: on_focus_in
 
-The on_focus_in() function forces the input focus to the CheckBox.
+The on_focus_in() function forces the input focus to the CheckBox. To accurately understand what this function does, think of it as get_focus().
 
 *Prototype:* on_focus_in()
 
 *Return Value:* None
 
+*See Also:* the <on_focus_out> function
+
 
 
 Function: on_focus_out
 
-The on_focus_out() function releases the input focus from the CheckBox object.
+The on_focus_out() function releases the input focus from the CheckBox object. To accurately understand what this function does, think of it as remove_focus().
 
-After calling on_focus_out(), no UI element has the input focus.
+After calling on_focus_out(), no screen element has the input focus.
 
 *Prototype:* on_focus_out()
 
 *Arguments:* None.
 
 *Return Value:* None.
+
+
+
+Event Handler: rotate_func
+
+The rotate_func() event handler is called after any checkbox in the CheckBox object has changed its checked/unchecked state. Based upon the checked/unchecked state, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+*Prototype:* rotate_func( selected_items )
+
+*Argument:*
+
+selected_items - the current setting of the CheckBox object's <selected_items> property
+
+*Return Value:* None
+
+*Default Setting:* nil
+
+*See Also:* the <items> and <selected_items> properties
 

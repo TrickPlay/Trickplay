@@ -89,24 +89,6 @@ You can assign values to the selected_item property to set the currently-selecte
 
 
 
-Property: rotate_func
-
-The rotate_func property is a reference to a function that is invoked automatically after the RadioButtonGroup has changed its currently-selected button. Based upon the selected radio button, the program can perform appropriate operations, such as displaying or hiding display elements.
-
-*Prototype:* rotate_func( selected_item )
-
-*Argument:*
-
-selected_item - the current setting of the RadioButtonGroup's <selected_item> property
-
-*Return Value:* None
-
-*Default Setting:* nil
-
-*See Also:* the <items> and <selected_item> properties
-
-
-
 Property: ui_width 
 
 The ui_width property is an integer value specifying the RadioButtonGroup's width in pixels.
@@ -355,4 +337,22 @@ After calling on_focus_out(), no UI element has the input focus.
 *Arguments:* None.
 
 *Return Value:* None.
+
+
+
+Event Handler: rotate_func
+
+The rotate_func() event handler is called whenever the selected button in the RadioButtonGroup has changed. Based upon the selected radio button, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+*Prototype:* rotate_func( selected_item )
+
+*Argument:*
+
+selected_item - the current setting of the RadioButtonGroup's <selected_item> property
+
+*Return Value:* None
+
+*Default Setting:* nil
+
+*See Also:* the <items> and <selected_item> properties
 
