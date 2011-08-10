@@ -249,7 +249,6 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
                 print("component "..tostring(router:get_active_component())
                 .." handling click")
-                -- hackish way to do this for now
                 router:get_active_controller():handle_click(controller, x, y)
             end
             function controller:on_touch_up(finger, x, y)
@@ -282,6 +281,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             character_selection:update_character_selection(player)
         end
 
+        function controller:on_ui_event(text)
+            print("ui_event!")
+        end
+
         --[[
             Brings up the name your dog screen on the iphone. Player may enter a name
             that replaces the Player # on their dogs name bubble.
@@ -289,9 +292,6 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             @parameter pos : the dogs number/position (1-6). Determines which dog icon
                 to show on the iphone.
         --]]
-        function controller:on_ui_event(text)
-            print("ui_event!")
-        end
         function controller:name_dog(pos)
             print("naming dog")
             controller.router:set_active_component(RemoteComponents.NAME_DOG)
@@ -439,6 +439,10 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             elseif controller.state == ControllerStates.WAITING then
                 controller:waiting_room()
             end
+
+            -- Add a group to disply popups
+            controller.popup_group = controller.factory:Group{size = controller.ui_size}
+            controller.screen:add(controller.popup_group)
         end
         router:get_active_controller():add_controller(controller)
     end
@@ -501,10 +505,36 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
     function ctrlman:disable_on_key_down()
         print("ctrlman disabling on_key_down")
-        for i, controller in ipairs(active_ctrls) do
+        for i,controller in ipairs(active_ctrls) do
             function controller:on_key_down()
                 return false
             end
+        end
+    end
+
+    function ctrlman:show_virtual_remote()
+        for i,controller in ipairs(active_ctrls) do
+            if controller.has_virtual_remote then
+                controller:show_virtual_remote()
+            end
+        end
+    end
+
+    function ctrlman:hide_virtual_remote()
+        for i,controller in ipairs(active_ctrls) do
+            if controller.has_virtual_remote then
+                controller:hide_virtual_remote()
+            end
+        end
+    end
+
+    function ctrlman:popup(string)
+        assert(string)
+        for i,controller in ipairs(active_ctrls) do
+            local size = controller.ui_size
+            controller.popup_group:add(controller.factory:Rectangle{
+                size = size, color = "101010", opacity = 255/2
+            })
         end
     end
 

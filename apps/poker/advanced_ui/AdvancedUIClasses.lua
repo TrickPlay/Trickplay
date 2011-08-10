@@ -70,7 +70,7 @@ local function UIElement()
 
     local animation_id = 1
     function call:animate(table)
-        if not self.on_completeds then
+        if not rawget(self, "on_completeds") then
             rawset(self, "on_completeds", {})
         end
         if table.on_completed then

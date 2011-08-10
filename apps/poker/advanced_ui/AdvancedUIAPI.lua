@@ -168,6 +168,21 @@ do
                 print("The key 'marker' is reserved for the garbage collector")
                 return
             end
+            
+            -- Protect on_completeds
+            if key == "on_completeds" then
+                print("The key 'on_completeds' is reserved for animations")
+                return
+            end
+
+            -- Protect event handlers
+
+            if (key == "on_touches" or key == "on_loaded"
+            or key == "on_text_changed") and value
+            and type(value) ~= "function" then
+                print("The key", key, "is reserved for functions only")
+                return
+            end
 
             local setter = rawget( set , key )
             if type( setter ) == "function" then
@@ -488,17 +503,20 @@ function controller:on_advanced_ui_event(json_object)
     if not proxy then
         return
     end
-
+    
     -- call the right callback for the event
-    if json_object.event == "touch" and proxy.on_touches then
-        proxy:on_touches(json_object.touch_id_list, json_object.state)
-    elseif json_object.event == "on_loaded" and proxy.on_loaded then
-        proxy:on_loaded(json_object.failed)
-    elseif json_object.event == "on_text_changed" and proxy.on_text_changed then
-        proxy:on_text_changed(json_object.text)
-    elseif json_object.event == "on_completed" and proxy.on_completeds then
-        proxy.on_completeds[json_object.animation_id]()
-        proxy.on_completeds[json_object.animation_id] = nil
+    local events = rawget(proxy, "__events")
+    local on_completeds = rawget(proxy, "on_completeds")
+    if json_object.event == "touch" and events.on_touches then
+        events:on_touches(json_object.touch_id_list, json_object.state)
+    elseif json_object.event == "on_loaded" and events.on_loaded then
+        events:on_loaded(json_object.failed)
+    elseif json_object.event == "on_text_changed" and events.on_text_changed then
+        events:on_text_changed(json_object.text)
+    elseif json_object.event == "on_completed" and on_completeds
+    and on_completeds[json_object.animation_id] then
+        on_completeds[json_object.animation_id]()
+        on_completeds[json_object.animation_id] = nil
     end
 end
 
