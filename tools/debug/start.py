@@ -13,6 +13,8 @@ from editor import LuaEditor
 from element import Element, ROW
 from model import ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData, dataToModel, BadDataException
+from push import TrickplayPushApp
+from connection import CON
 
 # Allow keyboard interrupt with ^C
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -36,6 +38,8 @@ class StartQT4(QMainWindow):
         
         QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.search)
         
+        QObject.connect(self.ui.pushAppButton, SIGNAL("clicked()"),  self.pushApp)
+        
         self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
         
         self.createFileSystem(appPath)
@@ -53,10 +57,21 @@ class StartQT4(QMainWindow):
         
         self.discovery = TrickplayDiscovery(self.ui.deviceComboBox)
         
+        self.appPath = appPath
+        
     def test(self, a):
         
         print(a)
         
+    def pushApp(self):
+        
+        print('pushing app')
+        
+        tp = TrickplayPushApp(self.appPath)
+        
+        print(CON.get())
+        
+        tp.push(address = CON.get())
     
     """
     Set up the file system model

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Tue Aug  9 16:18:38 2011
+# Created: Tue Aug  9 17:58:14 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -147,9 +147,9 @@ class Ui_MainWindow(object):
         self.deviceComboBox.setObjectName(_fromUtf8("deviceComboBox"))
         self.horizontalLayout_3.addWidget(self.deviceComboBox)
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
-        self.pushButton_3 = QtGui.QPushButton(self.frame)
-        self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
-        self.verticalLayout_4.addWidget(self.pushButton_3)
+        self.pushAppButton = QtGui.QPushButton(self.frame)
+        self.pushAppButton.setObjectName(_fromUtf8("pushAppButton"))
+        self.verticalLayout_4.addWidget(self.pushAppButton)
         self.verticalLayout.addWidget(self.frame)
         self.dockWidget_3.setWidget(self.dockWidgetContents_4)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_3)
@@ -204,7 +204,7 @@ class Ui_MainWindow(object):
         self.button_Refresh.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget_3.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Device Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Trickplay Device", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_3.setText(QtGui.QApplication.translate("MainWindow", "Push application to selected device", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushAppButton.setText(QtGui.QApplication.translate("MainWindow", "Push application to selected device", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  File System", "texty7", QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))

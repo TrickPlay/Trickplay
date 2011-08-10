@@ -278,7 +278,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="pushAppButton">
           <property name="text">
            <string>Push application to selected device</string>
           </property>
