@@ -26,6 +26,9 @@
 @synthesize socketDelegate;
 @synthesize advancedUIDelegate;
 
+#pragma mark -
+#pragma mark Network Setup
+
 /**
  * Establishes the host and port that will be used for the asynchronous socket
  * connection managed by GestureViewController's SocketManager.
@@ -100,7 +103,7 @@
         hasPictures = @"\tPS";
     }
     // Tell the service what this device is capable of
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.1\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
+	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.2\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
 	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     // Manages resources created with declare_resource
@@ -158,6 +161,9 @@
     [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
 }
 
+#pragma mark -
+#pragma mark Network Handling
+
 /**
  * Used to confirm that the GestureViewController has an async socket
  * connected to Trickplay.
@@ -203,6 +209,17 @@
     }
 }
 
+#pragma mark -
+#pragma mark Sending to Server
+
+/**
+ * Sends an event of name "name" with arguments "JSON_string" to the server.
+ */
+- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string {
+    NSString *sentData = [NSString stringWithFormat:@"UI\t%@\t%@\n", name, JSON_string];
+    [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
+}
+
 /**
  * Sends a key press over the asynch connection to Trickplay
  * (i.e. up key, down key, exit key)
@@ -233,8 +250,8 @@
 #pragma mark -
 #pragma mark Handling Commands From Server
 
-
-//--Welcome message
+#pragma mark -
+#pragma mark Welcome Message
 
 /**
  * WM = Welcome Message
@@ -264,7 +281,8 @@
     }
 }
 
-//--Audio junk
+#pragma mark -
+#pragma mark Audio Playback Commands
 
 /**
  * SS = Start Sound
@@ -299,7 +317,8 @@
               numberOfBytes:[sentData length]];
 }
 
-//--Multiple Choice junk
+#pragma mark -
+#pragma mark Multiple Choice Command and Action Sheet Callback
 
 /**
  * MC = Multiple Choice
@@ -377,7 +396,8 @@
     }
 }
 
-//-------------------Text input stuff---------------------
+#pragma mark -
+#pragma mark Text Entry Command and Text Field Callbacks
 
 /**
  * ET = Enter Text
@@ -430,8 +450,8 @@
     return YES;
 }
 
-
-//----------------------Graphics related----------------------
+#pragma mark -
+#pragma mark Declaring/Dropping Resource Commands
 
 /**
  * DR = Declare Resource
@@ -476,10 +496,13 @@
     [resourceManager dropResourceGroup:(NSString *)[args objectAtIndex:0]];
 }
 
+#pragma mark -
+#pragma mark Static Image Updating Commands
+
 /**
  * Updating the background
  *
- * WARNING: CANNOT USE WITH ADVANCED UI
+ * WARNING: Now Asynchronous
  */
 - (void)do_UB:(NSArray *)args {
     NSLog(@"Updating Background");
@@ -502,8 +525,7 @@
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
 
-        [virtualRemote.view removeFromSuperview];
-        graphics = YES;
+        [self object_added];
     }
 }
 
@@ -535,48 +557,12 @@
         UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
         [foregroundView addSubview:newImageView];
-        [virtualRemote.view removeFromSuperview];
-        graphics = YES;
+        [self object_added];
     }
 }
 
-
-//--------------------Resetting stuff-------------------
-
-// TODO: Reset all modules to the initial state
-/**
- * RT = Reset
- *
- * Resets everything. Deletes all graphics and objects.
- *
- * Passes no arguments.
- */
-- (void)do_RT:(NSArray *)args {
-    [audioController destroyAudioStreamer];
-    [accelDelegate pauseAccelerometer];
-    [touchDelegate reset];
-    [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
-    [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
-    [self clearUI];
-    [advancedUIDelegate clean];
-    [resourceManager clean];
-    [self.view addSubview:virtualRemote.view];
-    graphics = NO;
-}
-
-/**
- * CU = Clear UI
- *
- * Clears the screen of all graphics objects not created by AdvancedUI, resets the
- * background, removes the camera/multiple choice/text entry if currently on the
- * screen, adds the virtual remote if no AdvancedUI objects are on the screen.
- */
-- (void)do_CU {
-    [self clearUI];
-}
-
-
-//------------------ Stuff passed to AccelerometerController ------------
+#pragma mark -
+#pragma mark Accelerometer Controller Commands
 
 /**
  * SA = Start Accelerometer
@@ -602,18 +588,21 @@
     [accelDelegate pauseAccelerometer];
 }
 
-
-//------------------ Stuff passed to TouchController --------------------
+#pragma mark -
+#pragma mark Touch Controller Commands and Callbacks
 
 /**
  * ST = Stop Touches
  *
  * Tells the TouchController to start sending touch events to the server. This
- * removes the VirtualRemote from the screen.
+ * removes the VirtualRemote from the screen unless the VirtualRemote was initiated
+ * by a call to controller:show_virtual_remote() (hence background of VR is hidden).
  */
 - (void)do_ST {
     [touchDelegate startTouches];
-    [virtualRemote.view removeFromSuperview];
+    if (!virtualRemote.background.isHidden) {
+        [virtualRemote.view removeFromSuperview];
+    }
 }
 
 /**
@@ -621,11 +610,15 @@
  *
  * Tells the TouchController to stop sending touch events to the server.
  * This adds the VirtualRemote back to the screen if no graphics elements or
- * AdvancedUI Objects are currently added to the screen.
+ * AdvancedUI Objects are currently added to the screen. If the VirtualRemote
+ * was brought into view via controller:show_virtual_remote() then the
+ * method corresponding to controller:hide_vitual_remote() (aka. do_HV) is first called
+ * before restoring the VirtualRemote.
  */
 - (void)do_PT {
     [touchDelegate stopTouches];
     if (!graphics) {
+        [self do_HV];
         [self.view addSubview:virtualRemote.view];
     }
 }
@@ -647,7 +640,8 @@
 }
 
 
-//-------------------- Camera stuff ----------------------------
+#pragma mark -
+#pragma mark Camera Commands and Methods
 
 /**
  * PI = Pick Image
@@ -755,33 +749,70 @@
     }
 }
 
-//-------------------- Super Advanced UI stuff (depricated) -----------------
+#pragma mark -
+#pragma mark - Modal Virtual Remote
 
-- (void)do_UX:(NSArray *)args {
-    //NSArray *JSON_Array = [[args objectAtIndex:1] yajl_JSON];
-    
-    /*
-    if ([(NSString *)[args objectAtIndex:0] compare:@"CREATE"] == NSOrderedSame) {
-        [advancedUIDelegate createObjects:JSON_Array];
-    } else if ([(NSString *)[args objectAtIndex:0] compare:@"DESTROY"] == NSOrderedSame) {
-        [advancedUIDelegate destroyObjects:JSON_Array];
-    } else if ([(NSString *)[args objectAtIndex:0] compare:@"SET"] == NSOrderedSame) {
-        [advancedUIDelegate setValuesForObjects:JSON_Array];
+/**
+ * SV = Show Virtual Remote
+ *
+ * Displays a popup VirtualRemote with trasparent background
+ * if neither the virtual remote or camera are currently displayed.
+ */
+- (void)do_SV {
+    if (![virtualRemote parentViewController] && ![virtualRemote.view superview]) {
+        virtualRemote.background.hidden = YES;
+        [self.view addSubview:virtualRemote.view];
     }
-    */
 }
 
-//---------------------------------------------------------------------------
-
-- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string {
-    //NSLog(@"\n\nJSON_string: %@", JSON_string);
-    NSString *sentData = [NSString stringWithFormat:@"UI\t%@\t%@\n", name, JSON_string];
-    //NSLog(@"sent data: %@", sentData);
-    [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
-    //fprintf(stderr, "\n%s\n\n",[sentData UTF8String]);
+/**
+ * HD = Hide Virtual Remote
+ *
+ * Hides the popup VirtualRemote.
+ */
+- (void)do_HV {
+    if ([virtualRemote.view superview] && virtualRemote.background.isHidden) {
+        [virtualRemote.view removeFromSuperview];
+        virtualRemote.background.hidden = NO;
+    }
 }
 
-//-------------------- Other View stuff ------------------------
+#pragma mark -
+#pragma mark Cleaning/Clearing/Resetting Views
+
+// TODO: Reset all modules to the initial state
+/**
+ * RT = Reset
+ *
+ * Resets everything. Deletes all graphics and objects.
+ *
+ * Passes no arguments.
+ */
+- (void)do_RT:(NSArray *)args {
+    [audioController destroyAudioStreamer];
+    [accelDelegate pauseAccelerometer];
+    [touchDelegate reset];
+    [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
+    [self clearUI];
+    [advancedUIDelegate clean];
+    [resourceManager clean];
+    [self dismissModalViewControllerAnimated:NO];
+    [self do_HV];
+    [self.view addSubview:virtualRemote.view];
+    graphics = NO;
+}
+
+/**
+ * CU = Clear UI
+ *
+ * Clears the screen of all graphics objects not created by AdvancedUI, resets the
+ * background, removes the camera/multiple choice/text entry if currently on the
+ * screen, adds the virtual remote if no AdvancedUI objects are on the screen.
+ */
+- (void)do_CU {
+    [self clearUI];
+}
 
 - (void)clean {
     [self clearUI];
@@ -827,7 +858,8 @@
     
     [newImageView release];
     
-    if (advancedView.subviews.count == 0) {
+    if (advancedView.subviews.count == 0 && !((TouchController *)touchDelegate).touchEventsAllowed) {
+        [self do_HV];
         [self.view addSubview:virtualRemote.view];
         graphics = NO;
     }
@@ -837,7 +869,7 @@
 }
 
 - (void)object_added {
-    if ([virtualRemote.view superview]) {
+    if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
         [virtualRemote.view removeFromSuperview];
     }
     graphics = YES;
@@ -853,6 +885,9 @@
  return self;
  }
  */
+
+#pragma mark -
+#pragma mark View Handling
 
 //*
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
@@ -952,6 +987,8 @@
     }
 }
 
+#pragma mark -
+#pragma mark Deallocation
 
 - (void)dealloc {
     NSLog(@"Gesture View Controller dealloc");

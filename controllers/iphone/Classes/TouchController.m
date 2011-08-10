@@ -11,6 +11,7 @@
 
 @implementation TouchController
 
+@synthesize touchEventsAllowed;
 @synthesize view;
 @synthesize socketManager;
 

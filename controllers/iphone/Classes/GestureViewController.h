@@ -255,8 +255,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (IBAction)hideTextBox:(id)sender;
 
 - (void)clearUI;
-
 - (void)clean;
+
+- (void)object_added;
 
 - (void)exitTrickplayApp:(id)sender;
 

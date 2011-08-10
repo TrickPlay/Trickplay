@@ -21,9 +21,12 @@
     
     CFURLRef clickSoundRef;
     SystemSoundID audioClick;
+    
+    UIImageView *background;
 }
 
 @property (assign) id<VirtualRemoteDelegate> delegate;
+@property (retain) IBOutlet UIImageView *background;
 
 - (IBAction)rightPressed:(id)sender;
 - (IBAction)leftPressed:(id)sender;
