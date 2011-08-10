@@ -33,6 +33,7 @@
     BOOL swipeStarted;
 }
 
+@property (assign) BOOL touchEventsAllowed;
 @property (retain) SocketManager *socketManager;
 @property (retain) UIView *view;
 

@@ -32,14 +32,15 @@
 - (void)do_SS:(NSArray *)args;
 - (void)do_PS:(NSArray *)args;
 
-/** Advanced UI junk **/
-- (void)do_UX:(NSArray *)args;
-
 // Welcome Message
 - (void)do_WM:(NSArray *)args;
 
 // Take pictures
 - (void)do_PI:(NSArray *)args;
+
+// Modal Virtual Remote
+- (void)do_SV;
+- (void)do_HV;
 
 @end
 

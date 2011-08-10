@@ -103,8 +103,10 @@
         [delegate do_SS:args];
     } else if ([command compare:@"PS"] == NSOrderedSame) {
         [delegate do_PS:args];
-    } else if ([command compare:@"UX"] == NSOrderedSame) {
-        [delegate do_UX:args];
+    } else if ([command compare:@"SV"] == NSOrderedSame) {
+        [delegate do_SV];
+    } else if ([command compare:@"HV"] == NSOrderedSame) {
+        [delegate do_HV];
     } else if ([command compare:@"PI"] == NSOrderedSame) {
         [delegate do_PI:args];
     } else {
