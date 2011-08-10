@@ -87,74 +87,11 @@ Property: selected_item
 
 The selected_item property is the integer index into the items table for the currently-selected item. The first item in the items list is at index 1.
 
-You can set the selected_item property to initialize the starting item in the list or to force a particular item to be the current item. Setting the selected_item property does not cause the displayed list to automatically scroll to the designated item; the list must be scrolled programmatically to the modified item. Refer to the code example below for a demonstration.
+You can set the selected_item property to initialize the starting item in the list or to force a particular item to be the current item. Setting the selected_item property updates the display automatically.
 
 You can retrieve the selected_item property to determine which item has been selected/is current.
 
 *Default Setting:* 1
-
-*Code Example:* Programmatically jump to a particular item in the scrollable list
-
-(code)
--- Load the UI Element library
-ui_element = dofile("/lib/ui_element.lua")
-
--- Create a ButtonPicker, defining its scrollable list and other settings
-local bpNumbers = ui_element.buttonPicker{
-		items = { "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix" }
-		}
-bpNumbers.position = { 300, 350, 0 }
-
--- Create a Button, when pressed, it will jump to the 5th item in the list ("cinq")
-local bJumpToCinq = ui_element.button{ ui_width = 300,
-                                       label = "Jump to Cinq",
-                                     }
-bJumpToCinq.position = { 240, 550, 0 }
-
--- bJumpToCinq button-pressed event handler
-bJumpToCinq.pressed = function()
-	-- Jump to "cinq", the 5th item in the list
-	-- Note: At this point, the current selected_item may be anywhere in the list.
-	
-	-- Variable definitions
-	local curr      = bpNumbers.selected_item
-	local num_items = #bpNumbers.items
-	local desired   = 5
-	local num_scrolls_back, num_scrolls_forward
-	
-	-- Validate value of desired and verify we're not already at the desired item
-	if desired < 1 or desired > num_items or desired == curr then return end
-
-	-- Find the shortest scrolling path (backward or forward) to the 5th item	
-	-- Is current item past the desired item?
-	if curr > desired then
-		-- Yes, determine the number of scrolls in each direction to get to desired item
-		num_scrolls_back = curr - desired
-		num_scrolls_forward = num_items - curr + desired
-	else
-		-- No, current item is before desired, determine number of scrolls needed
-		num_scrolls_back = curr + num_items - desired
-		num_scrolls_forward = desired - curr
-	end
-	
-	-- Which direction is shorter?
-	if num_scrolls_back < num_scrolls_forward then
-		-- Scroll back
-		for i = 1, num_scrolls_back, 1 do
-			-- Note: These scroll operations occur asynchronously with immediate
-			-- termination of any existing unfinished operation. Because of this,
-			-- all the scrolling ops, except the last one, may be aborted and not
-			-- be viewable onscreen.
-			bpNumbers:press_left()
-		end
-	else
-		-- Scroll forward
-		for i = 1, num_scrolls_forward, 1 do
-			bpNumbers:press_right()
-		end
-	end
-end
-(end)
 
 *See Also:* the <items> property
 
@@ -194,6 +131,26 @@ The focus_text_font property is a string specifying the ButtonPicker's font when
 *Default Setting:* "DejaVu Sans 30px"
 
 *See Also:* the <focus_text_color> and <text_font> properties
+
+
+
+Property: skin
+
+The skin property is a string that specifies the display appearance of the ButtonPicker. The skin functionality is under active development.
+
+Predefined skins are provided, and the developer may define a custom skin. The following skin appearances are supported.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+"CarbonCandy" - an alternative skin. Flashy, attracts attention
+"custom" - the skin is defined by the developer
+
+When the "custom" skin is selected, the developer must define the <text_color>, <fill_color> and <border_color> properties of the ButtonPicker object for its focused and unfocused states.
+
+*Default Setting:* "default"
+
+*See Also:* the <text_color>, <fill_color> and <border_color> properties
 
 
 
@@ -247,7 +204,7 @@ The format of the RGB and alpha settings is described in the section RGB/Alpha C
 
 Property: border_color
 
-The border_color property is a table of integer RGB and alpha settings specifying the ButtonPicker border's color when the object does not have the input focus.
+The border_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object does not have the input focus.
 
 The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
@@ -259,55 +216,13 @@ The format of the RGB and alpha settings is described in the section RGB/Alpha C
 
 Property: focus_color
 
-The focus_color is a table of integer RGB and alpha settings specifying the ButtonPicker border's color when the object has the input focus.
+The focus_color is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object has the input focus.
 
 The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
 
 *Default Setting:* {0, 255, 0, 255} (green and opaque)
 
 *See Also:* the <border_color> property
-
-
-
-Property: skin
-
-The skin property is a string that specifies the display appearance of the ButtonPicker.
-
-Predefined skins are provided, and the developer may define a custom skin. The following skin appearances are supported.
-
-*Supported Settings:* The skin property is case-sensitive.
-
-"default" - a utilitarian and sedate skin
-"CarbonCandy" - an alternative skin. Flashy, attracts attention
-"custom" - the skin is defined by the developer
-
-When the "custom" skin is selected, the developer must define the <text_color>, <fill_color> and <border_color> properties of the ButtonPicker object for its focused and unfocused states.
-
-*Default Setting:* "default"
-
-*See Also:* the <text_color>, <fill_color> and <border_color> properties
-
-
-
-Property: rotate_func
-
-The rotate_func property is a reference to a function that is invoked after the ButtonPicker has scrolled to a new item in its list by a call to either the <press_left>, <press_right>, <press_up> or <press_down> function. Based upon the list's current item, the program can perform appropriate operations, such as displaying or hiding display elements.
-
-Note: Setting the ButtonPicker's <selected_item> property does *not* cause the rotate_func function to be called.
-
-The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, which includes invoking the rotate_func. Thus, the rotate_func is guaranteed to be called, even if the scrolling operation is aborted early.
-
-*Prototype:* rotate_func( current_item_index )
-
-*Argument:*
-
-current_item_index - integer index referencing the current item in the ButtonPicker's items property. The first item in the items list is at index 1.
-
-*Return Value:* None.
-
-*Default Setting:* nil
-
-*See Also:* the <items> property
 
 
 
@@ -403,8 +318,6 @@ The press_right() function can be called to perform the same operation; the two 
 
 The scrolling operation occurs asynchronously. If a second scrolling operation is invoked before the first operation has finished, the first operation jumps immediately to its final state, and the second scrolling operation begins.
 
-
-
 *Prototype:* press_down()
 
 *Return Value:* None.
@@ -415,23 +328,49 @@ The scrolling operation occurs asynchronously. If a second scrolling operation i
 
 Function: on_focus_in
 
-The on_focus_in() function forces the input focus to the ButtonPicker.
+The on_focus_in() function forces the key focus to the ButtonPicker. To accurately understand what this function does, think of it as get_focus().
 
 *Prototype:* on_focus_in()
 
 *Return Value:* None.
 
+*See Also:* the <on_focus_out> function
+
 
 
 Function: on_focus_out
 
-The on_focus_out() function releases the input focus from the ButtonPicker.
+The on_focus_out() function releases the key focus from the ButtonPicker. To accurately understand what this function does, think of it as remove_focus().
 
-After calling on_focus_out(), no UI element has the input focus.
+After calling on_focus_out(), no screen element has the input focus.
 
 *Prototype:* on_focus_out()
 
 *Arguments:* None.
 
 *Return Value:* None.
+
+*See Also:* the <on_focus_in> function
+
+
+
+Event Handler: rotate_func
+
+The rotate_func() event handler is called whenever the current item in the ButtonPicker changes. The item may change due to either a user having scrolled the button or because a program had set the <selected_item> property or called the directional <press_left>, <press_right>, <press_up> or <press_down> functions. Based upon the list's current item, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+If the user presses the button or if a program calls one of the directional press_xxx() functions, the ButtonPicker scrolls to the new item. If a program explicitly sets the selected_item property, the ButtonPicker jumps directly to the new item, without scrolling.
+
+The scrolling operation occurs asynchronously. It is possible for a user or program to change the current item a second time before the first scrolling operation completes.  If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, which includes invoking the rotate_func. Thus, the rotate_func is guaranteed to be called, even if the scrolling operation is aborted early.
+
+*Prototype:* rotate_func( current_item_index )
+
+*Argument:*
+
+current_item_index - integer index referencing the current item in the ButtonPicker's items property. The first item in the items list is at index 1.
+
+*Return Value:* None.
+
+*Default Setting:* nil
+
+*See Also:* the <items> and <selected_item> properties
 
