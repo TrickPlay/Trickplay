@@ -19,7 +19,6 @@ from connection import CON
 # Allow keyboard interrupt with ^C
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-
 class StartQT4(QMainWindow):
     
     def __init__(self, parent, appPath):
@@ -27,17 +26,17 @@ class StartQT4(QMainWindow):
         # Main window setup
         QWidget.__init__(self, parent)
         
-        self.ui = Ui_MainWindow()
+        # Restore size/position of window
+        settings = QSettings()
+        self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
         
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
         # Buttons
-        QObject.connect(self.ui.button_Refresh, SIGNAL("clicked()"), self.refresh)
-        
+        QObject.connect(self.ui.button_Refresh, SIGNAL("clicked()"), self.refresh)        
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
-        
         QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.search)
-        
         QObject.connect(self.ui.pushAppButton, SIGNAL("clicked()"),  self.pushApp)
         
         self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
@@ -59,17 +58,28 @@ class StartQT4(QMainWindow):
         
         self.appPath = appPath
         
+        # Restore sizes/positions of docks
+        self.restoreState(settings.value("mainWindowState").toByteArray());
+ 
+        
+    """
+    Save window geometry on close
+    """
+    def closeEvent(self, event):
+        
+        settings = QSettings()
+        settings.setValue("mainWindowGeometry", self.saveGeometry());
+        settings.setValue("mainWindowState", self.saveState());
+        
     def test(self, a):
         
         print(a)
         
     def pushApp(self):
         
-        print('pushing app')
+        print('Pushing app to', CON.get())
         
         tp = TrickplayPushApp(self.appPath)
-        
-        print(CON.get())
         
         tp.push(address = CON.get())
     
@@ -510,6 +520,11 @@ def main(argv):
     try:
     
         app = QApplication(argv)
+            
+        QCoreApplication.setOrganizationDomain("www.trickplay.com");
+        QCoreApplication.setOrganizationName("Trickplay");
+        QCoreApplication.setApplicationName("Trickplay Debugger");
+        QCoreApplication.setApplicationVersion("0.0.1");
         
         myapp = StartQT4(None, appPath)
         
