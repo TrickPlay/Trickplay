@@ -32,6 +32,9 @@ class TrickplayDiscovery(ServiceDiscovery):
         address = self.widget.itemData(index, ADDRESS).toPyObject()
         port = self.widget.itemData(index, PORT).toPyObject()
         
+        if not name or not address or not port:
+            return
+        
         print(index,name,address,port)
         
         # Echo client program
