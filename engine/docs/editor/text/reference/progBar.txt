@@ -69,18 +69,6 @@ The ui_position property is a table of integer values specifying the object's sc
 
 
 
-Property: skin
-
-The skin property is a string specifying the display appearance of the ProgressBar.
-
-*Supported Settings:* The skin property is case-sensitive.
-
-"default" - a utilitarian and sedate skin
-
-*Default Setting:* "default"
-
-
-
 Property: border_color
 
 The border_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the ProgressBar's border.
@@ -182,6 +170,18 @@ An alternative and equivalent method of updating the progress bar's display is t
 	(end)
 
 *See Also:* the <set_prog> function
+
+
+
+Property: skin
+
+The skin property is a string specifying the display appearance of the ProgressBar. This functionality is under active development.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+
+*Default Setting:* "default"
 
 
 
