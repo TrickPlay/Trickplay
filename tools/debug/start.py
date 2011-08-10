@@ -15,6 +15,7 @@ from model import ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData, dataToModel, BadDataException
 from push import TrickplayPushApp
 from connection import CON
+from wizard import Wizard
 
 # Allow keyboard interrupt with ^C
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -22,6 +23,32 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 class StartQT4(QMainWindow):
     
     def __init__(self, parent, appPath):
+        
+        if not appPath:
+            
+            #appPath = QFileDialog.getOpenFileName(QDir.homePath(), "All Files (*.*)", self, "open file dialog", "Choose a file..." );
+
+            #appPath = QFileDialog.getExistingDirectory(None, 'Select app directory', QDir.homePath())
+            getDir = QFileDialog(None, 'Select app directory', QDir.homePath())
+            #getDir.setLabelText(3, 'hello')
+            getDir.setFileMode(QFileDialog.Directory)
+            
+            if getDir.exec_():
+                selected = getDir.selectedFiles()
+                print(selected)
+                appPath = selected[0]
+                
+            #appPath = getDir.getSaveFileName(None, 'Select or create app directory', QDir.homePath())
+            #appPath = QFileDialog.
+            #QFileDialog.getSaveFileName()
+            
+            pass
+            
+        print('Chose path', appPath)
+        
+        if str(appPath) == '':
+            #sys.exit('No path given')
+            self.exit()
 
         # Main window setup
         QWidget.__init__(self, parent)
@@ -60,26 +87,21 @@ class StartQT4(QMainWindow):
         
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
- 
+
         
     """
     Save window geometry on close
     """
     def closeEvent(self, event):
-        
         settings = QSettings()
         settings.setValue("mainWindowGeometry", self.saveGeometry());
         settings.setValue("mainWindowState", self.saveState());
-        
-    def test(self, a):
-        
-        print(a)
         
     def pushApp(self):
         
         print('Pushing app to', CON.get())
         
-        tp = TrickplayPushApp(self.appPath)
+        tp = TrickplayPushApp(str(self.appPath))
         
         tp.push(address = CON.get())
     
@@ -407,7 +429,7 @@ class StartQT4(QMainWindow):
     def createTree(self):
 
         # Set up Inspector
-        self.inspectorModel.initialize(["UI Element",  "Name"],  True)
+        self.inspectorModel.initialize(["UI Element",  "Name"],  False)
         
         self.inspectorModel.setItemPrototype(Element())
 
@@ -513,9 +535,7 @@ def main(argv):
         
     except IndexError:
         
-        appPath = '/home/devinabbott/trickplay-source/apps/pandamonium/'
-    
-    print('Loaded app directory', appPath)
+        appPath = ''
     
     try:
     
@@ -527,6 +547,7 @@ def main(argv):
         QCoreApplication.setApplicationVersion("0.0.1");
         
         myapp = StartQT4(None, appPath)
+        wizard = Wizard(myapp)
         
         myapp.show()
         

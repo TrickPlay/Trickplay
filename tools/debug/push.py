@@ -10,19 +10,35 @@ import hashlib
 import socket
 import urllib2
 
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+
 class TrickplayPushApp():   
 
     def __init__(self, path = None):
         
         self.path = path
     
-    def push(self, path = None, address = 'localhost:8888'):
+    def push(self, path = None, address = None):
+        
+        path = path or self.path
+        
+        if not path:
+            print('No path given')
+            return False
+        
+        if not address:
+            print('No location given for pushing app')
+            return False
+        
+        path = str(path)
+        address = str(address)
         
         message = {}
         
         file_list = []
         
-        for root , dirs , files in os.walk( path or self.path ):
+        for root , dirs , files in os.walk( path ):
         
             for file in files:
                 
@@ -84,14 +100,26 @@ class TrickplayPushApp():
             
             return False
         
+        
+        numFiles = len(file_list)
+        progress = QProgressDialog("Pushing application...", "Abort", 0, numFiles);
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumDuration(0)
+        currentFile = 0
+        
         while not response[ "done" ]:
             
             try:
                 
+                progress.setValue(currentFile);
+                
+                if (progress.wasCanceled()):
+                    raise Exception
+                
                 file_name = file_map[ response[ "file" ] ]
                 length = os.path.getsize( file_name )
                 print( "Sending %s" % response[ "file" ] )
-        
+                
                 f = open( file_name )
                 
                 request = urllib2.Request( "http://" + address + response[ "url" ] , f , { "Content-Type" : "application/octet-stream" , "Content-Length" : "%d" % length } )
@@ -99,12 +127,15 @@ class TrickplayPushApp():
                 
                 f.close()
                 
+                currentFile += 1
+                
             except:
                 
                 print( "Failed to send files" )
                 
                 return False
-            
+        
+        progress.setValue(100);
             
         print( response[ "msg" ] )
         
