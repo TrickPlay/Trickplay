@@ -882,35 +882,64 @@ function util.make_attr_t(v)
        ["Image"] = function() return {"src", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
        ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","label","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
+       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
        ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "justify","single_line", "alignment", "wrap_mode"} end,
        ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","selected_item","items",} end,
-       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus","label","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
-       ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space", "box_position", "item_position","items", "selected_items"} end,
+       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus", "border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
+	   ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space", "box_position", "item_position","items", "selected_items"} end,
        ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","button_position", "item_position","items","selected_item"} end,
 
        ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
-       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label","message","border_color","fill_color","title_color","title_font","message_color","message_font","border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
-       ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","label","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
+       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label", "title_font", "title_color", "message", "message_font", "message_color", "border_color","fill_color",  "border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
+       ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
-       ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress"} end,
-       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable",} end,
+       ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color",} end,
+       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset",} end,
        ["ScrollPane"] = function() return {"lock", "skin", "visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
        ["ArrowPane"] = function() return {"lock", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","box_color", "box_width"} end,  
    }
   
   if util.is_this_widget(v) == true  then
-       obj_type = v.extra.type
-	attr_t =
-      {
-             {"title", "Inspector : "..(v.extra.type)},
-             {"caption", "Object Name"},
-             {"name", v.name,"name"},
-             {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
-             {"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
-             {"z", math.floor(v.z), "Z"},
-      }
-       if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) and v.extra.type ~= "ArrowPane" and  v.extra.type ~= "CheckBoxGroup" and  v.extra.type ~= "RadioButtonGroup" then 
+       	obj_type = v.extra.type
+		if v.extra.type == "Button" or v.extra.type ==  "MenuButton" or v.extra.type == "DialogBox" then 
+			attr_t =
+      		{
+             	{"title", "Inspector : "..(v.extra.type)},
+             	{"caption", "Object Name"},
+             	{"name", v.name, "name"},
+             	{"caption", "Label"},
+				{"label", v.label, "label"},  
+             	{"caption", "Position"},
+             	{"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
+             	{"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
+             	{"z", math.floor(v.z), "Z"},
+      		}
+	  	elseif v.extra.type == "ProgressBar" then 
+			attr_t =
+      		{
+             	{"title", "Inspector : "..(v.extra.type)},
+             	{"caption", "Object Name"},
+             	{"name", v.name,"name"},
+             	{"progress", math.floor(v.progress) , "Progress"},
+             	{"caption", "Position"},
+             	{"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
+             	{"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
+             	{"z", math.floor(v.z), "Z"},
+      		}
+	  	else 
+			attr_t =
+      		{
+             	{"title", "Inspector : "..(v.extra.type)},
+             	{"caption", "Object Name"},
+             	{"name", v.name,"name"},
+             	{"caption", "Position"},
+             	{"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
+             	{"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
+             	{"z", math.floor(v.z), "Z"},
+      		}
+	  	end 
+       	 if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) and v.extra.type ~= "ArrowPane" and  v.extra.type ~= "CheckBoxGroup" and  v.extra.type ~= "RadioButtonGroup" then 
+             table.insert(attr_t, {"caption", "Size"})
              table.insert(attr_t, {"ui_width", math.floor(v.ui_width), "W"})
              table.insert(attr_t, {"ui_height", math.floor(v.ui_height), "H"})
        end

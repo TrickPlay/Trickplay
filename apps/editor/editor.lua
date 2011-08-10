@@ -643,10 +643,16 @@ function editor.close(new, next_func, next_f_param, from_close)
 
 	local func_ok = function() 
  		editor.save(true, nil, editor.close, {true, nil, nil, true})
+		if next_func then 
+			next_func()
+		end 
 		return
  	end 
 	local func_nok = function() 
 		editor.close(true, nil, nil, true)
+		if next_func then 
+				next_func()
+		end 
 		return
  	end 
 
@@ -1188,18 +1194,14 @@ local function open_files(input_purpose, bg_image, inspector)
 		end
 	else 
 		button_ok.pressed = function() 
-			if input_purpose == "open_luafile" then 
-				undo_list = {} 
-				if editor.close(true) ~= "-1" then --, load_file, selected_file) == nil then --0802
-					load_file(selected_file) 
-				end 
-			else 
+			undo_list = {} 
+			if editor.close(true) ~= "-1" then --, load_file, selected_file) == nil then --0802
 				load_file(selected_file) 
 			end 
 			xbox:on_button_down(1) 
 
 			-- 0802		
-			local dir = editor_lb:readdir(current_dir.."/screens")
+			local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
@@ -1842,9 +1844,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		 			items_height = item.h 
 					prev_y = item.y
         		end 
+				--[[
 				if attr_s == "W" then 
 					item.x = item.x - 3
 				end
+				]]
 		 		space = space - item.w - PADDING		
 	    		used = item.x + item.w  
 				used_y = item.y + items_height
@@ -2241,8 +2245,10 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	end 
 ]]
 	if current_fn then 
-		local back_file = current_fn.."\.back"
-		editor_lb:writefile(back_file, contents, true)	
+		if current_fn ~= "unsaved_temp.lua" and current_fn ~= "/screens/unsaved_temp.lua"then
+			local back_file = current_fn.."\.back"
+			editor_lb:writefile(back_file, contents, true)	
+		end
 	end 
 
 	if save_backup_f == true then 
@@ -2262,6 +2268,11 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		end
 
 		editor_lb:writefile(current_fn, contents, true)	
+		
+		if current_fn == "unsaved_temp.lua" or current_fn == "/screens/unsaved_temp.lua"then
+				return 
+		end 
+
 		local main = readfile("main.lua")
 
 		if(current_fn ~= "" and main ) then 
@@ -3228,13 +3239,13 @@ function editor.duplicate()
                         				ui.dup:add(ui.dup_c)
                         				item_num = item_num + 1
 									else 
-											--[[
+										---[[
 										ui.dup_c = copy_widget(j)
 										ui.dup:add(ui.dup_c)
                         				ui.dup_c.extra.lock = false
                         				util.create_on_button_down_f(ui.dup_c)
                         				item_num = item_num + 1
-										]]
+										---]]
 										-- group's child is widget 
 									---[[	
 										 for a,b in pairs(w_attr_list) do 
@@ -3291,17 +3302,16 @@ function editor.duplicate()
 															end 
 						   								end
                                     				elseif type(j[b]) == "table" then  
-														----print("3 : table", b)
-						   								local temp_t = {}
-						   								for k,l in pairs (j[b]) do 
-															temp_t[k] = l
-															--ui.dup[b][k] = l
-						   								end
-														if ui.dup_c then 
-					           								ui.dup_c[b] = temp_t
-						   									if b == "items" then 
+														--print("3 : table", b)
+														if b ~= "children" then 
+						   									local temp_t = {}
+						   									for k,l in pairs (j[b]) do 
+																temp_t[k] = l
+																--ui.dup[b][k] = l
+						   									end
+															if ui.dup_c then 
 					           									ui.dup_c[b] = temp_t
-						   									end 
+															end 
 														end 
                                    					else --elseif ui.dup_c[b] ~= j[b]  then  
 														--print("-->", b, ":", j[b])
@@ -3392,20 +3402,19 @@ function editor.duplicate()
 											end 
 						   				end
                                     elseif type(v[j]) == "table" then  
-										--print("3 : table", j)
-						   				local temp_t = {}
-						   				for k,l in pairs (v[j]) do 
-											temp_t[k] = l
-						   				end
-					           			ui.dup[j] = temp_t
+										if j ~= "children" then 
+							   				local temp_t = {}
+						   					for k,l in pairs (v[j]) do 
+												temp_t[k] = l
+						   					end
+					           				ui.dup[j] = temp_t
+										end 
                                    else--elseif ui.dup[j] ~= v[j]  then  
-										--print("-->", j, ":", v[j])
 					           			ui.dup[j] = v[j] 
                                    end 
                                  end -- not position, name 
                              end 
                           end --for
-						-- ]]
 					end
 				end 
 
@@ -4857,7 +4866,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
  		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
  		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
-		["012"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid value for \""..str.."\" field." end, 
  		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
  		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
  		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 
@@ -4991,6 +4999,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	end 
 
 	return msgw
-end 
-return editor
+end
 
+return editor

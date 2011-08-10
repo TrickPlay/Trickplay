@@ -1992,7 +1992,14 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		group.w = group.w + 50
 	elseif item_n == "h" or item_n == "virtual_h" then 
 		group.w = group.w + 100
-	--elseif item_n == 
+	elseif item_n == "cell_timing" then 
+		group.w = group.w + 200
+	end 
+
+	if item_n == "cell_timing_offset" or item_n == "cell_timing" or item_n == "cell_spacing" then 
+        input_text.position = {130, 4.5}
+        ring.position = {125, 0}
+        focus.position ={125, 0} 
 	end 
 
     return group
