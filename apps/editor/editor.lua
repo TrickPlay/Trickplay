@@ -1201,7 +1201,7 @@ local function open_files(input_purpose, bg_image, inspector)
 			xbox:on_button_down(1) 
 
 			-- 0802		
-			local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+			local dir = editor_lb:readdir(current_dir.."/screens")
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
