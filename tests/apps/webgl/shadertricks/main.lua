@@ -2,6 +2,9 @@ local gl = WebGLCanvas{ size = screen.size }
 
 screen:add( gl )
 
+local shader_name = Text { font = "Highway Gothic Wide 120px", text = "ShaderName", color = "ffffff" }
+screen:add(shader_name)
+
 program = nil
 
 local function make_shader(i,z)
@@ -26,9 +29,10 @@ local function next_shader()
     end
     program = gl:createProgram()
     current_shader = (current_shader % #shaders)+1
-    print("Loading shader ",current_shader)
+    shader_name.text = shaders[current_shader]
+    print("Loading shader ",shader_name.text)
     make_shader(gl.VERTEX_SHADER,readfile("generic.vertex"))
-    make_shader(gl.FRAGMENT_SHADER,readfile(shaders[current_shader]..".fragment"))
+    make_shader(gl.FRAGMENT_SHADER,readfile(shader_name.text..".fragment"))
     gl:linkProgram(program)
     assert(gl:getProgramParameter( program , gl.LINK_STATUS ))
     gl:useProgram(program)
