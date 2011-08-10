@@ -455,7 +455,7 @@ class Image [[ClutterActor*]] actor
         ]];
 	
 	/*
-		Event: on_loaded
+		Event Handler: on_loaded
 		
 		The on_loaded() event handler is fired when an asynchronously-loaded 
 		image has finished loading.
@@ -497,7 +497,7 @@ class Image [[ClutterActor*]] actor
 		]];
 	
 	/*
-		Event: on_size_changed
+		Event Handler: on_size_changed
 		
 		The on_size_changed() event handler is fired in the following 
 		situations: (1) after the object's first image is loaded, and (2) after 
