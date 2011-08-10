@@ -831,7 +831,7 @@ function editor_ui.tabBar(t)
 		arrow_image = "lib/assets/tab-arrow-left-off.png" --nil,
 
     }
-    
+   	local b_indent = "   " 
 	local offset = {}
     --local buttons = {}
     
@@ -984,9 +984,9 @@ function editor_ui.tabBar(t)
 
 			p.buttons[i] = ui_element.button{ skin=p.skin, ui_width=p.ui_width, ui_height=p.ui_height, 
 						 focus_color=p.focus_color, border_width=p.border_width, border_corner_radius=p.border_corner_radius,
-						 label= p.tab_labels[i], text_font=p.font, text_color=p.text_color, fill_color=p.unsel_color, 
+						 label= b_indent..p.tab_labels[i], text_font=p.font, text_color=p.text_color, fill_color=p.unsel_color, 
 						 focus_fill_color=p.fill_color, focus_text_color=p.focus_text_color, 
-						 pressed=function() umbrella:display_tab(i) p.current_tab = i end, label_align = "left"} 
+						 pressed=function() umbrella:display_tab(i) p.current_tab = i end, label_align = "left", tab_button=true} 
 
 			p.tabs[i]:hide()
             p.buttons[i].position = {0,0}
@@ -1053,10 +1053,6 @@ function editor_ui.tabBar(t)
 				b.x = b.x +8
 			end
 
-		end
-		
-		if ap then
-			
 		end
 		
 --]]]

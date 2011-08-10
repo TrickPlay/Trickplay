@@ -19,6 +19,7 @@ current_inspector = nil
 current_fn  	  = ""
 restore_fn  	  = ""
 current_focus 	  = nil
+prev_tab 		  = nil
 
 input_mode        = S_MENU
 menu_hide         = false
@@ -123,7 +124,7 @@ skins = {}
         [ keys.w	] = function() input_mode = hdr.S_SELECT  editor.image() end,
         [ keys.n	] = function() editor.close(true) input_mode = hdr.S_SELECT end,
         [ keys.o	] = function() input_mode = hdr.S_SELECT editor.open()  end,
-        [ keys.q	] = function() if editor.close() == nil then exit() end end,
+        [ keys.q	] = function() if editor.close(nil,exit) == nil then exit() end end,
         [ keys.p	] = function() project_mng.open_project() end,
 		[ keys.r	] = function() input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end,
         [ keys.s	] = function() input_mode = hdr.S_SELECT editor.save(true) end,
@@ -659,8 +660,9 @@ skins = {}
 	    }
 
 	    function backup_timeline.on_completed()
-			if auto_save == true and current_fn ~= "" and current_fn ~= "unsaved_temp.lua" then 
+			if auto_save == true and current_fn ~= "" and current_fn ~= "unsaved_temp.lua" and current_fn ~= "/screens/unsaved_temp.lua" then 
 				editor.save(nil, true) 
+				print(current_fn.." is auto_saved")
 			end 
 			t = nil
 	    end

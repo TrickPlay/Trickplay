@@ -1325,6 +1325,7 @@ function ui_element.button(t)
 		single_button = false,
 		is_in_menu = false,
 		label_align = nil,
+		tab_button = false, 
     }
 
  --overwrite defaults
@@ -1375,17 +1376,22 @@ function ui_element.button(t)
 
     end
     
-    function b_group.extra.on_focus_out(key) 
+    function b_group.extra.on_focus_out(key, focus_to_tabButton) 
 		current_focus = nil 
-        if (p.skin == "custom") then 
-	     	ring.opacity = 255
-	     	focus_ring.opacity = 0
-            focus.opacity = 0
-        else
-	     	button.opacity = 255
-            focus.opacity = 0
-	     	focus_ring.opacity = 0
-        end
+		if b_group.tab_button == true and focus_to_tabButton == nil then 
+			prev_tab = b_group
+			return 
+		else
+        	if (p.skin == "custom") then 
+	     		ring.opacity = 255
+	     		focus_ring.opacity = 0
+            	focus.opacity = 0
+        	else
+	     		button.opacity = 255
+            	focus.opacity = 0
+	     		focus_ring.opacity = 0
+        	end
+		end 
         b_group:find_child("text").color = p.text_color
 		if p.released then  
 			if p.is_in_menu then 
@@ -1475,9 +1481,30 @@ function ui_element.button(t)
 		
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
+				
+				if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
+					for q,w in pairs (b_group.parent.buttons) do
+						if w.label ~= b_group.label then 
+							print("tab",w.label,"focus out")
+							if (w.skin == "custom") then 
+	     						w:find_child("ring").opacity = 255
+	     						w:find_child("focus_ring").opacity = 0
+            					w:find_child("focus").opacity = 0
+        					else
+	     						w:find_child("button").opacity = 255
+            					w:find_child("focus").opacity = 0
+	     						w:find_child("focus_ring").opacity = 0
+        					end
+						end 
+					end 
+				end 
+
 				if current_focus ~= b_group then 
 					if current_focus then 
-		     			current_focus.on_focus_out()
+		     			current_focus.on_focus_out(nil,true)
+						if prev_tab then 
+							prev_tab.on_focus_out(nil,true)
+						end 
 					end
 					b_group.extra.on_focus_in(keys.Return)
 				else 
@@ -3693,7 +3720,7 @@ function ui_element.layoutManager(t)
 		cell_timing_offset = 200,
         tiles       = {},
         focus       = nil,
-        cells_focusable = true, --focus_visible
+        cells_focusable = false, --focus_visible
         skin="default",
         cell_size="fixed",
  		ui_position = {200,100},
