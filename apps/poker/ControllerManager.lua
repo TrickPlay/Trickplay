@@ -21,7 +21,7 @@ RemoteComponents = {
 }
 
 ControllerManager = Class(nil,
-function(ctrlman, start_accel, start_click, start_touch, resources, max_controllers)
+function(ctrlman, start_accel, start_touch, resources, max_controllers)
     if resources ~= nil and not type(resources) == "table" then
         error("all resources must be declared as strings in a table", 3)
     end
@@ -190,7 +190,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
 
             return false
             --]]
-            --return true
+            return true
         end
 
 
@@ -208,7 +208,6 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
             controller.clear_and_set_background = nil
             controller.on_key_down = nil
             controller.on_disconnected = nil
-            controller.on_click = nil
             controller.on_accelerometer = nil
             controller.on_touch_down = nil
             controller.on_touch_up = nil
@@ -222,17 +221,6 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
                 end
             end
             number_of_ctrls = number_of_ctrls - 1
-        end
-
-        if start_click then
-            function controller:on_click(x, y)
-                print("answered", controller.name, x, y)
-
-                print("component "..tostring(router:get_active_component())
-                .."handling click")
-                router:get_active_controller():handle_click(controller, x, y)
-            end
-            controller:start_clicks()
         end
 
         if start_accel and controller.has_accelerometer then
@@ -507,7 +495,7 @@ function(ctrlman, start_accel, start_click, start_touch, resources, max_controll
         print("ctrlman disabling on_key_down")
         for i,controller in ipairs(active_ctrls) do
             function controller:on_key_down()
-                return false
+                return true
             end
         end
     end
