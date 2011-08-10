@@ -24,6 +24,14 @@
 
 //=============================================================================
 
+#define TP_LOG_DOMAIN   "IMAGES"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      true
+
+#include "log.h"
+
+//=============================================================================
+
 namespace ImageDecoders
 {
     class TIFFDecoder : public Images::Decoder
@@ -546,7 +554,7 @@ namespace ImageDecoders
             	JPEGTransform jpeg_transform( orientation, cinfo->output_width, cinfo->output_height, 3 );
             	if ( orientation > 1 )
             	{
-            		g_info( "Auto rotating JPEG image with orientation=%d", orientation );
+            		tplog2( "ROTATING JPEG WITH ORIENTATION = %d", orientation );
             	}
                 guchar * p = pixels;
 
