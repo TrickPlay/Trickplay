@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Tue Aug  9 17:58:14 2011
+# Created: Wed Aug 10 10:37:39 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -77,40 +77,15 @@ class Ui_MainWindow(object):
         self.splitter_2.setOrientation(QtCore.Qt.Vertical)
         self.splitter_2.setObjectName(_fromUtf8("splitter_2"))
         self.inspector = QtGui.QTreeView(self.splitter_2)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.inspector.sizePolicy().hasHeightForWidth())
-        self.inspector.setSizePolicy(sizePolicy)
         self.inspector.setMinimumSize(QtCore.QSize(100, 0))
-        palette = QtGui.QPalette()
-        brush = QtGui.QBrush(QtGui.QColor(75, 105, 131, 0))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Highlight, brush)
-        brush = QtGui.QBrush(QtGui.QColor(75, 105, 131, 0))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Highlight, brush)
-        brush = QtGui.QBrush(QtGui.QColor(131, 131, 131))
-        brush.setStyle(QtCore.Qt.SolidPattern)
-        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, brush)
-        self.inspector.setPalette(palette)
-        self.inspector.setAutoFillBackground(False)
-        self.inspector.setStyleSheet(_fromUtf8(""))
-        self.inspector.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.inspector.setAlternatingRowColors(True)
-        self.inspector.setIndentation(20)
-        self.inspector.setRootIsDecorated(True)
         self.inspector.setUniformRowHeights(True)
-        self.inspector.setAnimated(False)
-        self.inspector.setAllColumnsShowFocus(True)
         self.inspector.setObjectName(_fromUtf8("inspector"))
-        self.inspector.header().setCascadingSectionResizes(True)
         self.inspector.header().setDefaultSectionSize(150)
-        self.inspector.header().setHighlightSections(True)
-        self.inspector.header().setStretchLastSection(True)
         self.property = QtGui.QTreeView(self.splitter_2)
         self.property.setMinimumSize(QtCore.QSize(100, 0))
         self.property.setAlternatingRowColors(True)
+        self.property.setUniformRowHeights(True)
         self.property.setObjectName(_fromUtf8("property"))
         self.property.header().setDefaultSectionSize(150)
         self.gridLayout_2.addWidget(self.splitter_2, 2, 0, 1, 1)

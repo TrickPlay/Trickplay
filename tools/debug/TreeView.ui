@@ -125,93 +125,20 @@
         <enum>Qt::Vertical</enum>
        </property>
        <widget class="QTreeView" name="inspector">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
         <property name="minimumSize">
          <size>
           <width>100</width>
           <height>0</height>
          </size>
         </property>
-        <property name="palette">
-         <palette>
-          <active>
-           <colorrole role="Highlight">
-            <brush brushstyle="SolidPattern">
-             <color alpha="0">
-              <red>75</red>
-              <green>105</green>
-              <blue>131</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </active>
-          <inactive>
-           <colorrole role="Highlight">
-            <brush brushstyle="SolidPattern">
-             <color alpha="0">
-              <red>75</red>
-              <green>105</green>
-              <blue>131</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </inactive>
-          <disabled>
-           <colorrole role="Highlight">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>131</red>
-              <green>131</green>
-              <blue>131</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </disabled>
-         </palette>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="dragDropMode">
-         <enum>QAbstractItemView::NoDragDrop</enum>
-        </property>
         <property name="alternatingRowColors">
-         <bool>true</bool>
-        </property>
-        <property name="indentation">
-         <number>20</number>
-        </property>
-        <property name="rootIsDecorated">
          <bool>true</bool>
         </property>
         <property name="uniformRowHeights">
          <bool>true</bool>
         </property>
-        <property name="animated">
-         <bool>false</bool>
-        </property>
-        <property name="allColumnsShowFocus">
-         <bool>true</bool>
-        </property>
-        <attribute name="headerCascadingSectionResizes">
-         <bool>true</bool>
-        </attribute>
         <attribute name="headerDefaultSectionSize">
          <number>150</number>
-        </attribute>
-        <attribute name="headerHighlightSections">
-         <bool>true</bool>
-        </attribute>
-        <attribute name="headerStretchLastSection">
-         <bool>true</bool>
         </attribute>
        </widget>
        <widget class="QTreeView" name="property">
@@ -222,6 +149,9 @@
          </size>
         </property>
         <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="uniformRowHeights">
          <bool>true</bool>
         </property>
         <attribute name="headerDefaultSectionSize">
@@ -338,7 +268,6 @@
   <zorder>dockWidget_2</zorder>
   <zorder>dockWidget</zorder>
   <zorder>dockWidget_3</zorder>
-  <zorder>dockWidget_4</zorder>
  </widget>
  <tabstops>
   <tabstop>fileSystem</tabstop>
