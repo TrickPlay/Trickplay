@@ -5,6 +5,33 @@ module clutter_animator;
 #include "util.h"
 #include "clutter_util.h"
 
+
+bool get_two_doubles_from_table( lua_State * L , int index , GValue * a , GValue * b )
+{
+    index = abs_index( L , index );
+    
+	if ( lua_type( L , index ) != LUA_TTABLE )
+	{
+	   return false;
+	}
+	
+	lua_rawgeti( L , index , 1 );
+	lua_rawgeti( L , index , 2 );
+	
+    double va = lua_tonumber( L , -2 );
+    double vb = lua_tonumber( L , -1 );
+    
+    lua_pop( L , 2 );
+    
+    g_value_init( a , G_TYPE_DOUBLE );
+    g_value_set_double( a , va );
+    
+    g_value_init( b , G_TYPE_DOUBLE );
+    g_value_set_double( b , vb );
+    
+    return true; 	
+}
+
 bool get_two_floats_from_table( lua_State * L , int index , GValue * a , GValue * b )
 {
     index = abs_index( L , index );
@@ -104,7 +131,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
         GValue scalex={0};
         GValue scaley={0};
         
-        if ( get_two_floats_from_table( L , index , &scalex , &scaley ) )
+        if ( get_two_doubles_from_table( L , index , &scalex , &scaley ) )
         {
             clutter_animator_set_key(animator, G_OBJECT(source), "scale-x", nmode, progress, &scalex);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "scale-x", ease_in);
@@ -130,7 +157,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_float(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, -1));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-x", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-x", ease_in);
             g_value_unset(&gvalue);
@@ -146,7 +173,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_float(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, -1));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-y", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-y", ease_in);
             g_value_unset(&gvalue);
@@ -162,7 +189,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 		    GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_float(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, -1));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-z", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-z", ease_in);
             g_value_unset(&gvalue);
