@@ -20,15 +20,19 @@ class TrickplayDiscovery(ServiceDiscovery):
         
         self.widget = widget
         
-        #QObject.connect(self.widget, SIGNAL('clicked(QModelIndex)'), self.service_selected)
+        QObject.connect(self.widget, SIGNAL('currentIndexChanged(int)'), self.service_selected)
     
     def service_selected(self, index):
         
-        name = index.data(NAME).toPyObject()
-        address = index.data(ADDRESS).toPyObject()
-        port = index.data(PORT).toPyObject()
+        # No services exist yet
+        if index < 0:
+            return
         
-        print(name,address,port)
+        name = self.widget.itemData(index, NAME).toPyObject()
+        address = self.widget.itemData(index, ADDRESS).toPyObject()
+        port = self.widget.itemData(index, PORT).toPyObject()
+        
+        print(index,name,address,port)
         
         # Echo client program
         # http://docs.python.org/release/2.5.2/lib/socket-example.html
@@ -110,6 +114,8 @@ class TrickplayDiscovery(ServiceDiscovery):
         #new.setData(PORT, port)
         #new.setData(NAME, name)
         #
+        
+        # Add item to ComboBox
         self.widget.addItem(name)
         index = self.widget.findText(name)
         self.widget.setItemData(index, address, ADDRESS)
@@ -138,13 +144,15 @@ class TrickplayDiscovery(ServiceDiscovery):
         flags,
         ):
         
-        list = self.widget.findItems(name, Qt.MatchExactly)
+        index = self.widget.findText(name)
         
-        for item in list:
-            
-            r = self.widget.row(item)
-            
-            self.widget.takeItem(r)
+        self.widget.removeItem(index)
+        
+        #for item in list:
+        #    
+        #    r = self.widget.row(item)
+        #    
+        #    self.widget.takeItem(r)
     
         print "Service '%s' of type '%s' in domain '%s' on %s.%i disappeared." \
             % (name, type, domain, self.siocgifname(interface),
