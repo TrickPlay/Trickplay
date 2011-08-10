@@ -65,20 +65,6 @@ The style property is a string specifying the spinner's display type.
 
 
 
-Property: skin
-
-The skin property is a string specifying the display appearance of the ProgressSpinner.
-
-*Supported Settings:* The skin property is case-sensitive.
-
-"default" - a utilitarian and sedate skin
-"CarbonCandy" - an alternative skin. Flashy, attracts attention
-
-*Default Setting:* "default"
-
-
-
-
 Property: number_of_dots
 
 The number_of_dots property is an integer value specifying the number of dots to include in the spinner.
@@ -134,4 +120,45 @@ The cycle_time property is an integer value specifying the number of millisecond
 *Default Setting:* 1800, i.e., a little less than 2 seconds (1 second = 1000 milliseconds)
 
 *See Also:* the <style> property
+
+
+
+Property: skin
+
+The skin property is a string specifying the display appearance of the ProgressSpinner. This functionality is under active development.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+"CarbonCandy" - an alternative skin. Flashy, attracts attention
+
+*Default Setting:* "default"
+
+
+
+Function: speed_up
+
+The speed_up() function decreases the <cycle_time> property by 50 milliseconds, thereby increasing the speed of the spinner by 1/20th of a second. Note: It is also possible to set the cycle_time property directly to any desired value.
+
+*Prototype:* speed_up()
+
+*Arguments:* None
+
+*Return Value:* None
+
+*See Also:* the <speed_down> function and the <cycle_time> property
+
+
+
+Function: speed_down
+
+The speed_down() function increases the <cycle_time> property by 50 milliseconds, thereby decreasing the speed of the spinner by 1/20th of a second. Note: It is also possible to set the cycle_time property directly to any desired value.
+
+*Prototype:* speed_down()
+
+*Arguments:* None
+
+*Return Value:* None
+
+*See Also:* the <speed_up> function and the <cycle_time> property
 
