@@ -27,11 +27,12 @@ function(ctrl, router, controller, ...)
         position = {0, (6*115+86)*y_ratio},
         size = {640*x_ratio, 95*y_ratio}
     })
-    view:add(controller.factory:Image{
+    local start_button = controller.factory:Image{
         src = "start_button",
         position = {(320-206/2)*x_ratio, (6*115+106)*y_ratio},
         size = {206*x_ratio, 62*y_ratio}
-    })
+    }
+    view:add(start_button)
 
     local ready_labels = {}
     local human_labels = {}
@@ -63,11 +64,23 @@ function(ctrl, router, controller, ...)
 
     function ctrl:initialize_waiting_room(players)
         if not players then error("no players", 2) end
+        local can_select_player = (router:get_active_component() == Components.CHARACTER_SELECTION)
+        if can_select_player then
+            waiting_text:hide()
+            start_button:show()
+        else
+            waiting_text:show()
+            start_button:hide()
+        end
         local playing = {}
         for i,player in pairs(players) do
             local pos = player.dog_number
             click_labels[pos]:hide()
-            ready_labels[pos]:show()
+            if can_select_player then
+                ready_labels[pos]:show()
+            else
+                ready_labels[pos]:hide()
+            end
             if player.is_human then
                 human_labels[pos]:show()
                 comp_labels[pos]:hide()
@@ -79,7 +92,11 @@ function(ctrl, router, controller, ...)
         end
         for i = 1,6 do
             if not playing[i] then
-                click_labels[i]:show()
+                if can_select_player then
+                    click_labels[i]:show()
+                else
+                    click_labels[i]:hide()
+                end
                 human_labels[i]:hide()
                 comp_labels[i]:hide()
                 ready_labels[i]:hide()

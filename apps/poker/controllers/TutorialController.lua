@@ -1,6 +1,3 @@
--- TODO: fix the completely screwed up phone controls
--- uses keypresses but touches come simultaneously!
-
 TutorialController = Class(Controller, function(self, view, router, ...)
     self._base.init(self, router, Components.TUTORIAL)
     
@@ -19,6 +16,7 @@ TutorialController = Class(Controller, function(self, view, router, ...)
         c = 1
         n = 2
         ctrlman:disable_on_key_down()
+        ctrlman:hide_virtual_remote()
         router:set_active_component(router.previous_component)
         router:notify()
     end
@@ -102,6 +100,7 @@ TutorialController = Class(Controller, function(self, view, router, ...)
             ctrlman:enable_on_key_down()
             view:move_focus(selector)
             view:update(p, c, n)
+            ctrlman:show_virtual_remote()
         end
     end
 
