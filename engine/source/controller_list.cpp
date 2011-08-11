@@ -1265,6 +1265,34 @@ bool Controller::advanced_ui( const String & payload , String & result )
     return r;
 }
 
+bool Controller::show_virtual_remote()
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_VIRTUAL_REMOTE ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE,
+               0,
+               data ) == 0;
+}
+
+bool Controller::hide_virtual_remote()
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_VIRTUAL_REMOTE ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE,
+               0,
+               data ) == 0;
+}
+
 //==============================================================================
 
 #define LOCK Util::GSRMutexLock _lock(&mutex)

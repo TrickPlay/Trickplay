@@ -15,30 +15,6 @@ module clutter_image;
 [[
 
 //-----------------------------------------------------------------------------
-// A structure we attach to the image to keep track of extra stuff
-
-struct ImageExtra
-{
-	static ImageExtra * get( gpointer texture )
-	{
-		ImageExtra * result = ( ImageExtra * ) g_object_get_data( G_OBJECT( texture ), "tp-image-extra" );
-		
-		if ( ! result )
-		{
-			result = g_new0( ImageExtra , 1 );
-			
-			g_object_set_data_full( G_OBJECT( texture ), "tp-image-extra", result, g_free );
-		}
-		
-		return result;
-	}
-	
-	int constructing;
-	int loaded;
-	int async;
-};
-
-//-----------------------------------------------------------------------------
 
 static void image_load_callback( Image * image , gpointer _texture )
 {
@@ -61,7 +37,10 @@ static void image_load_callback( Image * image , gpointer _texture )
     }
     else
     {
-        ImageExtra::get( texture )->loaded = TRUE;
+        ImageExtra * extra = ImageExtra::get( texture );
+        
+        extra->loaded = true;
+        extra->tags = image->get_tags();
 
         Images::load_texture( texture, image );
 
@@ -100,13 +79,15 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 	
 	if ( ! extra->async )
 	{
-	    Image * image = App::get( L )->load_image( src );
+	    Image * image = App::get( L )->load_image( src , extra->read_tags );
 
 		bool result = image != 0;
 		
 		if ( result )
 		{
 		    Images::load_texture( texture , image );
+        
+            extra->tags = image->get_tags();		    
 
 		    delete image;
 		}
@@ -123,7 +104,7 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 
     g_object_ref( texture );
 
-	if ( ! App::get( L )->load_image_async( src , image_load_callback , texture , g_object_unref ) )
+	if ( ! App::get( L )->load_image_async( src , extra->read_tags , image_load_callback , texture , g_object_unref ) )
 	{
 	    g_object_unref( texture );
 
@@ -320,6 +301,16 @@ class Image [[ClutterActor*]] actor
 			clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
 		]];
 	
+	bool read_tags
+	    [[
+            ImageExtra * extra = ImageExtra::get( self );
+	        read_tags = extra->read_tags; 
+	    ]]
+	    [[
+            ImageExtra * extra = ImageExtra::get( self );
+            extra->read_tags = read_tags ? 1 : 0;	        
+	    ]];
+	
 	/*
 		Property: async
 		
@@ -412,6 +403,23 @@ class Image [[ClutterActor*]] actor
 		[[
 			loaded = ImageExtra::get( self )->loaded;
 		]];
+		
+    /*
+        Property: tags
+    */		
+    
+    readonly table tags
+        [[
+            const JSON::Object & tags( ImageExtra::get( self )->tags );
+            
+            JSON::to_lua( L , tags );
+            
+            if ( lua_isnil( L , -1 ) )
+            {
+                lua_pop( L , 1 );
+                lua_newtable( L );
+            }
+        ]];
 	
     bool load_from_data(lstring data)
 		[[
@@ -455,7 +463,7 @@ class Image [[ClutterActor*]] actor
         ]];
 	
 	/*
-		Event: on_loaded
+		Event Handler: on_loaded
 		
 		The on_loaded() event handler is fired when an asynchronously-loaded 
 		image has finished loading.
@@ -497,7 +505,7 @@ class Image [[ClutterActor*]] actor
 		]];
 	
 	/*
-		Event: on_size_changed
+		Event Handler: on_size_changed
 		
 		The on_size_changed() event handler is fired in the following 
 		situations: (1) after the object's first image is loaded, and (2) after 

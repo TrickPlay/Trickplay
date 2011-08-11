@@ -338,6 +338,17 @@ interface controller [[ControllerDelegate*]]
         [[
             has_advanced_ui = self->has_cap( TP_CONTROLLER_HAS_ADVANCED_UI );
         ]];
+        
+    /*
+        Property: has_virtual_remote
+        
+        Whether the controller supports a virtual remote.
+    */        
+    
+    readonly bool has_virtual_remote
+        [[
+            has_virtual_remote = self->has_cap( TP_CONTROLLER_HAS_VIRTUAL_REMOTE );
+        ]];
 
     /*
     	Property: ui_size
@@ -897,8 +908,42 @@ interface controller [[ControllerDelegate*]]
                 }
             }
         ]];
+        
+    /*
+        Function: show_virtual_remote
+        
+        Instructs the controller to show a virtual remote.
 
-     /*
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+    
+    bool show_virtual_remote()
+        [[
+            result = self->get_controller()->show_virtual_remote();
+        ]];        
+
+    /*
+        Function: hide_virtual_remote
+        
+        Instructs the controller to hide the virtual remote.
+
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+    
+    bool hide_virtual_remote()
+        [[
+            result = self->get_controller()->hide_virtual_remote();
+        ]];        
+
+    /*
 		Event: on_disconnected
 		
 		This event is triggered when the controller is disconnected from

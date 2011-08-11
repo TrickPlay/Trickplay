@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "clutter/clutter.h"
+#include "libexif/exif-data.h"
 
 #include "common.h"
 #include "images.h"
@@ -222,20 +223,34 @@ Image * Image::make( const TPImage & image )
 
 //-----------------------------------------------------------------------------
 
-Image * Image::decode( gpointer data, gsize size, const gchar * content_type )
+Image * Image::decode( gpointer data, gsize size, bool read_tags , const gchar * content_type )
 {
     TPImage * image = Images::decode_image( data, size, content_type );
 
-    return image ? new Image( image ) : NULL;
+    Image * result = image ? new Image( image ) : 0;
+
+    if ( result && read_tags )
+    {
+    	result->load_tags( data , size );
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------
 
-Image * Image::decode( const gchar * filename )
+Image * Image::decode( const gchar * filename , bool read_tags )
 {
     TPImage * image = Images::decode_image( filename );
 
-    return image ? new Image( image ) : NULL;
+    Image * result = image ? new Image( image ) : 0;
+
+    if ( result && read_tags )
+    {
+    	result->load_tags( filename );
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------
@@ -717,22 +732,24 @@ class DecodeFileTask : public DecodeTask
 {
 public:
 
-    DecodeFileTask( const gchar * _filename , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    DecodeFileTask( const gchar * _filename , bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
     :
         DecodeTask( _callback , _user , _destroy_notify ),
-        filename( _filename )
+        filename( _filename ),
+    	read_tags( _read_tags )
     {
 
     }
 
     virtual void process()
     {
-        image = Image::decode( filename.c_str() );
+        image = Image::decode( filename.c_str() , read_tags );
     }
 
 private:
 
     String                      filename;
+    bool						read_tags;
 };
 
 //-----------------------------------------------------------------------------
@@ -741,10 +758,11 @@ class DecodeBufferTask : public DecodeTask
 {
 public:
 
-    DecodeBufferTask( GByteArray * _bytes , const gchar * _content_type , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    DecodeBufferTask( GByteArray * _bytes , bool _read_tags , const gchar * _content_type , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
     :
         DecodeTask( _callback , _user , _destroy_notify ),
         bytes( _bytes ),
+        read_tags( _read_tags ),
         content_type( _content_type ? _content_type : "" )
     {
         g_byte_array_ref( bytes );
@@ -757,33 +775,213 @@ public:
 
     virtual void process()
     {
-        image = Image::decode( bytes->data , bytes->len , content_type.c_str() );
+        image = Image::decode( bytes->data , bytes->len , read_tags , content_type.c_str() );
     }
 
 private:
 
     GByteArray *    bytes;
+    bool			read_tags;
     String          content_type;
 };
 
 //-----------------------------------------------------------------------------
 
-void Image::decode_async( const gchar * filename , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+void Image::decode_async( const gchar * filename , bool read_tags , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     g_assert( filename );
 
-    get_images_threadpool()->push( new DecodeFileTask( filename , callback , user , destroy_notify ) );
+    get_images_threadpool()->push( new DecodeFileTask( filename , read_tags , callback , user , destroy_notify ) );
 }
 
 //-----------------------------------------------------------------------------
 
-void Image::decode_async( GByteArray * bytes , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+void Image::decode_async( GByteArray * bytes , bool read_tags , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     g_assert( bytes );
     g_assert( bytes->data );
     g_assert( bytes->len );
 
-    get_images_threadpool()->push( new DecodeBufferTask( bytes , content_type , callback , user , destroy_notify ) );
+    get_images_threadpool()->push( new DecodeBufferTask( bytes , read_tags , content_type , callback , user , destroy_notify ) );
+}
+
+//-----------------------------------------------------------------------------
+
+typedef struct
+{
+	ExifData * 		exif_data;
+	JSON::Object * 	tags;
+
+} ExifClosure;
+
+static void foreach_exif_entry( ExifEntry * entry , void * _closure )
+{
+	if ( ! entry )
+	{
+		return;
+	}
+
+	ExifClosure * closure = ( ExifClosure * ) _closure;
+
+	JSON::Object * tags = closure->tags;
+
+	unsigned char component_size = exif_format_get_size( entry->format );
+
+	const char * name = exif_tag_get_name_in_ifd( entry->tag , exif_content_get_ifd( entry->parent ) );
+
+	if ( ! name || ! entry->data || ! entry->size || ! component_size || ! entry->components )
+	{
+		return;
+	}
+
+	if ( entry->format == EXIF_FORMAT_ASCII )
+	{
+		(*tags)[ name ] = String( ( const char * ) entry->data , entry->size );
+		return;
+	}
+
+	if ( entry->components * component_size != entry->size )
+	{
+		return;
+	}
+
+	ExifByteOrder byte_order = exif_data_get_byte_order( closure->exif_data );
+
+	const unsigned char * data = entry->data;
+
+	JSON::Array array;
+
+	for ( unsigned long i = 0; i < entry->components; ++i )
+	{
+		switch( entry->format )
+		{
+		case EXIF_FORMAT_ASCII:
+		case EXIF_FORMAT_UNDEFINED:
+		case EXIF_FORMAT_FLOAT:
+		case EXIF_FORMAT_DOUBLE:
+			break;
+
+		case EXIF_FORMAT_BYTE:
+			array.append( JSON::Value( int( * data ) ) );
+			break;
+
+		case EXIF_FORMAT_SHORT:
+			array.append( JSON::Value( int( exif_get_short( data , byte_order ) ) ) );
+			break;
+
+		case EXIF_FORMAT_LONG:
+			array.append( JSON::Value( int( exif_get_long( data , byte_order ) ) ) );
+			break;
+
+		case EXIF_FORMAT_SBYTE:
+			array.append( JSON::Value( int( * ( ( const char * ) data ) ) ) );
+			break;
+
+		case EXIF_FORMAT_SSHORT:
+			array.append( JSON::Value( exif_get_sshort( data , byte_order ) ) );
+			break;
+
+		case EXIF_FORMAT_SLONG:
+			array.append( JSON::Value( exif_get_slong( data , byte_order ) ) );
+			break;
+
+		// TODO: I don't like representing a rational number as a string with a slash,
+
+		case EXIF_FORMAT_SRATIONAL:
+		{
+			ExifSRational r = exif_get_srational( data , byte_order );
+			array.append( Util::format("%ld/%ld" , r.numerator , r.denominator ) );
+			break;
+		}
+
+		case EXIF_FORMAT_RATIONAL:
+		{
+			ExifRational r = exif_get_rational( data , byte_order );
+			array.append( Util::format("%lu/%lu" , r.numerator , r.denominator ) );
+			break;
+		}
+
+		}
+
+		data += component_size;
+	}
+
+	if ( array.size() == 1 )
+	{
+		(*tags)[ name ] = array[ 0 ];
+	}
+	else if ( array.size() > 1 )
+	{
+		(*tags)[ name ] = array;
+	}
+}
+
+
+static void load_exif_tags( ExifData * ed , JSON::Object & tags )
+{
+	tplog2( "  LOADING EXIF TAGS" );
+
+	exif_data_set_option( ed , EXIF_DATA_OPTION_IGNORE_UNKNOWN_TAGS );
+	exif_data_set_option( ed , EXIF_DATA_OPTION_FOLLOW_SPECIFICATION );
+
+	exif_data_fix( ed );
+
+	ExifClosure closure;
+
+	closure.exif_data = ed;
+	closure.tags = & tags;
+
+	for ( int i = 0; i < EXIF_IFD_COUNT; ++i )
+	{
+		if ( ExifContent * c = ed->ifd[i] )
+		{
+			exif_content_foreach_entry( c , foreach_exif_entry , & closure );
+		}
+	}
+
+	tplog2( "  LOADED EXIF TAGS" );
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::load_tags( const gchar * filename )
+{
+	g_assert( filename );
+
+	if ( ExifData * ed = exif_data_new_from_file( filename ) )
+	{
+		load_exif_tags( ed , tags );
+		exif_data_unref( ed );
+	}
+	else
+	{
+		tplog2( "  FAILED TO LOAD TAGS" );
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void Image::load_tags( gpointer data , gsize size )
+{
+	g_assert( data );
+	g_assert( size );
+
+	if ( ExifData * ed = exif_data_new_from_data( ( const unsigned char * ) data , size ) )
+	{
+		load_exif_tags( ed , tags );
+		exif_data_unref( ed );
+	}
+	else
+	{
+		tplog2( "  FAILED TO LOAD TAGS" );
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+const JSON::Object & Image::get_tags() const
+{
+	return tags;
 }
 
 //=============================================================================
