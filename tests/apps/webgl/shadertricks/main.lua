@@ -2,7 +2,7 @@ local gl = WebGLCanvas{ size = screen.size }
 
 screen:add( gl )
 
-local shader_name = Text { font = "Highway Gothic Wide 120px", text = "ShaderName", color = "ffffff" }
+local shader_name = Text { font = "Highway Gothic Wide 120px", text = "ShaderName", color = "ffffff", opacity=255 }
 screen:add(shader_name)
 
 program = nil
@@ -30,6 +30,37 @@ local function next_shader()
     program = gl:createProgram()
     current_shader = (current_shader % #shaders)+1
     shader_name.text = shaders[current_shader]
+    shader_name.x = math.random(0, screen.w-shader_name.w)
+    shader_name.y = math.random(0, screen.h-shader_name.h)
+    local shader_name_animator = Animator({
+                                    duration = 2000,
+                                    properties = {
+                                        {
+                                            source = shader_name,
+                                            name = "position",
+                                            ease_in = true,
+                                            keys = {
+                                                {   0.0, "LINEAR", { 0, 0 } } ,
+                                                {   1.0, "EASE_IN_OUT_SINE", {
+                                                                            math.random(0, screen.w-shader_name.w),
+                                                                            math.random(0, screen.h-shader_name.h)
+                                                                        }
+                                                },
+                                            },
+                                        },
+                                        {
+                                            source = shader_name,
+                                            name = "opacity",
+                                            ease_in = true,
+                                            keys = {
+                                                {   0.0, "LINEAR", 0 } ,
+                                                {   0.5, "EASE_IN_SINE", 255 },
+                                                {   1.0, "EASE_OUT_SINE", 0 },
+                                            },
+                                        },
+                                    },
+                              })
+    shader_name_animator:start()
     print("Loading shader ",shader_name.text)
     make_shader(gl.VERTEX_SHADER,readfile("generic.vertex"))
     make_shader(gl.FRAGMENT_SHADER,readfile(shader_name.text..".fragment"))
