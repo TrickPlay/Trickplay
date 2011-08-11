@@ -350,6 +350,7 @@ local function make_title_separator(thickness, color, length)
 end 
 
 
+
 -- make_dialogBox_bg() : make message window background 
 
 --make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_corner_radius) 
@@ -1802,6 +1803,56 @@ function ui_element.textInput(t)
      return t_group
 end 
 
+local function draw_dialogBG(w,h,lw,color)
+	local c = Canvas(w,h)
+ 	local x=0 
+    local y=35
+
+	c:round_rectangle(10,10,w-20,h-20,10)
+
+	c.line_width = lw
+	c:set_source_linear_pattern(0,0,0,h)
+	c:add_source_pattern_color_stop(0.0, "00000060")
+	c:add_source_pattern_color_stop(1.0, "ffffff60")
+	c:stroke(true)
+	
+	c:set_source_linear_pattern(0,w+20,0,0)
+	c:add_source_pattern_color_stop(0.00,"000000ff")
+	c:add_source_pattern_color_stop(0.35,"444444ff")
+	c:add_source_pattern_color_stop(0.43,"525252ff")
+	c:add_source_pattern_color_stop(0.50,"565656ff")
+	c:add_source_pattern_color_stop(0.57,"525252ff")
+	c:add_source_pattern_color_stop(0.65,"444444ff")
+	c:add_source_pattern_color_stop(0.82,"1c1c1cff")
+	c:add_source_pattern_color_stop(1.00,"000000ff")
+	c:fill(true)
+	
+	c:clip()
+	--c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	
+	c:set_source_linear_pattern(0,0,w,0)
+	c:add_source_pattern_color_stop(0.0, "ffffff0c")
+	c:add_source_pattern_color_stop(1.0, "ffffff40")
+	c:fill()
+
+
+    c:new_path()
+	c:move_to ( x, y)
+    c:line_to ( x + w, y)
+    c:set_line_width (lw/2)
+    c:set_source_color(color)
+    c:stroke (true)
+    c:fill (true)
+
+	if c.Image then
+         c = c:Image()
+    end
+    
+    return c
+end 
+
+
 --[[
 Function: dialogBox
 
@@ -1834,19 +1885,19 @@ function ui_element.dialogBox(t)
 --default parameters
    local p = {
 	skin = "custom", 
-	ui_width = 900 ,
-	ui_height = 500 ,
+	ui_width = 500 ,
+	ui_height = 400 ,
 	label = "Dialog Box Title" ,
 	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
 	title_color = {255,255,255,255} , --"FFFFFF" , 
-	title_font = "DejaVu Sans 30px" , 
-	border_width  = 4 ,
+	title_font = "FreeSans Medium 28px" , 
+	border_width  = 12 ,
 	padding_x = 0 ,
 	padding_y = 0 ,
 	border_corner_radius = 22 ,
-	title_separator_thickness = 4, 
-	title_separator_color = {255,255,255,255},
+	title_separator_thickness = 10, 
+	title_separator_color = {100,100,100,100},
 	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
     }
 
@@ -1872,12 +1923,15 @@ function ui_element.dialogBox(t)
     create_dialogBox  = function ()
    
         db_group:clear()
-        db_group.size = { p.ui_width , p.ui_height - 34}
+        --db_group.size = { p.ui_width , p.ui_height - 34}
+        db_group.size = { p.ui_width , p.ui_height }
 
-        d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
-	d_box.y = d_box.y - 34
-	d_box:set{name="d_box"} 
-	db_group:add(d_box)
+		d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+        --d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
+		--d_box.y = d_box.y - 34
+		d_box.y = d_box.y 
+		d_box:set{name="d_box"} 
+		db_group:add(d_box)
 --[[
 	if p.title_separator_thickness >  0 then 
              title_separator = make_title_separator(p.title_separator_thickness, p.title_separator_color, p.ui_width)
@@ -3567,7 +3621,7 @@ function ui_element.progressBar(t)
 				size = {p.ui_width,p.ui_height},
 		}
 		c_fill  = Canvas{
-				size = {1,p.ui_height-2*stroke_width},
+				size = {1,p.ui_height-stroke_width},
 		}  
         
 		
@@ -4865,7 +4919,7 @@ end
             track_vert=nil
         end
         
-        scroll_group.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
+        scroll_group.size = {p.visible_w, p.visible_h}
 	end
 	
     
@@ -6324,7 +6378,7 @@ function ui_element.arrowPane(t)
 		end
 		
         
-		umbrella.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
+		umbrella.size = {p.visible_w, p.visible_h}
 		umbrella:add(border,window)
 	end
 	

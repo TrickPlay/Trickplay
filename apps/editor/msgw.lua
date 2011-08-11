@@ -319,14 +319,16 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 		local bfc = readfile(back_fn)
 
 		if cfc ~= bfc and bfc ~= nil and ret == nil then 
-			editor.error_message("009", input_text, msg_window.inputMsgWindow_openfile)  
-			return
+			if current_fn ~= "screens/unsaved_temp.lua" then 
+				editor.error_message("009", input_text, msg_window.inputMsgWindow_openfile)  
+				return
+			end
 		elseif ret == "OK" then 
 			-- restore
 			bfc = readfile(back_fn)
 			if bfc then 
-				editor_lb:writefile("unsaved_temp.lua", bfc, true)
-				current_fn = "unsaved_temp.lua"
+				editor_lb:writefile("screens/unsaved_temp.lua", bfc, true)
+				current_fn = "screens/unsaved_temp.lua"
 			end 
 			restore_fn = input_text
 		end 
@@ -334,9 +336,9 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
         local f = loadfile(current_fn)
         f(g) 
 
-		 if current_fn == "unsaved_temp.lua" then 
+		 if current_fn == "screens/unsaved_temp.lua" then 
 			current_fn = ""
-			editor_lb:writefile("unsaved_temp.lua", "", true)
+			editor_lb:writefile("screens/unsaved_temp.lua", "", true)
 		else 
 			local back_file = current_fn.."\.back"
 			editor_lb:writefile(back_file, cfc, true)	
@@ -550,7 +552,7 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 	  input_mode = hdr.S_SELECT
      elseif(util.is_img_file(input_text) == true) then 
 	  
-	  while (util.is_available("image"..tostring(item_num)) == false) do  
+	  while (is_available("image"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	  end 
 

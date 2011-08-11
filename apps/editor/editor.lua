@@ -2245,7 +2245,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	end 
 ]]
 	if current_fn then 
-		if current_fn ~= "unsaved_temp.lua" and current_fn ~= "/screens/unsaved_temp.lua"then
+		if current_fn ~= "unsaved_temp.lua" and current_fn ~= "screens/unsaved_temp.lua" and current_fn ~= "/screens/unsaved_temp.lua"then
 			local back_file = current_fn.."\.back"
 			editor_lb:writefile(back_file, contents, true)	
 		end
@@ -4855,7 +4855,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	title_shadow.text = ""
 
 	local error_msg_map = {
-		--[[
 		["001"] = function(str) OK_label = "Open" return "A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
  		["002"] = function() OK_label = "OK" return "Before saving the screen, a project must be open." end,
  		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save the file before closing?" end, 					
@@ -4867,22 +4866,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
  		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
  		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
- 		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
- 		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
- 		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 
-		--]]
-		["001"] = function(str) OK_label = "Open" return "A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
- 		["002"] = function() OK_label = "OK" return "Before saving the screen, a project must be open." end,
- 		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save the file before closing?" end, 					
- 		["004"] = function(str) OK_label = "Overwrite" return "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
- 		["005"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A file name is required." end, 
- 		["006"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A guideline position is required." end, 
- 		["007"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" is required." end, 
- 		["008"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "There are no guidelines."  end, 
- 		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
- 		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
- 		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
-		["012"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid value for \""..str.."\" field." end,
  		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
  		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
  		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 
