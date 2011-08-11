@@ -333,7 +333,7 @@ local difficulty = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=s
 local confirm    = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=screen_h/2,opacity=0}
 
 local dim = Rectangle{color ="000000", w=screen_w,h=screen_h,opacity=100,z=2}
-local side_font = "Dejavu Bold 60px"
+local side_font = "Dejavu Sans Bold 60px"
 right_menu = Group{z=1}
 yellow_light = Image{src="assets/button-yellow-circle.png",x=0,y=2*(blank_button_off.h+8),opacity=0}
 local right_list = {}
@@ -639,7 +639,7 @@ end
 
 end
 
-local num_font = "DejaVu Bold Condensed 30px"
+local num_font = "DejaVu Sans Bold Condensed 30px"
 local pencil_menu    = Group{y=40,opacity=0,z=1}
 local p_m_button_on  = Image{src="assets/button_on.png",y=60,x=105,opacity=0}
 local p_m_button_off = Image{src="assets/button_off.png",y=60,x=105,opacity=0}
@@ -647,14 +647,14 @@ screen:add(p_m_button_on,p_m_button_off)
 
 local clear_txt        = Text{ name  = "clear", 
                                text  = "Clear",
-                               font  = "DejaVu 36px",
+                               font  = "DejaVu Sans 36px",
                                color = "FFFFFF"}
 clear_txt.anchor_point = {         clear_txt.w/2,        clear_txt.h/2 }
 clear_txt.position     = { 105+p_m_button_on.w/2, 60+p_m_button_on.h/2 }
 
 local done_txt        = Text{ name  = "done", 
                               text  = "Done",
-                              font  = "DejaVu 36px",
+                              font  = "DejaVu Sans 36px",
                               color = "FFFFFF"}
 done_txt.anchor_point = {          done_txt.w/2,        done_txt.h/2 }
 done_txt.position     = { 215+p_m_button_on.w/2,60+p_m_button_on.h/2 }
