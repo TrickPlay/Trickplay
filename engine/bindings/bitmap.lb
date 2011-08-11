@@ -23,17 +23,40 @@ class Bitmap [[ Bitmap * ]]
     /*
         Constructor: Bitmap
         
-        The constructor for a Bitmap object; initiates a synchronous(default) 
-        or asynchronous image-load operation.
+        The constructor for a Bitmap object; initiates a synchronous(default) or asynchronous image-load operation.
         
-        *Arguments:*
+        *Prototype:* The Bitmap constructor accepts arguments in two formats: (1) as a list of variables and values and (2) as a table of properties. Each format is shown below.
+        
+        	(code)
+        	-- Variable/Value Prototype -- Arguments must be enclosed within parentheses
+        	Bitmap( src, async, read_tags )
+        	
+        	-- Table of Properties Prototype -- Arguments must be enclosed within curly braces
+        	Bitmap{ src = "filename", async = true, read_tags = true }
+        	(end)
 
-		src - String specifying the image file to load. The src argument can 
-		reference either the application bundle or a URI.
-		async - Optional boolean flag indicating whether to load the image 
-		asynchronously(true) or	synchronously(false). By default, files are 
-		loaded synchronously.
+        *Arguments:*
+        
+		src - String specifying the image file to load. The src argument can reference either the application bundle or a URI.
+		async - Boolean flag indicating whether to load the image asynchronously(true) or synchronously(false). By default, files are loaded synchronously. The async argument is optional; however, if calling the constructor using variable/value arguments and the read_tags argument is specified then the async argument must also be specified.
+		read_tags - Boolean flag indicating whether or not to store any Exif (Exchangable image file format) tags contained in the bitmap file (true = store tags). If tags are stored, they can be accessed through the <tags> property. By default, Exif tags are not stored.
+
+		*Argument Examples:*
 		
+			(code)
+			-- Sample variable/value arguments
+			myBitmap01 = Bitmap( "bitmap01.jpg" )
+			myBitmap02 = Bitmap( "bitmap02.jpg", true )
+			myBitmap03 = Bitmap( "bitmap03.jpg", true, true )
+			myBitmap04 = Bitmap( "bitmap04.jpg", false, true )  -- async is false by default, but must be specified here because read_tags argument is specified
+			
+			-- Equivalent table of properties arguments
+			myBitmap01 = Bitmap{ src = "bitmap01.jpg" }
+			myBitmap02 = Bitmap{ src = "bitmap02.jpg", async = true }
+			myBitmap03 = Bitmap{ src = "bitmap03.jpg", async = true, read_tags = true }
+			myBitmap04 = Bitmap{ src = "bitmap04.jpg", read_tags = true }  -- async argument is not needed here; it defaults to the desired false
+			(end)
+        
 		*Return Value:* The generated Bitmap object
 
 		Loading the image file for a Bitmap object is essentially identical to 
@@ -279,6 +302,27 @@ class Bitmap [[ Bitmap * ]]
         
     /*
         Property: tags
+        
+        The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded bitmap. If the storage of Exif tags was not enabled (via the read_tags argument to the Bitmap constructor) or if the bitmap file contained no tags then the tags table will be empty.
+        
+        *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
+        
+        *Default Setting:* {}, i.e., an empty table
+        
+        *Code Example:* Output bitmap tag names and values to the console        
+
+			(code)
+			-- Load a bitmap, including its Exif tags
+			myBitmap = Bitmap{ src = "assets/images/foo.jpg", read_tags = true }
+			
+			-- If the image loaded successfully, dump all the Exif tags to the console
+			if( myBitmap.loaded ) then
+				dumptable( myBitmap.tags )
+			end
+			(end)
+			
+		*See Also:* the read_tags argument in the <Bitmap> constructor
+
     */        
     
     readonly table tags
@@ -363,6 +407,9 @@ class Bitmap [[ Bitmap * ]]
         The Image() function converts the Bitmap object to an Image object which 
         can then be added to the screen. It is possible to convert the Bitmap's 
         entire image or a just portion of it.
+        
+        If the Bitmap object has Exif (Exchangable image file format) tags 
+        associated with it, the tags are carried over to the Image object.
         
         After the Bitmap has been converted, the resulting Image object has no 
         dependencies upon the original Bitmap object; the Bitmap object may be 
