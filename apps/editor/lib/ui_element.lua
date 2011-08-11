@@ -6060,6 +6060,7 @@ function ui_element.arrowPane(t)
 		tab_buttons = nil 
     }
 	
+	--[[
 	local make_arrow = function()
 		
 		local c = Canvas{size={p.arrow_sz,p.arrow_sz}}
@@ -6089,7 +6090,8 @@ function ui_element.arrowPane(t)
             p[k] = v
         end
     end
-	
+	]]
+
 	--Group that Clips the content
 	local window  = Group{name="window"}
 	--Group that contains all of the content
@@ -6168,7 +6170,36 @@ function ui_element.arrowPane(t)
 	local function create()
 		
 		umbrella:clear()
+		local make_arrow = function()
 		
+		local c = Canvas{size={p.arrow_sz,p.arrow_sz}}
+		
+		c:move_to(    0,c.h)
+		c:line_to(c.w/2,  0)
+		c:line_to(  c.w,c.h)
+		c:line_to(    0,c.h)
+		
+		c:set_source_color( p.arrow_color )
+		c:fill(true)
+		
+		if c.Image then
+			c= c:Image()
+		end
+		
+		c.anchor_point={c.w/2,c.h}
+		
+		return c
+		
+		end
+	
+		p.arrow_src = make_arrow()
+    	--overwrite defaults
+    	if t ~= nil then
+        	for k, v in pairs (t) do
+            	p[k] = v
+        	end
+    	end
+
 		if type(p.arrow_src) == "string" then p.arrow_src = assets(p.arrow_src) end
 
 		if p.arrow_src.parent then p.arrow_src:unparent() end
@@ -6222,7 +6253,7 @@ function ui_element.arrowPane(t)
 					arrow:raise_to_top()
 				else 
 					arrow = Clone{source=p.arrow_src}
-					arrow.anchor_point={arrow.w/2,arrow.h}=1
+					arrow.anchor_point={arrow.w/2,arrow.h}
 					arrow.x = border.w+p.arrow_dist_to_frame
 					arrow.y = border.h/2
 					arrow.z_rotation = {90,0,0}
