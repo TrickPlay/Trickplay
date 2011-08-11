@@ -48,7 +48,12 @@ namespace JPEGUtils
 
 static int get_exif_orientation( ExifData * exif_data )
 {
-	ExifEntry * entry = exif_data_get_entry( exif_data , EXIF_TAG_ORIENTATION );
+	if ( ! exif_data->ifd[ EXIF_IFD_0 ] )
+	{
+		return 0;
+	}
+
+	ExifEntry * entry = exif_content_get_entry( exif_data->ifd[ EXIF_IFD_0 ] , EXIF_TAG_ORIENTATION );
 
 	if ( ! entry )
 	{
