@@ -7,7 +7,7 @@ local bg = Image{
 
 local title = Text{
     text  = "Default Title",
-    font  = "DejaVu Condensed Bold 32px",
+    font  = "DejaVu Condensed Bold normal 32px",
     color = "e8e8e8",
     x     = bg.w/2,
     y     = bg.h/2,
@@ -16,7 +16,7 @@ local title = Text{
 
 local message = Text{
     text  = "Default Title",
-    font  = "DejaVu Condensed 32px",
+    font  = "DejaVu Condensed normal 32px",
     color = "e8e8e8",
     x     = bg.w/2,
     y     = bg.h/2,
