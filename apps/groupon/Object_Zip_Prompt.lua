@@ -18,7 +18,7 @@ zip_bg.anchor_point = {zip_bg.w/2,0}
 
 local prompt = Text{
     text  = "Change Location:",
-    font  = "DejaVu Sans Condensed 20px",
+    font  = "DejaVu Sans Condensed normal 20px",
     color = "#000000",
     y     =  zip_bg.h/2,
 }
@@ -30,7 +30,7 @@ prompt.anchor_point = {
 local location = Text{
     name="Location",
     text="",
-    font="DejaVu Sans Condensed Bold 24px",
+    font="DejaVu Sans Condensed Bold normal 24px",
     color="#86ad53",
     x = -30,
     y = zip_bg.h/2,

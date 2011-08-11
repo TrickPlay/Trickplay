@@ -20,7 +20,7 @@ local digit_spacing = 50
 ---[[
 local prompt = Text{
     text="Enter a zip code:",
-    font="DejaVu Sans Condensed Bold 20px",
+    font="DejaVu Sans Condensed Bold normal 20px",
     color="#86ad53",
     y = 15,
 	x = top_bg.w/2
@@ -66,7 +66,7 @@ for i = 1,5 do
     entered[i]:hide()
     entry[i] = Text{
         text  = "",
-        font  = "DejaVu Sans Condensed Bold 30px",
+        font  = "DejaVu Sans Condensed Bold normal 30px",
         color = "#f4fce9",
         y     = 67,
         x     = digit_spacing*(i-1)+114

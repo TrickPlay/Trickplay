@@ -1,6 +1,6 @@
 --Card Object Class
-local font   = "DejaVu Condensed"
-local font_b = "DejaVu Condensed Bold"
+local font   = "DejaVu Sans Condensed normal"
+local font_b = "DejaVu Sans Condensed Bold normal"
 local title_padding = 23
 local white_text = "f4fce9"
 local black_text = "333333"
