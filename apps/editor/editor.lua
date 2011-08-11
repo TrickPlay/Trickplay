@@ -1201,7 +1201,7 @@ local function open_files(input_purpose, bg_image, inspector)
 			xbox:on_button_down(1) 
 
 			-- 0802		
-			local dir = editor_lb:readdir(current_dir.."/screens")
+			local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
@@ -1804,7 +1804,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			local item
 			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
 				item = factory.make_filechooser(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" or attr_n == "justify" or attr_n == "single_line" then  -- Attribute with single checkbox
+			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" or attr_n == "justify" or attr_n == "single_line" or attr_n == "arrows_visible" then  -- Attribute with single checkbox
 				item = factory.make_onecheckbox(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true)
 			elseif attr_n == "anchor_point" then 
 				item = factory.make_anchorpoint(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
@@ -4855,6 +4855,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	title_shadow.text = ""
 
 	local error_msg_map = {
+		--[[
 		["001"] = function(str) OK_label = "Open" return "A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
  		["002"] = function() OK_label = "OK" return "Before saving the screen, a project must be open." end,
  		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save the file before closing?" end, 					
@@ -4866,6 +4867,22 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
  		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
  		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
+ 		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
+ 		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
+ 		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 
+		--]]
+		["001"] = function(str) OK_label = "Open" return "A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
+ 		["002"] = function() OK_label = "OK" return "Before saving the screen, a project must be open." end,
+ 		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save the file before closing?" end, 					
+ 		["004"] = function(str) OK_label = "Overwrite" return "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
+ 		["005"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A file name is required." end, 
+ 		["006"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A guideline position is required." end, 
+ 		["007"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" is required." end, 
+ 		["008"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "There are no guidelines."  end, 
+ 		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
+ 		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
+ 		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
+		["012"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid value for \""..str.."\" field." end,
  		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
  		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
  		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 

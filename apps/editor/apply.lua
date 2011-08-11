@@ -12,7 +12,7 @@ end
 local number_attrs = { "x", "y", "z", "w", "h", "opacity", "button_radius", "select_radius", "line_space", "volume", "ui_width", "ui_height", "border_width", "border_corner_radius", "on_screen_duration", "fade_duration", "padding", "label_padding", "display_width", "display_height", "arrow_sz", "arrow_dist_to_frame", "visible_w", "visible_h", "virtual_w", "virtual_h", "frame_thickness", "bar_thickness", "bar_offset", "box_width", "overall_diameter", "dot_diameter", "number_of_dots", "cycle_time", "progress", "menu_width", "horz_padding", "vert_spacing", "horz_spacing", "vert_offset", "separator_thickness", "rows", "columns", "cell_w", "cell_h", "cell_spacing", "cell_timing", "cell_timing_offset", "title_separator_thickness",
 } 
 
-local non_txt_items = {"anchor_point", "reactive", "focusChanger", "src", "source", "loop", "skin", "wrap_mode", "items", "itemsList", "icon", "items", "expansion_location", "tab_position", "style", "cell_size", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", "direction", "justify", "alignment", "single_line", }
+local non_txt_items = {"arrows_visible", "anchor_point", "reactive", "focusChanger", "src", "source", "loop", "skin", "wrap_mode", "items", "itemsList", "icon", "items", "expansion_location", "tab_position", "style", "cell_size", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", "direction", "justify", "alignment", "single_line", }
 
 local reserved_words = {"and", "end", "break", "do" ,"else", "elseif", "false", "for", "function", "if", "in",
 "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
@@ -60,8 +60,13 @@ local verify_attr_val = function(attr_name, attr_val, v, inspector)
 			return -1 
 		end 
 	end 
-
-	if attr_name == "selected_item" then 
+	if attr_name == "frame_thickness" then 
+		if tonumber(attr_val) >=  v.bar_thickness then 
+			editor.error_message("012","frame thickness",nil,nil,inspector) 
+			inspector_deactivate(inspector)
+			return -1 
+		end 
+	elseif attr_name == "selected_item" then 
 		attr_val = tonumber(attr_val) 
 		if attr_val > #v.items or attr_val < 1 then 
 			editor.error_message("012","selected_item",nil,nil,inspector)
@@ -188,6 +193,20 @@ function inspector_apply (v, inspector)
     	          v["skin"] = hdr.inspector_skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
 
               end,
+
+		["frame_thickness"] = function ()
+					
+				  v["frame_thickness"] =  tonumber(item_group:find_child("frame_thickness"):find_child("input_text").text)
+
+			end, 
+
+		["arrows_visible"] = function() 
+	       	  	if item_group:find_child("bool_checkarrows_visible"):find_child("check1").opacity > 0 then 
+	          		v.arrows_visible = true
+	       		else 
+	            	v.arrows_visible = false
+	       		end
+			end,
 
        	["anchor_point"] = function()
 
@@ -543,7 +562,7 @@ function inspector_apply (v, inspector)
                     		not_checkbox = true
                     	end
 				  		if not_checkbox then 
-                            local clip_t = {}
+							local clip_t = {}
 							if v.clip then 
 								clip_t = v.clip
 							end 
