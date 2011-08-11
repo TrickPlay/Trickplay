@@ -20,14 +20,14 @@ local sms_bg = Clone{ source = assets.info_panel }
 sms_entry.h = sms_bg.h
 local fine_print_title = Text{
     text="The Fine Print",
-    font="DejaVu Sans Condensed Bold 20px",
+    font="DejaVu Sans Condensed Bold normal 20px",
     color="#484747",
     x = 40,
 	y = 20,
 }
 local fine_print_body = Text{
     text="The Fine Print",
-    font="DejaVu Sans Condensed 16px",
+    font="DejaVu Sans Condensed normal 16px",
     color="#484747",
     --x = fine_print_title.x,
 	wrap = true,
@@ -49,14 +49,14 @@ fp_clip:add(fine_print_body)
 
 local highlights_title = Text{
     text="Highlights",
-    font="DejaVu Sans Condensed Bold 20px",
+    font="DejaVu Sans Condensed Bold normal 20px",
     color="#484747",
     x = 440,
 	y = fine_print_title.y,
 }
 local highlights_body = Text{
     text="",
-    font="DejaVu Sans Condensed 16px",
+    font="DejaVu Sans Condensed normal 16px",
     color="#484747",
     --x = 440,
 	wrap = true,
@@ -91,7 +91,7 @@ local cursor = Clone{
 
 local prompt = Text{
 	text = "Unable to send.",
-	font = "DejaVu Sans Condensed 30px",
+	font = "DejaVu Sans Condensed normal 30px",
 	color = "#000000",
 	opacity=0,
 	y     = 270,
@@ -103,7 +103,7 @@ local entry = {}
 for i = 1,phone_digit_max do
     entry[i] = Text{
         text  = "",
-        font  = "DejaVu Sans Condensed Bold 40px",
+        font  = "DejaVu Sans Condensed Bold normal 40px",
         color = "#f4fce9",
         y     = 369,
         x     = first_digit_x+digit_spacing*(i-1)
@@ -245,7 +245,7 @@ function submit_button:on_button_up()
 end
 local submit_button_shadow = Text{
 	text  = "Send",
-	font  = "DejaVu Condensed Bold 22px",
+	font  = "DejaVu Sans Condensed Bold normal 22px",
 	color = "#000000",
 	opacity = 255*.5,
 	x = submit_button.x + submit_button.w/2 + 1,
@@ -253,7 +253,7 @@ local submit_button_shadow = Text{
 }
 local submit_button_text = Text{
 	text = "Send",
-	font = "DejaVu Condensed Bold 22px",
+	font = "DejaVu Sans Condensed Bold normal 22px",
 	color = "#ffffff",
 	x = submit_button.x + submit_button.w/2,
 	y = submit_button.y + submit_button.h/2,
