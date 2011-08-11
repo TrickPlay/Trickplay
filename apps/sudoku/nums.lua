@@ -1,5 +1,5 @@
-local big_font_s   = "DejaVu Bold 82px"
-local big_font     = "DejaVu Bold 80px"
+local big_font_s   = "DejaVu Sans Bold 82px"
+local big_font     = "DejaVu Sans Bold 80px"
 local shadow_color = "000000"
 local given_color  = "FFFFFF"
 local user_color   = "fefa00"
