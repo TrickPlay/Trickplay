@@ -251,9 +251,9 @@ public:
 
     //.........................................................................
 
-    Image * load_image( const gchar * source );
+    Image * load_image( const gchar * source , bool read_tags );
 
-    bool load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+    bool load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
     void audio_match( const String & json );
 

@@ -6,6 +6,7 @@
 
 #include "trickplay/image.h"
 #include "common.h"
+#include "json.h"
 
 //-----------------------------------------------------------------------------
 // Set to 1 to enable caching of images
@@ -24,17 +25,17 @@ public:
 
     static Image * make( cairo_surface_t * surface );
 
-    static Image * decode( gpointer data, gsize size, const gchar * content_type = NULL );
+    static Image * decode( gpointer data, gsize size, bool read_tags , const gchar * content_type = NULL );
 
-    static Image * decode( const gchar * filename );
+    static Image * decode( const gchar * filename , bool read_tags );
 
     static Image * screenshot();
 
     typedef void ( * DecodeAsyncCallback )( Image * image , gpointer user );
 
-    static void decode_async( const gchar * filename , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+    static void decode_async( const gchar * filename , bool read_tags , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
-    static void decode_async( GByteArray * bytes , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+    static void decode_async( GByteArray * bytes , bool read_tags , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
     ~Image();
 
@@ -77,6 +78,8 @@ public:
 
     void premultiply_alpha();
 
+    const JSON::Object & get_tags() const;
+
     //.........................................................................
 
     static void destroy( void * image );
@@ -93,7 +96,11 @@ private:
 
     Image * convert_to_cairo_argb32() const;
 
-    TPImage * image;
+    void load_tags( const gchar * filename );
+    void load_tags( gpointer data , gsize size );
+
+    TPImage * 		image;
+    JSON::Object 	tags;
 };
 
 //=============================================================================
@@ -341,6 +348,59 @@ private:
 
 #endif
 
+};
+
+//-----------------------------------------------------------------------------
+// A structure we attach to ClutterTexture to keep track of extra stuff
+
+class ImageExtra
+{
+
+public:
+
+	static ImageExtra * get( gpointer texture )
+	{
+		ImageExtra * result = ( ImageExtra * ) g_object_get_data( G_OBJECT( texture ), "tp-image-extra" );
+
+		if ( ! result )
+		{
+			result = new ImageExtra();
+
+			g_object_set_data_full( G_OBJECT( texture ), "tp-image-extra", result, ( GDestroyNotify ) ImageExtra::destroy );
+		}
+
+		return result;
+	}
+
+	bool           constructing;
+	bool           loaded;
+	bool           async;
+	bool           read_tags;
+	JSON::Object   tags;
+
+private:
+
+    ImageExtra()
+    :
+        constructing( false ),
+        loaded( false ),
+        async( false ),
+        read_tags( false )
+    {
+    }
+
+    ~ImageExtra()
+    {
+    }
+
+    ImageExtra( const ImageExtra & )
+    {
+    }
+
+    static void destroy( ImageExtra * me )
+    {
+        delete me;
+    }
 };
 
 #endif // _TRICKPLAY_IMAGES_H

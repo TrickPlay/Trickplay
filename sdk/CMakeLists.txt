@@ -48,6 +48,7 @@ if (UNIX AND NOT APPLE)
             "libupnp3 (>= 1.6)"
             "liburiparser1"
             "libxml2"
+            "libexif12"
 		)
 		
 		set( FIRST 1 )

@@ -35,6 +35,7 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(SOUP          REQUIRED    libsoup-2.4)
     pkg_check_modules(SQLITE        REQUIRED    sqlite3)
     pkg_check_modules(OPENSSL       REQUIRED    openssl)
+    pkg_check_modules(EXIF          REQUIRED    libexif)
     pkg_check_modules(CARES                     libcares)
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_CLUTTER_BACKEND_EGL)
@@ -69,6 +70,7 @@ IF( PKG_CONFIG_FOUND )
         ${CARES_INCLUDE_DIRS}
         ${AVAHI_CORE_INCLUDE_DIRS}
         ${AVAHI_GLIB_INCLUDE_DIRS}
+        ${EXIF_INCLUDE_INCLUDE_DIRS}
     )
 
     list(APPEND ENGINE_LIBRARY_NAMES
@@ -91,6 +93,7 @@ IF( PKG_CONFIG_FOUND )
         ${CARES_LIBRARIES}
         ${AVAHI_CORE_LIBRARIES}
         ${AVAHI_GLIB_LIBRARIES}
+        ${EXIF_LIBRARIES}
     )
 
 ELSE ( PKG_CONFIG_FOUND )
@@ -110,6 +113,7 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( atk-1.0 atk/atk.h                      ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( sndfile.h                              ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( libexif/exif-data.h                    ENGINE_INCLUDE_DIRS )
 
     if (TP_CONTROLLER_DISCOVERY_MDNS)
         TP_FIND_INCLUDE( avahi-core core.h                  ENGINE_INCLUDE_DIRS )
@@ -140,6 +144,8 @@ ELSE ( PKG_CONFIG_FOUND )
         json-glib-1.0
 
         sndfile
+        
+        exif
     )
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
