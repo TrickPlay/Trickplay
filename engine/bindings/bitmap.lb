@@ -87,9 +87,61 @@ class Bitmap [[ Bitmap * ]]
 
     */
 
-    Bitmap( string src, bool async = false )
+    Bitmap( any props )
         [[
-            self = lb_construct( Bitmap , new Bitmap( L , src , async ) );
+            String src;
+            bool async = false;
+            bool read_tags = false;
+            
+            int nargs = lua_gettop( L ) - 1 ; // The new user data is the last one
+            
+            if ( lua_type( L , 1 ) == LUA_TSTRING )
+            {
+                src = lua_tostring( L , 1 );
+                
+                if ( nargs > 1 )
+                {
+                    if ( lua_type( L , 2 ) == LUA_TBOOLEAN )
+                    {
+                        async = lua_toboolean( L , 2 );
+                    }
+                }
+                
+                if ( nargs > 2 )
+                {
+                    if ( lua_type( L , 3 ) == LUA_TBOOLEAN )
+                    {
+                        read_tags = lua_toboolean( L , 3 );
+                    }
+                }
+            }
+            else 
+            {
+                lb_checktable( L , 1 );
+                
+                lua_getfield( L , 1 , "src" );                
+                if ( lua_type( L , -1 ) == LUA_TSTRING )
+                {
+                    src = lua_tostring( L , -1 );
+                }
+                lua_pop( L , 1 );
+                
+                lua_getfield( L , 1 , "async" );
+                if ( lua_type( L , -1 ) == LUA_TBOOLEAN )
+                {
+                    async = lua_toboolean( L , -1 );
+                }
+                lua_pop( L , 1 );
+                
+                lua_getfield( L , 1 , "read_tags" );
+                if ( lua_type( L , -1 ) == LUA_TBOOLEAN )
+                {
+                    read_tags = lua_toboolean( L , -1 );
+                }
+                lua_pop( L , 1 );
+            }
+            
+            self = lb_construct( Bitmap , new Bitmap( L , src.c_str() , async , read_tags ) );
         ]];
 
     ~Bitmap()
@@ -223,6 +275,30 @@ class Bitmap [[ Bitmap * ]]
     readonly bool loaded
         [[
             loaded = self->loaded();
+        ]];
+        
+    /*
+        Property: tags
+    */        
+    
+    readonly table tags
+        [[
+            Image * image = self->get_image();
+            
+            if ( image )
+            {
+                JSON::to_lua( L , image->get_tags() );
+                
+                if ( lua_isnil( L , -1 ) )
+                {
+                    lua_pop( L , 1 );
+                    lua_newtable( L );
+                }
+            }
+            else
+            {
+                lua_newtable( L );
+            }
         ]];
         
     /*
@@ -387,6 +463,8 @@ class Bitmap [[ Bitmap * ]]
                     Images::load_texture( t , image , x , y , w , h );
 
                     g_object_set_data_full( G_OBJECT( t ), "tp-src", g_strdup( "[bitmap]" ) , g_free );
+                    
+                    ImageExtra::get( t )->tags = image->get_tags();
                 }
             }
         ]];

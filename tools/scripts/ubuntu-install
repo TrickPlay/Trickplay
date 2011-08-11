@@ -22,5 +22,6 @@ sudo apt-get install \
     libsndfile1-dev \
     libsoup2.4-dev \
     libc-ares-dev \
+    libexif-dev \
     cmake 
 
