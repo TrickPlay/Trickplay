@@ -176,7 +176,7 @@ class Image [[ClutterActor*]] actor
     	
     	(code)
     	local myImage = Image()
-    	myImage.src = "assets/foo.png"		-- load image synchronously
+    	myImage.src = "assets/images/foo.png"		-- load image synchronously
     	if myImage.loaded == false then
     	  -- Image not loaded; insert error-handling code here
     	end
@@ -185,13 +185,13 @@ class Image [[ClutterActor*]] actor
     	(code)
     	-- Same as above, but combining object creation and
     	-- the setting of the src property in a single statement
-    	local myImage = Image{ src = "assets/foo.png" }
+    	local myImage = Image{ src = "assets/images/foo.png" }
     	if myImage.loaded == false then
     	  -- Insert error-handling code here
     	end
     	(end)
     	
-    	*See Also:* the <loaded> property, the <async> property
+    	*See Also:* the <read_tags>, <loaded>, and <async> properties
     	    
     */
     
@@ -206,111 +206,33 @@ class Image [[ClutterActor*]] actor
 		]];
 	
 	/*
-		Property: base_size
+		Property: loaded
 		
-		The base_size is a table that contains two integer values that specify
-		the image's original width and height, in that order, in pixels.
+		The boolean loaded property indicates the success/true or failure/false
+		of the image's synchronous-load operation.
 		
-		The base_size property is set automatically as part of the image-loading
-		operation. Its values can be retrieved, but they cannot be set.
+		The loaded property will also be set to false while an image is loading
+		asynchronously. This may make it tempting to intermittently poll the 
+		loaded property to determine if the image has finished loading, but you 
+		should not do this because the loaded property can also be set to false 
+		due to the load operation failing; in such a scenario, your polling 
+		application will wait forever for the property to become true. Instead, 
+		you should set up an on_loaded() event handler to notify your 
+		application when an asynchronous-load operation has completed.
 		
-		Notice that the image's display width and height may change during
-		the execution of your application, but the base_size values will remain
-		set to the image's original size.
+		*Default Setting:* false
 		
-		*Default Setting:* Before the image has been loaded: nil.
+		*Example:* To see the loaded property in use, check the code example 
+		given in the <src> property.
 		
 		*See Also:* the <src> property
-		
-	*/
+	*/	
 	
-    readonly table base_size
+	readonly bool loaded
 		[[
-		    gint w;
-		    gint h;
-		    clutter_texture_get_base_size(CLUTTER_TEXTURE(self),&w,&h);
-		    lua_newtable(L);
-		    lua_pushnumber(L,w);
-		    lua_rawseti(L,-2,1);
-		    lua_pushnumber(L,h);
-		    lua_rawseti(L,-2,2);
+			loaded = ImageExtra::get( self )->loaded;
 		]];
-	
-    bool sync_size
-		[[
-			sync_size=clutter_texture_get_sync_size(CLUTTER_TEXTURE(self));
-		]]
-		[[
-			clutter_texture_set_sync_size(CLUTTER_TEXTURE(self),sync_size);
-		]];
-	
-	/*
-		Property: tile
 		
-		The tile property is a table containing two boolean values that specify 
-		whether the image should be tiled horizontally and/or vertically. An 
-		image may be tiled if its actual size is less than the size of the area 
-		it needs to fill.
-		
-		The image area to fill is defined by setting the Image object's 
-		width and height properties.
-
-		If tiling is activated, the image will tile as many times as necessary 
-		to fill the area. For example, an image that is 50 pixels wide and 
-		whose width property is 200 pixels will tile four times to fill the 
-		entire width. Given the same scenario, but with tiling not activated, 
-		the image will display one time and the remaining space will remain 
-		empty.
-		
-		*Default Settings:* tile = { false, false }
-		
-		*Example:* Activate horizontal tiling
-		
-		(code)
-		mImage.tile = { true, false }	-- horizontal tiling active, vertical tiling inactive
-		(end)
-		
-		*See Also:* the <UIElement.width> and <UIElement.height> properties
-		
-	*/
-	
-    table tile
-		[[
-		    gboolean rx;
-		    gboolean ry;
-		    clutter_texture_get_repeat(CLUTTER_TEXTURE(self),&rx,&ry);
-		    lua_newtable(L);
-		    lua_pushboolean(L,rx);
-		    lua_rawseti(L,-2,1);
-		    lua_pushboolean(L,ry);
-		    lua_rawseti(L,-2,2);
-		]]
-		[[
-		    (void)lb_checktable(L,2);
-		    lua_rawgeti(L,2,1);
-		    lua_rawgeti(L,2,2);
-		    clutter_texture_set_repeat(CLUTTER_TEXTURE(self),lua_toboolean(L,-2),lua_toboolean(L,-1));
-		    lua_pop(L,2);
-		]];
-	
-    bool keep_aspect_ratio
-		[[
-			keep_aspect_ratio=clutter_texture_get_keep_aspect_ratio(CLUTTER_TEXTURE(self));
-		]]
-		[[
-			clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
-		]];
-	
-	bool read_tags
-	    [[
-            ImageExtra * extra = ImageExtra::get( self );
-	        read_tags = extra->read_tags; 
-	    ]]
-	    [[
-            ImageExtra * extra = ImageExtra::get( self );
-            extra->read_tags = read_tags ? 1 : 0;	        
-	    ]];
-	
 	/*
 		Property: async
 		
@@ -362,7 +284,7 @@ class Image [[ClutterActor*]] actor
 		myImage.on_loaded = on_loadedHandler
 
 		-- Start loading the image asynchronously
-		myImage.src = "images/SplashScreen.png"
+		myImage.src = "assets/images/SplashScreen.png"
 		(end)
 		
 		*See Also:* the <on_loaded> event handler, the <src> property
@@ -377,35 +299,56 @@ class Image [[ClutterActor*]] actor
 		]];
 	
 	/*
-		Property: loaded
+		Property: read_tags
 		
-		The boolean loaded property indicates the success/true or failure/false
-		of the image's synchronous-load operation.
+		The read_tags property is a boolean value specifying whether or not to store any Exif (Exchangable image file format) tags contained in the image file (true = save Exif tags). Exif tags are read while the image is loading, so the read_tags property must be set before loading the image. After the image has loaded, stored Exif tags can be accessed through the <tags> property.
 		
-		The loaded property will also be set to false while an image is loading
-		asynchronously. This may make it tempting to intermittently poll the 
-		loaded property to determine if the image has finished loading, but you 
-		should not do this because the loaded property can also be set to false 
-		due to the load operation failing; in such a scenario, your polling 
-		application will wait forever for the property to become true. Instead, 
-		you should set up an on_loaded() event handler to notify your 
-		application when an asynchronous-load operation has completed.
+		*Default Setting:* false, i.e., do not store Exif tags
 		
-		*Default Setting:* false
+		*Code Example:* Load an image, specifying that Exif tags should be saved.
 		
-		*Example:* To see the loaded property in use, check the code example 
-		given in the <src> property.
+			(code)
+	    	myImage = Image{ src = "assets/images/foo.jpg", read_tags = true }
+    		if myImage.loaded == false then
+    		  -- Insert error-handling code here
+    		end		
+			(end)
 		
-		*See Also:* the <src> property
-	*/	
+		*See Also:* the <tags> property
+	*/
 	
-	readonly bool loaded
-		[[
-			loaded = ImageExtra::get( self )->loaded;
-		]];
-		
+	bool read_tags
+	    [[
+            ImageExtra * extra = ImageExtra::get( self );
+	        read_tags = extra->read_tags; 
+	    ]]
+	    [[
+            ImageExtra * extra = ImageExtra::get( self );
+            extra->read_tags = read_tags ? 1 : 0;	        
+	    ]];
+	
     /*
         Property: tags
+        
+        The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded image. If the storage of Exif tags was not enabled (via the <read_tags> property) or if the image file contained no tags then the tags table will be empty.
+        
+        *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
+        
+        *Default Setting:* {}, i.e., an empty table
+        
+        *Code Example:* Output image tag names and values to the console        
+
+			(code)
+			-- Load an image, including its Exif tags
+			myImage = Image{ src = "assets/images/foo.jpg", read_tags = true }
+			
+			-- If the image loaded successfully, dump all the Exif tags to the console
+			if( myImage.loaded ) then
+				dumptable( myImage.tags )
+			end
+			(end)
+        
+        *See Also:* the <read_tags> property
     */		
     
     readonly table tags
@@ -420,6 +363,120 @@ class Image [[ClutterActor*]] actor
                 lua_newtable( L );
             }
         ]];
+	
+	/*
+		Property: base_size
+		
+		The base_size is a table that contains two integer values that specify
+		the image's original width and height, in that order, in pixels.
+		
+		The base_size property is set automatically as part of the image-loading
+		operation. Its values can be retrieved, but they cannot be set.
+		
+		Notice that the image's display width and height may change during
+		the execution of your application, but the base_size values will remain
+		set to the image's original size.
+		
+		*Default Setting:* Before the image has been loaded: nil.
+		
+		*See Also:* the <src> property
+		
+	*/
+	
+    readonly table base_size
+		[[
+		    gint w;
+		    gint h;
+		    clutter_texture_get_base_size(CLUTTER_TEXTURE(self),&w,&h);
+		    lua_newtable(L);
+		    lua_pushnumber(L,w);
+		    lua_rawseti(L,-2,1);
+		    lua_pushnumber(L,h);
+		    lua_rawseti(L,-2,2);
+		]];
+	
+	/*
+	  	*** FOR INTERNAL USE ONLY ***
+	  
+	  	The sync_size property is a boolean value specifying whether or not the texture's preferred size should be the same as the image size.
+	  	
+	  	The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
+	  
+	*/
+	  
+    bool sync_size
+		[[
+			sync_size=clutter_texture_get_sync_size(CLUTTER_TEXTURE(self));
+		]]
+		[[
+			clutter_texture_set_sync_size(CLUTTER_TEXTURE(self),sync_size);
+		]];
+	
+	/*
+		*** FOR INTERNAL USE ONLY ***
+		
+		The keep_aspect_ratio property is a boolean value specifying whether or not the texture's preferred size should preserve the aspect ratio of the image.
+		
+		The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
+		
+	*/
+
+    bool keep_aspect_ratio
+		[[
+			keep_aspect_ratio=clutter_texture_get_keep_aspect_ratio(CLUTTER_TEXTURE(self));
+		]]
+		[[
+			clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
+		]];
+	
+	/*
+		Property: tile
+		
+		The tile property is a table containing two boolean values that specify 
+		whether the image should be tiled horizontally and/or vertically. An 
+		image may be tiled if its actual size is less than the size of the area 
+		it needs to fill.
+		
+		The image area to fill is defined by setting the Image object's 
+		width and height properties.
+
+		If tiling is activated, the image will tile as many times as necessary 
+		to fill the area. For example, an image that is 50 pixels wide and 
+		whose width property is 200 pixels will tile four times to fill the 
+		entire width. Given the same scenario, but with tiling not activated, 
+		the image will display one time and the remaining space will remain 
+		empty.
+		
+		*Default Setting:* tile = { false, false }
+		
+		*Example:* Activate horizontal tiling
+		
+		(code)
+		mImage.tile = { true, false }	-- horizontal tiling active, vertical tiling inactive
+		(end)
+		
+		*See Also:* the <UIElement.width> and <UIElement.height> properties
+		
+	*/
+	
+    table tile
+		[[
+		    gboolean rx;
+		    gboolean ry;
+		    clutter_texture_get_repeat(CLUTTER_TEXTURE(self),&rx,&ry);
+		    lua_newtable(L);
+		    lua_pushboolean(L,rx);
+		    lua_rawseti(L,-2,1);
+		    lua_pushboolean(L,ry);
+		    lua_rawseti(L,-2,2);
+		]]
+		[[
+		    (void)lb_checktable(L,2);
+		    lua_rawgeti(L,2,1);
+		    lua_rawgeti(L,2,2);
+		    clutter_texture_set_repeat(CLUTTER_TEXTURE(self),lua_toboolean(L,-2),lua_toboolean(L,-1));
+		    lua_pop(L,2);
+		]];
 	
     bool load_from_data(lstring data)
 		[[
