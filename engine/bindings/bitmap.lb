@@ -470,7 +470,7 @@ class Bitmap [[ Bitmap * ]]
         ]];
 
     /*
-        Event: on_loaded
+        Event Handler: on_loaded
 
 		The on_loaded() event handler is fired when an asynchronously-loaded 
 		image has finished loading.

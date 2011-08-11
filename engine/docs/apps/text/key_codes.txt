@@ -2081,3 +2081,49 @@ There may be some overlap with the TV-related keynames; in such cases, applicati
         braille_dots_1345678 - .
         braille_dots_2345678 - .
         braille_dots_12345678 - .
+        
+
+
+Group: Key Modifiers
+
+A group of modifier keys, such as the Shift and Control keys, are defined and available to all applications.
+
+The input event handlers typically include an argument specifying a table of modifier keys that were pressed at the time of the event. If no modifier keys were pressed, the argument is typically nil (as opposed to an empty table).
+
+Modifier keys can be referenced by using the "dot" syntax, as in modifier.shift. An example code snippet is included below.
+
+Constants: Defined Modifier Keys
+
+	Note: The modifier keys are case-sensitive.
+	
+	shift - .
+	lock - .
+	control - .
+	super - .
+	meta - .
+	hyper - .
+	
+*Code Example:* Check for Control, Shift, and Control+Shift modifier keystrokes
+
+	(code)
+	function screen:on_button_down( x, y, buttonID, numClicks, modifiers )
+		-- Was a modifier key pressed?
+		if( modifiers ~= nil ) then
+			-- Yes, was Control key pressed?
+			if( modifiers.control ) then
+				-- Yes, were Control and Shift keys pressed?
+				if( modifiers.shift ) then
+					-- Yes, insert Control+Shift handler code here...
+				else
+					-- No, insert Control handler code here...
+				end
+			else
+				-- Was Shift key pressed (without Control key)?
+				if( modifiers.shift ) then
+					-- Yes, insert Shift handler code here
+				end
+			end
+		end
+	end
+	(end)
+
