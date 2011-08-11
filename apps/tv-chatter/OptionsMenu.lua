@@ -10,7 +10,7 @@ do
     local x = 60
 	local title= Text{
 		text="Scroll Speed",
-		font="Helvetica Bold 36px",
+		font="DejaVu Sans Bold 36px",
 		color="#FFFFFF",
 		y = 5,
 		x=20
@@ -29,35 +29,35 @@ do
 	local speed = {
 		Text{
 			text="Slowest",
-			font="Helvetica Bold 26px",
+			font="DejaVu Sans Bold 26px",
 			color="#FFFFFF",
 			y = .5*scroll_listing_h+y,
 			x=x
 		},
 		Text{
 			text="Slow",
-			font="Helvetica Bold 26px",
+			font="DejaVu Sans Bold 26px",
 			color="#FFFFFF",
 			y = 1.5*scroll_listing_h+y,
 			x=x
 		},
 		Text{
 			text="Medium",
-			font="Helvetica Bold 26px",
+			font="DejaVu Sans Bold 26px",
 			color="#FFFFFF",
 			y = 2.5*scroll_listing_h+y,
 			x=x
 		},
 		Text{
 			text="Fast",
-			font="Helvetica Bold 26px",
+			font="DejaVu Sans Bold 26px",
 			color="#FFFFFF",
 			y = 3.5*scroll_listing_h+y,
 			x=x
 		},
 		Text{
 			text="Fastest",
-			font="Helvetica Bold 26px",
+			font="DejaVu Sans Bold 26px",
 			color="#FFFFFF",
 			y = 4.5*scroll_listing_h+y,
 			x=x
@@ -308,9 +308,9 @@ Options = Class(function(self,x,y,parent,...)
 	local focus_n = Clone{source = focus_strip,scale={485,1},opacity=0}
     --local focus_n = Clone{source=focus_o,opacity=0}
     
-    local Option_Name_Font  = "Helvetica 24px"
+    local Option_Name_Font  = "DejaVu Sans 24px"
     local Option_Name_Color = "#a6a6a6"
-    local Option_Sel_Font   = "Helvetica bold 26px"
+    local Option_Sel_Font   = "DejaVu Sans bold 26px"
     local Option_Sel_Color  = "#FFFFFF"
 
     local listings = {}

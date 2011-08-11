@@ -196,7 +196,7 @@ TweetStream = Class(function(t,parent,...)
     local num_tweets_on_screen  = 0
     local index_of_bottom_tweet = 0
     
-    local error_message = Text{text="",font="Helvetica 22px",color=Show_Time_Color,x=20}
+    local error_message = Text{text="",font="DejaVu Sans 22px",color=Show_Time_Color,x=20}
     
     group:add(highlight,error_message)
     

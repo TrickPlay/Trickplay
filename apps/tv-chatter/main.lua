@@ -13,15 +13,15 @@ tags = {}
 hash_tag_map = {}
 
 --Global Text info
-TV_Station_Font  = "Helvetica bold 24px"
+TV_Station_Font  = "DejaVu Sans bold 24px"
 TV_Station_Color = "#FFFFFF"
-Show_Time_Font   = "Helvetica 24px"
+Show_Time_Font   = "DejaVu Sans 24px"
 Show_Time_Color  = "#a6a6a6"
-Username_Font    = "Helvetica bold 26px"
+Username_Font    = "DejaVu Sans bold 26px"
 Username_Color   = "#b1ff0a"
-User_text_Font   = "Helvetica 26px"
+User_text_Font   = "DejaVu Sans 26px"
 User_text_Color  = "#ffffff"
-Time_Font   = "Helvetica 24px"
+Time_Font   = "DejaVu Sans 24px"
 Time_Color  = "#a6a6a6"
 
 dofile("Canvas_Elements.lua") --Contains functions for creating Canvas peices

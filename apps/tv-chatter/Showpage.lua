@@ -138,7 +138,7 @@ local TweetStream_Container = Class(function(self,...)
     }
     local title   = Image{src="assets/tweetstream.png"}
     
-    local Show_Name_Font  = "Helvetica bold 26px"
+    local Show_Name_Font  = "DejaVu Sans bold 26px"
     local Show_Name_Color = "#FFFFFF"
     
     local bg,big_focus = make_bg(
