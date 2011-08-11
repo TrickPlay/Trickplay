@@ -827,10 +827,35 @@ static void foreach_exif_entry( ExifEntry * entry , void * _closure )
 
 	unsigned char component_size = exif_format_get_size( entry->format );
 
-	const char * name = exif_tag_get_name_in_ifd( entry->tag , exif_content_get_ifd( entry->parent ) );
+	ExifIfd ifd = exif_content_get_ifd( entry->parent );
 
-	if ( ! name || ! entry->data || ! entry->size || ! component_size || ! entry->components )
+	const char * tag_name = exif_tag_get_name_in_ifd( entry->tag , ifd );
+
+	if ( ! tag_name || ! entry->data || ! entry->size || ! component_size || ! entry->components )
 	{
+		return;
+	}
+
+	String name( tag_name );
+
+	switch( ifd )
+	{
+	case EXIF_IFD_0:
+		name = "IMAGE/" + name;
+		break;
+	case EXIF_IFD_1:
+		name = "THUMBNAIL/" + name;
+		break;
+	case EXIF_IFD_EXIF:
+		name = "EXIF/" + name;
+		break;
+	case EXIF_IFD_GPS:
+		name = "GPS/" + name;
+		break;
+	case EXIF_IFD_INTEROPERABILITY:
+		name = "INTEROP/" + name;
+		break;
+	default:
 		return;
 	}
 
