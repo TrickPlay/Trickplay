@@ -229,7 +229,7 @@ local Listings = Class(function(self,...)
     local focus_o = Clone{source = focus_strip,scale={bg.w,1},opacity=0}
     local focus_n = Clone{source = focus_strip,scale={bg.w,1},opacity=0}
     
-    local Show_Name_Font  = "Helvetica bold 26px"
+    local Show_Name_Font  = "DejaVu Sans bold 26px"
     local Show_Name_Color = "#FFFFFF"
 
     local listings = {}
@@ -650,7 +650,7 @@ local TweetStream_Container = Class(function(self,...)
     }
     local title   = Image{src="assets/tweetstream.png"}
     
-    local Show_Name_Font  = "Helvetica bold 40px"
+    local Show_Name_Font  = "DejaVu Sans bold 40px"
     local Show_Name_Color = "#FFFFFF"
     local Show_Desc_Font  = Show_Time_Font
     local Show_Desc_Color = Show_Time_Color

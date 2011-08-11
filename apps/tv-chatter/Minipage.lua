@@ -34,7 +34,7 @@ local TweetStream_Container = Class(function(self,...)
         y = screen_h-bg.h,
     }
     
-    local Show_Name_Font  = "Helvetica bold 26px"
+    local Show_Name_Font  = "DejaVu Sans bold 26px"
     local Show_Name_Color = "#FFFFFF"
     
     local bg = Image{src="assets/mp_tweetstream_container.png"}
