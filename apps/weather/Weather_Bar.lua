@@ -17,7 +17,7 @@ local MINI_BAR_MIN_W = 500
 local FULL_BAR_W     = screen_w-MINI_BAR_X*2-bar_side_w*2--1478
 local COLOR_BUTTON_SPACING = 19
 
-local FONT          = "DejaVuSans "
+local FONT          = "DejaVu Sans "
 local LARGE_TEMP_SZ = "97px"
 local LOCATION_SZ   = "40px"
 local HI_LO_SZ      = "42px"
@@ -92,13 +92,13 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     --Curr temp
     c:new_path()
     c:move_to(0+2,CURR_TEMP_Y-30+2)
-    c:text_path(FONT.."Bold Condensed "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
+    c:text_path(FONT.."Condensed Bold "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
     c:set_source_color({0,0,0,255*.4})
     c:fill(true) 
     
     c:new_path()
     c:move_to(0,CURR_TEMP_Y-30)
-    c:text_path(FONT.."Bold Condensed "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
+    c:text_path(FONT.."Condensed Bold "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
     c:set_source_color(HI_TEMP_COLOR)
     c:fill(true)
     
@@ -106,13 +106,13 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     --Hi temp
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X+2,HI_LO_Y-10+2)
-    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.high.fahrenheit..DEG)
+    c:text_path(FONT.."Condensed Bold "..HI_LO_SZ,fday.high.fahrenheit..DEG)
     c:set_source_color({0,0,0,255*.4})
     c:fill(true)
     
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X,HI_LO_Y-10)
-    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.high.fahrenheit..DEG)
+    c:text_path(FONT.."Condensed Bold "..HI_LO_SZ,fday.high.fahrenheit..DEG)
     c:set_source_color(HI_TEMP_COLOR)
     c:fill(true)
     
@@ -120,13 +120,13 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     --Lo temp
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X+80+2,HI_LO_Y-10+2)
-    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
+    c:text_path(FONT.."Condensed Bold "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
     c:set_source_color({0,0,0,255*.4})
     c:fill(true)
     
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X+80,HI_LO_Y-10)
-    c:text_path(FONT.."Bold Condensed "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
+    c:text_path(FONT.."Condensed Bold "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
     c:set_source_color(LO_TEMP_COLOR)
     c:fill(true)
     
@@ -327,7 +327,7 @@ function Make_Bar(loc,index, master)
         }
         digits[i] = Text{
             text="",
-            font=FONT.."Bold Condensed "..ZIP_SZ,
+            font=FONT.."Condensed Bold "..ZIP_SZ,
             color={0,0,0},
         }
         digits[i].anchor_point = {digits[i].w/2,digits[i].h/2}
@@ -417,7 +417,7 @@ function Make_Bar(loc,index, master)
         if f_tbl ~= nil and pws_tbl ~= nil then
             
             mini_width = Text{
-                font=FONT.."Bold Condensed "..LOCATION_SZ,
+                font=FONT.."Condensed Bold "..LOCATION_SZ,
                 text=pws_tbl.current_observation.location.city..
                     ", "..pws_tbl.current_observation.location.state
             }.w + LOCATION_X - MINI_BAR_X + 100
@@ -426,7 +426,7 @@ function Make_Bar(loc,index, master)
                 pws_tbl.current_observation.location.city =
                     string.sub(pws_tbl.current_observation.location.city,1,10).."... "
                 mini_width = Text{
-                    font=FONT.."Bold Condensed "..LOCATION_SZ,
+                    font=FONT.."Condensed Bold "..LOCATION_SZ,
                     text=pws_tbl.current_observation.location.city..
                         ", "..pws_tbl.current_observation.location.state
                 }.w + LOCATION_X - MINI_BAR_X + 100
