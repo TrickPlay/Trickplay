@@ -811,26 +811,32 @@ interface actor [[ClutterActor*]]
     /*
 	Property: has_clip
 	
-	The has_clip property is a boolean value specifying whether or not the object has a defined clipping rectangle (true = clipping rectangle defined).
-	
-	A clipping rectangle is defined by setting the <clip> property. By default, clipping is not enabled. To enable clipping, define a clipping rectangle.
+	The has_clip property is a boolean value specifying whether or not the object has enabled clipping. Clipping can be enabled by either defining a clipping rectangle via the <clip> property or setting the clip_to_size property to true.
 	
 	*Default Setting:* false (clipping is not enabled)
 	
-	*See Also:* the <clip> property
-	
+	*See Also:* the <clip> and <clip_to_size> properties
+
     */
 
     readonly bool has_clip
-        [[has_clip=clutter_actor_has_clip(self);]];
+        [[
+            has_clip=clutter_actor_has_clip(self) || clutter_actor_get_clip_to_allocation(self);
+        ]];
         
     
     /*
     Property: clip_to_size
     
-    The clip_to_size property works on <Group> objects only. TODO
+	The clip_to_size property is a boolean value that enables and disables clipping on a <Group at file:clutter_group-lb.html> object. By default, objects within a Group can be displayed outside of the Group's defined size. To enable clipping to the Group's defined size, set the clip_to_size property to true.
+	
+	Clipping on a Group object can also be enabled by defining a clipping rectangle via the <clip> property.
+	
+	The clip_to_size property affects objects of type Group only; it has no effect on other object types.
+
+    *Default Setting:* false (clipping in the Group is disabled)
     
-    The clip_to_size property seems to be intended for build-it-yourself type layout managers, which the runtime engine does not support. As is, the property currently has no effect. It should be left undocumented.
+    *See Also:* the <Group at file:clutter_group-lb.html> class and the <clip> and <has_clip> properties
     
     */
     
@@ -1455,13 +1461,15 @@ interface actor [[ClutterActor*]]
     
     /* ***FOR INTERNAL USE ONLY***
     
-    //This function will apply a blur effect to the UI element.  Reversible with unblur()
+      blur()
+    
+      This function will apply a blur effect to the UI element.  Reversible with unblur()
 
-    //Returns:
+      Returns:
 
-    //  true - The effect was applied.
+        true - The effect was applied.
 
-    //  false - If the effect is not available.
+        false - If the effect is not available.
     */
 
     bool blur()
@@ -1478,13 +1486,15 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Turn off a blur effect on the UI element.  The opposite of blur()
+      unblur()
+    
+      Turn off a blur effect on the UI element.  The opposite of blur()
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool unblur()
@@ -1500,18 +1510,20 @@ interface actor [[ClutterActor*]]
     ]];
 
     /* ***FOR INTERNAL USE ONLY***
+    
+      desaturate()
 	
-	//How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+	  How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
 
-	//Arguments:
+	  Arguments:
 
-    //    desaturation - 0 for fully saturated, 1 for fully desaturated.
+          desaturation - 0 for fully saturated, 1 for fully desaturated.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool desaturate(double desaturation)
@@ -1526,14 +1538,16 @@ interface actor [[ClutterActor*]]
     ]];
 
     /* ***FOR INTERNAL USE ONLY***
+    
+      saturate()
 	
-	//Restore saturation to the UI element.  This undoes any call to <desaturate>.
+	  Restore saturation to the UI element.  This undoes any call to <desaturate>.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool saturate()
@@ -1548,17 +1562,19 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Turn on a tint effect for the UI element.
+      tint()
     
-    //Arguments:
+      Turn on a tint effect for the UI element.
+    
+      Arguments:
 
-    //    color - Required.  The tint color to apply to the UI element.
+          color - Required.  The tint color to apply to the UI element.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool tint(...)
@@ -1576,13 +1592,15 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Turn off any existing tint effect for the UI element.
+      untint()
+    
+      Turn off any existing tint effect for the UI element.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool untint()
@@ -1598,21 +1616,23 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Apply a "page turn" effect to the UIElement.
+      pageturn()
     
-    //Arguments:
+      Apply a "page turn" effect to the UIElement.
     
-    //    period - The period of the page curl, between 0.0 (flat) and 1.0 (fully curled) [defaults to 0]
+      Arguments:
+    
+          period - The period of the page curl, between 0.0 (flat) and 1.0 (fully curled) [defaults to 0]
 
-    //    angle - The angle of the page curl, in degrees, between 0.0 and 360.0 [defaults to 45]
+          angle - The angle of the page curl, in degrees, between 0.0 and 360.0 [defaults to 45]
 
-    //    radius - The radius of the page curl effect, in pixels [defaults to 1/16 width of the UIElement]
+          radius - The radius of the page curl effect, in pixels [defaults to 1/16 width of the UIElement]
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
     
     bool pageturn(double period=0.5, double angle=45, double radius=0)
@@ -1641,13 +1661,15 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Remove any "page turn" effect on the UIElement.
+      pageflatten()
+    
+      Remove any "page turn" effect on the UIElement.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool pageflatten()
@@ -2091,7 +2113,7 @@ interface actor [[ClutterActor*]]
         ]];
 
     /*
-	Event: on_key_focus_in
+	Event Handler: on_key_focus_in
 	
 	The on_key_focus_in() event handler is called whenever the object receives the key focus. Focus can be directed to the object by the user or the object can force focus to itself by calling its <grab_key_focus> function.
 	
@@ -2116,7 +2138,7 @@ interface actor [[ClutterActor*]]
 	]];
 
     /*
-	Event: on_key_focus_out
+	Event Handler: on_key_focus_out
 	
 	The on_key_focus_out() event handler is called whenever the object loses the key focus.
 	
@@ -2141,17 +2163,17 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_key_down
+	Event Handler: on_key_down
 	
 	The on_key_down() event handler is called whenever a key is pressed while the object has the key focus.
 
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	keyval - integer key value. This value can be compared to the global <keys> variable.
-	unicode - the key's Unicode representation, if any
-	time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
-	modifiers - table of modifiers, if any. If no modifiers, set to nil.
+		self - reference to the object receiving the event
+		keyval - integer key value. This value can be compared to the global <keys> variable.
+		unicode - the key's Unicode representation, if any
+		time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 	
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
@@ -2170,17 +2192,17 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_key_up
+	Event Handler: on_key_up
 	
 	The on_key_up() event handler is called whenever a key is released while the object has the key focus.
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	keyval - integer key value. This value can be compared to the global <keys> variable.
-	unicode - the key's Unicode representation, if any
-	time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
-	modifiers - table of modifiers, if any. If no modifiers, set to nil.
+		self - reference to the object receiving the event
+		keyval - integer key value. This value can be compared to the global <keys> variable.
+		unicode - the key's Unicode representation, if any
+		time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 	
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
@@ -2198,29 +2220,8 @@ interface actor [[ClutterActor*]]
 			L);	    
 	]];
 	
-	/* ***FOR INTERNAL USE ONLY***
-	
-	//The on_scroll() event handler is called whenever a scroll wheel event occurs.
-	
-	//*Arguments:*
-	//	??? - ???
-		
-	//*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
-
-	*/
-
-    callback on_scroll
-	[[
-		UserData::get(L)->connect_signal_if( 
-			on_scroll,
-			"on_scroll",
-			"scroll-event",
-			G_CALLBACK(actor_on_scroll),
-			L);	    
-	]];
-	
 	/*
-	Event: on_button_down
+	Event Handler: on_button_down
 	
 	The on_button_down() event handler is called whenever a mouse button is pressed.
 	
@@ -2228,12 +2229,13 @@ interface actor [[ClutterActor*]]
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	x - X coordinate position of the mouse pointer
-	y - Y coordinate position of the mouse pointer
-	button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
-	num_clicks - number of repeated mouse clicks
-	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+		button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
+		num_clicks - number of repeated mouse clicks
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.	
+	    
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
 	*See Also:* the <on_button_up> event handler
@@ -2251,7 +2253,7 @@ interface actor [[ClutterActor*]]
 	]];
 	
 	/*
-	Event: on_button_up
+	Event Handler: on_button_up
 	
 	The on_button_up() event handler is called whenever a mouse button is released.
 	
@@ -2259,12 +2261,13 @@ interface actor [[ClutterActor*]]
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	x - X coordinate position of the mouse pointer
-	y - Y coordinate position of the mouse pointer
-	button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
-	num_clicks - number of repeated mouse clicks
-	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+		button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
+		num_clicks - number of repeated mouse clicks
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.	
+	    
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
 	*See Also:* the <on_button_down> event handler
@@ -2282,7 +2285,7 @@ interface actor [[ClutterActor*]]
 	]];
 	
 	/*
-	Event: on_motion
+	Event Handler: on_motion
 	
 	The on_motion() event handler is called whenever the mouse pointer moves.
 	
@@ -2290,10 +2293,11 @@ interface actor [[ClutterActor*]]
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	x - X coordinate position of the mouse pointer
-	y - Y coordinate position of the mouse pointer
-	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
+	    	
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
 	*See Also:* the <on_enter> and <on_leave> event handlers
@@ -2311,7 +2315,34 @@ interface actor [[ClutterActor*]]
 	]];
 
 	/*
-	Event: on_enter
+	Event Handler: on_scroll
+	
+	The on_scroll() event handler is called whenever a scroll wheel event occurs. Scroll wheels are commonly found on computer mice and can be on other input devices, as well.
+	
+	*Arguments:*
+	
+	    self - reference to the object receiving the event
+	    x - X coordinate position of the pointer
+	    y - Y coordinate position of the pointer
+	    scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
+		
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+
+	*/
+
+    callback on_scroll
+	[[
+		UserData::get(L)->connect_signal_if( 
+			on_scroll,
+			"on_scroll",
+			"scroll-event",
+			G_CALLBACK(actor_on_scroll),
+			L);	    
+	]];
+	
+	/*
+	Event Handler: on_enter
 	
 	The on_enter() event handler is called whenever the mouse pointer enters the object's display space.
 	
@@ -2340,7 +2371,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 	/*
-	Event: on_leave
+	Event Handler: on_leave
 	
 	The on_leave() event handler is called whenever the mouse pointer leaves the object's display space.
 	
@@ -2370,7 +2401,7 @@ interface actor [[ClutterActor*]]
 
 
     /*
-	Event: on_show
+	Event Handler: on_show
 	
 	The on_show() event handler is called whenever the object's <show> or <show_all> function is called.
 	
@@ -2395,7 +2426,7 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_hide
+	Event Handler: on_hide
 	
 	The on_hide() event handler is called whenever the object's <hide> or <hide_all> function is called.
 	

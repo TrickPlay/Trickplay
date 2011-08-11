@@ -81,6 +81,8 @@ typedef struct TPController TPController;
 
     TP_CONTROLLER_HAS_ADVANCED_UI     - The controller supports advanced UI operations.
 
+    TP_CONTROLLER_HAS_VIRTUAL_REMOTE  - The controller can display a virtual remote.
+
 */
 
 #define TP_CONTROLLER_HAS_KEYS                      0x0001
@@ -93,6 +95,7 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
 #define TP_CONTROLLER_HAS_IMAGES                	0x0100
 #define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
+#define TP_CONTROLLER_HAS_VIRTUAL_REMOTE			0x0400
 
 #define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
 
@@ -481,6 +484,36 @@ struct TPControllerSpec
 */
 
 #define TP_CONTROLLER_COMMAND_SET_UI_IMAGE          31
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE
+
+    The controller should display a virtual remote that sends key events.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_VIRTUAL_REMOTE
+    in its capabilities.
+
+    Parameters:
+
+        None.
+*/
+
+#define TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE   32
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE
+
+    The controller should hide the virtual remote.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_VIRTUAL_REMOTE
+    in its capabilities.
+
+    Parameters:
+
+        None.
+*/
+
+#define TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE   33
 
 /*
     Constant: TP_CONTROLLER_COMMAND_PLAY_SOUND
