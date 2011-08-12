@@ -36,7 +36,7 @@ local panel             = Image{src = "assets/panel.png",          opacity=0}
 local diff_title        = Image{src = "assets/difficulty.png",     opacity=0}
 local sudoku_title      = Image{src = "assets/sudoku.png",         opacity=0}
 local conf_text         = Text { text  = "Are you sure you want to start a new game?",
-                                 font  = "DejaVu Sans Condensed 32px",
+                                 font  = "DejaVu Sans Condensed normal 32px",
                                  color = "FFFFFF", 
 								 opacity = 0
 }
@@ -142,7 +142,7 @@ win_txt.anchor_point = {win_txt.w/2,win_txt.h/2}
 win_txt.y = 35+win_txt.h/2
 win_txt.x = screen_w/2+3/2*block_sz+30+(screen_w/2-3/2*block_sz-30)/2
 function start_sparkle(x,y, num_sparkles)
---Text{text="You've Won!",font="DejaVu ExtraLight 60px",color="FFFFFF",opacity=0,z=3,x=x[math.ceil(#x/2)],y=y[math.ceil(#y/2)]}
+--Text{text="You've Won!",font="DejaVu ExtraLight normal 60px",color="FFFFFF",opacity=0,z=3,x=x[math.ceil(#x/2)],y=y[math.ceil(#y/2)]}
 win_txt.anchor_point = {win_txt.w/2,win_txt.h/2}
 win_txt.y = 35+win_txt.h/2
 win_txt.x = screen_w/2+3/2*block_sz+30+(screen_w/2-3/2*block_sz-30)/2
@@ -333,7 +333,7 @@ local difficulty = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=s
 local confirm    = Group{z=2,anchor_point={panel.w/2,panel.h/2},x=screen_w/2,y=screen_h/2,opacity=0}
 
 local dim = Rectangle{color ="000000", w=screen_w,h=screen_h,opacity=100,z=2}
-local side_font = "Dejavu Sans Bold 60px"
+local side_font = "Dejavu Sans Bold normal 60px"
 right_menu = Group{z=1}
 yellow_light = Image{src="assets/button-yellow-circle.png",x=0,y=2*(blank_button_off.h+8),opacity=0}
 local right_list = {}
@@ -639,7 +639,7 @@ end
 
 end
 
-local num_font = "DejaVu Sans Bold Condensed 30px"
+local num_font = "DejaVu Sans Condensed Bold normal 30px"
 local pencil_menu    = Group{y=40,opacity=0,z=1}
 local p_m_button_on  = Image{src="assets/button_on.png",y=60,x=105,opacity=0}
 local p_m_button_off = Image{src="assets/button_off.png",y=60,x=105,opacity=0}
