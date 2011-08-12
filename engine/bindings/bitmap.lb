@@ -140,7 +140,7 @@ class Bitmap [[ Bitmap * ]]
             }
             else 
             {
-                lb_checktable( L , 1 );
+                (void)lb_checktable( L , 1 );
                 
                 lua_getfield( L , 1 , "src" );                
                 if ( lua_type( L , -1 ) == LUA_TSTRING )
