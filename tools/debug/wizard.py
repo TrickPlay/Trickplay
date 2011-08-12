@@ -41,7 +41,7 @@ class Wizard():
                                                'prompted to create a new app there.');
                         msg.setWindowTitle("Error")
                         msg.exec_()
-                        self.start(None)
+                        return self.start(None)
      
                 # Can't currently get here...
                 #else:

@@ -63,14 +63,14 @@ class MainWindow(QMainWindow):
         self.app = app
         
     """
-    Cleanup code goes here
+    Cleanup code goes here... nothing yet?
     """
     def cleanUp(self):
         pass
         #print('Quitting.')
     
     """
-    Initialize with a given app path
+    Initialize widgets on the main window with a given app path
     """
     def start(self, path):
         self.path = path
@@ -176,21 +176,18 @@ class MainWindow(QMainWindow):
             print('Failed to open dropped file.')
 
 
+    """
+    Open a file from the FileSystemModel in the correct tab group.
+    """
     def openInEditor(self, fileIndex, n = None):
-        
         if not self.fileModel.isDir(fileIndex):
-            
-            #name = fileIndex.data(QFileSystemModel.FileNameRole)
-            #name = name.toString()
-            
-            #try:
             path = self.fileModel.filePath(fileIndex)
-            self.newEditor(path, n)
-            #except Exception, e:
-            #    print('Failed to load file')
-            #    print(e)
-            
-            
+            self.newEditor(path, n)            
+    
+    """
+    Create a tab group if both don't exist,
+    then add an editor in the correct tab group.
+    """
     def newEditor(self, path, tabGroup = None):
         
         print('tg', tabGroup)
