@@ -15,6 +15,7 @@ from data import modelToData, dataToModel, BadDataException
 from push import TrickplayPushApp
 from connection import CON
 from wizard import Wizard
+from files import FileSystemModel
 
 class MainWindow(QMainWindow):
     
@@ -34,11 +35,8 @@ class MainWindow(QMainWindow):
         # Setup
         self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
         
-        # Created Editor
-        self.splitter = QSplitter()
-        self.ui.editorDock.addWidget(self.splitter)
-        self.editorGroups = []
-        self.editors = {}
+        # Create Editor
+        self.createEditor()
         
         # Toolbar
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
@@ -74,7 +72,6 @@ class MainWindow(QMainWindow):
     Initialize with a given app path
     """
     def start(self, path):
-        
         self.path = path
         self.createTree()
         self.createFileSystem(path)
@@ -93,25 +90,36 @@ class MainWindow(QMainWindow):
         tp = TrickplayPushApp(str(self.path))
         tp.push(address = CON.get())
         
-            
-    
+    """
+    Create editor in a new dock that accepts drop events from the FileSystemModel
+    """
+    def createEditor(self):
+        
+        # Dock in MainWindow
+        self.editorDock = QtGui.QDockWidget(self.centralwidget)
+        self.editorDock.setAcceptDrops(True)
+        self.editorDock.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
+        self.editorDock.setObjectName("editorDock")
+        self.editorDock.setWindowTitle("Text Editor")
+        
+        self.splitter = QSplitter()
+        self.editorLayout = QHBoxLayout(self.editorDock)
+
+        
+        self.editorDock.addWidget(self.splitter)
+        self.editorGroups = []
+        self.editors = {}
+
     """
     Set up the file system model
     """
     def createFileSystem(self, appPath):
         
-        QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
+        #QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
         
-        self.fileModel = QFileSystemModel()
-        self.fileModel.setRootPath(appPath)
+        self.fileModel = FileSystemModel(self.ui.fileSystem, appPath)
         
-        self.ui.fileSystem.setModel(self.fileModel)
-        self.ui.fileSystem.setRootIndex(self.fileModel.index(appPath))
-        
-        header = self.ui.fileSystem.header()
-        
-        for i in range(1,4):
-            header.hideSection(header.logicalIndex(i))
+
     
     def EditorTabWidget(self, parent = None):
         tab = QTabWidget(self.splitter)
@@ -125,24 +133,9 @@ class MainWindow(QMainWindow):
     def save(self):
         editor = self.app.focusWidget()
         if isinstance(editor, LuaEditor):
-            path = None
-            for p in self.editors:
-                if self.editors[p] == editor:
-                    path = p
-                    break
-            if path:
-                try:
-                    f = open(path,'w+')
-                except:
-                    self.statusBar().message('Could not write to %s' % (self.filename),2000)
-                    return
-        
-                f.write(editor.text())
-                f.close()
-        
-                #self.setCaption(path)
-                self.statusBar().showMessage('File %s saved' % (path), 2000)
-                
+            editor.save(self.statusBar())
+        else:
+            self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
 
     def openInEditor(self, fileIndex):
         
@@ -180,6 +173,7 @@ class MainWindow(QMainWindow):
             
             self.editorGroups[tabGroup].setCurrentIndex(index)
             editor.setFocus()
+            editor.path = path
     
         
     """
