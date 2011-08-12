@@ -117,8 +117,10 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
                 "assets/phone/waiting_screen/label-ready.png")
             controller:declare_resource("start_button",
                 "assets/phone/waiting_screen/button-startplaying.png")
-            controller:declare_resource("waiting_text",
-                "assets/phone/waiting_screen/text-waiting.png")
+            controller:declare_resource("select_opponent_text",
+                "assets/phone/waiting_screen/text-opponent.png")
+            controller:declare_resource("please_wait",
+                "assets/phone/waiting_screen/text-wait_for_hand.png")
             for i = 1,6 do
                 controller:declare_resource("player_"..i,
                     "assets/phone/waiting_screen/player"..i..".png")
@@ -152,6 +154,9 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
                 "assets/phone/betting/button-help.png")
             controller:declare_resource("new_game_button",
                 "assets/phone/betting/button-new-game.png")
+            controller:declare_resource("folded_text",
+                "assets/phone/betting/text-folded.png")
+
             controller:declare_resource("click_sound",
                 "assets/sounds/enter.mp3")
 
@@ -378,6 +383,9 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
                 controller.router:set_active_component(RemoteComponents.BETTING)
                 controller.router:notify()
 
+                controller.router:get_active_controller():set_hole_cards(hole)
+
+                --[[
                 controller:declare_resource("card1",
                     "assets/cards/"..getCardImageName(hole[1])..".png")
                 controller:declare_resource("card2",
@@ -385,6 +393,7 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
 
                 controller:add_image("card1", 60, 70, 100*3, 130*3)
                 controller:add_image("card2", 280, 90, 100*3, 130*3)
+                --]]
             end
 
             controller.state = ControllerStates.BETTING

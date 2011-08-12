@@ -7,6 +7,7 @@ function(ctrl, router, controller, ...)
     local y_ratio = controller.y_ratio
 
     local view = controller.factory:Group()
+    local betting_buttons_view = controller.factory:Group()
 
     local buttons = controller.factory:Image{
         src = "buttons",
@@ -48,8 +49,6 @@ function(ctrl, router, controller, ...)
         )
     }
 
-    blah = check_button
-
     local wooden_buttons = {
         exit = controller.factory:Image{
             src = "exit_button",
@@ -68,17 +67,65 @@ function(ctrl, router, controller, ...)
         }
     }
 
-    view:add(buttons, wooden_bar)
-    view:add(check_button.group)
+    local folded_text = controller.factory:Image{
+        src = "folded_text",
+        position = {0, 870*y_ratio/2},
+        size = {640*x_ratio, 86*y_ratio},
+        anchor_point = {0, 86*y_ratio/2}
+    }
+    folded_text:hide()
+
+    betting_buttons_view:add(buttons, check_button.group, betting_buttons.fold.group,
+        betting_buttons.call.group, betting_buttons.bet.group,
+        betting_buttons.plus.group, betting_buttons.minus.group)
+    view:add(betting_buttons_view, wooden_bar, wooden_buttons.exit,
+        wooden_buttons.new_game, wooden_buttons.help, folded_text)
+
     check_button:hide()
-    for k,button in pairs(betting_buttons) do
-        view:add(button.group)
-    end
-    for k,button in pairs(wooden_buttons) do
-        view:add(button)
-    end
 
     controller.screen:add(view)
+
+    local card1, card2
+    function ctrl:set_hole_cards(hole)
+        if card1 then card1:unparent() end
+        if card2 then card2:unparent() end
+
+        controller:declare_resource("card1",
+            "assets/cards/"..getCardImageName(hole[1])..".png")
+        controller:declare_resource("card2",
+            "assets/cards/"..getCardImageName(hole[2])..".png")
+
+        card1 = controller.factory:Image{
+            src = "card1",
+            position = {60*x_ratio, 70*y_ratio},
+            size = {300*x_ratio, 390*y_ratio}
+        }
+        card2 = controller.factory:Image{
+            src = "card2",
+            position = {280*x_ratio, 90*y_ratio},
+            size = {300*x_ratio, 390*y_ratio}
+        }
+        view:add(card1, card2)
+    end
+
+    function ctrl:fold()
+        folded_text:show()
+        betting_buttons_view:hide()
+
+        card1:animate{
+            x = 60*x_ratio-200*x_ratio,
+            y = 70*y_ratio-200*y_ratio,
+            z_rotation = 30,
+            duration = 800
+        }
+        card2.z_rotation = {0, 250*x_ratio, 0}
+        card2:animate{
+            x = 280*x_ratio+200*x_ratio,
+            y = 90*y_ratio-200*y_ratio,
+            z_rotation = -30,
+            duration = 800
+        }
+    end
 
     function ctrl:call_or_check(string)
         if string == "check" then
@@ -103,6 +150,13 @@ function(ctrl, router, controller, ...)
                     button:reset()
                     if event.cb then event:cb() end
                 end
+                if button_name == "fold" then
+                    local lambda = button.callback
+                    button.callback = function()
+                        ctrl:fold()
+                        lambda()
+                    end
+                end
                 button:press()
             end
         end
@@ -111,8 +165,12 @@ function(ctrl, router, controller, ...)
     function ctrl:notify(event)
         if ctrl:is_active_component() then
             view:show()
+            betting_buttons_view:show()
+            folded_text:hide()
         else
             view:hide()
+            betting_buttons_view:show()
+            folded_text:hide()
         end
     end
 
