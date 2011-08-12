@@ -27,5 +27,6 @@
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
 
 - (NSDictionary *)do_find_child:(NSArray *)args;
+- (NSNumber *)do_clear:(NSArray *)args;
 
 @end

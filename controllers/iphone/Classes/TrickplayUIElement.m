@@ -1001,6 +1001,7 @@
 }
 
 - (id)do_unparent:(NSArray *)args {
+    [self do_complete_animation:nil];
     [self removeFromSuperview];
     return [NSNumber numberWithBool:YES];
 }

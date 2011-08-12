@@ -144,6 +144,8 @@
 
 /**
  * Creates Images and stores them
+ *
+ * MUST NOT USE AUTORELEASE POOL FOR ADVANCED_UI OBJECTS!
  */
 
 - (void)createImage:(NSString *)imageID withArgs:(NSDictionary *)args {
@@ -234,6 +236,16 @@
     [self reply:JSON_String];
 }
 
+- (void)destroyObjectReply:(NSString *)ID absolute:(BOOL)absolute {
+    if (!socketManager) {
+        return;
+    }
+    
+    NSDictionary *object = [NSDictionary dictionaryWithObjectsAndKeys:ID, @"id", [NSNumber numberWithBool:absolute], @"destroyed", nil];
+    NSString *JSON_String = [object yajl_JSONString];
+    [self reply:JSON_String];
+}
+
 - (void)createObject:(NSDictionary *)object {
     //NSLog(@"Creating object %@", object);
     
@@ -281,26 +293,34 @@
         return;
     }
     
+    BOOL destroy_absolutely = NO;
     if ([rectangles objectForKey:ID]) {
+        TrickplayRectangle *rectangle = [rectangles objectForKey:ID];
+        destroy_absolutely = (rectangle.retainCount <= 1);
         [rectangles removeObjectForKey:ID];
     } else if ([groups objectForKey:ID]) {
         TrickplayGroup * group = [groups objectForKey:ID];
-        for (TrickplayUIElement *element in group.view.subviews) {
-            [element do_unparent:nil];
-        }
+        [group do_clear:nil];
+        destroy_absolutely = (group.retainCount <= 1);
         [groups removeObjectForKey:ID];
     } else if ([textFields objectForKey:ID]) {
+        TrickplayText *text = [textFields objectForKey:ID];
+        destroy_absolutely = (text.retainCount <= 1);
         [textFields removeObjectForKey:ID];
     } else if ([webTexts objectForKey:ID]) {
+        TrickplayTextHTML *webText = [webTexts objectForKey:ID];
+        destroy_absolutely = (webText.retainCount <= 1);
         [webTexts removeObjectForKey:ID];
     } else if ([images objectForKey:ID]) {
+        TrickplayImage *image = [images objectForKey:ID];
+        destroy_absolutely = (image.retainCount <= 1);
         [images removeObjectForKey:ID];
     } else {
         [self reply:nil];
         return;
     }
     
-    [self createObjectReply:ID];
+    [self destroyObjectReply:ID absolute:destroy_absolutely];
 }
 
 - (void)setValuesForObject:(NSDictionary *)JSON_object {
