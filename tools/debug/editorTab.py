@@ -3,7 +3,7 @@ from PyQt4.QtCore import *
 
 class EditorTabWidget(QTabWidget):
 
-    def __init__(self, parent = None):
+    def __init__(self, main, parent = None):
         
         QTabWidget.__init__(self, parent)
         
@@ -11,6 +11,24 @@ class EditorTabWidget(QTabWidget):
         self.setTabsClosable(True)
         self.setMovable(True)
         self.setCurrentIndex(-1)
+        self.setAcceptDrops(True)
+        
+        self.main = main
+        
+        QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
+        
+    def dragEnterEvent(self, event):
+        event.acceptProposedAction()
+        
+    def dropEvent(self, event):
+        self.main.dropFileEvent(event, 'tab', self)
+        
+    def closeTab(self, index):
+        print('closing', index)
+        self.removeTab(index)
+        if 0 == self.count():
+            self.close()
+            self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
 
 """
 Subclass of dock to handle drag/drop events
@@ -30,7 +48,7 @@ class EditorDock(QDockWidget):
         event.acceptProposedAction()
         
     def dropEvent(self, event):
-        self.main.dropFileEvent(event)
+        self.main.dropFileEvent(event, 'dock')
         
         #print('From', event.source(), event.mimeData().hasText())
         #if event.mimeData().hasText():

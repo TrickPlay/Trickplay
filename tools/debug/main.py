@@ -130,10 +130,19 @@ class MainWindow(QMainWindow):
     def getFileSystemView(self):
         return self.ui.fileSystem
     
+    def getEditorTabs(self):
+        return self.editorGroups
+    
     def EditorTabWidget(self, parent = None):
-        tab = EditorTabWidget(self.splitter)
+        tab = EditorTabWidget(self, self.splitter)
         tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
         return tab
+    
+    def getTabWidgetNumber(self, w):
+        for n in range(len(self.editorGroups)):
+            if self.editorGroups[n] == w:
+                return n
+        return None
 
     def save(self):
         editor = self.app.focusWidget()
@@ -142,39 +151,49 @@ class MainWindow(QMainWindow):
         else:
             self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
 
-    def dropFileEvent(self, event):
+    def dropFileEvent(self, event, src, w = None):
         print('From', event.source(), event.mimeData().hasText())
+        
+        if len(self.editorGroups) > 0:
+            # Prevent the drop event from firing twice
+            # TODO Is this even required?
+            if src == 'dock':
+                return
+            
+        n = self.getTabWidgetNumber(w)
         
         # This external file can be opened as plain text
         if event.mimeData().hasText():
             event.acceptProposedAction()
             path = str(event.mimeData().urls()[0].path())
-            self.newEditor(path)
+            self.newEditor(path, n)
             
-        # This file is from the file system
+        # This file is from the fileSystem view
         elif event.source() == self.getFileSystemView():
-            self.openInEditor(event.source().currentIndex())
+            self.openInEditor(event.source().currentIndex(), n)
             
         else:
             print('Failed to open dropped file.')
 
 
-    def openInEditor(self, fileIndex):
+    def openInEditor(self, fileIndex, n = None):
         
         if not self.fileModel.isDir(fileIndex):
             
             #name = fileIndex.data(QFileSystemModel.FileNameRole)
             #name = name.toString()
             
-            try:
-                path = self.fileModel.filePath(fileIndex)
-                self.newEditor(path)
-            except Exception, e:
-                print('Failed to load file')
-                print(e)
+            #try:
+            path = self.fileModel.filePath(fileIndex)
+            self.newEditor(path, n)
+            #except Exception, e:
+            #    print('Failed to load file')
+            #    print(e)
             
             
-    def newEditor(self, path):
+    def newEditor(self, path, tabGroup = None):
+        
+        print('tg', tabGroup)
         
         path = str(path)
         name = os.path.basename(str(path))
@@ -187,28 +206,32 @@ class MainWindow(QMainWindow):
         else:
             editor.readFile(path)
         
-        if len(self.editorGroups) == 0:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
-        elif len(self.editorGroups) == 1:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
+        nTabGroups = len(self.editorGroups)
         
-        index = None
-        tabGroup = None
-        if len(self.editors) <= 1:
-            index = self.editorGroups[len(self.editors)].addTab(editor, name)
-            tabGroup = len(self.editors)
-        else:
-            index = self.editorGroups[0].addTab(editor, name)
+        # If there is already one tab group, create a new one in split view and open the file there  
+        if 1 == nTabGroups:
+            self.editorGroups.append(self.EditorTabWidget(self.splitter))
+            tabGroup = 1
+        
+        # If there are no tab groups, create the first one
+        elif 0 == nTabGroups:
+            self.editorGroups.append(self.EditorTabWidget(self.splitter))
             tabGroup = 0
             
+        # Default to opening in the first tab group
+        elif not tabGroup:
+            tabGroup = 0
+            
+        print('tg', tabGroup)
+        
+        index = self.editorGroups[tabGroup].addTab(editor, name)
+        
         if not self.editors.has_key(path):
             self.editors[path] = editor
         
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()
         editor.path = path
-                
-    
         
     """
     Search for a node by Gid or Name
