@@ -1,4 +1,33 @@
+local function handle_set_children(self, children)
+    local __children = rawget(self, "__children")
+    local result = {}
+    for i = 1 , # children do
+        local child = children[i]
+        local id = rawget(child, "id")
+        local T = rawget(child, "type")
+        if id and T then
+            table.insert( result , id )
 
+            -- Child must know it has a parent
+            -- First remove old parent
+            local __parent = rawget(child, "__parent")
+
+            if __parent then
+                local __children2 = rawget(__parent.parent, "__children")
+                __children2[id] = nil
+            end
+            
+            -- Give the child its new parent
+            local parent = setmetatable({parent = self}, {__mode = "v"})
+            rawset(child, "__parent", parent)
+
+            -- Set child as a child to self
+            __children[id] = child
+        end
+    end
+
+    return result
+end
 
 --=============================================================================
 
@@ -17,6 +46,15 @@ local function UIElement()
 
     function call:set(properties)
         assert(type(properties) == "table")
+
+        local children = properties.children
+        if children and type(children == "table") then
+            -- Remove all children from self
+            rawset(self, "__children", {})
+
+            handle_set_children(self, children)
+        end
+
         self("set", properties)
     end
 
@@ -41,6 +79,18 @@ local function UIElement()
     end
 
     function call:unparent()
+        local __parent = rawget(self, "__parent")
+        if __parent then
+            local id = rawget(self, "id")
+
+            -- Remove parent from child
+            rawset(self, "__parent", nil)
+
+            -- Remove child from parent
+            local __children = rawget(__parent.parent, "__children")
+            __children[id] = nil
+        end
+
         self("unparent")
     end
 
@@ -167,14 +217,11 @@ local function GroupClass()
     function set:children( children )
         -- When setting the children, we have a table of proxy objects. All we
         -- need to tell the remote end is a list of ids.
-        local result = {}
-        for i = 1 , # children do
-            local id = children[ i ].id
-            local T = children[ i ].type
-            if id and T then
-                table.insert( result , id )
-            end
-        end
+
+        -- Remove all children from self
+        rawset(self, "__children", {})
+
+        local result = handle_set_children(self, children)
         self( "set_children" , result )
     end
     
@@ -182,14 +229,8 @@ local function GroupClass()
         -- Adding is similar to setting children, except we get passed many
         -- proxies and we simply create an array of ids.
         local children = {...}
-        local result = {}
-        for i = 1 , # children do
-            local id = children[ i ].id
-            local T = children[ i ].type
-            if id and T then
-                table.insert( result , id )
-            end
-        end
+        local result = handle_set_children(self, children)
+
         self( "add" , result )
     end
     
@@ -201,12 +242,31 @@ local function GroupClass()
             local T = children[ i ].type
             if id and T then
                 table.insert( result , id )
+
+                -- Child must know it has a parent
+                local __parent = rawget(child, "__parent")
+                if __parent and __parent.parent == self then
+                    -- Remove parent from child
+                    rawset(child, "__parent", nil)
+                    -- Remove child from parent
+                    local __children = rawget(parent, "__children")
+                    __children[id] = nil
+                end
             end
         end
         self( "remove" , result )
     end
     
     function call:clear()
+        -- Remove all parent references from the children
+        local __children = rawget(self, "__children")
+        for id,child in pairs(__children) do
+            rawset(child, "__parent", nil)
+        end
+
+        -- Remove all children from parent
+        rawset(self, "__children", {})
+
         self( "clear" )
     end
     
