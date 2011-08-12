@@ -29,6 +29,8 @@ private:
 
 //-----------------------------------------------------------------------------
 
+#ifndef TP_PRODUCTION
+
 class DebugUIRequestHandler: public Handler
 {
 public:
@@ -400,6 +402,8 @@ private:
 	}
 };
 
+#endif // TP_PRODUCTION
+
 //-----------------------------------------------------------------------------
 
 class ListAppsRequestHandler : public Handler
@@ -598,7 +602,12 @@ HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
     handlers.push_back( new ListAppsRequestHandler( context ) );
 	handlers.push_back( new LaunchAppRequestHandler( context ) );
 	handlers.push_back( new CurrentAppRequestHandler( context ) );
+
+#ifndef TP_PRODUCTION
+
 	handlers.push_back( new DebugUIRequestHandler( context ) );
+
+#endif
 }
 
 //-----------------------------------------------------------------------------
