@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Wed Aug 10 10:37:39 2011
+# Created: Thu Aug 11 12:20:36 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,17 +32,14 @@ class Ui_MainWindow(object):
         self.dockWidget_4 = QtGui.QDockWidget(self.centralwidget)
         self.dockWidget_4.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
         self.dockWidget_4.setObjectName(_fromUtf8("dockWidget_4"))
-        self.dockWidgetContents_5 = QtGui.QWidget()
-        self.dockWidgetContents_5.setObjectName(_fromUtf8("dockWidgetContents_5"))
-        self.gridLayout = QtGui.QGridLayout(self.dockWidgetContents_5)
+        self.editorDockBox = QtGui.QWidget()
+        self.editorDockBox.setObjectName(_fromUtf8("editorDockBox"))
+        self.gridLayout = QtGui.QGridLayout(self.editorDockBox)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.editor = QtGui.QTabWidget(self.dockWidgetContents_5)
-        self.editor.setDocumentMode(True)
-        self.editor.setTabsClosable(True)
-        self.editor.setMovable(True)
-        self.editor.setObjectName(_fromUtf8("editor"))
-        self.gridLayout.addWidget(self.editor, 0, 0, 1, 1)
-        self.dockWidget_4.setWidget(self.dockWidgetContents_5)
+        self.editorDock = QtGui.QHBoxLayout()
+        self.editorDock.setObjectName(_fromUtf8("editorDock"))
+        self.gridLayout.addLayout(self.editorDock, 0, 1, 1, 1)
+        self.dockWidget_4.setWidget(self.editorDockBox)
         self.gridLayout_4.addWidget(self.dockWidget_4, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -157,18 +154,19 @@ class Ui_MainWindow(object):
         self.action_Exit = QtGui.QAction(MainWindow)
         self.action_Exit.setMenuRole(QtGui.QAction.QuitRole)
         self.action_Exit.setObjectName(_fromUtf8("action_Exit"))
+        self.action_Save = QtGui.QAction(MainWindow)
+        self.action_Save.setObjectName(_fromUtf8("action_Save"))
+        self.menuFile.addAction(self.action_Save)
         self.menuFile.addAction(self.action_Exit)
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.editor.setCurrentIndex(-1)
         QtCore.QObject.connect(self.lineEdit, QtCore.SIGNAL(_fromUtf8("returnPressed()")), self.button_Search.click)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         MainWindow.setTabOrder(self.fileSystem, self.button_Search)
         MainWindow.setTabOrder(self.button_Search, self.lineEdit)
         MainWindow.setTabOrder(self.lineEdit, self.inspector)
         MainWindow.setTabOrder(self.inspector, self.property)
-        MainWindow.setTabOrder(self.property, self.editor)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay UI Tree Viewer", None, QtGui.QApplication.UnicodeUTF8))
@@ -182,5 +180,8 @@ class Ui_MainWindow(object):
         self.pushAppButton.setText(QtGui.QApplication.translate("MainWindow", "Push application to selected device", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  File System", "texty7", QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "&Exit", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Exit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Save.setText(QtGui.QApplication.translate("MainWindow", "&Save", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Save.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
 

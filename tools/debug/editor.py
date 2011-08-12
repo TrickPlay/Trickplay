@@ -17,7 +17,15 @@ class LuaEditor(QsciScintilla):
     def __init__(self, parent=None):
         super(LuaEditor, self).__init__(parent)
 
-        self.SendScintilla(QsciScintilla.SCI_SETTABWIDTH, 4)
+        self.setTabWidth(4)
+        
+        self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        self.setAutoIndent(1)
+        self.setIndentationWidth(4)
+        self.setIndentationGuides(1)
+        self.setIndentationsUseTabs(0)
+        self.setAutoCompletionThreshold(2)
+        #self.SendScintilla(QsciScintilla.SCI_SETTABWIDTH, 4)
     
         # Set the default font
         font = QFont()
