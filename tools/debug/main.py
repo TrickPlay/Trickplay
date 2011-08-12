@@ -16,6 +16,7 @@ from push import TrickplayPushApp
 from connection import CON
 from wizard import Wizard
 from files import FileSystemModel
+from editorTab import EditorTabWidget, EditorDock
 
 class MainWindow(QMainWindow):
     
@@ -95,18 +96,26 @@ class MainWindow(QMainWindow):
     """
     def createEditor(self):
         
-        # Dock in MainWindow
-        self.editorDock = QtGui.QDockWidget(self.centralwidget)
-        self.editorDock.setAcceptDrops(True)
-        self.editorDock.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
-        self.editorDock.setObjectName("editorDock")
-        self.editorDock.setWindowTitle("Text Editor")
-        
         self.splitter = QSplitter()
-        self.editorLayout = QHBoxLayout(self.editorDock)
-
         
-        self.editorDock.addWidget(self.splitter)
+        mainGrid = QGridLayout(self.ui.centralwidget)
+        
+        # Dock in MainWindow
+        dock = EditorDock(self.ui.centralwidget)
+        
+        frame = QWidget()
+        grid = QGridLayout(frame)
+        hbox = QHBoxLayout()
+        grid.addLayout(hbox, 0, 1, 1, 1)
+        
+        dock.setWidget(frame)
+        
+        dock.setWidget(self.splitter)
+        
+        mainGrid.addWidget(dock, 0, 0, 1, 1)
+        
+        print(frame.width(), frame.height())
+        
         self.editorGroups = []
         self.editors = {}
 
@@ -115,19 +124,15 @@ class MainWindow(QMainWindow):
     """
     def createFileSystem(self, appPath):
         
-        #QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
+        QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
         
         self.fileModel = FileSystemModel(self.ui.fileSystem, appPath)
         
 
     
     def EditorTabWidget(self, parent = None):
-        tab = QTabWidget(self.splitter)
-        tab.setDocumentMode(True)
-        tab.setTabsClosable(True)
-        tab.setMovable(True)
+        tab = EditorTabWidget(self.splitter)
         tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
-        tab.setCurrentIndex(-1)
         return tab
 
     def save(self):

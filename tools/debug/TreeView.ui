@@ -25,30 +25,7 @@
   <property name="windowTitle">
    <string>Trickplay Editor</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_4">
-    <item row="0" column="0">
-     <widget class="QDockWidget" name="dockWidget_4">
-      <property name="acceptDrops">
-       <bool>true</bool>
-      </property>
-      <property name="features">
-       <set>QDockWidget::DockWidgetClosable</set>
-      </property>
-      <property name="windowTitle">
-       <string>  Text Editor</string>
-      </property>
-      <widget class="QWidget" name="editorDockBox">
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="1">
-         <layout class="QHBoxLayout" name="editorDock"/>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+  <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>

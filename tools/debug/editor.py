@@ -97,10 +97,10 @@ class LuaEditor(QsciScintilla):
         except:
             statusBar.message('Could not write to %s' % (path),2000)
             return
-
+        
         f.write(self.text())
         f.close()
-
+        
         statusBar.showMessage('File %s saved' % (path), 2000)
             
 if __name__ == "__main__":
