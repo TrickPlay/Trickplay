@@ -79,7 +79,7 @@ class LuaEditor(QsciScintilla):
         #self.SendScintilla(QsciScintilla.SCI_SETHSCROLLBAR, 0)
 
         # not too small
-        self.setMinimumSize(600, 450)
+        #self.setMinimumSize(600, 450)
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
