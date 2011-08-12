@@ -27,7 +27,7 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 		{
 			name     = "text_s",
 			text     = txt,
-			font     = "DejaVu Sans Condensed 32px",
+			font     = "DejaVu Sans Condensed normal 32px",
 			color    = "000000"
 		}
 		t_shadow.anchor_point = {t_shadow.w/2,t_shadow.h/2}
@@ -41,7 +41,7 @@ FocusableImage = Class(function(focusimg, pos, txt, image_clone, focus_clone,ent
 		{
 			name     = "text",
 			text     = txt,
-			font     = "DejaVu Sans Condensed 32px",
+			font     = "DejaVu Sans Condensed normal 32px",
 			color    = "FFFFFF"
 		}
 		t.anchor_point = {t.w/2,t.h/2}
@@ -138,7 +138,7 @@ VertButtonCarousel = Class(function(
 	menu.name = Text
 	{
 		text = name,
-		font = "DejaVu Sans Bold 36px",
+		font = "DejaVu Sans Bold normal 36px",
 		color = "FFFFFF",
 	}
 --[[
@@ -171,7 +171,7 @@ VertButtonCarousel = Class(function(
 		local txt = Text
 		{
 			text  = options[i],
-			font  = "DejaVu Sans Condensed 32px",
+			font  = "DejaVu Sans Condensed normal 32px",
 			color = "FFFFFF",
 			--opacity = 0
 		}
@@ -184,7 +184,7 @@ VertButtonCarousel = Class(function(
 		local t_shadow = Text
 		{
 			text  = options[i],
-			font  = "DejaVu Sans Condensed 32px",
+			font  = "DejaVu Sans Condensed normal 32px",
 			color = "000000",
 			--opacity = 0
 		}
