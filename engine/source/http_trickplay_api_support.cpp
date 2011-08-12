@@ -10,25 +10,16 @@ class Handler : public HttpServer::RequestHandler
 {
 public:
 
-    Handler( TPContext * _context , const String & _path )
+    Handler( TPContext * _context , const String & path )
     :
-        context( _context ),
-        path( _path )
+    	HttpServer::RequestHandler( _context->get_http_server() , path ),
+        context( _context )
     {
-        g_assert( context );
-
-        context->get_http_server()->register_handler( path , this );
-    }
-
-    virtual ~Handler()
-    {
-        context->get_http_server()->unregister_handler( path );
     }
 
 protected:
 
     TPContext * context;
-    String      path;
 
 private:
 
