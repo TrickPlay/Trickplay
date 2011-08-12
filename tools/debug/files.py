@@ -34,9 +34,15 @@ class FileSystemModel(QFileSystemModel):
 
     def contextMenu(self, point):
         self.popMenu.exec_( self.view.mapToGlobal(point) )
-        
-    def delete(self):
+    
+    def currentIndex(self):
         indexList = self.view.selectedIndexes()
         if len(indexList) == 1:
-            i = indexList[0]
+            return indexList[0]
+        else:
+            return None
+    
+    def delete(self):
+        i = self.currentIndex()
+        if i:
             success = self.remove(i)

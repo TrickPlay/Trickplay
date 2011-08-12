@@ -16,6 +16,7 @@ class LuaEditor(QsciScintilla):
 
     def __init__(self, parent=None):
         super(LuaEditor, self).__init__(parent)
+        self.setAcceptDrops(False)
 
         self.setTabWidth(4)
         

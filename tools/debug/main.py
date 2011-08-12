@@ -1,4 +1,4 @@
-
+import os
 import sys
 import signal
 
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
         mainGrid = QGridLayout(self.ui.centralwidget)
         
         # Dock in MainWindow
-        dock = EditorDock(self.ui.centralwidget)
+        dock = EditorDock(self, self.ui.centralwidget)
         
         frame = QWidget()
         grid = QGridLayout(frame)
@@ -114,8 +114,6 @@ class MainWindow(QMainWindow):
         
         mainGrid.addWidget(dock, 0, 0, 1, 1)
         
-        print(frame.width(), frame.height())
-        
         self.editorGroups = []
         self.editors = {}
 
@@ -123,12 +121,14 @@ class MainWindow(QMainWindow):
     Set up the file system model
     """
     def createFileSystem(self, appPath):
-        
-        QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
-        
+        #QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
         self.fileModel = FileSystemModel(self.ui.fileSystem, appPath)
         
-
+    def getFileSystemModel(self):
+        return self.fileModel
+    
+    def getFileSystemView(self):
+        return self.ui.fileSystem
     
     def EditorTabWidget(self, parent = None):
         tab = EditorTabWidget(self.splitter)
@@ -142,43 +142,72 @@ class MainWindow(QMainWindow):
         else:
             self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
 
+    def dropFileEvent(self, event):
+        print('From', event.source(), event.mimeData().hasText())
+        
+        # This external file can be opened as plain text
+        if event.mimeData().hasText():
+            event.acceptProposedAction()
+            path = str(event.mimeData().urls()[0].path())
+            self.newEditor(path)
+            
+        # This file is from the file system
+        elif event.source() == self.getFileSystemView():
+            self.openInEditor(event.source().currentIndex())
+            
+        else:
+            print('Failed to open dropped file.')
+
+
     def openInEditor(self, fileIndex):
         
         if not self.fileModel.isDir(fileIndex):
             
-            name = fileIndex.data(QFileSystemModel.FileNameRole)
-            name = name.toString()
+            #name = fileIndex.data(QFileSystemModel.FileNameRole)
+            #name = name.toString()
             
-            path = self.fileModel.filePath(fileIndex)
+            try:
+                path = self.fileModel.filePath(fileIndex)
+                self.newEditor(path)
+            except Exception, e:
+                print('Failed to load file')
+                print(e)
             
-            editor = LuaEditor()
             
-            # If the file is already open, just use the open document
-            if self.editors.has_key(path):
-                editor.setDocument(self.editors[path].document())
-            else:
-                editor.readFile(path)
+    def newEditor(self, path):
+        
+        path = str(path)
+        name = os.path.basename(str(path))
             
-            if len(self.editorGroups) == 0:
-                self.editorGroups.append(self.EditorTabWidget(self.splitter))
-            elif len(self.editorGroups) == 1:
-                self.editorGroups.append(self.EditorTabWidget(self.splitter))
+        editor = LuaEditor()
+        
+        # If the file is already open, just use the open document
+        if self.editors.has_key(path):
+            editor.setDocument(self.editors[path].document())
+        else:
+            editor.readFile(path)
+        
+        if len(self.editorGroups) == 0:
+            self.editorGroups.append(self.EditorTabWidget(self.splitter))
+        elif len(self.editorGroups) == 1:
+            self.editorGroups.append(self.EditorTabWidget(self.splitter))
+        
+        index = None
+        tabGroup = None
+        if len(self.editors) <= 1:
+            index = self.editorGroups[len(self.editors)].addTab(editor, name)
+            tabGroup = len(self.editors)
+        else:
+            index = self.editorGroups[0].addTab(editor, name)
+            tabGroup = 0
             
-            index = None
-            tabGroup = None
-            if len(self.editors) <= 1:
-                index = self.editorGroups[len(self.editors)].addTab(editor, name)
-                tabGroup = len(self.editors)
-            else:
-                index = self.editorGroups[0].addTab(editor, name)
-                tabGroup = 0
+        if not self.editors.has_key(path):
+            self.editors[path] = editor
+        
+        self.editorGroups[tabGroup].setCurrentIndex(index)
+        editor.setFocus()
+        editor.path = path
                 
-            if not self.editors.has_key(path):
-                self.editors[path] = editor
-            
-            self.editorGroups[tabGroup].setCurrentIndex(index)
-            editor.setFocus()
-            editor.path = path
     
         
     """
