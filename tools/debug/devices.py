@@ -14,11 +14,13 @@ PORT = Qt.UserRole + 3
     
 class TrickplayDiscovery(ServiceDiscovery):
     
-    def __init__(self, widget):
+    def __init__(self, widget, main):
         
         ServiceDiscovery.__init__(self)
         
         self.widget = widget
+        
+        self.main = main
         
         QObject.connect(self.widget, SIGNAL('currentIndexChanged(int)'), self.service_selected)
     
@@ -34,6 +36,8 @@ class TrickplayDiscovery(ServiceDiscovery):
         
         if not name or not address or not port:
             return
+        
+        self.main.clearTree()
         
         print(index,name,address,port)
         
@@ -150,6 +154,8 @@ class TrickplayDiscovery(ServiceDiscovery):
         index = self.widget.findText(name)
         
         self.widget.removeItem(index)
+        
+        self.main.clearTree()
         
         #for item in list:
         #    

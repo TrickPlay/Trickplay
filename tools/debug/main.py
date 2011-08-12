@@ -18,7 +18,7 @@ from wizard import Wizard
 
 class MainWindow(QMainWindow):
     
-    def __init__(self, parent = None):
+    def __init__(self, app, parent = None):
         
         # Main window setup
         QWidget.__init__(self, parent)
@@ -34,14 +34,22 @@ class MainWindow(QMainWindow):
         # Setup
         self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
         
+        # Created Editor
+        self.splitter = QSplitter()
+        self.ui.editorDock.addWidget(self.splitter)
+        self.editorGroups = []
         self.editors = {}
         
+        # Toolbar
+        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.save)
+        
+        # Models
         self.inspectorModel = ElementModel()
         self.propertyModel = ElementModel()
                 
         # Buttons
         QObject.connect(self.ui.button_Refresh, SIGNAL("clicked()"), self.refresh)        
-        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.search)
         QObject.connect(self.ui.pushAppButton, SIGNAL("clicked()"),  self.pushApp)
         
@@ -50,7 +58,17 @@ class MainWindow(QMainWindow):
         
         self.preventChanges = False
         self.path = None
-    
+        
+        QObject.connect(app, SIGNAL('aboutToQuit()'), self.cleanUp)
+        
+        self.app = app
+        
+    """
+    Cleanup code goes here
+    """
+    def cleanUp(self):
+        pass
+        #print('Quitting.')
     
     """
     Initialize with a given app path
@@ -60,7 +78,7 @@ class MainWindow(QMainWindow):
         self.path = path
         self.createTree()
         self.createFileSystem(path)
-        self.discovery = TrickplayDiscovery(self.ui.deviceComboBox)
+        self.discovery = TrickplayDiscovery(self.ui.deviceComboBox, self)
 
     """
     Save window and dock geometry on close
@@ -72,7 +90,7 @@ class MainWindow(QMainWindow):
     
     def pushApp(self):    
         print('Pushing app to', CON.get())
-        tp = TrickplayPushApp(str(self.appPath))
+        tp = TrickplayPushApp(str(self.path))
         tp.push(address = CON.get())
         
             
@@ -95,28 +113,73 @@ class MainWindow(QMainWindow):
         for i in range(1,4):
             header.hideSection(header.logicalIndex(i))
     
-    
-    """
-    """
+    def EditorTabWidget(self, parent = None):
+        tab = QTabWidget(self.splitter)
+        tab.setDocumentMode(True)
+        tab.setTabsClosable(True)
+        tab.setMovable(True)
+        tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
+        tab.setCurrentIndex(-1)
+        return tab
+
+    def save(self):
+        editor = self.app.focusWidget()
+        if isinstance(editor, LuaEditor):
+            path = None
+            for p in self.editors:
+                if self.editors[p] == editor:
+                    path = p
+                    break
+            if path:
+                try:
+                    f = open(path,'w+')
+                except:
+                    self.statusBar().message('Could not write to %s' % (self.filename),2000)
+                    return
+        
+                f.write(editor.text())
+                f.close()
+        
+                #self.setCaption(path)
+                self.statusBar().showMessage('File %s saved' % (path), 2000)
+                
+
     def openInEditor(self, fileIndex):
         
         if not self.fileModel.isDir(fileIndex):
             
-            editor = LuaEditor()
-            
             name = fileIndex.data(QFileSystemModel.FileNameRole)
-            
             name = name.toString()
             
             path = self.fileModel.filePath(fileIndex)
             
-            editor.readFile(path)
+            editor = LuaEditor()
             
-            index = self.ui.editor.addTab(editor, name)
+            # If the file is already open, just use the open document
+            if self.editors.has_key(path):
+                editor.setDocument(self.editors[path].document())
+            else:
+                editor.readFile(path)
             
-            self.editors[index] = editor
+            if len(self.editorGroups) == 0:
+                self.editorGroups.append(self.EditorTabWidget(self.splitter))
+            elif len(self.editorGroups) == 1:
+                self.editorGroups.append(self.EditorTabWidget(self.splitter))
             
-            self.ui.editor.setCurrentIndex(index)
+            index = None
+            tabGroup = None
+            if len(self.editors) <= 1:
+                index = self.editorGroups[len(self.editors)].addTab(editor, name)
+                tabGroup = len(self.editors)
+            else:
+                index = self.editorGroups[0].addTab(editor, name)
+                tabGroup = 0
+                
+            if not self.editors.has_key(path):
+                self.editors[path] = editor
+            
+            self.editorGroups[tabGroup].setCurrentIndex(index)
+            editor.setFocus()
     
         
     """
@@ -479,7 +542,9 @@ class MainWindow(QMainWindow):
             
             gid = 1
         
-        self.inspectorModel.invisibleRootItem().removeRow(0)
+        #self.inspectorModel.invisibleRootItem().removeRow(0)
+        
+        self.clearTree()
         
         self.inspectorModel.initialize(None, True)
         
@@ -491,6 +556,17 @@ class MainWindow(QMainWindow):
         
         self.preventChanges = False
         
+    def clearTree(self):
+        
+        old = self.preventChanges
+        
+        if not old:
+            self.preventChanges = True
+        
+        self.inspectorModel.invisibleRootItem().removeRow(0)
+        
+        if not old:
+            self.preventChanges = False
         
     def exit(self):
         

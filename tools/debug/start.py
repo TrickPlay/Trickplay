@@ -12,7 +12,6 @@ from PyQt4.QtCore import QCoreApplication, QSettings
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-
 def main(argv):
     
     path = None
@@ -31,7 +30,7 @@ def main(argv):
         QCoreApplication.setApplicationName('Trickplay Debugger');
         QCoreApplication.setApplicationVersion('0.0.1');
             
-        main = MainWindow()
+        main = MainWindow(app)
         wizard = Wizard()
         
         path = wizard.start(path)
@@ -45,7 +44,7 @@ def main(argv):
         
         sys.exit(app.exec_())
     
-    # TODO, better way of doing this....
+    # TODO, better way of doing this for 'clean' exit...
     except KeyboardInterrupt:
         pass
 

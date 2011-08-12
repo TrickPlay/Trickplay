@@ -35,23 +35,10 @@
       <property name="windowTitle">
        <string>  Text Editor</string>
       </property>
-      <widget class="QWidget" name="dockWidgetContents_5">
+      <widget class="QWidget" name="editorDockBox">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QTabWidget" name="editor">
-          <property name="currentIndex">
-           <number>-1</number>
-          </property>
-          <property name="documentMode">
-           <bool>true</bool>
-          </property>
-          <property name="tabsClosable">
-           <bool>true</bool>
-          </property>
-          <property name="movable">
-           <bool>true</bool>
-          </property>
-         </widget>
+        <item row="0" column="1">
+         <layout class="QHBoxLayout" name="editorDock"/>
         </item>
        </layout>
       </widget>
@@ -72,6 +59,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="action_Save"/>
     <addaction name="action_Exit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -259,10 +247,21 @@
   </action>
   <action name="action_Exit">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
    <property name="menuRole">
     <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="action_Save">
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <zorder>dockWidget_2</zorder>
@@ -275,7 +274,6 @@
   <tabstop>lineEdit</tabstop>
   <tabstop>inspector</tabstop>
   <tabstop>property</tabstop>
-  <tabstop>editor</tabstop>
  </tabstops>
  <resources/>
  <connections>
