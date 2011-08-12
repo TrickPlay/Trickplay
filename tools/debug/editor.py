@@ -88,8 +88,20 @@ class LuaEditor(QsciScintilla):
             self.markerAdd(nline, self.ARROW_MARKER_NUM)
             
     def readFile(self, path):
-            
         self.setText(open(path).read())
+        
+    def save(self, statusBar):
+        path = self.path
+        try:
+            f = open(path,'w+')
+        except:
+            statusBar.message('Could not write to %s' % (path),2000)
+            return
+
+        f.write(self.text())
+        f.close()
+
+        statusBar.showMessage('File %s saved' % (path), 2000)
             
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -23,12 +23,15 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Trickplay UI Tree Viewer</string>
+   <string>Trickplay Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
      <widget class="QDockWidget" name="dockWidget_4">
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
       <property name="features">
        <set>QDockWidget::DockWidgetClosable</set>
       </property>
@@ -232,7 +235,14 @@
      <item row="0" column="0">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QTreeView" name="fileSystem"/>
+        <widget class="QTreeView" name="fileSystem">
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragOnly</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
