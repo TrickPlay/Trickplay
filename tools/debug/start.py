@@ -39,7 +39,7 @@ def main(argv):
             settings.setValue('path', path)
             
             app.setActiveWindow(main)
-            main.start(path)
+            main.start(path, wizard.filesToOpen())
             main.show()
         
         sys.exit(app.exec_())
