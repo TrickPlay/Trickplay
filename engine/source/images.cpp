@@ -821,9 +821,20 @@ static void foreach_exif_entry( ExifEntry * entry , void * _closure )
 		return;
 	}
 
-	ExifClosure * closure = ( ExifClosure * ) _closure;
+	//.........................................................................
+	// Bail out of types we don't handle
 
-	JSON::Object * tags = closure->tags;
+	switch( entry->format )
+	{
+	case EXIF_FORMAT_UNDEFINED:
+	case EXIF_FORMAT_FLOAT:
+	case EXIF_FORMAT_DOUBLE:
+		return;
+	default:
+		break;
+	}
+
+	//.........................................................................
 
 	unsigned char component_size = exif_format_get_size( entry->format );
 
@@ -835,6 +846,9 @@ static void foreach_exif_entry( ExifEntry * entry , void * _closure )
 	{
 		return;
 	}
+
+	//.........................................................................
+	// Add a prefix based on the IFD
 
 	String name( tag_name );
 
@@ -859,13 +873,22 @@ static void foreach_exif_entry( ExifEntry * entry , void * _closure )
 		return;
 	}
 
+	ExifClosure * closure = ( ExifClosure * ) _closure;
+
+	JSON::Object * tags = closure->tags;
+
+	//.........................................................................
+	// ASCII ones are easy
+
 	if ( entry->format == EXIF_FORMAT_ASCII )
 	{
 		(*tags)[ name ] = String( ( const char * ) entry->data , entry->size );
 		return;
 	}
 
-	if ( entry->components * component_size != entry->size )
+	//.........................................................................
+
+	if ( ( entry->components * component_size ) != entry->size )
 	{
 		return;
 	}
@@ -880,12 +903,6 @@ static void foreach_exif_entry( ExifEntry * entry , void * _closure )
 	{
 		switch( entry->format )
 		{
-		case EXIF_FORMAT_ASCII:
-		case EXIF_FORMAT_UNDEFINED:
-		case EXIF_FORMAT_FLOAT:
-		case EXIF_FORMAT_DOUBLE:
-			break;
-
 		case EXIF_FORMAT_BYTE:
 			array.append( JSON::Value( int( * data ) ) );
 			break;
@@ -925,7 +942,8 @@ static void foreach_exif_entry( ExifEntry * entry , void * _closure )
 			array.append( Util::format("%lu/%lu" , r.numerator , r.denominator ) );
 			break;
 		}
-
+		default:
+			break;
 		}
 
 		data += component_size;
