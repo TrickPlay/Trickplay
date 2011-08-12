@@ -1104,7 +1104,7 @@ function editor_ui.checkBoxGroup(t)
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	text_font = "DejaVu Sans 30px", 
+	text_font = "FreeSans Medium 30px", 
 	text_color = {255,255,255,255}, 
 	box_color = {255,255,255,255},
 	fill_color = {255,255,255,0},

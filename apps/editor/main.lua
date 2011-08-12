@@ -315,6 +315,7 @@ skins = {}
 			end 
 	  	end 
 
+		--[[
 	  	if(input_mode == S_MENU) then
 			if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
 				screen:find_child("menuButton_file").on_focus_out()
@@ -328,6 +329,7 @@ skins = {}
 			screen:grab_key_focus()
 			input_mode = hdr.S_SELECT
 	  	end 
+		]]
 
 	  	for i, j in pairs (g.children) do  
 	       if j.type == "Text" then 
@@ -346,6 +348,7 @@ skins = {}
 	  	end
 
       	if(input_mode == S_MENU) then
+	  --[[
 		if screen:find_child("menuButton_file"):find_child("focus").opacity > 0 then 
 			screen:find_child("menuButton_file").on_focus_out()
 		elseif screen:find_child("menuButton_edit"):find_child("focus").opacity > 0 then 
@@ -355,6 +358,7 @@ skins = {}
 		elseif screen:find_child("menuButton_view"):find_child("focus").opacity > 0 then 
 			screen:find_child("menuButton_view").on_focus_out()
 		end
+		]]
 		screen:grab_key_focus()
 
 		input_mode = hdr.S_SELECT
@@ -410,6 +414,8 @@ skins = {}
 
 
       function screen:on_motion(x,y)
+	  local tab_extra
+
 	  if control == true then 
 		if util.is_in_container_group(x,y) == true and selected_content then 
 			if selected_content.extra.is_in_group ~= true then 
@@ -504,6 +510,14 @@ skins = {}
 										bumo = c	
 									end 
 								end 
+							elseif c.extra.type == "TabBar" then 
+								for h,q in pairs (c.tabs) do 
+									for k,w in pairs (q.children) do 
+										if w.name == actor.name then 
+											tab_extra = c.ui_height
+										end
+									end
+								end 
 							end 
 						end
 					end
@@ -520,7 +534,10 @@ skins = {}
 	             border.position = {x -dx, y -dy}
 		    end 
 	       end 
-	      
+	     	if tab_extra then 
+				border.y = border.y + tab_extra
+			end 
+ 
 	       if(actor.name ~= "scroll_bar" and actor.name ~= "xscroll_bar") then
 	            actor.x =  x - dx 
 	            actor.y =  y - dy  
@@ -611,6 +628,10 @@ skins = {}
 
                end
           end
+
+		  if tab_extra then 
+			anchor_mark.y = anchor_mark.y + tab_extra
+		  end 
 
           if(mouse_state == hdr.BUTTON_DOWN) then
                if (input_mode == hdr.S_RECTANGLE) then 

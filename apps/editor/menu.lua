@@ -284,7 +284,7 @@ menuButton_view.insert_item(2,{type="item", string="Image...", bg=assets("assets
 menuButton_view.items[2]["icon"].opacity = 0
 menuButton_view.insert_item(3,{type="item", string="Small Grid", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.small_grid, icon=assets("assets/menu-checkmark.png")} )
 menuButton_view.items[3]["icon"].opacity = 0
-menuButton_view.insert_item(4,{type="item", string="Medium Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() print ("JJJJJJ") editor.medium_grid() end , icon=assets("assets/menu-checkmark.png")})
+menuButton_view.insert_item(4,{type="item", string="Medium Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() editor.medium_grid() end , icon=assets("assets/menu-checkmark.png")})
 menuButton_view.insert_item(5,{type="item", string="Large Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.large_grid, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.items[5]["icon"].opacity = 0
 menuButton_view.insert_item(6,{type="item", string="White", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.white_bg, icon=assets("assets/menu-checkmark.png")})
@@ -426,6 +426,27 @@ screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButto
 
 	screen:grab_key_focus()
     end 
+----------------------------------------------------------------------------
+-- Deactivate Menu 
+----------------------------------------------------------------------------
+function deactivate_menu()
+	local menu_hide = Rectangle{name = "menu_hide_rect", color = {0,0,0,0}, position = {0,0,0}, size = {menu_bar.w, menu_bar.h}, reactive = true} 
+
+	function menu_hide.on_button_down()
+		return true
+	end 
+
+	screen:add(menu_hide)
+
+end 
+
+----------------------------------------------------------------------------
+-- Reactivate Menu 
+----------------------------------------------------------------------------
+
+function reactivate_menu()
+	screen:remove(screen:find_child("menu_hide_rect"))
+end 
 
 ----------------------------------------------------------------------------
 -- Menu Raise To Top

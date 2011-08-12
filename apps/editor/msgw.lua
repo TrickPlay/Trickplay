@@ -61,7 +61,7 @@ function msg_window.printMsgWindow(txt, name)
 
      msgw:add(msgw_bg)
      input_mode = hdr.S_POPUP
-     local textText = Text{name= name, text = txt, font= "DejaVu Sans 32px",
+     local textText = Text{name= name, text = txt, font= "FreeSans Medium 32px",
      color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
      reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
      msgw:add(textText)     
@@ -72,8 +72,8 @@ function msg_window.printMsgWindow(txt, name)
          msgw_cur_x = msgw_cur_x + string.len(txt) * 20
 	 
      	 for i, j in pairs (projects) do  
-	     --local prj_text = Text {text = j, color = {255,255,255,255}, font= "DejaVu Sans 32px", color = "FFFFFF"}
-	     local prj_text = Text {text = j, color = DEFAULT_COLOR, font= "DejaVu Sans 32px", color = "FFFFFF"}
+	     --local prj_text = Text {text = j, color = {255,255,255,255}, font= "FreeSans Medium 32px", color = "FFFFFF"}
+	     local prj_text = Text {text = j, color = DEFAULT_COLOR, font= "FreeSans Medium 32px", color = "FFFFFF"}
 	     prj_text.reactive = true
 	     prj_text.position = {msgw_cur_x, msgw_cur_y+10}
 	     prj_text.extra.index = i 
@@ -672,7 +672,7 @@ function msg_window.inputMsgWindow(input_purpose, cfn)
      elseif(input_purpose == "projectlist") then 
 		msgw_cur_x = 25
 		if(msgw_focus ~= "") then 
-			msgw:add(Text{name= name, text = "   New Project : ", font= "DejaVu Sans 32px",
+			msgw:add(Text{name= name, text = "   New Project : ", font= "FreeSans Medium 32px",
      		color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
      		reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})  
 		else 
@@ -689,7 +689,7 @@ function msg_window.inputMsgWindow(input_purpose, cfn)
 
      if (input_purpose ~= "yn") then 
 		if(input_purpose == "projectlist") then 
-            input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
+            input_t = Text { name="input", font= "FreeSans Medium 30px", color = "FFFFFF" ,
             position = {25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
             input_box = create_small_input_box(input_t)
             input_box.position = position
