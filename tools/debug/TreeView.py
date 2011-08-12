@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Fri Aug 12 10:32:00 2011
+# Created: Fri Aug 12 11:44:24 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,21 +27,6 @@ class Ui_MainWindow(object):
         MainWindow.setCursor(QtCore.Qt.ArrowCursor)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.gridLayout_4 = QtGui.QGridLayout(self.centralwidget)
-        self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.dockWidget_4 = QtGui.QDockWidget(self.centralwidget)
-        self.dockWidget_4.setAcceptDrops(True)
-        self.dockWidget_4.setFeatures(QtGui.QDockWidget.DockWidgetClosable)
-        self.dockWidget_4.setObjectName(_fromUtf8("dockWidget_4"))
-        self.editorDockBox = QtGui.QWidget()
-        self.editorDockBox.setObjectName(_fromUtf8("editorDockBox"))
-        self.gridLayout = QtGui.QGridLayout(self.editorDockBox)
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.editorDock = QtGui.QHBoxLayout()
-        self.editorDock.setObjectName(_fromUtf8("editorDock"))
-        self.gridLayout.addLayout(self.editorDock, 0, 1, 1, 1)
-        self.dockWidget_4.setWidget(self.editorDockBox)
-        self.gridLayout_4.addWidget(self.dockWidget_4, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1121, 25))
@@ -173,7 +158,6 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.dockWidget_4.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Text Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget_2.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.button_Search.setText(QtGui.QApplication.translate("MainWindow", "Search", None, QtGui.QApplication.UnicodeUTF8))
