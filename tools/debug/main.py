@@ -72,11 +72,15 @@ class MainWindow(QMainWindow):
     """
     Initialize widgets on the main window with a given app path
     """
-    def start(self, path):
+    def start(self, path, openList = None):
         self.path = path
         self.createTree()
         self.createFileSystem(path)
         self.discovery = TrickplayDiscovery(self.ui.deviceComboBox, self)
+        
+        if openList:
+            for file in openList:
+                self.newEditor(file)
 
     """
     Save window and dock geometry on close
@@ -190,8 +194,6 @@ class MainWindow(QMainWindow):
     """
     def newEditor(self, path, tabGroup = None):
         
-        print('tg', tabGroup)
-        
         path = str(path)
         name = os.path.basename(str(path))
             
@@ -218,8 +220,6 @@ class MainWindow(QMainWindow):
         # Default to opening in the first tab group
         elif not tabGroup:
             tabGroup = 0
-            
-        print('tg', tabGroup)
         
         index = self.editorGroups[tabGroup].addTab(editor, name)
         

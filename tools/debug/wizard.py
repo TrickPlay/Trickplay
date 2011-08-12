@@ -3,16 +3,30 @@ import os
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from NewApplicationDialog import Ui_newApplicationDialog
+
+APP = """
+    id          = "{0}"
+    release     = "0",
+    version     = "0.0",
+    name        = "{1}",
+    copyright   = "",
+"""
 
 # Could use QWizard, but this is simpler
 class Wizard():
     
     def __init(self, mainWindow):
         self.mainWindow = mainWindow
+        
+    def filesToOpen(self):
+        return self.openList
     
     
     def start(self, path):
     
+        self.openList = None
+        
         # First get an app path if one wasn't passed in
         if not path:
             userPath = self.chooseDirectoryDialog()
@@ -29,7 +43,7 @@ class Wizard():
                     
                     # If the directory is empty, start the app creator
                     if len(files) <= 0:
-                        self.createAppDialog(userPath)
+                        return self.createAppDialog(userPath)
                         
                     if 'app' in files and 'main.lua' in files:
                         return userPath
@@ -57,7 +71,7 @@ class Wizard():
             if os.path.exists(path) and os.path.isdir(path):
                 files = os.listdir(path)
                 if len(files) <= 0:
-                    self.createAppDialog(path)
+                    return self.createAppDialog(path)
                 else:
                     if 'app' in files and 'main.lua' in files:
                         return path
@@ -81,25 +95,47 @@ class Wizard():
         settings = QSettings()
         dir = settings.value('path', QDir.homePath()).toPyObject()
         
-        dialog = QFileDialog(None, 'Select app directory', dir)
-        
-        #def openDir(d):
-        #    path = str(d)
-        #    print('opened', d)
-        #    dialog.close()
-        #    
-        #QObject.connect(dialog, SIGNAL('directoryEntered(const QString)'), openDir)
+        #dialog = QFileDialog(None, 'Select app directory', dir)
         #
-        dialog.setFileMode(QFileDialog.Directory)
+        #dialog.setFileMode(QFileDialog.Directory)
+        #
+        #if dialog.exec_():
+        #    selected = dialog.selectedFiles()
+        #    path = selected[0]
         
-        if dialog.exec_():
-            selected = dialog.selectedFiles()
-            path = selected[0]
-        
-        #print(path)
+        path = QFileDialog.getExistingDirectory(None, 'Select app directory', dir)
         
         return path
         
     def createAppDialog(self, path):
         print('started app creator!')
-        pass
+        
+        dialog = QDialog()
+        ui = Ui_newApplicationDialog()
+        ui.setupUi(dialog)
+        ui.directory.setText(path)
+        if dialog.exec_():
+            id = str(ui.id.text())
+            name = str(ui.name.text())
+            path = str(path)
+            print('now creating', path, id, name)
+            appPath = os.path.join(path, 'app')
+            appFile = open(appPath, 'w')
+            appFile.write('app = {' + APP.format(id, name) + '}')
+            appFile.close()
+            mainPath = os.path.join(path, 'main.lua')
+            mainFile = open(mainPath, 'w')
+            mainFile.close()
+            self.openList = [appPath, mainPath]
+            return path
+        else:
+            sys.exit()
+
+        
+#def openDir(d):
+#    path = str(d)
+#    print('opened', d)
+#    dialog.close()
+#    
+#QObject.connect(dialog, SIGNAL('directoryEntered(const QString)'), openDir)
+#
