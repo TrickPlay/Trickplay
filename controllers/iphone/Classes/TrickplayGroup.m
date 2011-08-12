@@ -314,7 +314,10 @@
 #pragma mark Function Calls
 
 - (NSNumber *)do_add:(NSArray *)args {
-    NSArray *childIDs = [args objectAtIndex:0];
+    id childIDs = [args objectAtIndex:0];
+    if (![childIDs isKindOfClass:[NSArray class]]) {
+        return [NSNumber numberWithBool:NO];
+    }
     BOOL result = NO;
     for (NSString *childID in childIDs) {
         TrickplayUIElement *child = [manager findObjectForID:childID];
@@ -335,7 +338,7 @@
     for (NSString *childID in childIDs) {
         TrickplayUIElement *child = [manager findObjectForID:childID];
         if (child && [child isDescendantOfView:self.view]) {
-            [child removeFromSuperview];
+            [child do_unparent:nil];
             result = YES;
         }
     }
@@ -385,8 +388,8 @@
 }
 
 - (NSNumber *)do_clear:(NSArray *)args {
-    for (UIView *child in self.view.subviews) {
-        [child removeFromSuperview];
+    for (TrickplayUIElement *child in self.view.subviews) {
+        [child do_unparent:nil];
     }
     
     return [NSNumber numberWithBool:YES];
@@ -457,6 +460,7 @@
 
 - (void)dealloc {
     NSLog(@"TrickplayGroup dealloc: %@", self);
+    [self do_clear:nil];
     self.manager = nil;
     
     [super dealloc];
