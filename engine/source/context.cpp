@@ -1695,6 +1695,8 @@ void TPContext::close_current_app()
 
 void TPContext::reload_app()
 {
+	close_current_app();
+
     App * new_app = NULL;
 
     load_app( &new_app );
