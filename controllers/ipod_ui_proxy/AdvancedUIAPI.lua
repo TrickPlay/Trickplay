@@ -184,6 +184,11 @@ do
                 return
             end
 
+            if key == "__parent" then
+                print("The key", key, "is reserved for referencing parents")
+                return
+            end
+
             local setter = rawget( set , key )
             if type( setter ) == "function" then
                 setter( self , value )
@@ -372,14 +377,17 @@ local function create_local( id , T , proxy_metatable , property_cache )
     
     -- Here it is
     
-    proxy = setmetatable(
-    {
-        id = id ,
-        type = T ,
-        --__pcache = property_cache,
-        __events = {}
+    local events = {}
+
+    proxy_table = {
+        id = id,
+        type = T,
+        --__pcache = property,
+        __events = events,
+        __children = {}
     }
-    , proxy_metatable )
+
+    proxy = setmetatable(proxy_table, proxy_metatable )
     
     -- Store it
     
@@ -394,11 +402,15 @@ local function create_local( id , T , proxy_metatable , property_cache )
     }
     destruction_marker.__gc = function()
 
-        send_request( "destroy" , destruction_payload )
+        local absolute = send_request( "destroy" , destruction_payload ).destroyed
+        --print("absolut vodka?", absolute)
 
     end
 
-    rawset( proxy , "marker" , newudata(destruction_marker) )
+    -- If not the screen then its destructable
+    if id ~= 0 then
+        rawset( proxy , "marker" , newudata(destruction_marker) )
+    end
 
     return proxy
 end
@@ -483,7 +495,7 @@ end
 -- List every proxy !
 
 function mt:list()
-    --dumptable(proxies)
+    dumptable(proxies)
 end
 
 ---------------------------------------------------------------------------
