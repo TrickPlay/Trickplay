@@ -351,7 +351,7 @@ function util.create_on_button_down_f(v)
 							end
 
 							for i,j in pairs (g.children) do 
-								if is_this_container(j) == true then 
+								if util.is_this_container(j) == true then 
 									j:lower_to_bottom()
 								end 
 							end 
@@ -894,7 +894,7 @@ function util.make_attr_t(v)
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color",} end,
-       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset",} end,
+       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset",} end,
        ["ScrollPane"] = function() return {"lock", "skin", "visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
        ["ArrowPane"] = function() return {"lock", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","box_color", "box_width"} end,  
    }
@@ -1045,7 +1045,7 @@ function util.itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "tab_labels", "tabs", "wrap_mode", "wrap", "justify", "alignment", "single_line" }
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "tab_labels", "tabs", "wrap_mode", "wrap", "justify", "alignment", "single_line" }
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
@@ -1207,7 +1207,7 @@ function util.itemTostring(v, d_list, t_list)
 	     	end      
 	 	end 
 
-        for e in values(v.children) do
+        for e in util.values(v.children) do
 	     	result, done_list, todo_list, result2 = util.itemTostring(e, d_list, t_list)
 	     	if(result ~= nil) then 
 		 		itm_str = itm_str..result

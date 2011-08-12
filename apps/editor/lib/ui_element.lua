@@ -735,7 +735,7 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 
 	timeline:add(Text{
 		color = {255,255,255,255},
-		font = "DejaVu Sans 22px",
+		font = "FreeSans Medium 22px",
 		text = "Beginnig", 
 		editable = true,
 		wants_enter = true,
@@ -801,7 +801,7 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 	for i, j in orderedPairs(p) do 
 	    timeline:add(Text{
 		color = {255,255,255,255},
-		font = "DejaVu Sans 22px",
+		font = "FreeSans Medium 22px",
 		text = p[i][1],
 		editable = true,
 		wants_enter = true,
@@ -1301,7 +1301,7 @@ function ui_element.button(t)
 
  --default parameters
     local p = {
-    	text_font = "DejaVu Sans 30px",
+    	text_font = "FreeSans Medium 30px",
     	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	ui_width = 180,
@@ -1372,7 +1372,7 @@ function ui_element.button(t)
 		end 
 		
 		if p.skin == "edit" then 
-			input_mode = S_MENU_M
+			input_mode = hdr.S_MENU_M
 		end 
 
     end
@@ -1518,7 +1518,7 @@ function ui_element.button(t)
 	     	end 
 
 			function b_group:on_button_up(x,y,b,n)
-				--if input_mode ~= S_MENU_M then 
+				--if input_mode ~= hdr.S_MENU_M then 
 				if b_group.single_button == true then 
 	     			button.opacity = 255
             		focus.opacity = 0
@@ -1530,7 +1530,7 @@ function ui_element.button(t)
 
 		--[[
 			function b_group:on_enter()
-				if input_mode ~= S_MENU_M then 
+				if input_mode ~= hdr.S_MENU_M then 
 		    		if current_focus ~= b_group then 
 						if current_focus then 
 		     				current_focus.on_focus_out()
@@ -1551,7 +1551,7 @@ function ui_element.button(t)
 		--[[
 		if p.skin == "editor"  then 
 	     	function b_group:on_motion()
-				if input_mode == S_MENU_M then 
+				if input_mode == hdr.S_MENU_M then 
 		    		if current_focus ~= b_group then 
 						if current_focus then 
 		     				current_focus.on_focus_out()
@@ -1638,7 +1638,7 @@ function ui_element.textInput(t)
     	focus_color  = {0,255,0,255},
     	focus_fill_color = {27,145,27,0}, 
     	cursor_color = {255,255,255,255},
-    	text_font = "DejaVu Sans 30px"  , 
+    	text_font = "FreeSans Medium 30px"  , 
     	text_color =  {255,255,255,255},
     	border_corner_radius = 12 ,
 		readonly = "",
@@ -2031,8 +2031,8 @@ function ui_element.toastAlert(t)
 	ui_height = 113,
 	label = "Toast Alert Title",
 	message = "Toast alert message",
-	title_font = "DejaVu Sans 22px", 
-	message_font = "DejaVu Sans 20px", 
+	title_font = "FreeSans Medium 22px", 
+	message_font = "FreeSans Medium 20px", 
 	title_color = {255,255,255,255},  
 	message_color = {255,255,255,255}, 
 	border_width  = 4,
@@ -2206,8 +2206,8 @@ function ui_element.buttonPicker(t)
 	ui_width =  180,
 	ui_height = 60,
 	items = {"item1", "item2", "item3"},
-	text_font = "DejaVu Sans 30px" , 
-	focus_text_font = "DejaVu Sans 30px" , 
+	text_font = "FreeSans Medium 30px" , 
+	focus_text_font = "FreeSans Medium 30px" , 
 	text_color = {255,255,255,255}, 
 	focus_text_color = {255,255,255,255}, 
 	border_color = {255,255,255,255},
@@ -2770,7 +2770,7 @@ function ui_element.radioButtonGroup(t)
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	text_font = "DejaVu Sans 30px", -- items 
+	text_font = "FreeSans Medium 30px", -- items 
 	text_color = {255,255,255,255}, --"FFFFFF", -- items 
 	button_color = {255,255,255,255}, -- items 
 	select_color = {255, 255, 255, 255}, -- items 
@@ -3051,7 +3051,7 @@ function ui_element.checkBoxGroup(t)
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	text_font = "DejaVu Sans 30px", 
+	text_font = "FreeSans Medium 30px", 
 	text_color = {255,255,255,255}, 
 	box_color = {255,255,255,255},
 	fill_color = {255,255,255,0},
@@ -3417,13 +3417,49 @@ function ui_element.progressSpinner(t)
     end
     local make_big_dot = function()
 
-          return Rectangle{
-              w=p.overall_diameter,
-              h=p.overall_diameter,
-              color = p.dot_color,
-              anchor_point={p.overall_diameter/2,p.overall_diameter/2}
-          }
-          
+        local dot  = Canvas{size={p.overall_diameter, p.overall_diameter}}
+		dot:begin_painting()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,0,90)
+		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
+		dot:line_to(p.overall_diameter,  p.overall_diameter/2)
+		dot:set_source_color(p.dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,90,180)
+		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
+		dot:line_to(p.overall_diameter/2,p.overall_diameter)
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,180,270)
+		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
+		dot:line_to(                    0, p.overall_diameter/2 )
+		dot:set_source_color(p.dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,270,360)
+		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
+		dot:line_to( p.overall_diameter/2,                    0 )
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+        dot:finish_painting()
+		
+        if dot.Image then
+            dot = dot:Image()
+        end
+        dot.anchor_point ={p.overall_diameter/2,p.overall_diameter/2}
+        dot.name         = "Loading Dot"
+        dot.position     = {x,y}
+
+        return dot
     end
     local img, load_timeline
     --function used to remake the dots upon a parameter change
@@ -3765,11 +3801,12 @@ Extra Function:
 function ui_element.layoutManager(t)
     --default parameters
     local p = {
-        rows    = 1,
-        columns    = 5,
+        rows    	= 1,
+        columns    	= 5,
         cell_w      = 300,
         cell_h      = 200,
-        cell_spacing = 40, --grid_gap
+        cell_spacing_w = 40, --grid_gap
+        cell_spacing_h = 40, --grid_gap
 		cell_timing = 300, -- duration_per_time
 		cell_timing_offset = 200,
         tiles       = {},
@@ -3796,14 +3833,14 @@ function ui_element.layoutManager(t)
 	
     local x_y_from_index = function(r,c)
         if p.cell_size == "fixed" then
-		    return (p.cell_w+p.cell_spacing)*(c-1)+p.cell_w/2,
-		           (p.cell_h+p.cell_spacing)*(r-1)+p.cell_h/2
+		    return (p.cell_w+p.cell_spacing_w)*(c-1)+p.cell_w/2,
+		           (p.cell_h+p.cell_spacing_h)*(r-1)+p.cell_h/2
         end
         
         local x = (col_ws[1] or p.cell_w)/2
         local y = (row_hs[1] or p.cell_h)/2
-        for i = 1, c-1 do x = x + (col_ws[i] or p.cell_w)/2 + (col_ws[i+1] or p.cell_w)/2 + p.cell_spacing end
-        for i = 1, r-1 do y = y + (row_hs[i] or p.cell_h)/2 + (row_hs[i+1] or p.cell_h)/2 + p.cell_spacing end
+        for i = 1, c-1 do x = x + (col_ws[i] or p.cell_w)/2 + (col_ws[i+1] or p.cell_w)/2 + p.cell_spacing_w end
+        for i = 1, r-1 do y = y + (row_hs[i] or p.cell_h)/2 + (row_hs[i+1] or p.cell_h)/2 + p.cell_spacing_h end
         return x,y
 	end
 
@@ -3820,8 +3857,9 @@ function ui_element.layoutManager(t)
                     p.tiles[r][c]:unparent()
                 end
                 p.tiles[r][c] = obj
-                
-                if obj.parent ~= nil then obj:unparent() end
+               	if obj then  
+                	if obj.parent ~= nil then obj:unparent() end
+				end 
                 
                 make_grid()
 			end,
@@ -3963,20 +4001,20 @@ function ui_element.layoutManager(t)
                 x = x - self.transformed_position[1]/screen.scale[1]
                 y = y - self.transformed_position[2]/screen.scale[2]
                 if p.cell_size == "fixed" then
-	        	    return math.floor(x/(p.cell_w+p.cell_spacing))+1,
-                           math.floor(y/(p.cell_h+p.cell_spacing))+1
+	        	    return math.floor(x/(p.cell_w+p.cell_spacing_w))+1,
+                           math.floor(y/(p.cell_h+p.cell_spacing_h))+1
                 end
                 
                 local r = 1
                 local c = 1
                 for i = 1, p.columns do
                     if x < (col_ws[i] or p.cell_w) then break end
-                    x = x - (col_ws[i] or p.cell_w) - p.cell_spacing
+                    x = x - (col_ws[i] or p.cell_w) - p.cell_spacing_w
                     r = r + 1
                 end
                 for i = 1, p.rows do
                     if y < (row_hs[i] or p.cell_h) then break end
-                    y = y - (row_hs[i] or p.cell_h) - p.cell_spacing
+                    y = y - (row_hs[i] or p.cell_h) - p.cell_spacing_h
                     c = c + 1
                 end
                 return  r,c
@@ -3984,8 +4022,8 @@ function ui_element.layoutManager(t)
             cell_x_y_w_h = function(self,r,c)
                 if p.cell_size == "fixed" then
                     
-                    return  (p.cell_w+p.cell_spacing)*(c-1),
-                            (p.cell_h+p.cell_spacing)*(r-1),
+                    return  (p.cell_w+p.cell_spacing_w)*(c-1),
+                            (p.cell_h+p.cell_spacing_h)*(r-1),
                             p.cell_w,
                             p.cell_h
                     
@@ -3995,13 +4033,13 @@ function ui_element.layoutManager(t)
                     
                     for i = 1,c-1 do
                         
-                        x = x + (col_ws[i] or p.cell_w) + p.cell_spacing
+                        x = x + (col_ws[i] or p.cell_w) + p.cell_spacing_w
                         
                     end
                     
                     for i = 1,r-1 do
                         
-                        y = y + (row_hs[i] or p.cell_h) + p.cell_spacing
+                        y = y + (row_hs[i] or p.cell_h) + p.cell_spacing_h
                         
                     end
                     
@@ -4160,7 +4198,53 @@ function ui_element.layoutManager(t)
 	end
 	make_grid()
 
-    
+    --Key Handler
+	local keys={
+		[keys.Left] = function()
+			
+			if focus_i[1] - 1 > 1 then
+				slate:focus_to(focus_i[1] - 1,focus_i[2])
+			else
+				--heejung
+			end
+			
+		end,
+		[keys.Right] = function()
+			
+			if focus_i[1] + 1 < p.rows then
+				slate:focus_to(focus_i[1] + 1,focus_i[2])
+			else
+				--heejung
+			end
+			
+		end,
+		[keys.Up] = function()
+			
+			if focus_i[2] - 1 > 1 then
+				slate:focus_to(focus_i[1],focus_i[2] - 1)
+			else
+				--heejung
+			end
+			
+		end,
+		[keys.Down] = function()
+			
+			if focus_i[2] + 1 < p.cols then
+				slate:focus_to(focus_i[1],focus_i[2] + 1)
+			else
+				--heejung
+			end
+			
+		end,
+	}
+	
+	slate.on_key_down = function(self,key)
+		
+		if keys[key] then keys[key]() end
+		
+	end
+
+	ssss = slate 
 
 
     mt = {}
@@ -4178,6 +4262,9 @@ function ui_element.layoutManager(t)
     setmetatable(slate.extra, mt)
     return slate
 end
+
+
+
 --[[
 Function: Scroll Pane
 
@@ -5085,7 +5172,7 @@ button
     	item_text_color = nil,
     	item_text_focus_color = nil,
 
-		text_font = "DejaVu Sans 30px",
+		text_font = "FreeSans Medium 30px",
     	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "default", 
     	ui_width = 250,
@@ -5325,7 +5412,7 @@ button
 		 			screen:find_child("mouse_pointer"):raise_to_top()
 				end
 				]]
-				input_mode = S_MENU_M
+				input_mode = hdr.S_MENU_M
 				p.status = "fade_in"
             end,
             fade_out = function()
@@ -5750,9 +5837,9 @@ function ui_element.tabBar(t)
     
     --default parameters
     local p = {
-        font  = "DejaVu Sans 26px",
+        font  = "FreeSans Medium 26px",
         
-        text_font = "DejaVu Sans 26px",
+        text_font = "FreeSans Medium 26px",
     	text_color = {255,255,255,255}, 
     	text_focus_color = {27,145,27,255}, 	  --"1b911b",
         
@@ -6204,6 +6291,11 @@ function ui_element.arrowPane(t)
                     
                 end
 			end,
+			screen_pos_of_child = function(self,child)
+                return  child.x + child.parent.x + self.x + p.box_width,
+                        child.y + child.parent.y + self.y + p.box_width
+           end,
+
         }
     }
 	umbrella.pan_by = function(self,dx,dy)
@@ -6304,7 +6396,6 @@ function ui_element.arrowPane(t)
 					arrow = Image {name = "right", src ="/lib/assets/tab-arrow-right-on.png"}
 					arrow.x = border.w+p.arrow_dist_to_frame  - 15
 					arrow.y = border.h/2 - 10
-					arrow:raise_to_top()
 				else 
 					arrow = Clone{source=p.arrow_src}
 					arrow.anchor_point={arrow.w/2,arrow.h}
@@ -6334,6 +6425,7 @@ function ui_element.arrowPane(t)
 				
 				arrow.reactive=true
 				umbrella:add(arrow)
+				arrow:raise_to_top()
 
 
 				-- [[ Left Arrow ]]-- 

@@ -499,8 +499,6 @@ end
 
 
 function editor.selected(obj, call_by_inspector)
-
-
    if obj.name == nil then 
 	  return 
    end 
@@ -530,6 +528,7 @@ function editor.selected(obj, call_by_inspector)
    	obj_border.border_width = 2
    	local group_pos
 	local bumo	
+	local tab_extra
 
    	if(obj.extra.is_in_group == true)then 
 		for i, c in pairs(g.children) do
@@ -542,6 +541,14 @@ function editor.selected(obj, call_by_inspector)
 							if e.name == obj.name then 
 								bumo = c	
 							end 
+						end 
+					elseif c.extra.type == "TabBar" then 
+						for h,q in pairs (c.tabs) do 
+							for k,w in pairs (q.children) do 
+								if w.name == obj.name then 
+									tab_extra = c.ui_height
+								end
+							end
 						end 
 					end 
 				end
@@ -583,6 +590,12 @@ function editor.selected(obj, call_by_inspector)
     else 
         anchor_mark.position = {obj.x, obj.y, obj.z}
     end
+
+	if tab_extra then 
+		anchor_mark.y = anchor_mark.y + tab_extra 
+		obj_border.y = obj_border.y + tab_extra
+	end 
+
     anchor_mark.name = obj.name.."a_m"
     screen:add(anchor_mark)
     screen:add(obj_border)
@@ -808,7 +821,7 @@ local function draw_dialogbox()
 		button_color = {255,255,255,255},
 		focus_color = {27,145,27,255},
 		text_color = {255,255,255,255},
-		text_font = "DejaVu Sans 30px",
+		text_font = "FreeSans Medium 30px",
 		border_width = 1,
 		border_corner_radius = 12,
 		reactive = true,
@@ -852,7 +865,7 @@ local function draw_dialogbox()
 		button_color = {255,255,255,255},
 		focus_color = {27,145,27,255},
 		text_color = {255,255,255,255},
-		text_font = "DejaVu Sans 30px",
+		text_font = "FreeSans Medium 30px",
 		border_width = 1,
 		border_corner_radius = 12,
 		reactive = true,
@@ -900,7 +913,7 @@ local function draw_dialogbox()
 		border_color = {255,255,255,255},
 		fill_color = {25,25,25,100},
 		title_color = {255,255,255,255},
-		title_font = "DejaVu Sans 30px",
+		title_font = "FreeSans Medium 30px",
 		title_separator_color = {255,255,255,255},
 		title_separator_thickness = 4,
 		content= Group { children = {button0,button1,scrollPane1,} },
@@ -927,7 +940,7 @@ function editor.the_image(bg_image)
     local BOTTOM_PADDING = 12
     local Y_PADDING = 10 
 	local X_PADDING = 10
-	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
+	local STYLE = {font = "FreeSans Medium 24px" , color = "FFFFFF"}
 	local space = WIDTH
 
 	local dir = editor_lb:readdir(current_dir.."/assets/images")
@@ -939,7 +952,7 @@ function editor.the_image(bg_image)
 
 	local dialog = draw_dialogbox()
 	dialog.label =  "File Location : "..current_dir.."/assets/images"
-	dialog.title_font = "DejaVu Sans 24px"
+	dialog.title_font = "FreeSans Medium 24px"
 
 	function get_file_list_sz() 
 	     local iw = cur_w
@@ -1201,7 +1214,7 @@ local function open_files(input_purpose, bg_image, inspector)
 			xbox:on_button_down(1) 
 
 			-- 0802		
-			local dir = editor_lb:readdir(CURRENT_DIR.."/screens")
+			local dir = editor_lb:readdir(current_dir.."/screens")
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
@@ -1429,7 +1442,7 @@ function editor.the_open()
     local BOTTOM_PADDING = 12
     local Y_PADDING = 10 
 	local X_PADDING = 10
-	local STYLE = {font = "DejaVu Sans 24px" , color = "FFFFFF"}
+	local STYLE = {font = "FreeSans Medium 24px" , color = "FFFFFF"}
 	local space = WIDTH
 	local dir = editor_lb:readdir(current_dir.."/screens")
 	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/screens"}:set(STYLE)
@@ -1438,7 +1451,7 @@ function editor.the_open()
 	local dialog = draw_dialogbox()
 
 	dialog.label =  "File Location : "..current_dir.."/screens"
-	dialog.title_font = "DejaVu Sans 24px"
+	dialog.title_font = "FreeSans Medium 24px"
 
 	function get_file_list_sz() 
 	     local iw = cur_w
@@ -1960,6 +1973,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
             	v.spin_out()
 	    	end 
 	    end 
+		reactivate_menu()
 		return true
 	end 
 
@@ -1985,7 +1999,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	     	screen:find_child("si_items").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 		 end 
 	end 
-
+	deactivate_menu()
 end
 
 function editor.view_code(v)
@@ -2041,7 +2055,7 @@ bg("Code", "Widget")
     	local b_indent       = "\n\t"
  		local i = 1
         local children = ""
-        for e in values(v.children) do
+        for e in util.values(v.children) do
 			if i == 1 then
 	        	children = children..e.name
 	        else 
@@ -2118,7 +2132,7 @@ bg("Code", "Widget")
 	     codeViewWin.y = screen.h / 16
     end 
 
-    text_codes = Text{name="codes",text = codes,font="DejaVu Sans 25px" ,
+    text_codes = Text{name="codes",text = codes,font="FreeSans Medium 25px" ,
     color = "FFFFFF" , position = { 25 , 0} , editable = false ,
     reactive = false, wants_enter = false, }
 
@@ -2764,11 +2778,11 @@ function editor.text()
 
     ui.text = Text{
     name="text"..tostring(item_num),
-	text = strings[""], font= "DejaVu Sans 30px",
-	-- 0111 text = "", font= "DejaVu Sans 40px",
+	text = strings[""], font= "FreeSans Medium 30px",
+	-- 0111 text = "", font= "FreeSans Medium 40px",
     color = hdr.DEFAULT_COLOR, 
 	position ={200, 200, 0}, 
-	editable = true , reactive = true, ellipsize = "END", 
+	editable = true , reactive = true, --ellipsize = "END", 
 	--wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
 	wants_enter = true, wrap=true, wrap_mode="CHAR", 
 	extra = {org_x = 200, org_y = 200}
@@ -2838,7 +2852,7 @@ function editor.the_video()
     local BOTTOM_PADDING = 12
     local Y_PADDING = 10 
 	local X_PADDING = 10
-	local STYLE = {font = "DejaVu Sans 26px" , color = "FFFFFF"}
+	local STYLE = {font = "FreeSans Medium 26px" , color = "FFFFFF"}
 	local space = WIDTH
 
 	local dir = editor_lb:readdir(current_dir.."/assets/videos")
@@ -3104,7 +3118,7 @@ function editor.clone()
 end
 	
 function editor.duplicate()
-	local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+	local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
 
 	local next_position 
     if(table.getn(selected_objs) == 0 )then 
@@ -3462,6 +3476,7 @@ function editor.duplicate()
 end
 
 function editor.delete()
+
 	if(table.getn(selected_objs) == 0 )then 
 		print("there are no selected objects") 
         screen:grab_key_focus()
@@ -3469,6 +3484,99 @@ function editor.delete()
 		return 
    	end 
 
+
+	local delete_f = function(del_obj)
+		editor.n_selected(del_obj)
+
+        table.insert(undo_list, {del_obj.name, DEL, del_obj})
+
+        if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
+	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
+        end
+
+		if util.need_stub_code(del_obj) == true then 
+			if current_fn then 
+	   			local fileUpper= string.upper(string.sub(current_fn, 1, -5))
+	   		    local fileLower= string.lower(string.sub(current_fn, 1, -5))
+			    local main = readfile("main.lua")
+			    if main then 
+			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
+			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
+				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
+				  		local main_first = string.sub(main, 1, q-1)
+				  		local main_last = string.sub(main, r+1, -1)
+				  		main = ""
+				  		main = main_first..main_last
+				  		editor_lb:writefile("main.lua",main, true)
+	       		    end 
+			     end 
+	       	end 
+	   end 
+    end 
+
+	for i, j in pairs(selected_objs) do 
+		j = string.sub(j, 1,-7)
+		local s_obj = g:find_child(j)
+		local bumo = s_obj.parent 
+
+		if bumo.name == "screen_objects" then 	-- not a content 
+			delete_f(s_obj)
+		 	for q,w in pairs(g.children) do 
+				if w.type == "Clone" then 
+					if w.source == s_obj then 
+						g:remove(w)
+					end
+				end 
+			end 
+        	g:remove(s_obj)
+		else
+			if bumo.name == nil then 
+				if (bumo.parent.name == "window") then -- AP, SP 
+			    	bumo = bumo.parent.parent
+					for j, k in pairs (bumo.content.children) do 
+			 			if(k.extra.selected == true) then
+							delete_f(k) 
+        	     	    	bumo.content:remove(k)
+			 			end 
+					end 
+				elseif (bumo.parent.extra.type == "DialogBox") then
+					bumo = bumo.parent 
+					delete_f(s_obj)
+					bumo.content:remove(s_obj)
+				elseif (bumo.parent.extra.type == "TabBar") then
+					bumo = bumo.parent
+					for e,f in pairs (bumo.tabs) do 
+						for t,y in pairs (f.children) do 
+							if y.name == s_obj.name then 
+								delete_f(s_obj)
+								f:remove(y)
+							end 
+						end 
+					end 
+				end 
+			elseif bumo.extra.type == "LayoutManager" then  
+				for e, r in pairs (bumo.tiles) do 
+					if r then 
+						for x, c in pairs (r) do 
+							if c.name == s_obj.name then 
+							 	delete_f(s_obj) 
+							 	bumo:replace(e,x,nil)
+							end 
+						end
+					end 
+				end
+			else -- Regular Group 
+				for p, q in pairs (bumo.children) do 
+					if q.name == s_obj.name then 
+						delete_f(s_obj) 
+						bumo:remove(s_obj)
+					end 
+				end 
+			end 
+		end 
+	end 
+
+--[[
 	for i, v in pairs(g.children) do
     	if g:find_child(v.name) then
 			if(v.extra.selected == true) then
@@ -3519,7 +3627,7 @@ function editor.delete()
 			end 
          end
     end
-
+]]
 	if table.getn(g.children) == 0 then 
 	    if screen:find_child("timeline") then 
 		screen:remove(screen:find_child("timeline"))
@@ -4644,7 +4752,7 @@ function editor.ui_elements()
     local BOTTOM_PADDING = 12
     local Y_PADDING = 5
     local X_PADDING = 10
-    local STYLE = {font = "DejaVu Sans 25px" , color = "FFFFFF"}
+    local STYLE = {font = "FreeSans Medium 25px" , color = "FFFFFF"}
     local space = WIDTH
     local msgw_bg = factory.make_popup_bg("widgets")
     local xbox = factory.make_xbox()
@@ -4866,6 +4974,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
  		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
  		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
+		["012"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid value for \""..str.."\" field." end,
  		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
  		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
  		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 

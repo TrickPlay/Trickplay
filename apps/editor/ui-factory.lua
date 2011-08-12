@@ -12,7 +12,7 @@ local icon_dvc = Image{src = "assets/distribute-vertical-center.png", opacity = 
 
 local info_attr_t_idx = {"name","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
 
-local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","message", "button_colorr","button_colorg","button_colorb","button_colora","border_colorr", "border_colorg", "border_colorb", "border_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_colorr","focus_colorg","focus_colorb","focus_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora", "select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","colorr", "colorg", "colorb", "colora","title_colorr","title_colorg","title_colorb","title_colora","title_font","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora","box_colorr","box_colorg","box_colorb","box_colora", "box_width", "box_height", "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing","cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","items","reactive", "focus"} 
+local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","message", "button_colorr","button_colorg","button_colorb","button_colora","border_colorr", "border_colorg", "border_colorb", "border_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_colorr","focus_colorg","focus_colorb","focus_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora", "select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","colorr", "colorg", "colorb", "colora","title_colorr","title_colorg","title_colorb","title_colora","title_font","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora","box_colorr","box_colorg","box_colorb","box_colora", "box_width", "box_height", "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","items","reactive", "focus"} 
 
 
 local attr_t_idx 
@@ -210,7 +210,7 @@ end
 
 function factory.make_msgw_button_item( assets , caption)
 
-    local STYLE         = { font = "DejaVu Sans 30px" , color = "FFFFFF" }
+    local STYLE         = { font = "FreeSans Medium 30px" , color = "FFFFFF" }
     local PADDING_X     = 7 
     local PADDING_Y     = 7
     local WIDTH         = 180
@@ -284,7 +284,7 @@ end
 
 function factory.make_msgw_widget_item( assets , caption)
 
-    local STYLE         = { font = "DejaVu Sans 25px" , color = "FFFFFF" }
+    local STYLE         = { font = "FreeSans Medium 25px" , color = "FFFFFF" }
     local PADDING_X     = 7 
     local PADDING_Y     = 7
     local WIDTH         = 280
@@ -1046,7 +1046,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={255,25,25,255}, }
-	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_w = 100, cell_h = 40, cell_spacing=5, cell_size="variable", cells_focusable=false}
+	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_w = 100, cell_h = 40, cell_spacing_w=5, cell_spacing_h=5, cell_size="variable", cells_focusable=false}
 	if text then 
     	--items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
     	items_list.position = {0, text.y + text.h + 7}
@@ -1996,7 +1996,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		group.w = group.w + 200
 	end 
 
-	if item_n == "cell_timing_offset" or item_n == "cell_timing" or item_n == "cell_spacing" then 
+	if item_n == "cell_timing_offset" or item_n == "cell_timing" then -- or item_n == "cell_spacing" then 
         input_text.position = {130, 4.5}
         ring.position = {125, 0}
         focus.position ={125, 0} 
@@ -2169,7 +2169,7 @@ local l_scale = 1
 rect_minus = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, name = "rect_minus", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-text_minus = Text { color = l_col, font = "DejaVu Sans bold 30px", text = "-", editable = false, wants_enter = false, wrap = false, wrap_mode = "CHAR", name = "text_minus", cursor_visible = false, position = {10,-5,0}, size = {30,30}, opacity = 255, }
+text_minus = Text { color = l_col, font = "FreeSans bold 30px", text = "-", editable = false, wants_enter = false, wrap = false, wrap_mode = "CHAR", name = "text_minus", cursor_visible = false, position = {10,-5,0}, size = {30,30}, opacity = 255, }
 
 
 minus = Group { scale = {l_scale,l_scale,0,0}, name = "minus", position = {536,727,0}, size = {30,30}, opacity = 255, children = {rect_minus,text_minus}, reactive = true, }
@@ -2218,7 +2218,7 @@ local l_scale = 1
 rect_plus = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_plus", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-text_plus = Text { color = l_col, font = "DejaVu Sans bold 30px", text = "+", editable = false, wants_enter = false, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_plus", position = {3,-5,0}, size = {30,30}, opacity = 255, cursor_visible = false, }
+text_plus = Text { color = l_col, font = "FreeSans bold 30px", text = "+", editable = false, wants_enter = false, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_plus", position = {3,-5,0}, size = {30,30}, opacity = 255, cursor_visible = false, }
 
 
 plus = Group { scale = {l_scale,l_scale,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "plus", position = {0,0,0}, size = {30,30}, opacity = 255, children = {rect_plus,text_plus}, reactive = true, }
@@ -2241,14 +2241,14 @@ rect_label.position = {0,0,0}
 label_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "label_plus", position = {0,0,0}, size = {127,35}, opacity = 255, children = {text_label,rect_label}, reactive = true, }
 
 
-text_item = Text { color = {255,255,255,255}, font = "DejaVu Sans 26px", text = "Item +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_item", position = {10,0,0}, size = {120,30}, opacity = 255, } 
+text_item = Text { color = {255,255,255,255}, font = "FreeSans Medium 26px", text = "Item +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_item", position = {10,0,0}, size = {120,30}, opacity = 255, } 
 
 rect_item = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_item", position = {0,0,0}, size = {110,35}, opacity = 255, }
 
 item_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "item_plus", position = {129,0,0}, size = {130,35}, opacity = 255, children = {text_item,rect_item}, reactive = true, }
 
 
-text_separator = Text { color = {255,255,255,255}, font = "DejaVu Sans 26px", text = "Separator +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_separator", position = {7,0,0}, size = {180,30}, opacity = 255, }
+text_separator = Text { color = {255,255,255,255}, font = "FreeSans Medium 26px", text = "Separator +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_separator", position = {7,0,0}, size = {180,30}, opacity = 255, }
 
 
 rect_separator = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_separator", position = {0,0,0}, size = {180,35}, opacity = 255, }
@@ -2451,9 +2451,9 @@ end
 
 function factory.create_input_box()
      	local box_g = Group {}
-        local input_l = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" ,
+        local input_l = Text { name="input", font= "FreeSans Medium 30px", color = "FFFFFF" ,
               position = {25, 10}, text = project.."/screens/" } --hhhhhh
-        input_t = Text { name="input", font= "DejaVu Sans 30px", color = "FFFFFF" , ellipsize = "END",
+        input_t = Text { name="input", font= "FreeSans Medium 30px", color = "FFFFFF" , ellipsize = "END",
         -- 0111 position = {input_l.w + 25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
         position = {input_l.w + 25, 10}, text = strings[""] , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
      	local box = factory.draw_ring()
