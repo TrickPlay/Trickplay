@@ -6,9 +6,9 @@ from PyQt4.QtCore import *
 from NewApplicationDialog import Ui_newApplicationDialog
 
 APP = """
-    id          = "{0}"
-    release     = "0",
-    version     = "0.0",
+    id          = "{0}",
+    release     = "1",
+    version     = "0.1",
     name        = "{1}",
     copyright   = "",
 """

@@ -12,8 +12,13 @@ class Connection():
         s = str(self.address) + ':' + str(self.port)
         print('Address returned', s)
         return s
-
-CON = Connection('localhost', '8888')
+    
+    def set(self, address, port):
+        self.address = address        
+        self.port = port
+    
+#CON = Connection('localhost', '8888')
+CON = Connection('', '')
 
 def send(data):
     
@@ -68,6 +73,12 @@ def getTrickplayData():
         print("Error >> Trickplay application closed before data could be retreived.")
         
         print(e)
+        
+        return None
+    
+    except httplib.InvalidURL, e:
+    
+        print('Could not find a Trickplay device.')
         
         return None
     

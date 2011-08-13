@@ -33,7 +33,7 @@ class TrickplayDiscovery(ServiceDiscovery):
         name = self.widget.itemData(index, NAME).toPyObject()
         address = self.widget.itemData(index, ADDRESS).toPyObject()
         port = self.widget.itemData(index, PORT).toPyObject()
-        
+
         if not name or not address or not port:
             return
         
@@ -116,18 +116,16 @@ class TrickplayDiscovery(ServiceDiscovery):
         stdb = ServiceTypeDatabase()
         h_type = stdb.get_human_type(type)
         
-        #new = QListWidgetItem(name)
-        #new.setData(ADDRESS, address)
-        #new.setData(PORT, port)
-        #new.setData(NAME, name)
-        #
-        
         # Add item to ComboBox
         self.widget.addItem(name)
         index = self.widget.findText(name)
         self.widget.setItemData(index, address, ADDRESS)
         self.widget.setItemData(index, port, PORT)
         self.widget.setItemData(index, address, NAME)
+        
+        # Automatically select a service if only one exists
+        if 1 == self.widget.count():
+            self.service_selected(index)
         
         print "Service data for service '%s' of type '%s' (%s) in domain '%s' on %s.%i:" \
             % (
