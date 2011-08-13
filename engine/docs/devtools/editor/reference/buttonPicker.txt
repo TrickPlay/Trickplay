@@ -116,7 +116,7 @@ Supported direction settings are shown below.
 
 Property: text_font
 
-The text_font property is a string specifying the ButtonPicker's font when the object does not have the input focus. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+The text_font property is a string specifying the ButtonPicker's font when the object does not have the input focus. The font string's format is described in the <Text.font> section.
 
 *Default Setting:* "DejaVu Sans 30px"
 
@@ -126,7 +126,7 @@ The text_font property is a string specifying the ButtonPicker's font when the o
 
 Property: focus_text_font
 
-The focus_text_font property is a string specifying the ButtonPicker's font when the object has the input focus. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+The focus_text_font property is a string specifying the ButtonPicker's font when the object has the input focus. The font string's format is described in the <Text.font> section.
 
 *Default Setting:* "DejaVu Sans 30px"
 
@@ -158,7 +158,7 @@ Property: text_color
 
 The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the ButtonPicker's text color when the object does not have the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -170,7 +170,7 @@ Property: focus_text_color
 
 The focus_text_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's text color when the object has the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -182,7 +182,7 @@ Property: fill_color
 
 The fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when the object does not have the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 0} (white and transparent)
 
@@ -194,7 +194,7 @@ Property: focus_fill_color
 
 The focus_fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when the object has the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {0, 255, 0, 0} (green and transparent)
 
@@ -206,7 +206,7 @@ Property: border_color
 
 The border_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object does not have the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -218,7 +218,7 @@ Property: focus_color
 
 The focus_color is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object has the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {0, 255, 0, 255} (green and opaque)
 

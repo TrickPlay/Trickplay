@@ -73,7 +73,7 @@ Property: border_color
 
 The border_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the ProgressBar's border.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 160, 160, 160, 255 } (light gray and completely opaque)
 
@@ -83,7 +83,7 @@ Property: empty_top_color
 
 The empty_top_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's beginning color at the top of the empty, "not completed" portion of the ProgressBar.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 The progress bar comprises two portions: the filled or "completed" portion and the empty or "not completed" portion. When the progress bar is first displayed and 100% of the associated operation is not completed, the empty portion takes up the entire bar. As the associated operation progresses, the filled or "completed" portion fills a percentage of the bar's space equal to the percentage of the operation that has completed. Eventually, the operation finishes, and the filled portion then takes 100% of the progress bar.
 
@@ -99,7 +99,7 @@ Property: empty_bottom_color
 
 The empty_bottom_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's ending color at the bottom of the empty, "not completed" portion of the bar. Refer to the <empty_top_color> property for a description of the empty and filled portions of the ProgressBar.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 127, 127, 127, 255 } (gray and opaque)
 
@@ -111,7 +111,7 @@ Property: filled_top_color
 
 The filled_top_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's starting color at the top of the filled, "completed" portion of the bar. Refer to the <empty_top_color> property for a description of the empty and filled portions of the ProgressBar.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 255, 0, 0, 255 } (red and opaque)
 
@@ -123,7 +123,7 @@ Property: filled_bottom_color
 
 The filled_bottom_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the gradient's ending color at the bottom of the filled, "completed" portion of the bar. Refer to the <empty_top_color> property for a description of the empty and filled portions of the ProgressBar.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 96, 48, 48, 255 } (reddish-gray and opaque)
 
