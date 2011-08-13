@@ -1,6 +1,6 @@
 Class: Button
 
-A Button is a standard user interface button. In addition to Button-specific properties, Buttons also provide all the properties, events, and functions implemented by the TrickPlay Runtime Engine's UIElement interface, described in <file:../../../apps/files/bindings/clutter_actor-lb.html#UIElement>.
+A Button is a standard user interface button. In addition to Button-specific properties, Buttons also provide all the properties, events, and functions implemented by the TrickPlay Runtime Engine's <UIElement> interface.
 
 
 
@@ -74,7 +74,7 @@ The label property is a string to display within the button.
 
 Property: text_font
 
-The text_font property is a string specifying the Button's font. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+The text_font property is a string specifying the Button's font. The font string's format is described in the <Text.font> section.
 
 *Default Setting:* "DejaVu Sans 30px"
 
@@ -84,7 +84,7 @@ The text_font property is a string specifying the Button's font. The font string
 
 Property: text_color 
 
-The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -94,7 +94,7 @@ The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(tra
 
 Property: focus_text_color
 
-The focus_text_color property is a table of integer RGB and alpha settings specifying the button's text color when it has input focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The focus_text_color property is a table of integer RGB and alpha settings specifying the button's text color when it has input focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -120,7 +120,7 @@ The skin property is a string specifying the button's skin. The skin functionali
 
 Property: fill_color
 
-The fill_color property is a table of integer RGB and alpha settings specifying the button's fill color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The fill_color property is a table of integer RGB and alpha settings specifying the button's fill color. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 255, 255, 255, 0 } (white and transparent)
 
@@ -130,7 +130,7 @@ The fill_color property is a table of integer RGB and alpha settings specifying 
 
 Property: focus_fill_color
 
-The focus_fill_color property is a table of integer RGB and alpha settings specifying the button's fill color when it has focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The focus_fill_color property is a table of integer RGB and alpha settings specifying the button's fill color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {27, 145, 27, 0}
 
@@ -162,7 +162,7 @@ A radius of 0 will produce square, 90-degree corners. As values increase, the co
 
 Property: border_color
 
-The border_color property is a table of integer RGB and alpha settings specifying the button's border color. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The border_color property is a table of integer RGB and alpha settings specifying the button's border color. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 The border's color when the button has key focus is specified in the <focus_color> property.
 
@@ -174,7 +174,7 @@ The border's color when the button has key focus is specified in the <focus_colo
 
 Property: focus_color
 
-The focus_color is a table of integer RGB and alpha settings specifying the button's border color when it has focus. The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The focus_color is a table of integer RGB and alpha settings specifying the button's border color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {27, 145, 27, 255}
 
