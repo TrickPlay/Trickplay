@@ -20,6 +20,14 @@ function(ctrl, router, controller, ...)
         size = {640*x_ratio, 95*y_ratio}
     }
 
+    local continue_button = RemoteButton(
+        controller, "continue_button", "continue_button_on",
+        {640/2*x_ratio, (870/2 + 100)*y_ratio}, {216*x_ratio, 59*y_ratio}
+    )
+    continue_button.group.anchor_point = {
+        216/2*x_ratio, 59/2*y_ratio
+    }
+
     local check_button = RemoteButton(
         controller, "check_button_off_touch", "check_button_on_touch",
         {257*x_ratio, 592*y_ratio}, {154*x_ratio, 55*y_ratio}
@@ -79,7 +87,7 @@ function(ctrl, router, controller, ...)
         betting_buttons.call.group, betting_buttons.bet.group,
         betting_buttons.plus.group, betting_buttons.minus.group)
     view:add(betting_buttons_view, wooden_bar, wooden_buttons.exit,
-        wooden_buttons.new_game, wooden_buttons.help, folded_text)
+        wooden_buttons.new_game, wooden_buttons.help, folded_text, continue_button.group)
 
     check_button:hide()
 
@@ -90,22 +98,31 @@ function(ctrl, router, controller, ...)
         if card1 then card1:unparent() end
         if card2 then card2:unparent() end
 
-        controller:declare_resource("card1",
-            "assets/cards/"..getCardImageName(hole[1])..".png")
-        controller:declare_resource("card2",
-            "assets/cards/"..getCardImageName(hole[2])..".png")
-
         card1 = controller.factory:Image{
-            src = "card1",
+            src = getCardImageName(hole[1]),
             position = {60*x_ratio, 70*y_ratio},
             size = {300*x_ratio, 390*y_ratio}
         }
         card2 = controller.factory:Image{
-            src = "card2",
+            src = getCardImageName(hole[2]),
             position = {280*x_ratio, 90*y_ratio},
             size = {300*x_ratio, 390*y_ratio}
         }
         view:add(card1, card2)
+        a_card1 = card1
+        a_card2 = card2
+    end
+
+    continue_button.callback = function()
+        continue_button:reset()
+        screen:on_key_down(keys.OK)
+    end
+    blah = continue_button
+    a_ctrl = controller
+    function ctrl:end_hand()
+        continue_button:show()
+        continue_button.group:raise_to_top()
+        betting_buttons_view:hide()
     end
 
     function ctrl:fold()
@@ -158,19 +175,23 @@ function(ctrl, router, controller, ...)
                     end
                 end
                 button:press()
+            elseif button_name == "continue" then
+                continue_button:press()
+                if event.cb then event:cb() end
             end
         end
     end
 
     function ctrl:notify(event)
         if ctrl:is_active_component() then
+            betting_buttons_view:show()
+            folded_text:hide()
+            continue_button:hide()
             view:show()
-            betting_buttons_view:show()
-            folded_text:hide()
         else
-            view:hide()
             betting_buttons_view:show()
             folded_text:hide()
+            view:hide()
         end
     end
 

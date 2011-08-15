@@ -224,13 +224,28 @@ HandControl = Class(nil,function(ctrl, game_ctrl, ...)
             )
         else
             enable_event_listener(KbdEvent())
+            ctrlman:end_hand()
             --ctrlman:popup("Tap to Continue")
-            function game:handle_click()
-                --ctrlman:unpop()
-                screen:on_key_down(keys.Return)
-                game.handle_click = function()
-                    print("Click consumed")
+            function game:handle_click(controller, x, y)
+                x = x/controller.x_ratio
+                y = y/controller.y_ratio
+
+                if x > 212 and x < 420
+                and y > 512 and y < 560 then
+                    ctrlman:delegate(TouchEvent{
+                        controller = controller,
+                        cb = function()
+                            function game:handle_click()
+                                print("Click consumed")
+                            end
+                        end,
+                        x = x,
+                        y = y,
+                        pos = "continue"
+                    })
                 end
+
+                --ctrlman:unpop()
             end
         end
 

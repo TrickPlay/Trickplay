@@ -7,7 +7,7 @@ function(button, controller, image_src, focus_src, position, size)
     local image
     local focus
 
-    local group = controller.factory:Group()
+    local group = controller.factory:Group{size = controller.ui_size}
     button.group = group
 
     if image_src then
