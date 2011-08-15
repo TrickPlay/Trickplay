@@ -34,6 +34,8 @@ interface container [[ClutterActor*]]
     	
     	The count property specifies the number of UIElement children currently stored in the Container object.
     	
+    	*Default Setting:* 0
+    	
     	*See Also:* the <children> property
     	
     */
@@ -59,6 +61,8 @@ interface container [[ClutterActor*]]
 		The order of the UIElements in the table defines their Z-order, i.e., their order along the Z-axis, within the Container.
 		
 		When iterating through a Container's children, best performance will be achieved by retrieving the property's table a single time, storing the returned table in a local variable, and then accessing individual UIElement objects from the local variable. This technique is preferred over accessing each object from the children table directly. The two techniques are demonstrated in the Code Example below.
+		
+		*Default Setting:* an empty table, {}
 		
 		*Code Example:* Demonstrate two methods to iterate through the children property table
 		

@@ -10,25 +10,16 @@ class Handler : public HttpServer::RequestHandler
 {
 public:
 
-    Handler( TPContext * _context , const String & _path )
+    Handler( TPContext * _context , const String & path )
     :
-        context( _context ),
-        path( _path )
+    	HttpServer::RequestHandler( _context->get_http_server() , path ),
+        context( _context )
     {
-        g_assert( context );
-
-        context->get_http_server()->register_handler( path , this );
-    }
-
-    virtual ~Handler()
-    {
-        context->get_http_server()->unregister_handler( path );
     }
 
 protected:
 
     TPContext * context;
-    String      path;
 
 private:
 
@@ -37,6 +28,8 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+
+#ifndef TP_PRODUCTION
 
 class DebugUIRequestHandler: public Handler
 {
@@ -409,6 +402,8 @@ private:
 	}
 };
 
+#endif // TP_PRODUCTION
+
 //-----------------------------------------------------------------------------
 
 class ListAppsRequestHandler : public Handler
@@ -607,7 +602,12 @@ HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
     handlers.push_back( new ListAppsRequestHandler( context ) );
 	handlers.push_back( new LaunchAppRequestHandler( context ) );
 	handlers.push_back( new CurrentAppRequestHandler( context ) );
+
+#ifndef TP_PRODUCTION
+
 	handlers.push_back( new DebugUIRequestHandler( context ) );
+
+#endif
 }
 
 //-----------------------------------------------------------------------------

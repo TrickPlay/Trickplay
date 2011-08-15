@@ -14,7 +14,7 @@
 
 //.............................................................................
 
-Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
+Bitmap::Bitmap( lua_State * L , const char * _src , bool _async , bool read_tags )
 :
     src( _src ),
     image( 0 ),
@@ -30,7 +30,7 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
     {
         if ( strlen( _src ) > 0 )
         {
-            image = app->load_image( _src );
+            image = app->load_image( _src , read_tags );
         }
     }
     else
@@ -39,7 +39,7 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
 
         RefCounted::ref( this );
 
-        if ( ! app->load_image_async( _src , callback , this , destroy_notify ) )
+        if ( ! app->load_image_async( _src , read_tags , callback , this , destroy_notify ) )
         {
             RefCounted::unref( this );
         }
