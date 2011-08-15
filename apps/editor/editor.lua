@@ -1698,7 +1698,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
-		tabs.on_focus_in()
 	end
 
 	--Focus Destination

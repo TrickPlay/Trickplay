@@ -1282,7 +1282,6 @@ function util.itemTostring(v, d_list, t_list)
 
     if v.extra then 
     if v.extra.focus then 
-		
 		local scroll_seek_to_line = ""
 		for i, c in pairs(g.children) do
 			if v.name == c.name then 
@@ -1292,7 +1291,12 @@ function util.itemTostring(v, d_list, t_list)
 					if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
 						for k, e in pairs (c.content.children) do 
 							if e.name == v.name then 
-								scroll_seek_to_line = "\t"..c.name..".seek_to_middle(0,screen:find_child("..v.name..".focus[key]).y)\n\t\t\t" 
+								for q,w in pairs (c.content.children) do 
+									if w.name == v.name then 
+										scroll_seek_to_line = "\t"..c.name..".seek_to_middle(screen:find_child("..v.name..".focus[key]).x, screen:find_child("..v.name..".focus[key]).y)\n\t\t\t" 
+										break
+									end 
+								end 
 							end 
 						end 
 					end 
