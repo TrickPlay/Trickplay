@@ -4464,6 +4464,10 @@ function ui_element.scrollPane(t)
 		end
 	end
 	
+	function scroll_group.extra.on_focus_in() 
+		scroll_group:grab_key_focus()
+    end
+
 	scroll_y = function(dir)
 		local new_y = p.content.y+ dir*10
 		animating = true
@@ -6291,6 +6295,8 @@ function ui_element.arrowPane(t)
                     
                 end
 			end,
+			seek_to_middle = function(x,y)
+            end,
 			screen_pos_of_child = function(self,child)
                 return  child.x + child.parent.x + self.x + p.box_width,
                         child.y + child.parent.y + self.y + p.box_width
@@ -6308,6 +6314,10 @@ function ui_element.arrowPane(t)
 		
 	end
 	
+	umbrella.extra.seek_to = function(x,y)
+    end
+
+
 	--this function creates the whole scroll bar box
     local hold = false
 	
