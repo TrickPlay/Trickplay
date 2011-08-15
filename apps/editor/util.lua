@@ -524,7 +524,7 @@ end
 		       			local group_pos
 	       	       		if(border ~= nil) then 
 		             		if (v.extra.is_in_group == true) then
-			     				group_pos = get_group_position(v)
+			     				group_pos = util.get_group_position(v)
 			     				if group_pos then 
 									if border then border.position = {x - dx + group_pos[1], y - dy + group_pos[2]} end
 	                     				if am then am.position = {am.x + group_pos[1], am.y + group_pos[2]} end

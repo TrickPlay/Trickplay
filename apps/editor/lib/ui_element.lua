@@ -4244,6 +4244,12 @@ function ui_element.layoutManager(t)
 		
 	end
 
+	slate.on_focus_in = function()
+
+		slate:grab_key_focus()
+
+	end 
+
 	ssss = slate 
 
 

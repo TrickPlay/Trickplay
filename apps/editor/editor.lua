@@ -1207,8 +1207,12 @@ local function open_files(input_purpose, bg_image, inspector)
 		end
 	else 
 		button_ok.pressed = function() 
-			undo_list = {} 
-			if editor.close(true) ~= "-1" then --, load_file, selected_file) == nil then --0802
+			if input_purpose == "open_luafile" then
+				undo_list = {} 
+				if editor.close(true) ~= "-1" then --, load_file, selected_file) == nil then --0802
+					load_file(selected_file) 
+				end 
+			else 
 				load_file(selected_file) 
 			end 
 			xbox:on_button_down(1) 
