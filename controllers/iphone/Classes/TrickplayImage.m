@@ -188,6 +188,9 @@
     return [super callMethod:method withArgs:args];
 }
 
+#pragma mark -
+#pragma mark Deallocation
+
 - (void)dealloc {
     NSLog(@"TrickplayImage dealloc");
     

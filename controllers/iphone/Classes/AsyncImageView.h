@@ -45,7 +45,7 @@
 @property (retain) id resourceKey;
 @property (assign) BOOL tileWidth;
 @property (assign) BOOL tileHeight;
-@property (retain) id <AsyncImageViewDelegate> otherDelegate;
+@property (assign) id <AsyncImageViewDelegate> otherDelegate;
 @property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key;
