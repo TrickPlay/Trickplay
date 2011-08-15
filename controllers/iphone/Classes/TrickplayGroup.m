@@ -59,7 +59,8 @@
                 && x_sub >= view.bounds.origin.x
                 && x_sub <= view.bounds.size.width
                 && y_sub >= view.bounds.origin.y
-                && y_sub <= view.bounds.size.height) {
+                && y_sub <= view.bounds.size.height
+                && !self.isHidden) {
                 
                 CFArrayAppendValue(newTouches, touch);
                 [self addTouch:touch];
@@ -95,7 +96,8 @@
                     && x_sub >= view.bounds.origin.x
                     && x_sub <= view.bounds.size.width
                     && y_sub >= view.bounds.origin.y
-                    && y_sub <= view.bounds.size.height) {
+                    && y_sub <= view.bounds.size.height
+                    && !self.isHidden) {
                     
                     CFArrayAppendValue(newTouchesIn, touch);
                 } else {
@@ -140,7 +142,8 @@
                     && x_sub >= view.bounds.origin.x
                     && x_sub <= view.bounds.size.width
                     && y_sub >= view.bounds.origin.y
-                    && y_sub <= view.bounds.size.height) {
+                    && y_sub <= view.bounds.size.height
+                    && !self.isHidden) {
                     
                     CFArrayAppendValue(newTouchesIn, touch);
                 } else {
