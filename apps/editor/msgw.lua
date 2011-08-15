@@ -552,7 +552,7 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 	  input_mode = hdr.S_SELECT
      elseif(util.is_img_file(input_text) == true) then 
 	  
-	  while (is_available("image"..tostring(item_num)) == false) do  
+	  while (util.is_available("image"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	  end 
 
