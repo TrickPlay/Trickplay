@@ -168,7 +168,7 @@ The item_position property is a table of integer values specifying the X,Y offse
 
 Property: text_font
 
-The text_font property is a text string describing the font to use for the RadioButtonGroup's descriptive text. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+The text_font property is a text string describing the font to use for the RadioButtonGroup's descriptive text. The font string's format is described in the <Text.font> section.
 
 *Default Setting:* "DejaVu Sans 30px"
 
@@ -180,7 +180,7 @@ Property: text_color
 
 The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the RadioBoxGroup's text.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 255, 255, 255, 255 } (white and completely opaque)
 
@@ -194,7 +194,7 @@ The button_color property is a table of integer RGB and alpha settings specifyin
 
 The button_color property is used only if the object's <skin> property is set to "custom".
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -208,7 +208,7 @@ The focus_color property is a table of integer RGB and alpha settings specifying
 
 The focus_color property is used only if the object's <skin> property is set to "custom".
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
 
@@ -222,7 +222,7 @@ The select_color property is a table of integer RGB and alpha settings specifyin
 
 The select_color property is used only if the object's <skin> property is set to "custom".
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 

@@ -259,7 +259,7 @@ The item_position property is a table of integer values specifying the X,Y offse
 
 Property: text_font
 
-The text_font property is a text string describing the font to use for the CheckBox's descriptive text. The font string's format is described in the Text.font section at <file:../../../apps/files/bindings/clutter_text-lb.html#Text.font>.
+The text_font property is a text string describing the font to use for the CheckBox's descriptive text. The font string's format is described in the <Text.font> section.
 
 *Default Setting:* "DejaVu Sans 30px"
 
@@ -271,7 +271,7 @@ Property: text_color
 
 The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the CheckBox object's text.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 255, 255, 255, 255 } (white and completely opaque)
 
@@ -322,7 +322,7 @@ Property: box_color
 
 The box_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object does not have the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -334,7 +334,7 @@ Property: fill_color
 
 The fill_color property is a table of integer RGB and alpha settings specifying the CheckBox's fill color when the object does not have the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 0} (white and transparent)
 
@@ -346,7 +346,7 @@ Property: focus_fill_color
 
 The focus_fill_color property is a table of integer RGB and alpha settings specifying the CheckBox's fill color when the object has the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {0, 50, 0, 0} (dark green and transparent)
 
@@ -358,7 +358,7 @@ Property: focus_color
 
 The focus_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object has the input focus.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
 
