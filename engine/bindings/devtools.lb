@@ -125,5 +125,79 @@ global devtools [[ void * ]]
         [[
             usleep( ms * 1000 );
         ]];
+        
+    string screenshot( string filename = 0 )
+        [[
+            result = 0;
+            
+            String name;
+                    
+            const gchar * home = g_getenv( "HOME" );
+    
+            if ( ! home )
+            {
+                home = g_get_home_dir();
+    
+                if ( ! home )
+                {
+                    home = g_get_tmp_dir();
+                }
+            }
+            
+            if ( ! home )
+            {
+                g_warning( "FAILED TO FIND HOME DIRECTORY" );
+            }
+            else
+            {
+                Image * image = Image::screenshot();
+                
+                if ( ! image )
+                {
+                    g_warning( "FAILED TO TAKE SCREENSHOT" );
+                }
+                else
+                {
+                    if ( ! filename || ( filename && 0 == strlen( filename ) ) )
+                    {
+                        GTimeVal t;
+        
+                        g_get_current_time( & t );
+        
+                        gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+        
+                        gchar * fn = g_build_filename( home , ts , NULL );
+        
+                        name = fn;
+                        
+                        g_free( ts );
+                        g_free( fn );
+                    }
+                    else
+                    {
+                        gchar * ts = g_strdup_printf( "%s.png" , filename );
+                        
+                        gchar * fn = g_build_filename( home , ts , NULL );
+                        
+                        name = fn;
+                        
+                        g_free( ts );
+                        g_free( fn );
+                    }
+                    
+                    if ( ! image->write_to_png( name.c_str() ) )
+                    {
+                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , name.c_str() );
+                    }
+                    else
+                    {
+                        result = name.c_str();
+                    }
+                    
+                    delete image;
+                }
+            }
+                    
+        ]];        
 }
 

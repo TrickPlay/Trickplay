@@ -69,6 +69,8 @@ else (CMAKE_TOOLCHAIN_FILE)
 
     add_subdirectory( clients/clutter-mediaplayer )
     
+    add_subdirectory( clients/jpeg-utils-test )
+    
     add_subdirectory( sdk )
     
 endif (CMAKE_TOOLCHAIN_FILE)

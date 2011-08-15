@@ -117,7 +117,7 @@ void TPContext::set( const char * key, const String & value )
 }
 //-----------------------------------------------------------------------------
 
-const char * TPContext::get( const char * key, const char * def )
+const char * TPContext::get( const char * key, const char * def , bool default_if_empty )
 {
     g_assert( key );
 
@@ -127,6 +127,12 @@ const char * TPContext::get( const char * key, const char * def )
     {
         return def;
     }
+
+    if ( default_if_empty && it->second.empty() )
+    {
+    	return def;
+    }
+
     return it->second.c_str();
 }
 
@@ -646,9 +652,9 @@ void TPContext::setup_fonts()
 
     String fonts_path;
 
-    if ( const char * fp = get( TP_FONTS_PATH ) )
+    if ( const char * fp = get( TP_FONTS_PATH , 0 , true ) )
     {
-        fonts_path = fp;
+        fonts_path = Util::canonical_external_path( fp );
     }
     else
     {
@@ -1689,6 +1695,8 @@ void TPContext::close_current_app()
 
 void TPContext::reload_app()
 {
+	close_current_app();
+
     App * new_app = NULL;
 
     load_app( &new_app );
@@ -2161,33 +2169,20 @@ void TPContext::validate_configuration()
 {
     // TP_APP_SOURCES
 
-    const char * app_sources = get( TP_APP_SOURCES );
+    String app_sources = Util::canonical_external_path( get( TP_APP_SOURCES , "apps" , true ) );
 
-    if ( !app_sources )
-    {
-        gchar * s = g_build_filename( g_get_current_dir(), "apps", NULL );
-        set( TP_APP_SOURCES, s );
-        g_warning( "DEFAULT:%s=%s", TP_APP_SOURCES, s );
-        g_free( s );
-    }
+    set( TP_APP_SOURCES, app_sources );
+
 
     // TP_APP_PATH
 
     const char * app_path = get( TP_APP_PATH );
-#if 0
-    if ( !app_path && !get( TP_APP_ID ) )
+
+    if ( app_path )
     {
-        gchar * c = g_get_current_dir();
-        set( TP_APP_PATH, c );
-        g_warning( "DEFAULT:%s=%s", TP_APP_PATH, c );
-        g_free( c );
-    }
-#endif
-    if ( app_path && !g_path_is_absolute( app_path ) )
-    {
-        gchar * new_app_path = g_build_filename( g_get_current_dir(), app_path, NULL );
-        set( TP_APP_PATH, new_app_path );
-        g_free( new_app_path );
+    	String app_path_s = Util::canonical_external_path( app_path );
+
+    	set( TP_APP_PATH , app_path_s );
     }
 
     // TP_SYSTEM_LANGUAGE
@@ -2252,22 +2247,13 @@ void TPContext::validate_configuration()
 
     // DATA PATH
 
-    const char * data_path = get( TP_DATA_PATH );
+    String data_path = Util::canonical_external_path( get( TP_DATA_PATH , g_get_tmp_dir() , true ) );
 
-    if ( !data_path )
+    gchar * full_data_path = g_build_filename( data_path.c_str() , "trickplay" , NULL );
+
+    if ( g_mkdir_with_parents( full_data_path , 0700 ) != 0 )
     {
-        data_path = g_get_tmp_dir();
-        g_assert( data_path );
-        g_warning( "DEFAULT:%s=%s", TP_DATA_PATH, data_path );
-    }
-
-    gchar * full_data_path = g_build_filename( data_path, "trickplay", NULL );
-
-	g_debug( "USING DATA PATH: '%s'", full_data_path );
-
-    if ( g_mkdir_with_parents( full_data_path, 0700 ) != 0 )
-    {
-        g_error( "Data path '%s' does not exist and could not be created", full_data_path );
+        g_error( "DATA PATH '%s' DOES NOT EXIST AND COULD NOT BE CREATED" , full_data_path );
     }
 
     set( TP_DATA_PATH, full_data_path );
@@ -2276,40 +2262,20 @@ void TPContext::validate_configuration()
 
     // DOWNLOADS PATH
 
-    const char * downloads_path = get( TP_DOWNLOADS_PATH );
+    String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , "downloads" , true ) );
 
-    if ( !downloads_path )
+    set( TP_DOWNLOADS_PATH , downloads_path );
+
+    if ( g_mkdir_with_parents( downloads_path.c_str() , 0700 ) != 0 )
     {
-        gchar * path = g_build_filename( get( TP_DATA_PATH ), "downloads", NULL );
-
-        g_warning( "DEFAULT:%s=%s", TP_DOWNLOADS_PATH, path );
-
-        set( TP_DOWNLOADS_PATH, path );
-
-        g_free( path );
-
-        downloads_path = get( TP_DOWNLOADS_PATH );
-    }
-
-    if ( g_mkdir_with_parents( downloads_path, 0700 ) != 0 )
-    {
-        g_error( "DOWNLOADS PATH '%s' DOES NOT EXIST AND COULD NOT BE CREATED", downloads_path );
+        g_error( "DOWNLOADS PATH '%s' DOES NOT EXIST AND COULD NOT BE CREATED", downloads_path.c_str() );
     }
 
     // PLUGINS PATH
 
-    const char * plugins_path = get( TP_PLUGINS_PATH );
+    String plugins_path = Util::canonical_external_path( get( TP_PLUGINS_PATH , "plugins" , true ) );
 
-    if ( ! plugins_path )
-    {
-        gchar * path = g_build_filename( g_get_current_dir() , "plugins" , NULL );
-
-        g_warning( "DEFAULT:%s=%s", TP_PLUGINS_PATH, path );
-
-        set( TP_PLUGINS_PATH, path );
-
-        g_free( path );
-    }
+    set( TP_PLUGINS_PATH , plugins_path );
 
     // SCREEN WIDTH AND HEIGHT
 
@@ -2323,23 +2289,25 @@ void TPContext::validate_configuration()
         set( TP_SCREEN_HEIGHT, TP_SCREEN_HEIGHT_DEFAULT );
     }
 
-    const char * resources_path = get( TP_RESOURCES_PATH );
+    // RESOURCES PATH
+
+    const char * resources_path = get( TP_RESOURCES_PATH , 0 , true );
 
     if ( ! resources_path )
     {
         if ( g_file_test( TP_DEFAULT_RESOURCES_PATH , G_FILE_TEST_IS_DIR ) )
         {
-            set( TP_RESOURCES_PATH , TP_DEFAULT_RESOURCES_PATH );
-            g_info( "DEFAULT:%s=%s", TP_RESOURCES_PATH , TP_DEFAULT_RESOURCES_PATH );
+        	resources_path = TP_DEFAULT_RESOURCES_PATH;
         }
         else
         {
-            gchar * s = g_build_filename( g_get_current_dir(), "resources", NULL );
-            set( TP_RESOURCES_PATH , s );
-            g_warning( "DEFAULT:%s=%s", TP_RESOURCES_PATH, s );
-            g_free( s );
+        	resources_path = "resources";
         }
     }
+
+    String resources_path_s = Util::canonical_external_path( resources_path );
+
+    set( TP_RESOURCES_PATH , resources_path_s );
 
     // Allowed secure objects
 
