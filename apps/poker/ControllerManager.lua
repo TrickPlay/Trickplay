@@ -86,6 +86,12 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
             --[[
                 Declare resources to be used by the phone
             --]]
+            -- all the cards
+            for _,card in ipairs(Cards) do
+                controller:declare_resource(getCardImageName(card),
+                    "assets/cards/"..getCardImageName(card)..".png")
+            end
+
             -- buttons for betting
             --controller:declare_resource("buttons", "assets/phone/buttons.png")
             -- buttons for dog selection
@@ -156,6 +162,10 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
                 "assets/phone/betting/button-new-game.png")
             controller:declare_resource("folded_text",
                 "assets/phone/betting/text-folded.png")
+            controller:declare_resource("continue_button",
+                "assets/phone/betting/button-continue.png")
+            controller:declare_resource("continue_button_on",
+                "assets/phone/betting/button-touch-continue.png")
 
             controller:declare_resource("click_sound",
                 "assets/sounds/enter.mp3")
@@ -384,16 +394,6 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
                 controller.router:notify()
 
                 controller.router:get_active_controller():set_hole_cards(hole)
-
-                --[[
-                controller:declare_resource("card1",
-                    "assets/cards/"..getCardImageName(hole[1])..".png")
-                controller:declare_resource("card2",
-                    "assets/cards/"..getCardImageName(hole[2])..".png")
-
-                controller:add_image("card1", 60, 70, 100*3, 130*3)
-                controller:add_image("card2", 280, 90, 100*3, 130*3)
-                --]]
             end
 
             controller.state = ControllerStates.BETTING
@@ -487,6 +487,14 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
         for i,controller in ipairs(active_ctrls) do
             if controller.state == ControllerStates.WAITING then
                 controller:update_waiting_room(players)
+            end
+        end
+    end
+
+    function ctrlman:end_hand()
+        for i,controller in ipairs(active_ctrls) do
+            if controller.router:get_active_component() == RemoteComponents.BETTING then
+                controller.router:get_active_controller():end_hand()
             end
         end
     end

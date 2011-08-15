@@ -243,7 +243,7 @@ end
 Deck = Class(nil,
 function(self, ...)
     local cards = {}
-    for _, card in ipairs(Cards) do
+    for _,card in ipairs(Cards) do
         table.insert(cards, card)
     end
 
