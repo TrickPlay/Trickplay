@@ -81,7 +81,7 @@ Property: dot_color
 
 The dot_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the spinner's graphic.
 
-The format of the RGB and alpha settings is described in the section RGB/Alpha Color Formats at <file:../../../apps/files/bindings/clutter_rectangle-lb.html#RGB/Alpha_Color_Formats>.
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 If the object's <skin> property is set to "CarbonCandy", the dot_color property is not used.
 
