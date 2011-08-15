@@ -96,7 +96,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)theConnection {
-    NSLog(@"Connection did finish loading %@", resourceKey);
+    fprintf(stderr, "Connection did finish loading %s", [resourceKey UTF8String]);
     [connection cancel];
     [connection release];
     connection = nil;
@@ -227,7 +227,10 @@
     }
 }
 //*/
- 
+
+#pragma mark -
+#pragma mark Deallocation
+
 - (void)dealloc {
     NSLog(@"AsyncImageView dealloc");
     if (connection) {
@@ -240,14 +243,8 @@
     if (resourceKey) {
         [resourceKey release];
     }
-    if (dataCacheDelegate) {
-        [(NSObject *)dataCacheDelegate release];
-        dataCacheDelegate = nil;
-    }
-    if (otherDelegate) {
-        [(NSObject *)otherDelegate release];
-        otherDelegate = nil;
-    }
+    self.dataCacheDelegate = nil;
+    self.otherDelegate = nil;
     
     self.image = nil;
     

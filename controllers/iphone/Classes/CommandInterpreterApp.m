@@ -32,7 +32,7 @@
 
 
 - (void)interpretCommand:(NSString *)command {
-    NSLog(@"\n\nReceived command: %@\n\n", command);
+    fprintf(stderr, "\n\nAsync Command received: %s\n\n", [command UTF8String]);
     
     NSArray *components = [[command componentsSeparatedByString:@"\t"] retain];
     NSMutableArray *args = [[[NSMutableArray alloc] initWithCapacity:20] autorelease];

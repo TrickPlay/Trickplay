@@ -150,6 +150,9 @@
     [loadingResources removeAllObjects];
 }
 
+#pragma mark -
+#pragma mark Deallocation
+
 - (void)dealloc {
     NSLog(@"ResourceManager dealloc");
     [self clean];

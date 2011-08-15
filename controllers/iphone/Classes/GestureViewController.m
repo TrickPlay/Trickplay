@@ -794,9 +794,7 @@
     [touchDelegate reset];
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
-    [self clearUI];
-    [advancedUIDelegate clean];
-    [resourceManager clean];
+    [self clean];
     [self dismissModalViewControllerAnimated:NO];
     [self do_HV];
     [self.view addSubview:virtualRemote.view];
@@ -992,6 +990,8 @@
 
 - (void)dealloc {
     NSLog(@"Gesture View Controller dealloc");
+    [self do_RT:nil];
+    
     if (version) {
         [version release];
     }
