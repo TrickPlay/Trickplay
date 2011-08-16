@@ -24,6 +24,9 @@ local title      = Text{
 
 title = make_text(title,"green")
 
+local scrim = Rectangle{size = screen.size,color="000000",opacity = 0}
+
+
 Death_Screen:add(title)
 Death_Screen:hide()
 
@@ -143,11 +146,19 @@ Death_Screen:add(Save_Score_Group)
 --for just viewing
 local View_Scores_Group = Group{opacity = 0}
 
+local help       = Text{
+	font         = "Baveuse 70px",
+	text         = "help",
+	color        = "ffffff",
+	position     = {screen.w/4, 920}
+	
+}
+help = make_text(help,"green")
 local play_again = Text{
 	font         = "Baveuse 70px",
-	text         = "New Game",
+	text         = "Play",
 	color        = "ffffff",
-	position     = {screen.w/3, screen_h - title.y}
+	position     = {screen.w/2, 920}
 	
 }
 play_again = make_text(play_again,"green")
@@ -155,14 +166,19 @@ local quit       = Text{
 	font         = "Baveuse 70px",
 	text         = "QUIT",
 	color        = "ffffff",
-	position     = {screen.w*2/3, 950}
+	position     = {screen.w*3/4, 920}
 	
 }
 quit = make_text(quit,"green")
 
-View_Scores_Group:add(play_again,quit)
+View_Scores_Group:add(help,play_again,quit)
 
 Death_Screen:add(View_Scores_Group)
+
+
+
+
+Death_Screen:add(scrim)
 
 --------------------------------------------------------------------------------
 --behavior
@@ -176,9 +192,10 @@ local save_h_score_selectables = {
 	submit
 }
 
-local view_index = 1
+local view_index = 2
 
 local view_h_score_selectables = {
+	help,
 	play_again,
 	quit,
 }
@@ -457,6 +474,9 @@ submit.lose_focus = function()
 	lose_wobble(submit)
 end
 
+help.get_focus  = get_wobble
+help.lose_focus = lose_wobble
+
 quit.get_focus  = get_wobble
 quit.lose_focus = lose_wobble
 
@@ -464,6 +484,7 @@ play_again.get_focus  = get_wobble
 play_again.lose_focus = lose_wobble
 
 --the press enter functions
+function help:press_enter()    GameState:change_state_to("HELP")    end
 function quit:press_enter()    exit()    end
 
 function play_again:press_enter()    GameState:change_state_to("GAME")    end
@@ -513,14 +534,60 @@ do
 			}
 		end,
 		
-		"VIEW_HIGHSCORE", nil
+		"VIEW_HIGHSCORE", "GAME"
+	)
+	GameState:add_state_change_function(
+		function()
+			screen.on_key_down = nil
+			
+			wobble:stop()
+			
+			curr_opacity = scrim.opacity
+			
+			scrim:complete_animation()
+			
+			scrim.opacity = curr_opacity
+			
+			scrim:animate{
+				duration = 300,
+				opacity  = 255*.6,
+			}
+		end,
+		
+		"VIEW_HIGHSCORE", "HELP"
 	)
 	
 	GameState:add_state_change_function(
 		function()
+			screen.on_key_down = nil
+			
+			curr_opacity = scrim.opacity
+			
+			scrim:complete_animation()
+			
+			scrim.opacity = curr_opacity
+			
+			scrim:animate{
+				duration = 600,
+				opacity  = 0,
+				on_completed = function()
+					wobble:start()
+					screen.on_key_down = Play_Again.on_key_down
+				end
+			}
+		end,
+		
+		"HELP", "VIEW_HIGHSCORE"
+	)
+	
+	GameState:add_state_change_function(
+		function(old)
+			
+			if old == "HELP" then return end
+			
 			wobble:stop()
 			
-			view_index = 1
+			view_index = 2
 			
 			if Death_Screen.opacity ~= 255 then fade_in_death_screen() end
 			

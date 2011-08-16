@@ -5,6 +5,7 @@ local help_font = "Baveuse 45px"
 
 local done
 
+local return_to_sender = nil
 do
     
 	local first_line  = 0
@@ -172,7 +173,8 @@ local wobble = Timeline{
 
 local curr_x_rot = 0
 	GameState:add_state_change_function(
-		function()
+		function(old,new)
+			return_to_sender = old
 			--wobble:stop()
 			--curr_x_rot = Help.x_rotation[1]
 			Help:show()
@@ -194,7 +196,7 @@ local curr_x_rot = 0
 				end
 			}
 		end,
-		"SPLASH", "HELP"
+		nil, "HELP"
 	)
 
 	GameState:add_state_change_function(
@@ -207,18 +209,18 @@ local curr_x_rot = 0
 			Help.y = curr_y
 			
 			Help:animate{
-				duration = 600,
+				duration = 500,
 				
 				--y        = screen_h+200,
 				x_rotation = 100,
 				on_completed = function()
-					screen.on_key_down = Splash.on_key_down
-					physics:start()
+					--screen.on_key_down = Splash.on_key_down
+					
 					Help:hide()
 				end
 			}
 		end,
-		"HELP", "SPLASH"
+		"HELP", nil
 	)
 	
 	
@@ -231,7 +233,7 @@ do
 		
 		[keys.OK] = function()
 			
-			GameState:change_state_to("SPLASH")
+			GameState:change_state_to(return_to_sender)
 			
 		end,
 	}
