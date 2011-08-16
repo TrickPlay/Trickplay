@@ -1,5 +1,5 @@
 local init_dist  = 100
-local digit_dist = 72
+local digit_dist = 60
 local h_digit_dist = 40
 
 local yellow_digits = {}
@@ -165,10 +165,6 @@ local function add_to(nums,amt,digits,add_a_digit)
 			
 			nums[i].text.source = digits[nums[i].value]
 			
-			nums[i].text.anchor_point = {
-				nums[i].text.w/2,
-				nums[i].text.h/2
-			}
 		else
 			
 			amt = 0
@@ -176,6 +172,20 @@ local function add_to(nums,amt,digits,add_a_digit)
 			nums[i].text.source = digits[nums[i].value]
 			
 		end
+		
+		
+		if nums[i].value == 1 then
+			nums[i].text.anchor_point = {
+				nums[i].text.w/2,
+				nums[i].text.h/2
+			}
+		else
+			nums[i].text.anchor_point = {
+				nums[i].text.w/2,
+				nums[i].text.h/2
+			}
+		end
+		
 		--print(i,nums[i].value,amt,"\n" )
 		i = i + 1
 	end
@@ -236,6 +246,10 @@ local hud = {
 				
 				if i == 1 then
 					n.text.source = yellow_digits[0]
+					n.text.anchor_point = {
+						n.text.w/2,
+						n.text.h/2
+					}
 				else
 					n.text:hide()
 				end
