@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.button_Refresh, SIGNAL("clicked()"), self.refresh)        
         QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.search)
         QObject.connect(self.ui.pushAppButton, SIGNAL("clicked()"),  self.pushApp)
+        QObject.connect(self.ui.runButton, SIGNAL("clicked()"),  self.run)
         
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
@@ -61,14 +62,29 @@ class MainWindow(QMainWindow):
         QObject.connect(app, SIGNAL('aboutToQuit()'), self.cleanUp)
         
         self.app = app
+        self.trickplay = QProcess()
+        
+    def run(self):
+        if self.trickplay.state() == QProcess.Running:
+            self.trickplay.close()
+        print('exit status', self.trickplay.exitStatus())
+        self.trickplay.start('/usr/bin/trickplay', [self.path])
+        
         
     """
     Cleanup code goes here... nothing yet?
     """
     def cleanUp(self):
-        pass
-        #print('Quitting.')
-    
+        # If there is a running trickplay, terminate it
+        try:
+            print(self.trickplay.state())
+            #if self.trickplay.state() == QProcess.Running:
+            self.trickplay.terminate()
+            #    print('terminated trickplay')
+        except AttributeError, e:
+            pass
+        print('quitting')
+            
     """
     Initialize widgets on the main window with a given app path
     """
@@ -125,7 +141,7 @@ class MainWindow(QMainWindow):
     Set up the file system model
     """
     def createFileSystem(self, appPath):
-        #QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
+        QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
         self.fileModel = FileSystemModel(self.ui.fileSystem, appPath)
         
     def getFileSystemModel(self):
@@ -155,14 +171,13 @@ class MainWindow(QMainWindow):
         else:
             self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
 
+    """
+    Accept a file either by dragging onto the editor dock or into one of the
+    editor tab widget
+    """
     def dropFileEvent(self, event, src, w = None):
-        print('From', event.source(), event.mimeData().hasText())
         
-        if len(self.editorGroups) > 0:
-            # Prevent the drop event from firing twice
-            # TODO Is this even required?
-            if src == 'dock':
-                return
+        #print('From', event.source(), event.mimeData().hasText())
             
         n = self.getTabWidgetNumber(w)
         
@@ -181,7 +196,7 @@ class MainWindow(QMainWindow):
 
 
     """
-    Open a file from the FileSystemModel in the correct tab group.
+    Open a file from the FileSystemModel in the correct tab widget.
     """
     def openInEditor(self, fileIndex, n = None):
         if not self.fileModel.isDir(fileIndex):
@@ -190,7 +205,7 @@ class MainWindow(QMainWindow):
     
     """
     Create a tab group if both don't exist,
-    then add an editor in the correct tab group.
+    then add an editor in the correct tab widget.
     """
     def newEditor(self, path, tabGroup = None):
         

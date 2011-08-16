@@ -26,12 +26,10 @@ class FileSystemModel(QFileSystemModel):
         
         # Popup Menu
         self.popMenu = QMenu( self.view )
-        #self.popMenu.addAction('&Test', self.test)
-        #self.popMenu.addAction( self.actionEdit )
+        self.popMenu.addAction( '&Rename', self.rename )
+        self.popMenu.addSeparator()
         self.popMenu.addAction( '&Delete', self.delete )
-        #self.popMenu.addSeparator()
-        #self.popMenu.addAction( self.actionAdd )
-
+        
     def contextMenu(self, point):
         self.popMenu.exec_( self.view.mapToGlobal(point) )
     
@@ -46,3 +44,9 @@ class FileSystemModel(QFileSystemModel):
         i = self.currentIndex()
         if i:
             success = self.remove(i)
+            
+    def rename(self):
+        i = self.currentIndex()
+        if i:
+            self.view.setCurrentIndex(i)
+            self.view.edit(i)

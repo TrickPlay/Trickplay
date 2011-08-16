@@ -131,6 +131,7 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidget_3">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -174,6 +175,13 @@
            <widget class="QComboBox" name="deviceComboBox"/>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="runButton">
+          <property name="text">
+           <string>Run application locally</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushAppButton">
@@ -232,7 +240,6 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
