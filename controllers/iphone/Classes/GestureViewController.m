@@ -18,6 +18,7 @@
 
 @synthesize loadingIndicator;
 @synthesize theTextField;
+@synthesize theLabel;
 @synthesize textView;
 @synthesize backgroundView;
 
@@ -416,10 +417,13 @@
     [theTextField becomeFirstResponder];
     
     // see if trickplay passed any text
-    if ([args count] > 1) {
-        theTextField.text = [args objectAtIndex:1];
-    } else {
-        theTextField.text = @"";
+    theTextField.text = @"";
+    theLabel.text = @"Enter Text";
+    if (args.count > 0) {
+        theLabel.text = [args objectAtIndex:0];
+        if (args.count > 1) {
+            theTextField.text = [args objectAtIndex:1];
+        }
     }
     [theTextField selectAll:theTextField];
     [UIMenuController sharedMenuController].menuVisible = NO;
@@ -895,7 +899,7 @@
     
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
-    textView.layer.borderWidth = 10.0;
+    textView.layer.borderWidth = 7.0;
     
     loadingIndicator.hidesWhenStopped = YES;
     //loadingIndicator.bounds = self.view.frame;
