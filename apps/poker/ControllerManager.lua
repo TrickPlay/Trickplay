@@ -303,7 +303,7 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
 
             controller:clear_and_set_background("bkg")
             controller:add_image("hdr_name_dog", 109, 30, 422, 50)
-            controller:add_image("dog_"..pos, 192, 100, 256, 256)
+            controller:add_image("dog_"..pos, 192, 80, 256, 256)
 
             local default_name = settings[controller.name] or "Name Your Dog"
             if controller.has_text_entry
