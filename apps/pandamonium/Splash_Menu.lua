@@ -25,7 +25,7 @@ do
 	local start     = Text{--Clone{
 		--source       = assets.title,
 		font         = "Baveuse 70px",
-		text         = "START",
+		text         = "Play",
 		position     = {screen.w/2, 300}
 		
 	}
@@ -383,8 +383,12 @@ do
 				scrim.opacity = curr_opacity
 				
 				scrim:animate{
-					duration = 300,
+					duration = 600,
 					opacity  = 0,
+					on_completed = function()
+						physics:start()
+						screen.on_key_down = Splash.on_key_down
+					end
 				}
 				
 				return

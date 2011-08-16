@@ -522,6 +522,8 @@ World.check_hopper = function()
 	end
 	
 	if dy ~= 0 then
+	
+		hud:add_to_dist(math.ceil(dy/50))
 		--scroll the tiles background by a lesser amount
 		bg.y = (bg.y + dy/3) % bg.base_size[2] - bg.base_size[2]
 		

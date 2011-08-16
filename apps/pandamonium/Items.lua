@@ -26,7 +26,8 @@ envelope.tl = {
 	end,
 	on_loop = function()
 		envelope.index  = (envelope.index+1) % (# assets.envelope)
-		envelope.source = assets.envelope[envelope.index]
+		
+		envelope.source = assets.envelope[envelope.index+1]
 	end
 }
 
