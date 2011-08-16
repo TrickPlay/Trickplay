@@ -164,6 +164,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // TextField for entering text; used when Trickplay requests text input
     // with controller:enter_text(string label, string text) call from Trickplay.
     UITextField *theTextField;
+    UILabel *theLabel;
     // Black border around theTextField
     UIView *textView;
     // Displays the background which the developer may change with the
@@ -233,6 +234,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 @property (nonatomic, retain) IBOutlet UITextField *theTextField;
+@property (nonatomic, retain) IBOutlet UILabel *theLabel;
 @property (nonatomic, retain) IBOutlet UIView *textView;
 @property (retain) IBOutlet UIImageView *backgroundView;
 
