@@ -66,10 +66,10 @@ local function send_request( end_point , payload )
     if foo%30 == 0 then
         print("\t\tcalls = ", foo)
     end
-    ---[[
+    --[[
     print("send_request result:", result)
     if type(result) == "table" then
-        --dumptable(result)
+        dumptable(result)
     end
     --]]
 

@@ -189,12 +189,12 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
         local current_bkg = nil
         function controller:clear_and_set_background(image_name)
             print("\n\nClear and Set Background with image name:", image_name, "\n\n")
-            --if current_bkg ~= image_name then
+            if current_bkg ~= image_name then
                 controller:clear_ui()
                 --controller.screen:set_background(image_name)
                 controller:set_ui_background(image_name)
                 current_bkg = image_name
-            --end
+            end
         end
 
         function controller:on_key_down(key)
@@ -295,15 +295,36 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
             @parameter pos : the dogs number/position (1-6). Determines which dog icon
                 to show on the iphone.
         --]]
+        local name_dog = nil
+        local dog_coin = nil
         function controller:name_dog(pos)
             print("naming dog")
             controller.router:set_active_component(RemoteComponents.NAME_DOG)
             controller.router:notify()
             controller.state = ControllerStates.NAME_DOG
 
-            controller:clear_and_set_background("bkg")
-            controller:add_image("hdr_name_dog", 109, 30, 422, 50)
-            controller:add_image("dog_"..pos, 192, 80, 256, 256)
+            --controller:clear_and_set_background("bkg")
+            --controller:add_image("hdr_name_dog", 109, 30, 422, 50)
+            if not name_dog then
+                name_dog = controller.factory:Image{
+                    src = "hdr_name_dog",
+                    position = {109*x_ratio, 30*y_ratio},
+                    size = {422*x_ratio, 50*y_ratio}
+                }
+                controller.screen:add(name_dog)
+            else
+                name_dog:show()
+            end
+            --controller:add_image("dog_"..pos, 192, 80, 256, 256)
+            if dog_coin then
+                dog_coin:unparent()
+            end
+            dog_coin = controller.factory:Image{
+                src = "dog_"..pos,
+                position = {192*x_ratio, 80*y_ratio},
+                size = {256*x_ratio, 256*y_ratio}
+            }
+            controller.screen:add(dog_coin)
 
             local default_name = settings[controller.name] or "Name Your Dog"
             if controller.has_text_entry
@@ -328,6 +349,8 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
         function controller:photo_dog(pos)
             print("giving dog a photo")
             local function handle_next_state()
+                name_dog:hide()
+                dog_coin:hide()
                 if controller.state == ControllerStates.BETTING then
                     controller.router:set_active_component(RemoteComponents.BETTING)
                     controller:set_hole_cards(controller.hole_cards)
