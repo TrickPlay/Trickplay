@@ -150,11 +150,7 @@
     if (self.frame.size.width == 0.0 || self.frame.size.height == 0.0) {
         self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, width, height);
     }
-    /*
-     [self addSubview:imageView];
-     imageView.frame = self.bounds;
-     [imageView setNeedsLayout];
-     //*/
+    
     [self setNeedsLayout];
     [self setNeedsDisplay];
     
