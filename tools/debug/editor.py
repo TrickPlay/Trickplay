@@ -13,7 +13,7 @@ from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
 class LuaEditor(QsciScintilla):
     ARROW_MARKER_NUM = 8
-
+    
     def __init__(self, parent=None):
         super(LuaEditor, self).__init__(parent)
         self.setAcceptDrops(False)
@@ -80,6 +80,8 @@ class LuaEditor(QsciScintilla):
 
         # not too small
         #self.setMinimumSize(600, 450)
+        
+        QObject.connect(self, SIGNAL("SCN_CHARADDED(int)"), self.charAdded)
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
@@ -103,10 +105,36 @@ class LuaEditor(QsciScintilla):
         f.close()
         
         statusBar.showMessage('File %s saved' % (path), 2000)
+        
+    def charAdded(self, c):
+        print(int(c))
+        
+        # :
+        if c == 58:
+            self.SendScintilla(QsciScintilla.SCI_AUTOCSHOW, 0, UI_ELEMENT_FUNCTIONS + UI_CONTAINER_FUNCTIONS)
+        
+        # ()
+        elif c == 40:
+            pos = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
+            self.SendScintilla(QsciScintilla.SCI_INSERTTEXT, pos, ')')
             
+        # {}
+        elif c == 123:
+            pos = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
+            self.SendScintilla(QsciScintilla.SCI_INSERTTEXT, pos, '}')
+        
+        # .
+        elif c == 46:
+            self.SendScintilla(QsciScintilla.SCI_AUTOCSHOW, 0, UI_ELEMENT_PROPS + UI_CONTAINER_PROPS)
+        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     editor = LuaEditor()
     editor.show()
     editor.setText(open(sys.argv[0]).read())
     app.exec_()
+    
+UI_CONTAINER_FUNCTIONS = 'add remove clear foreach_child find_child raise_child lower_child'
+UI_ELEMENT_FUNCTIONS = 'animate blur complete_animation desaturate grab_key_focus hide hide_all lower lower_to_bottom move_anchor_point move_by pageflatten pageturn raise raise_to_top saturate set show show_all tint transform_point unblur unparent untint'
+UI_ELEMENT_PROPS = 'anchor_point center clip clip_to_size depth gid h has_clip height is_animating is_rotated is_scaled is_visible min_size name natural_size opacity parent position reactive request_mode scale size transformed_position transformed_size w width x x_rotation y y_rotation z z_rotation'
+UI_CONTAINER_PROPS = 'count children'
