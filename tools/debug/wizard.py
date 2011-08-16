@@ -117,7 +117,7 @@ class Wizard():
         if dialog.exec_():
             id = str(ui.id.text())
             name = str(ui.name.text())
-            path = str(path)
+            path = str(ui.directory.text())
             print('now creating', path, id, name)
             appPath = os.path.join(path, 'app')
             appFile = open(appPath, 'w')

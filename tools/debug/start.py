@@ -31,6 +31,7 @@ def main(argv):
         QCoreApplication.setApplicationVersion('0.0.1');
             
         main = MainWindow(app)
+        main.show()
         wizard = Wizard()
         
         path = wizard.start(path)
