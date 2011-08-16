@@ -47,6 +47,7 @@ local height_g       = Group{
 	x    = height.x + height.w/2 + 10,
 	y    = h_h+10
 }
+--[[
 local multiplier_g   = Group{
 	x    = height.x + height.w/2 + 35,
 	y    = h_h,
@@ -75,16 +76,16 @@ local multiplier_value = Clone{
 }
 --multiplier_value.x = 5
 multiplier_g:add(multiplier_txt,multiplier_value)
+--]]
 
-
-layers.hud:add(height,height_g,multiplier_g)
+layers.hud:add(height,height_g)--,multiplier_g)
 
 coin:move_anchor_point(
 	coin.w/2,
 	coin.h/2
 )
 local dist = 0
-local multiplier = 1
+--local multiplier = 1
 local score = 0
 local score_nums = {}
 local dist_nums  = {}
@@ -132,7 +133,7 @@ local add_h_digit = function()
 	height_g:add( dist_nums[ # dist_nums ].text )
 	dist_nums[ # dist_nums ].text:lower_to_bottom()
 	height_g.x     =     height_g.x + h_digit_dist
-	multiplier_g.x = multiplier_g.x + h_digit_dist
+	--multiplier_g.x = multiplier_g.x + h_digit_dist
 end
 
 local i = 1
@@ -190,19 +191,19 @@ local function add_to(nums,amt,digits,add_a_digit)
 		i = i + 1
 	end
 end
-
+--[[
 local multiplier_index = 1
 local multiplier_thresholds = {
 	{dist = 1000, multiplier = 2},
 	{dist = 2000, multiplier = 3}
 }
-
+--]]
 local hud = {
 	
 	add_to_dist = function(_,amt)
 		
 		dist = dist + amt
-		
+		--[[
 		if multiplier_index <= # multiplier_thresholds and
 			multiplier_thresholds[multiplier_index].dist < dist then
 			print("seety")
@@ -215,13 +216,13 @@ local hud = {
 			multiplier_g.opacity = 255
 			multiplier_index = multiplier_index + 1
 		end
-		
+		--]]
 		add_to(dist_nums,amt,green_digits,add_h_digit)
 		
 	end,
 	add_to_score = function(_,amt)
 		
-		amt = amt*multiplier
+		--amt = amt*multiplier
 		
 		score = score + amt
 		
@@ -230,8 +231,8 @@ local hud = {
 	end,
 	
 	reset = function()
-		multiplier_index = 1
-		multiplier = 1
+		--multiplier_index = 1
+		--multiplier = 1
 		dist  = 0
 		score = 0
 		
@@ -261,20 +262,21 @@ local hud = {
 		end
 		dist_nums = {}
 		height_g.x     = height.x + height.w/2 + 10
-		multiplier_g.x = height.x + height.w/2 + 35
+		--multiplier_g.x = height.x + height.w/2 + 35
 		add_h_digit(score_nums,yellow_digits)
+		--[[
 		multiplier_g.opacity = 0
 		multiplier_value.source = yellow_digits[1]
 		multiplier_value.anchor_point = {
 			multiplier_value.w/2,
 			multiplier_value.h/2
 		}
-		
+		--]]
 	end,
 	
 	get_score = function()
 		
-		return score
+		return score+dist
 		
 	end
 }
