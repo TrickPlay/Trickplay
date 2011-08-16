@@ -38,6 +38,7 @@ if (NATURAL_DOCS)
             -o HTML ${PROJECT_BINARY_DIR}/docs/rte
             -p ${PROJECT_SOURCE_DIR}/engine/docs/rte/config
             -s Default Trickplay
+        COMMAND cat ${PROJECT_SOURCE_DIR}/engine/docs/expand-subsections.js >> ${PROJECT_BINARY_DIR}/docs/rte/javascript/main.js
 	)
 	add_dependencies(rte-docs git-tag-menu-txt)
 
