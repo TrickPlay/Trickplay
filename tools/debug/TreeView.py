@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'TreeView.ui'
 #
-# Created: Fri Aug 12 11:44:24 2011
+# Created: Tue Aug 16 13:54:17 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -74,6 +74,9 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.splitter_2, 2, 0, 1, 1)
         self.dockWidget_2.setWidget(self.dockWidgetContents_2)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.dockWidget_2)
+        self.statusbar = QtGui.QStatusBar(MainWindow)
+        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        MainWindow.setStatusBar(self.statusbar)
         self.dockWidget_3 = QtGui.QDockWidget(MainWindow)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -105,6 +108,9 @@ class Ui_MainWindow(object):
         self.deviceComboBox.setObjectName(_fromUtf8("deviceComboBox"))
         self.horizontalLayout_3.addWidget(self.deviceComboBox)
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
+        self.runButton = QtGui.QPushButton(self.frame)
+        self.runButton.setObjectName(_fromUtf8("runButton"))
+        self.verticalLayout_4.addWidget(self.runButton)
         self.pushAppButton = QtGui.QPushButton(self.frame)
         self.pushAppButton.setObjectName(_fromUtf8("pushAppButton"))
         self.verticalLayout_4.addWidget(self.pushAppButton)
@@ -127,16 +133,15 @@ class Ui_MainWindow(object):
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.fileSystem = QtGui.QTreeView(self.dockWidgetContents)
+        self.fileSystem.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.fileSystem.setDragEnabled(True)
         self.fileSystem.setDragDropMode(QtGui.QAbstractItemView.DragOnly)
+        self.fileSystem.setUniformRowHeights(True)
         self.fileSystem.setObjectName(_fromUtf8("fileSystem"))
         self.verticalLayout_3.addWidget(self.fileSystem)
         self.gridLayout_3.addLayout(self.verticalLayout_3, 0, 0, 1, 1)
         self.dockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
-        self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName(_fromUtf8("statusbar"))
-        MainWindow.setStatusBar(self.statusbar)
         self.actionExit = QtGui.QAction(MainWindow)
         self.actionExit.setObjectName(_fromUtf8("actionExit"))
         self.action_Exit = QtGui.QAction(MainWindow)
@@ -164,6 +169,7 @@ class Ui_MainWindow(object):
         self.button_Refresh.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget_3.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Device Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Trickplay Device", None, QtGui.QApplication.UnicodeUTF8))
+        self.runButton.setText(QtGui.QApplication.translate("MainWindow", "Run application locally", None, QtGui.QApplication.UnicodeUTF8))
         self.pushAppButton.setText(QtGui.QApplication.translate("MainWindow", "Push application to selected device", None, QtGui.QApplication.UnicodeUTF8))
         self.dockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  File System", "texty7", QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))

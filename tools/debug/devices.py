@@ -30,16 +30,15 @@ class TrickplayDiscovery(ServiceDiscovery):
         if index < 0:
             return
         
-        name = self.widget.itemData(index, NAME).toPyObject()
         address = self.widget.itemData(index, ADDRESS).toPyObject()
         port = self.widget.itemData(index, PORT).toPyObject()
 
-        if not name or not address or not port:
+        if not address or not port:
             return
         
         self.main.clearTree()
         
-        print(index,name,address,port)
+        print(index,address,port)
         
         # Echo client program
         # http://docs.python.org/release/2.5.2/lib/socket-example.html
@@ -85,9 +84,9 @@ class TrickplayDiscovery(ServiceDiscovery):
         flags,
         ):
         
-        print "Found service '%s' of type '%s' in domain '%s' on %s.%i." \
-            % (name, type, domain, self.siocgifname(interface),
-               protocol)
+        #print "Found service '%s' of type '%s' in domain '%s' on %s.%i." \
+        #    % (name, type, domain, self.siocgifname(interface),
+        #       protocol)
         
         ServiceDiscovery.new_service(
             self,
@@ -123,21 +122,23 @@ class TrickplayDiscovery(ServiceDiscovery):
         self.widget.setItemData(index, port, PORT)
         self.widget.setItemData(index, address, NAME)
         
+        print('Found', address, port)
+        
         # Automatically select a service if only one exists
         if 1 == self.widget.count():
             self.service_selected(index)
         
-        print "Service data for service '%s' of type '%s' (%s) in domain '%s' on %s.%i:" \
-            % (
-            name,
-            h_type,
-            type,
-            domain,
-            self.siocgifname(interface),
-            protocol,
-            )
-        print '\tHost %s (%s), port %i, TXT data: %s' % (host, address,
-                port, avahi.txt_array_to_string_array(txt))
+        #print "Service data for service '%s' of type '%s' (%s) in domain '%s' on %s.%i:" \
+        #    % (
+        #    name,
+        #    h_type,
+        #    type,
+        #    domain,
+        #    self.siocgifname(interface),
+        #    protocol,
+        #    )
+        #print '\tHost %s (%s), port %i, TXT data: %s' % (host, address,
+        #        port, avahi.txt_array_to_string_array(txt))
         
     def remove_service(
         self,
