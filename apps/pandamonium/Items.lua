@@ -80,7 +80,7 @@ envelope.state:add_state_change_function(
 envelope.state:add_state_change_function(
 	function(old,new)
 		
-		hud:add_to_score(10)
+		hud:add_to_score(100)
 		
 		Effects:make_sparkles(envelope.x,envelope.y)
 		
@@ -295,7 +295,7 @@ local function new_coin()
 	coin.state:add_state_change_function(
 		function(old,new)
 			
-			hud:add_to_score(1)
+			hud:add_to_score(10)
 			
 			Effects:make_sparkles(coin.x,coin.y)
 			

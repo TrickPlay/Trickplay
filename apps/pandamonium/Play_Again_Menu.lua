@@ -51,7 +51,7 @@ for i,s in pairs(highscores) do
 			font = "Baveuse 55px",
 			x    = 3*screen_w/5,
 			y    = screen_h/2 + (i-(#highscores+1)/2)*70
-		},"yellow"
+		},"green"
 	)
 	
 	--scores[i].score.anchor_point = {scores[i].score.w,scores[i].score.h/2}
@@ -630,6 +630,29 @@ do
 			
 			while true do
 				
+				if scores[i].yellow then
+					
+					scores[i].name:unparent()
+					scores[i].name = make_text(
+						Text{
+							text = highscores[i].name,
+							font = "Baveuse 55px",
+							x    = 2*screen_w/5,
+							y    = screen_h/2 + (i-(#highscores+1)/2)*70
+						},"green"
+					)
+					scores[i].score:unparent()
+					scores[i].score = make_text(
+						Text{
+							text = highscores[i].score,
+							font = "Baveuse 55px",
+							x    = 3*screen_w/5,
+							y    = screen_h/2 + (i-(#highscores+1)/2)*70
+						},"green"
+					)
+					scores[i].yellow = false
+					Death_Screen:add(scores[i].name, scores[i].score)
+				end
 				if highscores[i].score < hud:get_score() then
 					
 					table.insert(
@@ -649,17 +672,18 @@ do
 									text = highscores[i].name,
 									font = "Baveuse 55px",
 									x    = 2*screen_w/5,
-									y    = screen_h/2 + (i-(#highscores+1)/2+1)*70
-								},"green"
+									y    = screen_h/2 + (i-(#highscores+1)/2)*70
+								},"yellow"
 							),
 							score = make_text(
 								Text{
 									text = highscores[i].score,
 									font = "Baveuse 55px",
 									x    = 3*screen_w/5,
-									y    = screen_h/2 + (i-(#highscores+1)/2+1)*70
+									y    = screen_h/2 + (i-(#highscores+1)/2)*70
 								},"yellow"
-							)
+							),
+							yellow = true
 						}
 					)
 					--print(screen_h/2 + (i-(#highscores+1)/2)*70)
@@ -673,6 +697,30 @@ do
 					scores[# scores] = nil
 					
 					for j = i,#scores do
+						
+						if j ~= i and scores[j].yellow then
+							scores[j].name:unparent()
+							scores[j].name = make_text(
+								Text{
+									text = highscores[j].name,
+									font = "Baveuse 55px",
+									x    = 2*screen_w/5,
+									y    = screen_h/2 + (j-(#highscores+1)/2+1)*70
+								},"green"
+							)
+							scores[j].score:unparent()
+							scores[j].score = make_text(
+								Text{
+									text = highscores[j].score,
+									font = "Baveuse 55px",
+									x    = 3*screen_w/5,
+									y    = screen_h/2 + (j-(#highscores+1)/2+1)*70
+								},"green"
+							)
+							scores[j].yellow = false
+							Death_Screen:add(scores[j].name, scores[j].score)
+						end
+						
 						scores[j].name.y  = screen_h/2 + (j-(#highscores+1)/2)*70
 						scores[j].score.y = screen_h/2 + (j-(#highscores+1)/2)*70
 					end
