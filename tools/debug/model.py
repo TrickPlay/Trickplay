@@ -24,94 +24,50 @@ NOT_EDITABLE = {
     'z center', 
 }
 
+T = 0  # Title
+V = 1  # Value
+A = -1 # All
 
 class ElementModel(QStandardItemModel):
     
-    """
-    Return the screen element
-    """
-    def screen(self, column = ROW['T']):
-        
-        r = self.invisibleRootItem()
-        
-        if column >= 0:
-            
-            return r.child(0, column)
-            
-        else:
-        
-            row = []
-            
-            for i in range(r.columnCount()):
-                
-                row.append(r.child(0, i))
-                
-            return row
-        
-    
-    """
-    Find a child in the model given a value
-    """
     def matchChild(self, value, role = Qt.DisplayRole,
                    flags = Qt.MatchRecursive, hits = 1,
-                   start = None, column = ROW['T']):
+                   start = None, column = T):
+        """
+        Find a child in the model given a value
+        """
         
-        if not start:
-            
+        if not start:        
             start = self.index(0, 0)
         
-        result = self.match(start, role, value, hits, flags)
+        result = self.match(start,
+                            role,
+                            value,
+                            hits,
+                            flags)
         
-        if len(result) and ROW['T'] != column:
-            
+        # Return rows instead of indexes (these are more useful)
+        if len(result) and T != column:
             for i in range(len(result)):
-    
                 item = self.itemFromIndex(result[i])
-                
                 result[i] = item.toRow()
             
         return result
-    
-    
-    """
-    Find a child in any column
-    NOTE: Column parameter is for the column returned
-    All columns are searched regardless of this parameter
-    """
-    #def fullMatch(self, value, role = Qt.DisplayRole,
-    #              flags = Qt.MatchRecursive, hits = 1,
-    #              start = None, column = ROW['T']):
-    #    
-    #    found = []
-    #    
-    #    search
-    #    
-    #    while 0 == len(found):
-    #        
-    #        pass
-    #        
-    #        
-    #    
         
+    def initialize(self,  headers,  populate):    
+        """
+        Initialize the model with JSON data
+        The root of the model will be the Screen actor (instead of Stage)
+        """
         
-    """
-    Initialize the model with JSON data
-    The root of the model will be the Screen actor (instead of Stage)
-    """
-    def initialize(self,  headers,  populate):
-        
-        if headers:
-            
+        if headers:    
             self.setHorizontalHeaderLabels(headers)
         
         root = self.invisibleRootItem()
         
         if populate:
-            
             data = getTrickplayData()
-            
             if data:
-            
                 child = None
             
                 for c in data["children"]:
@@ -120,62 +76,44 @@ class ElementModel(QStandardItemModel):
                         break
                     
                 if child is None:
-                    
                     print( "Could not find screen element." )
-                    
                 else:
-                    
                     self.addElement(root, child, screen = True)
-                
-                #screen = self.screen()
-                
-                #screen.setCheckable(-1)
-                
-                #screen.setCheckState(-1)
-                
+                                
             else:
-                
                 print("Could not retreive data.")
                 
-            
-    
-    """
-    Find an attribute given the index of a UIElement
-    Return an index tuple (title, value)
-    """
     def findAttr(self, parent, title, requiresElement = False):
-    
+        """
+        Find an attribute given the index of a UIElement
+        Return an index tuple (title, value)
+        """
+        
         # Set requiresElement if this search should only take place on a UI element
         # Speed will improve significantly
-        if requiresElement and not self.isElement(self.title(parent)):
-            
+        if requiresElement and not self.isElement(self.title(parent)):    
             return None
         
         n = self.rowCount(parent)
         
         for i in range(n):
-            
             index = self.index(i, 0, parent)
-            
             if title == self.data(index):
-                
                 return (index,  self.index(i,  1,  parent))
                 
         print("ERROR >> Node attribute " +  str(title) +  " not found in " + str(parent.data(0).toString()) + ".")
 
-    
-    """
-    Return the title index of a row given the value index
-    """
-    def titleFromValue(self, valueNode):
-        
+    def titleFromValue(self, valueNode): 
+        """
+        Return the title index of a row given the value index
+        """    
+
         return self.getPair(valueNode)[0]
 
-
-    """
-    Return the value index of a row given the title index
-    """
     def valueFromTitle(self, titleNode):
+        """
+        Return the value index of a row given the title index
+        """
         
         return self.getPair(titleNode)[1]
 
@@ -186,50 +124,37 @@ class ElementModel(QStandardItemModel):
     def getPair(self, index):
         
         if isinstance(index, Element):
-            
             index = self.indexFromItem(index)
         
         parentIndex = index.parent()
-        
         row = index.row()
-        
         originalColumn = index.column()
         
         column = None
-        
         if originalColumn:
-        
             column = 0
-            
         else:
-            
             column = 1
         
         partnerIndex = None
         
         # Screen
         if not parentIndex.isValid():
-
             partnerIndex = self.indexFromItem(self.invisibleRootItem().child(row, column))
 
         # Everything else
         else:
-        
             partnerIndex = parentIndex.child(row, column)
         
         if originalColumn:
-            
             return (partnerIndex, index)
-            
         else:
-            
             return (index, partnerIndex)
 
-
-    """
-    Add a UI element to the tree as a Element
-    """
     def addElement(self, parent, data, screen = False):
+        """
+        Add a UI element to the tree as an Element
+        """
         
         value = data["name"]
         
@@ -290,14 +215,14 @@ class ElementModel(QStandardItemModel):
         
         self.addAttrs(titleNode, data, gid, False)
     
-    """
-    Add the list of UI element attributes to the tree as a Element
-    Parent is a QStandardItem (an Element), data is the JSON data,
-    gid is the parent Element's gid, and nested is the name of the parent
-    attribute, like 'anchor_point', if applicable ('anchor_point' has children x, y)
-    """
     def addAttrs(self, parent, data, gid, nested):
-        
+        """
+        Add the list of UI element attributes to the tree as a Element
+        Parent is a QStandardItem (an Element), data is the JSON data,
+        gid is the parent Element's gid, and nested is the name of the parent
+        attribute, like 'anchor_point', if applicable ('anchor_point' has children x, y)
+        """    
+    
         a = AttrIter(nested)
         
         for attr in a:
@@ -319,157 +244,39 @@ class ElementModel(QStandardItemModel):
             # Add children in reverse order, so the top of the element stack 
             # is the first in the list
             if 'children' == title:
-                
-                for child in range(len(value)-1,  -1,  -1):
-                #for child in value:
-                    
+                for child in range(len(value)-1,  -1,  -1):                    
                     self.addElement(parent, value[child])
                 
             elif isSimple:
-                
                 valueNode = Element()
-                
                 valueNode.setData(value,  Qt.DisplayRole)
-                
                 parent.appendRow([titleNode, valueNode])
                 
             else:
-                
                 summary = summarize(value, attr)
-                
                 valueNode = Element(summary)
-                
                 valueNode.setFlags(Qt.NoItemFlags)
-                
                 parent.appendRow([titleNode, valueNode])
-                
                 self.addAttrs(titleNode, value, gid, attr)
             
             if title in NOT_EDITABLE or (nested and nested in NOT_EDITABLE):
-                
                 valueNode.setFlags(Qt.NoItemFlags)
                 
             if nested:
-                
                 valueNode.setData(True, Qt.Nested)
     
     
-    """
-    Refresh all Tree data from the root
-    Most data will remain the same between refreshes
-    """
     def refreshRoot(self):
+        """
+        Refresh all Tree data from the root
+        Most data will remain the same between refreshes
+        """
         
         data = getTrickplayData()["children"][0]
         
         self.refreshElements(self.toItem(self.getRoot()),  data)
     
-    
-    """
-    Delete marked children
-    """
-    #def deleteChildren(self, item):
-    #
-    #    # Check each child (in reverse, so deletions don't change indexing)
-    #    for i in range(len(item)-1,  -1,  -1):
-    #        
-    #        #print(item[i][ROW['T']].pyData(Qt.Save), item[i][ROW['T']].pyData(Qt.Gid))
-    #        
-    #        
-    #        
-    #        if not item[i][ROW['T']].pyData(Qt.Save):
-    #            
-    #            item[i][ROW['T']].setData('DEL', Qt.DisplayRole)
-    
-    
-    """
-    TODO:
-        This function doesn't actually work. There is (mostly) working (but slow)
-        version back in git somewhere... however, given that we will likely not
-        refresh every node all at once, this will wait till later.
-    
-    Refreshes a UI element given its index
-    
-    Refresh each child element
-    Pull each child from the model
-    
-    Delete every attr and remaining child
-    Add every attr
-    
-    Put the children back in the model in the correct order
-    
-    """
-    ##TODO perhaps just recreate the entire tree, record which nodes were open,
-    ##and reoppen them
-    #def refreshElements(self, item, data):
-    #    
-    #    # If this UI element is a group...
-    #    if data.has_key('children'):
-    #        
-    #        dataToAdd = []
-    #        
-    #        dataOrder = []
-    #        
-    #        elementsTaken = {}
-    #        
-    #        # Mark children as 'keep' or 'delete'
-    #        for i in range(len(data['children'])):
-    #            
-    #            c = data['children'][i]
-    #            
-    #            result = self.matchChild(c['gid'], role = Qt.Gid, column = -1,
-    #                                     start = item.index().child(0, 0), flags = Qt.MatchWrap)
-    #            
-    #            # Child still exists
-    #            if len(result) > 0:
-    #                
-    #                result = result[0]
-    #                
-    #                result[ROW['V']].setData('NEW', Qt.DisplayRole)
-    #                
-    #                result[ROW['T']].setData(True, Qt.Save)
-    #                
-    #                self.refreshElements(result[ROW['T']], c)
-    #                
-    #                dataOrder.append(c['gid'])
-    #                
-    #                elementsTaken[c['gid']] = item.takeRow(result[ROW['T']].row())
-    #            
-    #            # Child doesn't exist; add it
-    #            else:
-    #                
-    #                dataToAdd.append(c['gid'])
-    #                
-    #                #item.addElement(item, c)
-    #                
-    #        for i in elementsTaken:
-    #            
-    #            item.appendRow(elementsTaken[i])
-    #        
-    #    #attrs = item.attrs()
-    #    
-    #    # Update non-children elements
-    #    #for attr in AttrIter():
-    #    #    
-    #    #    if 'children' != attr:
-    #    #
-    #    #        attrRow = item[attr]
-    #    #        
-    #    #        # Attr still exists
-    #    #        if attrRow:
-    #    #            
-    #    #            attrRow[ROW['V']].setData('NEW', Qt.DisplayRole)
-    #    #            
-    #    #            attrRow[ROW['T']].setData(True, Qt.Save)
-    #    #            
-    #    #        # Attr doesn't exist; add it
-    #    #        else:
-    #    #            
-    #    #            self.addAttrs(parent, data[attr], data['gid'], nested)
-    #    #        
-    #    #
-    #    #
-    #    self.deleteChildren(item)        
+     
 
 
          
@@ -491,58 +298,46 @@ class ElementModel(QStandardItemModel):
             raise BadDataException("toIndex must be called on a node")
     
     
-    """
-    Return an index given either an item or an index
-    """
     def toItem(self, node):
-        
-        if isinstance(node, Element):
-            
+        """
+        Return an index given either an item or an index
+        """    
+    
+        if isinstance(node, Element):        
             return node
             
         elif isinstance(node, QModelIndex):
-            
             return self.itemFromIndex(node)
             
         else:
-            
             raise BadDataException("toItem must be called on a node")
 
     
-    """
-    Copy attributes from the inspector model to the property model.
-    This happens every time selection changes in the inspector model.
-    """
     def copyAttrs(self, original, new, isNested = False):
-        
+        """
+        Copy attributes from the inspector model to the property model.
+        This happens every time selection changes in the inspector model.
+        """    
+    
         try:
-            
             e = self.itemFromIndex(original)
-            
             attrs = e.attrs()
             
             for row in attrs:
-            
                 c = []
-                
                 for i in range(e.columnCount()):
-                    
                     c.append(row[i].fullClone())
-                
                 new.appendRow(c)
             
         # Nothing was selected, so no rows need be coppied
         except TypeError:
-            
             pass
-            
-            #print("Nothing was selected")
 
     
-    """
-    Recreate the Python data structure given a row of elements
-    """
     def dataStructure(self, pair):
+        """
+        Recreate the Python data structure given a row of elements
+        """
     
         data = {}
         
@@ -551,45 +346,44 @@ class ElementModel(QStandardItemModel):
         return data
     
     
-    """
-    Recreate the python data structure given a (title, value) pair of indexes
-    """
+    
     def createDataStructure(self, pair, data):
-        
-        titleIndex, valueIndex = pair
-        
+        """
+        Recreate the python data structure given a (title, value) pair of indexes
+        """    
+    
+        titleIndex, valueIndex = pair    
         title = pyData(titleIndex, 0)
-        
         value = pyData(valueIndex, 0)
-        
+
         titleItem = self.itemFromIndex(titleIndex)
         
-        if titleItem.hasChildren():
-            
+        if titleItem.hasChildren():            
             childData = {}
-                
             data[title] = childData
-            
             for i in range(titleItem.rowCount()):
-                
                 self.createDataStructure((titleIndex.child(i, 0), titleIndex.child(i, 1)), childData)
-                
+           
         else:
-            
             data[title] = value
             
         return data
     
     
     def getRoot(self):
+        """
+        Return the root index
+        """
         
         return self.index(0,  0)
     
     
-    """
-    Return a list of tuples (column 0, column 1)
-    """
+    
     def children(self,  index):
+        """
+        Return a list of tuples (column 0, column 1)
+        """
+    
         c = []
         for i in range(self.rowCount(index)):
             c.append((index.child(i, 0),  index.child(i, 1)))
@@ -599,25 +393,19 @@ class ElementModel(QStandardItemModel):
         return index.data(Qt.DisplayRole).toString()
 
 
-    """
-    Returns true if title string is a UIElement name
-    """
     def isElement(self,  title):
-
-        if title in UI_ELEMENTS:
+        """
+        Return true if title string is a UIElement name
+        """
         
-            return title
-        
-        else:
-            
-            return None
+        return title if title in UI_ELEMENTS else None
 
 
-"""
-The read-only summary of attributes
-"""
 def summarize(value, nested = None):
-    
+    """
+    The read-only summary of attributes
+    """    
+
     try:
     
         a = AttrIter(nested)
@@ -638,24 +426,128 @@ def summarize(value, nested = None):
         
         raise Exception
 
-"""
-Get node data and return the result as a Python object,
-as opposed to data which returns the result as a QVariant
-If the data is a QString, return a Python str
-"""
 def pyData(index, role):
+    """
+    Get node data and return the result as a Python object,
+    as opposed to data which returns the result as a QVariant
+    If the data is a QString, return a Python str
+    """
     
     i = index.data(role).toPyObject()
     
     if isinstance(i, QString):
-        
         i = str(i)
     
     return i
 
 
 
+### For refreshing nodes instead of recreating the entire tree...
+### But this doesn't actually gain anything?
 
 
-
+#def deleteChildren(self, item):
+#    """
+#    Delete marked children
+#    """
+#    # Check each child (in reverse, so deletions don't change indexing)
+#    for i in range(len(item)-1,  -1,  -1):
+#        
+#        #print(item[i][T].pyData(Qt.Save), item[i][T].pyData(Qt.Gid))
+#        
+#        
+#        
+#        if not item[i][T].pyData(Qt.Save):
+#            
+#            item[i][T].setData('DEL', Qt.DisplayRole)
+#
+#
+#"""
+#TODO:
+#    This function doesn't actually work. There is (mostly) working (but slow)
+#    version back in git somewhere... however, given that we will likely not
+#    refresh every node all at once, this will wait till later.
+#
+#Refreshes a UI element given its index
+#
+#Refresh each child element
+#Pull each child from the model
+#
+#Delete every attr and remaining child
+#Add every attr
+#
+#Put the children back in the model in the correct order
+#
+#"""
+##TODO perhaps just recreate the entire tree, record which nodes were open,
+##and reoppen them
+#def refreshElements(self, item, data):
+#    
+#    # If this UI element is a group...
+#    if data.has_key('children'):
+#        
+#        dataToAdd = []
+#        
+#        dataOrder = []
+#        
+#        elementsTaken = {}
+#        
+#        # Mark children as 'keep' or 'delete'
+#        for i in range(len(data['children'])):
+#            
+#            c = data['children'][i]
+#            
+#            result = self.matchChild(c['gid'], role = Qt.Gid, column = -1,
+#                                     start = item.index().child(0, 0), flags = Qt.MatchWrap)
+#            
+#            # Child still exists
+#            if len(result) > 0:
+#                
+#                result = result[0]
+#                
+#                result[V].setData('NEW', Qt.DisplayRole)
+#                
+#                result[T].setData(True, Qt.Save)
+#                
+#                self.refreshElements(result[T], c)
+#                
+#                dataOrder.append(c['gid'])
+#                
+#                elementsTaken[c['gid']] = item.takeRow(result[T].row())
+#            
+#            # Child doesn't exist; add it
+#            else:
+#                
+#                dataToAdd.append(c['gid'])
+#                
+#                #item.addElement(item, c)
+#                
+#        for i in elementsTaken:
+#            
+#            item.appendRow(elementsTaken[i])
+#        
+#    #attrs = item.attrs()
+#    
+#    # Update non-children elements
+#    #for attr in AttrIter():
+#    #    
+#    #    if 'children' != attr:
+#    #
+#    #        attrRow = item[attr]
+#    #        
+#    #        # Attr still exists
+#    #        if attrRow:
+#    #            
+#    #            attrRow[V].setData('NEW', Qt.DisplayRole)
+#    #            
+#    #            attrRow[T].setData(True, Qt.Save)
+#    #            
+#    #        # Attr doesn't exist; add it
+#    #        else:
+#    #            
+#    #            self.addAttrs(parent, data[attr], data['gid'], nested)
+#    #        
+#    #
+#    #
+#    self.deleteChildren(item)       
 

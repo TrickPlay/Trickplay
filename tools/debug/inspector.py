@@ -22,8 +22,10 @@ class Inspector():
         # Ignore signals while updating elements internally
         self.preventChanges = False
         
-        # UI
-        self.ui = { 'inspector' : inspectorView, 'property' : propertyView }
+        self.ui = {
+            'inspector' : inspectorView,
+            'property' : propertyView
+        }
         
         # Models
         self.inspectorModel = ElementModel()
@@ -177,10 +179,6 @@ class Inspector():
                     
                     item.model().itemFromIndex(propertyValueIndex).setData(checkState, 0)
                     
-                    #row = item['is_visible']
-                    
-                    #row[1].setData(checkState, Qt.DisplayRole)
-                    
                     self.updatePropertyList(item.index())
             
             self.preventChanges = False
@@ -289,11 +287,11 @@ class Inspector():
             self.preventChanges = False
     
     
-    """
-    Initialize models, proxy models, selection models, and connections
-    """
     def createTree(self):
-
+        """
+        Initialize models, proxy models, selection models, and connections
+        """
+        
         # Set up Inspector
         self.inspectorModel.initialize(["UI Element",  "Name"],  False)
         
@@ -354,40 +352,33 @@ class Inspector():
         
         
     def refresh(self):
+        """
+        TODO, At some point, perhaps refresh each node istead of redrawing
+        the entire tree. Not yet though, because we'll probably change
+        nodes so that they're only retreived when expanded.
+        """
         
         self.preventChanges = True
         
-        # TODO, At some point, perhaps refresh each node istead of redrawing
-        # the entire tree. Not yet though, because we'll probably change
-        # nodes so that they're only retreived when expanded.
-        
-        # self.inspectorModel.refreshRoot()
-        
         gid = None
-        
         try:
-        
             gid = self.selectedGid()
-        
         except IndexError:
-            
             gid = 1
         
-        #self.inspectorModel.invisibleRootItem().removeRow(0)
-        
         self.clearTree()
-        
         self.inspectorModel.initialize(None, True)
-        
+
         row = self.inspectorModel.matchChild(gid, role = Qt.Gid, column = -1)
-        
         if len(row) > 0:
-        
             self.selectRow(row[0])
         
         self.preventChanges = False
         
     def clearTree(self):
+        """
+        Make sure no old data remains in the tree
+        """
         
         old = self.preventChanges
         
