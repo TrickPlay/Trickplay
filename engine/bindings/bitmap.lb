@@ -39,7 +39,7 @@ class Bitmap [[ Bitmap * ]]
         
 		src - String specifying the image file to load. The src argument can reference either the application bundle or a URI.
 		async - Boolean flag indicating whether to load the image asynchronously(true) or synchronously(false). By default, files are loaded synchronously. The async argument is optional; however, if calling the constructor using variable/value arguments and the read_tags argument is specified then the async argument must also be specified.
-		read_tags - Boolean flag indicating whether or not to store any Exif (Exchangable image file format) tags contained in the bitmap file (true = store tags). If tags are stored, they can be accessed through the <tags> property. By default, Exif tags are not stored.
+		read_tags - Boolean flag indicating whether or not to store any Exif (Exchangable image file format) tags contained in the bitmap file (true = store tags). If tags are stored, they can be accessed through the <tags> property. By default, Exif tags are not stored. Note: Exif tags that have a format of "undefined" are never stored. Also tags of type "long" that are actually pointers to data are never stored.
 
 		*Argument Examples:*
 		
@@ -304,6 +304,8 @@ class Bitmap [[ Bitmap * ]]
         Property: tags
         
         The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded bitmap. If the storage of Exif tags was not enabled (via the read_tags argument to the Bitmap constructor) or if the bitmap file contained no tags then the tags table will be empty.
+        
+        Exif tags that have a format of "undefined" are not stored. Also tags of type "long" that are actually pointers to data are not stored.
         
         *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
         
