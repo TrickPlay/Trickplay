@@ -3,7 +3,7 @@ from PyQt4.QtCore import *
 
 import sys
 
-from element import Element, ROW
+from element import Element, 
 from model import ElementModel, pyData, modelToData, dataToModel, summarize
 from data import modelToData, dataToModel, BadDataException
 import connection
