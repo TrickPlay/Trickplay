@@ -303,6 +303,8 @@ class Image [[ClutterActor*]] actor
 		
 		The read_tags property is a boolean value specifying whether or not to store any Exif (Exchangable image file format) tags contained in the image file (true = save Exif tags). Exif tags are read while the image is loading, so the read_tags property must be set before loading the image. After the image has loaded, stored Exif tags can be accessed through the <tags> property.
 		
+		Exif tags that have a format of "undefined" are never stored. Also tags of type "long" that are actually pointers to data are never stored.
+		
 		*Default Setting:* false, i.e., do not store Exif tags
 		
 		*Code Example:* Load an image, specifying that Exif tags should be saved.
@@ -331,6 +333,8 @@ class Image [[ClutterActor*]] actor
         Property: tags
         
         The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded image. If the storage of Exif tags was not enabled (via the <read_tags> property) or if the image file contained no tags then the tags table will be empty.
+        
+   		Exif tags that have a format of "undefined" are not stored. Also tags of type "long" that are actually pointers to data are not stored.
         
         *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
         
