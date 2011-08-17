@@ -36,7 +36,7 @@ class TrickplayDiscovery(ServiceDiscovery):
         if not address or not port:
             return
         
-        self.main.clearTree()
+        self.main.inspector.clearTree()
         
         print(index,address,port)
         
