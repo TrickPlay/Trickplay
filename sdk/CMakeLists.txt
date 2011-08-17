@@ -107,7 +107,7 @@ if (UNIX AND NOT APPLE)
 
         # Documentation
         
-        install(DIRECTORY ${PROJECT_BINARY_DIR}/docs/apps/ DESTINATION share/doc/trickplay-sdk/html)
+        install(DIRECTORY ${PROJECT_BINARY_DIR}/docs/rte/ DESTINATION share/doc/trickplay-sdk/html)
         
         # Copyright
         
@@ -147,14 +147,9 @@ if (UNIX AND NOT APPLE)
 	
 	    install(DIRECTORY ${PROJECT_SOURCE_DIR}/apps/editor DESTINATION share/trickplay/apps/ )
 
-        #Editor docs	
-
-        install(DIRECTORY ${PROJECT_BINARY_DIR}/docs/editor/ DESTINATION share/doc/trickplay-editor/html )
-        
         # Editor icons
 
 	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor.desktop DESTINATION share/applications/ ) 
-	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor-docs.desktop DESTINATION share/applications/ ) 
 	    
     endif ( EXISTS ${PROJECT_SOURCE_DIR}/apps/editor )
 
