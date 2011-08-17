@@ -69,6 +69,7 @@ public:
             case T_FLOAT32: return sizeof( gfloat );
             case T_FLOAT64: return sizeof( gdouble );
         }
+        return 0; // warnings
     }
 
     // Bad one

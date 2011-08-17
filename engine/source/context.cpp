@@ -427,6 +427,86 @@ private:
 
 //-----------------------------------------------------------------------------
 
+class MemReporter : public Action
+{
+public:
+
+	MemReporter( bool _once )
+	:
+		once( _once )
+	{
+		gchar * fn = g_build_filename( G_DIR_SEPARATOR_S "proc" , "self" , "status" , NULL );
+
+		filename = fn;
+
+		g_free( fn );
+
+		regex = g_regex_new( "^VmRSS:[^0-9]*([0-9]+).*$" , G_REGEX_MULTILINE , ( GRegexMatchFlags ) 0 , 0 );
+	}
+
+	~MemReporter()
+	{
+		g_regex_unref( regex );
+	}
+
+protected:
+
+	virtual bool run()
+	{
+		bool ok = false;
+
+		gchar * contents = 0;
+
+		if ( g_file_get_contents( filename.c_str() , & contents , 0 , 0 ) )
+		{
+			GMatchInfo * mi = 0;
+
+			if ( g_regex_match( regex , contents , ( GRegexMatchFlags ) 0 , & mi ) )
+			{
+				if ( gchar * n = g_match_info_fetch( mi , 1 ) )
+				{
+					int rss = atoi( n );
+
+					if ( rss > peak )
+					{
+						peak = rss;
+					}
+
+					g_info( "RSS = %d : %+d : peak %d " , rss , last ? rss - last : 0 , peak );
+
+					last = rss;
+
+					g_free( n );
+
+					ok = true;
+				}
+			}
+
+			g_match_info_free( mi );
+
+			g_free( contents );
+		}
+
+		if ( ! ok )
+		{
+			g_info( "FAILED TO GET MEMORY INFORMATION" );
+			return false;
+		}
+
+		return ! once;
+	}
+
+	bool		once;
+	String 		filename;
+	GRegex *	regex;
+	static int	peak;
+	static int 	last;
+};
+
+int MemReporter::peak = 0;
+int MemReporter::last = 0;
+
+//-----------------------------------------------------------------------------
 
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
 {
@@ -629,6 +709,17 @@ int TPContext::console_command_handler( const char * command, const char * param
                 g_info( "FAILED TO OPEN '%s'" , parameters );
             }
         }
+    }
+    else if ( ! strcmp( command , "mem" ) )
+    {
+    	int interval = -1;
+
+    	if ( parameters )
+    	{
+    		interval = atoi( parameters ) * 1000;
+    	}
+
+    	Action::post( new MemReporter( interval == -1 ? true : false ) , interval );
     }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
