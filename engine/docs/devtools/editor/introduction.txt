@@ -1,5 +1,5 @@
 
-Title: Introduction
+Title: Visual Editor Introduction
 
 This section documents the TrickPlay Visual Editor. Included is a <Tutorial at file:tutorial/introduction-txt.html> to get you started and a <Programmer's Reference at file:reference/button-txt.html>.
 
