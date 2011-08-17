@@ -621,10 +621,83 @@ do
 		
 		nil,"VIEW_HIGHSCORE"
 	)
-	
+	local new_entry_i = nil
 	GameState:add_state_change_function(
 		function()
 			--wobble:stop()
+			
+			
+			
+			highscores[new_entry_i].name = initials[1].text..initials[2].text..initials[3].text
+			scores[new_entry_i].name:unparent()
+			scores[new_entry_i].name = make_text(
+				Text{
+					text = highscores[new_entry_i].name,
+					font = "Baveuse 55px",
+					x    = 2*screen_w/5,
+					y    = screen_h/2 + (new_entry_i-(#highscores+1)/2)*70
+				},"yellow"
+			)
+			
+			Death_Screen:add(scores[new_entry_i].name)
+			
+			
+			
+			curr_opacity = Save_Score_Group.opacity
+			
+			Save_Score_Group:complete_animation()
+			
+			Save_Score_Group.opacity = curr_opacity
+			
+			Save_Score_Group:animate{
+				duration = 300,
+				opacity  = 0,
+			}
+		end,
+		
+		"SAVE_HIGHSCORE", nil
+	)
+	
+	GameState:add_state_change_function(
+		function()
+			
+			if Death_Screen.opacity ~= 255 then fade_in_death_screen() end
+			
+			wobble:stop()
+			
+			up_arrow.x = initials[1].x
+			dn_arrow.x = initials[1].x
+			
+			up_arrow.opacity = 255
+			dn_arrow.opacity = 255
+			
+			save_index = 1
+			
+			View_Scores_Group.opacity = 0
+			
+			curr_opacity = Save_Score_Group.opacity
+			
+			Save_Score_Group:complete_animation()
+			
+			Save_Score_Group.opacity = curr_opacity
+			
+			Save_Score_Group:animate{
+				duration = 300,
+				opacity  = 255,
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			
 			local i = 1
 			
@@ -658,11 +731,13 @@ do
 					table.insert(
 						highscores,i,
 						{
-							name = initials[1].text..initials[2].text..initials[3].text,
+							name = "***",
 							score = hud:get_score()
 						}
 					)
 					highscores[#highscores] = nil
+					
+					new_entry_i = i
 					
 					table.insert(
 						scores,i,
@@ -736,48 +811,12 @@ do
 				if i > #highscores then error("the shit?") end
 			end
 			
-			curr_opacity = Save_Score_Group.opacity
 			
-			Save_Score_Group:complete_animation()
 			
-			Save_Score_Group.opacity = curr_opacity
 			
-			Save_Score_Group:animate{
-				duration = 300,
-				opacity  = 0,
-			}
-		end,
-		
-		"SAVE_HIGHSCORE", nil
-	)
-	
-	GameState:add_state_change_function(
-		function()
 			
-			if Death_Screen.opacity ~= 255 then fade_in_death_screen() end
 			
-			wobble:stop()
 			
-			up_arrow.x = initials[1].x
-			dn_arrow.x = initials[1].x
-			
-			up_arrow.opacity = 255
-			dn_arrow.opacity = 255
-			
-			save_index = 1
-			
-			View_Scores_Group.opacity = 0
-			
-			curr_opacity = Save_Score_Group.opacity
-			
-			Save_Score_Group:complete_animation()
-			
-			Save_Score_Group.opacity = curr_opacity
-			
-			Save_Score_Group:animate{
-				duration = 300,
-				opacity  = 255,
-			}
 		end,
 		
 		nil, "SAVE_HIGHSCORE"
