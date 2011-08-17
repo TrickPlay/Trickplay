@@ -4,9 +4,10 @@ import signal
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+
+# UI File
 from TreeView import Ui_MainWindow
 
-import connection
 from devices import TrickplayDiscovery
 from editor import LuaEditor
 from push import TrickplayPushApp
@@ -54,7 +55,6 @@ class MainWindow(QMainWindow):
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
         
-        self.preventChanges = False
         self.path = None
         
         QObject.connect(app, SIGNAL('aboutToQuit()'), self.cleanUp)

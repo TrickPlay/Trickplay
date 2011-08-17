@@ -154,7 +154,7 @@ class TrickplayDiscovery(ServiceDiscovery):
         
         self.widget.removeItem(index)
         
-        self.main.clearTree()
+        self.main.inspector.clearTree()
         
         #for item in list:
         #    
