@@ -22,7 +22,7 @@ From any directory, enter the following command.
 
 To run from a graphical user interface:
 
-In the Applications->Developer Tools window, click on the "TrickPlay Visual Editor" icon.
+In either the Applications->Developer Tools or Applications->Programming window (depending on the Linux graphic shell you are running), click on the "TrickPlay Visual Editor" icon.
 
 (see images/VisualEditorIcon.png)
 
