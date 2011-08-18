@@ -35,12 +35,16 @@ def send(data):
         data = response.read()
             
         conn.close()
+        
+        return True
 
     except error, e:
         
         print("Error >> Trickplay Application unavailable.")
         
         print(e)
+        
+        return False
         
     
 def getTrickplayData():

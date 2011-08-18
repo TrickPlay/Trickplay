@@ -15,7 +15,7 @@ from connection import CON
 from wizard import Wizard
 from files import FileSystemModel
 from editorTab import EditorTabWidget, EditorDock
-from inspector import Inspector
+from Inspector.TrickplayInspector import TrickplayInspector
 
 class MainWindow(QMainWindow):
     
@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
         self.createEditor()
         
         # Create Inspector
-        self.inspector = Inspector(self.ui.inspector, self.ui.property) 
+        self.inspector = TrickplayInspector(self.ui.inspector, self.ui.property) 
         
         # Toolbar
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
                 
         # Buttons
         QObject.connect(self.ui.button_Refresh, SIGNAL("clicked()"), self.inspector.refresh)        
-        QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.inspector.search)
+        #QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.inspector.search)
         QObject.connect(self.ui.pushAppButton, SIGNAL("clicked()"),  self.pushApp)
         QObject.connect(self.ui.runButton, SIGNAL("clicked()"),  self.run)
         
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
     """
     def start(self, path, openList = None):
         self.path = path
-        self.inspector.createTree()
+        #self.inspector.fill()
         self.createFileSystem(path)
         self.discovery = TrickplayDiscovery(self.ui.deviceComboBox, self)
         
@@ -245,6 +245,6 @@ class MainWindow(QMainWindow):
  
         
     def exit(self):
-        sys.exit()
+        self.close()
         
         
