@@ -1,7 +1,7 @@
 
 Topic: Save the Screen
 
-To retain the modifications applied to a screen, it is necessary to save the screen to a disk file. Doing so enables you to retrieve the screen in the future without having to regenerate it from scratch. The saved screen image will also be used when the finished application is eventually run by the TrickPlay Runtime Engine.
+To retain the modifications applied to a screen, it is necessary to save the screen to a disk file. Doing so enables you to retrieve the screen in the future without having to regenerate it from scratch. The saved screen image will also be used when the finished application is eventually run by the TrickPlay Engine.
 
 To save the current screen, select the File->Save... menu item. A Save File dialog window will display.
 
