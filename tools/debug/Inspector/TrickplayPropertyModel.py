@@ -111,7 +111,12 @@ class TrickplayPropertyModel(QStandardItemModel):
         Get the value of this item's property
         """
         
-        return item.data(Qt.DisplayRole).toPyObject()
+        v = item.data(Qt.DisplayRole).toPyObject()
+        
+        if isinstance(v, QString):
+            v = str(v)
+        
+        return v
         
     def prepareData(self, item):
         """

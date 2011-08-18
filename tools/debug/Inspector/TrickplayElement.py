@@ -59,7 +59,6 @@ class TrickplayElement(QStandardItem):
         self.setData(TrickplayData(), Qt.TP)
         
         self._partner = QStandardItem()
-        #self.setData(QStandardItem(), Qt.Partner)
         
     def partner(self):
         """
@@ -67,7 +66,6 @@ class TrickplayElement(QStandardItem):
         """
         
         return self._partner
-        #return self.data(Qt.Partner).toPyObject()
     
     def setPartner(self, p):
         """
@@ -75,7 +73,6 @@ class TrickplayElement(QStandardItem):
         """
         
         self._partner = p
-        #self.setData(p, Qt.Partner)
         
     def _TP(self):
         """
