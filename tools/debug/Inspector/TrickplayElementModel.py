@@ -1,14 +1,9 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-from connection import getTrickplayData, CON
-from data import dataToModel,  modelToData,  BadDataException
-from PropertyIter import PropertyIter
-from element import Element, ROW, UI_ELEMENTS
-
 from TrickplayElement import TrickplayElement
+from connection import getTrickplayData
 
-Qt.Gid = Qt.UserRole + 3
 
 class TrickplayElementModel(QStandardItemModel):
     
@@ -87,14 +82,10 @@ class TrickplayElementModel(QStandardItemModel):
             del(data['is_visible'])
         
         partner = node.partner()
-        partner.setData(gid, Qt.Gid)
         partner.setFlags(partner.flags() ^ Qt.ItemIsEditable)
+        partner.setData(value, Qt.DisplayRole)
         
         parent.appendRow([node, partner])
-        
-        # This may be obsolete
-        node.setData(gid, Qt.Gid)
-        partner.setData(value, Qt.DisplayRole)
         
         # Recurse through children
         try:
@@ -112,12 +103,33 @@ class TrickplayElementModel(QStandardItemModel):
         
         self.invisibleRootItem().removeRow(0)
         
-    #def
+    def search(self, property, value, start = None):
+        """
+        Find an element where property == value
+        """
         
-#app = QApplication([])
-#t = TrickplayElementModel()
-#v = QTreeView()
-#v.setModel(t)
-#v.show()
-#CON.set('localhost', '8888')
-#t.fill()
+        start = start or self.invisibleRootItem().child(0, 0)
+        
+        if start:
+            return self.recSearch(property, value, start)
+        else:
+            return None
+       
+    def recSearch(self, property, value, item):
+        
+        if item[property] == value:
+            return item
+        
+        # Check the item's children
+        else:
+            
+            count = item.rowCount()
+            if count > 0:
+                for i in range(count):
+                    result = self.recSearch(property, value, item.child(i))
+                    if result:
+                        return result
+                        
+            else:
+                return None
+

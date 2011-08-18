@@ -1,29 +1,33 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-import sys
 import connection
 
 from TrickplayPropertyModel import TrickplayPropertyModel
 from TrickplayElementModel import TrickplayElementModel
 from data import BadDataException, modelToData
 
-Qt.Subtitle = Qt.UserRole + 2
+
 
 class TrickplayInspector():
     
-    def __init__(self, inspectorView, propertyView):
+    def __init__(self, inspectorView, propertyView, search):
         """
-        Initialize inspector with two QTreeViews
+        Initialize inspector with two QTreeViews and one lineEdit for search
         """
         
         # Ignore signals while updating elements internally
         self.preventChanges = False
         
+        # Searches find multiple items with the same name
+        #self.lastSearchedText = None
+        #self.lastSearchedItem = None
+        
         # Views
         self.ui = {
             'inspector' : inspectorView,
-            'property' : propertyView
+            'property' : propertyView,
+            'search' : search
         }
         
         # Models
@@ -59,10 +63,30 @@ class TrickplayInspector():
         
         self.preventChanges = True
         
+        # Reselect gid of last item selected
+        gid = None
+        try:
+            index = self.selected(self.ui['inspector'])
+            item = self.inspectorModel.itemFromIndex(index)
+            gid = item['gid']
+        except Exception, e:
+            print(e)
+            gid = 1
+            
+        print(gid)
+        
+        # Get all new data
         self.inspectorModel.empty()
         self.inspectorModel.fill()
+        self.propertyModel.empty()
         
         self.preventChanges = False
+        
+        # Find the last item after getting new data so that
+        # both trees reflect the changes
+        result = self.search(gid, 'gid')
+        if result:
+            self.selectItem(result)
         
     def setHeaders(self, model, headers):
         """
@@ -85,47 +109,59 @@ class TrickplayInspector():
         except:
             return None
     
-    def search(self, text = '', model = None):
+    def userSearch(self):
         """
-        Search for a node by Gid or Name
+        Perform a search and select the item found
+        
+        TODO:
+        If search is pressed multiple times with the same string, then
+        search for the next item matching the search
         """
         
-        model = model or self.inspectorModel
+        text = self.ui['search'].text()
         
         # Search by gid if possible, otherwise name
-        r = None
+        property = None
         try:
-            t = int(t)
-            r = Qt.Gid
+            text = int(text)
+            property = 'gid'
         except:
-            r = Qt.Name
+            property = 'name'
         
-        i = model.invisibleRootItem().child(0, 0)
-        
-        row = self.inspectorModel.matchChild(t, role = r, flags = Qt.MatchRecursive, column = -1)
-        
-        if len(row) > 0:
-            row = row[0]
-            self.selectRow(row)
+        #item = None
+        #if self.lastSearchedText == text:
+        #    item = self.lastSearchedItem
             
+        result = self.search(text, property)
+        
+        if result:
+            print('Found', result['gid'], result['name'])
+            #self.lastSearchedText = text
+            #self.lastSearchedItem = item
+            self.selectItem(result)
         else:
-            
             print('UI Element not found')
             
-    def selectRow(self, row):
+    
+    def search(self, value, property, start = None):
+        """
+        Search for a node by one of its properties
+        """
+        
+        return self.inspectorModel.search(property, value, start)
+            
+    def selectItem(self, item):
         """
         Select a row of the inspector model (as the result of a search)
         """
         
-        index = row[T].index()
-            
-        proxyIndex = self.inspectorProxyModel.mapFromSource(index)
+        topLeft = item.index()
+        bottomRight = item.partner().index()
         
-        proxyValue = self.inspectorProxyModel.mapFromSource(row[V].index())
+        self.ui['inspector'].scrollTo(topLeft, 3)
         
-        self.ui['inspector'].scrollTo(proxyIndex, 3)        
-        self.inspectorSelectionModel.select(
-            QItemSelection(proxyIndex, proxyValue),
+        self.ui['inspector'].selectionModel().select(
+            QItemSelection(topLeft, bottomRight),
             QItemSelectionModel.SelectCurrent)
     
     # "selectionChanged(QItemSelection, QItemSelection)"
@@ -201,44 +237,20 @@ class TrickplayInspector():
         
     def sendData(self, gid, property, value):
         """
-        Update a UI Element property
+        Send changed properties to Trickplay device
         """
     
         try:    
             property, value = modelToData(property, value)
         
         except BadDataException, (e):
-            print("BadDataException",  e.value)
-            return False  
+            print("Error >> Invalid data entered", e.value)
+            return False
             
         print('Sending:', gid, property, value)
         
         return connection.send({'gid': gid,
                                 'properties' : {property : value}})
-
-    #def refresh(self):
-    #    """
-    #    TODO, At some point, perhaps refresh each node istead of redrawing
-    #    the entire tree. Not yet though, because we'll probably change
-    #    nodes so that they're only retreived when expanded.
-    #    """
-    #    
-    #    self.preventChanges = True
-    #    
-    #    gid = None
-    #    try:
-    #        gid = self.selectedGid()
-    #    except IndexError:
-    #        gid = 1
-    #    
-    #    self.clearTree()
-    #    self.inspectorModel.initialize(None, True)
-    #
-    #    row = self.inspectorModel.matchChild(gid, role = Qt.Gid, column = -1)
-    #    if len(row) > 0:
-    #        self.selectRow(row[0])
-    #    
-    #    self.preventChanges = False
         
     def clearTree(self):
         """
@@ -254,3 +266,5 @@ class TrickplayInspector():
         
         if not old:
             self.preventChanges = False
+            
+            
