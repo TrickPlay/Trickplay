@@ -485,6 +485,8 @@ class Image [[ClutterActor*]] actor
     bool load_from_data(lstring data)
 		[[
 		    result = Images::load_texture(CLUTTER_TEXTURE(self),(gpointer)data,data_len);
+
+            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( "[data]" ) , g_free);
 		]];
 	
     /*
@@ -516,6 +518,8 @@ class Image [[ClutterActor*]] actor
 	                	
 	                	delete image;
 	
+                        g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup_printf( "[icon:%s]" , app_id ) , g_free);
+
 	                    result = true;
 	                }
 				}	              
