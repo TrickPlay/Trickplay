@@ -37,6 +37,8 @@ public:
 
     static void decode_async( GByteArray * bytes , bool read_tags , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
+    static void free_image_with_g_free( TPImage * image );
+
     ~Image();
 
     inline const guchar * pixels() const { return ( const guchar * ) image->pixels; }
