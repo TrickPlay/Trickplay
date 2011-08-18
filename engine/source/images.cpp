@@ -97,7 +97,7 @@ public:
             tplog( "      pitch       : %u", image->pitch );
             tplog( "      depth       : %u", image->depth );
             tplog( "      bgr         : %u", image->bgr );
-            tplog( "      free_pixels : %p", image->free_pixels );
+            tplog( "      free_image  : %p", image->free_image );
 
             g_assert( image->pixels != NULL );
             g_assert( image->pitch >= image->width * image->depth );
