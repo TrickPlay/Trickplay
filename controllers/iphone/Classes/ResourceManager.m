@@ -30,13 +30,10 @@
     if ([loadingResources objectForKey:resourceKey]) {
         // Use one AsyncImageView as the master which pulls the data
         NSMutableArray *dependentImages = [loadingResources objectForKey:resourceKey];
-        NSLog(@"resourceKey: %@", resourceKey);
         if (dependentImages.count > 0) {
-            NSLog(@"dependent count: %d", dependentImages.count);
             AsyncImageView *imageView = [dependentImages objectAtIndex:0];
             [dependentImages removeObjectAtIndex:0];
             [self loadImageDataForImageView:imageView withResource:resourceKey];
-            NSLog(@"dependent count: %d", dependentImages.count);
         }
     }
 }
@@ -47,11 +44,11 @@
 
 - (void)loadImageDataForImageView:(AsyncImageView *)imageView withResource:(NSString *)name {
     // asynchronously pull the image
-    NSLog(@" from network");
+    //NSLog(@" from network");
     NSURL *dataurl;
     // create the url to pull the data from
     NSString *dataURLString = [[resourceNames objectForKey:name] objectForKey:@"link"];
-    NSLog(@"URL String %@", dataURLString);
+    fprintf(stderr, "URL String %s\n", [dataURLString UTF8String]);
     if ([dataURLString hasPrefix:@"http:"] || [dataURLString hasPrefix:@"https:"]) {
         dataurl = [NSURL URLWithString:dataURLString];
     } else {
@@ -81,14 +78,14 @@
  */
 
 - (NSData *)fetchResource:(NSString *)name {
-    NSLog(@"Fetching resource %@", name);
+    fprintf(stderr, "Fetching resource %s", [name UTF8String]);
     NSData *tempData;
     
     if ((tempData = [resources objectForKey:name])) {
-        NSLog(@" from dictionary");
+        fprintf(stderr, " from dictionary\n");
         return tempData;
     } else {    // pull resource
-        NSLog(@" from network");
+        fprintf(stderr, " from network\n");
         NSString *dataURLString = [[resourceNames objectForKey:name] objectForKey:@"link"];
         if ([dataURLString hasPrefix:@"http:"] || [dataURLString hasPrefix:@"https:"]) {
             tempData = [NSData dataWithContentsOfURL:[NSURL URLWithString:dataURLString]];
@@ -140,9 +137,7 @@
     if (data && resourceKey) {
         [resources setObject:data forKey:(NSString *)resourceKey];
         NSMutableArray *dependentImages = [loadingResources objectForKey:(NSString *)resourceKey];
-        NSLog(@"dependents: %@", dependentImages);
-        NSLog(@"dependents count: %d", dependentImages.count);
-        NSLog(@"resourceKey: %@", resourceKey);
+        
         for (AsyncImageView *imageView in dependentImages) {
             [imageView loadImageFromData:data];
         }

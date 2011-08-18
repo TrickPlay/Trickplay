@@ -89,6 +89,8 @@
 - (void)startTouches;
 - (void)stopTouches;
 
+- (void)setSwipe:(BOOL)allowed;
+
 - (void)reset;
 
 @end
@@ -231,6 +233,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 @property (nonatomic, retain) NSString *version;
 @property (nonatomic, assign) SocketManager *socketManager;
+
+@property (assign) BOOL graphics;
 
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 @property (nonatomic, retain) IBOutlet UITextField *theTextField;

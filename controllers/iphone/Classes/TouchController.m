@@ -12,6 +12,7 @@
 @implementation TouchController
 
 @synthesize touchEventsAllowed;
+@synthesize swipeEventsAllowed;
 @synthesize view;
 @synthesize socketManager;
 
@@ -34,9 +35,9 @@
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount {
-	if (socketManager && !touchEventsAllowed)
+	if (socketManager && !touchEventsAllowed && swipeEventsAllowed)
 	{
-	    int index;	
+	    int index;
 		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", thekey];
         
 		for (index = 1; index <= thecount; index++) {
@@ -60,6 +61,10 @@
 - (void)setMultipleTouch:(BOOL)val {
     view.multipleTouchEnabled = val;
     [self resetTouches];
+}
+
+- (void)setSwipe:(BOOL)allowed {
+    swipeEventsAllowed = allowed;
 }
 
 //*
