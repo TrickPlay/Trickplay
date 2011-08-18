@@ -3,7 +3,7 @@ Topic: Screen Transition
 
 We now have two screens, Language and Mode, but each screen is isolated; there is no way to switch from one to the other. To transition to a different screen, it is necessary to add code to the main.lua file that we looked at earlier in <The main.lua File>.
 
-During our previous examination of main.lua, it was explained that the SDK Visual Editor implements many of its supported UI elements, such as Button and ButtonPicker, in a library called lib/ui_elements.lua. Further, an internal variable called ui_element is created in main.lua and this ui_element object includes methods that perform useful tasks. We've already seen two of these methods: populate_to() which copies the screen's UI elements from a groups{} table to a layout{} table and screen_add() which adds the screen's UI elements to the TrickPlay Engine's global screen object.
+During our previous examination of main.lua, it was explained that the Visual Editor implements many of its supported UI elements, such as Button and ButtonPicker, in a library called lib/ui_elements.lua. Further, an internal variable called ui_element is created in main.lua and this ui_element object includes methods that perform useful tasks. We've already seen two of these methods: populate_to() which copies the screen's UI elements from a groups{} table to a layout{} table and screen_add() which adds the screen's UI elements to the TrickPlay Engine's global screen object.
 
 The ui_elements.lua library provides another useful method called transit_to() that happens to perform the exact operation we are interested in performing right now: transitioning from one screen to another.
 
