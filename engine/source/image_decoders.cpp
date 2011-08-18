@@ -108,7 +108,7 @@ namespace ImageDecoders
                     image->pitch = width * 4;
                     image->depth = 4;
                     image->bgr = 0;
-                    image->free_pixels = _TIFFfree;
+                    image->free_image = free_image;
 
                     result = TP_IMAGE_DECODE_OK;
                 }
@@ -119,6 +119,14 @@ namespace ImageDecoders
             }
 
             return result;
+        }
+
+        static void free_image( TPImage * image )
+        {
+        	g_assert( image );
+        	g_assert( image->pixels );
+
+        	_TIFFfree( image->pixels );
         }
     };
 
@@ -281,7 +289,7 @@ namespace ImageDecoders
                                 image->pitch = width * depth;
                                 image->depth = depth;
                                 image->bgr = 0;
-                                image->free_pixels = NULL;
+                                image->free_image = 0;
 
                                 result = TP_IMAGE_DECODE_OK;
                             }
@@ -562,7 +570,7 @@ namespace ImageDecoders
                 image->depth = 3;
                 image->pitch = rotator.get_transformed_width() * 3;
                 image->bgr = 0;
-                image->free_pixels = 0;
+                image->free_image = 0;
             }
             catch( ... )
             {

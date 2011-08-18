@@ -288,7 +288,7 @@ Image * Image::screenshot()
     image.depth = 4;
     image.pitch = width * 4;
     image.bgr = 0;
-    image.free_pixels = g_free;
+    image.free_image = Image::free_image_with_g_free;
 
     return Image::make( image );
 }
@@ -350,7 +350,7 @@ Image * Image::make( cairo_surface_t * surface )
     result.width = cairo_image_surface_get_width( surface );
     result.height = cairo_image_surface_get_height( surface );
     result.pitch = result.width * 4;
-    result.free_pixels = 0;
+    result.free_image = 0;
     result.pixels = malloc( result.height * result.pitch );
 
     if ( ! result.pixels )
@@ -408,7 +408,7 @@ Image * Image::convert_to_cairo_argb32() const
     result->width = image->width;
     result->pitch = image->width * 4;
     result->pixels = malloc( image->width * image->height * 4 );
-    result->free_pixels = NULL;
+    result->free_image = 0;
 
     guint8 * dest_pixel = ( guint8 * ) result->pixels;
 
@@ -562,7 +562,7 @@ Image * Image::make_packed_copy() const
 
     result.pitch = result.width * result.depth;
     result.pixels = malloc( result.height * result.pitch );
-    result.free_pixels = 0;
+    result.free_image = 0;
 
     if ( ! result.pixels )
     {
@@ -596,7 +596,7 @@ Image * Image::make_copy() const
     TPImage result = * image;
 
     result.pixels = malloc( result.height * result.pitch );
-    result.free_pixels = 0;
+    result.free_image = 0;
 
     if ( ! result.pixels )
     {
@@ -1027,6 +1027,16 @@ const JSON::Object & Image::get_tags() const
 	return tags;
 }
 
+//-----------------------------------------------------------------------------
+
+void Image::free_image_with_g_free( TPImage * image )
+{
+	g_assert( image );
+	g_assert( image->pixels );
+
+	g_free( image->pixels );
+}
+
 //=============================================================================
 
 Images::Images()
@@ -1330,9 +1340,9 @@ void Images::destroy_image( TPImage * image )
     {
         if ( image->pixels )
         {
-            if ( image->free_pixels )
+            if ( image->free_image )
             {
-                image->free_pixels( image->pixels );
+                image->free_image( image );
             }
             else
             {
