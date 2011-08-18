@@ -105,10 +105,19 @@ class TrickplayElementModel(QStandardItemModel):
         except KeyError:
             pass
         
-app = QApplication([])
-t = TrickplayElementModel()
-v = QTreeView()
-v.setModel(t)
-v.show()
-CON.set('localhost', '8888')
-t.fill()
+    def empty(self):
+        """
+        Remove all nodes from the tree
+        """
+        
+        self.invisibleRootItem().removeRow(0)
+        
+    #def
+        
+#app = QApplication([])
+#t = TrickplayElementModel()
+#v = QTreeView()
+#v.setModel(t)
+#v.show()
+#CON.set('localhost', '8888')
+#t.fill()

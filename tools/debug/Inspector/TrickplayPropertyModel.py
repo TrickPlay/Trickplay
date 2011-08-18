@@ -14,6 +14,8 @@ NOT_EDITABLE = {
     'z center', 
 }
 
+Qt.Subtitle = Qt.UserRole + 2
+
 class TrickplayPropertyModel(QStandardItemModel):
     
     def fill(self, data):
@@ -21,10 +23,12 @@ class TrickplayPropertyModel(QStandardItemModel):
         Fill the model with data from a dictionary
         """
         
+        self.empty()
+        
         root = self.invisibleRootItem()
-        self.insertProperties(root, data, False)
+        self.insertProperties(root, data, data, None)
             
-    def insertProperties(self, parent, data, subtitle):
+    def insertProperties(self, parent, data, parentData, subtitle):
         """
         Recursively add property Items to the tree
         """
@@ -33,6 +37,8 @@ class TrickplayPropertyModel(QStandardItemModel):
         Parent is the parent node
         
         Data is the property data for this node
+        
+        parentData is the dictionary containing Data
         
         Subtitle is the name of the parent node, if the parent node
         was a Lua table like 'anchor_point' as opposed to a value
@@ -48,12 +54,19 @@ class TrickplayPropertyModel(QStandardItemModel):
             
             # The value of this property... editable
             valueNode = TrickplayElement()
-            valueNode.setTPJSON(data)
+            
+            # Reference to the UI Element data
+            valueNode.setTPJSON(parentData)
             
             # The name of this property... not editable
             nameNode = valueNode.partner()
             nameNode.setData(name, Qt.DisplayRole)
             nameNode.setFlags(nameNode.flags() ^ Qt.ItemIsEditable)
+            
+            if subtitle:
+                valueNode.setData(subtitle, Qt.Subtitle)
+            else:
+                valueNode.setData('', Qt.Subtitle)
             
             # A simple value, like int or string
             if isSimple:
@@ -66,11 +79,94 @@ class TrickplayPropertyModel(QStandardItemModel):
                 valueNode.setData(summary, Qt.DisplayRole)
                 valueNode.setFlags(Qt.NoItemFlags)
                 parent.appendRow([nameNode, valueNode])
-                self.insertProperties(nameNode, value, p)
+                self.insertProperties(nameNode, value, data, p)
                 
             if name in NOT_EDITABLE or (subtitle and subtitle in NOT_EDITABLE):
                 valueNode.setFlags(Qt.NoItemFlags)
                 
+    def empty(self):
+        """
+        Remove all nodes from the tree
+        """
+        
+        i = self.invisibleRootItem()
+        i.removeRows(0, i.rowCount())
+        
+    def subtitle(self, item):
+        """
+        Get the subtitle of a given property, like 'size' or 'anchor_point'
+        """
+        
+        return str( item.data(Qt.Subtitle).toString() )
+        
+    def title(self, item):
+        """
+        Get the title of a given property, like 'opacity'
+        """
+        
+        return str( item.partner().data(Qt.DisplayRole).toString() )
+        
+    def value(self, item):
+        """
+        Get the value of this item's property
+        """
+        
+        return item.data(Qt.DisplayRole).toPyObject()
+        
+    def prepareData(self, item):
+        """
+        Copy the data dictionary for sending to Trickplay
+        """
+        
+        copy = {}
+        
+        subtitle = self.subtitle(item)
+        title = self.title(item)
+        value = self.value(item)
+        
+        # Copy each necessary value, and insert the changed value
+        # Don't overwrite the original value until we know Trickplay received it
+        orig = None
+        if '' == subtitle:
+            copy = value
+        else:
+            orig = item[subtitle]
+            for k in orig:
+                copy[k] = orig[k]
+            copy[title] = value
+            
+        print(copy)
+            
+        return copy
+    
+    def updateData(self, item):
+        """
+        Send data from this item to the original JSON dictionary
+        """
+        
+        subtitle = self.subtitle(item)
+        title = self.title(item)
+        value = self.value(item)
+        
+        if '' == subtitle:
+            item[title] = value
+        else:
+            item[subtitle][title] = value
+    
+    def revertData(self, item):
+        """
+        Revert this item to the original value from the JSON dictionary
+        """
+
+        subtitle = self.subtitle(item)
+        title = self.title(item)
+        
+        if '' == subtitle:
+            item.setData(item[title], Qt.DisplayRole)
+        else:
+            item.setData(item[subtitle][title], Qt.DisplayRole)
+        
+    
 def summarize(value, subtitle = None):
     """
     The read-only summary of attributes

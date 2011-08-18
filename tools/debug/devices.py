@@ -36,7 +36,7 @@ class TrickplayDiscovery(ServiceDiscovery):
         if not address or not port:
             return
         
-        self.main.inspector.clearTree()
+        #self.main.inspector.clearTree()
         
         print(index,address,port)
         
@@ -154,7 +154,7 @@ class TrickplayDiscovery(ServiceDiscovery):
         
         self.widget.removeItem(index)
         
-        self.main.inspector.clearTree()
+        #self.main.inspector.clearTree()
         
         #for item in list:
         #    

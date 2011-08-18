@@ -2,17 +2,15 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
 import sys
-
-from element import Element, 
-from model import ElementModel, pyData, modelToData, dataToModel, summarize
-from data import modelToData, dataToModel, BadDataException
 import connection
 
-T = 0  # Title
-V = 1  # Value
-A = -1 # All
+from TrickplayPropertyModel import TrickplayPropertyModel
+from TrickplayElementModel import TrickplayElementModel
+from data import BadDataException, modelToData
 
-class Inspector():
+Qt.Subtitle = Qt.UserRole + 2
+
+class TrickplayInspector():
     
     def __init__(self, inspectorView, propertyView):
         """
@@ -29,9 +27,49 @@ class Inspector():
         }
         
         # Models
-        self.inspectorModel = ElementModel()
-        self.propertyModel = ElementModel()
+        self.inspectorModel = TrickplayElementModel()
+        self.propertyModel = TrickplayPropertyModel()
         
+        self.ui['inspector'].setModel(self.inspectorModel)
+        self.ui['property'].setModel(self.propertyModel)
+        
+        self.setHeaders(self.inspectorModel, ['UI Element', 'Name'])
+        self.setHeaders(self.propertyModel, ['Property', 'Value'])
+        
+        # QTreeView selectionChanged signal doesn't seem to work here...
+        # Use the selection model instead
+        QObject.connect(self.ui['inspector'].selectionModel(),
+                        SIGNAL('selectionChanged(QItemSelection, QItemSelection)'),
+                        self.selectionChanged)
+        
+        # For changing checkboxes (visibility)
+        QObject.connect(self.inspectorModel,
+                        SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"),
+                        self.inspectorDataChanged)
+        
+        # For changing UI Element properties
+        QObject.connect(self.propertyModel,
+                        SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"),
+                        self.propertyDataChanged)
+        
+    def refresh(self):
+        """
+        Fill the inspector with Trickplay UI element data
+        """
+        
+        self.preventChanges = True
+        
+        self.inspectorModel.empty()
+        self.inspectorModel.fill()
+        
+        self.preventChanges = False
+        
+    def setHeaders(self, model, headers):
+        """
+        Set headers for a given model
+        """
+        
+        model.setHorizontalHeaderLabels(headers)
         
     def selected(self, view = None):
         """
@@ -42,24 +80,10 @@ class Inspector():
         
         try:
             i = view.selectionModel().selection()
-            i = view.model().mapSelectionToSource(i)
             return i.indexes()[0]
             
         except:
             return None
-        
-    def selectedGid(self):
-        """
-        Return the gid of the selected index or 1 if no index is selected
-        """
-        
-        i = self.selected()
-        
-        gid = 1
-        if i:
-            gid = self.inspectorModel.itemFromIndex(i).pyData(Qt.Gid)
-            
-        return gid
     
     def search(self, text = '', model = None):
         """
@@ -103,278 +127,118 @@ class Inspector():
         self.inspectorSelectionModel.select(
             QItemSelection(proxyIndex, proxyValue),
             QItemSelectionModel.SelectCurrent)
-        
     
-    # SIGNAL
-    def selectionChanged(self,  a,  b):    
+    # "selectionChanged(QItemSelection, QItemSelection)"
+    def selectionChanged(self, selected, deselected):    
         """
         Re-populate the property view every time a new UI element
         is selected in the inspector view.
         """
         
-        s = self.selected()
-        
-        self.updatePropertyList(s)
-        
-    def updatePropertyList(self, inspectorElementIndex):
-        """
-        Remove and re-append the list of UI Element properties in the property view
-        """
-
-        r = self.propertyModel.invisibleRootItem()
-        
-        r.setData(inspectorElementIndex,  Qt.Pointer)
-        
-        r.removeRows(0, r.rowCount())
-    
-        self.inspectorModel.copyAttrs(inspectorElementIndex, r)
-
-    
-    def sendData(self,  gid,  title,  value):
-        """
-        Update a UI Element in the app given its gid
-        """
-    
-        try:
-                    
-            modelToData(title, value)
-        
-        except BadDataException, (e):
+        if not self.preventChanges:
             
-            print("BadDataException",  e.value)
+            self.preventChanges = True
             
-            return False
+            index = self.selected(self.ui['inspector'])
+            item = self.inspectorModel.itemFromIndex(index)
+            data = item.TPJSON()
             
-        # Convert the data to proper format for sending
-        title, value = modelToData(title, value)
-        
-        print('Sending:', gid, title, value)
-        
-        connection.send({'gid': gid, 'properties' : {title : value}})
-        
-        return True
+            self.propertyModel.fill(data)
+            
+            self.preventChanges = False
     
-    
+    # "dataChanged(const QModelIndex &, const QModelIndex &)"
     def inspectorDataChanged(self, topLeft, bottomRight):
         """
-        Handle hiding/showing using the checkboxes
+        Change UI Element visibility using checkboxes
         """     
-    
+          
         if not self.preventChanges:
-                        
+            
             self.preventChanges = True
             
             item = topLeft.model().itemFromIndex(topLeft)
             
-            # A change in the checkbox is a change in the title column
-            if T == item.column():
+            # Only nodes in the first column have checkboxes
+            if 0 == item.column():
                 
                 checkState = bool(item.checkState())
                 
-                gid = item.pyData(Qt.Gid)
-                
-                # After data is sent, update the model
-                if self.sendData(gid, 'is_visible', checkState):
-                    
-                    propertyValueIndex = self.inspectorModel.findAttr(item.index(), 'is_visible')[1]
-                    
-                    item.model().itemFromIndex(propertyValueIndex).setData(checkState, 0)
-                    
-                    self.updatePropertyList(item.index())
+                if self.sendData(item['gid'], 'is_visible', checkState):        
+                    item['is_visible'] = checkState
+                    self.propertyModel.fill(item.TPJSON())
             
             self.preventChanges = False
     
-    # SIGNAL        
-    def dataChanged(self,  topLeft,  bottomRight):
+    # "dataChanged(const QModelIndex &, const QModelIndex &)"
+    def propertyDataChanged(self, topLeft, bottomRight):
         """
-        Update Trickplay app when data is changed (by the user) in the property view
+        Change UI Element properties
         """
         
         if not self.preventChanges:
             
             self.preventChanges = True
-                
-            r = self.propertyModel.invisibleRootItem()
             
-            propertyValueIndex = topLeft
+            model = topLeft.model() 
+            item = model.itemFromIndex(topLeft)
             
-            # Get the index of the UI Element in the inspector
-            inspectorElementIndex = r.data(Qt.Pointer).toPyObject()
+            gid = item['gid']
             
-            gid = pyData(inspectorElementIndex, Qt.Gid)
+            # For example, if changing { 'size' : { 'w' : 100 , 'h' : 200 } },
+            # then subtitle would be 'size' and title would be 'w' or 'h'
+            title = model.title(item)
+            subtitle = model.subtitle(item)
             
-            value = pyData(propertyValueIndex, 0)
-            
-            title = None
-            
-            nested = pyData(propertyValueIndex, Qt.Nested)
-            
-            propertySummaryValueItem = None
-            
-            # If the data is nested, figure out the full name and indexes
-            if (nested):
-                
-                parentProperty = propertyValueIndex.parent()
-                
-                parentPropertyTitle = r.child(parentProperty.row(), 0)
-                
-                propertySummaryValueItem = r.child(parentProperty.row(), 1)
-                
-                childPropertyTitle = propertyValueIndex.parent().child(propertyValueIndex.row(), 0)
-                
-                parentTitle = pyData(parentPropertyTitle, 0)
-                
-                childTitle = pyData(childPropertyTitle, 0)
-                
-                title = parentTitle + childTitle
-                
-                nested = (parentTitle, childTitle)
-                
-                m = parentPropertyTitle.model()
-                
-                value = m.dataStructure(m.getPair(parentPropertyTitle))[parentTitle]
-                
+            value = model.prepareData(item)
+            if self.sendData(gid, subtitle + title, value): 
+                model.updateData(item)
             else:
-            
-                propertyTitleIndex = r.child(propertyValueIndex.row(), 0)
+                model.revertData(item)
+                print('Error >> Unable to send data to Trickplay')
                 
-                inspectorIndexPair = self.inspectorModel.findAttr(inspectorElementIndex,  pyData(propertyTitleIndex, 0))
-                
-                title = pyData(propertyTitleIndex, 0)
-            
-            # Verify data sent OK before making any changes to model
-            if self.sendData(gid, title, value):
-                
-                # Update the checkbox
-                if "is_visible" == title:
-                    
-                    if value:
-                        
-                        value = 2
-                    
-                    inspectorElementIndex.model().itemFromIndex(inspectorElementIndex).setCheckState(value)
-                    
-                # Update the data in the inspector
-                valueItem = None
-                
-                if not nested:
-                    
-                    valueItem = self.inspectorModel.itemFromIndex(inspectorIndexPair[1])
-                    
-                else:
-                    
-                    parentPair = self.inspectorModel.findAttr(inspectorElementIndex, nested[0])
-                    
-                    parentTitleIndex = parentPair[0]
-                    
-                    parentValueItem = self.inspectorModel.itemFromIndex(parentPair[1])
-                    
-                    parentValueItem.setData(summarize(value, nested[0]), 0)
-                    
-                    propertySummaryValueItem.setData(summarize(value, nested[0]), 0)
-                    
-                    childValueIndex = self.inspectorModel.findAttr(parentTitleIndex, nested[1])[1]
-                    
-                    valueItem = self.inspectorModel.itemFromIndex(childValueIndex)
-                    
-                    value = value[nested[1]]
-                
-                print("Changed item data from",  pyData(valueItem, 0))
-                    
-                valueItem.setData(value,  0)
-                
-                print("Changed item data to  ",  pyData(valueItem, 0))
-                    
             self.preventChanges = False
+        
+    def sendData(self, gid, property, value):
+        """
+        Update a UI Element property
+        """
     
-    
-    def createTree(self):
-        """
-        Initialize models, proxy models, selection models, and connections
-        """
+        try:    
+            property, value = modelToData(property, value)
         
-        # Set up Inspector
-        self.inspectorModel.initialize(["UI Element",  "Name"],  False)
+        except BadDataException, (e):
+            print("BadDataException",  e.value)
+            return False  
+            
+        print('Sending:', gid, property, value)
         
-        self.inspectorModel.setItemPrototype(Element())
+        return connection.send({'gid': gid,
+                                'properties' : {property : value}})
 
-        # Inspector Proxy Model
-        self.inspectorProxyModel= QSortFilterProxyModel()
-        
-        self.inspectorProxyModel.setSourceModel(self.inspectorModel)
-        
-        self.inspectorProxyModel.setFilterRole(0)
-
-        self.inspectorProxyModel.setFilterRegExp(QRegExp("(Group|Image|Text|Rectangle|Clone|Canvas|Bitmap)"))
-        
-        self.ui['inspector'].setModel(self.inspectorProxyModel)
-        
-        self.ui['inspector'].header().setMovable(False)
-        
-        #self.ui['inspector'].header().resizeSection(0, 200)
-        
-        # Inspector Selection Model
-        self.inspectorSelectionModel = QItemSelectionModel(self.inspectorProxyModel)
-        
-        self.ui['inspector'].setSelectionMode(QAbstractItemView.SingleSelection)
-        
-        self.ui['inspector'].setSelectionModel(self.inspectorSelectionModel)
-        
-        # Set up Property
-        self.ui['property'].setModel(self.propertyModel)
-        
-        self.propertyModel.initialize(["Property",  "Value"],  False)
-        
-        self.ui['property'].header().setMovable(False)
-        
-        self.propertySelectionModel = QItemSelectionModel(self.propertyModel)
-        
-        self.ui['property'].setSelectionModel(self.propertySelectionModel)
-
-        # Property Proxy Model
-        self.propertyProxyModel= QSortFilterProxyModel()
-        
-        self.propertyProxyModel.setSourceModel(self.propertyModel)
-        
-        self.propertyProxyModel.setFilterRole(0)
-        
-        self.propertyProxyModel.setDynamicSortFilter(True)
-
-        #self.propertyProxyModel.setFilterRegExp(QRegExp("(opacity|is_visible|scale|clip|anchor_point|position|x|y|z|size|h|w|source|src|tile|border_color|border_width|color|text|a|r|g|b)"))
-        
-        self.ui['property'].setModel(self.propertyProxyModel)
-        
-        # Connections
-        self.inspectorSelectionModel.connect(self.inspectorSelectionModel, SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.selectionChanged)
-        
-        self.inspectorModel.connect(self.inspectorModel, SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"), self.inspectorDataChanged)
-        
-        self.propertyModel.connect(self.propertyModel, SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"), self.dataChanged)
-        
-        
-    def refresh(self):
-        """
-        TODO, At some point, perhaps refresh each node istead of redrawing
-        the entire tree. Not yet though, because we'll probably change
-        nodes so that they're only retreived when expanded.
-        """
-        
-        self.preventChanges = True
-        
-        gid = None
-        try:
-            gid = self.selectedGid()
-        except IndexError:
-            gid = 1
-        
-        self.clearTree()
-        self.inspectorModel.initialize(None, True)
-
-        row = self.inspectorModel.matchChild(gid, role = Qt.Gid, column = -1)
-        if len(row) > 0:
-            self.selectRow(row[0])
-        
-        self.preventChanges = False
+    #def refresh(self):
+    #    """
+    #    TODO, At some point, perhaps refresh each node istead of redrawing
+    #    the entire tree. Not yet though, because we'll probably change
+    #    nodes so that they're only retreived when expanded.
+    #    """
+    #    
+    #    self.preventChanges = True
+    #    
+    #    gid = None
+    #    try:
+    #        gid = self.selectedGid()
+    #    except IndexError:
+    #        gid = 1
+    #    
+    #    self.clearTree()
+    #    self.inspectorModel.initialize(None, True)
+    #
+    #    row = self.inspectorModel.matchChild(gid, role = Qt.Gid, column = -1)
+    #    if len(row) > 0:
+    #        self.selectRow(row[0])
+    #    
+    #    self.preventChanges = False
         
     def clearTree(self):
         """
@@ -386,7 +250,7 @@ class Inspector():
         if not old:
             self.preventChanges = True
         
-        self.inspectorModel.invisibleRootItem().removeRow(0)
+        self.inspectorModel.empty()
         
         if not old:
             self.preventChanges = False
