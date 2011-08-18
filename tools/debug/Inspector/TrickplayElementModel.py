@@ -5,6 +5,7 @@ from TrickplayElement import TrickplayElement
 from connection import getTrickplayData
 
 
+
 class TrickplayElementModel(QStandardItemModel):
     
     def fill(self):
