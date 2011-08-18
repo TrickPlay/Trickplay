@@ -11,6 +11,8 @@ A ProgressBar provides a visual graphic indicating the amount of progress comple
 
 A ProgressBar's size and display colors can be configured. As the time-consuming operation advances, the program intermittently sets the ProgressBar's progress property to appropriate values to update the displayed ProgressBar and inform the user of the operation's status.
 
+For additional information about the ProgressBar element, refer to the <Visual Editor Reference at file:../reference/progBar-txt.html#ProgressBar>.
+
 
 
 ProgressSpinner:
@@ -20,4 +22,6 @@ A ProgressSpinner provides an animated visual graphic indicating that an operati
 (see images/edProgSpinners.png)
 
 A ProgressSpinner supports various display characteristics, including several built-in styles with configurable size, color and animation speed.
+
+For additional information about the ProgressSpinner element, refer to the <Visual Editor Reference at file:../reference/progSpinner-txt.html#ProgressSpinner>.
 

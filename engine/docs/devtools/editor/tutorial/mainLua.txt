@@ -1,10 +1,10 @@
 Topic: The main.lua File
 
-In the previous section, we defined the focus destinations for each of the button elements in our screen. But when the screen is first displayed, which element will have the focus? This initial focus is assigned outside of the SDK Visual Editor, in one of the source files that the Editor generates called main.lua.
+In the previous section, we defined the focus destinations for each of the button elements in our screen. But when the screen is first displayed, which element will have the focus? This initial focus is assigned outside of the Visual Editor, in one of the source files that the Editor generates called main.lua.
 
 Note: The following discussion assumes a familiarity with the Lua programming language. Refer to a Lua language reference if you need information about this programming language.
 
-During part of the SDK Visual Editor's processing, it converts the UI elements on the screen to Lua source code. This source code is eventually executed by the TrickPlay Engine when the application is run. It is possible for you to write the source code that the Editor generates yourself, but having the Editor generate it for you is a more convenient process.
+During part of the Visual Editor's processing, it converts the UI elements on the screen to Lua source code. This source code is eventually executed by the TrickPlay Engine when the application is run. It is possible for you to write the source code that the Editor generates yourself, but having the Editor generate it for you is a more convenient process.
 
 The Editor-generated source code is saved to various files. Recall that we previously saved our screen in the language.lua file. Another Editor-related file is called main.lua, and it is generated automatically by the Editor. The main.lua file is updated every time you save your current screen.
 
@@ -20,7 +20,7 @@ groups = {} --Table of groups of the UIElements of each screen, each of which ca
 -- END GLOBAL SECTION
 (end)
 
-The first and last lines are simply comments and they perform no operation. The first line of executable code invokes the Lua dofile() function to load and execute the /lib/ui_element.lua library. This library implements most of the UI elements (also known as "widgets") supported by the SDK Visual Editor, such as the Button element we have been using. (The other elements we have used so far--the Rectangle, Image, and Text elements--are implemented in the core TrickPlay Engine.) Loading and running this library enables all the Editor's widgets, making them available for use.
+The first and last lines are simply comments and they perform no operation. The first line of executable code invokes the Lua dofile() function to load and execute the /lib/ui_element.lua library. This library implements most of the UI elements (also known as "widgets") supported by the Visual Editor, such as the Button element we have been using. (The other elements we have used so far--the Rectangle, Image, and Text elements--are implemented in the core TrickPlay Engine.) Loading and running this library enables all the Editor's widgets, making them available for use.
 
 The next lines of code create two empty Lua tables called "groups" and "layout". Each table is initialized in subsequent code statements shown below.
 
