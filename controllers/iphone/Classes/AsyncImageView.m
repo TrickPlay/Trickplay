@@ -96,7 +96,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)theConnection {
-    fprintf(stderr, "Connection did finish loading %s", [resourceKey UTF8String]);
+    fprintf(stderr, "Connection did finish loading %s\n", [resourceKey UTF8String]);
     [connection cancel];
     [connection release];
     connection = nil;
