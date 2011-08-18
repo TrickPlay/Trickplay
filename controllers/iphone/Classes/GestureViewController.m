@@ -16,6 +16,8 @@
 @synthesize version;
 @synthesize socketManager;
 
+@synthesize graphics;
+
 @synthesize loadingIndicator;
 @synthesize theTextField;
 @synthesize theLabel;
@@ -145,6 +147,7 @@
     virtualRemote.delegate = self;
     
     graphics = NO;
+    [touchDelegate setSwipe:graphics];
     
     return YES;
 }
@@ -348,7 +351,7 @@
         styleAlert = nil;
     }
     
-    styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:nil];
+    styleAlert = [[UIActionSheet alloc] initWithTitle:windowtitle delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
     
     styleAlert.title = windowtitle;
     [multipleChoiceArray removeAllObjects];
@@ -356,9 +359,10 @@
         //First one is <id>
         //Second is the text
         //Theindex is the id
+        NSLog(@"theindex: %d, object 1: %@, object 2: %@", theindex, [args objectAtIndex:theindex], [args objectAtIndex:theindex+1]);
         [multipleChoiceArray addObject:[args objectAtIndex:theindex]];
         [styleAlert addButtonWithTitle:[args objectAtIndex:theindex+1]];
-        theindex = theindex + 2;
+        theindex += 2;
     }
     styleAlert.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
     //[styleAlert addButtonWithTitle:@"Cancel"]; 
@@ -377,9 +381,9 @@
  */
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if (actionSheet == styleAlert) {
-        NSLog(@"Dismiss the alertview");
-        if (buttonIndex < 5) {
-            NSString *sentData = [NSString stringWithFormat:@"UI\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
+        //NSLog(@"object: %@", [multipleChoiceArray objectAtIndex:buttonIndex]);
+        if (buttonIndex < 5 && buttonIndex >= 0) {
+            NSString *sentData = [NSString stringWithFormat:@"UI\tMC\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
             [socketManager sendData:[sentData UTF8String]
                   numberOfBytes:[sentData length]];
         }
@@ -803,6 +807,7 @@
     [self do_HV];
     [self.view addSubview:virtualRemote.view];
     graphics = NO;
+    [touchDelegate setSwipe:graphics];
 }
 
 /**
@@ -827,6 +832,9 @@
     [theTextField resignFirstResponder];
 	theTextField.hidden = YES;
     textView.hidden = YES;
+    
+    [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     
     if (camera) {
         [camera release];
@@ -864,6 +872,7 @@
         [self do_HV];
         [self.view addSubview:virtualRemote.view];
         graphics = NO;
+        [touchDelegate setSwipe:graphics];
     }
 
     [backgroundView addSubview:foregroundView];
@@ -875,6 +884,7 @@
         [virtualRemote.view removeFromSuperview];
     }
     graphics = YES;
+    [touchDelegate setSwipe:graphics];
 }
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
