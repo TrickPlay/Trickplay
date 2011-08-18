@@ -1,7 +1,8 @@
 BettingController = Class(Controller,
-function(self, router, ...)
-    router:attach(self, Components.PLAYER_BETTING)
-    self._base.init(self, router, Components.PLAYER_BETTING)
+function(ctrl, router, ...)
+    self = ctrl
+    ctrl._base.init(ctrl, router, Components.PLAYER_BETTING)
+    router:attach(ctrl, Components.PLAYER_BETTING)
     
     local view = assetman:create_group({name = "betting_ui"})
     screen:add(view)
@@ -492,7 +493,16 @@ function(self, router, ...)
             })
             return
         elseif x > DEAL_X_1 and x < DEAL_X_2 and y > DEAL_Y_1 and y < DEAL_Y_2 then
-            change_selector(new_deal_selector)
+            controller:show_multiple_choice("Start New Game?", "1", "Yes", "2", "No")
+            function controller:on_ui_event(text)
+                if text == "1" then
+                    change_selector(new_deal_selector)
+                    ctrl:update_views()
+                    ctrl:return_pressed()
+                end
+            end
+            return
+            --change_selector(new_deal_selector)
         elseif x > HELP_X_1 and x < HELP_X_2 and y > HELP_Y_1 and y < HELP_Y_2 then
             change_selector(help_selector)
         elseif x > EXIT_X_1 and x < EXIT_X_2 and y > EXIT_Y_1 and y < EXIT_Y_2 then

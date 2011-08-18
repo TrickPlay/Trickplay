@@ -187,9 +187,9 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
         end
 
         local current_bkg = nil
-        function controller:clear_and_set_background(image_name)
+        function controller:clear_and_set_background(image_name, hard)
             print("\n\nClear and Set Background with image name:", image_name, "\n\n")
-            if current_bkg ~= image_name then
+            if current_bkg ~= image_name or hard then
                 controller:clear_ui()
                 --controller.screen:set_background(image_name)
                 controller:set_ui_background(image_name)
@@ -267,7 +267,7 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
         function controller:choose_dog(players)
             print("controller", controller.name, "choosing dog")
 
-            controller:clear_and_set_background("bkg")
+            controller:clear_and_set_background("bkg", true)
             controller.router:set_active_component(RemoteComponents.CHOOSE_DOG)
             controller.router:notify()
             if advanced_ui_ready then
