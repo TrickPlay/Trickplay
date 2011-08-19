@@ -14,31 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="search">
-       <property name="text">
-        <string>Search</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QPushButton" name="refresh">
-     <property name="text">
-      <string>Refresh</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -68,6 +43,9 @@
         <height>0</height>
        </size>
       </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+      </property>
       <property name="alternatingRowColors">
        <bool>true</bool>
       </property>
@@ -79,6 +57,31 @@
       </attribute>
      </widget>
     </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="refresh">
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="search">
+       <property name="text">
+        <string>Search</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
   <zorder>splitter</zorder>

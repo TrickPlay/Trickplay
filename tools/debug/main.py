@@ -83,7 +83,7 @@ class MainWindow(QMainWindow):
         try:
             print('Trickplay state', self.deviceManager.trickplay.state())
             #if self.trickplay.state() == QProcess.Running:
-            self.deviceManager.trickplay.terminate()
+            self.deviceManager.trickplay.close()
             #    print('terminated trickplay')
         except AttributeError, e:
             pass

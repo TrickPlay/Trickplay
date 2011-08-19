@@ -29,7 +29,3 @@ class FileSystem(QWidget):
         QObject.connect(self.ui.view,
                         SIGNAL('doubleClicked( QModelIndex )'),
                         self.editorManager.openFromFileSystem)
-        
-    def closeEvent(self, e):
-        
-        print('closing fielsystem')
