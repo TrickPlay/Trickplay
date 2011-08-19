@@ -3,7 +3,7 @@ import os
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from NewApplicationDialog import Ui_newApplicationDialog
+from UI.NewApplicationDialog import Ui_newApplicationDialog
 
 APP = """
     id          = "{0}",
