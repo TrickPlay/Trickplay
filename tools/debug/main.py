@@ -6,7 +6,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
 # UI File
-from TreeView import Ui_MainWindow
+from UI.MainWindow import Ui_MainWindow
 
 from devices import TrickplayDiscovery
 from editor import LuaEditor
@@ -28,27 +28,21 @@ class MainWindow(QMainWindow):
         settings = QSettings()
         self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
         
-        # Main UI file, from Qt Designer, converted to .py using pyuic4
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
-        # Setup
-        self.ui.lineEdit.setPlaceholderText("Search by GID or Name")
         
         # Create Editor
         self.createEditor()
         
         # Create Inspector
-        self.inspector = TrickplayInspector(self.ui.inspector, self.ui.property, self.ui.lineEdit)
+        self.inspector = TrickplayInspector()
+        self.ui.InspectorLayout.addWidget(self.inspector)
         
         # Toolbar
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.save)
 
-                
         # Buttons
-        QObject.connect(self.ui.button_Refresh, SIGNAL("clicked()"), self.inspector.refresh)        
-        QObject.connect(self.ui.button_Search, SIGNAL("clicked()"),  self.inspector.userSearch)
         QObject.connect(self.ui.pushAppButton, SIGNAL("clicked()"),  self.pushApp)
         QObject.connect(self.ui.runButton, SIGNAL("clicked()"),  self.run)
         

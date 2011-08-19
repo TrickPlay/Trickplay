@@ -7,18 +7,21 @@ from TrickplayPropertyModel import TrickplayPropertyModel
 from TrickplayElementModel import TrickplayElementModel
 from data import BadDataException, modelToData
 
-from UI.Inspector import Ui_Form
+from UI.Inspector import Ui_TrickplayInspector
 
 
 
 class TrickplayInspector(QWidget):
     
-    def __init__(self, inspectorView, propertyView, search):
+    def __init__(self, parent = None, f = 0):
         """
-        Initialize inspector with two QTreeViews and one lineEdit for search
+        UI Element property inspector made up of two QTreeViews
         """
         
-        #self.ui = Ui_Form.setupUi(self)
+        QWidget.__init__(self, parent)
+        
+        self.ui = Ui_TrickplayInspector()
+        self.ui.setupUi(self)
         
         # Ignore signals while updating elements internally
         self.preventChanges = False
@@ -27,26 +30,21 @@ class TrickplayInspector(QWidget):
         #self.lastSearchedText = None
         #self.lastSearchedItem = None
         
-        # Views
-        self.ui = {
-            'inspector' : inspectorView,
-            'property' : propertyView,
-            'search' : search
-        }
-        
         # Models
         self.inspectorModel = TrickplayElementModel()
         self.propertyModel = TrickplayPropertyModel()
         
-        self.ui['inspector'].setModel(self.inspectorModel)
-        self.ui['property'].setModel(self.propertyModel)
+        self.ui.inspector.setModel(self.inspectorModel)
+        self.ui.property.setModel(self.propertyModel)
+
+        self.ui.lineEdit.setPlaceholderText("Search by GID or Name")        
         
         self.setHeaders(self.inspectorModel, ['UI Element', 'Name'])
         self.setHeaders(self.propertyModel, ['Property', 'Value'])
         
         # QTreeView selectionChanged signal doesn't seem to work here...
         # Use the selection model instead
-        QObject.connect(self.ui['inspector'].selectionModel(),
+        QObject.connect(self.ui.inspector.selectionModel(),
                         SIGNAL('selectionChanged(QItemSelection, QItemSelection)'),
                         self.selectionChanged)
         
@@ -60,6 +58,19 @@ class TrickplayInspector(QWidget):
                         SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"),
                         self.propertyDataChanged)
         
+        QObject.connect(self.ui.refresh,
+                        SIGNAL("clicked()"),
+                        self.refresh)
+        
+        QObject.connect(self.ui.search,
+                        SIGNAL("clicked()"),
+                        self.userSearch)
+        
+        QObject.connect(self.ui.lineEdit,
+                        SIGNAL('returnPressed()'),
+                        self.userSearch)
+        
+        
     def refresh(self):
         """
         Fill the inspector with Trickplay UI element data
@@ -70,11 +81,10 @@ class TrickplayInspector(QWidget):
         # Reselect gid of last item selected
         gid = None
         try:
-            index = self.selected(self.ui['inspector'])
+            index = self.selected(self.ui.inspector)
             item = self.inspectorModel.itemFromIndex(index)
             gid = item['gid']
-        except Exception, e:
-            print(e)
+        except:
             gid = 1
             
         print(gid)
@@ -104,7 +114,7 @@ class TrickplayInspector(QWidget):
         Return the selected index from the view given or None
         """
         
-        view = view or self.ui['inspector']
+        view = view or self.ui.inspector
         
         try:
             i = view.selectionModel().selection()
@@ -122,7 +132,7 @@ class TrickplayInspector(QWidget):
         search for the next item matching the search
         """
         
-        text = self.ui['search'].text()
+        text = self.ui.lineEdit.text()
         
         # Search by gid if possible, otherwise name
         property = None
@@ -162,9 +172,9 @@ class TrickplayInspector(QWidget):
         topLeft = item.index()
         bottomRight = item.partner().index()
         
-        self.ui['inspector'].scrollTo(topLeft, 3)
+        self.ui.inspector.scrollTo(topLeft, 3)
         
-        self.ui['inspector'].selectionModel().select(
+        self.ui.inspector.selectionModel().select(
             QItemSelection(topLeft, bottomRight),
             QItemSelectionModel.SelectCurrent)
     
@@ -179,7 +189,7 @@ class TrickplayInspector(QWidget):
             
             self.preventChanges = True
             
-            index = self.selected(self.ui['inspector'])
+            index = self.selected(self.ui.inspector)
             item = self.inspectorModel.itemFromIndex(index)
             data = item.TPJSON()
             
