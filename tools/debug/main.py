@@ -7,16 +7,13 @@ from PyQt4.QtCore import *
 
 from UI.MainWindow import Ui_MainWindow
 
-from editor import LuaEditor
 from connection import CON
 from wizard import Wizard
-from files import FileSystemModel
-from editorTab import EditorTabWidget, EditorDock
 
 from Inspector.TrickplayInspector import TrickplayInspector
 from DeviceManager.TrickplayDeviceManager import TrickplayDeviceManager
-
-
+from Editor.EditorManager import EditorManager
+from FileSystem.FileSystem import FileSystem
 
 class MainWindow(QMainWindow):
     
@@ -31,22 +28,24 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
+        # Create FileSystem
+        self._fileSystem = FileSystem()
+        self.ui.FileSystemLayout.addWidget(self._fileSystem)
+        
         # Create Editor
-        self.createEditor()
+        self._editorManager = EditorManager(self._fileSystem, self.ui.centralwidget)
         
         # Create Inspector
-        self.inspector = TrickplayInspector()
-        self.ui.InspectorLayout.addWidget(self.inspector)
+        #self._inspector = TrickplayInspector()
+        #self.ui.InspectorLayout.addWidget(self._inspector)
         
-        # Create Device Manager
-        self.devices = TrickplayDeviceManager()
-        self.ui.DeviceManagerLayout.addWidget(self.devices)
+        # Create DeviceManager
+        #self._deviceManager = TrickplayDeviceManager()
+        #self.ui.DeviceManagerLayout.addWidget(self._deviceManager)
         
         # Toolbar
-        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
-        QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.save)
-
-        # Buttons
+        #QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        #QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
@@ -57,181 +56,74 @@ class MainWindow(QMainWindow):
         
         self.app = app
         
-        
-    """
-    Cleanup code goes here... nothing yet?
-    """
+    @property
+    def fileSystem(self):
+        return self._fileSystem
+    
+    @property
+    def deviceManager(self):
+        return self._deviceManager
+    
+    @property
+    def editorManager(self):
+        return self._editorManager
+    
+    @property
+    def inspector(self):
+        return self._inspector
+
+    
     def cleanUp(self):
-        # If there is a running trickplay, terminate it
-        #try:
-        #    print(self.trickplay.state())
-        #    #if self.trickplay.state() == QProcess.Running:
-        #    self.trickplay.terminate()
-        #    #    print('terminated trickplay')
-        #except AttributeError, e:
-        #    pass
-        #print('quitting')
-        pass
-            
-    """
-    Initialize widgets on the main window with a given app path
-    """
+        """
+        End running Trickplay process
+        
+        TODO: Somehow stop Trickplay Avahi service...
+        """
+        
+        try:
+            #print(self.trickplay.state())
+            #if self.trickplay.state() == QProcess.Running:
+            self.trickplay.terminate()
+            #    print('terminated trickplay')
+        except AttributeError, e:
+            pass
+        
+        
+        self.fileSystem.close()
+        #self.deviceManager.close()
+        
+        print('quitting')
+        
+    
     def start(self, path, openList = None):
+        """
+        Initialize widgets on the main window with a given app path
+        """
+    
         self.path = path
-        #self.inspector.fill()
-        self.createFileSystem(path)
-        self.devices.setPath(path)
+        
+        self.fileSystem.start(self.editorManager, path)
+        
+        #self.deviceManager.setPath(path)
         
         if openList:
             for file in openList:
                 self.newEditor(file)
 
-    """
-    Save window and dock geometry on close
-    """
     def closeEvent(self, event):
+        """
+        Save window and dock geometry on close
+        """
+        
         settings = QSettings()
         settings.setValue("mainWindowGeometry", self.saveGeometry());
         settings.setValue("mainWindowState", self.saveState());
-    
-
-        
-    """
-    Create editor in a new dock that accepts drop events from the FileSystemModel
-    """
-    def createEditor(self):
-        
-        self.splitter = QSplitter()
-        
-        mainGrid = QGridLayout(self.ui.centralwidget)
-        
-        # Dock in MainWindow
-        dock = EditorDock(self, self.ui.centralwidget)
-        
-        frame = QWidget()
-        grid = QGridLayout(frame)
-        hbox = QHBoxLayout()
-        grid.addLayout(hbox, 0, 1, 1, 1)
-        
-        dock.setWidget(frame)
-        
-        dock.setWidget(self.splitter)
-        
-        mainGrid.addWidget(dock, 0, 0, 1, 1)
-        
-        self.editorGroups = []
-        self.editors = {}
-
-    """
-    Set up the file system model
-    """
-    def createFileSystem(self, appPath):
-        QObject.connect(self.ui.fileSystem, SIGNAL('doubleClicked( QModelIndex )'), self.openInEditor)
-        self.fileModel = FileSystemModel(self.ui.fileSystem, appPath)
-        
-    def getFileSystemModel(self):
-        return self.fileModel
-    
-    def getFileSystemView(self):
-        return self.ui.fileSystem
-    
-    def getEditorTabs(self):
-        return self.editorGroups
-    
-    def EditorTabWidget(self, parent = None):
-        tab = EditorTabWidget(self, self.splitter)
-        tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
-        return tab
-    
-    def getTabWidgetNumber(self, w):
-        for n in range(len(self.editorGroups)):
-            if self.editorGroups[n] == w:
-                return n
-        return None
-
-    def save(self):
-        editor = self.app.focusWidget()
-        if isinstance(editor, LuaEditor):
-            editor.save(self.statusBar())
-        else:
-            self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
-
-    """
-    Accept a file either by dragging onto the editor dock or into one of the
-    editor tab widget
-    """
-    def dropFileEvent(self, event, src, w = None):
-        
-        #print('From', event.source(), event.mimeData().hasText())
-            
-        n = self.getTabWidgetNumber(w)
-        
-        # This external file can be opened as plain text
-        if event.mimeData().hasText():
-            event.acceptProposedAction()
-            path = str(event.mimeData().urls()[0].path())
-            self.newEditor(path, n)
-            
-        # This file is from the fileSystem view
-        elif event.source() == self.getFileSystemView():
-            self.openInEditor(event.source().currentIndex(), n)
-            
-        else:
-            print('Failed to open dropped file.')
-
-
-    """
-    Open a file from the FileSystemModel in the correct tab widget.
-    """
-    def openInEditor(self, fileIndex, n = None):
-        if not self.fileModel.isDir(fileIndex):
-            path = self.fileModel.filePath(fileIndex)
-            self.newEditor(path, n)            
-    
-    """
-    Create a tab group if both don't exist,
-    then add an editor in the correct tab widget.
-    """
-    def newEditor(self, path, tabGroup = None):
-        
-        path = str(path)
-        name = os.path.basename(str(path))
-            
-        editor = LuaEditor()
-        
-        # If the file is already open, just use the open document
-        if self.editors.has_key(path):
-            editor.setDocument(self.editors[path].document())
-        else:
-            editor.readFile(path)
-        
-        nTabGroups = len(self.editorGroups)
-        
-        # If there is already one tab group, create a new one in split view and open the file there  
-        if 1 == nTabGroups:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
-            tabGroup = 1
-        
-        # If there are no tab groups, create the first one
-        elif 0 == nTabGroups:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
-            tabGroup = 0
-            
-        # Default to opening in the first tab group
-        elif not tabGroup:
-            tabGroup = 0
-        
-        index = self.editorGroups[tabGroup].addTab(editor, name)
-        
-        if not self.editors.has_key(path):
-            self.editors[path] = editor
-        
-        self.editorGroups[tabGroup].setCurrentIndex(index)
-        editor.setFocus()
-        editor.path = path
- 
         
     def exit(self):
+        """
+        Close in a clean way... but still some issues
+        """
+        
         self.close()
         
         

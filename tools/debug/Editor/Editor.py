@@ -11,11 +11,11 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
-class LuaEditor(QsciScintilla):
+class Editor(QsciScintilla):
     ARROW_MARKER_NUM = 8
     
     def __init__(self, parent=None):
-        super(LuaEditor, self).__init__(parent)
+        super(Editor, self).__init__(parent)
         self.setAcceptDrops(False)
 
         self.setTabWidth(4)
@@ -129,7 +129,7 @@ class LuaEditor(QsciScintilla):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    editor = LuaEditor()
+    editor = Editor()
     editor.show()
     editor.setText(open(sys.argv[0]).read())
     app.exec_()
