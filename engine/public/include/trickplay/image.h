@@ -10,24 +10,6 @@ extern "C" {
 /*-----------------------------------------------------------------------------
     File: Image Decoding
 */
-
-/*-----------------------------------------------------------------------------
-    Function: TPImageFreePixels
-
-    A function used to free an image's pixel data. If it is not set in the
-    <TPImage> structure, then free will be used.
-
-    Arguments:
-
-        pixels - The pixel data of a TPImage structure.
-*/
-
-    typedef
-    void
-    (*TPImageFreePixels)(
-
-        void * pixels);
-
 /*-----------------------------------------------------------------------------
     Struct: TPImage
 
@@ -42,7 +24,7 @@ extern "C" {
 
             Pixels should be set to a contiguous memory block holding the
             decoded image data as either RGB or RGBA. If this data needs
-            to be freed in a special manner, set the <free_pixels> field
+            to be freed in a special manner, set the <free_image> field
             to point to a function that will free the data.
         */
 
@@ -92,14 +74,23 @@ extern "C" {
         unsigned int        bgr;
 
         /*
-            Field: free_pixels
+            Field: free_image
 
             Pointer to a function that will be used to free the pixels once
             TrickPlay is done with them. If this is NULL (the default), then
             free will be used.
         */
 
-        TPImageFreePixels   free_pixels;
+        void 				(*free_image)( TPImage * image );
+
+        /*
+            Field: user_data
+
+            An opaque pointer that TrickPlay ignores. You can use this pointer
+            when free_image is invoked.
+        */
+
+        void *				user_data;
     };
 
 /*-----------------------------------------------------------------------------
@@ -142,7 +133,7 @@ extern "C" {
     present, is the alpha byte.
 
     If the pixel data needs to be freed in a special manner, you can set
-    the <free_pixels> field of the image parameter to a function; otherwise
+    the <free_image> field of the image parameter to a function; otherwise
     TrickPlay will use the system's 'free' function.
 
     This function should be thread safe.
