@@ -5,23 +5,23 @@ import signal
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-# UI File
 from UI.MainWindow import Ui_MainWindow
 
-from devices import TrickplayDiscovery
 from editor import LuaEditor
-from push import TrickplayPushApp
 from connection import CON
 from wizard import Wizard
 from files import FileSystemModel
 from editorTab import EditorTabWidget, EditorDock
+
 from Inspector.TrickplayInspector import TrickplayInspector
+from DeviceManager.TrickplayDeviceManager import TrickplayDeviceManager
+
+
 
 class MainWindow(QMainWindow):
     
     def __init__(self, app, parent = None):
         
-        # Main window setup
         QWidget.__init__(self, parent)
         
         # Restore size/position of window
@@ -38,13 +38,15 @@ class MainWindow(QMainWindow):
         self.inspector = TrickplayInspector()
         self.ui.InspectorLayout.addWidget(self.inspector)
         
+        # Create Device Manager
+        self.devices = TrickplayDeviceManager()
+        self.ui.DeviceManagerLayout.addWidget(self.devices)
+        
         # Toolbar
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.save)
 
         # Buttons
-        QObject.connect(self.ui.pushAppButton, SIGNAL("clicked()"),  self.pushApp)
-        QObject.connect(self.ui.runButton, SIGNAL("clicked()"),  self.run)
         
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
@@ -54,13 +56,6 @@ class MainWindow(QMainWindow):
         QObject.connect(app, SIGNAL('aboutToQuit()'), self.cleanUp)
         
         self.app = app
-        self.trickplay = QProcess()
-        
-    def run(self):
-        if self.trickplay.state() == QProcess.Running:
-            self.trickplay.close()
-        print('exit status', self.trickplay.exitStatus())
-        self.trickplay.start('trickplay', [self.path])
         
         
     """
@@ -68,14 +63,15 @@ class MainWindow(QMainWindow):
     """
     def cleanUp(self):
         # If there is a running trickplay, terminate it
-        try:
-            print(self.trickplay.state())
-            #if self.trickplay.state() == QProcess.Running:
-            self.trickplay.terminate()
-            #    print('terminated trickplay')
-        except AttributeError, e:
-            pass
-        print('quitting')
+        #try:
+        #    print(self.trickplay.state())
+        #    #if self.trickplay.state() == QProcess.Running:
+        #    self.trickplay.terminate()
+        #    #    print('terminated trickplay')
+        #except AttributeError, e:
+        #    pass
+        #print('quitting')
+        pass
             
     """
     Initialize widgets on the main window with a given app path
@@ -84,7 +80,7 @@ class MainWindow(QMainWindow):
         self.path = path
         #self.inspector.fill()
         self.createFileSystem(path)
-        self.discovery = TrickplayDiscovery(self.ui.deviceComboBox, self)
+        self.devices.setPath(path)
         
         if openList:
             for file in openList:
@@ -98,10 +94,7 @@ class MainWindow(QMainWindow):
         settings.setValue("mainWindowGeometry", self.saveGeometry());
         settings.setValue("mainWindowState", self.saveState());
     
-    def pushApp(self):    
-        print('Pushing app to', CON.get())
-        tp = TrickplayPushApp(str(self.path))
-        tp.push(address = CON.get())
+
         
     """
     Create editor in a new dock that accepts drop events from the FileSystemModel
