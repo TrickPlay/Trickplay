@@ -1,10 +1,3 @@
---[[
-Filename: 0001_rectangle_basic.lua
-Author: Peter von dem Hagen
-Date: January 19, 2011
-Test type: Manual GUI Test
-Description: Create several rectangles and verify that they display as expected
---]]
 
 -- Test Set up --
 local test_description = "Animate the scaling of a rectangle using animator"

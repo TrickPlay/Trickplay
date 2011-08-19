@@ -1,18 +1,10 @@
---[[
-Filename: 0001_rectangle_basic.lua
-Author: Peter von dem Hagen
-Date: January 19, 2011
-Test type: Manual GUI Test
-Description: Create several rectangles and verify that they display as expected
---]]
-
 -- Test Set up --
-local test_description = "Animate the scaling of a rectangle using animator"
+local test_description = "Animate the rotation of a rectangle using animator"
 local test_group = "smoke"
 local test_area = "animator"
-local test_api = "scale"
+local test_api = "rotation"
 
-test_question = "Does the red rectangle scale quickly to 0.5 then double size in 5 secs then go back to original size in 5 seconds?"
+test_question = "Does the red rectangle rotate 45 degrees CW for 2.5 secs then rotate 90 degrees CW in the final 2.5 secs?"
 
 function generate_test_image ()
 
@@ -33,10 +25,11 @@ function generate_test_image ()
 		   		{
 				source = rect1, 
 				name = "z_rotation", 
-				ease_in = true, 
+				ease_in = false, 
 				keys = {
+				{0.0, "LINEAR", 0},
 				{0.5, "LINEAR", 45},
-				{0.9, "LINEAR", 90}
+				{0.9, "LINEAR", -45}
 					}
 				}			
 			}	
