@@ -89,6 +89,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 @property (retain) NSMutableArray *appsAvailable;
 @property (nonatomic, retain) NSString *currentAppName;
 @property (nonatomic, assign) BOOL pushingViewController;
+@property (nonatomic, assign) GestureViewController *gestureViewController;
 
 @property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
 

@@ -16,6 +16,7 @@
 @synthesize currentAppName;
 @synthesize pushingViewController;
 @synthesize socketDelegate;
+@synthesize gestureViewController;
 
 /*
 @synthesize appShopButton;
@@ -124,6 +125,11 @@
 
 - (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
     NSLog(@"Fetching Apps");
+    
+    if (!delegate) {
+        return;
+    }
+    
     currentAppDelegate = delegate;
     
     if (![gestureViewController hasConnection]) {
@@ -186,6 +192,11 @@
 
 - (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
     NSLog(@"Fetching Apps");
+    
+    if (!delegate) {
+        return;
+    }
+    
     fetchAppsDelegate = delegate;
     
     if (![gestureViewController hasConnection]) {
