@@ -22,7 +22,7 @@ class FileSystem(QWidget):
         Start the FileSystem with the given app path and editor
         """
         
-        self.model = FileSystemModel(self.ui.view, path)
+        self.model = FileSystemModel(self.ui.view, path, self)
         
         self.editorManager = editorManager
         
@@ -30,3 +30,6 @@ class FileSystem(QWidget):
                         SIGNAL('doubleClicked( QModelIndex )'),
                         self.editorManager.openFromFileSystem)
         
+    def closeEvent(self, e):
+        
+        print('closing fielsystem')
