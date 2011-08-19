@@ -1,8 +1,30 @@
-Topic: Introduction
 
-This tutorial will walk through the creation of a non-trivial application using the TrickPlay SDK Visual Editor. The application will enable the user to configure an imaginary television set. The user will be able to specfy a display language, select an operation mode, and assign other typical settings. Over the course of creating this application, many of the SDK Editor's capabilities will be demonstrated.
+Topic: Visual Editor Tutorial
+
+Introduction:
+
+This tutorial will walk through the creation of a non-trivial application using the TrickPlay Visual Editor. The application will enable the user to configure an imaginary television set. The user will be able to specify a display language, select an operation mode, and assign other typical television settings. Over the course of creating this application, many of the Editor's capabilities will be demonstrated.
 
 Prerequisites:
 
 To walk through this tutorial, you should have completed the following steps.
 - Installed the TrickPlay SDK
+
+After installing the TrickPlay SDK, the Visual Editor can be run from either the command line or from a graphical interface.
+
+To run from the command line:
+
+From any directory, enter the following command.
+
+	(code)
+	trickplay-editor
+	(end)
+
+To run from a graphical user interface:
+
+In either the Applications->Developer Tools or Applications->Programming window (depending on the Linux graphic shell you are running), click on the "TrickPlay Visual Editor" icon.
+
+(see images/VisualEditorIcon.png)
+
+The first time the Visual Editor is run, it creates a subdirectory in your home directory called trickplay-editor. The ~/trickplay-editor directory stores all the project files, screen files, and other files created during the running of the Editor.
+
