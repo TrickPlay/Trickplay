@@ -14,15 +14,15 @@ PORT = Qt.UserRole + 3
     
 class TrickplayDiscovery(ServiceDiscovery):
     
-    def __init__(self, widget, main = None):
+    def __init__(self, combo, inspector):
         
         ServiceDiscovery.__init__(self)
         
-        self.widget = widget
+        self.combo = combo
         
-        self.main = main
+        self.inspector = inspector
         
-        QObject.connect(self.widget, SIGNAL('currentIndexChanged(int)'), self.service_selected)
+        QObject.connect(self.combo, SIGNAL('currentIndexChanged(int)'), self.service_selected)
     
     def service_selected(self, index):
         
@@ -30,13 +30,13 @@ class TrickplayDiscovery(ServiceDiscovery):
         if index < 0:
             return
         
-        address = self.widget.itemData(index, ADDRESS).toPyObject()
-        port = self.widget.itemData(index, PORT).toPyObject()
+        address = self.combo.itemData(index, ADDRESS).toPyObject()
+        port = self.combo.itemData(index, PORT).toPyObject()
 
         if not address or not port:
             return
         
-        #self.main.inspector.clearTree()
+        self.inspector.clearTree()
         
         print(index,address,port)
         
@@ -116,16 +116,16 @@ class TrickplayDiscovery(ServiceDiscovery):
         h_type = stdb.get_human_type(type)
         
         # Add item to ComboBox
-        self.widget.addItem(name)
-        index = self.widget.findText(name)
-        self.widget.setItemData(index, address, ADDRESS)
-        self.widget.setItemData(index, port, PORT)
-        self.widget.setItemData(index, address, NAME)
+        self.combo.addItem(name)
+        index = self.combo.findText(name)
+        self.combo.setItemData(index, address, ADDRESS)
+        self.combo.setItemData(index, port, PORT)
+        self.combo.setItemData(index, address, NAME)
         
         print('Found', address, port)
         
         # Automatically select a service if only one exists
-        if 1 == self.widget.count():
+        if 1 == self.combo.count():
             self.service_selected(index)
         
         #print "Service data for service '%s' of type '%s' (%s) in domain '%s' on %s.%i:" \
@@ -150,17 +150,17 @@ class TrickplayDiscovery(ServiceDiscovery):
         flags,
         ):
         
-        index = self.widget.findText(name)
+        index = self.combo.findText(name)
         
-        self.widget.removeItem(index)
+        self.combo.removeItem(index)
         
-        #self.main.inspector.clearTree()
+        self.inspector.clearTree()
         
         #for item in list:
         #    
-        #    r = self.widget.row(item)
+        #    r = self.combo.row(item)
         #    
-        #    self.widget.takeItem(r)
+        #    self.combo.takeItem(r)
     
         print "Service '%s' of type '%s' in domain '%s' on %s.%i disappeared." \
             % (name, type, domain, self.siocgifname(interface),

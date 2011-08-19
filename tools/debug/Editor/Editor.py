@@ -107,25 +107,30 @@ class Editor(QsciScintilla):
         statusBar.showMessage('File %s saved' % (path), 2000)
         
     def charAdded(self, c):
-        print(int(c))
+        """
+        Notification every time a character is typed, used for bringing up
+        autocomplete or calltip menus.
+        """
         
-        # :
-        if c == 58:
-            self.SendScintilla(QsciScintilla.SCI_AUTOCSHOW, 0, UI_ELEMENT_FUNCTIONS + UI_CONTAINER_FUNCTIONS)
-        
-        # ()
-        elif c == 40:
-            pos = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
-            self.SendScintilla(QsciScintilla.SCI_INSERTTEXT, pos, ')')
-            
-        # {}
-        elif c == 123:
-            pos = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
-            self.SendScintilla(QsciScintilla.SCI_INSERTTEXT, pos, '}')
-        
-        # .
-        elif c == 46:
-            self.SendScintilla(QsciScintilla.SCI_AUTOCSHOW, 0, UI_ELEMENT_PROPS + UI_CONTAINER_PROPS)
+        #print(int(c))
+        pass
+        ## :
+        #if c == 58:
+        #    self.SendScintilla(QsciScintilla.SCI_AUTOCSHOW, 0, UI_ELEMENT_FUNCTIONS + UI_CONTAINER_FUNCTIONS)
+        #
+        ## ()
+        #elif c == 40:
+        #    pos = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
+        #    self.SendScintilla(QsciScintilla.SCI_INSERTTEXT, pos, ')')
+        #    
+        ## {}
+        #elif c == 123:
+        #    pos = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
+        #    self.SendScintilla(QsciScintilla.SCI_INSERTTEXT, pos, '}')
+        #
+        ## .
+        #elif c == 46:
+        #    self.SendScintilla(QsciScintilla.SCI_AUTOCSHOW, 0, UI_ELEMENT_PROPS + UI_CONTAINER_PROPS)
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
