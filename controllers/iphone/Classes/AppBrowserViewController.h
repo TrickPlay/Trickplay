@@ -10,6 +10,15 @@
 #import <YAJLiOS/YAJL.h>
 #import "GestureViewController.h"
 
+@protocol AppBrowserDelegate <NSObject>
+
+@required
+// If nil then didn't recieve data
+- (void)didRecieveAvailableAppsInfo:(NSArray *)info;
+- (void)didRecieveCurrentAppInfo:(NSDictionary *)info;
+
+@end
+
 /**
  * The AppBrowserViewController lists apps available from a service.
  *
@@ -23,7 +32,6 @@
  *
  * Refer to AppBrowserViewController.xib for the AppBrowser's view.
  */
-
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
 UITableViewDataSource, GestureViewControllerSocketDelegate> {
     /*
@@ -34,9 +42,11 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     BOOL viewDidAppear;
      
     UITableView *theTableView;
+    // Spins while a app data is loading; disappears otherwise.
+    UIActivityIndicatorView *loadingSpinner;
     // An array of JSON strings containing information of apps available
     // on the Television/Trickplay
-    NSArray *appsAvailable;
+    NSMutableArray *appsAvailable;
     GestureViewController *gestureViewController;
     
     // Name of the current app running on Trickplay
@@ -50,6 +60,20 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     // when the AppBrowserViewController (self) calls viewDidAppear.
     BOOL pushingViewController;
     
+    // Asynchronous URL connections for populating the table with
+    // available apps and fetching information on the current
+    // running app
+    NSURLConnection *fetchAppsConnection;
+    NSURLConnection *currentAppInfoConnection;
+    
+    // The data buffers for the connections
+    NSMutableData *fetchAppsData;
+    NSMutableData *currentAppData;
+    
+    // The delegates for the connections
+    id <AppBrowserDelegate> fetchAppsDelegate;
+    id <AppBrowserDelegate> currentAppDelegate;
+    
     // Refers to the RootViewController; informs the view controller
     // if a socket having an error or closing/ending
     id <GestureViewControllerSocketDelegate> socketDelegate;
@@ -62,7 +86,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 @property (nonatomic, retain) IBOutlet UIToolbar *toolBar;
 */
 @property (retain) IBOutlet UITableView *theTableView;
-@property (retain) NSArray *appsAvailable;
+@property (retain) NSMutableArray *appsAvailable;
 @property (nonatomic, retain) NSString *currentAppName;
 @property (nonatomic, assign) BOOL pushingViewController;
 
@@ -74,6 +98,8 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 - (void)createGestureViewWithPort:(NSInteger)p hostName:(NSString *)h;
 - (NSDictionary *)getCurrentAppInfo;
 - (BOOL)fetchApps;
+- (void)getAvailableAppsInfoWithDelegate:(id<AppBrowserDelegate>)delegate;
+- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
 - (void)setupService:(NSInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n;
