@@ -18,5 +18,22 @@
 {
 "name": "00005_clone_fractal.lua", 
 "active": "true"
+},
+{
+"name": "0006_animator_position.lua", 
+"active": "true"
+}
+,
+{
+"name": "0007_animator_size.lua", 
+"active": "true"
+},
+{
+"name": "0008_animator_scale.lua", 
+"active": "true"
+},
+{
+"name": "0009_animator_rotation.lua", 
+"active": "true"
 }
 ]

@@ -132,6 +132,16 @@ function load_initial_ui ()
 	)
 	screen:add (fail_txt)
 
+	no_baseline_image_txt = Text (
+		{
+			font="san 30px",
+			color = "FFFFFF", 
+			position = {screen.w/2 + 350,240},
+			text = "No baseline image\n for this test."
+		}
+	)
+	screen:add (no_baseline_image_txt)
+
 	-- set default focus to Next
 	current_focus = focus_items["Pass"]
 	pass_txt.color = "00FF33" 
@@ -326,27 +336,32 @@ function load_test ( test_list, test_no )
 	local old_code_image = screen:find_child("code_image")
 	if old_code_image ~= nil then old_code_image:unparent() end
 
+
 	local generated_image = generate_test_image()
+
+	if generated_image ~= nil then
 	
 	-- display the code_image
 	code_image = Group 
-		{      
-		name = "code_image",
-    		size = { screen.w , screen.h },
-    		position = { 0 , 200 },
-   		scale = { 0.5, 0.5 },
-    		children = 
-    		{
-         		Rectangle 
-         		{
-        			color = "FFFFFF",
-        			size = { 1920, 1080 },
-        			position = { 0, 0 }
-        		},
-        		generated_image  --function in the external file that contains the test code to be rendered.
-        	}
-    	}
-    screen:add(code_image)	
+			{      
+			name = "code_image",
+	    		size = { screen.w , screen.h },
+	    		position = { 0 , 200 },
+	   		scale = { 0.5, 0.5 },
+	    		children = 
+	    		{
+		 		Rectangle 
+		 		{
+					color = "FFFFFF",
+					size = { 1920, 1080 },
+					position = { 0, 0 }
+				},
+				generated_image  --function in the external file that contains the test code to be rendered.
+			}
+	    	}
+	    screen:add(code_image)
+
+end	
     
 	
 	-- load the baseline png as well as other dynamic data (test name, test number, etc)
@@ -355,6 +370,7 @@ function load_test ( test_list, test_no )
 		name = "test_ui",
 		children = 
 		{
+
 			Image
 			{
 				name = "base_image",
@@ -382,7 +398,8 @@ function load_test ( test_list, test_no )
 			Text {
 					font="san 30px",
 					color = "F5B800", 
-					position = {10,screen.h - 80},
+					position = {10,screen.h - 90},
+					size = {1200, 60},
 					text = test_question
 			},
 			Text {
