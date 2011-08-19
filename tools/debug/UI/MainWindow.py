@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Aug 19 10:28:38 2011
+# Created: Fri Aug 19 14:32:17 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,6 +36,7 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
         self.InspectorDock = QtGui.QDockWidget(MainWindow)
         self.InspectorDock.setEnabled(True)
+        self.InspectorDock.setMinimumSize(QtCore.QSize(300, 45))
         self.InspectorDock.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.InspectorDock.setFeatures(QtGui.QDockWidget.AllDockWidgetFeatures)
         self.InspectorDock.setObjectName(_fromUtf8("InspectorDock"))
@@ -57,6 +58,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.DeviceManagerDock.sizePolicy().hasHeightForWidth())
         self.DeviceManagerDock.setSizePolicy(sizePolicy)
+        self.DeviceManagerDock.setMinimumSize(QtCore.QSize(100, 163))
         self.DeviceManagerDock.setObjectName(_fromUtf8("DeviceManagerDock"))
         self.DeviceManagerContainer = QtGui.QWidget()
         self.DeviceManagerContainer.setObjectName(_fromUtf8("DeviceManagerContainer"))

@@ -277,6 +277,7 @@ class TrickplayInspector(QWidget):
             self.preventChanges = True
         
         self.inspectorModel.empty()
+        self.propertyModel.empty()
         
         if not old:
             self.preventChanges = False

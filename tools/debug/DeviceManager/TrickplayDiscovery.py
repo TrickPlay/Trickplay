@@ -11,6 +11,8 @@ from connection import CON
 NAME = Qt.UserRole + 1
 ADDRESS = Qt.UserRole + 2
 PORT = Qt.UserRole + 3
+
+
     
 class TrickplayDiscovery(ServiceDiscovery):
     
@@ -39,6 +41,13 @@ class TrickplayDiscovery(ServiceDiscovery):
         self.inspector.clearTree()
         
         print(index,address,port)
+        
+        # This is the local device
+        if index == 0:
+            print('Local device selected')
+            CON.port = port
+            CON.address = address
+            return
         
         # Echo client program
         # http://docs.python.org/release/2.5.2/lib/socket-example.html
@@ -151,16 +160,9 @@ class TrickplayDiscovery(ServiceDiscovery):
         ):
         
         index = self.combo.findText(name)
-        
         self.combo.removeItem(index)
         
         self.inspector.clearTree()
-        
-        #for item in list:
-        #    
-        #    r = self.combo.row(item)
-        #    
-        #    self.combo.takeItem(r)
     
         print "Service '%s' of type '%s' in domain '%s' on %s.%i disappeared." \
             % (name, type, domain, self.siocgifname(interface),

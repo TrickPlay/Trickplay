@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>292</width>
-    <height>133</height>
+    <width>287</width>
+    <height>100</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,14 +46,7 @@
       <item>
        <widget class="QPushButton" name="run">
         <property name="text">
-         <string>Run application locally</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="push">
-        <property name="text">
-         <string>Push application to selected device</string>
+         <string>Run application on selected device</string>
         </property>
        </widget>
       </item>

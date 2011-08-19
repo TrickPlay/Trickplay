@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DeviceManager.ui'
 #
-# Created: Thu Aug 18 22:48:57 2011
+# Created: Fri Aug 19 14:27:27 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_DeviceManager(object):
     def setupUi(self, DeviceManager):
         DeviceManager.setObjectName(_fromUtf8("DeviceManager"))
-        DeviceManager.resize(292, 133)
+        DeviceManager.resize(287, 100)
         self.gridLayout = QtGui.QGridLayout(DeviceManager)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.frame = QtGui.QFrame(DeviceManager)
@@ -43,9 +43,6 @@ class Ui_DeviceManager(object):
         self.run = QtGui.QPushButton(self.frame)
         self.run.setObjectName(_fromUtf8("run"))
         self.verticalLayout_4.addWidget(self.run)
-        self.push = QtGui.QPushButton(self.frame)
-        self.push.setObjectName(_fromUtf8("push"))
-        self.verticalLayout_4.addWidget(self.push)
         self.gridLayout.addWidget(self.frame, 0, 0, 1, 1)
 
         self.retranslateUi(DeviceManager)
@@ -54,6 +51,5 @@ class Ui_DeviceManager(object):
     def retranslateUi(self, DeviceManager):
         DeviceManager.setWindowTitle(QtGui.QApplication.translate("DeviceManager", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("DeviceManager", "Trickplay Device", None, QtGui.QApplication.UnicodeUTF8))
-        self.run.setText(QtGui.QApplication.translate("DeviceManager", "Run application locally", None, QtGui.QApplication.UnicodeUTF8))
-        self.push.setText(QtGui.QApplication.translate("DeviceManager", "Push application to selected device", None, QtGui.QApplication.UnicodeUTF8))
+        self.run.setText(QtGui.QApplication.translate("DeviceManager", "Run application on selected device", None, QtGui.QApplication.UnicodeUTF8))
 
