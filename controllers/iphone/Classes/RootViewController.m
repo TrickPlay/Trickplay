@@ -59,6 +59,50 @@
     }
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    pushingAppBrowser = NO;
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    pushingAppBrowser = NO;
+}
+
+
+- (void)viewDidUnload {
+    //[super viewDidUnload];
+    NSLog(@"RootViewController Unload");
+    // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
+    // For example: self.myOutlet = nil;
+    if (currentTVIndicator) {
+        [currentTVIndicator release];
+        currentTVIndicator = nil;
+    }
+    if (loadingSpinner) {
+        [loadingSpinner stopAnimating];
+        [loadingSpinner release];
+        loadingSpinner = nil;
+    }
+    if (refreshButton) {
+        [refreshButton release];
+        refreshButton = nil;
+    }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+#pragma mark -
+#pragma mark - AppBrowserDelegate methods
+
+- (void)didRecieveCurrentAppInfo:(NSDictionary *)info {
+    
+}
+
+- (void)didRecieveAvailableAppsInfo:(NSArray *)info {
+    
+}
+
+#pragma mark -
+#pragma mark - Managing Broadcasted Services
+
 /**
  * Reloads the data in the UITableView which lists the advertised services.
  */
@@ -86,42 +130,55 @@
 - (void)pushAppBrowser:(NSNotification *)notification {
     NSLog(@"Pushing App Browser");
     // If self is not the visible view controller then it has no authority
-    // to push anther view controller to the top of the view controller stack.
-    if (self.navigationController.visibleViewController != self) {
+    // to push another view controller to the top of the view controller stack.
+    if (self.navigationController.visibleViewController != self || pushingAppBrowser) {
         return;
     }
+    
+    pushingAppBrowser = YES;
     
     // If Trickplay is running an app and the AppBrowserViewController is aware
     // that this app is running then push the AppBrowser to the top of the stack
     // and then push the app to the top of the stack. Meanwhile stop the
     // NetServiceManager from searching for advertised services to prevent
     // the network from bogging down.
-    if ([appBrowserViewController hasRunningApp]) {
-        [self.navigationController pushViewController:appBrowserViewController animated:NO];
-        [appBrowserViewController pushApp];
-        [netServiceManager stop];
-    } else {
-        // AppBrowserViewController is not aware of any currently running app
-        // on Trickplay, thus, fetch the apps this service provides.
-        if ([appBrowserViewController fetchApps]) {
-            // If there are apps available, push the AppBrowser to the top of the
-            // stack and stop searching for service advertisements.
-            [self.navigationController pushViewController:appBrowserViewController animated:YES];
-            [appBrowserViewController.theTableView reloadData];
-            [netServiceManager stop];
+    dispatch_queue_t hasRunningApp_queue = dispatch_queue_create("hasRunningAppQueue", NULL);
+    dispatch_async(hasRunningApp_queue, ^(void){
+        if ([appBrowserViewController hasRunningApp]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.navigationController pushViewController:appBrowserViewController animated:NO];
+                [appBrowserViewController pushApp];
+                [netServiceManager stop];
+            });
         } else {
-            // Either this service does not provide any of the functionality capable
-            // of running this controller or there was an error gathering data over
-            // the network; remain in the RootViewController and continue to search
-            // for services.
-            [self.navigationController.view.layer removeAllAnimations];
-            [self.navigationController popToRootViewControllerAnimated:YES];
-            self.currentTVName = nil;
-            [appBrowserViewController release];
-            appBrowserViewController = nil;
-            [self refresh];
+            // AppBrowserViewController is not aware of any currently running app
+            // on Trickplay, thus, fetch the apps this service provides.
+            if ([appBrowserViewController fetchApps]) {
+                // If there are apps available, push the AppBrowser to the top of the
+                // stack and stop searching for service advertisements.
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.navigationController pushViewController:appBrowserViewController animated:YES];
+                    [appBrowserViewController.theTableView reloadData];
+                    [netServiceManager stop];
+                });
+            } else {
+                // Either this service does not provide any of the functionality capable
+                // of running this controller or there was an error gathering data over
+                // the network; remain in the RootViewController and continue to search
+                // for services.
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.navigationController.view.layer removeAllAnimations];
+                    [self.navigationController popToRootViewControllerAnimated:YES];
+                    self.currentTVName = nil;
+                    [appBrowserViewController release];
+                    appBrowserViewController = nil;
+                    pushingAppBrowser = NO;
+                    [self refresh];
+                });
+            }
         }
-    }
+    });
+    dispatch_release(hasRunningApp_queue);
 }
 
 
@@ -216,28 +273,41 @@
 
     // if popping back to self
     if (viewController == self) {
-        if (appBrowserViewController && ![appBrowserViewController hasRunningApp]) {
-            if (gestureViewController) {
+        if (appBrowserViewController) {
+            if (gestureViewController && ![gestureViewController hasConnection]) {
                 [gestureViewController release];
                 gestureViewController = nil;
+                
+                [appBrowserViewController release];
+                appBrowserViewController = nil;
+                
+                if (currentTVName) {
+                    [currentTVName release];
+                    currentTVName = nil;
+                }
+                
+                [currentTVIndicator removeFromSuperview];
             }
-            [appBrowserViewController release];
-            appBrowserViewController = nil;
-            [currentTVName release];
-            currentTVName = nil;
-            [currentTVIndicator removeFromSuperview];
         }
-        
         [netServiceManager start];
     }
     // if popping back to app browser
     else if (viewController == appBrowserViewController) {
-        if ([appBrowserViewController fetchApps]) {
-            [appBrowserViewController.theTableView reloadData];
-            appBrowserViewController.pushingViewController = NO;
-        } else {
-            [self.navigationController popToRootViewControllerAnimated:YES];
-        }
+        dispatch_queue_t fetchApps_queue = dispatch_queue_create("navControllerQueue", NULL);
+        dispatch_async(fetchApps_queue, ^(void){
+            if ([appBrowserViewController fetchApps]) {
+                appBrowserViewController.pushingViewController = NO;
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.navigationController popToRootViewControllerAnimated:YES];
+                    [self reloadData];
+                });
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [appBrowserViewController.theTableView reloadData];
+            });
+        });
+        dispatch_release(fetchApps_queue);
     }
     
     [self reloadData];
@@ -507,28 +577,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     // Relinquish ownership any cached data, images, etc that aren't in use.
 }
-
-- (void)viewDidUnload {
-    //[super viewDidUnload];
-    NSLog(@"RootViewController Unload");
-    // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
-    // For example: self.myOutlet = nil;
-    if (currentTVIndicator) {
-        [currentTVIndicator release];
-        currentTVIndicator = nil;
-    }
-    if (loadingSpinner) {
-        [loadingSpinner stopAnimating];
-        [loadingSpinner release];
-        loadingSpinner = nil;
-    }
-    if (refreshButton) {
-        [refreshButton release];
-        refreshButton = nil;
-    }
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
 
 - (void)dealloc {
     NSLog(@"RootViewController dealloc");

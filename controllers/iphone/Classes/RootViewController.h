@@ -24,7 +24,8 @@
 
 @interface RootViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate,
-GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
+GestureViewControllerSocketDelegate, NetServiceManagerDelegate,
+AppBrowserDelegate> {
     UIWindow *window;
 
     // Name of the current TV; stores the name of the current service
@@ -36,6 +37,9 @@ GestureViewControllerSocketDelegate, NetServiceManagerDelegate> {
     UIActivityIndicatorView *loadingSpinner;
     // Refreshes the list of services
     UIBarButtonItem *refreshButton;
+    // Initialized to NO. Set to YES while the AppBrowser is in the course
+    // of being pushed to the top of the navigation stack
+    BOOL pushingAppBrowser;
     
     NetServiceManager *netServiceManager;
     GestureViewController *gestureViewController;
