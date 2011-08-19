@@ -76,6 +76,8 @@
     [self.navigationController pushViewController:gestureViewController animated:YES];
 }
 
+#pragma mark -
+#pragma mark Retrieving App Info From Network
 
 /**
  * Returns true if the AppBrowserViewController can confirm an app is running
@@ -120,6 +122,38 @@
     return (NSDictionary *)[JSONData yajl_JSON];
 }
 
+- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
+    NSLog(@"Fetching Apps");
+    currentAppDelegate = delegate;
+    
+    if (![gestureViewController hasConnection]) {
+        self.currentAppName = nil;
+        [delegate didRecieveCurrentAppInfo:nil];
+        return;
+    }
+    
+    if (currentAppInfoConnection) {
+        [currentAppInfoConnection cancel];
+        [currentAppInfoConnection release];
+        currentAppInfoConnection = nil;
+    }
+    if (currentAppData) {
+        [currentAppData release];
+        currentAppData = nil;
+    }
+    
+    // grab json data and put it into an array
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
+    currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    
+    if (!currentAppInfoConnection) {
+        self.currentAppName = nil;
+        [delegate didRecieveCurrentAppInfo:nil];
+    }
+}
+
 /**
  * Asks Trickplay for the most up-to-date information of apps it has available.
  * Trickplay replies with a JSON string of up-to-date apps. The method then
@@ -128,7 +162,7 @@
  *
  * TODO: might want to make this call asynchronous and add a time-to-live, otherwise
  * future changes to TakeControl could lead to deadlock scenerios since AdvancedUI
- * is synchronous. 
+ * is synchronous.
  */
 - (BOOL)fetchApps {
     NSLog(@"Fetching Apps");
@@ -136,19 +170,114 @@
         return NO;
     }
     
-    // grab json data and put it into an array
+    //grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     
     NSURL *dataURL = [NSURL URLWithString:JSONString];
     NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
     self.appsAvailable = [JSONData yajl_JSON];
-    NSLog(@"Received JSON array app data = %@", appsAvailable);
+    NSLog(@"Recieved JSON array app data = %@", appsAvailable);
     if (!appsAvailable) {
         return NO;
     }
     
     return YES;
 }
+
+- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
+    NSLog(@"Fetching Apps");
+    fetchAppsDelegate = delegate;
+    
+    if (![gestureViewController hasConnection]) {
+        self.appsAvailable = nil;
+        [delegate didRecieveAvailableAppsInfo:nil];
+        return;
+    }
+    
+    if (fetchAppsConnection) {
+        [fetchAppsConnection cancel];
+        [fetchAppsConnection release];
+        fetchAppsConnection = nil;
+    }
+    if (fetchAppsData) {
+        [fetchAppsData release];
+        fetchAppsData = nil;
+    }
+    
+    
+    // grab json data and put it into an array
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
+    fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    
+    if (!fetchAppsConnection) {
+        self.appsAvailable = nil;
+        [delegate didRecieveAvailableAppsInfo:nil];
+    }
+}
+
+#pragma mark -
+#pragma mark NSURLConnection Handling
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
+    if (connection == fetchAppsConnection) {
+        if (!fetchAppsData) {
+            fetchAppsData = [[NSMutableData alloc] initWithCapacity:10000];
+        }
+        
+        [fetchAppsData appendData:incrementalData];
+    } else if (connection == currentAppInfoConnection) {
+        if (!currentAppData) {
+            currentAppData = [[NSMutableData alloc] initWithCapacity:10000];
+        }
+        
+        [currentAppData appendData:incrementalData];
+    }
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    if (connection == fetchAppsDelegate) {
+        [fetchAppsConnection cancel];
+        [fetchAppsConnection release];
+        fetchAppsConnection = nil;
+        
+        self.appsAvailable = [fetchAppsData yajl_JSON];
+        NSLog(@"Received JSON array app data = %@", appsAvailable);
+        [fetchAppsDelegate didRecieveAvailableAppsInfo:appsAvailable];
+    } else if (connection == currentAppInfoConnection) {
+        [currentAppInfoConnection cancel];
+        [currentAppInfoConnection release];
+        currentAppInfoConnection = nil;
+        
+        NSDictionary *currentAppInfo = [currentAppData yajl_JSON];
+        self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
+        if ([currentAppName isEqualToString:@"Empty"]) {
+            self.currentAppName = nil;
+        }
+        [currentAppDelegate didRecieveCurrentAppInfo:currentAppInfo];
+    }
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+    if (connection == fetchAppsConnection) {
+        [fetchAppsConnection cancel];
+        [fetchAppsConnection release];
+        fetchAppsConnection = nil;
+        
+        self.appsAvailable = nil;
+        [fetchAppsDelegate didRecieveAvailableAppsInfo:nil];
+    } else if (connection == currentAppInfoConnection) {
+        [currentAppInfoConnection cancel];
+        [currentAppInfoConnection release];
+        currentAppInfoConnection = nil;
+        
+        [currentAppDelegate didRecieveCurrentAppInfo:nil];
+    }
+}
+
+#pragma mark -
+#pragma mark Launching App View
 
 /**
  * Tells Trickplay to launch a selected app and sets this app as the current
@@ -192,6 +321,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSLog(@"AppBrowserView Loaded!");
+    // Initialize the orange indicator for the current running app
     if (!currentAppIndicator) {
         currentAppIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
         currentAppIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
@@ -199,6 +329,12 @@
         currentAppIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
         currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
     }
+    
+    // Initialize the loadingSpinner if it does not exist
+    if (!loadingSpinner) {
+        loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    }
+    // Set the delegate for the table which holds the app info
     [theTableView setDelegate:self];
 }
 //*/
@@ -282,17 +418,21 @@
 	}
 
     if (!appsAvailable || [appsAvailable count] == 0) {
-        cell.textLabel.text = @"Apps Will Be Listed Here...";
-        cell.accessoryType = UITableViewCellAccessoryNone;
-        if (cell.accessoryView) {
-            cell.accessoryView = nil;
-        }
+        cell.textLabel.text = @"Loading Data...";
+        cell.accessoryView = loadingSpinner;
+        [loadingSpinner startAnimating];
+        cell.userInteractionEnabled = NO;
+        
         return cell;
     }
     
+    [loadingSpinner stopAnimating];
+    [loadingSpinner removeFromSuperview];
+    cell.accessoryView = nil;
+    
     cell.textLabel.text = (NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
     cell.textLabel.textColor = [UIColor blackColor];
-    if ([cell.textLabel.text compare:currentAppName] == NSOrderedSame) {
+    if (currentAppName && [cell.textLabel.text compare:currentAppName] == NSOrderedSame) {
         [cell addSubview:currentAppIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
     }
@@ -392,6 +532,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [theTableView release];
         theTableView = nil;
     }
+    if (loadingSpinner) {
+        [loadingSpinner stopAnimating];
+        [loadingSpinner release];
+        loadingSpinner = nil;
+    }
 }
 
 
@@ -400,6 +545,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (theTableView) {
         [theTableView release];
         theTableView = nil;
+    }
+    if (loadingSpinner) {
+        [loadingSpinner stopAnimating];
+        [loadingSpinner release];
+        loadingSpinner = nil;
     }
     if (appsAvailable) {
         [appsAvailable release];
