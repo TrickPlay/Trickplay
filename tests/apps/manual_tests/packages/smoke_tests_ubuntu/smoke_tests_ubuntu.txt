@@ -35,5 +35,11 @@
 {
 "name": "0009_animator_rotation.lua", 
 "active": "true"
+},
+{
+"name": "0010_animator_state_position.lua", 
+"active": "true"
 }
 ]
+
+

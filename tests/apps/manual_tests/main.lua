@@ -380,19 +380,19 @@ end
         		Text {
 					font="san 30px",
 					color = "F5B800", 
-					position = {screen.w - 175, 50},
+					position = {screen.w - 180, 50},
 					text = current_test
 			},
 			Text {
 					font="san 30px",
 					color = "FFFFFF", 
-					position = {screen.w - 150, 50},
+					position = {screen.w - 140, 50},
 					text = " of "
 			},
 			Text {
 					font="san 30px",
 					color = "F5B800", 
-					position = {screen.w - 70, 50},
+					position = {screen.w - 75, 50},
 					text = #test_list
 			},
 			Text {
