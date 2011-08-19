@@ -5,7 +5,7 @@ import connection
 
 from TrickplayPropertyModel import TrickplayPropertyModel
 from TrickplayElementModel import TrickplayElementModel
-from data import BadDataException, modelToData
+from Data import BadDataException, modelToData
 
 from UI.Inspector import Ui_TrickplayInspector
 

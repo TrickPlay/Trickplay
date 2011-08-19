@@ -1,6 +1,6 @@
 import httplib, urllib, urllib2, json
 from socket import error
-from data import BadDataException
+from Inspector.Data import BadDataException
 
 class Connection():
     
