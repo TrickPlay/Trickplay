@@ -195,6 +195,7 @@
     NSLog(@"TrickplayImage dealloc");
     
     self.src = nil;
+    ((AsyncImageView *)self.view).otherDelegate = nil;
     
     [super dealloc];
 }

@@ -206,12 +206,9 @@
  */
 - (void)didNotResolveService {
     NSLog(@"RootViewController didNotResolveService");
-    if (gestureViewController) {
-        if (self.navigationController.visibleViewController == gestureViewController) {
+    if (appBrowserViewController.gestureViewController) {
+        if (self.navigationController.visibleViewController == appBrowserViewController.gestureViewController) {
             [self.navigationController popViewControllerAnimated:NO];
-        } else {
-            [gestureViewController release];
-            gestureViewController = nil;
         }
     }
     if (appBrowserViewController) {
@@ -273,21 +270,18 @@
 
     // if popping back to self
     if (viewController == self) {
-        if (appBrowserViewController) {
-            if (gestureViewController && ![gestureViewController hasConnection]) {
-                [gestureViewController release];
-                gestureViewController = nil;
+        if (appBrowserViewController && appBrowserViewController.gestureViewController
+        && ![appBrowserViewController.gestureViewController hasConnection]) {
                 
-                [appBrowserViewController release];
-                appBrowserViewController = nil;
-                
-                if (currentTVName) {
-                    [currentTVName release];
-                    currentTVName = nil;
-                }
-                
-                [currentTVIndicator removeFromSuperview];
+            [appBrowserViewController release];
+            appBrowserViewController = nil;
+            
+            if (currentTVName) {
+                [currentTVName release];
+                currentTVName = nil;
             }
+                
+            [currentTVIndicator removeFromSuperview];
         }
         [netServiceManager start];
     }
@@ -325,10 +319,6 @@
     [self.navigationController popToRootViewControllerAnimated:YES];
     
     if (appBrowserViewController) {
-        if (gestureViewController) {
-            [gestureViewController release];
-            gestureViewController = nil;
-        }
         [appBrowserViewController release];
         appBrowserViewController = nil;
         [currentTVName release];
@@ -534,10 +524,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if ([services count] == 0) { [self refresh]; return; }
     
     if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
-        if (gestureViewController) {
-            [gestureViewController release];
-            gestureViewController = nil;
-        }
+        
         if (appBrowserViewController) {
             [appBrowserViewController release];
         }
@@ -581,9 +568,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 - (void)dealloc {
     NSLog(@"RootViewController dealloc");
     [netServiceManager release];
-    if (gestureViewController) {
-        [gestureViewController release];
-    }
+    
     if (appBrowserViewController) {
         // Make sure to get rid of the AppBrowser's socket delegate
         // or a race condition may occur where the AppBrowser recieves
