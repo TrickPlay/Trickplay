@@ -2,7 +2,7 @@ Topic: Create Screen Layout using Rectangles
 
 Our application's screen layout will be divided into several areas. One method to accomplish this is by placing rectangles of various colors and transparencies over the background image. This section describes the process.
 
-1. Select the Edit->Insert UI Element menu item. From the UI Elements dialog box, select Rectangle.
+1. Select the Edit->Insert UI Element... menu item. From the UI Elements dialog box, select Rectangle.
 
 (see images/EdUiElementsRect.png)
 

@@ -1,6 +1,8 @@
 Topic: Create a New Project
 
-Run the SDK Visual Editor. If this is the first time the Editor has been run, the New Project window displays. If the Editor has been run before, the Open Project window is shown. If Open Project is displayed, close it by clicking the Cancel button. Then from the File menu, select New Project... to display the New Project window.
+Run the Visual Editor. If this is the first time the Editor has run, the New Project window displays.
+
+If the Editor has been run before, the Editor automatically opens the project you were last working on. If this is the case and the New Project window is not shown, click on the File menu and select the New Project... item to display the New Project window.
 
 (see images/EdNewProject.png)
 
