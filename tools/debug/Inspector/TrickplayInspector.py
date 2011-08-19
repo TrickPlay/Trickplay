@@ -7,14 +7,18 @@ from TrickplayPropertyModel import TrickplayPropertyModel
 from TrickplayElementModel import TrickplayElementModel
 from data import BadDataException, modelToData
 
+from UI.Inspector import Ui_Form
 
 
-class TrickplayInspector():
+
+class TrickplayInspector(QWidget):
     
     def __init__(self, inspectorView, propertyView, search):
         """
         Initialize inspector with two QTreeViews and one lineEdit for search
         """
+        
+        #self.ui = Ui_Form.setupUi(self)
         
         # Ignore signals while updating elements internally
         self.preventChanges = False

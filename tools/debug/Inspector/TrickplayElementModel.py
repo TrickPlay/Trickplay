@@ -90,8 +90,9 @@ class TrickplayElementModel(QStandardItemModel):
         
         # Recurse through children
         try:
-            for c in data['children']:
-                self.insertElement(node, c, data, False)
+            children = data['children']
+            for i in range(len(children)-1, -1, -1):
+                self.insertElement(node, children[i], data, False)
         
         # Element has no children
         except KeyError:
