@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -18,6 +19,9 @@ class Wizard():
     
     def __init(self, mainWindow):
         self.mainWindow = mainWindow
+        self.id = None
+        self.name = None
+        self.new = None
         
     def filesToOpen(self):
         return self.openList
@@ -27,9 +31,15 @@ class Wizard():
     
         self.openList = None
         
-        # First get an app path if one wasn't passed in
+        # If no app path was passed in
         if not path:
-            userPath = self.chooseDirectoryDialog()
+            
+            # Check settings for the last path used
+            settings = QSettings()
+            dir = str(settings.value('path', '').toString())
+
+            # Get a path from the user
+            userPath = self.createAppDialog(dir)
             
             if userPath:
                 print('Path chosen: ' + str(userPath))
@@ -56,15 +66,6 @@ class Wizard():
                         msg.setWindowTitle("Error")
                         msg.exec_()
                         return self.start(None)
-     
-                # Can't currently get here...
-                #else:
-                #    msg = QMessageBox()
-                #    msg.setText(
-                #        os.path.basename(str(userPath)) + ' is not a directory.')
-                #    msg.setWindowTitle("Error")
-                #    msg.exec_()
-                #    self.start(None)
         
         # Path was given on command line
         else:
@@ -81,61 +82,174 @@ class Wizard():
             else:
                 sys.exit('Error >> ' + path + ' is not existing directory.')
             
-    
-    """
-    User chooses a directory if one wasn't passed as an argument
-    
-    TODO, let user type in a blank directory. Right now they have to hit the
-    new directory button.
-    """
+    def lineSplit(self, line):
+        """
+        TODO: Find the id/name in a better way...
+        """
+        s = line.split('"')
+        if len(s) == 3:
+            return s
+        else:
+            s = line.split("'")
+            if len(s) == 3:
+                return s
+        
+    def scan(self, path):
+        """
+        Scan the path given:
+        If invalid app file, return -3
+        If user cancels the dialog, return -2
+        If non-empty with no app and main.lua, return -1
+        If empty, return 0
+        If app and main.lua exist, return 1
+        """
+        
+        if os.path.isdir(path):
+            
+            files = os.listdir(path)
+            
+            # If the directory is empty, allow the user to change id and name
+            if len(files) <= 0:
+                return 0
+                
+            if 'app' in files and 'main.lua' in files:
+                f = open(os.path.join(path, 'app'))
+                
+                id = None
+                name = None
+                try:
+                    app = f.read()
+                    idLine = re.search('''id\s*=\s*['"].*['"]\s*[,]''', app).group(0)[:-1]
+                    nameLine = re.search('''name\s*=\s*['"].*['"]\s*[,]''', app).group(0)[:-1]
+                    id = self.lineSplit(idLine)[1]
+                    name = self.lineSplit(nameLine)[1]
+                    self.id = id
+                    self.name = name
+                    return 1
+                except:
+                    print('invalid app')
+                    return -3
+                
+            else:
+                return -1
+            
+        else:
+            return -2
+        
+    def adjustDialog(self, path):
+        
+        result = self.scan(str(path))
+        
+        # If the path is a directory...
+        if 0 == result:
+            self.ui.id.setReadOnly(False)
+            self.ui.name.setReadOnly(False)
+            self.new = True
+                
+        elif 1 == result:
+            self.ui.id.setReadOnly(True)
+            self.ui.name.setReadOnly(True)
+            self.ui.id.setText(self.id)
+            self.ui.name.setText(self.name)
+            self.new = False
+                
+        elif -1 == result:
+            msg = QMessageBox()
+            msg.setText('Directory "' + os.path.basename(str(path)) +
+                        '" does not contain an "app" file and a "main.lua" file.')
+            msg.setInformativeText('If you pick an empty directory, you will be '
+                                   'prompted to create a new app there.');
+            msg.setWindowTitle("Error")
+            msg.exec_()
+        
+        return result
+        
+
     def chooseDirectoryDialog(self):
+        """
+        User chooses a directory:
+        If the directory is empty, then they must fill in Name and Id
+        If the directory is not empty, it must have an 'app' and 'main.lua'
+        """
         
-        path = None
-        
-        settings = QSettings()
-        dir = settings.value('path', QDir.homePath()).toPyObject()
-        
-        #dialog = QFileDialog(None, 'Select app directory', dir)
-        #
-        #dialog.setFileMode(QFileDialog.Directory)
-        #
-        #if dialog.exec_():
-        #    selected = dialog.selectedFiles()
-        #    path = selected[0]
+        # Open the browser, wait for it to close
+        dir = self.ui.directory.text()
         
         path = QFileDialog.getExistingDirectory(None, 'Select app directory', dir)
         
-        return path
+        result = self.adjustDialog(path)
+        if result >= 0:
+            self.ui.directory.setText(path)
         
     def createAppDialog(self, path):
+        """
+        New app dialog
+        """
+        
         print('started app creator!')
         
-        dialog = QDialog()
-        ui = Ui_newApplicationDialog()
-        ui.setupUi(dialog)
-        ui.directory.setText(path)
-        if dialog.exec_():
-            id = str(ui.id.text())
-            name = str(ui.name.text())
-            path = str(ui.directory.text())
-            print('now creating', path, id, name)
-            appPath = os.path.join(path, 'app')
-            appFile = open(appPath, 'w')
-            appFile.write('app = {' + APP.format(id, name) + '}')
-            appFile.close()
-            mainPath = os.path.join(path, 'main.lua')
-            mainFile = open(mainPath, 'w')
-            mainFile.close()
-            self.openList = [appPath, mainPath]
-            return path
+        self.dialog = QDialog()
+        self.ui = Ui_newApplicationDialog()
+        self.ui.setupUi(self.dialog)
+        self.ui.directory.setText(path)
+        
+        self.adjustDialog(path)
+        
+        QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
+        
+        if self.dialog.exec_():
+            
+            id = str(self.ui.id.text())
+            name = str(self.ui.name.text())
+            path = str(self.ui.directory.text())
+            
+            if '' == id or '' == name or '' == path:
+                return self.createAppDialog(path)
+            
+            if self.new:
+                print('now creating', path, id, name)
+                appPath = os.path.join(path, 'app')
+                appFile = open(appPath, 'w')
+                appFile.write('app = {' + APP.format(id, name) + '}')
+                appFile.close()
+                mainPath = os.path.join(path, 'main.lua')
+                mainFile = open(mainPath, 'w')
+                mainFile.close()
+                self.openList = [appPath, mainPath]
+                return path
+            else:
+                return path
         else:
             sys.exit()
 
-        
-#def openDir(d):
-#    path = str(d)
-#    print('opened', d)
-#    dialog.close()
-#    
-#QObject.connect(dialog, SIGNAL('directoryEntered(const QString)'), openDir)
-#
+
+
+
+
+        # If the path is a directory...
+        #if os.path.isdir(path):
+        #    
+        #    files = os.listdir(path)
+        #    
+        #     If the directory is empty, allow the user to change id and name
+        #    if len(files) <= 0:
+        #        self.ui.id.setReadOnly(False)
+        #        self.ui.name.setReadOnly(False)
+        #        
+        #    if 'app' in files and 'main.lua' in files:
+        #        self.ui.id.setReadOnly(True)
+        #        self.ui.name.setReadOnly(True)
+        #        
+        #    else:
+        #        msg = QMessageBox()
+        #        msg.setText('Directory "' + os.path.basename(str(path)) +
+        #                    '" does not contain an "app" file and a "main.lua" file.')
+        #        msg.setInformativeText('If you pick an empty directory, you will be '
+        #                               'prompted to create a new app there.');
+        #        msg.setWindowTitle("Error")
+        #        msg.exec_()
+        #        return
+        #        
+        # User shouldn't be able to get here...
+        #else:
+        #    sys.exit()
