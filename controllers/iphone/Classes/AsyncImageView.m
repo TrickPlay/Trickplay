@@ -229,6 +229,9 @@
 
 - (void)dealloc {
     NSLog(@"AsyncImageView dealloc");
+    self.dataCacheDelegate = nil;
+    self.otherDelegate = nil;
+    
     if (connection) {
         [connection cancel];
         [connection release];
@@ -239,8 +242,6 @@
     if (resourceKey) {
         [resourceKey release];
     }
-    self.dataCacheDelegate = nil;
-    self.otherDelegate = nil;
     
     self.image = nil;
     

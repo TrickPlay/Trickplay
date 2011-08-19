@@ -42,7 +42,6 @@ AppBrowserDelegate> {
     BOOL pushingAppBrowser;
     
     NetServiceManager *netServiceManager;
-    GestureViewController *gestureViewController;
     AppBrowserViewController *appBrowserViewController;
 }
 
