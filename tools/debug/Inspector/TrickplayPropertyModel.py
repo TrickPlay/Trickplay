@@ -189,13 +189,4 @@ def summarize(value, subtitle = None):
         print(value,  subtitle)
         raise Exception
 
-#app = QApplication([])
-#m = TrickplayPropertyModel()
-#d = {"anchor_point":{"x":0,"y":0},"children":[],"gid":2,"is_visible":True,"name":"screen","opacity":255,"position":{"x":0,"y":0,"z":0},"scale":{"x":0.5,"y":0.5},"size":{"h":1080,"w":1920},"type":"Group","x_rotation":{"angle":0,"y center":0,"z center":0},"y_rotation":{"angle":0,"x center":0,"z center":0},"z_rotation":{"angle":0,"x center":0,"y center":0}}
-#m.fill(d)
-#v = QTreeView()
-#v.setModel(m)
-#v.show()
-#
-#e = m.invisibleRootItem().child(0,0).child(0,1)
-#print(e.partner().data(Qt.DisplayRole).toPyObject(), e.data(Qt.DisplayRole).toPyObject())
+
