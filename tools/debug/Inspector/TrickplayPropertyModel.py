@@ -3,7 +3,7 @@ from PyQt4.QtGui import *
 
 from PropertyIter import PropertyIter
 from TrickplayElement import TrickplayElement
-from data import dataToModel
+from Data import dataToModel
 
 NOT_EDITABLE = {
     'clip',
