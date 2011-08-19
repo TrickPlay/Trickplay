@@ -11,7 +11,7 @@ Our new screen will share the basic screen layout, but will not use the four lan
 
 Our new screen should have its own name, so select the Title element that is currently displaying the string "Language." Click at the end of the "Language" string and press <Backspace> until the entire string has been deleted. Then type in the name of our new screen: "Mode".
 
-This will be the foundation of our new screen. Save it by selecting the File->Save as... menu item. When prompted for a filename, enter "mode.lua". (Remember that the SDK Visual Editor converts our UI elements to Lua source code, so the file should have a .lua extension.)
+This will be the foundation of our new screen. Save it by selecting the File->Save as... menu item. When prompted for a filename, enter "mode.lua". (Remember that the Visual Editor converts our UI elements to Lua source code, so the file should have a .lua extension.)
 
 The screen should look something like this.
 

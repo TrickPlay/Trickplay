@@ -1,5 +1,9 @@
 
 Title: Visual Editor Introduction
 
-This section documents the TrickPlay Visual Editor. Included is a <Tutorial at file:tutorial/introduction-txt.html> to get you started and a <Programmer's Reference at file:reference/button-txt.html>.
+The TrickPlay Visual Editor is a WYSIWYG development environment that enables rapid development of a TrickPlay application's user interface. Display components, such as buttons, text and graphics, are precisely positioned to quickly compose each screen. Various configuration settings for each component can also be defined from within the Editor. After the screen is composed the way you want it, save it to a file and the Visual Editor will automatically generate all the underlying source code necessary to implement the screen in a running TrickPlay application.
+
+The next sections document the TrickPlay Visual Editor in detail. Included are a <Tutorial at file:tutorial/introduction-txt.html> to get you productive in only a few minutes and a <Programmer's Reference at file:reference/button-txt.html>.
+
+(see tutorial/images/EditorSplash.png)
 
