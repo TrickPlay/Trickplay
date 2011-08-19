@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         self.ui.InspectorLayout.addWidget(self._inspector)
         
         # Create DeviceManager
-        self._deviceManager = TrickplayDeviceManager()
+        self._deviceManager = TrickplayDeviceManager(self._inspector)
         self.ui.DeviceManagerLayout.addWidget(self._deviceManager)
         
         # Toolbar
@@ -81,18 +81,14 @@ class MainWindow(QMainWindow):
         """
         
         try:
-            #print(self.trickplay.state())
+            print('Trickplay state', self.deviceManager.trickplay.state())
             #if self.trickplay.state() == QProcess.Running:
-            self.trickplay.terminate()
+            self.deviceManager.trickplay.terminate()
             #    print('terminated trickplay')
         except AttributeError, e:
             pass
         
-        
-        #self.fileSystem.ui.view.close()
-        #self.deviceManager.close()
-        
-        print('quitting')
+        #print('quitting')
         
     
     def start(self, path, openList = None):
@@ -103,13 +99,12 @@ class MainWindow(QMainWindow):
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
-        #self.fileSystem.start(None, path)
         
         self.deviceManager.setPath(path)
         
         if openList:
             for file in openList:
-                self.newEditor(file)
+                self.editorManager.newEditor(file)
 
     def closeEvent(self, event):
         """
@@ -122,7 +117,8 @@ class MainWindow(QMainWindow):
         
     def exit(self):
         """
-        Close in a clean way... but still some issues
+        Close in a clean way... but still Trickplay closes too soon and the
+        Avahi service stays alive
         """
         
         self.close()

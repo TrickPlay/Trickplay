@@ -17,14 +17,14 @@ PORT = Qt.UserRole + 3
 
 class TrickplayDeviceManager(QWidget):
     
-    def __init__(self, parent = None):
+    def __init__(self, inspector, parent = None):
         
         QWidget.__init__(self, parent)
                 
         self.ui = Ui_DeviceManager()
         self.ui.setupUi(self)
         
-        self.discovery = TrickplayDiscovery(self.ui.comboBox)
+        self.discovery = TrickplayDiscovery(self.ui.comboBox, inspector)
         
         QObject.connect(self.ui.push,
                         SIGNAL("clicked()"),
