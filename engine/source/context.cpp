@@ -2353,9 +2353,13 @@ void TPContext::validate_configuration()
 
     // DOWNLOADS PATH
 
-    String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , "downloads" , true ) );
+    gchar * default_downloads_path = g_build_filename( get( TP_DATA_PATH ) , "downloads" , NULL );
+
+    String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , default_downloads_path , true ) );
 
     set( TP_DOWNLOADS_PATH , downloads_path );
+
+    g_free( default_downloads_path );
 
     if ( g_mkdir_with_parents( downloads_path.c_str() , 0700 ) != 0 )
     {

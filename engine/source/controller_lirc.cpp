@@ -132,6 +132,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
     key_map[ "GREEN"     ] = TP_KEY_GREEN;
     key_map[ "YELLOW"    ] = TP_KEY_YELLOW;
     key_map[ "BLUE"      ] = TP_KEY_BLUE;
+    key_map[ "BACK"      ] = TP_KEY_BACK;
 
     timer = g_timer_new();
 
