@@ -36,16 +36,16 @@ class MainWindow(QMainWindow):
         self._editorManager = EditorManager(self._fileSystem, self.ui.centralwidget)
         
         # Create Inspector
-        #self._inspector = TrickplayInspector()
-        #self.ui.InspectorLayout.addWidget(self._inspector)
+        self._inspector = TrickplayInspector()
+        self.ui.InspectorLayout.addWidget(self._inspector)
         
         # Create DeviceManager
-        #self._deviceManager = TrickplayDeviceManager()
-        #self.ui.DeviceManagerLayout.addWidget(self._deviceManager)
+        self._deviceManager = TrickplayDeviceManager()
+        self.ui.DeviceManagerLayout.addWidget(self._deviceManager)
         
         # Toolbar
-        #QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
-        #QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
+        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
             pass
         
         
-        self.fileSystem.close()
+        #self.fileSystem.ui.view.close()
         #self.deviceManager.close()
         
         print('quitting')
@@ -99,12 +99,13 @@ class MainWindow(QMainWindow):
         """
         Initialize widgets on the main window with a given app path
         """
-    
+        
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
+        #self.fileSystem.start(None, path)
         
-        #self.deviceManager.setPath(path)
+        self.deviceManager.setPath(path)
         
         if openList:
             for file in openList:
