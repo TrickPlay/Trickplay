@@ -43,7 +43,7 @@
           <string>App Directory</string>
          </property>
          <property name="readOnly">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
         </widget>
        </item>

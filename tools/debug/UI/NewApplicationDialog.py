@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'NewApplicationDialog.ui'
 #
-# Created: Fri Aug 19 14:42:41 2011
+# Created: Fri Aug 19 14:53:38 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,7 +32,7 @@ class Ui_newApplicationDialog(object):
         self.horizontalLayout.setSpacing(12)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.directory = QtGui.QLineEdit(newApplicationDialog)
-        self.directory.setReadOnly(False)
+        self.directory.setReadOnly(True)
         self.directory.setObjectName(_fromUtf8("directory"))
         self.horizontalLayout.addWidget(self.directory)
         self.browse = QtGui.QPushButton(newApplicationDialog)
