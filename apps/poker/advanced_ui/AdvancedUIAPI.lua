@@ -288,8 +288,15 @@ do
             -- OK, just fetch its value from the remote
         
             local payload = { id = self.id , properties = { [ key ] = true } }
-            local result = send_request( "get" , payload ).properties[ key ]
-            if result == json.null then
+            local result = send_request( "get" , payload )
+
+            if not result then return nil end
+            result = result.properties
+
+            if not result then return nil end
+            result = result[ key ]
+
+            if not result or result == json.null then
                 return nil
             end
             
@@ -328,8 +335,8 @@ do
         function proxy:__call( function_name , ... )
             local payload = { id = self.id , call = function_name , args = {...} }
             local result = send_request( "call" , payload )
-            if result == nil then error("result is nil", 3) end
-            if not result.result then error("no result.result", 3) end
+            if result == nil then return nil end
+            if not result.result then return nil end
 
             result = result.result
             if result == json.null then
