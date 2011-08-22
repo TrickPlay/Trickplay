@@ -19,12 +19,28 @@
 
 
 - (void)viewDidLoad {
-    [super viewDidLoad];
-    
-    // Customize the View
+    [super viewDidLoad];   
+
+  
+    UILabel *version_label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, 50)] autorelease];
+    version_label.text = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    // Colors and font
+    version_label.backgroundColor = [UIColor clearColor];
+    version_label.font = [UIFont systemFontOfSize:11];
+    version_label.textColor = [UIColor lightGrayColor];
+    // Automatic word wrap
+    version_label.lineBreakMode = UILineBreakModeHeadTruncation;
+    version_label.textAlignment = UITextAlignmentCenter;
+    version_label.numberOfLines = 0;
+    // Autosize
+    [version_label sizeToFit];
+    // Add the UILabel to the tableview
+    self.tableView.tableFooterView = version_label;
+  
+  // Customize the View
     self.title = @"TV";
     self.view.tag = 1;
-    
+
     self.navigationController.delegate = self;
     
     // After selecting a service the controller will try to make a connection
@@ -87,6 +103,7 @@
         refreshButton = nil;
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    self.tableView.tableFooterView = nil;
 }
 
 #pragma mark -
