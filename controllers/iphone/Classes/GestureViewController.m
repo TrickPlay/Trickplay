@@ -356,10 +356,6 @@
     styleAlert.title = windowtitle;
     [multipleChoiceArray removeAllObjects];
     while (theindex < [args count]) {
-        //First one is <id>
-        //Second is the text
-        //Theindex is the id
-        NSLog(@"theindex: %d, object 1: %@, object 2: %@", theindex, [args objectAtIndex:theindex], [args objectAtIndex:theindex+1]);
         [multipleChoiceArray addObject:[args objectAtIndex:theindex]];
         [styleAlert addButtonWithTitle:[args objectAtIndex:theindex+1]];
         theindex += 2;

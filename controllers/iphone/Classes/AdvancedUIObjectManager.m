@@ -328,6 +328,10 @@
     
     // Set values for class specific properties
     TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    if (!object) {
+        [self reply:nil];
+        return;
+    }
     [object setValuesFromArgs:args];
     
     [self reply:@"[true]"];
@@ -338,6 +342,10 @@
     NSDictionary *properties = [JSON_object objectForKey:@"properties"];
     // Find the AdvancedUI Object to get properties from
     TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    if (!object) {
+        [self reply:nil];
+        return;
+    }
     // Make a dictionary that will carry the returned values
     NSMutableDictionary *JSON_dictionary = [NSMutableDictionary dictionaryWithDictionary:JSON_object];
     // Set the properties to this dictionary
@@ -351,6 +359,10 @@
     
     // Set values for class specific properties
     TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    if (!object) {
+        [self reply:nil];
+        return;
+    }
     [object deleteValuesFromArgs:args];    // TODO: finish this
     [self reply:@"[false]"];
 }
