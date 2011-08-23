@@ -2,7 +2,7 @@ Topic: Add a Background Image
 
 To add a background image to the application's screen, perform the following steps.
 
-1. Select the Edit->Insert UI Element menu item. The UI Elements dialog box is displayed.
+1. Select the Edit->Insert UI Element... menu item. The UI Elements dialog box is displayed.
 
 (see images/EdUiElementsDialog.png)
 

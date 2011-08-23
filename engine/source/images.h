@@ -8,13 +8,6 @@
 #include "common.h"
 #include "json.h"
 
-//-----------------------------------------------------------------------------
-// Set to 1 to enable caching of images
-
-#define TP_IMAGE_CACHE_ENABLED                  0
-
-#define TP_IMAGE_CACHE_DEFAULT_LIMIT_BYTES      ( 20 * 1024 * 1024 )
-
 //=============================================================================
 
 class Image
@@ -36,6 +29,8 @@ public:
     static void decode_async( const gchar * filename , bool read_tags , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
     static void decode_async( GByteArray * bytes , bool read_tags , const gchar * content_type , DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+
+    static void free_image_with_g_free( TPImage * image );
 
     ~Image();
 
@@ -142,7 +137,6 @@ public:
         virtual int decode( const char * filename, TPImage * image ) = 0;
     };
 
-
     //.........................................................................
 
     static void add_to_image_list( ClutterTexture * texture );
@@ -155,9 +149,12 @@ public:
 
     //.........................................................................
 
-    static void set_cache_limit( guint bytes );
+    static bool cache_put( TPContext * context , const String & key , CoglHandle texture , const JSON::Object & tags );
 
-    //.........................................................................
+    static CoglHandle cache_get( const String & key , JSON::Object & tags );
+
+    static bool cache_has( const String & key );
+
     // Prints out the cache contents, when the cache is enabled
 
     static void dump_cache();
@@ -231,27 +228,69 @@ private:
 
     //.........................................................................
 
-#if TP_IMAGE_CACHE_ENABLED
+    class Cache
+    {
+    public:
 
-    typedef std::pair< TPImage *, guint > CacheEntry;
+    	Cache( int limit );
 
-    typedef std::map< String, CacheEntry > CacheMap;
+    	virtual ~Cache();
 
-    CacheMap         cache;
+    	bool put( const String & key , CoglHandle texture , const JSON::Object & tags );
 
-    typedef std::pair< String, CacheEntry > PruneEntry;
+    	CoglHandle get( const String & key , JSON::Object & tags );
 
-    typedef std::vector< PruneEntry > PruneVector;
+    	bool has( const String & key );
 
-    static bool prune_sort( const PruneEntry & a, const PruneEntry & b );
+    	void dump();
 
-    void prune_cache();
+    private:
 
-    guint cache_limit;
+    	int			limit;
+    	double		size;
 
-    guint cache_size;
+    	//.....................................................................
+    	// Entries we keep in the cache
 
-#endif
+    	class Entry
+    	{
+    	public:
+
+    		Entry( CoglHandle handle , const JSON::Object & tags );
+
+    		virtual ~Entry();
+
+    		void update_timestamp();
+
+    		CoglHandle		handle;
+    		double			timestamp;
+    		double			size;
+    		JSON::Object	tags;
+
+    	private:
+
+    		Entry() {};
+    		Entry( const Entry & ) {};
+    	};
+
+    	typedef std::map< String , Entry * > Map;
+
+    	Map			map;
+
+    	//.....................................................................
+    	// Pruning
+
+    	typedef std::pair< String , Entry * > PruneEntry;
+
+    	typedef std::vector< PruneEntry > PruneVector;
+
+    	static bool prune_sort( const PruneEntry & a , const PruneEntry & b );
+
+    	void prune();
+
+    };
+
+    Cache *			cache;
 
 #ifndef TP_PRODUCTION
 

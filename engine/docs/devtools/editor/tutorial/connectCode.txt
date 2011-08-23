@@ -3,7 +3,7 @@ Topic: Connect UI Elements to Code
 
 In <The main.lua File>, it was mentioned that empty event handlers are defined for each of the Button elements in the screen. When certain events occur to a button, such as when the user clicks the button with the mouse or when the button receives or loses the input focus, the system notifies our application of the event by "firing" or calling the appropriate event handler. Our application can either ignore the event by doing nothing or it can perform whatever operation it deems appropriate by executing its own custom handling code.
 
-By default, the SDK Visual Editor defines three empty event handlers for each Button element created in a screen. The three handlers--focused(), pressed(), and released()--are shown below for the ButtonEnglish button. Similar empty handlers are defined for each of the other buttons on our screen.
+By default, the Visual Editor defines three empty event handlers for each Button element created in a screen. The three handlers--focused(), pressed(), and released()--are shown below for the ButtonEnglish button. Similar empty handlers are defined for each of the other buttons on our screen.
 
 (code)
 -- LANGUAGE.BUTTONENGLISH SECTION

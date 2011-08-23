@@ -1778,6 +1778,11 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
 
     if ( ! source )
     {
+    	if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
@@ -1788,6 +1793,12 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
     if ( ! path )
     {
         tplog( "  INVALID PATH" );
+
+        if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
