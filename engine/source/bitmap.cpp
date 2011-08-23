@@ -39,10 +39,7 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async , bool read_tags
 
         RefCounted::ref( this );
 
-        if ( ! app->load_image_async( _src , read_tags , callback , this , destroy_notify ) )
-        {
-            RefCounted::unref( this );
-        }
+        app->load_image_async( _src , read_tags , callback , this , destroy_notify );
     }
 }
 

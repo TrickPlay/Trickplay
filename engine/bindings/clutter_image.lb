@@ -16,27 +16,100 @@ module clutter_image;
 
 //-----------------------------------------------------------------------------
 
-static void image_load_callback( Image * image , gpointer _texture )
+class ImageLoadedFromCacheAction : public Action
 {
-    ClutterTexture * texture = CLUTTER_TEXTURE( _texture );
+public:
 
-    if ( ! image )
+    ImageLoadedFromCacheAction( ClutterTexture * _texture , CoglHandle _handle , const JSON::Object _tags )
+    :
+        texture( CLUTTER_TEXTURE( g_object_ref( _texture ) ) ),
+        handle( cogl_handle_ref( _handle ) ),
+        tags( _tags )
     {
-        GError * error = NULL;
-
-        g_set_error( & error,
-            CLUTTER_TEXTURE_ERROR,
-            CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-            "Failed to load texture data");
-
-        g_warning("FAILED TO LOAD IMAGE : %s",error->message);
-
-        g_signal_emit_by_name( G_OBJECT( texture ), "load-finished", error );
-
-        g_clear_error( & error );
     }
-    else
+    
+    ~ImageLoadedFromCacheAction()
     {
+        g_object_unref( texture );
+        cogl_handle_unref( handle );
+    }
+    
+protected:
+
+    bool run()
+    {
+        ImageExtra * extra = ImageExtra::get( texture );
+        
+        extra->loaded = true;
+        extra->tags = tags;
+        
+        clutter_texture_set_cogl_texture( texture , handle );
+        
+        Images::add_to_image_list( texture );
+        
+        g_signal_emit_by_name( G_OBJECT( texture ) , "load-finished" , 0 );
+
+        return false;
+    }
+    
+private:
+
+    ClutterTexture *    texture;
+    CoglHandle          handle;
+    JSON::Object        tags;
+};
+
+//-----------------------------------------------------------------------------
+
+class ImageLoadedAsyncAction : public Action
+{
+public:
+
+    static void image_load_callback( Image * image , gpointer me )
+    {
+        ( ( ImageLoadedAsyncAction * ) me )->image_loaded( image ); 
+    }
+
+    ImageLoadedAsyncAction( TPContext * _context , ClutterTexture * _texture , const String & _cache_key )
+    :
+        context( _context ),
+        texture( CLUTTER_TEXTURE( g_object_ref( _texture ) ) ),
+        cache_key( _cache_key )
+    {
+    }
+    
+    ~ImageLoadedAsyncAction()
+    {
+        g_object_unref( texture );
+    }
+    
+private:
+
+    bool run()
+    {
+        return false;
+    }
+    
+    void image_loaded( Image * image )
+    {
+        if ( ! image )
+        {
+            GError * error = NULL;
+    
+            g_set_error( & error,
+                CLUTTER_TEXTURE_ERROR,
+                CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+                "Failed to load texture data");
+    
+            g_warning("FAILED TO LOAD IMAGE : %s",error->message);
+    
+            g_signal_emit_by_name( G_OBJECT( texture ), "load-finished", error );
+    
+            g_clear_error( & error );
+            
+            return;
+        }
+
         ImageExtra * extra = ImageExtra::get( texture );
         
         extra->loaded = true;
@@ -45,8 +118,20 @@ static void image_load_callback( Image * image , gpointer _texture )
         Images::load_texture( texture, image );
 
         delete image;
+        
+        if ( ! cache_key.empty() )
+        {
+            Images::cache_put( context , cache_key , clutter_texture_get_cogl_texture( texture ) , extra->tags );
+        }
     }
-}
+
+    TPContext *         context;
+    ClutterTexture *    texture;
+    String              cache_key;
+
+};
+
+//-----------------------------------------------------------------------------
 
 bool load_image( lua_State * L, ClutterTexture * texture )
 {
@@ -64,6 +149,12 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 		return false;
 	}
 	
+	// Clear existing tags
+	
+	extra->tags = JSON::Object();
+	
+	extra->loaded = false;
+	
 	//.........................................................................
 	// Get the image source 
 	
@@ -74,12 +165,56 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 		return false;
 	}
 	
+    //.........................................................................
+    
+    App * app = App::get( L );
+    
+    bool is_uri = false;
+    
+    char * path = app->normalize_path( src , & is_uri );
+    
+    if ( ! path )
+    {
+        return false;
+    }
+    
+    FreeLater free_later( path );
+    
+    String key;
+    
+    CoglHandle cached_handle = COGL_INVALID_HANDLE;
+    
+    JSON::Object cached_tags;
+    
+    if ( ! is_uri )
+    {
+        key = app->get_id() + ":" + src;
+        
+        cached_handle = Images::cache_get( key , cached_tags );
+    }
+    
 	//.........................................................................
 	// Synchronous loading
 	
 	if ( ! extra->async )
 	{
-	    Image * image = App::get( L )->load_image( src , extra->read_tags );
+        if ( COGL_INVALID_HANDLE != cached_handle )
+        {
+            clutter_texture_set_cogl_texture( texture , cached_handle );
+            
+            Images::add_to_image_list( texture ); 
+            
+            extra->loaded = true;
+            
+            if ( extra->read_tags )
+            {
+                extra->tags = cached_tags;
+            }
+            
+            return true;      
+        }
+	     
+	    Image * image = app->load_image( src , extra->read_tags );
 
 		bool result = image != 0;
 		
@@ -90,6 +225,11 @@ bool load_image( lua_State * L, ClutterTexture * texture )
             extra->tags = image->get_tags();		    
 
 		    delete image;
+		    
+		    if ( ! key.empty() )
+		    {
+		        Images::cache_put( app->get_context() , key , clutter_texture_get_cogl_texture( texture ) , extra->tags );
+		    }
 		}
 		
 		extra->loaded = result;
@@ -102,16 +242,20 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 	
     extra->loaded = false;
 
-    g_object_ref( texture );
+    if ( COGL_INVALID_HANDLE != cached_handle )
+    {
+        // If we found it in the cache, we still need to load it asynchronously,
+        // so that we don't deviate from the async behavior - so that on_loaded
+        // will be called 'later'.
+        
+        Action::post( new ImageLoadedFromCacheAction( texture , cached_handle , extra->read_tags ? cached_tags : JSON::Object() ) );
+        
+        return true;
+    }
 
-	if ( ! App::get( L )->load_image_async( src , extra->read_tags , image_load_callback , texture , g_object_unref ) )
-	{
-	    g_object_unref( texture );
-
-	    return false;
-	}
-
-	return true;
+    Action * action = new ImageLoadedAsyncAction( app->get_context() , texture , key );
+    
+	return app->load_image_async( src , extra->read_tags , ImageLoadedAsyncAction::image_load_callback , action , Action::destroy );
 } 
 
 void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L);
@@ -662,3 +806,72 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
 }
 ]]
 
+class ImageCache [[ void * ]]
+{
+    ImageCache( )
+        [[
+            lb_construct_empty();
+        ]];
+        
+    Image get( string key )
+        [[
+            JSON::Object tags;
+            
+            String k = App::get( L )->get_id() + ":" + key;
+            
+            CoglHandle handle = Images::cache_get( k , tags );
+            
+            if ( COGL_INVALID_HANDLE == handle )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_getglobal( L , "Image" );
+
+                lua_call( L , 0 , 1 );
+
+                ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+                clutter_texture_set_cogl_texture( t , handle );
+                
+                Images::add_to_image_list( t );
+
+                g_object_set_data_full( G_OBJECT( t ), "tp-src", g_strdup( key ) , g_free );
+                
+                ImageExtra * extra = ImageExtra::get( t );
+                
+                extra->tags = tags;
+                extra->loaded = true;
+            }
+        ]];        
+        
+    bool has( string key )
+        [[
+            String k = App::get( L )->get_id() + ":" + key;
+            
+            result = Images::cache_has( k );
+        ]];        
+
+    put( string key , Image image )
+        [[
+            if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , image ) )
+            {
+                if ( CLUTTER_IS_TEXTURE( actor ) )
+                {
+                    ClutterTexture * t = CLUTTER_TEXTURE( actor );
+                    
+                    CoglHandle handle = clutter_texture_get_cogl_texture( t );
+                    
+                    if ( COGL_INVALID_HANDLE != handle )
+                    {
+                        String k = App::get( L )->get_id() + ":" + key;
+                        
+                        ImageExtra * extra = ImageExtra::get( t );
+                        
+                        Images::cache_put( App::get( L )->get_context() , k , handle , extra->tags );             
+                    }  
+                }
+            }
+        ]];            
+}

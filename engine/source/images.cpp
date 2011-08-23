@@ -1041,7 +1041,8 @@ void Image::free_image_with_g_free( TPImage * image )
 
 Images::Images()
 :
-    external_decoder( NULL )
+    external_decoder( 0 ),
+    cache( 0 )
 {
     g_static_rec_mutex_init( & mutex );
 
@@ -1082,15 +1083,6 @@ Images::Images()
     hints[ ".GIF" ] = gif;
     hints[ "/gif" ] = gif;
     hints[ "/GIF" ] = gif;
-
-
-#if TP_IMAGE_CACHE_ENABLED
-
-    cache_limit = TP_IMAGE_CACHE_DEFAULT_LIMIT_BYTES;
-
-    cache_size = 0;
-
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1119,14 +1111,10 @@ Images::~Images()
 
 #endif
 
-#if TP_IMAGE_CACHE_ENABLED
-
-    for( CacheMap::iterator it = cache.begin(); it != cache.end(); ++it )
+    if ( cache )
     {
-        destroy_image( it->second.first );
+    	delete cache;
     }
-
-#endif
 
     g_static_rec_mutex_free( & mutex );
 }
@@ -1516,50 +1504,15 @@ void Images::dump()
 
 void Images::dump_cache()
 {
-#if TP_IMAGE_CACHE_ENABLED
-
     Images * self( Images::get() );
 
-    Util::GSRMutexLock lock( & self->mutex );
-
-    gsize total = 0;
-    int i = 1;
-
-    g_info( "Image cache:" );
-
-    for ( CacheMap::const_iterator it = self->cache.begin(); it != self->cache.end(); ++it, ++i )
+    if ( ! self->cache )
     {
-        gsize bytes = it->second.first->pitch * it->second.first->height;
-
-        g_info( "  %3d) %ux%u : %1.2f KB : %u hit(s) : %s", i, it->second.first->width, it->second.first->height, bytes / 1024.0, it->second.second, it->first.c_str() );
-
-        total += bytes;
+    	g_info( "Cache is disabled or empty." );
+    	return;
     }
 
-    g_info( "" );
-    g_info( "%d image(s), %1.2f KB, %1.2f MB", --i, total / 1024.0, total / ( 1024.0 * 1024.0 ) );
-    g_info( "" );
-
-#else
-
-    g_info( "Image cache is disabled" );
-
-#endif
-}
-
-//-----------------------------------------------------------------------------
-
-void Images::set_cache_limit( guint bytes )
-{
-#if TP_IMAGE_CACHE_ENABLED
-
-    Images * self( Images::get() );
-
-    Util::GSRMutexLock lock( & self->mutex );
-
-    self->cache_limit = bytes;
-
-#endif
+    self->cache->dump();
 }
 
 //-----------------------------------------------------------------------------
@@ -1593,27 +1546,6 @@ bool Images::load_texture( ClutterTexture * texture, gpointer data, gsize size, 
 
 bool Images::load_texture( ClutterTexture * texture, const char * filename )
 {
-
-#if TP_IMAGE_CACHE_ENABLED
-
-    Images * self( Images::get() );
-
-    Util::GSRMutexLock lock( & self->mutex );
-
-    CacheMap::iterator it = self->cache.find( filename );
-
-    if ( it != self->cache.end() )
-    {
-        load_texture( texture, it->second.first );
-
-        it->second.second++;
-
-        return true;
-    }
-
-#endif
-
-
     TPImage * image = decode_image( filename );
 
     if ( ! image )
@@ -1623,80 +1555,266 @@ bool Images::load_texture( ClutterTexture * texture, const char * filename )
 
     load_texture( texture, image );
 
-#if TP_IMAGE_CACHE_ENABLED
-
-    CacheEntry & entry( self->cache[ filename ] );
-
-    entry.first = image;
-    entry.second = 0;
-
-    self->cache_size += image->height * image->pitch;
-
-    self->prune_cache();
-
-#else
-
     destroy_image( image );
-
-#endif
 
     return true;
 }
 
 //-----------------------------------------------------------------------------
 
-#if TP_IMAGE_CACHE_ENABLED
-
-#define TPImageSize( t ) ( t->height * t->pitch )
-
-bool Images::prune_sort( const PruneEntry & a, const PruneEntry & b )
+bool Images::cache_put( TPContext * context , const String & key , CoglHandle texture , const JSON::Object & tags )
 {
-    return ( a.second.second < b.second.second || ( ( b.second.second == a.second.second ) && ( TPImageSize( a.second.first ) < TPImageSize( b.second.first ) ) ) );
+	g_assert( context );
+
+	if ( texture == COGL_INVALID_HANDLE )
+	{
+		return false;
+	}
+
+	Images * self = Images::get();
+
+	// If the cache has not been created yet, do so now
+
+	if ( ! self->cache )
+	{
+		if ( ! context->get_bool( TP_TEXTURE_CACHE_ENABLED , TP_TEXTURE_CACHE_ENABLED_DEFAULT ) )
+		{
+			return false;
+		}
+
+		int limit = context->get_int( TP_TEXTURE_CACHE_LIMIT , TP_TEXTURE_CACHE_LIMIT_DEFAULT );
+
+		if ( limit <= 0 )
+		{
+			return false;
+		}
+
+		self->cache = new Cache( limit );
+	}
+
+	return self->cache->put( key , texture , tags );
 }
-
-void Images::prune_cache()
-{
-    Util::GSRMutexLock lock( & mutex );
-
-    if ( cache_size < cache_limit )
-    {
-        return;
-    }
-
-    PruneVector prune;
-
-    prune.reserve( cache.size() );
-
-    for( CacheMap::const_iterator it = cache.begin(); it != cache.end(); ++it )
-    {
-        prune.push_back( PruneEntry( it->first, it->second ) );
-    }
-
-    std::sort( prune.begin(), prune.end(), prune_sort );
-
-    tplog( "PRUNE LIST:" );
-
-    for( PruneVector::const_iterator it = prune.begin(); it != prune.end(); ++it )
-    {
-        tplog( "%d : %u : %s", it->second.second, TPImageSize( it->second.first ) , it->first.c_str() );
-    }
-
-    guint target_limit = cache_limit * 0.85;
-
-    for( PruneVector::const_iterator it = prune.begin(); it != prune.end() && cache_size > target_limit; ++it )
-    {
-        cache.erase( it->first );
-
-        cache_size -= TPImageSize( it->second.first );
-
-        tplog( "DROPPING %s : %u", it->first.c_str(), TPImageSize( it->second.first ) );
-
-        destroy_image( it->second.first );
-    }
-
-    tplog( "CACHE SIZE IS NOW %u", cache_size );
-}
-
-#endif
 
 //-----------------------------------------------------------------------------
+
+CoglHandle Images::cache_get( const String & key , JSON::Object & tags )
+{
+	Images * self = Images::get();
+
+	if ( ! self->cache )
+	{
+		return COGL_INVALID_HANDLE;
+	}
+
+	return self->cache->get( key , tags );
+}
+
+//-----------------------------------------------------------------------------
+
+bool Images::cache_has( const String & key )
+{
+	Images * self = Images::get();
+
+	if ( ! self->cache )
+	{
+		return false;
+	}
+
+	return self->cache->has( key );
+}
+
+//=============================================================================
+
+Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object & _tags )
+:
+    handle( cogl_handle_ref( _handle ) ),
+    timestamp( ::timestamp() ),
+    tags( _tags )
+{
+	// Size in MB
+
+	size = ( cogl_texture_get_height( handle ) * cogl_texture_get_rowstride( handle ) ) / ( 1024.0 * 1024.0 );
+}
+
+Images::Cache::Entry::~Entry()
+{
+	cogl_handle_unref( handle );
+}
+
+void Images::Cache::Entry::update_timestamp()
+{
+	timestamp = ::timestamp();
+}
+
+
+Images::Cache::Cache( int _limit )
+:
+    limit( _limit ),
+    size( 0 )
+{
+}
+
+Images::Cache::~Cache()
+{
+	for ( Map::iterator it = map.begin(); it != map.end(); ++it )
+	{
+		delete it->second;
+	}
+}
+
+bool Images::Cache::put( const String & key , CoglHandle texture , const JSON::Object & tags )
+{
+	// Arguments have already been checked
+
+	Map::iterator it( map.find( key ) );
+
+	// An entry exists for this key
+
+	if ( it != map.end() )
+	{
+		size -= it->second->size;
+
+		delete it->second;
+
+		map.erase( it );
+
+		tplog2( "CACHE REMOVED '%s' : SIZE = %1.2f" , key.c_str() , size );
+	}
+
+	Entry * entry = new Entry( texture , tags );
+
+	if ( ! entry )
+	{
+		return false;
+	}
+
+	map[ key ] = entry;
+
+	size += entry->size;
+
+	tplog2( "CACHE ADDED '%s' : SIZE = %1.2f" , key.c_str() , size );
+
+	if ( size > limit )
+	{
+		prune();
+	}
+
+	return true;
+}
+
+CoglHandle Images::Cache::get( const String & key , JSON::Object & tags )
+{
+	Map::iterator it( map.find( key ) );
+
+	if ( it == map.end() )
+	{
+		tplog2( "CACHE MISS FOR '%s'" , key.c_str() );
+
+		return COGL_INVALID_HANDLE;
+	}
+
+	it->second->update_timestamp();
+
+	tplog2( "CACHE HIT FOR '%s'" , key.c_str() );
+
+	tags = it->second->tags;
+
+	return it->second->handle;
+}
+
+bool Images::Cache::has( const String & key )
+{
+	return map.find( key ) != map.end();
+}
+
+bool Images::Cache::prune_sort( const PruneEntry & a , const PruneEntry & b )
+{
+	return a.second->timestamp < b.second->timestamp;
+}
+
+void Images::Cache::prune()
+{
+	tplog2( "CACHE PRUNING : SIZE = %1.2f" , size );
+
+	// Copy all of the entries to a vector
+
+	PruneVector v;
+
+	v.reserve( map.size() );
+
+	for ( Map::const_iterator it = map.begin(); it != map.end(); ++it )
+	{
+		v.push_back( PruneEntry( it->first , it->second ) );
+	}
+
+	// Sort them in order of timestamp, oldest ones will be first
+
+	std::sort( v.begin() , v.end() , prune_sort );
+
+	// Set our target cache size
+
+	double target_size = size * 0.70;
+
+	// Now, get rid of each one, until we reach our target size
+
+	for ( PruneVector::const_iterator it = v.begin(); it != v.end() && size > target_size; ++it )
+	{
+		size -= it->second->size;
+
+		tplog2( "  DROPPED '%s' : SIZE = %1.2f" , it->first.c_str() , size );
+
+		delete it->second;
+
+		map.erase( it->first );
+
+	}
+
+	tplog2( "CACHE PRUNED : SIZE = %1.2f" , size );
+}
+
+
+void Images::Cache::dump()
+{
+	// Copy all of the entries to a vector
+
+	PruneVector v;
+
+	v.reserve( map.size() );
+
+	for ( Map::const_iterator it = map.begin(); it != map.end(); ++it )
+	{
+		v.push_back( PruneEntry( it->first , it->second ) );
+	}
+
+	// Sort them in order of timestamp, oldest ones will be first
+
+	std::sort( v.begin() , v.end() , prune_sort );
+
+	double total = 0;
+	int i = 1;
+
+	g_info( "Texture cache:" );
+
+	if ( ! v.empty() )
+	{
+		double now = v.back().second->timestamp;
+
+		for ( PruneVector::const_iterator it = v.begin(); it != v.end(); ++it , ++i )
+		{
+			g_info( "  %3d) %4u x %-4u : %8.2f KB : %8.3f s : %s" ,
+					i ,
+					cogl_texture_get_width( it->second->handle ),
+					cogl_texture_get_height( it->second->handle ),
+					it->second->size * 1024.0,
+					( now - it->second->timestamp ) / 1000,
+					it->first.c_str() );
+
+			total += it->second->size;
+		}
+	}
+
+    g_info( "" );
+    g_info( "%d texture(s), %1.2f KB, %1.2f MB", --i, total * 1024.0, total );
+    g_info( "" );
+
+}
