@@ -42,7 +42,6 @@ Timestamp: mm.d.yyyy
 
 
 Group: Programmer's Guide  {
-	File: Overview* (no auto-title, docs/rte/progguide/overview_progguide.txt)
 	File: Getting Started*  (no auto-title, docs/rte/progguide/getting_started.txt)
    	File: User Interface*  (no auto-title, docs/rte/progguide/user_interface.txt)
 }
@@ -57,10 +56,10 @@ Group: Reference  {
 			File: Alpha*  (no auto-title, bindings/clutter_alpha.lb)
 	        File: Animator* (no auto-title, bindings/clutter_animator.lb)
     	    File: AnimationState* (no auto-title, bindings/clutter_state.lb)
-            File: Interval*  (no auto-title, bindings/clutter_interval.lb)
+            File: Interval  (no auto-title, bindings/clutter_interval.lb)
             File: Path* (no auto-title, bindings/clutter_path.lb)
             File: Score* (no auto-title, bindings/clutter_score.lb)
-            File: Timeline*  (no auto-title, bindings/clutter_timeline.lb)
+            File: Timeline  (no auto-title, bindings/clutter_timeline.lb)
         }
 	}
 	
@@ -135,7 +134,7 @@ Group: Reference  {
 	}
 	
 	Group: User Interface {
-		File: Overview* (no auto-title, docs/rte/reference/overview_ui.txt)
+		File: Overview (no auto-title, docs/rte/reference/overview_ui.txt)
 		
 		Group: Globals {
 			File: screen  (no auto-title, bindings/clutter_screen.lb)
@@ -188,7 +187,6 @@ Group: Development Tools {
 		
 		Group: Tutorial {
 			File: Introduction  (no auto-title, docs/devtools/editor/tutorial/introduction.txt)
-			File: Run the Visual Editor  (no auto-title, docs/devtools/editor/tutorial/runEditor.txt)
 			File: Create a New Project  (no auto-title, docs/devtools/editor/tutorial/createnewproject.txt)
 			File: Visual Editor Menus  (no auto-title, docs/devtools/editor/tutorial/menus.txt)
       		File: Add a Background Image  (no auto-title, docs/devtools/editor/tutorial/addBackgroundImage.txt)

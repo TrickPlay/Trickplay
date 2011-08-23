@@ -2223,6 +2223,8 @@ void TPContext::load_external_configuration()
         TP_FIRST_APP_EXITS,
         TP_HTTP_PORT,
         TP_RESOURCES_PATH,
+        TP_TEXTURE_CACHE_ENABLED,
+        TP_TEXTURE_CACHE_LIMIT,
 
         NULL
     };
@@ -2353,9 +2355,13 @@ void TPContext::validate_configuration()
 
     // DOWNLOADS PATH
 
-    String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , "downloads" , true ) );
+    gchar * default_downloads_path = g_build_filename( get( TP_DATA_PATH ) , "downloads" , NULL );
+
+    String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , default_downloads_path , true ) );
 
     set( TP_DOWNLOADS_PATH , downloads_path );
+
+    g_free( default_downloads_path );
 
     if ( g_mkdir_with_parents( downloads_path.c_str() , 0700 ) != 0 )
     {
@@ -2696,7 +2702,7 @@ Image * TPContext::load_icon( const gchar * path )
                 if ( g_file_get_contents( icon_file_path, &raw_contents, &length, NULL ) )
                 {
                     result.pixels = raw_contents;
-                    result.free_pixels = g_free;
+                    result.free_image = Image::free_image_with_g_free;
 
                     return Image::make( result );
                 }

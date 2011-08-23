@@ -294,10 +294,34 @@ interface actor [[ClutterActor*]]
     /*
 	Property: z
 	
-	The z property specifies the object's Z coordinate location relative to its parent, which is usually the global <screen at file:clutter_screen-lb.html#Screen> variable. Positive values move toward the viewer along the z-axis; negative values move further away. The Z coordinate's value does not take into account any transformations, such as rotation or scaling.
+	The z property specifies the object's Z coordinate location relative to its parent, which is usually the global <screen at file:clutter_screen-lb.html#Screen> variable. Positive values move toward the viewer along the Z-axis; negative values move farther away. The Z coordinate's value does not take into account any transformations, such as rotation or scaling.
 	
 	The <depth> property sets and retrieves the same Z coordinate.
 	
+	Understanding the Z-Axis:
+	
+	It is valuable to understand the relationship between an object's location along the Z-axis and the effect that location has on how the object is shown within the display's viewing area.
+	
+	The Z-axis moves perpendicular to the X and Y-axes. At any given X,Y point, the Z-axis is a perpendicular line extending straight back and forward in the third dimension. Given two different X,Y points, two perpendicular Z-axis lines extend forward and back. These Z-axis lines are *parallel* to each other. This is an important point to remember when dealing with the Z-axis because, as will be explained later, it is the reason why objects located farther back on the Z-axis appear smaller, while objects closer on the Z-axis appear larger. When projecting lines extend in parallel, the process is called "orthographic projection."
+	
+	Each point on a display can be thought of as extending back in orthographic projection along the Z-axis, perpendicular to the flat plane of the display. Think of the display as one end of a shoebox and the Z-axis as extending back in space, forming the rectangular sides of the box. Each X,Y point on the display will extend a unique line through the shoebox along its Z-axis.
+	
+	In addition to orthographic projection, there exists another process called "perspective projection." Unlike orthographic projection which extends along parallel lines, perspective projection extends along lines that converge and eventually intersect at a vanishing point. The traditional example is two railroad tracks extending toward the horizon, converging until they eventually appear to touch each other.
+	
+	The expanding projection lines also work in reverse and can be thought of as starting at a single, common point and expanding outward as they project farther away. As an example, consider the view from a camera; it starts at a single point (the camera lens) and its field of vision expands outward like a megaphone as it moves farther away in distance. The display's camera-viewing environment works in the same way, expanding wider and wider as it extends back in depth.
+	
+	A megaphone is typically shaped like a circular cone, but the display's camera-viewing shape is that of a rectangular cone. The megaphone's narrow end is placed immediately in front of the viewer's eyes, and expands wider and wider as it projects farther away.
+	
+	Now place the orthographic shoebox display described earlier into that rectangular megaphone. Push the shoebox into the megaphone as far as it will go, until its edges touch the interior of the megaphone. The flat plane where the orthographic shoebox touches the rectangular megaphone represents the position where the display fills the entire camera view. At this point, the Z-axis has a value of zero. As positions move farther in depth from this point, they move in the shoebox along their perpendicular and parallel lines. But as the camera view moves farther in depth in the same direction, its lines widen outward. Similarly, as points move closer to the viewer along the Z-axis, they remain perpendicular to the display, but the camera view lines converge as they get closer to the viewer.
+	
+	Image a solid black graphic image that fills the entire display when positioned on the Z-axis at Z=0. Now move that same image back in depth along the Z-axis until it is located at Z=-100. The points of the image move back perpendicular to the X,Y display plane in orthographic projection. But as the camera view moves back the same distance, its view lines expand in perspective projection. When the image is located at Z=-100, the image remains the exact same size as when it was located at Z=0. But the expanding camera view now encompasses a larger viewing area. Because of this, the image will no longer fill the entire display; it will appear to be smaller, even though its size remains unchanged. The apparent change in size is due to the widening camera view as the object is placed farther in depth.
+	
+	A similar effect occurs when objects move closer to the viewer along the Z-axis. The perspective projection of the rectangular megaphone gets narrower as it gets closer to the viewer. Think of a small dot in the center of the display at Z=0  and move it closer to the viewer along the Z-axis. As the dot moves closer and closer, its actual size remains unchanged, but the dot takes up more of the narrowing viewing area as it gets closer to the viewer. Eventually, the small dot will fill the entire display without having altered its size, but solely by positioning itself closer to the viewer in the narrowing viewing area.
+	
+	Finally, think of a circle located in the upper-left corner of the display at Z=0. Move it closer to the viewer along the Z-axis. The Z-axis extends forward perpendicular to the X,Y display plane. Because the viewing area is narrowing, the circle's Z-axis line will eventually extend outside the boundary of the viewing area. As the circle moves closer to the viewer, with larger values of Z, it will appear to move above the viewer's line of sight. Eventually, the circle will move completely outside of the viewing area, even though it will still exist at a position along its Z-axis.
+	
+	Knowing this relationship between the orthographic display and the perspective viewing camera will enable you to understand how items on the display will interact with each other as they move along the Z-axis. Thinking of them as a shoebox contained within a rectangular megaphone provides a concrete and clear example of the relationship.
+
 	*Default Setting:* 0
 	
 	*See Also:* the <x>, <y>, <depth> and <position> properties
@@ -580,7 +604,7 @@ interface actor [[ClutterActor*]]
 	
 	(code)
 	-- Flip 180 degrees around object's horizontal center
-	myObject.x_rotation = { 180, myObject.height / 2, 0 }
+	myObject.x_rotation = { 180, 0, 0 }
 	(end)
 	
 	*See Also:* the <y_rotation> and <z_rotation> properties
@@ -621,7 +645,7 @@ interface actor [[ClutterActor*]]
 	
 	(code)
 	-- Flip 180 degrees around object's vertical center
-	myObject.y_rotation = { 180, myObject.width / 2, 0 }
+	myObject.y_rotation = { 180, 0, 0 }
 	(end)
 	
 	*See Also:* the <x_rotation> and <z_rotation> properties
@@ -662,7 +686,7 @@ interface actor [[ClutterActor*]]
 	
 	(code)
 	-- Rotate 180 degrees around object's horizontal and vertical centers
-	myObject.z_rotation = { 180, myObject.width / 2, myObject.height / 2 }
+	myObject.z_rotation = { 180, 0, 0 }
 	(end)
 	
 	*See Also:* the <x_rotation> and <y_rotation> properties
@@ -1687,6 +1711,12 @@ interface actor [[ClutterActor*]]
 	
 	The animate() function performs an asynchronous animation by changing one or more property values, such as X, Y coordinates, opacity and rotation, over a period of time.
 	
+	If the object's animate() function is called while an animation is already in progress, the animation is updated with the new settings.
+	
+	A program can be notified when the animation completes by specifying a function name for the on_completed argument.
+	
+	The animation provides no notifications while it is running. For an animation that requires in-progress notifications, consider basing the animation on the <Timeline> class.
+	
 	*Arguments:*
 	
 	props - table of comma-separated properties and settings that define the animation. Supported properties and settings are listed below.
@@ -1747,7 +1777,7 @@ interface actor [[ClutterActor*]]
 	                    } )  
 	(end)
 	
-	*See Also:* the <complete_animation> function
+	*See Also:* the <complete_animation> function and the <Timeline> class
 	
     */
 
