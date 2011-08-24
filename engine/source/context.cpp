@@ -2223,7 +2223,6 @@ void TPContext::load_external_configuration()
         TP_FIRST_APP_EXITS,
         TP_HTTP_PORT,
         TP_RESOURCES_PATH,
-        TP_TEXTURE_CACHE_ENABLED,
         TP_TEXTURE_CACHE_LIMIT,
 
         NULL

@@ -248,10 +248,8 @@ typedef struct TPContext TPContext;
     TP_RESOURCES_PATH -         The path to various Trickplay resources.
                                 Defaults to "resources" (in the current working directory).
 
-    TP_TEXTURE_CACHE_ENABLED -	Whether texture caching is enabled.
-    							Defaults to "false".
-
-    TP_TEXTURE_CACHE_LIMIT	 -	The size of the texture cache (in MB) when it is enabled.
+    TP_TEXTURE_CACHE_LIMIT	 -	The size of the texture cache (in MB). A value <= 0 will disable
+    							the cache altogether.
                                 Defaults to "0".
 
 */
@@ -300,7 +298,6 @@ typedef struct TPContext TPContext;
 #define TP_FIRST_APP_EXITS              "first_app_exits"
 #define TP_HTTP_PORT                    "http_port"
 #define TP_RESOURCES_PATH               "resources_path"
-#define TP_TEXTURE_CACHE_ENABLED		"texture_cache_enabled"
 #define TP_TEXTURE_CACHE_LIMIT			"texture_cache_limit"
 
 /*-----------------------------------------------------------------------------

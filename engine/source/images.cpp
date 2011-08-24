@@ -1577,11 +1577,6 @@ bool Images::cache_put( TPContext * context , const String & key , CoglHandle te
 
 	if ( ! self->cache )
 	{
-		if ( ! context->get_bool( TP_TEXTURE_CACHE_ENABLED , TP_TEXTURE_CACHE_ENABLED_DEFAULT ) )
-		{
-			return false;
-		}
-
 		int limit = context->get_int( TP_TEXTURE_CACHE_LIMIT , TP_TEXTURE_CACHE_LIMIT_DEFAULT );
 
 		if ( limit <= 0 )
@@ -1814,7 +1809,7 @@ void Images::Cache::dump()
 	}
 
     g_info( "" );
-    g_info( "%d texture(s), %1.2f KB, %1.2f MB", --i, total * 1024.0, total );
+    g_info( "%d texture(s), %1.2f MB (limit is %d MB)", --i, total , limit );
     g_info( "" );
 
 }
