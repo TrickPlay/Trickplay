@@ -729,14 +729,14 @@ function( ui , details_shop_app , featured_apps , all_apps )
     
     function section:animate_out( callback , skip_animation , leave_background )
 
-        local ANIMATE_OUT_DURATION = 150
+        local ANIMATE_OUT_DURATION = 200
         local ANIMATE_OUT_MODE     = nil
         
         
         local function finished()
             group.opacity = 0
             if callback then
-                callback()
+                dolater( callback )
             end
         end
         
@@ -787,7 +787,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
         end
         
         if background and not leave_background then
-            table.insert( to_animate , function( progress ) background.opacity = 255 * ( 1 - progress ) end )
+            table.insert( to_animate , function( progress ) if background then background.opacity = 255 * ( 1 - progress ) end end )
         end
         
         if skip_animation then
@@ -821,7 +821,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
     
     function section:animate_in( callback , leave_background )
     
-        local ANIMATE_IN_DURATION = 150
+        local ANIMATE_IN_DURATION = 200
         local ANIMATE_IN_MODE     = nil
         
         local function finished()
@@ -933,7 +933,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
         ui:on_exit_section( section )
         
         local function show_details()
-            details:show_app( shop_app , back_from_details )
+            dolater( details.show_app , details , shop_app , back_from_details )
         end
         
         section:animate_out( show_details , false , true )

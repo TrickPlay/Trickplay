@@ -165,9 +165,9 @@ function( ui , app_list , statistics )
         local progress
         local yr
         local op
+              
+        function idle.on_idle( idle , s )
         
-        function idle.on_idle( idle )
-            
             done = true
         
             for i , tile in ipairs( to_animate ) do
@@ -308,8 +308,16 @@ function( ui , app_list , statistics )
                     
         -- Animate the tiles and invoke the callback when done
         
-        animate_tiles( show )
-    
+        -- Setting their opacity to 1 here forces them to be completely
+        -- realized and gets rid of the stutter in the animation the first
+        -- time around
+        
+        for _ , tile in ipairs( tiles ) do
+            tile.opacity = 1
+        end
+        
+        dolater( animate_tiles , show )
+        
     end
     
     ---------------------------------------------------------------------------
@@ -366,3 +374,5 @@ function( ui , app_list , statistics )
     return section
     
 end
+
+

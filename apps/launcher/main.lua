@@ -338,7 +338,7 @@ local function build_ui( show_it )
 
     local function animate_in_dropdown( )
         
-        local ANIMATION_DURATION = 150
+        local ANIMATION_DURATION = 200
         
         local section = ui.sections[ ui.focus ]
         
@@ -505,7 +505,7 @@ local function build_ui( show_it )
 
             ui.fs_focus = nil
             
-            animate_in_dropdown()
+            dolater( 200 , animate_in_dropdown )
             
             ui.dropdowns = nil
             
@@ -816,6 +816,9 @@ end
 
 function main()
 
+    idle.limit = 1/60
+
+
     screen:show()
 
     --local
@@ -841,3 +844,5 @@ screen:add( t:set{ position = { 200 , 200 } } )
 
 screen:show()
 ]]
+
+
