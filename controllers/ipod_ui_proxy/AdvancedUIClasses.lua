@@ -238,8 +238,9 @@ local function GroupClass()
         local children = {...}
         local result = {}
         for i = 1 , # children do
-            local id = children[ i ].id
-            local T = children[ i ].type
+            local child = children[i]
+            local id = rawget(child, "id")
+            local T = rawget(child, "type")
             if id and T then
                 table.insert( result , id )
 
@@ -249,7 +250,7 @@ local function GroupClass()
                     -- Remove parent from child
                     rawset(child, "__parent", nil)
                     -- Remove child from parent
-                    local __children = rawget(parent, "__children")
+                    local __children = rawget(__parent.parent, "__children")
                     __children[id] = nil
                 end
             end
