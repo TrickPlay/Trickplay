@@ -71,6 +71,7 @@
 		CD9A68661371CB0E00977730 /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */; };
 		CDB20FF113CFAE6900A9F166 /* TrickplayAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */; };
 		CDCE770013B28A0E00768A2A /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
+		CDDB36C614032DE7005FB306 /* AudioPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = CDDB36C514032DE7005FB306 /* AudioPlayback.m */; };
 		CDEE44A8137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */; };
 		CDEE44AD137CC93200A4B5E2 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44AC137CC93100A4B5E2 /* CommandInterpreter.m */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
@@ -184,6 +185,8 @@
 		CDB20FEF13CFAE6900A9F166 /* TrickplayAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayAnimation.h; sourceTree = "<group>"; };
 		CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayAnimation.m; sourceTree = "<group>"; };
 		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
+		CDDB36C414032DE6005FB306 /* AudioPlayback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioPlayback.h; sourceTree = "<group>"; };
+		CDDB36C514032DE7005FB306 /* AudioPlayback.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioPlayback.m; sourceTree = "<group>"; };
 		CDEE44A6137CBA2500A4B5E2 /* CommandInterpreterAdvancedUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreterAdvancedUI.h; sourceTree = "<group>"; };
 		CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreterAdvancedUI.m; sourceTree = "<group>"; };
 		CDEE44AB137CC93100A4B5E2 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreter.h; sourceTree = "<group>"; };
@@ -543,6 +546,8 @@
 				CD6BC36313678D6F00CF1973 /* AudioStreamer.m */,
 				CDFEC0FA13147A6A00A14307 /* AudioController.h */,
 				CDFEC0FB13147A6A00A14307 /* AudioController.m */,
+				CDDB36C414032DE6005FB306 /* AudioPlayback.h */,
+				CDDB36C514032DE7005FB306 /* AudioPlayback.m */,
 			);
 			name = Audio;
 			sourceTree = "<group>";
@@ -714,6 +719,7 @@
 				CDB20FF113CFAE6900A9F166 /* TrickplayAnimation.m in Sources */,
 				CDFDCB0713DE49D60025768E /* AudioRecordingViewController.m in Sources */,
 				CD2F80C013EC965F001EACEA /* TrickplayTimeline.m in Sources */,
+				CDDB36C614032DE7005FB306 /* AudioPlayback.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1123,6 +1123,7 @@
         if ([table objectForKey:@"on_completed"]) {
             NSMutableDictionary *completion = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
             [animations setObject:completion forKey:table];
+            [completion release];
         } else {
             [animations setObject:@"1" forKey:table];
         }
