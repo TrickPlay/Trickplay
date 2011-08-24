@@ -100,8 +100,9 @@
 }
 
 - (void)animateWithTable:(NSDictionary *)table duration:(NSNumber *)duration view:(TrickplayUIElement *)view {
-    CGFloat start_x, start_y, start_z, start_rot_z,
-    start_w, start_h, start_scale_x, start_scale_y, start_opacity;
+    CGFloat start_x = 0.0, start_y = 0.0, start_z = 0.0,
+    start_rot_z = 0.0, start_w = 0.0, start_h = 0.0,
+    start_scale_x = 0.0, start_scale_y = 0.0, start_opacity = 0.0;
     
     NSNumber *x = [table objectForKey:@"x"];
     NSNumber *y = [table objectForKey:@"y"];

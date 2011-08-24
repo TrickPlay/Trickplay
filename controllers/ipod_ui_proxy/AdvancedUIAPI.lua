@@ -288,8 +288,12 @@ do
             -- OK, just fetch its value from the remote
         
             local payload = { id = self.id , properties = { [ key ] = true } }
-            local result = send_request( "get" , payload ).properties[ key ]
-            if result == json.null then
+            local result = send_request( "get" , payload )
+            if not result then return nil end
+            result = result.properties
+            if not result then return nil end
+            result = result[ key ]
+            if not result or result == json.null then
                 return nil
             end
             
@@ -327,7 +331,11 @@ do
 
         function proxy:__call( function_name , ... )
             local payload = { id = self.id , call = function_name , args = {...} }
-            local result = send_request( "call" , payload ).result
+            local result = send_request( "call" , payload )
+            if result == nil then return nil end
+            if not result.result then return nil end
+
+            result = result.result
             if result == json.null then
                 return nil
             end
@@ -402,12 +410,14 @@ local function create_local( id , T , proxy_metatable , property_cache )
     }
     destruction_marker.__gc = function()
 
-        local absolute = send_request( "destroy" , destruction_payload ).destroyed
+        local absolute = send_request( "destroy" , destruction_payload )
+        if absolute then absolute = absolute.destroyed end
         --print("absolut vodka?", absolute)
+        rawset(proxies, id, nil)
 
     end
 
-    -- If not the screen then its destructable
+    -- If not the screen then it's destructable
     if id ~= 0 then
         rawset( proxy , "marker" , newudata(destruction_marker) )
     end
@@ -506,7 +516,6 @@ setmetatable( factory , mt )
 -- Handle events for individual proxies
 
 function controller:on_advanced_ui_event(json_object)
-    print("event recieved:", json_object)
     if not json_object then
         return
     end
