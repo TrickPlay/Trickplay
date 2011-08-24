@@ -18,16 +18,30 @@ local group = nil
 
 mt.__index = mt
 
+local cache = ImageCache and ImageCache() or nil
+
 function mt.__call( t , k , f )
     local print = function() end
     print( "ASKING FOR" , k )
+
     local asset = rawget( list , k )
+    
     if not asset then
-        asset = ( f or make_image )( k )
-        if type( asset ) == "string" then
-            print( "  ASK AGAIN" )
-            return t( asset )
+        
+        if cache then
+            if cache:has( k ) then
+                asset = cache:get( k )
+            end
         end
+        
+        if not asset then        
+            asset = ( f or make_image )( k )
+            if type( asset ) == "string" then
+                print( "  ASK AGAIN" )
+                return t( asset )
+            end
+        end
+        
         assert( asset , "Failed to create asset "..k )
         rawset( list , k , asset )
         if not group then
@@ -36,6 +50,11 @@ function mt.__call( t , k , f )
             group:hide()
         end
         group:add( asset )
+        if cache then
+            if not cache:has( k ) then
+                cache:put( k , asset )
+            end
+        end
         print( "  MISS" )
     else
         print( "  HIT" )

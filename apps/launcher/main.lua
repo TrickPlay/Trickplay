@@ -164,18 +164,39 @@ local function build_ui( show_it )
     screen:add( ui.bar )    
     
     ----------------------------------------------------------------------------
+
+    --local cache = ( ImageCache and ImageCache() ) or nil
     
     local i = 0
     
     local left = FIRST_BUTTON_X
     
-    for _ , section in ipairs( ui.sections ) do
+    for sn , section in ipairs( ui.sections ) do
     
         section.ui = ui
         
         -- Create the dropdown background
-    
-        section.dropdown_bg = ui.factory.make_dropdown( { section.button.w + DROPDOWN_WIDTH_OFFSET , section.height } , section.color )
+        
+        section.dropdown_bg = Image{ src = "assets/dropdown"..tostring( sn )..".png" }
+        
+        --[[
+        local key
+        if cache then
+            key = "dropdown-"..tostring( sn )
+            local image = cache:get( key )
+            if image then
+                section.dropdown_bg = image
+            end
+        end
+        
+        if not section.dropdown_bg then
+            section.dropdown_bg = ui.factory.make_dropdown( { section.button.w + DROPDOWN_WIDTH_OFFSET , section.height } , section.color )
+            
+            if cache then
+                cache:put( key , section.dropdown_bg )
+            end
+        end
+        ]]
     
         -- Position the button and text for this section
         
