@@ -214,7 +214,8 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 					gen_stub_code(j.content)
 			    elseif j.extra.type == "LayoutManager" then 
 					local content_num = 0 
-			        	for k,l in pairs (j.tiles) do 
+					local lm_name = j.name
+			        for k,l in pairs (j.tiles) do 
 						for n,m in pairs (l) do 
 							if m then 
 								j = m 
@@ -222,6 +223,9 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 							end 
 						end 
 					end 
+
+					new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add on_focus_in and on_focus_out function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.on_focus_in == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_in ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.on_focus_out == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_out ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
+
 				elseif j.extra.type == "Group" then  
 					gen_stub_code(j)
 				end
@@ -292,7 +296,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   		cleanMsgWindow()
             screen:grab_key_focus(screen) 
       end
-      menu.menu_raise_to_top()
+      --menu.menu_raise_to_top()
 
 end -- end of msg_window.inputMsgWindow_savefile  
 

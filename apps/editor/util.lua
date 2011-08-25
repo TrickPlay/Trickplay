@@ -357,6 +357,7 @@ function util.create_on_button_down_f(v)
 							end 
 
 							editor_lb:set_cursor(52)
+							cursor_type = 52
 							selected_content = v 
 			
 							local odr 
@@ -403,9 +404,24 @@ function util.create_on_button_down_f(v)
 	    	elseif (input_mode == hdr.S_FOCUS) then 
 				if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
 		     		editor.selected(v)
-					if v.name then 
-		     			screen:find_child("text"..focus_type).text = v.name 
+					local tabs_focus = screen:find_child("tabs_focus")
+					local focus = screen:find_child("focusChanger")
+					if tabs_focus then 
+						for i,j in pairs (tabs_focus.children) do 
+							if j.color[2] == 25 then --활성화 되어 있는 탭 
+								if focus_type == "U" then 
+									focus.extra.tabs[i].up_focus = v.name
+								elseif focus_type == "D" then 
+									focus.extra.tabs[i].down_focus = v.name
+								elseif focus_type == "R" then 
+									focus.extra.tabs[i].right_focus = v.name
+								elseif focus_type == "L" then 
+									focus.extra.tabs[i].left_focus = v.name
+								end 
+							end
+						end 
 					end 
+		     		screen:find_child("text"..focus_type).text = v.name 
 				end 
 				input_mode = hdr.S_FOCUS
            		return true
@@ -500,6 +516,7 @@ end
 				    				end 
 			       				end 
 								editor_lb:set_cursor(68)
+								cursor_type = 68
 			     			end 
 			     			if screen:find_child(c.name.."border") and selected_container then 
 								screen:remove(screen:find_child(c.name.."border"))
@@ -889,14 +906,14 @@ function util.make_attr_t(v)
 	   ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space", "box_position", "item_position","items", "selected_items"} end,
        ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","button_position", "item_position","items","selected_item"} end,
 
-       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
+       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","focus","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
        ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label", "title_font", "title_color", "message", "message_font", "message_color", "border_color","fill_color",  "border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color",} end,
-       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","rows","columns","cell_size","cell_w","cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset",} end,
-       ["ScrollPane"] = function() return {"lock", "skin", "visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width"} end,  
-       ["ArrowPane"] = function() return {"lock", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","box_color", "box_width"} end,  
+       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","focus","rows","columns","cell_size","cell_w","cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset",} end,
+       ["ScrollPane"] = function() return {"lock", "skin", "visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer","empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_focus_color", "box_width"} end,  
+       ["ArrowPane"] = function() return {"lock", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","arrow_focus_color","box_color", "box_focus_color", "box_width"} end,  
    }
   
   if util.is_this_widget(v) == true  then
@@ -1045,7 +1062,7 @@ function util.itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "tab_labels", "tabs", "wrap_mode", "wrap", "justify", "alignment", "single_line" }
+    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_focus_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "arrow_focus_color", "tab_labels", "tabs", "wrap_mode", "wrap", "justify", "alignment", "single_line" }
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
@@ -1319,20 +1336,42 @@ function util.itemTostring(v, d_list, t_list)
 		end 
 		itm_str = itm_str.."}\n\n"
 
-		itm_str = itm_str.."function "..v.name..":on_key_down(key)\n\t"
-		.."if "..v.name..".focus[key] then\n\t\t" 
-		.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
-		..v.name..".focus[key]()\n\t\t"
-		.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
-		.."if "..v.name..".on_focus_out then\n\t\t\t\t"
-		..v.name..".on_focus_out(key)\n\t\t\t".."end\n\t\t\t" -- on_focus_out
-		.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
-		.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
-        .."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t\t"
-		.."end\n\t"
-		.."end\n\t"
-		.."return true\n"
-        .."end\n\n"
+		if v.extra.type == "TabBar" then 
+			for q=1, #v.tab_labels do 
+				if v.tab_position == "top" then 
+					if v.tabs[q].extra.up_focus ~= nil then 
+						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.up_focus = \""..v.tabs[q].extra.up_focus.."\"\n"
+					end 
+					if v.tabs[q].extra.down_focus ~= nil then 
+						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.down_focus = \""..v.tabs[q].extra.down_focus.."\"\n"
+					end 
+				else 
+					if v.tabs[q].extra.left_focus ~= nil then 
+						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.left_focus = \""..v.tabs[q].extra.left_focus.."\"\n"
+					end 
+					if v.tabs[q].extra.right_focus ~= nil then 
+						itm_str = itm_str..v.name.."\.tabs["..tostring(q).."]\.extra\.right_focus = \""..v.tabs[q].extra.right_focus.."\"\n"
+					end 
+				end 
+			end 
+		end
+
+		if v.extra.type ~= "ScrollPane" and v.extra.type ~= "ArrowPane" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "TabBar" then 
+			itm_str = itm_str.."function "..v.name..":on_key_down(key)\n\t"
+			.."if "..v.name..".focus[key] then\n\t\t" 
+			.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
+			..v.name..".focus[key]()\n\t\t"
+			.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
+			.."if "..v.name..".on_focus_out then\n\t\t\t\t"
+			..v.name..".on_focus_out(key)\n\t\t\t".."end\n\t\t\t" -- on_focus_out
+			.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
+			.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
+        	.."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t"
+			.."end\n\t"
+			.."end\n\t"
+			.."return true\n"
+        	.."end\n\n"
+		end
     end 
 
     if v.extra.reactive ~= nil then 

@@ -107,7 +107,7 @@ local function guideline_inspector(v)
 		message_shadow.text = "Y Position:"
 	end 
 
-	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = org_position, padding = 5 , border_width  = 1,
+	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = org_position, padding = 5 , border_width  = 1,
 		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px", text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
@@ -905,7 +905,7 @@ local function draw_dialogbox()
 	{
 		ui_width = 900,
 		ui_height = 500,
-		skin = "custom",
+		skin = "Custom",
 		label = "Dialog Box Title",
 		border_width = 4,
 		border_corner_radius = 22,
@@ -1355,7 +1355,7 @@ local function open_files(input_purpose, bg_image, inspector)
 						end
 						--screen:find_child(h_rect.focus[key]):grab_key_focus()
 						if msgw:find_child(h_rect.focus[key]).on_focus_in then
-							selected_project = v
+							selected_file = v
 							msgw:find_child(h_rect.focus[key]).on_focus_in(key)
 							if h_rect.focus[key] ~= "button_ok" then 
 								scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
@@ -1667,15 +1667,16 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
  	if util.is_this_widget(v) == true then 
  		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or       -- 2 Tabs 
  		   v.extra.type == "ProgressSpinner" or v.extra.type == "ProgressBar" or 
- 		   v.extra.type == "LayoutManager" or v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
+ 		   v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
  		   table.insert (labels_t, "Info")
  		   table.insert (labels_t, "More")
- 		elseif  v.extra.type == "Button" or v.extra.type == "TextInput" then  -- 3 Tabs
+ 		elseif  v.extra.type == "Button" or v.extra.type == "LayoutManager" or v.extra.type == "TextInput" then  -- 3 Tabs
  		   table.insert (labels_t, "Info")
  		   table.insert (labels_t, "Focus")
  		   table.insert (labels_t, "More")
 		elseif v.extra.type == "TabBar" then 
  		   table.insert (labels_t, "Info")
+ 		   table.insert (labels_t, "Focus")
  		   table.insert (labels_t, "Labels")
  		   table.insert (labels_t, "More")
  		else  -- 4 Tabs 
@@ -1810,11 +1811,14 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
    			scroll_items.content:add(item_group_list)
 			scroll_items.position = {0, 0}
 			scroll_items.reactive = true
+			tabs.tabs[3]:add(scroll_items) 
+			--[[
 			if attr_n == "tab_labels" then 
 				tabs.tabs[2]:add(scroll_items) 
 			else
 				tabs.tabs[3]:add(scroll_items) 
 			end 
+			]]
 
 		else 
 			local item
@@ -2166,6 +2170,16 @@ bg("Code", "Widget")
 
 end 
 
+ 
+local function is_this_group(v)
+	if v.extra then 
+		if v.extra.type == "Group" then 
+			return true 
+		end 
+	end 
+	return false
+end 
+
 
 local function save_new_file (fname, save_current_f, save_backup_f)
 	if current_fn == "unsaved_temp.lua" then
@@ -2254,13 +2268,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
     	redo_list  = {}
 	end 
 
---[[
-	if save_backup_f == true then  
-		local back_file = current_fn.."\.back"
-		editor_lb:writefile(back_file, contents, true)	
-		return 
-	end 
-]]
 	if current_fn then 
 		if current_fn ~= "unsaved_temp.lua" and current_fn ~= "screens/unsaved_temp.lua" and current_fn ~= "/screens/unsaved_temp.lua"then
 			local back_file = current_fn.."\.back"
@@ -2278,7 +2285,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 
 		for i, v in pairs(screen_dir) do
           	if(fname == v)then
-				--cleanMsgWindow()
 				editor.error_message("004",fname,msg_window.inputMsgWindow_savefile)
 				return 
           	end
@@ -2303,41 +2309,54 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 				-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
 				-- 그리고 저장 끝 	
 				for i, j in pairs (g.children) do 
-		   			if util.need_stub_code(j) == true then 
-						if j.extra.prev_name then 
-							if string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") ~= nil then  			
-			          			local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") 
-				  				local e, r = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
-				  				local main_first = string.sub(main, 1, q-1)
-				  				local main_temp = string.sub(main, q,r)
-				  				local main_last = string.sub(main, r+1, -1)
-				  				main_temp = string.gsub(main_temp,string.upper(j.extra.prev_name),string.upper(j.name))
-				  				main_temp = string.gsub(main_temp,j.extra.prev_name,tostring(j.name))
-				  				main = ""
-				  				main = main_first..main_temp..main_last
-				  				editor_lb:writefile("main.lua",main, true)
-	       		     		end 
+					local function here() 
+		   				if util.need_stub_code(j) == true then 
+							if j.extra.prev_name then 
+									-- object 의 이름이 변경된 경우 찾아서 변경해 준다. 
+								if string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") ~= nil then  			
+			          				local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(j.extra.prev_name).." SECTION\n") 
+				  					local e, r = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+				  					local main_first = string.sub(main, 1, q-1)
+				  					local main_temp = string.sub(main, q,r)
+				  					local main_last = string.sub(main, r+1, -1)
+				  					main_temp = string.gsub(main_temp,string.upper(j.extra.prev_name),string.upper(j.name))
+				  					main_temp = string.gsub(main_temp,j.extra.prev_name,tostring(j.name))
+				  					main = ""
+				  					main = main_first..main_temp..main_last
+				  					editor_lb:writefile("main.lua",main, true)
+	       		     			end 
+							end 
+							
+	                 		if string.find(main, "-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  	
+								-- object의 코드가 없을경우에 새로히 추가해 주어야 한다.
+					 			added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
+					    		if j.extra.type == "Button" then 
+					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
+			   		     		elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   		     		elseif j.extra.type == "CheckBoxGroup" then 
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   		     		elseif j.extra.type == "MenuButton" then 
+			   						for k,l in pairs (j.items) do 
+			   	     		     		if l["type"] == "item" then 
+	                   			    		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+			   	     		     		end 
+			   						end 
+			   		     		end 
+	                   			added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
+							end
 						end 
+					end -- here()
 
-	                 	if string.find(main, "-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n") == nil then  			
-					 		added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
-					    	if j.extra.type == "Button" then 
-					     		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
-					     	   	added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-					     	   	added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
-			   		     	elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   		     	elseif j.extra.type == "CheckBoxGroup" then 
-	                   			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   		     	elseif j.extra.type == "MenuButton" then 
-			   					for k,l in pairs (j.items) do 
-			   	     		     	if l["type"] == "item" then 
-	                   			    	added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
-			   	     		     	end 
-			   					end 
-			   		     	end 
-	                   		added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
-						end
+					if is_this_group(j) == false then 
+						here()
+					else 
+						for q,w in pairs (j.children) do 
+							j = w
+							here()
+						end 
 					end 
 				end --for
 
@@ -2443,7 +2462,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	-- No current file or save as command 
 
 	-- Text Input Field 	
-	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
+	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
 		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
     	  border_corner_radius = 0, readonly="screen/" }
@@ -2677,6 +2696,7 @@ local function ungroup(v)
 end 
 
 function editor.undo()
+print("editor.undo")
 	  if( undo_list == nil) then return true end 
       local undo_item= table.remove(undo_list)
 
@@ -2768,7 +2788,6 @@ function editor.rm(obj)
 end
 
 function editor.debug()
-	print("input_mode", input_mode)
 	print("selected objects")
 	dumptable(selected_objs)
 end 
@@ -2834,7 +2853,7 @@ function editor.text()
 			local text_len = string.len(ui.text.text) 
 			local font_len = string.len(ui.text.font) 
 	        local font_sz = tonumber(string.sub(ui.text.font, font_len - 3, font_len -2))	
-			local total = math.floor((font_sz * text_len / ui.text.w) * font_sz *2/3) -- math.floor(font_sz * text_len % ui.text.w)  
+			local total = math.floor((font_sz * text_len / ui.text.w) * font_sz *2/3) 
 			if(total > ui.text.h) then 
 				ui.text.h = total 
 			end 
@@ -2842,6 +2861,15 @@ function editor.text()
 			return true
 	    end 
 	end 
+
+	function ui.text:on_button_down()
+		if ui.text.on_key_down then 
+	          ui.text:on_key_down(keys.Return)
+		end 
+
+		return true
+	end 
+
 	ui.text.reactive = true
 	ui.text.extra.lock = false
 	util.create_on_button_down_f(ui.text)
@@ -3057,12 +3085,14 @@ function editor.the_video()
 end 
 
 function editor.clone()
+
 	if(table.getn(selected_objs) == 0 )then 
-		print("there are no selected objects") 
+		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
-	    input_mode = hdr.S_SELECT
+		input_mode = hdr.S_SELECT
 		return 
-    end 
+   	end 
+
 	while (util.is_available("clone"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	end 
@@ -3077,6 +3107,13 @@ function editor.clone()
         	    }
         	    table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
         	    g:add(ui.clone)
+
+				if v.extra.clone then 
+					table.insert(v.extra.clone, ui.clone.name)
+				else 
+					v.extra.clone = {}
+					table.insert(v.extra.clone, ui.clone.name)
+				end 
 
 		     	local timeline = screen:find_child("timeline")
 		     	if timeline then 
@@ -3116,20 +3153,22 @@ function editor.clone()
         end
 	end
 
+
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
 end
 	
 function editor.duplicate()
-	local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive"}
+	local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_focus_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "arrow_focus_color"}
 
 	local next_position 
-    if(table.getn(selected_objs) == 0 )then 
-		print("there are no selected objects") 
+
+	if(table.getn(selected_objs) == 0 )then 
+		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
-	    input_mode = hdr.S_SELECT
+		input_mode = hdr.S_SELECT
 		return 
-    end 
+   	end 
 
 	for i, v in pairs(g.children) do
     	if g:find_child(v.name) then
@@ -3481,12 +3520,11 @@ end
 function editor.delete()
 
 	if(table.getn(selected_objs) == 0 )then 
-		print("there are no selected objects") 
+		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return 
    	end 
-
 
 	local delete_f = function(del_obj)
 		editor.n_selected(del_obj)
@@ -3517,27 +3555,40 @@ function editor.delete()
 	   end 
     end 
 
+	for i, v in pairs(g.children) do
+
+		if(v.extra.selected == true) then
+			if v.extra.clone then 
+				if #v.extra.clone > 0 then
+					editor.error_message("017","",nil,nil,nil)
+        			screen:grab_key_focus()
+					input_mode = hdr.S_SELECT
+					return 
+				end 
+			end 
+
+			if v.type == "Clone" then 
+				util.table_remove_val(v.source.extra.clone, v.name)
+			end 
+			
+			if util.is_this_widget(v) == false then 
+				delete_f(v)
+		    	g:remove(v)
+			end 
+		end 
+	end 
+	
 	for i, j in pairs(selected_objs) do 
 		j = string.sub(j, 1,-7)
 		local s_obj = g:find_child(j)
 		local bumo = s_obj.parent 
 
-		if bumo.name == "screen_objects" then 	-- not a content 
-			delete_f(s_obj)
-		 	for q,w in pairs(g.children) do 
-				if w.type == "Clone" then 
-					if w.source == s_obj then 
-						g:remove(w)
-					end
-				end 
-			end 
-        	g:remove(s_obj)
-		else
-			if bumo.name == nil then 
+		if bumo.name == nil then 
 				if (bumo.parent.name == "window") then -- AP, SP 
 			    	bumo = bumo.parent.parent
 					for j, k in pairs (bumo.content.children) do 
-			 			if(k.extra.selected == true) then
+			 			--if(k.extra.selected == true) then
+						if k.name == s_obj.name then 
 							delete_f(k) 
         	     	    	bumo.content:remove(k)
 			 			end 
@@ -3557,7 +3608,7 @@ function editor.delete()
 						end 
 					end 
 				end 
-			elseif bumo.extra.type == "LayoutManager" then  
+		elseif bumo.extra.type == "LayoutManager" then  
 				for e, r in pairs (bumo.tiles) do 
 					if r then 
 						for x, c in pairs (r) do 
@@ -3568,74 +3619,23 @@ function editor.delete()
 						end
 					end 
 				end
-			else -- Regular Group 
+		else -- Regular Group 
 				for p, q in pairs (bumo.children) do 
 					if q.name == s_obj.name then 
 						delete_f(s_obj) 
 						bumo:remove(s_obj)
 					end 
 				end 
-			end 
 		end 
+
 	end 
 
---[[
-	for i, v in pairs(g.children) do
-    	if g:find_child(v.name) then
-			if(v.extra.selected == true) then
-		     	editor.n_selected(v)
-        	    table.insert(undo_list, {v.name, hdr.DEL, v})
-        	    if (screen:find_child(v.name.."a_m") ~= nil) then 
-	     			screen:remove(screen:find_child(v.name.."a_m"))
-                end
-		     	if util.need_stub_code(v) == true then 
-					if current_fn then 
-	   		     		local fileUpper= string.upper(string.sub(current_fn, 1, -5))
-	   		     		local fileLower= string.lower(string.sub(current_fn, 1, -5))
-			     		local main = readfile("main.lua")
-			     		if main then 
-			        		if string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") ~= nil then  			
-			          			local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(v.name).." SECTION\n") 
-				  				local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(v.name).." SECTION\n\n")
-				  				local main_first = string.sub(main, 1, q-1)
-				  				local main_last = string.sub(main, r+1, -1)
-				  				main = ""
-				  				main = main_first..main_last
-				  				editor_lb:writefile("main.lua",main, true)
-	       		        	end 
-			     		end 
-	       			end 
-	       	     end 
-
-		 		 for q,w in pairs(g.children) do 
-					if w.type == "Clone" then 
-						if w.source == v then 
-							g:remove(w)
-						end
-					end 
-				 end 
-
-        	     g:remove(v)
-
-			elseif v.extra.type == "ScrollPane" or  v.extra.type == "ArrowPane" then 
-				for j, k in pairs (v.content.children) do 
-			 		if(k.extra.selected == true) then
-		     	     	editor.n_selected(k)
-        	     	    if (screen:find_child(k.name.."a_m") ~= nil) then 
-	     		 			screen:remove(screen:find_child(k.name.."a_m"))
-                     	end
-        	     	    v.content:remove(k)
-			 		end 
-				end 
-			end 
-         end
-    end
-]]
 	if table.getn(g.children) == 0 then 
 	    if screen:find_child("timeline") then 
 		screen:remove(screen:find_child("timeline"))
 	    end 
 	end 
+
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
 end
@@ -3888,10 +3888,11 @@ function editor.group_done(x, y)
         end
 
         item_num = item_num + 1
-	ui.group.extra.lock = false
+		ui.group.extra.lock = false
+		ui.group.extra.type = "Group"
         util.create_on_button_down_f(ui.group) 
         screen.grab_key_focus(screen)
-	input_mode = hdr.S_SELECT
+		input_mode = hdr.S_SELECT
 end 
 
 function editor.group_move(x,y)
@@ -4981,6 +4982,11 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
  		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
  		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 
+
+		-- new error messages 
+
+	    ["016"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "There is no selected object." end, 
+ 		["017"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Can't delete this object. Clone exists." end, 
 	}
 
 	local error_msg = error_msg_map[error_num](str) 
@@ -5113,4 +5119,92 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	return msgw
 end
 
+function editor.timeline_show()
+	if not screen:find_child("timeline") then 
+		if table.getn(g.children) > 0 then
+			input_mode = hdr.S_SELECT local tl = ui_element.timeline() screen:add(tl)
+			screen:find_child("timeline").extra.show = true 
+		end
+	elseif table.getn(g.children) == 0 then 
+		screen:remove(screen:find_child("timeline"))
+		if screen:find_child("tline") then 
+			screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
+		end 
+	elseif screen:find_child("timeline").extra.show ~= true  then 
+		screen:find_child("timeline"):show()
+		screen:find_child("timeline").extra.show = true
+	else 
+		screen:find_child("timeline"):hide()
+		screen:find_child("timeline").extra.show = false
+	end
+end 
+
+function editor.menu_hide()
+	if (menu_hide  == true) then 
+		menu.menuShow()
+		if(screen:find_child("xscroll_bar") ~= nil) then 
+			screen:find_child("xscroll_bar"):show() 
+			screen:find_child("xscroll_box"):show() 
+			screen:find_child("x_0_mark"):show()
+			screen:find_child("x_1920_mark"):show()
+		end 
+		if(screen:find_child("scroll_bar") ~= nil) then 
+			screen:find_child("scroll_bar"):show() 
+			screen:find_child("scroll_box"):show() 
+			screen:find_child("y_0_mark"):show()
+			screen:find_child("y_1080_mark"):show()
+		end 
+		menu_hide  = false 
+	else 
+		menu.menuHide()
+		if(screen:find_child("xscroll_bar") ~= nil) then 
+			screen:find_child("xscroll_bar"):hide() 
+			screen:find_child("xscroll_box"):hide() 
+			screen:find_child("x_0_mark"):hide()
+			screen:find_child("x_1920_mark"):hide()
+		end 
+		if(screen:find_child("scroll_bar") ~= nil) then 
+			screen:find_child("scroll_bar"):hide() 
+			screen:find_child("scroll_box"):hide() 
+			screen:find_child("y_0_mark"):hide()
+			screen:find_child("y_1080_mark"):hide()
+		end 
+		menu_hide  = true 
+		screen:grab_key_focus()
+	end 
+end 
+
+function editor.move_selected_obj(direction)
+	local direction_val = {["Left"] = function() return -1 end, 
+						   ["Right"] = function() return 1 end,  
+						   ["Up"] = function() return -1 end,  
+						   ["Down"] = function() return 1 end,  
+	}
+
+	if table.getn(selected_objs) ~= 0 then
+		for q, w in pairs (selected_objs) do
+			local t_border = screen:find_child(w)
+			if(t_border ~= nil) then 
+		     	local i, j = string.find(t_border.name,"border") 
+				local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
+
+				if direction == "Left" or direction == "Right" then 
+		    		t_border.x = t_border.x + direction_val[direction]()
+		        	if(t_obj ~= nil) then 
+			    		t_obj.x = t_obj.x + direction_val[direction]()
+					end 
+				else 
+		     		t_border.y = t_border.y + direction_val[direction]()
+					 if(t_obj ~= nil) then 
+			           	t_obj.y = t_obj.y + direction_val[direction]()
+					 end 
+				end 
+	       		if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
+		     		local anchor_mark = screen:find_child(t_obj.name.."a_m")
+		     		anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
+               	end
+	         end
+		end
+	end 
+end
 return editor

@@ -15,7 +15,7 @@ skin_list = {
     	["drop_down_color"]={0,0,0},
 	},
 
-	["custom"] = {},
+	["Custom"] = {},
 	["CarbonCandy"] = { 
 		["button"] = "lib/assets/button1-blank.png",
 		["button_focus"] = "lib/assets/button1-focus.png", 

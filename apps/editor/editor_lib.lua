@@ -169,7 +169,9 @@ function editor_ui.button(table)
 			end 
 
 			if p.focus_object ~= nil then 
-				p.focus_object.on_focus_in()
+				if 	p.focus_object.on_focus_in then
+					p.focus_object.on_focus_in()
+				end
 			end 
 		 end 
 		

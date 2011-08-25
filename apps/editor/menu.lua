@@ -44,13 +44,14 @@ local menuButton_file = ui_element.menuButton
 		ui_position = {249,28,0}
 	}
 
-menuButton_file.insert_item(1,{type="item", string="New\t\t\t\t     N", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, parameter=true, mstring="New\t\t\t\t     <span foreground=\"#a6a6a6\">N</span>"})
-menuButton_file.insert_item(2,{type="item", string="Open...\t\t\t     O", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, mstring="Open...\t\t\t     <span foreground=\"#a6a6a6\">O</span>"})
-menuButton_file.insert_item(3,{type="item", string="Save    \t\t\t     S", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true, mstring="Save    \t\t\t     <span foreground=\"#a6a6a6\">S</span>"}) 
-menuButton_file.insert_item(4,{type="item", string="Save As...\t\t     A", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=false, mstring="Save As...\t\t     <span foreground=\"#a6a6a6\">A</span>" })
-menuButton_file.insert_item(5,{type="item", string="New Project...\t\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=new_project, parameter=false, mstring="New Project...\t\t     <span foreground=\"#a6a6a6\">F</span>"})
-menuButton_file.insert_item(6,{type="item", string="Open Project...\t     P", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=open_project, parameter=false, mstring="Open Project...\t     <span foreground=\"#a6a6a6\">P</span>"})
-menuButton_file.insert_item(7,{type="item", string="Quit\t\t\t\t     Q", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=function() if editor.close(nil,exit) == nil then exit() end end , mstring="Quit\t\t\t\t     <span foreground=\"#a6a6a6\">Q</span>"})
+
+menuButton_file.insert_item(1,{type="item", string="New", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, parameter=true, icon=Text{text="N"}})
+menuButton_file.insert_item(2,{type="item", string="Open...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, icon=Text{text="O"}})
+menuButton_file.insert_item(3,{type="item", string="Save", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true, icon=Text{text="S"}})
+menuButton_file.insert_item(4,{type="item", string="Save As...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=false,  icon=Text{text="A"}})
+menuButton_file.insert_item(5,{type="item", string="New Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=new_project, parameter=false,  icon=Text{text="F"}})
+menuButton_file.insert_item(6,{type="item", string="Open Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=open_project, parameter=false,  icon=Text{text="P"}})
+menuButton_file.insert_item(7,{type="item", string="Quit", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=function() if editor.close(nil,exit) == nil then exit() end end, icon=Text{text="Q"}})
 
 menuButton_file.name = "menuButton_file"
 menuButton_file.anchor_point = {71,30.5}
@@ -118,18 +119,22 @@ local menuButton_edit = ui_element.menuButton
 		ui_position = {489,28,0}, 
 	}
 
-menuButton_edit.insert_item(1,{type="item", string="Undo\t\t\t     Z", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end, mstring="Undo\t\t\t     <span foreground=\"#a6a6a6\">Z</span>"}) --editor.undo} )
-menuButton_edit.insert_item(2,{type="item", string="Redo\t\t\t     E", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end, mstring="Redo\t\t\t     <span foreground=\"#a6a6a6\">E</span>"}) --editor.redo} )
-menuButton_edit.insert_item(3,{type="item", string="Insert UI Element\t     I", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_ui_elements, mstring="Insert UI Element\t     <span foreground=\"#a6a6a6\">I</span>"})
-menuButton_edit.insert_item(4,{type="item", string="Timeline...\t\t     J", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline, mstring="Timeline...\t\t     <span foreground=\"#a6a6a6\">J</span>"}) --icon=assets("assets/menu-checkmark.png")
+menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="Z"}})
+
+menuButton_edit.insert_item(2,{type="item", string="Redo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="E"}})
+
+menuButton_edit.insert_item(3,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_ui_elements,  icon=Text{text="I"}})
+
+menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline,  icon=Text{text="J"}})
+
 menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
+menuButton_edit.insert_item(6,{type="item", string="Duplicate", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate,  icon=Text{text="D"}})
 
+menuButton_edit.insert_item(7,{type="item", string="Clone", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone,   icon=Text{text="C"}})
 
+menuButton_edit.insert_item(8,{type="item", string="Group", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group,   icon=Text{text="G"}})
 
-menuButton_edit.insert_item(6,{type="item", string="Duplicate\t\t\t     D", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate, mstring="Duplicate\t\t\t     <span foreground=\"#a6a6a6\">D</span>"}) 
-menuButton_edit.insert_item(7,{type="item", string="Clone\t\t\t     C", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone, mstring="Clone\t\t\t     <span foreground=\"#a6a6a6\">C</span>"}) 
-menuButton_edit.insert_item(8,{type="item", string="Group\t\t\t     G", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group, mstring="Group\t\t\t     <span foreground=\"#a6a6a6\">G</span>"}) 
-menuButton_edit.insert_item(9,{type="item", string="UnGroup\t\t\t     U", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup, mstring="UnGroup\t\t\t     <span foreground=\"#a6a6a6\">U</span>"}) 
+menuButton_edit.insert_item(9,{type="item", string="UnGroup", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup,  icon=Text{text="U"}})
 
 menuButton_edit.name = "menuButton_edit"
 menuButton_edit.anchor_point = {71,30.5}
@@ -205,8 +210,7 @@ menuButton_arrange.insert_item(6,{type="item", string="Horizontal Center", bg=as
 menuButton_arrange.insert_item(7,{type="item", string="Vertical Center", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.vcenter, icon=assets("assets/icon-align-vcenter.png")}) 
 menuButton_arrange.insert_item(8,{type="label", string="  Distribute:", bg=assets("assets/menu-item-label.png")} )
 menuButton_arrange.insert_item(9,{type="item", string="Horizontally", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.hspace, icon=assets("assets/icon-align-distributeh.png")}) 
-menuButton_arrange.insert_item(10,{type="item", string="Vertically", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.vspace, icon=assets("assets/icon-align-distributev.png")}) 
-menuButton_arrange.insert_item(11,{type="label", string="  Arrange:", bg=assets("assets/menu-item-label.png")} )
+menuButton_arrange.insert_item(10,{type="item", string="Vertically", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.vspace, icon=assets("assets/icon-align-distributev.png")}) menuButton_arrange.insert_item(11,{type="label", string="  Arrange:", bg=assets("assets/menu-item-label.png")} )
 menuButton_arrange.insert_item(12,{type="item", string="Bring to Front", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bring_to_front}) 
 menuButton_arrange.insert_item(13,{type="item", string="Bring Forward", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.bring_forward}) 
 menuButton_arrange.insert_item(14,{type="item", string="Send to Back", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.send_to_back}) 
@@ -303,8 +307,8 @@ function menu.clearMenuButtonView_BGIcons()
 end 
 
 menuButton_view.insert_item(8,{type="label", string="  Guides:", bg=assets("assets/menu-item-label.png")} )
-menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide   H", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline, mstring="Add Horizontal Guide   <span foreground=\"#a6a6a6\">H</span>"}) 
-menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide        V", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline, mstring="Add Virtical Guide        <span foreground=\"#a6a6a6\">V</span>"}) 
+menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline, icon=Text{text="H"}})
+menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline, icon=Text{text="V"}})
 menuButton_view.insert_item(11,{type="item", string="Show Guides", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.show_guides, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.insert_item(12,{type="item", string="Snap to Guides", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.snap_guides, icon=assets("assets/menu-checkmark.png")}) 
 
