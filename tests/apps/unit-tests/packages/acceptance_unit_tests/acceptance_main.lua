@@ -81,7 +81,7 @@ function idle.on_idle( idle , seconds )
 	end
 
 	-- run unit test
-        local results = unit_test() 
+        local engine_results = engine_unit_test() 
 		screen:remove (test_group)
 		mediaplayer:set_viewport_geometry (750,10,0,0)
         idle.on_idle = nil

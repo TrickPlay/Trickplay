@@ -29,10 +29,11 @@ end
 
 -- UI3.BUTTON11 SECTION
 layout["ui3"].button11.pressed = function() -- Handler for button11.pressed in this screen
-	steps_txt.text = ""
-	col1_results_txt.text = ""
-	col2_results_txt.text = ""
-	col3_results_txt.text = ""
+	layout["ui3"].steps_txt.text = ""
+	layout["ui3"].pass_results_txt.text = ""
+	layout["ui3"].fail_results_txt.text = ""
+
+
 end
 layout["ui3"].button11.released = function() -- Handler for button11.released in this screen
 end
@@ -68,10 +69,7 @@ end
 -- UI2.BUTTON11 SECTION
 layout["ui2"].button11.pressed = function() -- Handler for button11.pressed in this screen
 	steps_txt.text = ""
-	results_col_1_txt.text = ""
-	results_col_2_txt.text = ""
-	results_col_3_txt.text = ""
-	results_col_4_txt.text = ""
+	results_txt.text = ""
 end
 layout["ui2"].button11.released = function() -- Handler for button11.released in this screen
 end
@@ -100,6 +98,7 @@ end
 layout["ui1"].button1.pressed = function() -- Handler for button1.pressed in this screen
 	ui_element.transit_to(groups["ui1"], groups["ui3"])
 	layout["ui3"].button0.on_focus_in()
+	layout["ui3"].steps_txt.text = "Press Run Controller Tests button before connecting to device."
 end
 layout["ui1"].button1.released = function() -- Handler for button1.released in this screen
 end
@@ -123,11 +122,6 @@ end
 
 -- SCREEN ON_MONTION SECTION
 function screen:on_motion(x,y)
-	if(screen:find_child("user_mouse_pointer") == nil) then
-		screen:add(user_mouse_pointer)
-	end
-	user_mouse_pointer.position = {x-15 ,y-10 ,0}
-	user_mouse_pointer:raise_to_top()
 	if dragging then
 		local actor = unpack(dragging)
 		if (actor.name == "grip") then

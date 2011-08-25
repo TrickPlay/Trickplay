@@ -47,8 +47,8 @@ function assert_function    ( f , m ) assert_private( is_function(f) , m ) end
 --
 -------------------------------------------------------------------------------
 
-function unit_test( positive_tests , negative_tests , quiet )
-    local results = {}
+function controller_unit_test( )
+    local controller_results = {}
     local function run_tests( tests , negative )
         if tests then
         
@@ -58,7 +58,7 @@ function unit_test( positive_tests , negative_tests , quiet )
             
                 if type( v ) == "function" then
                 
-                    ok , message = pcall( v )
+                    ok , message = pcall( v, controller, factory )
                 
                 else
             
@@ -73,7 +73,7 @@ function unit_test( positive_tests , negative_tests , quiet )
                     message = nil
                 
                 end
-                table.insert( results , { name = k , passed = ok , message = message } )
+                table.insert( controller_results , { name = k , passed = ok , message = message } )
     
             end
         
@@ -83,7 +83,7 @@ function unit_test( positive_tests , negative_tests , quiet )
     
     -- Run all the ones that are defined as global functions named 'test...'
     
-    local global_tests = {}
+    local controller_global_tests = {}
     
     for k , v in pairs( _G ) do
 
@@ -97,13 +97,13 @@ function unit_test( positive_tests , negative_tests , quiet )
                 
             end
             
-            global_tests[ name ] = v
-        
+            controller_global_tests[ name ] = v
+        	_G[k] = nil
         end
     
     end
     
-    run_tests( global_tests , false )
+    run_tests( controller_global_tests , false )
     
     -- Run all the ones passed in 
     
@@ -115,10 +115,9 @@ function unit_test( positive_tests , negative_tests , quiet )
 	local column_line_max = 11
 	local line_count = 0
 	local test_count = 0
-	local col_results = {}
-	col_results[1] = ""
-	col_results[2] = ""
-	col_results[3] = ""
+	local pass_results = "\t\t-- PASS --\n"
+	local fail_results = "\t\t\t\t-- FAIL --\n"
+
         
     if not quiet then
     
@@ -130,18 +129,12 @@ function unit_test( positive_tests , negative_tests , quiet )
         print( "" )
         print( "UNIT TESTS" )
         print( "" )
+        print ("controller_results")
+        for i , t in ipairs( controller_results ) do
+
         
-        for i , t in ipairs( results ) do
-
-        	if line_count > column_line_max then
-				current_column = current_column + 1
-				line_count = 0
-			end
-
-			line_count = line_count + 1
-
             if t.passed then
-        		col_results[current_column] = col_results[current_column]..string.format( "PASS [%s]" , t.name ).."\n"
+        		pass_results = pass_results..string.format( "* [%s]" , t.name ).."\n"
                 print( string.format( "PASS [%s]" , t.name ) )
                     
                 passed = passed + 1
@@ -158,38 +151,38 @@ function unit_test( positive_tests , negative_tests , quiet )
         
             print( "" )
         
-            for i , t in ipairs( results ) do
+            for i , t in ipairs( controller_results ) do
             
                 if not t.passed then
-            		col_results[current_column] = col_results[current_column]..string.format( "FAIL [%s] %s" , t.name , t.message or "" ).."\n"
+            		fail_results = fail_results..string.format( "* [%s] %s" , t.name , t.message or "" ).."\n"
                     print( string.format( "FAIL [%s] %s" , t.name , t.message or "" ) )
                         		
                 end
-            line_count = line_count + 2
             end
         end
 
 
         
         print( "" )
-        print( string.format( "PASSED   %4d (%d%%)" , passed , ( passed / # results ) * 100 ) )
-        print( string.format( "FAILED   %4d (%d%%)" , failed , ( failed / # results ) * 100 ) )
-        print( string.format( "TOTAL    %4d" , #results ) )
+        print( string.format( "PASSED   %4d (%d%%)" , passed , ( passed / #controller_results ) * 100 ) )
+        print( string.format( "FAILED   %4d (%d%%)" , failed , ( failed / #controller_results ) * 100 ) )
+        print( string.format( "TOTAL    %4d" , #controller_results ) )
         print( "" )
 
-		col_results[current_column] = col_results[current_column]..string.format( "PASSED   %4d (%d%%)" , passed , ( passed / # results ) * 100 ).."\n"
-        col_results[current_column] = col_results[current_column]..string.format(  "FAILED   %4d (%d%%)" , failed , ( failed / # results ) * 100 ).."\n"
-		col_results[current_column] = col_results[current_column]..string.format( "TOTAL    %4d" , #results ).. "\n"
+		layout["ui3"].pass_summary_txt.text = "Passed: "..passed
+		layout["ui3"].fail_summary_txt.text = "Failed: "..failed
+		layout["ui3"].total_tests_txt.text = "Total: "..#controller_results
 
 
 
     end
-	dumptable (col_results)
+
 	
-	col1_results_txt.text = col_results[1]
-	col2_results_txt.text = col_results[2]
-	col3_results_txt.text = col_results[3]
+	layout["ui3"].pass_results_txt.text = pass_results
+	layout["ui3"].fail_results_txt.text = fail_results
+	
+	layout["ui3"].scrollPane12.virtual_h = #controller_results * 30 + 100
     
-    return results
+    return controller_results
 end
 

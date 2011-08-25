@@ -47,8 +47,8 @@ function assert_function    ( f , m ) assert_private( is_function(f) , m ) end
 --
 -------------------------------------------------------------------------------
 
-function unit_test( positive_tests , negative_tests , quiet )
-    local results = {}
+function engine_unit_test( positive_tests , negative_tests , quiet )
+    local engine_results = {}
     local function run_tests( tests , negative )
         if tests then
         
@@ -73,7 +73,7 @@ function unit_test( positive_tests , negative_tests , quiet )
                     message = nil
                 
                 end
-                table.insert( results , { name = k , passed = ok , message = message } )
+                table.insert( engine_results , { name = k , passed = ok , message = message } )
     
             end
         
@@ -83,7 +83,7 @@ function unit_test( positive_tests , negative_tests , quiet )
     
     -- Run all the ones that are defined as global functions named 'test...'
     
-    local global_tests = {}
+    local engine_global_tests = {}
     
     for k , v in pairs( _G ) do
 
@@ -97,13 +97,14 @@ function unit_test( positive_tests , negative_tests , quiet )
                 
             end
             
-            global_tests[ name ] = v
+            engine_global_tests[ name ] = v
+			_G[k] = nil
         
         end
     
     end
     
-    run_tests( global_tests , false )
+    run_tests( engine_global_tests , false )
     
     -- Run all the ones passed in 
     
@@ -132,7 +133,7 @@ function unit_test( positive_tests , negative_tests , quiet )
         print( "UNIT TESTS" )
         print( "" )
         
-        for i , t in ipairs( results ) do
+        for i , t in ipairs( engine_results ) do
 
         	if line_count > column_line_max then
 				if current_column < 4 then
@@ -161,7 +162,7 @@ function unit_test( positive_tests , negative_tests , quiet )
         
             print( "" )
         
-            for i , t in ipairs( results ) do
+            for i , t in ipairs( engine_results ) do
             
                 if not t.passed then
             		col_results[current_column] = col_results[current_column]..string.format( "FAIL [%s] %s" , t.name , t.message or "" ).."\n"
@@ -175,14 +176,14 @@ function unit_test( positive_tests , negative_tests , quiet )
 
         
         print( "" )
-        print( string.format( "PASSED   %4d (%d%%)" , passed , ( passed / # results ) * 100 ) )
-        print( string.format( "FAILED   %4d (%d%%)" , failed , ( failed / # results ) * 100 ) )
-        print( string.format( "TOTAL    %4d" , #results ) )
+        print( string.format( "PASSED   %4d (%d%%)" , passed , ( passed / #engine_results ) * 100 ) )
+        print( string.format( "FAILED   %4d (%d%%)" , failed , ( failed / #engine_results ) * 100 ) )
+        print( string.format( "TOTAL    %4d" , #engine_results ) )
         print( "" )
 
-		col_results[current_column] = "/n"..col_results[current_column]..string.format( "PASSED   %4d (%d%%)" , passed , ( passed / # results ) * 100 ).."\n"
-        col_results[current_column] = col_results[current_column]..string.format(  "FAILED   %4d (%d%%)" , failed , ( failed / # results ) * 100 ).."\n"
-		col_results[current_column] = col_results[current_column]..string.format( "TOTAL    %4d" , #results ).. "\n"
+		col_results[current_column] = "/n"..col_results[current_column]..string.format( "PASSED   %4d (%d%%)" , passed , ( passed / #engine_results ) * 100 ).."\n"
+        col_results[current_column] = col_results[current_column]..string.format(  "FAILED   %4d (%d%%)" , failed , ( failed / #engine_results ) * 100 ).."\n"
+		col_results[current_column] = col_results[current_column]..string.format( "TOTAL    %4d" , #engine_results ).. "\n"
 
 
 
@@ -192,7 +193,10 @@ function unit_test( positive_tests , negative_tests , quiet )
 	results_col_2_txt.text = col_results[2]
 	results_col_3_txt.text = col_results[3]
 	results_col_4_txt.text = col_results[4]
+
+	passed = nil
+	failed = nil
     
-    return results
+    return engine_results
 end
 

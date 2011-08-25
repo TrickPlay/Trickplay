@@ -1,9 +1,10 @@
 local ui_element = {}
 
 dofile("/lib/ui_element_header.lua")     
+
 function ui_element.populate_to (grp, tbl)
 
-	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group"} 
+	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
 	 
 	local function is_in_list(item, list)
     		if list == nil then 
@@ -31,99 +32,130 @@ function ui_element.populate_to (grp, tbl)
 	end 	
 
 	for i, j in pairs (grp.children) do 
-	     local function there()
-		if j.extra then 
-			if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" then 
-				for k,l in pairs (j.content.children) do 
-					if is_this_container(l) == true then 
-						j = l 
-						there()
-					else 
-						tbl[l.name] = grp:find_child(l.name) 
-					end 
-				end 
-			elseif j.extra.type == "LayoutManager" then
-				for k,l in pairs (j.tiles) do 
-					for n,m in pairs (l) do 
-						if m then 
-						     if is_this_container(m) == true then 
-							j = m 
+		local function there()
+			if j.extra then 
+				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
+					tbl[j.name] = grp:find_child(j.name) 
+					for k,l in pairs (j.content.children) do 
+						if is_this_container(l) == true then 
+							j = l 
 							there()
-						     else 
-							tbl[m.name] = grp:find_child(m.name) 
-						     end 
+						else 
+							tbl[l.name] = grp:find_child(l.name) 
 						end 
 					end 
-				end 
-			elseif j.extra.type == "Group" then 
-				for k,l in pairs (j.children) do 
-					if is_this_container(l) == true then 
-						j = l 
-						there()
-					else 
-						tbl[l.name] = grp:find_child(l.name) 
+
+				elseif j.extra.type == "LayoutManager" then
+					tbl[j.name] = grp:find_child(j.name) 
+					for k,l in pairs (j.tiles) do 
+						for n,m in pairs (l) do 
+							if m then 
+								if is_this_container(m) == true then 
+									j = m 
+									there()
+								else 
+									tbl[m.name] = grp:find_child(m.name) 
+								end 
+							end 
+						end 
+					end 
+
+				elseif j.extra.type == "TabBar" then 
+					tbl[j.name] = grp:find_child(j.name) 
+
+					for k, l in pairs (j.tabs) do 
+						for n,m in pairs (l.children) do 
+							if m then 
+								if is_this_container(m) == true then 
+									j = m 
+									there()
+								else 
+									tbl[m.name] = grp:find_child(m.name) 
+								end 
+							end 
+						end
+					end 
+
+				elseif j.type == "Group" and j.extra.type == nil then 
+					tbl[j.name] = grp:find_child(j.name) 
+					for k,l in pairs (j.children) do 
+						if is_this_container(l) == true then 
+							j = l 
+							there()
+						else 
+							tbl[l.name] = grp:find_child(l.name) 
+						end 
+					end 
+				else 
+					if j.name then 
+						tbl[j.name] = j
 					end 
 				end 
 			else 
-				tbl[j.name] = j
+				if j.name then 
+					tbl[j.name] = j
+				end 
 			end 
-		else 
-			tbl[j.name] = j
 		end 
-	     end 
-	     there()
+		there()
 	end 
-	
-	return tbl
+	if grp.extra then 	
+		if grp.extra.video then 
+			tbl[grp.extra.video.name] = grp.extra.video
+		end
+	end
+
+return tbl
 
 end 
 
+--[[
 function ui_element.set_cursor_pointer (src_file)
-	user_mouse_pointer.src = "/assets/images/"..src_file
+	--user_mouse_pointer.src = "/assets/images/"..src_file
 end 
+]]
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
-
 	for i, j in pairs (g.children) do
 		if j.on_focus_out then 
 				j.on_focus_out()
 		end
 	end 
 	if effect == "fade" then 
-		
 		screen:add(next_grp)
-    		local fade_timeline = Timeline ()
+    	local fade_timeline = Timeline ()
 
-    		fade_timeline.duration = 1000 -- progress duration 
-    		fade_timeline.direction = "FORWARD"
-    		fade_timeline.loop = false
+    	fade_timeline.duration = 1000 -- progress duration 
+    	fade_timeline.direction = "FORWARD"
+    	fade_timeline.loop = false
 
-     		function fade_timeline.on_new_frame(t, m, p)
+     	function fade_timeline.on_new_frame(t, m, p)
 			next_grp.opacity = p * 255
 			prev_grp.opacity = (1-p) * 255 
-     		end  
+     	end  
 
-     		function fade_timeline.on_completed()
+     	function fade_timeline.on_completed()
 			screen:remove(prev_grp)
+			--g:clear()
 			g = next_grp
 			screen:add(g)
 			screen:grab_key_focus()
-     		end 
-
+			prev_grp.opacity = 255
+     	end 
 		fade_timeline:start()
 	else 
 		if prev_grp then 
 			screen:remove(prev_grp)
 		end 
+		--g:clear()
 		g = next_grp
 		screen:add(g)
 		screen:grab_key_focus()
-
-
 	end 
 end 
 
 function ui_element.screen_add(grp)
+	--g:clear()
 	g = grp
 	screen:add(g)
 end 
@@ -141,8 +173,7 @@ end
 
 --[[
 Function: change_all_skin
-
-Changes all ui elements' skins to 'skin_name' item:find_child("textInput").text
+	Changes all ui elements' skins to 'skin_name' item:find_child("textInput").text
 
 Arguments:
 	skin_name - name of skin  
@@ -193,7 +224,6 @@ local function orderedNext(t, state)
     -- order. We use a temporary ordered key table that is stored in the
     -- table being iterated.
 
-    --print("orderedNext: state = "..tostring(state) )
     if state == nil then
         -- the first time, generate the index
         t.__orderedIndex = __genOrderedIndex( t )
@@ -277,11 +307,11 @@ local function table_remove_val(t, val)
 	return t
 end 
 
-local function table_removekey(table, key)
+local function table_removekey(t, key)
 	local idx = 1	
 	local temp_t = {}
-	table[key] = nil
-	for i, j in pairs (table) do 
+	t[key] = nil
+	for i, j in pairs (t) do 
 		temp_t[idx] = j 
 		idx = idx + 1 
 	end 
@@ -292,9 +322,10 @@ end
 -- UI Factory
 -------------------
 
--- make_titile_seperator() : make a title seperator line
+-- make_titile_separator() : make a title separator line
 
-local function make_title_seperator(thickness, color, length)
+--[[
+local function make_title_separator(thickness, color, length)
 
     local c = Canvas{ size = {length, thickness} }
 
@@ -320,6 +351,7 @@ local function make_title_seperator(thickness, color, length)
     
     return c
 end 
+]]
 
 
 -- make_dialogBox_bg() : make message window background 
@@ -432,9 +464,6 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
 
     return c
 end 
-
-
-
 
 -- make_toastb_group_bg() : make toast box background  
 
@@ -709,7 +738,7 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 
 	timeline:add(Text{
 		color = {255,255,255,255},
-		font = "DejaVu Sans 22px",
+		font = "FreeSans Medium 22px",
 		text = "Beginnig", 
 		editable = true,
 		wants_enter = true,
@@ -775,7 +804,7 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 	for i, j in orderedPairs(p) do 
 	    timeline:add(Text{
 		color = {255,255,255,255},
-		font = "DejaVu Sans 22px",
+		font = "FreeSans Medium 22px",
 		text = p[i][1],
 		editable = true,
 		wants_enter = true,
@@ -950,8 +979,6 @@ function ui_element.timeline(t)
 	     	          end 
 		      end 
 			
-		      --print("new_point::",new_timepoint)
-		      --print("next_point::",next_point)
                       if next_point then 
 		          screen:find_child("timeline").points[next_point][2] = next_point - new_timepoint 
 		          screen:find_child("timeline").points[next_point][3] = next_point - new_timepoint 
@@ -1264,8 +1291,6 @@ Arguments:
     	border_corner_radius - Radius of the border for the button
 	pressed - Function that is called by on_focus_in() or on_key_down() event
 	release - Function that is called by on_focus_out()
-
-
 Return:
  	b_group - The group containing the button 
 
@@ -1275,13 +1300,13 @@ Extra Function:
 	
 ]]
 
-function ui_element.button(table) 
+function ui_element.button(t) 
 
  --default parameters
     local p = {
-    	text_font = "DejaVu Sans 30px",
+    	text_font = "FreeSans Medium 30px",
     	text_color = {255,255,255,255}, --"FFFFFF",
-    	skin = "default", 
+    	skin = "CarbonCandy", 
     	ui_width = 180,
     	ui_height = 60, 
 
@@ -1293,74 +1318,97 @@ function ui_element.button(table)
     	fill_color = {255,255,255,0},
     	border_width = 1,
     	border_corner_radius = 12,
-	pressed = nil, 
-	released = nil, 
-	button_image = nil,
-	focus_image  = nil,
-	text_has_shadow = true,
+		focused=nil, 
+		pressed = nil, 
+		released = nil, 
+		text_has_shadow = true,
+		ui_position = {100,100,0},
+		--------------------------------
+		button_image = nil,
+		focus_image  = nil,
+		single_button = false,
+		is_in_menu = false,
+		label_align = nil,
+		tab_button = false, 
     }
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
 
  --the umbrella Group
-    local ring, focus_ring, text, button, focus, s_txt
+    local ring, focus_ring, text, button, focus, s_txt, create_button
 
     local b_group = Group
     {
         name = "button", 
         size = { p.ui_width , p.ui_height},
-        position = {100, 100, 0},  
+        position = p.ui_position, 
         reactive = true,
         extra = {type = "Button"}
     } 
     
     function b_group.extra.on_focus_in(key) 
-	current_focus = b_group
-        if (p.skin == "custom") then 
-	     ring.opacity = 0
-	     focus_ring.opacity = 255
+		current_focus = b_group
+        if (p.skin == "Custom") then 
+	     	ring.opacity = 0
+	     	focus_ring.opacity = 255
         else
-	     button.opacity = 0
-             focus.opacity = 255
+	     	button.opacity = 0
+            focus.opacity = 255
         end 
         b_group:find_child("text").color = p.focus_text_color
 	
-	if key then 
-	    if p.pressed and key == keys.Return then
-		p.pressed()
-	    end 
-	end 
-	
-	if p.skin == "edit" then 
-		input_mode = S_MENU_M
-	end 
+	    if p.focused ~= nil then 
+			p.focused()
+		end 
 
-	b_group:grab_key_focus(b_group)
+		b_group:grab_key_focus(b_group)
+
+		if key then 
+	    	if p.pressed and key == keys.Return then
+				p.pressed()
+	    	end 
+		end 
+		
+		if p.skin == "edit" then 
+			input_mode = S_MENU_M
+		end 
+
     end
     
-    function b_group.extra.on_focus_out(key) 
-	current_focus = nil 
-        if (p.skin == "custom") then 
-	     ring.opacity = 255
-	     focus_ring.opacity = 0
-             focus.opacity = 0
-        else
-	     button.opacity = 255
-             focus.opacity = 0
-	     focus_ring.opacity = 0
-        end
+    function b_group.extra.on_focus_out(key, focus_to_tabButton) 
+		current_focus = nil 
+		if b_group.tab_button == true and focus_to_tabButton == nil then 
+			prev_tab = b_group
+			return 
+		else
+        	if (p.skin == "Custom") then 
+	     		ring.opacity = 255
+	     		focus_ring.opacity = 0
+            	focus.opacity = 0
+        	else
+	     		button.opacity = 255
+            	focus.opacity = 0
+	     		focus_ring.opacity = 0
+        	end
+		end 
         b_group:find_child("text").color = p.text_color
-	if p.released then 
-		p.released()
-	end 
+		if p.released then  
+			if p.is_in_menu then 
+				if key ~= keys.Return and b_group.single_button == false then
+					p.released()
+				end 
+			elseif b_group.single_button == false then 
+				p.released()
+			end
+		end 
     end
 
-    local create_button = function() 
+    create_button = function() 
         b_group:clear()
         b_group.size = { p.ui_width , p.ui_height}
         ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
@@ -1368,75 +1416,157 @@ function ui_element.button(table)
 
         focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
-
-	if(p.skin == "editor") then 
-	    button= assets("assets/invisible_pixel.png")
+		
+		if(p.skin == "editor") then 
+	    	button= assets("assets/invisible_pixel.png")
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-	    focus= assets("assets/menu-bar-focus.png")
+	    	focus= assets("assets/menu-bar-focus.png")
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-	elseif(p.skin ~= "custom") then 
+		elseif(p.skin == "inspector") then 
+	    	button= Group{}
+			left_cap = Image{src="lib/assets/button-small-leftcap.png", position = {0,0}} 
+			repeat_1px = Image{src="lib/assets/button-small-center1px.png", tile={true, false}, width = p.ui_width-left_cap.w*2, position = {left_cap.w, 0}} 
+			right_cap = Image{src="lib/assets/button-small-rightcap.png", position = {p.ui_width-left_cap.w, 0 }} 
+			button:add(left_cap, repeat_1px, right_cap)
+			button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
+			button.reactive = true 
+
+			focus = Group{}
+			left_cap_f = Image{src="lib/assets/button-small-leftcap-focus.png", position = {0,0}} 
+			repeat_1px_f = Image{src="lib/assets/button-small-center1px-focus.png", tile={true, false}, 
+						 width = p.ui_width - left_cap_f.w * 2, position = {left_cap_f.w, 0}} 
+			right_cap_f = Image{src="lib/assets/button-small-rightcap-focus.png", position = {p.ui_width-left_cap_f.w, 0 }} 
+			focus:add(left_cap_f, repeat_1px_f, right_cap_f)
+            focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+			button.reactive = true 
+		elseif(p.skin ~= "Custom") then 
             button = assets(skin_list[p.skin]["button"])
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
             focus = assets(skin_list[p.skin]["button_focus"])
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-	else 
-	     button = Image{}
-	     focus = Image{}
-	end 
+		else
+			
+	     	button = Image{}
+	     	focus = Image{}
+		end 
+
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
-        text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
+		if p.label_align ~= nil then 
+        	text:set{name = "text", position = { 10, p.ui_height/2 - text.h/2}}
+		else 
+        	text:set{name = "text", position = { (p.ui_width-text.w)/2, p.ui_height/2 - text.h/2}}
+		end 
 	
-	b_group:add(ring, focus_ring, button, focus)
-	if p.text_has_shadow then 
-	       s_txt = Text{
-		        name = "shadow",
-                        text  = p.label, 
-                        font  = p.text_font,
-                        color = {0,0,0,255/2},
-                        x     = (p.ui_width  -text.w)/2 - 1,
-                        y     = (p.ui_height - text.h)/2 - 1,
-                    }
-                    s_txt.anchor_point={0,s_txt.h/2}
-                    s_txt.y = s_txt.y+s_txt.h/2
+		b_group:add(ring, focus_ring, button, focus)
+		if p.text_has_shadow then 
+	       	s_txt = Text{
+		    	name = "shadow",
+            	text  = p.label, 
+            	font  = p.text_font,
+            	color = {0,0,0,255/2},
+            	x     = p.ui_width/2-text.w/2 - 1,
+            	y     = p.ui_height/2- text.h/2 - 1,
+            }
+			if p.label_align ~= nil then 
+            	s_txt.x = 9
+			end 
+            s_txt.anchor_point={0,s_txt.h/2}
+            s_txt.y = s_txt.y+s_txt.h/2
         	b_group:add(s_txt)
-	end 
+		end 
 
         b_group:add(text)
 
-        if (p.skin == "custom") then button.opacity = 0 
-        else ring.opacity = 0 end 
+        if (p.skin == "Custom") then 
+			button.opacity = 0 
+        else 
+			ring.opacity = 0 
+		end
+		
+		if editor_lb == nil or editor_use then 
+	     	function b_group:on_button_down(x,y,b,n)
+				
+				if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
+					for q,w in pairs (b_group.parent.buttons) do
+						if w.label ~= b_group.label then 
+							print("tab",w.label,"focus out")
+							if (w.skin == "Custom") then 
+	     						w:find_child("ring").opacity = 255
+	     						w:find_child("focus_ring").opacity = 0
+            					w:find_child("focus").opacity = 0
+        					else
+	     						w:find_child("button").opacity = 255
+            					w:find_child("focus").opacity = 0
+	     						w:find_child("focus_ring").opacity = 0
+        					end
+						end 
+					end 
+				end 
 
-	if editor_lb == nil or editor_use then 
-	     function b_group:on_button_down(x,y,b,n)
-		if current_focus ~= b_group then 
-			if current_focus then 
+				if current_focus ~= b_group then 
+					if current_focus then 
+		     			current_focus.on_focus_out(nil,true)
+						if prev_tab then 
+							prev_tab.on_focus_out(nil,true)
+						end 
+					end
+					b_group.extra.on_focus_in(keys.Return)
+				else 
 		     		current_focus.on_focus_out()
-			end
-			b_group.extra.on_focus_in(keys.Return)
-		else 
-		     	--current_focus.on_focus_in(keys.Return)
-		     	current_focus.on_focus_out()
-			screen:grab_key_focus()
-		end 
-		return true
-	     end 
-	end 
+					current_focus = b_group
+		     		current_focus.on_focus_in(keys.Return)
+					screen:grab_key_focus()
+				end 
+				return true
+	     	end 
 
-	if p.skin == "editor"  then 
-	     function b_group:on_motion()
-		if input_mode == S_MENU_M then 
-		    if current_focus ~= b_group then 
-			if current_focus then 
-		     		current_focus.on_focus_out()
+			function b_group:on_button_up(x,y,b,n)
+				--if input_mode ~= S_MENU_M then 
+				if b_group.single_button == true then 
+	     			button.opacity = 255
+            		focus.opacity = 0
+	     			focus_ring.opacity = 0
+				end 
+				--end
+				return true
+	     	end 
+
+		--[[
+			function b_group:on_enter()
+				if input_mode ~= S_MENU_M then 
+		    		if current_focus ~= b_group then 
+						if current_focus then 
+		     				current_focus.on_focus_out()
+						end
+						b_group.extra.on_focus_in(keys.Return)
+		    		else 
+		     			current_focus.on_focus_in(keys.Return)
+		    		end 
+				end
+				return true
+            end
+			function b_group:on_leave()
+				b_group.extra.on_focus_out()
 			end
-			b_group.extra.on_focus_in(keys.Return)
-		    else 
-		     	current_focus.on_focus_in(keys.Return)
-		    end 
-		end 
+			---]]
+		end
+
+		--[[
+		if p.skin == "editor"  then 
+	     	function b_group:on_motion()
+				if input_mode == S_MENU_M then 
+		    		if current_focus ~= b_group then 
+						if current_focus then 
+		     				current_focus.on_focus_out()
+						end
+						b_group.extra.on_focus_in(keys.Return)
+		    		else 
+		     			current_focus.on_focus_in(keys.Return)
+		    		end 
+				end 
              end
-	end 
-	
+		end 
+		]]
     end 
 
     create_button()
@@ -1444,11 +1574,13 @@ function ui_element.button(table)
     mt = {}
     mt.__newindex = function (t, k, v)
         if k == "bsize" then  
-	    p.ui_width = v[1] p.ui_height = v[2]  
+	    	p.ui_width = v[1] p.ui_height = v[2]  
         else 
-           p[k] = v
+           	p[k] = v
         end
-        create_button()
+		if k ~= "selected" then 
+        	create_button()
+		end
     end 
 
     mt.__index = function (t,k)
@@ -1495,13 +1627,13 @@ Extra Function:
 ]]
 
 
-function ui_element.textInput(table) 
+function ui_element.textInput(t) 
  --default parameters
     local p = {
-    	skin = "custom", 
+    	skin = "Custom", 
     	ui_width = 200 ,
     	ui_height = 60 ,
-    	text = "" ,
+    	text = "",
     	padding = 20 ,
     	border_width  = 4 ,
     	border_color  = {255,255,255,255}, 
@@ -1509,32 +1641,68 @@ function ui_element.textInput(table)
     	focus_color  = {0,255,0,255},
     	focus_fill_color = {27,145,27,0}, 
     	cursor_color = {255,255,255,255},
-    	text_font = "DejaVu Sans 30px"  , 
+    	text_font = "FreeSans Medium 30px"  , 
     	text_color =  {255,255,255,255},
     	border_corner_radius = 12 ,
-
+		readonly = "",
+		ui_position = {200,200,0},
+		----------------
+		item_type = nil,
+		justify = false,
+		wrap = false,
+		wrap_mode = "CHAR", -- CHAR, WORD, WORD_CHAR 
+		alignment = "LEFT", -- LEFT, CENTER, RIGHT
+		single_line = true, 
     }
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end
 
  --the umbrella Group
-    local box, focus_box, box_img, focus_img, text
-
+    local box, focus_box, box_img, focus_img, readonly, text, create_textInputField
     local t_group = Group
     {
        name = "t_group", 
        size = { p.ui_width , p.ui_height},
-       position = {200, 200, 0},  
+       position = p.ui_position, 
        reactive = true, 
        extra = {type = "TextInput"} 
     }
- 
 
-    local create_textInputField= function()
+ 	function t_group.extra.on_focus_in()
+	  	current_focus = t_group
+
+        if (p.skin == "Custom") then 
+	    	box.opacity = 0
+	     	focus_box.opacity = 255
+        else
+	    	box_img.opacity = 0
+            focus_img.opacity = 255
+        end 
+	  	text.editable = true
+	  	text.cursor_visible = true
+	  	text.reactive = true 
+        text:grab_key_focus(text)
+     end
+
+     function t_group.extra.on_focus_out()
+        if (p.skin == "Custom") then 
+	    	box.opacity = 255
+	     	focus_box.opacity = 0
+        else
+	    	box_img.opacity = 255
+           	focus_img.opacity = 0
+        end 
+	  	text.cursor_visible = false
+	  	text.reactive = false 
+		t_group.text = text.text
+		--current_focus = nil
+     end 
+
+    create_textInputField= function()
     	t_group:clear()
         t_group.size = { p.ui_width , p.ui_height}
 
@@ -1544,141 +1712,92 @@ function ui_element.textInput(table)
     	focus_box = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
     	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
 
-	if(p.skin ~= "custom") then 
-    	     box_img = assets(skin_list[p.skin]["textinput"])
-    	     box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
-    	     focus_img = assets(skin_list[p.skin]["textinput_focus"])
-    	     focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
-	else 
-	     box_img = Image{}
-	     focus_img = Image{}
-	end 
+		if(p.skin ~= "Custom") then 
+    		box_img = assets(skin_list[p.skin]["textinput"])
+    		box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
+    		focus_img = assets(skin_list[p.skin]["textinput_focus"])
+    		focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
+		else 
+	    	box_img = Image{}
+	    	focus_img = Image{}
+		end 
 
-    	text = Text{text=p.text, editable=true, cursor_visible=false, cursor_color = p.cursor_color, wants_enter = true, reactive = true, font = p.text_font, color = p.text_color}
-    	text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
-    	t_group:add(box, focus_box, box_img, focus_img, text)
+		if p.readonly ~= "" then 
+			readonly = Text{text= p.readonly, editable=false, cursor_visible=false, font = p.text_font, color = p.text_color, }
 
-	if editor_lb == nil or editor_use then 
-	   function t_group:on_button_down()
-		t_group.extra.on_focus_in()
-		text:grab_key_focus()
-		return true
-	   end 
+    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = p.single_line, 
+						cursor_color = p.cursor_color, wants_enter = true, 
+						alignment = p.alignment, justify = p.justify, wrap = p.wrap, wrap_mode = p.wrap_mode, 
+						reactive = true, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding - readonly.w}
+			
+    		readonly:set{name = "readonlyText", position = {p.padding, (p.ui_height - text.h)/2},}
+    		text:set{name = "textInput", position = {readonly.x+readonly.w, (p.ui_height - text.h)/2},}
+    		--text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
 
-	   local t_pos_max = p.ui_width - 2 * p.padding
+    		t_group:add(box, focus_box, box_img, focus_img, readonly, text)
+		else 
 
-	   function text:on_key_down(key)
-	        local c_x, prev_c_x
-		local t_w = t_group:find_child("textInput").w
-	        local scroll_w = t_w - t_pos_max 
-		local c_pos = t_group:find_child("textInput").cursor_position
-	
-		if key == keys.Return and shift == false then 
-			screen:grab_key_focus()
-			t_group.extra.on_focus_out()
-			return true
-		elseif key == keys.Left then 
-			if t_group:find_child("textInput").position_to_coordinates then 
-				if t_group:find_child("textInput").clip then 
-		                     	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
-				     	local x = c_x[1] 
-				     	local letter_sz 
-					if c_pos ~= -1 and c_pos ~= 0 then 
-		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
-				     	     letter_sz =  x - prev_c_x[1] 
-					end 
-	
-				     	if (t_group:find_child("textInput").clip[1] > x-p.padding ) and letter_sz then 
-		    			    t_group:find_child("textInput").x = t_group:find_child("textInput").x + letter_sz 
-		    			    t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] - letter_sz ,  
-					    t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] - letter_sz ,  t_group:find_child("textInput").clip[4]}
-					    letter_sz = nil
-					    c_x = nil
-					    prev_c_x = nil
-				     	end
-			        end
+    		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = p.single_line, 
+						cursor_color = p.cursor_color, wants_enter = true, 
+						alignment = p.alignment, justify = p.justify, wrap = p.wrap, wrap_mode = p.wrap_mode, 
+						reactive = false, font = p.text_font, color = p.text_color, width = p.ui_width - 2 * p.padding}
+
+			if p.single_line == false then 
+    			text:set{name = "textInput", position = {p.padding, p.padding}} 
+			else
+    			text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
 			end 
-		elseif key == keys.Right then 
-			if t_group:find_child("textInput").position_to_coordinates then 
-				if t_group:find_child("textInput").clip then 
-			        	c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos) 
-				     	local x = c_x[1] 
-				     	local letter_sz 
-					if c_pos ~= -1 then
-		                     	     prev_c_x = t_group:find_child("textInput"):position_to_coordinates(c_pos-1) 
-				     	     letter_sz = x - prev_c_x[1]
+    		t_group:add(box, focus_box, box_img, focus_img, text)
+		end
 
-		             		    if (t_group:find_child("textInput").clip[3] < x+p.padding )then 
-		    			         t_group:find_child("textInput").x = t_group:find_child("textInput").x - letter_sz 
-		    			         t_group:find_child("textInput").clip = {t_group:find_child("textInput").clip[1] + letter_sz ,  
-					         t_group:find_child("textInput").clip[2], t_group:find_child("textInput").clip[3] + letter_sz ,  t_group:find_child("textInput").clip[4]}
-					    	 letter_sz = nil
-					         c_x = nil
-					         prev_c_x = nil
-					    end
-					end 
-				end 
+
+		local t_pos_min = t_group.x + t_group:find_child("textInput").x 
+
+		if editor_lb == nil or editor_use then 
+	   		function t_group:on_button_down()
+				t_group.extra.on_focus_in()
+				return true
+	   		end 
+	    end 
+
+		function text:on_key_down(key)
+			if key == keys.Return then 
+				t_group:grab_key_focus()
+				t_group:on_key_down(key)
+			elseif key == keys.Tab then 
+				t_group:grab_key_focus()
+				t_group:on_key_down(key)
 			end 
-		elseif scroll_w > 0 then 
-		    t_group:find_child("textInput").x = scroll_w * -1
-		    t_group:find_child("textInput").clip = {scroll_w + p.padding, 0, t_group:find_child("textInput").w , t_group:find_child("textInput").h}
-	        end 
+			p.text = text.text 
+		end 
 
-	   end 
-	end 
-
-
-    	if (p.skin == "custom") then box_img.opacity = 0
-    	else box.opacity = 0 box_img.opacity = 255 end 
-
+    	if (p.skin == "Custom") then 
+			box_img.opacity = 0
+    	else 
+			box.opacity = 0 
+			box_img.opacity = 255 
+		end 
      end 
 
      create_textInputField()
 
-     function t_group.extra.on_focus_in()
-	if t_group:find_child("textInput").text ~= "--------------" then 
-	  current_focus = t_group
-          if (p.skin == "custom") then 
-	     box.opacity = 0
-	     focus_box.opacity = 255
-          else
-	     box_img.opacity = 0
-             focus_img.opacity = 255
-          end 
-	  text.editable = true
-	  text.cursor_visible = true
-	  text.reactive = true 
-          text:grab_key_focus(text)
-	end
-     end
-
-     function t_group.extra.on_focus_out()
-          if (p.skin == "custom") then 
-	     box.opacity = 255
-	     focus_box.opacity = 0
-          else
-	     box_img.opacity = 255
-             focus_img.opacity = 0
-          end 
-	  text.cursor_visible = false
-	  text.reactive = false 
-     end
-
      mt = {}
      mt.__newindex = function (t, k, v)
-	if k == "bsize" then  
-	    p.ui_width = v[1] p.ui_height = v[2]  
+	 	if k == "bsize" then  
+	     	p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
-        create_textInputField()
+		if k ~= "selected" then 
+        	create_textInputField()
+		end
      end 
 
      mt.__index = function (t,k)
         if k == "bsize" then 
-	    return {p.ui_width, p.ui_height}  
+	     	return {p.ui_width, p.ui_height}  
         else 
-	    return p[k]
+	     	return p[k]
         end 
      end 
   
@@ -1686,6 +1805,56 @@ function ui_element.textInput(table)
 
      return t_group
 end 
+
+local function draw_dialogBG(w,h,lw,color)
+	local c = Canvas(w,h)
+ 	local x=0 
+    local y=35
+
+	c:round_rectangle(10,10,w-20,h-20,10)
+
+	c.line_width = lw
+	c:set_source_linear_pattern(0,0,0,h)
+	c:add_source_pattern_color_stop(0.0, "00000060")
+	c:add_source_pattern_color_stop(1.0, "ffffff60")
+	c:stroke(true)
+	
+	c:set_source_linear_pattern(0,w+20,0,0)
+	c:add_source_pattern_color_stop(0.00,"000000ff")
+	c:add_source_pattern_color_stop(0.35,"444444ff")
+	c:add_source_pattern_color_stop(0.43,"525252ff")
+	c:add_source_pattern_color_stop(0.50,"565656ff")
+	c:add_source_pattern_color_stop(0.57,"525252ff")
+	c:add_source_pattern_color_stop(0.65,"444444ff")
+	c:add_source_pattern_color_stop(0.82,"1c1c1cff")
+	c:add_source_pattern_color_stop(1.00,"000000ff")
+	c:fill(true)
+	
+	c:clip()
+	--c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	
+	c:set_source_linear_pattern(0,0,w,0)
+	c:add_source_pattern_color_stop(0.0, "ffffff0c")
+	c:add_source_pattern_color_stop(1.0, "ffffff40")
+	c:fill()
+
+
+    c:new_path()
+	c:move_to ( x, y)
+    c:line_to ( x + w, y)
+    c:set_line_width (lw/2)
+    c:set_source_color(color)
+    c:stroke (true)
+    c:fill (true)
+
+	if c.Image then
+         c = c:Image()
+    end
+    
+    return c
+end 
+
 
 --[[
 Function: dialogBox
@@ -1705,8 +1874,8 @@ Arguments:
     	title_font - Font of the text in the dialog box
     	border_width - Border width of the dialog box  
     	border_corner_radius - The radius of the border of the dialog box
-	title_seperator_thickness - Thickness of the title seperator 
-	title_seperator_color - Color of the title seperator 
+	title_separator_thickness - Thickness of the title separator 
+	title_separator_color - Color of the title separator 
     	padding_x - Padding of the dialog box on the X axis
     	padding_y - Padding of the dialog box on the Y axis
 
@@ -1714,37 +1883,37 @@ Return:
  	db_group - group containing the dialog box
 ]]
 
-function ui_element.dialogBox(table) 
+function ui_element.dialogBox(t) 
  
 --default parameters
    local p = {
-	skin = "custom", 
-	ui_width = 900 ,
-	ui_height = 500 ,
+	skin = "Custom", 
+	ui_width = 500 ,
+	ui_height = 400 ,
 	label = "Dialog Box Title" ,
 	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
 	title_color = {255,255,255,255} , --"FFFFFF" , 
-	title_font = "DejaVu Sans 30px" , 
-	border_width  = 4 ,
+	title_font = "FreeSans Medium 28px" , 
+	border_width  = 12 ,
 	padding_x = 0 ,
 	padding_y = 0 ,
 	border_corner_radius = 22 ,
-	title_seperator_thickness = 4, 
-	title_seperator_color = {255,255,255,255},
+	title_separator_thickness = 10, 
+	title_separator_color = {100,100,100,100},
 	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
     }
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
 
  --the umbrella Group
     local db_group_cur_y = 6
-    local d_box, title_seperator, title, d_box_img, title_seperator_img
+    local d_box, title_separator, title, d_box_img, title_separator_img, create_dialogBox
 
     local  db_group = Group {
     	  name = "dialogBox",  
@@ -1754,27 +1923,30 @@ function ui_element.dialogBox(table)
     }
 
 
-    local create_dialogBox  = function ()
+    create_dialogBox  = function ()
    
         db_group:clear()
-        db_group.size = { p.ui_width , p.ui_height - 34}
+        --db_group.size = { p.ui_width , p.ui_height - 34}
+        db_group.size = { p.ui_width , p.ui_height }
 
-        d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_seperator_thickness, p.title_seperator_color) 
-	d_box.y = d_box.y - 34
-	d_box:set{name="d_box"} 
-	db_group:add(d_box)
+		d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+        --d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
+		--d_box.y = d_box.y - 34
+		d_box.y = d_box.y 
+		d_box:set{name="d_box"} 
+		db_group:add(d_box)
 --[[
-	if p.title_seperator_thickness >  0 then 
-             title_seperator = make_title_seperator(p.title_seperator_thickness, p.title_seperator_color, p.ui_width)
-             title_seperator:set{name = "title_seperator", position  = {0, db_group_cur_y + 30}}
-	     db_group:add(title_seperator)
+	if p.title_separator_thickness >  0 then 
+             title_separator = make_title_separator(p.title_separator_thickness, p.title_separator_color, p.ui_width)
+             title_separator:set{name = "title_separator", position  = {0, db_group_cur_y + 30}}
+	     db_group:add(title_separator)
 	end
   ]]
 
         title= Text{text = p.label, font= p.title_font, color = p.title_color}     
         title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
 
-	if(p.skin ~= "custom") then 
+	if(p.skin ~= "Custom") then 
         	d_box_img = assets(skin_list[p.skin]["dialogbox"])
         	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
 	else 
@@ -1785,7 +1957,7 @@ function ui_element.dialogBox(table)
 	if p.content then 
 	     db_group:add(p.content)
 	end 
-	if (p.skin == "custom") then d_box_img.opacity = 0
+	if (p.skin == "Custom") then d_box_img.opacity = 0
         else d_box.opacity = 0 end 
 
      end 
@@ -1794,13 +1966,15 @@ function ui_element.dialogBox(table)
 
      mt = {}
      mt.__newindex = function (t, k, v)
-	 if k == "bsize" then  
-	    p.ui_width = v[1] 
-	    p.ui_height = v[2]  
+	 	if k == "bsize" then  
+	    	p.ui_width = v[1] 
+	    	p.ui_height = v[2]  
         else 
            p[k] = v
         end
-        create_dialogBox()
+		if k ~= "selected" then 
+        	create_dialogBox()
+		end
      end 
 
      mt.__index = function (t,k)
@@ -1851,17 +2025,17 @@ Extra Function:
 
 
 
-function ui_element.toastAlert(table) 
+function ui_element.toastAlert(t) 
 
  --default parameters
     local p = {
- 	skin = "custom",  
+ 	skin = "Custom",  
 	ui_width = 770,
 	ui_height = 113,
 	label = "Toast Alert Title",
 	message = "Toast alert message",
-	title_font = "DejaVu Sans 22px", 
-	message_font = "DejaVu Sans 20px", 
+	title_font = "FreeSans Medium 22px", 
+	message_font = "FreeSans Medium 20px", 
 	title_color = {255,255,255,255},  
 	message_color = {255,255,255,255}, 
 	border_width  = 4,
@@ -1872,22 +2046,23 @@ function ui_element.toastAlert(table)
 	border_corner_radius = 22,
 	fade_duration = 2000,
 	on_screen_duration = 5000,
-	icon = "lib/assets/toast-icon.jpg"
+	icon = "lib/assets/toast-icon.jpg", 
+	ui_position = {800,600,0},
     }
 
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
 
  --the umbrella Group
-    local t_box, icon, title, message, t_box_img  
+    local t_box, icon, title, message, t_box_img, create_toastBox  
     local tb_group = Group {
     	  name = "toastb_group",  
-    	  position = {800, 600, 0}, 
+    	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "ToastAlert"} 
      }
@@ -1898,7 +2073,7 @@ function ui_element.toastAlert(table)
     local tb_group_timeline = Timeline ()
     
 
-    local create_toastBox = function()
+    create_toastBox = function()
 
     	tb_group:clear()
         tb_group.size = { p.ui_width , p.ui_height}
@@ -1907,7 +2082,7 @@ function ui_element.toastAlert(table)
     	t_box:set{name="t_box"}
 	tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
-	icon = assets(p.icon)
+		icon = Image {src = p.icon}
     	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
@@ -1916,7 +2091,7 @@ function ui_element.toastAlert(table)
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
     	message:set{name = "message", position = {icon.w  + icon.x + 20 , title.h + tb_group_cur_y }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
-	if(p.skin ~= "custom") then 
+	if(p.skin ~= "Custom") then 
     	     t_box_img = assets(skin_list[p.skin]["toast"])
     	     t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
 	else 
@@ -1928,7 +2103,7 @@ function ui_element.toastAlert(table)
 
     	tb_group:add(t_box, t_box_img, icon, title, message)
 
-    	if (p.skin == "custom") then t_box_img.opacity = 0
+    	if (p.skin == "Custom") then t_box_img.opacity = 0
     	else t_box.opacity = 0 end 
 
     	tb_group_timer.interval = p.on_screen_duration 
@@ -1948,8 +2123,9 @@ function ui_element.toastAlert(table)
      	end  
 
      	function tb_group_timeline.on_completed()
-		tb_group.opacity = 0
 		tb_group.scale = {0.8, 0.8}
+		tb_group.opacity = 255
+		tb_group:hide()
      	end 
 
      	function tb_group_timer.on_timer(tb_group_timer)
@@ -1960,9 +2136,14 @@ function ui_element.toastAlert(table)
 
      create_toastBox()
 
+	 if editor_lb == nil then 
+	 	tb_group:hide()
+	 end 
+
        
      function tb_group.extra.start_timer() 
-	tb_group_timer:start()
+		tb_group:show()
+		tb_group_timer:start()
      end 
     
      mt = {}
@@ -1972,7 +2153,9 @@ function ui_element.toastAlert(table)
         else 
            p[k] = v
         end
-        create_toastBox()
+		if k ~= "selected" then 
+        	create_toastBox()
+		end
      end 
 
      mt.__index = function (t,k)
@@ -2004,11 +2187,11 @@ Arguments:
     	text_color - Color of the Button picker items
     	border_color - Color of the Button 
     	focus_color - Focus color of the Button 
-	selected_item - The number of the selected item 
-	rotate_func - function that is called by selected item number   
+		selected_item - The number of the selected item 
+		rotate_func - function that is called by selected item number   
 
 Return:
- 	bp_group - Group containing the button picker 
+ 		bp_group - Group containing the button picker 
 
 Extra Function:
 		on_focus_in() - Grab focus of button picker 
@@ -2021,18 +2204,19 @@ Extra Function:
 		insert_item(item) - Add an item to the items table 
 		remove_item(item) - Remove an item from the items table 
 ]]
-function ui_element.buttonPicker(table) 
+
+function ui_element.buttonPicker(t) 
     local w_scale = 1
     local h_scale = 1
 
  --default parameters 
     local p = {
-	skin = "default", 
+	skin = "CarbonCandy", 
 	ui_width =  180,
 	ui_height = 60,
 	items = {"item1", "item2", "item3"},
-	text_font = "DejaVu Sans 30px" , 
-	focus_text_font = "DejaVu Sans 30px" , 
+	text_font = "FreeSans Medium 30px" , 
+	focus_text_font = "FreeSans Medium 30px" , 
 	text_color = {255,255,255,255}, 
 	focus_text_color = {255,255,255,255}, 
 	border_color = {255,255,255,255},
@@ -2040,217 +2224,258 @@ function ui_element.buttonPicker(table)
 	focus_color = {0,255,0,255},
 	focus_fill_color = {0,255,0,0},
 	rotate_func = nil, 
-        selected_item = 1, 
+    selected_item = 1, 
 	direction = "horizontal", 
-	
+	ui_position = {300, 300, 0},  
+	----------------------------------------------
+	inspector = 0, 
     }
 
  --overwrite defaults
-     if table ~= nil then 
-        for k, v in pairs (table) do
+     if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
      end 
      
  --the umbrella Group
-     local unfocus, focus, left_un, left_sel, right_un, right_sel
+     local unfocus, focus, left_un, left_sel, right_un, right_sel, create_buttonPicker
      local items = Group{name = "items"}
 
      local bp_group = Group
      {
-	name = "buttonPicker", 
-	position = {300, 300, 0}, 
+		name = "buttonPicker", 
+		position = p.ui_position, 
         reactive = true, 
-	extra = {type = "ButtonPicker"}
+		extra = {type = "ButtonPicker"}
      }
 
      local index 
 
-     local padding = 10 
+     local padding = 5
      --local pos = {26, 0} -- left arrow 
      local pos = {0, 0}    -- focus, unfocus 
      local t = nil
 
-     local create_buttonPicker = function() 
+     create_buttonPicker = function() 
 
-	index = p.selected_item 
-	bp_group:clear()
-	items:clear()
-        bp_group.size = { p.ui_width , p.ui_height}
+		index = p.selected_item 
+		bp_group:clear()
+		items:clear()
+    	bp_group.size = { p.ui_width , p.ui_height}
 
-	ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 12)
-        ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
+		ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 12)
+    	ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
 
-        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 12)
-        focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
+    	focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 12)
+    	focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
 
 
-	if p.skin == "custom" then 
-     	    unfocus = assets(skin_list["default"]["buttonpicker"])
-     	    focus = assets(skin_list["default"]["buttonpicker_focus"])
-            left_un   = assets(skin_list["default"]["buttonpicker_left_un"])
-	    left_sel  = assets(skin_list["default"]["buttonpciker_left_sel"])
-	    right_un  = assets(skin_list["default"]["buttonpicker_right_un"])
-            right_sel = assets(skin_list["default"]["buttonpicker_right_sel"])
-	else 
-     	    unfocus = assets(skin_list[p.skin]["buttonpicker"])
-     	    focus = assets(skin_list[p.skin]["buttonpicker_focus"])
-	    left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
-	    left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
-	    right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
-            right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
- 	end 
+		if p.skin == "Custom" then 
+    		unfocus = assets(skin_list["default"]["buttonpicker"])
+     		focus =   assets(skin_list["default"]["buttonpicker_focus"])
+        	left_un   = assets(skin_list["default"]["buttonpicker_left_un"])
+	    	left_sel  = assets(skin_list["default"]["buttonpciker_left_sel"])
+	    	right_un  = assets(skin_list["default"]["buttonpicker_right_un"])
+        	right_sel = assets(skin_list["default"]["buttonpicker_right_sel"])
+		elseif p.skin == "inspector" then  
+     		unfocus = Group{} --name = "unfocus-button", reactive = true, position = {pos[1], pos[2]}}
+			local left, right, u1px 
+			
+			left = Image{src="lib/assets/picker-left-cap.png"} 
+			right = Image{src="lib/assets/picker-right-cap.png", position = {p.ui_width - left.w, 0}} 
+			u1px = Image{src="lib/assets/picker-repeat1px.png", position = {left.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
 
-	left_un.scale = {w_scale, h_scale}
-	left_sel.scale = {w_scale, h_scale}
-	right_un.scale = {w_scale, h_scale}
-	right_sel.scale = {w_scale, h_scale}
+			unfocus:add(left)
+			unfocus:add(u1px)
+			unfocus:add(right)
 
-	if p.direction == "horizontal" then 
-		left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-		left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
-		right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-		right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
-	elseif p.direction == "vertical" then 
-            	left_un.anchor_point={left_un.w/2,left_un.h/2}
-            	left_un.z_rotation={90,0,0}
-		left_un:set{name = "left_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 }, opacity = 255, reactive = true} -- top
-		left_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 }, opacity = 0}
+     		focus = Group{} --name = "focus-button", reactive = true, position = {pos[1], pos[2]}}
 
-            	right_un.anchor_point={right_un.w/2,right_un.h/2}
-            	right_un.z_rotation={90,0,0}
-		right_un:set{name = "right_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 }, opacity = 255, reactive = true} -- bottom
-		right_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2  },  opacity = 0}
-	end
+			local fleft, fright, f1px
+			fleft = Image{src="lib/assets/picker-left-cap-focus.png"}
+			fright = Image{src="lib/assets/picker-right-cap-focus.png", position = {p.ui_width - fleft.w, 0}}
+			f1px = Image{src="lib/assets/picker-repeat1px-focus.png", position = {fleft.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
 
-     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
-	focus:set{name = "focus",  position = {pos[1], pos[2]}, size = {p.ui_width, p.ui_height}, opacity = 0}
+			focus:add(fleft)
+			focus:add(f1px)
+			focus:add(fright)
+
+	    	left_un   = assets("lib/assets/picker-left-arrow.png")
+	    	left_sel  = assets("lib/assets/picker-left-arrow-focus.png")
+	    	right_un  = assets("lib/assets/picker-right-arrow.png")
+        	right_sel = assets("lib/assets/picker-right-arrow-focus.png")
+		else 
+     		unfocus = assets(skin_list[p.skin]["buttonpicker"])
+     		focus = assets(skin_list[p.skin]["buttonpicker_focus"])
+	    	left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
+	    	left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
+	    	right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
+        	right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
+ 		end 
+
+		left_un.scale = {w_scale, h_scale}
+		left_sel.scale = {w_scale, h_scale}
+		right_un.scale = {w_scale, h_scale}
+		right_sel.scale = {w_scale, h_scale}
+
+     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
+		focus:set{name = "focus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 0}
+
+		if p.direction == "horizontal" then 
+			left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
+			left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
+			right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
+			right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+		elseif p.direction == "vertical" then 
+            left_un.anchor_point={left_un.w/2,left_un.h/2}
+            left_un.z_rotation={90,0,0}
+			left_un:set{name = "left_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 + 12}, opacity = 255, reactive = true} -- top
+			left_sel.anchor_point={left_un.w/2,left_un.h/2}
+            left_sel.z_rotation={90,0,0}
+			left_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2+ 12 }, opacity = 0}
+
+            right_un.anchor_point={right_un.w/2,right_un.h/2}
+            right_un.z_rotation={90,0,0}
+			right_un:set{name = "right_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2+ 5 }, opacity = 255, reactive = true} -- bottom
+            right_sel.anchor_point={right_un.w/2,right_un.h/2}
+            right_sel.z_rotation={90,0,0}
+			right_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 + 5 },  opacity = 0}
+		end
 
      	for i, j in pairs(p.items) do 
                items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, opacity = 255})     
      	end 
 
-	local j_padding
+		local j_padding = 0
 
-	for i, j in pairs(items.children) do 
-	  if i == p.selected_item then  -- i == 1
-               j.position = {p.ui_width/2 - j.width/2, p.ui_height/2 - j.height/2}
-	       j_padding = 5 * j.x -- 5 는 진정한 해답이 아니고.. 이걸 바꿔 줘야함.. 그리고 박스 크기가 문자열과 비례해서 적당히 커줘야하고.. ^^;;;
-	  else 
-               --j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
-	  end 
-     	end 
+		for i, j in pairs(items.children) do 
+	  		if i == p.selected_item then  
+               j.position = {p.ui_width/2 - j.width/2, p.ui_height/2 - j.height/2 - p.inspector }
+	       	   j_padding = 5 * j.x -- 5 는 진정한 해답이 아니고.. 이걸 바꿔 줘야함.. 그리고 박스 크기가 문자열과 비례해서 적당히 커줘야하고.. ^^;;;
+			   break
+			end 
+		end 
 
-	for i, j in pairs(items.children) do 
-	  if i > p.selected_item then  -- i == 1
+		for i, j in pairs(items.children) do 
+	  		if i > p.selected_item then  -- i == 1
                j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
-	  end 
-     	end 
-
-	for i, j in pairs(items.children) do 
-	  if i < p.selected_item then  -- i == 1
+	  		elseif i < p.selected_item then  -- i == 1
                j.position = {p.ui_width/2 - j.width/2 + j_padding, p.ui_height/2 - j.height/2}
-	  end 
+	  		end 
      	end 
 
-	items.clip = { 0, 0, p.ui_width, p.ui_height }
+		if p.direction == "vertical" then 
+			items.clip = { 0, 10, p.ui_width, p.ui_height-10 }
+		else 
+			items.clip = { 0, 0, p.ui_width, p.ui_height }
+     	end 
 
-   	bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
+   		bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
 
-	if(p.skin == "custom") then unfocus.opacity = 0 
-        else ring.opacity = 0 end 
+		if(p.skin == "Custom") then 
+			unfocus.opacity = 0 
+       	else 
+			ring.opacity = 0 
+		end 
 
         t = nil
 
-	if editor_lb == nil or editor_use then 
+		if editor_lb == nil or editor_use then 
+			local unfocus, left_arrow, right_arrow 
+			unfocus = bp_group:find_child("unfocus")
+			unfocus.reactive = true
+			function unfocus:on_button_down (x,y,b,n)
+				if current_focus then
+   			         current_focus.extra.on_focus_out()
+	        		 current_focus = group
+				end 
+				bp_group.on_focus_in()
+	            bp_group:grab_key_focus()
+		        return true
+			end 
 
-	local unfocus, left_arrow, right_arrow 
-	unfocus = bp_group:find_child("unfocus")
-	unfocus.reactive = true
-	function unfocus:on_button_down (x,y,b,n)
-		if current_focus then
-   		current_focus.extra.on_focus_out()
-	        current_focus = group
+        	left_arrow = bp_group:find_child("left_un")
+			left_arrow.reactive = true 
+			function left_arrow:on_button_down(x, y, b, n)
+				if current_focus then
+					current_focus.extra.on_focus_out()
+	        		current_focus = group
+				end
+				bp_group.on_focus_in()
+	        	bp_group:grab_key_focus()
+				if p.direction == "vertical" then 
+					bp_group.press_up()
+				else 
+					bp_group.press_left()
+				end 
+				return true 
+			end 
+
+			right_arrow = bp_group:find_child("right_un")
+			right_arrow.reactive = true 
+			function right_arrow:on_button_down(x, y, b, n)
+				if current_focus then
+					current_focus.extra.on_focus_out()
+	        		current_focus = group
+				end
+				bp_group.on_focus_in()
+	        	bp_group:grab_key_focus()
+				if p.direction == "vertical" then 
+					bp_group.press_down()
+				else
+					bp_group.press_right()
+				end 
+				return true 
+			end 
 		end 
-		bp_group.on_focus_in()
-	        bp_group:grab_key_focus()
-		return true
-	end 
-
-        left_arrow = bp_group:find_child("left_un")
-	left_arrow.reactive = true 
-	function left_arrow:on_button_down(x, y, b, n)
-		if current_focus then
-		current_focus.extra.on_focus_out()
-	        current_focus = group
-		end
-		bp_group.on_focus_in()
-	        bp_group:grab_key_focus()
-		bp_group.press_left()
-		return true 
-	end 
-
-	right_arrow = bp_group:find_child("right_un")
-	right_arrow.reactive = true 
-	function right_arrow:on_button_down(x, y, b, n)
-		if current_focus then
-		current_focus.extra.on_focus_out()
-	        current_focus = group
-		end
-		bp_group.on_focus_in()
-	        bp_group:grab_key_focus()
-		bp_group.press_right()
-		return true 
-	end 
-
-	end 
      end 
  
      create_buttonPicker()
 
      function bp_group.extra.on_focus_in()
-	current_focus = bp_group
-	if(p.skin == "custom") then 
-             ring.opacity = 0 
-	     focus_ring.opacity = 255
+		current_focus = bp_group
+		if(p.skin == "Custom") then 
+            ring.opacity = 0 
+	     	focus_ring.opacity = 255
         else 
-             unfocus.opacity = 0
-	     focus.opacity   = 255
-	end 
+            unfocus.opacity = 0
+	     	focus.opacity   = 255
+		end 
      	for i, j in pairs(p.items) do 
              bp_group:find_child("item"..tostring(i)).color = p.focus_text_color
-	end 
-
+		end 
+	    bp_group:grab_key_focus()
      end
+
      function bp_group.extra.on_focus_out()
-	if(p.skin == "custom") then 
-             ring.opacity = 255 
-	     focus_ring.opacity = 0
-	else 
+		if(p.skin == "Custom") then 
+        	ring.opacity = 255 
+	     	focus_ring.opacity = 0
+		else 
             unfocus.opacity = 255
-	    focus.opacity   = 0
-	end 
+	    	focus.opacity   = 0
+		end 
      	for i, j in pairs(p.items) do 
              bp_group:find_child("item"..tostring(i)).color = p.text_color
-	end
+		end
      end
 
      function bp_group.extra.press_left()
-            local prev_i = index
-
-            local next_i = (index-2)%(#p.items)+1
+     	local prev_i = index
+        local next_i = (index-2)%(#p.items)+1
 
 	    index = next_i
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
-	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector
 	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
+	    local next_old_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local prev_new_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local next_new_x = p.ui_width/2 - j.width/2
-	    local next_new_y = p.ui_height/2 - j.height/2
+	    local next_new_y = p.ui_height/2 - j.height/2 - p.inspector 
 
 	    if t ~= nil then
 	       t:stop()
@@ -2276,6 +2501,7 @@ function ui_element.buttonPicker(table)
 			items:find_child("item"..tostring(next_i)).x = next_old_x + p*(next_new_x - next_old_x)
 			items:find_child("item"..tostring(next_i)).y = next_old_y + p*(next_new_y - next_old_y)
 	    end
+
 	    function t.on_completed()
 			items:find_child("item"..tostring(prev_i)).x = prev_new_x
 			items:find_child("item"..tostring(prev_i)).y = prev_new_y
@@ -2283,12 +2509,10 @@ function ui_element.buttonPicker(table)
 			items:find_child("item"..tostring(next_i)).y = next_new_y
 			p.selected_item = next_i
 			if p.rotate_func then
-	       		     p.rotate_func(next_i)
-	    		end
-
+	       		p.rotate_func(next_i)
+	    	end
 			t = nil
 	    end
-	   
 	    t:start()
 	end
 
@@ -2299,13 +2523,13 @@ function ui_element.buttonPicker(table)
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
-	    local prev_old_y = p.ui_height/2 - j.height/2
+	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
+	    local next_old_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local prev_new_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local next_new_x = p.ui_width/2 - j.width/2
-	    local next_new_y = p.ui_height/2 - j.height/2
+	    local next_new_y = p.ui_height/2 - j.height/2 - p.inspector 
 
 	    if t ~= nil then
 		t:stop()
@@ -2347,19 +2571,23 @@ function ui_element.buttonPicker(table)
 	end
 
  	function bp_group.extra.press_up()
-	          local prev_i = index
+	    local prev_i = index
 
-            local next_i = (index-2)%(#p.items)+1
+        local next_i = (index-2)%(#p.items)+1
 
 	    index = next_i
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
-	    local prev_old_x = p.ui_width/2 - j.width/2
+	    
+		local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2
-	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
-	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+
+	    local next_old_x = p.ui_width/2 - j.width/2 
+	    local next_old_y = p.ui_height/2 - j.height/2 + focus.h
+
+	    local prev_new_x = p.ui_width/2 - j.width/2 
+	    local prev_new_y = p.ui_height/2 - j.height/2 - focus.h
+
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2
 
@@ -2413,10 +2641,10 @@ function ui_element.buttonPicker(table)
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2
-	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
-	    local next_old_y = p.ui_height/2 - j.height/2
-	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
-	    local prev_new_y = p.ui_height/2 - j.height/2
+	    local next_old_x = p.ui_width/2 - j.width/2 
+	    local next_old_y = p.ui_height/2 - j.height/2 - focus.h
+	    local prev_new_x = p.ui_width/2 - j.width/2 
+	    local prev_new_y = p.ui_height/2 - j.height/2 + focus.h
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2
 
@@ -2528,8 +2756,8 @@ Arguments:
 	select_color - Color of the selected Radio button
 	button_radius - Radius of the Radio button
 	select_radius - Radius of the selected Radio button
-	ring_pos - The position of the group of Radio buttons 
-	item_pos - The position of the group of text items 
+	ring_position - The position of the group of Radio buttons 
+	item_position - The position of the group of text items 
 	line_space - The space between the text items 
 	selected_item - Selected item's number 
 	rotate_func - function that is called by selceted item number
@@ -2543,36 +2771,42 @@ Extra Function:
 ]]
 
 
-function ui_element.radioButtonGroup(table) 
+function ui_element.radioButtonGroup(t) 
 
  --default parameters
     local p = {
-	skin = "custom", 
+	skin = "Custom", 
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	text_font = "DejaVu Sans 30px", -- items 
+	text_font = "FreeSans Medium 30px", -- items 
 	text_color = {255,255,255,255}, --"FFFFFF", -- items 
-	button_color = {255,255,255,200}, -- items 
+	button_color = {255,255,255,255}, -- items 
 	select_color = {255, 255, 255, 255}, -- items 
+	focus_color = {0,255,0,255},
+	--focus_fill_color = {0,50,0,100},
 	button_radius = 10, -- items 
 	select_radius = 4,  -- items 
-	b_pos = {0, 0},  -- items 
-	item_pos = {50,-5},  -- items 
+	button_position = {0, 0},  -- items 
+	item_position = {50,-10},  -- items 
 	line_space = 40,  -- items 
-	button_image = Image{}, --assets("assets/radiobutton.png"),
-	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
 	rotate_func = nil, 
 	direction = "vertical", 
-	selected_item = 1 
+	selected_item = 1,  
+	ui_position = {200, 200, 0}, 
+	------------------------------------------------
+	button_image = Image{}, --assets("assets/radiobutton.png"),
+	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
     }
 
  --overwrite defaults
-    if table ~= nil then 
-        for k, v in pairs (table) do
+ ------------------------------------------------
+    if t ~= nil then 
+        for k, v in pairs (t) do
 	    p[k] = v 
         end 
     end 
+
 
  --the umbrella Group
     local items = Group()
@@ -2581,100 +2815,208 @@ function ui_element.radioButtonGroup(table)
 
     local rb_group = Group {
           name = "radioButtonGroup",  
-    	  position = {200, 200, 0}, 
+    	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "RadioButtonGroup"}
      }
 
+
+	function rb_group.extra.on_focus_in()
+	  	current_focus = cb_group
+        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
+	    rings:find_child("ring"..1).opacity = 0 
+	    rings:find_child("focus"..1).opacity = 255 
+        --end 
+		rings:find_child("ring"..1):grab_key_focus() 
+    end
+
+    function rb_group.extra.on_focus_out()
+        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
+			--for i=1, table.getn(rings.children)/2 do 
+			for i=1,  #rings.children/2 do 
+	    		rings:find_child("ring"..i).opacity = 255 
+	    		rings:find_child("focus"..i).opacity = 0 
+			end 
+        --end 
+    end 
+
     function rb_group.extra.select_button(item_n) 
-	    p.selected_item = item_n
-            if p.rotate_func then
+	    rb_group.selected_item = item_n
+	    --p.selected_item = item_n
+        if p.rotate_func then
 	       p.rotate_func(p.selected_item)
 	    end
     end 
 
+    local create_radioButton 
+
     function rb_group.extra.insert_item(itm) 
-	table.insert(p.items, itm) 
-	create_radioButton()
+		table.insert(p.items, itm) 
+		create_radioButton()
     end 
 
     function rb_group.extra.remove_item() 
-	table.remove(p.items)
-	create_radioButton()
+		table.remove(p.items)
+		create_radioButton()
     end 
 
-    local create_radioButton = function() 
+    create_radioButton = function() 
 
-	if(p.skin ~= "custom") then 
-	 p.button_image = assets(skin_list[p.skin]["radiobutton"])
-	 p.select_image = assets(skin_list[p.skin]["radiobutton_sel"])
+	local sel_off_x = 12
+	local sel_off_y = 4
+
+	if(p.skin ~= "Custom" and p.skin ~= "default") then 
+	     p.button_image = skin_list[p.skin]["radiobutton"]
+	     p.button_focus_image = skin_list[p.skin]["radiobutton_focus"]
+	     p.select_image = skin_list[p.skin]["radiobutton_sel"]
+		 --[[
+		 if p.skin == "CarbonCandy" and p.line_space == 40 then
+			p.item_position = {70, 10}
+			p.line_space = 65
+		 end 
+		 ]]
 	end
 
-         rb_group:clear()
-         rings:clear()
-         items:clear()
+    rb_group:clear()
+    rings:clear()
+    items:clear()
          --rb_group.size = { p.ui_width , p.ui_height},
 	
-         if(p.skin == "custom") then 
-	     select_img = create_select_circle(p.select_radius, p.select_color)
-         else 
-    	     select_img = p.select_image
-         end 
+    if(p.skin == "Custom" or p.skin == "default") then 
+		select_img = create_select_circle(p.select_radius, p.select_color)
+        select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
+    else 
+    	select_img = Image{src = p.select_image}
+        select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
+    end 
     
-         select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
 
-	 local pos = {0,0}
-         for i, j in pairs(p.items) do 
-	      local donut 
-	      if(p.direction == "vertical") then --vertical 
-                  pos= {0, i * p.line_space - p.line_space}
-	      end   	
-              items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
-	      if p.skin == "custom" then 
-		   donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
-    	           rings:add(donut) 
-	      else
-	           donut = Clone{name = "item"..tostring(i),  source=p.button_image, position = {pos[1], pos[2] - 8}}
-    	           rings:add(donut) 
-	      end 
+	local pos = {0,0}
+    for i, j in pairs(p.items) do 
+		local donut, focus 
+	    if(p.direction == "vertical") then --vertical 
+        	pos= {0, i * p.line_space - p.line_space}
+	    end   	
+        items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
+	    if p.skin == "Custom"  or p.skin == "default"then 
+		   		donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
+		   	   	focus =  create_circle(p.button_radius, p.focus_color):set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
+    	       	rings:add(donut, focus) 
+	    else
+	           	donut = Image{name = "ring"..tostring(i),  src=p.button_image, position = {pos[1], pos[2] - 8}}
+	           	focus = Image{name = "focus"..tostring(i),  src=p.button_focus_image, position = {pos[1], pos[2] - 8}, opacity = 0}
+    	       	rings:add(donut, focus) 
+	    end 
 
-	      if(p.direction == "horizontal") then --horizontal
-		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
-	      end 
-	      donut.reactive = true
-  
-              if editor_lb == nil or editor_use then  
-	     		function donut:on_button_down (x,y,b,n)
-				local ring_num = tonumber(donut.name:sub(5,-1))
-				rb_group.extra.select_button(ring_num)
-				select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
-				return true
+	    if(p.direction == "horizontal") then --horizontal
+		  	   	pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
+	    end 
+	    donut.reactive = true
+
+        if editor_lb == nil or editor_use then  
+				function donut:on_key_down(key)
+					local ring_num = tonumber(donut.name:sub(5,-1))
+					local next_num
+					
+					if key == keys.Up then 
+						if ring_num > 1 then 
+							next_num = ring_num - 1
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
+	    						rings:find_child("ring"..ring_num).opacity = 255 
+	    						rings:find_child("focus"..ring_num).opacity = 0 
+	    						rings:find_child("ring"..next_num).opacity = 0 
+	    						rings:find_child("focus"..next_num).opacity = 255 
+        					--end 
+	    					rings:find_child("ring"..next_num):grab_key_focus()
+							return true 
+						end
+					elseif key == keys.Down then 
+						--if ring_num < table.getn(rings.children)/2 then 
+						if ring_num < #rings.children/2 then 
+							next_num = ring_num + 1
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
+	    						rings:find_child("ring"..ring_num).opacity = 255 
+	    						rings:find_child("focus"..ring_num).opacity = 0 
+	    						rings:find_child("ring"..next_num).opacity = 0 
+	    						rings:find_child("focus"..next_num).opacity = 255 
+        					--end 
+							rings:find_child("ring"..next_num):grab_key_focus() 
+							return true 
+						end
+					elseif key == keys.Return then 
+						rb_group.extra.select_button(ring_num)
+
+						--if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
+	    					rings:find_child("ring"..ring_num).opacity = 0 
+	    					rings:find_child("focus"..ring_num).opacity = 255 
+        				--end 
+
+						if (p.skin == "CarbonCandy") then 
+							select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + p.button_position[1]
+	    					select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + p.button_position[2] - 8
+						else 
+							select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x + p.button_position[1]
+	    					select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y + p.button_position[2]
+						end 
+
+						rings:find_child("ring"..ring_num):grab_key_focus() 
+
+						return true 
+					end 
+				end 
+	
+	           	function donut:on_button_down (x,y,b,n)
+					if current_focus then 
+						current_focus.on_focus_out() 
+					end 
+
+				    local ring_num = tonumber(donut.name:sub(5,-1))
+					rb_group.extra.select_button(ring_num)
+
+					current_focus = rb_group
+        			--if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
+	    				rings:find_child("ring"..ring_num).opacity = 0 
+	    				rings:find_child("focus"..ring_num).opacity = 255 
+        			--end 
+					rings:find_child("ring"..ring_num):grab_key_focus() 
+
+        			if (p.skin == "CarbonCandy") then 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x 
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y - 8 
+					else 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y
+					end 
+					return true
 	     		end 
-	      end
+	      	end
          end 
-	 rings:set{name = "rings", position = p.b_pos} 
-	 items:set{name = "items", position = p.item_pos} 
+	 	 rings:set{name = "rings", position = p.button_position} 
+	 	 items:set{name = "items", position = p.item_position} 
 
-     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 
+		 local sel_offset = 0
+		 if p.skin == "CarbonCandy" then 
+				sel_offset = 11
+		 end 
 
-	 rb_group:add(rings, items, select_img)
+     	 select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x + p.button_position[1] - sel_offset
+     	 select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y + p.button_position[2] - sel_offset
+
+	 	 rb_group:add(rings, items, select_img)
 
      end
-
      create_radioButton()
-
-    
 
      mt = {}
      mt.__newindex = function (t, k, v)
-	if k == "bsize" then  
+		if k == "bsize" then  
 	    p.ui_width = v[1] p.ui_height = v[2]  
         else 
            p[k] = v
         end
-        create_radioButton()
+		if k ~= "selected" then 
+        	create_radioButton()
+		end
      end 
 
      mt.__index = function (t,k)
@@ -2712,15 +3054,14 @@ Arguments:
 		box_size - The size of Check box 
         check_size - The size of Check image 
 		box_pos - Postion of the group of check boxes
-		item_pos - Position of the group of text items 
+		item_position - Position of the group of text items 
 		line_space - Space between the text items 
 		selected_item - Selected item's number 
 		rotate_func - function that is called by selected item number   
 		direction - Option of list direction (1=Vertical, 2=Horizontal)
 
-
 Return:
-		rb_group - Group containing the check box  
+		cb_group - Group containing the check box  
 
 Extra Function:
 		insert_item(item) - Add an item to the items table 
@@ -2732,25 +3073,34 @@ function ui_element.checkBoxGroup(t)
 
  --default parameters
     local p = {
-	skin = "custom", 
+	skin = "Custom", 
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	text_font = "DejaVu Sans 30px", 
+	text_font = "FreeSans Medium 30px", 
 	text_color = {255,255,255,255}, 
 	box_color = {255,255,255,255},
 	fill_color = {255,255,255,0},
+	focus_color = {0,255,0,255},
+	focus_fill_color = {0,50,0,0},
 	box_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
 	line_space = 40,   
-	b_pos = {0, 0},  
-	item_pos = {50,-5},  
+	box_position = {0, 0},  
+	item_position = {50,-5},  
 	selected_items = {1},  
 	direction = "vertical",  -- 1:vertical 2:horizontal
 	rotate_func = nil,  
+	ui_position = {200, 200, 0}, 
     } 
 
+--[[
+	if p.skin == "CarbonCandy" then
+		p.item_position = {70, 15}
+		p.line_space = 60
+	end 
+]]
  --overwrite defaults
     if t ~= nil then 
         for k, v in pairs (t) do
@@ -2764,103 +3114,220 @@ function ui_element.checkBoxGroup(t)
     local items = Group{name = "items"}
     local boxes = Group() 
     local cb_group = Group()
+	local create_checkBox
 
     local  cb_group = Group {
     	  name = "checkBoxGroup",  
-    	  position = {200, 200, 0}, 
+    	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "CheckBoxGroup"}
     }
 
+	function cb_group.extra.on_focus_in()
+	  	current_focus = cb_group
+        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
+	    	boxes:find_child("box"..1).opacity = 0 
+	    	boxes:find_child("focus"..1).opacity = 255 
+        --end 
+		boxes:find_child("box"..1):grab_key_focus() 
+    end
+
+    function cb_group.extra.on_focus_out()
+        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
+			for i=1, table.getn(boxes.children)/2 do 
+	    		boxes:find_child("box"..i).opacity = 255 
+	    		boxes:find_child("focus"..i).opacity = 0 
+			end 
+        --end 
+    end 
+
     function cb_group.extra.select_button(items) 
-	    p.selected_items = items
-            if p.rotate_func then
-	       p.rotate_func(p.selected_items)
+	    cb_group.selected_items = items
+        if cb_group.rotate_func then
+	       cb_group.rotate_func(cb_group.selected_items)
 	    end
     end 
 
     function cb_group.extra.insert_item(itm) 
-	table.insert(p.items, itm) 
-	create_checkBox()
+		table.insert(p.items, itm) 
+		create_checkBox()
     end 
 
     function cb_group.extra.remove_item() 
-	table.remove(p.items)
-	create_checkBox()
+		table.remove(p.items)
+		create_checkBox()
     end 
 
-    local function create_checkBox()
+    function create_checkBox()
+	 	items:clear() 
+	 	checks:clear() 
+	 	boxes:clear() 
+	 	cb_group:clear()
 
-	 items:clear() 
-	 checks:clear() 
-	 boxes:clear() 
-	 cb_group:clear()
 
-	 if(p.skin ~= "custom") then 
-             p.box_image = assets(skin_list[p.skin]["checkbox"])
-             p.check_image = skin_list[p.skin]["check"]
-	 else 
-	     p.box_image = Image{}
+	 	if(p.skin ~= "Custom" and p.skin ~= "default") then 
+             p.box_image = skin_list[p.skin]["checkbox"]
+             p.box_focus_image = skin_list[p.skin]["checkbox_focus"]
+             p.check_image = skin_list[p.skin]["checkbox_sel"]
+
+--[[
+			 if p.skin == "CarbonCandy" then
+				p.item_position = {70, 15}
+				p.line_space = 60
+			 end 
+	]]
+
+	 	else 
+	     	 p.box_image = Image{}
+			 p.box_focus_image = Image{}
              p.check_image = "lib/assets/checkmark.png"
-	 end
+	 	end
 	
-	 boxes:set{name = "boxes", position = p.b_pos} 
-	 checks:set{name = "checks", position = p.b_pos} 
-	 items:set{name = "items", position = p.item_pos} 
+	 	boxes:set{name = "boxes", position = p.box_position} 
+	 	checks:set{name = "checks", position = p.box_position} 
+	 	items:set{name = "items", position = p.item_position} 
 
-         local pos = {0, 0}
-         for i, j in pairs(p.items) do 
-	      local box, check
-	      if(p.direction == "vertical") then --vertical 
+        local pos = {0, 0}
+        for i, j in pairs(p.items) do 
+	      	local box, check, focus
+	      	if(p.direction == "vertical") then --vertical 
                   pos= {0, i * p.line_space - p.line_space}
-	      end   			
+	      	end   			
 
-	      items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
-	      if p.skin == "custom" then 
-		   box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
-				       size = p.box_size, position = pos, reactive = true, opacity = 255}
-    	           boxes:add(box) 
-	     else
-	           box = Clone{name = "box"..tostring(i),  source=p.button_image, size = p.box_size, position = pos, reactive = true, opacity = 255}
-		   boxes:add(box) 
-	     end 
-
-	     check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = false, opacity = 0}
-	     checks:add(check) 
-
-             if editor_lb == nil or editor_use then  
-	     	function box:on_button_down (x,y,b,n)
-			local box_num = tonumber(box.name:sub(4,-1))
-			dumptable(p.selected_items)
-			--print(box.name)
-			--print(box_num)
-			table.insert(p.selected_items, box_num)
-			cb_group:find_child("check"..tostring(box_num)).opacity = 255
-			cb_group:find_child("check"..tostring(box_num)).reactive = true
-    			cb_group.extra.select_button(p.selected_items) 
-			return true
+	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
+	      	if p.skin == "Custom"  or p.skin == "default"then 
+		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
+				size = p.box_size, position = pos, reactive = true, opacity = 0}
+		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
+				size = p.box_size, position = pos, reactive = true, opacity = 255}
+    	        boxes:add(box, focus) 
+	     	else
+	           	focus = Image{name = "focus"..tostring(i),  src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
+	           	box = Image{name = "box"..tostring(i),  src=p.box_image, position = pos, reactive = true, opacity = 255}
+		   		boxes:add(box, focus) 
 	     	end 
-	     	function check:on_button_down(x,y,b,n)
-			local check_num = tonumber(check.name:sub(6,-1))
-			p.selected_items = table_remove_val(p.selected_items, check_num)
-			check.opacity = 0
-			check.reactive = false
-    			cb_group.extra.select_button(p.selected_items) 
-			return true
-	     	end 
-	     end
 
-	     if(p.direction == "horizontal") then 
-		  pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
-	     end 
+	      	if p.skin == "Custom"  or p.skin == "default"  then 
+	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
+			else 
+	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
+			end
+	     	checks:add(check) 
+
+            if editor_lb == nil or editor_use then  
+
+				function box:on_key_down(key)
+					local box_num = tonumber(box.name:sub(4,-1))
+					local next_num
+					local next_key, prev_key
+
+					if cb_group.direction == "vertical" then 
+						next_key = keys.Down 
+						prev_key = keys.Up
+					else 
+						next_key = keys.Right 
+						prev_key = keys.Left
+					end 
+							
+					if key == prev_key then 
+						if box_num > 1 then 
+							next_num = box_num - 1
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
+	    						boxes:find_child("box"..box_num).opacity = 255 
+	    						boxes:find_child("focus"..box_num).opacity = 0 
+	    						boxes:find_child("box"..next_num).opacity = 0 
+	    						boxes:find_child("focus"..next_num).opacity = 255 
+        					--end 
+	    					boxes:find_child("box"..next_num):grab_key_focus()
+							return true 
+						end
+					elseif key == next_key then 
+						if box_num < table.getn(boxes.children)/2 then 
+							next_num = box_num + 1
+				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
+	    						boxes:find_child("box"..box_num).opacity = 255 
+	    						boxes:find_child("focus"..box_num).opacity = 0 
+	    						boxes:find_child("box"..next_num).opacity = 0 
+	    						boxes:find_child("focus"..next_num).opacity = 255 
+        					--end 
+							boxes:find_child("box"..next_num):grab_key_focus() 
+							return true 
+						end
+					elseif key == keys.Return then 
+    					cb_group.extra.select_button(p.selected_items) 
+						if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
+							cb_group.selected_items = table_remove_val(cb_group.selected_items, box_num)
+							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
+							cb_group:find_child("check"..tostring(box_num)).reactive = true 
+	    					cb_group:find_child("box"..box_num).opacity = 0 
+	    					cb_group:find_child("focus"..box_num).opacity = 255 
+						else 
+							table.insert(cb_group.selected_items, box_num)
+							cb_group:find_child("check"..tostring(box_num)).opacity = 255 
+	    					cb_group:find_child("box"..box_num).opacity = 0 
+	    					cb_group:find_child("focus"..box_num).opacity = 255 
+
+						end 
+						boxes:find_child("box"..box_num):grab_key_focus() 
+						return true 
+					end 
+				end 
+
+	     		function box:on_button_down (x,y,b,n)
+					if current_focus then 
+						current_focus.on_focus_out() 
+					end 
+					local box_num = tonumber(box.name:sub(4,-1))
+	  				
+					current_focus = cb_group
+
+					table.insert(cb_group.selected_items, box_num)
+    				cb_group.extra.select_button(cb_group.selected_items) 
+
+					cb_group:find_child("check"..tostring(box_num)).opacity = 255
+					cb_group:find_child("check"..tostring(box_num)).reactive = true
+					
+	    			boxes:find_child("box"..tostring(box_num)).opacity = 0 
+	    			boxes:find_child("focus"..tostring(box_num)).opacity = 255 
+					boxes:find_child("box"..tostring(box_num)):grab_key_focus() 
+					return true
+	     		end 
+
+	     		function check:on_button_down(x,y,b,n)
+					if current_focus then 
+						current_focus.on_focus_out() 
+					end 
+					local check_num = tonumber(check.name:sub(6,-1))
+					current_focus = cb_group
+					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
+						cb_group.selected_items = table_remove_val(cb_group.selected_items, check_num)
+						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
+						cb_group:find_child("check"..tostring(check_num)).reactive = true 
+					else 
+						table.insert(cb_group.selected_items, check_num)
+						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
+					end 
+    				cb_group.extra.select_button(cb_group.selected_items) 
+	    			cb_group:find_child("box"..check_num).opacity = 0 
+	    			cb_group:find_child("focus"..check_num).opacity = 255 
+					boxes:find_child("box"..check_num):grab_key_focus() 
+					return true
+	     		end 
+	     	end
+
+	     	if(p.direction == "horizontal") then 
+		  		pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
+	     	end 
          end 
 
-	 for i,j in pairs(p.selected_items) do 
+	 	for i,j in pairs(p.selected_items) do 
              checks:find_child("check"..tostring(j)).opacity = 255 
-	 end 
+             checks:find_child("check"..tostring(j)).reactive = true 
+	 	end 
 
-
-	 cb_group:add(boxes, items, checks)
+		boxes.reactive = true 
+		checks.reactive = true 
+	 	cb_group:add(boxes, items, checks)
     end
     
     create_checkBox()
@@ -2869,11 +3336,13 @@ function ui_element.checkBoxGroup(t)
     mt = {}
     mt.__newindex = function (t, k, v)
     	if k == "bsize" then  
-	    p.ui_width = v[1] p.ui_height = v[2]  
+	    	p.ui_width = v[1] p.ui_height = v[2]  
         else 
-           p[k] = v
+            p[k] = v
         end
-        create_checkBox()
+		if k ~= "selected" then 
+        	create_checkBox()
+		end
     end 
 
     mt.__index = function (t,k)
@@ -2916,13 +3385,14 @@ Extra Function:
 function ui_element.progressSpinner(t) 
     --default parameters
     local p = {
-        skin          = "default",
+        skin          = "Custom",
         dot_diameter    = 10,
         dot_color     = {255,255,255,255},
         number_of_dots      = 12,
         overall_diameter   = 100,
         cycle_time = 150*12,
-        style = "orbitting"
+        style = "orbitting", 
+		ui_position = {400,400, 0},
     }
     --overwrite defaults
     if t ~= nil then
@@ -2936,7 +3406,7 @@ function ui_element.progressSpinner(t)
     --the umbrella Group
     local l_dots = Group{ 
         name     = "progressSpinner",
-        position = {400,400},
+        position = p.ui_position,  
         --anchor_point = {p.overall_diameter/2,p.overall_diameter/2},
         reactive = true,
         extra = {
@@ -2953,7 +3423,6 @@ function ui_element.progressSpinner(t)
     }
     --table of the dots, used by the animation
     local dots   = {}
-    local load_timeline = nil
     
     --the Canvas used to create the dots
     local make_dot = function(x,y)
@@ -2976,15 +3445,57 @@ function ui_element.progressSpinner(t)
     end
     local make_big_dot = function()
 
-          return Rectangle{
-              w=p.overall_diameter,
-              h=p.overall_diameter,
-              color = p.dot_color,
-              anchor_point={p.overall_diameter/2,p.overall_diameter/2}
-          }
-          
+        local dot  = Canvas{size={p.overall_diameter, p.overall_diameter}}
+		dot:begin_painting()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,0,90)
+		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
+		dot:line_to(p.overall_diameter,  p.overall_diameter/2)
+		dot:set_source_color(p.dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,90,180)
+		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
+		dot:line_to(p.overall_diameter/2,p.overall_diameter)
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,180,270)
+		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
+		dot:line_to(                    0, p.overall_diameter/2 )
+		dot:set_source_color(p.dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,270,360)
+		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
+		dot:line_to( p.overall_diameter/2,                    0 )
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+        dot:finish_painting()
+		
+        if dot.Image then
+            dot = dot:Image()
+        end
+        dot.anchor_point ={p.overall_diameter/2,p.overall_diameter/2}
+        dot.name         = "Loading Dot"
+        dot.position     = {x,y}
+
+        return dot
     end
-    local img, load_timeline
+    local img
+	local load_timeline = Timeline{
+		name      = "Loading Animation",
+        loop      =  true,
+		duration  =  p.cycle_time,
+        direction = "FORWARD", 
+	}
     --function used to remake the dots upon a parameter change
     create_dots = function()
         l_dots:clear()
@@ -3020,30 +3531,21 @@ function ui_element.progressSpinner(t)
         
         -- the animation timeline
         if load_timeline ~= nil and load_timeline.is_playing then
-            load_timeline:stop()
-            load_timeline = nil
+            
+			load_timeline:stop()
+            
         end
-        load_timeline = Timeline
-        {
-            name      = "Loading Animation",
-            loop      =  true,
-            duration  =  p.cycle_time,
-            direction = "FORWARD", 
-        }
-
-
-        local increment = math.ceil(255/p.number_of_dots)
         
-        function load_timeline.on_new_frame(t)
-            local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
-            local curr_i    = nil
-            
-            for i = 1, p.number_of_dots do
-                curr_i = (start_i + (i-1))%(p.number_of_dots) +1
-                
-                dots[curr_i].opacity = increment*i
-            end
-            
+		load_timeline.duration  =  p.cycle_time
+		
+        function load_timeline.on_new_frame(_,ms,prog)
+			
+            for i,d in ipairs(dots) do
+				
+				d.opacity = 255*(  (1-prog)  -  i/p.number_of_dots  )
+				
+			end
+			
         end
         load_timeline:start()
         
@@ -3084,7 +3586,9 @@ function ui_element.progressSpinner(t)
     local mt = {}
     mt.__newindex = function(t,k,v)
        p[k] = v
-       create_dots()
+	   if k ~= "selected" then 
+       		create_dots()
+	   end
     end
     mt.__index = function(t,k)       
        return p[k]
@@ -3133,16 +3637,16 @@ function ui_element.progressBar(t)
         filled_top_color    = {255,  0,  0,255},
         filled_bottom_color = { 96, 48, 48,255},
         progress            = 0,
-        skin                = "default"
+        skin                = "Custom", 
+		ui_position 		= {400,400},
     }
+
     --overwrite defaults
     if t ~= nil then
         for k, v in pairs (t) do
             p[k] = v
         end
     end
-
-	
 
 	local c_shell = Canvas{
             size = {p.ui_width,p.ui_height},
@@ -3156,7 +3660,7 @@ function ui_element.progressBar(t)
         }
 	local l_bar_group = Group{
 		name     = "progressBar",
-        	position = {400,400},
+        	position = p.ui_position, 
 	        anchor_point = {p.radius,p.radius},
         	reactive = true,
 	        extra = {
@@ -3167,9 +3671,10 @@ function ui_element.progressBar(t)
 	        },
 	}
 
+--[[
 	local l_bar_timer = Timer()
-    	local l_bar_timeline = Timeline ()
-
+    local l_bar_timeline = Timeline ()
+]]
 	local function create_loading_bar()
 		l_bar_group:clear()
         local stroke_width = 2
@@ -3177,7 +3682,7 @@ function ui_element.progressBar(t)
 				size = {p.ui_width,p.ui_height},
 		}
 		c_fill  = Canvas{
-				size = {1,p.ui_height-stroke_width},
+				size = {1,p.ui_height-2*stroke_width},
 		}  
         
 		
@@ -3244,33 +3749,36 @@ function ui_element.progressBar(t)
         	c_fill.scale = {(p.ui_width-4)*(p.progress),1}
 		l_bar_group:add(c_shell,c_fill)
 
+--[[
 		l_bar_timer.interval = 1 -- immediately 
-    		l_bar_timeline.duration = 3000 -- progress duration 
-    		l_bar_timeline.direction = "FORWARD"
-    		l_bar_timeline.loop = false
+    	l_bar_timeline.duration = 3000 -- progress duration 
+    	l_bar_timeline.direction = "FORWARD"
+    	l_bar_timeline.loop = false
 
-     		function l_bar_timeline.on_new_frame(t, m, p)
+     	function l_bar_timeline.on_new_frame(t, m, p)
 			l_bar_group.set_prog(p)
-     		end  
+     	end  
 
-     		function l_bar_timeline.on_completed()
+     	function l_bar_timeline.on_completed()
 			l_bar_group.set_prog(1)
-     		end 
+     	end 
 
-     		function l_bar_timer.on_timer(l_bar_timer)
+     	function l_bar_timer.on_timer(l_bar_timer)
 			l_bar_timeline:start()
-        		l_bar_timer:stop()
-     		end 
-
+        	l_bar_timer:stop()
+     	end 
+]]
 	end
     
 	create_loading_bar()
     
-    	function l_bar_group.extra.start_timer() 
+	--[[
+    function l_bar_group.extra.start_timer() 
 		l_bar_timer:start()
-     	end 
- 
-    
+    end 
+ 	]]
+
+
 	local mt = {}
     
     mt.__newindex = function(t,k,v)
@@ -3278,7 +3786,9 @@ function ui_element.progressBar(t)
         if k == "progress" then
             c_fill.scale = {(p.ui_width-4)*(v),1}
         else
-            create_loading_bar()
+	   		if k ~= "selected" then 
+            	create_loading_bar()
+	   		end
         end
     end
     
@@ -3290,20 +3800,21 @@ function ui_element.progressBar(t)
     
 	return l_bar_group
 end
+
 --[[
 Function: Layout Manager
 
 Creates a 2D grid of items, that animate in with a flipping animation
 
 Arguments:
-    num_rows    - number of rows
-    num_cols    - number of columns
+    rows    - number of rows
+    columns    - number of columns
     item_w      - width of an item
     item_h      - height of an item
     grid_gap    - the number of pixels in between the grid items
     duration_per_tile - how long a particular tile flips for
     cascade_delay     - how long a tile waits to start flipping after its neighbor began flipping
-    tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'num_cols' elements in a 2 dimensional table 
+    tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'columns' elements in a 2 dimensional table 
 
 Return:
     Group - Group containing the grid
@@ -3315,18 +3826,19 @@ Extra Function:
 function ui_element.layoutManager(t)
     --default parameters
     local p = {
-        rows    = 1,
-        columns    = 5,
+        rows    	= 1,
+        columns    	= 5,
         cell_w      = 300,
         cell_h      = 200,
-        cell_spacing    = 40, --grid_gap
-	cell_timing = 300, -- duration_per_time
-	cell_timing_offset     = 200,
+        cell_spacing_w = 40, --grid_gap
+        cell_spacing_h = 40, --grid_gap
+		cell_timing = 300, -- duration_per_time
+		cell_timing_offset = 200,
         tiles       = {},
-        focus       = nil,
-        cells_focusable = true, --focus_visible
-        skin="default",
+        cells_focusable = false, --focus_visible
+        skin        = "Custom",
         cell_size="fixed",
+ 		ui_position = {200,100},
     }
     
     local functions={}
@@ -3345,21 +3857,21 @@ function ui_element.layoutManager(t)
 	
     local x_y_from_index = function(r,c)
         if p.cell_size == "fixed" then
-		    return (p.cell_w+p.cell_spacing)*(c-1)+p.cell_w/2,
-		           (p.cell_h+p.cell_spacing)*(r-1)+p.cell_h/2
+		    return (p.cell_w+p.cell_spacing_w)*(c-1)+p.cell_w/2,
+		           (p.cell_h+p.cell_spacing_h)*(r-1)+p.cell_h/2
         end
         
         local x = (col_ws[1] or p.cell_w)/2
         local y = (row_hs[1] or p.cell_h)/2
-        for i = 1, c-1 do x = x + (col_ws[i] or p.cell_w)/2 + (col_ws[i+1] or p.cell_w)/2 + p.cell_spacing end
-        for i = 1, r-1 do y = y + (row_hs[i] or p.cell_h)/2 + (row_hs[i+1] or p.cell_h)/2 + p.cell_spacing end
+        for i = 1, c-1 do x = x + (col_ws[i] or p.cell_w)/2 + (col_ws[i+1] or p.cell_w)/2 + p.cell_spacing_w end
+        for i = 1, r-1 do y = y + (row_hs[i] or p.cell_h)/2 + (row_hs[i+1] or p.cell_h)/2 + p.cell_spacing_h end
         return x,y
 	end
 
     --the umbrella Group, containing the full slate of tiles
     local slate = Group{ 
         name     = "layoutManager",
-        position = {200,100},
+        position = p.ui_position, 
         reactive = true,
         extra    = {
 	    type = "LayoutManager",
@@ -3369,8 +3881,9 @@ function ui_element.layoutManager(t)
                     p.tiles[r][c]:unparent()
                 end
                 p.tiles[r][c] = obj
-                
-                if obj.parent ~= nil then obj:unparent() end
+               	if obj then  
+                	if obj.parent ~= nil then obj:unparent() end
+				end 
                 
                 make_grid()
 			end,
@@ -3432,40 +3945,19 @@ function ui_element.layoutManager(t)
                 end
             end,
             focus_to = function(r,c)
-                if r > p.rows or r < 1 or c < 1 or c > p.columns then
-                    print("invalid row/col")
-                    return
-                end
-                focus_i = {r,c}
-                local x,y = x_y_from_index(r,c)
-                focus:complete_animation()
-                if p.cell_size == "variable" then
-                    local w,h 
-                    if p.tiles[r][c] == nil then
-                        w = col_ws[r] or p.cell_w
-                        h = row_hs[c] or p.cell_h
-                    else
-                        w=p.tiles[r][c].w
-                        h=p.tiles[r][c].h
-                    end
-                    focus:animate{
-                        duration=300,
-                        mode="EASE_OUT_CIRC",
-                        x=x,
-                        y=y,
-                        w=w,
-                        h=h,
-                        anchor_point={(col_ws[r] or p.cell_w)/2,(row_hs[c] or p.cell_h)/2}
-                    }
-                else
-                    focus:animate{
-                        duration=300,
-                        mode="EASE_OUT_CIRC",
-                        x=x,
-                        y=y
-                    }
-                end
-            end,
+				
+				if current_focus then
+					current_focus.on_focus_out()
+				end
+
+				if p.tiles[r][c].on_focus_in then 
+					 p.tiles[r][c].on_focus_in()
+					 current_focus = p.tiles[r][c]
+					 focus_i[1] = r
+					 focus_i[2] = c 
+			    end 
+				
+			end,
             press_enter = function(p)
                 functions[focus_i[1]][focus_i[2]](p)
             end,
@@ -3474,8 +3966,8 @@ function ui_element.layoutManager(t)
 					duration =p.cell_timing_offset*(p.rows+p.columns-2)+ p.cell_timing
 				}
 				function tl:on_started()
-					for r = 1, p.num_rows  do
-						for c = 1, p.num_cols do
+					for r = 1, p.rows  do
+						for c = 1, p.columns do
 							p.tiles[r][c].y_rotation={90,0,0}
 							p.tiles[r][c].opacity = 0
 						end
@@ -3484,8 +3976,8 @@ function ui_element.layoutManager(t)
 				function tl:on_new_frame(msecs,prog)
 					msecs = tl.elapsed
 					local item
-					for r = 1, p.num_rows  do
-						for c = 1, p.num_cols do
+					for r = 1, p.rows  do
+						for c = 1, p.columns do
 							item = p.tiles[r][c] 
 							if msecs > item.delay and msecs < (item.delay+p.cell_timing) then
 								prog = (msecs-item.delay) / p.cell_timing
@@ -3512,26 +4004,51 @@ function ui_element.layoutManager(t)
                 x = x - self.transformed_position[1]/screen.scale[1]
                 y = y - self.transformed_position[2]/screen.scale[2]
                 if p.cell_size == "fixed" then
-                            --print(math.floor(y/(p.cell_h+p.cell_spacing))+1,
-                           --math.floor(x/(p.cell_w+p.cell_spacing))+1)
-	        	    return math.floor(x/(p.cell_w+p.cell_spacing))+1,
-                           math.floor(y/(p.cell_h+p.cell_spacing))+1
+	        	    return math.floor(x/(p.cell_w+p.cell_spacing_w))+1,
+                           math.floor(y/(p.cell_h+p.cell_spacing_h))+1
                 end
                 
                 local r = 1
                 local c = 1
                 for i = 1, p.columns do
                     if x < (col_ws[i] or p.cell_w) then break end
-                    x = x - (col_ws[i] or p.cell_w) - p.cell_spacing
+                    x = x - (col_ws[i] or p.cell_w) - p.cell_spacing_w
                     r = r + 1
                 end
                 for i = 1, p.rows do
                     if y < (row_hs[i] or p.cell_h) then break end
-                    y = y - (row_hs[i] or p.cell_h) - p.cell_spacing
+                    y = y - (row_hs[i] or p.cell_h) - p.cell_spacing_h
                     c = c + 1
                 end
                 return  r,c
-	        end
+	        end,
+            cell_x_y_w_h = function(self,r,c)
+                if p.cell_size == "fixed" then
+                    
+                    return  (p.cell_w+p.cell_spacing_w)*(c-1),
+                            (p.cell_h+p.cell_spacing_h)*(r-1),
+                            p.cell_w,
+                            p.cell_h
+                    
+                else
+                    
+                    local x, y = 0, 0
+                    
+                    for i = 1,c-1 do
+                        
+                        x = x + (col_ws[i] or p.cell_w) + p.cell_spacing_w
+                        
+                    end
+                    
+                    for i = 1,r-1 do
+                        
+                        y = y + (row_hs[i] or p.cell_h) + p.cell_spacing_h
+                        
+                    end
+                    
+                    return x, y, (col_ws[c] or p.cell_w), (row_hs[r] or p.cell_h)
+                end
+            end,
         }
     }
 
@@ -3571,37 +4088,39 @@ function ui_element.layoutManager(t)
 		local g
         slate:clear()
         
-        if p.focus == nil then
-            focus = make_focus()
-        else
-            focus = p.focus
-            focus.anchor_point={focus.w/2,focus.h/2}
-        end
         focus_i[1] = 1
         focus_i[2] = 1
-        focus.x, focus.y = x_y_from_index(focus_i[1],focus_i[2])
-        slate:add(focus)
         
-        if p.cells_focusable then
-            focus.opacity=255
-        else
-            focus.opacity=0
-        end
         if p.cell_size == "variable" then
+            
             for r = 1, p.rows  do
-			    for c = 1, p.columns do
+			    
+                for c = 1, p.columns do
+                    
                     if p.tiles[r]    == nil then break end
+                    
                     if p.tiles[r][c] ~= nil and p.tiles[r][c].name ~= "placeholder" then 
-                    if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
-                        row_hs[r] = p.tiles[r][c].h
+                        
+                        if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
+                            
+                            row_hs[r] = p.tiles[r][c].h
+                            
+                        end
+                        
+                        if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
+                            
+                            col_ws[c] = p.tiles[r][c].w
+                            
+                        end
+                        
                     end
-                    if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
-                        col_ws[c] = p.tiles[r][c].w
-                    end
-                    end
+                    
                 end
+                
             end
+            
         end
+        
 		for r = 1, p.rows  do
             if p.tiles[r] == nil then
                 p.tiles[r]   = {}
@@ -3627,6 +4146,12 @@ function ui_element.layoutManager(t)
 			end
 		end
         
+        slate.w, slate.h = x_y_from_index(p.rows,p.columns)
+        
+        slate.w = slate.w + (col_ws[p.columns] or p.cell_w)/2
+        
+        slate.h = slate.h + (row_hs[p.rows]    or p.cell_h)/2
+        
         if p.rows < #p.tiles then
             for r = p.rows + 1, #p.tiles do
                 for c = 1, #p.tiles[r] do
@@ -3637,39 +4162,112 @@ function ui_element.layoutManager(t)
                 functions[r] = nil
             end
         end
-	
-	if p.tiles[1] then 
-        if p.columns < #p.tiles[1] then
-            for c = p.columns + 1, #p.tiles[r] do
-                for r = 1, #p.tiles do
-                    p.tiles[r][c]:unparent()
-                    p.tiles[r][c]   = nil
-                    functions[r][c] = nil
+        
+        if p.tiles[1] then 
+            if p.columns < #p.tiles[1] then
+                for c = p.columns + 1, #p.tiles[r] do
+                    for r = 1, #p.tiles do
+                        p.tiles[r][c]:unparent()
+                        p.tiles[r][c]   = nil
+                        functions[r][c] = nil
+                    end
                 end
             end
         end
-        if p.cell_size == "variable" then
-            if p.tiles[focus_i[1]][focus_i[2]] == nil then
-                focus.w = col_ws[focus_i[2]] or p.cell_w
-                focus.h = row_hs[focus_i[1]] or p.cell_h
-            else
-                focus.w = p.tiles[focus_i[1]][focus_i[2]].w
-                focus.h = p.tiles[focus_i[1]][focus_i[2]].h
-            end
-            focus.anchor_point = { (focus.w)/2, (focus.h)/2}
-        end
-	end
 	end
 	make_grid()
 
-    
+
+	local function layoutManager_on_key_down(key)
+		if slate.focus[key] then
+			if type(slate.focus[key]) == "function" then
+				slate.focus[key]()
+			elseif screen:find_child(slate.focus[key]) then
+				if slate.on_focus_out then
+					slate.on_focus_out(key)
+				end
+				screen:find_child(slate.focus[key]):grab_key_focus()
+				if screen:find_child(slate.focus[key]).on_focus_in then
+					screen:find_child(slate.focus[key]).on_focus_in(key)
+				end
+			end
+		end
+		return true
+	end
+
+    --Key Handler
+	local keys={
+		[keys.Return] = function()
+			if 1 <= focus_i[1] and focus_i[1] <= p.rows and 1 <= focus_i[2] and focus_i[2] <= p.columns then
+				p.tiles[focus_i[1]][focus_i[2]].pressed()
+		    end 
+		end,
+		[keys.Left] = function()
+			if focus_i[2] - 1 >= 1 then
+				slate.focus_to(focus_i[1] ,focus_i[2] - 1)
+			else
+				layoutManager_on_key_down(keys.Left)
+			end
+			
+		end,
+		[keys.Right] = function()
+			if focus_i[2] + 1 > p.columns then
+				layoutManager_on_key_down(keys.Right)
+			else
+				slate.focus_to(focus_i[1],focus_i[2] + 1)
+			end
+			
+		end,
+		[keys.Up] = function()
+			if focus_i[1] - 1 < 1 then
+				layoutManager_on_key_down(keys.Up)
+			else
+				slate.focus_to(focus_i[1] - 1,focus_i[2])
+			end
+			
+		end,
+		[keys.Down] = function()
+			if focus_i[1] + 1 > p.rows then
+				layoutManager_on_key_down(keys.Down)
+			else
+				slate.focus_to(focus_i[1] + 1,focus_i[2])
+			end
+			
+		end,
+	}
+	
+	slate.on_key_down = function(self,key)
+
+		if keys[key] then keys[key]() end
+		
+	end
+
+	slate.on_focus_in = function ()
+
+		slate:grab_key_focus()
+		slate.focus_to(1,1)
+
+	end 
+
+	slate.on_focus_out = function ()
+		if current_focus then 
+			current_focus.on_focus_out ()
+		end 
+		current_focus = nil 
+		screen:grab_key_focus()
+	end 
+
+
+	ssss = slate 
 
 
     mt = {}
     mt.__newindex = function(t,k,v)
 		
        p[k] = v
-       make_grid()
+	   if k ~= "selected" then 
+       		make_grid()
+	   end
 		
     end
     mt.__index = function(t,k)       
@@ -3678,6 +4276,9 @@ function ui_element.layoutManager(t)
     setmetatable(slate.extra, mt)
     return slate
 end
+
+
+
 --[[
 Function: Scroll Pane
 
@@ -3711,31 +4312,36 @@ function ui_element.scrollPane(t)
     --default parameters
     local p = {
         visible_w    =  600,
-	--color     =  {255,255,255,255},
+        --color     =  {255,255,255,255},
         visible_h    =  600,
         content   = Group{},
         virtual_h = 1000,
-	virtual_w = 1000,
-	--arrow_clone_source = nil,
-	
-	--arrows_in_box = false,
-	--arrows_centered = false,
+        virtual_w = 1000,
+        --arrow_clone_source = nil,
+        --arrow_sz = 15,
+        arrow_color = {255,255,255,255},
+        arrows_visible = false,
+        --arrows_in_box = false,
+        --arrows_centered = false,
         --hor_arrow_y     = nil,
         --vert_arrow_x    = nil,
-        bar_color_inner     = {180,180,180,255},
-        bar_color_outer     = {30,30,30,255},
-        empty_color_inner   = {120,120,120,255},
-        empty_color_outer   = {255,255,255,255},
-        frame_thickness     =    2,
-        frame_color        = {60, 60,60,255},
-        bar_thickness       =   15,
-        bar_offset          =    5,
-        vert_bar_visible    = true,
-        horz_bar_visible     = true,
-        
-        box_color = {160,160,160,255},
-        box_width = 2,
-        skin="default",
+        bar_color_inner       = {180,180,180,255},
+        bar_color_outer       = { 30, 30, 30,255},
+        bar_focus_color_inner = {180,255,180,255},
+        bar_focus_color_outer = { 30, 30, 30,255},
+        empty_color_inner     = {120,120,120,255},
+        empty_color_outer     = {255,255,255,255},
+        frame_thickness       = 2,
+        frame_color           = { 60, 60, 60,255},
+        bar_thickness         = 15,
+        bar_offset            = 5,
+        vert_bar_visible      = true,
+        horz_bar_visible      = true,
+        box_color             = {160,160,160,255},
+        box_focus_color       = {160,255,160,255},
+        box_width             = 2,
+        skin                  = "Custom",
+		ui_position           = {200,100},
     }
     --overwrite defaults
     if t ~= nil then
@@ -3756,13 +4362,14 @@ function ui_element.scrollPane(t)
 	local border = Rectangle{ color = "00000000" }
 	
 	
-	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
+	local track_w, grip_hor,  track_hor,  unfocus_grip_hor, focus_grip_hor
+	local track_h, grip_vert, track_vert, unfocus_grip_vert,focus_grip_vert
 	
 
     --the umbrella Group, containing the full slate of tiles
     local scroll_group = Group{ 
         name     = "scrollPane",
-        position = {200,100},
+        position = p.ui_position, 
         reactive = true,
         extra    = {
 			type = "ScrollPane",
@@ -3782,13 +4389,10 @@ function ui_element.scrollPane(t)
                 if p.virtual_h > p.visible_h then
                     if y > p.virtual_h - p.visible_h/2 then
                         new_y = -p.virtual_h + p.visible_h
-                        --print(1)
                     elseif y < p.visible_h/2 then
                         new_y = 0
-                        --print(2)
                     else
                         new_y = -y + p.visible_h/2
-                        --print(3)
                     end
                 else
                     new_y =0
@@ -3831,12 +4435,16 @@ function ui_element.scrollPane(t)
                     end
                     end
                 end
-            end
+            end,
             --[[
 			get_content_group = function()
 				return content
 			end
             --]]
+            screen_pos_of_child = function(self,child)
+                return  child.x + child.parent.x + self.x + p.box_width,
+                        child.y + child.parent.y + self.y + p.box_width
+            end,
         }
     }
     scroll_group.extra.seek_to = function(x,y)
@@ -3873,6 +4481,10 @@ function ui_element.scrollPane(t)
 		end
 	end
 	
+	function scroll_group.extra.on_focus_in() 
+		scroll_group:grab_key_focus()
+    end
+
 	scroll_y = function(dir)
 		local new_y = p.content.y+ dir*10
 		animating = true
@@ -3957,14 +4569,38 @@ function ui_element.scrollPane(t)
 			}
 		end
 	end
+    local make_arrow = function()
+		
+		local c = Canvas{size={p.bar_thickness,p.bar_thickness}}
+		
+		c:move_to(    0,c.h)
+		c:line_to(c.w/2,  0)
+		c:line_to(  c.w,c.h)
+		c:line_to(    0,c.h)
+		
+		c:set_source_color( p.arrow_color )
+		c:fill(true)
+		
+		if c.Image then
+			c= c:Image()
+		end
+		
+		c.anchor_point={c.w/2,c.h}
+		
+		return c
+		
+	end
     local function make_hor_bar(w,h,ratio)
         local bar = Group{}
         
 		local shell = Canvas{
-				size = {w,h},
+			size = {w,h},
 		}
-		local fill  = Canvas{
-				size = {w*ratio,h-p.frame_thickness},
+		local fill = Canvas{
+			size = {w*ratio,h-p.frame_thickness},
+		}
+		local focus = Canvas{
+			size = {w*ratio,h-p.frame_thickness},
 		}  
         
 		
@@ -4038,27 +4674,68 @@ function ui_element.scrollPane(t)
         
         -----------------------------------------------------
         
+		top    =           math.ceil(p.frame_thickness/2)
+		bottom = focus.h - math.ceil(p.frame_thickness/2)
+		left   =           math.ceil(p.frame_thickness/2)
+		right  = focus.w - math.ceil(p.frame_thickness/2)
+        
+		shell:begin_painting()
+        
+		
+		focus:move_to(        left,         top )
+		focus:line_to(   right-RAD,         top )
+		focus:curve_to( right, top,right,top,right,top+RAD)
+		focus:line_to(       right,  bottom-RAD )
+		focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		focus:line_to(           left+RAD,          bottom )
+		focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		focus:line_to(           left,            top+RAD )
+		focus:curve_to(left,top,left,top,left+RAD,top)
+        
+		focus:set_source_linear_pattern(
+			focus.w/2,0,
+			focus.w/2,focus.h
+		)
+		focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
+		focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+		focus:fill(true)
+        focus:set_line_width(   p.frame_thickness )
+		focus:set_source_color( p.frame_color )
+		focus:stroke( true )
+		focus:finish_painting()
+        
+        -----------------------------------------------------
+		
 		if shell.Image then shell = shell:Image() end
 		if  fill.Image then  fill =  fill:Image() end
+		if focus.Image then focus = focus:Image() end
         
-		bar:add(shell,fill)
+		bar:add(shell,fill,focus)
         
         shell.name="track"
         shell.reactive = true
         fill.name="grip"
         fill.reactive=true
-        fill.y=p.frame_thickness/2 
+        fill.y=p.frame_thickness/2
+		focus.name="focus_grip"
+		focus.reactive=true
+        focus.y=p.frame_thickness/2
+		focus:hide()
         return bar
     end
     local function make_vert_bar(w,h,ratio)
         local bar = Group{}
         
 		local shell = Canvas{
-				size = {w,h},
+			size = {w,h},
 		}
 		local fill  = Canvas{
-				size = {w-p.frame_thickness,h*ratio},
-		}  
+			size = {w-p.frame_thickness,h*ratio},
+		}
+		local focus  = Canvas{
+			size = {w-p.frame_thickness,h*ratio},
+		}
         
 		
 		local RAD = 6
@@ -4130,20 +4807,54 @@ function ui_element.scrollPane(t)
         
         -----------------------------------------------------
         
-		if shell.Image then
-			shell = shell:Image()
-		end
-		if fill.Image then
-			fill = fill:Image()
-		end
+		top    =           math.ceil(p.frame_thickness/2)
+		bottom = focus.h - math.ceil(p.frame_thickness/2)
+		left   =           math.ceil(p.frame_thickness/2)
+		right  = focus.w - math.ceil(p.frame_thickness/2)
         
-		bar:add(shell,fill)
+		shell:begin_painting()
+        
+		
+		focus:move_to(        left,         top )
+		focus:line_to(   right-RAD,         top )
+		focus:curve_to( right, top,right,top,right,top+RAD)
+		focus:line_to(       right,  bottom-RAD )
+		focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+		focus:line_to(           left+RAD,          bottom )
+		focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+		focus:line_to(           left,            top+RAD )
+		focus:curve_to(left,top,left,top,left+RAD,top)
+        
+		focus:set_source_linear_pattern(
+			0,focus.h/2,
+            focus.w,focus.h/2
+		)
+		focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
+		focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+		focus:fill(true)
+        focus:set_line_width(   p.frame_thickness )
+		focus:set_source_color( p.frame_color )
+		focus:stroke( true )
+		focus:finish_painting()
+        
+        -----------------------------------------------------
+		
+		if shell.Image then shell = shell:Image() end
+		if  fill.Image then fill  =  fill:Image() end
+		if focus.Image then focus = focus:Image() end
+        
+		bar:add(shell,fill,focus)
         
         shell.name="track"
         shell.reactive = true
         fill.name="grip"
         fill.reactive=true
-        fill.x=p.frame_thickness/2 
+        fill.x=p.frame_thickness/2
+		focus.name="focus_grip"
+		focus.reactive=true
+        focus.x=p.frame_thickness/2
+		focus:hide()
         return bar
     end
 	
@@ -4171,32 +4882,14 @@ function ui_element.scrollPane(t)
         if p.bar_offset < 0 then
             track_w = p.visible_w+p.bar_offset
             track_h = p.visible_h+p.bar_offset
+        elseif p.arrows_visible then
+            track_w = p.visible_w-p.bar_thickness*2-10
+            track_h = p.visible_h-p.bar_thickness*2-10
         else
             track_w = p.visible_w
             track_h = p.visible_h
         end
-        
---[[
-if editor_lb == nil  then
-            function screen:on_motion(x,y) 
-	  	if dragging then
-	        local actor = unpack(dragging)
-	    	  if (actor.name == "grip") then  
-	             local actor,s_on_motion = unpack(dragging) 
-	             s_on_motion(x, y)
-	             return true
-	    	  end 
-		  return true 
-		end
-	    end 
-	    function screen:on_button_up()
-		if dragging then 
-			dragging = nil 
-		end 
-	    end 
-end
-]]
-        
+           
         if p.horz_bar_visible and p.visible_w/p.virtual_w < 1 then
             hor_s_bar = make_hor_bar(
                 track_w,
@@ -4204,15 +4897,39 @@ end
                 track_w/p.virtual_w
             )
             hor_s_bar.name = "Horizontal Scroll Bar"
-            hor_s_bar.position={
-                p.box_width,
-                p.box_width*2+p.visible_h+p.bar_offset
-            }
+            if p.arrows_visible then
+                local l = make_arrow()
+                l.name="L"
+                l.x = p.box_width+p.bar_thickness
+                l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                scroll_group:add(l)
+                l.reactive=true
+                function l:on_button_down()
+                    scroll_x(1)
+                end
+                hor_s_bar.position={
+                    p.box_width+p.bar_thickness+5,
+                    p.box_width*2+p.visible_h+p.bar_offset
+                }
+                local r = make_arrow()
+                r.name="R"
+                r.x = p.box_width+p.bar_thickness+hor_s_bar.w+10
+                r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                scroll_group:add(r)
+                r.reactive=true
+            else
+                hor_s_bar.position={
+                    p.box_width,
+                    p.box_width*2+p.visible_h+p.bar_offset
+                }
+            end
             scroll_group:add(hor_s_bar)
             
-            grip_hor = hor_s_bar:find_child("grip")
+            unfocus_grip_hor = hor_s_bar:find_child("grip")
+            focus_grip_hor = hor_s_bar:find_child("focus_grip")
             track_hor = hor_s_bar:find_child("track")
-            function grip_hor:on_button_down(x,y,button,num_clicks)
+			grip_hor = unfocus_grip_hor
+            function focus_grip_hor:on_button_down(x,y,button,num_clicks)
                 local dx = x - grip_hor.x
 	   	        
                 dragging = {grip_hor,
@@ -4233,30 +4950,9 @@ end
 	   	
                 return true
             end
+			
+			unfocus_grip_hor.on_button_down = focus_grip_hor.on_button_down
 
---[[
-            function grip_hor:on_button_up(x,y,button,num_clicks)
-                hold = false
-            end
--]] 
-
-
-
---[[
-            function grip_hor:on_motion(dx,dy)
-                if hold then
-                    grip_hor.x =  grip_hor.x - dx
-                   	print("on motion !!!!!!") 
-                    if  grip_hor.x < 0 then
-                    grip_hor.x = 0
-                    elseif grip_hor.x > track_w-grip_hor.w then
-                        grip_hor.x = track_w-grip_hor.w
-                    end
-                    
-                    p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
-                end
-            end
---]]
             function track_hor:on_button_down(x,y,button,num_clicks)
                 
                 local rel_x = x - track_hor.transformed_position[1]/screen.scale[1]
@@ -4276,6 +4972,8 @@ end
         else
             grip_hor=nil
             track_hor=nil
+			focus_grip_hor=nil
+			unfocus_grip_hor=nil
         end
         if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
             vert_s_bar = make_vert_bar(
@@ -4285,15 +4983,44 @@ end
                 track_h/p.virtual_h
             )
             vert_s_bar.name = "Vertical Scroll Bar"
-            vert_s_bar.position={
-                p.box_width*2+p.visible_w+p.bar_offset,
-                p.box_width
-            }
+            if p.arrows_visible then
+                local up = make_arrow()
+                up.name="UP"
+                up.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                up.y = p.box_width+p.bar_thickness
+                scroll_group:add(up)
+                up.reactive=true
+                function up:on_button_down()
+                    scroll_y(1)
+                end
+                vert_s_bar.position={
+                    p.box_width*2+p.visible_w+p.bar_offset,
+                    p.box_width+p.bar_thickness+5
+                }
+                local dn = make_arrow()
+                dn.name="DN"
+                dn.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                dn.y = p.box_width+p.bar_thickness+vert_s_bar.h+10
+                dn.z_rotation = {180,0,0}
+                scroll_group:add(dn)
+                dn.reactive=true
+                function dn:on_button_down()
+                    scroll_y(-1)
+                end
+            else
+                vert_s_bar.position={
+                    p.box_width*2+p.visible_w+p.bar_offset,
+                    p.box_width
+                }
+            end
             --vert_s_bar.z_rotation={90,0,0}
             scroll_group:add(vert_s_bar)
             
-            grip_vert = vert_s_bar:find_child("grip")
+            unfocus_grip_vert = vert_s_bar:find_child("grip")
             track_vert = vert_s_bar:find_child("track")
+            focus_grip_vert = vert_s_bar:find_child("focus_grip")
+			
+			grip_vert = unfocus_grip_vert
             ---[[
             function grip_vert:on_button_down(x,y,button,num_clicks)
                 
@@ -4301,20 +5028,20 @@ end
 	   	        
                 dragging = {grip_vert,
 	   		        function(x,y)
-	   			
+                        
 	   			        grip_vert.y = y - dy
-	   			
+                        
 	   			        if  grip_vert.y < 0 then
 	   				        grip_vert.y = 0
 	   			        elseif grip_vert.y > track_h-grip_vert.h then
 	   				           grip_vert.y = track_h-grip_vert.h
 	   			        end
-	   			
+                        
 	   			        p.content.y = -(grip_vert.y) * p.virtual_h/track_h
-	   			
+                        
 	   		        end 
 	   	        }
-	   	
+                
                 return true
             end
 
@@ -4341,13 +5068,11 @@ end
         else
             grip_vert=nil
             track_vert=nil
+			focus_grip_vert=nil
+			unfocus_grip_vert=nil
         end
         
-		
-
-  ---[[
-          scroll_group.size = {p.visible_w, p.visible_h}
- --]]
+		scroll_group.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
 	end
 	
     
@@ -4356,7 +5081,37 @@ end
 	window:add(p.content)
 	
 	
+	function scroll_group:on_key_focus_in()
+		if grip_hor ~= nil then
+			unfocus_grip_hor:hide()
+			focus_grip_hor:show()
+			focus_grip_hor.y = unfocus_grip_hor.y
+			grip_hor = focus_grip_hor
+		end
+		if grip_vert ~= nil then
+			unfocus_grip_vert:hide()
+			focus_grip_vert:show()
+			focus_grip_vert.y = unfocus_grip_vert.y
+			grip_vert = focus_grip_vert
+		end
+		border.border_color = p.box_focus_color
+	end
 	
+	function scroll_group:on_key_focus_out()
+		if grip_hor ~= nil then
+			unfocus_grip_hor:show()
+			focus_grip_hor:hide()
+			unfocus_grip_hor.y = focus_grip_hor.y
+			grip_hor = unfocus_grip_hor
+		end
+		if grip_vert ~= nil then
+			unfocus_grip_vert:show()
+			focus_grip_vert:hide()
+			unfocus_grip_vert.y = focus_grip_vert.y
+			grip_vert = unfocus_grip_vert
+		end
+		border.border_color = p.box_color
+	end
 
 
 	--set the meta table to overwrite the parameters
@@ -4371,10 +5126,13 @@ end
             v.position={0,0}
             v.reactive = false
             window:add(v)
-        end
-        p[k] = v
-        create()
-		
+        	p[k] = v
+        elseif k =="selected" then 
+        	p[k] = v
+		else
+        	p[k] = v
+        	create()
+		end
     end
     mt.__index = function(t,k)       
        return p[k]
@@ -4497,13 +5255,12 @@ end
 function ui_element.menuButton(t)
     --default parameters
     local p = {
-
 --[[
 button 
 --]]
-        button_text_font = nil,
-    	button_text_color = nil,
-    	button_text_focus_color = nil,
+        text_font = nil,
+    	text_color = nil,
+    	text_focus_color = nil,
         label_text_font = nil,
     	label_text_color = nil,
     	label_text_focus_color = nil,
@@ -4511,16 +5268,16 @@ button
     	item_text_color = nil,
     	item_text_focus_color = nil,
 
-	text_font = "DejaVu Sans 30px",
+		text_font = "FreeSans Medium 30px",
     	text_color = {255,255,255,255}, --"FFFFFF",
-    	skin = "default", 
+    	skin = "CarbonCandy", 
     	ui_width = 250,
     	ui_height = 60, 
 
     	label = "Menu Button", 
     	focus_color = {27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,0}, --"1b911b", 
-	focus_text_color =  {255,255,255,255},   
+		focus_text_color =  {255,255,255,255},   
     	border_color = {255,255,255,255}, --"FFFFFF"
     	fill_color = {255,255,255,0},     --"FFFFFF"
     	border_width = 1,
@@ -4530,26 +5287,25 @@ button
         name  = "dropdownbar",
         items = {
             {type="label", string="Label ..."},
-            {type="seperator"},
+            {type="separator"},
             {type="item",  string="Item ...", f=nil},
         },
         vert_spacing = 5, --item_spacing
-        horz_spacing  = 10, -- new 
+        horz_spacing = 10, -- new 
         vert_offset  = 40, --item_start_y
         horz_offset  = 0,
         text_has_shadow = true,
         
         background_color     = {255,0,0,255},
         
-        menu_width   = 250,       -- bg_w 
+        menu_width = 250,   -- bg_w 
         horz_padding  = 10, -- padding 
-        seperator_thickness    = 2, --divider_h
+        separator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         align = "left",
         show_ring     = true,
-        
-        
-        skin = "default",
+		status = nil,
+		ui_position = {300,300},
     }
     --overwrite defaults
     if t ~= nil then
@@ -4562,9 +5318,9 @@ button
     local curr_index = 0
     local selectable_items  = {}
 
-    local t_f = {"button_text_font", "label_text_font", "item_text_font"}
-    local t_c = {"button_text_color", "label_text_color", "item_text_color",}
-    local f_c = {"button_text_focus_color", "label_text_focus_color", "item_text_focus_color"}
+    local t_f = {"text_font", "label_text_font", "item_text_font"}
+    local t_c = {"text_color", "label_text_color", "item_text_color",}
+    local f_c = {"text_focus_color", "label_text_focus_color", "item_text_focus_color"}
     
     for k, v in pairs (t_f) do
 	if p[v] == nil then 
@@ -4584,19 +5340,18 @@ button
 
     local shadow 
     if p.skin == "editor" then
-	p.horz_offset = -4
-	shadow = true 
+		p.horz_offset = -4
+		shadow = true 
     else 
-	shadow = false 
+		shadow = false 
     end 
-
 
     local dropDownMenu = Group{}
     local button       = ui_element.button{
-	name = "button",
-        text_font=p.button_text_font,
-    	text_color=p.button_text_color,
-    	focus_text_color=p.button_text_focus_color,
+		name = "button",
+        text_font=p.text_font,
+    	text_color=p.text_color,
+    	focus_text_color=p.text_focus_color,
     	skin=p.skin,
     	ui_width=p.ui_width,
     	ui_height=p.ui_height, 
@@ -4607,45 +5362,48 @@ button
     	fill_color=p.fill_color, 
     	border_width=p.border_width,
     	border_corner_radius=p.border_corner_radius,
-	text_has_shadow = shadow,
+		text_has_shadow = shadow,
+		is_in_menu = true, 
+		ui_position = p.ui_position,
     }
+
     local umbrella
     umbrella     = Group{
         name="menuButton",
         reactive = true,
-        position={300,300},
-        children={button,dropDownMenu},
+        position = p.ui_position, 
+        children = {button,dropDownMenu},
         extra={
             type="MenuButton",
             focus_index = function(i)
-                if curr_index == i then
-                    print("Item on Drop Down Bar is already focused")
-                    return
-                end
-                if selectable_items[curr_index] ~= nil then
-                    selectable_items[curr_index].focus:complete_animation()
-                    selectable_items[curr_index].focus.opacity=255
-                    selectable_items[curr_index].focus:animate{
-                        duration=300,
-                        opacity=0
-                    }
-                elseif curr_index==0 then
+            if curr_index == i then
+            	print("Item on Drop Down Bar is already focused")
+                return
+            end
+            if selectable_items[curr_index] ~= nil then
+            	selectable_items[curr_index].focus:complete_animation()
+                selectable_items[curr_index].focus.opacity=255
+                selectable_items[curr_index].focus:animate{
+                	duration=300,
+                	opacity=0
+                }
+            elseif curr_index==0 then
                     --button:on_focus_out()
-                end
-                if selectable_items[i] ~= nil then
-                   
-                    selectable_items[i].focus:complete_animation()
-                    selectable_items[i].focus.opacity=0
-                    selectable_items[i].focus:animate{
-                        duration=300,
-                        opacity=255,
-                    }
-                    curr_index=i
-                elseif i==0 then
-                    button:on_focus_in()
-                    curr_index=i
-                end
-            end,
+            end
+            if selectable_items[i] ~= nil then
+               selectable_items[i].focus:complete_animation()
+               selectable_items[i].focus.opacity=0
+               selectable_items[i].focus:animate{
+
+               		duration=300,
+                    opacity=255,
+               }
+               curr_index=i
+           elseif i==0 then
+           	   button:on_focus_in()
+               curr_index=i
+           end
+           end,
 	    get_index = function ()
 		return curr_index
 	    end,
@@ -4666,7 +5424,6 @@ button
             insert_item = function (index,item)
                 assert(type(item)=="table","invalid item")
                 assert(index > 0 and index <= #p.items + 1, "invalid index")
-                
                 table.insert(p.items,index,item)
                 create()
             end,
@@ -4737,30 +5494,33 @@ button
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=0
                 dropDownMenu:animate{
-                    duration=300,
+                    duration=100,
                     opacity=255,
                 }
                 for _,s_i in ipairs(selectable_items) do
                     s_i.focus.opacity=0
                 end
                 curr_index = 0
-		umbrella:raise_to_top()
-		if screen:find_child("mouse_pointer") then 
-		 screen:find_child("mouse_pointer"):raise_to_top()
-		end
-
-		input_mode = S_MENU_M
+				umbrella:raise_to_top()
+				--[[
+				if screen:find_child("mouse_pointer") then 
+		 			screen:find_child("mouse_pointer"):raise_to_top()
+				end
+				]]
+				input_mode = S_MENU_M
+				p.status = "fade_in"
             end,
             fade_out = function()
                 dropDownMenu:complete_animation()
                 dropDownMenu.y_rotation={0,0,0}
                 dropDownMenu.opacity=255
                 dropDownMenu:animate{
-                    duration=300,
+                    duration=100,
                     opacity=0,
-		    on_completed = function()  dropDownMenu:hide()  end,
+		    		on_completed = function()  dropDownMenu:hide()  end,
                 }
-		input_mode = S_SELECT
+				input_mode = S_SELECT
+				p.status = "fade_out"
             end,
             set_item_function = function(index,f)
                 assert(index > 0 and index <= #selectable_items, "invalid index")
@@ -4773,13 +5533,35 @@ button
                    selectable_items[curr_index].f ~= nil then
                    selectable_items[curr_index].f(...)
                 else
-                    print("no function")
                 end
             end
         }
 
   	--[[ umbrella.size = {p.ui_width, p.ui_height} ]]
     }
+
+	--yugi
+	if editor_lb == nil or editor_use then  
+		function button:on_key_down(key) 
+			if input_mode == S_SELECT or p.status ==  "fade_out" then 
+				if key == keys.Down then 
+					umbrella.press_down()
+					return true
+				elseif key == keys.Up then 
+					umbrella.press_up()
+					return true
+				elseif key == keys.Return then 
+					if curr_index > 0 then 
+						umbrella.press_enter()
+					end 
+                    umbrella.fade_out()
+					umbrella:grab_key_focus()
+					return true
+				end 
+			end 
+		end 
+	end
+
     local function make_item_ring(w,h,padding)
         local ring = Canvas{ size = { w , h } }
         ring:begin_painting()
@@ -4799,18 +5581,39 @@ button
     end
     
     function umbrella.extra.on_focus_in(key) 
-	button.on_focus_in()
-	umbrella.fade_in()
-	umbrella:grab_key_focus(umbrella)
+		if key then 
+			if key == keys.Return then 
+				button.on_focus_in(keys.Return)
+			else 
+				button.on_focus_in()
+				umbrella:grab_key_focus()
+			end 
+		else 
+				button.on_focus_in()
+				umbrella:grab_key_focus()
+		end 
     end
-    
-    function umbrella.extra.on_focus_out() 
-	button.on_focus_out()
-	umbrella.fade_out()
+	 
+	 --[[ not working
+    function umbrella.extra.on_focus_in(key) 
+		if key then 
+			if key == keys.Return then 
+				button.on_focus_in(keys.Return)
+				return 
+			end 
+		end  
+		button.on_focus_in()
+		umbrella:grab_key_focus()
+    end
+	]]
+
+    function umbrella.extra.on_focus_out(key) 
+		if key then 
+			button.on_focus_out(key)
+		end
     end
    
     function create()
-        
         --local vars used to create the menu
         local ui_ele = nil
         local txt, s_txt
@@ -4829,10 +5632,10 @@ button
         selectable_items  = {}
         dropDownMenu:clear()
         dropDownMenu.opacity=0
-	dropDownMenu:hide()
+        dropDownMenu:hide()
         
-        button.text_font=p.button_text_font
-    	button.text_color=p.button_text_color
+        button.text_font=p.text_font
+    	button.text_color=p.text_color
     	button.skin=p.skin
     	button.ui_width=p.ui_width
     	button.ui_height=p.ui_height
@@ -4842,45 +5645,50 @@ button
     	button.fill_color=p.button_color
     	button.border_width=p.border_width
     	button.border_corner_radius=p.border_corner_radius
-
+        
         umbrella.size = {button.ui_width,button.ui_height}
         curr_y = p.vert_offset
         
         --For each category
-	local prev_item 
+        local prev_item 
         for i = 1, #p.items do
             local item=p.items[i]
             --focus_sel_items[cat] = {}
              
-            if item.type == "seperator" then
+            if item.type == "separator" then
                 dropDownMenu:add(
                     Rectangle{
                         x     = p.horz_padding,
                         y     = curr_y,
                         name  = "divider "..i,
                         w     = p.menu_width-2*p.horz_padding,
-                        h     = p.seperator_thickness,
+                        h     = p.separator_thickness,
                         color = txt_color
                     }
                 )
-                curr_y = curr_y + p.seperator_thickness + p.vert_spacing
+                curr_y = curr_y + p.separator_thickness + p.vert_spacing
             elseif item.type == "item" then
-                
-                
                 
                 --Make the text label for each item
                 if p.text_has_shadow then
-                s_txt = Text{
-                        text  = item.string,
-                        font  = p.item_text_font,
-                        color = "000000",
-                        opacity=255*.5,
-                        x     = p.horz_padding+p.horz_spacing - 1,
-                        y     = curr_y - 1,
-                    }
-                    s_txt.anchor_point={0,s_txt.h/2}
-                    s_txt.y = s_txt.y+s_txt.h/2
-                    dropDownMenu:add(s_txt)
+                	s_txt = Text{
+                        	text  = item.string,
+                        	font  = p.item_text_font,
+                        	color = "000000",
+                        	opacity=255*.5,
+                        	x     = p.horz_padding+p.horz_spacing - 1,
+                        	y     = curr_y - 1,
+                    	}
+                    	s_txt.anchor_point={0,s_txt.h/2}
+						if item.icon then
+							local icon_img = item.icon
+							if icon_img.type ~= "Text" then
+                    			s_txt.y = s_txt.y+s_txt.h/2
+							end 
+						else 
+                    		s_txt.y = s_txt.y+s_txt.h/2
+						end 
+                    	dropDownMenu:add(s_txt)
                 end
                 txt = Text{
                         text  = item.string,
@@ -4888,32 +5696,31 @@ button
                         color = p.item_text_color,
                         x     = p.horz_padding+p.horz_spacing,
                         y     = curr_y,
-                    }
-                    txt.anchor_point={0,txt.h/2}
-                    txt.y = txt.y+txt.h/2
-		    if item.mstring then 
-			txt.use_markup =true
-			txt.markup = item.mstring
-		    end 
-                    dropDownMenu:add(txt)
-
-		
+                }
+                txt.anchor_point={0,txt.h/2}
+                txt.y = txt.y+txt.h/2
+                if item.mstring then 
+                	txt.use_markup =true
+                    txt.markup = item.mstring
+                end 
+                dropDownMenu:add(txt)
+                
+                
                 if item.bg then
-
                     ui_ele = item.bg
-		    if i == #p.items and prev_item ~= nil then 
+                    if i == #p.items and prev_item ~= nil then 
                     	ui_ele.anchor_point = { 0, prev_item.bg.h/2 }
-                    	ui_ele.position     = {  0, txt.y }
-		    else 
+                    	ui_ele.position     = { 0, txt.y }
+                    else 
                     	ui_ele.anchor_point = { 0, ui_ele.h/2 }
-                    	ui_ele.position     = {  0, txt.y }
-		    end 
+                    	ui_ele.position     = { 0, txt.y }
+                    end 
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f(item.parameter) end
-			    button.on_focus_out() 
+                            button.on_focus_out() 
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do
@@ -4924,7 +5731,7 @@ button
                         ui_ele.reactive=true
                     end
                 elseif p.show_ring then
-                    ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
+                    ui_ele = make_item_ring(p.menu_width-2 * p.horz_spacing,txt.h+10, 7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = { 0, 	   txt.y }
                     dropDownMenu:add(ui_ele)
@@ -4968,13 +5775,15 @@ button
                 end
                 
                 ui_ele.name="focus"
-		if i == #p.items and prev_item ~= nil and prev_item.focus ~= nil then 
-                    	ui_ele.anchor_point = { 0, prev_item.focus.h/2 }
-                    	ui_ele.position     = {  0, txt.y }
-		else 
-                    	ui_ele.anchor_point = { 0, ui_ele.h/2 }
-                    	ui_ele.position     = {  0, txt.y }
-		end 
+                if i == #p.items and prev_item ~= nil and
+                    prev_item.focus ~= nil then
+                     
+                    ui_ele.anchor_point = {  0, prev_item.focus.h/2 }
+                    ui_ele.position     = {  0, txt.y }
+                else 
+                    ui_ele.anchor_point = {  0, ui_ele.h/2 }
+                    ui_ele.position     = {  0, txt.y }
+                end 
                 --ui_ele.anchor_point = { 0, ui_ele.h/2 }
                 --ui_ele.position     = { 0, txt.y }
                 ui_ele.opacity      = 0
@@ -4984,6 +5793,27 @@ button
                 
                 if item.icon then
                     ui_ele = item.icon
+					if ui_ele.type == "Text" then 
+						if p.text_has_shadow then
+                			local ui_ele_shadow = Text{
+                        		text  = ui_ele.text,
+                        		font  = p.item_text_font,
+                        		color = "000000",
+                        		opacity=255*.5,
+                    			anchor_point = {ui_ele.w,ui_ele.h/2}, 
+                    			position={
+                            			p.menu_width + 9 , txt.y -1
+                    			}
+							}
+
+                    		s_txt.anchor_point={0,s_txt.h/2}
+                    		s_txt.y = s_txt.y+s_txt.h/2
+                			dropDownMenu:add(ui_ele_shadow)
+                		end
+                		ui_ele.font  = p.item_text_font
+                        ui_ele.color = "#a6a6a6" --p.item_text_color
+					end 
+
                     if ui_ele.parent then ui_ele:unparent() end
                     ui_ele.anchor_point = {ui_ele.w,ui_ele.h/2}
                     ui_ele.position={
@@ -5111,7 +5941,9 @@ button
     mt.__newindex = function(t,k,v)
 		
         p[k] = v
-        create()
+	    if k ~= "selected" then 
+        	create()
+	    end
 		
     end
     mt.__index = function(t,k)       
@@ -5121,465 +5953,1072 @@ button
 
     return umbrella
 end
-
-
---[[
-
-function ui_element.menuBar(t)
-    local p = {
-        bar_widgets = {
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.menuButton(),
-            ui_element.button(),
-            ui_element.button(),
-            ui_element.button(),
-            ui_element.button(),
-            ui_element.button(),
-        },
-        y_offset  = 20,
-        clip_w      = 2/3*screen.w,
-        bg_pic      = nil,
-        arrow_img   = nil,
-        arrow_y     = 60,
-        skin        = "default"
-    }
-    --overwrite defaults
-    if t ~= nil then
-        for k, v in pairs (t) do
-            p[k] = v
-        end
-    end
-    local create
-    local index = 0
-    
-    local si = ui_element.scrollPane{
-        visible_h    = screen.h,
-        vitual_h = screen.h,
-        --arrow_sz  = 30, --kkk
-        --arrows_centered   = true,
-        --border_is_visible = false,
-    }
-    si.position={40,0}
-    local func = {
-        ["Button"] = {
-            fade_in = "on_focus_in",
-            fade_out = "on_focus_out"
-        },
-        ["MenuButton"] ={
-            fade_in = "spin_in",
-            fade_out = "spin_out"
-        }
-    }
-    local width = {
-        ["Button"]   = 200,
-        ["MenuButton"] = 300
-    }
-    local umbrella = Group{
-        name     = "menubar",
-        reactive = true,
-        position = {0,200},
-        extra    = {
-            type = "MenuBar",
-            press_left = function()
-                if index > 1 then
-                    if p.bar_widgets[index] ~= nil then
-                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
-                        si.seek_to(p.bar_widgets[index].x,0)
-                    end
-                    index = index - 1
-                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
-                end
-            end,
-            press_right = function()
-                if index < #p.bar_widgets then
-                    if p.bar_widgets[index] ~= nil then
-                        p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_out]()
-                    end
-                    index = index + 1
-                    p.bar_widgets[index].extra[func[p.bar_widgets[index].extra.type].fade_in]()
-                    
-                    si.seek_to(p.bar_widgets[index].x,0)
-                end
-            end,
-            press_up = function()
-                if p.bar_widgets[index].press_up then
-                    p.bar_widgets[index].press_up()
-                end
-            end,
-            press_down = function()
-                if p.bar_widgets[index].press_down then
-                    p.bar_widgets[index].press_down()
-                end
-            end,
-            press_enter= function()
-                if p.bar_widgets[index].press_enter then
-                    p.bar_widgets[index].press_enter()
-                elseif p.bar_widgets[index].pressed then
-                    p.bar_widgets[index].pressed()
-                end
-            end,
-            insert_widget = function(i,w)
-                table.insert(p.bar_widgets,i,w)
-                create()
-            end,
-            replace_widget = function(i,w)
-                p.bar_widgets[i] = w
-                create()
-            end,
-            remove_widget = function(i)
-                table.remove(p.bar_widgets,i)
-                create()
-            end,
-        }
-    }
-    
-    create = function()
-        
-        --clear the groups
-        umbrella:clear()
-        si.content:clear()
-        
-        --load the background
-        if p.bg_pic == nil then
-            umbrella:add(assets(skin_list[p.skin]["menu_bar"]))
-        else
-            umbrella:add(p.bg_pic)
-        end
-        
-        umbrella:add(si)
-        si.seek_to(0,0)
-        si.visible_w = p.clip_w
-        si.skin      = p.skin
-        --si.hor_arrows_y = p.arrow_y --kkkk
-        index = 0
-        
-        local curr_w = 0
-        for i = 1, #p.bar_widgets do
-            
-            assert(
-                p.bar_widgets[i].extra.type == "Button" or
-                p.bar_widgets[i].extra.type == "MenuButton",
-                "invalid widget added to the dropdown bar"
-            )
-            si.content:add(p.bar_widgets[i])
-            p.bar_widgets[i].position = {curr_w,p.y_offset}
-            p.bar_widgets[i].skin     = p.skin
-            
-            curr_w = curr_w + width[p.bar_widgets[i].extra.type] + 15
-            
-        end
-        si.virtual_w = curr_w
-    end
-    
-    create()
-    --set the meta table to overwrite the parameters
-    mt = {}
-    mt.__newindex = function(t,k,v)
-		
-        p[k] = v
-        create()
-		
-    end
-    mt.__index = function(t,k)       
-       return p[k]
-    end
-    setmetatable(umbrella.extra, mt)
-
-    return umbrella
-end
-
 
 
 function ui_element.tabBar(t)
     
     --default parameters
     local p = {
-        name  = "Drop Down Bar",
-        font  = "DejaVu Sans 26px",
-        tabs = {
-        --  item text, selectable, icon source
-            {"Item 1",      true,  nil },
-            {"Item 2",      true,  nil },
-            {"Item 3",      true,  nil },
+        font  = "FreeSans Medium 26px",
+        text_font = "FreeSans Medium 26px",
+    	text_color = {255,255,255,255}, 
+    	text_focus_color = {27,145,27,255}, 	  --"1b911b",
+        
+    	skin = "CarbonCandy", 
+    	ui_width = 150,
+    	ui_height = 60, 
+        
+    	focus_color      = { 27,145, 27,255}, --"1b911b", 
+    	focus_fill_color = { 27,145, 27,255}, --"1b911b", 
+    	focus_text_color = {255,255,255,255}, --"1b911b", 
+    	border_color     = {255,255,255,255}, --"FFFFFF"
+    	border_width = 1,
+    	border_corner_radius = 12,
+        
+        tab_labels = {
+            "Label 1",
+			"Label 2",
+            "Label 3",
         },
-        tab_w_equal = false,
-        tab_w_padding = 30,
-        min_w = 500,
-        border_width=2,
-        border_color={255,255,255},
+        tabs = {},
+        --tab_align          = "CENTER",
+        --label_align        = "CENTER",
+        label_padding = 10,
+        tab_position = "top",
         
-        bg_color = {0,0,0},
-        border_rad=12,
-        
+        display_width  = 600,
+        display_height = 500,
+        tab_spacing = 0,--10,
+        --slant_width  = 20,
+        border_width =  2,
+        --border_color = {255,255,255,255},
+        fill_color   = {  0,  0,  0,255},
+        label_color  = {255,255,255,255},
+        unsel_color  = { 60, 60, 60,255},
+		
+		arrow_sz     = 15,
+		arrow_dist_to_frame = 5,
+		arrow_image = nil,
+
+		ui_position = {200,200},
     }
+    
+	local offset = {}
+    local buttons = {}
+    
     --overwrite defaults
     if t ~= nil then
-        for k, v in pairs (t) do
-            p[k] = v
-        end
+		for k, v in pairs (t) do p[k] = v end
     end
     
-    local curr_index = 0
-    local selectable_items = {}
-    local focus_sel_items  = {}
-    
-    local dropDownMenu = Group{}
-    local button       = Group{}
-    local button_focus = nil
-    local umbrella     = Group{
-        name="Drop down bar",
-        reactive = true,
-        children={button,dropDownMenu},
+	local ap = nil
+	
+    local create
+    local current_index = 1
+    --local tabs = {}
+    local tab_bg = {}
+    local tab_focus = {}
+	
+    local umbrella     = Group {
+		
+        name="tabBar",
+		reactive = true,
+		position = p.ui_position, 
         extra={
-            type="MenuBar",
-            focus_index = function(i)
-                if curr_index == i then
-                    print("Item on Drop Down Bar is already focused")
-                    return
-                end
-                if focus_sel_items[curr_index] ~= nil then
-                    focus_sel_items[curr_index]:complete_animation()
-                    focus_sel_items[curr_index].opacity=255
-                    focus_sel_items[curr_index]:animate{
-                        duration=300,
-                        opacity=0
-                    }
-                end
-                if focus_sel_items[i] ~= nil then
-                    focus_sel_items[i]:complete_animation()
-                    focus_sel_items[i].opacity=0
-                    focus_sel_items[i]:animate{
-                        duration=300,
-                        opacity=255
-                    }
-                    curr_index=i
-                end
+            
+			type="TabBar",
+			
+            insert_tab = function(self,index)
+                
+                if index == nil then index = #p.tab_labels + 1 end
+                
+                table.insert(p.tab_labels,index,"Label "..tostring(index))
+                
+                table.insert(p.tabs,index,Group{})
+                
+                create()
+                
             end,
-            spin_in = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
-                dropDownMenu.y_rotation={90,0,0}
-                dropDownMenu.opacity=0
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=255,
-                    y_rotation=0
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                curr_index = 0
+
+			
+            remove_tab = function(self,index)
+                
+				if index == nil then index = #p.tab_labels + 1 end
+                
+                table.remove(p.tab_labels,index, "Label "..tostring(index))
+                
+                table.remove(p.tabs,index,Group{})
+                
+                create()
+				
             end,
-            spin_out = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
-                dropDownMenu.y_rotation={0,0,0}
-                dropDownMenu.opacity=255
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=0,
-                    y_rotation=-90
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
+			
+            rename_tab = function(self,index,name)
+                assert(index)
+                p.tab_labels[index] = name
+                
+                create()
             end,
-            fade_in = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=0
-                dropDownMenu.y_rotation={0,0,0}
-                dropDownMenu.opacity=0
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=255,
-                }
-                curr_index = 0
+            
+            move_tab_up = function(self,index)
+                if index == 1 then return end
+                local temp  = p.tab_labels[index-1]
+                p.tab_labels[index-1] = p.tab_labels[index]
+                p.tab_labels[index]   = temp
+                
+                temp      = p.tabs[index-1]
+                p.tabs[index-1] = p.tabs[index]
+                p.tabs[index]   = temp
+                
+                create()
             end,
-            fade_out = function()
-                dropDownMenu:complete_animation()
-                button_focus:complete_animation()
-                button_focus.opacity=255
-                dropDownMenu.y_rotation={0,0,0}
-                dropDownMenu.opacity=255
-                dropDownMenu:animate{
-                    duration=300,
-                    opacity=0,
-                }
-                button_focus:animate{
-                    duration=300,
-                    opacity=0,
-                }
-                button_focus:hide ()
-		dropDownMenu:hide()
+            move_tab_down = function(self,index)
+                if index == #p.tab_labels then return end
+                local temp  = p.tab_labels[index+1]
+                p.tab_labels[index+1] = p.tab_labels[index]
+                p.tab_labels[index]   = temp
+                
+                temp      = p.tabs[index+1]
+                p.tabs[index+1] = p.tabs[index]
+                p.tabs[index]   = temp
+                
+                create()
             end,
+            
+            --switching 'visible tab' functions
+            display_tab = function(self,index)
+                
+				if index < 1 or index > #p.tab_labels then return end
+                
+				p.tabs[current_index]:hide()
+                buttons[current_index].on_focus_out()
+				
+                current_index = index
+				
+                p.tabs[current_index]:show()
+                buttons[current_index].on_focus_in()
+				
+				if ap then
+					ap:pan_to(
+						
+						buttons[current_index].x+buttons[current_index].w/2,
+						buttons[current_index].y+buttons[current_index].h/2
+						
+					)
+				end
+            end,
+			
+            previous_tab = function(self)
+                if current_index == 1 then return end
+
+                
+                self:display_tab(current_index-1)
+            end,
+			
+            next_tab = function(self)
+                if current_index == #p.tab_labels then return end
+                
+                self:display_tab(current_index+1)
+            end,
+			
+			get_tab_group = function(self,index) return p.tabs[index] end,
+			
+			get_index = function(self) return current_index end,
+			
+			get_offset = function(self) return self.x+offset.x, self.y+offset.y end
+
         }
     }
-    local function make_ring(w,h,padding)
-        local ring = Canvas{ size = { w , h } }
-        ring:begin_painting()
-        ring:set_source_color( p.txt_color )
-        ring:round_rectangle(
-            padding + 2 / 2,
-            padding + 2 / 2,
-            w - 2 - padding * 2 ,
-            h - 2 - padding * 2 ,
-            12 )
-        ring:stroke()
-        ring:finish_painting()
-    	if ring.Image then
-       		ring= ring:Image()
-    	end
-        return ring
+    
+    create = function()
+        
+        local labels, txt_h, txt_w 
+        
+		current_index = 1
+		
+        umbrella:clear()
+        tab_bg = {}
+        tab_focus = {}
+        
+        local bg = Rectangle{
+            color        = p.fill_color,
+            border_color = p.border_color,
+            border_width = p.border_width,
+            w = p.display_width,
+            h = p.display_height,
+        }
+        
+        umbrella:add(bg)
+        for i = 1, #p.tab_labels do
+			editor_use = true
+            if p.tabs[i] == nil then
+                p.tabs[i] = Group{}
+            end
+            p.tabs[i]:hide()
+
+			
+			buttons[i] = ui_element.button{
+				
+				ui_position             = { 0, 0 },
+				skin                 = p.skin,
+				ui_width             = p.ui_width,
+				ui_height            = p.ui_height,
+				focus_color          = p.focus_color,
+				border_width         = p.border_width,
+				border_corner_radius = p.border_corner_radius,
+				label                = p.tab_labels[i],
+				text_font            = p.font,
+				fill_color           = p.unsel_color,
+				focus_fill_color     = p.fill_color,
+				focus_text_color     = p.focus_text_color,
+				pressed              = function () umbrella:display_tab(i) end,
+				
+			}
+			--buttons[i].position         = {0,0}
+			
+            if p.tab_position == "top" then
+                buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
+                p.tabs[i].y  = buttons[i].h
+            else
+                p.tabs[i].x  = buttons[i].w
+                buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
+            end
+            umbrella:add(p.tabs[i],buttons[i])
+			offset.x = p.tabs[i].x
+			offset.y = p.tabs[i].y
+			editor_use = false
+        end
+		
+		ap = nil
+		
+		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
+		
+		if p.tab_position == "top" and
+			(buttons[# buttons].w + buttons[# buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+			
+			ap = ui_element.arrowPane{
+				visible_w=p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame),
+				visible_h=buttons[# buttons].h,
+				virtual_w=buttons[# buttons].w + buttons[# buttons].x,
+				virtual_h=buttons[# buttons].h,
+				arrow_color=p.label_color,
+				box_width=0,
+				dist_per_press=buttons[# buttons].w,
+				arrow_sz = p.arrow_sz,
+				arrow_dist_to_frame = p.arrow_dist_to_frame,
+				arrow_src = p.arrow_image,
+			}
+			
+			ap.x = p.arrow_sz+p.arrow_dist_to_frame
+			ap.y = 0
+			
+			for _,b in ipairs(buttons) do
+				
+				b:unparent()
+				ap.content:add(b)
+				
+			end
+			
+			umbrella:add(ap)
+			
+		elseif (buttons[# buttons].h + buttons[# buttons].y) > (p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+			
+			ap = ui_element.arrowPane{
+				visible_w=buttons[# buttons].w,
+				visible_h=p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame),
+				virtual_w=buttons[# buttons].w,
+				virtual_h=buttons[# buttons].h + buttons[# buttons].y,
+				arrow_color=p.label_color,
+				box_width=0,
+				dist_per_press=buttons[# buttons].h,
+				arrow_sz = p.arrow_sz,
+				arrow_dist_to_frame = p.arrow_dist_to_frame,
+				arrow_src = p.arrow_image,
+			}
+			
+			ap.x = 0
+			ap.y = p.arrow_sz+p.arrow_dist_to_frame
+			
+			for _,b in ipairs(buttons) do
+				
+				b:unparent()
+				ap.content:add(b)
+				
+			end
+			
+			umbrella:add(ap)
+			
+		end
+		
+		if ap then
+			
+		end
+		
+        if p.tab_position == "top" then
+            bg.y = buttons[1].h-p.border_width
+        else
+            bg.x = buttons[1].w-p.border_width
+        end
+        
+        for i = #p.tab_labels+1, #p.tabs do
+            p.tabs[i]  = nil
+            --tab_bg[i]  = nil
+            buttons[i] = nil
+        end
+		
+		if editor_lb then 
+			umbrella:display_tab(current_index)
+		end 
     end
     
-    local function create()
-        
-        local ui_ele = nil
-        local curr_y = 0
-        
-        local max_item_w = 0
-        local max_item_h = 0
-        
-        curr_index   = 0
-        selectable_items = {}
-        focus_sel_items  = {}
-        dropDownMenu:clear()
-        dropDownMenu.opacity=0
-        
-        if p.bg_clone_src == nil then
-            curr_y = 45
-        else
-            curr_y = p.item_start_y
-        end
-        
-        for i = 1, #p.items do
-            
-            ui_ele = Text{
-                text  = p.items[i][1],
-                font  = p.font,
-                color = p.txt_color,
-                x     = p.padding,
-                y     = curr_y,
-            }
-            
-            curr_y = ui_ele.h+curr_y+p.item_spacing
-            
-            if p.items[i][2] then
-                table.insert(selectable_items,ui_ele)
-                ui_ele.x = ui_ele.x + 20
-            end
-            
-            if  max_item_w < ui_ele.w + ui_ele.x then
-                max_item_w = ui_ele.w + ui_ele.x
-            end
-            if  max_item_h < ui_ele.h then
-                max_item_h = ui_ele.h
-            end
-            
-            dropDownMenu:add(ui_ele)
-        end
-        max_item_w = max_item_w+p.right_margin+p.padding
-        
-        for i = 1, #selectable_items do
-            if p.item_focus_clone_src ~= nil then
-                ui_ele = Clone{source=p.item_focus_clone_src}
-            else
-                ui_ele = assets(skin_list[p.skin]["button_focus"])
-                ui_ele.size = {max_item_w,max_item_h+15}
-            end
-            
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            ui_ele.position     = {max_item_w/2,selectable_items[i].y+selectable_items[i].h/2}
-            ui_ele.opacity = 0
-            dropDownMenu:add(ui_ele)
-            ui_ele:lower_to_bottom()
-            table.insert(focus_sel_items,ui_ele)
-            if p.item_bg_clone_src ~= nil then
-                ui_ele = Clone{source=p.item_bg_clone_src}
-                
-            else
-                ui_ele = make_ring(max_item_w,max_item_h+15,7)
-            end
-            
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            ui_ele.position     = {max_item_w/2,selectable_items[i].y+selectable_items[i].h/2}
-            dropDownMenu:add(ui_ele)
-            ui_ele:lower_to_bottom()
-        end
-        
-        if p.bg_clone_src == nil then
-            local color = p.bg_color or skin_list[p.skin]["drop_down_color"]
-            ui_ele = ui.factory.make_dropdown(
-                { max_item_w , curr_y } ,
-                color
-            )
-        else
-            ui_ele = Clone{source=p.bg_clone_src}
-            --print("this")
-        end
-        dropDownMenu:add(ui_ele)
-        ui_ele:lower_to_bottom()
-        
-        dropDownMenu.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        dropDownMenu.position     = {ui_ele.w/2,ui_ele.h/2}
-        
-        button:clear()
-        if p.top_img ~= nil then
-            if p.top_img.parent ~= nil then
-                p.top_img.unparent()
-            end
-            p.top_img.anchor_point = {p.top_img.w/2,p.top_img.h/2}
-            button:add(p.top_img)
-        else
-            ui_ele = assets(skin_list[p.skin]["button"])
-            ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-            button:add(ui_ele)
-        end
-        
-        if p.top_focus_img ~= nil then
-            if p.top_focus_img.parent ~= nil then
-                p.top_focus_img.unparent()
-            end
-            p.top_focus_img.anchor_point = {p.top_focus_img.w/2,p.top_focus_img.h/2}
-            button:add(p.top_focus_img)
-            button_focus = p.top_focus_img
-        else
-            button_focus = assets(skin_list[p.skin]["button_focus"])
-            button_focus.anchor_point = {button_focus.w/2,button_focus.h/2}
-            button:add(button_focus)
-        end
-        
-        button_focus.opacity = 0
-        ui_ele = Text{text=p.name,font=p.font,color = p.txt_color}
-        ui_ele.anchor_point = {ui_ele.w/2,ui_ele.h/2}
-        button:add(ui_ele)
-        
-        button.position = {button.w/2,button.h/2}
-        dropDownMenu.x = button.w/2
-        dropDownMenu.y = dropDownMenu.y + button.h+10
-    end
+    create()
     
-    
-    
+	local function tabBar_on_key_down(key)
+		if umbrella.focus[key] then
+			if type(umbrella.focus[key]) == "function" then
+				umbrella.focus[key]()
+			elseif screen:find_child(umbrella.focus[key]) then
+				if umbrella.on_focus_out then
+					umbrella.on_focus_out(key)
+				end
+				screen:find_child(umbrella.focus[key]):grab_key_focus()
+				if screen:find_child(umbrella.focus[key]).on_focus_in then
+					screen:find_child(umbrella.focus[key]).on_focus_in(key)
+				end
+			end
+		end
+		return true
+	end
+
+    --Key Handler
+	local keys={
+		[keys.Left] = function()
+			if umbrella.tab_position == "top" then 
+				if current_index - 1 >= 1 then
+					umbrella:display_tab(current_index - 1)
+				else
+					tabBar_on_key_down(keys.Left)
+				end
+			else
+				if current_focus.parent.name == umbrella.name then 
+					--tabBar_on_key_down(keys.Up)
+					local left_obj_name = umbrella.tabs[current_index].left_focus
+					local left_obj 
+
+					if left_obj_name then
+						left_obj = screen:find_child(left_obj_name)
+						if left_obj then
+							if umbrella.on_focus_out then
+								umbrella.on_focus_out(key)
+							end
+							left_obj:grab_key_focus()
+							if left_obj.on_focus_in then
+								left_obj.on_focus_in(key)
+							end
+						end
+					end
+				end
+			end
+		end,
+		[keys.Right] = function()
+			if umbrella.tab_position == "top" then 
+				if current_index + 1 >  #umbrella.tab_labels then
+					tabBar_on_key_down(keys.Right)
+				else
+					umbrella:display_tab(current_index + 1)
+				end
+			else 
+				local right_obj_name = umbrella.tabs[current_index].right_focus
+				local right_obj 
+
+				if right_obj_name then
+					right_obj = screen:find_child(right_obj_name)
+					if right_obj then
+						if umbrella.on_focus_out then
+							umbrella.on_focus_out(key)
+						end
+						right_obj:grab_key_focus()
+						if right_obj.on_focus_in then
+							right_obj.on_focus_in(key)
+						end
+					end
+				end
+			end 
+		end,
+		[keys.Up] = function()
+			if umbrella.tab_position == "top" then 
+				if current_focus.parent.name == umbrella.name then 
+				--tabBar_on_key_down(keys.Up)
+				
+					local up_obj_name = umbrella.tabs[current_index].up_focus
+					local up_obj 
+
+					if up_obj_name then
+						up_obj = screen:find_child(up_obj_name)
+						if up_obj then
+							if umbrella.on_focus_out then
+								umbrella.on_focus_out(key)
+							end
+							up_obj:grab_key_focus()
+							if up_obj.on_focus_in then
+								up_obj.on_focus_in(key)
+							end
+						end
+					end
+				end 
+			else 
+				if current_index - 1 >= 1 then
+					umbrella:display_tab(current_index - 1)
+				else
+					tabBar_on_key_down(keys.Up)
+				end
+			end
+		end,
+		[keys.Down] = function()
+			if umbrella.tab_position == "top" then 
+				local down_obj_name = umbrella.tabs[current_index].down_focus
+				local down_obj 
+
+				if down_obj_name then
+					down_obj = screen:find_child(down_obj_name)
+					if down_obj then
+						if umbrella.on_focus_out then
+							umbrella.on_focus_out(key)
+						end
+						down_obj:grab_key_focus()
+						if down_obj.on_focus_in then
+							down_obj.on_focus_in(key)
+						end
+					end
+				end
+			else
+				if current_index + 1 >  #umbrella.tab_labels then
+					tabBar_on_key_down(keys.Down)
+				else
+					umbrella:display_tab(current_index + 1)
+				end
+			end 
+		end,
+	}
+
+	umbrella.on_key_down = function (self, key)
+		if keys[key] then keys[key]() end 
+	end 
+
+	umbrella.on_focus_in = function (key)
+		umbrella:grab_key_focus()
+		umbrella:display_tab(current_index)
+	end 
+
+	umbrella.on_focus_out = function ()
+		if current_focus then 
+			current_focus.on_focus_out ()
+		end 
+		current_focus = nil 
+		screen:grab_key_focus()
+	end 
+
     --set the meta table to overwrite the parameters
+    setmetatable(umbrella.extra,{
+		
+		__newindex = function(t,k,v)
+			
+			p[k] = v
+			
+			if k ~= "selected" then
+				
+				create()
+				
+			end
+			
+		end,
+		
+		__index = function(t,k)       return p[k]       end,
+		
+    })
+
+    return umbrella
+end
+
+
+function ui_element.arrowPane(t)
+
+    --default parameters
+    local p = {
+        
+		visible_w =     600,
+        visible_h =     600,
+        content   = 	Group{},
+        virtual_h =    1000,
+		virtual_w =    1000,
+        arrow_sz  =      15,
+		
+		dist_per_press      = 10,
+        arrow_dist_to_frame = 5,
+        arrows_visible =   true,
+        arrow_color       = {160,160,160,255},
+        arrow_focus_color = {160,255,160,255},
+        box_color         = {160,160,160,255},
+        box_focus_color   = {160,255,160,255},
+        box_width =    2,
+        skin = "Custom",
+		ui_position = {200,100},
+		--------------------------
+		tab = nil, 
+		tab_buttons = nil 
+    }
+	
+	local make_arrow = function(sz,color)
+		
+		local c = Canvas{size={sz,sz}}
+		
+		c:move_to(    0,c.h)
+		c:line_to(c.w/2,  0)
+		c:line_to(  c.w,c.h)
+		c:line_to(    0,c.h)
+		
+		c:set_source_color( color )
+		c:fill(true)
+		
+		if c.Image then
+			c= c:Image()
+		end
+		
+		c.anchor_point={c.w/2,c.h}
+		
+		return c
+		
+	end
+	
+	--overwrite defaults
+    if t ~= nil then
+       	for k, v in pairs (t) do
+           	p[k] = v
+       	end
+    end
+
+	--Group that Clips the content
+	local window  = Group{name="window"}
+	--Group that contains all of the content
+	--local content = Group{}
+	--declarations for dependencies from scroll_group
+	local scroll, scroll_x, scroll_y
+	--flag to hold back key presses while animating content group
+	local animating = false
+
+	local border = Rectangle{ color = "00000000" }
+	
+	local arrow, f_arrow
+	
+	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
+	
+    --the umbrella Group, containing the full slate of tiles
+    local umbrella = Group{ 
+        name     = "arrowPane",
+        position = p.ui_position, 
+        reactive = true,
+        extra    = {
+			type = "ArrowPane",
+			--tries to place virtual coordinates 'x' and 'y' in the middle of the window
+			pan_to = function(self,x,y,top_left,f_arrow)
+				
+				if animating then return end
+				if top_left == true then
+					x = x + p.visible_w/2
+					y = y + p.visible_h/2
+				end
+				
+				local new_x, new_y
+                
+				if x > p.virtual_w - p.visible_w/2 then
+                    new_x = -p.virtual_w + p.visible_w - 11
+                elseif x < p.visible_w/2 then
+                    new_x = 0
+                else
+                    new_x = -x + p.visible_w/2
+                end
+				
+                
+                if y > p.virtual_h - p.visible_h/2 then
+                    new_y = -p.virtual_h + p.visible_h
+                elseif y < p.visible_h/2 then
+                    new_y = 0
+                else
+                    new_y = -y + p.visible_h/2
+                end
+				if new_x ~= p.content.x or new_y ~= p.content.y then
+                    
+				if p.tab_buttons == nil then 
+					if f_arrow.is_visible then
+						f_arrow:hide()
+					else
+						f_arrow:show()
+					end
+				end 
+					animating = true
+					p.content:animate{
+                        duration = 200,
+                        x = new_x,
+                        y = new_y,
+                        on_completed = function()
+                            animating = false
+							if p.tab_buttons == nil then 
+								if f_arrow.is_visible then
+									f_arrow:hide()
+								else
+									f_arrow:show()
+								end
+							end 
+                        end
+                    }
+                    
+                end
+			end,
+            seek_to_middle = function(x,y)
+                local new_x, new_y
+                if p.virtual_w > p.visible_w then
+                    if x > p.virtual_w - p.visible_w/2 then
+                        new_x = -p.virtual_w + p.visible_w
+                    elseif x < p.visible_w/2 then
+                        new_x = 0
+                    else
+                        new_x = -x + p.visible_w/2
+                    end
+                else
+                    new_x =0
+                end
+                if p.virtual_h > p.visible_h then
+                    if y > p.virtual_h - p.visible_h/2 then
+                        new_y = -p.virtual_h + p.visible_h
+                    elseif y < p.visible_h/2 then
+                        new_y = 0
+                    else
+                        new_y = -y + p.visible_h/2
+                    end
+                else
+                    new_y =0
+                end
+                
+                if new_x ~= p.content.x or new_y ~= p.content.y then
+                    p.content:animate{
+                        duration = 200,
+                        x = new_x,
+                        y = new_y,
+                        on_completed = function()
+                            animating = false
+                        end
+                    }
+                
+                    if grip_vert ~= nil then
+                    if new_y < -(p.virtual_h - p.visible_h) then
+                        grip_vert.y = track_h-grip_vert.h
+                    elseif new_y > 0 then
+                        grip_vert.y = 0
+                    elseif new_y ~= p.content.y then
+                        grip_vert:complete_animation()
+                        grip_vert:animate{
+                            duration= 200,
+                            y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
+                        }
+                    end
+                    end
+                    if grip_hor ~= nil then
+                    if new_x < -(p.virtual_w - p.visible_w) then
+                        grip_hor.x = track_w-grip_hor.w
+                    elseif new_x > 0 then
+                        grip_hor.x = 0
+                    elseif new_x ~= p.content.x then
+                        grip_hor:complete_animation()
+                        grip_hor:animate{
+                            duration= 200,
+                            x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
+                        }
+                    end
+                    end
+                end
+            end,
+			screen_pos_of_child = function(self,child)
+                return  child.x + child.parent.x + self.x + p.box_width,
+                        child.y + child.parent.y + self.y + p.box_width
+           end,
+
+        }
+    }
+	umbrella.pan_by = function(self,dx,dy,f_arrow)
+		
+		self:pan_to(
+			-p.content.x + dx,
+			-p.content.y + dy,
+			true,
+			f_arrow
+		)
+		
+	end
+	
+	umbrella.extra.seek_to = function(x,y)
+		--umbrella.extra.seek_to_middle(x+p.visible_w/2,y+p.visible_h/2) --hh
+    end
+
+	--this function creates the whole scroll bar box
+    local hold = false
+	
+	local arrow_pane_keys = {}
+	
+	local arrow_src, focus_arrow_src
+	
+	local function create()
+		
+		umbrella:clear()
+		arrow_pane_keys = {}
+		
+		
+		if arrow_src ~= nil and
+			arrow_src.parent == umbrella then
+			
+			arrow_src:unparent()
+		end
+		
+		if focus_arrow_src ~= nil and
+			focus_arrow_src.parent == umbrella then
+			
+			focus_arrow_src:unparent()
+		end
+		
+		if type(p.arrow_src) == "string" then
+			
+			arrow_src = assets(p.arrow_src)
+			
+		elseif type(p.arrow_src) == "userdata" then
+			
+			arrow_src = p.arrow_src
+			
+			if arrow_src.parent then
+				umbrella:add(arrow_src)
+				arrow_src:hide()
+			end
+			
+		else
+			
+			arrow_src   = make_arrow( p.arrow_sz, p.arrow_color )
+			umbrella:add(arrow_src)
+			arrow_src:hide()
+		end
+		
+		if type(p.focus_arrow_src) == "string" then
+			
+			focus_arrow_src = assets(p.focus_arrow_src)
+			
+		elseif type(p.focus_arrow_src) == "userdata" then
+			
+			focus_arrow_src = p.focus_arrow_src
+			
+			if focus_arrow_src.parent then
+				umbrella:add(focus_arrow_src)
+				focus_arrow_src:hide()
+			end
+			
+		else
+			
+			focus_arrow_src   = make_arrow( p.arrow_sz, p.arrow_focus_color )
+			umbrella:add(focus_arrow_src)
+			focus_arrow_src:hide()
+		end
+		--[[
+		if arrow_src.parent       then arrow_src:unparent() end
+		if focus_arrow_src.parent then focus_arrow_src:unparent() end
+		umbrella:add(arrow_src)
+		umbrella:add(focus_arrow_src)
+		arrow_src:hide()
+		focus_arrow_src:hide()
+		--]]
+        window.position={ p.box_width, p.box_width }
+		window.clip = { 0,0, p.visible_w, p.visible_h }
+        border:set{
+            w = p.visible_w+2*p.box_width,
+            h = p.visible_h+2*p.box_width,
+            border_width =    p.box_width,
+            border_color =    p.box_color,
+        }
+		
+        
+        if p.arrows_visible then
+			if p.visible_h < p.virtual_h then
+				do
+				f_arrow = Clone{
+					source       =  focus_arrow_src,
+					x            =  border.w/2,
+					y            = -p.arrow_dist_to_frame,
+					anchor_point = {
+						focus_arrow_src.w/2,
+						focus_arrow_src.h
+					},
+				}
+				f_arrow:hide()
+				
+				local arrow = Clone{
+					source       =  arrow_src,
+					x            =  border.w/2,
+					y            = -p.arrow_dist_to_frame,
+					anchor_point = {
+						arrow_src.w/2,
+						arrow_src.h
+					},
+					reactive       = true,
+					on_button_down = function(self)
+						--self.focus:show()
+					end,
+					on_button_up = function(self)
+						umbrella:pan_by(0,-p.dist_per_press,self.focus)
+						--self.focus:hide()
+					end,
+					extra = {
+						focus = f_arrow
+					}
+				}
+				arrow_pane_keys[keys.Up] = function() arrow:on_button_up() end
+				
+				--arrow.reactive=true
+				umbrella:add(arrow,f_arrow)
+				end
+				do
+				f_arrow = Clone{
+					source       =  focus_arrow_src,
+					x            =  border.w/2,
+					y            =  p.arrow_dist_to_frame+border.h,
+					z_rotation   = {180,0,0},
+					anchor_point = {
+						focus_arrow_src.w/2,
+						focus_arrow_src.h
+					},
+				}
+				f_arrow:hide()
+				
+				local arrow = Clone{
+					source       =  arrow_src,
+					x            =  border.w/2,
+					y            =  p.arrow_dist_to_frame+border.h,
+					z_rotation   = {180,0,0},
+					anchor_point = {
+						arrow_src.w/2,
+						arrow_src.h
+					},
+					reactive       = true,
+					on_button_down = function(self)
+						--self.focus:show()
+					end,
+					on_button_up = function(self)
+						umbrella:pan_by(0,p.dist_per_press,self.focus)
+						--self.focus:hide()
+					end,
+					extra = {
+						focus = f_arrow
+					},
+				}
+				
+				arrow_pane_keys[keys.Down] = function() arrow:on_button_up() end
+				
+				umbrella:add(arrow,f_arrow)
+				end
+			end
+
+			if p.visible_w < p.virtual_w then
+				-- [[ Right Arrow ]]-- 
+				if p.tab_buttons then 
+					f_arrow = Clone{
+						source       = p.focus_arrow_src,
+						x            = border.w+p.arrow_dist_to_frame,
+						y            = border.h/2,
+						z_rotation   = {90,0,0},
+						anchor_point = {
+							focus_arrow_src.w/2,
+							focus_arrow_src.h
+						},
+					}
+					f_arrow:hide()
+
+					local arrow = Image {
+						name = "right",
+						src ="/lib/assets/tab-arrow-right-on.png",
+						x = border.w+p.arrow_dist_to_frame  - 15,
+						y = border.h/2 - 10,
+						reactive=true,
+						on_button_down = function()
+							umbrella:pan_by(p.dist_per_press,0)
+							if p.tab then 
+								local current_tab = p.tab.current_tab
+								if umbrella:find_child("right").src == "/lib/assets/tab-arrow-right-on.png" then
+									if current_tab == 1 then 
+										p.tab_buttons[2].on_button_down()
+									end 
+									umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-off.png"
+									umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-on.png"
+								end 
+								if p.tab_buttons[4].reactive == false then 
+									p.tab_buttons[4]:show()
+									p.tab_buttons[4].reactive = true 
+								end 
+								return true
+							end 
+						end,
+						extra = {
+							focus = f_arrow
+						}
+					}
+					
+					umbrella:add(arrow,f_arrow)
+				else 
+					
+					f_arrow = Clone{
+						source       = focus_arrow_src,
+						x            = border.w+p.arrow_dist_to_frame,
+						y            = border.h/2,
+						z_rotation   = {90,0,0},
+						anchor_point = {
+							focus_arrow_src.w/2,
+							focus_arrow_src.h
+						},
+					}
+					f_arrow:hide()
+					local arrow = Clone{
+						source       = arrow_src,
+						x            = border.w+p.arrow_dist_to_frame,
+						y            = border.h/2,
+						z_rotation   = {90,0,0},
+						--extra        = { focus = f_arrow },
+						anchor_point = {
+							arrow_src.w/2,
+							arrow_src.h
+						},
+						reactive = true,
+						on_button_down = function(self)
+							--self.focus:show()
+						end,
+						on_button_up = function(self)
+							umbrella:pan_by(p.dist_per_press,0,self.focus)
+							--self.focus:hide()
+						end,
+						extra = {
+							focus = f_arrow
+						},
+					}
+					
+					
+					arrow_pane_keys[keys.Right] = function()  arrow:on_button_up() end
+					
+					umbrella:add(arrow,f_arrow)
+				end 
+				
+				if p.tab_buttons then 
+					arrow = Image {
+						name = "left",
+						src ="/lib/assets/tab-arrow-left-off.png",
+						x = - 20,
+						reactive = true,
+						on_button_down = function()
+							umbrella:pan_by(-p.dist_per_press,0)
+							if p.tab then 
+								local current_tab = p.tab.current_tab
+								if umbrella:find_child("left").src == "/lib/assets/tab-arrow-left-on.png" then 
+									if current_tab == 4 then 
+										p.tab_buttons[1].on_button_down()
+									end 
+									umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-on.png"
+									umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-off.png"
+								end 
+								if  p.tab_buttons[4].reactive == true then 
+									p.tab_buttons[4]:hide()
+									p.tab_buttons[4].reactive = false 
+								end 
+								return true
+							end 
+						end
+					}
+					umbrella:add(arrow)
+				else
+					
+					f_arrow = Clone{
+						source       = focus_arrow_src,
+						x            = -p.arrow_dist_to_frame,
+						y            = border.h/2,
+						z_rotation   = {270,0,0},
+						anchor_point = {
+							focus_arrow_src.w/2,
+							focus_arrow_src.h
+						},
+					}
+					f_arrow:hide()
+					arrow = Clone{
+						source       = arrow_src,
+						x            = -p.arrow_dist_to_frame,
+						y            = border.h/2,
+						z_rotation   = {270,0,0},
+						extra        = { focus = f_arrow },
+						anchor_point = {
+							arrow_src.w/2,
+							arrow_src.h
+						},
+						reactive = true,
+						on_button_down = function(self)
+							--self.focus:show()
+						end,
+						on_button_up = function(self)
+							umbrella:pan_by(-p.dist_per_press,0,self.focus)
+							--self.focus:hide()
+						end,
+						extra = {
+							focus = f_arrow
+						},
+					}
+					
+					arrow_pane_keys[keys.Left] = function() arrow:on_button_up() end
+					
+					umbrella:add(arrow,f_arrow)
+				end 
+			end
+		end
+		
+		
+		function umbrella:on_key_focus_in()
+			
+			border.border_color = p.box_focus_color
+			
+		end
+		function umbrella:on_key_focus_out()
+			
+			border.border_color = p.box_color
+			
+		end
+        
+		umbrella.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
+		umbrella:add(border,window)
+	end
+	
+    create()
+	window:add(p.content)
+	
+	function umbrella:on_key_down(key)
+		if arrow_pane_keys[key] then arrow_pane_keys[key]() end
+	end
+	
+	--set the meta table to overwrite the parameters
     mt = {}
     mt.__newindex = function(t,k,v)
 		
-        p[k] = v
-        create()
-		
+        if k == "content" then
+            p.content:unparent()
+            if v.parent ~= nil then
+                v:unparent()
+            end
+            v.position={0,0}
+            v.reactive = false
+            window:add(v)
+        	p[k] = v
+		elseif k == "selected" then 
+        	p[k] = v
+		else
+        	p[k] = v
+        	create()
+        end
     end
     mt.__index = function(t,k)       
        return p[k]
@@ -5588,7 +7027,6 @@ function ui_element.tabBar(t)
 
     return umbrella
 end
-
 --]]
 
 
