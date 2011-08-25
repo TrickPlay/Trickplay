@@ -2,6 +2,8 @@ dofile("util.lua")
 
 local factory = ui.factory
 
+local prev_skin, new_skin, prev_font_size, new_font_size
+local prev_ix, prev_iy, new_ix, new_iy, prev_line_space, new_line_space 
 
 local check_number_val = function(val, name)
 	if tonumber(val) == nil then 
@@ -132,6 +134,63 @@ local verify_attr_val = function(attr_name, attr_val, v, inspector)
 	return 	
 end 
 
+
+local function CB_RB(v)
+local font_diff = new_font_size - prev_font_size 
+local line_space_diff = new_line_space - prev_line_space
+local ix_diff = new_ix - prev_ix
+local iy_diff = new_iy - prev_iy 
+
+if v.extra.type == "CheckBoxGroup" then 
+	if prev_skin ~= "CarbonCandy" and v.skin == "CarbonCandy" then -- Custom->CarbonCandy
+		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
+			v.line_space = v.line_space + 20
+			v.item_position = {v.item_position[1] + 20, v.item_position[2] + 20}
+		end
+	elseif  prev_skin ~= "Custom" and v.skin == "Custom" then -- CarbonCandy -> Custom
+		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
+			v.line_space = v.line_space - 20
+			v.item_position = {v.item_position[1] - 20, v.item_position[2] - 20}
+		end
+	end 
+
+	if prev_line_space == new_line_space and prev_ix == new_ix then 
+		if font_diff > 0 then -- bigger font
+			v.line_space = v.line_space + math.floor(font_diff/3)
+			v.item_position = {v.item_position[1]- font_diff, v.item_position[2] - font_diff}
+	elseif font_diff < 0 then -- smaller font 
+			v.line_space = v.line_space + math.floor(font_diff/3)
+			v.item_position = {v.item_position[1] - font_diff, v.item_position[2] - font_diff}
+		end 
+	end
+elseif v.extra.type == "RadioButtonGroup" then 
+	if prev_skin ~= "CarbonCandy" and v.skin == "CarbonCandy" then -- Custom->CarbonCandy
+		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
+			v.line_space = v.line_space + 25
+			v.item_position = {v.item_position[1] + 20, v.item_position[2] + 20}
+		end
+	elseif  prev_skin ~= "Custom" and v.skin == "Custom" then -- CarbonCandy -> Custom
+		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
+			v.line_space = v.line_space - 25
+			v.item_position = {v.item_position[1] - 20, v.item_position[2] - 20}
+		end
+	end 
+
+	if prev_line_space == new_line_space and prev_ix == new_ix then 
+		if font_diff > 0 then -- bigger font
+			v.line_space = v.line_space + math.floor(font_diff/3)
+			v.item_position = {v.item_position[1]- font_diff, v.item_position[2] - font_diff}
+	elseif font_diff < 0 then -- smaller font 
+			v.line_space = v.line_space + math.floor(font_diff/3)
+			v.item_position = {v.item_position[1] - font_diff, v.item_position[2] - font_diff}
+		end 
+	end
+
+end 
+
+end 
+
+
 function inspector_apply (v, inspector)
 
 	  local org_object, new_object, item_group 
@@ -189,8 +248,9 @@ function inspector_apply (v, inspector)
          	end,
 
        	["skin"] = function()
-	
+				  prev_skin = v.skin
     	          v["skin"] = hdr.inspector_skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
+				  new_skin = skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
 
               end,
 
@@ -361,6 +421,38 @@ function inspector_apply (v, inspector)
 			  		local itemLists = {"top", "right"} 
               		v["tab_position"] = itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)]
 
+					if itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)] == "top" and 
+			    	 inspector:find_child("focuschanger_bg".."R").opacity == 255 then 
+				 		for i = 1, #v.tab_labels do
+				 			v.tabs[i].extra.up_focus = v.tabs[i].extra.left_focus 
+				 			v.tabs[i].extra.left_focus = ""
+				 			v.tabs[i].extra.down_focus = v.tabs[i].extra.right_focus 
+				 			v.tabs[i].extra.right_focus = ""
+				    		if i == 1 then 
+				 				v.extra.focus[keys.Left] = v.extra.focus[keys.Up] 
+					    		v.extra.focus[keys.Up] = "" 
+							elseif i == #v.tab_labels then 
+				 				v.extra.focus[keys.Right] = v.extra.focus[keys.Down]
+								v.extra.focus[keys.Down] = "" 
+							end 
+				 		end 
+		      		elseif itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)] == "right" and 
+			     		inspector:find_child("focuschanger_bg".."D").opacity == 255 then 
+				 		for i = 1, #v.tab_labels do
+				 			v.tabs[i].extra.left_focus = v.tabs[i].extra.up_focus 
+				 			v.tabs[i].extra.up_focus = ""
+				 			v.tabs[i].extra.right_focus = v.tabs[i].extra.down_focus 
+				 			v.tabs[i].extra.down_focus = ""
+				    		if i == 1 then 
+				 				v.extra.focus[keys.Up] = v.extra.focus[keys.Left] 
+					    		v.extra.focus[keys.Left] = "" 
+							elseif i == #v.tab_labels then 
+				 				v.extra.focus[keys.Down] = v.extra.focus[keys.Right]
+								v.extra.focus[keys.Right] = "" 
+							end 
+				 		end 
+			  		end 
+
 				end,
 
 		["expansion_location"] = function()
@@ -511,6 +603,10 @@ function inspector_apply (v, inspector)
 						 		if v[j.name] ~= inum then 
                         	 		v[j.name] = inum
 								end 
+							elseif j.name == "line_space" then 
+							 	prev_line_space = v[j.name]
+					         	v[j.name] = inum
+							 	new_line_space = inum
 			    	 		else
                         		v[j.name] = inum 
 			    			end 
@@ -519,6 +615,16 @@ function inspector_apply (v, inspector)
 			    			if v[j.name] == true or v[j.name] == false then
 								v[j.name] = toboolean(itxt)
 			    			else 
+								if j.name == "text_font" then 
+							 		local a,b = string.find(v.text_font, "px")
+							 		prev_font_size = tonumber(string.sub(v.text_font, a-3, a-1))
+									local new_font = tostring(itxt)
+									if new_font then 
+										a,b = string.find(new_font, "px")
+							 			new_font_size = tonumber(string.sub(new_font, a-3, a-1))
+									end 
+								end 
+
 								if tostring(itxt) then 
                         			v[j.name] = tostring(itxt)
 								end 
@@ -609,38 +715,22 @@ function inspector_apply (v, inspector)
 					 	end 
 
 					elseif j.name == "ix" or j.name == "iy" then
-                 		local ipos_t = v.item_position
+						
+						prev_ix = v.item_position[1]
+						prev_iy = v.item_position[2]
+						
+                 		local ipos_t = {}
 
 						if tonumber(itxt) then 
-							if j.name == "ix" then ipos_t[1] = tonumber(itxt)
-							elseif j.name == "iy" then ipos_t[2] = tonumber(itxt)
+							if j.name == "ix" then ipos_t[1] = tonumber(itxt) new_ix = ipos_t[1] v.item_position[1] = ipos_t[1]
+							elseif j.name == "iy" then ipos_t[2] = tonumber(itxt) new_iy = ipos_t[2] v.item_position[2] = ipos_t[2]
 							end 
- 		         			v.item_position = ipos_t
+ 		         			
 				 		end 
-					elseif j.name == "focusChanger" then 
-		     			v.extra.focus = {}
-		     			for m,n in pairs (focus_t_list) do 
-							local nth_txt =  item_group:find_child("text"..n).text 
-		          			if nth_txt ~= "" then 
-								if nth_txt == v.extra.prev_name then 
-									v.extra.focus[focus_map[n]] = v.name
-								else 
-									v.extra.focus[focus_map[n]] = nth_txt
-								end 
-								if focus_match[n] then 
-									local g_nth_txt = g:find_child(nth_txt) 
 
-									if g_nth_txt then 
-										if g_nth_txt.extra.focus then 
-					     					g_nth_txt.extra.focus[focus_match[n]] = v.name
-										else
-					     					g_nth_txt.extra.focus = {} 
-					     					g_nth_txt.extra.focus[focus_match[n]] = v.name
-										end
-									end
-								end 
-			  				end 
-		     			end 
+						
+						
+
 					elseif j.name == "left" or j.name == "top" or  j.name == "width" or j.name == "height" then 
 		     			local viewport_t = {}
                      	viewport_t[1] = item_group:find_child("left"):find_child("input_text").text
@@ -671,7 +761,84 @@ function inspector_apply (v, inspector)
 	  	if inspector:find_child("focusChanger") then 
 		   item_group = inspector:find_child("focusChanger") 
 		   v.extra.focus = {}
-		   for m,n in pairs (focus_t_list) do 
+		   if v.extra.type == "TabBar" then 
+				for i = 1, #v.tab_labels do
+				if v.tab_position == "top" then 
+					if item_group.extra.tabs[i].up_focus ~= nil then 
+						v.tabs[i].extra.up_focus = item_group.extra.tabs[i].up_focus
+						if g:find_child(item_group.extra.tabs[i].up_focus).extra.focus == nil then 
+							g:find_child(item_group.extra.tabs[i].up_focus).extra.focus = {}
+						end 
+						g:find_child(item_group.extra.tabs[i].up_focus).extra.focus[keys.Down] = v.name
+					end 
+
+					if item_group.extra.tabs[i].down_focus ~= nil then 
+						v.tabs[i].extra.down_focus = item_group.extra.tabs[i].down_focus
+						if g:find_child(item_group.extra.tabs[i].down_focus).extra.focus == nil then 
+							g:find_child(item_group.extra.tabs[i].down_focus).extra.focus = {}
+						end 
+						g:find_child(item_group.extra.tabs[i].down_focus).extra.focus[keys.Up] = v.name
+					end 
+				else 
+					if item_group.extra.tabs[i].left_focus ~= nil then 
+						v.tabs[i].extra.left_focus = item_group.extra.tabs[i].left_focus
+						if g:find_child(item_group.extra.tabs[i].left_focus).extra.focus == nil then 
+							g:find_child(item_group.extra.tabs[i].left_focus).extra.focus = {}
+						end 
+						g:find_child(item_group.extra.tabs[i].left_focus).extra.focus[keys.Right] = v.name
+					end 
+
+					if item_group.extra.tabs[i].right_focus ~= nil then 
+						v.tabs[i].extra.right_focus = item_group.extra.tabs[i].right_focus
+						if g:find_child(item_group.extra.tabs[i].right_focus).extra.focus == nil then 
+							g:find_child(item_group.extra.tabs[i].right_focus).extra.focus = {}
+						end 
+						g:find_child(item_group.extra.tabs[i].right_focus).extra.focus[keys.Left] = v.name
+					end 
+
+				end 
+
+				if i == 1 then 
+					if v.tab_position == "top" then 
+						if item_group.extra.tabs[i].left_focus ~= nil then 
+							v.extra.focus[keys.Left] = item_group.extra.tabs[i].left_focus
+							if g:find_child(item_group.extra.tabs[i].left_focus).extra.focus == nil then 
+								g:find_child(item_group.extra.tabs[i].left_focus).extra.focus = {}
+							end 
+							g:find_child(item_group.extra.tabs[i].left_focus).extra.focus[keys.Right] = v.name
+						end 
+					else 
+						if item_group.extra.tabs[i].up_focus ~= nil then 
+							v.extra.focus[keys.Up] = item_group.extra.tabs[i].up_focus
+							if g:find_child(item_group.extra.tabs[i].up_focus).extra.focus == nil then 
+								g:find_child(item_group.extra.tabs[i].up_focus).extra.focus = {}
+							end 
+							g:find_child(item_group.extra.tabs[i].up_focus).extra.focus[keys.Down] = v.name
+						end 
+					end 
+				elseif i == #v.tab_labels then 
+					if v.tab_position == "top" then 
+						if item_group.extra.tabs[i].right_focus ~= nil then 
+							v.extra.focus[keys.Right] = item_group.extra.tabs[i].right_focus
+							if g:find_child(item_group.extra.tabs[i].right_focus).extra.focus == nil then 
+								g:find_child(item_group.extra.tabs[i].right_focus).extra.focus = {}
+							end 
+							g:find_child(item_group.extra.tabs[i].right_focus).extra.focus[keys.Left] = v.name
+						end
+					else
+						if item_group.extra.tabs[i].down_focus ~= nil then 
+							v.extra.focus[keys.Down] = item_group.extra.tabs[i].down_focus
+							if g:find_child(item_group.extra.tabs[i].down_focus).extra.focus == nil then 
+								g:find_child(item_group.extra.tabs[i].down_focus).extra.focus = {}
+							end 
+							g:find_child(item_group.extra.tabs[i].down_focus).extra.focus[keys.Up] = v.name
+						end
+
+					end
+				end 
+			end 
+		else 
+		   	for m,n in pairs (focus_t_list) do 
 				local nth_txt = item_group:find_child("text"..n).text
 		   	    if nth_txt ~= "" then 
 					if nth_txt == v.extra.prev_name then 
@@ -681,7 +848,6 @@ function inspector_apply (v, inspector)
 					end 
 					if focus_match[n] then 
 						local g_nth_txt = g:find_child(item_group:find_child("text"..n).text)
-
 						if g_nth_txt then 
 							if g_nth_txt.extra.focus then 
 					     		g_nth_txt.extra.focus[focus_match[n]] = v.name
@@ -692,7 +858,8 @@ function inspector_apply (v, inspector)
 						end
 					end 
 			    end 
-		  	end 
+		 	 end 
+		  end 
 	  	end 
 
 		if inspector:find_child("item_group_more") then 
@@ -709,6 +876,9 @@ function inspector_apply (v, inspector)
 		   end 
 	  	end 
 
+		if v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then
+			CB_RB(v)
+		end
         util.set_obj(new_object, v) 
         input_mode = hdr.S_SELECT
         if(v.name ~= "video1") then 

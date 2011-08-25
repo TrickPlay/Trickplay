@@ -12,7 +12,7 @@ local icon_dvc = Image{src = "assets/distribute-vertical-center.png", opacity = 
 
 local info_attr_t_idx = {"name","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
 
-local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","message", "button_colorr","button_colorg","button_colorb","button_colora","border_colorr", "border_colorg", "border_colorb", "border_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_colorr","focus_colorg","focus_colorb","focus_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora", "select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","colorr", "colorg", "colorb", "colora","title_colorr","title_colorg","title_colorb","title_colora","title_font","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora","box_colorr","box_colorg","box_colorb","box_colora", "box_width", "box_height", "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","items","reactive", "focus"} 
+local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","message", "button_colorr","button_colorg","button_colorb","button_colora","border_colorr", "border_colorg", "border_colorb", "border_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_colorr","focus_colorg","focus_colorb","focus_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora", "select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","colorr", "colorg", "colorb", "colora","title_colorr","title_colorg","title_colorb","title_colora","title_font","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera","bar_focus_color_innerr", "bar_focus_color_innerg","bar_focus_color_innerb","bar_focus_color_innera", "bar_focus_color_outerr","bar_focus_color_outerg","bar_focus_color_outerb","bar_focus_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora", "arrow_focus_colorr", "arrow_focus_colorg", "arrow_focus_colorb", "arrow_focus_colora", "box_colorr","box_colorg","box_colorb","box_colora", "box_focus_colorr","box_focus_colorg","box_focus_colorb","box_focus_colora", "box_width", "box_height", "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","items","reactive", "focus"} 
 
 
 local attr_t_idx 
@@ -1109,11 +1109,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 					editor.error_message("010","two",nil,nil,inspector)
 				end 
 			elseif v.extra.type == "TabBar" then 
-				if #v.tab_labels > 1 then 
+				if #v.tab_labels > 2 then 
 					minus.src="lib/assets/li-btn-red-minus.png"
 				else 
 					v.extra.last = true
-					editor.error_message("010","one",nil,nil,inspector)
+					editor.error_message("010","two",nil,nil,inspector)
 				end 
 			else
 				if #v.items > 1 then 
@@ -1625,76 +1625,121 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
 
 	
+		local function deactive_tab(tab_type) 
+			focus_changer:find_child("text"..tab_type).text = v.name 
+			focus_changer:find_child("text"..tab_type).color = {255,255,255,100}
+			focus_changer:find_child("focuschanger_bg"..tab_type).opacity = 100 
+			focus_changer:find_child("g"..tab_type).reactive = false 
+		end 
+
+		local function active_tab(tab_type, txt) 
+			if txt then 
+				focus_changer:find_child("text"..tab_type).text = txt
+		    end 
+			focus_changer:find_child("text"..tab_type).color = {255,255,255,255}
+			focus_changer:find_child("focuschanger_bg"..tab_type).opacity = 255 
+			focus_changer:find_child("g"..tab_type).reactive = true 
+		end 
+
 		if v.extra.type == "Button" or v.extra.type == "MenuButton" then
-			focus_changer:find_child("textE").text = v.name 
-			focus_changer:find_child("textE").color = {255,255,255,100}
-			focus_changer:find_child("focuschanger_bgE").opacity = 100 
-			focus_changer:find_child("gE").reactive = false 
+			deactive_tab("E") 
 		elseif v.extra.type == "TextInput" then 
-			focus_changer:find_child("textE").text = v.name 
-			focus_changer:find_child("textE").color = {255,255,255,100}
-			focus_changer:find_child("focuschanger_bgE").opacity = 100 
-			focus_changer:find_child("gE").reactive = false 
-			focus_changer:find_child("textL").text = v.name 
-			focus_changer:find_child("textL").color = {255,255,255,100}
-			focus_changer:find_child("focuschanger_bgL").opacity = 100 
-			focus_changer:find_child("gL").reactive = false 
-			focus_changer:find_child("textR").text = v.name 
-			focus_changer:find_child("textR").color = {255,255,255,100}
-			focus_changer:find_child("focuschanger_bgR").opacity = 100 
-			focus_changer:find_child("gR").reactive = false 
+			deactive_tab("E") 
+			deactive_tab("L") 
+			deactive_tab("R") 
 		elseif v.extra.type == "ButtonPicker" then 
 			if v.direction == "vertical" then 
-				focus_changer:find_child("textL").text = "" 
-				focus_changer:find_child("textL").color = {255,255,255,255}
-				focus_changer:find_child("focuschanger_bgL").opacity = 255 
-				focus_changer:find_child("gL").reactive = true 
-				focus_changer:find_child("textR").text = ""
-				focus_changer:find_child("textR").color = {255,255,255,255}
-				focus_changer:find_child("focuschanger_bgR").opacity = 255 
-				focus_changer:find_child("gR").reactive = true 
+				--들어 있으나 아래코드서 덮어 써짐 
+				active_tab("L","") 
+				active_tab("R","") 
+				--여기 까지 
 
-				focus_changer:find_child("textE").text = v.name 
-				focus_changer:find_child("textE").color = {255,255,255,100}
-				focus_changer:find_child("focuschanger_bgE").opacity = 100 
-				focus_changer:find_child("gE").reactive = false 
-
-				focus_changer:find_child("textU").text = v.name 
-				focus_changer:find_child("textU").color = {255,255,255,100}
-				focus_changer:find_child("focuschanger_bgU").opacity = 100 
-				focus_changer:find_child("gU").reactive = false 
-
-				focus_changer:find_child("textD").text = v.name 
-				focus_changer:find_child("textD").color = {255,255,255,100}
-				focus_changer:find_child("focuschanger_bgD").opacity = 100 
-				focus_changer:find_child("gD").reactive = false 
+				deactive_tab("E") 
+				deactive_tab("U") 
+				deactive_tab("D") 
 			else 
-				focus_changer:find_child("textE").text = v.name 
-				focus_changer:find_child("textE").color = {255,255,255,100}
-				focus_changer:find_child("focuschanger_bgE").opacity = 100 
-				focus_changer:find_child("gE").reactive = false 
-				focus_changer:find_child("textL").text = v.name 
-				focus_changer:find_child("textL").color = {255,255,255,100}
-				focus_changer:find_child("focuschanger_bgL").opacity = 100 
-				focus_changer:find_child("gL").reactive = false 
-				focus_changer:find_child("textR").text = v.name 
-				focus_changer:find_child("textR").color = {255,255,255,100}
-				focus_changer:find_child("focuschanger_bgR").opacity = 100 
-				focus_changer:find_child("gR").reactive = false 
 
-				focus_changer:find_child("textU").text = "" 
-				focus_changer:find_child("textU").color = {255,255,255,255}
-				focus_changer:find_child("focuschanger_bgU").opacity = 255 
-				focus_changer:find_child("gU").reactive = true 
-				focus_changer:find_child("textD").text = ""
-				focus_changer:find_child("textD").color = {255,255,255,255}
-				focus_changer:find_child("focuschanger_bgD").opacity = 255 
-				focus_changer:find_child("gD").reactive = true 
+				deactive_tab("E") 
+				deactive_tab("L") 
+				deactive_tab("R") 
 
+					--들어 있으나 아래코드서 덮어 써짐 
+				active_tab("U","") 
+				active_tab("D","") 
+					--여기 까지 
 			end 
+
+		elseif v.extra.type == "TabBar" then 
+			if v.tab_position == "top" then 
+				focus_changer.extra.tabs = {}
+				for q=1,#v.tab_labels,1 do
+					focus_changer.extra.tabs[q] = {}
+					focus_changer.extra.tabs[q].up_focus = v.tabs[q].extra.up_focus 
+					focus_changer.extra.tabs[q].down_focus = v.tabs[q].extra.down_focus 
+				end 
+
+				if v.tabs[1].extra.up_focus then
+					focus_changer:find_child("textU").text = v.tabs[1].extra.up_focus 
+				else 
+					focus_changer:find_child("textU").text = ""
+				end 
+				if v.tabs[1].extra.down_focus then 
+					focus_changer:find_child("textD").text = v.tabs[1].extra.down_focus 
+				else 
+					focus_changer:find_child("textD").text = ""
+				end 
+
+				if v.extra.focus then 
+					if v.extra.focus[keys.Left] ~= nil then 
+						focus_changer:find_child("textL").text = v.extra.focus[keys.Left] 
+						focus_changer.extra.tabs[1].left_focus = v.extra.focus[keys.Left] 
+					end 
+
+					if v.extra.focus[keys.Right] ~= nil then 
+						focus_changer.extra.tabs[#v.tab_labels].right_focus = v.extra.focus[keys.Right] 
+					end 
+				end 
+
+				deactive_tab("E") 
+				deactive_tab("R") 
+			else
+				focus_changer.extra.tabs = {}
+				for q=1,#v.tab_labels,1 do
+					focus_changer.extra.tabs[q] = {}
+					focus_changer.extra.tabs[q].up_focus = v.tabs[q].extra.up_focus 
+					focus_changer.extra.tabs[q].down_focus = v.tabs[q].extra.down_focus 
+				end 
+
+				if v.tabs[1].extra.left_focus then
+					focus_changer:find_child("textL").text = v.tabs[1].extra.left_focus 
+				else 
+					focus_changer:find_child("textL").text = ""
+				end 
+				if v.tabs[1].extra.right_focus then 
+					focus_changer:find_child("textR").text = v.tabs[1].extra.right_focus 
+				else 
+					focus_changer:find_child("textR").text = ""
+				end 
+
+				if v.extra.focus then 
+					if v.extra.focus[keys.Up] ~= nil then 
+						focus_changer:find_child("textU").text = v.extra.focus[keys.Up] 
+						focus_changer.extra.tabs[1].up_focus = v.extra.focus[keys.Up] 
+					end 
+
+					if v.extra.focus[keys.Down] ~= nil then 
+						focus_changer.extra.tabs[#v.tab_labels].down_focus = v.extra.focus[keys.Down] 
+					end 
+				end 
+
+				deactive_tab("E") 
+				deactive_tab("D") 
+			end
 		end 	
 
-		if v.extra.focus then 
+		--ER_1 : 버튼 피커 일경우나.. 여기를 덮어 써버리는 구먼 H방향 에서 V방향으로 바뀔때 이거 생각해 보고 고치기 나중에.. 
+
+		if v.extra.focus and v.extra.type ~= "TabBar" then 
 			for m, n in pairs (v.extra.focus) do
 		     	if type(n) ~= "function" then 
 		          	focus_changer:find_child("text"..focus_map[m]).text = n
@@ -1706,10 +1751,10 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 			end 	
 		end
 
-
-    	focus_changer.position  = {0 , 5}
-
-	    return focus_changer
+		if focus_changer then 
+    		focus_changer.position  = {0 , 5}
+	    	return focus_changer
+		end 
 
 end 
 end 
@@ -2310,7 +2355,22 @@ function factory.draw_focus_changer(v)
 	focus_changer_bgL = Image{src = "lib/assets/assign-focus-left.png", name = "focuschanger_bgL", position = {0,110}}
 	focus_changer_bgE = Image{src = "lib/assets/assign-focus-ok.png", name = "focuschanger_bgE", position = {85,110}}
 
-	text11 = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "Assign Focus".."["..v.name.."]", name = "text11", position = {0,0,0}, }
+	if v.extra.type == "TabBar" then 
+		local space = 0
+		tabs = Group {name = "tabs_focus", position = {0,0,0}, reactive = true}
+		for i=1, #v.tab_labels, 1 do 
+			local tab_txt = Text{name = tostring(i), color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "Tab_"..tostring(i).." | ", x = space, reactive == true}
+			if i == 1 then 
+				tab_txt.color = {255,25,25,255}
+			end
+
+			tabs:add(tab_txt)
+			space = space + 45
+		end
+	else 
+		text11 = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "Assign Focus".."["..v.name.."]", name = "text11", position = {0,0,0}, }
+	end 
+
 
 	gU = Rectangle { name = "gU", position = {85,25,0}, size = {85,85}, opacity = 255, color = {255,255,255,0}, reactive = true, } 
 
@@ -2332,7 +2392,11 @@ function factory.draw_focus_changer(v)
 
 	textD = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "", wants_enter = true, wrap = true, wrap_mode = "CHAR", name = "textD", position = {90,237}, size = {75,45}, opacity = 255, alignment = "CENTER" }
 
-	focus:add(text11,focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
+	if v.extra.type =="TabBar" then 
+		focus:add(tabs, focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
+	else 
+		focus:add(text11, focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
+	end 
 	
 	function focus.extra.on_focus_in()
 	 	if current_focus then 
@@ -2358,16 +2422,53 @@ function factory.draw_focus_changer(v)
 		end 
 	end 
 
-	function make_on_button_down_f(v)
-     	function v:on_button_down(x,y,b,n)
+	function make_on_button_down_f(r)
+     	function r:on_button_down(x,y,b,n)
 	 		if focus then 
 				if focus.extra.on_focus_in then 
         			focus.extra.on_focus_in()
 				end 
 			end
-	   		focus_type = v.name:sub(2,-1)
-	   		v.border_color = {255,25,25,255} 
-	   		v.border_width = 2
+	   		focus_type = r.name:sub(2,-1)
+	   		r.border_color = {255,25,25,255} 
+	   		r.border_width = 2
+
+			local tabs_focus = focus:find_child("tabs_focus")
+			if tabs_focus then 
+				for i,j in pairs (tabs_focus.children) do 
+					if j.color[2] == 25 then --활성화 되어 있는 탭 
+						if tab_dir == "top" then 
+							if focus_type == "U" then 
+	   							if (focus:find_child("text"..focus_type).text ~= "") then
+									focus.extra.tabs[i].up_focus = ""
+	   							end   
+							elseif focus_type == "D" then 
+	   							if (focus:find_child("text"..focus_type).text ~= "") then
+									focus.extra.tabs[i].down_focus = ""
+	   							end   
+							elseif focus_type == "R" then 
+								focus.extra.tabs[i].right_focus = ""
+							elseif focus_type == "L" then 
+								focus.extra.tabs[i].left_focus = ""
+							end 
+						else 
+							if focus_type == "L" then 
+	   							if (focus:find_child("text"..focus_type).text ~= "") then
+									focus.extra.tabs[i].left_focus = ""
+	   							end   
+							elseif focus_type == "R" then 
+	   							if (focus:find_child("text"..focus_type).text ~= "") then
+									focus.extra.tabs[i].right = ""
+	   							end   
+							elseif focus_type == "U" then 
+								focus.extra.tabs[i].up_focus = ""
+							elseif focus_type == "D" then 
+								focus.extra.tabs[i].down_focus = ""
+							end 
+						end 
+					end 
+				end 
+			end 
 	   		if (focus:find_child("text"..focus_type).text ~= "") then
 				focus:find_child("text"..focus_type).text = ""
 	   		end   
@@ -2380,6 +2481,123 @@ function factory.draw_focus_changer(v)
      	j.reactive = true 
      	if (j.type == "Rectangle") then 
           	make_on_button_down_f(j)
+		elseif j.name == "tabs_focus" then 
+			local current_tabs_focus = 1
+			local tab_dir = v.tab_position 
+
+			local f_n_map = {
+				["U"] = function(focus_tab_n) return focus.tabs[focus_tab_n].up_focus end, 
+				["D"] = function(focus_tab_n) return focus.tabs[focus_tab_n].down_focus end, 
+				["R"] = function(focus_tab_n) return focus.tabs[focus_tab_n].right_focus end, 
+				["L"] = function(focus_tab_n) return focus.tabs[focus_tab_n].left_focus end, 
+			}
+			local f_n_map2 = {
+				["U"] = function(focus_tab_n) return v.tabs[focus_tab_n].extra.up_focus  end, 
+				["D"] = function(focus_tab_n) return v.tabs[focus_tab_n].extra.down_focus end, 
+				["R"] = function(focus_tab_n) return v.tabs[focus_tab_n].extra.right_focus end, 
+				["L"] = function(focus_tab_n) return v.tabs[focus_tab_n].extra.left_focus end, 
+			}
+
+			local function update_tab_f(n, focus_t)
+				if f_n_map[focus_t](n) ~= nil then 
+					focus:find_child("text"..focus_t).text = f_n_map[focus_t](n)
+				else 
+					if  f_n_map2[focus_t](n) then 
+						focus:find_child("text"..focus_t).text = f_n_map2[focus_t](n)
+					else 
+						focus:find_child("text"..focus_t).text = ""
+					end 
+				end 
+			end 
+
+			local function deactive_tab(tab_type) 
+				focus:find_child("text"..tab_type).text = v.name 
+				focus:find_child("text"..tab_type).color = {255,255,255,100}
+				focus:find_child("focuschanger_bg"..tab_type).opacity = 100 
+				focus:find_child("g"..tab_type).reactive = false 
+			end 
+
+			local function active_tab(tab_type, txt) 
+				if txt then 
+					focus_changer:find_child("text"..tab_type).text = txt
+		    	end 
+				focus:find_child("text"..tab_type).color = {255,255,255,255}
+				focus:find_child("focuschanger_bg"..tab_type).opacity = 255 
+				focus:find_child("g"..tab_type).reactive = true 
+			end 
+
+			for k=1, #v.tab_labels, 1 do 
+				local aa = j:find_child(tostring(k))
+     			aa.reactive = true 
+				function aa:on_button_down(x,y,b,n)
+					j:find_child(tostring(current_tabs_focus)).color = {255,255,255,255}
+					aa.color = {255,25,25,255} 
+					local focus_tab_n = tonumber(aa.name) -- same with k 
+
+					if  focus_tab_n == 1 then 
+						
+						if tab_dir == "top" then 
+							update_tab_f(focus_tab_n, "U")
+							update_tab_f(focus_tab_n, "D")
+							update_tab_f(focus_tab_n, "L")
+
+							active_tab("L") 
+							deactive_tab("E") 
+							deactive_tab("R") 
+						else 
+							update_tab_f(focus_tab_n, "L")
+							update_tab_f(focus_tab_n, "R")
+							update_tab_f(focus_tab_n, "U")
+
+							active_tab("U") 
+							deactive_tab("E") 
+							deactive_tab("D") 
+						end 
+
+					elseif tonumber(aa.name) == #v.tab_labels then 
+					
+						if tab_dir == "top" then 
+							update_tab_f(focus_tab_n, "U")
+							update_tab_f(focus_tab_n, "D")
+							update_tab_f(focus_tab_n, "R")
+
+							active_tab("R") 
+							deactive_tab("L") 
+							deactive_tab("E") 
+						else
+							update_tab_f(focus_tab_n, "L")
+							update_tab_f(focus_tab_n, "R")
+							update_tab_f(focus_tab_n, "D")
+
+							active_tab("D") 
+							deactive_tab("U") 
+							deactive_tab("E") 
+						end
+
+					else
+
+						if tab_dir == "top" then 
+							update_tab_f(focus_tab_n, "U")
+							update_tab_f(focus_tab_n, "D")
+
+							deactive_tab("L") 
+							deactive_tab("E") 
+							deactive_tab("R") 
+						else
+							update_tab_f(focus_tab_n, "L")
+							update_tab_f(focus_tab_n, "R")
+
+							deactive_tab("U") 
+							deactive_tab("E") 
+							deactive_tab("D") 
+						end 
+					end 
+
+					current_tabs_focus = k
+					input_mode = hdr.S_FOCUS
+					return true
+				end 
+			end
      	end
 	end
 	return focus

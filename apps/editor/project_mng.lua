@@ -160,7 +160,7 @@ function project_mng.new_project(fname, from_new_project)
 
 	editor_use = true
 	-- Text Input Field 	
-	local text_input = ui_element.textInput{skin = "custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
+	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
 		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
