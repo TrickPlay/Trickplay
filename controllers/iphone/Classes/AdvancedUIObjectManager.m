@@ -139,6 +139,8 @@
         [group removeFromSuperview];
     }
     [groups removeAllObjects];
+    
+    [gestureViewController advancedUIObjectDeleted];
 }
 
 
@@ -320,6 +322,8 @@
         return;
     }
     
+    [gestureViewController advancedUIObjectDeleted];
+    
     [self destroyObjectReply:ID absolute:destroy_absolutely];
 }
 
@@ -400,6 +404,10 @@
     TrickplayUIElement *uiObject = [self findObjectForID:ID];
     if (uiObject) {
         result = [uiObject callMethod:method withArgs:args];
+    }
+    
+    if (view.view.subviews.count == 0) {
+        [gestureViewController performSelector:@selector(advancedUIObjectDeleted)];
     }
     
     if (result) {

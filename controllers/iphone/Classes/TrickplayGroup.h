@@ -14,7 +14,7 @@
 
 @required
 - (void)do_UB:(NSArray *)args;
-- (void)object_added;
+- (void)advancedUIObjectAdded;
 
 @end
 
