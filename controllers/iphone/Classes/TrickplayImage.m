@@ -44,6 +44,7 @@
         NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_loaded" forKey:@"event"];
+        [JSON_dic setObject:[NSArray arrayWithObjects:[NSNumber numberWithBool:failed], nil] forKey:@"args"];
         [JSON_dic setObject:[NSNumber numberWithBool:failed] forKey:@"failed"];
         
         [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
@@ -122,8 +123,10 @@
  */
 
 - (void)get_src:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"src"] && src) {
+    if (src) {
         [dictionary setObject:src forKey:@"src"];
+    } else {
+        [dictionary setObject:@"[null]" forKey:@"src"];
     }
 }
 
@@ -132,10 +135,8 @@
  */
 
 - (void)get_tile:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"tile"]) {
-        NSArray *tiling = [NSArray arrayWithObjects:[NSNumber numberWithBool:((AsyncImageView *)view).tileWidth], [NSNumber numberWithBool:((AsyncImageView *)view).tileHeight], nil];
-        [dictionary setObject:tiling forKey:@"tile"];
-    }
+    NSArray *tiling = [NSArray arrayWithObjects:[NSNumber numberWithBool:((AsyncImageView *)view).tileWidth], [NSNumber numberWithBool:((AsyncImageView *)view).tileHeight], nil];
+    [dictionary setObject:tiling forKey:@"tile"];
 }
 
 /**
@@ -143,9 +144,7 @@
  */
 
 - (void)get_loaded:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"loaded"]) {
-        [dictionary setObject:[NSNumber numberWithBool:((AsyncImageView *)view).loaded] forKey:@"loaded"];
-    }
+    [dictionary setObject:[NSNumber numberWithBool:((AsyncImageView *)view).loaded] forKey:@"loaded"];
 }
 
 /**
@@ -153,16 +152,14 @@
  */
 
 - (void)get_base_size:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"base_size"]) {
-        if (((AsyncImageView *)view).loaded) {
-            NSNumber *width = [NSNumber numberWithFloat:((UIImageView *)view).image.size.width];
-            NSNumber *height = [NSNumber numberWithFloat:((UIImageView *)view).image.size.height];
-            NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
-            [dictionary setObject:imageSize forKey:@"base_size"];
-        } else {
-            NSArray *imageSize = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:0.0], nil];
-            [dictionary setObject:imageSize forKey:@"base_size"];
-        }
+    if (((AsyncImageView *)view).loaded) {
+        NSNumber *width = [NSNumber numberWithFloat:((UIImageView *)view).image.size.width];
+        NSNumber *height = [NSNumber numberWithFloat:((UIImageView *)view).image.size.height];
+        NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
+        [dictionary setObject:imageSize forKey:@"base_size"];
+    } else {
+        NSArray *imageSize = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:0.0], nil];
+        [dictionary setObject:imageSize forKey:@"base_size"];
     }
 }
 

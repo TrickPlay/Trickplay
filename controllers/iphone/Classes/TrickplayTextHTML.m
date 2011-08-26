@@ -203,6 +203,7 @@
         NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_text_changed" forKey:@"event"];
+        [JSON_dic setObject:[NSArray arrayWithObjects:theText, nil] forKey:@"args"];
         [JSON_dic setObject:theText forKey:@"text"];
         
         [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
@@ -524,17 +525,15 @@
  */
 
 - (void)get_color:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"color"]) {
-        NSNumber *a_red, *a_green, *a_blue, *an_alpha;
+    NSNumber *a_red, *a_green, *a_blue, *an_alpha;
         
-        a_red = [NSNumber numberWithUnsignedInt:red];
-        a_green = [NSNumber numberWithUnsignedInt:green];
-        a_blue = [NSNumber numberWithUnsignedInt:blue];
-        an_alpha = [NSNumber numberWithFloat:textAlpha * 255.0];
+    a_red = [NSNumber numberWithUnsignedInt:red];
+    a_green = [NSNumber numberWithUnsignedInt:green];
+    a_blue = [NSNumber numberWithUnsignedInt:blue];
+    an_alpha = [NSNumber numberWithFloat:textAlpha * 255.0];
         
-        NSArray *colorArray = [NSArray arrayWithObjects:a_red, a_green, a_blue, an_alpha, nil];
-        [dictionary setObject:colorArray forKey:@"color"];
-    }
+    NSArray *colorArray = [NSArray arrayWithObjects:a_red, a_green, a_blue, an_alpha, nil];
+    [dictionary setObject:colorArray forKey:@"color"];
 }
 
 /**
@@ -542,18 +541,16 @@
  */
 
 - (void)get_background_color:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"background_color"]) {
-        NSNumber *a_red, *a_green, *a_blue, *an_alpha;
+    NSNumber *a_red, *a_green, *a_blue, *an_alpha;
         
-        const CGFloat *components = CGColorGetComponents(view.layer.backgroundColor);
-        a_red = [NSNumber numberWithFloat:components[0] * 255.0];
-        a_green = [NSNumber numberWithFloat:components[1] * 255.0];
-        a_blue = [NSNumber numberWithFloat:components[2] * 255.0];
-        an_alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.backgroundColor) * 255.0];
+    const CGFloat *components = CGColorGetComponents(view.layer.backgroundColor);
+    a_red = [NSNumber numberWithFloat:components[0] * 255.0];
+    a_green = [NSNumber numberWithFloat:components[1] * 255.0];
+    a_blue = [NSNumber numberWithFloat:components[2] * 255.0];
+    an_alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.backgroundColor) * 255.0];
         
-        NSArray *colorArray = [NSArray arrayWithObjects:a_red, a_green, a_blue, an_alpha, nil];
-        [dictionary setObject:colorArray forKey:@"background_color"];
-    }
+    NSArray *colorArray = [NSArray arrayWithObjects:a_red, a_green, a_blue, an_alpha, nil];
+    [dictionary setObject:colorArray forKey:@"background_color"];
 }
 
 /**
@@ -561,9 +558,7 @@
  */
 
 - (void)get_text:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"text"]) {
-        [dictionary setObject:origText forKey:@"text"];
-    }
+    [dictionary setObject:origText forKey:@"text"];
 }
 
 /**
@@ -622,7 +617,7 @@
 }
 
 - (void)get_wrap_mode:(NSMutableDictionary *)dictionary {
-        [dictionary setObject:wrap_mode forKey:@"wrap_mode"];
+    [dictionary setObject:wrap_mode forKey:@"wrap_mode"];
 }
 
 /**
