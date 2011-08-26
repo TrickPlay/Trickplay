@@ -465,6 +465,9 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
             controller.screen:add(controller.popup_group)
         end
         router:get_active_controller():add_controller(controller)
+        if controller.is_advanced_ui_ready then
+            controller:on_advanced_ui_ready()
+        end
     end
 
 ---------------Controller states---------------
@@ -476,6 +479,9 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
             print("adding controller "..controller.name)
             if controller.has_ui then
                 controllers:on_controller_connected(controller)
+                -- hack to get controllers working that weren't before
+                -- TODO: fix hack
+                controller:on_advanced_ui_ready()
             end
         end
     end

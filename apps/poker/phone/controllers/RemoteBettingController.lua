@@ -117,8 +117,6 @@ function(ctrl, router, controller, ...)
         continue_button:reset()
         screen:on_key_down(keys.OK)
     end
-    blah = continue_button
-    a_ctrl = controller
     function ctrl:end_hand()
         continue_button:show()
         continue_button.group:raise_to_top()
