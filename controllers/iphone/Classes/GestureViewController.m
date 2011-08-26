@@ -98,7 +98,7 @@
 	// Get the actual width and height of the available area
 	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
 	backgroundHeight = mainframe.size.height;
-	backgroundHeight = backgroundHeight - 45;  //subtract the height of navbar
+	backgroundHeight = backgroundHeight - 44;  //subtract the height of navbar
 	backgroundWidth = mainframe.size.width;
     // Figure out if the device can use pcitures
     NSString *hasPictures = @"";
@@ -121,15 +121,11 @@
     // Controls Acceleration
     accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
     
-    
-    CGFloat
-    width = backgroundWidth,
-    height = backgroundHeight;
     // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
     // from Trickplay
     advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
     advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
-    advancedView.frame = CGRectMake(0.0, 0.0, width, height);
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     [self.view addSubview:advancedView];
     
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
@@ -137,12 +133,13 @@
     ((AdvancedUIObjectManager *)advancedUIDelegate).gestureViewController = self;
     
     // This is where the elements from UG (add_ui_image call) go
-    CGRect frame = CGRectMake(0.0, 0.0, width, height);
+    CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     foregroundView = [[UIImageView alloc] initWithFrame:frame];
     [backgroundView addSubview:foregroundView];
     
     // the virtual remote for controlling the Television
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
+    virtualRemote.view.frame = frame;
     [self.view addSubview:virtualRemote.view];
     virtualRemote.delegate = self;
     
@@ -514,10 +511,7 @@
     NSString *key = [args objectAtIndex:0];
     
     if ([resourceManager getResourceInfo:key]) {
-        CGFloat
-        width = self.view.frame.size.width,
-        height = self.view.frame.size.height;
-        CGRect frame = CGRectMake(0.0, 0.0, width, height);
+        CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
         for (UIView *subview in [backgroundView subviews]) {
@@ -529,7 +523,11 @@
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
 
-        [self object_added];
+        graphics = YES;
+        if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
+            [virtualRemote.view removeFromSuperview];
+        }
+        [touchDelegate setSwipe:YES];
     }
 }
 
@@ -561,7 +559,11 @@
         UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
         [foregroundView addSubview:newImageView];
-        [self object_added];
+        graphics = YES;
+        if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
+            [virtualRemote.view removeFromSuperview];
+        }
+        [touchDelegate setSwipe:YES];
     }
 }
 
@@ -621,10 +623,7 @@
  */
 - (void)do_PT {
     [touchDelegate stopTouches];
-    if (!graphics) {
-        [self do_HV];
-        [self.view addSubview:virtualRemote.view];
-    }
+    [self checkShowVirtualRemote];
 }
 
 /**
@@ -687,7 +686,6 @@
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
         
         if ([args objectAtIndex:4] && ([args objectAtIndex:4] != @"")) {
-            //TODO: may need to subtract from height
             mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
         }
         
@@ -766,6 +764,7 @@
     if (![virtualRemote parentViewController] && ![virtualRemote.view superview]) {
         virtualRemote.background.hidden = YES;
         [self.view addSubview:virtualRemote.view];
+        [touchDelegate setSwipe:NO];
     }
 }
 
@@ -778,6 +777,15 @@
     if ([virtualRemote.view superview] && virtualRemote.background.isHidden) {
         [virtualRemote.view removeFromSuperview];
         virtualRemote.background.hidden = NO;
+        [touchDelegate setSwipe:YES];
+    }
+}
+
+- (void)checkShowVirtualRemote {
+    if (!graphics && advancedView.view.subviews.count == 0 && !((TouchController *)touchDelegate).touchEventsAllowed) {
+        [self do_HV];
+        [self.view addSubview:virtualRemote.view];
+        [touchDelegate setSwipe:NO];
     }
 }
 
@@ -823,6 +831,17 @@
     [resourceManager clean];
 }
 
+- (void)advancedUIObjectAdded {
+    if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
+        [virtualRemote.view removeFromSuperview];
+    }
+    [touchDelegate setSwipe:YES];
+}
+
+- (void)advancedUIObjectDeleted {
+    [self checkShowVirtualRemote];
+}
+
 - (void)clearUI {
     NSLog(@"Clearing the UI");
     [theTextField resignFirstResponder];
@@ -845,12 +864,8 @@
     //*/
     
     //*
-    CGFloat
-    x = self.view.frame.origin.x,
-    y = self.view.frame.origin.y;
-    
     UIImageView *newImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background.png"]];
-    newImageView.frame = CGRectMake(x, y, backgroundWidth, backgroundHeight);
+    newImageView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     [foregroundView removeFromSuperview];
     for (UIView *subview in [foregroundView subviews]) {
         [subview removeFromSuperview];
@@ -861,25 +876,14 @@
     [self.view sendSubviewToBack:backgroundView];
     
     [newImageView release];
-    
-    if (advancedView.subviews.count == 0 && !((TouchController *)touchDelegate).touchEventsAllowed) {
-        [self do_HV];
-        [self.view addSubview:virtualRemote.view];
-        graphics = NO;
-        [touchDelegate setSwipe:graphics];
-    }
 
     [backgroundView addSubview:foregroundView];
+    graphics = NO;
+    
+    [self checkShowVirtualRemote];
     //*/
 }
 
-- (void)object_added {
-    if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
-        [virtualRemote.view removeFromSuperview];
-    }
-    graphics = YES;
-    [touchDelegate setSwipe:graphics];
-}
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*

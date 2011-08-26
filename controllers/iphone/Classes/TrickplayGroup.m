@@ -327,7 +327,7 @@
         [child removeFromSuperview];
         [self.view addSubview:child];
         if (delegate) {
-            [delegate object_added];
+            [delegate advancedUIObjectAdded];
         }
         result = YES;
     }

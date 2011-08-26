@@ -72,6 +72,8 @@
 		CDB20FF113CFAE6900A9F166 /* TrickplayAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */; };
 		CDCE770013B28A0E00768A2A /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
 		CDDB36C614032DE7005FB306 /* AudioPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = CDDB36C514032DE7005FB306 /* AudioPlayback.m */; };
+		CDECA31414072872007C58ED /* TVBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDECA31314072872007C58ED /* TVBrowserController.m */; };
+		CDECA317140728B9007C58ED /* AppBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDECA316140728B9007C58ED /* AppBrowserController.m */; };
 		CDEE44A8137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */; };
 		CDEE44AD137CC93200A4B5E2 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44AC137CC93100A4B5E2 /* CommandInterpreter.m */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
@@ -187,6 +189,10 @@
 		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
 		CDDB36C414032DE6005FB306 /* AudioPlayback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioPlayback.h; sourceTree = "<group>"; };
 		CDDB36C514032DE7005FB306 /* AudioPlayback.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioPlayback.m; sourceTree = "<group>"; };
+		CDECA31214072872007C58ED /* TVBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVBrowserController.h; sourceTree = "<group>"; };
+		CDECA31314072872007C58ED /* TVBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVBrowserController.m; sourceTree = "<group>"; };
+		CDECA315140728B9007C58ED /* AppBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppBrowserController.h; sourceTree = "<group>"; };
+		CDECA316140728B9007C58ED /* AppBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppBrowserController.m; sourceTree = "<group>"; };
 		CDEE44A6137CBA2500A4B5E2 /* CommandInterpreterAdvancedUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreterAdvancedUI.h; sourceTree = "<group>"; };
 		CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreterAdvancedUI.m; sourceTree = "<group>"; };
 		CDEE44AB137CC93100A4B5E2 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreter.h; sourceTree = "<group>"; };
@@ -443,6 +449,17 @@
 			name = PhotoLibrary;
 			sourceTree = "<group>";
 		};
+		CDECA31014072849007C58ED /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				CDECA31214072872007C58ED /* TVBrowserController.h */,
+				CDECA31314072872007C58ED /* TVBrowserController.m */,
+				CDECA315140728B9007C58ED /* AppBrowserController.h */,
+				CDECA316140728B9007C58ED /* AppBrowserController.m */,
+			);
+			name = Main;
+			sourceTree = "<group>";
+		};
 		CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */ = {
 			isa = PBXGroup;
 			children = (
@@ -494,6 +511,7 @@
 		CDFEBBA1130A4B8700A14307 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				CDECA31014072849007C58ED /* Main */,
 				CD404C09134A74CD0021D36C /* UserInterface */,
 				CDFEBEBA130C704800A14307 /* UserInput */,
 				CDFEBEB9130C6F9A00A14307 /* Networking */,
@@ -720,6 +738,8 @@
 				CDFDCB0713DE49D60025768E /* AudioRecordingViewController.m in Sources */,
 				CD2F80C013EC965F001EACEA /* TrickplayTimeline.m in Sources */,
 				CDDB36C614032DE7005FB306 /* AudioPlayback.m in Sources */,
+				CDECA31414072872007C58ED /* TVBrowserController.m in Sources */,
+				CDECA317140728B9007C58ED /* AppBrowserController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
