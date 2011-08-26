@@ -13,7 +13,7 @@
 
 - (id)init
 {
-    self = [super init];
+    self = [super initWithID:@"0" args:nil objectManager:nil];
     if (self) {
         // Initialization code here.
     }
@@ -21,7 +21,6 @@
     return self;
 }
 
-//*
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     //NSLog(@"\n\nbegin\n\n");
 
@@ -54,7 +53,7 @@
     }
     [self.nextResponder touchesCancelled:touches withEvent:event];
 }
-//*/
+
 - (void)handleTouchesBegan:(NSSet *)touches {
     
 }
