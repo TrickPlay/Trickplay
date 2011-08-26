@@ -52,7 +52,7 @@
 
 /**
  * Sends an arbitrary newline to the async socket which will be ignored by
- * Trickplay. This fires every 100ms to keep the wireless transmitter of the
+ * the TV. This fires every 100ms to keep the wireless transmitter of the
  * iOS device energized and <20ms ping. Otherwise connection speeds may drop
  * to >200ms ping.
  */
@@ -847,12 +847,10 @@
     //*
     CGFloat
     x = self.view.frame.origin.x,
-    y = self.view.frame.origin.y,
-    width = self.view.frame.size.width,
-    height = self.view.frame.size.height;
+    y = self.view.frame.origin.y;
     
     UIImageView *newImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background.png"]];
-    newImageView.frame = CGRectMake(x, y, width, height);
+    newImageView.frame = CGRectMake(x, y, backgroundWidth, backgroundHeight);
     [foregroundView removeFromSuperview];
     for (UIView *subview in [foregroundView subviews]) {
         [subview removeFromSuperview];

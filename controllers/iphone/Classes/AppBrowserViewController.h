@@ -14,8 +14,8 @@
 
 @required
 // If nil then didn't recieve data
-- (void)didRecieveAvailableAppsInfo:(NSArray *)info;
-- (void)didRecieveCurrentAppInfo:(NSDictionary *)info;
+- (void)didReceiveAvailableAppsInfo:(NSArray *)info;
+- (void)didReceiveCurrentAppInfo:(NSDictionary *)info;
 
 @end
 
@@ -98,7 +98,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 - (IBAction) showcaseButtonClick;
 - (void)createGestureViewWithPort:(NSInteger)p hostName:(NSString *)h;
 - (NSDictionary *)getCurrentAppInfo;
-- (BOOL)fetchApps;
+- (NSArray *)fetchApps;
 - (void)getAvailableAppsInfoWithDelegate:(id<AppBrowserDelegate>)delegate;
 - (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
 - (void)setupService:(NSInteger)p
@@ -107,7 +107,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 - (BOOL)hasRunningApp;
 - (void)pushApp;
 
-    // GestureViewControllerSocketDelegate methods
+// GestureViewControllerSocketDelegate methods
 - (void)socketErrorOccurred;
 - (void)streamEndEncountered;
 

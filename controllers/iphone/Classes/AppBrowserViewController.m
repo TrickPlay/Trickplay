@@ -105,13 +105,12 @@
  * Asks Trickplay for the currently running app and any information pertaining
  * to this app assembled in a JSON string. The method takes this JSON string reply
  * and returns it as an NSDictionary or nil on error.
- *
- * TODO: might want to make this call asynchronous and add a time-to-live, otherwise
- * future changes to TakeControl could lead to deadlock scenerios since AdvancedUI
- * is synchronous.
  */
 - (NSDictionary *)getCurrentAppInfo {
     NSLog(@"Getting Current App Info");
+    if (![gestureViewController hasConnection]) {
+        return nil;
+    }
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
@@ -134,7 +133,7 @@
     
     if (![gestureViewController hasConnection]) {
         self.currentAppName = nil;
-        [delegate didRecieveCurrentAppInfo:nil];
+        [delegate didReceiveCurrentAppInfo:nil];
         return;
     }
     
@@ -156,24 +155,24 @@
     
     if (!currentAppInfoConnection) {
         self.currentAppName = nil;
-        [delegate didRecieveCurrentAppInfo:nil];
+        [delegate didReceiveCurrentAppInfo:nil];
     }
 }
 
 /**
  * Asks Trickplay for the most up-to-date information of apps it has available.
  * Trickplay replies with a JSON string of up-to-date apps. The method then
- * composes an NSDictionary with this information and sets appsAvailable to
- * this Dictionary which will later populate the TableView.
+ * composes an NSArray of NSDictioanry Objects with information on each app
+ * available to the user on the TV, each individual NSDictionary Object referring
+ * to one app, and returns this NSArray to the caller. The method also sets
+ * appsAvailable to this NSArray which is later used to populate the TableView.
  *
- * TODO: might want to make this call asynchronous and add a time-to-live, otherwise
- * future changes to TakeControl could lead to deadlock scenerios since AdvancedUI
- * is synchronous.
+ * Returns the NSArray passed to appsAvailable or nil on error.
  */
-- (BOOL)fetchApps {
+- (NSArray *)fetchApps {
     NSLog(@"Fetching Apps");
     if (![gestureViewController hasConnection]) {
-        return NO;
+        return nil;
     }
     
     //grab json data and put it into an array
@@ -184,10 +183,10 @@
     self.appsAvailable = [JSONData yajl_JSON];
     NSLog(@"Recieved JSON array app data = %@", appsAvailable);
     if (!appsAvailable) {
-        return NO;
+        return nil;
     }
     
-    return YES;
+    return appsAvailable;
 }
 
 - (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
@@ -201,7 +200,7 @@
     
     if (![gestureViewController hasConnection]) {
         self.appsAvailable = nil;
-        [delegate didRecieveAvailableAppsInfo:nil];
+        [delegate didReceiveAvailableAppsInfo:nil];
         return;
     }
     
@@ -224,7 +223,7 @@
     
     if (!fetchAppsConnection) {
         self.appsAvailable = nil;
-        [delegate didRecieveAvailableAppsInfo:nil];
+        [delegate didReceiveAvailableAppsInfo:nil];
     }
 }
 
@@ -255,7 +254,7 @@
         
         self.appsAvailable = [fetchAppsData yajl_JSON];
         NSLog(@"Received JSON array app data = %@", appsAvailable);
-        [fetchAppsDelegate didRecieveAvailableAppsInfo:appsAvailable];
+        [fetchAppsDelegate didReceiveAvailableAppsInfo:appsAvailable];
     } else if (connection == currentAppInfoConnection) {
         [currentAppInfoConnection cancel];
         [currentAppInfoConnection release];
@@ -266,7 +265,7 @@
         if ([currentAppName isEqualToString:@"Empty"]) {
             self.currentAppName = nil;
         }
-        [currentAppDelegate didRecieveCurrentAppInfo:currentAppInfo];
+        [currentAppDelegate didReceiveCurrentAppInfo:currentAppInfo];
     }
 }
 
@@ -277,13 +276,13 @@
         fetchAppsConnection = nil;
         
         self.appsAvailable = nil;
-        [fetchAppsDelegate didRecieveAvailableAppsInfo:nil];
+        [fetchAppsDelegate didReceiveAvailableAppsInfo:nil];
     } else if (connection == currentAppInfoConnection) {
         [currentAppInfoConnection cancel];
         [currentAppInfoConnection release];
         currentAppInfoConnection = nil;
         
-        [currentAppDelegate didRecieveCurrentAppInfo:nil];
+        [currentAppDelegate didReceiveCurrentAppInfo:nil];
     }
 }
 
@@ -295,14 +294,18 @@
  * app.
  */
 - (void)launchApp:(NSDictionary *)appInfo {
-    NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
-    NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", gestureViewController.socketManager.host, gestureViewController.socketManager.port, appID];
-    NSLog(@"Launching app via url '%@'", launchString);
-    NSURL *launchURL = [NSURL URLWithString:launchString];
-    NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
-    NSLog(@"launch data = %@", launchData);
+    dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
+    dispatch_async(launchApp_queue, ^(void){
+        NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
+        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", gestureViewController.socketManager.host, gestureViewController.socketManager.port, appID];
+        NSLog(@"Launching app via url '%@'", launchString);
+        NSURL *launchURL = [NSURL URLWithString:launchString];
+        NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
+        NSLog(@"launch data = %@", launchData);
     
-    self.currentAppName = (NSString *)[appInfo objectForKey:@"name"];
+        self.currentAppName = (NSString *)[appInfo objectForKey:@"name"];
+    });
+    dispatch_release(launchApp_queue);
 }
 
 /**
