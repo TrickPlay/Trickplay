@@ -153,11 +153,16 @@
  */
 
 - (void)get_base_size:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"base_size"] && ((AsyncImageView *)view).loaded) {
-        NSNumber *width = [NSNumber numberWithFloat:((UIImageView *)view).image.size.width];
-        NSNumber *height = [NSNumber numberWithFloat:((UIImageView *)view).image.size.height];
-        NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
-        [dictionary setObject:imageSize forKey:@"base_size"];
+    if ([dictionary objectForKey:@"base_size"]) {
+        if (((AsyncImageView *)view).loaded) {
+            NSNumber *width = [NSNumber numberWithFloat:((UIImageView *)view).image.size.width];
+            NSNumber *height = [NSNumber numberWithFloat:((UIImageView *)view).image.size.height];
+            NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
+            [dictionary setObject:imageSize forKey:@"base_size"];
+        } else {
+            NSArray *imageSize = [NSArray array];
+            [dictionary setObject:imageSize forKey:@"base_size"];
+        }
     }
 }
 
