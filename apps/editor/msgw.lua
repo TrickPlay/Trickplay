@@ -296,7 +296,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   		cleanMsgWindow()
             screen:grab_key_focus(screen) 
       end
-      --menu.menu_raise_to_top()
+      menu.menu_raise_to_top()
 
 end -- end of msg_window.inputMsgWindow_savefile  
 
@@ -358,18 +358,11 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 
 		if ret == "OK" then 
 			if current_fn == "" then 
-	   			--screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text.."*"
 	   			screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
 			end 
 		else
 	   		screen:find_child("menu_text").text = screen:find_child("menu_text").text .. "/screens/" .. input_text
 		end
-
-     else 
-		  -- need error handling 
-          --printMsgWindow("The file is not a lua file.\nFile Name : ","err_msg")
-          --inputMsgWindow("reopenfile")
-          return 
      end 
 
      if(g.extra.video ~= nil) then util.clear_bg() end 
@@ -437,53 +430,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 	  end 
 
      end 
-
-	 
---[[-- 0727
-
-      if(v.x < 0) then 
-			if( v.x < x_scroll_from )then 
-		     	x_scroll_from = v.x 
-			end
-      end 
-	  
-      if(v.y < 0) then 
-			if( v.y < y_scroll_from ) then 
-		     	y_scroll_from = v.y 
-			end
-      end 
-
-      if(v.x > screen.w) then 
-			if( x_scroll_to < v.x + v.w)then 
-		     	x_scroll_to = v.x + v.w
-			end
-      end 
-	  
-      if(v.y > screen.h) then 
-			if(y_scroll_to < v.y + v.h) then 
-		     	y_scroll_to = v.y + v.h 
-			end
-      end 
-
-     end 
-
-     if (x_scroll_to ~= 0 or x_scroll_from ~= 0 or y_scroll_to ~=0 or y_scroll_from ~= 0) then 
-          --factory.make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
-     end 
-     if(screen:find_child("screen_objects") == nil) then
-	  	for i,j in pairs(g.children) do 
-			if(y_scroll_from < 0) then
-				j.y = j.y - y_scroll_from
-			end 
-			if(x_scroll_from < 0) then
-				j.x = j.x - x_scroll_from
-			end 
-	  	end 
-        screen:add(g)
-     end
-
-]]
-     menu:menu_raise_to_top()
+     menu.menu_raise_to_top()
 end
 
 function msg_window.inputMsgWindow_yn(txt)
@@ -597,24 +544,12 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 	     end 
 	  end 
 
+      if(screen:find_child("screen_objects") == nil) then
+      		screen:add(g)
+      end 
+      item_num = item_num + 1
 
-	
-          if(screen:find_child("screen_objects") == nil) then
-               screen:add(g)
-          end 
-          item_num = item_num + 1
-     else 
-	  --cleanMsgWindow()
-	  --screen:grab_key_focus(screen) -- iii
-          --printMsgWindow("The file is not an image file.\nFile Name : ","err_msg")
-          --inputMsgWindow("reopenImg")
-          return 
      end 
-
-     --cleanMsgWindow()
-     --screen:grab_key_focus(screen)
-	 
-	 
 end
 
 

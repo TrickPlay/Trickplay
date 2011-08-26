@@ -40,21 +40,27 @@ hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group", "ArrowP
 
 hdr.attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "ui_width", "ui_height", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src", "empty_top_color", "empty_bottom_color", "stroke_color", "progress"}
 
+hdr.AUTO_SAVE_DURATION = 60000  
+hdr.AUTO_SAVE = true
+
 ---------------------
 -- Global Variables
 ---------------------
 editor_lb = editor
 editor_use = false
 
-current_dir 	  = ""
-current_inspector = nil 
-current_fn  	  = ""
-restore_fn  	  = ""
-current_focus 	  = nil
-prev_tab 		  = nil
+current_dir 	   = ""
+current_inspector  = nil 
+current_fn  	   = ""
+restore_fn  	   = ""
+current_focus 	   = nil
+prev_tab 		   = nil
+selected_container = nil
+selected_content   = nil
 
-input_mode        = S_MENU
-menu_hide         = false
+input_mode         = hdr.S_MENU
+menu_hide          = false
+
 
 -- table for mouse dragging information 
 dragging          = nil
@@ -75,6 +81,15 @@ focus_type        = ""
 -- cursor 
 cursor_type 	  = 68
 
+-- for the modifier keys 
+shift 		      = false
+shift_changed 	  = false
+control 	      = false
+
+
+-- table for skin 
+skins = {}
+
 -- table for ui elements selcection 
 selected_objs	  = {}
 
@@ -86,7 +101,7 @@ redo_list 	      = {}
 g = Group{name = "screen_objects", extra={canvas_xf = 0, canvas_f = 0, canvas_xt = 0, canvas_t = 0, canvas_w = screen.w, canvas_h = screen.h, scroll_x = 0, scroll_y = 0, scroll_dy = 1}}
 
 -- localized string table
-strings = dofile( "localized:strings" ) or {}
+	strings = dofile( "localized:strings" ) or {}
 
 function missing_localized_string( t , s )
 	rawset(t,s,s) -- only warn once per string
@@ -96,7 +111,32 @@ end
 setmetatable( strings , { __index = missing_localized_string } )
 
 -- The asset cache
-assets = dofile( "assets-cache" )
+	assets = dofile( "assets-cache" )
+-- Editor Defined UI Elements 
+	ui_element	= dofile("/lib/ui_element")
+-- Utility Functions 
+	util 	   	= dofile("util")
+-- Project Management Functions 
+	project_mng	= dofile("project_mng")
+-- Create Message Windows
+	msg_window  = dofile("msgw")
+
+	ui =
+    	{
+        	assets              = assets,
+        	factory             = dofile( "ui-factory" ),
+    	}
+
+-- Inspector Setting Functions 
+	apply	   	= dofile("apply")
+-- UI Elements for Editor UI
+	editor_lib  = dofile("editor_lib")
+-- Editor functions 
+	editor 	   	= dofile("editor")
+-- Editor Main Menu 
+	menu 		= dofile("menu")
+-- Screen ui functions 
+	screen_ui 		= dofile("screen_ui")
 
 -- background images 
 BG_IMAGE_20 = Image{src = "assets/transparency-grid-20-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
@@ -104,39 +144,5 @@ BG_IMAGE_40 = Image{src = "assets/transparency-grid-40-2.png", position = {0,0},
 BG_IMAGE_80 = Image{src = "assets/transparency-grid-80-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_import = Image{src = "assets/white.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-
-
--- Editor Defined UI Elements 
-ui_element	= dofile("/lib/ui_element")
--- Utility Functions 
-util 	   	= dofile("util")
--- Project Management Functions 
-project_mng	= dofile("project_mng")
--- Create Message Windows
-msg_window  = dofile("msgw")
-
-ui =
-    {
-        assets              = assets,
-        factory             = dofile( "ui-factory" ),
-    }
-
-
--- Inspector Setting Functions 
-apply	   	= dofile("apply")
--- UI Elements for Editor UI
-editor_lib  = dofile("editor_lib")
--- Editor functions 
-editor 	   	= dofile("editor")
--- Editor Main Menu 
-menu 		= dofile("menu")
-
--- for the modifier keys 
-shift 		      = false
-shift_changed 	  = false
-control 	      = false
-
-skins = {}
-
 
 return hdr

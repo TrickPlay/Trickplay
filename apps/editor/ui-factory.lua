@@ -909,7 +909,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			editor.n_selected(v, true)
+			screen_ui.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -941,7 +941,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			editor.n_selected(v, true)
+			screen_ui.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -993,7 +993,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			editor.n_selected(v, true)
+			screen_ui.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -1013,7 +1013,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			editor.n_selected(v, true)
+			screen_ui.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -1034,7 +1034,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			editor.n_selected(v, true)
+			screen_ui.n_selected(v, true)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -1144,7 +1144,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		    current_inspector = nil
             screen:grab_key_focus(screen) 
 		    text_reactive()
-		    editor.n_selected(v, true)
+		    screen_ui.n_selected(v, true)
 
 			inspector:clear()
 		    editor.inspector(v, ix, iy, siy)
@@ -1203,7 +1203,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		   current_inspector = nil
            screen:grab_key_focus(screen) 
 		   text_reactive()
-		   editor.n_selected(v, true)
+		   screen_ui.n_selected(v, true)
 
 		   inspector:clear()
 		   editor.inspector(v, ix, iy, siy)
@@ -1261,7 +1261,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     current_inspector = nil
              screen:grab_key_focus(screen) 
 		     text_reactive()
-		     editor.n_selected(v, true)
+		     screen_ui.n_selected(v, true)
 
 			 inspector:clear()
 		     editor.inspector(v, ix, iy, siy)

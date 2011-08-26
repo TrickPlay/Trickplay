@@ -257,8 +257,6 @@ function util.is_there_guideline ()
 	return false
 end 
 
-selected_container = nil
-selected_content = nil
 
 function util.is_in_container_group(x_pos, y_pos) 
 	for i, j in pairs (g.children) do 
@@ -282,14 +280,19 @@ function util.find_container(x_pos, y_pos)
 			if j.extra then 
 				if util.is_this_container(j) then
 					table.insert(c_tbl, j)
+					print("--", j.name)
 				end 
 			end 
 		end 
 	end 
 
-	local j = table.remove(c_tbl)
+	if #c_tbl > 0 then 
+		local j = table.remove(c_tbl)
+		return j, j.extra.type 
+	else 
+		return nil
+	end 
 
-	return j, j.extra.type 
 end 
 
 function util.create_on_button_down_f(v)
@@ -309,9 +312,9 @@ function util.create_on_button_down_f(v)
                 		end 
 
 	            		if(input_mode == hdr.S_SELECT and p_obj.extra.selected == false) then 
-		     				editor.selected(p_obj)
+		     				screen_ui.selected(p_obj)
 	            		elseif (p_obj.extra.selected == true) then 
-		     				editor.n_select(p_obj)
+		     				screen_ui.n_select(p_obj)
 		    			end
 	            		org_object = util.copy_obj(p_obj)
 		    			if v.extra.lock == false then -- or  v.name =="inspector" then 
@@ -326,7 +329,7 @@ function util.create_on_button_down_f(v)
                 		end 
 	            		if(input_mode == hdr.S_SELECT and v.extra.selected == false) then 
 								----kkkk
-		     				editor.selected(v) 
+		     				screen_ui.selected(v) 
 							if(v.type == "Text") then 
 			      				v:set{cursor_visible = true}
 			      				v:set{editable= true}
@@ -339,7 +342,7 @@ function util.create_on_button_down_f(v)
 			      					v:set{editable= true}
      			    				v:grab_key_focus(v)
 								end 
-								editor.n_select(v) 
+								screen_ui.n_select(v) 
 	       				end
 -----[[ 	SHOW POSSIBLE CONTAINERS
 		    			if control == true then 
@@ -358,7 +361,10 @@ function util.create_on_button_down_f(v)
 
 							editor_lb:set_cursor(52)
 							cursor_type = 52
-							selected_content = v 
+
+							--if util.is_this_container(v) == false then 
+								selected_content = v 
+							--end 
 			
 							local odr 
 							for i,j in pairs (g.children) do 
@@ -403,7 +409,7 @@ function util.create_on_button_down_f(v)
 				end
 	    	elseif (input_mode == hdr.S_FOCUS) then 
 				if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
-		     		editor.selected(v)
+		     		screen_ui.selected(v)
 					local tabs_focus = screen:find_child("tabs_focus")
 					local focus = screen:find_child("focusChanger")
 					if tabs_focus then 
@@ -457,9 +463,9 @@ end
 									return 
 							end 
 							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-								editor.n_select(v, false, dragging) 
-								editor.n_select(new_object, false, dragging) 
-								editor.n_select(org_object, false, dragging) 
+								screen_ui.n_select(v, false, dragging) 
+								screen_ui.n_select(new_object, false, dragging) 
+								screen_ui.n_select(org_object, false, dragging) 
                     			table.insert(undo_list, {p_obj.name, hdr.CHG, org_object, new_object})
 							end 
 	            			dragging = nil
@@ -476,7 +482,7 @@ end
 		       			new_object = util.copy_obj(v)
 	               		new_object.position = {x-dx, y-dy}
 ---[[ Content Setting 
-		       			if util.is_in_container_group(x,y) then 
+		       			if util.is_in_container_group(x,y) and selected_content then 
 			     			local c, t = util.find_container(x,y) 
 			     			if control == true then 
 			       				if not util.is_this_container(v) or c.name ~= v.name then
@@ -597,9 +603,9 @@ end
 							end 
 							if(org_object ~= nil) then  
 		           				if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			     					editor.n_select(v, false, dragging) 
-			     					editor.n_select(new_object, false, dragging) 
-			     					editor.n_select(org_object, false, dragging) 
+			     					screen_ui.n_select(v, false, dragging) 
+			     					screen_ui.n_select(new_object, false, dragging) 
+			     					screen_ui.n_select(org_object, false, dragging) 
 			     					v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
 			     					v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
                     	     		table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
@@ -1427,5 +1433,18 @@ function util.itemTostring(v, d_list, t_list)
 
     return itm_str, d_list, t_list, itm_str2
 end
+
+
+function util.guideline_type(name) 
+    local i, j = string.find(name,"v_guideline")
+    if(i ~= nil and j ~= nil)then 
+         return "v_guideline"
+    end 
+    local i, j = string.find(name,"h_guideline")
+    if(i ~= nil and j ~= nil)then 
+         return "h_guideline"
+    end 
+    return ""
+end 
 
 return util
