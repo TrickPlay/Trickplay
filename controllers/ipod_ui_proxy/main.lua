@@ -46,7 +46,7 @@ function controllers:on_controller_connected(controller)
     --]]
 
     -- Declare an image resource than may be used to load images
-    controller:declare_resource("chip", "assets/chip1.png")
+    --controller:declare_resource("chip", "assets/chip1.png")
 
     -- create a Rectangle
     key_handler[keys.r] = function()
@@ -68,8 +68,9 @@ function controllers:on_controller_connected(controller)
     end
     -- create an Image using the 'chip' image
     key_handler[keys.i] = function()
+        controller:declare_resource("chip", "assets/chip1.png")
         i = controller.factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
-        j = controller.factory:Image{x = 200, y = 500, w = 100, h = 100, src = ""}
+        j = controller.factory:Image{x = 200, y = 500, w = 100, h = 100, src = "chip"}
         function i:on_loaded(failed)
             print("i image loaded?: "..tostring(not failed))
         end

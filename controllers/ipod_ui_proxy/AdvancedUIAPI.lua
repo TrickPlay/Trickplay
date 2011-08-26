@@ -81,42 +81,6 @@ local function send_request( end_point , payload )
 end
 
 ---------------------------------------------------------------------------
--- Connect a streaming web request to receive events
---[[
-do
-    local request = URLRequest{ url = base_url.."/events" , timeout = 0 }
-    
-    function request:on_complete( )
-        -- TODO: what do we do?
-        log( "** DISCONNECED FROM EVENTS" )          
-    end
-    
-    local body = ""
-    
-    local function deliver_event( event )
-        
-        event = json:parse( event )
-        if event then
-            local proxy = proxies[ event.id ]
-            if proxy then
-                proxy:__event( event.event , event.args )
-            end
-        end
-        return ""
-    end
-    
-    function request:on_response_chunk( response )
-        if response.body then
-            -- Append the new chunk and parse out the newline delimited chunks
-            body = string.gsub( body..response.body , "([^\n]*\n)" , deliver_event )
-        end
-    end
-
-    request:stream()
-end
---]]
-
----------------------------------------------------------------------------
 -- This is a table that contains the metatables for each class. It starts
 -- out empty and gets populated when new instances are created.
 --
@@ -308,22 +272,6 @@ do
         
         function proxy.__has_setter( key )
             return type( rawget( set , key ) ) == "function"
-        end
-        
-        -----------------------------------------------------------------------
-        -- Calls an event handler function on the proxy. If there is a local
-        -- filter for that event, it is called to filter the arguments
-        
-        function proxy:__event( name , args )
-            local handler = rawget( self.__events , name )
-            if type( handler ) == "function" then
-                local filter = rawget( event , name )
-                if type( filter ) == "function" then
-                    handler( self , filter( self , unpack( args ) ) )
-                else
-                    handler( self , unpack( args ) )
-                end
-            end
         end
         
         -----------------------------------------------------------------------
@@ -525,15 +473,22 @@ function controller:on_advanced_ui_event(json_object)
         return
     end
     
+    --[[
+        events are:
+        on_touches(touch_id_list, state)
+        on_loaded(failed)
+        on_text_changed(text)
+        on_show()
+        on_hide()
+        on_completed()
+    --]]
+
     -- call the right callback for the event
     local events = rawget(proxy, "__events")
     local on_completeds = rawget(proxy, "on_completeds")
-    if json_object.event == "touch" and events.on_touches then
-        events:on_touches(json_object.touch_id_list, json_object.state)
-    elseif json_object.event == "on_loaded" and events.on_loaded then
-        events:on_loaded(json_object.failed)
-    elseif json_object.event == "on_text_changed" and events.on_text_changed then
-        events:on_text_changed(json_object.text)
+    if events[json_object.event] then
+        json_object.args = json_object.args or {}
+        events[json_object.event](proxy, unpack(json_object.args))
     elseif json_object.event == "on_completed" and on_completeds
     and on_completeds[json_object.animation_id] then
         on_completeds[json_object.animation_id]()
